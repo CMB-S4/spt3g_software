@@ -37,6 +37,9 @@ namespace G3Units {
 
 	/* Angles: base unit is radians */
 	const double rad = 1;
+	const double radian = rad;
+	const double radians = rad;
+	
 	const double deg = M_PI/180.;
 	const double degree = deg;
 	const double degrees = deg;
