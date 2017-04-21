@@ -194,11 +194,11 @@ G3Pipeline_halt_processing()
     \
     (Hz)(hz)(MHz)(GHz)(kHz) \
     \
-    (rad)(deg)(degree)(degrees)(arcmin)(arcsec)(rahour)(rahr)	\
-	(raminute)(rasecond)\
+    (rad)(radian)(radians)(deg)(degree)(degrees)(arcmin)(arcsec)(rahour)(rahr) \
+    (raminute)(rasecond)\
     \
     (meter)(m)(meters)(centimeter)(cm)(millimeter)(mm)(micron)(nanometer)(nm) \
-  (kilometer)(km)(au)(AU)(parsec)(pc)(inch)(in)(foot)(ft)		\
+    (kilometer)(km)(au)(AU)(parsec)(pc)(inch)(in)(foot)(ft)		\
     \
     (watt)(W)(milliwatt)(mW)(microwatt)(uW)(nanowatt)(nW)(picowatt)(pW) \
     (attowatt)(aW)(horsepower)(hp) \
