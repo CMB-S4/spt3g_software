@@ -9,7 +9,7 @@ Quick Start
 How to Install
 --------------
 
-This depends on Boost and cmake, as well as the usual Python packages. Having NetCDF, BLAS, LAPACK, GSL, and FFTW installed will turn on various optional components of the code. You also need a C++11 compiler. This software is designed to run and work on a variety of operating systems (all Linuxes, Mac OS X, and FreeBSD).
+This depends on Boost and cmake, as well as the usual Python packages. Some additional packages (NetCDF, in particular) will activate optional components of the code if installed. You also need a C++11 compiler. This software is designed to run and work on a variety of operating systems (all Linuxes, Mac OS X, and FreeBSD) and architectures (at least 64-bit x86 and POWER).
 
 Minimum versions:
 
@@ -34,16 +34,16 @@ On RHEL-type systems (SL, CentOS, etc.), do this:
 
 Note that on RHEL/SL versions before 7, you will need a newer compiler than ships with the OS. Please see the clustertools repository for a script in this case.
 
-Installation on Cloud and OSG (Scott/Amundsen)
-==============================================
+Installation on the Open Science Grid
+=====================================
 
-On cloud or another system with OASIS configured, run this before anything else:
+On an OSG or other system with OASIS configured, run this before anything else:
 
 .. code-block:: sh
 
 	eval `/cvmfs/spt.opensciencegrid.org/py2-v1/setup.sh`
 
-This sets up a software environment with all the packages installed by yum, etc. above that you need for both the SPT3G and SPTpol software environments. You will obtain best results if you place the line above in your ``.bash_profile``. Do *not* put it in ``.bashrc`` and make *sure* that this is the *only* software installation set up in your bash profile. In particular, take care that there are no references to the sptcloud Anaconda installation, which this replaces.
+This sets up a software environment with all the packages installed by yum, etc. above that you need for the SPT3G software environment, as well as a variety of standard cosmology and astrophysics tasks. You will obtain best results if you place the line above in your ``.bash_profile``. Do *not* put it in ``.bashrc`` and make *sure* that this is the *only* software installation set up in your bash profile. In particular, take care that there are no references to other python installations (Anaconda, etc.).
 
 Compilation
 ===========
@@ -68,7 +68,7 @@ Once that is complete, you can use the ``env-shell.sh`` script in the build dire
 Overview
 --------
 
-For those experienced with sptpol/spt software, a lot has changed. For those completely new, welcome.  The large volume of SPT3G data, even for single observations, has forced some changes in the time-ordered-data processing workflow to ensure that a minimum amount of data is in memory and being processed at any given moment. Typically, this minimum quantum of data is a left-right (or right-left) scan, which corresponds to the standard chunk size used in almost all filtering operations. You can of course also write code that runs on longer chunks of data, though this should be avoided where possible to avoid using too much memory. A short overview of the moving parts of the system appears below.
+The large volume of SPT3G data, even for single observations, has forced some changes in the time-ordered-data processing workflow from previous processing to ensure that a minimum amount of data is in memory and being processed at any given moment. Typically, this minimum quantum of data is a left-right (or right-left) scan, which corresponds to the standard chunk size used in almost all filtering operations. You can of course also write code that runs on longer chunks of data, though this should be avoided where possible to avoid using too much memory. A short overview of the moving parts of the system appears below.
 
 There are three main ingredients to data processing: frames, modules, and pipelines. Details on these topics can be found elsewhere in the manual, in particular in the :doc:`modules` and :doc:`frames` chapters; a brief overview is given here.
 
@@ -206,7 +206,7 @@ Units
 
 This software includes a units system that is meant to end wondering whether a given function takes radians or degrees as an argument, or whether a stored time is in milliseconds or seconds. The support code is accessible to both C++ and Python as part of the ``G3Units`` namespace (``core.G3Units.X`` in Python and ``G3Units::X`` in C++).
 
-You should read the documentation on the :doc:`units` system.  No seriously.  Do it right now.
+You should read the documentation on the :doc:`units` system.
 
 Debugging Code
 ==============
