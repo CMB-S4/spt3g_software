@@ -1,0 +1,18 @@
+*~
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Makefile
+cmake_install.cmake
+CTestTestfile.cmake
+install_manifest.txt
+*.pyc
+__pycache__
+build
+# Some test files that really should be deleted automatically but ¯\_(ツ)_/¯
+mapmaker/np
+mapmaker/pickle
+mapmaker/unittest
+doc/module-autodocs.rst
+doc/moddoc_*
+*.g3

@@ -1,0 +1,8 @@
+from __future__ import print_function
+import os, sys
+
+if not ('SPT3G_SOFTWARE_BUILD_PATH' in os.environ):
+    if sys.stderr.isatty():
+        print('\033[0;31mWARNING: Environment not set!\033[0m', file=sys.stderr)
+    else:
+        print('WARNING: Environment not set!', file=sys.stderr)

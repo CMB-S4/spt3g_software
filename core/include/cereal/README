@@ -1,0 +1,6 @@
+This is the cereal library, as of 5/23/2016. The following patches have been applied:
+- All std::shared_ptr and friends replaced by boost::shared_ptr and friends using sed for compatibility with boost::python.
+- Instances of nullptr removed when initializing boost::shared_ptr for compatibility with ancient boost versions
+
+Sed script:
+sed -E -I '' -e 's/std::shared_ptr/boost::shared_ptr/g' -e 's/std::static_pointer_cast/boost::static_pointer_cast/g' -e 's/std::dynamic_pointer_cast/boost::dynamic_pointer_cast/g' -e 's/std::make_shared/boost::make_shared/g'

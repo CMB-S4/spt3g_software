@@ -1,0 +1,11 @@
+#!/usr/bin/env python
+
+import sys, inspect
+from spt3g import core
+
+if len(sys.argv) < 2:
+    print('Usage: %s name-of-module' % sys.argv[0])
+    sys.exit(1)
+out_str, mod_lst, fun_lst, obj_lst = core.get_doc_for_module(sys.argv[1])
+print(out_str)
+
