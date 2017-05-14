@@ -98,6 +98,10 @@ PushFrameThroughQueue(G3FramePtr frame, bool profile, bool graph,
 		log_trace("Pushing frame through module \"%s\"",
 		    next_mod->name.c_str());
 		next_mod->mod->Process(frame, outqueue);
+	} catch (const std::exception &e) {
+		log_warn("Exception in module \"%s\" (%s): %s",
+		    next_mod->name.c_str(), typeid(e).name(), e.what());
+		throw;
 	} catch (...) {
 		log_warn("Exception in module \"%s\"", next_mod->name.c_str());
 		throw;
