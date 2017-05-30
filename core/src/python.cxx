@@ -97,7 +97,8 @@ static bp::object g3frame_python_get(G3Frame &f, std::string name)
 	// Python doesn't have a concept of const. Add subterfuge.
 	G3FrameObjectConstPtr element = f[name];
 	if (!element) {
-		PyErr_SetString(PyExc_KeyError, "Key not found");
+		std::string err = "Key \'" + name + "\' not found";
+		PyErr_SetString(PyExc_KeyError, err.c_str());
 		bp::throw_error_already_set();
 	}
 

@@ -205,7 +205,9 @@ return incref(tuple.attr("__iter__")().ptr());
                 return result;
             }
             else {
-                PyErr_SetString(PyExc_KeyError,"Key not found.");
+                std::ostringstream err;
+                err << k;
+                PyErr_SetString(PyExc_KeyError, err.str().c_str());
                 throw_error_already_set();
                 return object(); // None
             };
@@ -397,7 +399,9 @@ return incref(tuple.attr("__iter__")().ptr());
             typename Container::iterator i = container.find(i_);
             if (i == container.end())
             {
-                PyErr_SetString(PyExc_KeyError, "Invalid key");
+                std::ostringstream err;
+                err << i_;
+                PyErr_SetString(PyExc_KeyError, err.str().c_str());
                 throw_error_already_set();
             }
             return i->second;
