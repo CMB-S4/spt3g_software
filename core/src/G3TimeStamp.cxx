@@ -97,18 +97,16 @@ G3Time::G3Time(std::string t)
 	if (rv == NULL)
 		rv = strptime(t.c_str(), "%y%m%d %H:%M:%S", &tm);
 
-	// All above are in UTC, so set the time zone appropriately.
-	if (rv != NULL)
-		tm.tm_gmtoff = 0;
-
 	// 5. 2012-01-26T23:29:36+00:00
-	if (rv == NULL)
+	if (rv == NULL) {
 		rv = strptime(t.c_str(), "%Y-%m-%dT%H:%M:%S%z", &tm);
+		tm.tm_sec -= tm.tm_gmtoff; // timegm() doesn't respect TZ
+	}
 
 	if (rv == NULL)
 		log_fatal("Could not convert time string \"%s\"", t.c_str());
 
-	time = G3TimeStamp(mktime(&tm)*G3Units::s) + subsecond;
+	time = G3TimeStamp(timegm(&tm)*G3Units::s) + subsecond;
 }
 
 bool G3Time::operator==(const G3Time & other) const
