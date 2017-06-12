@@ -4,6 +4,8 @@
 #include <G3Frame.h>
 #include <G3Map.h>
 
+#include <stdint.h>
+
 /*
  * Class representing a single DfMux channel mapping. Module and channel numbers
  * are 0-indexed.
@@ -11,12 +13,12 @@
 class DfMuxChannelMapping : public G3FrameObject
 {
 public:
-	int board_ip;
-	int board_serial;
-	int board_slot;
-	int crate_serial;
-	int module;
-	int channel;
+	int32_t board_ip;
+	int32_t board_serial;
+	int32_t board_slot;
+	int32_t crate_serial;
+	int32_t module;
+	int32_t channel;
 
 	std::string Description() const;
 	std::string Summary() const;

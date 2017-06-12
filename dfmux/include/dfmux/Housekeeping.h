@@ -5,6 +5,8 @@
 #include <G3TimeStamp.h>
 #include <G3Map.h>
 
+#include <stdint.h>
+
 /*
  * DfMux housekeeping data is organized into a tree:
  * HkBoardInfo -> HkMezzanineInfo ->  HkModuleInfo -> HkChannelInfo
@@ -26,7 +28,7 @@ public:
         dan_railed(false), rlatched(NAN), rnormal(NAN), rfrac_achieved(NAN),
         res_conversion_factor(NAN) {}
 
-	int channel_number; // 1-indexed
+	int32_t channel_number; // 1-indexed
 	double carrier_amplitude;
 	double carrier_frequency;
 	bool dan_accumulator_enable;
@@ -60,11 +62,11 @@ public:
         demod_railed(false), squid_flux_bias(NAN), squid_current_bias(NAN),
         squid_stage1_offset(NAN), squid_p2p(NAN), squid_transimpedance(NAN) {}
 
-	int module_number; // 1-indexed
+	int32_t module_number; // 1-indexed
 
-	int carrier_gain;
-	int nuller_gain;
-	int demod_gain;
+	int32_t carrier_gain;
+	int32_t nuller_gain;
+	int32_t demod_gain;
 
 	bool carrier_railed;
 	bool nuller_railed;
@@ -81,7 +83,7 @@ public:
 	std::string squid_feedback;
 	std::string routing_type;
 
-	std::map<int, HkChannelInfo> channels; // 1-indexed
+	std::map<int32_t, HkChannelInfo> channels; // 1-indexed
 
 	template <class A> void serialize(A &ar, unsigned v);
 	std::string Description() const;
@@ -107,7 +109,7 @@ public:
 	std::map<std::string, double> currents;
 	std::map<std::string, double> voltages;
 
-	std::map<int, HkModuleInfo> modules; // 1-indexed
+	std::map<int32_t, HkModuleInfo> modules; // 1-indexed
 
 	template <class A> void serialize(A &ar, unsigned v);
 	std::string Description() const;
@@ -130,13 +132,13 @@ public:
 
 	std::string timestamp_port;
 	std::string serial;
-	int fir_stage;
+	int32_t fir_stage;
 
 	std::map<std::string, double> currents;
 	std::map<std::string, double> voltages;
 	std::map<std::string, double> temperatures;
 
-	std::map<int, HkMezzanineInfo> mezz; // 1-indexed
+	std::map<int32_t, HkMezzanineInfo> mezz; // 1-indexed
 
 	template <class A> void serialize(A &ar, unsigned v);
 	std::string Description() const;
