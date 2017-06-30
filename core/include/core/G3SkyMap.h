@@ -40,6 +40,7 @@ public:
 	    is_weighted(isweighted), data_(pre_allocate_map ? xpix*ypix+1 : 0),
 	    xpix_(xpix), ypix_(ypix) {}
 
+	// Instantiate from a numpy array
 	G3SkyMap(boost::python::object v, MapCoordReference coords,
 	    bool is_weighted, G3Timestream::TimestreamUnits units,
 	    G3SkyMap::MapPolType pol_type);

@@ -12,6 +12,8 @@ add_library(coordinateutils SHARED
   src/get_interp_val.c
   src/polarizationutils.cpp
   src/coordinateutils.cpp
+  src/CutskyHealpixMap.cxx
+  src/FlatSkyMap.cxx
   src/python.cpp
 )
 
