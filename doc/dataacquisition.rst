@@ -131,6 +131,8 @@ An example follows, including the addition of the wiring map from pydfmux and co
 
 This is contained in runnable form in ``dfmux/bin/ledgerman.py``.
 
+Note that the version of KST installed from the default package repository under Ubuntu may not have support for reading NetCDF files produced by ledgerman. The version available from the KST PPA repository is compiled with NetCDF support (http://launchpad.net/~kst-plot/+archive/ubuntu/ppa).
+
 Core Tools
 ==========
 
