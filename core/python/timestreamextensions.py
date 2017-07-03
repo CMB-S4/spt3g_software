@@ -1,5 +1,5 @@
 import numpy
-from spt3g.core import G3Timestream, DoubleVector, G3VectorDouble, G3TimestreamMap, G3Time
+from spt3g.core import G3Timestream, DoubleVector, G3VectorDouble, G3TimestreamMap, G3Time, usefulfunc
 from spt3g.core import G3Units, log_fatal
 
 __all__ = ['concatenate_timestreams']
@@ -151,6 +151,7 @@ G3TimestreamMap.concatenate = classmethod(_concatenate_timestream_maps)
 
 
 # global concatenation function
+@usefulfunc
 def concatenate_timestreams(ts_lst, ts_rounding_error=0.5):
     """
     Concatenate G3Timestream or G3TimestreamMap objects together.
