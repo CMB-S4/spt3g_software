@@ -2,6 +2,8 @@ import numpy
 from spt3g.core import G3Timestream, DoubleVector, G3VectorDouble, G3TimestreamMap, G3Time
 from spt3g.core import G3Units, log_fatal
 
+__all__ = ['concatenate_timestreams']
+
 # Use numpy bindings rather than vector_indexing_suite for G3Timestream
 def G3Timestream_getitem(x, y):
     if isinstance(y, slice):
@@ -27,9 +29,6 @@ G3Timestream.__setitem__ = lambda x, y, z: numpy.asarray(x).__setitem__(y, z)
 G3Timestream.__len__ = lambda x: numpy.asarray(x).__len__()
 G3Timestream.shape = timestream_shape
 G3Timestream.ndim = timestream_ndim
-
-del timestream_shape
-del timestream_ndim
 
 # Provide all the numpy binary arithmetic operators, first non-in-place, then
 # in-place, with slightly different semantics
@@ -88,64 +87,108 @@ G3VectorDouble.__div__ = lambda self, val: G3VectorDouble(numpy.asarray(self)/va
 G3VectorDouble.__truediv__ = G3VectorDouble.__div__
 
 #add concatenation routines to g3timestream objects
-@staticmethod
-def concatenate_timestreams(ts_lst,  ts_rounding_error = 0.5, sample_rate_error = 0.01):
-    '''
-    This is a static method so the G3Timestream object you are calling 
-    this from doesn't automatically get added to ts_lst.  You will 
-    need to do that manually.
+def _concatenate_timestreams(cls, ts_lst, ts_rounding_error = 0.5):
+    """
+    Concatenate G3Timestream objects together.
 
-    concatenates the timestreams in ts_lst together.  
+    Arguments
+    ---------
+    ts_lst : list
+        list of G3Timestream objects.
+    ts_rounding_error : float
+        allowed error in timestream separation such that timestreams are
+        contiguous, as a fraction of the sample rate
 
-    It checks that the timestreams are contiguous.
-    '''
+    Returns
+    -------
+    ts : G3Timestream instance
+        The concatenation of the input list of G3Timestream objects
+    """
     #check for contiguous timestreams
     for i in range(1, len(ts_lst)):
-        if (ts_lst[i].start.time - ts_lst[i-1].stop.time) * ts_lst[i].sample_rate - 1 > ts_rounding_error:
+        ts_sep = (ts_lst[i].start.time - ts_lst[i-1].stop.time) * ts_lst[i].sample_rate
+        if numpy.abs(ts_sep - 1) > ts_rounding_error:
             log_fatal("Timestreams are not contiguous")
         if (ts_lst[i].units != ts_lst[0].units):
             log_fatal("Timestreams are not the same units")
-    out_ts = G3Timestream(numpy.concatenate( ts_lst))
+    out_ts = cls(numpy.concatenate(ts_lst))
     out_ts.units = ts_lst[0].units
     out_ts.start = ts_lst[0].start
     out_ts.stop = ts_lst[-1].stop
     return out_ts
 
-G3Timestream.concatenate = concatenate_timestreams
+G3Timestream.concatenate = classmethod(_concatenate_timestreams)
 
 
-@staticmethod
-def concatenate_timestream_maps(ts_map_lst, 
-                                ts_rounding_error=0.5):
-    '''
-    This is a static method so the G3TimestreamMap object you are calling 
-    this from doesn't automatically get added to ts_lst.  You will 
-    need to do that manually.
+def _concatenate_timestream_maps(cls, ts_map_lst, ts_rounding_error=0.5):
+    """
+    Concatenate G3TimestreamMap objects together.
 
-    concatenates the G3TimestreamMaps together.
-    checks that the store the same values and are contiguous.
-    
-    '''
+    Arguments
+    ---------
+    ts_map_lst : list
+        list of G3TimestreamMap objects.
+    ts_rounding_error : float
+        allowed error in timestream separation such that timestreams are
+        contiguous, as a fraction of the sample rate
+
+    Returns
+    -------
+    tsm : G3TimestreamMap instance
+        The concatenation of the input list of G3TimestreamMap objects
+    """
 
     for tsm in ts_map_lst[1:]:
         if set(tsm.keys()) != set(ts_map_lst[0].keys()):
             log_fatal("Timestream maps do not have the same keys")
-    out_tsm = G3TimestreamMap()
+    out_tsm = cls()
     for k in ts_map_lst[0].keys():
         ts_lst = [tsm[k] for tsm in ts_map_lst]
         out_tsm[k] = G3Timestream.concatenate(ts_lst, ts_rounding_error)
     return out_tsm
 
-G3TimestreamMap.concatenate = concatenate_timestream_maps
+G3TimestreamMap.concatenate = classmethod(_concatenate_timestream_maps)
 
-def timestream_t(ts):
+
+# global concatenation function
+def concatenate_timestreams(ts_lst, ts_rounding_error=0.5):
+    """
+    Concatenate G3Timestream or G3TimestreamMap objects together.
+
+    Arguments
+    ---------
+    ts_lst : list
+        list of G3Timestream or G3TimestreamMap objects.  Must all be
+        the same type.
+    ts_rounding_error : float
+        allowed error in timestream separation such that timestreams are
+        contiguous, as a fraction of the sample rate
+
+    Returns
+    -------
+    ts : G3Timestream or G3TimestreamMap object
+        The concatenation of the input list of objects
+    """
+    return ts_lst[0].concatenate(ts_lst, ts_rounding_error)
+
+
+def timestream_elapsed(self):
+    '''
+    Compute elapsed time array for samples.
+    '''
+    return (numpy.arange(self.n_samples) / self.sample_rate).astype(int)
+
+G3Timestream.elapsed = timestream_elapsed
+G3TimestreamMap.elapsed = timestream_elapsed
+
+
+def timestream_t(self):
     '''
     Compute time vector for samples.
     '''
 
-    start = ts.start
-    invrate = 1./(ts.sample_rate)
-    return [G3Time(start.time + int(i*invrate)) for i in range(ts.n_samples)]
+    times = self.elapsed() + self.start.time
+    return [G3Time(t) for t in times]
 
 G3Timestream.times = timestream_t
 G3TimestreamMap.times = timestream_t
