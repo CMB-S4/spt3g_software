@@ -18,6 +18,7 @@ public:
 
 	template <class A> void serialize(A &ar, const unsigned v);
 	std::string Description() const;
+	std::string isoformat() const;
 	bool operator==(const G3Time & other) const;
 	bool operator>(const G3Time & other) const;
 	bool operator<(const G3Time & other) const;

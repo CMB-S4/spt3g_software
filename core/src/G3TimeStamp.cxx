@@ -29,6 +29,25 @@ std::string G3Time::Description() const
 	return desc.str();
 }
 
+std::string G3Time::isoformat() const
+{
+	struct tm tm;
+	std::ostringstream desc;
+	char ftime[255];
+	time_t t;
+
+	t = time_t(time / G3Units::s);
+	gmtime_r(&t, &tm);
+
+	strftime(ftime, sizeof(ftime), "%Y-%m-%dT%H:%M:%S", &tm);
+
+	// Funky casts are to avoid FP errors with non-representability of .1
+	desc << ftime << "." << std::setfill('0') << std::setw(9) <<
+		uint64_t(time % uint64_t(G3Units::s))*uint64_t(1./G3Units::ns);
+
+	return desc.str();
+}
+
 template <class A> void G3Time::serialize(A &ar, const unsigned v)
 {
 	ar & cereal::make_nvp("G3FrameObject",
@@ -257,6 +276,7 @@ PYBINDINGS("core") {
 	    .def(bp::init<std::string>("Create a time object from a string representation. Supported formats are: YYYYMMDD_HHMMSS, YYMMDD_HHMMSS, YYMMDD HH:MM:SS, DD-Mon-YYYY:HH:MM:SS"))
 	    .def("__init__", bp::make_constructor(g3time_from_timestamp, bp::default_call_policies(), (bp::arg("timestamp"))), "Create a G3Time from a numeric timestamp")
 	    .def("GetFileFormatString", &G3Time::GetFileFormatString, "Get a string corresponding to how SPTpol and GCP name files for this time")
+	    .def("isoformat", &G3Time::isoformat, "Return the ISO formatted timestamp string")
 	    .def("Now", &G3Time::Now, "Return a G3Time object corresponding to the current system time")
 	    .staticmethod("Now")
 	    .def_readwrite("time", &G3Time::time, "Time relative to the UNIX epoch")
