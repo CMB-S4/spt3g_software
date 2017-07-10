@@ -87,7 +87,7 @@ G3VectorDouble.__div__ = lambda self, val: G3VectorDouble(numpy.asarray(self)/va
 G3VectorDouble.__truediv__ = G3VectorDouble.__div__
 
 #add concatenation routines to g3timestream objects
-def _concatenate_timestreams(cls, ts_lst, ts_rounding_error = 0.5):
+def _concatenate_timestreams(cls, ts_lst, ts_rounding_error = 0.6):
     """
     Concatenate G3Timestream objects together.
 
@@ -97,7 +97,10 @@ def _concatenate_timestreams(cls, ts_lst, ts_rounding_error = 0.5):
         list of G3Timestream objects.
     ts_rounding_error : float
         allowed error in timestream separation such that timestreams are
-        contiguous, as a fraction of the sample rate
+        contiguous, as a fraction of the sample rate. This should be
+        0 by default, but is 0.5 to allow for downsampler shifting,
+        and then bumpted again to 0.6 to allow for floating-point
+        errors in what 0.5 is.
 
     Returns
     -------
