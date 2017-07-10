@@ -396,6 +396,7 @@ BOOST_PYTHON_MODULE(core)
 	    .value("Counts",  G3Timestream::Counts)
 	    .value("Amps",  G3Timestream::Amps)
 	    .value("Watts",  G3Timestream::Watts)
+	    .value("Ohms",  G3Timestream::Ohms)
 	    .value("Kcmb",  G3Timestream::Kcmb)
 	;
 

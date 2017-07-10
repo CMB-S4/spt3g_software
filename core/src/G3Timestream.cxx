@@ -400,6 +400,9 @@ std::string G3Timestream::Description() const
 	case Watts:
 		desc << " (Watts)";
 		break;
+	case Ohms:
+		desc << " (Ohms)";
+		break;
 	case Kcmb:
 		desc << " (Kcmb)";
 		break;

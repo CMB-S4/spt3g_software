@@ -14,6 +14,7 @@ public:
 		Counts = 1,
 		Amps = 2,
 		Watts = 3,
+		Ohms = 5,
 		Kcmb = 4,
 	};
 
