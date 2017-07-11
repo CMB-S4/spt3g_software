@@ -12,6 +12,8 @@ assert(str(core.G3Time('2017-01-01T00:00:00+00:00')) == '01-Jan-2017:00:00:00.00
 
 # Check time zones for ISO dates
 assert(str(core.G3Time('2017-01-01T00:00:00-03:00')) == '01-Jan-2017:03:00:00.000000000')
+t = core.G3Time.Now()
+assert(core.G3Time(t.isoformat()) == t)
 
 # Check that internal values are right. String identities above check for
 # consistency, so we only need one case here.

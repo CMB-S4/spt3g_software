@@ -84,25 +84,6 @@ G3Time::G3Time(std::string t)
 
 	// 1. 26-Jan-2012:23:29:36
 	rv = strptime(t.c_str(), "%d-%b-%Y:%H:%M:%S", &tm);
-	if (rv != NULL && *rv == '.') {
-		// This format can have a subsecond field, so handle that
-		char *endptr;
-		int i;
-		G3TimeStamp prefactor = G3Units::s;
-		subsecond = strtol(rv+1, &endptr, 10);
-
-		// Figure out what to divide by to get the units right for the
-		// number of digits given. Note that, because the internal
-		// storage is as an integer, diving the prefactor by more
-		// than the unit time interval results in it being zero.
-		// Instead, drop precision on the subsecond field if there
-		// were too many digits.
-		for (i = 0; i < endptr - (rv+1) && prefactor >= 10; i++)
-			prefactor /= 10;
-		for (; i < endptr - (rv+1); i++)
-			subsecond /= 10;
-		subsecond *= prefactor;
-	}
 
 	// 2. 20120126_232936
 	if (rv == NULL)
@@ -120,6 +101,31 @@ G3Time::G3Time(std::string t)
 	if (rv == NULL) {
 		rv = strptime(t.c_str(), "%Y-%m-%dT%H:%M:%S%z", &tm);
 		tm.tm_sec -= tm.tm_gmtoff; // timegm() doesn't respect TZ
+	}
+
+	// 6. 2012-01-26T23:29:36
+	if (rv == NULL)
+		rv = strptime(t.c_str(), "%Y-%m-%dT%H:%M:%S", &tm);
+
+	// If there is a string of digits after the field after a period,
+	// interpret that as a decimal subsecond
+	if (rv != NULL && *rv == '.') {
+		char *endptr;
+		int i;
+		G3TimeStamp prefactor = G3Units::s;
+		subsecond = strtol(rv+1, &endptr, 10);
+
+		// Figure out what to divide by to get the units right for the
+		// number of digits given. Note that, because the internal
+		// storage is as an integer, diving the prefactor by more
+		// than the unit time interval results in it being zero.
+		// Instead, drop precision on the subsecond field if there
+		// were too many digits.
+		for (i = 0; i < endptr - (rv+1) && prefactor >= 10; i++)
+			prefactor /= 10;
+		for (; i < endptr - (rv+1); i++)
+			subsecond /= 10;
+		subsecond *= prefactor;
 	}
 
 	if (rv == NULL)
@@ -273,10 +279,10 @@ PYBINDINGS("core") {
 
 	EXPORT_FRAMEOBJECT(G3Time, init<>(), "UTC Time")
 	    .def(bp::init<int, int , int , int, int, int>("Create a timestamp object from IRIG B code", bp::args("y", "d", "h", "m", "s", "ss")))
-	    .def(bp::init<std::string>("Create a time object from a string representation. Supported formats are: YYYYMMDD_HHMMSS, YYMMDD_HHMMSS, YYMMDD HH:MM:SS, DD-Mon-YYYY:HH:MM:SS"))
+	    .def(bp::init<std::string>("Create a time object from a string representation. Supported formats are: YYYYMMDD_HHMMSS, YYMMDD_HHMMSS, YYMMDD HH:MM:SS, DD-Mon-YYYY:HH:MM:SS, YYYY-MM-DDTHH:MM:SS[+TZ] (ISO 8601). All can have a fraction of second field after a dot."))
 	    .def("__init__", bp::make_constructor(g3time_from_timestamp, bp::default_call_policies(), (bp::arg("timestamp"))), "Create a G3Time from a numeric timestamp")
 	    .def("GetFileFormatString", &G3Time::GetFileFormatString, "Get a string corresponding to how SPTpol and GCP name files for this time")
-	    .def("isoformat", &G3Time::isoformat, "Return the ISO formatted timestamp string")
+	    .def("isoformat", &G3Time::isoformat, "Return the ISO 8601 formatted timestamp string")
 	    .def("Now", &G3Time::Now, "Return a G3Time object corresponding to the current system time")
 	    .staticmethod("Now")
 	    .def_readwrite("time", &G3Time::time, "Time relative to the UNIX epoch")
