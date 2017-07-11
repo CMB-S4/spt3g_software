@@ -111,7 +111,8 @@ def _concatenate_timestreams(cls, ts_lst, ts_rounding_error = 0.6):
     for i in range(1, len(ts_lst)):
         ts_sep = (ts_lst[i].start.time - ts_lst[i-1].stop.time) * ts_lst[i].sample_rate
         if numpy.abs(ts_sep - 1) > ts_rounding_error:
-            log_fatal("Timestreams are not contiguous")
+            log_fatal("Timestreams are not contiguous: timestreams %d and %d "
+                      "separated by %f samples" % (i, i-1, ts_sep - 1))
         if (ts_lst[i].units != ts_lst[0].units):
             log_fatal("Timestreams are not the same units")
     out_ts = cls(numpy.concatenate(ts_lst))
@@ -123,7 +124,7 @@ def _concatenate_timestreams(cls, ts_lst, ts_rounding_error = 0.6):
 G3Timestream.concatenate = classmethod(_concatenate_timestreams)
 
 
-def _concatenate_timestream_maps(cls, ts_map_lst, ts_rounding_error=0.5):
+def _concatenate_timestream_maps(cls, ts_map_lst, ts_rounding_error=0.6):
     """
     Concatenate G3TimestreamMap objects together.
 
@@ -133,7 +134,10 @@ def _concatenate_timestream_maps(cls, ts_map_lst, ts_rounding_error=0.5):
         list of G3TimestreamMap objects.
     ts_rounding_error : float
         allowed error in timestream separation such that timestreams are
-        contiguous, as a fraction of the sample rate
+        contiguous, as a fraction of the sample rate. This should be
+        0 by default, but is 0.5 to allow for downsampler shifting,
+        and then bumpted again to 0.6 to allow for floating-point
+        errors in what 0.5 is.
 
     Returns
     -------
