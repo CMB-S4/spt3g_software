@@ -71,7 +71,7 @@ FlatSkyMap::Description() const
 
 	os << xpix_ << " x " << ypix_ <<
 	    " (" << xpix_*((x_res != 0) ? x_res : res)/G3Units::deg << " x "
-	    " (" << ypix_*res/G3Units::deg << " deg) in ";
+	    << ypix_*res/G3Units::deg << " deg) in ";
 
 	switch (coord_ref) {
 	case Local:
