@@ -97,10 +97,12 @@ container_from_object(boost::python::object v)
 	    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) != -1) {
 		if (strcmp(view.format, "Zd") == 0) {
 			x->insert(x->begin(), (std::complex<double> *)view.buf,
-		       (std::complex<double> *)view.buf + view.len/sizeof(std::complex<double>));
+			    (std::complex<double> *)view.buf +
+			    view.len/sizeof(std::complex<double>));
 		} else if (strcmp(view.format, "Zf") == 0) {
 			x->resize(view.len/sizeof(std::complex<float>));
-			for (size_t i = 0; i < view.len/sizeof(std::complex<float>); i++)
+			for (size_t i = 0;
+			    i < view.len/sizeof(std::complex<float>); i++)
 				(*x)[i] = ((std::complex<float> *)view.buf)[i];
 		} else if (strcmp(view.format, "d") == 0) {
 			x->resize(view.len/sizeof(double));
