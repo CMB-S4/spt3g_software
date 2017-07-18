@@ -7,23 +7,26 @@
 #  - env-shell.sh command runs command with all the PYTHONPATH and such things
 #    configured, then exits to the previous environment
 
-# Things can get confusing if we load this multiple times
-if [ -n "$SPT3G_SOFTWARE_PATH" ]; then
+# Things can get confusing if we load this multiple times for different environments
+if [ -n "$SPT3G_SOFTWARE_PATH" -a "$SPT3G_SOFTWARE_PATH" != "@CMAKE_SOURCE_DIR@" ]; then
 	echo 'Environment already loaded!'
 	exit 1
 fi
 
-# For other software (e.g. Lyrebird) that needs to link to this
-export SPT3G_SOFTWARE_PATH=@CMAKE_SOURCE_DIR@
-export SPT3G_SOFTWARE_BUILD_PATH=@CMAKE_BINARY_DIR@
+# If variables already set to the right things, skip to the end
+if [ "$SPT3G_SOFTWARE_PATH" != "@CMAKE_SOURCE_DIR@" ]; then
+	# For other software (e.g. Lyrebird) that needs to link to this
+	export SPT3G_SOFTWARE_PATH=@CMAKE_SOURCE_DIR@
+	export SPT3G_SOFTWARE_BUILD_PATH=@CMAKE_BINARY_DIR@
 
-# Add binaries to PATH, relative to this script to allow files to be movable
-SPT3G_BUILD_ROOT=$(cd `dirname $0`; pwd)
-export PATH=${SPT3G_BUILD_ROOT}/bin:$PATH
-export LD_LIBRARY_PATH=${SPT3G_BUILD_ROOT}/spt3g:$LD_LIBRARY_PATH
+	# Add binaries to PATH, relative to this script to allow files to be movable
+	SPT3G_BUILD_ROOT=$(cd `dirname $0`; pwd)
+	export PATH=${SPT3G_BUILD_ROOT}/bin:$PATH
+	export LD_LIBRARY_PATH=${SPT3G_BUILD_ROOT}/spt3g:$LD_LIBRARY_PATH
 
-# And python bits...
-export PYTHONPATH=${SPT3G_BUILD_ROOT}:$PYTHONPATH
+	# And python bits...
+	export PYTHONPATH=${SPT3G_BUILD_ROOT}:$PYTHONPATH
+fi
 
 if [ -z "$1" ]; then
 	echo 'SPT3G Environment Variables Set'
