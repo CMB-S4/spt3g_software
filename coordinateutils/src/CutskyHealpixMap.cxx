@@ -67,7 +67,7 @@ void CutSkyHealpixMap::serialize(A &ar, unsigned u)
         using namespace cereal;
 
         ar & make_nvp("G3SkyMap", base_class<G3SkyMap>(this));
-        ar & make_nvp("hitpix_", hitpix_);
+        ar & make_nvp("hitpix", hitpix);
         ar & make_nvp("nside_", nside_);
         ar & make_nvp("is_nested_", is_nested_);
 }
@@ -101,7 +101,7 @@ HealpixHitPix::HealpixHitPix(const FlatSkyMap &flat_map, size_t nside,
   : coord_ref(coord_reference), is_nested_(is_nested), nside_(nside)
 {
         g3_assert(flat_map.coord_ref != MapCoordReference::Local);
-        
+	
 	std::vector<double> alpha(1, 0);
 	std::vector<double> delta(1, 0);
 	std::vector<int> out_inds(1, 0);
@@ -122,11 +122,6 @@ HealpixHitPix::HealpixHitPix(const FlatSkyMap &flat_map, size_t nside,
 			pix2ang_ring(nside, i, &theta, &phi);
 		delta[0] = (M_PI/2.0 - theta) * G3Units::rad;
 		alpha[0] = (phi) * G3Units::rad;
-
-		if (coord_ref == MapCoordReference::Galactic) {
-			double l(alpha[0]), b(delta[0]);
-			coord_gal_to_eq(&l, &b, &alpha[0], &delta[0], 1);
-		}
 
 		// XXX: temporarily disabled
 		//get_pointing_pixel(flat_map, alpha, delta, out_inds);
@@ -178,9 +173,9 @@ CutSkyHealpixMap::CutSkyHealpixMap(boost::python::object v,
     size_t full_sky_map_nside, HealpixHitPixPtr hitpix, bool is_weighted,
     G3SkyMap::MapPolType pol_type, G3Timestream::TimestreamUnits u,
     int init_sym_group) :
-      G3SkyMap(hitpix->coord_ref, hitpix->get_total(), 1, is_weighted, u,
+      G3SkyMap(hitpix->coord_ref, hitpix->total_, 1, is_weighted, u,
        pol_type, true),
-      hitpix_(hitpix),  nside_(hitpix->get_nside()),
+      hitpix(hitpix),  nside_(hitpix->get_nside()),
       is_nested_(hitpix->is_nested())
 {
 	size_t nside = hitpix->get_nside();
@@ -192,8 +187,8 @@ CutSkyHealpixMap::CutSkyHealpixMap(boost::python::object v,
 	if (PyObject_GetBuffer(v.ptr(), &view,
 	    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) != -1) {
 		if (strcmp(view.format, "d") == 0) {
-			for (size_t i = hitpix->get_ipixmin();
-			    i < hitpix->get_ipixmax(); i++) {
+			for (size_t i = hitpix->ipixmin_;
+			    i < hitpix->ipixmax_; i++) {
 				long tmp_full_ind;
 				double u_scale;
 
@@ -242,16 +237,16 @@ CutSkyHealpixMap::CutSkyHealpixMap(boost::python::object v,
     HealpixHitPixPtr hitpix, bool is_weighted, G3SkyMap::MapPolType pol_type,
     G3Timestream::TimestreamUnits u) :
       G3SkyMap(v, hitpix->coord_ref, is_weighted, u, pol_type),
-      hitpix_(hitpix),  nside_(hitpix->get_nside()),
+      hitpix(hitpix),  nside_(hitpix->get_nside()),
       is_nested_(hitpix->is_nested())
 {
 }
 
 CutSkyHealpixMap::CutSkyHealpixMap(HealpixHitPixPtr hitpix, bool is_weighted,
     G3SkyMap::MapPolType pol_type, G3Timestream::TimestreamUnits u) :
-      G3SkyMap(hitpix->coord_ref, hitpix->get_total(), 1, is_weighted, u,
+      G3SkyMap(hitpix->coord_ref, hitpix->total_, 1, is_weighted, u,
        pol_type, false),
-      hitpix_(hitpix),  nside_(hitpix->get_nside()),
+      hitpix(hitpix),  nside_(hitpix->get_nside()),
       is_nested_(hitpix->is_nested())
 {
 }
@@ -262,55 +257,35 @@ CutSkyHealpixMap::CutSkyHealpixMap() :
 }
 
 void
-CutSkyHealpixMap::get_full_sized_healpix_map(G3VectorDouble & full_sized_map)
+CutSkyHealpixMap::get_full_sized_healpix_map(
+    std::vector<double> & full_sized_map)
 {
-	g3_assert(hitpix_->pixinds_.size() == data_.size());
-	size_t nside = hitpix_->get_nside();
+	g3_assert(hitpix->pixinds_.size() == data_.size());
+	size_t nside = hitpix->get_nside();
 
-	full_sized_map = G3VectorDouble(12 * nside * nside, 0);
+	full_sized_map = std::vector<double>(12 * nside * nside, 0);
 
-	for (size_t i = 0; i < hitpix_->pixinds_.size() - 1; i++) {
-		size_t index = hitpix_->pixinds_[i];
+	for (size_t i = 0; i < hitpix->pixinds_.size() - 1; i++) {
+		size_t index = hitpix->pixinds_[i];
 		g3_assert(index < full_sized_map.size());
 		full_sized_map[index] = data_[i];
 	}
 }
 
-void
-CutSkyHealpixMap::get_pointing_pixel(const std::vector<double> &alpha,
-    const std::vector<double> &delta, std::vector<int> & out_inds) const
-{
-	for (size_t i=0; i < alpha.size(); i++)
-		out_inds[i] = radec_2_pix(alpha[i], delta[i]);
-}
 
-long
-CutSkyHealpixMap::radec_2_pix(double alpha, double delta) const
-{
-	alpha /= G3Units::rad;
-	delta /= G3Units::rad;
-
-	if (coord_ref == MapCoordReference::Galactic) {
-		double l, b;
-		coord_eq_to_gal(&alpha, &delta, &l, &b, 1);
-		alpha = l;
-		delta = b;
+std::vector<int> CutSkyHealpixMap::angles_to_pixels(
+    const std::vector<double> & alphas, 
+    const std::vector<double> & deltas) const { 
+	std::vector<int> v( alphas.size(), 0);
+	for (size_t i=0; i < alphas.size(); i++){
+		v[i] = ang_2_pix_(alphas[i], deltas[i]);
 	}
-
-	double theta = M_PI/2.0 - delta;
-	long outpix = 0;
-
-	if (is_nested_)
-		ang2pix_nest(nside_, theta, alpha, &outpix);
-	else
-		ang2pix_ring(nside_, theta, alpha, &outpix);
-
-	return hitpix_->get_cutsky_index(outpix);
+	return v;
 }
 
+
 long
-CutSkyHealpixMap::ang_2_pix(double alpha, double delta) const
-{
+CutSkyHealpixMap::ang_2_pix_(double alpha, double delta) const {
 	alpha /= G3Units::rad;
 	delta /= G3Units::rad;
 
@@ -322,17 +297,15 @@ CutSkyHealpixMap::ang_2_pix(double alpha, double delta) const
 	else
 		ang2pix_ring(nside_, theta, alpha, &outpix);
 
-	return hitpix_->get_cutsky_index(outpix);
+	return hitpix->get_cutsky_index(outpix);
 }
 
-void
-CutSkyHealpixMap::pix_2_ang(long pix, double &alpha, double &delta) const
-{
-	if (coord_ref == MapCoordReference::Galactic) {
-		double l(alpha), b(delta);
-		coord_gal_to_eq(&l, &b, &alpha, &delta, 1);
-	}
-	pix = hitpix_->get_fullsky_index(pix);
+std::vector<double>
+CutSkyHealpixMap::pixel_to_angle(size_t pix) const {
+	double alpha=0;
+	double delta=0;
+
+	pix = hitpix->get_fullsky_index(pix);
 
 	double theta, phi;
 	if (is_nested_)
@@ -342,14 +315,10 @@ CutSkyHealpixMap::pix_2_ang(long pix, double &alpha, double &delta) const
 
 	alpha = phi * G3Units::rad;
 	delta = M_PI/2.0 * G3Units::rad - theta * G3Units::rad;
-}
-
-static std::vector<double>
-CutSkyHealpixMap_pix_2_ang_py(CutSkyHealpixMap &map, long pix)
-{
-	std::vector<double> resies(2,0);
-	map.pix_2_ang(pix, resies[0], resies[1]);
-	return resies;
+	std::vector<double> ov(2,0); 
+	ov.push_back(alpha);
+	ov.push_back(delta);
+	return ov;
 }
 
 void
@@ -360,13 +329,6 @@ CutSkyHealpixMap::get_interpolated_weights(double alpha, double delta,
 	alpha /= G3Units::rad;
 	delta /= G3Units::rad;
 
-	if (coord_ref == MapCoordReference::Galactic) {
-		double l, b;
-		coord_eq_to_gal(&alpha, &delta, &l, &b, 1);
-		alpha = l;
-		delta = b;
-	}
-
 	double theta = M_PI/2.0 - delta;
 	get_interp_weights(ugh.get(), theta, alpha, pix, weight);
 }
@@ -376,7 +338,7 @@ CutSkyHealpixMap::get_interp_precalc(long pix[4], double weight[4]) const
 {
 	double outval = 0;
 	for (size_t i = 0; i < 4; i++) {
-		size_t cutsky_pix = hitpix_->get_cutsky_index(pix[i]);
+		size_t cutsky_pix = hitpix->get_cutsky_index(pix[i]);
 		outval += data_[cutsky_pix] * weight[i];
 	}
 	return outval;
@@ -389,12 +351,6 @@ CutSkyHealpixMap::get_interpolated_value(double alpha, double delta) const
 
 	alpha /= G3Units::rad;
 	delta /= G3Units::rad;
-	if (coord_ref == MapCoordReference::Galactic) {
-		double l, b;
-		coord_eq_to_gal(&alpha, &delta, &l, &b, 1);
-		alpha = l;
-		delta = b;
-	}
 
 	double theta = M_PI/2.0 - delta;
 
@@ -404,7 +360,7 @@ CutSkyHealpixMap::get_interpolated_value(double alpha, double delta) const
 
 	double outval = 0;
 	for (size_t i = 0; i < 4; i++) {
-		size_t cutsky_pix = hitpix_->get_cutsky_index(pix[i]);
+		size_t cutsky_pix = hitpix->get_cutsky_index(pix[i]);
 		outval += data_[cutsky_pix] * weight[i];
 	}
 
@@ -438,14 +394,12 @@ PYBINDINGS("coordinateutils")
 	         (bp::arg("pix_inds"), bp::arg("nside"), bp::arg("is_nested"),
 		  bp::arg("coord_ref"))))
 	    .def_pickle(g3frameobject_picklesuite<HealpixHitPix>())
-	    .def("get_total", &HealpixHitPix::get_total)
 	    .def("get_nside", &HealpixHitPix::get_nside)
 	    .def("is_nested", &HealpixHitPix::is_nested)
 	    .def("get_fullsky_index", &HealpixHitPix::get_fullsky_index,
 	         bp::arg("cut_sky_index"))
 	    .def("get_cutsky_index", &HealpixHitPix::get_cutsky_index,
 		 bp::arg("full_sky_index"))
-	    .def_readwrite("pixinds", &HealpixHitPix::pixinds_)
 	;
 
 	// XXX docstrings
@@ -473,16 +427,16 @@ PYBINDINGS("coordinateutils")
 	    .def("get_full_sized_healpix_map",
 	        &CutSkyHealpixMap::get_full_sized_healpix_map,
 	        bp::arg("out_full_sized_map"))
-	    .def("get_pointing_pixel", &CutSkyHealpixMap::get_pointing_pixel,
-	        bp::arg("alpha"), bp::arg("delta"), bp::arg("out_inds"))
-	    .def("radec_2_pix",&CutSkyHealpixMap::radec_2_pix,
-	        (bp::arg("alpha"), bp::arg("delta")))
-	    .def("ang_2_pix", &CutSkyHealpixMap::ang_2_pix,
-	        (bp::arg("alpha"), bp::arg("delta")))
-	    .def("pix_2_ang", &CutSkyHealpixMap_pix_2_ang_py)
+	    .def("pixel_to_angle", &CutSkyHealpixMap::pixel_to_angle)
 	    .def("is_nested", &CutSkyHealpixMap::is_nested)
 	    .def("get_nside", &CutSkyHealpixMap::get_nside)
-	    .def_readwrite("hitpix", &CutSkyHealpixMap::hitpix_)
+
+	    .def("angles_to_pixels", &CutSkyHealpixMap::angles_to_pixels )
+	    .def("pixel_to_angle", &CutSkyHealpixMap::pixel_to_angle )
+	    .def("angle_to_pixel", &CutSkyHealpixMap::angle_to_pixel )
+
+
+	    .def_readwrite("hitpix", &CutSkyHealpixMap::hitpix)
 	;
 
         register_pointer_conversions<CutSkyHealpixMap>();

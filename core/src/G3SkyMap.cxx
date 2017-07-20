@@ -94,6 +94,16 @@ G3SkyMap::G3SkyMap(bp::object v, MapCoordReference coords, bool is_weighted,
 	throw bp::error_already_set();
 }
 
+size_t G3SkyMap::angle_to_pixel(double alpha, double delta) const {
+	std::vector<double> alphas = {alpha};
+	std::vector<double> deltas = {delta};
+	return angles_to_pixels(alphas, deltas)[0];
+}
+
+std::vector<double> G3SkyMap::pixel_to_angle(size_t x_pix, size_t y_pix) const {
+	return pixel_to_angle(pixat(x_pix, y_pix));
+}
+
 static int
 G3SkyMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 {

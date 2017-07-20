@@ -22,28 +22,25 @@ G3_POINTERS(WCSMapInfo);
  *  sky
  *
  * The HealpixHitPix class contains a mapping of full sky pixel index <-> cut
- *  sky pixel index
+ *  sky pixel index.  It defines the area of sky for a cutsky healpix map
  *
- * If you apply the HealpixHitPix mapping of cut sky to full sky index and
- * then use the healpix routine pix_to_ang, it will return the appropriate
- * galactic coordinate system angles for where that pixel maps to. In galactic
- * coordinates, this allows a 1:1 mapping to Planck maps.
- *
- * The radec_2_pix routine accepts arguments in equatorial coordinates and then
- * performs an internal transform to galactic coordinates internally.
- *
- * Otherwise, the ang_2_pix and pix_2_ang methods maintain whatever coordinate
- * system is provided.
+ * CutSkyHealpixMap stores the actual map information.
+
+ 
+
+
+
  */
+
+
+class CutSkyHealpixMap;
 
 class HealpixHitPix : public G3FrameObject {
 public:
 	HealpixHitPix(){};
-
-	// Initialize with all the pixels in a flat sky map, potentially
-	// transformed into a coordinate system given by coord_reference
+	
 	HealpixHitPix(const FlatSkyMap &flat_map, size_t nside, 
-            bool is_nested, MapCoordReference coord_reference);
+	    bool is_nested, MapCoordReference coord_reference);
 
 	// Initialize with a vector of pixel indices to include
 	HealpixHitPix(const std::vector<uint64_t> &pixinds, size_t nside, 
@@ -54,16 +51,15 @@ public:
   
 	bool is_nested() const { return is_nested_; }
 	size_t get_nside() const { return nside_; }
-	long get_ipixmax() const { return ipixmax_; }
-	long get_ipixmin() const { return ipixmin_; }
-	long get_total() const { return total_; }
-	
+
 	template <class A> void serialize(A &ar, unsigned u);
 	std::string Description() const;
 
 	MapCoordReference coord_ref;
 
-public: // XXX: should be private
+private:
+	friend class CutSkyHealpixMap;
+	
 	bool is_nested_;
 	size_t nside_;	
 	long ipixmin_;
@@ -85,52 +81,44 @@ public:
 	    G3SkyMap::MapPolType pol_type = G3SkyMap::None,
 	    G3Timestream::TimestreamUnits u = G3Timestream::Kcmb,
 	    int init_sym_group = 0);
-
+	
 	CutSkyHealpixMap(boost::python::object v, HealpixHitPixPtr hitpix, 
 	    bool is_weighted = true,
 	    G3SkyMap::MapPolType pol_type = G3SkyMap::None,
 	    G3Timestream::TimestreamUnits u = G3Timestream::Kcmb);
-
+	
 	CutSkyHealpixMap(HealpixHitPixPtr hitpix, bool is_weighted = true,
 	    G3SkyMap::MapPolType pol_type = G3SkyMap::None,
 	    G3Timestream::TimestreamUnits u = G3Timestream::Kcmb);
-
+	
 	CutSkyHealpixMap();
-
-	void get_full_sized_healpix_map(G3VectorDouble & full_sized_map);
+	
+	void get_full_sized_healpix_map(std::vector<double> & full_sized_map);
 	
 	void get_pointing_pixel(const std::vector<double> &alpha,
 	    const std::vector<double> &delta, std::vector<int> &out_inds) const;
 	
-	/*
-	 * The alpha and delta provided is in FK5 coordinates (equatorial)
-	 * If the map is galactic translates the FK5 coordinates into 
-	 * galactic and returns that pixel.
-	 */
-	long radec_2_pix(double alpha, double delta) const;
-
-	// As above, but without the possible coordinate transform
-	long ang_2_pix(double alpha, double delta) const;
-
-	// Always returns RA, Dec
-	void pix_2_ang(long pix, double & alpha, double & delta) const;
-
-	// XXX: Document these interpolation functions
+	std::vector<int> angles_to_pixels(const std::vector<double> & alphas, 
+	    const std::vector<double> & deltas) const;
+	
+	std::vector<double> pixel_to_angle(size_t pix) const;
+	
 	void get_interpolated_weights(double alpha, double delta,
 	    long pix[4], double weight[4]) const;
 	double get_interp_precalc(long pix[4], double weight[4]) const;
 	double get_interpolated_value(double alpha, double delta) const;
 	
 	template <class A> void serialize(A &ar, unsigned u);
-
+	
 	std::string Description() const;
-
+	
 	bool is_nested() const { return is_nested_; }
 	size_t get_nside() const { return nside_; }
-
-	HealpixHitPixPtr hitpix_; // XXX: should be renamed without _
-
+	HealpixHitPixPtr hitpix; 
+	
 private:
+	long ang_2_pix_(double alpha, double delta) const;
+	
 	SET_LOGGER("CutSkyHealpixMap");	
 	
 	size_t nside_;

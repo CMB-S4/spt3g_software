@@ -3,6 +3,8 @@
 
 #include <coordinateutils/FlatSkyMap.h>
 
+#include <coordinateutils/flatskyprojection.h>
+
 FlatSkyMap::FlatSkyMap(int x_len, int y_len, double res, bool is_weighted,
     MapProjection proj, double alpha_center, double delta_center,
     MapCoordReference coord_ref, G3Timestream::TimestreamUnits u,
@@ -282,6 +284,46 @@ FlatSkyMap::operator/(double rhs)
 	return new_map;
 }
 
+std::vector<int> FlatSkyMap::angles_to_pixels(const std::vector<double> & alphas, 
+					 const std::vector<double> & deltas) const {
+	std::vector<int> ovec;
+	angle_to_pixel_1d_vec(alphas, deltas, 
+			      alpha_center, delta_center,
+			      xpix_, ypix_,
+			      res, x_res,
+			      proj,
+			      ovec);
+	return ovec;
+}
+
+std::vector<double> FlatSkyMap::pixel_to_angle(size_t pixel) const {
+	std::vector<int> inds;
+	inds.push_back(pixel);
+	std::vector<double> ra_out;
+	std::vector<double> dec_out;
+	pixel_1d_to_angle(inds, alpha_center, delta_center, xpix_, ypix_, res, x_res, proj,
+			  false, ra_out, dec_out);
+	std::vector<double> retval;
+	retval.push_back(ra_out[0]);
+	retval.push_back(dec_out[0]);
+	return retval;
+}
+
+std::vector<double> FlatSkyMap::pixel_to_angle_wrap_ra(size_t pixel) const {
+	std::vector<int> inds;
+	inds.push_back(pixel);
+	std::vector<double> ra_out;
+	std::vector<double> dec_out;
+	pixel_1d_to_angle(inds, alpha_center, delta_center, xpix_, ypix_, res, x_res, proj,
+			  true, ra_out, dec_out);
+	std::vector<double> retval;
+	retval.push_back(ra_out[0]);
+	retval.push_back(dec_out[0]);
+	return retval;
+}
+
+
+
 #define FLAT_SKY_MAP_DOCSTR \
         "FlatSkyMap is a G3SkyMap with the extra meta information about the particular flat sky projection included\n\n" \
         "For reasons (skymap __setitem__ has to handle both 1d and 2d semantics) the FlatSkyMap has a slightly unintuitive way of setting values when using a slicing operator.  Instead of being able to  slice directly you need to cast it to be an array first:\n\n"\
@@ -366,6 +408,12 @@ PYBINDINGS("coordinateutils")
 	      "direction for maps with rectangular pixels")
 	    .def_readwrite("y_res", &FlatSkyMap::res, "Resolution in Y "
 	      "direction for maps with rectangular pixels")
+
+	    .def("angles_to_pixels", &FlatSkyMap::angles_to_pixels )
+	    .def("pixel_to_angle", &FlatSkyMap::pixel_to_angle)
+	    .def("pixel_to_angle", &FlatSkyMap::pixel_to_angle )
+	    .def("angle_to_pixel", &FlatSkyMap::angle_to_pixel )
+
 
 	    .def(bp::self + bp::self)
 	    .def(bp::self * bp::self)

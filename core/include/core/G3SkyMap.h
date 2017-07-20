@@ -104,6 +104,19 @@ public:
 		return data_.size() > 0;
 	}
 
+	//pointing information
+	virtual std::vector<int> angles_to_pixels(const std::vector<double> & alphas, 
+					     const std::vector<double> & deltas) const { 
+		return std::vector<int>();
+	}
+
+	virtual std::vector<double> pixel_to_angle(size_t pixel) const {
+		return std::vector<double>();
+	}
+
+	std::vector<double> pixel_to_angle(size_t x_pix, size_t y_pix) const;
+	size_t angle_to_pixel(double alpha, double delta) const;
+
 protected:
 	// Last bin is an overflow bin
 	std::vector<double> data_;

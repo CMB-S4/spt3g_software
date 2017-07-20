@@ -97,6 +97,12 @@ public:
 	FlatSkyMap & operator/=(double rhs);
 	FlatSkyMap operator/(const FlatSkyMap & rhs);
 	FlatSkyMap operator/(double rhs);
+
+	std::vector<int> angles_to_pixels(const std::vector<double> & alphas, 
+	    const std::vector<double> & deltas) const override;
+	std::vector<double> pixel_to_angle(size_t pixel) const override;
+	std::vector<double> pixel_to_angle_wrap_ra(size_t pixel) const;
+
 private:
 	SET_LOGGER("FlatSkyMap");
 };
