@@ -241,7 +241,7 @@ static PyBufferProcs vec_bufferprocs_##T;
 	boost::python::object cls = register_vector_of<T>(desc); \
 	PyTypeObject *vdclass = (PyTypeObject *)cls.ptr(); \
 	vec_bufferprocs_##T.bf_getbuffer = vector_getbuffer_##T; \
-	vdclass->tp_as_buffer = &vecdouble_bufferprocs; \
+	vdclass->tp_as_buffer = &vec_bufferprocs_##T; \
 	vdclass->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER; \
 }
 #else
