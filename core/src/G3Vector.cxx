@@ -16,75 +16,14 @@ template <>
 G3VectorDoublePtr
 container_from_object(boost::python::object v)
 {
-	G3VectorDoublePtr x(new (G3VectorDouble));
-	Py_buffer view;
-	if (PyObject_GetBuffer(v.ptr(), &view,
-	    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) != -1) {
-		if (strcmp(view.format, "d") == 0) {
-			x->insert(x->begin(), (double *)view.buf,
-			(double *)view.buf + view.len/sizeof(double));
-		} else if (strcmp(view.format, "f") == 0) {
-			x->resize(view.len/sizeof(float));
-			for (size_t i = 0; i < view.len/sizeof(float); i++)
-				(*x)[i] = ((float *)view.buf)[i];
-		} else if (strcmp(view.format, "i") == 0) {
-			x->resize(view.len/sizeof(int));
-			for (size_t i = 0; i < view.len/sizeof(int); i++)
-				(*x)[i] = ((int *)view.buf)[i];
-		} else if (strcmp(view.format, "I") == 0) {
-			x->resize(view.len/sizeof(int));
-			for (size_t i = 0; i < view.len/sizeof(int); i++)
-				(*x)[i] = ((unsigned int *)view.buf)[i];
-		} else if (strcmp(view.format, "l") == 0) {
-			x->resize(view.len/sizeof(long));
-			for (size_t i = 0; i < view.len/sizeof(long); i++)
-				(*x)[i] = ((unsigned long *)view.buf)[i];
-		} else {
-			// We could add more types, but why do that?
-			// Let Python do the work for obscure cases
-			boost::python::container_utils::extend_container(*x, v);
-		}
-		PyBuffer_Release(&view);
-	} else {
-		PyErr_Clear();
-		boost::python::container_utils::extend_container(*x, v);
-	}
-
-	return x;
+	return numpy_container_from_object<G3VectorDouble>(v);
 }
 
 template <>
 G3VectorIntPtr
 container_from_object(boost::python::object v)
 {
-	G3VectorIntPtr x(new (G3VectorInt));
-	Py_buffer view;
-	if (PyObject_GetBuffer(v.ptr(), &view,
-	    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) != -1) {
-		if (strcmp(view.format, "i") == 0) {
-			x->resize(view.len/sizeof(int));
-			for (size_t i = 0; i < view.len/sizeof(int); i++)
-				(*x)[i] = ((int *)view.buf)[i];
-		} else if (strcmp(view.format, "I") == 0) {
-			x->resize(view.len/sizeof(int));
-			for (size_t i = 0; i < view.len/sizeof(int); i++)
-				(*x)[i] = ((unsigned int *)view.buf)[i];
-		} else if (strcmp(view.format, "l") == 0) {
-			x->resize(view.len/sizeof(long));
-			for (size_t i = 0; i < view.len/sizeof(long); i++)
-				(*x)[i] = ((unsigned long *)view.buf)[i];
-		} else {
-			// We could add more types, but why do that?
-			// Let Python do the work for obscure cases
-			boost::python::container_utils::extend_container(*x, v);
-		}
-		PyBuffer_Release(&view);
-	} else {
-		PyErr_Clear();
-		boost::python::container_utils::extend_container(*x, v);
-	}
-
-	return x;
+	return numpy_container_from_object<G3VectorInt>(v);
 }
 
 template <>
@@ -138,140 +77,25 @@ container_from_object(boost::python::object v)
 	return x;
 }
 
-
-
 static int
 G3VectorDouble_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 {
-	if (view == NULL) {
-		PyErr_SetString(PyExc_ValueError, "NULL view");
-		return -1;
-	}
-
-	view->shape = NULL;
-
-	boost::python::handle<> self(boost::python::borrowed(obj));
-	boost::python::object selfobj(self);
-	G3VectorDoublePtr ts = boost::python::extract<G3VectorDoublePtr>(selfobj)();
-	view->obj = obj;
-	view->buf = (void*)&(*ts)[0];
-	view->len = ts->size() * sizeof(double);
-	view->readonly = 0;
-	view->itemsize = sizeof(double);
-	if (flags & PyBUF_FORMAT)
-		view->format = (char *)"d";
-	else
-		view->format = NULL;
-	view->ndim = 1;
-#if (PY_MAJOR_VERSION == 2 && PY_MINOR_VERSION < 7) || (PY_MAJOR_VERSION >= 3)
-	// Abuse internal pointer in the absence of smalltable. This is safe
-	// on all architectures except MIPS N32.
-	view->internal = (void *)ts->size();
-	view->shape = (Py_ssize_t *)(&view->internal);
-#else
-	view->smalltable[0] = ts->size();
-	view->shape = &view->smalltable[0];
-	view->internal = NULL;
-#endif
-	view->strides = &view->itemsize;
-	view->suboffsets = NULL;
-
-	// Try to hold onto our collective hats. This is still very dangerous if
-	// the vector's underlying vector is resized.
-	Py_INCREF(obj);
-
-	return 0;
+	return pyvector_getbuffer<G3VectorDouble::value_type>(obj, view, flags,
+	    "d");
 }
-
-
-
-static int
-G3VectorComplexDouble_getbuffer(PyObject *obj, Py_buffer *view, int flags)
-{
-	if (view == NULL) {
-		PyErr_SetString(PyExc_ValueError, "NULL view");
-		return -1;
-	}
-
-	view->shape = NULL;
-
-	boost::python::handle<> self(boost::python::borrowed(obj));
-	boost::python::object selfobj(self);
-	G3VectorComplexDoublePtr ts = 
-	    boost::python::extract<G3VectorComplexDoublePtr>(selfobj)();
-	view->obj = obj;
-	view->buf = (void*)&(*ts)[0];
-	view->len = ts->size() * sizeof(std::complex<double> );
-	view->readonly = 0;
-	view->itemsize = sizeof(std::complex<double> );
-	if (flags & PyBUF_FORMAT)
-		view->format = (char *)"Zd";
-	else
-		view->format = NULL;
-	view->ndim = 1;
-#if (PY_MAJOR_VERSION == 2 && PY_MINOR_VERSION < 7) || (PY_MAJOR_VERSION >= 3)
-	// Abuse internal pointer in the absence of smalltable. This is safe
-	// on all architectures except MIPS N32.
-	view->internal = (void *)ts->size();
-	view->shape = (Py_ssize_t *)(&view->internal);
-#else
-	view->smalltable[0] = ts->size();
-	view->shape = &view->smalltable[0];
-	view->internal = NULL;
-#endif
-	view->strides = &view->itemsize;
-	view->suboffsets = NULL;
-
-	// Try to hold onto our collective hats. This is still very dangerous if
-	// the vector's underlying vector is resized.
-	Py_INCREF(obj);
-
-	return 0;
-}
-
-
 
 static int
 G3VectorInt_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 {
-	if (view == NULL) {
-		PyErr_SetString(PyExc_ValueError, "NULL view");
-		return -1;
-	}
+	return pyvector_getbuffer<G3VectorInt::value_type>(obj, view, flags,
+	    "i");
+}
 
-	view->shape = NULL;
-
-	boost::python::handle<> self(boost::python::borrowed(obj));
-	boost::python::object selfobj(self);
-	G3VectorIntPtr ts = boost::python::extract<G3VectorIntPtr>(selfobj)();
-	view->obj = obj;
-	view->buf = (void*)&(*ts)[0];
-	view->len = ts->size() * sizeof(int32_t);
-	view->readonly = 0;
-	view->itemsize = sizeof(int32_t);
-	if (flags & PyBUF_FORMAT)
-		view->format = (char *)"i";
-	else
-		view->format = NULL;
-	view->ndim = 1;
-#if (PY_MAJOR_VERSION == 2 && PY_MINOR_VERSION < 7) || (PY_MAJOR_VERSION >= 3)
-	// Abuse internal pointer in the absence of smalltable. This is safe
-	// on all architectures except MIPS N32.
-	view->internal = (void *)ts->size();
-	view->shape = (Py_ssize_t *)(&view->internal);
-#else
-	view->smalltable[0] = ts->size();
-	view->shape = &view->smalltable[0];
-	view->internal = NULL;
-#endif
-	view->strides = &view->itemsize;
-	view->suboffsets = NULL;
-
-	// Try to hold onto our collective hats. This is still very dangerous if
-	// the vector's underlying vector is resized.
-	Py_INCREF(obj);
-
-	return 0;
+static int
+G3VectorComplexDouble_getbuffer(PyObject *obj, Py_buffer *view, int flags)
+{
+	return pyvector_getbuffer<G3VectorComplexDouble::value_type>(obj,
+	    view, flags, "Zd");
 }
 
 static PyBufferProcs vecdouble_bufferprocs;
@@ -311,18 +135,20 @@ PYBINDINGS("core") {
 	    "to and from numpy arrays.");
 	// Add buffer protocol interface
 	PyTypeObject *vdclass = (PyTypeObject *)vecdouble.ptr();
-	vecdouble_bufferprocs.bf_getbuffer = G3VectorDouble_getbuffer,
+	vecdouble_bufferprocs.bf_getbuffer = G3VectorDouble_getbuffer;
 	vdclass->tp_as_buffer = &vecdouble_bufferprocs;
 #if PY_MAJOR_VERSION < 3
 	vdclass->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
 #endif
-	boost::python::object veccomplexdouble = register_g3vector<std::complex<double> >(
+	boost::python::object veccomplexdouble =
+	   register_g3vector<std::complex<double> >(
 	    "G3VectorComplexDouble", "Array of complex floats. Treat as a serializable "
 	    "version of numpy.array(dtype=complex128). Can be efficiently cast "
 	    "to and from numpy arrays.");
 	// Add buffer protocol interface
 	PyTypeObject *vcclass = (PyTypeObject *)veccomplexdouble.ptr();
-	veccomplexdouble_bufferprocs.bf_getbuffer = G3VectorComplexDouble_getbuffer,
+	veccomplexdouble_bufferprocs.bf_getbuffer =
+	    G3VectorComplexDouble_getbuffer;
 	vcclass->tp_as_buffer = &veccomplexdouble_bufferprocs;
 #if PY_MAJOR_VERSION < 3
 	vcclass->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;

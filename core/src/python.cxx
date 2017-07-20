@@ -220,6 +220,44 @@ BOOST_PP_SEQ_FOR_EACH(UNITS_INTERFACE,~,UNITS)
   .add_static_property(BOOST_PP_STRINGIZE(T), &BOOST_PP_CAT(g3units_return_, T))
 struct __XXX_fake_g3units_namespace_XXX {};
 
+// Nonsense boilerplate for POD vector numpy bindings
+#define numpy_vector_infrastructure(T, conv) \
+template <> \
+boost::shared_ptr<std::vector<T> > \
+container_from_object(boost::python::object v) \
+{ \
+	return numpy_container_from_object<std::vector<T> >(v); \
+} \
+static int \
+vector_getbuffer_##T(PyObject *obj, Py_buffer *view, int flags) \
+{ \
+	return pyvector_getbuffer<T>(obj, view, flags, conv); \
+} \
+static PyBufferProcs vec_bufferprocs_##T;
+
+#if PY_MAJOR_VERSION < 3
+#define numpy_vector_of(T, desc) \
+{ \
+	boost::python::object cls = register_vector_of<T>(desc); \
+	PyTypeObject *vdclass = (PyTypeObject *)cls.ptr(); \
+	vec_bufferprocs_##T.bf_getbuffer = vector_getbuffer_##T; \
+	vdclass->tp_as_buffer = &vecdouble_bufferprocs; \
+	vdclass->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER; \
+}
+#else
+#define numpy_vector_of(T, desc) \
+{ \
+	boost::python::object cls = register_vector_of<T>(desc); \
+	PyTypeObject *vdclass = (PyTypeObject *)cls.ptr(); \
+	vec_bufferprocs_##T.bf_getbuffer = vector_getbuffer_##T; \
+	vdclass->tp_as_buffer = &vec_bufferprocs_##T; \
+}
+#endif
+
+numpy_vector_infrastructure(int32_t, "i")
+numpy_vector_infrastructure(double, "d")
+numpy_vector_infrastructure(float, "f")
+
 BOOST_PYTHON_MODULE(core)
 {
 	bp::docstring_options docopts(true, true, false);
@@ -235,11 +273,11 @@ BOOST_PYTHON_MODULE(core)
 	// Some POD types
 	register_vector_of<bool>("Bool");
 	register_vector_of<int64_t>("Int64");
-	register_vector_of<int32_t>("Int");
+	numpy_vector_of(int32_t, "Int");
 	register_vector_of<uint32_t>("UInt");
-	register_vector_of<double>("Double");
+	numpy_vector_of(double, "Double");
 	register_vector_of<std::complex<double> >("ComplexDouble");
-	register_vector_of<float>("Float");
+	numpy_vector_of(float, "Float");
 	register_vector_of<std::string>("String");
 	register_vector_of<unsigned char>("UnsignedChar");
 	register_vector_of<G3Time>("G3Time");
