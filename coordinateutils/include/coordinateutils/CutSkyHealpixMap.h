@@ -25,11 +25,6 @@ G3_POINTERS(WCSMapInfo);
  *  sky pixel index.  It defines the area of sky for a cutsky healpix map
  *
  * CutSkyHealpixMap stores the actual map information.
-
- 
-
-
-
  */
 
 
@@ -75,7 +70,6 @@ G3_SERIALIZABLE(HealpixHitPix, 1);
 
 class CutSkyHealpixMap : public G3SkyMap {
 public:
-	// XXX: Document arguments
 	CutSkyHealpixMap(boost::python::object v, size_t full_sky_map_nside,
 	    HealpixHitPixPtr hitpix, bool is_weighted = true,
 	    G3SkyMap::MapPolType pol_type = G3SkyMap::None,
