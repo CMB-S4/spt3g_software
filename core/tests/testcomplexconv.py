@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
-from spt3g import core, todfilter
+from spt3g import core
 import unittest
 
 class TestBackAndForthConversion(unittest.TestCase):
