@@ -2,7 +2,7 @@
 SPT3G Software
 --------------
 
-The SPT3G analysis and data acquisition software uses pipelines that hand frames containing data between a series of modules. Documentation both on the framework and data processing modules is below. The top contains a set of general overview documents, while the bottom of this page contains more specific information on individual code modules.
+The SPT3G analysis and data acquisition software uses pipelines that hand frames containing data between a series of modules. Documentation both on the framework and data processing modules is below. The top contains a set of general overview documents, while the bottom of this page contains more specific information on individual code modules.  All of the data types that can be stored in frames are listed in the "Frame Objects" part of the individual module documentation.
 
 General Manuals
 ~~~~~~~~~~~~~~~
