@@ -69,8 +69,8 @@ public:
 	FlatSkyMap(const FlatSkyMap & fm);
 
 	template <class A> void serialize(A &ar, const unsigned u);
-	G3SkyMapPtr Clone(bool copy_data) const;
-	std::string Description() const;
+	virtual G3SkyMapPtr Clone(bool copy_data) const override;
+	std::string Description() const override;
 
 	// Arithmetic operations:
 
