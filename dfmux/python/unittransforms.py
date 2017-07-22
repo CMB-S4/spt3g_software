@@ -6,7 +6,7 @@ from spt3g.dfmux import HousekeepingForBolo
 from spt3g.dfmux import IceboardConversions
 from .wtl_ConvertUtils import convert_squid, convert_demod, convert_mb
 
-def counts_to_amps(wiringmap, hkmap, bolo, system):
+def counts_to_rms_amps(wiringmap, hkmap, bolo, system):
     boardhk, mezzhk, modhk, chanhk = HousekeepingForBolo(hkmap, wiringmap, bolo, True)
 
     if system == 'ICE':
@@ -15,10 +15,12 @@ def counts_to_amps(wiringmap, hkmap, bolo, system):
         else:
             tf_V = IceboardConversions.convert_adc_samples('Streamer')
             tf_I = tf_V/modhk.squid_transimpedance
+        if chanhk.carrier_frequency != 0:
+            tf_I /= numpy.sqrt(2) # Use RMS amps
     elif system == 'DfMux':
         if chanhk.dan_streaming_enable:
             squid_converter = convert_squid(units='Normalized')
-            tf_I = numpy.sqrt(2) / (2.**24) * squid_converter.theo_AnToIbolo(1., Gnuller=modhk.nuller_gain, eff=1.)
+            tf_I = 1. / (2.**24) * squid_converter.theo_AnToIbolo(1., Gnuller=modhk.nuller_gain, eff=1.)
         else:
             dfmux_converter = convert_demod('gcp')
             resistor='10K' # Assume this for DAN Off
@@ -35,12 +37,14 @@ def counts_to_amps(wiringmap, hkmap, bolo, system):
 
     return tf_I * core.G3Units.amp
 
-def bolo_bias_voltage(wiringmap, hkmap, bolo, system):
+def bolo_bias_voltage_rms(wiringmap, hkmap, bolo, system):
     boardhk, mezzhk, modhk, chanhk = HousekeepingForBolo(hkmap, wiringmap, bolo, True)
 
     if system == 'ICE':
         tf_V = IceboardConversions.convert_TF(modhk.carrier_gain, target='carrier', unit='NORMALIZED', frequency=chanhk.carrier_frequency/core.G3Units.Hz)
         volts = tf_V * chanhk.carrier_amplitude * core.G3Units.V
+        if chanhk.carrier_frequency != 0:
+            volts /= numpy.sqrt(2) # Use RMS amps
     elif system == 'DfMux':
         squid_converter = convert_squid(units='Normalized')
         volts = squid_converter.theo_AcToVbias(chanhk.carrier_amplitude, modhk.carrier_gain) * core.G3Units.V
@@ -55,6 +59,7 @@ def get_timestream_unit_conversion(from_units, to_units, bolo, wiringmap=None, h
     Return the scalar conversion factor to move timestream data from a
     given system of units (Watts, Amps, Counts) to another one.
     Requires a wiring map and recent housekeeping data.
+    Returned quantities are RMS for currents and time-averaged for power.
 
     Note that this does not handle conversions to on-sky quantities (e.g. K_cmb)
     '''
@@ -70,10 +75,10 @@ def get_timestream_unit_conversion(from_units, to_units, bolo, wiringmap=None, h
 
     # First, convert to watts
     if from_units == core.G3TimestreamUnits.Counts:
-        to_watts = counts_to_amps(wiringmap, hkmap, bolo, system)
-        to_watts *= bolo_bias_voltage(wiringmap, hkmap, bolo, system)
+        to_watts = counts_to_rms_amps(wiringmap, hkmap, bolo, system)
+        to_watts *= bolo_bias_voltage_rms(wiringmap, hkmap, bolo, system)
     elif from_units == core.G3TimestreamUnits.Amps:
-        to_watts = bolo_bias_voltage(wiringmap, hkmap, bolo, system)
+        to_watts = bolo_bias_voltage_rms(wiringmap, hkmap, bolo, system)
     elif from_units == core.G3TimestreamUnits.Watts:
         to_watts = 1.
     else:
@@ -81,10 +86,10 @@ def get_timestream_unit_conversion(from_units, to_units, bolo, wiringmap=None, h
 
     # Now the conversion from watts
     if to_units == core.G3TimestreamUnits.Counts:
-        from_watts = 1./counts_to_amps(wiringmap, hkmap, bolo, system)
-        from_watts /= bolo_bias_voltage(wiringmap, hkmap, bolo, system)
+        from_watts = 1./counts_to_rms_amps(wiringmap, hkmap, bolo, system)
+        from_watts /= bolo_bias_voltage_rms(wiringmap, hkmap, bolo, system)
     elif to_units == core.G3TimestreamUnits.Amps:
-        from_watts = bolo_bias_voltage(wiringmap, hkmap, bolo, system)
+        from_watts = bolo_bias_voltage_rms(wiringmap, hkmap, bolo, system)
         if from_watts != 0:
             from_watts = 1./from_watts
     elif to_units == core.G3TimestreamUnits.Watts:
@@ -99,7 +104,8 @@ def get_timestream_unit_conversion(from_units, to_units, bolo, wiringmap=None, h
 class ConvertTimestreamUnits(object):
     '''
     Changes timestream units from one set of units (e.g. ADC counts) to
-    another (e.g. Watts)
+    another (e.g. Watts). Currents and power are time averaged quantities
+    (i.e. currents give RMS values).
 
     Note that this does not handle conversions to on-sky quantities (e.g. K_cmb)
     '''
