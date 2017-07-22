@@ -184,7 +184,7 @@ class ConvertTimestreamUnits(object):
             # Convert timestream and store results
             convts = core.G3Timestream(ts)
             convts.units = self.units
-            convts[:] *= convfactor
+            convts *= convfactor
             if convts.units != core.G3TimestreamUnits.Counts:
                 convts.SetFLACCompression(False)
             newts[bolo] = convts
