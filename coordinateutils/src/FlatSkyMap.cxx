@@ -432,7 +432,6 @@ PYBINDINGS("coordinateutils")
 	    .def(bp::self -= double())
 	    .def(bp::self /= double())
 	    .def("Clone", &FlatSkyMap::Clone)
-	    .def("__copy__", &FlatSkyMap::Clone)
 	;
 	register_pointer_conversions<FlatSkyMap>();
 

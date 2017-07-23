@@ -46,7 +46,7 @@ public:
 	    G3SkyMap::MapPolType pol_type);
 
 	// Reimplement the following in subclasses
-	virtual boost::shared_ptr<G3SkyMap> Clone(bool copy_data) const
+	virtual boost::shared_ptr<G3SkyMap> Clone(bool copy_data = true) const
 	{
 		if (copy_data)
 			return boost::make_shared<G3SkyMap>(*this);
