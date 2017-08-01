@@ -43,7 +43,7 @@ def get_function_signature(f, replacement_kwargs = None):
 
 class cache_frame_data(object):
     '''
-    This is a decorator for use with G3Modules written as functionos.  It enables a function
+    This is a decorator for use with G3Modules written as functions.  It enables a function
     to use cached values from other types of frames in the processing of a frame.
     
     To make that confusing sentence clearer with an example, in a lot of cases we want to have a module that works on 
@@ -94,13 +94,11 @@ None to the function.  You can change the defulat key by supplying the following
                         self.kwargs.pop(k)
 
             def __call__(self, frame):
+                for vname, stored_key in self.argument_map.iteritems():
+                    if stored_key in frame:
+                        self.kwargs[vname] = frame[stored_key]
                 if frame.type == self_outer.type:
                     return f(frame, *(self.args), **(self.kwargs))
-                #elif frame.type != self_outer.type:
-                else:
-                    for vname, stored_key in self.argument_map.iteritems():
-                        if stored_key in frame:
-                            self.kwargs[vname] = frame[stored_key]
 
         WrappedFunc.__name__ = f.__name__
         WrappedFunc.__doc__ = doc_prepend + str(f.__doc__) + doc_append
