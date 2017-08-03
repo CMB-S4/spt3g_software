@@ -169,7 +169,7 @@ def get_doc_for_module(module_path, include_link_list = True):
                     out_str = out_str + tmp_str
                     #after we have gotten the documention, find the properties and load their documentation
                     out_str += '\n\n    Members:\n'
-                    for p_name, p_obj in mod.__dict__[x].__dict__.iteritems():
+                    for p_name, p_obj in mod.__dict__[x].__dict__.items():
                         if isinstance( p_obj, property):
                             if p_name == 'value':
                                 continue
