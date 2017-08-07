@@ -430,12 +430,7 @@ PYBINDINGS("coordinateutils")
 	    .def("pixel_to_angle", &CutSkyHealpixMap::pixel_to_angle)
 	    .def("is_nested", &CutSkyHealpixMap::is_nested)
 	    .def("get_nside", &CutSkyHealpixMap::get_nside)
-
-	    .def("angles_to_pixels", &CutSkyHealpixMap::angles_to_pixels )
-	    .def("pixel_to_angle", &CutSkyHealpixMap::pixel_to_angle )
-	    .def("angle_to_pixel", &CutSkyHealpixMap::angle_to_pixel )
-
-
+		
 	    .def_readwrite("hitpix", &CutSkyHealpixMap::hitpix)
 	;
 

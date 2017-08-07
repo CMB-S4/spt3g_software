@@ -409,12 +409,6 @@ PYBINDINGS("coordinateutils")
 	    .def_readwrite("y_res", &FlatSkyMap::res, "Resolution in Y "
 	      "direction for maps with rectangular pixels")
 
-	    .def("angles_to_pixels", &FlatSkyMap::angles_to_pixels )
-	    .def("pixel_to_angle", &FlatSkyMap::pixel_to_angle)
-	    .def("pixel_to_angle", &FlatSkyMap::pixel_to_angle )
-	    .def("angle_to_pixel", &FlatSkyMap::angle_to_pixel )
-
-
 	    .def(bp::self + bp::self)
 	    .def(bp::self * bp::self)
 	    .def(bp::self - bp::self)

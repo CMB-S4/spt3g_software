@@ -402,3 +402,11 @@ void pixel_1d_to_pixel_2d_ref( int map_index,  int nx, int ny, int & out_x,
 		out_y = map_index / nx;
 	}
 }
+
+
+PYBINDINGS("coordinateutils")
+{
+	using namespace boost::python;
+	def("pixel_2d_to_pixel_1d", pixel_2d_to_pixel_1d);
+	def("pixel_1d_to_pixel_2d", pixel_1d_to_pixel_2d);
+}
