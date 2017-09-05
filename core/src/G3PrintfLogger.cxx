@@ -4,7 +4,7 @@
 #include <unistd.h>
 
 G3PrintfLogger::G3PrintfLogger(G3LogLevel level)
-    : G3Logger(level), TrimFileNames(true)
+    : G3Logger(level), TrimFileNames(true), Timestamps(false)
 {
 	tty_ = isatty(STDERR_FILENO);
 }
@@ -64,16 +64,27 @@ G3PrintfLogger::Log(G3LogLevel level, const std::string &unit,
 	else
 		trimmed_filename = file;
 
+	char timestamp[255];
+	memset(timestamp, 0, sizeof(timestamp));
+	if (Timestamps) {
+		struct tm tm;
+		time_t t = time(NULL);
+		localtime_r(&t, &tm);
+		strftime(timestamp, sizeof(timestamp),
+		    " %d-%b-%Y:%H:%M:%S %Z", &tm);
+	}
+
 	int messagesize = snprintf(NULL, 0,
-	    "%s%s (%s):%s %s (%s%s:%d%s in %s%s%s)\n",
-	    log_prolog, log_description, unit.c_str(), log_epilog,
+	    "%s%s (%s)%s:%s %s (%s%s:%d%s in %s%s%s)\n",
+	    log_prolog, log_description, unit.c_str(), timestamp, log_epilog,
 	    message.c_str(), file_prolog, trimmed_filename.c_str(), line,
 	    log_epilog, file_prolog, func.c_str(), log_epilog);
 
 	char log_message[messagesize + 1];
 
-	sprintf(log_message, "%s%s (%s):%s %s (%s%s:%d%s in %s%s%s)\n",
-	    log_prolog, log_description, unit.c_str(), log_epilog,
+	sprintf(log_message,
+	    "%s%s (%s)%s:%s %s (%s%s:%d%s in %s%s%s)\n",
+	    log_prolog, log_description, unit.c_str(), timestamp, log_epilog,
 	    message.c_str(), file_prolog, trimmed_filename.c_str(), line,
 	    log_epilog, file_prolog, func.c_str(), log_epilog);
 

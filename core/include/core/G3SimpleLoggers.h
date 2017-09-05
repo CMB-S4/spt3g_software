@@ -19,7 +19,8 @@ public:
 	    const std::string &file, int line, const std::string &func,
 	    const std::string &message);
 
-	bool TrimFileNames;
+	bool TrimFileNames; // Print only leaf paths (default true)
+	bool Timestamps;    // Include timestamps in messages (default false)
 private:
 	bool tty_;
 };

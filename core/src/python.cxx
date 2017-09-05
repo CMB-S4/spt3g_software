@@ -422,6 +422,7 @@ BOOST_PYTHON_MODULE(core)
 	  "G3PrintfLogger", "Logger that prints error messages to stderr (in color, if stderr is a tty).",
 	  bp::init<bp::optional<G3LogLevel> >())
 	    .def_readwrite("trim_file_names", &G3PrintfLogger::TrimFileNames)
+	    .def_readwrite("timestamps", &G3PrintfLogger::Timestamps)
 	;
 
 	// A few things that need to be in a particular order
