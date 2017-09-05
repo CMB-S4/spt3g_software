@@ -75,7 +75,7 @@ def FlagSomeStuff(frame, flag_key = 'Flags', bolo_props = None)
         doc_append = '''\n\n
 This function automatic caches values from frames that are not %s.
 It will only operate on %s frames.  If the cached keys are not found it will pass
-None to the function.  You can change the defulat key by supplying the following arguments:
+None to the function.  You can change the default key by supplying the following arguments:
 
    Cached Values:
 ''' % ( str(self_outer.type), str(self_outer.type) )
@@ -87,19 +87,21 @@ None to the function.  You can change the defulat key by supplying the following
                 self.args = args
                 self.kwargs = kwargs
 
-                self.argument_map = self_outer.keyargs
+                self.argument_map = copy(self_outer.keyargs)
+                pop_ks = []
                 for k in self.kwargs.keys():
                     if k in self.argument_map:
                         self.argument_map[k] = self.kwargs[k]
-                        self.kwargs.pop(k)
+                        pop_ks.append(k)
+                for k in pop_ks:
+                    self.kwargs.pop(k)
 
             def __call__(self, frame):
-                for vname, stored_key in self.argument_map.iteritems():
+                for vname, stored_key in self.argument_map.items():
                     if stored_key in frame:
                         self.kwargs[vname] = frame[stored_key]
                 if frame.type == self_outer.type:
                     return f(frame, *(self.args), **(self.kwargs))
-
         WrappedFunc.__name__ = f.__name__
         WrappedFunc.__doc__ = doc_prepend + str(f.__doc__) + doc_append
         WrappedFunc.__g3module__ = True
