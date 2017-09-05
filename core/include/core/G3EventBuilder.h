@@ -13,7 +13,8 @@
 
 class G3EventBuilder : public G3Module {
 public:
-	G3EventBuilder();
+	G3EventBuilder(int warn_size = 1000); // Yell if the output frame queue
+	                                      // grows larger than warn_size
 	virtual ~G3EventBuilder();
 
 	void AsyncDatum(G3TimeStamp, G3FrameObjectConstPtr);
@@ -35,6 +36,8 @@ protected:
 
 private:
 	static void ProcessThread(G3EventBuilder *);
+
+	int warn_size_;
 
 	std::thread process_thread_;
 	std::condition_variable process_sem_;

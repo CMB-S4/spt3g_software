@@ -1,12 +1,13 @@
 #include <G3EventBuilder.h>
+#include <G3Pipeline.h>
 
 #ifdef __FreeBSD__
 #include <pthread_np.h>
 #endif
 
-G3EventBuilder::G3EventBuilder() : G3Module()
+G3EventBuilder::G3EventBuilder(int warn_size) :
+  G3Module(), warn_size_(warn_size), dead_(false)
 {
-	dead_ = false;
 	process_thread_ = std::thread(ProcessThread, this);
 
 #ifdef __linux__
@@ -58,6 +59,18 @@ void G3EventBuilder::FrameOut(G3FramePtr frame)
 
 	out_queue_.push_back(frame);
 	out_queue_sem_.notify_one();
+
+	if (out_queue_.size() > 1 && out_queue_.size() % warn_size_ == 0) {
+		std::string cur_mod = G3Pipeline::GetCurrentModule();
+		if (cur_mod == "")
+			log_warn("Outbound frame queue at %zd frames. "
+			    "Possible IO stall? Rerun with profile=True to "
+			    "print where.", out_queue_.size());
+		else
+			log_warn("Outbound frame queue at %zd frames. "
+			    "Possible IO stall in module %s.",
+			    out_queue_.size(), cur_mod.c_str());
+	}
 }
 
 void G3EventBuilder::CollectPolledData(G3FramePtr frame)
