@@ -4,6 +4,7 @@
 #include <G3Module.h>
 #include <vector>
 #include <string>
+#include <signal.h>
 
 /*
  * Core data processing class. Runs a sequence of modules like a for loop.
@@ -51,6 +52,9 @@ private:
 	std::string graph_info_;
 
 	static void sigint_catcher(int);
+#ifdef SIGINFO
+	static void siginfo_catcher(int);
+#endif
 
 	SET_LOGGER("G3Pipeline");
 };

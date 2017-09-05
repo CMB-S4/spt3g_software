@@ -188,12 +188,26 @@ G3Pipeline::sigint_catcher(int)
 	G3Pipeline::halt_processing = true;
 }
 
+#ifdef SIGINFO
+void
+G3Pipeline::siginfo_catcher(int)
+{
+	std::string module = G3Pipeline::GetCurrentModule();
+
+	log_notice("SIGINFO received: currently executing module %s.",
+	    module.c_str());
+}
+#endif
+
 void
 G3Pipeline::Run(bool profile, bool graph)
 {
 	struct rusage last_rusage;
 	std::vector<G3Pipeline_mod_data> mods;
 	struct sigaction sigint_catcher, oldsigint;
+#ifdef SIGINFO
+	struct sigaction siginfo_catcher, oldsiginfo;
+#endif
 	
 	// Variables needed for graphing processing chain
 	int graph_frame_id_vals = 0;
@@ -214,6 +228,16 @@ G3Pipeline::Run(bool profile, bool graph)
 	sigemptyset(&sigint_catcher.sa_mask);
 	sigaddset(&sigint_catcher.sa_mask, SIGINT);
 	sigaction(SIGINT, &sigint_catcher, &oldsigint);
+
+#ifdef SIGINFO
+	if (profile) {
+		siginfo_catcher.sa_handler = &G3Pipeline::siginfo_catcher;
+		siginfo_catcher.sa_flags = SA_RESTART;
+		sigemptyset(&siginfo_catcher.sa_mask);
+		sigaddset(&siginfo_catcher.sa_mask, SIGINFO);
+		sigaction(SIGINFO, &siginfo_catcher, &oldsiginfo);
+	}
+#endif
 
 	for (auto i = modules_.begin(); i != modules_.end(); i++)
 		mods.push_back(G3Pipeline_mod_data(*i));
@@ -242,6 +266,10 @@ G3Pipeline::Run(bool profile, bool graph)
 	// Restore old handler
 	G3Pipeline::halt_processing = false;
 	sigaction(SIGINT, &oldsigint, &sigint_catcher);
+#ifdef SIGINFO
+	if (profile)
+		sigaction(SIGINFO, &oldsiginfo, &siginfo_catcher);
+#endif
 
 	if (profile) {
 		printf("Pipeline profiling results:\n");
