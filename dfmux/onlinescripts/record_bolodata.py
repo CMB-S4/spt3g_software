@@ -108,5 +108,5 @@ pipe.Add(core.G3MultiFileWriter, filename=filename, size_limit=args.max_file_siz
 
 for collector in collectors:
     collector.Start()
-pipe.Run()
+pipe.Run(profile=True)
 
