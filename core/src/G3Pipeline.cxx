@@ -6,6 +6,7 @@
 #include <sys/resource.h>
 #include <cxxabi.h>
 #include <iostream>
+#include <mutex>
 
 G3Pipeline::G3Pipeline()
 {
@@ -66,6 +67,10 @@ struct G3Pipeline_proc_data{
 	G3Frame::FrameType frame_type;
 };
 
+// Global accounting variables for debugging (see G3Pipeline::GetCurrentModule)
+static std::string pipeline_global_mod;
+static std::mutex pipeline_global_mod_lock;
+
 // Recursive inner loop of G3Pipeline::Run()
 static size_t
 PushFrameThroughQueue(G3FramePtr frame, bool profile, bool graph,
@@ -91,6 +96,14 @@ PushFrameThroughQueue(G3FramePtr frame, bool profile, bool graph,
 
 		graph_proc_data.push_back(G3Pipeline_proc_data(
 		    next_mod->graph_id, local_frame_id, frame->type));
+	}
+
+	// Record what module is currently running for debugging purposes
+	// if profiling is on.
+	if (profile) {
+		pipeline_global_mod_lock.lock();
+		pipeline_global_mod = next_mod->name;
+		pipeline_global_mod_lock.unlock();
 	}
 
 	// Actually perform the processing
@@ -150,6 +163,18 @@ PushFrameThroughQueue(G3FramePtr frame, bool profile, bool graph,
 
 	return outqueue.size();
 }
+}
+
+std::string
+G3Pipeline::GetCurrentModule()
+{
+	std::string rv;
+
+	pipeline_global_mod_lock.lock();
+	rv = pipeline_global_mod;
+	pipeline_global_mod_lock.unlock();
+
+	return rv;
 }
 
 volatile bool G3Pipeline::halt_processing = false;

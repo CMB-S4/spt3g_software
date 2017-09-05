@@ -33,10 +33,16 @@ public:
 	// statistics for each module at completion.
 	void Run(bool profile = false, bool graph = false);
 
-	//If there is stored graph information get it
+	// If there is stored graph information get it
 	std::string GetGraphInfo() const {
 		return graph_info_;
 	}
+
+	// If profile is True in a running pipeline, Run() will record the
+	// currently-running module name in a global variable, which can
+	// be read using GetCurrentModule(). This is provided on a best-effort
+	// basis only and is meaningless unless profile is true.
+	static std::string GetCurrentModule();
 
 	static volatile bool halt_processing;
 
