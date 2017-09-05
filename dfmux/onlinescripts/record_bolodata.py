@@ -11,6 +11,9 @@ parser.add_argument('-v', dest='verbose', action='store_true', help='Verbose mod
 parser.add_argument('--max_file_size', dest='max_file_size', default=1024, help='Maximum file size in MB (default 1024)')
 args = parser.parse_args()
 
+# Make sure to get timestamps in the logs (NB: assumes printf logger)
+core.G3Logger.global_logger.timestamps = True
+
 # Import pydfmux later since it can take a while
 import pydfmux
 
