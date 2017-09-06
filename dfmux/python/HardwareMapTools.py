@@ -109,6 +109,7 @@ def PyDfMuxBolometerPropertiesInjector(frame, pydfmux_hwm=None, angle_per_mm = 4
             bp.band = float(bolo.observing_band)*core.G3Units.GHz
         if hasattr(bolo, 'polarization_angle') and bolo.polarization_angle is not None:
             bp.pol_angle = float(bolo.polarization_angle)*core.G3Units.deg
+            bp.pol_efficiency = 1.0
 
         bpm[str(bolo.global_name)] = bp
 
