@@ -41,15 +41,16 @@ template <class A> void DfMuxMetaSample::serialize(A &ar, const unsigned v)
 G3_SERIALIZABLE_CODE(DfMuxMetaSample);
 
 DfMuxBuilder::DfMuxBuilder(int nboards, int64_t collation_tolerance) : 
-    G3EventBuilder(), nboards_(nboards), last_out_pkt_(0),
-    tolerance_(collation_tolerance), out_pkt_cnt_(0)
+    G3EventBuilder(MAX_DATASOURCE_QUEUE_SIZE*3), nboards_(nboards),
+    last_out_pkt_(0), tolerance_(collation_tolerance), out_pkt_cnt_(0)
 {
 }
 
 DfMuxBuilder::DfMuxBuilder(std::vector<int> boards,
   int64_t collation_tolerance) : 
-    G3EventBuilder(), nboards_(boards.size()), last_out_pkt_(0),
-    board_list_(boards), tolerance_(collation_tolerance), out_pkt_cnt_(0)
+    G3EventBuilder(MAX_DATASOURCE_QUEUE_SIZE*3), nboards_(boards.size()),
+    last_out_pkt_(0), board_list_(boards), tolerance_(collation_tolerance),
+    out_pkt_cnt_(0)
 {
 }
 
