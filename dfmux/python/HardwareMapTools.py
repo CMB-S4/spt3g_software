@@ -32,28 +32,22 @@ class PyDfMuxWiringMapInjector(object):
     '''
     def __init__(self, pydfmux_hwm, pathstring=None, state=[]):
         self.ran = False
-        self.hwm = pydfmux_hwm
-        self.pathstring = pathstring
-        self.state = state
-    def __call__(self, frame):
-        if self.ran:
-            return frame
 
         from pydfmux.core import dfmux as pydfmux
-        hwmf = core.G3Frame(core.G3FrameType.Wiring)
+        self.hwmf = core.G3Frame(core.G3FrameType.Wiring)
         hwm = DfMuxWiringMap()
         
-        if self.pathstring:
-            chan_map_query = self.hwm.channel_maps_from_pstring(self.pathstring)
+        if pathstring:
+            chan_map_query = pydfmux_hwm.channel_maps_from_pstring(pathstring)
         else:
-            chan_map_query = self.hwm.query(pydfmux.ChannelMapping)
+            chan_map_query = pydfmux_hwm.query(pydfmux.ChannelMapping)
 
-        if self.state:
-            for bolo in self.hwm.query(pydfmux.Bolometer):
+        if len(state) > 0:
+            for bolo in pydfmux_hwm.query(pydfmux.Bolometer):
                 if bolo.readout_channel:
                     bolo.state = bolo.retrieve_bolo_state().state
-            self.hwm.commit()
-            chan_map_query = chan_map_query.join(pydfmux.ChannelMapping, pydfmux.Bolometer).filter(pydfmux.Bolometer.state._in(self.state))
+            pydfmux_hwm.commit()
+            chan_map_query = chan_map_query.join(pydfmux.ChannelMapping, pydfmux.Bolometer).filter(pydfmux.Bolometer.state._in(state))
 
         for bolo in chan_map_query:
             mapping = DfMuxChannelMapping()
@@ -66,11 +60,17 @@ class PyDfMuxWiringMapInjector(object):
                 mapping.module += 4
             mapping.channel = bolo.readout_channel.channel - 1 # pydfmux HWMs use 1-indexing of channels, while FPGA uses 0-indexing
             hwm[str(bolo.bolometer.global_name)] = mapping
-        hwmf['WiringMap'] = hwm
-        hwmf['ReadoutSystem'] = 'ICE'
-        self.ran = True
+        self.hwmf['WiringMap'] = hwm
+        self.hwmf['ReadoutSystem'] = 'ICE'
 
-        return [hwmf, frame]
+    def __call__(self, frame):
+        if self.ran:
+            return frame
+
+        self.ran = True
+        out = [self.hwmf, frame]
+        del self.hwmf
+        return out
 
 # Compatibility
 PyDfMuxHardwareMapInjector = PyDfMuxWiringMapInjector
