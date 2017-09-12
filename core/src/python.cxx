@@ -393,6 +393,8 @@ BOOST_PYTHON_MODULE(core)
 	      "sent to this process. Once set, the first module will not be "
 	      "called again.")
 	    .staticmethod("halt_processing")
+	    .def_readonly("last_frame",
+	        &G3Pipeline::last_frame)
 	;
 
 	bp::enum_<G3LogLevel>("G3LogLevel")

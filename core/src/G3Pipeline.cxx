@@ -76,7 +76,8 @@ static size_t
 PushFrameThroughQueue(G3FramePtr frame, bool profile, bool graph,
     struct rusage &last_rusage, std::vector<G3Pipeline_mod_data> &mods,
     std::vector<G3Pipeline_mod_data>::iterator next_mod,
-    int &graph_frame_id_vals, std::deque<G3Pipeline_proc_data> &graph_proc_data)
+    int &graph_frame_id_vals, std::deque<G3Pipeline_proc_data> &graph_proc_data,
+    G3FramePtr &last_frame)
 {
 	std::deque<G3FramePtr> outqueue;
 
@@ -114,9 +115,11 @@ PushFrameThroughQueue(G3FramePtr frame, bool profile, bool graph,
 	} catch (const std::exception &e) {
 		log_warn("Exception in module \"%s\" (%s): %s",
 		    next_mod->name.c_str(), typeid(e).name(), e.what());
+		last_frame = frame;
 		throw;
 	} catch (...) {
 		log_warn("Exception in module \"%s\"", next_mod->name.c_str());
+		last_frame = frame;
 		throw;
 	}
 
@@ -159,7 +162,8 @@ PushFrameThroughQueue(G3FramePtr frame, bool profile, bool graph,
 	// Send each frame on recursively
 	for (auto i = outqueue.begin(); i != outqueue.end(); i++)
 		PushFrameThroughQueue(*i, profile, graph, last_rusage, mods,
-		    next_mod + 1, graph_frame_id_vals, graph_proc_data);
+		    next_mod + 1, graph_frame_id_vals, graph_proc_data, 
+		    last_frame);
 
 	return outqueue.size();
 }
@@ -251,7 +255,7 @@ G3Pipeline::Run(bool profile, bool graph)
 	// frames
 	while (!G3Pipeline::halt_processing && PushFrameThroughQueue(
 	    G3FramePtr(), profile, graph, last_rusage, mods, mods.begin(),
-	    graph_frame_id_vals, graph_proc_data) != 0)
+	    graph_frame_id_vals, graph_proc_data, last_frame) != 0)
 	{}
 
 	// One last EndProcessing frame, starting at the second module, so
@@ -260,7 +264,8 @@ G3Pipeline::Run(bool profile, bool graph)
 		PushFrameThroughQueue(
 		    G3FramePtr(new G3Frame(G3Frame::EndProcessing)), profile,
 		    graph, last_rusage, mods, mods.begin() + 1,
-		    graph_frame_id_vals, graph_proc_data);
+		    graph_frame_id_vals, graph_proc_data, 
+		    last_frame);
 	}
 
 	// Restore old handler

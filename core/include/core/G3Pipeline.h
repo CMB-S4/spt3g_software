@@ -46,7 +46,9 @@ public:
 	static std::string GetCurrentModule();
 
 	static volatile bool halt_processing;
-
+	
+	//Stores the last frame of processing if there is an exception
+	G3FramePtr last_frame;
 private:
 	std::vector<std::pair<std::string, G3ModulePtr> > modules_;
 	std::string graph_info_;
