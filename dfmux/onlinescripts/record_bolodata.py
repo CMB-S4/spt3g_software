@@ -11,6 +11,9 @@ parser.add_argument('-v', dest='verbose', action='store_true', help='Verbose mod
 parser.add_argument('--max_file_size', dest='max_file_size', default=1024, help='Maximum file size in MB (default 1024)')
 args = parser.parse_args()
 
+# Tee log messages to both log file and GCP socket
+core.G3Logger.global_logger = core.G3MultiLogger([core.G3PrintfLogger(), gcp.GCPLogger()])
+
 # Make sure to get timestamps in the logs (NB: assumes printf logger)
 core.G3Logger.global_logger.timestamps = True
 
@@ -110,3 +113,6 @@ for collector in collectors:
     collector.Start()
 pipe.Run(profile=True)
 
+# C++ global destructor runs after python has closed, sometimes
+# Setting the logger to None like this explicitly avoids segfaults
+core.G3Logger.global_logger = None
