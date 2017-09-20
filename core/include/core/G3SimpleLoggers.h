@@ -25,5 +25,19 @@ private:
 	bool tty_;
 };
 
+// Aggregate multiple loggers and log to all of them
+class G3MultiLogger : public G3Logger {
+public:
+	G3MultiLogger(std::vector<G3LoggerPtr> loggers) : loggers_(loggers) {}
+	virtual void Log(G3LogLevel level, const std::string &unit,
+	    const std::string &file, int line, const std::string &func,
+	    const std::string &message) {
+		for (auto i = loggers_.begin(); i != loggers_.end(); i++)
+			(*i)->Log(level, unit, file, line, func, message);
+	}
+private:
+	std::vector<G3LoggerPtr> loggers_;
+};
+
 #endif
 

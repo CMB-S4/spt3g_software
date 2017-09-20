@@ -415,17 +415,22 @@ BOOST_PYTHON_MODULE(core)
 	    .def("set_level_for_unit", &G3Logger::SetLogLevelForUnit)
 	    .def("set_level", &G3Logger::SetLogLevel)
         ;
+	register_vector_of<G3LoggerPtr>("G3Logger");
 
-        bp::class_<G3NullLogger, bp::bases<G3Logger>,
+	bp::class_<G3NullLogger, bp::bases<G3Logger>,
 	  boost::shared_ptr<G3NullLogger>, boost::noncopyable>(
 	  "G3NullLogger", "Logger that does not log. Useful if you don't want log messages");
-        bp::class_<G3PrintfLogger, bp::bases<G3Logger>,
+	bp::class_<G3PrintfLogger, bp::bases<G3Logger>,
 	  boost::shared_ptr<G3PrintfLogger>, boost::noncopyable>(
 	  "G3PrintfLogger", "Logger that prints error messages to stderr (in color, if stderr is a tty).",
 	  bp::init<bp::optional<G3LogLevel> >())
 	    .def_readwrite("trim_file_names", &G3PrintfLogger::TrimFileNames)
 	    .def_readwrite("timestamps", &G3PrintfLogger::Timestamps)
 	;
+	bp::class_<G3MultiLogger, bp::bases<G3Logger>,
+	  boost::shared_ptr<G3MultiLogger>, boost::noncopyable>(
+	  "G3MultiLogger", "Log to multiple loggers at once",
+	  bp::init<std::vector<G3LoggerPtr> >());
 
 	// A few things that need to be in a particular order
 	bp::enum_<G3Timestream::TimestreamUnits>("G3TimestreamUnits",
