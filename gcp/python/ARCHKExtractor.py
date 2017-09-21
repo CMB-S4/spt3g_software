@@ -56,21 +56,23 @@ class UnpackSPTpolHKData(object):
                     modhk.carrier_gain = hkregs['carrierGain'][i][j*2 + k]
                     modhk.nuller_gain = hkregs['nullerGain'][i][j*2 + k]
                     modhk.demod_gain = hkregs['demodGain'][i][j*2 + k]
-                    modhk.carrier_railed = hkregs['mezz' + mezz + 'Car' + mod + 'Overload'][i]
+                    if 'danGain' in hkregs: 
+                        modhk.carrier_railed = hkregs['mezz' + mezz + 'Car' + mod + 'Overload'][i]
+                        modhk.nuller_railed = hkregs['mezz' + mezz + 'Nul' + mod + 'Overload'][i]
                     modhk.demod_railed = hkregs['mezz' + mezz + 'Adc' + mod + 'Overload'][i]
-                    modhk.nuller_railed = hkregs['mezz' + mezz + 'Nul' + mod + 'Overload'][i]
 
-                    nchan = len(hkregs['danGain'][0])//4
+                    nchan = len(hkregs['carrierSettings'][0])//(3*2*2) # 3 fields per mezz/module
                     for chan in range(nchan):
                         chanhk = dfmux.HkChannelInfo()
                         chanhk.channel_number = chan+1
                         arcchan = (j*2 + k)*nchan + chan
 
-                        chanhk.dan_gain = hkregs['danGain'][i][arcchan]
-                        chanhk.dan_feedback_enable = hkregs['danFeedbackEnable'][i][arcchan]
-                        chanhk.dan_streaming_enable = hkregs['danStreamingEnable'][i][arcchan]
-                        chanhk.dan_accumulator_enable = hkregs['danAccumulatorRailed'][i][arcchan]
-                        chanhk.dan_railed = hkregs['danAccumulatorRailed'][i][arcchan]
+                        if 'danGain' in hkregs:
+                            chanhk.dan_gain = hkregs['danGain'][i][arcchan]
+                            chanhk.dan_feedback_enable = hkregs['danFeedbackEnable'][i][arcchan]
+                            chanhk.dan_streaming_enable = hkregs['danStreamingEnable'][i][arcchan]
+                            chanhk.dan_accumulator_enable = hkregs['danAccumulatorRailed'][i][arcchan]
+                            chanhk.dan_railed = hkregs['danAccumulatorRailed'][i][arcchan]
 
                         # Decrypt xSettings registers: (freq, phase, amp)
                         chanhk.carrier_frequency = hkregs['carrierSettings'][i][arcchan*3 + 0]*25.e6/(2.**32-1)*core.G3Units.Hz

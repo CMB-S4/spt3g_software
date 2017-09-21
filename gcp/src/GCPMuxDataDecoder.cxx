@@ -26,6 +26,7 @@ public:
 
 private:
 	G3FramePtr EmitWiringMap(G3FramePtr input);
+	DfMuxWiringMapConstPtr cached_wiring_map_;
 	
 	bool hwm_emitted_;
 	size_t max_channel_count_;
@@ -39,7 +40,11 @@ EXPORT_G3MODULE("gcp", GCPMuxDataDecoder, init<>(),
     "Extracts contents of receiver registers in SPTpol-style ARC files into a "
     "wiring map and timepoint frames. This is designed to convert SPTpol-style "
     "data in which GCP records bolometer data into the ARC files into a format "
-    "equivalent to that for SPT-3G.");
+    "equivalent to that for SPT-3G. \n\n"
+    "For old (100d SPTpol) data not containing wiring information, insert a "
+    "wiring map into the pipeline ahead of this module. The board_serial "
+    "should be set to a real (positive) value for all bolometer channels and "
+    "-1 for the calibrator sync readout.");
 
 G3FramePtr
 GCPMuxDataDecoder::EmitWiringMap(G3FramePtr input)
@@ -70,17 +75,66 @@ GCPMuxDataDecoder::EmitWiringMap(G3FramePtr input)
 	recv = input->Get<G3MapFrameObject>("receiver");
 	bolos = boost::dynamic_pointer_cast<G3MapFrameObject>(
 	    recv->at("bolometers"));
+	phys_id_reg = boost::dynamic_pointer_cast<G3VectorFrameObject>(
+	    bolos->at("id"));
+	max_channel_count_ = 0;
+
+	// Get board indices in the boardValid array for later.
+	G3VectorFrameObjectConstPtr board_id;
+	board_id = boost::dynamic_pointer_cast<G3VectorFrameObject>(
+	    bolos->at("board_id"));
+	for (size_t i = 0; i < board_id->size(); i++) {
+		int board_num = atoi(boost::dynamic_pointer_cast<G3String>
+                    ((*board_id)[i])->value.c_str());
+		board_id_map_[board_num] = i;
+	}
+
+	// Switch on old vs. new data, extracting wiring information from the
+	// pipeline iff it is absent in the archive files.
+	if (bolos->find("dfml_addr") == bolos->end()) {
+		if (!cached_wiring_map_)
+			log_fatal("No wiring information (dfml_addr registers) "
+			    "in the data and no wiring map to make up for it. "
+			    "Please insert a wiring map into the pipeline "
+			    "ahead of the first GcpSlow frame containing the "
+			    "detector ID->hardware path information.");
+
+		for (auto i : *phys_id_reg) {
+			std::string id =
+			    boost::dynamic_pointer_cast<G3String>(i)->value;
+			if (cached_wiring_map_->find(id) ==
+			    cached_wiring_map_->end()) {
+				// Add a bogus channel as a sentinel for
+				// channels not in the wiring map.
+				DfMuxChannelMapping channel_info;
+				channel_info.board_serial = -2;
+				channels_.push_back(channel_info);
+			} else {
+				const DfMuxChannelMapping &channel_info =
+				    cached_wiring_map_->at(id);
+				channels_.push_back(channel_info);
+				if (channel_info.channel > max_channel_count_)
+					max_channel_count_ =
+					    channel_info.channel + 1;
+			}
+		} 
+		return G3FramePtr();
+	} else {
+		if (cached_wiring_map_)
+			log_warn("External wiring frame found in data stream, "
+			    "but archive data contains wiring information. "
+			    "Emitting a new wiring frame with the archive "
+			    "information.");
+	}
+
 	dfml_addr = boost::dynamic_pointer_cast<G3VectorFrameObject>(
 	    bolos->at("dfml_addr"));
 	mbi_addr = boost::dynamic_pointer_cast<G3VectorFrameObject>(
 	    bolos->at("mbi_addr"));
-	phys_id_reg = boost::dynamic_pointer_cast<G3VectorFrameObject>(
-	    bolos->at("id"));
 
 	g3_assert(dfml_addr->size() == mbi_addr->size());
 	g3_assert(dfml_addr->size() == phys_id_reg->size());
 
-	max_channel_count_ = 0;
 
 	for (size_t i = 0; i < dfml_addr->size(); i++) {
 		DfMuxChannelMapping channel_info;
@@ -139,16 +193,6 @@ GCPMuxDataDecoder::EmitWiringMap(G3FramePtr input)
 			max_channel_count_ = channel_info.channel + 1;
 	}
 
-	// Get board indices in the boardValid array for later.
-	G3VectorFrameObjectConstPtr board_id;
-	board_id = boost::dynamic_pointer_cast<G3VectorFrameObject>(
-	    bolos->at("board_id"));
-	for (size_t i = 0; i < board_id->size(); i++) {
-		int board_num = atoi(boost::dynamic_pointer_cast<G3String>
-                    ((*board_id)[i])->value.c_str());
-		board_id_map_[board_num] = i;
-	}
-
 	// Now into the frame
 	G3FramePtr wiringframe(new G3Frame(G3Frame::Wiring));
 	wiringframe->Put("WiringMap", wiring);
@@ -164,13 +208,21 @@ GCPMuxDataDecoder::EmitWiringMap(G3FramePtr input)
 void
 GCPMuxDataDecoder::Process(G3FramePtr frame, std::deque<G3FramePtr> &out_queue)
 {
+	// For ancient SPT data without stored wiring information, we can
+	// use an external wiring map, which we need to cache.
+	if (frame->type == G3Frame::Wiring && frame->Has("WiringMap"))
+		cached_wiring_map_ = frame->Get<DfMuxWiringMap>("WiringMap");
+
+	// Otherwise we only operate on GCP slow frames
 	if (frame->type != G3Frame::GcpSlow) {
 		out_queue.push_back(frame);
 		return;
 	}
 
 	if (!hwm_emitted_) {
-		out_queue.push_back(EmitWiringMap(frame));
+		G3FramePtr wf = EmitWiringMap(frame);
+		if (wf)
+			out_queue.push_back(wf);
 		hwm_emitted_ = true;
 	}
 
@@ -245,6 +297,10 @@ GCPMuxDataDecoder::Process(G3FramePtr frame, std::deque<G3FramePtr> &out_queue)
 				*calibrator = (*Icounts[j])[i] >> 8;
 				continue;
 			}
+
+			// Skip virtual channels
+			if (chan.board_serial == -2)
+				continue;
 
 			DfMuxSamplePtr sample =
 			    (*metasample)[chan.board_serial][chan.module];
