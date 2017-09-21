@@ -9,8 +9,8 @@
 
 class G3Reader : public G3Module {
 public:
-	G3Reader(std::string filename);
-	G3Reader(std::vector<std::string> filenames);
+	G3Reader(std::string filename, int n_frames_to_read = -1);
+	G3Reader(std::vector<std::string> filenames, int n_frames_to_read = -1);
 
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
 
@@ -20,6 +20,8 @@ private:
 	std::string cur_file_;
 	std::deque<std::string> filename_;
 	boost::iostreams::filtering_istream stream_;
+	int n_frames_to_read_;
+	int n_frames_read_;
 
 	SET_LOGGER("G3Reader");
 };

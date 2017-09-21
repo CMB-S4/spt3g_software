@@ -4,7 +4,9 @@
 
 #include <boost/filesystem.hpp>
 
-G3Reader::G3Reader(std::string filename) : prefix_file_(false)
+G3Reader::G3Reader(std::string filename, int n_frames_to_read) : 
+    prefix_file_(false), n_frames_to_read_(n_frames_to_read),
+    n_frames_read_(0)
 {
 	boost::filesystem::path fpath(filename);
 	if (filename.find("://") == -1 &&
@@ -14,7 +16,9 @@ G3Reader::G3Reader(std::string filename) : prefix_file_(false)
 	StartFile(filename);
 }
 
-G3Reader::G3Reader(std::vector<std::string> filename) : prefix_file_(false)
+G3Reader::G3Reader(std::vector<std::string> filename, int n_frames_to_read) :
+    prefix_file_(false), n_frames_to_read_(n_frames_to_read),
+    n_frames_read_(0)
 {
 	if (filename.size() == 0)
 		log_fatal("Empty file list provided to G3Reader");
@@ -40,6 +44,11 @@ void G3Reader::StartFile(std::string path)
 
 void G3Reader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 {
+	// Bail (ends processing) if too many frames have passed by
+	if (!frame && n_frames_to_read_ > 0 && 
+	    n_frames_read_ >= n_frames_to_read_)
+		return;
+
 	// If this is not a driving module and we haven't already, prepend the
 	// file to the input frame
 	if (frame) {
@@ -77,6 +86,7 @@ void G3Reader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		throw;
 	}
 	out.push_back(frame);
+	n_frames_read_++;
 }
 
 PYBINDINGS("core") {
@@ -86,9 +96,13 @@ PYBINDINGS("core") {
 	class_<G3Reader, bases<G3Module>, boost::shared_ptr<G3Reader>,
 	    boost::noncopyable>("G3Reader",
 	      "Read frames from disk. Takes either the path to a file to read "
-	      "or an iterable of files to be read in sequence.",
-	    init<std::string>(args("filename")))
-		.def(init<std::vector<std::string> >(args("filename")))
+	      "or an iterable of files to be read in sequence. If "
+	      "n_frames_to_read is greater than zero, will stop after "
+	      "n_frames_to_read frames rather than at the end of the file[s].",
+	    init<std::string, int>((arg("filename"),
+	      arg("n_frames_to_read")=0)))
+		.def(init<std::vector<std::string> >((arg("filename"), 
+		  arg("n_frames_to_read")=-1)))
 		.def_readonly("__g3module__", true)
 	;
 }
