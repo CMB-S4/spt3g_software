@@ -1,0 +1,78 @@
+#-----------------------------------------------------------------------
+# This is an SPT-3G register calibration file. 
+#
+# It was created on Fri Feb  3 10:34:02 2017 by user sptdaq
+#  with the spt3g_software function gcp.CalFile.create_g3_cal_file. 
+#
+# Each line has the following format:
+#
+#   register offset 1/factor units
+#
+# (Note that factors are stored as reciprocals, because they are most 
+#  often one over a whole number.) 
+#
+# The calibrated value of a register is given by:
+#
+#   reg_cal = factor * (offset + register_value) * core.G3Units.$UNIT$
+#
+#-----------------------------------------------------------------------
+# Register      Offset       1/Factor      Units 
+#-----------------------------------------------------------------------
+
+antenna0.acu.az_err                             0.0000  1.000000e+00  deg
+antenna0.acu.az_pos                             0.0000  1.000000e+00  deg
+antenna0.acu.el_err                             0.0000  1.000000e+00  deg
+antenna0.acu.el_pos                             0.0000  1.000000e+00  deg
+antenna0.scu.benchAcquiredThreshold[0]          0.0000  1.000000e+03  
+antenna0.scu.benchActual[0-5]                   0.0000  1.000000e+03  
+antenna0.scu.benchDeadBand[0]                   0.0000  1.000000e+03  
+antenna0.scu.benchErrors[0-5]                   0.0000  1.000000e+03  
+antenna0.scu.benchExpected[0-5]                 0.0000  1.000000e+03  
+antenna0.scu.benchFocus                         0.0000  1.000000e+03  
+antenna0.scu.benchOffsets[0-5]                  0.0000  1.000000e+03  
+antenna0.scu.benchZeros[0-5]                    0.0000  1.000000e+03  
+antenna0.scu.temp                            -273.1500  1.000000e+00  K
+antenna0.tracker.actual                         0.0000  1.745329e-02  deg
+antenna0.tracker.actual_rates[0]                0.0000  3.356643e+06  deg/s
+antenna0.tracker.actual_rates[1]                0.0000  7.783784e+06  deg/s
+antenna0.tracker.az_limits                      0.0000  3.600000e+06  deg
+antenna0.tracker.el_limits                      0.0000  3.600000e+06  deg
+antenna0.tracker.encoder_off                    0.0000  3.600000e+06  deg
+antenna0.tracker.eqneqx                         0.0000  1.000000e+03  sec
+antenna0.tracker.equat_geoc[0]                  0.0000  5.400000e+07  hours
+antenna0.tracker.equat_geoc[1]                  0.0000  3.600000e+06  deg
+antenna0.tracker.equat_geoc[2]                  0.0000  1.000000e+06  AU
+antenna0.tracker.equat_off[0]                   0.0000  5.400000e+07  hours
+antenna0.tracker.equat_off[1]                   0.0000  3.600000e+06  deg
+antenna0.tracker.errors                         0.0000  1.745329e-02  deg
+antenna0.tracker.expected                       0.0000  1.745329e-02  deg
+antenna0.tracker.expected_rates                 0.0000  3.600000e+06  deg/s
+antenna0.tracker.fixedCollimation               0.0000  3.600000e+06  deg
+antenna0.tracker.flexure                        0.0000  3.600000e+06  deg
+antenna0.tracker.horiz_geoc                     0.0000  3.600000e+06  deg
+antenna0.tracker.horiz_mount                    0.0000  1.745329e-02  deg
+antenna0.tracker.horiz_off                      0.0000  1.745329e-02  deg
+antenna0.tracker.horiz_topo                     0.0000  3.600000e+06  deg
+antenna0.tracker.linear_sensor[0-3]             9.5000  1.638400e+04  
+antenna0.tracker.linear_sensor_avg[0-3]         9.5000  1.000000e+00  
+antenna0.tracker.location                       0.0000  1.000000e+03  meters
+antenna0.tracker.lst                            0.0000  3.600000e+06  hours
+antenna0.tracker.refraction[0-1]                0.0000  3.600000e+09  degrees
+antenna0.tracker.refraction[2]                  0.0000  3.600000e+06  degrees
+antenna0.tracker.scan_off                       0.0000  3.600000e+06  deg
+antenna0.tracker.siteActual[0-1]                0.0000  3.600000e+06  deg
+antenna0.tracker.siteActual[2]                  0.0000  1.000000e+03  meters
+antenna0.tracker.siteFiducial[0-1]              0.0000  3.600000e+06  deg
+antenna0.tracker.siteFiducial[2]                0.0000  1.000000e+03  meters
+antenna0.tracker.sky_xy_off                     0.0000  3.600000e+06  deg
+antenna0.tracker.tilt_max[0]                    0.0000  3.600000e+06  deg
+antenna0.tracker.tilt_temp[0]                  30.0000  4.681143e+02  
+antenna0.tracker.tilt_theta[0]                  0.0000  3.600000e+06  deg
+antenna0.tracker.tilt_xy[0-1]                   0.0000  1.985747e+01  arcsec
+antenna0.tracker.tilt_xy_avg[0-1]               0.0000  1.000000e+03  arcsec
+antenna0.tracker.tilt_xy_offset[0-1]            0.0000  1.000000e+03  arcsec
+antenna0.tracker.tilts                          0.0000  3.600000e+06  degrees
+antenna0.tracker.ut1utc                         0.0000  1.000000e+03  sec
+array.weather.airTemperature                 -273.1500  1.000000e+00  K
+array.weather.relativeHumidity                  0.0000  1.000000e-02  
+array.weather.windDirection                   -80.0000  1.000000e+00  
