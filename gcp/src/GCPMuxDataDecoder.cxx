@@ -317,8 +317,8 @@ GCPMuxDataDecoder::Process(G3FramePtr frame, std::deque<G3FramePtr> &out_queue)
 
 			// GCP aligns the 24-bit samples to the left. 3G
 			// aligns to the right. Use the 3G convention.
-			(*sample)[chan.channel*2] = (*Icounts[j])[i] >> 8;
-			(*sample)[chan.channel*2+1] = (*Qcounts[j])[i] >> 8;
+			(*sample)[chan.channel*2] = (*Icounts[j])[i] / 256;
+			(*sample)[chan.channel*2+1] = (*Qcounts[j])[i] / 256;
 		}
 
 		// Set nmodules to avoid triggering warnings
