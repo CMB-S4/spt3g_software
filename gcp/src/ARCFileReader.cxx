@@ -68,20 +68,16 @@ enum {
 
 class ARCFileReader : public G3Module {
 public:
-	ARCFileReader(const std::string &path,
-	    double jiffie_base = G3Units::ms);
+	ARCFileReader(const std::string &path, unsigned experiment=Experiments::SPT);
 	ARCFileReader(const std::vector<std::string> & filename,
-	    double jiffie_base = G3Units::ms);
-	// NB: POLARBEAR uses a different definition of "ms" in which a
-	//  millisecond is 86400/INT_MAX seconds. Adjust jiffie_base if reading
-	//  POLARBEAR data.
+	              unsigned experiment=Experiments::SPT);
 	virtual ~ARCFileReader() {}
 
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
 
 private:
 	void StartFile(const std::string & path);
-	
+
 	boost::iostreams::filtering_istream stream_;
 
 	struct block_stats {
@@ -108,13 +104,23 @@ private:
 	std::deque<std::string> filename_;
 	std::string cur_file_;
 
+	int experiment;
+
 	SET_LOGGER("ARCFileReader");
 };
 
 
-ARCFileReader::ARCFileReader(const std::string &path, double jiffie_base) :
-    ms_jiffie_base_(jiffie_base)
+ARCFileReader::ARCFileReader(const std::string &path, unsigned experiment) :
+	experiment(experiment)
 {
+	if (experiment == Experiments::SPT || experiment == Experiments::BK) {
+		ms_jiffie_base_ = G3Units::ms;
+	} else if (experiment == Experiments::PB) {
+		ms_jiffie_base_ = 86400/INT_MAX;
+	} else {
+		log_fatal("Unrecognized Experiment");
+	}
+
 	boost::filesystem::path fpath(path);
 	if (!boost::filesystem::exists(fpath) ||
 	    !boost::filesystem::is_regular_file(fpath))
@@ -124,16 +130,24 @@ ARCFileReader::ARCFileReader(const std::string &path, double jiffie_base) :
 
 
 
-ARCFileReader::ARCFileReader(const std::vector<std::string> &filename, double jiffie_base) :
-    ms_jiffie_base_(jiffie_base)
+ARCFileReader::ARCFileReader(const std::vector<std::string> &filename,
+                             unsigned experiment) : experiment(experiment)
 {
+	if (experiment == Experiments::SPT || experiment == Experiments::BK) {
+		ms_jiffie_base_ = G3Units::ms;
+	} else if (experiment == Experiments::PB) {
+		ms_jiffie_base_ = 86400/INT_MAX;
+	} else {
+		log_fatal("Unrecognized Experiment");
+	}
+
 	if (filename.size() == 0)
 		log_fatal("Empty file list provided to G3Reader");
 
 	for (auto i = filename.begin(); i != filename.end(); i++){
 		boost::filesystem::path fpath(*i);
 		if (!boost::filesystem::exists(fpath) ||
-		    !boost::filesystem::is_regular_file(fpath)) 
+		    !boost::filesystem::is_regular_file(fpath))
 			log_fatal("Could not find file %s", i->c_str());
 		filename_.push_back(*i);
 	}
@@ -141,7 +155,6 @@ ARCFileReader::ARCFileReader(const std::vector<std::string> &filename, double ji
 	const std::string path = filename_.front();
 	filename_.pop_front();
 	StartFile(path);
-
 }
 
 
@@ -268,6 +281,12 @@ void ARCFileReader::ParseArrayMap(uint8_t *buf, size_t size)
 			block_info.flags = REG_UTC; block_offset += 8;
 			board["utc"] = block_info;
 
+			if (experiment == Experiments::BK) {
+				block_info.offset = block_offset;
+				block_info.flags = REG_UINT; block_offset += 4;
+				board["lst"] = block_info;
+			}
+
 			block_info.offset = block_offset;
 			block_info.flags = REG_UINT; block_offset += 4;
 			board["features"] = block_info;
@@ -324,17 +343,28 @@ void ARCFileReader::ParseArrayMap(uint8_t *buf, size_t size)
 				memcpy(block_name, buf + off, namelen);
 				block_name[namelen] = '\0';
 				off += namelen;
-				
+
 				/* Block parameters */
-				memcpy(ltmp, buf + off, sizeof(ltmp));
-				off += sizeof(ltmp);
+				if (experiment == Experiments::BK) {
+					// BK has one fewer dim registers
+					memcpy(ltmp, buf + off, sizeof(ltmp) - sizeof(ltmp[0]));
+					off += sizeof(ltmp) - sizeof(ltmp[0]);
+				} else {
+					memcpy(ltmp, buf + off, sizeof(ltmp));
+					off += sizeof(ltmp);
+				}
 				block_info.flags = ntohl(ltmp[0]);
 				block_info.mode = ntohl(ltmp[1]);
 				block_info.base = ntohl(ltmp[2]);
 				block_info.addr = ntohl(ltmp[3]);
 				block_info.dim[0] = ntohl(ltmp[4]);
 				block_info.dim[1] = ntohl(ltmp[5]);
-				block_info.dim[2] = ntohl(ltmp[6]);
+				if ((experiment == Experiments::SPT) ||
+					(experiment == Experiments::PB)) {
+					block_info.dim[2] = ntohl(ltmp[6]);
+				} else {
+					block_info.dim[2] = 0;
+				}
 				block_info.offset = block_offset;
 
 				/* Get type width */
@@ -342,9 +372,9 @@ void ARCFileReader::ParseArrayMap(uint8_t *buf, size_t size)
 				case REG_UTC:
 					block_info.width = 8;
 					break;
-				case REG_BOOL: 
-				case REG_CHAR: 
-				case REG_UCHAR: 
+				case REG_BOOL:
+				case REG_CHAR:
+				case REG_UCHAR:
 					block_info.width = 1;
 					break;
 				case REG_SHORT:
@@ -368,31 +398,51 @@ void ARCFileReader::ParseArrayMap(uint8_t *buf, size_t size)
 				}
 
 				/* Skip unarchived registers */
-				if (!(block_info.flags & REG_EXC))
-					block_offset += block_info.width *
-					    ((block_info.dim[0] == 0) ? 1 :
-					      block_info.dim[0]) *
-					    ((block_info.dim[1] == 0) ? 1 :
-					      block_info.dim[1]) *
-					    ((block_info.dim[2] == 0) ? 1 :
-					      block_info.dim[2]);
-				
-				/* Human-readable type info */
-				memcpy(&namelen, buf + off, sizeof(namelen));
-				namelen = ntohs(namelen); off += 2;
-				memcpy(axes_help, buf + off, namelen);
-				axes_help[namelen] = '\0';
-				off += namelen;
-				block_info.axes_help = axes_help;
+				if (!(block_info.flags & REG_EXC)) {
+					if (experiment == Experiments::BK) {
+						block_offset += block_info.width *
+							((block_info.dim[0] == 0) ? 1 :
+							  block_info.dim[0]) *
+							((block_info.dim[1] == 0) ? 1 :
+							  block_info.dim[1]);
+					} else {
+						block_offset += block_info.width *
+							((block_info.dim[0] == 0) ? 1 :
+							  block_info.dim[0]) *
+							((block_info.dim[1] == 0) ? 1 :
+							  block_info.dim[1]) *
+							((block_info.dim[2] == 0) ? 1 :
+							  block_info.dim[2]);
+					}
+				}
+
+				if ((experiment == Experiments::SPT) ||
+					(experiment == Experiments::PB)) {
+					/* Human-readable type info */
+					memcpy(&namelen, buf + off, sizeof(namelen));
+					namelen = ntohs(namelen); off += 2;
+					memcpy(axes_help, buf + off, namelen);
+					axes_help[namelen] = '\0';
+					off += namelen;
+					block_info.axes_help = axes_help;
+				} else {
+					block_info.axes_help = "";
+				}
 
 				/* Add to map iff actually archived */
 				if (!(block_info.flags & REG_EXC))
 					board[block_name] = block_info;
 			}
 
-			// Ignored VME addresses bases
-			memcpy(bases, buf + off, sizeof(bases));
-			off += sizeof(bases);
+			if ((experiment == Experiments::SPT) ||
+				(experiment == Experiments::PB)) {
+				// Ignored VME addresses bases
+				memcpy(bases, buf + off, sizeof(bases));
+				off += sizeof(bases);
+			} else if (experiment == Experiments::BK) {
+				// Inter-frame whitespace
+				off += 16;
+			}
 
 			templ[board_name] = board;
 		}
@@ -473,12 +523,16 @@ G3FrameObjectPtr ARCFileReader::GCPToFrameObject(uint8_t *buffer,
 	if (base_offset == 0)
 		base_offset = block.offset;
 
+	int max_depth = 2;
+	if (experiment == Experiments::BK)
+		max_depth = 1;
+
 	/* Check for two- and three-dimensional case (use vector of vectors) */
-	if (depth < 2 && block.dim[depth+1] != 0) {
+	if (depth < max_depth && block.dim[depth+1] != 0) {
 		size_t stride = 1;
 		G3VectorFrameObjectPtr root(new G3VectorFrameObject);
-		
-		for (int i = depth+1; i < 3; i++)
+
+		for (int i = depth+1; i < max_depth+1; i++)
 			if (block.dim[i] != 0)
 				stride *= block.dim[i];
 
@@ -502,7 +556,7 @@ G3FrameObjectPtr ARCFileReader::GCPToFrameObject(uint8_t *buffer,
 				base_offset += block.width;
 			}
 			return root; }
-		case REG_CHAR: 
+		case REG_CHAR:
 		case REG_UCHAR:
 			if (buffer[base_offset + block.dim[depth] - 1] == '\0')
 				return G3StringPtr(new G3String(
@@ -556,9 +610,9 @@ G3FrameObjectPtr ARCFileReader::GCPToFrameObject(uint8_t *buffer,
 	case REG_UTC:
 		return GCPToTime(buffer, base_offset, ms_jiffie_base_);
 		break;
-	case REG_BOOL: 
-	case REG_CHAR: 
-	case REG_UCHAR: 
+	case REG_BOOL:
+	case REG_CHAR:
+	case REG_UCHAR:
 		return G3IntPtr(new G3Int(GCP8ToInt(buffer, base_offset)));
 		break;
 	case REG_SHORT:
@@ -609,7 +663,7 @@ void ARCFileReader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		log_fatal("Message not an ARC_FRAME_RECORD mid-file");
 	if (size != frame_length_)
 		log_fatal("%zd-byte frame does not match expected length (%zd)",
-		    (size_t)size, (size_t)frame_length_);
+		          (size_t)size, (size_t)frame_length_);
 	buffer = new uint8_t[size];
 	stream_.read((char *)buffer, size);
 
@@ -642,8 +696,10 @@ PYBINDINGS("gcp") {
 	    "Read GCP archive file (or files if you pass an iterable of paths)."
 	    " Jiffiebase is the length of 1 GCP tick. Set to 1 ms by default"
 	    " (SPT). For POLARBEAR, use G3Units.day/(1 << 32).",
-		init<std::string, optional<double> >(args("filename", "jiffiebase")))
-		.def(init<std::vector<std::string>, optional<double> >(args("filename", "jiffiebase")))
+		init<std::string, optional<unsigned> >(
+		        args("filename", "experiment")))
+		.def(init<std::vector<std::string>, optional<unsigned> >(
+		        args("filename", "experiment")))
 		.def_readonly("__g3module__", true)
 	;
 }
