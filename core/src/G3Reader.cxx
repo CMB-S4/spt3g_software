@@ -101,8 +101,8 @@ PYBINDINGS("core") {
 	      "n_frames_to_read frames rather than at the end of the file[s].",
 	    init<std::string, int>((arg("filename"),
 	      arg("n_frames_to_read")=0)))
-		.def(init<std::vector<std::string> >((arg("filename"), 
-		  arg("n_frames_to_read")=-1)))
+		.def(init<std::vector<std::string>, int>((arg("filename"), 
+		  arg("n_frames_to_read")=0)))
 		.def_readonly("__g3module__", true)
 	;
 }
