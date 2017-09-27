@@ -108,6 +108,8 @@ private:
 	std::deque<std::string> filename_;
 	std::string cur_file_;
 
+	G3TimePtr GCPToTime(uint8_t *buffer, off_t offset);
+
 	SET_LOGGER("ARCFileReader");
 };
 
@@ -124,8 +126,8 @@ ARCFileReader::ARCFileReader(const std::string &path, double jiffie_base) :
 
 
 
-ARCFileReader::ARCFileReader(const std::vector<std::string> &filename, double jiffie_base) :
-    ms_jiffie_base_(jiffie_base)
+ARCFileReader::ARCFileReader(const std::vector<std::string> &filename,
+    double jiffie_base) : ms_jiffie_base_(jiffie_base)
 {
 	if (filename.size() == 0)
 		log_fatal("Empty file list provided to G3Reader");
@@ -403,7 +405,7 @@ void ARCFileReader::ParseArrayMap(uint8_t *buf, size_t size)
 	frame_length_ = block_offset;
 }
 
-static G3TimePtr GCPToTime(uint8_t *buffer, off_t offset, uint64_t jiffiebase)
+G3TimePtr ARCFileReader::GCPToTime(uint8_t *buffer, off_t offset)
 {
 	uint32_t mjd, ms;
 
@@ -413,9 +415,11 @@ static G3TimePtr GCPToTime(uint8_t *buffer, off_t offset, uint64_t jiffiebase)
 	ms = le32toh(ms);
 
 	mjd -= 40587;	/* MJD to UNIX time */
-	g3_assert(uint64_t(ms)*jiffiebase <= 86400ULL*100000000ULL);
+	if (uint64_t(ms)*ms_jiffie_base_ >= 86400ULL*100000000ULL)
+		log_error("Fast time value %d longer than 1 day (%lf seconds)",
+		    ms, uint64_t(ms)*ms_jiffie_base_/G3Units::s);
 	return G3TimePtr(new G3Time(
-	    uint64_t(mjd)*86400ULL*100000000ULL + uint64_t(ms)*jiffiebase));
+	   uint64_t(mjd)*86400ULL*100000000ULL + uint64_t(ms)*ms_jiffie_base_));
 }
 
 static int GCP8ToInt(uint8_t *buffer, off_t offset)
@@ -497,8 +501,7 @@ G3FrameObjectPtr ARCFileReader::GCPToFrameObject(uint8_t *buffer,
 		case REG_UTC: {
 			G3VectorFrameObjectPtr root(new G3VectorFrameObject);
 			for (int i = 0; i < block.dim[depth]; i++) {
-				root->push_back(GCPToTime(buffer,
-				    base_offset, ms_jiffie_base_));
+				root->push_back(GCPToTime(buffer, base_offset));
 				base_offset += block.width;
 			}
 			return root; }
@@ -554,7 +557,7 @@ G3FrameObjectPtr ARCFileReader::GCPToFrameObject(uint8_t *buffer,
 
 	switch (block.flags & REG_TYPEMASK) {
 	case REG_UTC:
-		return GCPToTime(buffer, base_offset, ms_jiffie_base_);
+		return GCPToTime(buffer, base_offset);
 		break;
 	case REG_BOOL: 
 	case REG_CHAR: 
