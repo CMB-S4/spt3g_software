@@ -232,7 +232,7 @@ private:
 G3_POINTERS(G3SkyMapWeights);
 
 G3_SERIALIZABLE(G3SkyMap, 1);
-G3_SERIALIZABLE(G3SkyMapWeights, 1);
+G3_SERIALIZABLE(G3SkyMapWeights, 2);
 
 #endif
 

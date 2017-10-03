@@ -30,6 +30,9 @@ G3SkyMapWeights::serialize(A &ar, unsigned v)
 	ar & cereal::make_nvp("QQ", QQ);
 	ar & cereal::make_nvp("QU", QU);
 	ar & cereal::make_nvp("UU", UU);
+	if (v > 1) {
+		ar & cereal::make_nvp("weight_type", weight_type);
+	}
 }
 
 G3_SERIALIZABLE_CODE(G3SkyMap);
