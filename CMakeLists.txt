@@ -35,10 +35,22 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DBOOST_NO_CXX11_SMART_PTR=1")
 
 # Boost bits we need
-set(Boost_USE_MULTITHREADED ON)
-find_package(Boost COMPONENTS system python iostreams filesystem REQUIRED)
 find_package(PythonInterp)
 find_package(PythonLibs)
+
+set(Boost_USE_MULTITHREADED ON)
+if(${PYTHON_LIBRARIES} MATCHES "libpython3.*\\.so")
+	# Handle possible naming of the Boost python library as
+	# libboost_python3.so
+	set(_Boost_PYTHON3_HEADERS "boost/python.hpp")
+	find_package(Boost COMPONENTS system iostreams filesystem REQUIRED)
+	find_package(Boost COMPONENTS python3)
+	if (NOT ${Boost_PYTHON3_FOUND})
+		find_package(Boost COMPONENTS python REQUIRED)
+	endif()
+else()
+	find_package(Boost COMPONENTS system iostreams filesystem python REQUIRED)
+endif()
 include_directories(${Boost_INCLUDE_DIR} ${PYTHON_INCLUDE_DIRS} ${PYTHON_INCLUDE_PATH})
 if(Boost_VERSION EQUAL 104700 OR Boost_VERSION GREATER 104700)
 	set(Boost_GEOMETRY_AVAIL ON)
