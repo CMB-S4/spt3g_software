@@ -273,6 +273,18 @@ G3Timestream &G3Timestream::operator +=(const G3Timestream &r)
 	return *this;
 }
 
+G3Timestream &G3Timestream::operator -=(const G3Timestream &r)
+{
+	if (r.size() != size())
+		log_fatal("Subtracting timestreams of unequal length");
+	if (r.units != units && r.units != None && units != None)
+		log_fatal("Subtracting timestreams of unequal units");
+	for (size_t i = 0; i < size(); i++)
+		(*this)[i] -= r[i];
+
+	return *this;
+}
+
 G3Timestream G3Timestream::operator -(const G3Timestream &r) const
 {
 	G3Timestream ret(*this);
@@ -357,6 +369,13 @@ G3Timestream &G3Timestream::operator *=(double r)
 {
 	for (size_t i = 0; i < size(); i++)
 		(*this)[i] *= r;
+	return *this;
+}
+
+G3Timestream &G3Timestream::operator /=(double r)
+{
+	for (size_t i = 0; i < size(); i++)
+		(*this)[i] /= r;
 	return *this;
 }
 
