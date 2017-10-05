@@ -267,6 +267,7 @@ PYBINDINGS("core") {
 	bp::enum_<G3SkyMapWeights::WeightType>("WeightType")
 	    .value("Wpol", G3SkyMapWeights::Wpol)
 	    .value("Wunpol", G3SkyMapWeights::Wunpol)
+	    .value("None", G3SkyMapWeights::None)
 	;
 
 	bp::object skymap = EXPORT_FRAMEOBJECT(G3SkyMap, no_init,
@@ -327,7 +328,7 @@ PYBINDINGS("core") {
 	smclass->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
 #endif
 
-	EXPORT_FRAMEOBJECT(G3SkyMapWeights, no_init, "generic sky weight")
+	EXPORT_FRAMEOBJECT(G3SkyMapWeights, init<>(), "generic sky weight")
 	    .def(bp::init<G3SkyMapConstPtr, G3SkyMapWeights::WeightType>(
 	      (bp::arg("skymap"),
                bp::arg("weight_type") = G3SkyMapWeights::Wpol)))
