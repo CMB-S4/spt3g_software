@@ -45,7 +45,7 @@ if(${PYTHON_LIBRARIES} MATCHES "libpython3.*\\.so")
 	# libboost_python3.so
 	set(_Boost_PYTHON3_HEADERS "boost/python.hpp")
 	find_package(Boost COMPONENTS python3)
-	if (${Boost_PYTHON_FOUND})
+	if (${Boost_PYTHON3_FOUND})
 		set(Boost_PYTHON_TYPE python3)
 	endif()
 endif()
