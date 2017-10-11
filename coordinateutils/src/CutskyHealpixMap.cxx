@@ -166,6 +166,7 @@ HealpixHitPix::get_cutsky_index(long fullsky_index) const
 	return full_to_cut_inds_[fullsky_index - ipixmin_];
 }
 
+//assumed to be ring ordering
 CutSkyHealpixMap::CutSkyHealpixMap(boost::python::object v,
     size_t full_sky_map_nside, HealpixHitPixPtr hitpix, bool is_weighted,
     G3SkyMap::MapPolType pol_type, G3Timestream::TimestreamUnits u,
@@ -185,7 +186,7 @@ CutSkyHealpixMap::CutSkyHealpixMap(boost::python::object v,
 	    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) != -1) {
 		if (strcmp(view.format, "d") == 0) {
 			for (size_t i = hitpix->ipixmin_;
-			    i < hitpix->ipixmax_; i++) {
+			    i <= hitpix->ipixmax_; i++) {
 				long tmp_full_ind;
 				double u_scale;
 
@@ -196,17 +197,18 @@ CutSkyHealpixMap::CutSkyHealpixMap(boost::python::object v,
 
 				int64_t local_ind =
 				    hitpix->full_to_cut_inds_[
-				    tmp_full_ind - hitpix->ipixmin_];
+				    i - hitpix->ipixmin_];
 				if (local_ind < 0) {
 					local_ind = data_.size()-1;
 				}
 				g3_assert(local_ind < data_.size());
+				g3_assert(local_ind >= 0);
 
 				data_[local_ind] =
-				    ((double *)view.buf)[i] * u_scale;
+				    ((double *)view.buf)[tmp_full_ind] * u_scale;
 			}
 		} else if (strcmp(view.format, "f") == 0) {
-			for (size_t i = hitpix->ipixmin_; i < hitpix->ipixmax_;
+			for (size_t i = hitpix->ipixmin_; i <= hitpix->ipixmax_;
 			    i++) {
 				long tmp_full_ind;
 				double u_scale;
@@ -215,12 +217,17 @@ CutSkyHealpixMap::CutSkyHealpixMap(boost::python::object v,
 				    u_scale);
 				u_scale = is_u ? u_scale : 1.0;
 
-				size_t local_ind =
+				int64_t local_ind =
 				    hitpix->full_to_cut_inds_[
-				    tmp_full_ind - hitpix->ipixmin_];
+				    i - hitpix->ipixmin_];
+				if (local_ind < 0) {
+					local_ind = data_.size()-1;
+				}
 				g3_assert(local_ind < data_.size());
+				g3_assert(local_ind >= 0);
+
 				data_[local_ind] =
-				    ((float *)view.buf)[i] * u_scale;
+				    ((float *)view.buf)[tmp_full_ind] * u_scale;
 			}
 		} else {
 			log_fatal("Unknown type code %s", view.format);
