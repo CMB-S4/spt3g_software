@@ -33,7 +33,7 @@ def convert_azel_to_radec(az, el, location=spt):
 
     ra = core.G3Timestream(numpy.asarray(kt.ra/astropy.units.deg)*core.G3Units.deg)
     dec = core.G3Timestream(numpy.asarray(kt.dec/astropy.units.deg)*core.G3Units.deg)
-    dec[badel_inds] = -numpy.nan
+    dec[badel_inds] = numpy.nan
 
     ra.start = dec.start = az.start
     ra.stop = dec.stop = az.stop
