@@ -27,13 +27,11 @@ On Ubuntu/Debian, you can install the non-Python dependencies, including the opt
 
 	apt-get install cmake libboost-all-dev libflac-dev libnetcdf-dev libfftw3-dev libgsl0-dev
 
-Newer Debians can also install `libhealpix-cxx-dev`. Users of older versions will need to install libcfitsio3-dev and then build healpix from source.
-
 On RHEL-type systems (SL, CentOS, etc.), do this:
 
 .. code-block:: shell
 
-	yum install cmake netcdf-devel boost-devel flac-devel fftw-devel gsl-devel healpix-devel
+	yum install cmake netcdf-devel boost-devel flac-devel fftw-devel gsl-devel
 
 
 Setup on RHEL6
