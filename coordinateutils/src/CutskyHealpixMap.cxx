@@ -1,6 +1,6 @@
 #include <pybindings.h>
 #include <serialization.h>
-
+#include <math.h>
 #include <coordinateutils/coordinateutils.h>
 #include <coordinateutils/CutSkyHealpixMap.h>
 
@@ -301,11 +301,14 @@ CutSkyHealpixMap::ang_2_pix_(double alpha, double delta) const {
 	double theta = M_PI/2.0 - delta;
 	long outpix = 0;
 
+	if ( isnan(theta) || isnan(alpha) ) {
+		return -1;
+	}
+
 	if (is_nested_)
 		ang2pix_nest(nside_, theta, alpha, &outpix);
 	else
 		ang2pix_ring(nside_, theta, alpha, &outpix);
-
 	return hitpix->get_cutsky_index(outpix);
 }
 
