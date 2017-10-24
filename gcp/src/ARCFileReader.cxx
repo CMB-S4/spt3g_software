@@ -79,7 +79,7 @@ public:
 
 private:
 	void StartFile(const std::string & path);
-
+	
 	boost::iostreams::filtering_istream stream_;
 
 	struct block_stats {
@@ -149,7 +149,7 @@ ARCFileReader::ARCFileReader(const std::vector<std::string> &filename,
 	for (auto i = filename.begin(); i != filename.end(); i++){
 		boost::filesystem::path fpath(*i);
 		if (!boost::filesystem::exists(fpath) ||
-		    !boost::filesystem::is_regular_file(fpath))
+		    !boost::filesystem::is_regular_file(fpath)) 
 			log_fatal("Could not find file %s", i->c_str());
 		filename_.push_back(*i);
 	}
@@ -157,6 +157,7 @@ ARCFileReader::ARCFileReader(const std::vector<std::string> &filename,
 	const std::string path = filename_.front();
 	filename_.pop_front();
 	StartFile(path);
+
 }
 
 
@@ -345,7 +346,7 @@ void ARCFileReader::ParseArrayMap(uint8_t *buf, size_t size)
 				memcpy(block_name, buf + off, namelen);
 				block_name[namelen] = '\0';
 				off += namelen;
-
+				
 				/* Block parameters */
 				if (experiment == Experiment::BK) {
 					// BK has one fewer dim registers
@@ -374,9 +375,9 @@ void ARCFileReader::ParseArrayMap(uint8_t *buf, size_t size)
 				case REG_UTC:
 					block_info.width = 8;
 					break;
-				case REG_BOOL:
-				case REG_CHAR:
-				case REG_UCHAR:
+				case REG_BOOL: 
+				case REG_CHAR: 
+				case REG_UCHAR: 
 					block_info.width = 1;
 					break;
 				case REG_SHORT:
@@ -558,7 +559,7 @@ G3FrameObjectPtr ARCFileReader::GCPToFrameObject(uint8_t *buffer,
 				base_offset += block.width;
 			}
 			return root; }
-		case REG_CHAR:
+		case REG_CHAR: 
 		case REG_UCHAR:
 			if (buffer[base_offset + block.dim[depth] - 1] == '\0')
 				return G3StringPtr(new G3String(
@@ -612,9 +613,9 @@ G3FrameObjectPtr ARCFileReader::GCPToFrameObject(uint8_t *buffer,
 	case REG_UTC:
 		return GCPToTime(buffer, base_offset, ms_jiffie_base_);
 		break;
-	case REG_BOOL:
-	case REG_CHAR:
-	case REG_UCHAR:
+	case REG_BOOL: 
+	case REG_CHAR: 
+	case REG_UCHAR: 
 		return G3IntPtr(new G3Int(GCP8ToInt(buffer, base_offset)));
 		break;
 	case REG_SHORT:
@@ -665,7 +666,7 @@ void ARCFileReader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		log_fatal("Message not an ARC_FRAME_RECORD mid-file");
 	if (size != frame_length_)
 		log_fatal("%zd-byte frame does not match expected length (%zd)",
-		          (size_t)size, (size_t)frame_length_);
+		    (size_t)size, (size_t)frame_length_);
 	buffer = new uint8_t[size];
 	stream_.read((char *)buffer, size);
 
