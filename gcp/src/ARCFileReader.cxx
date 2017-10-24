@@ -69,9 +69,10 @@ enum {
 
 class ARCFileReader : public G3Module {
 public:
-	ARCFileReader(const std::string &path, unsigned experiment=Experiments::SPT);
+	ARCFileReader(const std::string &path,
+	    Experiments::Experiment experiment=Experiments::SPT);
 	ARCFileReader(const std::vector<std::string> & filename,
-	              unsigned experiment=Experiments::SPT);
+	    Experiments::Experiment experiment=Experiments::SPT);
 	virtual ~ARCFileReader() {}
 
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
@@ -105,14 +106,14 @@ private:
 	std::deque<std::string> filename_;
 	std::string cur_file_;
 
-	int experiment;
+	Experiments::Experiment experiment;
 
 	SET_LOGGER("ARCFileReader");
 };
 
 
-ARCFileReader::ARCFileReader(const std::string &path, unsigned experiment) :
-	experiment(experiment)
+ARCFileReader::ARCFileReader(const std::string &path,
+    Experiments::Experiment experiment) : experiment(experiment)
 {
 	if (experiment == Experiments::SPT || experiment == Experiments::BK) {
 		ms_jiffie_base_ = G3Units::ms;
@@ -132,7 +133,7 @@ ARCFileReader::ARCFileReader(const std::string &path, unsigned experiment) :
 
 
 ARCFileReader::ARCFileReader(const std::vector<std::string> &filename,
-                             unsigned experiment) : experiment(experiment)
+    Experiments::Experiment experiment) : experiment(experiment)
 {
 	if (experiment == Experiments::SPT || experiment == Experiments::BK) {
 		ms_jiffie_base_ = G3Units::ms;
@@ -697,9 +698,9 @@ PYBINDINGS("gcp") {
 	    "Read GCP archive file (or files if you pass an iterable of paths)."
 	    " Jiffiebase is the length of 1 GCP tick. Set to 1 ms by default"
 	    " (SPT). For POLARBEAR, use G3Units.day/(1 << 32).",
-		init<std::string, optional<unsigned> >(
+		init<std::string, optional<Experiments::Experiment> >(
 		        args("filename", "experiment")))
-		.def(init<std::vector<std::string>, optional<unsigned> >(
+		.def(init<std::vector<std::string>, optional<Experiments::Experiment> >(
 		        args("filename", "experiment")))
 		.def_readonly("__g3module__", true)
 	;
