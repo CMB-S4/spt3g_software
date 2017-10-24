@@ -70,9 +70,9 @@ enum {
 class ARCFileReader : public G3Module {
 public:
 	ARCFileReader(const std::string &path,
-	    Experiments::Experiment experiment=Experiments::SPT);
+	    Experiment experiment=Experiment::SPT);
 	ARCFileReader(const std::vector<std::string> & filename,
-	    Experiments::Experiment experiment=Experiments::SPT);
+	    Experiment experiment=Experiment::SPT);
 	virtual ~ARCFileReader() {}
 
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
@@ -106,18 +106,18 @@ private:
 	std::deque<std::string> filename_;
 	std::string cur_file_;
 
-	Experiments::Experiment experiment;
+	Experiment experiment;
 
 	SET_LOGGER("ARCFileReader");
 };
 
 
 ARCFileReader::ARCFileReader(const std::string &path,
-    Experiments::Experiment experiment) : experiment(experiment)
+    Experiment experiment) : experiment(experiment)
 {
-	if (experiment == Experiments::SPT || experiment == Experiments::BK) {
+	if (experiment == Experiment::SPT || experiment == Experiment::BK) {
 		ms_jiffie_base_ = G3Units::ms;
-	} else if (experiment == Experiments::PB) {
+	} else if (experiment == Experiment::PB) {
 		ms_jiffie_base_ = 86400/INT_MAX;
 	} else {
 		log_fatal("Unrecognized Experiment");
@@ -133,11 +133,11 @@ ARCFileReader::ARCFileReader(const std::string &path,
 
 
 ARCFileReader::ARCFileReader(const std::vector<std::string> &filename,
-    Experiments::Experiment experiment) : experiment(experiment)
+    Experiment experiment) : experiment(experiment)
 {
-	if (experiment == Experiments::SPT || experiment == Experiments::BK) {
+	if (experiment == Experiment::SPT || experiment == Experiment::BK) {
 		ms_jiffie_base_ = G3Units::ms;
-	} else if (experiment == Experiments::PB) {
+	} else if (experiment == Experiment::PB) {
 		ms_jiffie_base_ = 86400/INT_MAX;
 	} else {
 		log_fatal("Unrecognized Experiment");
@@ -283,7 +283,7 @@ void ARCFileReader::ParseArrayMap(uint8_t *buf, size_t size)
 			block_info.flags = REG_UTC; block_offset += 8;
 			board["utc"] = block_info;
 
-			if (experiment == Experiments::BK) {
+			if (experiment == Experiment::BK) {
 				block_info.offset = block_offset;
 				block_info.flags = REG_UINT; block_offset += 4;
 				board["lst"] = block_info;
@@ -347,7 +347,7 @@ void ARCFileReader::ParseArrayMap(uint8_t *buf, size_t size)
 				off += namelen;
 
 				/* Block parameters */
-				if (experiment == Experiments::BK) {
+				if (experiment == Experiment::BK) {
 					// BK has one fewer dim registers
 					memcpy(ltmp, buf + off, sizeof(ltmp) - sizeof(ltmp[0]));
 					off += sizeof(ltmp) - sizeof(ltmp[0]);
@@ -361,8 +361,8 @@ void ARCFileReader::ParseArrayMap(uint8_t *buf, size_t size)
 				block_info.addr = ntohl(ltmp[3]);
 				block_info.dim[0] = ntohl(ltmp[4]);
 				block_info.dim[1] = ntohl(ltmp[5]);
-				if ((experiment == Experiments::SPT) ||
-					(experiment == Experiments::PB)) {
+				if ((experiment == Experiment::SPT) ||
+					(experiment == Experiment::PB)) {
 					block_info.dim[2] = ntohl(ltmp[6]);
 				} else {
 					block_info.dim[2] = 0;
@@ -401,7 +401,7 @@ void ARCFileReader::ParseArrayMap(uint8_t *buf, size_t size)
 
 				/* Skip unarchived registers */
 				if (!(block_info.flags & REG_EXC)) {
-					if (experiment == Experiments::BK) {
+					if (experiment == Experiment::BK) {
 						block_offset += block_info.width *
 							((block_info.dim[0] == 0) ? 1 :
 							  block_info.dim[0]) *
@@ -418,8 +418,8 @@ void ARCFileReader::ParseArrayMap(uint8_t *buf, size_t size)
 					}
 				}
 
-				if ((experiment == Experiments::SPT) ||
-					(experiment == Experiments::PB)) {
+				if ((experiment == Experiment::SPT) ||
+					(experiment == Experiment::PB)) {
 					/* Human-readable type info */
 					memcpy(&namelen, buf + off, sizeof(namelen));
 					namelen = ntohs(namelen); off += 2;
@@ -436,12 +436,12 @@ void ARCFileReader::ParseArrayMap(uint8_t *buf, size_t size)
 					board[block_name] = block_info;
 			}
 
-			if ((experiment == Experiments::SPT) ||
-				(experiment == Experiments::PB)) {
+			if ((experiment == Experiment::SPT) ||
+				(experiment == Experiment::PB)) {
 				// Ignored VME addresses bases
 				memcpy(bases, buf + off, sizeof(bases));
 				off += sizeof(bases);
-			} else if (experiment == Experiments::BK) {
+			} else if (experiment == Experiment::BK) {
 				// Inter-frame whitespace
 				off += 16;
 			}
@@ -526,7 +526,7 @@ G3FrameObjectPtr ARCFileReader::GCPToFrameObject(uint8_t *buffer,
 		base_offset = block.offset;
 
 	int max_depth = 2;
-	if (experiment == Experiments::BK)
+	if (experiment == Experiment::BK)
 		max_depth = 1;
 
 	/* Check for two- and three-dimensional case (use vector of vectors) */
@@ -698,9 +698,9 @@ PYBINDINGS("gcp") {
 	    "Read GCP archive file (or files if you pass an iterable of paths)."
 	    " Jiffiebase is the length of 1 GCP tick. Set to 1 ms by default"
 	    " (SPT). For POLARBEAR, use G3Units.day/(1 << 32).",
-		init<std::string, optional<Experiments::Experiment> >(
+		init<std::string, optional<Experiment> >(
 		        args("filename", "experiment")))
-		.def(init<std::vector<std::string>, optional<Experiments::Experiment> >(
+		.def(init<std::vector<std::string>, optional<Experiment> >(
 		        args("filename", "experiment")))
 		.def_readonly("__g3module__", true)
 	;

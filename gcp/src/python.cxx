@@ -13,10 +13,10 @@ BOOST_PYTHON_MODULE(gcp)
 	bp::docstring_options docopts(true, true, false);
 
 	// Supported Experiments
-	bp::enum_<Experiments::Experiment>("Experiments")
-		.value("SPT",   Experiments::SPT)
-		.value("BK",    Experiments::BK)
-		.value("PB",    Experiments::PB)
+	bp::enum_<Experiment>("Experiment")
+		.value("SPT",   Experiment::SPT)
+		.value("BK",    Experiment::BK)
+		.value("PB",    Experiment::PB)
 	;
 
 	G3ModuleRegistrator::CallRegistrarsFor("gcp");
