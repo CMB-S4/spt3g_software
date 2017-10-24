@@ -35,10 +35,10 @@ public:
 	HealpixHitPix(){};
 	
 	HealpixHitPix(const FlatSkyMap &flat_map, size_t nside, 
-	    bool is_nested, MapCoordReference coord_reference);
+	    bool is_nested);
 
 	// Initialize with a vector of pixel indices to include
-	HealpixHitPix(const std::vector<uint64_t> &pixinds, size_t nside, 
+	HealpixHitPix(const std::vector<int64_t> &pixinds, size_t nside, 
 	    bool is_nested, MapCoordReference coord_ref);
 
 	long get_fullsky_index(long cutsky_index) const;
@@ -52,6 +52,7 @@ public:
 
 	MapCoordReference coord_ref;
 
+	std::vector<int64_t> pixinds_; // maps cutsky to full sky
 private:
 	friend class CutSkyHealpixMap;
 	
@@ -59,10 +60,9 @@ private:
 	size_t nside_;	
 	long ipixmin_;
 	long ipixmax_;
-	long total_; //total number of pixels in the map
+	long total_; //total number of pixels in the map (not counting the overflow)
 
-	std::vector<uint64_t> pixinds_; // maps cutsky to full sky
-	std::vector<uint64_t> full_to_cut_inds_; // maps full sky to cutsky, kind of
+	std::vector<int64_t> full_to_cut_inds_; // maps full sky to cutsky, kind of
 };
 
 G3_POINTERS(HealpixHitPix);
@@ -87,7 +87,7 @@ public:
 	
 	CutSkyHealpixMap();
 	
-	void get_full_sized_healpix_map(std::vector<double> & full_sized_map);
+	std::vector<double> get_full_sized_healpix_map();
 	
 	void get_pointing_pixel(const std::vector<double> &alpha,
 	    const std::vector<double> &delta, std::vector<int> &out_inds) const;

@@ -72,7 +72,7 @@ void CutSkyHealpixMap::serialize(A &ar, unsigned u)
         ar & make_nvp("is_nested_", is_nested_);
 }
 
-HealpixHitPix::HealpixHitPix(const std::vector<uint64_t> & pixinds,
+HealpixHitPix::HealpixHitPix(const std::vector<int64_t> & pixinds,
     size_t nside, bool is_nested, MapCoordReference coord_reference)
 {
 	nside_ = nside;
@@ -90,15 +90,15 @@ HealpixHitPix::HealpixHitPix(const std::vector<uint64_t> & pixinds,
 	}
 
 	//full_to_cut_inds_ is the inverse;
-	full_to_cut_inds_ = std::vector<uint64_t>(
+	full_to_cut_inds_ = std::vector<int64_t>(
 	    ipixmax_ - ipixmin_ + 1, total_);
 	for (size_t i=0; i < pixinds.size(); i++)
 		full_to_cut_inds_[pixinds[i] -  ipixmin_] = i;
 }
 
 HealpixHitPix::HealpixHitPix(const FlatSkyMap &flat_map, size_t nside,
-    bool is_nested, MapCoordReference coord_reference) 
-  : coord_ref(coord_reference), is_nested_(is_nested), nside_(nside)
+    bool is_nested) 
+  : coord_ref(flat_map.coord_ref), is_nested_(is_nested), nside_(nside)
 {
         g3_assert(flat_map.coord_ref != MapCoordReference::Local);
 	
@@ -123,10 +123,7 @@ HealpixHitPix::HealpixHitPix(const FlatSkyMap &flat_map, size_t nside,
 		delta[0] = (M_PI/2.0 - theta) * G3Units::rad;
 		alpha[0] = (phi) * G3Units::rad;
 
-		// XXX: temporarily disabled
-		//get_pointing_pixel(flat_map, alpha, delta, out_inds);
-		log_fatal("NEEDS TO BE REIMPLEMENTED!");
-
+		out_inds = flat_map.angles_to_pixels(alpha, delta);
 		if (out_inds[0] != overflow_index) {
 			is_hit[i] = true;
 			if (total_ == 0)
@@ -139,9 +136,9 @@ HealpixHitPix::HealpixHitPix(const FlatSkyMap &flat_map, size_t nside,
 	if (total_ == 0)
 		log_fatal("No pixels defined in this map.");
 
-	pixinds_ = std::vector<uint64_t>(total_ + 1);
+	pixinds_ = std::vector<int64_t>(total_ + 1);
 	pixinds_[total_] = -1;
-	full_to_cut_inds_ = std::vector<uint64_t>(
+	full_to_cut_inds_ = std::vector<int64_t>(
 	    ipixmax_ - ipixmin_ + 1, total_);
 	size_t index_for_pixinds = 0;
 	for (size_t i = ipixmin_; i < ipixmax_ + 1; i++) {
@@ -169,6 +166,7 @@ HealpixHitPix::get_cutsky_index(long fullsky_index) const
 	return full_to_cut_inds_[fullsky_index - ipixmin_];
 }
 
+//assumed to be ring ordering
 CutSkyHealpixMap::CutSkyHealpixMap(boost::python::object v,
     size_t full_sky_map_nside, HealpixHitPixPtr hitpix, bool is_weighted,
     G3SkyMap::MapPolType pol_type, G3Timestream::TimestreamUnits u,
@@ -188,7 +186,7 @@ CutSkyHealpixMap::CutSkyHealpixMap(boost::python::object v,
 	    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) != -1) {
 		if (strcmp(view.format, "d") == 0) {
 			for (size_t i = hitpix->ipixmin_;
-			    i < hitpix->ipixmax_; i++) {
+			    i <= hitpix->ipixmax_; i++) {
 				long tmp_full_ind;
 				double u_scale;
 
@@ -197,16 +195,20 @@ CutSkyHealpixMap::CutSkyHealpixMap(boost::python::object v,
 				    u_scale);
 				u_scale = is_u ? u_scale : 1.0;
 
-				size_t local_ind =
+				int64_t local_ind =
 				    hitpix->full_to_cut_inds_[
-				    tmp_full_ind - hitpix->ipixmin_];
+				    i - hitpix->ipixmin_];
+				if (local_ind < 0) {
+					local_ind = data_.size()-1;
+				}
 				g3_assert(local_ind < data_.size());
+				g3_assert(local_ind >= 0);
 
 				data_[local_ind] =
-				    ((double *)view.buf)[i] * u_scale;
+				    ((double *)view.buf)[tmp_full_ind] * u_scale;
 			}
 		} else if (strcmp(view.format, "f") == 0) {
-			for (size_t i = hitpix->ipixmin_; i < hitpix->ipixmax_;
+			for (size_t i = hitpix->ipixmin_; i <= hitpix->ipixmax_;
 			    i++) {
 				long tmp_full_ind;
 				double u_scale;
@@ -215,12 +217,17 @@ CutSkyHealpixMap::CutSkyHealpixMap(boost::python::object v,
 				    u_scale);
 				u_scale = is_u ? u_scale : 1.0;
 
-				size_t local_ind =
+				int64_t local_ind =
 				    hitpix->full_to_cut_inds_[
-				    tmp_full_ind - hitpix->ipixmin_];
+				    i - hitpix->ipixmin_];
+				if (local_ind < 0) {
+					local_ind = data_.size()-1;
+				}
 				g3_assert(local_ind < data_.size());
+				g3_assert(local_ind >= 0);
+
 				data_[local_ind] =
-				    ((float *)view.buf)[i] * u_scale;
+				    ((float *)view.buf)[tmp_full_ind] * u_scale;
 			}
 		} else {
 			log_fatal("Unknown type code %s", view.format);
@@ -256,20 +263,22 @@ CutSkyHealpixMap::CutSkyHealpixMap() :
 {
 }
 
-void
-CutSkyHealpixMap::get_full_sized_healpix_map(
-    std::vector<double> & full_sized_map)
+std::vector<double>
+CutSkyHealpixMap::get_full_sized_healpix_map()
 {
+
+	log_debug("%zu %zu\n", hitpix->pixinds_.size(), data_.size());
 	g3_assert(hitpix->pixinds_.size() == data_.size());
 	size_t nside = hitpix->get_nside();
 
-	full_sized_map = std::vector<double>(12 * nside * nside, 0);
+	std::vector<double> full_sized_map(12 * nside * nside, 0);
 
-	for (size_t i = 0; i < hitpix->pixinds_.size() - 1; i++) {
+	for (size_t i = 0; i < hitpix->total_; i++) {
 		size_t index = hitpix->pixinds_[i];
-		g3_assert(index < full_sized_map.size());
+		g3_assert(index < full_sized_map.size() + 1);
 		full_sized_map[index] = data_[i];
 	}
+	return full_sized_map;
 }
 
 
@@ -386,10 +395,10 @@ PYBINDINGS("coordinateutils")
 	  "It provides the mapping between the indices.\n\n"
 	  "Out of necessity this object also defines a patch of "
 	  "sky.")
-	    .def(bp::init<const FlatSkyMap &, size_t, int, MapCoordReference>(
+	    .def(bp::init<const FlatSkyMap &, size_t, int>(
 		(bp::arg("flat_map"), bp::arg("nside"),
-		 bp::arg("is_nested"), bp::arg("coord_ref"))))
-            .def(bp::init<const std::vector<uint64_t> &, size_t, int,
+		 bp::arg("is_nested"))))
+            .def(bp::init<const std::vector<int64_t> &, size_t, int,
                  MapCoordReference>(
 	         (bp::arg("pix_inds"), bp::arg("nside"), bp::arg("is_nested"),
 		  bp::arg("coord_ref"))))
@@ -400,36 +409,44 @@ PYBINDINGS("coordinateutils")
 	         bp::arg("cut_sky_index"))
 	    .def("get_cutsky_index", &HealpixHitPix::get_cutsky_index,
 		 bp::arg("full_sky_index"))
-	;
+	    .def_readwrite("pixinds", &HealpixHitPix::pixinds_)
+	    ;
 
 	// XXX docstrings
 	bp::class_<CutSkyHealpixMap, bp::bases<G3SkyMap>, CutSkyHealpixMapPtr>
-	  ("CutSkyHealpixMap", bp::init<HealpixHitPixPtr, bool,
-           G3SkyMap::MapPolType, G3Timestream::TimestreamUnits>())
+		("CutSkyHealpixMap", bp::no_init)
+	    .def(bp::init<HealpixHitPixPtr, bool,
+		 G3SkyMap::MapPolType, G3Timestream::TimestreamUnits>(
+			 (bp::arg("hitpix"),
+			  bp::arg("is_weighted"),
+			  bp::arg("pol_type"),
+			  bp::arg("units"))
+			 ))
+
 	    .def(bp::init<bp::object, size_t, HealpixHitPixPtr, bool,
-	       G3SkyMap::MapPolType, G3Timestream::TimestreamUnits >(
-	       (bp::arg("full_sky_map"),
-	        bp::arg("full_sky_map_nside"),
-	        bp::arg("hitpix"),
-	        bp::arg("is_weighted") = true,
-	        bp::arg("pol_type") = G3SkyMap::None,
-	        bp::arg("units") = G3Timestream::Kcmb,
-	        bp::arg("init_sym_group") = 0)))
-	    .def(bp::init<bp::object, HealpixHitPixPtr, bool,
-	      G3SkyMap::MapPolType, G3Timestream::TimestreamUnits>(
-	       (bp::arg("cut_sky_map"), bp::arg("hitpix"),
-	        bp::arg("is_weighted") = true,
-	        bp::arg("pol_type") = G3SkyMap::None,
-	        bp::arg("units") = G3Timestream::Kcmb))
-	     )
-	    .def(boost::python::init<>())
-	    .def_pickle(g3frameobject_picklesuite<CutSkyHealpixMap>())
-	    .def("get_full_sized_healpix_map",
-	        &CutSkyHealpixMap::get_full_sized_healpix_map,
-	        bp::arg("out_full_sized_map"))
-	    .def("pixel_to_angle", &CutSkyHealpixMap::pixel_to_angle)
-	    .def("is_nested", &CutSkyHealpixMap::is_nested)
-	    .def("get_nside", &CutSkyHealpixMap::get_nside)
+		 G3SkyMap::MapPolType, G3Timestream::TimestreamUnits, int >(
+			 (bp::arg("full_sky_map"),
+			  bp::arg("full_sky_smap_nside"),
+			  bp::arg("hitpix"),
+			  bp::arg("is_weighted") = true,
+			  bp::arg("pol_type") = G3SkyMap::None,
+			  bp::arg("units") = G3Timestream::Kcmb,
+			  bp::arg("init_sym_group") = 0)))
+		.def(bp::init<bp::object, HealpixHitPixPtr, bool,
+		     G3SkyMap::MapPolType, G3Timestream::TimestreamUnits>(
+			     (bp::arg("cut_sky_map"), bp::arg("hitpix"),
+			      bp::arg("is_weighted") = true,
+			      bp::arg("pol_type") = G3SkyMap::None,
+			      bp::arg("units") = G3Timestream::Kcmb))
+			)
+		.def(boost::python::init<>())
+		.def_pickle(g3frameobject_picklesuite<CutSkyHealpixMap>())
+		.def("get_full_sized_healpix_map",
+		     &CutSkyHealpixMap::get_full_sized_healpix_map,
+		     bp::arg("out_full_sized_map"))
+		.def("pixel_to_angle", &CutSkyHealpixMap::pixel_to_angle)
+		.def("is_nested", &CutSkyHealpixMap::is_nested)
+		.def("get_nside", &CutSkyHealpixMap::get_nside)
 		
 	    .def_readwrite("hitpix", &CutSkyHealpixMap::hitpix)
 	;

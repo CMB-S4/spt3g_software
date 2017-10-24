@@ -47,6 +47,7 @@ public:
 	// Arithmetic operations
 	G3Timestream operator +(const G3Timestream &r) const;
 	G3Timestream &operator +=(const G3Timestream &r);
+	G3Timestream &operator -=(const G3Timestream &r);
 	G3Timestream operator -(const G3Timestream &r) const;
 	G3Timestream operator *(const G3Timestream &r) const;
 	G3Timestream operator /(const G3Timestream &r) const;
@@ -55,7 +56,7 @@ public:
 	G3Timestream operator *(double r) const;
 	G3Timestream &operator *=(double r);
 	G3Timestream operator /(double r) const;
-
+	G3Timestream &operator /=(double r);
 private:
 	SET_LOGGER("G3Timestream");
 

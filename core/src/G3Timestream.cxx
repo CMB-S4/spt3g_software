@@ -273,6 +273,18 @@ G3Timestream &G3Timestream::operator +=(const G3Timestream &r)
 	return *this;
 }
 
+G3Timestream &G3Timestream::operator -=(const G3Timestream &r)
+{
+	if (r.size() != size())
+		log_fatal("Subtracting timestreams of unequal length");
+	if (r.units != units && r.units != None && units != None)
+		log_fatal("Subtracting timestreams of unequal units");
+	for (size_t i = 0; i < size(); i++)
+		(*this)[i] -= r[i];
+
+	return *this;
+}
+
 G3Timestream G3Timestream::operator -(const G3Timestream &r) const
 {
 	G3Timestream ret(*this);
@@ -357,6 +369,13 @@ G3Timestream &G3Timestream::operator *=(double r)
 {
 	for (size_t i = 0; i < size(); i++)
 		(*this)[i] *= r;
+	return *this;
+}
+
+G3Timestream &G3Timestream::operator /=(double r)
+{
+	for (size_t i = 0; i < size(); i++)
+		(*this)[i] /= r;
 	return *this;
 }
 
@@ -513,6 +532,144 @@ size_t G3TimestreamMap::NSamples() const
 
 G3_SPLIT_SERIALIZABLE_CODE(G3Timestream);
 G3_SERIALIZABLE_CODE(G3TimestreamMap);
+
+namespace {
+static int
+G3TimestreamMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
+{
+	if (view == NULL) {
+		PyErr_SetString(PyExc_ValueError, "NULL view");
+		return -1;
+	}
+
+	view->shape = NULL;
+	view->internal = NULL;
+	view->suboffsets = NULL;
+	view->buf = NULL;
+
+	boost::python::handle<> self(boost::python::borrowed(obj));
+	boost::python::object selfobj(self);
+	G3TimestreamMapPtr ts =
+	    boost::python::extract<G3TimestreamMapPtr>(selfobj)();
+	if (!ts->CheckAlignment()) {
+		PyErr_SetString(PyExc_BufferError, "Timestream map is not "
+		    "aligned, cannot cast to a 2D array.");
+		view->obj = NULL;
+		return -1;
+	}
+	if (ts->size() == 0) {
+		PyErr_SetString(PyExc_BufferError, "Timestream map is empty.");
+		view->obj = NULL;
+		return -1;
+	}
+#if 0
+	if ((flags & (PyBUF_WRITABLE | PyBUF_ANY_CONTIGUOUS)) ==
+	    (PyBUF_WRITABLE | PyBUF_ANY_CONTIGUOUS)) {
+#else
+	if ((flags & PyBUF_WRITABLE) == PyBUF_WRITABLE) { // See XXX note below
+#endif
+		PyErr_SetString(PyExc_BufferError, "Cannot provide writable "
+		    "contiguous buffer.");
+		view->obj = NULL;
+		return -1;
+	}
+	if ((flags & PyBUF_F_CONTIGUOUS) == PyBUF_F_CONTIGUOUS) {
+		PyErr_SetString(PyExc_BufferError, "Cannot provide FORTRAN "
+		    "contiguous buffer.");
+		view->obj = NULL;
+		return -1;
+	}
+
+	view->obj = obj;
+	view->len = ts->size() * ts->begin()->second->size() * sizeof(double);
+	view->readonly = 0;
+	view->itemsize = sizeof(double);
+	if (flags & PyBUF_FORMAT)
+		view->format = (char *)"d";
+	else
+		view->format = NULL;
+	view->ndim = 2;
+
+	view->shape = new Py_ssize_t[2];
+	view->shape[0] = ts->size();
+	view->shape[1] = ts->begin()->second->size();
+
+	if (false && (flags & PyBUF_INDIRECT) == PyBUF_INDIRECT) {
+		// XXX: code path disabled as a result of a bug in numpy:
+		// it calls PyMemoryView_FromObject, which implicitly
+		// sets PyBUF_INDIRECT, but then has no code to deal
+		// with suboffsets. The code in this branch does work, but
+		// breaks numpy.
+		
+		// Provide an "indirect" buffer in which the buffer
+		// is an array of pointers to buffers. The API is really
+		// weird for this.
+		//
+		// NB: This *must* get used before any changes to the provider!
+		// We do *not* increment reference counts on timestreams, nor
+		// do we even have a way to freeze the buffer locations.
+
+		view->strides = new Py_ssize_t[2];
+		view->strides[0] = sizeof(double *);
+		view->strides[1] = sizeof(double);
+
+		view->suboffsets = new Py_ssize_t[2];
+		view->suboffsets[0] = 0;
+		view->suboffsets[1] = -1;
+
+		view->buf = malloc(sizeof(double *)*ts->size());
+
+		int j = 0;
+		for (auto i : (*ts))
+			((double **)(view->buf))[j++] = &(*i.second)[0];
+	} else {
+		// To honor a contiguous buffer request, make a copy of the
+		// data. This violates the spirit of the buffer protocol
+		// slightly, but both simplifies the API and allows a
+		// potential faster memory copy than iterating over the
+		// map in Python would.
+
+		view->buf = malloc(view->len);
+		view->readonly = 1;
+
+		view->strides = new Py_ssize_t[2];
+		view->strides[0] = ts->begin()->second->size()*view->itemsize;
+		view->strides[1] = view->itemsize; 
+
+		int j = 0;
+		for (auto i : (*ts)) {
+			memcpy((int8_t *)view->buf + j*view->strides[0],
+			    &(*i.second)[0], view->strides[0]);
+			j++;
+		}
+
+		view->suboffsets = NULL;
+		view->internal = view->buf;
+	}
+
+	// Try to hold onto our collective hats. This is still very dangerous if
+	// the G3Timestream's underlying vector is resized in the case that the
+	// buffer is not a copy.
+	Py_INCREF(obj);
+
+	return 0;
+}
+
+static void
+G3TimestreamMap_relbuffer(PyObject *obj, Py_buffer *view)
+{
+	if (view->strides != NULL)
+		delete [] view->strides;
+	if (view->shape != NULL)
+		delete [] view->shape;
+	if (view->suboffsets != NULL)
+		delete [] view->suboffsets;
+	if (view->buf != NULL)
+		free(view->buf);
+}
+}
+
+static PyBufferProcs timestreammap_bufferprocs;
 
 namespace {
 
@@ -706,13 +863,14 @@ PYBINDINGS("core") {
 
 	// Add buffer protocol interface
 	PyTypeObject *tsclass = (PyTypeObject *)ts.ptr();
-	timestream_bufferprocs.bf_getbuffer = G3Timestream_getbuffer,
+	timestream_bufferprocs.bf_getbuffer = G3Timestream_getbuffer;
 	tsclass->tp_as_buffer = &timestream_bufferprocs;
 #if PY_MAJOR_VERSION < 3
 	tsclass->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
 #endif
 
-	EXPORT_FRAMEOBJECT(G3TimestreamMap, init<>(), "Collection of timestreams indexed by logical detector ID")
+	bp::object tsm =
+	  EXPORT_FRAMEOBJECT(G3TimestreamMap, init<>(), "Collection of timestreams indexed by logical detector ID")
 	    .def(bp::std_map_indexing_suite<G3TimestreamMap, true>())
 	    .def("CheckAlignment", &G3TimestreamMap::CheckAlignment)
 	    .add_property("start", &G3TimestreamMap::GetStartTime,
@@ -728,5 +886,14 @@ PYBINDINGS("core") {
 	      "of one of the timestreams.")
 	;
 	register_pointer_conversions<G3TimestreamMap>();
+
+	// Add buffer protocol interface
+	PyTypeObject *tsmclass = (PyTypeObject *)tsm.ptr();
+	timestreammap_bufferprocs.bf_getbuffer = G3TimestreamMap_getbuffer;
+	timestreammap_bufferprocs.bf_releasebuffer = G3TimestreamMap_relbuffer;
+	tsmclass->tp_as_buffer = &timestreammap_bufferprocs;
+#if PY_MAJOR_VERSION < 3
+	tsmclass->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
+#endif
 }
 

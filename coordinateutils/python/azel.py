@@ -21,14 +21,19 @@ def convert_azel_to_radec(az, el, location=spt):
     assert(az.stop == el.stop)
     assert(az.n_samples == el.n_samples)
 
-    t = astropy.time.Time(numpy.asarray([i.mjd for i in az.times()]), format='mjd')
+    # record locations of bad elevation values to mark them later
+    badel_inds = numpy.where((el < -90. * core.G3Units.deg) | (el > 90. * core.G3Units.deg))
+    el[badel_inds] = 0. * core.G3Units.deg
 
+    t = astropy.time.Time(numpy.asarray([i.mjd for i in az.times()]), format='mjd')
+    
     k = astropy.coordinates.AltAz(az=numpy.asarray(az)/core.G3Units.deg*astropy.units.deg, alt=numpy.asarray(el)/core.G3Units.deg*astropy.units.deg, obstime=t, location=location, pressure=0)
 
     kt = k.transform_to(astropy.coordinates.FK5)
 
     ra = core.G3Timestream(numpy.asarray(kt.ra/astropy.units.deg)*core.G3Units.deg)
     dec = core.G3Timestream(numpy.asarray(kt.dec/astropy.units.deg)*core.G3Units.deg)
+    dec[badel_inds] = numpy.nan
 
     ra.start = dec.start = az.start
     ra.stop = dec.stop = az.stop

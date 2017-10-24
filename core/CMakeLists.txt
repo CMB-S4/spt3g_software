@@ -58,5 +58,6 @@ add_spt3g_test(droporphanmetadata)
 add_spt3g_test(networktest SLOWTEST)
 add_spt3g_test(endprocessing)
 add_spt3g_test(lazyreader)
+add_spt3g_test(timestream_2d)
 add_spt3g_test(cached_frame)
 

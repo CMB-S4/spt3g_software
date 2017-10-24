@@ -50,7 +50,7 @@ void radec_to_map2d_proj0(double ra,double dec, double ra0, double dec0,
 	x=(ra-ra0) * COS(dec/rad);
 	y=(-1.*dec+dec0);
 	
-	//x *= -1;
+	x *= -1;
 	y *= -1;
 	
 	xpix = ((x-x_min)/res);
@@ -68,7 +68,7 @@ void radec_to_map2d_proj1(double ra,double dec, double ra0, double dec0,
 	x=(ra-ra0);
 	y=(-1.*dec+dec0);
 	
-	//x *= -1;
+	x *= -1;
 	y *= -1;
 	
 	xpix = ((x-x_min)/res);
@@ -91,7 +91,7 @@ void radec_to_map2d_proj2(double ra,double dec, double ra0, double dec0,
 	    sindelta0 *SIN(delta)) * rad;
 	x = (COS(delta)*SIN(alpha - alpha0)) * rad;
 
-	//x *= -1;
+	x *= -1;
 	y *= -1;
 
 	xpix = ((x-x_min)/res);
@@ -117,7 +117,7 @@ void radec_to_map2d_proj4(double ra,double dec,  double ra0, double dec0,
 	     sindelta0 *SIN(delta));
 	x= k * COS(delta)*SIN(alpha-alpha0);
 
-	//x *= -1;
+	x *= -1;
 	y *= -1;
 
 	xpix = ((x-x_min)/res);
@@ -144,7 +144,7 @@ void radec_to_map2d_proj5(double ra,double dec, double ra0, double dec0,
 	    sindelta0*cos_delta*cos_alphaalpha0 ));
 	y = -1 * k * (cos_delta * negcosdelta0 * cos_alphaalpha0 - 
 	    sindelta0 * sin_delta);
-	x = k * (cos_delta * SIN(alpha-alpha0));
+	x = -k * (cos_delta * SIN(alpha-alpha0));
 	xpix =  ((x-x_min)/res);
 	ypix =  ((y-y_min)/res);
 }
@@ -274,7 +274,7 @@ void pixel_1d_to_angle(const std::vector<int> & pix_ind, double ra0,
 
 
 	for (size_t i=0; i < npix; i++){
-		x_coord[i] = -(0.5 * n_x - ((double) (pix_ind[i] % n_x)) - 0.5)
+		x_coord[i] = (0.5 * n_x - ((double) (pix_ind[i] % n_x)) - 0.5)
 		    * pixel_res/rad;
 		y_coord[i] = (0.5 * n_y - ((double) (pix_ind[i] / n_x)) - 0.5) 
 		    * pixel_res/rad;

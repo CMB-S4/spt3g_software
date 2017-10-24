@@ -183,7 +183,11 @@ public:
 	enum WeightType {
 		Wpol = 3,
 		Wunpol = 4,
+		None = 5
 	};
+
+	G3SkyMapWeights() : weight_type(None) {}
+
 	// Instantiate weight maps based on the metadata of a reference map
 	G3SkyMapWeights(G3SkyMapConstPtr ref_map, WeightType wt);
 
@@ -221,10 +225,7 @@ public:
 		else
 			return boost::make_shared<G3SkyMapWeights>(this->TT, this->weight_type);
 	}
-
-
 private:
-	G3SkyMapWeights() {} // Fake out for serialization
 	template <class A> void serialize(A &ar, const unsigned v);
 	friend class cereal::access;
 };
@@ -232,7 +233,7 @@ private:
 G3_POINTERS(G3SkyMapWeights);
 
 G3_SERIALIZABLE(G3SkyMap, 1);
-G3_SERIALIZABLE(G3SkyMapWeights, 1);
+G3_SERIALIZABLE(G3SkyMapWeights, 2);
 
 #endif
 

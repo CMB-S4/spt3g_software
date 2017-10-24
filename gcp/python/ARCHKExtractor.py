@@ -56,7 +56,7 @@ class UnpackSPTpolHKData(object):
                     modhk.carrier_gain = hkregs['carrierGain'][i][j*2 + k]
                     modhk.nuller_gain = hkregs['nullerGain'][i][j*2 + k]
                     modhk.demod_gain = hkregs['demodGain'][i][j*2 + k]
-                    if 'danGain' in hkregs: 
+                    if 'mezz' + mezz + 'Car' + mod + 'Overload' in hkregs: 
                         modhk.carrier_railed = hkregs['mezz' + mezz + 'Car' + mod + 'Overload'][i]
                         modhk.nuller_railed = hkregs['mezz' + mezz + 'Nul' + mod + 'Overload'][i]
                     modhk.demod_railed = hkregs['mezz' + mezz + 'Adc' + mod + 'Overload'][i]
