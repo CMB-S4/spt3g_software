@@ -220,15 +220,6 @@ BOOST_PP_SEQ_FOR_EACH(UNITS_INTERFACE,~,UNITS)
   .add_static_property(BOOST_PP_STRINGIZE(T), &BOOST_PP_CAT(g3units_return_, T))
 struct __XXX_fake_g3units_namespace_XXX {};
 
-#define EXPERIMENTS (SPT)(PB)(BK)
-
-#define EXPERIMENTS_INTERFACE(r,data,T) \
-  static unsigned BOOST_PP_CAT(experiments_return_,T)() { return Experiments::T; }
-BOOST_PP_SEQ_FOR_EACH(EXPERIMENTS_INTERFACE,~,EXPERIMENTS)
-#define EXPERIMENTS_DEF(r,data,T) \
-  .add_static_property(BOOST_PP_STRINGIZE(T), &BOOST_PP_CAT(experiments_return_, T))
-struct __XXX_fake_experiments_namespace_XXX {};
-
 // Nonsense boilerplate for POD vector numpy bindings
 #define numpy_vector_infrastructure(T, conv) \
 template <> \
@@ -278,13 +269,6 @@ BOOST_PYTHON_MODULE(core)
 	    "units arguments to functions. 1 second is 1*G3Units.s.",
 	    bp::no_init)
 	      BOOST_PP_SEQ_FOR_EACH(G3_UNITS_DEF,~,UNITS);
-
-	// Supported Experiments
-	bp::class_<__XXX_fake_experiments_namespace_XXX, boost::noncopyable>(
-	  "Experiments",
-	    "Supported CMB Experiments",
-	    bp::no_init)
-	      BOOST_PP_SEQ_FOR_EACH(EXPERIMENTS_DEF,~,EXPERIMENTS);
 
 	// Some POD types
 	register_vector_of<bool>("Bool");

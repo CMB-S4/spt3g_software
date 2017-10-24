@@ -6,6 +6,7 @@
 #include <G3Vector.h>
 #include <G3Data.h>
 #include <dataio.h>
+#include <gcp/Experiments.h>
 
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/filesystem.hpp>
