@@ -12,10 +12,9 @@ parser.add_argument('--max_file_size', dest='max_file_size', default=1024, help=
 args = parser.parse_args()
 
 # Tee log messages to both log file and GCP socket
-core.G3Logger.global_logger = core.G3MultiLogger([core.G3PrintfLogger(), gcp.GCPLogger()])
-
-# Make sure to get timestamps in the logs (NB: assumes printf logger)
-core.G3Logger.global_logger.timestamps = True
+console_logger = core.G3PrintfLogger()
+console_logger.timestamps = True # Make sure to get timestamps in the logs
+core.G3Logger.global_logger = core.G3MultiLogger([console_logger, gcp.GCPLogger()])
 
 # Import pydfmux later since it can take a while
 import pydfmux
