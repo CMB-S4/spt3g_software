@@ -467,7 +467,7 @@ G3TimePtr ARCFileReader::GCPToTime(uint8_t *buffer, off_t offset)
 	ms = le32toh(ms);
 
 	mjd -= 40587;	/* MJD to UNIX time */
-	if (uint64_t(ms)*ms_jiffie_base_ >= 86400ULL*100000000ULL)
+	if (uint64_t(ms)*ms_jiffie_base_ > 86400ULL*100000000ULL)
 		log_error("Fast time value %d longer than 1 day (%lf seconds)",
 		    ms, uint64_t(ms)*ms_jiffie_base_/G3Units::s);
 	return G3TimePtr(new G3Time(
