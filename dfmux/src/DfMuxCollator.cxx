@@ -11,7 +11,8 @@
 
 class DfMuxCollator : public G3Module {
 public:
-	DfMuxCollator(bool flac_compress = true, bool drop_timepoints = true);
+	DfMuxCollator(bool flac_compress = true, bool drop_timepoints = true,
+	    bool record_sample_times = true);
 
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
 
@@ -23,10 +24,13 @@ private:
 	DfMuxWiringMapConstPtr hwm_;
 	bool flac_compress_;
 	bool drop_timepoints_;
+	bool record_sample_times_;
 };
 
-DfMuxCollator::DfMuxCollator(bool flac_compress, bool drop_timepoints) :
-    G3Module(), flac_compress_(flac_compress), drop_timepoints_(drop_timepoints)
+DfMuxCollator::DfMuxCollator(bool flac_compress, bool drop_timepoints,
+  bool record_sample_times) :
+    G3Module(), flac_compress_(flac_compress),
+    drop_timepoints_(drop_timepoints), record_sample_times_(record_sample_times)
 {
 }
 
@@ -66,6 +70,7 @@ void DfMuxCollator::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	// signal. Begin collating in either case.
 	G3TimestreamMapPtr itsmap(new G3TimestreamMap),
 	    qtsmap(new G3TimestreamMap);
+	G3VectorTimePtr sample_times(new G3VectorTime);
 	std::map<std::string, G3TimestreamPtr> extra_data;
 	G3Time start, stop;
 	int sample = 0;
@@ -117,6 +122,7 @@ void DfMuxCollator::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 
 		// Collect all the bolo data
 		stop = *((*t)->Get<G3Time>("EventHeader"));
+		sample_times->push_back(stop);
 		for (auto chan = hwmts_cache.begin(); chan != hwmts_cache.end();
 		    chan++) {
 			auto board = metasamp->find(
@@ -180,6 +186,10 @@ void DfMuxCollator::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	for (auto aux = extra_data.begin(); aux != extra_data.end(); aux++)
 		scan_->Put(aux->first, aux->second);
 
+	// Save timestamps if requested
+	if (record_sample_times_)
+		scan_->Put("DetectorSampleTimes", sample_times);
+
 	out.push_back(scan_);
 
 out:
@@ -190,8 +200,8 @@ out:
 		out.push_back(frame);
 }
 
-EXPORT_G3MODULE("dfmux", DfMuxCollator, (init<optional<bool, bool> >(
-    args("flac_compress", "drop_timepoints"))),
+EXPORT_G3MODULE("dfmux", DfMuxCollator, (init<optional<bool, bool, bool> >(
+    args("flac_compress", "drop_timepoints", "record_sampletimes"))),
     "Collects DfMux timepoints into scan frames using a provided wiring map. "
     "Scan frames are created when an empty Scan frame appears in the data "
     "stream. This frame will contain all subsequent timepoints until either "
