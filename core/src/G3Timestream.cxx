@@ -114,10 +114,10 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 		if (units != Counts)
 			log_fatal("Cannot use FLAC on non-counts timestreams");
 
-		// Copy to 32-bit integers
+		// Copy to 24-bit integers
 		inbuf.resize(size());
 		for (size_t i = 0; i < size(); i++)
-			inbuf[i] = (*this)[i];
+			inbuf[i] = int32_t((*this)[i]) & 0x00ffffff;
 		chanmap[0] = &inbuf[0];
 
 		// Mark bad samples using an out-of-band signal. Since we
