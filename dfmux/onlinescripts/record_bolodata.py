@@ -112,6 +112,10 @@ for collector in collectors:
     collector.Start()
 pipe.Run(profile=True)
 
+# Shut everything down
+for collector in collectors:
+    collector.Stop()
+
 # C++ global destructor runs after python has closed, sometimes
 # Setting the logger to None like this explicitly avoids segfaults
 core.G3Logger.global_logger = None
