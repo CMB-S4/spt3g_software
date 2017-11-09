@@ -117,7 +117,8 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 		// Copy to 24-bit integers
 		inbuf.resize(size());
 		for (size_t i = 0; i < size(); i++)
-			inbuf[i] = int32_t((*this)[i]) & 0x00ffffff;
+			inbuf[i] = ((int32_t((*this)[i]) & 0x00ffffff) << 8)
+			    >> 8;
 		chanmap[0] = &inbuf[0];
 
 		// Mark bad samples using an out-of-band signal. Since we
