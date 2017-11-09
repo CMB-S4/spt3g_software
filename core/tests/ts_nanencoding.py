@@ -3,10 +3,12 @@
 import pickle, numpy, sys
 from spt3g import core
 
-ts = core.G3Timestream(numpy.ones(1200))
+dat = numpy.floor(numpy.random.normal(size=1200, scale=20, loc=0))
+ts = core.G3Timestream(dat)
 ts.units = core.G3TimestreamUnits.Counts
 ts.SetFLACCompression(5)
 ts[5] = numpy.nan
+dat[5] = numpy.nan
 
 pickle.dump(ts, open('tsdump.pkl', 'wb'))
 
@@ -26,7 +28,7 @@ if numpy.isfinite(ts_rehyd[5]):
 	print('Element 5 finite!')
 	sys.exit(1)
 
-if (numpy.asarray(ts_rehyd)[:5] != 1).any() or (numpy.asarray(ts_rehyd)[6:] != 1).any():
-	print('Elements not 1!')
+if (numpy.asarray(ts_rehyd)[numpy.isfinite(ts_rehyd)] != dat[numpy.isfinite(dat)]).any():
+	print('Elements not preserved!')
 	sys.exit(1)
 
