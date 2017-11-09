@@ -28,6 +28,7 @@ from spt3g.core.util import *
 from spt3g.core.skymapaddons import *
 
 from spt3g.core.docparser import *
+from spt3g.core.dataextensions import *
 from spt3g.core.frameextensions import *
 from spt3g.core.timestreamextensions import *
 
