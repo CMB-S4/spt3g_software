@@ -107,6 +107,12 @@ G3Time::G3Time(std::string t)
 	if (rv == NULL)
 		rv = strptime(t.c_str(), "%Y-%m-%dT%H:%M:%S", &tm);
 
+	// 7. 2012-01-26 23:29:36+00:00
+	if (rv == NULL) {
+		rv = strptime(t.c_str(), "%Y-%m-%d %H:%M:%S%z", &tm);
+		tm.tm_sec -= tm.tm_gmtoff; // timegm() doesn't respect TZ
+	}
+
 	// If there is a string of digits after the field after a period,
 	// interpret that as a decimal subsecond
 	if (rv != NULL && *rv == '.') {
