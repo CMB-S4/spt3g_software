@@ -213,6 +213,10 @@ def UnpackTrackerData(f, rewrite_source_from_feature_bits=True):
             source = source + '-pixelraster' # NB: Do NOT use in-place +=
     f['SourceName'] = source
 
+    # And observation ID, if present
+    if 'obs_id' in f['antenna0']['tracker']:
+        f['ObservationID'] = f['antenna0']['tracker']['obs_id']
+
     t = TrackerStatus()
     # List comprehensions are due to funny business with G3VectorFrameObject
     t.time = [tm for tm in f['antenna0']['tracker']['utc'][0]]
