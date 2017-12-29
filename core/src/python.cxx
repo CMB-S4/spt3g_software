@@ -431,6 +431,12 @@ BOOST_PYTHON_MODULE(core)
 	  boost::shared_ptr<G3MultiLogger>, boost::noncopyable>(
 	  "G3MultiLogger", "Log to multiple loggers at once",
 	  bp::init<std::vector<G3LoggerPtr> >());
+	bp::class_<G3SyslogLogger, bp::bases<G3Logger>,
+	  boost::shared_ptr<G3SyslogLogger>, boost::noncopyable>(
+	  "G3SyslogLogger", "Pass log messages to the syslog service. Initialize with "
+	  "a string identifier and a logging facility. See syslog(3) for details. Example:\n"
+	  "\timport syslog\n\tlogger = core.G3SyslogLogger('myprogram', syslog.LOG_USER)",
+	  bp::init<std::string, int, bp::optional<G3LogLevel> >());
 
 	// A few things that need to be in a particular order
 	bp::enum_<G3Timestream::TimestreamUnits>("G3TimestreamUnits",

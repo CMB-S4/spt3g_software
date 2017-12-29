@@ -39,5 +39,18 @@ private:
 	std::vector<G3LoggerPtr> loggers_;
 };
 
+// Pass log messages to syslog
+class G3SyslogLogger : public G3Logger {
+public:
+
+	G3SyslogLogger(const std::string &ident, int facility,
+	    G3LogLevel default_level=G3DefaultLogLevel);
+	virtual ~G3SyslogLogger();
+
+	virtual void Log(G3LogLevel level, const std::string &unit,
+	    const std::string &file, int line, const std::string &func,
+	    const std::string &message);
+};
+
 #endif
 
