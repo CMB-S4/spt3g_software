@@ -63,6 +63,12 @@ class PyDfMuxWiringMapInjector(object):
         self.hwmf['WiringMap'] = hwm
         self.hwmf['ReadoutSystem'] = 'ICE'
 
+        try:
+            from pydfmux import current_transferfunction
+            self.hwmf['DfMuxTransferFunction'] = current_transferfunction
+        except ImportError:
+            pass
+
     def __call__(self, frame):
         if self.ran:
             return frame
