@@ -313,9 +313,14 @@ PYBINDINGS("core") {
 	    .def("__deepcopy__", &skymap_copy)
 
 	    .def("angles_to_pixels", &G3SkyMap::angles_to_pixels)
-	    .def("pixel_to_angle", (std::vector<double> (G3SkyMap::*)(size_t, size_t) const) &G3SkyMap::pixel_to_angle)
-	    .def("pixel_to_angle", (std::vector<double> (G3SkyMap::*)(size_t) const) &G3SkyMap::pixel_to_angle)
-	    .def("angle_to_pixel", &G3SkyMap::angle_to_pixel)
+	    .def("pixel_to_angle", 
+	      (std::vector<double> (G3SkyMap::*)(size_t, size_t) const) 
+	      &G3SkyMap::pixel_to_angle, ((bp::arg("x_pix"), bp::arg("y_pix"))))
+	    .def("pixel_to_angle", 
+	      (std::vector<double> (G3SkyMap::*)(size_t) const) 
+	      &G3SkyMap::pixel_to_angle, ((bp::arg("pixel"))))
+	    .def("angle_to_pixel", &G3SkyMap::angle_to_pixel,
+	      ((bp::arg("alpha"), bp::arg("delta"))))
 
 
 	;
