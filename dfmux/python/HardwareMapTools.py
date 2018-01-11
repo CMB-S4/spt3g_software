@@ -59,7 +59,7 @@ class PyDfMuxWiringMapInjector(object):
             if bolo.readout_channel.mezzanine.mezzanine == 2:
                 mapping.module += 4
             mapping.channel = bolo.readout_channel.channel - 1 # pydfmux HWMs use 1-indexing of channels, while FPGA uses 0-indexing
-            hwm[str(bolo.bolometer.global_name)] = mapping
+            hwm[str(bolo.bolometer.name)] = mapping
         self.hwmf['WiringMap'] = hwm
         self.hwmf['ReadoutSystem'] = 'ICE'
 
@@ -111,7 +111,7 @@ def PyDfMuxBolometerPropertiesInjector(frame, pydfmux_hwm=None, angle_per_mm = 4
             bp.pol_angle = float(bolo.polarization_angle)*core.G3Units.deg
             bp.pol_efficiency = 1.0
 
-        bpm[str(bolo.global_name)] = bp
+        bpm[str(bolo.name)] = bp
 
     cal['NominalBolometerProperties'] = bpm
  
