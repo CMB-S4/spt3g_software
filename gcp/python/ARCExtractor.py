@@ -331,6 +331,7 @@ def AddBenchData(f):
     bench_axes = ['y1', 'y2', 'y3', 'x4', 'x5', 'z6']
     benchcom = core.G3TimestreamMap()
     benchpos = core.G3TimestreamMap()
+    benchzero = core.G3TimestreamMap()
     for i, key in enumerate(bench_axes):
         # As of 2017-08-03, SCU time is not trustworthy
         # start = f['antenna0']['scu']['benchSampleTime'][0][0]
@@ -346,8 +347,14 @@ def AddBenchData(f):
         benchpos[key] = core.G3Timestream(f['antenna0']['scu']['benchActual'][i])
         benchpos[key].start = start
         benchpos[key].stop = stop
+
+        benchzero[key] = core.G3Timestream(f['antenna0']['scu']['benchZeros'][i])
+        benchzero[key].start = start
+        benchzero[key].stop = stop
+
     f['BenchPosition'] = benchpos
     f['BenchCommandedPosition'] = benchcom
+    f['BenchZeros'] = benchzero
     
 
 @core.pipesegment
