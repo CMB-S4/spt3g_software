@@ -6,12 +6,12 @@ from spt3g.dfmux import HousekeepingForBolo
 from spt3g.dfmux import IceboardConversions
 from .wtl_ConvertUtils import convert_squid, convert_demod, convert_mb
 
-def counts_to_rms_amps(wiringmap, hkmap, bolo, system):
+def counts_to_rms_amps(wiringmap, hkmap, bolo, system, tf=None):
     boardhk, mezzhk, modhk, chanhk = HousekeepingForBolo(hkmap, wiringmap, bolo, True)
 
     if system == 'ICE':
         if chanhk.dan_streaming_enable:
-            tf_I = IceboardConversions.convert_TF(modhk.nuller_gain, target='nuller', unit='RAW', frequency=chanhk.carrier_frequency/core.G3Units.Hz)
+            tf_I = IceboardConversions.convert_TF(modhk.nuller_gain, target='nuller', custom_TF=tf, unit='RAW', frequency=chanhk.carrier_frequency/core.G3Units.Hz)
         else:
             tf_V = IceboardConversions.convert_adc_samples('Streamer')
             tf_I = tf_V/modhk.squid_transimpedance
@@ -37,11 +37,11 @@ def counts_to_rms_amps(wiringmap, hkmap, bolo, system):
 
     return tf_I * core.G3Units.amp
 
-def bolo_bias_voltage_rms(wiringmap, hkmap, bolo, system):
+def bolo_bias_voltage_rms(wiringmap, hkmap, bolo, system, tf=None):
     boardhk, mezzhk, modhk, chanhk = HousekeepingForBolo(hkmap, wiringmap, bolo, True)
 
     if system == 'ICE':
-        tf_V = IceboardConversions.convert_TF(modhk.carrier_gain, target='carrier', unit='NORMALIZED', frequency=chanhk.carrier_frequency/core.G3Units.Hz)
+        tf_V = IceboardConversions.convert_TF(modhk.carrier_gain, target='carrier', custom_TF=tf, unit='NORMALIZED', frequency=chanhk.carrier_frequency/core.G3Units.Hz)
         volts = tf_V * chanhk.carrier_amplitude * core.G3Units.V
         if chanhk.carrier_frequency != 0:
             volts /= numpy.sqrt(2) # Use RMS amps
@@ -54,7 +54,7 @@ def bolo_bias_voltage_rms(wiringmap, hkmap, bolo, system):
     return volts
 
 @core.usefulfunc
-def get_timestream_unit_conversion(from_units, to_units, bolo, wiringmap=None, hkmap=None, system=None):
+def get_timestream_unit_conversion(from_units, to_units, bolo, wiringmap=None, hkmap=None, system=None, tf=None):
     '''
     Return the scalar conversion factor to move timestream data from a
     given system of units (Watts, Amps, Counts) to another one.
@@ -75,10 +75,10 @@ def get_timestream_unit_conversion(from_units, to_units, bolo, wiringmap=None, h
 
     # First, convert to watts
     if from_units == core.G3TimestreamUnits.Counts:
-        to_watts = counts_to_rms_amps(wiringmap, hkmap, bolo, system)
-        to_watts *= bolo_bias_voltage_rms(wiringmap, hkmap, bolo, system)
+        to_watts = counts_to_rms_amps(wiringmap, hkmap, bolo, system, tf)
+        to_watts *= bolo_bias_voltage_rms(wiringmap, hkmap, bolo, system, tf)
     elif from_units == core.G3TimestreamUnits.Amps:
-        to_watts = bolo_bias_voltage_rms(wiringmap, hkmap, bolo, system)
+        to_watts = bolo_bias_voltage_rms(wiringmap, hkmap, bolo, system, tf)
     elif from_units == core.G3TimestreamUnits.Watts:
         to_watts = 1.
     else:
@@ -86,10 +86,10 @@ def get_timestream_unit_conversion(from_units, to_units, bolo, wiringmap=None, h
 
     # Now the conversion from watts
     if to_units == core.G3TimestreamUnits.Counts:
-        from_watts = 1./counts_to_rms_amps(wiringmap, hkmap, bolo, system)
-        from_watts /= bolo_bias_voltage_rms(wiringmap, hkmap, bolo, system)
+        from_watts = 1./counts_to_rms_amps(wiringmap, hkmap, bolo, system, tf)
+        from_watts /= bolo_bias_voltage_rms(wiringmap, hkmap, bolo, system, tf)
     elif to_units == core.G3TimestreamUnits.Amps:
-        from_watts = bolo_bias_voltage_rms(wiringmap, hkmap, bolo, system)
+        from_watts = bolo_bias_voltage_rms(wiringmap, hkmap, bolo, system, tf)
         if from_watts != 0:
             from_watts = 1./from_watts
     elif to_units == core.G3TimestreamUnits.Watts:
@@ -132,6 +132,7 @@ class ConvertTimestreamUnits(object):
 
         self.wiringmap = None
         self.system = None
+        self.default_tf = None
         self.hkmap = None
         self.convfactors = {}
         self.skiperrors = SkipUncalibratable
@@ -141,6 +142,7 @@ class ConvertTimestreamUnits(object):
         if frame.type == core.G3FrameType.Wiring:
             self.wiringmap = frame['WiringMap']
             self.system = frame['ReadoutSystem']
+            self.default_tf = frame.get('DfMuxTransferFunction', None)
             self.convfactors = {}
             return
         if frame.type == core.G3FrameType.Housekeeping:
@@ -149,6 +151,7 @@ class ConvertTimestreamUnits(object):
             return
         if self.keepconversions and frame.type == core.G3FrameType.Observation:
             self.convfactors = {}
+            self.hkmap = None
             return
 
         if frame.type != core.G3FrameType.Scan:
@@ -172,8 +175,9 @@ class ConvertTimestreamUnits(object):
             elif bolo in self.convfactors[ts.units]:
                 convfactor = self.convfactors[ts.units][bolo]
             else:
+                tf = self.default_tf # XXX: might get from HK data
                 try:
-                    convfactor = get_timestream_unit_conversion(ts.units, self.units, bolo, wiringmap=self.wiringmap, hkmap=self.hkmap, system=self.system)
+                    convfactor = get_timestream_unit_conversion(ts.units, self.units, bolo, wiringmap=self.wiringmap, hkmap=self.hkmap, system=self.system, tf=tf)
                 except KeyError:
                     if not self.skiperrors:
                         raise

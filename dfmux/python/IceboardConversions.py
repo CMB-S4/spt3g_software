@@ -17,15 +17,14 @@ import numpy as np
 import json
 import functools
 import os
+from scipy import interpolate
 
 # Figure out pydfmux directory and names and fine the json file containing
 # the frequency dependent transfer function
 TFpath = os.path.dirname(os.path.realpath(__file__))
-TFfile = open('{0}/TFPoly_full_with_10MHz_pi.txt'.format(TFpath), 'r')
-TFDict = json.load(TFfile)
-TFfile.close()
+TFDicts = {}
 
-def frequency_correction(frequency, gain, target='nuller'):
+def frequency_correction(frequency, gain, target='nuller', custom_TF=None):
     """Returns fractional correction to the DC transfer function for a requested
     frequency and analog gain (defaults to baseline gain if none is provided)
 
@@ -46,6 +45,10 @@ def frequency_correction(frequency, gain, target='nuller'):
 
     target : string ['nuller', 'carrier'], default='nuller'
 
+    custom_TF : string, default=None
+        Optional, allows using a custom frequency correction.  Looks for a file
+        in this directory with the argument name
+
     Returns
     -------
     float
@@ -57,7 +60,21 @@ def frequency_correction(frequency, gain, target='nuller'):
     except TypeError: ## Only given one number
         warn = frequency>9e6
 
-    tf_funct = functools.partial(np.polyval, TFDict['Gain_{0}'.format(int(gain))][target])
+    if custom_TF is None:
+        custom_TF = 'TFPoly_full_with_10MHz_pi'
+
+    try:
+        tf_model = TFDicts[custom_TF]
+    except KeyError:
+        TFfile = open('{0}/{1}.txt'.format(TFpath, custom_TF), 'r')
+        tf_model = json.load(TFfile)
+        TFfile.close()
+        TFDicts[custom_TF] = tf_model
+
+    if 'type' in tf_model and tf_model['type'] == 'spline_interpolation':
+        tf_funct = lambda x: interpolate.splev(x, tf_model[target][str(gain)])
+    else:
+        tf_funct = functools.partial(np.polyval, tf_model['Gain_{0}'.format(int(gain))][target])
     return tf_funct(frequency)
 
 def gsetting_to_R(G, oldmezz=False):
@@ -90,7 +107,7 @@ def gsetting_to_R(G, oldmezz=False):
               104.4444, 102.7586, 101.2903, 100.0000]
         return Rs[G]
 
-def convert_TF(gain, target, unit='NORMALIZED', frequency=False):
+def convert_TF(gain, target, unit='NORMALIZED', frequency=False, custom_TF=None):
     """Analytic Transfer Function.
 
      Parameters
@@ -107,6 +124,10 @@ def convert_TF(gain, target, unit='NORMALIZED', frequency=False):
 
     frequency : float, default=False
         Optional, will apply a frequency dependent correction if included.
+
+    custom_TF : string, default=None
+        Optional, allows using a custom frequency correction.  Looks for a file
+        in this directory with the argument name
 
     Note
     ----
@@ -130,7 +151,7 @@ def convert_TF(gain, target, unit='NORMALIZED', frequency=False):
         prefactor = 1
 
     if frequency:
-        freq_corr = frequency_correction(frequency, gain, target)
+        freq_corr = frequency_correction(frequency, gain, target, custom_TF)
     else:
         freq_corr = 1
 
