@@ -268,7 +268,7 @@ def UnpackTrackerPointingData(f):
     t.encoder_off_y = numpy.asarray([f['antenna0']['tracker']['encoder_off'][1]], dtype=numpy.double)
     t.tilts_x = numpy.asarray(f['antenna0']['tracker']['tilt_xy_avg'][0], dtype=numpy.double)
     t.tilts_y = numpy.asarray(f['antenna0']['tracker']['tilt_xy_avg'][1], dtype=numpy.double)
-    t.refraction = numpy.asarray(f['antenna0']['tracker']['refraction'][0], dtype=numpy.double)
+    t.refraction = numpy.asarray(f['antenna0']['tracker']['refraction'][2], dtype=numpy.double)
 
     t.horiz_mount_x = numpy.asarray(f['antenna0']['tracker']['horiz_mount'][0])
     t.horiz_mount_y = numpy.asarray(f['antenna0']['tracker']['horiz_mount'][1])
