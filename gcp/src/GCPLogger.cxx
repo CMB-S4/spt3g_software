@@ -151,16 +151,29 @@ GCPLogger::Log(G3LogLevel level, const std::string &unit,
 void GCPLogger::ListenThread(GCPLogger *logger)
 {
 	std::unique_lock<std::mutex> lock(logger->log_deque_lock_);
-	int fd;
 	uint64_t loglen;
 	std::string curlog;
 
-	while (true) {
-		lock.unlock();
-		fd = accept(logger->fd_, NULL, NULL);
+	fd_set wfds;
+	int nready;
+	struct timeval tv;
 
-		if (fd < 0) {
-			fprintf(stderr, "GCPLogger accept() failure: %s\n",
+	do {
+		lock.unlock();
+
+		tv.tv_sec = 1;
+		tv.tv_usec = 0;
+
+		FD_ZERO(&wfds);
+		FD_SET(logger->fd_, &wfds);
+
+		nready = select(logger->fd_ + 1, NULL, &wfds, NULL, &tv);
+
+		if (nready == 0) {
+			lock.lock();
+			continue;
+		} else if (nready < 0) {
+			fprintf(stderr, "GCPLogger select() failure: %s\n",
 			    strerror(errno));
 			return;
 		}
@@ -178,12 +191,13 @@ void GCPLogger::ListenThread(GCPLogger *logger)
 		lock.unlock();
 
 		loglen = htonl(curlog.size());
-		(void)write(fd, &loglen, sizeof(loglen));
-		(void)write(fd, curlog.c_str(), curlog.size());
-		close(fd);
+		(void)write(logger->fd_, &loglen, sizeof(loglen));
+		(void)write(logger->fd_, curlog.c_str(), curlog.size());
 
 		lock.lock();
-	}
+	} while (nready >= 0 && !logger->dead_);
+
+	lock.unlock();
 }
 
 PYBINDINGS("gcp") {
