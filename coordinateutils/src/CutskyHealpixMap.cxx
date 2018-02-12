@@ -301,7 +301,7 @@ CutSkyHealpixMap::ang_2_pix_(double alpha, double delta) const {
 	double theta = M_PI/2.0 - delta;
 	long outpix = 0;
 
-	if ( isnan(theta) || isnan(alpha) ) {
+	if ( std::isnan(theta) || std::isnan(alpha) ) {
 		return -1;
 	}
 
