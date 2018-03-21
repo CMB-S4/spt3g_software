@@ -277,6 +277,9 @@ G3Pipeline::Run(bool profile, bool graph)
 #endif
 
 	if (profile) {
+		struct timeval utime_total = {0, 0};
+		struct timeval stime_total = {0, 0};
+
 		printf("Pipeline profiling results:\n");
 		for (auto i = mods.begin(); i != mods.end(); i++) {
 			printf("%s: %ld.%06ld user, %ld.%06ld system, %d frames"
@@ -287,7 +290,12 @@ G3Pipeline::Run(bool profile, bool graph)
 			    (double(i->utime.tv_sec + i->stime.tv_sec) +
 			     double(i->utime.tv_usec + i->stime.tv_usec)/1e6) /
 			     i->frames);
+			timeradd(&utime_total, &i->utime, &utime_total);
+			timeradd(&stime_total, &i->stime, &stime_total);
 		}
+		printf("Total: %ld.%06ld user, %ld.%06ld system\n",
+		    long(utime_total.tv_sec), long(utime_total.tv_usec),
+		    long(stime_total.tv_sec), long(stime_total.tv_usec));
 	}
 
 	if (graph) {
