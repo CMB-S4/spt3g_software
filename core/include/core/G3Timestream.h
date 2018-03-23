@@ -12,9 +12,9 @@ public:
 	enum TimestreamUnits {
 		None = 0,
 		Counts = 1,
-		Amps = 2,
-		Watts = 3,
-		Ohms = 5,
+		Current = 2,
+		Power = 3,
+		Resistance = 5,
 		Tcmb = 4,
 	};
 

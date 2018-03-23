@@ -414,14 +414,14 @@ std::string G3Timestream::Description() const
 	case Counts:
 		desc << " (Counts)";
 		break;
-	case Amps:
-		desc << " (Amps)";
+	case Current:
+		desc << " (Current)";
 		break;
-	case Watts:
-		desc << " (Watts)";
+	case Power:
+		desc << " (Power)";
 		break;
-	case Ohms:
-		desc << " (Ohms)";
+	case Resistance:
+		desc << " (Resistance)";
 		break;
 	case Tcmb:
 		desc << " (Tcmb)";

@@ -117,14 +117,14 @@ FlatSkyMap::Description() const
 	case G3Timestream::Counts:
 		os << " (Counts)";
 		break;
-	case G3Timestream::Amps:
-		os << " (Amps)";
+	case G3Timestream::Current:
+		os << " (Current)";
 		break;
-	case G3Timestream::Watts:
-		os << " (Watts)";
+	case G3Timestream::Power:
+		os << " (Power)";
 		break;
-	case G3Timestream::Ohms:
-		os << " (Ohms)";
+	case G3Timestream::Resistance:
+		os << " (Resistance)";
 		break;
 	case G3Timestream::Tcmb:
 		os << " (Tcmb)";

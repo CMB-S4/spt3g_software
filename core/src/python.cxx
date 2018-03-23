@@ -446,9 +446,9 @@ BOOST_PYTHON_MODULE(core)
 	  "transformations between which are handled by core.G3Units.")
 	    .value("None",  G3Timestream::None)
 	    .value("Counts",  G3Timestream::Counts)
-	    .value("Amps",  G3Timestream::Amps)
-	    .value("Watts",  G3Timestream::Watts)
-	    .value("Ohms",  G3Timestream::Ohms)
+	    .value("Current",  G3Timestream::Current)
+	    .value("Power",  G3Timestream::Power)
+	    .value("Resistance",  G3Timestream::Resistance)
 	    .value("Tcmb",  G3Timestream::Tcmb)
 	;
 

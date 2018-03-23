@@ -4,7 +4,7 @@ import numpy
 from spt3g import core
 
 ts = core.G3Timestream(numpy.zeros(50))
-ts.units = core.G3TimestreamUnits.Watts
+ts.units = core.G3TimestreamUnits.Power
 ts.start = core.G3Time(0)
 ts.stop = core.G3Time(10*core.G3Units.s)
 
