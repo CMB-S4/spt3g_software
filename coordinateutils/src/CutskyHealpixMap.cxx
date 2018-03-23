@@ -433,14 +433,14 @@ PYBINDINGS("coordinateutils")
 			  bp::arg("hitpix"),
 			  bp::arg("is_weighted") = true,
 			  bp::arg("pol_type") = G3SkyMap::None,
-			  bp::arg("units") = G3Timestream::Kcmb,
+			  bp::arg("units") = G3Timestream::Tcmb,
 			  bp::arg("init_sym_group") = 0)))
 		.def(bp::init<bp::object, HealpixHitPixPtr, bool,
 		     G3SkyMap::MapPolType, G3Timestream::TimestreamUnits>(
 			     (bp::arg("cut_sky_map"), bp::arg("hitpix"),
 			      bp::arg("is_weighted") = true,
 			      bp::arg("pol_type") = G3SkyMap::None,
-			      bp::arg("units") = G3Timestream::Kcmb))
+			      bp::arg("units") = G3Timestream::Tcmb))
 			)
 		.def(boost::python::init<>())
 		.def_pickle(g3frameobject_picklesuite<CutSkyHealpixMap>())

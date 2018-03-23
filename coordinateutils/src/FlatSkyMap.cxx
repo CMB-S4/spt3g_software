@@ -126,8 +126,8 @@ FlatSkyMap::Description() const
 	case G3Timestream::Ohms:
 		os << " (Ohms)";
 		break;
-	case G3Timestream::Kcmb:
-		os << " (Kcmb)";
+	case G3Timestream::Tcmb:
+		os << " (Tcmb)";
 		break;
 	default:
 		break;
@@ -380,7 +380,7 @@ PYBINDINGS("coordinateutils")
 		  bp::arg("proj") = MapProjection::ProjNone,
 		  bp::arg("alpha_center") = 0, bp::arg("delta_center") = 0,
 		  bp::arg("coord_ref") = MapCoordReference::Equatorial,
-		  bp::arg("units") = G3Timestream::Kcmb,
+		  bp::arg("units") = G3Timestream::Tcmb,
 		  bp::arg("pol_type") = G3SkyMap::None, bp::arg("x_res") = 0)))
 	    .def(bp::init<boost::python::object, double, bool, MapProjection,
 	       double, double, MapCoordReference, G3Timestream::TimestreamUnits,
@@ -390,7 +390,7 @@ PYBINDINGS("coordinateutils")
 		   bp::arg("proj") = MapProjection::ProjNone,
 		   bp::arg("alpha_center") = 0, bp::arg("delta_center") = 0,
 		   bp::arg("coord_ref") = MapCoordReference::Equatorial,
-		   bp::arg("units") = G3Timestream::Kcmb,
+		   bp::arg("units") = G3Timestream::Tcmb,
 		   bp::arg("pol_type") = G3SkyMap::None,
 		   bp::arg("x_res") = 0)))
 

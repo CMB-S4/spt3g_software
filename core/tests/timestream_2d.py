@@ -13,7 +13,7 @@ for ts in ['A', 'B', 'C', 'D']:
 	i = core.G3Timestream(numpy.random.normal(size=600))
 	i.start = start
 	i.stop = stop
-	i.units = core.G3TimestreamUnits.Kcmb
+	i.units = core.G3TimestreamUnits.Tcmb
 	tsm[ts] = i
 
 buffer1d = numpy.asarray(list(tsm.values()))

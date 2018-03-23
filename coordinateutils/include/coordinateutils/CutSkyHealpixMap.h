@@ -73,17 +73,17 @@ public:
 	CutSkyHealpixMap(boost::python::object v, size_t full_sky_map_nside,
 	    HealpixHitPixPtr hitpix, bool is_weighted = true,
 	    G3SkyMap::MapPolType pol_type = G3SkyMap::None,
-	    G3Timestream::TimestreamUnits u = G3Timestream::Kcmb,
+	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
 	    int init_sym_group = 0);
 	
 	CutSkyHealpixMap(boost::python::object v, HealpixHitPixPtr hitpix, 
 	    bool is_weighted = true,
 	    G3SkyMap::MapPolType pol_type = G3SkyMap::None,
-	    G3Timestream::TimestreamUnits u = G3Timestream::Kcmb);
+	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb);
 	
 	CutSkyHealpixMap(HealpixHitPixPtr hitpix, bool is_weighted = true,
 	    G3SkyMap::MapPolType pol_type = G3SkyMap::None,
-	    G3Timestream::TimestreamUnits u = G3Timestream::Kcmb);
+	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb);
 	
 	CutSkyHealpixMap();
 	

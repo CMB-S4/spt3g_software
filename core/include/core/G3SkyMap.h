@@ -33,7 +33,7 @@ public:
 	
 	G3SkyMap(MapCoordReference coords, size_t xpix, size_t ypix = 1,
 	    bool isweighted = true,
-	    G3Timestream::TimestreamUnits u = G3Timestream::Kcmb,
+	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
 	    MapPolType pol_type = None, 
 	    bool pre_allocate_map = false) :
 	    coord_ref(coords), units(u), pol_type(pol_type),

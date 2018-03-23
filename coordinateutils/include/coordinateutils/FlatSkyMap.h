@@ -51,7 +51,7 @@ public:
 	    MapProjection proj = MapProjection::ProjNone, 
 	    double alpha_center = 0, double delta_center = 0, 
 	    MapCoordReference coord_ref = MapCoordReference::Equatorial,
-	    G3Timestream::TimestreamUnits u = G3Timestream::Kcmb,
+	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
 	    G3SkyMap::MapPolType pol_type = MapPolType::None,
 	    double x_res = 0 /* if different from res */);
 
@@ -61,7 +61,7 @@ public:
 	    MapProjection proj = MapProjection::ProjNone, 
 	    double alpha_center = 0, double delta_center = 0, 
 	    MapCoordReference coord_ref = MapCoordReference::Equatorial,
-	    G3Timestream::TimestreamUnits u = G3Timestream::Kcmb,
+	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
 	    G3SkyMap::MapPolType pol_type = MapPolType::None,
 	    double x_res = 0);
 

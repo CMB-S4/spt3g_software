@@ -278,14 +278,14 @@ PYBINDINGS("core") {
 	      G3Timestream::TimestreamUnits, G3SkyMap::MapPolType, bool>(
 	      (bp::arg("coords"), "xpixels", bp::arg("ypixels")=1,
 	       bp::arg("is_weighted")=true,
-	       bp::arg("units")=G3Timestream::Kcmb,
+	       bp::arg("units")=G3Timestream::Tcmb,
 	       bp::arg("pol_type")=G3SkyMap::MapPolType::None,
 	       bp::arg("allocate_map")=false), "Initialize a sky map with all "
 	       "pixels set to zero and the given dimensions"))
 	    .def(bp::init<bp::object, MapCoordReference, bool,
 	      G3Timestream::TimestreamUnits, G3SkyMap::MapPolType>
 	      ((bp::arg("array"), "coords", bp::arg("is_weighted")=true,
-	        bp::arg("units")=G3Timestream::Kcmb,
+	        bp::arg("units")=G3Timestream::Tcmb,
 	        bp::arg("pol_type")=G3SkyMap::MapPolType::None),
 	      "Create a skymap from a numpy array"))
 	    .def_readwrite("coord_ref", &G3SkyMap::coord_ref,
@@ -296,7 +296,7 @@ PYBINDINGS("core") {
 	      "(e.g. core.MapPolType.Q)")
 	    .def_readwrite("units", &G3SkyMap::units,
 	      "Unit class (core.G3TimestreamUnits) of the map (e.g. "
-	      "core.G3TimestreamUnits.Kcmb). Within each unit class, further "
+	      "core.G3TimestreamUnits.Tcmb). Within each unit class, further "
 	      "conversions, for example from K to uK, should use core.G3Units.")
 	    .def_readwrite("is_weighted", &G3SkyMap::is_weighted,
 	      "True if map is multiplied by weights")

@@ -423,8 +423,8 @@ std::string G3Timestream::Description() const
 	case Ohms:
 		desc << " (Ohms)";
 		break;
-	case Kcmb:
-		desc << " (Kcmb)";
+	case Tcmb:
+		desc << " (Tcmb)";
 		break;
 	default:
 		break;

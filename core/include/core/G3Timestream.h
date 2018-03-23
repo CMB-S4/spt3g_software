@@ -15,7 +15,7 @@ public:
 		Amps = 2,
 		Watts = 3,
 		Ohms = 5,
-		Kcmb = 4,
+		Tcmb = 4,
 	};
 
 	G3Timestream() : G3Vector<double>(), units(None), use_flac_(0) {}
