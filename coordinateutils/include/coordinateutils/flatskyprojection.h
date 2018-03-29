@@ -32,5 +32,13 @@ void pixel_1d_to_angle(const std::vector<int> & pix_ind,
     MapProjection proj, bool wrap_ra, 
     std::vector<double> & ra_out, std::vector<double> & dec_out );
 
+void angle_to_pixel_floats( const std::vector<double> & ras, 
+			    const std::vector<double> & decs,
+                            double ra0, double dec0,
+                            int n_x, int n_y,
+                            double pixel_res, double x_pixel_res,
+                            MapProjection proj,
+                            std::vector<double> & output_x,
+                            std::vector<double> & output_y);
 
 #endif //#ifndef _COORDINATEUTILS_FLATSKYPROJECTION_H

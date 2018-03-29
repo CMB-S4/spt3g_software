@@ -11,11 +11,6 @@
 
 #include <coordinateutils/FlatSkyMap.h>
 #include <coordinateutils/chealpix.h>
-#include <coordinateutils/wcs.h>
-#include <coordinateutils/wcslib.h>
-
-typedef map_info WCSMapInfo;
-G3_POINTERS(WCSMapInfo);
 
 /*
  * The Healpix library contains a mapping of full sky pixel index <-> angle on
@@ -27,6 +22,9 @@ G3_POINTERS(WCSMapInfo);
  * CutSkyHealpixMap stores the actual map information.
  */
 
+
+typedef map_info HealpixMapInfo;
+G3_POINTERS(HealpixMapInfo);
 
 class CutSkyHealpixMap;
 

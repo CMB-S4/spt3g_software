@@ -1,6 +1,6 @@
 import numpy
 from spt3g.core import G3Timestream, DoubleVector, G3VectorDouble, G3TimestreamMap, G3Time, usefulfunc
-from spt3g.core import G3Units, log_fatal
+from spt3g.core import G3Units, log_fatal, log_warn
 
 __all__ = ['concatenate_timestreams']
 
@@ -87,7 +87,7 @@ G3VectorDouble.__div__ = lambda self, val: G3VectorDouble(numpy.asarray(self)/va
 G3VectorDouble.__truediv__ = G3VectorDouble.__div__
 
 #add concatenation routines to g3timestream objects
-def _concatenate_timestreams(cls, ts_lst, ts_rounding_error = 0.6):
+def _concatenate_timestreams(cls, ts_lst, ts_rounding_error=0.6, ts_interp_threshold=0):
     """
     Concatenate G3Timestream objects together.
 
@@ -101,6 +101,9 @@ def _concatenate_timestreams(cls, ts_lst, ts_rounding_error = 0.6):
         0 by default, but is 0.5 to allow for downsampler shifting,
         and then bumpted again to 0.6 to allow for floating-point
         errors in what 0.5 is.
+    ts_interp_threshold : float
+        allowed timestream separation below which gaps between timestreams are
+        interpolated to be made continuous
 
     Returns
     -------
@@ -111,8 +114,19 @@ def _concatenate_timestreams(cls, ts_lst, ts_rounding_error = 0.6):
     for i in range(1, len(ts_lst)):
         ts_sep = (ts_lst[i].start.time - ts_lst[i-1].stop.time) * ts_lst[i].sample_rate
         if numpy.abs(ts_sep - 1) > ts_rounding_error:
-            log_fatal("Timestreams are not contiguous: timestreams %d and %d "
-                      "separated by %f samples" % (i, i-1, ts_sep - 1))
+            if (ts_interp_threshold > 0) and ((ts_sep - 1) < ts_interp_threshold):
+                log_warn("Timestreams are not contiguous: timestreams %d and %d "
+                          "separated by %f samples (%s).  Interpolating." %
+                         (i, i-1, ts_sep - 1, str(ts_lst[i].start)))
+                v = numpy.linspace(ts_lst[i-1][-1], ts_lst[i][0], ts_sep + 1)[1:-1]
+                ts_interp = cls(v)
+                ts_interp.units = ts_lst[0].units
+                ts_interp.start = ts_lst[i-1].stop + 1. / ts_lst[i].sample_rate
+                ts_interp.stop = ts_lst[i].start - 1. / ts_lst[i].sample_rate
+                ts_lst = ts_lst[:i] + [ts_interp] + ts_lst[i:]
+            else:
+                log_fatal("Timestreams are not contiguous: timestreams %d and %d "
+                          "separated by %f samples (%s)" % (i, i-1, ts_sep - 1, str(ts_lst[i].start)))
         if (ts_lst[i].units != ts_lst[0].units):
             log_fatal("Timestreams are not the same units")
     out_ts = cls(numpy.concatenate(ts_lst))
@@ -124,7 +138,7 @@ def _concatenate_timestreams(cls, ts_lst, ts_rounding_error = 0.6):
 G3Timestream.concatenate = classmethod(_concatenate_timestreams)
 
 
-def _concatenate_timestream_maps(cls, ts_map_lst, ts_rounding_error=0.6):
+def _concatenate_timestream_maps(cls, ts_map_lst, ts_rounding_error=0.6, ts_interp_threshold=0):
     """
     Concatenate G3TimestreamMap objects together.
 
@@ -138,6 +152,9 @@ def _concatenate_timestream_maps(cls, ts_map_lst, ts_rounding_error=0.6):
         0 by default, but is 0.5 to allow for downsampler shifting,
         and then bumpted again to 0.6 to allow for floating-point
         errors in what 0.5 is.
+    ts_interp_threshold : float
+        allowed timestream separation below which gaps between timestreams are
+        interpolated to be made continuous
 
     Returns
     -------
@@ -151,7 +168,7 @@ def _concatenate_timestream_maps(cls, ts_map_lst, ts_rounding_error=0.6):
     out_tsm = cls()
     for k in ts_map_lst[0].keys():
         ts_lst = [tsm[k] for tsm in ts_map_lst]
-        out_tsm[k] = G3Timestream.concatenate(ts_lst, ts_rounding_error)
+        out_tsm[k] = G3Timestream.concatenate(ts_lst, ts_rounding_error, ts_interp_threshold)
     return out_tsm
 
 G3TimestreamMap.concatenate = classmethod(_concatenate_timestream_maps)
@@ -159,7 +176,7 @@ G3TimestreamMap.concatenate = classmethod(_concatenate_timestream_maps)
 
 # global concatenation function
 @usefulfunc
-def concatenate_timestreams(ts_lst, ts_rounding_error=0.5):
+def concatenate_timestreams(ts_lst, ts_rounding_error=0.6, ts_interp_threshold=0):
     """
     Concatenate G3Timestream or G3TimestreamMap objects together.
 
@@ -170,20 +187,28 @@ def concatenate_timestreams(ts_lst, ts_rounding_error=0.5):
         the same type.
     ts_rounding_error : float
         allowed error in timestream separation such that timestreams are
-        contiguous, as a fraction of the sample rate
+        contiguous, as a fraction of the sample rate. This should be
+        0 by default, but is 0.5 to allow for downsampler shifting,
+        and then bumpted again to 0.6 to allow for floating-point
+        errors in what 0.5 is.
+    ts_interp_threshold : float
+        allowed timestream separation below which gaps between timestreams are
+        interpolated to be made continuous
 
     Returns
     -------
     ts : G3Timestream or G3TimestreamMap object
         The concatenation of the input list of objects
     """
-    return ts_lst[0].concatenate(ts_lst, ts_rounding_error)
+    return ts_lst[0].concatenate(ts_lst, ts_rounding_error, ts_interp_threshold)
 
 
 def timestream_elapsed(self):
     '''
     Compute elapsed time array for samples.
     '''
+    if self.n_samples == 1:
+        return numpy.array([0]).astype(int)
     return (numpy.arange(self.n_samples) / self.sample_rate).astype(int)
 
 G3Timestream.elapsed = timestream_elapsed
@@ -194,7 +219,6 @@ def timestream_t(self):
     '''
     Compute time vector for samples.
     '''
-
     times = self.elapsed() + self.start.time
     return [G3Time(t) for t in times]
 

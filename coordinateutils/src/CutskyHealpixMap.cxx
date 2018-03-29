@@ -1,7 +1,6 @@
 #include <pybindings.h>
 #include <serialization.h>
-#include <math.h>
-#include <coordinateutils/coordinateutils.h>
+#include <cmath>
 #include <coordinateutils/CutSkyHealpixMap.h>
 
 G3_SERIALIZABLE_CODE(HealpixHitPix);
@@ -21,6 +20,7 @@ get_flipped_pixel_and_u_scaling(size_t pix, size_t nside, int is_nested,
 
 	auto p2a_ptr = pix2ang_ring;
 	auto a2p_ptr = ang2pix_ring;
+
 	if (is_nested) {
 		p2a_ptr = pix2ang_nest;
 		a2p_ptr = ang2pix_nest;
@@ -28,10 +28,16 @@ get_flipped_pixel_and_u_scaling(size_t pix, size_t nside, int is_nested,
 
 	double theta, phi;
 	p2a_ptr(nside, pix, &theta, &phi);
+
 	theta = theta * theta_scaling[sym_group] + theta_off[sym_group];
-	phi = phi + phi_off[sym_group];
+	phi = fmod(phi + phi_off[sym_group], 2*M_PI);
+
+	if (theta >= M_PI || phi >= 2 * M_PI) log_warn("Theta %lf, Phi %lf\n", theta, phi);
 	a2p_ptr(nside, theta, phi, &out_pix);
 
+
+	if (out_pix > nside * nside * 12) log_warn("Shit son %ld\n", out_pix);
+	
 	out_u_scale = u_scalings[sym_group];
 }
 
@@ -166,7 +172,7 @@ HealpixHitPix::get_cutsky_index(long fullsky_index) const
 	return full_to_cut_inds_[fullsky_index - ipixmin_];
 }
 
-//assumed to be ring ordering
+//assumed map to be ring ordering
 CutSkyHealpixMap::CutSkyHealpixMap(boost::python::object v,
     size_t full_sky_map_nside, HealpixHitPixPtr hitpix, bool is_weighted,
     G3SkyMap::MapPolType pol_type, G3Timestream::TimestreamUnits u,
@@ -193,7 +199,14 @@ CutSkyHealpixMap::CutSkyHealpixMap(boost::python::object v,
 				get_flipped_pixel_and_u_scaling(i, nside,
 				    is_nested, sym_group, tmp_full_ind,
 				    u_scale);
+
 				u_scale = is_u ? u_scale : 1.0;
+
+				if (hitpix->is_nested() ) {
+					long tmp_ind;
+					nest2ring(hitpix->get_nside(), tmp_full_ind, &tmp_ind);
+					tmp_full_ind = tmp_ind;
+				}
 
 				int64_t local_ind =
 				    hitpix->full_to_cut_inds_[
@@ -216,6 +229,13 @@ CutSkyHealpixMap::CutSkyHealpixMap(boost::python::object v,
 				    is_nested, sym_group, tmp_full_ind,
 				    u_scale);
 				u_scale = is_u ? u_scale : 1.0;
+
+
+				if (hitpix->is_nested() ) {
+					long tmp_ind;
+					nest2ring(hitpix->get_nside(), tmp_full_ind, &tmp_ind);
+					tmp_full_ind = tmp_ind;
+				}
 
 				int64_t local_ind =
 				    hitpix->full_to_cut_inds_[
@@ -337,7 +357,7 @@ void
 CutSkyHealpixMap::get_interpolated_weights(double alpha, double delta,
     long pix[4], double weight[4]) const
 {
-	WCSMapInfoPtr ugh(init_map_info(nside_, 0), free_map_info);
+	HealpixMapInfoPtr ugh(init_map_info(nside_, 0), free_map_info);
 	alpha /= G3Units::rad;
 	delta /= G3Units::rad;
 
@@ -359,7 +379,7 @@ CutSkyHealpixMap::get_interp_precalc(long pix[4], double weight[4]) const
 double
 CutSkyHealpixMap::get_interpolated_value(double alpha, double delta) const
 {
-	WCSMapInfoPtr ugh(init_map_info(nside_, 0), free_map_info);
+	HealpixMapInfoPtr ugh(init_map_info(nside_, 0), free_map_info);
 
 	alpha /= G3Units::rad;
 	delta /= G3Units::rad;

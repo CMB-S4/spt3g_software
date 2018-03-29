@@ -6,21 +6,15 @@ endif()
 
 add_library(coordinateutils SHARED
   src/chealpix.c
-  src/wcscon.c
-  src/hget.c
-  src/iget.c
   src/get_interp_val.c
-  src/polarizationutils.cpp
-  src/coordinateutils.cpp
   src/CutskyHealpixMap.cxx
   src/FlatSkyMap.cxx
   src/flatskyprojection.cpp
+  src/quaternion.cpp
   src/python.cpp
 )
 
 target_link_libraries(coordinateutils core)
 execute_process(COMMAND ln -fsn ${CMAKE_CURRENT_SOURCE_DIR}/python ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/coordinateutils)
 
-#Tests
-add_spt3g_test(coord_change_fixture SLOWTEST)
-add_spt3g_test(polarization_transforms_fixture SLOWTEST)
+add_spt3g_test(transtest SLOWTEST)

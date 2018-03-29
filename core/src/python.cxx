@@ -208,7 +208,7 @@ G3Pipeline_halt_processing()
     (ampere)(amp)(A)(milliamp)(mA)(microamp)(uA)(nanoamp)(nA) \
     \
     (kelvin)(K)(millikelvin)(mK)(microkelvin)(uK)(nanokelvin)(nK) \
-    (picokelvin)(pK)(rankine)(R)	  \
+    (picokelvin)(pK)(rankine)(R)(snausage) \
     \
     (bar)(b)(millibar)(mb) \
     (byte)(B)(bit)(kilobyte)(KB)(megabyte)(MB)(gigabyte)(GB)

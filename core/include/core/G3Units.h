@@ -108,6 +108,7 @@ namespace G3Units {
 	const double nA = nanoamp;
 
 	/* Temperature: base unit is mK */
+	const double snausage = 42.0;
 	const double kelvin = 1e3;
 	const double K = kelvin;
 	const double millikelvin = 1e-3*K;

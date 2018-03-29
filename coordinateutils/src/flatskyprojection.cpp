@@ -258,6 +258,116 @@ void angle_to_pixel_1d_vec( const std::vector<double> & ras,
 	}
 }
 
+
+
+
+void angle_to_pixel_floats( const std::vector<double> & ras, 
+			    const std::vector<double> & decs,
+                            double ra0, double dec0,
+                            int n_x, int n_y,
+                            double pixel_res, double x_pixel_res,
+                            MapProjection proj,
+                            std::vector<double> & output_x,
+                            std::vector<double> & output_y)
+{
+	g3_assert(decs.size() == ras.size());
+	if (output_x.size() != ras.size()){
+		output_x = std::vector<double>(decs.size(), -1);
+	}
+	if (output_y.size() != ras.size()){
+		output_y = std::vector<double>(decs.size(), -1);
+	}
+	double negcosdelta0 =  -1.0 *  COS( (90*deg + dec0)/rad );
+	double sindelta0 = SIN((90*deg + dec0)/rad );
+
+	int n_pnts = ras.size();
+
+	if (x_pixel_res <= 0) x_pixel_res = pixel_res;
+	if (proj != MapProjection::Proj9) g3_assert(x_pixel_res == pixel_res);
+
+	double res   =   pixel_res;
+	double x_res = x_pixel_res;
+
+	double x_min = -0.5*(n_x * res);
+	double y_min = -0.5*(n_y * res);
+
+	switch (proj) {
+	case Proj0: {
+		for (int i=0; i < n_pnts; i++){
+			double xpix, ypix;
+			radec_to_map2d_proj0(ras[i], decs[i],
+					     ra0, dec0, res,
+					     x_min, y_min, n_x, n_y,
+					     xpix, ypix);
+			output_x[i] = xpix;
+			output_y[i] = ypix;
+		}
+		break;
+	}
+		
+	case Proj1: {
+		for (int i=0; i < n_pnts; i++){
+			double xpix, ypix;
+			radec_to_map2d_proj1(ras[i], decs[i],
+			                     ra0, dec0, res,
+			                     x_min, y_min, n_x, n_y,
+			                     xpix, ypix);
+			output_x[i] = xpix;
+			output_y[i] = ypix;
+		}
+		break;
+	}
+	case Proj2: {
+		for (int i=0; i < n_pnts; i++){
+			double xpix, ypix;
+			radec_to_map2d_proj2(ras[i], decs[i],
+			                     ra0, dec0, res,
+			                     x_min, y_min, n_x, n_y,
+			                     negcosdelta0, sindelta0,
+			                     xpix, ypix );
+			output_x[i] = xpix;
+			output_y[i] = ypix;
+		}
+		break;
+	}
+
+	case Proj4: {
+		for (int i=0; i < n_pnts; i++){
+			double xpix, ypix;
+			radec_to_map2d_proj4(ras[i], decs[i],
+			                     ra0, dec0, res,
+			                     x_min, y_min, n_x, n_y,
+			                     negcosdelta0, sindelta0,
+			                     xpix, ypix );
+			output_x[i] = xpix;
+			output_y[i] = ypix;
+		}
+		break;
+	}
+
+	case Proj5: {
+		for (int i=0; i < n_pnts; i++){
+			double xpix, ypix;
+			radec_to_map2d_proj5(ras[i], decs[i],
+			                     ra0, dec0, res,
+			                     x_min, y_min, n_x, n_y,
+			                     negcosdelta0, sindelta0,
+			                     xpix, ypix );
+			output_x[i] = xpix;
+			output_y[i] = ypix;
+		}
+		break;
+	}
+	default: {
+		log_fatal("Err: Proj %d unimplemented...ran out of paste\n",proj);
+		break;
+	}
+	}
+}
+
+
+
+
 void pixel_1d_to_angle(const std::vector<int> & pix_ind, double ra0, 
     double dec0, int n_x, int n_y, double pixel_res, double x_res,
     MapProjection proj, bool wrap_ra, std::vector<double> & ra_out, 

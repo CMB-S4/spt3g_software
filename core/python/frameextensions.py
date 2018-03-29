@@ -38,7 +38,7 @@ def __iter__(self):
     for key in keys:
         yield key
 
-def get(self, key, default):
+def get(self, key, default=None):
     """
     get implementation for G3Frame
     """
@@ -46,14 +46,14 @@ def get(self, key, default):
         return self[key]
     return default
 
-def setdefault(self, key, default):
+def setdefault(self, key, default=None):
     """
     setdefault implementation for G3Frame
     """
     if key not in self.keys():
         self[key] = default
 
-def pop(self, key, default):
+def pop(self, key, default=None):
     """
     pop implementation for G3Frame
     """
