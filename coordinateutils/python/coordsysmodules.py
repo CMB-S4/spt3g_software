@@ -1,7 +1,6 @@
 from spt3g import core
 
 from spt3g.coordinateutils.azel import convert_azel_to_radec
-from spt3g.pointing.offline_pointing import CorrectBoresightPointing
 
 from spt3g.coordinateutils import create_det_az_el_trans, create_lazy_det_ra_dec_trans
 from spt3g.coordinateutils import create_det_ra_dec_trans, G3VectorQuat, convert_ra_dec_trans_to_gal
