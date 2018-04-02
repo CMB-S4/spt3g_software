@@ -23,8 +23,8 @@ def ConvertTMapsToPolarized(frame):
     wgt_out.TQ = np.zeros_like(wgt)
     wgt_out.TU = np.zeros_like(wgt)
     wgt_out.QQ = np.ones_like(wgt)
-    wgt_out.QU = np.ones_like(wgt)
-    wgt_out.UU = np.zeros_like(wgt)
+    wgt_out.QU = np.zeros_like(wgt)
+    wgt_out.UU = np.ones_like(wgt)
 
     frame['Wpol'] = wgt_out
 
