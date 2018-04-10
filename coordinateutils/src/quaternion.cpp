@@ -442,10 +442,6 @@ std::vector<double> convert_celestial_offsets_to_local_offsets(
 	quat det_cel = celestial_trans * offsets_to_quat(x_offset_celest, y_offset_celest) / 
 	    celestial_trans;
 
-
-	std::cout<< trans << std::endl;
-	std::cout<< celestial_trans << std::endl;
-
 	// We then transform those positions to local coordinates using the full transform
 	quat inv_trans = boost::math::conj(trans);
 	quat det_local = inv_trans * det_cel / inv_trans;
@@ -459,6 +455,39 @@ std::vector<double> convert_celestial_offsets_to_local_offsets(
 	//C++11 is magic.
 	return {x_offset_local, -y_offset_local};
 
+}
+
+double angle_d2(double ra_0, double dec_0, double ra_1, double dec_1){
+	double delta_ra_abs = fabs(ra_0 - ra_1);
+	double delta_dec = dec_0 - dec_1;
+	if (delta_ra_abs > PI){
+		delta_ra_abs = 2 * PI - delta_ra_abs;
+	}
+	delta_ra_abs /= cos(dec_0);
+	return delta_ra_abs*delta_ra_abs + delta_dec*delta_dec;
+
+}
+
+G3VectorQuat get_closest_transform(double ra, double dec,
+				   const G3VectorDouble & ras, const G3VectorDouble & decs,
+				   const G3VectorQuat & trans){
+	/**
+	   returns the quaternion transformation that is nearest the requested ra/dec
+	 **/
+	double dist = angle_d2(ras[0]/G3Units::rad, decs[0]/G3Units::rad,
+			       ra/G3Units::rad, dec/G3Units::rad);
+	size_t ind = 0;
+	for (size_t i=0; i < ras.size(); i++){
+		double td = angle_d2(ras[i]/G3Units::rad, decs[i]/G3Units::rad,
+				     ra/G3Units::rad, dec/G3Units::rad);
+		if (td < dist){
+			dist = td;
+			ind = i;
+		}
+	}
+	G3VectorQuat v;
+	v.push_back(trans[ind]);
+	return v;
 }
 
 G3_SERIALIZABLE_CODE(G3VectorQuat);
@@ -481,4 +510,6 @@ PYBINDINGS("coordinateutils")
 
 	def("convert_celestial_offsets_to_local_offsets", 
 	    convert_celestial_offsets_to_local_offsets);
+
+	def("get_closest_transform", get_closest_transform);
 }
