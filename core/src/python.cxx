@@ -132,15 +132,15 @@ static bp::list g3frame_python_values(G3Frame &f)
 	return values;
 }
 
-std::vector<G3FramePtr> G3Module_Process(G3Module &mod, G3FramePtr ptr)
+static bp::list G3Module_Process(G3Module &mod, G3FramePtr ptr)
 {
 	std::deque<G3FramePtr> queue;
-	std::vector<G3FramePtr> vec;
+	bp::list vec;
 
 	mod.Process(ptr, queue);
 
 	for (auto i = queue.begin(); i != queue.end(); i++)
-		vec.push_back(*i);
+		vec.append(*i);
 
 	return vec;
 }
