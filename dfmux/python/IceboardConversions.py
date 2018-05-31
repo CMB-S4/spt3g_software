@@ -61,7 +61,7 @@ def frequency_correction(frequency, gain, target='nuller', custom_TF=None):
         warn = frequency>9e6
 
     if custom_TF is None:
-        custom_TF = 'TFPoly_full_with_10MHz_pi'
+        custom_TF = 'spt3g_filtering_2017_full'
 
     try:
         tf_model = TFDicts[custom_TF]
