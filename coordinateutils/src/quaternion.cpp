@@ -507,11 +507,34 @@ G3_SERIALIZABLE_CODE(G3VectorQuat);
 PYBINDINGS("coordinateutils")
 {
 	using namespace boost::python;
+
+	class_<quat>("quat",
+	    "Representation of a quaternion. Data in a,b,c,d.",
+	    init<double, double, double, double>())
+	     .add_property("a", &quat::R_component_1)
+	     .add_property("b", &quat::R_component_2)
+	     .add_property("c", &quat::R_component_3)
+	     .add_property("d", &quat::R_component_4)
+	     .def(self == self)
+	     .def(self != self)
+	     .def(self + self)
+	     .def(self += self)
+	     .def(self - self)
+	     .def(self -= self)
+	     .def(self * self)
+	     .def(self *= self)
+	     .def(self / self)
+	     .def(self /= self)
+	     .def("dot3", dot3, "Dot product of last three entries")
+	     .def("cross3", cross3, "Cross product of last three entries")
+	;
+	register_vector_of<quat>("QuatVector");
+	register_g3vector<quat>("G3VectorQuat", "List of quaternions");
+
 	def("test_trans", test_trans);
 	def("test_gal_trans", test_gal_trans);
 	def("test_gal_trans_rot", test_gal_trans_rot);
 	def("print_fk5_j2000_to_gal_quat", print_fk5_j2000_to_gal_quat);
-	EXPORT_FRAMEOBJECT(G3VectorQuat, init<>(), "Quaternion vector stub");
 
 	def("create_det_az_el_trans", create_det_az_el_trans);
 	def("create_lazy_det_ra_dec_trans", create_lazy_det_ra_dec_trans);
