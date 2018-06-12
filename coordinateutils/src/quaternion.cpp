@@ -504,6 +504,67 @@ get_closest_transform(double ra, double dec,
 
 G3_SERIALIZABLE_CODE(G3VectorQuat);
 
+namespace {
+static int
+G3VectorQuat_getbuffer(PyObject *obj, Py_buffer *view, int flags)
+{
+	if (view == NULL) {
+		PyErr_SetString(PyExc_ValueError, "NULL view");
+		return -1;
+	}
+
+	view->shape = NULL;
+
+	bp::handle<> self(bp::borrowed(obj));
+	bp::object selfobj(self);
+	G3VectorQuatPtr q = bp::extract<G3VectorQuatPtr>(selfobj)();
+
+	view->obj = obj;
+	view->buf = (void*)&(*q)[0];
+	view->len = q->size() * sizeof(double) * 4;
+	view->readonly = 0;
+	view->itemsize = sizeof(double);
+	if (flags & PyBUF_FORMAT)
+		view->format = (char *)"d";
+	else
+		view->format = NULL;
+
+	// XXX: following leaks small amounts of memory!
+	view->shape = new Py_ssize_t[2];
+	view->strides = new Py_ssize_t[2];
+
+	view->ndim = 2;
+	view->shape[0] = q->size();
+	view->shape[1] = 4;
+	view->strides[0] = view->shape[1]*view->itemsize;
+	view->strides[1] = view->itemsize;
+
+	view->suboffsets = NULL;
+
+	Py_INCREF(obj);
+
+	return 0;
+}
+
+static PyBufferProcs vectorquat_bufferprocs;
+
+static std::string
+quat_str(const quat &q)
+{
+	std::ostringstream oss;
+	oss << q;
+	return oss.str();
+}
+
+static std::string
+quat_repr(const quat &q)
+{
+	std::ostringstream oss;
+	oss << "spt3g.coordinatutils.quat" << q;
+	return oss.str();
+}
+}
+
 PYBINDINGS("coordinateutils")
 {
 	using namespace boost::python;
@@ -525,11 +586,20 @@ PYBINDINGS("coordinateutils")
 	     .def(self *= self)
 	     .def(self / self)
 	     .def(self /= self)
+	     .def("__str__", quat_str)
+	     .def("__repr__", quat_repr)
 	     .def("dot3", dot3, "Dot product of last three entries")
 	     .def("cross3", cross3, "Cross product of last three entries")
 	;
 	register_vector_of<quat>("QuatVector");
-	register_g3vector<quat>("G3VectorQuat", "List of quaternions");
+	object vq =
+	    register_g3vector<quat>("G3VectorQuat", "List of quaternions");
+	PyTypeObject *vqclass = (PyTypeObject *)vq.ptr();
+	vectorquat_bufferprocs.bf_getbuffer = G3VectorQuat_getbuffer;
+	vqclass->tp_as_buffer = &vectorquat_bufferprocs;
+#if PY_MAJOR_VERSION < 3
+	vqclass->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
+#endif
 
 	def("test_trans", test_trans);
 	def("test_gal_trans", test_gal_trans);
