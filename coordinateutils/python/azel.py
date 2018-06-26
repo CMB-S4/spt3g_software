@@ -40,6 +40,36 @@ def convert_azel_to_radec(az, el, location=spt):
 
     return (ra, dec)
 
+@core.usefulfunc
+def convert_radec_to_azel(ra, dec, location=spt):
+    '''
+    When passed G3Timestreams of RA and declination positions and a
+    telescope location (where SPT is, by default), return an (Az, El)
+    tuple of timestreams corresponding to the local coordinates
+    at which the telescope was pointing.
+
+    Example:
+    az, el = convert_radec_to_azel(az, el)
+    '''
+
+    assert(ra.start == dec.start)
+    assert(ra.stop == dec.stop)
+    assert(ra.n_samples == dec.n_samples)
+
+    t = astropy.time.Time(numpy.asarray([i.mjd for i in ra.times()]), format='mjd')
+    
+    k = astropy.coordinates.FK5(ra=numpy.asarray(ra)/core.G3Units.deg*astropy.units.deg, dec=numpy.asarray(dec)/core.G3Units.deg*astropy.units.deg)
+
+    kt = k.transform_to(astropy.coordinates.AltAz(obstime=t, location=location, pressure=0))
+
+    az = core.G3Timestream(numpy.asarray(kt.az/astropy.units.deg)*core.G3Units.deg)
+    el = core.G3Timestream(numpy.asarray(kt.alt/astropy.units.deg)*core.G3Units.deg)
+
+    az.start = el.start = ra.start
+    az.stop = el.stop = ra.stop
+
+    return (az, el)
+
 @core.indexmod
 def LocalToAstronomicalPointing(frame, az_timestream='BoresightAz', el_timestream='BoresightEl', ra_timestream='BoresightRa', dec_timestream='BoresightDec', Telescope=spt):
     '''
