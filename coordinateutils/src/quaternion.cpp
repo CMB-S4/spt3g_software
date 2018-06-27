@@ -124,6 +124,24 @@ operator *=(G3VectorQuat &a, quat b)
 	return a;
 }
 
+G3VectorQuat
+pow(const G3VectorQuat &a, double b)
+{
+	G3VectorQuat out(a.size());
+	for (unsigned i = 0; i < a.size(); i++)
+		out[i] = pow(a[i], b);
+	return out;
+}
+
+G3VectorQuat
+pow(const G3VectorQuat &a, int b)
+{
+	G3VectorQuat out(a.size());
+	for (unsigned i = 0; i < a.size(); i++)
+		out[i] = pow(a[i], b);
+	return out;
+}
+
 static quat
 cross3(quat u, quat v)
 {
@@ -739,7 +757,9 @@ PYBINDINGS("coordinateutils")
  	     .def(self *= quat())
  	     .def(self *= self)
 	     .def(self / double())
-	     .def(self /= double());
+	     .def(self /= double())
+	     .def(pow(self, double()))
+	     .def(pow(self, int()));
 	PyTypeObject *vqclass = (PyTypeObject *)vq.ptr();
 	vectorquat_bufferprocs.bf_getbuffer = G3VectorQuat_getbuffer;
 	vqclass->tp_as_buffer = &vectorquat_bufferprocs;

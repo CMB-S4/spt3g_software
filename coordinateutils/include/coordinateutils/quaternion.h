@@ -43,6 +43,9 @@ G3VectorQuat operator * (const G3VectorQuat &, quat);
 G3VectorQuat operator * (quat, const G3VectorQuat &);
 G3VectorQuat &operator *= (G3VectorQuat &, quat);
 
+G3VectorQuat pow(const G3VectorQuat &a, double b);
+G3VectorQuat pow(const G3VectorQuat &a, int b);
+
 // XXX: Define what the following functions do!
 
 void get_detector_pointing( 
