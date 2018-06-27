@@ -4,7 +4,12 @@ import numpy as np
 
 a = coordinateutils.quat(2,3,4,5)
 
-b = coordinateutils.G3VectorQuat([a, a*a, a+a])
+assert(a+a == 2*a)
+assert(a+a == a*2)
+assert(a*a == a**2)
+assert(a*a*a == a**3)
+
+b = coordinateutils.G3VectorQuat([a, a**2, 2*a])
 
 assert(b[0].a == 2)
 assert(b[0].b == 3)
