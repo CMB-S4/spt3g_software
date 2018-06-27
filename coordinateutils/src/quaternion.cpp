@@ -209,6 +209,15 @@ quat_to_ang(quat q, double &alpha, double &delta)
 	alpha = ATAN2(q.R_component_3(), q.R_component_2())*G3Units::rad;
 }
 
+static boost::python::tuple
+py_quat_to_ang(quat q)
+{
+	double a,d;
+	quat_to_ang(q, a, d);
+
+	return boost::python::make_tuple(a, d);
+}
+
 quat
 coord_quat_to_delta_hat(quat q)
 {
@@ -776,6 +785,8 @@ PYBINDINGS("coordinateutils")
 	def("create_lazy_det_ra_dec_trans", create_lazy_det_ra_dec_trans);
 	def("create_det_ra_dec_trans", create_det_ra_dec_trans);
 	def("convert_ra_dec_trans_to_gal", convert_ra_dec_trans_to_gal);
+	def("quat_to_ang", py_quat_to_ang);
+	def("ang_to_quat", ang_to_quat);
 	def("get_detector_pointing", get_detector_pointing);
 	def("get_detector_rotation", get_detector_rotation);
 
