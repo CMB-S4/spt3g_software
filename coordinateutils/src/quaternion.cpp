@@ -565,6 +565,49 @@ quat_repr(const quat &q)
 }
 }
 
+template <>
+G3VectorQuatPtr
+container_from_object(boost::python::object v)
+{
+        G3VectorQuatPtr x(new (G3VectorQuat));
+	Py_buffer view;
+	if (PyObject_GetBuffer(v.ptr(), &view,
+	    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) != -1) {
+		if (view.ndim != 2 || view.shape[1] != 4) {
+			boost::python::container_utils::extend_container(*x, v);
+		} else if (strcmp(view.format, "d") == 0) {
+			x->resize(view.shape[0]);
+			memcpy(&(*x)[0], view.buf, view.len);
+		} else if (strcmp(view.format, "f") == 0) {
+			x->resize(view.shape[0]);
+			for (size_t i = 0; i < view.shape[0]; i++)
+				(*x)[i] = quat(
+				    ((float *)view.buf)[4*i + 0],
+				    ((float *)view.buf)[4*i + 1],
+				    ((float *)view.buf)[4*i + 2],
+				    ((float *)view.buf)[4*i + 3]);
+		} else if (strcmp(view.format, "i") == 0) {
+			x->resize(view.shape[0]);
+			for (size_t i = 0; i < view.shape[0]; i++)
+				(*x)[i] = quat(
+				    ((int *)view.buf)[4*i + 0],
+				    ((int *)view.buf)[4*i + 1],
+				    ((int *)view.buf)[4*i + 2],
+				    ((int *)view.buf)[4*i + 3]);
+		} else {
+			// We could add more types, but why do that?
+			// Let Python do the work for obscure cases
+			boost::python::container_utils::extend_container(*x, v);
+		}
+		PyBuffer_Release(&view);
+	} else {
+		PyErr_Clear();
+		boost::python::container_utils::extend_container(*x, v);
+	}
+
+	return x;
+}
+
 PYBINDINGS("coordinateutils")
 {
 	using namespace boost::python;
