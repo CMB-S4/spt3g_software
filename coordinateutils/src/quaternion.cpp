@@ -38,6 +38,92 @@ const double PI = constants::pi<double>();
 
 // Quaternion utilities
 
+G3VectorQuat
+operator *(const G3VectorQuat &a, double b)
+{
+	G3VectorQuat out(a.size());
+	for (unsigned i = 0; i < a.size(); i++)
+		out[i] = a[i]*b;
+	return out;
+}
+
+G3VectorQuat
+operator *(double b, const G3VectorQuat &a)
+{
+	return a*b;
+}
+
+G3VectorQuat &
+operator *=(G3VectorQuat &a, double b)
+{
+	for (quat &i: a)
+		i *= b;
+	return a;
+}
+
+G3VectorQuat
+operator /(const G3VectorQuat &a, double b)
+{
+	G3VectorQuat out(a.size());
+	for (unsigned i = 0; i < a.size(); i++)
+		out[i] = a[i]/b;
+	return out;
+}
+
+G3VectorQuat &
+operator /=(G3VectorQuat &a, double b)
+{
+	for (quat &i: a)
+		i /= b;
+	return a;
+}
+
+
+G3VectorQuat
+operator *(const G3VectorQuat &a, const G3VectorQuat &b)
+{
+	g3_assert(a.size() == b.size());
+	G3VectorQuat out(a.size());
+	for (unsigned i = 0; i < a.size(); i++)
+		out[i] = a[i]*b[i];
+	return out;
+}
+
+G3VectorQuat &
+operator *=(G3VectorQuat &a, const G3VectorQuat &b)
+{
+	g3_assert(a.size() == b.size());
+	for (unsigned i = 0; i < a.size(); i++)
+		a[i] *= b[i];
+	return a;
+}
+
+G3VectorQuat
+operator *(const G3VectorQuat &a, quat b)
+{
+	G3VectorQuat out(a.size());
+	for (unsigned i = 0; i < a.size(); i++)
+		out[i] = a[i]*b;
+	return out;
+}
+
+G3VectorQuat
+operator *(quat b, const G3VectorQuat &a)
+{
+	G3VectorQuat out(a.size());
+	for (unsigned i = 0; i < a.size(); i++)
+		out[i] = b*a[i];
+	return out;
+}
+
+G3VectorQuat &
+operator *=(G3VectorQuat &a, quat b)
+{
+	for (quat &i: a)
+		i *= b;
+	return a;
+}
+
 static quat
 cross3(quat u, quat v)
 {
@@ -647,7 +733,17 @@ PYBINDINGS("coordinateutils")
 	;
 	register_vector_of<quat>("QuatVector");
 	object vq =
-	    register_g3vector<quat>("G3VectorQuat", "List of quaternions");
+	    register_g3vector<quat>("G3VectorQuat", "List of quaternions")
+	     .def(self * double())
+	     .def(double() * self)
+	     .def(self * self)
+ 	     .def(self * quat())
+ 	     .def(quat() * self)
+ 	     .def(self *= double())
+ 	     .def(self *= quat())
+ 	     .def(self *= self)
+	     .def(self / double())
+	     .def(self /= double());
 	PyTypeObject *vqclass = (PyTypeObject *)vq.ptr();
 	vectorquat_bufferprocs.bf_getbuffer = G3VectorQuat_getbuffer;
 	vqclass->tp_as_buffer = &vectorquat_bufferprocs;

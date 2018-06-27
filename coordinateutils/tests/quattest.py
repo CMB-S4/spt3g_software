@@ -41,5 +41,10 @@ assert(d[2] == b[2])
 c[1,3] = 15
 assert(b[1].d == 15)
 
+e = 2*b
+assert((2*np.asarray(b) == np.asarray(e)).all())
+e = b/2
+assert((np.asarray(b)/2 == np.asarray(e)).all())
 
+assert((np.asarray(b*b) == np.asarray(coordinateutils.G3VectorQuat([x**2 for x in b]))).all())
 

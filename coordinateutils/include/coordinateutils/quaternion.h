@@ -32,6 +32,17 @@ void serialize(A & ar, quat & q, unsigned version)
 
 G3VECTOR_OF(quat, G3VectorQuat);
 
+G3VectorQuat operator * (const G3VectorQuat &, double);
+G3VectorQuat &operator *= (G3VectorQuat &, double);
+G3VectorQuat operator / (const G3VectorQuat &, double);
+G3VectorQuat &operator /= (G3VectorQuat &, double);
+G3VectorQuat operator * (const G3VectorQuat &, const G3VectorQuat &);
+G3VectorQuat &operator *= (G3VectorQuat &, const G3VectorQuat &);
+G3VectorQuat operator * (double, const G3VectorQuat &);
+G3VectorQuat operator * (const G3VectorQuat &, quat);
+G3VectorQuat operator * (quat, const G3VectorQuat &);
+G3VectorQuat &operator *= (G3VectorQuat &, quat);
+
 // XXX: Define what the following functions do!
 
 void get_detector_pointing( 
