@@ -70,6 +70,16 @@ operator /(const G3VectorQuat &a, double b)
 	return out;
 }
 
+G3VectorQuat
+operator /(const G3VectorQuat &a, const G3VectorQuat &b)
+{
+	g3_assert(a.size() == b.size());
+	G3VectorQuat out(a.size());
+	for (unsigned i = 0; i < a.size(); i++)
+		out[i] = a[i]/b[i];
+	return out;
+}
+
 G3VectorQuat &
 operator /=(G3VectorQuat &a, double b)
 {
@@ -78,6 +88,14 @@ operator /=(G3VectorQuat &a, double b)
 	return a;
 }
 
+G3VectorQuat &
+operator /=(G3VectorQuat &a, const G3VectorQuat &b)
+{
+	g3_assert(a.size() == b.size());
+	for (unsigned i = 0; i < a.size(); i++)
+		a[i] /= b[i];
+	return a;
+}
 
 G3VectorQuat
 operator *(const G3VectorQuat &a, const G3VectorQuat &b)
@@ -406,17 +424,17 @@ get_fk5_j2000_to_gal_quat()
 	return quat(0.4889475076,-0.483210684,0.1962537583,0.699229742);
 }
 
-static void
-create_det_az_el_trans(const G3Timestream &az, const G3Timestream &el,
-    G3VectorQuat &trans_quats)
+static G3VectorQuat
+create_det_az_el_trans(const std::vector<double> &az, const std::vector<double> &el)
 {
 	// Creates the transform that takes (1,0,0) to az, -el 
 	// for why it's -el see the comment at the top of this document
 
 	g3_assert(az.size() == el.size());
-	trans_quats = G3VectorQuat(az.size(), quat(1,0,0,0));
+	G3VectorQuat trans_quats = G3VectorQuat(az.size(), quat(1,0,0,0));
 	for (size_t i = 0; i < az.size(); i++)
 		trans_quats[i] = get_origin_rotator(az[i], -el[i]);
+	return trans_quats;
 }
 
 static void
@@ -767,6 +785,8 @@ PYBINDINGS("coordinateutils")
  	     .def(self *= self)
 	     .def(self / double())
 	     .def(self /= double())
+	     .def(self / self)
+	     .def(self /= self)
 	     .def(pow(self, double()))
 	     .def(pow(self, int()));
 	PyTypeObject *vqclass = (PyTypeObject *)vq.ptr();
@@ -776,6 +796,7 @@ PYBINDINGS("coordinateutils")
 	vqclass->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
 #endif
 
+	// XXX: All of these need doc strings
 	def("test_trans", test_trans);
 	def("test_gal_trans", test_gal_trans);
 	def("test_gal_trans_rot", test_gal_trans_rot);
@@ -789,6 +810,7 @@ PYBINDINGS("coordinateutils")
 	def("ang_to_quat", ang_to_quat);
 	def("get_detector_pointing", get_detector_pointing);
 	def("get_detector_rotation", get_detector_rotation);
+	def("get_origin_rotator", get_origin_rotator);
 
 	def("convert_celestial_offsets_to_local_offsets", 
 	    convert_celestial_offsets_to_local_offsets);
