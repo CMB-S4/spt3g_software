@@ -29,11 +29,11 @@ register_g3map(std::string name, const char *docstring)
 }
 
 template <typename T>
-boost::python::object
+boost::python::class_<G3Vector<T>, boost::python::bases<G3FrameObject, std::vector<T> >, boost::shared_ptr<G3Vector<T> > >
 register_g3vector(std::string name, const char *docstring)
 {
 	using namespace boost::python;
-	object cls = class_<G3Vector<T> , bases<G3FrameObject, std::vector<T> >, boost::shared_ptr<G3Vector<T> > >(name.c_str(), docstring) 
+	auto cls = class_<G3Vector<T> , bases<G3FrameObject, std::vector<T> >, boost::shared_ptr<G3Vector<T> > >(name.c_str(), docstring) 
 	    .def("__init__", make_constructor(container_from_object<G3Vector<T>
 	>))
 	    .def(vector_indexing_suite<G3Vector<T> , true>())
