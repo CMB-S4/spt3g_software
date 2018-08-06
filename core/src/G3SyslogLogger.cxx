@@ -12,9 +12,11 @@
  * ident : string
  *     Identifier to prepend to syslog messages.
  * facility : integer
- *     Facility type, e.g. LOG_USER.  See syslog(3) for a full list of accepted values.
+ *     Facility type, e.g. LOG_USER.  See syslog(3) for a full list of accepted
+ *     values.
  */
-G3SyslogLogger::G3SyslogLogger(const std::string& ident, int facility, G3LogLevel level)
+G3SyslogLogger::G3SyslogLogger(const std::string& ident, int facility,
+  G3LogLevel level)
   : G3Logger(level)
 {
 	openlog(ident.empty() ? NULL : ident.c_str(),
@@ -72,12 +74,7 @@ G3SyslogLogger::Log(G3LogLevel level, const std::string &unit,
 		break;
 	}
 
-	int messagesize = snprintf(NULL, 0, "%s (%s): %s (%s:%d in %s)",
-	    log_description, unit.c_str(), message.c_str(), file.c_str(), line,
-	    func.c_str());
-	char log_message[messagesize + 1];
-	sprintf(log_message, "%s (%s): %s (%s:%d in %s)", log_description,
+	syslog(priority, "%s (%s): %s (%s:%d in %s)", log_description,
 	    unit.c_str(), message.c_str(), file.c_str(), line, func.c_str());
-
-	syslog(priority, "%s", log_message);
 }
+
