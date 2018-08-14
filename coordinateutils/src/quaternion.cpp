@@ -708,7 +708,7 @@ container_from_object(boost::python::object v)
 			boost::python::container_utils::extend_container(*x, v);
 		} else if (strcmp(view.format, "d") == 0) {
 			x->resize(view.shape[0]);
-			memcpy(&(*x)[0], view.buf, view.len);
+			memcpy((void *)&(*x)[0], view.buf, view.len);
 		} else if (strcmp(view.format, "f") == 0) {
 			x->resize(view.shape[0]);
 			for (size_t i = 0; i < view.shape[0]; i++)
