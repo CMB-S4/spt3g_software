@@ -78,6 +78,9 @@ class BuildBoloPropertiesMap(object):
                     p.pol_angle = numpy.arctan2(poly, polx)
                     p.pol_efficiency = numpy.hypot(poly, polx)
 
+                if 'coupling' in self.props[bolo]:
+                    p.coupling = self.props[bolo]['coupling']
+
                 if 'pixel_id' in self.props[bolo]:
                     p.pixel_id = self.props[bolo]['pixel_id']
                 if 'wafer_id' in self.props[bolo]:
@@ -116,6 +119,13 @@ class BuildBoloPropertiesMap(object):
                     self.props[bolo] = {}
                 #assert('band' not in self.props[bolo] or self.props[bolo]['band'] == frame['BoloBands'][bolo])
                 self.props[bolo]['band'] = frame['BoloBands'][bolo]
+
+        # Optical coupling
+        if 'BoloCoupling' in frame:
+            for bolo in frame['BoloCoupling'].keys():
+                if bolo not in self.props:
+                    self.props[bolo] = {}
+                self.props[bolo]['coupling'] = frames['BoloCoupling'][bolo]
 
         # Names
         if 'PhysicalBoloIDs' in frame:
@@ -175,6 +185,7 @@ def ExplodeBolometerProperties(frame, bpmname='NominalBolometerProperties'):
     wafers = core.G3MapString()
     xoff = core.G3MapDouble()
     yoff = core.G3MapDouble()
+    coupling = core.G3MapInt()
 
     for bolo, p in bpm.iteritems():
         polangle[bolo] = p.pol_angle
@@ -185,6 +196,7 @@ def ExplodeBolometerProperties(frame, bpmname='NominalBolometerProperties'):
         yoff[bolo] = p.y_offset
         pixels[bolo] = p.pixel_id
         wafers[bolo] = p.wafer_id
+        coupling[bolo] = p.coupling
 
     frame['PolarizationAngle'] = polangle
     frame['PolarizationEfficiency'] = poleff
@@ -194,6 +206,7 @@ def ExplodeBolometerProperties(frame, bpmname='NominalBolometerProperties'):
     frame['PointingOffsetY'] = yoff
     frame['PixelIDs'] = pixels
     frame['WaferIDs'] = wafers
+    frame['BoloCoupling'] = coupling
 
 @core.indexmod
 class BuildPointingProperties(object):

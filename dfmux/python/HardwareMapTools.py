@@ -116,6 +116,17 @@ def PyDfMuxBolometerPropertiesInjector(frame, pydfmux_hwm=None, angle_per_mm = 4
         if hasattr(bolo, 'polarization_angle') and bolo.polarization_angle is not None:
             bp.pol_angle = float(bolo.polarization_angle)*core.G3Units.deg
             bp.pol_efficiency = 1.0
+        if hasattr(bolo, 'coupling') and bolo.coupling is not None:
+            if bolo.coupling == "optical":
+                bp.coupling = calibration.BolometerCouplingType.Optical
+            elif bolo.coupling == "dark_tres":
+                bp.coupling = calibration.BolometerCouplingType.DarkTermination
+            elif bolo.coupling == "dark_xover":
+                bp.coupling = calibration.BolometerCouplingType.DarkCrossover
+            elif bolo.coupling == "resistor":
+                bp.coupling = calibration.BolometerCouplingType.Resistor
+            else:
+                raise ValueError("Unrecognized coupling type %s" % bolo.coupling)
 
         bpm[str(bolo.name)] = bp
 

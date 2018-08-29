@@ -13,7 +13,7 @@ class BolometerProperties : public G3FrameObject
 {
 public:
 	BolometerProperties() : x_offset(NAN), y_offset(NAN), band(NAN),
-	    pol_angle(NAN), pol_efficiency(NAN) {}
+	    pol_angle(NAN), pol_efficiency(NAN), coupling(Unknown) {}
 	std::string Description() const;
 
 	std::string physical_name; /* e.g. D4.A2.3.Y */
@@ -26,6 +26,16 @@ public:
 	double pol_angle;	/* Standard angular units */
 	double pol_efficiency;	/* 0-1 */
 
+	enum CouplingType {
+		Unknown = 'U',
+		Optical = 'O',
+		DarkTermination = 'T',
+		DarkCrossover = 'X',
+		Resistor = 'R',
+	};
+
+	CouplingType coupling;  /* Optical coupling type */
+
 	std::string wafer_id;
 	std::string pixel_id;
 
@@ -33,7 +43,7 @@ public:
 };
 
 G3_POINTERS(BolometerProperties);
-G3_SERIALIZABLE(BolometerProperties, 4);
+G3_SERIALIZABLE(BolometerProperties, 5);
 
 G3MAP_OF(std::string, BolometerProperties, BolometerPropertiesMap);
 

@@ -29,6 +29,9 @@ template <class A> void BolometerProperties::serialize(A &ar, unsigned v)
 		ar & make_nvp("pixel_id", pixel_id);		
 	}
 	
+	if (v > 4) {
+		ar & make_nvp("coupling", (uint32_t &)coupling);
+	}
 
 }
 
@@ -58,11 +61,22 @@ PYBINDINGS("calibration") {
 	       "Polarization angle in angular units")
 	    .def_readwrite("pol_efficiency", &BolometerProperties::pol_efficiency,
 	       "Polarization efficiency (0-1)")
+	    .def_readwrite("coupling", &BolometerProperties::coupling,
+	       "Optical coupling type")
 
 	    .def_readwrite("wafer_id", &BolometerProperties::wafer_id,
 	       "Name of the name this detector is on")
 	    .def_readwrite("pixel_id", &BolometerProperties::pixel_id,
 	       "Name of the pixel of which this detector is a part")
+	;
+
+	bp::enum_<BolometerProperties::CouplingType>("BolometerCouplingType",
+	  "Coupling type for BolometerProperties objects.")
+	    .value("Unknown", BolometerProperties::Unknown)
+	    .value("Optical", BolometerProperties::Optical)
+	    .value("DarkTermination", BolometerProperties::DarkTermination)
+	    .value("DarkCrossover", BolometerProperties::DarkCrossover)
+	    .value("Resistor", BolometerProperties::Resistor)
 	;
 
 	register_g3map<BolometerPropertiesMap>("BolometerPropertiesMap",
