@@ -25,7 +25,8 @@ class BuildBoloPropertiesMap(object):
     - Physical Name Data (Key: 'PhysicalBoloIDs')
     '''
     
-    def __init__(self, drop_original_frames=True, filter_abs_point=False):
+    def __init__(self, drop_original_frames=True, filter_abs_point=False,
+                 bpm_name='NominalBolometerProperties', use_bpm_pointing=False):
         '''
         If drop_original_frames is True, will drop all input Calibration frames.
 
@@ -33,10 +34,19 @@ class BuildBoloPropertiesMap(object):
         motion by centering the source on the focal plane. Note that this is less
         robust than having real offline pointing and should only be used in
         desperation.
+
+        bpm_name is the name of the key containing the input BolometerPropertiesMap
+        that will be merged into the output map.
+
+        If use_bpm_pointing is True, then the pointing information is extracted
+        from the input BolometerPropertiesMap.  If False, pointing information
+        must be supplied in an additional input frame.
         '''
 
         self.drop_original_frames = drop_original_frames
         self.filter_abs_point = filter_abs_point
+        self.bpm_name = bpm_name
+        self.use_bpm_pointing = use_bpm_pointing
 
         self.props = {}
 
@@ -91,6 +101,43 @@ class BuildBoloPropertiesMap(object):
             cframe = core.G3Frame(core.G3FrameType.Calibration)
             cframe['BolometerProperties'] = boloprops
             return [cframe, frame]
+
+        if self.bpm_name in frame:
+            bpm = frame[self.bpm_name]
+
+            if self.use_bpm_pointing:
+                xshift = yshift = 0.
+
+                if self.filter_abs_point:
+                    # XXX: this algorithm is dubious and universally worse than
+                    # correct boresight pointing
+                    xshift = numpy.nanmedian([bpm[b].x_offset for b in bpm.keys()])
+                    yshift = numpy.nanmedian([bpm[b].y_offset for b in bpm.keys()])
+
+            for bolo in bpm.keys():
+                bp = bpm[bolo]
+
+                if bolo not in self.props:
+                    self.props[bolo] = {}
+
+                if self.use_bpm_pointing:
+                    if 'xoffsets' not in self.props[bolo]:
+                        self.props[bolo]['xoffsets'] = []
+                        self.props[bolo]['yoffsets'] = []
+                    self.props[bolo]['xoffsets'].append(bp.x_offset - xshift)
+                    self.props[bolo]['yoffsets'].append(bp.y_offset - yshift)
+
+                self.props[bolo]['band'] = bp.band
+                self.props[bolo]['coupling'] = bp.coupling
+                self.props[bolo]['physname'] = bp.physical_name
+                self.props[bolo]['pixel_id'] = bp.pixel_id
+                self.props[bolo]['wafer_id'] = bp.wafer_id
+
+                if 'polangle' not in self.props[bolo]:
+                    self.props[bolo]['polangle'] = []
+                    self.props[bolo]['poleff'] = []
+                self.props[bolo]['polangle'].append(bp.pol_angle)
+                self.props[bolo]['poleff'].append(bp.pol_efficiency)
 
         # Pointing calibration
         if 'PointingOffsetX' in frame:
