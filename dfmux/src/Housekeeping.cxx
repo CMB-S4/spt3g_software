@@ -16,6 +16,8 @@ template <class A> void HkChannelInfo::serialize(A &ar, unsigned v)
 {
 	using namespace cereal;
 
+	G3_CHECK_VERSION(v);
+
 	ar & make_nvp("G3FrameObject", base_class<G3FrameObject>(this));
 	ar & make_nvp("channel_number", channel_number);
 	ar & make_nvp("carrier_amplitude", carrier_amplitude);
@@ -50,6 +52,8 @@ std::string HkModuleInfo::Description() const
 template <class A> void HkModuleInfo::serialize(A &ar, unsigned v)
 {
 	using namespace cereal;
+
+	G3_CHECK_VERSION(v);
 
 	ar & make_nvp("G3FrameObject", base_class<G3FrameObject>(this));
 	ar & make_nvp("module_number", module_number);
@@ -86,6 +90,8 @@ template <class A> void HkMezzanineInfo::serialize(A &ar, unsigned v)
 {
 	using namespace cereal;
 
+	G3_CHECK_VERSION(v);
+
 	ar & make_nvp("G3FrameObject", base_class<G3FrameObject>(this));
 	ar & make_nvp("power", power);
 	ar & make_nvp("present", present);
@@ -115,6 +121,8 @@ std::string HkBoardInfo::Description() const
 template <class A> void HkBoardInfo::serialize(A &ar, unsigned v)
 {
 	using namespace cereal;
+
+	G3_CHECK_VERSION(v);
 
 	ar & make_nvp("G3FrameObject", base_class<G3FrameObject>(this));
 	ar & make_nvp("timestamp", timestamp);

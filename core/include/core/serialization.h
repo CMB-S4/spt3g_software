@@ -15,6 +15,7 @@
 #include <cereal/types/map.hpp>
 
 #include <pybindings.h>
+#include <G3Logging.h>
 
 #define G3_SERIALIZABLE_CODE(x) \
 template void x::serialize(cereal::PortableBinaryOutputArchive &, unsigned); \
@@ -62,5 +63,19 @@ struct g3frameobject_picklesuite : boost::python::pickle_suite
 		PyBuffer_Release(&view);
 	}
 };
+
+template <class T>
+inline int
+_g3_class_version(T *)
+{
+	return cereal::detail::Version<T>::version;
+}
+
+#define G3_CHECK_VERSION(v) \
+	if (v > _g3_class_version(this)) \
+		log_fatal("Trying to read newer class version (%d) than " \
+		    "supported (%d). Please upgrade your software.", v, \
+		    _g3_class_version(this));
+	
 
 #endif

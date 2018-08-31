@@ -6,6 +6,8 @@ template <class A> void TrackerPointing::serialize(A &ar, unsigned v)
 {
 	using namespace cereal;
 
+	G3_CHECK_VERSION(v);
+
 	// These correspond to GCP slow registers (sampled once per frame).
 	ar & make_nvp("G3FrameObject", base_class<G3FrameObject>(this));
 	ar & make_nvp("time", time);

@@ -13,6 +13,8 @@
 template <class A> void DfMuxBoardSamples::serialize(A &ar, const unsigned v)
 {
 	using namespace cereal;
+	
+	G3_CHECK_VERSION(v);
 
 	ar & make_nvp("G3FrameObject", base_class<G3FrameObject>(this));
 	ar & make_nvp("samples", base_class<std::map<int, DfMuxSamplePtr> >(this));
@@ -33,6 +35,8 @@ std::string DfMuxMetaSample::Summary() const {
 template <class A> void DfMuxMetaSample::serialize(A &ar, const unsigned v)
 {
 	using namespace cereal;
+
+	G3_CHECK_VERSION(v);
 
 	ar & make_nvp("G3FrameObject", base_class<G3FrameObject>(this));
 	ar & make_nvp("boards", base_class<std::map<int, DfMuxBoardSamples> >(this));

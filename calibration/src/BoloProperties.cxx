@@ -6,6 +6,8 @@ template <class A> void BolometerProperties::serialize(A &ar, unsigned v)
 {
 	using namespace cereal;
 
+	G3_CHECK_VERSION(v);
+
 	ar & make_nvp("G3FrameObject", base_class<G3FrameObject>(this));
 	ar & make_nvp("physical_name", physical_name);
 	ar & make_nvp("x_offset", x_offset);

@@ -6,6 +6,8 @@ template <class A> void PointingProperties::serialize(A &ar, unsigned v)
 {
 	using namespace cereal;
 
+	G3_CHECK_VERSION(v);
+
 	ar & make_nvp("G3FrameObject", base_class<G3FrameObject>(this));
 	ar & make_nvp("tiltLat", tiltLat);
 	ar & make_nvp("tiltHA", tiltHA);

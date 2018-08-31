@@ -50,6 +50,8 @@ std::string G3Time::isoformat() const
 
 template <class A> void G3Time::serialize(A &ar, const unsigned v)
 {
+	G3_CHECK_VERSION(v);
+
 	ar & cereal::make_nvp("G3FrameObject",
 	    cereal::base_class<G3FrameObject>(this));
 	ar & cereal::make_nvp("timestamp", time);

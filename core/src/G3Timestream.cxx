@@ -169,6 +169,7 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 
 template <class A> void G3Timestream::load(A &ar, unsigned v)
 {
+	G3_CHECK_VERSION(v);
 
 	ar & cereal::make_nvp("G3FrameObject",
 	    cereal::base_class<G3FrameObject>(this));
@@ -434,6 +435,8 @@ std::string G3Timestream::Description() const
 
 template <class A> void G3TimestreamMap::serialize(A &ar, unsigned v)
 {
+	G3_CHECK_VERSION(v);
+
 	ar & cereal::make_nvp("G3FrameObject",
 	    cereal::base_class<G3FrameObject>(this));
 	if (v < 3) {

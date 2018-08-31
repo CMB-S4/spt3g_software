@@ -9,6 +9,8 @@ template <class A> void DfMuxSample::serialize(A &ar, unsigned v)
 {
 	using namespace cereal;
 
+	G3_CHECK_VERSION(v);
+
 	ar & make_nvp("G3FrameObject", base_class<G3FrameObject>(this));
 	ar & make_nvp("samples", base_class<std::vector<int32_t> >(this));
 	ar & make_nvp("time", Timestamp);

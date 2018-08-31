@@ -7,6 +7,8 @@ template <class A> void ACUStatus::serialize(A &ar, unsigned v)
 {
 	using namespace cereal;
 
+	G3_CHECK_VERSION(v);
+
 	ar & make_nvp("G3FrameObject", base_class<G3FrameObject>(this));
 	ar & make_nvp("time", time);
 	ar & make_nvp("az_pos", az_pos);

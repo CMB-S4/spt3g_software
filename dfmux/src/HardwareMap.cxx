@@ -33,6 +33,8 @@ template <class A> void DfMuxChannelMapping::serialize(A &ar, unsigned v)
 {
 	using namespace cereal;
 
+	G3_CHECK_VERSION(v);
+
 	ar & make_nvp("G3FrameObject", base_class<G3FrameObject>(this));
 	ar & make_nvp("board_ip", board_ip);
 	ar & make_nvp("board_serial", board_serial);

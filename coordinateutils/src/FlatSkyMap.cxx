@@ -41,9 +41,11 @@ FlatSkyMap::FlatSkyMap(const FlatSkyMap & fm) :
 }
 
 template <class A> void
-FlatSkyMap::serialize(A &ar, const unsigned u)
+FlatSkyMap::serialize(A &ar, const unsigned v)
 {
 	using namespace cereal;
+
+	G3_CHECK_VERSION(v);
 
 	ar & make_nvp("G3SkyMap", base_class<G3SkyMap>(this));
 	ar & make_nvp("proj",proj);

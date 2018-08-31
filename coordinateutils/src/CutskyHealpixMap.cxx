@@ -42,9 +42,11 @@ get_flipped_pixel_and_u_scaling(size_t pix, size_t nside, int is_nested,
 }
 
 template <class A>
-void HealpixHitPix::serialize(A &ar, unsigned u)
+void HealpixHitPix::serialize(A &ar, unsigned v)
 {
 	using namespace cereal;
+
+	G3_CHECK_VERSION(v);
 
 	ar & make_nvp("G3FrameObject", base_class<G3FrameObject>(this));
 	ar & make_nvp("is_nested_", is_nested_);
@@ -68,14 +70,16 @@ HealpixHitPix::Description() const
 }
 
 template <class A>
-void CutSkyHealpixMap::serialize(A &ar, unsigned u)
+void CutSkyHealpixMap::serialize(A &ar, unsigned v)
 {
-        using namespace cereal;
+	using namespace cereal;
 
-        ar & make_nvp("G3SkyMap", base_class<G3SkyMap>(this));
-        ar & make_nvp("hitpix", hitpix);
-        ar & make_nvp("nside_", nside_);
-        ar & make_nvp("is_nested_", is_nested_);
+	G3_CHECK_VERSION(v);
+
+	ar & make_nvp("G3SkyMap", base_class<G3SkyMap>(this));
+	ar & make_nvp("hitpix", hitpix);
+	ar & make_nvp("nside_", nside_);
+	ar & make_nvp("is_nested_", is_nested_);
 }
 
 HealpixHitPix::HealpixHitPix(const std::vector<int64_t> & pixinds,

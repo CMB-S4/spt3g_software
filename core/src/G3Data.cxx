@@ -34,6 +34,8 @@ std::string G3String::Description() const
 
 template <class A> void G3Bool::serialize(A &ar, unsigned v)
 {
+	G3_CHECK_VERSION(v);
+
 	ar & cereal::make_nvp("G3FrameObject",
 	    cereal::base_class<G3FrameObject>(this));
 	ar & cereal::make_nvp("value", value);
@@ -41,6 +43,8 @@ template <class A> void G3Bool::serialize(A &ar, unsigned v)
 
 template <class A> void G3Int::serialize(A &ar, unsigned v)
 {
+	G3_CHECK_VERSION(v);
+
 	ar & cereal::make_nvp("G3FrameObject",
 	    cereal::base_class<G3FrameObject>(this));
 	ar & cereal::make_nvp("value", value);
@@ -48,6 +52,8 @@ template <class A> void G3Int::serialize(A &ar, unsigned v)
 
 template <class A> void G3Double::serialize(A &ar, unsigned v)
 {
+	G3_CHECK_VERSION(v);
+
 	ar & cereal::make_nvp("G3FrameObject",
 	    cereal::base_class<G3FrameObject>(this));
 	ar & cereal::make_nvp("value", value);
@@ -55,6 +61,8 @@ template <class A> void G3Double::serialize(A &ar, unsigned v)
 
 template <class A> void G3String::serialize(A &ar, unsigned v)
 {
+	G3_CHECK_VERSION(v);
+
 	ar & cereal::make_nvp("G3FrameObject",
 	    cereal::base_class<G3FrameObject>(this));
 	ar & cereal::make_nvp("value", value);
