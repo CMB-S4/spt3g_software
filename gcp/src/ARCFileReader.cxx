@@ -650,7 +650,7 @@ void ARCFileReader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	uint8_t *buffer;
 	off_t off;
 
-	if (stream_.peek() == EOF) {
+	while (stream_.peek() == EOF) {
 		if (filename_.size() > 0) {
 			const std::string path = filename_.front();
 			filename_.pop_front();
