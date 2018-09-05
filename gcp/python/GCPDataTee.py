@@ -158,7 +158,7 @@ class GCPHousekeepingTee(object):
                                board.currents['MOTHERBOARD_RAIL_VCC1V8'],
                                board.currents['MOTHERBOARD_RAIL_VCC3V3'],
                                board.currents['MOTHERBOARD_RAIL_VCC5V5'])
-            buf += struct.pack('255s', 'iceboard' + board.serial)
+            buf += struct.pack('255s', ('iceboard' + board.serial).encode())
             for i in [1,2]:
                 buf += struct.pack('<?',
                                    board.mezz[i].present)
@@ -283,7 +283,7 @@ class GCPBoloDataTee(object):
         for i in range(len(data)):
             if data.keys()[i] == 'DataOK':
                 continue
-            buf += struct.pack('16s', data.keys()[i])
+            buf += struct.pack('16s', data.keys()[i].encode())
             assert(len(data.values()[i]) == len(data.values()[0]))
             buf += struct.pack('<%di' % len(data.values()[i]), *data.values()[i])
 
