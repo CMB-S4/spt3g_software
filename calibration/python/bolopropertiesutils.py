@@ -154,6 +154,16 @@ class SplitByBand(SplitByProperty):
 
 
 @core.indexmod
+class SplitTimestreamsByBand(SplitByBand):
+
+    def __init__(self, input='CalTimestreams', output_root=None,
+                 bands=None, bpm='BolometerProperties'):
+        core.log_warn("SplitTimestreamsByBand is deprecated, use SplitByBand instead")
+        super(SplitTimestreamsByBand, self).__init__(
+            input=input, output_root=output_root, bands=bands, bpm=bpm)
+
+
+@core.indexmod
 class SplitByWafer(SplitByProperty):
     '''
     Take an input G3FrameObject-derivative Map keyed by bolometer name and

@@ -3,5 +3,4 @@ load_pybindings(__name__, __path__)
 
 from . import build_cal_frames
 
-from .bolopropertiesutils import SplitByProperty, SplitByBand, SplitByWafer
-
+from .bolopropertiesutils import SplitByProperty, SplitByBand, SplitByWafer, SplitTimestreamsByBand
