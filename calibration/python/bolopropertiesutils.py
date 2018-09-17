@@ -3,7 +3,7 @@ from spt3g import core
 import math
 
 __all__ = ['SplitByProperty', 'SplitByBand', 'SplitTimestreamsByBand',
-           'SplitByWafer']
+           'SplitByWafer', 'SplitByPixelType']
 
 @core.indexmod
 class SplitByProperty(object):
@@ -172,3 +172,41 @@ class SplitByWafer(SplitByProperty):
         if wafer is None:
             return None
         return str(wafer).capitalize()
+
+
+@core.indexmod
+class SplitByPixelType(SplitByProperty):
+    '''
+    Take an input G3FrameObject-derivative Map keyed by bolometer name and
+    split it into several based on the pixel types of the detectors as given by
+    the BolometerProperties key.
+    Return the same type of maps as the one it was handed, e.g.
+    G3TimestreamMap, G3MapInt, etc.
+    '''
+    def __init__(self, input='CalTimestreams', output_root=None,
+                 types=None, bpm='BolometerProperties'):
+        '''
+        Split the input map given by input into several output
+        maps named output_root + wafer (e.g. CalTimestreamsW172 with
+        the default options). If wafers is not None, use only the wafers in the
+        list (possibly writing empty timestream maps to the frame). Otherwise,
+        creates maps for every wafer that exists in the input. Setting bpm
+        to a non-default value causes this to get its wafer mapping from an
+        alternative data source.
+        '''
+        super(SplitByPixelType, self).__init__(
+            input=input, output_root=output_root, property_list=types,
+            bpm=bpm, property='pixel_type')
+
+    @staticmethod
+    def converter(pixel_type):
+        if pixel_type is None:
+            return None
+        if not pixel_type:
+            return None
+        pixel_type = str(pixel_type)
+        if pixel_type.lower() == 'n/a':
+            return None
+        if pixel_type.islower():
+            return pixel_type.capitalize()
+        return pixel_type
