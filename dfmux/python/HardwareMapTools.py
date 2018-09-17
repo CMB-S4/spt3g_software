@@ -111,6 +111,8 @@ def PyDfMuxBolometerPropertiesInjector(frame, pydfmux_hwm=None, angle_per_mm = 4
             bp.wafer_id = str(bolo.wafer.name)
         if hasattr(bolo, 'pixel') and bolo.pixel is not None:
             bp.pixel_id = str(bolo.pixel)
+        if hasattr(bolo, 'pixel_type') and bolo.pixel_type is not None:
+            bp.pixel_type = str(bolo.pixel_type)
         if hasattr(bolo, 'observing_band') and bolo.observing_band is not None:
             bp.band = float(bolo.observing_band)*core.G3Units.GHz
         if hasattr(bolo, 'polarization_angle') and bolo.polarization_angle is not None:

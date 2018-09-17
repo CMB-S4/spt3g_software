@@ -95,6 +95,8 @@ class BuildBoloPropertiesMap(object):
                     p.pixel_id = self.props[bolo]['pixel_id']
                 if 'wafer_id' in self.props[bolo]:
                     p.wafer_id = self.props[bolo]['wafer_id']
+                if 'pixel_type' in self.props[bolo]:
+                    p.pixel_type = self.props[bolo]['pixel_type']
                 
                 boloprops[bolo] = p
 
@@ -132,6 +134,7 @@ class BuildBoloPropertiesMap(object):
                 self.props[bolo]['physname'] = bp.physical_name
                 self.props[bolo]['pixel_id'] = bp.pixel_id
                 self.props[bolo]['wafer_id'] = bp.wafer_id
+                self.props[bolo]['pixel_type'] = bp.pixel_type
 
                 if 'polangle' not in self.props[bolo]:
                     self.props[bolo]['polangle'] = []
@@ -196,6 +199,13 @@ class BuildBoloPropertiesMap(object):
                 #assert('wafer_id' not in self.props[bolo] or self.props[bolo]['wafer_id'] == frame['WaferIDs'][bolo])
                 self.props[bolo]['wafer_id'] = frame['WaferIDs'][bolo]
 
+        if 'PixelTypes' in frame:
+            for bolo in frame['PixelTypes'].keys():
+                if bolo not in self.props:
+                    self.props[bolo] = {}
+                # assert('pixel_type' not in self.props[bolo] or self.props[bolo]['pixel_type'] == frame['PixelTypes'][bolo])
+                self.props[bolo]['pixel_type'] = frame['PixelTypes'][bolo]
+
         # Polarization Angles
         if 'PolarizationAngle' in frame:
             for bolo in frame['PolarizationAngle'].keys():
@@ -230,6 +240,7 @@ def ExplodeBolometerProperties(frame, bpmname='NominalBolometerProperties'):
     names = core.G3MapString()
     pixels = core.G3MapString()
     wafers = core.G3MapString()
+    pixtypes = core.G3MapString()
     xoff = core.G3MapDouble()
     yoff = core.G3MapDouble()
     coupling = core.G3MapInt()
@@ -243,6 +254,7 @@ def ExplodeBolometerProperties(frame, bpmname='NominalBolometerProperties'):
         yoff[bolo] = p.y_offset
         pixels[bolo] = p.pixel_id
         wafers[bolo] = p.wafer_id
+        pixtypes[bolo] = p.pixel_type
         coupling[bolo] = p.coupling
 
     frame['PolarizationAngle'] = polangle
@@ -253,6 +265,7 @@ def ExplodeBolometerProperties(frame, bpmname='NominalBolometerProperties'):
     frame['PointingOffsetY'] = yoff
     frame['PixelIDs'] = pixels
     frame['WaferIDs'] = wafers
+    frame['PixelTypes'] = pixtypes
     frame['BoloCoupling'] = coupling
 
 @core.indexmod

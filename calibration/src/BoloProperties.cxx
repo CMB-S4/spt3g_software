@@ -33,6 +33,10 @@ template <class A> void BolometerProperties::serialize(A &ar, unsigned v)
 		ar & make_nvp("coupling", (uint32_t &)coupling);
 	}
 
+	if (v > 5) {
+		ar & make_nvp("pixel_type", pixel_type);
+	}
+
 }
 
 std::string BolometerProperties::Description() const
@@ -68,6 +72,8 @@ PYBINDINGS("calibration") {
 	       "Name of the name this detector is on")
 	    .def_readwrite("pixel_id", &BolometerProperties::pixel_id,
 	       "Name of the pixel of which this detector is a part")
+	    .def_readwrite("pixel_type", &BolometerProperties::pixel_type,
+	       "Name of the pixel type of which this detector is a part")
 	;
 
 	bp::enum_<BolometerProperties::CouplingType>("BolometerCouplingType",

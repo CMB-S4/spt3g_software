@@ -38,12 +38,13 @@ public:
 
 	std::string wafer_id;
 	std::string pixel_id;
+	std::string pixel_type;
 
 	template <class A> void serialize(A &ar, unsigned v);
 };
 
 G3_POINTERS(BolometerProperties);
-G3_SERIALIZABLE(BolometerProperties, 5);
+G3_SERIALIZABLE(BolometerProperties, 6);
 
 G3MAP_OF(std::string, BolometerProperties, BolometerPropertiesMap);
 
