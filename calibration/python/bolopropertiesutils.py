@@ -2,34 +2,8 @@ from spt3g.calibration import BolometerProperties
 from spt3g import core
 import math
 
-def InvertBoloProperties(frame, 
-                         bolo_props_key = 'BolometerProperties',
-                         wafer_map_key = 'WaferMap',
-                         squid_map_key = 'SquidMap',
-                         band_map_key = 'BandMap'):
-    if frame.type != core.G3FrameType.Calibration:
-        return
-
-    def _add_myself(k, val, mp):
-        if not val in mp:
-            mp[val] = []
-        mp[val] = k
-
-    bolo_props = frame[bolo_props_key]
-    
-    wafer_map = core.G3MapVectorString()
-    squid_map = core.G3MapVectorString()
-    band_map = core.G3MapVectorString()
-
-    for k in bolo_props.keys():
-        _add_myself(k, bolo_props[k].wafer_id, wafer_map)
-        _add_myself(k, bolo_props[k].squid_id, squid_map)
-        _add_myself(k, bolo_props[k].band, band_map)
-
-    frame[wafer_map_key] = wafer_map
-    frame[squid_map_key] = squid_map
-    frame[band_map_key] = band_map
-
+__all__ = ['SplitByProperty', 'SplitByBand', 'SplitTimestreamsByBand',
+           'SplitByWafer']
 
 @core.indexmod
 class SplitByProperty(object):
@@ -40,12 +14,11 @@ class SplitByProperty(object):
     Return the same type of maps as the one it was handed, e.g.
     G3TimestreamMap, G3MapInt, etc.
     '''
-    def __init__(self, input='CalTimestreams', property=None,
-                 converter=lambda x: str(x), property_list=None,
+    def __init__(self, input='CalTimestreams', property=None, property_list=None,
                  output_root=None, bpm='BolometerProperties'):
         '''
         Split the input map given by input into several output
-        maps named output_root + key (e.g. CalTimestreams + converter(property)) with
+        maps named output_root + key (e.g. CalTimestreams + str(property)) with
         the default options).
 
         Arguments
@@ -55,13 +28,9 @@ class SplitByProperty(object):
         property : str
             Attribute name to extract from the BolometerProperties object.
             Required.
-        converter : callable
-            Callable (function) for converting the property to its corresponding
-            string name.  Returns a string representation of the input argument,
-            or None if the argument is invalid.
         property_list : list of properties
             Properties to include in the output keys.  Entries that are not strings
-            will be converted to strings using `converter`.
+            will be converted to strings using the `SplitByProperty.converter` method.
             If property_list is not None, use only the names in the
             list (possibly writing empty timestream maps to the frame). Otherwise,
             creates maps for every that exists in the input.
@@ -76,19 +45,29 @@ class SplitByProperty(object):
             core.log_fatal("Property is a required argument")
         self.bpmattr = property
 
-        if converter is None:
-            core.log_fatal("Converter is a required argument")
-        self.converter = converter
-
         self.input = input
         self.output_root = output_root if output_root is not None else input
         if property_list is not None:
-            self.props = [converter(x) if not isinstance(x, str) else x
+            self.props = [self.converter(x) if not isinstance(x, str) else x
                           for x in property_list]
         else:
             self.props = None
         self.bpmkey = bpm
         self.bpm = None
+
+    @staticmethod
+    def converter(prop):
+        """
+        Function for converting the property to its corresponding string name.
+        Returns a string representation of the input argument, or None if the
+        argument is invalid.
+
+        Overload this function in subclasses of SplitByProperty to change
+        how attributes are parsed into their string representations.
+        """
+        if prop is None:
+            return None
+        return str(prop)
 
     def __call__(self, frame):
         if self.bpmkey in frame:
@@ -139,18 +118,19 @@ class SplitByBand(SplitByProperty):
         to a non-default value causes this to get its band mapping from an
         alternative data source.
         '''
-        def converter(band):
-            if isinstance(band, str):
-                return band
-            if math.isnan(band) or math.isinf(band):
-                return None
-            if band < 0:
-                return None
-            return '%dGHz' % int(band/core.G3Units.GHz)
-
         super(SplitByBand, self).__init__(
             input=input, output_root=output_root, property_list=bands,
-            bpm=bpm, property='band', converter=converter)
+            bpm=bpm, property='band')
+
+    @staticmethod
+    def converter(band):
+        if isinstance(band, str):
+            return band
+        if math.isnan(band) or math.isinf(band):
+            return None
+        if band < 0:
+            return None
+        return '%dGHz' % int(band/core.G3Units.GHz)
 
 
 @core.indexmod
@@ -183,11 +163,12 @@ class SplitByWafer(SplitByProperty):
         to a non-default value causes this to get its wafer mapping from an
         alternative data source.
         '''
-        def converter(wafer):
-            if wafer is None:
-                return None
-            return str(wafer).capitalize()
-
         super(SplitByWafer, self).__init__(
             input=input, output_root=output_root, property_list=wafers,
-            bpm=bpm, property='wafer_id', converter=converter)
+            bpm=bpm, property='wafer_id')
+
+    @staticmethod
+    def converter(wafer):
+        if wafer is None:
+            return None
+        return str(wafer).capitalize()
