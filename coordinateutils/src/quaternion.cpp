@@ -390,9 +390,11 @@ offsets_to_quat(double x_offset, double y_offset)
 {
 	// Rotates the point (1,0,0) by the rotation matrix for the y_offset
 	// and then the rotation matrix for the x_offset
-	quat t = (quat(cos(x_offset/(2.0*G3Units::rad)),0,0,sin(x_offset/(2.0*G3Units::rad))) *
-		  quat(cos(y_offset/(2.0*G3Units::rad)),0,sin(y_offset/(2.0*G3Units::rad)),0));
-	return t*quat(0,1.0,0,0)/t;
+	// quat t = (quat(cos(x_offset/(2.0*G3Units::rad)),0,0,sin(x_offset/(2.0*G3Units::rad))) *
+	// 	  quat(cos(y_offset/(2.0*G3Units::rad)),0,sin(y_offset/(2.0*G3Units::rad)),0));
+	// return t*quat(0,1.0,0,0)/t;
+	// The above is exactly equal to:
+	return ang_to_quat(x_offset, -y_offset);
 }
 
 quat
@@ -587,8 +589,10 @@ convert_celestial_offsets_to_local_offsets(G3VectorQuat trans_vec,
 	quat inv_trans = boost::math::conj(trans);
 	quat det_local = inv_trans * det_cel / inv_trans;
 
+	#ifdef CHECK_QUAT_INVERSE
 	//just to check I'm not insane can be dropped in the future
 	g3_assert(sloppy_eq(inv_trans * bs_cel / inv_trans, quat(0,1,0,0)));
+	#endif
 	
 	// we read off the position of the detector.
 	quat_to_ang(det_local, x_offset_local, y_offset_local);
