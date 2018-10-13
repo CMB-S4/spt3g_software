@@ -134,6 +134,10 @@ template <class A> void HkBoardInfo::serialize(A &ar, unsigned v)
 	ar & make_nvp("voltages", voltages);
 	ar & make_nvp("temperatures", temperatures);
 	ar & make_nvp("mezz", mezz);
+
+	if (v >= 2) {
+		ar & make_nvp("is128x", is128x);
+	}
 }
 
 G3_SERIALIZABLE_CODE(HkChannelInfo);
@@ -272,6 +276,8 @@ PYBINDINGS("dfmux") {
 	    .def_readwrite("fir_stage", &HkBoardInfo::fir_stage,
 	       "Sample rate encoded as the \"FIR Stage\". Smaller numbers are "
 	       "faster and grow by factors of two with each decrement")
+	    .def_readwrite("is128x", &HkBoardInfo::is128x,
+		"Boolean for whether 128x firmware is running")
 	    .def_readwrite("currents", &HkBoardInfo::currents,
 	       "Dictionary of data from on-board current sensors")
 	    .def_readwrite("voltages", &HkBoardInfo::voltages,

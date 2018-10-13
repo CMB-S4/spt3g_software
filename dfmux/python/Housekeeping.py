@@ -58,7 +58,10 @@ class HousekeepingConsumer(object):
         '''
         # Board-global quantities
         boardhk = HkBoardInfo()
-
+        if 'is128x' in dat:
+            boardhk.is128x = dat['is128x']
+        else:
+            boardhk.is128x = False
         year = dat['timestamp']['y']
         if year == 0:
             # It probably isn't 1900
@@ -133,12 +136,16 @@ class HousekeepingConsumer(object):
                     chanhk.channel_number = k+1
                     chanhk.carrier_amplitude = chan['carrier_amplitude']
                     chanhk.nuller_amplitude = chan['nuller_amplitude']
-                    chanhk.carrier_frequency = chan['carrier_frequency']*core.G3Units.Hz
-                    chanhk.demod_frequency = chan['demod_frequency']*core.G3Units.Hz
                     chanhk.dan_gain = chan['dan_gain']
-                    chanhk.dan_accumulator_enable = chan['dan_accumulator_enable']
-                    chanhk.dan_feedback_enable = chan['dan_feedback_enable']
                     chanhk.dan_streaming_enable = chan['dan_streaming_enable']
+                    if boardhk.is128x:
+                        chanhk.carrier_frequency = chan['frequency']*core.G3Units.Hz
+                        chanhk.demod_frequency = chan['frequency']*core.G3Units.Hz
+                    else:
+                        chanhk.carrier_frequency = chan['carrier_frequency']*core.G3Units.Hz
+                        chanhk.demod_frequency = chan['demod_frequency']*core.G3Units.Hz
+                        chanhk.dan_accumulator_enable = chan['dan_accumulator_enable']
+                        chanhk.dan_feedback_enable = chan['dan_feedback_enable']
                     if 'dan_railed' in chan:
                         chanhk.dan_railed = chan['dan_railed']
                     if 'tuning' in chan and chan['tuning'] is not None:

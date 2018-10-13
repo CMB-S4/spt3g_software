@@ -126,13 +126,14 @@ G3_SERIALIZABLE(HkMezzanineInfo, 2);
 class HkBoardInfo : public G3FrameObject
 {
 public:
-	HkBoardInfo() : G3FrameObject(), fir_stage(-1) {}
+	HkBoardInfo() : G3FrameObject(), fir_stage(-1), is128x(false) {}
 
 	G3Time timestamp;
 
 	std::string timestamp_port;
 	std::string serial;
 	int32_t fir_stage;
+	bool is128x;
 
 	std::map<std::string, double> currents;
 	std::map<std::string, double> voltages;
@@ -145,7 +146,7 @@ public:
 };
 
 G3_POINTERS(HkBoardInfo);
-G3_SERIALIZABLE(HkBoardInfo, 1);
+G3_SERIALIZABLE(HkBoardInfo, 2);
 
 G3MAP_OF(int32_t, HkBoardInfo, DfMuxHousekeepingMap);
 
