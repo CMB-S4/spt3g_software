@@ -38,6 +38,10 @@ As an alternative, you can specify a specific list of boards to listen for. This
 
 	The mux system can deliver large numbers of UDP packets rapidly. If you see warnings about missed samples, you may need to increase the maximum size of the kernel UDP receive queue. On Linux, this can be accomplished by changing the value in ``/proc/sys/net/core/rmem_max``. On FreeBSD and Mac OS X, the maximum is in the sysctl ``kern.ipc.maxsockbuf``. A value of 5000000000 seems to work well.
 
+.. note::
+
+	On some versions of Linux with 128x DfMux firmware, you will need to disable strict reverse-path validation in the kernel to take data. This can be accomplished by setting the sysctl ``net.ipv4.conf.all.rp_filter`` to 0.
+
 This code can also be used to collect data from legacy boards with DAN firmware if you are so inclined by using the ``dfmux.LegacyDfMuxCollector`` class in place of ``dfmux.DfMuxCollector``.
 
 Data Structures
