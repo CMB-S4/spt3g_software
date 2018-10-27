@@ -123,20 +123,21 @@ RawTimestampToTimeCode(RawTimestamp stamp)
 }
 
 DfMuxCollector::DfMuxCollector(const char *listenaddr,
-    G3EventBuilderPtr builder, int prefix) : builder_(builder), success_(false),
-    stop_listening_(false)
+   G3EventBuilderPtr builder, std::vector<int32_t> board_list) :
+    builder_(builder), success_(false), stop_listening_(false),
+    board_list_(board_list)
 {
-	netmask_ = ~((1 << (32 - prefix)) - 1);
 	success_ = (SetupSocket(listenaddr) != 0);
 }
 
 DfMuxCollector::DfMuxCollector(const char *listenaddr,
-    G3EventBuilderPtr builder, std::map<in_addr_t, int32_t> board_serial_map,
-    int prefix) :
+    G3EventBuilderPtr builder, std::map<in_addr_t, int32_t> board_serial_map) :
      builder_(builder), success_(false), stop_listening_(false),
      board_serials_(board_serial_map)
 {
-	netmask_ = ~((1 << (32 - prefix)) - 1);
+	for (auto i : board_serials_)
+		board_list_.push_back(i.second);
+
 	success_ = (SetupSocket(listenaddr) != 0);
 }
 
@@ -253,10 +254,6 @@ int DfMuxCollector::BookPacket(struct DfmuxPacket *packet, struct in_addr src)
 	int64_t timecode;
 	int board_id;
 
-	// Filter bogons
-	if ((htonl(src.s_addr) & netmask_) != (htonl(listenaddr_) & netmask_))
-		return (-1);
-
 	if (le32toh(packet->magic) != FAST_MAGIC) {
 		log_error("Corrupted packet from %s begins with %#x "
 		    "instead of %#x", inet_ntoa(src), le32toh(packet->magic),
@@ -274,6 +271,16 @@ int DfMuxCollector::BookPacket(struct DfmuxPacket *packet, struct in_addr src)
 		board_id = id_it->second;
 	} else if (le16toh(packet->version) == 3) {
 		board_id = le16toh(packet->serial);
+		if (board_list_.size() > 0 &&
+		    std::find(board_list_.begin(), board_list_.end(), board_id)
+		    == board_list_.end()) {
+			struct in_addr i;
+			i.s_addr = listenaddr_;
+			log_debug("Received V3 data for board %d not "
+			    "enumerated on listener for interface %s",
+			    board_id, inet_ntoa(i));
+			return (-1);
+		}
 	} else {
 		log_error("Unknown packet version %d from %s",
 		    le16toh(packet->version), inet_ntoa(src));
@@ -327,7 +334,7 @@ int DfMuxCollector::BookPacket(struct DfmuxPacket *packet, struct in_addr src)
 
 static DfMuxCollectorPtr
 make_dfmux_collector_v2_from_dict(const char *listenaddr,
-    G3EventBuilderPtr builder, boost::python::dict board_serial_map, int prefix)
+    G3EventBuilderPtr builder, boost::python::dict board_serial_map)
 {
 	namespace bp = boost::python;
 	std::map<in_addr_t, int32_t> serial_map;
@@ -365,15 +372,15 @@ make_dfmux_collector_v2_from_dict(const char *listenaddr,
 	}
 
 	return DfMuxCollectorPtr(new DfMuxCollector(listenaddr, builder,
-	    serial_map, prefix));
+	    serial_map));
 }
 
 PYBINDINGS("dfmux")
 {
 	namespace bp = boost::python;
 
-	bp::class_<DfMuxCollector, DfMuxCollectorPtr, boost::noncopyable>("DfMuxCollector", "Listener object that collects IceBoard packets from a single network interface and decodes and forwards them to a DfMuxBuilder object for insertion into the data stream. Takes the IP address of the interface on the host computer on which to listen as well as the builder object to which the data should be sent.", bp::init<const char *, G3EventBuilderPtr, int>((bp::arg("interface"), bp::arg("builder"), bp::arg("prefixlen")=24), "Create a DfMuxCollector listening on \"interface\" for multicasted packets and forwards it to DfMuxBuilder \"builder\". Will filter packet from IP addresses not matching the first prefixlen bits of listenaddr."))
-	    .def("__init__", bp::make_constructor(make_dfmux_collector_v2_from_dict, bp::default_call_policies(), (bp::arg("interface"), bp::arg("builder"), bp::arg("board_serial_map"), bp::arg("prefixlen")=24)), "Crate a DfMuxCollector that can parse V2 (64x) data. Pass a mapping from board IP address (strings or integers) to serial numbers as the last argument")
+	bp::class_<DfMuxCollector, DfMuxCollectorPtr, boost::noncopyable>("DfMuxCollector", "Listener object that collects IceBoard packets from a single network interface and decodes and forwards them to a DfMuxBuilder object for insertion into the data stream. Takes the IP address of the interface on the host computer on which to listen as well as the builder object to which the data should be sent.", bp::init<const char *, G3EventBuilderPtr, std::vector<int32_t> >((bp::arg("interface"), bp::arg("builder"), bp::arg("boardlist")=std::vector<int32_t>()), "Create a DfMuxCollector listening on \"interface\" for multicasted packets and forwards it to DfMuxBuilder \"builder\". Filters to only the boards specified in \"boardlist\" (by default empty, implying all boards)."))
+	    .def("__init__", bp::make_constructor(make_dfmux_collector_v2_from_dict, bp::default_call_policies(), (bp::arg("interface"), bp::arg("builder"), bp::arg("board_serial_map"))), "Crate a DfMuxCollector that can parse V2 (64x) data. Pass a mapping from board IP address (strings or integers) to serial numbers as the last argument")
 	    .def("Start", &DfMuxCollector::Start)
 	    .def("Stop", &DfMuxCollector::Stop)
 	;
