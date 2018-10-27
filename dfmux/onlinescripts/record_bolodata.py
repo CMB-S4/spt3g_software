@@ -31,15 +31,18 @@ builder = dfmux.DfMuxBuilder([int(board.serial) for board in hwm.query(pydfmux.I
 
 # Get the local IP(s) to use to connect to the boards by opening test
 # connections. Using a set rather than a list deduplicates the results.
-local_ips = set()
+local_ips = {}
 for board in hwm.query(pydfmux.core.dfmux.IceBoard):
     testsock = socket.create_connection(('iceboard' + board.serial + '.local', 80))
-    local_ips.add(testsock.getsockname()[0])
+    local_ip = testsock.getsockname()[0]
+    if local_ip not in local_ips:
+        local_ips[local_ip] = set()
+    local_ips[local_ip].add(int(board.serial))
     testsock.close()
-print('Creating listeners for %d boards on interfaces: %s' % (hwm.query(pydfmux.core.dfmux.IceBoard).count(), ', '.join(local_ips)))
+print('Creating listeners for %d boards on interfaces: %s' % (hwm.query(pydfmux.core.dfmux.IceBoard).count(), ', '.join(local_ips.keys())))
 
 # Set up listeners per network segment and point them at the event builder
-collectors = [dfmux.DfMuxCollector(ip, builder) for ip in local_ips]
+collectors = [dfmux.DfMuxCollector(ip, builder, list(boards)) for ip,boards in local_ips.items()]
 pipe.Add(builder)
 
 # Catch errors if samples have become misaligned. Don't even bother processing
