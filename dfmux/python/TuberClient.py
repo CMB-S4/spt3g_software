@@ -18,7 +18,7 @@ class TuberClient(object):
     def ReadLineFromSocket(self):
         out = str()
         while not out.endswith('\n'):
-            out += self.socket.recv(1)
+            out += self.socket.recv(1).decode()
         return out
     def CallMethod(self, obj, method, wait_for_reply=True):
         if self.socket is None:
@@ -36,7 +36,7 @@ class TuberClient(object):
         request += 'Content-Length: %d\r\n\r\n' % len(jsonbits)
         request += jsonbits
 
-        self.socket.send(request)
+        self.socket.send(request.encode())
 
         if wait_for_reply:
             return self.GetReply()
@@ -67,7 +67,7 @@ class TuberClient(object):
                 if toread == 0:
                     still_chunking = False
                 while toread > 0:
-                    chunk = self.socket.recv(toread)
+                    chunk = self.socket.recv(toread).decode()
                     assert(len(chunk) > 0)
                     out += chunk
                     toread -= len(chunk)
@@ -75,7 +75,7 @@ class TuberClient(object):
                 assert(len(lf)) == 0
         else:
             while toread > 0:
-                chunk = self.socket.recv(toread)
+                chunk = self.socket.recv(toread).decode()
                 assert(len(chunk) > 0)
                 out += chunk
                 toread -= len(chunk)
