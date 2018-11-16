@@ -139,10 +139,11 @@ class ConvertTimestreamUnits(object):
         self.keepconversions = KeepConversionsForObservation
 
     def __call__(self, frame):
+        if 'DfMuxTransferFunction' in frame:
+            self.default_tf = frame['DfMuxTransferFunction']
         if frame.type == core.G3FrameType.Wiring:
             self.wiringmap = frame['WiringMap']
             self.system = frame['ReadoutSystem']
-            self.default_tf = frame.get('DfMuxTransferFunction', None)
             self.convfactors = {}
             return
         if frame.type == core.G3FrameType.Housekeeping:

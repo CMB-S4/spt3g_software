@@ -61,7 +61,7 @@ def frequency_correction(frequency, gain, target='nuller', custom_TF=None):
         warn = frequency>9e6
 
     if custom_TF is None:
-        custom_TF = 'spt3g_filtering_2017_full'
+        raise ValueError('custom_TF argument is required')
 
     try:
         tf_model = TFDicts[custom_TF]
