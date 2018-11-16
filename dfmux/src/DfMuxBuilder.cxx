@@ -170,6 +170,10 @@ void DfMuxBuilder::ProcessNewData()
 				if (oqueue_.front().sample->find(*b) == 
 				    oqueue_.front().sample->end()) {
 					msg_boards_missing << " " << *b;
+					// Insert blank sample from this board
+					// so later code knows what could be
+					// there.
+					(void)(*oqueue_.front().sample)[*b];
 				}
 			} 
 			log_warn("Abandoning missing packets (%s, data "
