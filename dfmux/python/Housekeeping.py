@@ -1,5 +1,5 @@
 from spt3g import core
-from spt3g.dfmux import DfMuxHousekeepingMap, HkBoardInfo, HkMezzanineInfo, HkModuleInfo, HkChannelInfo
+from spt3g.dfmux import DfMuxHousekeepingMap, HkBoardInfo, HkMezzanineInfo, HkModuleInfo, HkChannelInfo, DfMuxWiringMap, DfMuxChannelMapping
 
 from spt3g.dfmux.IceboardConversions import convert_TF
 from .TuberClient import TuberClient
@@ -14,35 +14,157 @@ class HousekeepingConsumer(object):
     goes by containing the data as of the arrival of the housekeeping frame.
     Use in conjunction with a dfmux.PeriodicHousekeepingCollector to get
     data at fixed intervals.
-   
+
+    Also emits a Wiring frame from the housekeeping data.  This requires a
+    recent (as of November 2018) version of pydfmux in order to read mapped
+    channel names from each board.
+
     If collecting real-time data, you may want to set subprocess=True when
     adding this module.
     '''
     def __init__(self):
-        self.tuber = None
+        self.tuber = {}
+        self.board_map = {}
+        self.board_serials = []
+        self.buffer = []
+        self.hwmf = None
+
+    def map_boards(self):
+        '''
+        Cache IP address, crate serial and slot number and
+        create a TuberClient for each IceBoard.
+        '''
+        boards = [b for b in self.board_serials if b not in self.board_map]
+        if not boards:
+            return
+
+        ips = {}
+        crates = {}
+        slots = {}
+
+        # create tubers for each missing board
+        for board in boards:
+            ip = socket.inet_aton(socket.gethostbyname('iceboard{}.local'.format(board)))
+            ips[board] = struct.unpack("i", ip)[0]
+            self.tuber[board] = TuberClient(socket.inet_ntoa(ip), timeout=5.0)
+
+        # get crate ID for each missing board
+        for board in boards:
+            self.tuber[board].CallMethod('Dfmux', '_get_backplane_serial', False)
+        for board in boards:
+            reply = self.tuber[board].GetReply()[0]
+            if reply.get('error', None):
+                crates[board] = -1
+            else:
+                crates[board] = int(reply['result'])
+
+        # get slot ID for each missing board
+        for board in boards:
+            if crates[board] >= 0:
+                self.tuber[board].CallMethod('Dfmux', 'get_backplane_slot', False)
+        for board in boards:
+            if crates[board] < 0:
+                slots[board] = -1
+            else:
+                reply = self.tuber[board].GetReply()[0]
+                if reply.get('error', None):
+                    slots[board] = -1
+                else:
+                    slots[board] = int(reply['result'])
+
+        # store
+        for board in boards:
+            self.board_map[board] = (ips[board], crates[board], slots[board])
+
     def __call__(self, frame):
+
+        # If a wiring frame has been emitted once already, then process every frame
+        # as received.
+        if self.hwmf is not None:
+            return self.ProcessBuffered(frame)
+
+        # Otherwise, process at least one Timepoint frame first to gather
+        # a list of IceBoards for which housekeeping data are required,
+        # Then process any buffered frames after Timepoint frame,
+        # but emit before the Timepoint
+        if frame.type == core.G3FrameType.Timepoint:
+            tp_frames = self.ProcessBuffered(frame)
+            frames = sum([self.ProcessBuffered(fr) for fr in self.buffer], [])
+            frames += tp_frames
+            self.buffer = []
+            return frames
+
+        # Buffer until a Timepoint frame is received
+        self.buffer.append(frame)
+        return False
+
+    def ProcessBuffered(self, frame):
+        '''
+        Process frames in the buffered order.  Returned value should
+        always be a list of frames, possibly empty.
+        '''
+        if frame.type == core.G3FrameType.Timepoint:
+            self.board_serials = [('%04d' % k) for k in frame['DfMux'].keys()]
+            return [frame]
+
         if frame.type == core.G3FrameType.Wiring:
-            wmap = frame['WiringMap']
-            self.board_ips = set([m.board_ip for m in wmap.values()])
-            self.tuber = [(ip, TuberClient(socket.inet_ntoa(struct.pack('i', ip)), timeout=5.0)) for ip in self.board_ips]
+            core.log_fatal("Received spurious wiring frame.  Do not use "
+                           "PyDfMuxHardwareMapInjector with the HousekeepingConsumer.  "
+                           "You may update pydfmux to a newer version of pydfmux "
+                           "that stores mapped channel names on the boards, and "
+                           "rearrange your data acquisition script.",
+                           unit='HousekeepingConsumer')
 
         if frame.type == core.G3FrameType.Housekeeping:
-            if self.tuber is None:
-                self.tuber = [(ip, TuberClient(socket.inet_ntoa(struct.pack('i', ip)), timeout=5.0)) for ip in self.board_ips]
+            self.map_boards()
 
+            hwm = DfMuxWiringMap()
             hkdata = DfMuxHousekeepingMap()
             try:
-                for board,board_tuber in self.tuber:
-                    board_tuber.CallMethod('Dfmux', '_dump_housekeeping', False)
+                for board in self.board_serials:
+                    self.tuber[board].CallMethod('Dfmux', '_dump_housekeeping', False)
                     time.sleep(0.02) # Stagger return data transfer a little to
                                      # avoid overloading the network on the return
 
-                for board,board_tuber in self.tuber:
-                    dat = board_tuber.GetReply()[0]['result']
+                for board in self.board_serials:
+                    dat = self.tuber[board].GetReply()[0]['result']
 
                     boardhk = self.HousekeepingFromJSON(dat)
                     hkdata[int(boardhk.serial)] = boardhk
+
+                    ip, crate, slot = self.board_map[board]
+                    boardw = self.WiringFromJSON(dat, ip, crate, slot)
+                    for key in boardw.keys():
+                        hwm[key] = boardw[key]
+
                 frame['DfMuxHousekeeping'] = hkdata
+
+                hwmf = core.G3Frame(core.G3FrameType.Wiring)
+                hwmf['WiringMap'] = hwm
+                hwmf['ReadoutSystem'] = 'ICE'
+
+                if self.hwmf is None:
+                    self.hwmf = hwmf
+                    # If this is the first time the consumer is triggered, make sure
+                    # a Housekeeping and WiringMap frame are issued before any
+                    # Timepoint frames
+                    frames = [hwmf, frame]
+                    return frames
+                else:
+                    # Compare wiring maps and re-issue frame if anything has changed
+                    old_hwm = self.hwmf['WiringMap']
+                    if (set(hwm.keys()) ^ set(old_hwm.keys())):
+                        self.hwmf = hwmf
+                        return [hwmf, frame]
+                    for k in hwm:
+                        if vars(hwm[k]) != vars(old_hwm['WiringMap'][k]):
+                            self.hwmf = hwmf
+                            return [hwmf, frame]
+
+                # If we get here then the wiring map hasn't changed,
+                # so return the populated Housekeeping frame as it is
+                return [frame]
+
             except socket.timeout:
                 core.log_error('Timeout collecting housekeeping data from mux boards. Dropping housekeeping sample', unit='HousekeepingConsumer')
                 return []
@@ -176,6 +298,38 @@ class HousekeepingConsumer(object):
             boardhk.mezz[n+1] = mezzhk
     
         return boardhk
+
+    @classmethod
+    def WiringFromJSON(cls, dat, ip, crate, slot):
+        '''
+        Build WiringMap object from a JSON blob returned by the
+        _dump_housekeeping call
+        '''
+        found = False
+        hwm = DfMuxWiringMap()
+        serial = int(dat['serial'])
+        for imezz, mezz in enumerate(dat['mezzanines']):
+            for imod, mod in enumerate(mezz['modules']):
+                for ichan, chan in enumerate(mod['channels']):
+                    name = (chan.get('tuning', {}) or {}).get('name', None)
+                    if name is None:
+                        continue
+                    found = True
+                    mapping = DfMuxChannelMapping()
+                    mapping.board_ip = ip
+                    mapping.board_serial = serial
+                    mapping.board_slot = slot
+                    mapping.crate_serial = crate
+                    mapping.module = imod + 4 * imezz
+                    mapping.channel = ichan
+                    hwm[name] = mapping
+        if not found:
+            core.log_fatal("No mapped channels found on iceboard%04d. "
+                           "You may need to update pydfmux to a newer version of pydfmux "
+                           "that stores mapped channel names on the boards, and reload "
+                           "the hardware map." % (serial),
+                           unit='HousekeepingConsumer')
+        return hwm
 
     @classmethod
     def HousekeepingForBoard(cls, hostname):
