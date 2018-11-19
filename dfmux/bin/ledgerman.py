@@ -49,10 +49,7 @@ if args.pathstring:
 else:
     chan_map_query = hwm.query(pydfmux.ChannelMapping)
 if args.state:
-    for bolo in hwm.query(pydfmux.Bolometer):
-        if bolo.readout_channel:
-            bolo.state = bolo.retrieve_bolo_state().state
-    hwm.commit()
+    hwm.query(pydfmux.Bolometer).load_bolo_states()
     chan_map_query = chan_map_query.join(pydfmux.ChannelMapping, pydfmux.Bolometer).filter(pydfmux.Bolometer.state._in(args.state))
 serial_list = np.unique(np.array([cm.iceboard.serial for cm in chan_map_query]))
 

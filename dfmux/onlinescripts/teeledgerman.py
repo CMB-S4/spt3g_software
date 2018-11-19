@@ -38,9 +38,7 @@ if args.hardware_map is not None:
 
     # Retrieve pydfmux state
     if args.state:
-        for bolo in hwm.query(pydfmux.Bolometer):
-            if bolo.readout_channel:
-                bolo.state = bolo.retrieve_bolo_state().state
+        hwm.query(pydfmux.Bolometer).load_bolo_states()
 
 print('Beginning data acquisition')
 
