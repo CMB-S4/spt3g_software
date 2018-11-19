@@ -37,7 +37,8 @@ if hwm.query(pydfmux.IceCrate).count() > 0:
     hwm.query(pydfmux.IceCrate).resolve()
 
 # make sure that the hardware map is consistent with what's on the IceBoards
-hwm.query(pydfmux.Bolometer).load_bolo_states()
+if args.state:
+    hwm.query(pydfmux.Bolometer).load_bolo_states()
 
 if args.align:
     core.log_notice('Aligning board sampling, this will break any existing DAN loops!',

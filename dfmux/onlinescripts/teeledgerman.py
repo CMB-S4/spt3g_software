@@ -38,7 +38,8 @@ if args.hardware_map is not None:
 
     # Retrieve pydfmux state
     # Make sure the hardware map is consistent with what's on the IceBoards
-    hwm.query(pydfmux.Bolometer).load_bolo_states()
+    if args.state:
+        hwm.query(pydfmux.Bolometer).load_bolo_states()
 
 core.log_notice('Beginning data acquisition', unit='TeeLedgerman')
 
