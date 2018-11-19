@@ -224,9 +224,10 @@ class HousekeepingConsumer(object):
 
             if mezzhk.present and mezzhk.power:
                 mezzhk.temperature = mezz['temperature']
-                mezzhk.squid_heater = 0.0 #mezz['squid_heater']  # AJA/KTS: temporary kludge, not in housekeeping tuber
-                mezzhk.squid_controller_power = False #mezz['squid_controller_power']  # AJA/KTS: temporary kludge, not in housekeeping tuber
-                mezzhk.squid_controller_temperature = 0.0 #mezz['squid_controller_temperature']  # AJA/KTS: temporary kludge, not in housekeeping tuber
+                # these parameters are not in the 64x housekeeping tuber
+                mezzhk.squid_heater = mezz.get('squid_heater', 0.0)
+                mezzhk.squid_controller_power = mezz.get('squid_controller_power', False)
+                mezzhk.squid_controller_temperature = mezz.get('squid_controller_temperature', 0.0)
 
             # Modules
             for m, mod in enumerate(mezz['modules']):
@@ -273,13 +274,13 @@ class HousekeepingConsumer(object):
                     if 'tuning' in chan and chan['tuning'] is not None:
                         chanhk.state = str(chan['tuning']['state'])
                         if ('rlatched' in chan['tuning'] and 
-                            chan['tuning']['rlatched'] != None):
+                            chan['tuning']['rlatched'] is not None):
                             chanhk.rlatched = chan['tuning']['rlatched']
                         if ('rnormal' in chan['tuning'] and 
-                            chan['tuning']['rnormal'] != None):
+                            chan['tuning']['rnormal'] is not None):
                             chanhk.rnormal = chan['tuning']['rnormal']
                         if ('rfrac_achieved' in chan['tuning'] and 
-                            chan['tuning']['rfrac_achieved'] != None):
+                            chan['tuning']['rfrac_achieved'] is not None):
                             chanhk.rfrac_achieved = chan['tuning']['rfrac_achieved']
 
                     #calculate the resistance conversion factor
