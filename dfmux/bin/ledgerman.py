@@ -31,17 +31,21 @@ args = parser.parse_args()
 # Import pydfmux later since it can take a while
 import pydfmux
 
-print('Initializing hardware map and boards')
+core.log_notice('Initializing hardware map and boards', unit='Ledgerman')
 hwm = pydfmux.load_session(open(args.hardware_map, 'r'))['hardware_map']
 if hwm.query(pydfmux.IceCrate).count() > 0:
     hwm.query(pydfmux.IceCrate).resolve()
 
+# make sure that the hardware map is consistent with what's on the IceBoards
+hwm.query(pydfmux.Bolometer).load_bolo_states()
+
 if args.align:
-    print('Aligning board sampling, this will break any existing DAN loops!')
+    core.log_notice('Aligning board sampling, this will break any existing DAN loops!',
+                    unit='Ledgerman')
     hwm.query(pydfmux.IceBoard).set_fir_stage(6)
     hwm.query(pydfmux.IceBoard).align_sampling()
 
-print('Beginning data acquisition')
+core.log_notice('Beginning data acquisition', unit='Ledgerman')
 
 # get board serial numbers only for the channels that we are recording
 if args.pathstring:
@@ -49,7 +53,6 @@ if args.pathstring:
 else:
     chan_map_query = hwm.query(pydfmux.ChannelMapping)
 if args.state:
-    hwm.query(pydfmux.Bolometer).load_bolo_states()
     chan_map_query = chan_map_query.join(pydfmux.ChannelMapping, pydfmux.Bolometer).filter(pydfmux.Bolometer.state._in(args.state))
 serial_list = np.unique(np.array([cm.iceboard.serial for cm in chan_map_query]))
 
@@ -64,7 +67,7 @@ for board in hwm.query(pydfmux.core.dfmux.IceBoard):
     testsock = socket.create_connection(('iceboard' + board.serial + '.local', 80))
     local_ips.add(testsock.getsockname()[0])
     testsock.close()
-print('Creating listeners for %d boards on interfaces: %s' % (hwm.query(pydfmux.core.dfmux.IceBoard).count(), ', '.join(local_ips)))
+core.log_notice('Creating listeners for %d boards on interfaces: %s' % (hwm.query(pydfmux.core.dfmux.IceBoard).count(), ', '.join(local_ips)), unit='Ledgerman')
 
 # Build mapping dictionary for old (64x) firmware
 v2_mapping = {'iceboard' + str(serial) + '.local': int(serial) for serial in serial_list}

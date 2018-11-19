@@ -31,16 +31,16 @@ if args.hardware_map is not None:
     # Import pydfmux later since it can take a while
     import pydfmux
 
-    print('Initializing hardware map and boards')
+    core.log_notice('Initializing hardware map and boards', unit='TeeLedgerman')
     hwm = pydfmux.load_session(open(args.hardware_map, 'r'))['hardware_map']
     if hwm.query(pydfmux.IceCrate).count() > 0:
         hwm.query(pydfmux.IceCrate).resolve()
 
     # Retrieve pydfmux state
-    if args.state:
-        hwm.query(pydfmux.Bolometer).load_bolo_states()
+    # Make sure the hardware map is consistent with what's on the IceBoards
+    hwm.query(pydfmux.Bolometer).load_bolo_states()
 
-print('Beginning data acquisition')
+core.log_notice('Beginning data acquisition', unit='TeeLedgerman')
 
 # Set up DfMux consumer
 pipe = core.G3Pipeline()
@@ -109,7 +109,7 @@ if args.hardware_map is None and len(args.pathstring) > 0:
         for k in keys_to_keep:
             new_wiring[k] = fr['OriginalWiringMap'][k]
         fr['WiringMap'] = new_wiring
-        print('Taking data from %d/%d detectors' % (len(keys_to_keep), len(fr['OriginalWiringMap'])))
+        core.log_notice('Taking data from %d/%d detectors' % (len(keys_to_keep), len(fr['OriginalWiringMap'])), unit='TeeLedgerman')
     pipe.Add(trim_wiring_map)
 
 if args.verbose:
