@@ -20,8 +20,8 @@ using namespace boost::math;
 
 const double PI = constants::pi<double>();
 
-#define ASIN asinf
-#define ATAN2 atan2f
+#define ASIN asin
+#define ATAN2 atan2
 
 //#define CHECK_QUAT_INVERSE
 
@@ -810,8 +810,8 @@ PYBINDINGS("coordinateutils")
 	def("create_lazy_det_ra_dec_trans", create_lazy_det_ra_dec_trans);
 	def("create_det_ra_dec_trans", create_det_ra_dec_trans);
 	def("convert_ra_dec_trans_to_gal", convert_ra_dec_trans_to_gal);
-	def("quat_to_ang", py_quat_to_ang);
-	def("ang_to_quat", ang_to_quat);
+	def("c_quat_to_ang", py_quat_to_ang);
+	def("c_ang_to_quat", ang_to_quat);
 	def("get_detector_pointing", get_detector_pointing);
 	def("get_detector_rotation", get_detector_rotation);
 	def("get_origin_rotator", get_origin_rotator);

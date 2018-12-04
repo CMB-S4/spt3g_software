@@ -18,4 +18,5 @@ target_link_libraries(coordinateutils core)
 execute_process(COMMAND ln -fsn ${CMAKE_CURRENT_SOURCE_DIR}/python ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/coordinateutils)
 
 add_spt3g_test(quattest)
+add_spt3g_test(quatangtest)
 add_spt3g_test(transtest SLOWTEST)
