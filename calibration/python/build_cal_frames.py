@@ -25,15 +25,17 @@ class BuildBoloPropertiesMap(object):
     - Physical Name Data (Key: 'PhysicalBoloIDs')
     '''
     
-    def __init__(self, drop_original_frames=True, filter_abs_point=False,
+    def __init__(self, drop_original_frames=True, fiducial_detectors=[],
                  bpm_name='NominalBolometerProperties', use_bpm_pointing=False):
         '''
         If drop_original_frames is True, will drop all input Calibration frames.
 
-        If filter_abs_point is True, will attempt to compensate for telescope
-        motion by centering the source on the focal plane. Note that this is less
-        robust than having real offline pointing and should only be used in
-        desperation.
+        If fiducial_detectors is set, will use the average of the position[s] of 
+        whatever detector[s] are specified to center each set of relative offsets
+        encountered (NB: this recentering is done in a Cartesian way). If it is
+        *not* specified, five detectors near the middle of the focal plane present
+        in every observation given will be chosen automatically and printed to the
+        console.
 
         bpm_name is the name of the key containing the input BolometerPropertiesMap
         that will be merged into the output map.
@@ -44,7 +46,7 @@ class BuildBoloPropertiesMap(object):
         '''
 
         self.drop_original_frames = drop_original_frames
-        self.filter_abs_point = filter_abs_point
+        self.fiducial_detectors = fiducial_detectors
         self.bpm_name = bpm_name
         self.use_bpm_pointing = use_bpm_pointing
 
@@ -56,18 +58,20 @@ class BuildBoloPropertiesMap(object):
 
             # Technique to average together points while ignoring outliers
             def robust_avg(data):
-                data = numpy.asarray(data)[numpy.isfinite(data)]
-                if len(data) == 1:
-                    return data[0]
-                return numpy.mean(scipy.stats.sigmaclip(data, low=2.5, high=2.5)[0])
+                return numpy.median(scipy.stats.sigmaclip(numpy.asarray(data)[numpy.isfinite(data)], low=2.0, high=2.0)[0])
+
+            if len(self.fiducial_detectors) == 0:
+                always_dets = set([bolo for bolo in self.props if numpy.isfinite(self.props[bolo].get('xoffsets', [numpy.nan])).all()])
+                self.fiducial_detectors = sorted(always_dets, key=lambda bolo: robust_avg(self.props[bolo]['xoffsets'])**2 + robust_avg(self.props[bolo]['yoffsets'])**2)[:5]
+                print('Using %s as the set of fiducial detectors for pointing' % self.fiducial_detectors)
 
             for bolo in self.props.keys():
                 p = BolometerProperties()
 
                 if 'xoffsets' in self.props[bolo]:
                     # Ideally we would have error bars on these measurements...
-                    p.x_offset = robust_avg(self.props[bolo]['xoffsets'])
-                    p.y_offset = robust_avg(self.props[bolo]['yoffsets'])
+                    p.x_offset = robust_avg([self.props[bolo]['xoffsets'][i] - numpy.mean([self.props[fd]['xoffsets'][i] for fd in self.fiducial_detectors]) for i in range(len(self.props[bolo]['xoffsets']))])
+                    p.y_offset = robust_avg([self.props[bolo]['yoffsets'][i] - numpy.mean([self.props[fd]['yoffsets'][i] for fd in self.fiducial_detectors]) for i in range(len(self.props[bolo]['xoffsets']))])
 
                 if 'physname' in self.props[bolo]:
                     p.physical_name = self.props[bolo]['physname']
@@ -102,19 +106,15 @@ class BuildBoloPropertiesMap(object):
 
             cframe = core.G3Frame(core.G3FrameType.Calibration)
             cframe['BolometerProperties'] = boloprops
+            cframe['FiducialPointingDetectors'] = core.G3VectorString(self.fiducial_detectors)
             return [cframe, frame]
 
         if self.bpm_name in frame:
             bpm = frame[self.bpm_name]
-
-            if self.use_bpm_pointing:
-                xshift = yshift = 0.
-
-                if self.filter_abs_point:
-                    # XXX: this algorithm is dubious and universally worse than
-                    # correct boresight pointing
-                    xshift = numpy.nanmedian([bpm[b].x_offset for b in bpm.keys()])
-                    yshift = numpy.nanmedian([bpm[b].y_offset for b in bpm.keys()])
+            if len(self.props) > 0:
+                npointings = max([len(p.get('xoffsets', [])) for p in self.props.values()])
+            else:
+                npointings = 0
 
             for bolo in bpm.keys():
                 bp = bpm[bolo]
@@ -124,10 +124,11 @@ class BuildBoloPropertiesMap(object):
 
                 if self.use_bpm_pointing:
                     if 'xoffsets' not in self.props[bolo]:
-                        self.props[bolo]['xoffsets'] = []
-                        self.props[bolo]['yoffsets'] = []
-                    self.props[bolo]['xoffsets'].append(bp.x_offset - xshift)
-                    self.props[bolo]['yoffsets'].append(bp.y_offset - yshift)
+                        self.props[bolo]['xoffsets'] = [numpy.nan]*npointings
+                        self.props[bolo]['yoffsets'] = [numpy.nan]*npointings
+
+                    self.props[bolo]['xoffsets'].append(bp.x_offset)
+                    self.props[bolo]['yoffsets'].append(bp.y_offset)
 
                 self.props[bolo]['band'] = bp.band
                 self.props[bolo]['coupling'] = bp.coupling
@@ -142,25 +143,36 @@ class BuildBoloPropertiesMap(object):
                 self.props[bolo]['polangle'].append(bp.pol_angle)
                 self.props[bolo]['poleff'].append(bp.pol_efficiency)
 
+            # Book NaNs for any non-present detectors
+            if self.use_bpm_pointing:
+                for bolo,p in self.props.items():
+                    if bolo in bpm:
+                        continue
+                    if 'xoffsets' in p:
+                        self.props[bolo]['xoffsets'].append(numpy.nan)
+                        self.props[bolo]['yoffsets'].append(numpy.nan)
+
         # Pointing calibration
         if 'PointingOffsetX' in frame:
-            xshift = yshift = 0.
-
-            if self.filter_abs_point:
-                # XXX: this algorithm is dubious and universally worse than
-                # correct boresight pointing
-                xshift = numpy.nanmedian(frame['PointingOffsetX'].values())
-                yshift = numpy.nanmedian(frame['PointingOffsetY'].values())
-
+            if len(self.props) > 0:
+                npointings = max([len(p.get('xoffsets', [])) for p in self.props.values()])
+            else:
+                npointings = 0
             for bolo in frame['PointingOffsetX'].keys():
                 if bolo not in self.props:
                     self.props[bolo] = {}
                 if 'xoffsets' not in self.props[bolo]:
-                    self.props[bolo]['xoffsets'] = []
-                    self.props[bolo]['yoffsets'] = []
+                    self.props[bolo]['xoffsets'] = [numpy.nan]*npointings
+                    self.props[bolo]['yoffsets'] = [numpy.nan]*npointings
 
-                self.props[bolo]['xoffsets'].append(frame['PointingOffsetX'][bolo] - xshift)
-                self.props[bolo]['yoffsets'].append(frame['PointingOffsetY'][bolo] - yshift)
+                self.props[bolo]['xoffsets'].append(frame['PointingOffsetX'][bolo])
+                self.props[bolo]['yoffsets'].append(frame['PointingOffsetY'][bolo])
+            for bolo,p in self.props.items():
+                if bolo in frame['PointingOffsetX']:
+                    continue
+                if 'xoffsets' in p:
+                    self.props[bolo]['xoffsets'].append(numpy.nan)
+                    self.props[bolo]['yoffsets'].append(numpy.nan)
 
         # Band calibration
         if 'BoloBands' in frame:
