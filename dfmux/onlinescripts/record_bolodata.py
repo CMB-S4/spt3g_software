@@ -125,6 +125,12 @@ if hwm is None:
     pipe.Add(BolometerPropertiesInjector)
 else:
     # Otherwise inject using the loaded HWM
+    def CheckWiring(frame):
+        if frame.type == core.G3FrameType.Wiring:
+            nchan = len(frame['WiringMap'].keys())
+            core.log_notice("Collecting data from %d mapped channels." % (nchan),
+                            unit='Data Acquisition')
+    pipe.Add(CheckWiring)
     pipe.Add(dfmux.PyDfMuxBolometerPropertiesInjector, pydfmux_hwm=hwm)
 
 # Provide a tee for realtime visualization before possible buffering
