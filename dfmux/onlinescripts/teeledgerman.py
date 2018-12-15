@@ -51,7 +51,7 @@ if args.hardware_map is not None:
     # Insert current hardware map, replacing whatever we got from the server,
     # if user requests it
     pipe.Add(lambda fr: fr.type != core.G3FrameType.Wiring)
-    pipe.Add(dfmux.PyDfMuxHardwareMapInjector, pydfmux_hwm=hwm, pathstring=args.pathstring, state=args.state)
+    pipe.Add(dfmux.PyDfMuxHardwareMapInjector, pydfmux_hwm=hwm)
 
     if args.physnames:
         # Need bolo properties below
@@ -96,7 +96,7 @@ if args.physnames:
             return [self.wiringframe, frame]
     pipe.Add(SwapPhysLogicalNames)
 
-if args.hardware_map is None and len(args.pathstring) > 0:
+if len(args.pathstring) > 0:
     def trim_wiring_map(fr):
         if fr.type != core.G3FrameType.Wiring:
             return
