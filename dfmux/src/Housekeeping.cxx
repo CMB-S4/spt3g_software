@@ -37,7 +37,10 @@ template <class A> void HkChannelInfo::serialize(A &ar, unsigned v)
 		ar & make_nvp("rfrac_achieved", rfrac_achieved);
 	}
 
-	if (v >= 3) {
+	if (v == 3) {
+		// Absorb a short-lived calibration constant that lived in
+		// the HK data to address software limitations in Lyrebird.
+		double res_conversion_factor;
 		ar & make_nvp("res_conversion_factor", res_conversion_factor);
 	}
 }
@@ -186,7 +189,6 @@ PYBINDINGS("dfmux") {
 	    .def_readwrite("rfrac_achieved", &HkChannelInfo::rfrac_achieved,
 	       "Achieved resistance of the detector when tuned as a fraction "
 	       "of rnormal, as stored by the control software tuning script.")
-	    .def_readwrite("res_conversion_factor", &HkChannelInfo::res_conversion_factor)
 	;
 	register_map<std::map<int, HkChannelInfo> >("HkChannelInfoMap",
 	    "Mapping of channel number (1-indexed) to channel status "

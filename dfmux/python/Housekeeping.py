@@ -283,17 +283,6 @@ class HousekeepingConsumer(object):
                             chan['tuning']['rfrac_achieved'] is not None):
                             chanhk.rfrac_achieved = chan['tuning']['rfrac_achieved']
 
-                    #calculate the resistance conversion factor
-                    if 'gains' in mod:
-                        V = convert_TF(modhk.carrier_gain, 
-                                       target='carrier', unit='NORMALIZED', 
-                                       frequency = chanhk.carrier_frequency / core.G3Units.Hz)
-                        I = convert_TF(modhk.nuller_gain, 
-                                       target='nuller', unit='RAW', 
-                                       frequency = chanhk.carrier_frequency / core.G3Units.Hz)
-                        chanhk.res_conversion_factor = chanhk.carrier_amplitude * V/I
-                        #  R = (V * Vconv) / (I  * Iconv)
-
                     modhk.channels[k+1] = chanhk
                 mezzhk.modules[m+1] = modhk
             boardhk.mezz[n+1] = mezzhk
