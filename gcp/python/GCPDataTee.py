@@ -162,7 +162,7 @@ class GCPHousekeepingTee(object):
             for i in [1,2]:
                 buf += struct.pack('<?',
                                    board.mezz[i].present)
-                buf += struct.pack('<f',
+                buf += struct.pack('<?',
                                    board.mezz[i].power)
                 buf += struct.pack('<?',
                                    board.mezz[i].squid_controller_power)
