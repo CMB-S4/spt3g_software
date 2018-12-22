@@ -157,7 +157,7 @@ class HousekeepingConsumer(object):
                         self.hwmf = hwmf
                         return [hwmf, frame]
                     for k in hwm:
-                        if vars(hwm[k]) != vars(old_hwm['WiringMap'][k]):
+                        if vars(hwm[k]) != vars(old_hwm[k]):
                             self.hwmf = hwmf
                             return [hwmf, frame]
 
