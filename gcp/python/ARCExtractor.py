@@ -164,9 +164,6 @@ def UnpackACUData(f):
     a.time = f['antenna0']['frame']['utc']
     a.az_pos = f['antenna0']['acu']['az_pos'].value
     a.el_pos = f['antenna0']['acu']['el_pos'].value
-    a.az_err = f['antenna0']['acu']['az_err'].value
-    a.el_err = f['antenna0']['acu']['el_err'].value
-
     a.az_rate = f['antenna0']['acu']['az_rate'].value
     a.el_rate = f['antenna0']['acu']['el_rate'].value
 

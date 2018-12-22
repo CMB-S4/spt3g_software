@@ -15,8 +15,12 @@ template <class A> void ACUStatus::serialize(A &ar, unsigned v)
 	ar & make_nvp("el_pos", el_pos);
 	ar & make_nvp("az_rate", az_rate);
 	ar & make_nvp("el_rate", el_rate);
-	ar & make_nvp("az_err", az_err);
-	ar & make_nvp("el_err", el_err);
+
+	if (v < 2) {
+		double az_err = 0, el_err = 0;
+		ar & make_nvp("az_err", az_err);
+		ar & make_nvp("el_err", el_err);
+	}
 
 	ar & make_nvp("px_checksum_error_count", px_checksum_error_count);
 	ar & make_nvp("px_resync_count", px_resync_count);
@@ -78,7 +82,6 @@ PYBINDINGS("gcp") {
 	    .def_readwrite("el_pos", &ACUStatus::el_pos)
 	    .def_readwrite("az_rate", &ACUStatus::az_rate)
 	    .def_readwrite("el_rate", &ACUStatus::el_rate)
-	    .def_readwrite("az_err", &ACUStatus::az_err)
 	    .def_readwrite("px_checksum_error_count", &ACUStatus::px_checksum_error_count)
 	    .def_readwrite("px_resync_count", &ACUStatus::px_resync_count)
 	    .def_readwrite("px_resync_timeout_count", &ACUStatus::px_resync_timeout_count)

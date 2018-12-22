@@ -12,8 +12,8 @@
 class ACUStatus : public G3FrameObject
 {
 public:
-	ACUStatus() : az_pos(NAN), el_pos(NAN), az_rate(NAN), el_rate(NAN),
-	    az_err(NAN), el_err(NAN) {}
+	ACUStatus() : az_pos(NAN), el_pos(NAN), az_rate(NAN), el_rate(NAN)
+	    {}
 	std::string Description() const;
 
 	G3Time time;
@@ -23,9 +23,6 @@ public:
 
 	double az_rate; /* Angular units per second */
 	double el_rate;
-
-	double az_err;
-	double el_err;
 
 	int px_checksum_error_count;
 	int px_resync_count;
@@ -48,7 +45,7 @@ public:
 };
 
 G3_POINTERS(ACUStatus);
-G3_SERIALIZABLE(ACUStatus, 1);
+G3_SERIALIZABLE(ACUStatus, 2);
 
 G3VECTOR_OF(ACUStatus, ACUStatusVector);
 
