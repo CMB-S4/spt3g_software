@@ -133,6 +133,8 @@ def PyDfMuxBolometerPropertiesInjector(frame, pydfmux_hwm=None, angle_per_mm = 4
         bpm[str(bolo.name)] = bp
 
     cal['NominalBolometerProperties'] = bpm
+    from pydfmux import current_transferfunction
+    cal['DfMuxTransferFunction'] = current_transferfunction
  
     return [frame, cal]
     
