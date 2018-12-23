@@ -126,6 +126,7 @@ class HousekeepingConsumer(object):
                     time.sleep(0.02) # Stagger return data transfer a little to
                                      # avoid overloading the network on the return
 
+                found = False
                 for board in self.board_serials:
                     dat = self.tuber[board].GetReply()[0]['result']
 
@@ -136,6 +137,14 @@ class HousekeepingConsumer(object):
                     boardw = self.WiringFromJSON(dat, ip, crate, slot)
                     for key in boardw.keys():
                         hwm[key] = boardw[key]
+                        found = True
+
+                if not found:
+                    core.log_fatal("No mapped channels found on any IceBoards. "
+                                   "You may need to update pydfmux to a newer version of pydfmux "
+                                   "that stores mapped channel names on the boards, and reload "
+                                   "the hardware map.",
+                                   unit='HousekeepingConsumer')
 
                 frame['DfMuxHousekeeping'] = hkdata
 
@@ -156,10 +165,13 @@ class HousekeepingConsumer(object):
                     if (set(hwm.keys()) ^ set(old_hwm.keys())):
                         self.hwmf = hwmf
                         return [hwmf, frame]
-                    for k in hwm:
-                        if vars(hwm[k]) != vars(old_hwm[k]):
-                            self.hwmf = hwmf
-                            return [hwmf, frame]
+                    for k in hwm.keys():
+                        try:
+                            if vars(hwm[str(k)]) != vars(old_hwm[str(k)]):
+                                self.hwmf = hwmf
+                                return [hwmf, frame]
+                        except:
+                            core.log_error("Invalid HWM key %r" % k)
 
                 # If we get here then the wiring map hasn't changed,
                 # so return the populated Housekeeping frame as it is
@@ -302,9 +314,8 @@ class HousekeepingConsumer(object):
             for imod, mod in enumerate(mezz['modules']):
                 for ichan, chan in enumerate(mod['channels']):
                     name = (chan.get('tuning', {}) or {}).get('name', None)
-                    if name is None:
+                    if not name:
                         continue
-                    found = True
                     mapping = DfMuxChannelMapping()
                     mapping.board_ip = ip
                     mapping.board_serial = serial
@@ -312,9 +323,14 @@ class HousekeepingConsumer(object):
                     mapping.crate_serial = crate
                     mapping.module = imod + 4 * imezz
                     mapping.channel = ichan
-                    hwm[name] = mapping
+                    try:
+                        name = str(name)
+                        hwm[name] = mapping
+                        found = True
+                    except:
+                        core.log_error("Invalid channel name %r" % (name))
         if not found:
-            core.log_fatal("No mapped channels found on iceboard%04d. "
+            core.log_error("No mapped channels found on iceboard%04d. "
                            "You may need to update pydfmux to a newer version of pydfmux "
                            "that stores mapped channel names on the boards, and reload "
                            "the hardware map." % (serial),
