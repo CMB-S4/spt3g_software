@@ -43,6 +43,10 @@ template <class A> void HkChannelInfo::serialize(A &ar, unsigned v)
 		double res_conversion_factor;
 		ar & make_nvp("res_conversion_factor", res_conversion_factor);
 	}
+
+	if (v > 4) {
+		ar & make_nvp("loopgain", loopgain);
+	}
 }
 
 std::string HkModuleInfo::Description() const
@@ -189,6 +193,9 @@ PYBINDINGS("dfmux") {
 	    .def_readwrite("rfrac_achieved", &HkChannelInfo::rfrac_achieved,
 	       "Achieved resistance of the detector when tuned as a fraction "
 	       "of rnormal, as stored by the control software tuning script.")
+	    .def_readwrite("loopgain", &HkChannelInfo::loopgain,
+	       "Measured loopgain of the detector as stored by the "
+	       "control software tuning script.")
 	;
 	register_map<std::map<int, HkChannelInfo> >("HkChannelInfoMap",
 	    "Mapping of channel number (1-indexed) to channel status "

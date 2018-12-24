@@ -294,6 +294,9 @@ class HousekeepingConsumer(object):
                         if ('rfrac_achieved' in chan['tuning'] and 
                             chan['tuning']['rfrac_achieved'] is not None):
                             chanhk.rfrac_achieved = chan['tuning']['rfrac_achieved']
+                        if ('loopgain' in chan['tuning'] and
+                            chan['tuning']['loopgain'] is not None):
+                            chanhk.loopgain = chan['tuning']['loopgain']
 
                     modhk.channels[k+1] = chanhk
                 mezzhk.modules[m+1] = modhk

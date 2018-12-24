@@ -25,7 +25,7 @@ public:
 	HkChannelInfo() : G3FrameObject(), channel_number(-1), carrier_amplitude(NAN),
         carrier_frequency(NAN), dan_accumulator_enable(false), dan_feedback_enable(false),
         dan_streaming_enable(false), dan_gain(NAN), demod_frequency(NAN), nuller_amplitude(NAN),
-        dan_railed(false), rlatched(NAN), rnormal(NAN), rfrac_achieved(NAN) {}
+        dan_railed(false), rlatched(NAN), rnormal(NAN), rfrac_achieved(NAN), loopgain(NAN) {}
 
 	int32_t channel_number; // 1-indexed
 	double carrier_amplitude;
@@ -43,13 +43,14 @@ public:
 	double rlatched;
 	double rnormal;
 	double rfrac_achieved;
+	double loopgain;
 
 	template <class A> void serialize(A &ar, unsigned v);
 	std::string Description() const;
 };
 
 G3_POINTERS(HkChannelInfo);
-G3_SERIALIZABLE(HkChannelInfo, 4);
+G3_SERIALIZABLE(HkChannelInfo, 5);
 
 class HkModuleInfo : public G3FrameObject
 {
