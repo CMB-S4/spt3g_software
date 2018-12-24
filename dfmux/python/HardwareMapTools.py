@@ -20,6 +20,10 @@ class GenerateFakeHardwareMap(object):
             self.ran = True
             return [self.insert, frame]
 
+NUM_MEZZANINES = 2
+NUM_MODS_PER_MEZZ = 4
+NUM_MODULES = NUM_MEZZANINES * NUM_MODS_PER_MEZZ
+
 @core.indexmod
 class PyDfMuxWiringMapInjector(object):
     '''
@@ -55,9 +59,9 @@ class PyDfMuxWiringMapInjector(object):
             mapping.board_serial = int(bolo.iceboard.serial)
             mapping.board_slot = bolo.iceboard.slot if bolo.iceboard.slot else -1
             mapping.crate_serial = int(bolo.iceboard.crate.serial) if bolo.iceboard.slot else -1
-            mapping.module = bolo.readout_channel.module.module - 1 # pydfmux HWMs use 1-indexing of modules, while FPGA uses 0-indexing
-            if bolo.readout_channel.mezzanine.mezzanine == 2:
-                mapping.module += 4
+            mezz = bolo.readout_channel.mezzanine.mezzanine
+            mod = bolo.readout_channel.module.module
+            mapping.module = (mezz - 1) * NUM_MODS_PER_MEZZ + (mod - 1)
             mapping.channel = bolo.readout_channel.channel - 1 # pydfmux HWMs use 1-indexing of channels, while FPGA uses 0-indexing
             hwm[str(bolo.bolometer.name)] = mapping
         self.hwmf['WiringMap'] = hwm
@@ -80,6 +84,30 @@ class PyDfMuxWiringMapInjector(object):
 
 # Compatibility
 PyDfMuxHardwareMapInjector = PyDfMuxWiringMapInjector
+
+
+@core.usefulfunc
+def PathStringForBolo(wiringmap, bolo):
+    '''
+    Obtain the channel pathstring for a bolometer named "bolo"
+    using the passed wiring map.
+    '''
+    wiringentry = wiringmap[bolo]
+    if wiringentry.crate_serial >= 0:
+        path = '/'.join([
+            '%03d' % wiringentry.crate_serial,
+            '%d' % wiringentry.board_slot,
+        ])
+    else:
+        path = '%04d' % wiringentry.board_serial
+    path.append('/'.join([
+        path,
+        '%d' % (wiringentry.module // NUM_MODULES) + 1,
+        '%d' % (wiringentry.module % NUM_MODULES) + 1,
+        '%d' % wiringentry.channel + 1,
+    ]))
+    return path
+
 
 @core.indexmod
 def PyDfMuxBolometerPropertiesInjector(frame, pydfmux_hwm=None, angle_per_mm = 4.186*core.G3Units.deg/1000):
@@ -135,9 +163,9 @@ def PyDfMuxBolometerPropertiesInjector(frame, pydfmux_hwm=None, angle_per_mm = 4
     cal['NominalBolometerProperties'] = bpm
     from pydfmux import current_transferfunction
     cal['DfMuxTransferFunction'] = current_transferfunction
- 
+
     return [frame, cal]
-    
+
 core.indexmod
 class PyDfMuxWiringMapInjectorAllChannels(object):
     '''
@@ -167,9 +195,9 @@ class PyDfMuxWiringMapInjectorAllChannels(object):
                 mapping.board_serial = int(mod.iceboard.serial)
                 mapping.board_slot = mod.iceboard.slot if mod.iceboard.slot else -1
                 mapping.crate_serial = int(mod.iceboard.crate.serial) if mod.iceboard.slot else -1
-                mapping.module = mod.module - 1 # pydfmux HWMs use 1-indexing of modules, while FPGA uses 0-indexing
-                if mod.mezzanine.mezzanine == 2:
-                    mapping.module += 4
+                mezz = mod.mezzanine.mezzanine
+                # pydfmux HWMs use 1-indexing of modules, while FPGA uses 0-indexing
+                mapping.module = (mezz - 1) * NUM_MODS_PER_MEZZ + mod.module - 1
                 mapping.channel = bolo
                 hwm[str(mapping)] = mapping
         hwmf['WiringMap'] = hwm
