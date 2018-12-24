@@ -51,6 +51,7 @@ class BuildBoloPropertiesMap(object):
         self.use_bpm_pointing = use_bpm_pointing
 
         self.props = {}
+        self.dfmux_tf = None
 
     def __call__(self, frame):
         if frame.type == core.G3FrameType.EndProcessing:
@@ -58,7 +59,11 @@ class BuildBoloPropertiesMap(object):
 
             # Technique to average together points while ignoring outliers
             def robust_avg(data):
-                return numpy.median(scipy.stats.sigmaclip(numpy.asarray(data)[numpy.isfinite(data)], low=2.0, high=2.0)[0])
+                gooddata = numpy.asarray(data)[numpy.isfinite(data)]
+                if len(gooddata) == 1:
+                    return gooddata[0]
+                return numpy.median(scipy.stats.sigmaclip(gooddata, 
+                                                          low=2.0, high=2.0)[0])
 
             if len(self.fiducial_detectors) == 0:
                 always_dets = set([bolo for bolo in self.props if numpy.isfinite(self.props[bolo].get('xoffsets', [numpy.nan])).all()])
@@ -107,6 +112,7 @@ class BuildBoloPropertiesMap(object):
             cframe = core.G3Frame(core.G3FrameType.Calibration)
             cframe['BolometerProperties'] = boloprops
             cframe['FiducialPointingDetectors'] = core.G3VectorString(self.fiducial_detectors)
+            cframe['DfMuxTransferFunction'] = self.dfmux_tf
             return [cframe, frame]
 
         if self.bpm_name in frame:
@@ -229,6 +235,10 @@ class BuildBoloPropertiesMap(object):
 
                 self.props[bolo]['polangle'].append(frame['PolarizationAngle'][bolo])
                 self.props[bolo]['poleff'].append(frame['PolarizationEfficiency'][bolo])
+
+        # DfMux Transfer Function
+        if 'DfMuxTransferFunction' in frame:
+            self.dfmux_tf = frame['DfMuxTransferFunction']
 
         if frame.type == core.G3FrameType.Calibration and self.drop_original_frames:
             return []
