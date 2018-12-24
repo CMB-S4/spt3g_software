@@ -57,7 +57,7 @@ def bolo_bias_voltage_rms(wiringmap, hkmap, bolo, system, tf=None):
 def get_timestream_unit_conversion(from_units, to_units, bolo, wiringmap=None, hkmap=None, system=None, tf=None):
     '''
     Return the scalar conversion factor to move timestream data from a
-    given system of units (Power, Current, Counts) to another one.
+    given system of units (Power, Resistance, Current, Counts) to another one.
     Requires a wiring map and recent housekeeping data.
     Returned quantities are RMS for currents and time-averaged for power.
 
@@ -73,12 +73,32 @@ def get_timestream_unit_conversion(from_units, to_units, bolo, wiringmap=None, h
     if hkmap is None:
         core.log_fatal('Try to convert data with no housekeeping', unit='dfmux.unittransforms')
 
+    if from_units == to_units:
+        return 1.
+
+    I = counts_to_rms_amps(wiringmap, hkmap, bolo, system, tf)
+    V = bolo_bias_voltage_rms(wiringmap, hkmap, bolo, system, tf)
+
+    if from_units == core.G3TimestreamUnits.Resistance:
+        if to_units == core.G3TimestreamUnits.Counts:
+            return V / I
+        if to_units == core.G3TimestreamUnits.Current:
+            return V
+        if to_units == core.G3TimestreamUnits.Power:
+            return V * V
+    if to_units == core.G3TimestreamUnits.Resistance:
+        if from_units == core.G3TimestreamUnits.Counts:
+            return V / I
+        if from_units == core.G3TimestreamUnits.Current:
+            return V
+        if from_units == core.G3TimestreamUnits.Power:
+            return V * V
+
     # First, convert to watts
     if from_units == core.G3TimestreamUnits.Counts:
-        to_watts = counts_to_rms_amps(wiringmap, hkmap, bolo, system, tf)
-        to_watts *= bolo_bias_voltage_rms(wiringmap, hkmap, bolo, system, tf)
+        to_watts = I * V
     elif from_units == core.G3TimestreamUnits.Current:
-        to_watts = bolo_bias_voltage_rms(wiringmap, hkmap, bolo, system, tf)
+        to_watts = V
     elif from_units == core.G3TimestreamUnits.Power:
         to_watts = 1.
     else:
@@ -86,10 +106,11 @@ def get_timestream_unit_conversion(from_units, to_units, bolo, wiringmap=None, h
 
     # Now the conversion from watts
     if to_units == core.G3TimestreamUnits.Counts:
-        from_watts = 1./counts_to_rms_amps(wiringmap, hkmap, bolo, system, tf)
-        from_watts /= bolo_bias_voltage_rms(wiringmap, hkmap, bolo, system, tf)
+        from_watts = I * V
+        if from_watts != 0:
+            from_watts = 1./from_watts
     elif to_units == core.G3TimestreamUnits.Current:
-        from_watts = bolo_bias_voltage_rms(wiringmap, hkmap, bolo, system, tf)
+        from_watts = V
         if from_watts != 0:
             from_watts = 1./from_watts
     elif to_units == core.G3TimestreamUnits.Power:
@@ -188,6 +209,8 @@ class ConvertTimestreamUnits(object):
 
             # Convert timestream and store results
             convts = core.G3Timestream(ts)
+            if core.G3TimestreamUnits.Resistance in [self.units, ts.units] and self.units != ts.units:
+                convts = 1. / convts
             convts.units = self.units
             convts *= convfactor
             if convts.units != core.G3TimestreamUnits.Counts:
