@@ -1,5 +1,6 @@
 from spt3g import core
 from spt3g.dfmux import DfMuxMetaSample
+import numpy as np
 
 def get_empty_timepoint(sample_time):
     tp_frame = core.G3Frame(core.G3FrameType.Timepoint)
