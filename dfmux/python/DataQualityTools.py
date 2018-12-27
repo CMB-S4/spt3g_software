@@ -28,3 +28,60 @@ class AddMissingTimepoints(object):
         new_packets.append(frame)
         return new_packets
 
+class FillMissingTimepointFrames(object):
+    '''
+    Search for Timepoint frames that come at larger-than-expected intervals.
+    Fill in the missin frames with garbage, and mark them as garbage for
+    conversion to NaNs later.
+    '''
+    def __init__(self):
+        self.dt = None
+        self.last_frame = None
+        self.buffer = []
+
+    def __call__(self, fr):
+        if fr.type != core.G3FrameType.Timepoint:
+            return
+        if self.dt is None:
+            # Calculate the sample rate from the first 20 frames
+            self.buffer.append(fr)
+            if len(self.buffer) < 20:
+                return []
+            else:
+                times = [_fr['EventHeader'].time for _fr in self.buffer]
+                intervals = np.diff(times)
+                self.dt = min(intervals[intervals > 0])
+                # Now process the frames in the buffer
+                out = sum([self._find_and_fill_frames(_fr) for _fr in self.buffer], [])
+                self.buffer = []
+                return out
+        return self._find_and_fill_frames(fr)
+
+    def _find_and_fill_frames(self, fr):
+        # This function does most of the work:
+        # Find frames with separation that is too large, and fill the gaps
+        # with new frames.
+        if self.last_frame is None:
+            self.last_frame = fr
+            return [fr]
+        this_dt = fr['EventHeader'].time - self.last_frame['EventHeader'].time
+        if this_dt > 1.5 * self.dt:
+            # We're missing at least one frame
+            nframes = int(np.round(this_dt / self.dt) - 1)
+            injected_dt = this_dt / (nframes + 1)
+            injected_frs = [core.G3Frame(core.G3FrameType.Timepoint)
+                            for i in range(nframes)]
+            for i, new_fr in enumerate(injected_frs):
+                new_fr['EventHeader'] = self.last_frame['EventHeader'] + \
+                                     injected_dt * (i + 1)
+                new_fr['DfMux'] = fr['DfMux'].copy()
+                try:
+                    new_fr['CalibratorOn'] = fr['CalibratorOn']
+                except KeyError:
+                    pass
+                new_fr['GarbageData'] = True
+            self.last_frame = fr
+            return injected_frs + [fr]
+        self.last_frame = fr
+        return [fr]
+
