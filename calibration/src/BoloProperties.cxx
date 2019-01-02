@@ -30,7 +30,9 @@ template <class A> void BolometerProperties::serialize(A &ar, unsigned v)
 	}
 	
 	if (v > 4) {
-		ar & make_nvp("coupling", (uint32_t &)coupling);
+               uint32_t couplingX = coupling;
+               ar & make_nvp("coupling", couplingX);
+               coupling = (BolometerProperties::CouplingType) couplingX;
 	}
 
 	if (v > 5) {
