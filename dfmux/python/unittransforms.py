@@ -193,7 +193,8 @@ class ConvertTimestreamUnits(object):
             if ts.units not in self.convfactors:
                 self.convfactors[ts.units] = {}
             if ts.units == self.units:
-                convfactor = 1.
+                newts[bolo] = ts
+                continue
             elif bolo in self.convfactors[ts.units]:
                 convfactor = self.convfactors[ts.units][bolo]
             else:
