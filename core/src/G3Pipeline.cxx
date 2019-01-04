@@ -155,7 +155,7 @@ PushFrameThroughQueue(G3FramePtr frame, bool profile, bool graph,
 
 		// If memory usage has increased (allow for lazy deallocation),
 		// mark the peak RAM while this module was running.
-		if (rusage.ru_maxrss > last_rusage.ru_maxrss)
+		if (rusage.ru_maxrss > last_rusage.ru_maxrss + 10*1024 /*10MB*/)
 			next_mod->maxrss = rusage.ru_maxrss;
 
 		next_mod->frames++;
