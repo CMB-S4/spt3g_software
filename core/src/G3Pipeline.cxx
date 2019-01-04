@@ -46,6 +46,7 @@ struct G3Pipeline_mod_data {
 		mod = module.second;
 		name = module.first;
 		utime.tv_sec = 0; utime.tv_usec = 0; stime = utime;
+		maxrss = 0;
 	}
 
 	std::string name;
@@ -53,6 +54,7 @@ struct G3Pipeline_mod_data {
 	int frames;
 	struct timeval utime;
 	struct timeval stime;
+	long maxrss;
 	int graph_id;
 };
 
@@ -150,6 +152,11 @@ PushFrameThroughQueue(G3FramePtr frame, bool profile, bool graph,
 
 		timersub(&rusage.ru_stime, &last_rusage.ru_stime, &deltat);
 		timeradd(&next_mod->stime, &deltat, &next_mod->stime);
+
+		// If memory usage has increased (allow for lazy deallocation),
+		// mark the peak RAM while this module was running.
+		if (rusage.ru_maxrss > last_rusage.ru_maxrss)
+			next_mod->maxrss = rusage.ru_maxrss;
 
 		next_mod->frames++;
 		last_rusage = rusage;
@@ -279,6 +286,8 @@ G3Pipeline::Run(bool profile, bool graph)
 	if (profile) {
 		struct timeval utime_total = {0, 0};
 		struct timeval stime_total = {0, 0};
+		long last_maxrss = 0;
+		std::string balloonmod = "";
 
 		printf("Pipeline profiling results:\n");
 		for (auto i = mods.begin(); i != mods.end(); i++) {
@@ -292,10 +301,17 @@ G3Pipeline::Run(bool profile, bool graph)
 			     i->frames);
 			timeradd(&utime_total, &i->utime, &utime_total);
 			timeradd(&stime_total, &i->stime, &stime_total);
+
+			if (i->maxrss > last_maxrss) {
+				balloonmod = i->name;
+				last_maxrss = i->maxrss;
+			}
 		}
 		printf("Total: %ld.%06ld user, %ld.%06ld system\n",
 		    long(utime_total.tv_sec), long(utime_total.tv_usec),
 		    long(stime_total.tv_sec), long(stime_total.tv_usec));
+		printf("Peak memory consumption (%.1f MB) in module %s\n",
+		    double(last_maxrss) / 1024, balloonmod.c_str());
 	}
 
 	if (graph) {
