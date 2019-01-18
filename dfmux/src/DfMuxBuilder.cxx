@@ -162,6 +162,7 @@ void DfMuxBuilder::ProcessNewData()
 			// Prepare message about which boards are missing
 			// if we have a board list.
 			std::ostringstream msg_boards_missing;
+			unsigned boards_received = nboards_;
 			if (board_list_.size() > 0)
 				msg_boards_missing << ". Missing boards";
 
@@ -170,6 +171,7 @@ void DfMuxBuilder::ProcessNewData()
 				if (oqueue_.front().sample->find(*b) == 
 				    oqueue_.front().sample->end()) {
 					msg_boards_missing << " " << *b;
+					boards_received -= 1;
 					// Insert blank sample from this board
 					// so later code knows what could be
 					// there.
@@ -180,7 +182,7 @@ void DfMuxBuilder::ProcessNewData()
 			    "from %zd/%zd boards received)%s",
 			    oqueue_.front().frame->Get<G3Time>(
 			      "EventHeader")->Description().c_str(),
-			    oqueue_.front().sample->size(), nboards_,
+			    boards_received, nboards_,
 			    msg_boards_missing.str().c_str());
 
 			oqueue_.front().frame->Put("DfMux",
