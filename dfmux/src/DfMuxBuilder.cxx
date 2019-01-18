@@ -162,7 +162,7 @@ void DfMuxBuilder::ProcessNewData()
 			// Prepare message about which boards are missing
 			// if we have a board list.
 			std::ostringstream msg_boards_missing;
-			unsigned boards_received = nboards_;
+			size_t boards_received = nboards_;
 			if (board_list_.size() > 0)
 				msg_boards_missing << ". Missing boards";
 
