@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from spt3g import core, dfmux, gcp, auxdaq
-import socket, argparse, os
+import socket, argparse, os, syslog
 
 parser = argparse.ArgumentParser(description='Record dfmux data to disk')
 parser.add_argument('hardware_map', metavar='/path/to/hwm.yaml', help='Path to hardware map YAML file')
@@ -17,7 +17,7 @@ args = parser.parse_args()
 # Tee log messages to both log file and GCP socket
 console_logger = core.G3PrintfLogger()
 console_logger.timestamps = True # Make sure to get timestamps in the logs
-core.G3Logger.global_logger = core.G3MultiLogger([console_logger, gcp.GCPLogger()])
+core.G3Logger.global_logger = core.G3MultiLogger([console_logger, core.G3SyslogLogger("dfmuxdaq: ", syslog.LOG_USER)])
 
 args.hardware_map = os.path.realpath(args.hardware_map)
 
