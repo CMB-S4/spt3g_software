@@ -17,16 +17,8 @@
  */
 G3SyslogLogger::G3SyslogLogger(const std::string& ident, int facility,
   G3LogLevel level)
-  : G3Logger(level)
-{
-	openlog(ident.empty() ? NULL : ident.c_str(),
-	    LOG_CONS | LOG_PID | LOG_NDELAY, facility);
-}
-
-G3SyslogLogger::~G3SyslogLogger()
-{
-	closelog();
-}
+  : G3Logger(level), syslog_ident(ident), syslog_facility(facility)
+{}
 
 void
 G3SyslogLogger::Log(G3LogLevel level, const std::string &unit,
@@ -38,6 +30,9 @@ G3SyslogLogger::Log(G3LogLevel level, const std::string &unit,
 
 	if(LogLevelForUnit(unit) > level)
 		return;
+
+	openlog(syslog_ident.empty() ? NULL : syslog_ident.c_str(),
+	    LOG_CONS | LOG_PID | LOG_NDELAY, syslog_facility);
 
 	switch(level) {
 	case G3LOG_TRACE:
@@ -76,5 +71,7 @@ G3SyslogLogger::Log(G3LogLevel level, const std::string &unit,
 
 	syslog(priority, "%s (%s): %s (%s:%d in %s)", log_description,
 	    unit.c_str(), message.c_str(), file.c_str(), line, func.c_str());
+
+	closelog();
 }
 
