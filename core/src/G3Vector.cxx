@@ -8,6 +8,7 @@ G3_SERIALIZABLE_CODE(G3VectorInt);
 G3_SERIALIZABLE_CODE(G3VectorDouble);
 G3_SERIALIZABLE_CODE(G3VectorComplexDouble);
 G3_SERIALIZABLE_CODE(G3VectorString);
+G3_SERIALIZABLE_CODE(G3VectorVectorString);
 G3_SERIALIZABLE_CODE(G3VectorFrameObject);
 G3_SERIALIZABLE_CODE(G3VectorUnsignedChar);
 G3_SERIALIZABLE_CODE(G3VectorTime);
@@ -167,6 +168,9 @@ PYBINDINGS("core") {
 #endif
 
 	register_g3vector<std::string>("G3VectorString", "List of strings.");
+	register_vector_of<G3VectorString>("VectorG3VectorString");
+	register_g3vector<G3VectorString>("G3VectorVectorString", "List of "
+	    "lists of strings.");
 	register_g3vector<G3FrameObjectPtr>("G3VectorFrameObject", "List of "
 	    "generic frame objects. Can lead to paradoxes; avoid use of this "
 	    "class unless you are sure you need it.");

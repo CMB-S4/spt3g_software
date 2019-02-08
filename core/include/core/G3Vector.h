@@ -73,6 +73,7 @@ G3VECTOR_OF(double, G3VectorDouble);
 G3VECTOR_OF(int32_t, G3VectorInt);
 G3VECTOR_OF(uint8_t, G3VectorUnsignedChar);
 G3VECTOR_OF(std::string, G3VectorString);
+G3VECTOR_OF(G3VectorString, G3VectorVectorString);
 G3VECTOR_OF(G3FrameObjectPtr, G3VectorFrameObject);
 G3VECTOR_OF(G3Time, G3VectorTime);
 
