@@ -48,6 +48,7 @@ public:
 		Wiring = 'W',
 		Calibration = 'C',
 		GcpSlow = 'G',
+		PipelineInfo = 'P',
 		EndProcessing = 'Z',
 		None = 'N',
 	};

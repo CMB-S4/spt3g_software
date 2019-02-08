@@ -205,6 +205,9 @@ std::ostream& operator<<(std::ostream& os, const G3Frame::FrameType &frame_type)
 	case G3Frame::InstrumentStatus:
 		ft_str = "InstrumentStatus";
 		break;
+	case G3Frame::PipelineInfo:
+		ft_str = "PipelineInfo";
+		break;
 	case G3Frame::GcpSlow:
 		ft_str = "GcpSlow";
 		break;
