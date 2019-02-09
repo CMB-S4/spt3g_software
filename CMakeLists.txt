@@ -36,22 +36,24 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DBOOST_NO_CXX11_SMART_PTR=1")
 
 # Boost bits we need
 find_package(PythonInterp)
-find_package(PythonLibs)
+find_package(PythonLibs ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
 
 set(Boost_USE_MULTITHREADED ON)
-set(Boost_PYTHON_TYPE python)
-if(${PYTHON_LIBRARIES} MATCHES "libpython3.*\\.so")
-	# Handle possible naming of the Boost python library as
-	# libboost_python3.so
-	set(_Boost_PYTHON3_HEADERS "boost/python.hpp")
-	string(REGEX REPLACE ".*libpython3.([0-9]+).*\\.so" "\\1" PYTHONMINORVER ${PYTHON_LIBRARIES})
-	find_package(Boost COMPONENTS python3${PYTHONMINORVER})
-	if (${Boost_PYTHON3${PYTHONMINORVER}_FOUND})
-		set(Boost_PYTHON_TYPE python3${PYTHONMINORVER})
-	else()
-		find_package(Boost COMPONENTS python3)
-		if (${Boost_PYTHON3_FOUND})
-			set(Boost_PYTHON_TYPE python3)
+if(NOT DEFINED Boost_PYTHON_TYPE)
+	set(Boost_PYTHON_TYPE python)
+	if(${PYTHON_LIBRARIES} MATCHES "libpython3.*\\.so")
+		# Handle possible naming of the Boost python library as
+		# libboost_python3.so
+		set(_Boost_PYTHON3_HEADERS "boost/python.hpp")
+		string(REGEX REPLACE ".*libpython3.([0-9]+).*\\.so" "\\1" PYTHONMINORVER ${PYTHON_LIBRARIES})
+		find_package(Boost COMPONENTS python3${PYTHONMINORVER})
+		if (${Boost_PYTHON3${PYTHONMINORVER}_FOUND})
+			set(Boost_PYTHON_TYPE python3${PYTHONMINORVER})
+		else()
+			find_package(Boost COMPONENTS python3)
+			if (${Boost_PYTHON3_FOUND})
+				set(Boost_PYTHON_TYPE python3)
+			endif()
 		endif()
 	endif()
 endif()
