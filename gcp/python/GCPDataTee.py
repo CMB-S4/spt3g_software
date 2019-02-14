@@ -1,5 +1,78 @@
-import struct, socket, errno, numpy
+import struct, socket, errno, numpy, time, threading
 from spt3g import core, dfmux
+
+@core.indexmod
+class GCPWatchdog(object):
+    '''
+    Module that sends a watchdog (ping) message to the GCP pager when it is operational.
+    '''
+    def __init__(self, interval=1200, host='sptnet.spt', port=50040, timeout=20, sim=False):
+        self.host = host
+        self.port = port
+        self.interval = interval
+        self.timeout = timeout
+        self.sim = sim
+        self.last_ping = None
+        self.last_missing = None
+        self.thread = None
+
+    def ping(self):
+        # send a watchdog command to the pager server port
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(self.timeout)
+            sock.connect((self.host, self.port))
+            sock.send('watchdog daq'.encode())
+            resp = sock.recv(4096)
+            if resp:
+                core.log_debug("Sent DAQ watchdog ping, got response {}".format(resp.decode()),
+                               unit='GCPWatchdog')
+            sock.close()
+        except Exception as e:
+            core.log_error("Error sending watchdog ping: {}".format(e), unit='GCPWatchdog')
+            # try again in ten seconds
+            self.last_ping = time.time() - self.interval + 10
+        else:
+            core.log_info('Sent DAQ watchdog ping', unit='GCPWatchdog')
+            self.last_ping = time.time()
+
+    def __call__(self, frame):
+        # only ping on Timepoint frames
+        if not self.sim and 'DfMux' not in frame:
+            return
+
+        # only ping if another ping isn't already running
+        if self.thread is not None:
+            if not self.thread.is_alive():
+                del self.thread
+                self.thread = None
+            else:
+                return
+
+        # only ping on the appropriate interval
+        now = time.time()
+        if self.last_ping and (now - self.last_ping < self.interval):
+            return
+
+        # only ping if all the modules are returning data
+        if not self.sim:
+            data = frame['DfMux']
+            nmods_expected = 8 * len(data.keys())
+            nmods = sum([v.nmodules for v in data.values()])
+            if nmods < nmods_expected:
+                core.log_error("Missing {} modules in DAQ data stream".format(nmods_expected - nmods),
+                               unit='GCPWatchdog')
+                self.last_missing = now
+                return
+            else:
+                # only ping if normal data acquisition has been going for a bit
+                if self.last_missing and now - self.last_missing < 10:
+                    return
+
+        # spawn thread
+        self.thread = threading.Thread(target=self.ping)
+        self.thread.start()
+
 
 @core.indexmod
 class GCPSignalledHousekeeping(object):
