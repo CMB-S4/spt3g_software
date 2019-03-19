@@ -106,10 +106,10 @@ def create_g3_cal_file(path, read_from_gcp=True, extra_dict=None,
     if read_from_gcp:
         try:
             default_calibration_file = \
-                os.environ['GCP']+'/control/conf/spt/cal'
+                os.environ['GCP_DIR']+'/config/init/cal'
         except:
             default_calibration_file = \
-                '/home/sptdat/gcproot/control/conf/spt/cal'
+                '/home/sptdat/gcproot/gcp/config/init/cal'
         if gcp_cal_file is None:
             calibration_file = default_calibration_file
         else:
@@ -222,7 +222,7 @@ def create_g3_cal_file(path, read_from_gcp=True, extra_dict=None,
     fcal.write('# Register      Offset       1/Factor      Units \n')
     fcal.write('#-----------------------------------------------------------------------\n')
     fcal.write('\n')
-    ktemp = cal_dict.keys()
+    ktemp = list(cal_dict.keys())
     ktemp.sort()
     for key in ktemp:
         kstr = (str(key)).ljust(42)
