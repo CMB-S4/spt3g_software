@@ -184,9 +184,9 @@ def create_g3_cal_file(path, read_from_gcp=True, extra_dict=None,
                 {'ReciprocalFactor':1.,'Offset':0,'UnitName':'deg'}
 
             cal_dict['antenna0.scu.temp'] = \
-                {'ReciprocalFactor':1.,'Offset':-273.15,'UnitName':'K'}
+                {'ReciprocalFactor':1.,'Offset':273.15,'UnitName':'K'}
             cal_dict['array.weather.airTemperature'] = \
-                {'ReciprocalFactor':1.,'Offset':-273.15,'UnitName':'K'}
+                {'ReciprocalFactor':1.,'Offset':273.15,'UnitName':'K'}
         else:
             try:
                 for key in extra_dict:
