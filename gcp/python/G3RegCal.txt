@@ -73,7 +73,7 @@ antenna0.tracker.tilt_xy_avg[0-1]               0.0000  1.000000e+03  arcsec
 antenna0.tracker.tilt_xy_offset[0-1]            0.0000  1.000000e+03  arcsec
 antenna0.tracker.tilts                          0.0000  3.600000e+06  degrees
 antenna0.tracker.ut1utc                         0.0000  1.000000e+03  sec
-array.dc.currents[0-7]                        -10.0000  1.000000e+02  volts
+array.dc.currents[0-7]                        -10.0000  1.000000e+02  volt
 array.weather.airTemperature                  273.1500  1.000000e+00  K
 array.weather.relativeHumidity                  0.0000  1.000000e-02  
 array.weather.windDirection                   -80.0000  1.000000e+00  deg
