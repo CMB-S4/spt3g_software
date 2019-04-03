@@ -120,6 +120,10 @@ void DfMuxCollator::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		DfMuxMetaSampleConstPtr metasamp =
 		    (*t)->Get<DfMuxMetaSample>("DfMux");
 
+		// Collect timestamps
+		stop = *((*t)->Get<G3Time>("EventHeader"));
+		sample_times->push_back(stop);
+
 		// Skip points that have been marked as garbage (e.g. by the
 		// scanifier).  Implicitly fills these points with NaNs.
 		if ((*t)->Has("GarbageData")) {
@@ -130,8 +134,6 @@ void DfMuxCollator::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		}
 
 		// Collect all the bolo data
-		stop = *((*t)->Get<G3Time>("EventHeader"));
-		sample_times->push_back(stop);
 		for (auto chan = hwmts_cache.begin(); chan != hwmts_cache.end();
 		    chan++) {
 			auto board = metasamp->find(
