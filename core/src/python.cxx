@@ -162,13 +162,13 @@ public:
 		bp::object ret = this->get_override("Process")(frame);
 		if (ret.ptr() == Py_None) {
 			out.push_back(frame);
+		} else if (bp::extract<G3FramePtr>(ret).check()) {
+			out.push_back(bp::extract<G3FramePtr>(ret)());
 		} else if (bp::extract<std::vector<G3FramePtr> >(ret).check()) {
 			std::vector<G3FramePtr> outlist =
 			    bp::extract<std::vector<G3FramePtr> >(ret)();
 			for (auto i = outlist.begin(); i != outlist.end(); i++)
 				out.push_back(*i);
-		} else if (bp::extract<G3FramePtr>(ret).check()) {
-			out.push_back(bp::extract<G3FramePtr>(ret)());
 		} else if (!!ret) {
 			out.push_back(frame);
 		} else {
