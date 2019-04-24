@@ -100,12 +100,12 @@ def PathStringForBolo(wiringmap, bolo):
         ])
     else:
         path = '%04d' % wiringentry.board_serial
-    path.append('/'.join([
+    path = '/'.join([
         path,
-        '%d' % (wiringentry.module // NUM_MODULES) + 1,
-        '%d' % (wiringentry.module % NUM_MODULES) + 1,
-        '%d' % wiringentry.channel + 1,
-    ]))
+        '%d' % ((wiringentry.module // NUM_MODULES) + 1),
+        '%d' % ((wiringentry.module % NUM_MODULES) + 1),
+        '%d' % (wiringentry.channel + 1),
+    ])
     return path
 
 
