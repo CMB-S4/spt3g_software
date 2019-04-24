@@ -426,17 +426,17 @@ get_fk5_j2000_to_gal_quat()
 	return quat(0.4889475076,-0.483210684,0.1962537583,0.699229742);
 }
 
-static G3VectorQuat
-create_det_az_el_trans(const std::vector<double> &az, const std::vector<double> &el)
+static void
+create_det_az_el_trans(const G3Timestream &az, const G3Timestream &el,
+    G3VectorQuat &trans_quats)
 {
 	// Creates the transform that takes (1,0,0) to az, -el 
 	// for why it's -el see the comment at the top of this document
 
 	g3_assert(az.size() == el.size());
-	G3VectorQuat trans_quats = G3VectorQuat(az.size(), quat(1,0,0,0));
+	trans_quats = G3VectorQuat(az.size(), quat(1,0,0,0));
 	for (size_t i = 0; i < az.size(); i++)
 		trans_quats[i] = get_origin_rotator(az[i], -el[i]);
-	return trans_quats;
 }
 
 static void
