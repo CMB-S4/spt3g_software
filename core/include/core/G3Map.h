@@ -2,6 +2,7 @@
 #define _G3_MAP_H
 
 #include <G3Frame.h>
+#include <G3Vector.h>
 #include <map>
 #include <sstream>
 #include <complex>
@@ -72,6 +73,7 @@ G3MAP_OF(std::string, std::vector<double>, G3MapVectorDouble);
 G3MAP_OF(std::string, std::vector<int32_t>, G3MapVectorInt);
 G3MAP_OF(std::string, std::vector<std::string>, G3MapVectorString);
 G3MAP_OF(std::string, std::vector<std::complex<double> >, G3MapVectorComplexDouble);
+G3MAP_OF(std::string, G3VectorTime, G3MapVectorTime);
 G3MAP_OF(std::string, int32_t, G3MapInt);
 G3MAP_OF(std::string, std::string, G3MapString);
 
