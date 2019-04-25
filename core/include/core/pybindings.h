@@ -179,6 +179,32 @@ register_map(std::string name, const char *docstring)
 	;
 }
 
+// Tool for exporting enum elements called 'None', reserved in Python
+// Invoke by doing enum_none_converter::from_python<T>()
+struct enum_none_converter {
+	template <typename Enum>
+	static void from_python()
+	{
+		boost::python::converter::registry::push_back(
+		    &enum_none_converter::convertible,
+		    &enum_none_converter::construct<Enum>,
+		    boost::python::type_id<Enum>());
+	}
+
+	static void* convertible(PyObject* object)
+	{
+		return (object == Py_None) ? object : NULL;
+	}
+
+	template <typename Enum>
+	static void construct(
+	    PyObject* object,
+	    boost::python::converter::rvalue_from_python_stage1_data* data)
+	{
+		data->convertible = new Enum(Enum::None);
+	}
+};
+
 class G3ModuleRegistrator {
 public:
 	G3ModuleRegistrator(const char *mod, void (*def)());

@@ -267,12 +267,14 @@ PYBINDINGS("core") {
 	    .value("U", G3SkyMap::U)
 	    .value("none", G3SkyMap::None) // "None" is reserved in python
 	;
+	enum_none_converter::from_python<G3SkyMap::MapPolType>();
 
 	bp::enum_<G3SkyMapWeights::WeightType>("WeightType")
 	    .value("Wpol", G3SkyMapWeights::Wpol)
 	    .value("Wunpol", G3SkyMapWeights::Wunpol)
 	    .value("None", G3SkyMapWeights::None)
 	;
+	enum_none_converter::from_python<G3SkyMapWeights::WeightType>();
 
 	bp::object skymap = EXPORT_FRAMEOBJECT(G3SkyMap, no_init,
 	  "Base class for 1- and 2-D skymaps of various projections. Usually "

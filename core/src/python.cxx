@@ -310,6 +310,7 @@ BOOST_PYTHON_MODULE(core)
 	    .value("GcpSlow",         G3Frame::GcpSlow)
 	    .value("None",            G3Frame::None)
 	;
+	enum_none_converter::from_python<G3Frame::FrameType>();
 	register_vector_of<G3Frame::FrameType>("FrameType");
 
 	bp::class_<G3Frame, G3FramePtr>("G3Frame",
@@ -452,6 +453,7 @@ BOOST_PYTHON_MODULE(core)
 	    .value("Resistance",  G3Timestream::Resistance)
 	    .value("Tcmb",  G3Timestream::Tcmb)
 	;
+	enum_none_converter::from_python<G3Timestream::TimestreamUnits>();
 
 	// Do everything else
 	G3ModuleRegistrator::CallRegistrarsFor("core");
