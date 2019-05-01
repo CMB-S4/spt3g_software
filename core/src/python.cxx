@@ -80,8 +80,8 @@ static void g3frame_python_put(G3Frame &f, std::string name, bp::object obj)
 		f.Put(name, bp::extract<G3FrameObjectPtr>(obj)());
 	else if (PyBool_Check(obj.ptr()))
 		f.Put(name, boost::make_shared<G3Bool>(bp::extract<bool>(obj)()));
-	else if (bp::extract<int>(obj).check())
-		f.Put(name, boost::make_shared<G3Int>(bp::extract<int>(obj)()));
+	else if (bp::extract<int64_t>(obj).check())
+		f.Put(name, boost::make_shared<G3Int>(bp::extract<int64_t>(obj)()));
 	else if (bp::extract<double>(obj).check())
 		f.Put(name, boost::make_shared<G3Double>(bp::extract<double>(obj)()));
 	else if (bp::extract<std::string>(obj).check())
