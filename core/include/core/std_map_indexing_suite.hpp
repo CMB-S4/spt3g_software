@@ -466,7 +466,12 @@ return incref(tuple.attr("__iter__")().ptr());
             std::string cl_name;
             object class_name(cl.attr("__name__"));
             extract<std::string> class_name_extractor(class_name);
-            cl_name = class_name_extractor();
+
+	    if (!class_name_extractor.check())
+	        std::cerr << __FILE__ << ":" << __LINE__ << ": object name "
+		    "extractor failed; import error imminent.\n" << std::flush;
+	    cl_name = class_name_extractor();
+
             elem_name += cl_name;
             elem_name += "_entry";
 
