@@ -19,8 +19,14 @@ def numpyinplace(skymap, array):
     numpy.asarray(rv)[:] = array
     return rv
 
+def numpycompat(a, b, op):
+    if isinstance(b, G3SkyMap) and not a.IsCompatible(b):
+        raise TypeError("Map of type <{}> is incompatible with map of type <{}>".format(a, b))
+    return numpyinplace(a, numpy.ndarray.__dict__[op](numpy.asarray(a), numpy.asarray(b)))
+
+
 for x in ['__add__', '__and__', '__div__', '__divmod__', '__floordiv__', '__ge__', '__gt__', '__iadd__', '__iand__', '__idiv__', '__ifloordiv__', '__imod__', '__imul__', '__ior__', '__ipow__', '__isub__', '__itruediv__', '__le__', '__lt__', '__mul__', '__neg__', '__nonzero__', '__or__', '__pow__', '__radd__', '__rdiv__', '__rdivmod__', '__rmod__', '__rmul__', '__rpow__', '__rsub__', '__rtruediv__', '__truediv__']:
-    setattr(G3SkyMap, x, lambda a, b, op=x: numpyinplace(a, numpy.ndarray.__dict__[op](numpy.asarray(a), numpy.asarray(b))))
+    setattr(G3SkyMap, x, lambda a, b, op=x: numpycompat(a, b, op))
 
 # Bind all numpy unary operators to G3SkyMap
 for x in ['__neg__', '__pos__', '__invert__']:

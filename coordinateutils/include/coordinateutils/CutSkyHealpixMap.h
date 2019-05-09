@@ -31,19 +31,40 @@ class CutSkyHealpixMap;
 class HealpixHitPix : public G3FrameObject {
 public:
 	HealpixHitPix(){};
-	
-	HealpixHitPix(const FlatSkyMap &flat_map, size_t nside, 
+
+        // Basic object, useful for manipulating fullsky pixels
+	HealpixHitPix(size_t nside, bool is_nested,
+	    MapCoordReference coord_ref);
+
+	HealpixHitPix(const FlatSkyMap & in_map, size_t nside,
+	    bool is_nested);
+	HealpixHitPix(const CutSkyHealpixMap & in_map, size_t nside,
 	    bool is_nested);
 
 	// Initialize with a vector of pixel indices to include
-	HealpixHitPix(const std::vector<int64_t> &pixinds, size_t nside, 
+	HealpixHitPix(const std::vector<int64_t> &pixinds, size_t nside,
 	    bool is_nested, MapCoordReference coord_ref);
 
 	long get_fullsky_index(long cutsky_index) const;
 	long get_cutsky_index(long fullsky_index) const;
-  
+
 	bool is_nested() const { return is_nested_; }
 	size_t get_nside() const { return nside_; }
+	size_t get_size(void) const { return total_; }
+
+	void pixels_from_map(const G3SkyMap & in_map);
+
+	long angle_to_pixel(double alpha, double delta,
+	    bool cutsky=true) const;
+	std::vector<double> pixel_to_angle(long pixel,
+	    bool cutsky=true) const;
+
+        void get_rebin_angles(long pixel, size_t scale,
+	    std::vector<double> & alphas, std::vector<double> & deltas,
+	    bool cutsky=true) const;
+	void get_interp_pixels_weights(double alpha, double delta,
+	    std::vector<long> & pixels, std::vector<double> & weights,
+	    bool cutsky=true) const;
 
 	template <class A> void serialize(A &ar, unsigned u);
 	std::string Description() const;
@@ -53,14 +74,16 @@ public:
 	std::vector<int64_t> pixinds_; // maps cutsky to full sky
 private:
 	friend class CutSkyHealpixMap;
-	
+
 	bool is_nested_;
-	size_t nside_;	
+	size_t nside_;
 	long ipixmin_;
 	long ipixmax_;
 	long total_; //total number of pixels in the map (not counting the overflow)
 
 	std::vector<int64_t> full_to_cut_inds_; // maps full sky to cutsky, kind of
+
+	HealpixMapInfoPtr map_info_;
 };
 
 G3_POINTERS(HealpixHitPix);
@@ -73,46 +96,43 @@ public:
 	    G3SkyMap::MapPolType pol_type = G3SkyMap::None,
 	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
 	    int init_sym_group = 0);
-	
-	CutSkyHealpixMap(boost::python::object v, HealpixHitPixPtr hitpix, 
+
+	CutSkyHealpixMap(boost::python::object v, HealpixHitPixPtr hitpix,
 	    bool is_weighted = true,
 	    G3SkyMap::MapPolType pol_type = G3SkyMap::None,
 	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb);
-	
+
 	CutSkyHealpixMap(HealpixHitPixPtr hitpix, bool is_weighted = true,
 	    G3SkyMap::MapPolType pol_type = G3SkyMap::None,
 	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb);
-	
+
 	CutSkyHealpixMap();
-	
-	std::vector<double> get_full_sized_healpix_map();
-	
-	void get_pointing_pixel(const std::vector<double> &alpha,
-	    const std::vector<double> &delta, std::vector<int> &out_inds) const;
-	
-	std::vector<int> angles_to_pixels(const std::vector<double> & alphas, 
-	    const std::vector<double> & deltas) const;
-	
-	std::vector<double> pixel_to_angle(size_t pix) const;
-	
-	void get_interpolated_weights(double alpha, double delta,
-	    long pix[4], double weight[4]) const;
-	double get_interp_precalc(long pix[4], double weight[4]) const;
-	double get_interpolated_value(double alpha, double delta) const;
-	
+
+	bool IsCompatible(const G3SkyMap & other) const override;
+
+	std::vector<double> get_fullsky_map();
+
+	size_t angle_to_pixel(double alpha, double delta) const override;
+	std::vector<double> pixel_to_angle(size_t pixel) const override;
+
+	void get_rebin_angles(long pixel, size_t scale,
+	    std::vector<double> & alphas, std::vector<double> & deltas) const override;
+	void get_interp_pixels_weights(double alpha, double delta,
+	    std::vector<long> & pixels, std::vector<double> & weights) const override;
+
+	G3SkyMapPtr rebin(size_t scale) const override;
+
 	template <class A> void serialize(A &ar, unsigned u);
-	
-	std::string Description() const;
-	
+	virtual G3SkyMapPtr Clone(bool copy_data = true) const override;
+	std::string Description() const override;
+
 	bool is_nested() const { return is_nested_; }
 	size_t get_nside() const { return nside_; }
-	HealpixHitPixPtr hitpix; 
-	
+	HealpixHitPixPtr hitpix;
+
 private:
-	long ang_2_pix_(double alpha, double delta) const;
-	
-	SET_LOGGER("CutSkyHealpixMap");	
-	
+	SET_LOGGER("CutSkyHealpixMap");
+
 	size_t nside_;
 	int is_nested_;
 };

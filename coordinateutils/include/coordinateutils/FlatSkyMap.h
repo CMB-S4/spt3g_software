@@ -9,30 +9,7 @@
 #include <vector>
 #include <string>
 
-// Defined map projections
-enum MapProjection {
-	// Standard projections
-	ProjSansonFlamsteed = 0,
-	ProjCAR = 1,
-	ProjSIN = 2,
-	ProjStereographic = 4,
-	ProjLambertAzimuthalEqualArea = 5,
-	ProjBICEP = 9,
-
-	ProjNone = 42,
-
-	// Compatibility aliases for SPTpol
-	Proj0 = 0,
-	Proj1 = 1,
-	Proj2 = 2,
-	Proj3 = 3,
-	Proj4 = 4,
-	Proj5 = 5,
-	Proj6 = 6,
-	Proj7 = 7,
-	Proj8 = 8,
-	Proj9 = 9,
-};
+#include <coordinateutils/flatskyprojection.h>
 
 class FlatSkyMap : public G3SkyMap {
 public:
@@ -72,38 +49,24 @@ public:
 	virtual G3SkyMapPtr Clone(bool copy_data = true) const override;
 	std::string Description() const override;
 
-	// Arithmetic operations:
+	bool IsCompatible(const G3SkyMap & other) const override;
 
-	// +
-	FlatSkyMap & operator+=(const FlatSkyMap & rhs);
-	FlatSkyMap & operator+=(double rhs);
-	FlatSkyMap operator+(const FlatSkyMap & rhs);
-	FlatSkyMap operator+(double rhs);
-
-	// -
-	FlatSkyMap & operator-=(const FlatSkyMap & rhs);
-	FlatSkyMap & operator-=(double rhs);
-	FlatSkyMap operator-(const FlatSkyMap & rhs);
-	FlatSkyMap operator-(double rhs);
-
-	// *
-	FlatSkyMap & operator*=(const FlatSkyMap & rhs);
-	FlatSkyMap & operator*=(double rhs);
-	FlatSkyMap operator*(const FlatSkyMap & rhs);
-	FlatSkyMap operator*(double rhs);
-
-	// /
-	FlatSkyMap & operator/=(const FlatSkyMap & rhs);
-	FlatSkyMap & operator/=(double rhs);
-	FlatSkyMap operator/(const FlatSkyMap & rhs);
-	FlatSkyMap operator/(double rhs);
-
-	std::vector<int> angles_to_pixels(const std::vector<double> & alphas, 
-	    const std::vector<double> & deltas) const override;
+	size_t angle_to_pixel(double alpha, double delta) const override;
 	std::vector<double> pixel_to_angle(size_t pixel) const override;
 	std::vector<double> pixel_to_angle_wrap_ra(size_t pixel) const;
+	std::vector<double> angle_to_xy(double alpha, double delta) const;
+	std::vector<double> xy_to_angle(double x, double y) const;
+
+	void get_rebin_angles(long pixel, size_t scale,
+	    std::vector<double> & alphas, std::vector<double> & deltas) const override;
+	void get_interp_pixels_weights(double alpha, double delta,
+	    std::vector<long> & pixels, std::vector<double> & weights) const override;
+
+	G3SkyMapPtr rebin(size_t scale) const override;
 
 private:
+	FlatSkyProjection proj_info_;
+
 	SET_LOGGER("FlatSkyMap");
 };
 

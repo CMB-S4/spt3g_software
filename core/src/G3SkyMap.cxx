@@ -2,6 +2,10 @@
 #include <serialization.h>
 #include <G3SkyMap.h>
 
+#ifdef OPENMP_FOUND
+#include <omp.h>
+#endif
+
 namespace bp=boost::python;
 
 template <class A> void
@@ -101,14 +105,74 @@ G3SkyMap::G3SkyMap(bp::object v, MapCoordReference coords, bool is_weighted,
 	throw bp::error_already_set();
 }
 
-size_t G3SkyMap::angle_to_pixel(double alpha, double delta) const {
-	std::vector<double> alphas = {alpha};
-	std::vector<double> deltas = {delta};
-	return angles_to_pixels(alphas, deltas)[0];
+std::vector<int> G3SkyMap::angles_to_pixels(const std::vector<double> & alphas,
+    const std::vector<double> & deltas) const
+{
+	std::vector<int> pixels(alphas.size());
+#ifdef OPENMP_FOUND
+#pragma omp parallel for
+#endif
+	for (size_t i = 0; i < alphas.size(); i++) {
+		pixels[i] = angle_to_pixel(alphas[i], deltas[i]);
+	}
+
+	return pixels;
+}
+
+void G3SkyMap::pixels_to_angles(const std::vector<int> & pixels,
+    std::vector<double> & alphas, std::vector<double> & deltas) const
+{
+	if (alphas.size() != pixels.size()) {
+		alphas = std::vector<double>(pixels.size());
+	}
+	if (deltas.size() != pixels.size()) {
+		deltas = std::vector<double>(pixels.size());
+	}
+#ifdef OPENMP_FOUND
+#pragma omp parallel for
+#endif
+	for (size_t i = 0; i < pixels.size(); i++) {
+		std::vector<double> ang;
+		ang = pixel_to_angle(pixels[i]);
+		alphas[i] = ang[0];
+		deltas[i] = ang[1];
+	}
 }
 
 std::vector<double> G3SkyMap::pixel_to_angle(size_t x_pix, size_t y_pix) const {
 	return pixel_to_angle(pixat(x_pix, y_pix));
+}
+
+double G3SkyMap::get_interp_precalc(const std::vector<long> & pix,
+    const std::vector<double> & weight) const
+{
+	double outval = 0;
+	for (size_t i = 0; i < pix.size(); i++) {
+		outval += data_[pix[i]] * weight[i];
+	}
+	return outval;
+}
+
+double G3SkyMap::get_interp_value(double alpha, double delta) const
+{
+	std::vector<long> pix;
+	std::vector<double> weight;
+	get_interp_pixels_weights(alpha, delta, pix, weight);
+	return get_interp_precalc(pix, weight);
+}
+
+std::vector<double> G3SkyMap::get_interp_values(const std::vector<double> & alphas,
+    const std::vector<double> & deltas) const
+{
+	std::vector<double> outvals(alphas.size());
+#ifdef OPENMP_FOUND
+#pragma omp parallel for
+#endif
+	for (size_t i = 0; i < alphas.size(); i++) {
+		outvals[i] = get_interp_value(alphas[i], deltas[i]);
+	}
+
+	return outvals;
 }
 
 static int
@@ -254,6 +318,154 @@ skymap_copy(G3SkyMap &r)
 	return r.Clone(true);
 }
 
+G3SkyMap &
+G3SkyMap::operator+=(const G3SkyMap & rhs)
+{
+	EnsureAllocated();
+	g3_assert(IsCompatible(rhs));
+	for (size_t i = 0; i < data_.size(); i++)
+		data_[i] += rhs.data_[i];
+	return *this;
+}
+
+G3SkyMap &
+G3SkyMap::operator+=(double rhs)
+{
+	EnsureAllocated();
+	for (size_t i = 0; i < data_.size(); i++)
+		data_[i] += rhs;
+	return *this;
+}
+
+G3SkyMap
+G3SkyMap::operator+(const G3SkyMap & rhs)
+{
+	EnsureAllocated();
+	G3SkyMap new_map(*this);
+	new_map += rhs;
+	return new_map;
+}
+
+G3SkyMap
+G3SkyMap::operator+(double rhs)
+{
+	EnsureAllocated();
+	G3SkyMap new_map(*this);
+	new_map += rhs;
+	return new_map;
+}
+
+G3SkyMap &
+G3SkyMap::operator-=(const G3SkyMap &rhs)
+{
+	EnsureAllocated();
+	g3_assert(IsCompatible(rhs));
+	for (size_t i = 0; i < data_.size(); i++)
+		data_[i] -= rhs.data_[i];
+	return *this;
+}
+
+G3SkyMap &
+G3SkyMap::operator-=(double rhs)
+{
+	EnsureAllocated();
+	for (size_t i = 0; i < data_.size(); i++)
+	data_[i] -= rhs;
+	return *this;
+}
+
+G3SkyMap
+G3SkyMap::operator-(const G3SkyMap & rhs)
+{
+	EnsureAllocated();
+	G3SkyMap new_map(*this);
+	new_map -= rhs;
+	return new_map;
+}
+
+G3SkyMap
+G3SkyMap::operator-(double rhs)
+{
+	EnsureAllocated();
+	G3SkyMap new_map(*this);
+	new_map -= rhs;
+	return new_map;
+}
+
+G3SkyMap &
+G3SkyMap::operator*=(const G3SkyMap & rhs)
+{
+	EnsureAllocated();
+	g3_assert(IsCompatible(rhs));
+	for (size_t i = 0; i < data_.size(); i++)
+		data_[i] *= rhs.data_[i];
+	return *this;
+}
+
+G3SkyMap &
+G3SkyMap::operator*=(double rhs)
+{
+	EnsureAllocated();
+	for (size_t i = 0; i < data_.size(); i++)
+		data_[i] *= rhs;
+	return *this;
+}
+
+G3SkyMap
+G3SkyMap::operator*(const G3SkyMap & rhs)
+{
+	EnsureAllocated();
+	G3SkyMap new_map(*this);
+	new_map *= rhs;
+	return new_map;
+}
+
+G3SkyMap
+G3SkyMap::operator*(double rhs)
+{
+	EnsureAllocated();
+	G3SkyMap new_map(*this);
+	new_map *= rhs;
+	return new_map;
+}
+
+G3SkyMap &
+G3SkyMap::operator/=(const G3SkyMap & rhs)
+{
+	EnsureAllocated();
+	g3_assert(IsCompatible(rhs));
+	for (size_t i = 0; i < data_.size(); i++)
+		data_[i] /= rhs.data_[i];
+	return *this;
+}
+
+G3SkyMap &
+G3SkyMap::operator/=(double rhs)
+{
+	EnsureAllocated();
+	for (size_t i = 0; i < data_.size(); i++)
+		data_[i] /= rhs;
+	return *this;
+}
+
+G3SkyMap
+G3SkyMap::operator/(const G3SkyMap & rhs)
+{
+	EnsureAllocated();
+	G3SkyMap new_map(*this);
+	new_map /= rhs;
+	return new_map;
+}
+
+G3SkyMap
+G3SkyMap::operator/(double rhs)
+{
+	EnsureAllocated();
+	G3SkyMap new_map(*this);
+	new_map /= rhs;
+	return new_map;
+}
+
 PYBINDINGS("core") {
 	bp::enum_<MapCoordReference>("MapCoordReference")
 	    .value("Local", Local)
@@ -317,18 +529,59 @@ PYBINDINGS("core") {
 	    .def("__setitem__", &skymap_setitem_2d)
 	    .def("__copy__", &skymap_copy)
 	    .def("__deepcopy__", &skymap_copy)
+	    .def("Clone", &G3SkyMap::Clone,
+	      ((bp::arg("copy_data")=true),
+	       "Return a map of the same type, populated with a copy of the data "
+	       "if the argument is true (default), empty otherwise."))
+	    .def("IsCompatible", &G3SkyMap::IsCompatible,
+	      "Returns true if the input argument is a map with matching dimensions "
+	      "and boundaries on the sky.")
 
-	    .def("angles_to_pixels", &G3SkyMap::angles_to_pixels)
+	    .def("angles_to_pixels", &G3SkyMap::angles_to_pixels,
+	      (bp::arg("alphas"), bp::arg("deltas")),
+	       "Compute the 1D pixel location for each of the sky coordinates")
+	    .def("pixels_to_angles", &G3SkyMap::pixels_to_angles,
+	      (bp::arg("pixels"), bp::arg("alphas"), bp::arg("deltas")),
+	       "Compute the sky coordinates of each of the given 1D pixels")
 	    .def("pixel_to_angle", 
 	      (std::vector<double> (G3SkyMap::*)(size_t, size_t) const) 
-	      &G3SkyMap::pixel_to_angle, ((bp::arg("x_pix"), bp::arg("y_pix"))))
+	      &G3SkyMap::pixel_to_angle, (bp::arg("x_pix"), bp::arg("y_pix")),
+	      "Compute the sky coordinates of the given 2D pixel")
 	    .def("pixel_to_angle", 
 	      (std::vector<double> (G3SkyMap::*)(size_t) const) 
-	      &G3SkyMap::pixel_to_angle, ((bp::arg("pixel"))))
+	      &G3SkyMap::pixel_to_angle, bp::arg("pixel"),
+	      "Compute the sky coordinates of the given 1D pixel")
 	    .def("angle_to_pixel", &G3SkyMap::angle_to_pixel,
-	      ((bp::arg("alpha"), bp::arg("delta"))))
+	      (bp::arg("alpha"), bp::arg("delta")),
+	       "Compute the 1D pixel location of the given sky coordinates.")
 
+	    .def("get_interp_values", &G3SkyMap::get_interp_values,
+	      (bp::arg("alphas"), bp::arg("deltas")),
+	       "Return the values at each of the input coordinate locations. "
+	       "Computes each value using bilinear interpolation over the "
+	       "map pixels.")
 
+	    .def("rebin", &G3SkyMap::rebin, bp::arg("scale"),
+	      "Rebin the map into larger pixels by averaging scale-x-scale "
+	      "blocks of pixels together.  Returns a new map object. "
+	      "Map dimensions must be a multiple of the rebinning scale.")
+
+	    .def(bp::self + bp::self)
+	    .def(bp::self * bp::self)
+	    .def(bp::self - bp::self)
+	    .def(bp::self / bp::self)
+	    .def(bp::self + double())
+	    .def(bp::self * double())
+	    .def(bp::self - double())
+	    .def(bp::self / double())
+	    .def(bp::self += bp::self)
+	    .def(bp::self *= bp::self)
+	    .def(bp::self -= bp::self)
+	    .def(bp::self /= bp::self)
+	    .def(bp::self += double())
+	    .def(bp::self *= double())
+	    .def(bp::self -= double())
+	    .def(bp::self /= double())
 	;
 
 	// Add buffer protocol interface

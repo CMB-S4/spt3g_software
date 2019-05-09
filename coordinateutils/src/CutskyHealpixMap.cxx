@@ -1,7 +1,12 @@
 #include <pybindings.h>
 #include <serialization.h>
 #include <cmath>
+#include <typeinfo>
 #include <coordinateutils/CutSkyHealpixMap.h>
+
+#ifdef OPENMP_FOUND
+#include <omp.h>
+#endif
 
 G3_SERIALIZABLE_CODE(HealpixHitPix);
 G3_SERIALIZABLE_CODE(CutSkyHealpixMap);
@@ -37,7 +42,7 @@ get_flipped_pixel_and_u_scaling(size_t pix, size_t nside, int is_nested,
 
 
 	if (out_pix > nside * nside * 12) log_warn("Shit son %ld\n", out_pix);
-	
+
 	out_u_scale = u_scalings[sym_group];
 }
 
@@ -84,12 +89,11 @@ void CutSkyHealpixMap::serialize(A &ar, unsigned v)
 
 HealpixHitPix::HealpixHitPix(const std::vector<int64_t> & pixinds,
     size_t nside, bool is_nested, MapCoordReference coord_reference)
+  : coord_ref(coord_reference), is_nested_(is_nested), nside_(nside),
+    map_info_(init_map_info(nside, 1), free_map_info)
 {
-	nside_ = nside;
-	is_nested_ = is_nested;
 	pixinds_ = pixinds;
 	total_ = pixinds.size()-1;
-	coord_ref = coord_reference;
 
 	//notes
 	ipixmin_ = 12 * nside * nside;
@@ -106,17 +110,38 @@ HealpixHitPix::HealpixHitPix(const std::vector<int64_t> & pixinds,
 		full_to_cut_inds_[pixinds[i] -  ipixmin_] = i;
 }
 
-HealpixHitPix::HealpixHitPix(const FlatSkyMap &flat_map, size_t nside,
-    bool is_nested) 
-  : coord_ref(flat_map.coord_ref), is_nested_(is_nested), nside_(nside)
+HealpixHitPix::HealpixHitPix(size_t nside, bool is_nested, MapCoordReference coord_ref)
+  : coord_ref(coord_ref), is_nested_(is_nested), nside_(nside),
+    ipixmin_(0), ipixmax_(0), total_(0),
+    map_info_(init_map_info(nside, 1), free_map_info)
 {
-        g3_assert(flat_map.coord_ref != MapCoordReference::Local);
-	
+}
+
+HealpixHitPix::HealpixHitPix(const FlatSkyMap &in_map, size_t nside,
+    bool is_nested)
+  : coord_ref(in_map.coord_ref), is_nested_(is_nested), nside_(nside),
+    map_info_(init_map_info(nside, 1), free_map_info)
+{
+	pixels_from_map(in_map);
+}
+
+HealpixHitPix::HealpixHitPix(const CutSkyHealpixMap &in_map, size_t nside,
+    bool is_nested)
+  : coord_ref(in_map.coord_ref), is_nested_(is_nested), nside_(nside),
+    map_info_(init_map_info(nside, 1), free_map_info)
+{
+	pixels_from_map(in_map);
+}
+
+void HealpixHitPix::pixels_from_map(const G3SkyMap & in_map)
+{
+        g3_assert(in_map.coord_ref != MapCoordReference::Local);
+
 	std::vector<double> alpha(1, 0);
 	std::vector<double> delta(1, 0);
 	std::vector<int> out_inds(1, 0);
-	size_t overflow_index = flat_map.xdim() * flat_map.ydim();
-	size_t n_pix = 12 * nside * nside;
+	size_t overflow_index = in_map.xdim() * in_map.ydim();
+	size_t n_pix = 12 * nside_ * nside_;
 
 	std::vector<bool> is_hit(n_pix, false);
 	ipixmin_ = 0;
@@ -126,14 +151,14 @@ HealpixHitPix::HealpixHitPix(const FlatSkyMap &flat_map, size_t nside,
 	for (size_t i = 0; i < n_pix; i++) {
 		double theta, phi;
 
-		if (is_nested)
-			pix2ang_nest(nside, i, &theta, &phi);
+		if (is_nested_)
+			pix2ang_nest(nside_, i, &theta, &phi);
 		else
-			pix2ang_ring(nside, i, &theta, &phi);
+			pix2ang_ring(nside_, i, &theta, &phi);
 		delta[0] = (M_PI/2.0 - theta) * G3Units::rad;
 		alpha[0] = (phi) * G3Units::rad;
 
-		out_inds = flat_map.angles_to_pixels(alpha, delta);
+		out_inds = in_map.angles_to_pixels(alpha, delta);
 		if (out_inds[0] != overflow_index) {
 			is_hit[i] = true;
 			if (total_ == 0)
@@ -282,13 +307,37 @@ CutSkyHealpixMap::CutSkyHealpixMap(HealpixHitPixPtr hitpix, bool is_weighted,
 {
 }
 
+G3SkyMapPtr
+CutSkyHealpixMap::Clone(bool copy_data) const
+{
+	if (copy_data)
+		return boost::make_shared<CutSkyHealpixMap>(*this);
+	else
+		return boost::make_shared<CutSkyHealpixMap>(hitpix,
+		    is_weighted, pol_type, units);
+}
+
 CutSkyHealpixMap::CutSkyHealpixMap() :
     G3SkyMap(MapCoordReference::Equatorial, 0), nside_(0), is_nested_(0)
 {
 }
 
+bool CutSkyHealpixMap::IsCompatible(const G3SkyMap & other) const {
+	try {
+		const CutSkyHealpixMap & hpx = dynamic_cast<const CutSkyHealpixMap&>(other);
+		return (G3SkyMap::IsCompatible(other) &&
+			(nside_ == hpx.nside_) &&
+			(is_nested_ == hpx.is_nested_) &&
+			(hitpix && hpx.hitpix) &&
+			(hitpix->ipixmin_ == hpx.hitpix->ipixmin_) &&
+			(hitpix->ipixmax_ == hpx.hitpix->ipixmax_));
+	} catch(const std::bad_cast& e) {
+		return false;
+	}
+}
+
 std::vector<double>
-CutSkyHealpixMap::get_full_sized_healpix_map()
+CutSkyHealpixMap::get_fullsky_map()
 {
 
 	log_debug("%zu %zu\n", hitpix->pixinds_.size(), data_.size());
@@ -306,24 +355,13 @@ CutSkyHealpixMap::get_full_sized_healpix_map()
 }
 
 
-std::vector<int> CutSkyHealpixMap::angles_to_pixels(
-    const std::vector<double> & alphas, 
-    const std::vector<double> & deltas) const { 
-	std::vector<int> v( alphas.size(), 0);
-	for (size_t i=0; i < alphas.size(); i++){
-		v[i] = ang_2_pix_(alphas[i], deltas[i]);
-	}
-	return v;
-}
-
-
 long
-CutSkyHealpixMap::ang_2_pix_(double alpha, double delta) const {
+HealpixHitPix::angle_to_pixel(double alpha, double delta, bool cutsky) const
+{
 	alpha /= G3Units::rad;
-	delta /= G3Units::rad;
+	double theta = (90 * G3Units::deg - delta) / G3Units::rad;
 
-	double theta = M_PI/2.0 - delta;
-	long outpix = 0;
+	long outpix = -1;
 
 	if ( std::isnan(theta) || std::isnan(alpha) ) {
 		return -1;
@@ -333,74 +371,149 @@ CutSkyHealpixMap::ang_2_pix_(double alpha, double delta) const {
 		ang2pix_nest(nside_, theta, alpha, &outpix);
 	else
 		ang2pix_ring(nside_, theta, alpha, &outpix);
-	return hitpix->get_cutsky_index(outpix);
+
+	if (cutsky)
+		outpix = get_cutsky_index(outpix);
+
+	return outpix;
 }
 
 std::vector<double>
-CutSkyHealpixMap::pixel_to_angle(size_t pix) const {
-	double alpha=0;
-	double delta=0;
+HealpixHitPix::pixel_to_angle(long pixel, bool cutsky) const
+{
+	if (cutsky)
+		pixel = get_fullsky_index(pixel);
 
-	pix = hitpix->get_fullsky_index(pix);
-
-	double theta, phi;
+	double alpha, delta;
 	if (is_nested_)
-		pix2ang_nest(nside_, pix, &theta, &phi);
+		pix2ang_nest(nside_, pixel, &delta, &alpha);
 	else
-		pix2ang_ring(nside_, pix, &theta, &phi);
+		pix2ang_ring(nside_, pixel, &delta, &alpha);
 
-	alpha = phi * G3Units::rad;
-	delta = M_PI/2.0 * G3Units::rad - theta * G3Units::rad;
-	std::vector<double> ov(2,0); 
-	ov.push_back(alpha);
-	ov.push_back(delta);
-	return ov;
+	alpha *= G3Units::rad;
+	delta = 90 * G3Units::deg - delta * G3Units::rad;
+
+	std::vector<double> out = {alpha, delta};
+	return out;
 }
 
 void
-CutSkyHealpixMap::get_interpolated_weights(double alpha, double delta,
-    long pix[4], double weight[4]) const
+HealpixHitPix::get_rebin_angles(long pixel, size_t scale,
+    std::vector<double> & alphas, std::vector<double> & deltas, bool cutsky) const
 {
-	HealpixMapInfoPtr ugh(init_map_info(nside_, 0), free_map_info);
+	if (nside_ % scale != 0)
+		log_fatal("Nside must be a multiple of rebinning scale");
+
+	if (cutsky)
+		pixel = get_fullsky_index(pixel);
+
+	if (!is_nested_)
+		ring2nest(nside_, pixel, &pixel);
+
+	alphas = std::vector<double>(scale * scale);
+	deltas = std::vector<double>(scale * scale);
+
+	size_t nside_rebin = nside_ * scale;
+	long pixmin = pixel * scale * scale;
+	for (size_t i = 0; i < (scale * scale); i++) {
+		long p = pixmin + i;
+		double theta, phi;
+		pix2ang_nest(nside_rebin, p, &theta, &phi);
+		alphas[i] = phi * G3Units::rad;
+		deltas[i] = 90 * G3Units::deg - theta * G3Units::rad;
+	}
+}
+
+void
+HealpixHitPix::get_interp_pixels_weights(double alpha, double delta,
+    std::vector<long> & pix, std::vector<double> & weight, bool cutsky) const
+{
 	alpha /= G3Units::rad;
 	delta /= G3Units::rad;
 
 	double theta = M_PI/2.0 - delta;
-	get_interp_weights(ugh.get(), theta, alpha, pix, weight);
-}
+	double w[4];
+	long fullpix[4];
+	get_interp_weights(map_info_.get(), theta, alpha, fullpix, w);
 
-double
-CutSkyHealpixMap::get_interp_precalc(long pix[4], double weight[4]) const
-{
-	double outval = 0;
-	for (size_t i = 0; i < 4; i++) {
-		size_t cutsky_pix = hitpix->get_cutsky_index(pix[i]);
-		outval += data_[cutsky_pix] * weight[i];
-	}
-	return outval;
-}
-
-double
-CutSkyHealpixMap::get_interpolated_value(double alpha, double delta) const
-{
-	HealpixMapInfoPtr ugh(init_map_info(nside_, 0), free_map_info);
-
-	alpha /= G3Units::rad;
-	delta /= G3Units::rad;
-
-	double theta = M_PI/2.0 - delta;
-
-	long pix[4];
-	double weight[4];
-	get_interp_weights(ugh.get(), theta, alpha, pix, weight);
-
-	double outval = 0;
-	for (size_t i = 0; i < 4; i++) {
-		size_t cutsky_pix = hitpix->get_cutsky_index(pix[i]);
-		outval += data_[cutsky_pix] * weight[i];
+	if (is_nested_) {
+		for (size_t i = 0; i < 4; i++) {
+			ring2nest(nside_, fullpix[i], fullpix + i);
+		}
 	}
 
-	return outval;
+	pix = std::vector<long>(4, -1);
+	weight = std::vector<double>(4, 0);
+	for (size_t i = 0; i < 4; i++) {
+		pix[i] = cutsky ? get_cutsky_index(fullpix[i]) : fullpix[i];
+		weight[i] = w[i];
+	}
+}
+
+size_t
+CutSkyHealpixMap::angle_to_pixel(double alpha, double delta) const
+{
+	return hitpix->angle_to_pixel(alpha, delta, true);
+}
+
+std::vector<double>
+CutSkyHealpixMap::pixel_to_angle(size_t pixel) const
+{
+	return hitpix->pixel_to_angle(pixel, true);
+}
+
+void
+CutSkyHealpixMap::get_rebin_angles(long pixel, size_t scale,
+    std::vector<double> & alphas, std::vector<double> & deltas) const
+{
+	hitpix->get_rebin_angles(pixel, scale, alphas, deltas, true);
+}
+
+void
+CutSkyHealpixMap::get_interp_pixels_weights(double alpha, double delta,
+    std::vector<long> & pix, std::vector<double> & weight) const
+{
+	hitpix->get_interp_pixels_weights(alpha, delta, pix, weight, true);
+}
+
+
+G3SkyMapPtr CutSkyHealpixMap::rebin(size_t scale) const
+{
+	if (nside_ % scale != 0)
+		log_fatal("Map nside must be a multiple of rebinning scale");
+
+	if (scale == 1)
+		return Clone(true);
+
+	HealpixHitPixPtr hpx = boost::make_shared<HealpixHitPix>(*this,
+	    nside_ / scale, is_nested_);
+	CutSkyHealpixMap out(hpx, is_weighted, pol_type, units);
+        out.EnsureAllocated();
+
+	size_t scale2 = scale * scale;
+
+#ifdef OPENMP_FOUND
+#pragma omp parallel for
+#endif
+	for (long i = 0; i < out.size(); i++) {
+		long ipmin = out.hitpix->get_fullsky_index(i);
+		if (!is_nested_)
+			ring2nest(out.nside_, ipmin, &ipmin);
+		ipmin *= scale2;
+		double norm = 0;
+		for (size_t j = 0; j < scale2; j++) {
+			long ip = ipmin + j;
+			if (!is_nested_)
+				nest2ring(nside_, ip, &ip);
+			ip = hitpix->get_cutsky_index(ip);
+			if (ip >= size()) continue;
+			out[i] += data_[ip];
+			norm += 1.;
+		}
+		out[i] /= norm;
+	}
+
+	return boost::make_shared<CutSkyHealpixMap>(out);
 }
 
 std::string
@@ -412,6 +525,30 @@ CutSkyHealpixMap::Description() const
 	return os.str();
 }
 
+#define CUT_SKY_MAP_DOCSTR \
+	"CutSkyHealpixMap is a G3SkyMap with the extra meta information for a "\
+	"Healpix-pixelized sky.\nIn practice it behaves (mostly) like a 1D "\
+	"numpy array.\n\n"                                                   \
+	"Meta information stored:\n\n"\
+	"    get_nside() : returns the healpix resolution parameter\n"\
+	"    is_nested() : returns True if the pixels are in nested ordering,\n"\
+	"        false if in ring ordering\n"\
+	"\n\n"\
+	"Map array includes only the pixels that are within the sky patch covered\n"\
+	"by the map, as defined by the HealpixHitPix hitpix attribute.  To obtain a\n"\
+	"full-sized map for use with standard healpix tools, use get_fullsky_map()\n"\
+	"utility function.\n\n"\
+	"The other meta information is inheritted from G3SkyMap that lives in core. \n\n" \
+	"For reasons (skymap __setitem__ has to handle both 1d and 2d \n"\
+	" semantics) the CutSkyHealpixMap has a slightly unintuitive way of \n"\
+	" setting values when using a slicing operator.  Instead of being\n"\
+	" able to slice directly you need to cast it to be an array first: \n\n" \
+	"    np.asarray(your_cut_sky_map)[:] = the_numpy_array_you_are_assigning\n\n\n"\
+	"If you find that you need numpy functionality from a CutSkyHealpixMap,\n"\
+	" using np.asarray will convert it to a numpy array without copying the data.\n" \
+	" any changes to the resulting numpy array will affect the data stored in the\n" \
+	" CutSkyHealpixMap."
+
 PYBINDINGS("coordinateutils")
 {
 	namespace bp = boost::python;
@@ -421,35 +558,40 @@ PYBINDINGS("coordinateutils")
 	  "transform between cut sky and full sky healpix maps.  "
 	  "It provides the mapping between the indices.\n\n"
 	  "Out of necessity this object also defines a patch of "
-	  "sky.")
+	  "sky, and therefore the mapping between pixel and sky angle.")
 	    .def(bp::init<const FlatSkyMap &, size_t, int>(
-		(bp::arg("flat_map"), bp::arg("nside"),
+		(bp::arg("in_map"), bp::arg("nside"),
+		 bp::arg("is_nested"))))
+	    .def(bp::init<const CutSkyHealpixMap &, size_t, int>(
+		(bp::arg("in_map"), bp::arg("nside"),
 		 bp::arg("is_nested"))))
             .def(bp::init<const std::vector<int64_t> &, size_t, int,
                  MapCoordReference>(
 	         (bp::arg("pix_inds"), bp::arg("nside"), bp::arg("is_nested"),
 		  bp::arg("coord_ref"))))
 	    .def_pickle(g3frameobject_picklesuite<HealpixHitPix>())
-	    .def("get_nside", &HealpixHitPix::get_nside)
-	    .def("is_nested", &HealpixHitPix::is_nested)
+	    .def("get_size", &HealpixHitPix::get_size, "Number of hit pixels")
+	    .def("get_nside", &HealpixHitPix::get_nside, "Map resolution parameter")
+	    .def("is_nested", &HealpixHitPix::is_nested,
+	        "True if pixels are in nested ordering, False if in ring ordering")
 	    .def("get_fullsky_index", &HealpixHitPix::get_fullsky_index,
 	         bp::arg("cut_sky_index"))
 	    .def("get_cutsky_index", &HealpixHitPix::get_cutsky_index,
 		 bp::arg("full_sky_index"))
-	    .def_readwrite("pixinds", &HealpixHitPix::pixinds_)
+	    .def_readwrite("pixinds", &HealpixHitPix::pixinds_,
+	        "Vector of full sky indices corresponding to each cut sky pixel")
 	    ;
 
-	// XXX docstrings
 	bp::class_<CutSkyHealpixMap, bp::bases<G3SkyMap>, CutSkyHealpixMapPtr>
-		("CutSkyHealpixMap", bp::no_init)
+		("CutSkyHealpixMap", CUT_SKY_MAP_DOCSTR, bp::no_init)
 	    .def(bp::init<HealpixHitPixPtr, bool,
 		 G3SkyMap::MapPolType, G3Timestream::TimestreamUnits>(
 			 (bp::arg("hitpix"),
-			  bp::arg("is_weighted"),
-			  bp::arg("pol_type"),
-			  bp::arg("units"))
-			 ))
-
+			  bp::arg("is_weighted") = true,
+			  bp::arg("pol_type") = G3SkyMap::None,
+			  bp::arg("units") = G3Timestream::Tcmb),
+			 "Initialize an empty sky map from sky patch "
+			 "defined by the hitpix input"))
 	    .def(bp::init<bp::object, size_t, HealpixHitPixPtr, bool,
 		 G3SkyMap::MapPolType, G3Timestream::TimestreamUnits, int >(
 			 (bp::arg("full_sky_map"),
@@ -458,23 +600,29 @@ PYBINDINGS("coordinateutils")
 			  bp::arg("is_weighted") = true,
 			  bp::arg("pol_type") = G3SkyMap::None,
 			  bp::arg("units") = G3Timestream::Tcmb,
-			  bp::arg("init_sym_group") = 0)))
-		.def(bp::init<bp::object, HealpixHitPixPtr, bool,
-		     G3SkyMap::MapPolType, G3Timestream::TimestreamUnits>(
-			     (bp::arg("cut_sky_map"), bp::arg("hitpix"),
-			      bp::arg("is_weighted") = true,
-			      bp::arg("pol_type") = G3SkyMap::None,
-			      bp::arg("units") = G3Timestream::Tcmb))
-			)
-		.def(boost::python::init<>())
-		.def_pickle(g3frameobject_picklesuite<CutSkyHealpixMap>())
-		.def("get_full_sized_healpix_map",
-		     &CutSkyHealpixMap::get_full_sized_healpix_map,
-		     bp::arg("out_full_sized_map"))
-		.def("pixel_to_angle", &CutSkyHealpixMap::pixel_to_angle)
-		.def("is_nested", &CutSkyHealpixMap::is_nested)
-		.def("get_nside", &CutSkyHealpixMap::get_nside)
-		
+			  bp::arg("init_sym_group") = 0),
+			 "Initialize a sky map by copying data from the full sky map "
+			 "into the sky patch defined by the hitpix input"))
+	    .def(bp::init<bp::object, HealpixHitPixPtr, bool,
+		 G3SkyMap::MapPolType, G3Timestream::TimestreamUnits>(
+			 (bp::arg("cut_sky_map"), bp::arg("hitpix"),
+			  bp::arg("is_weighted") = true,
+			  bp::arg("pol_type") = G3SkyMap::None,
+			  bp::arg("units") = G3Timestream::Tcmb),
+			 "Create a sky map from a numpy array"))
+	    .def(boost::python::init<>())
+	    .def_pickle(g3frameobject_picklesuite<CutSkyHealpixMap>())
+	    .def("get_fullsky_map",
+		 &CutSkyHealpixMap::get_fullsky_map,
+		 bp::arg("out_fullsky_map"),
+		 "Return a full sky array for use with standard healpix tools")
+	    .def("pixel_to_angle", &CutSkyHealpixMap::pixel_to_angle,
+	         "Compute the sky coordinates of the given pixel")
+	    .def("is_nested", &CutSkyHealpixMap::is_nested,
+	         "True if pixels are in nested ordering, false if in ring ordering")
+	    .def("get_nside", &CutSkyHealpixMap::get_nside,
+	         "Map resolution parameter")
+
 	    .def_readwrite("hitpix", &CutSkyHealpixMap::hitpix)
 	;
 

@@ -100,22 +100,70 @@ public:
 			data_.resize( xpix_ * ypix_ + 1, 0);
 	}
 
+	virtual bool IsCompatible(const G3SkyMap & other) const {
+		return ((xpix_ == other.xpix_) &&
+			(ypix_ == other.ypix_) &&
+			(coord_ref == other.coord_ref));
+	}
+
 	bool IsAllocated(void) const {
 		return data_.size() > 0;
 	}
 
-	//pointing information
+	// Arithmetic operations:
+
+	// +
+	G3SkyMap & operator+=(const G3SkyMap & rhs);
+	G3SkyMap & operator+=(double rhs);
+	G3SkyMap operator+(const G3SkyMap & rhs);
+	G3SkyMap operator+(double rhs);
+
+	// -
+	G3SkyMap & operator-=(const G3SkyMap & rhs);
+	G3SkyMap & operator-=(double rhs);
+	G3SkyMap operator-(const G3SkyMap & rhs);
+	G3SkyMap operator-(double rhs);
+
+	// *
+	G3SkyMap & operator*=(const G3SkyMap & rhs);
+	G3SkyMap & operator*=(double rhs);
+	G3SkyMap operator*(const G3SkyMap & rhs);
+	G3SkyMap operator*(double rhs);
+
+	// /
+	G3SkyMap & operator/=(const G3SkyMap & rhs);
+	G3SkyMap & operator/=(double rhs);
+	G3SkyMap operator/(const G3SkyMap & rhs);
+	G3SkyMap operator/(double rhs);
+
+	// Pointing information
 	virtual std::vector<int> angles_to_pixels(const std::vector<double> & alphas, 
-					     const std::vector<double> & deltas) const { 
-		return std::vector<int>();
-	}
+	    const std::vector<double> & deltas) const;
+	virtual void pixels_to_angles(const std::vector<int> & pixels,
+	    std::vector<double> & alphas, std::vector<double> & deltas) const;
 
 	virtual std::vector<double> pixel_to_angle(size_t pixel) const {
 		return std::vector<double>();
 	}
-
 	std::vector<double> pixel_to_angle(size_t x_pix, size_t y_pix) const;
-	size_t angle_to_pixel(double alpha, double delta) const;
+	virtual size_t angle_to_pixel(double alpha, double delta) const {
+		return 0;
+	};
+
+	// Rebinning and interpolation
+	virtual void get_rebin_angles(long pixel, size_t scale,
+	    std::vector<double> & alphas, std::vector<double> & deltas) const {};
+	virtual void get_interp_pixels_weights(double alpha, double delta,
+	    std::vector<long> & pixels, std::vector<double> & weights) const {};
+	double get_interp_precalc(const std::vector<long> & pixels,
+	    const std::vector<double> & weights) const;
+	double get_interp_value(double alpha, double delta) const;
+	std::vector<double> get_interp_values(const std::vector<double> & alphas,
+	    const std::vector<double> & deltas) const ;
+
+	virtual boost::shared_ptr<G3SkyMap> rebin(size_t scale) const {
+		return Clone(false);
+	};
 
 protected:
 	// Last bin is an overflow bin

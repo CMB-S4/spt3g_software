@@ -1,5 +1,6 @@
 #include <pybindings.h>
 #include <serialization.h>
+#include <typeinfo>
 
 #include <coordinateutils/FlatSkyMap.h>
 
@@ -11,7 +12,8 @@ FlatSkyMap::FlatSkyMap(int x_len, int y_len, double res, bool is_weighted,
     G3SkyMap::MapPolType pol_type, double x_res) :
       G3SkyMap(coord_ref, x_len, y_len, is_weighted, u, pol_type, false),
       proj(proj), alpha_center(alpha_center), delta_center(delta_center),
-      res(res), x_res(x_res > 0 ? x_res : res)
+      res(res), x_res(x_res > 0 ? x_res : res),
+      proj_info_(x_len, y_len, res, alpha_center, delta_center, x_res, proj)
 {
 }
 
@@ -24,19 +26,21 @@ FlatSkyMap::FlatSkyMap(boost::python::object v, double res,
     G3SkyMap::MapPolType pol_type, double x_res) :
       G3SkyMap(v, coord_ref, is_weighted, u, pol_type),
       proj(proj), alpha_center(alpha_center), delta_center(delta_center),
-      res(res), x_res(x_res > 0 ? x_res : res)
+      res(res), x_res(x_res > 0 ? x_res : res),
+      proj_info_(xpix_, ypix_, res, alpha_center, delta_center, x_res, proj)
 {
 }
 
 FlatSkyMap::FlatSkyMap() :
     G3SkyMap(MapCoordReference::Local, 0), proj(MapProjection::Proj0),
-    alpha_center(0), delta_center(0), res(0), x_res(0)
+    alpha_center(0), delta_center(0), res(0), x_res(0), proj_info_(0, 0, 0)
 {
 }
 
 FlatSkyMap::FlatSkyMap(const FlatSkyMap & fm) :
     G3SkyMap(fm), proj(fm.proj), alpha_center(fm.alpha_center),
-    delta_center(fm.delta_center), res(fm.res), x_res(fm.x_res)
+    delta_center(fm.delta_center), res(fm.res), x_res(fm.x_res),
+    proj_info_(xpix_, ypix_, res, alpha_center, delta_center, x_res, proj)
 {
 }
 
@@ -138,193 +142,76 @@ FlatSkyMap::Description() const
 	return os.str();
 }
 
-FlatSkyMap &
-FlatSkyMap::operator+=(const FlatSkyMap & rhs)
-{
-	EnsureAllocated();
-	g3_assert(data_.size() == rhs.data_.size());
-	for (size_t i = 0; i < data_.size(); i++)
-		data_[i] += rhs.data_[i];
-	return *this;
+bool FlatSkyMap::IsCompatible(const G3SkyMap & other) const {
+	try {
+		const FlatSkyMap & flat = dynamic_cast<const FlatSkyMap&>(other);
+		return (G3SkyMap::IsCompatible(other) &&
+			(proj == flat.proj) &&
+			(alpha_center == flat.alpha_center) &&
+			(delta_center == flat.delta_center) &&
+			(res == flat.res) &&
+			(x_res == flat.x_res));
+	} catch(const std::bad_cast& e) {
+		return false;
+	}
 }
 
-FlatSkyMap &
-FlatSkyMap::operator+=(double rhs)
-{
-	EnsureAllocated();
-	for (size_t i = 0; i < data_.size(); i++)
-		data_[i] += rhs;
-	return *this;
+
+std::vector<double> FlatSkyMap::angle_to_xy(double alpha, double delta) const {
+	return proj_info_.angle_to_xy(alpha, delta);
 }
 
-FlatSkyMap
-FlatSkyMap::operator+(const FlatSkyMap & rhs)
-{
-	EnsureAllocated();
-	FlatSkyMap new_map(*this);
-	new_map += rhs;
-	return new_map;
+std::vector<double> FlatSkyMap::xy_to_angle(double x, double y) const {
+	return proj_info_.xy_to_angle(x, y, false);
 }
 
-FlatSkyMap
-FlatSkyMap::operator+(double rhs)
-{
-	EnsureAllocated();
-	FlatSkyMap new_map(*this);
-	new_map += rhs;
-	return new_map;
+size_t FlatSkyMap::angle_to_pixel(double alpha, double delta) const {
+	return proj_info_.angle_to_pixel(alpha, delta);
 }
-
-FlatSkyMap &
-FlatSkyMap::operator-=(const FlatSkyMap &rhs)
-{
-	EnsureAllocated();
-	g3_assert(data_.size() == rhs.data_.size());
-	for (size_t i = 0; i < data_.size(); i++)
-		data_[i] -= rhs.data_[i];
-	return *this;
-}
-
-FlatSkyMap &
-FlatSkyMap::operator-=(double rhs)
-{
-	EnsureAllocated();
-	for (size_t i = 0; i < data_.size(); i++)
-	data_[i] -= rhs;
-	return *this;
-}
-
-FlatSkyMap
-FlatSkyMap::operator-(const FlatSkyMap & rhs)
-{
-	EnsureAllocated();
-	FlatSkyMap new_map(*this);
-	new_map -= rhs;
-	return new_map;
-}
-
-FlatSkyMap
-FlatSkyMap::operator-(double rhs)
-{
-	EnsureAllocated();
-	FlatSkyMap new_map(*this);
-	new_map -= rhs;
-	return new_map;
-}
-
-FlatSkyMap &
-FlatSkyMap::operator*=(const FlatSkyMap & rhs)
-{
-	EnsureAllocated();
-	g3_assert(data_.size() == rhs.data_.size());
-	for (size_t i = 0; i < data_.size(); i++)
-		data_[i] *= rhs.data_[i];
-	return *this;
-}
-
-FlatSkyMap &
-FlatSkyMap::operator*=(double rhs)
-{
-	EnsureAllocated();
-	for (size_t i = 0; i < data_.size(); i++)
-		data_[i] *= rhs;
-	return *this;
-}
-
-FlatSkyMap
-FlatSkyMap::operator*(const FlatSkyMap & rhs)
-{
-	EnsureAllocated();
-	FlatSkyMap new_map(*this);
-	new_map *= rhs;
-	return new_map;
-}
-
-FlatSkyMap
-FlatSkyMap::operator*(double rhs)
-{
-	EnsureAllocated();
-	FlatSkyMap new_map(*this);
-	new_map *= rhs;
-	return new_map;
-}
-
-FlatSkyMap &
-FlatSkyMap::operator/=(const FlatSkyMap & rhs)
-{
-	EnsureAllocated();
-	g3_assert(data_.size() == rhs.data_.size());
-	for (size_t i = 0; i < data_.size(); i++)
-		data_[i] /= rhs.data_[i];
-	return *this;
-}
-
-FlatSkyMap &
-FlatSkyMap::operator/=(double rhs)
-{
-	EnsureAllocated();
-	for (size_t i = 0; i < data_.size(); i++)
-		data_[i] /= rhs;
-	return *this;
-}
-
-FlatSkyMap
-FlatSkyMap::operator/(const FlatSkyMap & rhs)
-{
-	EnsureAllocated();
-	FlatSkyMap new_map(*this);
-	new_map /= rhs;
-	return new_map;
-}
-
-FlatSkyMap
-FlatSkyMap::operator/(double rhs)
-{
-	EnsureAllocated();
-	FlatSkyMap new_map(*this);
-	new_map /= rhs;
-	return new_map;
-}
-
-std::vector<int> FlatSkyMap::angles_to_pixels(const std::vector<double> & alphas, 
-					 const std::vector<double> & deltas) const {
-	std::vector<int> ovec;
-	angle_to_pixel_1d_vec(alphas, deltas, 
-			      alpha_center, delta_center,
-			      xpix_, ypix_,
-			      res, x_res,
-			      proj,
-			      ovec);
-	return ovec;
-}
-
 
 std::vector<double> FlatSkyMap::pixel_to_angle(size_t pixel) const {
-	std::vector<int> inds;
-	inds.push_back(pixel);
-	std::vector<double> ra_out;
-	std::vector<double> dec_out;
-	pixel_1d_to_angle(inds, alpha_center, delta_center, xpix_, ypix_, res, x_res, proj,
-			  false, ra_out, dec_out);
-	std::vector<double> retval;
-	retval.push_back(ra_out[0]);
-	retval.push_back(dec_out[0]);
-	return retval;
+	return proj_info_.pixel_to_angle(pixel, false);
 }
 
 std::vector<double> FlatSkyMap::pixel_to_angle_wrap_ra(size_t pixel) const {
-	std::vector<int> inds;
-	inds.push_back(pixel);
-	std::vector<double> ra_out;
-	std::vector<double> dec_out;
-	pixel_1d_to_angle(inds, alpha_center, delta_center, xpix_, ypix_, res, x_res, proj,
-			  true, ra_out, dec_out);
-	std::vector<double> retval;
-	retval.push_back(ra_out[0]);
-	retval.push_back(dec_out[0]);
-	return retval;
+	return proj_info_.pixel_to_angle(pixel, true);
 }
 
+void FlatSkyMap::get_rebin_angles(long pixel, size_t scale,
+    std::vector<double> & alphas, std::vector<double> & deltas) const
+{
+	proj_info_.get_rebin_angles(pixel, scale, alphas, deltas, false);
+}
+
+void FlatSkyMap::get_interp_pixels_weights(double alpha, double delta,
+    std::vector<long> & pixels, std::vector<double> & weights) const
+{
+	proj_info_.get_interp_pixels_weights(alpha, delta, pixels, weights);
+}
+
+G3SkyMapPtr FlatSkyMap::rebin(size_t scale) const
+{
+	if ((xpix_ % scale != 0) || (ypix_ % scale != 0)) {
+		log_fatal("Map dimensions must be a multiple of rebinning scale");
+	}
+
+	if (scale == 1)
+		return Clone(true);
+
+	FlatSkyMap out(xpix_ / scale, ypix_ / scale, res * scale,
+	    is_weighted, proj, alpha_center, delta_center, coord_ref,
+	    units, pol_type, x_res * scale);
+	out.EnsureAllocated();
+
+	for (size_t i = 0; i < xpix_; i++) {
+		for (size_t j = 0; j < ypix_; j++) {
+			out[out.pixat(i / scale, j / scale)] += data_[pixat(i, j)];
+		}
+	}
+
+	out /= (scale * scale);
+	return boost::make_shared<FlatSkyMap>(out);
+}
 
 
 #define FLAT_SKY_MAP_DOCSTR \
@@ -337,17 +224,17 @@ std::vector<double> FlatSkyMap::pixel_to_angle_wrap_ra(size_t pixel) const {
         "    alpha_center : (double)  Ra (or Az) of the center of the map \n" \
         "    delta_center : (double)  Dec (or El) of the center of the map \n" \
         "    res : (double) approximate resolution of the pixel\n" \
-	"          (the actual shape of a pixel is  is projection dependent)\n"\
+	"          (the actual shape of a pixel is projection dependent)\n"\
         "    proj : (MapProjection)  proj is a MapProjection enum that specifies\n"\
 	"           the flat sky projection \n"	\
         "\n\n" \
-        "The other meta information is inheritted from G3SkyMap that lives in core. \n\n" \
+        "The other meta information is inherited from G3SkyMap that lives in core. \n\n" \
         "For reasons (skymap __setitem__ has to handle both 1d and 2d \n"\
 	" semantics) the FlatSkyMap has a slightly unintuitive way of \n"\
 	" setting values when using a slicing operator.  Instead of being\n"\
 	" able to  slice directly you need to cast it to be an array first: \n\n" \
 	"    np.asarray(your_flat_sky_map)[:] = the_numpy_array_you_are_assigning\n\n\n"\
-	"If you find that you need numpy functionality from a FlatSkyObject,\n"\
+	"If you find that you need numpy functionality from a FlatSkyMap,\n"\
 	" using np.asarray will convert it to a numpy array without copying the data.\n" \
 	" any changes to the resulting numpy array will affect the data stored in the\n" \
 	" FlatSkyMap."
@@ -373,11 +260,21 @@ PYBINDINGS("coordinateutils")
 	    .value("Proj9", Proj9)
 
 	    .value("ProjSansonFlamsteed", ProjSansonFlamsteed)
+	    .value("ProjSFL", ProjSFL)
+	    .value("ProjPlateCarree", ProjPlateCarree)
 	    .value("ProjCAR", ProjCAR)
+	    .value("ProjOrthographic", ProjOrthographic)
 	    .value("ProjSIN", ProjSIN)
 	    .value("ProjStereographic", ProjStereographic)
+	    .value("ProjSTG", ProjSTG)
 	    .value("ProjLambertAzimuthalEqualArea",
 	      ProjLambertAzimuthalEqualArea)
+	    .value("ProjZEA", ProjZEA)
+	    .value("ProjGnomonic", ProjGnomonic)
+	    .value("ProjTAN", ProjTAN)
+	    .value("ProjCylindricalEqualArea",
+	      ProjCylindricalEqualArea)
+	    .value("ProjCEA", ProjCEA)
 	    .value("ProjBICEP", ProjBICEP)
 	    .value("ProjNone", ProjNone)
 	;
@@ -425,23 +322,12 @@ PYBINDINGS("coordinateutils")
 	    .def_readwrite("y_res", &FlatSkyMap::res, "Resolution in Y "
 	      "direction for maps with rectangular pixels")
 
-	    .def(bp::self + bp::self)
-	    .def(bp::self * bp::self)
-	    .def(bp::self - bp::self)
-	    .def(bp::self / bp::self)
-	    .def(bp::self + double())
-	    .def(bp::self * double())
-	    .def(bp::self - double())
-	    .def(bp::self / double())
-	    .def(bp::self += bp::self)
-	    .def(bp::self *= bp::self)
-	    .def(bp::self -= bp::self)
-	    .def(bp::self /= bp::self)
-	    .def(bp::self += double())
-	    .def(bp::self *= double())
-	    .def(bp::self -= double())
-	    .def(bp::self /= double())
-	    .def("Clone", &FlatSkyMap::Clone)
+	    .def("xy_to_angle", &FlatSkyMap::xy_to_angle,
+	      (bp::arg("x"), bp::arg("y")),
+	       "Compute the sky coordinates of the input flat 2D coordinates")
+	    .def("angle_to_xy", &FlatSkyMap::angle_to_xy,
+	      (bp::arg("alpha"), bp::arg("delta")),
+	       "Compute the flat 2D coordinates of the input sky coordinates")
 	;
 	register_pointer_conversions<FlatSkyMap>();
 
