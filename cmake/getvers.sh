@@ -90,7 +90,11 @@ if [ -d .svn ]; then
 	fi
 elif [ -d .git ]; then
 	remote_branch=$(git rev-parse --abbrev-ref --symbolic-full-name @{u})
-	echo upstream_url=\"$(git remote get-url "$(echo $remote_branch | cut -d / -f 1)")\"
+	if (git remote get-url); then
+		echo upstream_url=\"$(git remote get-url "$(echo $remote_branch | cut -d / -f 1)")\"
+	else
+		echo upstream_url=\"$(git config remote."$(echo $remote_branch | cut -d / -f 1)".url)\"
+	fi
 	echo upstream_branch=\"$(echo $remote_branch | cut -d / -f 2)\"
 	echo revision=\"$(git rev-parse --verify HEAD 2>/dev/null)\"
 	echo gitrevision=\"$(git rev-parse --verify HEAD 2>/dev/null)\"
