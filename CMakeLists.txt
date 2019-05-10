@@ -151,6 +151,13 @@ add_custom_target(fasttest COMMAND ctest -LE SLOWTEST COMMENT "Running fast test
 configure_file(${CMAKE_SOURCE_DIR}/cmake/test_env.py.in ${CMAKE_BINARY_DIR}/test_env.py @ONLY)
 configure_file(${CMAKE_SOURCE_DIR}/cmake/CTestCustom.cmake.in ${CMAKE_BINARY_DIR}/CTestCustom.cmake @ONLY)
 
+# Target for version string
+add_custom_target(version ALL
+	COMMAND sh ${CMAKE_SOURCE_DIR}/cmake/getvers.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}/spt3g/__version__.py
+	BYPRODUCTS ${CMAKE_BINARY_DIR}/spt3g/__version__.py
+	COMMENT "Regenerating VCS version information"
+)
+
 # Add mechanism to make a tarball for the grid
 add_custom_target(tarball
 	COMMAND rm -rf ${CMAKE_BINARY_DIR}/tarball ${CMAKE_BINARY_DIR}/spt3g.tgz
