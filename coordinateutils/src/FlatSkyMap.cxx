@@ -11,9 +11,7 @@ FlatSkyMap::FlatSkyMap(int x_len, int y_len, double res, bool is_weighted,
     MapCoordReference coord_ref, G3Timestream::TimestreamUnits u,
     G3SkyMap::MapPolType pol_type, double x_res) :
       G3SkyMap(coord_ref, x_len, y_len, is_weighted, u, pol_type, false),
-      proj(proj), alpha_center(alpha_center), delta_center(delta_center),
-      res(res), x_res(x_res > 0 ? x_res : res),
-      proj_info_(x_len, y_len, res, alpha_center, delta_center, x_res, proj)
+      proj_info(x_len, y_len, res, alpha_center, delta_center, x_res, proj)
 {
 }
 
@@ -25,38 +23,59 @@ FlatSkyMap::FlatSkyMap(boost::python::object v, double res,
     MapCoordReference coord_ref, G3Timestream::TimestreamUnits u,
     G3SkyMap::MapPolType pol_type, double x_res) :
       G3SkyMap(v, coord_ref, is_weighted, u, pol_type),
-      proj(proj), alpha_center(alpha_center), delta_center(delta_center),
-      res(res), x_res(x_res > 0 ? x_res : res),
-      proj_info_(xpix_, ypix_, res, alpha_center, delta_center, x_res, proj)
+      proj_info(xpix_, ypix_, res, alpha_center, delta_center, x_res, proj)
+{
+}
+
+FlatSkyMap::FlatSkyMap(const FlatSkyProjection & fp,
+    MapCoordReference coord_ref, bool is_weighted,
+    G3Timestream::TimestreamUnits u, G3SkyMap::MapPolType pol_type) :
+      G3SkyMap(coord_ref, fp.xdim(), fp.ydim(), is_weighted, u, pol_type, false),
+      proj_info(fp)
 {
 }
 
 FlatSkyMap::FlatSkyMap() :
-    G3SkyMap(MapCoordReference::Local, 0), proj(MapProjection::Proj0),
-    alpha_center(0), delta_center(0), res(0), x_res(0), proj_info_(0, 0, 0)
+    G3SkyMap(MapCoordReference::Local, 0), proj_info(0, 0, 0)
 {
 }
 
 FlatSkyMap::FlatSkyMap(const FlatSkyMap & fm) :
-    G3SkyMap(fm), proj(fm.proj), alpha_center(fm.alpha_center),
-    delta_center(fm.delta_center), res(fm.res), x_res(fm.x_res),
-    proj_info_(xpix_, ypix_, res, alpha_center, delta_center, x_res, proj)
+    G3SkyMap(fm), proj_info(fm.proj_info)
 {
 }
 
 template <class A> void
-FlatSkyMap::serialize(A &ar, const unsigned v)
+FlatSkyMap::save(A &ar, unsigned v) const
 {
 	using namespace cereal;
 
 	G3_CHECK_VERSION(v);
 
 	ar & make_nvp("G3SkyMap", base_class<G3SkyMap>(this));
-	ar & make_nvp("proj",proj);
-	ar & make_nvp("alpha_center",alpha_center);
-	ar & make_nvp("delta_center",delta_center);
-	ar & make_nvp("res",res);
-	ar & make_nvp("x_res", x_res);
+	ar & make_nvp("proj_info", proj_info);
+}
+
+template <class A> void
+FlatSkyMap::load(A &ar, unsigned v)
+{
+	using namespace cereal;
+
+	G3_CHECK_VERSION(v);
+
+	ar & make_nvp("G3SkyMap", base_class<G3SkyMap>(this));
+	if (v > 1) {
+	  ar & make_nvp("proj_info", proj_info);
+	} else {
+		MapProjection proj;
+		double alpha_center, delta_center, res, x_res;
+		ar & make_nvp("proj", proj);
+		ar & make_nvp("alpha_center", alpha_center);
+		ar & make_nvp("delta_center", delta_center);
+		ar & make_nvp("res", res);
+		ar & make_nvp("x_res", x_res);
+		proj_info.initialize(xpix_, ypix_, res, alpha_center, delta_center, x_res, proj);
+	}
 }
 
 G3SkyMapPtr
@@ -65,9 +84,8 @@ FlatSkyMap::Clone(bool copy_data) const
 	if (copy_data)
 		return boost::make_shared<FlatSkyMap>(*this);
 	else
-		return boost::make_shared<FlatSkyMap>(xpix_,  ypix_, res,
-		    is_weighted, proj, alpha_center, delta_center, coord_ref,
-		    units, pol_type, x_res);
+		return boost::make_shared<FlatSkyMap>(proj_info,
+		    coord_ref, is_weighted, units, pol_type);
 }
 
 std::string
@@ -77,9 +95,7 @@ FlatSkyMap::Description() const
 
 	os.precision(1);
 
-	os << xpix_ << " x " << ypix_ <<
-	    " (" << xpix_*((x_res != 0) ? x_res : res)/G3Units::deg << " x "
-	    << ypix_*res/G3Units::deg << " deg) in ";
+	os << proj_info.Description() << " in ";
 
 	switch (coord_ref) {
 	case Local:
@@ -94,30 +110,7 @@ FlatSkyMap::Description() const
 	default:
 		os << "unknown";
 	}
-	os << " coordinates, ";
-
-	switch (proj) {
-	case ProjSansonFlamsteed:
-		os << "Sanson-Flamsteed";
-		break;
-	case ProjCAR:
-		os << "CAR";
-		break;
-	case ProjSIN:
-		os << "Sin";
-		break;
-	case ProjStereographic:
-		os << "stereographic";
-		break;
-	case ProjLambertAzimuthalEqualArea:
-		os << "Lambert Azimuthal Equal Area";
-		break;
-	case ProjBICEP:
-		os << "BICEP";
-		break;
-	default:
-		os << "other (" << proj << ")";
-	}
+	os << " coordinates ";
 
 	switch (units) {
 	case G3Timestream::Counts:
@@ -146,47 +139,59 @@ bool FlatSkyMap::IsCompatible(const G3SkyMap & other) const {
 	try {
 		const FlatSkyMap & flat = dynamic_cast<const FlatSkyMap&>(other);
 		return (G3SkyMap::IsCompatible(other) &&
-			(proj == flat.proj) &&
-			(alpha_center == flat.alpha_center) &&
-			(delta_center == flat.delta_center) &&
-			(res == flat.res) &&
-			(x_res == flat.x_res));
+			proj_info.IsCompatible(flat.proj_info));
 	} catch(const std::bad_cast& e) {
 		return false;
 	}
 }
 
+#define GETSET(name, type)                     \
+	type FlatSkyMap::name() const          \
+	{                                      \
+		return proj_info.name();       \
+	}                                      \
+	void FlatSkyMap::set_##name(type name) \
+	{                                      \
+		proj_info.set_##name(name);    \
+	}
+
+GETSET(proj, MapProjection);
+GETSET(alpha_center, double);
+GETSET(delta_center, double);
+GETSET(xres, double);
+GETSET(yres, double);
+GETSET(res, double);
 
 std::vector<double> FlatSkyMap::angle_to_xy(double alpha, double delta) const {
-	return proj_info_.angle_to_xy(alpha, delta);
+	return proj_info.angle_to_xy(alpha, delta);
 }
 
 std::vector<double> FlatSkyMap::xy_to_angle(double x, double y) const {
-	return proj_info_.xy_to_angle(x, y, false);
+	return proj_info.xy_to_angle(x, y, false);
 }
 
 size_t FlatSkyMap::angle_to_pixel(double alpha, double delta) const {
-	return proj_info_.angle_to_pixel(alpha, delta);
+	return proj_info.angle_to_pixel(alpha, delta);
 }
 
 std::vector<double> FlatSkyMap::pixel_to_angle(size_t pixel) const {
-	return proj_info_.pixel_to_angle(pixel, false);
+	return proj_info.pixel_to_angle(pixel, false);
 }
 
 std::vector<double> FlatSkyMap::pixel_to_angle_wrap_ra(size_t pixel) const {
-	return proj_info_.pixel_to_angle(pixel, true);
+	return proj_info.pixel_to_angle(pixel, true);
 }
 
 void FlatSkyMap::get_rebin_angles(long pixel, size_t scale,
     std::vector<double> & alphas, std::vector<double> & deltas) const
 {
-	proj_info_.get_rebin_angles(pixel, scale, alphas, deltas, false);
+	proj_info.get_rebin_angles(pixel, scale, alphas, deltas, false);
 }
 
 void FlatSkyMap::get_interp_pixels_weights(double alpha, double delta,
     std::vector<long> & pixels, std::vector<double> & weights) const
 {
-	proj_info_.get_interp_pixels_weights(alpha, delta, pixels, weights);
+	proj_info.get_interp_pixels_weights(alpha, delta, pixels, weights);
 }
 
 G3SkyMapPtr FlatSkyMap::rebin(size_t scale) const
@@ -195,12 +200,11 @@ G3SkyMapPtr FlatSkyMap::rebin(size_t scale) const
 		log_fatal("Map dimensions must be a multiple of rebinning scale");
 	}
 
-	if (scale == 1)
+	if (scale <= 1)
 		return Clone(true);
 
-	FlatSkyMap out(xpix_ / scale, ypix_ / scale, res * scale,
-	    is_weighted, proj, alpha_center, delta_center, coord_ref,
-	    units, pol_type, x_res * scale);
+	FlatSkyProjection p(proj_info.rebin(scale));
+	FlatSkyMap out(proj_info, coord_ref, is_weighted, units, pol_type);
 	out.EnsureAllocated();
 
 	for (size_t i = 0; i < xpix_; i++) {
@@ -241,43 +245,11 @@ G3SkyMapPtr FlatSkyMap::rebin(size_t scale) const
 
 
 
-G3_SERIALIZABLE_CODE(FlatSkyMap);
+G3_SPLIT_SERIALIZABLE_CODE(FlatSkyMap);
 
 PYBINDINGS("coordinateutils")
 {
 	using namespace boost::python;
-
-	bp::enum_<MapProjection>("MapProjection")
-	    .value("Proj0", Proj0)
-	    .value("Proj1", Proj1)
-	    .value("Proj2", Proj2)
-	    .value("Proj3", Proj3)
-	    .value("Proj4", Proj4)
-	    .value("Proj5", Proj5)
-	    .value("Proj6", Proj6)
-	    .value("Proj7", Proj7)
-	    .value("Proj8", Proj8)
-	    .value("Proj9", Proj9)
-
-	    .value("ProjSansonFlamsteed", ProjSansonFlamsteed)
-	    .value("ProjSFL", ProjSFL)
-	    .value("ProjPlateCarree", ProjPlateCarree)
-	    .value("ProjCAR", ProjCAR)
-	    .value("ProjOrthographic", ProjOrthographic)
-	    .value("ProjSIN", ProjSIN)
-	    .value("ProjStereographic", ProjStereographic)
-	    .value("ProjSTG", ProjSTG)
-	    .value("ProjLambertAzimuthalEqualArea",
-	      ProjLambertAzimuthalEqualArea)
-	    .value("ProjZEA", ProjZEA)
-	    .value("ProjGnomonic", ProjGnomonic)
-	    .value("ProjTAN", ProjTAN)
-	    .value("ProjCylindricalEqualArea",
-	      ProjCylindricalEqualArea)
-	    .value("ProjCEA", ProjCEA)
-	    .value("ProjBICEP", ProjBICEP)
-	    .value("ProjNone", ProjNone)
-	;
 
 	// Can't use the normal FRAMEOBJECT code since this inherits
 	// from an intermediate class. Expanded by hand here.
@@ -309,18 +281,18 @@ PYBINDINGS("coordinateutils")
 
 	    .def(bp::init<const FlatSkyMap&>(bp::arg("flat_map")))
 	    .def(bp::init<>())
-	    .def_readwrite("proj", &FlatSkyMap::proj,
+	    .add_property("proj", &FlatSkyMap::proj, &FlatSkyMap::set_proj,
 	      "Map projection (one of coordinateutils.MapProjection)")
-	    .def_readwrite("alpha_center", &FlatSkyMap::alpha_center,
-	      "Horizontal axis center position")
-	    .def_readwrite("delta_center", &FlatSkyMap::delta_center,
-	      "Vertical axis center position")
-	    .def_readwrite("res", &FlatSkyMap::res, "Map resolution in "
-	      "angular units for maps with square pixels")
-	    .def_readwrite("x_res", &FlatSkyMap::x_res, "Resolution in X "
-	      "direction for maps with rectangular pixels")
-	    .def_readwrite("y_res", &FlatSkyMap::res, "Resolution in Y "
-	      "direction for maps with rectangular pixels")
+	    .add_property("alpha_center", &FlatSkyMap::alpha_center,
+	      &FlatSkyMap::set_alpha_center, "Horizontal axis center position")
+	    .add_property("delta_center", &FlatSkyMap::delta_center,
+	      &FlatSkyMap::set_delta_center, "Vertical axis center position")
+	    .add_property("res", &FlatSkyMap::res, &FlatSkyMap::set_res,
+	      "Map resolution in angular units for maps with square pixels")
+	    .add_property("x_res", &FlatSkyMap::xres, &FlatSkyMap::set_xres,
+	      "Resolution in X direction for maps with rectangular pixels")
+	    .add_property("y_res", &FlatSkyMap::yres, &FlatSkyMap::set_yres,
+	      "Resolution in Y direction for maps with rectangular pixels")
 
 	    .def("xy_to_angle", &FlatSkyMap::xy_to_angle,
 	      (bp::arg("x"), bp::arg("y")),

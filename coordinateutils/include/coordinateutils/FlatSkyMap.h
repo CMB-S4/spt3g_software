@@ -13,12 +13,6 @@
 
 class FlatSkyMap : public G3SkyMap {
 public:
-	MapProjection proj;
-	double alpha_center;    // Map center position in X
-	double delta_center;    // Map center in Y
-	double res;             // Pixel height (and width if x_res is 0)
-	double x_res;           // Pixel width if different from zero
-	
 	// Construct an X by Y pixel flat map with pixel width res and the given
 	// units, center, and coordinate system. If x_res is set to something
 	// non-zero, will set the X resolution to a different number than res,
@@ -42,14 +36,36 @@ public:
 	    G3SkyMap::MapPolType pol_type = MapPolType::None,
 	    double x_res = 0);
 
+	FlatSkyMap(const FlatSkyProjection & fp,
+	    MapCoordReference coord_ref = MapCoordReference::Equatorial,
+	    bool is_weighted = true,
+	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
+	    G3SkyMap::MapPolType pol_type = MapPolType::None);
+
 	FlatSkyMap();
 	FlatSkyMap(const FlatSkyMap & fm);
 
-	template <class A> void serialize(A &ar, const unsigned u);
+	template <class A> void load(A &ar, unsigned v);
+	template <class A> void save(A &ar, unsigned v) const;
 	virtual G3SkyMapPtr Clone(bool copy_data = true) const override;
 	std::string Description() const override;
 
 	bool IsCompatible(const G3SkyMap & other) const override;
+
+	void set_proj(MapProjection proj);
+	void set_alpha_center(double alpha);
+	void set_delta_center(double delta);
+	void set_center(double alpha, double delta);
+	void set_xres(double res);
+	void set_yres(double res);
+	void set_res(double res);
+
+	MapProjection proj() const;
+	double alpha_center() const;
+	double delta_center() const;
+	double xres() const;
+	double yres() const;
+	double res() const;
 
 	size_t angle_to_pixel(double alpha, double delta) const override;
 	std::vector<double> pixel_to_angle(size_t pixel) const override;
@@ -65,13 +81,18 @@ public:
 	G3SkyMapPtr rebin(size_t scale) const override;
 
 private:
-	FlatSkyProjection proj_info_;
+	FlatSkyProjection proj_info; // projection parameters and functions
 
 	SET_LOGGER("FlatSkyMap");
 };
 
 G3_POINTERS(FlatSkyMap);
-G3_SERIALIZABLE(FlatSkyMap, 1);
+
+namespace cereal {
+  template <class A> struct specialize<A, FlatSkyMap, cereal::specialization::member_load_save> {};
+}
+
+G3_SERIALIZABLE(FlatSkyMap, 2);
 
 #endif //_COORDINATEUTILS_FLATSKYMAP_H
 

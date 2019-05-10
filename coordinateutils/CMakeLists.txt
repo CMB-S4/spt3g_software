@@ -8,8 +8,8 @@ add_library(coordinateutils SHARED
   src/chealpix.c
   src/get_interp_val.c
   src/CutskyHealpixMap.cxx
-  src/FlatSkyMap.cxx
   src/flatskyprojection.cpp
+  src/FlatSkyMap.cxx
   src/maputils.cpp
   src/quaternion.cpp
   src/python.cpp

@@ -482,7 +482,7 @@ G3SkyMapPtr CutSkyHealpixMap::rebin(size_t scale) const
 	if (nside_ % scale != 0)
 		log_fatal("Map nside must be a multiple of rebinning scale");
 
-	if (scale == 1)
+	if (scale <= 1)
 		return Clone(true);
 
 	HealpixHitPixPtr hpx = boost::make_shared<HealpixHitPix>(*this,

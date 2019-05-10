@@ -3,9 +3,8 @@
 
 #include <vector>
 
+#include <G3Frame.h>
 #include <G3Logging.h>
-
-typedef double angle_t;
 
 // Defined map projections
 enum MapProjection {
@@ -41,12 +40,41 @@ enum MapProjection {
 	Proj9 = 9,
 };
 
-class FlatSkyProjection {
+class FlatSkyProjection : public G3FrameObject {
 public:
 	FlatSkyProjection(size_t xpix, size_t ypix, double res,
 			  double alpha_center = 0, double delta_center = 0,
 			  double x_res = 0,
 			  MapProjection proj = MapProjection::ProjNone);
+
+	FlatSkyProjection();
+	FlatSkyProjection(const FlatSkyProjection & fp);
+
+	void initialize(size_t xpix, size_t ypix, double res,
+	    double alpha_center = 0, double delta_center = 0, double x_res = 0,
+	    MapProjection proj = MapProjection::ProjNone);
+
+	template <class A> void load(A &ar, unsigned v);
+	template <class A> void save(A &ar, unsigned v) const;
+	bool IsCompatible(const FlatSkyProjection & other) const;
+	std::string Description() const override;
+
+	void set_proj(MapProjection proj);
+	void set_alpha_center(double alpha);
+	void set_delta_center(double delta);
+	void set_center(double alpha, double delta);
+	void set_xres(double res);
+	void set_yres(double res);
+	void set_res(double res, double x_res=0);
+
+	size_t xdim() const { return xpix_; };
+	size_t ydim() const { return ypix_; };
+	MapProjection proj() const { return proj_; };
+	double alpha_center() const { return alpha0_; };
+	double delta_center() const { return delta0_; };
+	double xres() const { return x_res_; };
+	double yres() const { return y_res_; };
+	double res() const { return y_res_; };
 
 	long xy_to_pixel(double x, double y) const;
 	std::vector<double> pixel_to_xy(long pixel) const;
@@ -61,15 +89,17 @@ public:
 	void get_interp_pixels_weights(double alpha, double delta,
 	    std::vector<long> & pixels, std::vector<double> & weights) const;
 
+	FlatSkyProjection rebin(size_t scale) const;
+
 private:
 	// projection parameters
-	double alpha0_;
-	double delta0_;
 	size_t xpix_;
 	size_t ypix_;
+	MapProjection proj_;
+	double alpha0_;
+	double delta0_;
 	double x_res_;
 	double y_res_;
-	MapProjection proj_;
 
 	// derived values
 	double x_min_;
@@ -81,5 +111,11 @@ private:
 };
 
 G3_POINTERS(FlatSkyProjection);
+
+namespace cereal {
+  template <class A> struct specialize<A, FlatSkyProjection, cereal::specialization::member_load_save> {};
+}
+
+G3_SERIALIZABLE(FlatSkyProjection, 1);
 
 #endif //#ifndef _COORDINATEUTILS_FLATSKYPROJECTION_H

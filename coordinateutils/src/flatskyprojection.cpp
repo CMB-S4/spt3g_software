@@ -1,4 +1,5 @@
 #include <pybindings.h>
+#include <serialization.h>
 
 #include <math.h>
 #include <assert.h>
@@ -17,14 +18,158 @@
 using namespace G3Units;
 
 FlatSkyProjection::FlatSkyProjection(size_t xpix, size_t ypix, double res,
-    double alpha_center, double delta_center, double x_res, MapProjection proj) :
-      alpha0_(alpha_center), delta0_(delta_center), xpix_(xpix), ypix_(ypix),
-      x_res_(x_res > 0 ? x_res: res), y_res_(res), proj_(proj)
+    double alpha_center, double delta_center, double x_res, MapProjection proj)
 {
-	x_min_ = -0.5 * (xpix_ - 1) * x_res_;
-	y_min_ = -0.5 * (ypix_ - 1) * y_res_;
+	initialize(xpix, ypix, res, alpha_center, delta_center, x_res, proj);
+}
+
+FlatSkyProjection::FlatSkyProjection()
+{
+	initialize(0, 0, 0);
+}
+
+FlatSkyProjection::FlatSkyProjection(const FlatSkyProjection & fp)
+{
+	initialize(fp.xpix_, fp.ypix_, fp.y_res_, fp.alpha0_, fp.delta0_,
+	    fp.x_res_, fp.proj_);
+}
+
+template <class A> void FlatSkyProjection::load(A &ar, unsigned v)
+{
+	using namespace cereal;
+
+	G3_CHECK_VERSION(v);
+
+	ar & make_nvp("G3FrameObject", base_class<G3FrameObject>(this));
+	ar & make_nvp("xdim", xpix_);
+	ar & make_nvp("ydim", ypix_);
+	ar & make_nvp("proj", proj_);
+	ar & make_nvp("alpha_center", alpha0_);
+	ar & make_nvp("delta_center", delta0_);
+	ar & make_nvp("x_res", x_res_);
+	ar & make_nvp("y_res", y_res_);
+
+	initialize(xpix_, ypix_, y_res_, alpha0_, delta0_, x_res_, proj_);
+}
+
+template <class A> void FlatSkyProjection::save(A &ar, unsigned v) const
+{
+	using namespace cereal;
+
+	G3_CHECK_VERSION(v);
+
+	ar & make_nvp("G3FrameObject", base_class<G3FrameObject>(this));
+	ar & make_nvp("xdim", xpix_);
+	ar & make_nvp("ydim", ypix_);
+	ar & make_nvp("proj", proj_);
+	ar & make_nvp("alpha_center", alpha0_);
+	ar & make_nvp("delta_center", delta0_);
+	ar & make_nvp("res", y_res_);
+	ar & make_nvp("x_res", x_res_);
+}
+
+std::string FlatSkyProjection::Description() const
+{
+	std::ostringstream os;
+
+	os.precision(1);
+
+	os << xpix_ << " x " << ypix_ <<
+	    " (" << xpix_ * x_res_ / deg << " x "
+	     << ypix_ * y_res_ / deg << " deg) ";
+
+	switch (proj_) {
+	case ProjSansonFlamsteed:
+		os << "Sanson-Flamsteed";
+		break;
+	case ProjCAR:
+		os << "Plate Carree";
+		break;
+	case ProjSIN:
+		os << "Orthographic";
+		break;
+	case ProjStereographic:
+		os << "Stereographic";
+		break;
+	case ProjLambertAzimuthalEqualArea:
+		os << "Lambert Azimuthal Equal Area";
+		break;
+	case ProjGnomonic:
+		os << "Gnomonic";
+		break;
+	case ProjCEA:
+		os << "Cylindrical Equal Area";
+		break;
+	case ProjBICEP:
+		os << "BICEP";
+		break;
+	default:
+		os << "other (" << proj_ << ")";
+	}
+
+	return os.str();
+}
+
+bool FlatSkyProjection::IsCompatible(const FlatSkyProjection & other) const
+{
+	return ((xpix_ == other.xpix_) &&
+		(ypix_ == other.ypix_) &&
+		(proj_ == other.proj_) &&
+		(alpha0_ == other.alpha0_) &&
+		(delta0_ == other.delta0_) &&
+		(x_res_ == other.x_res_) &&
+		(y_res_ == other.y_res_));
+}
+
+void FlatSkyProjection::initialize(size_t xpix, size_t ypix, double res,
+    double alpha_center, double delta_center, double x_res, MapProjection proj)
+{
+	xpix_ = xpix;
+	ypix_ = ypix;
+	set_proj(proj);
+	set_center(alpha_center, delta_center);
+	set_res(res, x_res);
+}
+
+void FlatSkyProjection::set_proj(MapProjection proj)
+{
+	proj_ = proj;
+}
+
+void FlatSkyProjection::set_alpha_center(double alpha)
+{
+	alpha0_ = alpha;
+}
+
+void FlatSkyProjection::set_delta_center(double delta)
+{
+	delta0_ = delta;
 	sindelta0_ = SIN(delta0_ / rad);
 	cosdelta0_ = COS(delta0_ / rad);
+}
+
+void FlatSkyProjection::set_center(double alpha, double delta)
+{
+	set_alpha_center(alpha);
+	set_delta_center(delta);
+}
+
+void FlatSkyProjection::set_xres(double res)
+{
+	x_res_ = res;
+	x_min_ = -0.5 * (xpix_ - 1) * x_res_;
+}
+
+void FlatSkyProjection::set_yres(double res)
+{
+	y_res_ = res;
+	y_min_ = -0.5 * (ypix_ - 1) * y_res_;
+}
+
+void FlatSkyProjection::set_res(double res, double x_res)
+{
+	set_yres(res);
+	set_xres(x_res > 0 ? x_res : res);
 }
 
 long
@@ -338,4 +483,58 @@ void FlatSkyProjection::get_interp_pixels_weights(double alpha, double delta,
 	pixels[1] = x_2 + y_1 * xpix_;  weights[1] = (x - x_1) * (y_2 - y);
 	pixels[2] = x_1 + y_2 * xpix_;  weights[2] = (x_2 - x) * (y - y_1);
 	pixels[3] = x_2 + y_2 * xpix_;  weights[3] = (x - x_1) * (y - y_1);
+}
+
+FlatSkyProjection FlatSkyProjection::rebin(size_t scale) const
+{
+	FlatSkyProjection fp(*this);
+
+	if (scale <= 1)
+		return fp;
+
+	fp.xpix_ /= scale;
+	fp.ypix_ /= scale;
+	fp.set_res(y_res_ * scale, x_res_ * scale);
+
+	return fp;
+}
+
+
+G3_SPLIT_SERIALIZABLE_CODE(FlatSkyProjection);
+
+PYBINDINGS("coordinateutils")
+{
+	using namespace boost::python;
+
+	bp::enum_<MapProjection>("MapProjection")
+	    .value("Proj0", Proj0)
+	    .value("Proj1", Proj1)
+	    .value("Proj2", Proj2)
+	    .value("Proj3", Proj3)
+	    .value("Proj4", Proj4)
+	    .value("Proj5", Proj5)
+	    .value("Proj6", Proj6)
+	    .value("Proj7", Proj7)
+	    .value("Proj8", Proj8)
+	    .value("Proj9", Proj9)
+
+	    .value("ProjSansonFlamsteed", ProjSansonFlamsteed)
+	    .value("ProjSFL", ProjSFL)
+	    .value("ProjPlateCarree", ProjPlateCarree)
+	    .value("ProjCAR", ProjCAR)
+	    .value("ProjOrthographic", ProjOrthographic)
+	    .value("ProjSIN", ProjSIN)
+	    .value("ProjStereographic", ProjStereographic)
+	    .value("ProjSTG", ProjSTG)
+	    .value("ProjLambertAzimuthalEqualArea",
+	      ProjLambertAzimuthalEqualArea)
+	    .value("ProjZEA", ProjZEA)
+	    .value("ProjGnomonic", ProjGnomonic)
+	    .value("ProjTAN", ProjTAN)
+	    .value("ProjCylindricalEqualArea",
+	      ProjCylindricalEqualArea)
+	    .value("ProjCEA", ProjCEA)
+	    .value("ProjBICEP", ProjBICEP)
+	    .value("ProjNone", ProjNone)
+	;
 }
