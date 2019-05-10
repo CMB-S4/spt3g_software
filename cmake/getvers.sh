@@ -46,14 +46,26 @@ git_tree_modified()
 }
 
 if [ -d .svn ]; then
-	url=$(svn info --show-item url)
+	if (svn info --show-item url 1>&2 2>/dev/null); then
+		url=$(svn info --show-item url)
+		relurl=$(svn info --show-item relative-url)
+		baserev=$(svn info --show-item revision)
+	else
+		url=$(svn info | grep '^URL: ')
+		url=${url#URL: }
+		repobase=$(svn info | grep '^Repository Root: ')
+		repobase=${repobase#Repository Root:}
+		relurl=^$(echo $url | cut -c $(echo $repobase | wc -c )-)
+		baserev=$(svn info | grep '^Revision: ')
+		baserev=${baserev#Revision: }
+	fi
 	echo upstream_url=\"$url\"
 
 	# Following redundant for SVN, but nice to have compatibility with
 	# the git case below. Since it is just compat with git, "trunk" is
 	# called "master" here.
 	if echo $url | grep -q '/branches/'; then
-		echo upstream_branch=\"$(svn info --show-item relative-url | sed 's/.*\/branches\///g')\"
+		echo upstream_branch=\"$(echo $relurl | sed 's/.*\/branches\///g')\"
 	elif echo $url | grep -q '/trunk'; then
 		echo upstream_branch=\"master\"
 	else
@@ -67,12 +79,12 @@ if [ -d .svn ]; then
 		echo localdiffs=False
 	fi
 	if (echo $url | grep -q github.com); then
-		echo gitrevision=\"$(svn pg --revprop -r HEAD git-commit)\"
+		echo gitrevision=\"$(svn pg --revprop -r $baserev git-commit)\"
 	fi
 	if echo $url | grep -q '/tags/'; then
-		echo versionname=\"$(svn info --show-item relative-url | sed 's/.*\/tags\///g')\"
+		echo versionname=\"$(echo $relurl | sed 's/.*\/tags\///g')\"
 	elif echo $url | grep -q '/releases/'; then
-		echo versionname=\"$(svn info --show-item relative-url | sed 's/.*\/releases\///g')\"
+		echo versionname=\"$(echo $relurl | sed 's/.*\/releases\///g')\"
 	else
 		echo versionname=\"\"
 	fi
