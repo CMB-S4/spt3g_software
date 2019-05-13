@@ -699,8 +699,8 @@ PYBINDINGS("gcp") {
 	class_<ARCFileReader, bases<G3Module>, boost::shared_ptr<ARCFileReader>,
 	    boost::noncopyable>("ARCFileReader",
 	    "Read GCP archive file (or files if you pass an iterable of paths)."
-	    " Jiffiebase is the length of 1 GCP tick. Set to 1 ms by default"
-	    " (SPT). For POLARBEAR, use G3Units.day/(1 << 32).",
+	    " For non-SPT ARC file formats, please set Experiment to the "
+	    " appropriate value.",
 		init<std::string, optional<Experiment> >(
 		        args("filename", "experiment")))
 		.def(init<std::vector<std::string>, optional<Experiment> >(

@@ -41,7 +41,7 @@ Note that on any RHEL6 system, you will need a newer compiler than ships with th
 
 .. code-block:: shell
 
-	eval `/cvmfs/spt.opensciencegrid.org/py2-v1/setup.sh`
+	eval `/cvmfs/spt.opensciencegrid.org/py3-v2/setup.sh`
 
 
 How to Build
