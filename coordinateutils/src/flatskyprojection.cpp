@@ -319,8 +319,8 @@ void FlatSkyProjection::get_interp_pixels_weights(double alpha, double delta,
     std::vector<long> & pixels, std::vector<double> & weights) const
 {
 	std::vector<double> xy = angle_to_xy(alpha, delta);
-	double x = xy[0] + 0.5;
-	double y = xy[1] + 0.5;
+	double x = xy[0];
+	double y = xy[1];
 
 	pixels = std::vector<long>(4, -1);
 	weights = std::vector<double>(4, 0);
