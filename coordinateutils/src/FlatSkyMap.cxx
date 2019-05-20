@@ -50,8 +50,6 @@ FlatSkyMap::save(A &ar, unsigned v) const
 {
 	using namespace cereal;
 
-	G3_CHECK_VERSION(v);
-
 	ar & make_nvp("G3SkyMap", base_class<G3SkyMap>(this));
 	ar & make_nvp("proj_info", proj_info);
 }
