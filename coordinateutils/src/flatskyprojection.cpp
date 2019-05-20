@@ -56,8 +56,6 @@ template <class A> void FlatSkyProjection::save(A &ar, unsigned v) const
 {
 	using namespace cereal;
 
-	G3_CHECK_VERSION(v);
-
 	ar & make_nvp("G3FrameObject", base_class<G3FrameObject>(this));
 	ar & make_nvp("xdim", xpix_);
 	ar & make_nvp("ydim", ypix_);
