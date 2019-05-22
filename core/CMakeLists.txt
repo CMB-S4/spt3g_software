@@ -22,6 +22,7 @@ add_library(core SHARED
 	src/G3TriggeredBuilder.cxx src/G3MultiFileWriter.cxx src/dataio.cxx
 	src/G3SkyMap.cxx src/crc32.c ${CORE_EXTRA_SRCS}
 	src/G3NetworkSender.cxx src/G3SyslogLogger.cxx
+	src/G3PipelineInfo.cxx
 )
 target_link_libraries(core pthread ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${FLAC_LIBRARIES})
 link_python_dir()
