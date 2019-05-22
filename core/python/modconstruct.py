@@ -212,4 +212,5 @@ def PipelineAddCallable(self, callable, name=None, subprocess=False, **kwargs):
 
 # Add this as G3Pipeline's Add method so it takes any Python callable
 G3Pipeline.Add = PipelineAddCallable
+G3Pipeline.__repr__ = lambda self: repr(self._pipelineinfo.pipelineinfo) if hasattr(self, '_pipelineinfo') else 'pipe = spt3g.core.G3Pipeline()'
 
