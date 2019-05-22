@@ -19,6 +19,7 @@ def addinfo(fr):
 	fr['count'] = n
 	n += 1
 pipe.Add(addinfo)
+pipe.Add(lambda fr: fr.type != core.G3FrameType.PipelineInfo) # Avoid extra frames that complicate accounting
 pipe.Add(core.G3MultiFileWriter, filename='multitest-%02u.g3', size_limit=20*1024)
 pipe.Add(core.G3MultiFileWriter, filename=lambda frame,seq: 'multitest2-%02d.g3' % seq, size_limit=20*1024)
 pipe.Add(core.G3MultiFileWriter, filename='multitest3-%02u.g3', size_limit=20*1024, divide_on=[core.G3FrameType.Timepoint])

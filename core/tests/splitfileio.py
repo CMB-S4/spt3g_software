@@ -8,7 +8,7 @@ pipe = core.G3Pipeline()
 pipe.Add(core.G3InfiniteSource, type=core.G3FrameType.Timepoint, n=10)
 n = 0
 def addinfo(fr):
-	if fr.type == core.G3FrameType.EndProcessing:
+	if fr.type != core.G3FrameType.Timepoint:
 		return
 	global n
 	fr['time'] = core.G3Time(int(time.time()*core.G3Units.s))

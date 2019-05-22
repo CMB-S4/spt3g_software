@@ -42,7 +42,7 @@ pipe.Add(framesource)
 pipe.Add(core.DeduplicateMetadata)
 
 def getframes(fr):
-	if fr.type != core.G3FrameType.EndProcessing:
+	if fr.type != core.G3FrameType.EndProcessing and fr.type != core.G3FrameType.PipelineInfo:
 		out.append(fr)
 pipe.Add(getframes)
 

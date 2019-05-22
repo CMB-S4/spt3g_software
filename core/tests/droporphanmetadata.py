@@ -28,7 +28,7 @@ pipe.Add(framesource)
 pipe.Add(core.DropOrphanMetadata)
 
 def getframes(fr):
-	if fr.type != G3FrameType.EndProcessing:
+	if fr.type != G3FrameType.EndProcessing and fr.type != G3FrameType.PipelineInfo:
 		out.append(fr)
 pipe.Add(getframes)
 
