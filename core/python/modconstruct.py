@@ -31,9 +31,10 @@ def pipesegment(func, autodoc=True):
         introdoc = ''
         if hasattr(func, '__doc__') and func.__doc__ is not None:
             introdoc = func.__doc__ + '\n\n'
-
+        from .docparser import format_doc
+        rstintrodoc = format_doc(introdoc)
         introdoc += 'Equivalent to:\n'
-        rstintrodoc = introdoc + '\n'
+        rstintrodoc += 'Equivalent to:\n\n'
         doclines = []
         class PotemkinPipe(object):
             def Add(self, thing, *args, **kwargs):

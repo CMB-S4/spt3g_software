@@ -1,6 +1,36 @@
 import sys, inspect, re
 from spt3g.core import G3Module, G3FrameObject
 
+def format_doc(x):
+    """
+    Apply some formatting cleanup to a docstring to make it play nice with the sphinx layout.
+    """
+    if isinstance(x, str):
+        doc = x
+    else:
+        doc = inspect.getdoc(x)
+    if not doc:
+        return doc
+    try:
+        if doc == inspect.getdoc(type.__init__):
+            return None
+    except:
+        pass
+    lines = doc.split('\n')
+    doclines = []
+    head = False
+    for line in lines:
+        if line.strip() and all([x == '-' for x in line.strip()]):
+            if doclines:
+                head = True
+                hdr = doclines[-1].strip()
+                if hdr[-1] != ':':
+                    hdr += ':'
+                doclines[-1] = '*{}*'.format(hdr)
+        else:
+            doclines.append('\t' * head + line)
+    return '\n'.join(doclines)
+
 def get_doc_for_module(module_path, include_link_list = True):
     try:
         mod = __import__(module_path)
@@ -50,34 +80,33 @@ def get_doc_for_module(module_path, include_link_list = True):
                 mod_lst.append('%s.%s'%(modname, x))
 
     
-                if inspect.getdoc(mod.__dict__[x]) is not None:
-                    baredoc = inspect.getdoc(mod.__dict__[x])
+                if format_doc(mod.__dict__[x]) is not None:
+                    baredoc = format_doc(mod.__dict__[x])
                     out_str = add_str(out_str, ' '.join(re.split('\n[ \t]+', baredoc))) # Join new lines starting with whitespace with the previous line
                 try:
-                    out_str = add_str(out_str, '\n*Constructor:*\n\t%s%s\n' % 
-                                      ((x, inspect.formatargspec(*inspect.getargspec(mod.__dict__[x].__init__))) ) )
-                except:
-                    try:
+                    # in py3, all functions have an __init__, so check if we are dealing with a function first
+                    # this logic should be backward-compatible with py2
+                    if inspect.isfunction(mod.__dict__[x]):
                         out_str = add_str(out_str, format_arguments(x, inspect.formatargspec(*inspect.getargspec(mod.__dict__[x]))))
-                    except:
-                        pass
-                if not inspect.isfunction(mod.__dict__[x]):
-                    try:
-                        con_str = '\n*Constructor:*\n\t%s\n' % inspect.getdoc(mod.__dict__[x].__init__).replace('\n', '\n\t')
-                        con_str = con_str.replace(' -> None', ' -> None``')
-                        con_str = con_str.replace('__init__', '``__init__')
-                        out_str += con_str + '\n'
-                    except:
-                        pass
+                    else:
+                        out_str = add_str(out_str, '\n*Constructor:*\n\t``%s%s``\n' %
+                                          ((x, inspect.formatargspec(*inspect.getargspec(mod.__dict__[x].__init__))) ) )
+                        if format_doc(mod.__dict__[x].__init__):
+                            con_str = '\n*Constructor:*\n\t%s\n' % format_doc(mod.__dict__[x].__init__).replace('\n', '\n\t')
+                            con_str = con_str.replace(' -> None', ' -> None``')
+                            con_str = con_str.replace('__init__', '``__init__')
+                            out_str += con_str + '\n'
+                except:
+                    pass
                 out_str = add_str(out_str, '')
             elif hasattr(mod.__dict__[x], '__pipesegment__'):
                 out_str = add_str(out_str, format_name(modname, x))
                 mod_lst.append('%s.%s'%(modname, x))
-                if inspect.getdoc(mod.__dict__[x]) is not None:
+                if format_doc(mod.__dict__[x]) is not None:
                     if hasattr(mod.__dict__[x], '__rstdoc__'):
                         out_str = add_str(out_str, mod.__dict__[x].__rstdoc__)
                     else:
-                        baredoc = inspect.getdoc(mod.__dict__[x])
+                        baredoc = format_doc(mod.__dict__[x])
                         out_str = add_str(out_str, ' '.join(re.split('\n[ \t]+', baredoc))) # Join new lines starting with whitespace with the previous line
                 else:
                     out_str = add_str(out_str, '\nNo documentation\n')
@@ -116,14 +145,14 @@ def get_doc_for_module(module_path, include_link_list = True):
             if hasattr(mod.__dict__[x], '__g3usefulfunc__') or subclasstest:
                 out_str = add_str(out_str, format_name(modname, x))
                 mod_lst.append('%s.%s'%(modname, x))
-                if inspect.getdoc(mod.__dict__[x]) is not None:
+                if format_doc(mod.__dict__[x]) is not None:
                     if subclasstest:
-                        tmp_str = '``' + inspect.getdoc(mod.__dict__[x]).strip().replace(':\n',':``\n') 
+                        tmp_str = '``' + format_doc(mod.__dict__[x]).strip().replace(':\n',':``\n')
                         if (tmp_str.count('``') <2):
                             tmp_str += '``'
                         out_str = out_str +tmp_str
                     else:
-                        tmp_str = inspect.getdoc(mod.__dict__[x])
+                        tmp_str = format_doc(mod.__dict__[x])
                         out_str = out_str + tmp_str
                     if subclasstest:
                         out_str = out_str 
@@ -164,8 +193,8 @@ def get_doc_for_module(module_path, include_link_list = True):
             if subclasstest:
                 out_str = add_str(out_str, format_name(modname, x))
                 mod_lst.append('%s.%s'%(modname, x))
-                if inspect.getdoc(mod.__dict__[x]) is not None:
-                    tmp_str = inspect.getdoc(mod.__dict__[x]).strip()
+                if format_doc(mod.__dict__[x]) is not None:
+                    tmp_str = format_doc(mod.__dict__[x]).strip()
                     out_str = out_str + tmp_str
                     #after we have gotten the documention, find the properties and load their documentation
                     out_str += '\n\n    Members:\n'
@@ -174,7 +203,7 @@ def get_doc_for_module(module_path, include_link_list = True):
                             if p_name == 'value':
                                 continue
                             out_str += '\n'
-                            tmp_doc = inspect.getdoc(p_obj)
+                            tmp_doc = format_doc(p_obj)
                             if tmp_doc is None:
                                 tmp_doc = 'No Doc (Shame!)'
                             out_str += '    * **%s**: %s\n' % (p_name, tmp_doc.strip() )
