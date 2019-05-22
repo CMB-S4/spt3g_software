@@ -14,6 +14,11 @@ public:
 
         template <class A> void load(A &ar, unsigned v);
         template <class A> void save(A &ar, unsigned v) const;
+
+	std::string Description() const;
+	std::string Summary() const;
+
+	bool operator ==(const G3ModuleConfig &) const;
 };
 
 class G3PipelineInfo : public G3FrameObject {
@@ -32,8 +37,8 @@ public:
 
 	template <class A> void serialize(A &ar, unsigned v);
 
-	std::string Description() const { return "Bork"; };
-	std::string Summary() const { return Description(); };
+	std::string Description() const;
+	std::string Summary() const;
 };
 
 G3_POINTERS(G3PipelineInfo);

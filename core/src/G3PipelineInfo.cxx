@@ -77,6 +77,35 @@ template <class A> void G3ModuleConfig::load(A &ar, unsigned v)
 	}
 }
 
+std::string
+G3ModuleConfig::Summary() const
+{
+	std::string rv = "pipe.Add(" + modname;
+	for (auto i : config) {
+		std::string repr = bp::extract<std::string>(
+		    i.second.attr("__repr__")());
+		rv += ", " + i.first + "=" + repr;
+	}
+
+	if (instancename.size() != 0 && instancename != modname)
+		rv += ", name=" + instancename;
+	rv += ")";
+	return rv;
+}
+
+std::string
+G3ModuleConfig::Description() const
+{
+	return Summary();
+}
+
+bool
+G3ModuleConfig::operator == (const G3ModuleConfig &b) const
+{
+	return (b.modname == modname) && (b.instancename == instancename) &&
+	    (b.config == config);
+}
+
 template <class A> void G3PipelineInfo::serialize(A &ar, unsigned v)
 {
 	using namespace cereal;
@@ -96,6 +125,44 @@ template <class A> void G3PipelineInfo::serialize(A &ar, unsigned v)
 	ar & make_nvp("modules", modules);
 }
 
+std::string
+G3PipelineInfo::Summary() const
+{
+	return vcs_branch + " branch, " + ((vcs_localdiffs) ? "" : "no ") +
+	    "local diffs";
+}
+
+std::string
+G3PipelineInfo::Description() const
+{
+	std::ostringstream rv;
+	rv << "Branch: " << vcs_branch <<  ", " <<
+	    ((vcs_localdiffs) ? "" : "no ") << "local diffs\n";
+	rv << "URL: " << vcs_url << "\n";
+	rv << "Revision: " << vcs_revision << "\n";
+	if (vcs_versionname.size() != 0)
+		rv << "Version: " << vcs_versionname << "\n";
+	rv << "Run by: " << user << " on " << hostname << "\n";
+
+	rv << modules.size();
+	rv << " modules\n";
+
+	return rv.str();
+}
+
+static std::string
+G3PipelineInfo_repr(const G3PipelineInfo &pi)
+{
+	std::string rv;
+	rv = "pipe = spt3g.core.G3Pipeline()\n";
+
+	for (auto i : pi.modules) {
+		rv += i.Summary();
+		rv += "\n";
+	}
+	return rv;
+}
+
 G3_SPLIT_SERIALIZABLE_CODE(G3ModuleConfig);
 G3_SERIALIZABLE_CODE(G3PipelineInfo);
 
@@ -109,9 +176,10 @@ PYBINDINGS("core") {
 	    .def_readwrite("modname", &G3ModuleConfig::modname)
 	    .def_readwrite("instancename", &G3ModuleConfig::instancename)
 	    .def_readwrite("config", &G3ModuleConfig::config)
+	    .def("__repr__", &G3ModuleConfig::Summary)
 	;
 	register_pointer_conversions<G3ModuleConfig>();
-	//register_vector_of<G3ModuleConfig>("VectorStringObjectMap");
+	register_vector_of<G3ModuleConfig>("VectorStringObjectMap");
 
 	EXPORT_FRAMEOBJECT(G3PipelineInfo, init<>(), "Stored configuration of a pipeline, including software version information")
 	    .def_readwrite("vcs_url", &G3PipelineInfo::vcs_url)
@@ -123,6 +191,7 @@ PYBINDINGS("core") {
 	    .def_readwrite("hostname", &G3PipelineInfo::hostname)
 	    .def_readwrite("user", &G3PipelineInfo::user)
 	    .def_readwrite("modules", &G3PipelineInfo::modules)
+	    .def("__repr__", &G3PipelineInfo_repr)
 	;
 	register_pointer_conversions<G3PipelineInfo>();
 }
