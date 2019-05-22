@@ -46,7 +46,7 @@ git_tree_modified()
 }
 
 if [ -d .svn ]; then
-	if (svn info --show-item url 1>&2 2>/dev/null); then
+	if (svn info --show-item url 1>/dev/null 2>/dev/null); then
 		url=$(svn info --show-item url)
 		relurl=$(svn info --show-item relative-url)
 		baserev=$(svn info --show-item revision)
