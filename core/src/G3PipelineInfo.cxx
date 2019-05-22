@@ -71,6 +71,7 @@ template <class A> void G3ModuleConfig::load(A &ar, unsigned v)
 				obj = bp::eval(bp::str(repr), global, global);
 			} catch (const bp::error_already_set& e) {
 				obj = bp::object(repr);
+				PyErr_Clear();
 			}
 			config[key] = obj;
 		}
