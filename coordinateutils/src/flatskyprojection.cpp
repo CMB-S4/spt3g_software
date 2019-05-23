@@ -46,8 +46,14 @@ template <class A> void FlatSkyProjection::load(A &ar, unsigned v)
 	ar & make_nvp("proj", proj_);
 	ar & make_nvp("alpha_center", alpha0_);
 	ar & make_nvp("delta_center", delta0_);
-	ar & make_nvp("x_res", x_res_);
-	ar & make_nvp("y_res", y_res_);
+	// Fix a stupid pickling mistake
+	if (v == 1) {
+		ar & make_nvp("y_res", y_res_);
+		ar & make_nvp("x_res", x_res_);
+	} else {
+		ar & make_nvp("x_res", x_res_);
+		ar & make_nvp("y_res", y_res_);
+	}
 
 	initialize(xpix_, ypix_, y_res_, alpha0_, delta0_, x_res_, proj_);
 }
@@ -62,8 +68,8 @@ template <class A> void FlatSkyProjection::save(A &ar, unsigned v) const
 	ar & make_nvp("proj", proj_);
 	ar & make_nvp("alpha_center", alpha0_);
 	ar & make_nvp("delta_center", delta0_);
-	ar & make_nvp("res", y_res_);
 	ar & make_nvp("x_res", x_res_);
+	ar & make_nvp("y_res", y_res_);
 }
 
 std::string FlatSkyProjection::Description() const

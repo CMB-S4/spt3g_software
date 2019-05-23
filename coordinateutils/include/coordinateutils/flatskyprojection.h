@@ -116,6 +116,6 @@ namespace cereal {
   template <class A> struct specialize<A, FlatSkyProjection, cereal::specialization::member_load_save> {};
 }
 
-G3_SERIALIZABLE(FlatSkyProjection, 1);
+G3_SERIALIZABLE(FlatSkyProjection, 2);
 
 #endif //#ifndef _COORDINATEUTILS_FLATSKYPROJECTION_H
