@@ -283,3 +283,22 @@ ____________
 
 The ``Run()`` method runs the pipeline until completion (see `The first module`_). It takes one optional keyword argument (``profile``). If set to ``True``, it will print out the amount of system and user time spent in that module during processing after completion.
 
+G3PipelineInfo
+--------------
+
+G3Pipeline will automatically insert information about its configuration into the data stream by internally emitting a PipelineInfo frame containing a timestamped G3PipelineInfo object with the following information:
+
+- Version control information (branch, revision number, source URL, version name if any, presence of local diffs, etc.) reflecting the software currently running.
+- The user and host running the software.
+- The configuration of all modules and/or segments added to the pipeline.
+
+This information is added immediately following the first added module or segment. If the first frame in the data stream at this point is already a PipelineInfo frame, the G3PipelineInfo object described above will be added to it; otherwise, a new PipelineInfo frame with the object is prepended to the data stream.
+
+Within some limits imposed by Python (related to lambda functions, most notably), calling ``repr()`` on a G3PipelineInfo object (or a G3Pipeline object) will yield an executable Python script reflecting the exact modules and configuration used to produce the data. To within the mentioned limitations, this script can be rerun to exactly reproduce stored data; it can also be inspected to learn the configuration of the data's source pipeline[s] and thus the processing that produced it.
+
+Limitations:
+
+- The content of functions defined inline in a script (either by ``def`` or ``lambda``), as opposed to functions defined in an imported Python module, will not appear in the output, though options will. Inline functions defined by ``def`` will at least give the name of the function.
+- Options passed to pre-instantiated modules will not be stored. Only options passed in ``pipe.Add()`` will be recorded. For example, ``pipe.Add(core.G3Reader, filename="test.g3")`` will fully record its arguments, but ``pipe.Add(core.G3Reader(filename="test.g3")`` will not. Prefer the syntax that records options unless you have a compelling reason to do something else.
+- A G3Pipeline created in C++ will not record configuration; only G3Pipelines created in Python will.
+
