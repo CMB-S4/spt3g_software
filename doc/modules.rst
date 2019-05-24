@@ -284,7 +284,7 @@ ____________
 The ``Run()`` method runs the pipeline until completion (see `The first module`_). It takes one optional keyword argument (``profile``). If set to ``True``, it will print out the amount of system and user time spent in that module during processing after completion.
 
 G3PipelineInfo
---------------
+______________
 
 G3Pipeline will automatically insert information about its configuration into the data stream by internally emitting a PipelineInfo frame containing a timestamped G3PipelineInfo object with the following information:
 
