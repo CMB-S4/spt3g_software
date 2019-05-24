@@ -37,6 +37,17 @@ CalibratorOn		G3Timestream		Timestream of the calibrator sync signal. Set to 1 i
 GCPFeatureBits		G3VectorString		Strings describing the GCP flags field.
 ===================	====================	===========
 
+PipelineInfo
+============
+
+PipelineInfo frames contain information on the processing applied to make the remainder of the data. They typically occur at the beginning of the data stream and are automatically inserted by G3Pipeline, if not previously present. The frame will contain at least one element of type G3PipelineInfo that gives information on the version of the software that made the data and the configuration of all modules and/or segments added to the pipeline. Other data (G3PipelineInfo from previous scripts, configuration information added by other modules) may also be present.
+
+===================			===============	===========
+Key					Type		Description
+===================			===============	===========
+22-May-2019:18:42:15.335969000		G3PipelineInfo	Configuration information of the pipeline that produced an object. Added automatically. The key name is a timestamp indicating the time at which the software began running.
+===================			===============	===========
+
 Timepoint
 =========
 
