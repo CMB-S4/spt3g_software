@@ -272,7 +272,7 @@ The ``Add()`` method adds a module to the pipeline immediately following the las
 	pipe = G3Pipeline()
 	pipe.Add(core.G3Reader, filename="test.g3")
 
-For pipeline segments, only the second syntax works. As a result, the second syntax is generally preferred, as it can be used uniformly for all objects that can be passed to ``Add()``.
+For pipeline segments, only the second syntax works. As a result, the second syntax is generally preferred, as it can be used uniformly for all objects that can be passed to ``Add()``. Additionally, only the first syntax will record configuration information (see G3PipelineInfo_).
 
 ``Add()`` accepts a special keyword argument (``name``) that can be used to set the name of a module or segment in the output of run profiling (see below). If unspecified, it defaults to the name of the class or function, with slashes indexing modules added by pipeline segments.
 
@@ -299,6 +299,6 @@ Within some limits imposed by Python (related to lambda functions, most notably)
 Limitations:
 
 - The content of functions defined inline in a script (either by ``def`` or ``lambda``), as opposed to functions defined in an imported Python module, will not appear in the output, though options will. Inline functions defined by ``def`` will at least give the name of the function.
-- Options passed to pre-instantiated modules will not be stored. Only options passed in ``pipe.Add()`` will be recorded. For example, ``pipe.Add(core.G3Reader, filename="test.g3")`` will fully record its arguments, but ``pipe.Add(core.G3Reader(filename="test.g3")`` will not. Prefer the syntax that records options unless you have a compelling reason to do something else.
+- Options passed to pre-instantiated modules will not be stored. Only options passed in ``pipe.Add()`` will be recorded. For example, ``pipe.Add(core.G3Reader, filename="test.g3")`` will fully record its arguments, but ``pipe.Add(core.G3Reader(filename="test.g3"))`` will not. Prefer the syntax that records options unless you have a compelling reason to do something else.
 - A G3Pipeline created in C++ will not record configuration; only G3Pipelines created in Python will.
 
