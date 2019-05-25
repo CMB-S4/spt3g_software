@@ -272,7 +272,7 @@ The ``Add()`` method adds a module to the pipeline immediately following the las
 	pipe = G3Pipeline()
 	pipe.Add(core.G3Reader, filename="test.g3")
 
-For pipeline segments, only the second syntax works. As a result, the second syntax is generally preferred, as it can be used uniformly for all objects that can be passed to ``Add()``.
+For pipeline segments, only the second syntax works. As a result, the second syntax is generally preferred, as it can be used uniformly for all objects that can be passed to ``Add()``. Additionally, only the second syntax will record configuration information (see G3PipelineInfo_).
 
 ``Add()`` accepts a special keyword argument (``name``) that can be used to set the name of a module or segment in the output of run profiling (see below). If unspecified, it defaults to the name of the class or function, with slashes indexing modules added by pipeline segments.
 
@@ -282,4 +282,23 @@ Pipeline.Run
 ____________
 
 The ``Run()`` method runs the pipeline until completion (see `The first module`_). It takes one optional keyword argument (``profile``). If set to ``True``, it will print out the amount of system and user time spent in that module during processing after completion.
+
+G3PipelineInfo
+______________
+
+G3Pipeline will automatically insert information about its configuration into the data stream by internally emitting a PipelineInfo frame containing a timestamped G3PipelineInfo object with the following information:
+
+- Version control information (branch, revision number, source URL, version name if any, presence of local diffs, etc.) reflecting the software currently running.
+- The user and host running the software.
+- The configuration of all modules and/or segments added to the pipeline.
+
+This information is added immediately following the first added module or segment. If the first frame in the data stream at this point is already a PipelineInfo frame, the G3PipelineInfo object described above will be added to it; otherwise, a new PipelineInfo frame with the object is prepended to the data stream.
+
+Within some limits imposed by Python (related to lambda functions, most notably), calling ``repr()`` on a G3PipelineInfo object (or a G3Pipeline object) will yield an executable Python script reflecting the exact modules and configuration used to produce the data. To within the mentioned limitations, this script can be rerun to exactly reproduce stored data; it can also be inspected to learn the configuration of the data's source pipeline[s] and thus the processing that produced it.
+
+Limitations:
+
+- The content of functions defined inline in a script (either by ``def`` or ``lambda``), as opposed to functions defined in an imported Python module, will not appear in the output, though options will. Inline functions defined by ``def`` will at least give the name of the function.
+- Options passed to pre-instantiated modules will not be stored. Only options passed in ``pipe.Add()`` will be recorded. For example, ``pipe.Add(core.G3Reader, filename="test.g3")`` will fully record its arguments, but ``pipe.Add(core.G3Reader(filename="test.g3"))`` will not. Prefer the syntax that records options unless you have a compelling reason to do something else.
+- A G3Pipeline created in C++ will not record configuration; only G3Pipelines created in Python will.
 

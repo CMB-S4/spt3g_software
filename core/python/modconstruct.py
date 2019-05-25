@@ -1,4 +1,4 @@
-from spt3g.core import G3Module, G3Pipeline, log_fatal
+from spt3g.core import G3Module, G3Pipeline, G3PipelineInfo, G3Frame, G3FrameType, G3Time, G3ModuleConfig, log_fatal
 try:
     from spt3g.core import multiprocess
     multiproc_avail = True
@@ -120,7 +120,38 @@ def build_pymodule(pycallable, *args, **kwargs):
 
     return PyCallObjModule()
 
-def PipelineAddCallable(self, callable, name=None, subprocess=False, *args, **kwargs):
+class _add_pipeline_info(G3Module):
+    def __init__(self):
+        from spt3g import __version__ as version
+        import socket, getpass
+
+        G3Module.__init__(self)
+        self.infoemitted = False
+        self.pipelineinfo = G3PipelineInfo()
+        self.pipelineinfo.vcs_url = version.upstream_url
+        self.pipelineinfo.vcs_branch = version.upstream_branch
+        self.pipelineinfo.vcs_revision = version.revision
+        self.pipelineinfo.vcs_localdiffs = version.localdiffs
+        self.pipelineinfo.vcs_versionname = version.versionname
+        self.pipelineinfo.vcs_githash = version.gitrevision
+
+        self.pipelineinfo.hostname = socket.gethostname()
+        self.pipelineinfo.user = getpass.getuser()
+    def Process(self, fr):
+        if self.infoemitted:
+            return fr
+
+        import time
+        self.infoemitted = True
+        if fr.type == G3FrameType.PipelineInfo:
+            fr[str(G3Time.Now())] = self.pipelineinfo
+            return fr
+        else:
+            f = G3Frame(G3FrameType.PipelineInfo)
+            f[str(G3Time.Now())] = self.pipelineinfo
+            return [f, fr]
+
+def PipelineAddCallable(self, callable, name=None, subprocess=False, **kwargs):
     '''
     Add a processing module to the pipeline. It can be any subclass of
     spt3g.core.G3Module or any Python callable, either an instance or
@@ -130,17 +161,31 @@ def PipelineAddCallable(self, callable, name=None, subprocess=False, *args, **kw
     run in a separate process.
     '''
 
+    addpipelineinfo = False
+    if not hasattr(self, '_pipelineinfo'):
+        self._pipelineinfo = _add_pipeline_info()
+        addpipelineinfo = True
+
     if not hasattr(self, 'nameprefix'):
         self.nameprefix = ''
+    if (hasattr(callable, '__name__')):
+        callable_name = callable.__name__
+    elif (hasattr(callable, '__class__')):
+        callable_name = callable.__class__.__name__
+    else:
+        raise RuntimeError("Cannot establish name of pipeline module")
     if name is None:
-        if (hasattr(callable, '__name__')):
-            callable_name = callable.__name__
-        elif (hasattr(callable, '__class__')):
-            callable_name = callable.__class__.__name__
-        else:
-            raise RuntimeError("Cannot establish name of pipeline module")
         name = '%s.%s' % (callable.__module__, callable_name)
     name = self.nameprefix + name
+
+    # Record module configuration for root objects
+    if self.nameprefix == '': 
+        modconfig = G3ModuleConfig()
+        modconfig.instancename = name
+        modconfig.modname = '%s.%s' % (callable.__module__, callable_name)
+        for k,v in kwargs.items():
+            modconfig.config[k] = v
+        self._pipelineinfo.pipelineinfo.modules.append(modconfig)
 
     # Deal with the segment case
     if hasattr(callable, '__pipesegment__'):
@@ -148,19 +193,24 @@ def PipelineAddCallable(self, callable, name=None, subprocess=False, *args, **kw
         oldnameprefix = self.nameprefix
         self.nameprefix = name + '/'
 
-        rv = callable(self, *args, **kwargs)
+        rv = callable(self, **kwargs)
 
         self.nameprefix = oldnameprefix
-        return rv
 
     # Otherwise it's a module
-    if subprocess:
+    elif subprocess:
         if not multiproc_avail:
             raise ImportError('Multiprocess not available')
-        return self._Add_(build_pymodule(multiprocess.Subproc(build_pymodule(callable, *args, **kwargs), name=name)), name=name)
+        rv = self._Add_(build_pymodule(multiprocess.Subproc(build_pymodule(callable, **kwargs), name=name)), name=name)
     else:
-        return self._Add_(build_pymodule(callable, *args, **kwargs), name=name)
+        rv = self._Add_(build_pymodule(callable, **kwargs), name=name)
+
+    if addpipelineinfo:
+        self._Add_(self._pipelineinfo, name='_pipelineinfo')
+
+    return rv
 
 # Add this as G3Pipeline's Add method so it takes any Python callable
 G3Pipeline.Add = PipelineAddCallable
+G3Pipeline.__repr__ = lambda self: repr(self._pipelineinfo.pipelineinfo) if hasattr(self, '_pipelineinfo') else 'pipe = spt3g.core.G3Pipeline()'
 
