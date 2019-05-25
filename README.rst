@@ -37,7 +37,7 @@ On RHEL-type systems (SL, CentOS, etc.), do this:
 Setup on RHEL6
 --------------
 
-Note that on any RHEL6 system, you will need a newer compiler than ships with the OS. Please follow whatever directions apply at your site to achieve this. Alternately, if you have OASIS set up on your local system, run this before anything else:
+Note that on any RHEL6 system, you will need a newer compiler than ships with the OS. Please follow whatever directions apply at your site to achieve this. Alternately, if you have OASIS set up on your local system, run this before anything else (also works on several other operating systems, including RHEL7):
 
 .. code-block:: shell
 
