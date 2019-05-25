@@ -272,7 +272,7 @@ The ``Add()`` method adds a module to the pipeline immediately following the las
 	pipe = G3Pipeline()
 	pipe.Add(core.G3Reader, filename="test.g3")
 
-For pipeline segments, only the second syntax works. As a result, the second syntax is generally preferred, as it can be used uniformly for all objects that can be passed to ``Add()``. Additionally, only the first syntax will record configuration information (see G3PipelineInfo_).
+For pipeline segments, only the second syntax works. As a result, the second syntax is generally preferred, as it can be used uniformly for all objects that can be passed to ``Add()``. Additionally, only the second syntax will record configuration information (see G3PipelineInfo_).
 
 ``Add()`` accepts a special keyword argument (``name``) that can be used to set the name of a module or segment in the output of run profiling (see below). If unspecified, it defaults to the name of the class or function, with slashes indexing modules added by pipeline segments.
 
