@@ -202,16 +202,19 @@ G3SkyMapPtr FlatSkyMap::rebin(size_t scale) const
 		return Clone(true);
 
 	FlatSkyProjection p(proj_info.rebin(scale));
-	FlatSkyMap out(proj_info, coord_ref, is_weighted, units, pol_type);
-	out.EnsureAllocated();
+	FlatSkyMap out(p, coord_ref, is_weighted, units, pol_type);
 
-	for (size_t i = 0; i < xpix_; i++) {
-		for (size_t j = 0; j < ypix_; j++) {
-			out[out.pixat(i / scale, j / scale)] += data_[pixat(i, j)];
+	if (IsAllocated()) {
+		out.EnsureAllocated();
+
+		for (size_t i = 0; i < xpix_; i++) {
+			for (size_t j = 0; j < ypix_; j++) {
+				out[out.pixat(i / scale, j / scale)] += data_[pixat(i, j)];
+			}
 		}
-	}
 
-	out /= (scale * scale);
+		out /= (scale * scale);
+	}
 	return boost::make_shared<FlatSkyMap>(out);
 }
 
