@@ -488,29 +488,32 @@ G3SkyMapPtr CutSkyHealpixMap::rebin(size_t scale) const
 	HealpixHitPixPtr hpx = boost::make_shared<HealpixHitPix>(*this,
 	    nside_ / scale, is_nested_);
 	CutSkyHealpixMap out(hpx, is_weighted, pol_type, units);
-        out.EnsureAllocated();
 
-	size_t scale2 = scale * scale;
+	if (IsAllocated()) {
+		out.EnsureAllocated();
+
+		size_t scale2 = scale * scale;
 
 #ifdef OPENMP_FOUND
 #pragma omp parallel for
 #endif
-	for (long i = 0; i < out.size(); i++) {
-		long ipmin = out.hitpix->get_fullsky_index(i);
-		if (!is_nested_)
-			ring2nest(out.nside_, ipmin, &ipmin);
-		ipmin *= scale2;
-		double norm = 0;
-		for (size_t j = 0; j < scale2; j++) {
-			long ip = ipmin + j;
+		for (long i = 0; i < out.size(); i++) {
+			long ipmin = out.hitpix->get_fullsky_index(i);
 			if (!is_nested_)
-				nest2ring(nside_, ip, &ip);
-			ip = hitpix->get_cutsky_index(ip);
-			if (ip >= size()) continue;
-			out[i] += data_[ip];
-			norm += 1.;
+				ring2nest(out.nside_, ipmin, &ipmin);
+			ipmin *= scale2;
+			double norm = 0;
+			for (size_t j = 0; j < scale2; j++) {
+				long ip = ipmin + j;
+				if (!is_nested_)
+					nest2ring(nside_, ip, &ip);
+				ip = hitpix->get_cutsky_index(ip);
+				if (ip >= size()) continue;
+				out[i] += data_[ip];
+				norm += 1.;
+			}
+			out[i] /= norm;
 		}
-		out[i] /= norm;
 	}
 
 	return boost::make_shared<CutSkyHealpixMap>(out);
