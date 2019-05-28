@@ -7,6 +7,7 @@ endif()
 add_library(coordinateutils SHARED
   src/chealpix.c
   src/get_interp_val.c
+  src/G3SkyMap.cxx
   src/CutskyHealpixMap.cxx
   src/flatskyprojection.cpp
   src/FlatSkyMap.cxx
@@ -21,3 +22,4 @@ execute_process(COMMAND ln -fsn ${CMAKE_CURRENT_SOURCE_DIR}/python ${CMAKE_LIBRA
 add_spt3g_test(quattest)
 add_spt3g_test(quatangtest)
 add_spt3g_test(transtest SLOWTEST)
+add_spt3g_test(skymappybindings)

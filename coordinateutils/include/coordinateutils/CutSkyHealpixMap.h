@@ -2,13 +2,13 @@
 #define _COORDINATEUTILS_CUTSKYHEALPIX_H
 
 #include <G3Frame.h>
-#include <G3SkyMap.h>
 #include <G3Module.h>
 
 #include <cmath>
 #include <cstdint>
 #include <string>
 
+#include <coordinateutils/G3SkyMap.h>
 #include <coordinateutils/FlatSkyMap.h>
 #include <coordinateutils/chealpix.h>
 

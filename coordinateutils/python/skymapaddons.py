@@ -1,5 +1,5 @@
 import numpy
-from spt3g.core import G3SkyMapWeights, G3SkyMap, WeightType
+from spt3g.coordinateutils import G3SkyMapWeights, G3SkyMap, WeightType
 
 # This file adds extra functionality to the python interface to G3SkyMap and
 # G3SkyMapWeights. This is done in ways that exploit a large fraction of

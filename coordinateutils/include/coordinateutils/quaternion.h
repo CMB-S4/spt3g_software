@@ -2,8 +2,9 @@
 #define _COORDINATEUTILS_QUATERNION_H
 
 #include <G3Frame.h>
-#include <G3SkyMap.h>
 #include <G3Vector.h>
+
+#include <coordinateutils/G3SkyMap.h>
 
 #include <boost/math/quaternion.hpp>
 #include <cereal/types/vector.hpp>

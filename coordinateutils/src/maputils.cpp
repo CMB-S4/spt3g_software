@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <G3Logging.h>
 #include <G3Units.h>
-#include <G3SkyMap.h>
 
 #include <coordinateutils/CutSkyHealpixMap.h>
 

@@ -2,6 +2,7 @@ from spt3g import core
 
 from spt3g.coordinateutils.azel import convert_azel_to_radec
 
+from spt3g.coordinateutils import MapCoordReference
 from spt3g.coordinateutils import create_det_az_el_trans, create_lazy_det_ra_dec_trans
 from spt3g.coordinateutils import create_det_ra_dec_trans, G3VectorQuat, convert_ra_dec_trans_to_gal
 
@@ -12,7 +13,7 @@ import numpy as np
 def FillCoordTransRotations(
         frame, 
         transform_store_key,
-        end_coord_sys = core.MapCoordReference.Equatorial,
+        end_coord_sys = MapCoordReference.Equatorial,
         
         do_bad_transform = False,
         
@@ -46,7 +47,7 @@ def FillCoordTransRotations(
         return
 
     trans = G3VectorQuat()
-    if end_coord_sys == core.MapCoordReference.Equatorial:
+    if end_coord_sys == MapCoordReference.Equatorial:
         if do_bad_transform:
             core.log_debug("You are doing the old calculation for pointing")
             create_lazy_det_ra_dec_trans(frame[bs_ra_key], frame[bs_dec_key], trans)
@@ -57,7 +58,7 @@ def FillCoordTransRotations(
                 frame[offset_az_key], frame[offset_el_key],
                 frame[offset_ra_key], frame[offset_dec_key],
                 trans)
-    elif end_coord_sys == core.MapCoordReference.Local:
+    elif end_coord_sys == MapCoordReference.Local:
         create_det_az_el_trans(frame[bs_az_key], frame[bs_el_key], trans)
     else:
         core.logfatal("To do the galactic convert the equatorial transform to galactic later "+

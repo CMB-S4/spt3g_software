@@ -14,12 +14,12 @@ def get_ra_dec_map(map_in):
 
     Parameters:
     -----------
-    map_in: spt3g.core.G3SkyMap or derived object thereof
+    map_in: spt3g.coordinateutils.G3SkyMap or derived object thereof
         Input map
 
     Returns:
     --------
-    ra, dec: spt3g.core.G3SkyMap
+    ra, dec: spt3g.coordinateutils.G3SkyMap
         Maps of the coordinates for each pixel, with the same map parameters
         as the input map.
     """

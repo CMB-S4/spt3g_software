@@ -1,9 +1,7 @@
 #include <pybindings.h>
 #include <container_pybindings.h>
 #include <coordinateutils/quaternion.h>
-#include <G3Vector.h>
 #include <G3Map.h>
-#include <G3SkyMap.h>
 #include <G3Units.h>
 
 #include <boost/math/constants/constants.hpp>

@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 import numpy
-from spt3g import core
+from spt3g.coordinateutils import G3SkyMap, MapCoordReference
 
 # 1D arrays
-m = core.G3SkyMap(core.MapCoordReference.Equatorial, xpixels=500)
+m = G3SkyMap(MapCoordReference.Equatorial, xpixels=500)
 assert(len(m.shape) == 1)
 assert(m.shape[0] == 500)
 m[15] = 65.4
@@ -12,7 +12,7 @@ assert(numpy.asarray(m)[15] == 65.4)
 assert(numpy.asarray(m).shape == m.shape)
 
 # 2D arrays
-m = core.G3SkyMap(core.MapCoordReference.Equatorial, xpixels=500, ypixels=20)
+m = G3SkyMap(MapCoordReference.Equatorial, xpixels=500, ypixels=20)
 assert(len(m.shape) == 2)
 assert(m.shape[0] == 20)
 assert(m.shape[1] == 500)
@@ -26,7 +26,7 @@ assert(numpy.asarray(m).shape == m.shape)
 
 # Reverse direction 2D arrays
 w = numpy.random.uniform(size=(300,50))
-m = core.G3SkyMap(w, core.MapCoordReference.Equatorial)
+m = G3SkyMap(w, MapCoordReference.Equatorial)
 assert(len(m.shape) == 2)
 assert(m.shape[0] == w.shape[0])
 assert(m.shape[1] == w.shape[1])

@@ -1,6 +1,6 @@
 #include <pybindings.h>
 #include <serialization.h>
-#include <G3SkyMap.h>
+#include <coordinateutils/G3SkyMap.h>
 
 #ifdef OPENMP_FOUND
 #include <omp.h>
@@ -466,7 +466,7 @@ G3SkyMap::operator/(double rhs)
 	return new_map;
 }
 
-PYBINDINGS("core") {
+PYBINDINGS("coordinateutils") {
 	bp::enum_<MapCoordReference>("MapCoordReference")
 	    .value("Local", Local)
 	    .value("Equatorial", Equatorial)
@@ -507,11 +507,11 @@ PYBINDINGS("core") {
 	        bp::arg("pol_type")=G3SkyMap::MapPolType::None),
 	      "Create a skymap from a numpy array"))
 	    .def_readwrite("coord_ref", &G3SkyMap::coord_ref,
-	      "Coordinate system (core.MapCoordReference) of the map (e.g. "
+	      "Coordinate system (coordinateutils.MapCoordReference) of the map (e.g. "
 	      "Galactic, Equatorial, etc.)")
 	    .def_readwrite("pol_type", &G3SkyMap::pol_type,
-	      "Polarization type (core.MapPolType) of the map "
-	      "(e.g. core.MapPolType.Q)")
+	      "Polarization type (coordinateutils.MapPolType) of the map "
+	      "(e.g. coordinateutils.MapPolType.Q)")
 	    .def_readwrite("units", &G3SkyMap::units,
 	      "Unit class (core.G3TimestreamUnits) of the map (e.g. "
 	      "core.G3TimestreamUnits.Tcmb). Within each unit class, further "

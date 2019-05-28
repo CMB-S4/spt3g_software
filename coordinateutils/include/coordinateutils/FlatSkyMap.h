@@ -4,11 +4,11 @@
 #include <G3Frame.h>
 #include <G3Map.h>
 #include <G3Logging.h>
-#include <G3SkyMap.h>
 
 #include <vector>
 #include <string>
 
+#include <coordinateutils/G3SkyMap.h>
 #include <coordinateutils/flatskyprojection.h>
 
 class FlatSkyMap : public G3SkyMap {
