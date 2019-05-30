@@ -184,6 +184,8 @@ class HousekeepingConsumer(object):
                 core.log_error('Error (%s) collecting housekeeping data from mux boards. Dropping housekeeping sample' % e, unit='HousekeepingConsumer')
                 return []
 
+        return [frame]
+
     @classmethod
     def HousekeepingFromJSON(cls, dat):
         '''
