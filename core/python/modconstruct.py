@@ -145,7 +145,7 @@ class _add_pipeline_info(G3Module):
 
         # Allow limited reordering of metadata
         if fr.type in [G3FrameType.Observation, G3FrameType.Wiring,
-          G3FrameType.Calibration, G3FrameType]:
+          G3FrameType.Calibration]:
             self.buffer.append(fr)
             return []
 
