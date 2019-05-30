@@ -292,7 +292,7 @@ G3Pipeline will automatically insert information about its configuration into th
 - The user and host running the software.
 - The configuration of all modules and/or segments added to the pipeline.
 
-This information is added immediately following the first added module or segment. If the first frame in the data stream at this point is already a PipelineInfo frame, the G3PipelineInfo object described above will be added to it; otherwise, a new PipelineInfo frame with the object is prepended to the data stream.
+This information is added immediately following the first added module or segment. If the first frame in the data stream at this point is already a PipelineInfo frame (or a PipelineInfo frame occurs in one of the first few frames, with only metadata frames before it), the G3PipelineInfo object described above will be added to it; otherwise, a new PipelineInfo frame with the object is prepended to the data stream.
 
 Within some limits imposed by Python (related to lambda functions, most notably), calling ``repr()`` on a G3PipelineInfo object (or a G3Pipeline object) will yield an executable Python script reflecting the exact modules and configuration used to produce the data. To within the mentioned limitations, this script can be rerun to exactly reproduce stored data; it can also be inspected to learn the configuration of the data's source pipeline[s] and thus the processing that produced it.
 

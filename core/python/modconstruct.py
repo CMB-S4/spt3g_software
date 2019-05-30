@@ -127,6 +127,8 @@ class _add_pipeline_info(G3Module):
 
         G3Module.__init__(self)
         self.infoemitted = False
+        self.buffer = []
+
         self.pipelineinfo = G3PipelineInfo()
         self.pipelineinfo.vcs_url = version.upstream_url
         self.pipelineinfo.vcs_branch = version.upstream_branch
@@ -141,15 +143,24 @@ class _add_pipeline_info(G3Module):
         if self.infoemitted:
             return fr
 
+        # Allow limited reordering of metadata
+        if fr.type in [G3FrameType.Observation, G3FrameType.Wiring,
+          G3FrameType.Calibration, G3FrameType]:
+            self.buffer.append(fr)
+            return []
+
         import time
         self.infoemitted = True
         if fr.type == G3FrameType.PipelineInfo:
             fr[str(G3Time.Now())] = self.pipelineinfo
-            return fr
+            self.buffer.append(fr)
         else:
             f = G3Frame(G3FrameType.PipelineInfo)
             f[str(G3Time.Now())] = self.pipelineinfo
-            return [f, fr]
+            self.buffer += [f, fr]
+        rv = self.buffer
+        del self.buffer
+        return rv
 
 def PipelineAddCallable(self, callable, name=None, subprocess=False, **kwargs):
     '''

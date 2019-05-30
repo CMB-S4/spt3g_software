@@ -63,4 +63,5 @@ add_spt3g_test(lazyreader)
 add_spt3g_test(returnvals)
 add_spt3g_test(timestream_2d)
 add_spt3g_test(cached_frame)
+add_spt3g_test(pipelineinfo)
 
