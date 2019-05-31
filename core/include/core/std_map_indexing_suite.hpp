@@ -22,7 +22,7 @@ namespace boost { namespace python {
     {
         namespace bp = boost::python;
         const bp::converter::registration* registration = bp::converter::registry::query(bp::type_id<T>());
-        if (registration == NULL)
+        if (registration == NULL || registration->m_to_python == NULL)
           return bp::object();
         const PyTypeObject *pytype = registration->expected_from_python_type();
         bp::handle<PyTypeObject> handle(bp::borrowed(const_cast<PyTypeObject*>(pytype)));
@@ -480,20 +480,27 @@ return incref(tuple.attr("__iter__")().ptr());
               , default_call_policies
             >::type get_data_return_policy;
 
-            class_<value_type>(elem_name.c_str())
-                .def("__repr__", &DerivedPolicies::print_elem)
-                .def("data", &DerivedPolicies::get_data, get_data_return_policy(),
-                   "K.data() -> the value associated with this pair.\n")
-                .def("key", &DerivedPolicies::get_key,
-                   "K.key() -> the key associated with this pair.\n")
-                .def("__getitem__",&pair_getitem)
-                .def("__iter__",&pair_iter)
-                .def("__len__",&pair_len)
-                .def("first",&DerivedPolicies::get_key,
-                   "K.first() -> the first item in this pair.\n")
-                .def("second",&DerivedPolicies::get_data, get_data_return_policy(),
-                   "K.second() -> the second item in this pair.\n")
-            ;
+            // If value_type not yet registered (possible it has),
+            // register it
+            const converter::registration* value_reg =
+               converter::registry::query(type_id<value_type>());
+            if (value_reg == NULL && value_reg->m_to_python == NULL) {
+                class_<value_type>(elem_name.c_str())
+                    .def("__repr__", &DerivedPolicies::print_elem)
+                    .def("data", &DerivedPolicies::get_data, get_data_return_policy(),
+                      "K.data() -> the value associated with this pair.\n")
+                    .def("key", &DerivedPolicies::get_key,
+                      "K.key() -> the key associated with this pair.\n")
+                    .def("__getitem__",&pair_getitem)
+                    .def("__iter__",&pair_iter)
+                    .def("__len__",&pair_len)
+                    .def("first",&DerivedPolicies::get_key,
+                     "K.first() -> the first item in this pair.\n")
+                    .def("second",&DerivedPolicies::get_data, get_data_return_policy(),
+                     "K.second() -> the second item in this pair.\n")
+                ;
+            }
+
             // add convenience methods to the map
 
             cl
