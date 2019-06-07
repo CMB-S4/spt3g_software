@@ -65,6 +65,9 @@ public:
 	size_t ydim(void) const {
 		return ypix_;
 	}
+	size_t size(void) const {
+		return ypix_*xpix_;
+	}
 
 	virtual bool IsCompatible(const G3SkyMap & other) const {
 		return ((xpix_ == other.xpix_) &&
@@ -107,7 +110,7 @@ public:
 	    std::vector<double> & alphas, std::vector<double> & deltas) const;
 
 	virtual std::vector<double> pixel_to_angle(size_t pixel) const = 0;
-	std::vector<double> pixel_to_angle(size_t x_pix, size_t y_pix) const;
+	virtual std::vector<double> pixel_to_angle(size_t x_pix, size_t y_pix) const = 0;
 	virtual size_t angle_to_pixel(double alpha, double delta) const  = 0;
 
 	// Rebinning and interpolation

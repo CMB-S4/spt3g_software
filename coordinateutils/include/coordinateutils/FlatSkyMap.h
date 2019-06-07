@@ -77,6 +77,7 @@ public:
 
 	size_t angle_to_pixel(double alpha, double delta) const override;
 	std::vector<double> pixel_to_angle(size_t pixel) const override;
+        std::vector<double> pixel_to_angle(size_t x_pix, size_t y_pix) const override;
 	std::vector<double> pixel_to_angle_wrap_ra(size_t pixel) const;
 	std::vector<double> angle_to_xy(double alpha, double delta) const;
 	std::vector<double> xy_to_angle(double x, double y) const;

@@ -287,6 +287,10 @@ std::vector<double> FlatSkyMap::pixel_to_angle(size_t pixel) const {
 	return proj_info.pixel_to_angle(pixel, false);
 }
 
+std::vector<double> FlatSkyMap::pixel_to_angle(size_t x, size_t y) const {
+	return proj_info.pixel_to_angle(y*xpix_ + x, false);
+}
+
 std::vector<double> FlatSkyMap::pixel_to_angle_wrap_ra(size_t pixel) const {
 	return proj_info.pixel_to_angle(pixel, true);
 }

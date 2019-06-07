@@ -8,7 +8,8 @@
 #include <G3Logging.h>
 #include <G3Units.h>
 
-#include <coordinateutils/CutSkyHealpixMap.h>
+//#include <coordinateutils/CutSkyHealpixMap.h>
+#include <coordinateutils/FlatSkyMap.h>
 
 #include <coordinateutils/maputils.h>
 
@@ -22,14 +23,23 @@ using namespace G3Units;
 
 void get_ra_dec_map_cpp(G3SkyMapConstPtr m, G3SkyMapPtr ra, G3SkyMapPtr dec)
 {
-	ra->EnsureAllocated();
-	dec->EnsureAllocated();
 
 	if (!m->IsCompatible(*ra)) {
 		log_fatal("Output ra map must match coordinates and dimensions of input sky map");
 	}
 	if (!m->IsCompatible(*dec)) {
 		log_fatal("Output ra map must match coordinates and dimensions of input sky map");
+	}
+
+	{
+		// These are going to be dense maps, so just start that way
+		FlatSkyMapPtr xra = boost::dynamic_pointer_cast<FlatSkyMap>(ra);
+		FlatSkyMapPtr xdec = boost::dynamic_pointer_cast<FlatSkyMap>(dec);
+
+		if (xra)
+			xra->ConvertToDense();
+		if (xdec)
+			xdec->ConvertToDense();
 	}
 
 #ifdef OPENMP_FOUND
@@ -47,12 +57,14 @@ void get_ra_dec_map_cpp(G3SkyMapConstPtr m, G3SkyMapPtr ra, G3SkyMapPtr dec)
 	dec->is_weighted = false;
 	dec->units = G3Timestream::None;
 	dec->pol_type = G3SkyMap::None;
+
+	// XXX return tuple directly
 }
 
 
 void reproj_map(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin)
 {
-	out_map->EnsureAllocated();
+
 	if (in_map->coord_ref != out_map->coord_ref) {
 		log_fatal("Input and output maps must use the same coordinates");
 	}
@@ -83,6 +95,7 @@ void reproj_map(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin)
 }
 
 
+#if 0
 void reproj_fullsky_healpix_map(std::vector<double> in_map, G3SkyMapPtr out_map,
     bool nest, int rebin)
 {
@@ -124,6 +137,7 @@ void reproj_fullsky_healpix_map(std::vector<double> in_map, G3SkyMapPtr out_map,
 		(*out_map)[i] = val;
 	}
 }
+#endif
 
 
 namespace bp = boost::python;
@@ -134,10 +148,12 @@ void maputils_pybindings(void){
 		"Takes the data in in_map and reprojects it onto out_map.  out_map can\n"
 		"have a different projection, size, resolution, etc.  Optionally account\n"
 		"for sub-pixel structure in the interpolation by setting rebin > 1.");
+#if 0
 	bp::def("reproj_fullsky_healpix_map", reproj_fullsky_healpix_map,
 		( bp::arg("in_map"), bp::arg("out_map"), bp::arg("nest")=false, bp::arg("rebin")=1),
 		"Takes the data in in_map (a full sky healpix map stored as a simple array)\n"
 		"and reprojects it onto out_map.  out_map can be any G3SkyMap instance.\n"
 		"Optionally account for sub-pixel structure in the interpolation by setting\n"
 		"rebin > 1");
+#endif
 }

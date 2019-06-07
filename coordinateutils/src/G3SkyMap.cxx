@@ -153,12 +153,6 @@ void G3SkyMap::pixels_to_angles(const std::vector<int> & pixels,
 }
 
 #if 0
-std::vector<double> G3SkyMap::pixel_to_angle(size_t x_pix, size_t y_pix) const {
-	return pixel_to_angle(pixat(x_pix, y_pix));
-}
-#endif
-
-#if 0
 double G3SkyMap::get_interp_precalc(const std::vector<long> & pix,
     const std::vector<double> & weight) const
 {

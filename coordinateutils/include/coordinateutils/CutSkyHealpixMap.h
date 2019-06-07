@@ -28,7 +28,7 @@ G3_POINTERS(HealpixMapInfo);
 
 class CutSkyHealpixMap;
 
-class HealpixHitPix : public G3FrameObject {
+class HealpixHitPix : public G3FrameObject, public G3SkyMap {
 public:
 	HealpixHitPix(){};
 
@@ -89,7 +89,7 @@ private:
 G3_POINTERS(HealpixHitPix);
 G3_SERIALIZABLE(HealpixHitPix, 1);
 
-class CutSkyHealpixMap : public G3SkyMap {
+class CutSkyHealpixMap : public G3FrameObject, public G3SkyMap {
 public:
 	CutSkyHealpixMap(boost::python::object v, size_t full_sky_map_nside,
 	    HealpixHitPixPtr hitpix, bool is_weighted = true,
