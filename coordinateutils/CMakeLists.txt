@@ -9,11 +9,11 @@ add_library(coordinateutils SHARED
   src/get_interp_val.c
   src/G3SkyMap.cxx
   src/CutskyHealpixMap.cxx
-  src/flatskyprojection.cpp
+  src/flatskyprojection.cxx
   src/FlatSkyMap.cxx
-  src/maputils.cpp
-  src/quaternion.cpp
-  src/python.cpp
+  src/maputils.cxx
+  src/quaternion.cxx
+  src/python.cxx
 )
 
 target_link_libraries(coordinateutils core)
