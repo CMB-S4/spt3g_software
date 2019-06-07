@@ -1,140 +1,151 @@
 #include <vector>
-#include <map>
-#include <stdexcept>
-#include <boost/python.hpp>
 
+#include <cereal/types/vector.hpp>
 
-class MapData {
-public:
-	MapData(size_t xlen, size_t ylen) :
-	    xlen_(xlen), ylen_(ylen) {}
+class SparseMapData;
+class DenseMapData;
 
-	size_t xdim() const { return xlen_; }
-	size_t ydim() const { return ylen_; }
-
-	virtual double & operator() (size_t x, size_t y);
-	virtual double operator() (size_t x, size_t y) const;
-
-private:
-	bool check_index(size_t x, size_t y, bool raise) {
-		bool valid = !(x < 0 || x >= xlen_ || y < 0 || y >= ylen_);
-		if (!valid && raise) {
-			std::ostringstream os;
-			os << "Map index (" << x << ", " << y << ") out of range";
-			throw std::out_of_range(os.str());
-		}
-		return valid;
-	}
-
-	size_t xlen_, ylen_;
-};
-
-class FilledMapData;
-
-class SparseMapData : public MapData {
+class SparseMapData {
 public:
 	SparseMapData(size_t xlen, size_t ylen) :
-	    MapData(xlen, ylen), offset(0) {}
+	    xlen_(xlen), ylen_(ylen), offset_(0) {}
+	SparseMapData(const DenseMapData &dense_map);
 
-	double & operator() (size_t x, size_t y) {
-		(void) check_index(x, y, true);
+	bool in_bounds(size_t x, size_t y) const {
+		return !(x < 0 || x >= xlen_ || y < 0 || y >= ylen_);
+	}
 
-		if (x < offset) {
-			data.insert(data.begin(), offset - x, data_element());
-			offset = x;
-		} else if (x >= offset + data.size()) {
-			data.resize(x - offset + 1);
+	double set(size_t x, size_t y, double val) {
+		assert(x >= 0);
+		assert(x < xlen_);
+		assert(y >= 0);
+		assert(y < ylen_);
+
+		if (x < offset_) {
+			data_.insert(data_.begin(), offset_-x, data_element());
+			offset_ = x;
+		} else if (x >= offset_ + data_.size()) {
+			data_.resize(x - offset_ + 1);
 		}
-		data_element &column = data[x - offset];
+		data_element &column = data_[x-offset_];
 
 		if (y < column.first) {
 			column.second.insert(column.second.begin(),
-			    y - column.first, double(0));
+			    y-column.first, double(0));
 			column.first = y;
 		} else if (y >= column.first + column.second.size()) {
 			column.second.resize(y - column.first + 1, double(0));
 		}
-		return column.second[y - column.first];
+		column.second[y - column.first] = val;
+		return val;
 	}
 
-	double operator() (size_t x, size_t y) const {
-		if (x < offset || x >= offset + data.size())
+	double get(size_t x, size_t y) const {
+		if (x < offset_ || x >= offset_ + data_.size())
 			return 0;
-		const data_element &column = data[x - offset];
-
+		const data_element &column = data_[x-offset_];
 		if (y < column.first ||
 		    y >= column.first + column.second.size())
 			return 0;
-		return column.second[y - column.first];
+		return column.second[y-column.first];
 	}
 
+	size_t xdim() const { return xlen_; }
+	size_t ydim() const { return ylen_; }
+
 	// dynamically deallocate the sparse map while filling?
-	boost::shared_ptr<FilledMapData> fill() const {
-		FilledMapData arr(xlen_, ylen_);
-		for (size_t ix = 0; ix < data.size(); ix++) {
-			size_t x = offset + ix;
-			data_element &column = data[ix];
-			for (size_t iy = 0; iy < column.second.size(); iy++) {
-				size_t y = column.first + iy;
-				arr(x, y) = column.second[iy];
-			}
-		}
-		return boost::make_shared<FilledMapData>(arr);
+	DenseMapData *to_dense() const;
+
+	template <class A> void serialize(A &ar, unsigned v) {
+		using namespace cereal;
+		// XXX: size_t vs. uint64_t
+		ar & make_nvp("xlen", xlen_);
+		ar & make_nvp("xlen", ylen_);
+		ar & make_nvp("offset", offset_);
+		ar & make_nvp("data", data_);
 	}
 
 private:
+	size_t xlen_, ylen_;
 	typedef std::pair<int, std::vector<double> > data_element;
-	std::vector<data_element> data;
-	size_t offset;
+	std::vector<data_element> data_;
+	size_t offset_;
 };
 
 
-class FilledMapData : public MapData {
+class DenseMapData {
 public:
-	FilledMapData(size_t xlen, size_t ylen) :
-	    MapData(xlen, ylen) {}
-
-	double & operator() (size_t x, size_t y) {
-		(void) check_index(x, y, true);
-		allocate();
-		return data[idxat(x, y)];
+	DenseMapData(size_t xlen, size_t ylen) :
+	    xlen_(xlen), ylen_(ylen) {
+		data_.resize(xlen*ylen);
 	}
 
-	double operator() (size_t x, size_t y) const {
-		if (!check_index(x, y, false))
-			return 0;
-		if (!allocated())
-			return 0;
-		return data[idxat(x, y)];
+	bool in_bounds(size_t x, size_t y) const {
+		return !(x < 0 || x >= xlen_ || y < 0 || y >= ylen_);
 	}
 
-	// dynamically deallocate the filled map while compressing?
-	boost::shared_ptr<SparseMapData> sparsen() const {
-		SparseMapData arr(xlen_, ylen_);
-		for (size_t x = 0; x < xlen_; x++) {
-			for (size_t y = 0; y < ylen_; y++) {
-				double val = data[idxat(x, y)];
-				if (val != 0)
-					arr(x, y) = val;
-			}
-		}
-		return boost::make_shared<SparseMapData>(arr);
+	size_t xdim() const { return xlen_; }
+	size_t ydim() const { return ylen_; }
+
+	double get(size_t x, size_t y) const {
+		if (!in_bounds(x, y))
+			return 0;
+		return data_[idxat(x, y)];
+	}
+
+	double set(size_t x, size_t y, double val) {
+		assert(x >= 0);
+		assert(x < xlen_);
+		assert(y >= 0);
+		assert(y < ylen_);
+
+		data_[idxat(x, y)] = val;
+		return val;
+	}
+
+	template <class A> void serialize(A &ar, unsigned v) {
+		using namespace cereal;
+		// XXX: size_t vs. uint64_t
+		ar & make_nvp("xlen", xlen_);
+		ar & make_nvp("xlen", ylen_);
+		ar & make_nvp("data", data_);
 	}
 
 private:
-	std::vector<double> data;
-
-	bool allocated() const {
-		return (data.size() > 0);
-	}
-
-	size_t allocate() {
-		if (!allocated())
-			data.resize(xlen_ * ylen_);
-		return data.size();
-	}
+	size_t xlen_, ylen_;
+	std::vector<double> data_;
 
 	inline size_t idxat(size_t x, size_t y) const {
 		return x + y * xlen_;
 	}
 };
+
+DenseMapData *
+SparseMapData::to_dense() const
+{
+	DenseMapData *rv = new DenseMapData(xlen_, ylen_);
+	for (size_t ix = 0; ix < data_.size(); ix++) {
+		size_t x = offset_ + ix;
+		const data_element &column = data_[ix];
+		for (size_t iy = 0; iy < column.second.size(); iy++) {
+			size_t y = column.first + iy;
+			rv->set(x, y, column.second[iy]);
+		}
+	}
+	return rv;
+}
+
+SparseMapData::SparseMapData(const DenseMapData &dense_map) :
+    xlen_(dense_map.xdim()), ylen_(dense_map.ydim())
+{
+	double val;
+
+	for (size_t ix = 0; ix < xlen_; ix++) {
+		for (size_t iy = 0; iy < ylen_; iy++) {
+			val = dense_map.get(ix, iy);
+			if (val != 0)
+				set(ix, iy, val);
+		}
+	}
+}
+
