@@ -40,7 +40,7 @@ As an alternative, you can specify a specific list of boards to listen for. This
 
 .. note::
 
-	On some versions of Linux with 128x DfMux firmware, you will need to disable strict reverse-path validation in the kernel to take data. This can be accomplished by setting the sysctl ``net.ipv4.conf.all.rp_filter`` to 0.
+	On some versions of Linux with 128x DfMux firmware, you will need to disable strict reverse-path validation in the kernel to take data. This can be accomplished by setting the sysctl ``net.ipv4.conf.all.rp_filter`` to 0. Depending on our system configuration, you may also need to set the corresponding per-interface sysctl (replace ``all`` with an interface name) corresponding to the network interface to which the DfMux boards are connected.
 
 This code can also be used to collect data from legacy boards with DAN firmware if you are so inclined by using the ``dfmux.LegacyDfMuxCollector`` class in place of ``dfmux.DfMuxCollector``.
 
