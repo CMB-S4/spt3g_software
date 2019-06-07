@@ -48,6 +48,8 @@ public:
 	FlatSkyMap();
 	FlatSkyMap(const FlatSkyMap & fm);
 
+	~FlatSkyMap();
+
         double operator [] (int i) const override;
         double &operator [] (int i) override;
 
@@ -85,6 +87,12 @@ public:
 	    std::vector<long> & pixels, std::vector<double> & weights) const override;
 
 	G3SkyMapPtr rebin(size_t scale) const override;
+
+	void ConvertToDense();
+	void ConvertToSparse();
+
+protected:
+	virtual void init_from_v1_data(const std::vector<double>) override;
 
 private:
 	FlatSkyProjection proj_info; // projection parameters and functions

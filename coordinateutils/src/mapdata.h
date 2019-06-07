@@ -110,10 +110,10 @@ public:
 		ar & make_nvp("data", data_);
 	}
 
-private:
-	size_t xlen_, ylen_;
 	std::vector<double> data_;
 
+private:
+	size_t xlen_, ylen_;
 	inline size_t idxat(size_t x, size_t y) const {
 		return x + y * xlen_;
 	}

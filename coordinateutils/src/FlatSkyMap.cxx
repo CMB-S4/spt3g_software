@@ -48,6 +48,18 @@ FlatSkyMap::FlatSkyMap() :
 FlatSkyMap::FlatSkyMap(const FlatSkyMap & fm) :
     G3SkyMap(fm), proj_info(fm.proj_info)
 {
+	if (fm.dense_)
+		dense_ = new DenseMapData(*fm.dense_);
+	else if (fm.sparse_)
+		sparse_ = new SparseMapData(*fm.sparse_);
+}
+
+FlatSkyMap::~FlatSkyMap()
+{
+	if (dense_)
+		delete dense_;
+	if (sparse_)
+		delete sparse_;
 }
 
 template <class A> void
@@ -88,7 +100,8 @@ FlatSkyMap::load(A &ar, unsigned v)
 		ar & make_nvp("delta_center", delta_center);
 		ar & make_nvp("res", res);
 		ar & make_nvp("x_res", x_res);
-		proj_info.initialize(xpix_, ypix_, res, alpha_center, delta_center, x_res, proj);
+		proj_info.initialize(xpix_, ypix_, res, alpha_center,
+		    delta_center, x_res, proj);
 	}
 
 	if (v >= 3) {
@@ -113,6 +126,41 @@ FlatSkyMap::load(A &ar, unsigned v)
 			break;
 		}
 	}
+}
+
+void
+FlatSkyMap::init_from_v1_data(const std::vector<double> data)
+{
+	dense_ = new DenseMapData(xpix_, ypix_);
+	dense_->data_ = data;
+}
+
+void
+FlatSkyMap::ConvertToDense()
+{
+	if (dense_)
+		return;
+
+	if (sparse_) {
+		dense_ = sparse_->to_dense();
+		delete sparse_;
+		sparse_ = NULL;
+	} else {
+		// Unallocated
+		dense_ = new DenseMapData(xpix_, ypix_);
+	}
+}
+
+void
+FlatSkyMap::ConvertToSparse()
+{
+	// Do nothing if unallocated (maximumally sparse) or already sparse.
+	if (!dense_)
+		return;
+
+	sparse_ = new SparseMapData(*dense_);
+	delete dense_;
+	dense_ = NULL;
 }
 
 G3SkyMapPtr
@@ -257,6 +305,7 @@ void FlatSkyMap::get_interp_pixels_weights(double alpha, double delta,
 
 G3SkyMapPtr FlatSkyMap::rebin(size_t scale) const
 {
+	const double sqscal = scale*scale;
 	if ((xpix_ % scale != 0) || (ypix_ % scale != 0)) {
 		log_fatal("Map dimensions must be a multiple of rebinning scale");
 	}
@@ -267,19 +316,27 @@ G3SkyMapPtr FlatSkyMap::rebin(size_t scale) const
 	FlatSkyProjection p(proj_info.rebin(scale));
 	FlatSkyMapPtr out(new FlatSkyMap(p, coord_ref, is_weighted, units, pol_type));
 
-#if 0
-	if (IsAllocated()) {
-		out->EnsureAllocated();
+	if (dense_ || sparse_) {
+		if (dense_)
+			out->ConvertToDense();
 
-		for (size_t i = 0; i < xpix_; i++) {
-			for (size_t j = 0; j < ypix_; j++) {
-				(*out)[out->pixat(i / scale, j / scale)] += data_[pixat(i, j)];
-			}
+		if (dense_) {
+			for (size_t i = 0; i < xpix_; i++)
+				for (size_t j = 0; j < ypix_; j++)
+					(*out->dense_)(i / scale, j / scale) +=
+					    (*dense_)(i, j) / sqscal;
+		} else {
+			double val;
+			for (size_t i = 0; i < xpix_; i++)
+				for (size_t j = 0; j < ypix_; j++) {
+					val = (*sparse_)(i, j);
+					if (val == 0) // XXX: more efficient?
+						continue;
+					(*out->sparse_)(i / scale, j / scale) +=
+					    val / sqscal;
+				}
 		}
-
-		out /= (scale * scale);
 	}
-#endif
 	return out;
 }
 
