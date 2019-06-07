@@ -21,7 +21,7 @@ enum MapCoordReference {
  * interface for the map maker.
  */
 
-class G3SkyMap : public G3FrameObject {
+class G3SkyMap {
 public:
 	// Following numerical values are important
 	enum MapPolType {
@@ -34,59 +34,30 @@ public:
 	G3SkyMap(MapCoordReference coords, size_t xpix, size_t ypix = 1,
 	    bool isweighted = true,
 	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
-	    MapPolType pol_type = None, 
-	    bool pre_allocate_map = false) :
+	    MapPolType pol_type = None) :
 	    coord_ref(coords), units(u), pol_type(pol_type),
-	    is_weighted(isweighted), data_(pre_allocate_map ? xpix*ypix+1 : 0),
-	    xpix_(xpix), ypix_(ypix) {}
-
-	// Instantiate from a numpy array
-	G3SkyMap(boost::python::object v, MapCoordReference coords,
-	    bool is_weighted, G3Timestream::TimestreamUnits units,
-	    G3SkyMap::MapPolType pol_type);
+	    is_weighted(isweighted), xpix_(xpix), ypix_(ypix) {}
+	virtual ~G3SkyMap() {};
 
 	// Reimplement the following in subclasses
-	virtual boost::shared_ptr<G3SkyMap> Clone(bool copy_data = true) const
-	{
-		if (copy_data)
-			return boost::make_shared<G3SkyMap>(*this);
-		else
-			return boost::make_shared<G3SkyMap>(coord_ref, xpix_,
-			    ypix_, is_weighted, units, pol_type, false);
-	}
+	virtual boost::shared_ptr<G3SkyMap> Clone(bool copy_data = true) const = 0;
 
 	MapCoordReference coord_ref;
 	G3Timestream::TimestreamUnits units;
 	MapPolType pol_type;
 	bool is_weighted;
+	double overflow;
 
-	void SetOverflow(double val) { 
-		EnsureAllocated();
-		*(data_.end() - 1) = val; 
+	void SetOverflow(double val) __attribute__((deprecated)) { 
+		overflow = val; 
 	}
-	double GetOverflow(void) const { 
-		if (!IsAllocated()) return 0;
-		return *(data_.end() - 1); 
+	double GetOverflow(void) const __attribute__((deprecated)) {
+		return overflow;
 	}
 
 	// Return a (modifiable) pixel value
-	double &operator [] (int i) {
-		return data_[i];
-	}
-	double operator [] (int i) const {
-		return data_[i];
-	}
-	const double &at (int i) const {
-		return data_.at(i);
-	}
-
-	int pixat(int x, int y) const {
-		return y*xpix_ + x;
-	}
-
-	size_t size(void) const {
-		return (data_.size() == 0) ? 0 : (data_.size() - 1);
-	}
+	virtual double &operator [] (int i) = 0;
+	virtual double operator [] (int i) const = 0;
 
 	size_t xdim(void) const {
 		return xpix_;
@@ -95,23 +66,15 @@ public:
 		return ypix_;
 	}
 
-	void EnsureAllocated(void) {
-		if (!IsAllocated()) 
-			data_.resize( xpix_ * ypix_ + 1, 0);
-	}
-
 	virtual bool IsCompatible(const G3SkyMap & other) const {
 		return ((xpix_ == other.xpix_) &&
 			(ypix_ == other.ypix_) &&
 			(coord_ref == other.coord_ref));
 	}
 
-	bool IsAllocated(void) const {
-		return data_.size() > 0;
-	}
-
 	// Arithmetic operations:
 
+#if 0
 	// +
 	G3SkyMap & operator+=(const G3SkyMap & rhs);
 	G3SkyMap & operator+=(double rhs);
@@ -135,6 +98,7 @@ public:
 	G3SkyMap & operator/=(double rhs);
 	G3SkyMap operator/(const G3SkyMap & rhs);
 	G3SkyMap operator/(double rhs);
+#endif
 
 	// Pointing information
 	virtual std::vector<int> angles_to_pixels(const std::vector<double> & alphas, 
@@ -142,33 +106,28 @@ public:
 	virtual void pixels_to_angles(const std::vector<int> & pixels,
 	    std::vector<double> & alphas, std::vector<double> & deltas) const;
 
-	virtual std::vector<double> pixel_to_angle(size_t pixel) const {
-		return std::vector<double>();
-	}
+	virtual std::vector<double> pixel_to_angle(size_t pixel) const = 0;
 	std::vector<double> pixel_to_angle(size_t x_pix, size_t y_pix) const;
-	virtual size_t angle_to_pixel(double alpha, double delta) const {
-		return 0;
-	};
+	virtual size_t angle_to_pixel(double alpha, double delta) const  = 0;
 
 	// Rebinning and interpolation
 	virtual void get_rebin_angles(long pixel, size_t scale,
-	    std::vector<double> & alphas, std::vector<double> & deltas) const {};
+	    std::vector<double> & alphas, std::vector<double> & deltas) const = 0;
 	virtual void get_interp_pixels_weights(double alpha, double delta,
-	    std::vector<long> & pixels, std::vector<double> & weights) const {};
+	    std::vector<long> & pixels, std::vector<double> & weights) const = 0;
 	double get_interp_precalc(const std::vector<long> & pixels,
 	    const std::vector<double> & weights) const;
 	double get_interp_value(double alpha, double delta) const;
 	std::vector<double> get_interp_values(const std::vector<double> & alphas,
 	    const std::vector<double> & deltas) const ;
 
-	virtual boost::shared_ptr<G3SkyMap> rebin(size_t scale) const {
-		return Clone(false);
-	};
+	virtual boost::shared_ptr<G3SkyMap> rebin(size_t scale) const = 0;
 
 protected:
-	// Last bin is an overflow bin
-	std::vector<double> data_;
 	uint32_t xpix_, ypix_;
+	virtual void init_from_v1_data(const std::vector<double>) {
+		throw std::runtime_error("Initializing from V1 not implemented");
+	}
 
 private:
 	G3SkyMap() {} // Fake out for serialization
@@ -254,6 +213,7 @@ public:
 		    (*QU)[i], (*UU)[i]);
 	}
 	
+#if 0
 	void EnsureAllocated(void) {
 		if (weight_type == Wunpol) {
 			TT->EnsureAllocated();
@@ -266,6 +226,7 @@ public:
 			UU->EnsureAllocated();
 		}
 	}
+#endif
 
 	boost::shared_ptr<G3SkyMapWeights> Clone(bool copy_data) const {
 		if (copy_data)
@@ -280,7 +241,7 @@ private:
 
 G3_POINTERS(G3SkyMapWeights);
 
-G3_SERIALIZABLE(G3SkyMap, 1);
+G3_SERIALIZABLE(G3SkyMap, 2);
 G3_SERIALIZABLE(G3SkyMapWeights, 2);
 
 #endif

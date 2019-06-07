@@ -3,18 +3,21 @@
 #include <typeinfo>
 
 #include <coordinateutils/FlatSkyMap.h>
-
 #include <coordinateutils/flatskyprojection.h>
+
+#include "mapdata.h"
 
 FlatSkyMap::FlatSkyMap(int x_len, int y_len, double res, bool is_weighted,
     MapProjection proj, double alpha_center, double delta_center,
     MapCoordReference coord_ref, G3Timestream::TimestreamUnits u,
     G3SkyMap::MapPolType pol_type, double x_res) :
-      G3SkyMap(coord_ref, x_len, y_len, is_weighted, u, pol_type, false),
-      proj_info(x_len, y_len, res, alpha_center, delta_center, x_res, proj)
+      G3SkyMap(coord_ref, x_len, y_len, is_weighted, u, pol_type),
+      proj_info(x_len, y_len, res, alpha_center, delta_center, x_res, proj),
+      dense_(NULL), sparse_(NULL)
 {
 }
 
+#if 0
 // Needs to pass-through to G3SkyMap constructor, so can't be an
 // out-of-class make_constructor() thing
 FlatSkyMap::FlatSkyMap(boost::python::object v, double res,
@@ -23,14 +26,16 @@ FlatSkyMap::FlatSkyMap(boost::python::object v, double res,
     MapCoordReference coord_ref, G3Timestream::TimestreamUnits u,
     G3SkyMap::MapPolType pol_type, double x_res) :
       G3SkyMap(v, coord_ref, is_weighted, u, pol_type),
-      proj_info(xpix_, ypix_, res, alpha_center, delta_center, x_res, proj)
+      proj_info(xpix_, ypix_, res, alpha_center, delta_center, x_res, proj), 
+      dense_(NULL), sparse_(NULL)
 {
 }
+#endif
 
 FlatSkyMap::FlatSkyMap(const FlatSkyProjection & fp,
     MapCoordReference coord_ref, bool is_weighted,
     G3Timestream::TimestreamUnits u, G3SkyMap::MapPolType pol_type) :
-      G3SkyMap(coord_ref, fp.xdim(), fp.ydim(), is_weighted, u, pol_type, false),
+      G3SkyMap(coord_ref, fp.xdim(), fp.ydim(), is_weighted, u, pol_type),
       proj_info(fp)
 {
 }
@@ -52,6 +57,15 @@ FlatSkyMap::save(A &ar, unsigned v) const
 
 	ar & make_nvp("G3SkyMap", base_class<G3SkyMap>(this));
 	ar & make_nvp("proj_info", proj_info);
+	if (dense_) {
+		ar & make_nvp("store", 2);
+		ar & make_nvp("data", *dense_);
+	} else if (sparse_) {
+		ar & make_nvp("store", 1);
+		ar & make_nvp("data", *sparse_);
+	} else {
+		ar & make_nvp("store", 0);
+	}
 }
 
 template <class A> void
@@ -61,9 +75,11 @@ FlatSkyMap::load(A &ar, unsigned v)
 
 	G3_CHECK_VERSION(v);
 
+	ar & make_nvp("G3FrameObject", base_class<G3FrameObject>(this));
 	ar & make_nvp("G3SkyMap", base_class<G3SkyMap>(this));
-	if (v > 1) {
-	  ar & make_nvp("proj_info", proj_info);
+
+	if (v >= 2) {
+		ar & make_nvp("proj_info", proj_info);
 	} else {
 		MapProjection proj;
 		double alpha_center, delta_center, res, x_res;
@@ -73,6 +89,29 @@ FlatSkyMap::load(A &ar, unsigned v)
 		ar & make_nvp("res", res);
 		ar & make_nvp("x_res", x_res);
 		proj_info.initialize(xpix_, ypix_, res, alpha_center, delta_center, x_res, proj);
+	}
+
+	if (v >= 3) {
+		int store;
+		ar & make_nvp("store", store);
+		if (dense_) {
+			delete dense_;
+			dense_ = NULL;
+		}
+		if (sparse_) {
+			delete sparse_;
+			sparse_ = NULL;
+		}
+		switch (store) {
+		case 2:
+			dense_ = new DenseMapData(xpix_, ypix_);
+			ar & make_nvp("dense", *dense_);
+			break;
+		case 1:
+			sparse_ = new SparseMapData(xpix_, ypix_);
+			ar & make_nvp("sparse", *sparse_);
+			break;
+		}
 	}
 }
 
@@ -85,6 +124,30 @@ FlatSkyMap::Clone(bool copy_data) const
 		return boost::make_shared<FlatSkyMap>(proj_info,
 		    coord_ref, is_weighted, units, pol_type);
 }
+
+double
+FlatSkyMap::operator [] (int i) const
+{
+	if (dense_)
+		return (*dense_)(i % xpix_, i / xpix_);
+	if (sparse_)
+		return (*sparse_)(i % xpix_, i / xpix_);
+	return 0;
+}
+
+double &
+FlatSkyMap::operator [] (int i)
+{
+	assert(i >= 0);
+	assert(i < xpix_*ypix_);
+
+	if (dense_)
+		return (*dense_)(i % xpix_, i / xpix_);
+	if (!sparse_)
+		sparse_ = new SparseMapData(xpix_, ypix_);
+	return (*sparse_)(i % xpix_, i / xpix_);
+}
+
 
 std::string
 FlatSkyMap::Description() const
@@ -202,20 +265,22 @@ G3SkyMapPtr FlatSkyMap::rebin(size_t scale) const
 		return Clone(true);
 
 	FlatSkyProjection p(proj_info.rebin(scale));
-	FlatSkyMap out(p, coord_ref, is_weighted, units, pol_type);
+	FlatSkyMapPtr out(new FlatSkyMap(p, coord_ref, is_weighted, units, pol_type));
 
+#if 0
 	if (IsAllocated()) {
-		out.EnsureAllocated();
+		out->EnsureAllocated();
 
 		for (size_t i = 0; i < xpix_; i++) {
 			for (size_t j = 0; j < ypix_; j++) {
-				out[out.pixat(i / scale, j / scale)] += data_[pixat(i, j)];
+				(*out)[out->pixat(i / scale, j / scale)] += data_[pixat(i, j)];
 			}
 		}
 
 		out /= (scale * scale);
 	}
-	return boost::make_shared<FlatSkyMap>(out);
+#endif
+	return out;
 }
 
 

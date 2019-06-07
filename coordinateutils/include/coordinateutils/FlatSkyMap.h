@@ -11,7 +11,10 @@
 #include <coordinateutils/G3SkyMap.h>
 #include <coordinateutils/flatskyprojection.h>
 
-class FlatSkyMap : public G3SkyMap {
+class DenseMapData;
+class SparseMapData;
+
+class FlatSkyMap : public G3FrameObject, public G3SkyMap {
 public:
 	// Construct an X by Y pixel flat map with pixel width res and the given
 	// units, center, and coordinate system. If x_res is set to something
@@ -44,6 +47,9 @@ public:
 
 	FlatSkyMap();
 	FlatSkyMap(const FlatSkyMap & fm);
+
+        double operator [] (int i) const override;
+        double &operator [] (int i) override;
 
 	template <class A> void load(A &ar, unsigned v);
 	template <class A> void save(A &ar, unsigned v) const;
@@ -83,6 +89,9 @@ public:
 private:
 	FlatSkyProjection proj_info; // projection parameters and functions
 
+	DenseMapData *dense_;
+	SparseMapData *sparse_;
+
 	SET_LOGGER("FlatSkyMap");
 };
 
@@ -92,7 +101,7 @@ namespace cereal {
   template <class A> struct specialize<A, FlatSkyMap, cereal::specialization::member_load_save> {};
 }
 
-G3_SERIALIZABLE(FlatSkyMap, 2);
+G3_SERIALIZABLE(FlatSkyMap, 3);
 
 #endif //_COORDINATEUTILS_FLATSKYMAP_H
 

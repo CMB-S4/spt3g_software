@@ -8,7 +8,7 @@ add_library(coordinateutils SHARED
   src/chealpix.c
   src/get_interp_val.c
   src/G3SkyMap.cxx
-  src/CutskyHealpixMap.cxx
+  #src/CutskyHealpixMap.cxx
   src/flatskyprojection.cxx
   src/FlatSkyMap.cxx
   src/maputils.cxx

@@ -13,13 +13,24 @@ G3SkyMap::serialize(A &ar, unsigned v)
 {
 	G3_CHECK_VERSION(v);
 
-	ar & cereal::make_nvp("G3FrameObject",
-	    cereal::base_class<G3FrameObject>(this));
 	ar & cereal::make_nvp("coord_ref", coord_ref);
 	ar & cereal::make_nvp("units", units);
-	ar & cereal::make_nvp("data", data_);
-	ar & cereal::make_nvp("xpix", xpix_);
-	ar & cereal::make_nvp("ypix", ypix_);
+	if (v == 1) {
+		std::vector<double> dat;
+		ar & cereal::make_nvp("data", dat);
+		
+		ar & cereal::make_nvp("xpix", xpix_);
+		ar & cereal::make_nvp("ypix", ypix_);
+		
+		overflow = dat[dat.size() - 1];
+		dat.resize(dat.size() - 1);
+		init_from_v1_data(dat);
+	} else {
+		ar & cereal::make_nvp("xpix", xpix_);
+		ar & cereal::make_nvp("ypix", ypix_);
+
+		ar & cereal::make_nvp("overflow", overflow);
+	}
 
 	ar & cereal::make_nvp("pol_type", pol_type);
 	ar & cereal::make_nvp("is_weighted", is_weighted);
@@ -61,6 +72,7 @@ G3SkyMapWeights::G3SkyMapWeights(const G3SkyMapWeights &r) :
 {
 }
 
+#if 0
 G3SkyMap::G3SkyMap(bp::object v, MapCoordReference coords, bool is_weighted,
     G3Timestream::TimestreamUnits u, G3SkyMap::MapPolType pol_type) :
     coord_ref(coords), units(u), pol_type(pol_type), is_weighted(is_weighted)
@@ -104,6 +116,7 @@ G3SkyMap::G3SkyMap(bp::object v, MapCoordReference coords, bool is_weighted,
 
 	throw bp::error_already_set();
 }
+#endif
 
 std::vector<int> G3SkyMap::angles_to_pixels(const std::vector<double> & alphas,
     const std::vector<double> & deltas) const
@@ -139,10 +152,13 @@ void G3SkyMap::pixels_to_angles(const std::vector<int> & pixels,
 	}
 }
 
+#if 0
 std::vector<double> G3SkyMap::pixel_to_angle(size_t x_pix, size_t y_pix) const {
 	return pixel_to_angle(pixat(x_pix, y_pix));
 }
+#endif
 
+#if 0
 double G3SkyMap::get_interp_precalc(const std::vector<long> & pix,
     const std::vector<double> & weight) const
 {
@@ -152,6 +168,7 @@ double G3SkyMap::get_interp_precalc(const std::vector<long> & pix,
 	}
 	return outval;
 }
+#endif
 
 double G3SkyMap::get_interp_value(double alpha, double delta) const
 {
@@ -175,6 +192,7 @@ std::vector<double> G3SkyMap::get_interp_values(const std::vector<double> & alph
 	return outvals;
 }
 
+#if 0
 static int
 G3SkyMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 {
@@ -465,6 +483,7 @@ G3SkyMap::operator/(double rhs)
 	new_map /= rhs;
 	return new_map;
 }
+#endif
 
 PYBINDINGS("coordinateutils") {
 	bp::enum_<MapCoordReference>("MapCoordReference")
@@ -488,24 +507,11 @@ PYBINDINGS("coordinateutils") {
 	;
 	enum_none_converter::from_python<G3SkyMapWeights::WeightType>();
 
-	bp::object skymap = EXPORT_FRAMEOBJECT(G3SkyMap, no_init,
+	bp::object skymap = bp::class_<G3SkyMap, boost::noncopyable,
+	  G3SkyMapPtr>("G3SkyMap",
 	  "Base class for 1- and 2-D skymaps of various projections. Usually "
 	  "you want a subclass of this (e.g. FlatSkyMap) rather than using it "
-	  "directly.")
-	    .def(bp::init<MapCoordReference, size_t, size_t, bool,
-	      G3Timestream::TimestreamUnits, G3SkyMap::MapPolType, bool>(
-	      (bp::arg("coords"), "xpixels", bp::arg("ypixels")=1,
-	       bp::arg("is_weighted")=true,
-	       bp::arg("units")=G3Timestream::Tcmb,
-	       bp::arg("pol_type")=G3SkyMap::MapPolType::None,
-	       bp::arg("allocate_map")=false), "Initialize a sky map with all "
-	       "pixels set to zero and the given dimensions"))
-	    .def(bp::init<bp::object, MapCoordReference, bool,
-	      G3Timestream::TimestreamUnits, G3SkyMap::MapPolType>
-	      ((bp::arg("array"), "coords", bp::arg("is_weighted")=true,
-	        bp::arg("units")=G3Timestream::Tcmb,
-	        bp::arg("pol_type")=G3SkyMap::MapPolType::None),
-	      "Create a skymap from a numpy array"))
+	  "directly.", bp::no_init)
 	    .def_readwrite("coord_ref", &G3SkyMap::coord_ref,
 	      "Coordinate system (coordinateutils.MapCoordReference) of the map (e.g. "
 	      "Galactic, Equatorial, etc.)")
@@ -516,19 +522,23 @@ PYBINDINGS("coordinateutils") {
 	      "Unit class (core.G3TimestreamUnits) of the map (e.g. "
 	      "core.G3TimestreamUnits.Tcmb). Within each unit class, further "
 	      "conversions, for example from K to uK, should use core.G3Units.")
+#if 0
 	    .def_readwrite("is_weighted", &G3SkyMap::is_weighted,
 	      "True if map is multiplied by weights")
 	    .add_property("size", &G3SkyMap::size, "Number of pixels in map")
 	    .add_property("shape", &skymap_shape, "Shape of map")
-	    .add_property("overflow", &G3SkyMap::GetOverflow,
-              &G3SkyMap::SetOverflow, "Combined value of data processed by "
+#endif
+	    .def_readwrite("overflow", &G3SkyMap::overflow,
+              "Combined value of data processed by "
 	      "the map maker but outside of the map area")
+#if 0
 	    .def("__getitem__", &skymap_getitem)
 	    .def("__setitem__", &skymap_setitem)
 	    .def("__getitem__", &skymap_getitem_2d)
 	    .def("__setitem__", &skymap_setitem_2d)
 	    .def("__copy__", &skymap_copy)
 	    .def("__deepcopy__", &skymap_copy)
+#endif
 	    .def("Clone", &G3SkyMap::Clone,
 	      ((bp::arg("copy_data")=true),
 	       "Return a map of the same type, populated with a copy of the data "
@@ -566,6 +576,7 @@ PYBINDINGS("coordinateutils") {
 	      "blocks of pixels together.  Returns a new map object. "
 	      "Map dimensions must be a multiple of the rebinning scale.")
 
+#if 0
 	    .def(bp::self + bp::self)
 	    .def(bp::self * bp::self)
 	    .def(bp::self - bp::self)
@@ -582,14 +593,17 @@ PYBINDINGS("coordinateutils") {
 	    .def(bp::self *= double())
 	    .def(bp::self -= double())
 	    .def(bp::self /= double())
+#endif
 	;
 
+#if 0
 	// Add buffer protocol interface
 	PyTypeObject *smclass = (PyTypeObject *)skymap.ptr();
 	skymap_bufferprocs.bf_getbuffer = G3SkyMap_getbuffer;
 	smclass->tp_as_buffer = &skymap_bufferprocs;
 #if PY_MAJOR_VERSION < 3
 	smclass->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
+#endif
 #endif
 
 	EXPORT_FRAMEOBJECT(G3SkyMapWeights, init<>(), "generic sky weight")
