@@ -1,6 +1,7 @@
 #include <vector>
 
 #include <cereal/types/vector.hpp>
+#include <cereal/types/utility.hpp>
 
 class SparseMapData;
 class DenseMapData;
@@ -15,7 +16,17 @@ public:
 		return !(x < 0 || x >= xlen_ || y < 0 || y >= ylen_);
 	}
 
-	double set(size_t x, size_t y, double val) {
+	double operator()(size_t x, size_t y) const {
+		if (x < offset_ || x >= offset_ + data_.size())
+			return 0;
+		const data_element &column = data_[x-offset_];
+		if (y < column.first ||
+		    y >= column.first + column.second.size())
+			return 0;
+		return column.second[y-column.first];
+	}
+
+	double &operator()(size_t x, size_t y) {
 		assert(x >= 0);
 		assert(x < xlen_);
 		assert(y >= 0);
@@ -36,18 +47,7 @@ public:
 		} else if (y >= column.first + column.second.size()) {
 			column.second.resize(y - column.first + 1, double(0));
 		}
-		column.second[y - column.first] = val;
-		return val;
-	}
-
-	double get(size_t x, size_t y) const {
-		if (x < offset_ || x >= offset_ + data_.size())
-			return 0;
-		const data_element &column = data_[x-offset_];
-		if (y < column.first ||
-		    y >= column.first + column.second.size())
-			return 0;
-		return column.second[y-column.first];
+		return column.second[y - column.first];
 	}
 
 	size_t xdim() const { return xlen_; }
@@ -87,20 +87,19 @@ public:
 	size_t xdim() const { return xlen_; }
 	size_t ydim() const { return ylen_; }
 
-	double get(size_t x, size_t y) const {
+	double operator()(size_t x, size_t y) const {
 		if (!in_bounds(x, y))
 			return 0;
 		return data_[idxat(x, y)];
 	}
 
-	double set(size_t x, size_t y, double val) {
+	double &operator()(size_t x, size_t y) {
 		assert(x >= 0);
 		assert(x < xlen_);
 		assert(y >= 0);
 		assert(y < ylen_);
 
-		data_[idxat(x, y)] = val;
-		return val;
+		return data_[idxat(x, y)];
 	}
 
 	template <class A> void serialize(A &ar, unsigned v) {
@@ -120,6 +119,9 @@ private:
 	}
 };
 
+CEREAL_CLASS_VERSION(SparseMapData, 1);
+CEREAL_CLASS_VERSION(DenseMapData, 1);
+
 DenseMapData *
 SparseMapData::to_dense() const
 {
@@ -129,7 +131,7 @@ SparseMapData::to_dense() const
 		const data_element &column = data_[ix];
 		for (size_t iy = 0; iy < column.second.size(); iy++) {
 			size_t y = column.first + iy;
-			rv->set(x, y, column.second[iy]);
+			(*rv)(x, y) = column.second[iy];
 		}
 	}
 	return rv;
@@ -142,9 +144,9 @@ SparseMapData::SparseMapData(const DenseMapData &dense_map) :
 
 	for (size_t ix = 0; ix < xlen_; ix++) {
 		for (size_t iy = 0; iy < ylen_; iy++) {
-			val = dense_map.get(ix, iy);
+			val = dense_map(ix, iy);
 			if (val != 0)
-				set(ix, iy, val);
+				(*this)(ix, iy) = val;
 		}
 	}
 }
