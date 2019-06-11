@@ -141,6 +141,13 @@ class _add_pipeline_info(G3Module):
         self.pipelineinfo.user = getpass.getuser()
     def Process(self, fr):
         if self.infoemitted:
+            if fr.type == G3FrameType.PipelineInfo and \
+              self.originalpi is not None and \
+              self.originalpi == fr.__getstate__()[1]:
+                # Deduplicate PipelineInfo frames identical to one that we
+                # added to earlier, which avoids false semi-duplicates down
+                # the line when processing multiple files.
+                return False
             return fr
 
         # Allow limited reordering of metadata
@@ -149,12 +156,13 @@ class _add_pipeline_info(G3Module):
             self.buffer.append(fr)
             return []
 
-        import time
         self.infoemitted = True
         if fr.type == G3FrameType.PipelineInfo:
+            self.originalpi = fr.__getstate__()[1] # See DeduplicateMetadata()
             fr[str(G3Time.Now())] = self.pipelineinfo
             self.buffer.append(fr)
         else:
+            self.originalpi = None
             f = G3Frame(G3FrameType.PipelineInfo)
             f[str(G3Time.Now())] = self.pipelineinfo
             self.buffer += [f, fr]
