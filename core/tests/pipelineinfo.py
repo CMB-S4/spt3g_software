@@ -44,6 +44,8 @@ p.Add(twiddle)
 p.Add(core.G3Writer, filename='testpi2.g3')
 p.Run()
 
+# Check that it has three entries when the headered version is run from a file
+print('Test for file reading after twiddling')
 p = core.G3Pipeline()
 p.Add(core.G3Reader, filename='testpi2.g3')
 p.Add(core.Dump)
@@ -52,6 +54,38 @@ def check(fr):
 		assert(len(fr) == 3)
 p.Add(check)
 p.Run()
+
+# Check that only one PipelineInfo frame is present, even if it occurs in
+# multiple input files.
+print('Dedup test 1')
+p = core.G3Pipeline()
+p.Add(core.G3Reader, filename=['testpi2.g3', 'testpi2.g3'])
+p.Add(core.Dump)
+i = 0
+def check(fr):
+	global i
+	if fr.type == core.G3FrameType.PipelineInfo:
+		assert(len(fr) == 3)
+		i += 1
+p.Add(check)
+p.Run()
+assert(i == 1)
+
+# Check that deduplication does not actually deduplicate if there are
+# *different* pipeline info frames in multiple input files.
+print('Dedup test 2')
+p = core.G3Pipeline()
+p.Add(core.G3Reader, filename=['testpi.g3', 'testpi2.g3'])
+p.Add(core.Dump)
+i = 0
+def check(fr):
+	global i
+	if fr.type == core.G3FrameType.PipelineInfo:
+		i += 1
+p.Add(check)
+p.Run()
+assert(i == 2)
+
 
 os.remove('testpi.g3')
 os.remove('testpi2.g3')
