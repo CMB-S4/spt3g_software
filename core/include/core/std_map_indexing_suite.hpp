@@ -484,7 +484,7 @@ return incref(tuple.attr("__iter__")().ptr());
             // register it
             const converter::registration* value_reg =
                converter::registry::query(type_id<value_type>());
-            if (value_reg == NULL && value_reg->m_to_python == NULL) {
+            if (value_reg == NULL || value_reg->m_to_python == NULL) {
                 class_<value_type>(elem_name.c_str())
                     .def("__repr__", &DerivedPolicies::print_elem)
                     .def("data", &DerivedPolicies::get_data, get_data_return_policy(),
