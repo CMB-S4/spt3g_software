@@ -53,14 +53,13 @@ public:
 	size_t xdim() const { return xlen_; }
 	size_t ydim() const { return ylen_; }
 
-	// dynamically deallocate the sparse map while filling?
 	DenseMapData *to_dense() const;
 
 	template <class A> void serialize(A &ar, unsigned v) {
 		using namespace cereal;
 		// XXX: size_t vs. uint64_t
 		ar & make_nvp("xlen", xlen_);
-		ar & make_nvp("xlen", ylen_);
+		ar & make_nvp("ylen", ylen_);
 		ar & make_nvp("offset", offset_);
 		ar & make_nvp("data", data_);
 	}
@@ -106,7 +105,7 @@ public:
 		using namespace cereal;
 		// XXX: size_t vs. uint64_t
 		ar & make_nvp("xlen", xlen_);
-		ar & make_nvp("xlen", ylen_);
+		ar & make_nvp("ylen", ylen_);
 		ar & make_nvp("data", data_);
 	}
 
