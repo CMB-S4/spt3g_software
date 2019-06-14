@@ -129,7 +129,7 @@ FlatSkyMap::load(A &ar, unsigned v)
 }
 
 void
-FlatSkyMap::init_from_v1_data(const std::vector<double> data)
+FlatSkyMap::init_from_v1_data(const std::vector<double> &data)
 {
 	dense_ = new DenseMapData(xpix_, ypix_);
 	dense_->data_ = data;

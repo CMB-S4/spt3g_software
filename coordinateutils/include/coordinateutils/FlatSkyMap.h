@@ -93,7 +93,7 @@ public:
 	void ConvertToSparse();
 
 protected:
-	virtual void init_from_v1_data(const std::vector<double>) override;
+	virtual void init_from_v1_data(const std::vector<double> &) override;
 
 private:
 	FlatSkyProjection proj_info; // projection parameters and functions

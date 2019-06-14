@@ -128,7 +128,7 @@ public:
 
 protected:
 	uint32_t xpix_, ypix_;
-	virtual void init_from_v1_data(const std::vector<double>) {
+	virtual void init_from_v1_data(const std::vector<double> &) {
 		throw std::runtime_error("Initializing from V1 not implemented");
 	}
 
