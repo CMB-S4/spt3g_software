@@ -42,10 +42,26 @@ out:
 	out.push_back(frame);
 }
 
-EXPORT_G3MODULE("core", G3Writer, (init<std::string, optional<std::vector<G3Frame::FrameType> > >((arg("filename"), arg("streams")))),
-    "Writes frames to disk. Frames will be written to the file specified by "
-    "filename. If filename ends in .gz, output will be compressed using gzip. "
-    "To write only some types of frames, pass a list of the desired frame "
-    "types to the second optional argument (streams). If no streams argument "
-    "is given, writes all types of frames.");
+void G3Writer::Flush()
+{
+    if (!stream_.strict_sync()){
+        printf("There was a problem flushing the stream...\n");
+    }
+}
 
+PYBINDINGS("core") {
+	using namespace boost::python;
+
+	// Instead of EXPORT_G3MODULE since there is an extra Flush function
+	class_<G3Writer, bases<G3Module>, boost::shared_ptr<G3Writer>,
+	    boost::noncopyable>("G3Writer",
+	      "Writes frames to disk. Frames will be written to the file specified by "
+          "filename. If filename ends in .gz, output will be compressed using gzip. "
+          "To write only some types of frames, pass a list of the desired frame "
+          "types to the second optional argument (streams). If no streams argument "
+          "is given, writes all types of frames.",
+        init<std::string, optional<std::vector<G3Frame::FrameType> > >((arg("filename"), arg("streams"))))
+        .def("Flush", &G3Writer::Flush)
+        .def_readonly("__g3module__", true)
+	;
+}
