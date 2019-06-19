@@ -14,6 +14,7 @@ public:
 
 	virtual ~G3Writer();
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
+	void Flush();
 private:
 	std::string filename_;
 	boost::iostreams::filtering_ostream stream_;
