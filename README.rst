@@ -20,6 +20,7 @@ Minimum versions:
 	- GCC >= 4.7 or clang >= 3.3
 	- Boost >= 1.48
 	- cmake >= 2.6
+	- Python >= 2.7
 
 On Ubuntu/Debian, you can install the non-Python dependencies, including the optional ones, by doing:
 
@@ -32,6 +33,12 @@ On RHEL-type systems (SL, CentOS, etc.), do this:
 .. code-block:: shell
 
 	yum install cmake netcdf-devel boost-devel flac-devel fftw-devel gsl-devel
+	
+If your system defaults to Python 2, but you wish to use Python 3, please do the following:
+
+	1. Install Python 3 *from the system package manager*
+	2. Make sure the python-3 version of the Boost library is installed (on Ubuntu, this is part of the standard boost-python package referenced above)
+	3. When you run cmake below, pass ``-DPYTHON_EXECUTABLE=`which python3```
 
 
 Setup on RHEL6
