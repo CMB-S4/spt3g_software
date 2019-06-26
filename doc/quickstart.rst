@@ -16,6 +16,9 @@ Minimum versions:
 	- GCC >= 4.7 or clang >= 3.3
 	- Boost >= 1.48
 	- cmake >= 2.6
+	- Python >= 2.7
+
+Do *not* install *anything* with Anaconda!
 
 Installing Dependencies on a Personal System
 ============================================
@@ -41,7 +44,7 @@ On an OSG or other system with OASIS configured, run this before anything else:
 
 .. code-block:: sh
 
-	eval `/cvmfs/spt.opensciencegrid.org/py2-v1/setup.sh`
+	eval `/cvmfs/spt.opensciencegrid.org/py3-v2/setup.sh`
 
 This sets up a software environment with all the packages installed by yum, etc. above that you need for the SPT3G software environment, as well as a variety of standard cosmology and astrophysics tasks. You will obtain best results if you place the line above in your ``.bash_profile``. Do *not* put it in ``.bashrc`` and make *sure* that this is the *only* software installation set up in your bash profile. In particular, take care that there are no references to other python installations (Anaconda, etc.).
 
@@ -58,6 +61,8 @@ Having installed the appropriate dependencies, return to your checkout and run t
 	make
 
 Passing ``-jN`` to ``make``, where N is the number of cores you wish to use during building, will speed up the process.
+
+By default, this will use the system's standard Python installation (whatever you get if you just run ``python``). If you want a different python, you can specify that python through passing the argument ``-DPYTHON_EXECUTABLE=`` to cmake. For example, to use Python 3 if Python 3 is not the default, replace the cmake command above with ``cmake -DPYTHON_EXECUTABLE=`which python3```. Note that, if you do this, make *sure* that a Boost library built for the version of Python you are using exists -- generally, installing everything from the system package manager will ensure this.
 
 Once that is complete, you can use the ``env-shell.sh`` script in the build directory to set up the appropriate environment variables (PYTHONPATH, etc.):
 
