@@ -77,23 +77,20 @@ class MPIAccumulator(object):
     def finalize(self):
         # Put all observation metadata everywhere
         fullobs = {}
-        localmetadata = {}
+        localchunk = {}
         for k,v in self.localdata.items():
-            localmetadata[k] = [(m, self.mpicomm.rank, None) for m,d in v]
-        for i in range(self.mpicomm.size):
-            if i == self.mpicomm.rank:
-                self.mpicomm.bcast(localmetadata, root=i)
-                metadata = {}
-                for k,v in self.localdata.items():
-                    metadata[k] = [(m, i, d) for m,d in v]
-            else:
-                metadata = self.mpicomm.bcast(None, root=i)
-            for obs, data in metadata.items():
+            localchunk[k] = [(m, self.mpicomm.rank, None) for m,d in v]
+        chunks = self.mpicomm.allgather(localchunk)
+        del localchunk
+        for k,v in self.localdata.items():
+            chunks[self.mpicomm.rank][k] = [(m, self.mpicomm.rank, d) for m,d in v]
+        del self.localdata
+        for chunk in chunks:
+            for obs, data in chunk.items():
                 if obs not in fullobs:
                     fullobs[obs] = []
                 fullobs[obs] += data
-        del localmetadata
-        del self.localdata
+        del chunks
             
         # Now let's organize it
         if self.sorter is not None:
