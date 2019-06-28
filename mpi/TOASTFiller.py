@@ -67,32 +67,42 @@ class TOASTFiller(object):
                         continue
                     if (i[0]['startsamp'] + i[0]['nsamples']) < need[1][0]:
                         continue
-                    if i[0]['startsamp'] > need[1][1]:
+                    if i[0]['startsamp'] > need[1][1] + need[1][0]:
                         break
 
                     # Scan overlaps a need, get the relevant timestreams
-                    mask = slice(need[1][0] - i[0]['startsamp'], need[1][1] + 1 - i[0]['startsamp'])
+                    mask = slice(need[1][0] - i[0]['startsamp'], need[1][1] + need[1][0] - i[0]['startsamp'])
                     if mask.start < 0:
-                        maskstart = need[1][0]
+                        maskstart = i[0]['startsamp']
                         mask = slice(0, mask.stop)
                     else:
-                        maskstart = i[0]['startsamp']
+                        maskstart = need[1][0]
                     if mask.stop > i[0]['nsamples']:
                         mask = slice(mask.start, i[0]['nsamples'])
-                    chunk = core.G3TimestreamMap()
+                    chunk = {}
                     for k in need[2]:
-                        chunk[k] = i[2][k][mask]
+                        chunk[k] = numpy.asarray(i[2][k])[mask]
                     outdata[need[0]].append((maskstart, chunk))
-            del self.mpia # Avoid RAM balloon by deleting the old copies
             del dataneeds
 
-            outdata = self.mpicomm.alltoall(outdata) # Swap with everyone
+            #outdata = self.mpicomm.alltoall(outdata) # Swap with everyone
+            # XXX: Use crummy half-duplex for loop because of overflows in
+            # alltoall with large amounts of data
+            for i in range(self.mpicomm.size):
+                if i == self.mpicomm.rank:
+                    indata = [self.mpicomm.recv() for j in range(self.mpicomm.size-1)] + [outdata[i]]
+                    print('Node %d -- %s from need %s' % (self.mpicomm.rank, indata, (self.mpicomm.rank, d.local_samples, None)))
+                else:
+                    self.mpicomm.send(outdata[i], i)
+            del self.mpia # Avoid RAM balloon by deleting the old copies
+            outdata = indata
 
             # Now stitch everything into the TOAST structure
-            for chunk in outdata:
-                localstart = chunk[0] - d.local_samples[0]
-                for k,v in chunk[1].items():
-                    d.write(k, localstart, v)
+            for sourcenode in outdata:
+                for chunk in sourcenode:
+                    localstart = chunk[0] - d.local_samples[0]
+                    for k,v in chunk[1].items():
+                        d.write(k, localstart, v)
 
             toastobses.append({'id': obs[0]['obsid'], 'tod': d})
 
