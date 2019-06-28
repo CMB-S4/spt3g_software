@@ -45,8 +45,9 @@ class MPIAccumulator(object):
         sorter is used, if defined, to sort the list of frame data in each
         group. This is passed to the Python sorted() function as a 'key'
         argument and receives the metadata element stored for each set of
-        frame data. By default, sorts by whatever comparison Python does
-        to metadata.
+        frame data. By default, does no sorting (frames will still appear in
+        a common order across nodes related to the data distribution if
+        unsorted).
         '''
         self.mpicomm = mpicomm
         self.extractfunc = extractfunc
@@ -57,8 +58,6 @@ class MPIAccumulator(object):
         if self.extractfunc is None:
             self.extractfunc = defaultextract
         self.sorter = sorter
-        if self.sorter is None:
-            self.sorter = lambda m: m
         self.dataframes = dataframes
         self.localdata = {}
     def __call__(self, frame):
@@ -97,8 +96,9 @@ class MPIAccumulator(object):
         del self.localdata
             
         # Now let's organize it
-        for obs, data in fullobs.items():
-            data.sort(key=self.sorter)
+        if self.sorter is not None:
+            for obs, data in fullobs.items():
+                data.sort(key=self.sorter)
 
         self.fullobs = fullobs
 
