@@ -44,10 +44,10 @@ class MPIAccumulator(object):
 
         sorter is used, if defined, to sort the list of frame data in each
         group. This is passed to the Python sorted() function as a 'key'
-        argument and receives the metadata element stored for each set of
-        frame data. By default, does no sorting (frames will still appear in
-        a common order across nodes related to the data distribution if
-        unsorted).
+        argument and receives the three-element tuple stored for each set of
+        frame data (metadata, node, data). By default, does no sorting
+        (frames will still appear in a common order across nodes related to
+        the data distribution if unsorted).
         '''
         self.mpicomm = mpicomm
         self.extractfunc = extractfunc
