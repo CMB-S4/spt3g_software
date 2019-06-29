@@ -3,6 +3,7 @@ from toast import qarray as qa
 from spt3g import core, calibration, dfmux, coordinateutils
 import numpy
 from .MPIAccumulator import MPIAccumulator
+import pickle
 
 class TOASTFiller(object):
     '''
@@ -58,44 +59,29 @@ class TOASTFiller(object):
             # Make a list of who needs what
             dataneeds = (self.mpicomm.rank, d.local_samples, d.local_dets)
             dataneeds = self.mpicomm.allgather(dataneeds)
-            outdata = [[]]*self.mpicomm.size
 
             # Send/receive needed data
+            outdata = [[] for i in range(self.mpicomm.size)]
             for need in dataneeds:
                 for i in scans:
                     if i[2] is None:
                         continue
-                    if (i[0]['startsamp'] + i[0]['nsamples']) < need[1][0]:
-                        continue
-                    if i[0]['startsamp'] > need[1][1] + need[1][0]:
-                        break
+                    mask = slice(max(need[1][0], i[0]['startsamp']),
+                            min(need[1][1] + need[1][0], i[0]['startsamp'] +
+                                i[0]['nsamples']))
+                    if mask.stop <= mask.start:
+                        continue # No overlap
 
                     # Scan overlaps a need, get the relevant timestreams
-                    mask = slice(need[1][0] - i[0]['startsamp'], need[1][1] + need[1][0] - i[0]['startsamp'])
-                    if mask.start < 0:
-                        maskstart = i[0]['startsamp']
-                        mask = slice(0, mask.stop)
-                    else:
-                        maskstart = need[1][0]
-                    if mask.stop > i[0]['nsamples']:
-                        mask = slice(mask.start, i[0]['nsamples'])
+                    maskstart = mask.start
+                    mask = slice(mask.start - i[0]['startsamp'], mask.stop - i[0]['startsamp'])
                     chunk = {}
                     for k in need[2]:
                         chunk[k] = numpy.asarray(i[2][k])[mask]
                     outdata[need[0]].append((maskstart, chunk))
             del dataneeds
 
-            #outdata = self.mpicomm.alltoall(outdata) # Swap with everyone
-            # XXX: Use crummy half-duplex for loop because of overflows in
-            # alltoall with large amounts of data
-            for i in range(self.mpicomm.size):
-                if i == self.mpicomm.rank:
-                    indata = [self.mpicomm.recv() for j in range(self.mpicomm.size-1)] + [outdata[i]]
-                    print('Node %d -- %s from need %s' % (self.mpicomm.rank, indata, (self.mpicomm.rank, d.local_samples, None)))
-                else:
-                    self.mpicomm.send(outdata[i], i)
-            del self.mpia # Avoid RAM balloon by deleting the old copies
-            outdata = indata
+            outdata = self.mpicomm.alltoall(outdata) # Swap with everyone
 
             # Now stitch everything into the TOAST structure
             for sourcenode in outdata:
@@ -104,7 +90,8 @@ class TOASTFiller(object):
                     for k,v in chunk[1].items():
                         d.write(k, localstart, v)
 
-            toastobses.append({'id': obs[0]['obsid'], 'tod': d})
+            del self.mpia # Don't need this anymore
+            toastobses.append({'id': obs, 'tod': d})
 
         self.toastobses = toastobses
         return frame
