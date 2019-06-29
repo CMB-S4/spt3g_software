@@ -11,7 +11,7 @@ The MPIFileIO sub-module contains a few modules that will add frame-level parall
 
 This processing will make sure all metadata frames are seen by all processes in the same order with respect to both each other and all data frames and are thus strongly ordered across all processes. Data frames (scans, typically) are ordered on a node, but are not ordered between nodes and thus should be considered weakly ordered. For a frame sequence MN12345PQ67, where letters denote metadata frames (calibration, etc.) and numbers data frames, a possible ordering seen by the pipelines on two processing nodes would be MN134PQ7 and MN25PQ6, respectively. A consequence of these ordering rules is that you *must not use any modules that depend on frame ordering and continuity*. Examples of such would be modules that buffer multiple scans together to get longer-time-period data; by their nature, these only work for observation-level parallelism, rather than frame-level or file-level.
 
-Parallelization in this sense can be achieved by replacement of G3Reader in a normal G3Pipeline with MPIFrameParallelizer.
+Parallelization in this sense can be achieved by replacement of G3Reader in a normal G3Pipeline with MPIIODistributor.
 
 Frame Accumulation
 ==================
