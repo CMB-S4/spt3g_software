@@ -21,3 +21,8 @@ At the end of a sequence of parallel pipelines, you in general want to join the 
 The first of these cases (restitching an observation processed on many parallel processes) is more complicated than the second, so this library provides a helper module (MPIAccumulator) that does it for you, placing the result in a member variable inspected after the pipelines end.
 
 The second case is easier, but potentially common enough that a module should be added in future.
+
+Interface to TOAST
+==================
+
+There is an experimental module (TOASTFiller) that uses MPIAccumulator to fill frame contents after processing in many parallel pipelines into a TOAST TOD object in order to use TOAST's set of parallel timestream algorithms and map-making. Basic functionality is present, but it should be considered in-development at present.
