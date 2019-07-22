@@ -32,7 +32,8 @@ def get_ra_dec_map(map_in):
     return ra, dec
 
 
-def healpix_to_flatsky(map_in, nest=False, map_stub=None, rebin=1, **kwargs):
+def healpix_to_flatsky(map_in, nest=False, map_stub=None, rebin=1, interp=false,
+                       **kwargs):
     '''
     Re-pixelize a map from Healpix to one of the flat sky projections.
 
@@ -42,24 +43,26 @@ def healpix_to_flatsky(map_in, nest=False, map_stub=None, rebin=1, **kwargs):
         The array containing the input healpix map to reproject.
 
     nest[False]: bool
-        Ordering of the healpix map, if the input is a numpy array.
-        Ring ordering is assumed by default.
+        Ordering of the healpix map, if the input is a numpy array.  Ring
+        ordering is assumed by default.
 
     map_stub[None]: coordinateutils.FlatSkyMap
-        Stub output map object to be used to construct the output map.
-        If not supplied, one will be constructed using the remaining
-        keyword arguments.
+        Stub output map object to be used to construct the output map.  If not
+        supplied, one will be constructed using the remaining keyword arguments.
 
     rebin[1]: int
-        If supplied and >1, interpolate over sub-pixel structure
-        by intepolating and integrating over a sub-grid on each pixel
-        of the given dimension.  This avoids aliasing of power at
-        angular scales beyond the map resolution.
+        If supplied and >1, account for sub-pixel structure by integrating
+        over a sub-grid on each pixel of the given dimension.  This avoids
+        aliasing of power at angular scales beyond the map resolution.
+
+    interp[false]: bool
+        If True, use bilinear interpolation to extract values from the input
+        map.  Otherwise, the nearest-neighbor value is used.
 
     **kwargs:
         All additional keyword arguments are passed to
-        coordinateutils.FlatSkyMap to construct the output map object.
-        Required if `map_stub` is not supplied, otherwise ignored.
+        coordinateutils.FlatSkyMap to construct the output map object.  Required
+        if `map_stub` is not supplied, otherwise ignored.
 
     Returns:
     --------
@@ -79,13 +82,16 @@ def healpix_to_flatsky(map_in, nest=False, map_stub=None, rebin=1, **kwargs):
 
     # Populate output map pixels with interpolation and rebinning
     if isinstance(map_in, CutSkyHealpixMap):
-        reproj_map(map_in, map_out, rebin=rebin)
+        reproj_map(map_in, map_out, rebin=rebin, interp=interp)
     else:
-        reproj_fullsky_healpix_map(map_in, map_out, nest=nest, rebin=rebin)
+        reproj_fullsky_healpix_map(
+            map_in, map_out, nest=nest, rebin=rebin, interp=interp
+        )
 
     return map_out
 
-def flatsky_to_healpix(map_in, nside, nest=False, rebin=1, fullsky=False):
+def flatsky_to_healpix(map_in, nside, nest=False, rebin=1, interp=false,
+                       fullsky=False):
     '''
     Re-pixelize a map to Healpix from one of the flat projections.
 
@@ -102,15 +108,18 @@ def flatsky_to_healpix(map_in, nside, nest=False, rebin=1, fullsky=False):
         Ordering of the healpix map. 'Ring' by default
 
     rebin[1]: int
-        If supplied and >1, interpolate over sub-pixel structure
-        by intepolating and integrating over a sub-grid on each pixel
-        of the given dimension.  This avoids aliasing of power at
-        angular scales beyond the map resolution.
+        If supplied and >1, account for sub-pixel structure by integrating
+        over a sub-grid on each pixel of the given dimension.  This avoids
+        aliasing of power at angular scales beyond the map resolution.
+
+    interp[false]: bool
+        If True, use bilinear interpolation to extract values from the input
+        map.  Otherwise, the nearest-neighbor value is used.
 
     fullsky[false]: bool
         If True a full-sky numpy array representation of the map is returned.
-        Otherwise, a CutSkyHealpixMap instance is returned, containing
-        only the pixels that overlap with the input map.
+        Otherwise, a CutSkyHealpixMap instance is returned, containing only the
+        pixels that overlap with the input map.
 
     Returns:
     --------
@@ -127,7 +136,7 @@ def flatsky_to_healpix(map_in, nside, nest=False, rebin=1, fullsky=False):
     map_out = CutSkyHealpixMap(hitpix)
 
     # Populate output map pixels with interpolation
-    reproj_map(map_in, map_out, rebin=rebin)
+    reproj_map(map_in, map_out, rebin=rebin, interp=interp)
 
     if fullsky:
         return np.asarray(map_out.get_fullsky_map())
