@@ -32,7 +32,7 @@ def get_ra_dec_map(map_in):
     return ra, dec
 
 
-def healpix_to_flatsky(map_in, nest=False, map_stub=None, rebin=1, interp=false,
+def healpix_to_flatsky(map_in, nest=False, map_stub=None, rebin=1, interp=False,
                        **kwargs):
     '''
     Re-pixelize a map from Healpix to one of the flat sky projections.
@@ -90,7 +90,7 @@ def healpix_to_flatsky(map_in, nest=False, map_stub=None, rebin=1, interp=false,
 
     return map_out
 
-def flatsky_to_healpix(map_in, nside, nest=False, rebin=1, interp=false,
+def flatsky_to_healpix(map_in, nside, nest=False, rebin=1, interp=False,
                        fullsky=False):
     '''
     Re-pixelize a map to Healpix from one of the flat projections.
