@@ -8,7 +8,8 @@
 
 class G3Writer : public G3Module {
 public:
-	G3Writer(std::string filename, std::vector<G3Frame::FrameType> streams={});
+	G3Writer(std::string filename,
+	    std::vector<G3Frame::FrameType> streams={}, bool append=false);
 	// Writes to file <filename> all frames with types in <streams>.
 	// If <streams> is empty (default), writes all frames.
 
