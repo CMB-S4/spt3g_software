@@ -16,6 +16,9 @@ public:
 		return !(x < 0 || x >= xlen_ || y < 0 || y >= ylen_);
 	}
 
+	size_t xdim() const { return xlen_; }
+	size_t ydim() const { return ylen_; }
+
 	double operator()(size_t x, size_t y) const {
 		if (x < offset_ || x >= offset_ + data_.size())
 			return 0;
@@ -50,8 +53,29 @@ public:
 		return column.second[y - column.first];
 	}
 
-	size_t xdim() const { return xlen_; }
-	size_t ydim() const { return ylen_; }
+	SparseMapData &operator+=(const SparseMapData &r);
+	SparseMapData &operator-=(const SparseMapData &r);
+	SparseMapData &operator*=(const SparseMapData &r);
+	SparseMapData &operator/=(const SparseMapData &r);
+
+	SparseMapData &operator+=(const DenseMapData &r);
+	SparseMapData &operator-=(const DenseMapData &r);
+	SparseMapData &operator*=(const DenseMapData &r);
+	SparseMapData &operator/=(const DenseMapData &r);
+
+	SparseMapData &operator+=(double r);
+	SparseMapData &operator-=(double r);
+	SparseMapData &operator*=(double r);
+	SparseMapData &operator/=(double r);
+
+	SparseMapData *clone(bool copy_data = true) {
+		SparseMapData *m = new SparseMapData(xlen_, ylen_);
+		if (copy_data) {
+			m->data_ = data_;
+			m->offset_ = offset_;
+		}
+		return m;
+	}
 
 	DenseMapData *to_dense() const;
 
@@ -65,10 +89,10 @@ public:
 	}
 
 private:
-	size_t xlen_, ylen_;
+	uint64_t xlen_, ylen_;
 	typedef std::pair<int, std::vector<double> > data_element;
 	std::vector<data_element> data_;
-	size_t offset_;
+	uint64_t offset_;
 };
 
 
@@ -101,6 +125,29 @@ public:
 		return data_[idxat(x, y)];
 	}
 
+	DenseMapData &operator+=(const DenseMapData &r);
+	DenseMapData &operator-=(const DenseMapData &r);
+	DenseMapData &operator*=(const DenseMapData &r);
+	DenseMapData &operator/=(const DenseMapData &r);
+
+	DenseMapData &operator+=(const SparseMapData &r);
+	DenseMapData &operator-=(const SparseMapData &r);
+	DenseMapData &operator*=(const SparseMapData &r);
+	DenseMapData &operator/=(const SparseMapData &r);
+
+	DenseMapData &operator+=(double r);
+	DenseMapData &operator-=(double r);
+	DenseMapData &operator*=(double r);
+	DenseMapData &operator/=(double r);
+
+	DenseMapData *clone(bool copy_data = true) {
+		DenseMapData *m = new DenseMapData(xlen_, ylen_);
+		if (copy_data) {
+			m->data_ = data_;
+		}
+		return m;
+	}
+
 	template <class A> void serialize(A &ar, unsigned v) {
 		using namespace cereal;
 		// XXX: size_t vs. uint64_t
@@ -109,10 +156,10 @@ public:
 		ar & make_nvp("data", data_);
 	}
 
+private:
+	uint64_t xlen_, ylen_;
 	std::vector<double> data_;
 
-private:
-	size_t xlen_, ylen_;
 	inline size_t idxat(size_t x, size_t y) const {
 		return x + y * xlen_;
 	}
@@ -120,33 +167,3 @@ private:
 
 CEREAL_CLASS_VERSION(SparseMapData, 1);
 CEREAL_CLASS_VERSION(DenseMapData, 1);
-
-DenseMapData *
-SparseMapData::to_dense() const
-{
-	DenseMapData *rv = new DenseMapData(xlen_, ylen_);
-	for (size_t ix = 0; ix < data_.size(); ix++) {
-		size_t x = offset_ + ix;
-		const data_element &column = data_[ix];
-		for (size_t iy = 0; iy < column.second.size(); iy++) {
-			size_t y = column.first + iy;
-			(*rv)(x, y) = column.second[iy];
-		}
-	}
-	return rv;
-}
-
-SparseMapData::SparseMapData(const DenseMapData &dense_map) :
-    xlen_(dense_map.xdim()), ylen_(dense_map.ydim())
-{
-	double val;
-
-	for (size_t ix = 0; ix < xlen_; ix++) {
-		for (size_t iy = 0; iy < ylen_; iy++) {
-			val = dense_map(ix, iy);
-			if (val != 0)
-				(*this)(ix, iy) = val;
-		}
-	}
-}
-
