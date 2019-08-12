@@ -511,8 +511,8 @@ get_detector_pointing(double x_offset, double y_offset,
 		for (size_t i=0; i<alpha.size(); i++){
 			alpha[i] = nan("");
 			delta[i] = nan("");
-			return;
 		}
+		return;
 	}
 
 	for (size_t i = 0; i < alpha.size(); i++) {

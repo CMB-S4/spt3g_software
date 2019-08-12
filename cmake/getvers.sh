@@ -89,7 +89,7 @@ if [ -d .svn ]; then
 		echo versionname=\"\"
 	fi
 elif [ -d .git ]; then
-	if (git rev-parse --abbrev-ref --symbolic-full-name @{u} 1>&2 2>/dev/null); then
+	if (git rev-parse --abbrev-ref --symbolic-full-name @{u}>/dev/null 2>/dev/null); then
 		remote_branch=$(git rev-parse --abbrev-ref --symbolic-full-name @{u})
 		if (git remote get-url 1>&2 2>/dev/null); then
 			echo upstream_url=\"$(git remote get-url "$(echo $remote_branch | cut -d / -f 1)")\"
@@ -108,7 +108,7 @@ elif [ -d .git ]; then
 	else
 		echo localdiffs=False
 	fi
-	echo versionname=\"$(git tag -l --points-at HEAD)\"
+	echo versionname=\"$(git tag -l --points-at HEAD 2>/dev/null)\"
 else
 	echo upstream_url=\"UNKNOWN VCS\"
 	echo upstream_branch=\"UNKNOWN VCS\"

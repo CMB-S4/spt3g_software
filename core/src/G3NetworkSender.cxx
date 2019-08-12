@@ -1,5 +1,6 @@
 #include <pybindings.h>
 #include <G3Module.h>
+#include <G3NetworkSender.h>
 
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/device/array.hpp>
@@ -28,7 +29,7 @@
  * and are then distributed to one or more communication threads, each of which
  * serves one network client. Data are communicated to the communication threads
  * as buffers rather than frames to accomplish the following things:
- * 
+ *
  * 1) Avoids paradoxes from later modification of frames by other modules.
  *    Frames, unlike frame objects, are mutable.
  * 2) Avoids worrying about races during serialization.
@@ -38,37 +39,6 @@
  *    pointers that may have come from Python
  */
 
-class G3NetworkSender : public G3Module {
-public:
-	G3NetworkSender(std::string hostname, int port, int max_queue_size);
-	virtual ~G3NetworkSender();
-	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
-private:
-	int fd_;
-	int max_queue_size_;
-	bool listening_;
-
-	typedef boost::shared_ptr<std::vector<char> > netbuf_type;
-
-	struct thread_data {
-		std::thread thread;
-		std::mutex queue_lock;
-		std::condition_variable queue_sem;
-		std::deque<netbuf_type> queue;
-
-		int fd;
-		bool die; // Protected by queue lock
-	};
-
-	std::vector<boost::shared_ptr<thread_data> > threads_;
-	static void SendLoop(boost::shared_ptr<struct thread_data>);
-	void StartThread(int fd);
-	void ReapDeadThreads(void);
-
-	std::vector<std::pair<G3Frame::FrameType, netbuf_type> > metadata_;
-
-	SET_LOGGER("G3NetworkSender");
-};
 
 EXPORT_G3MODULE("core", G3NetworkSender,
     (init<std::string, int, int>((arg("hostname"), arg("port"),
@@ -247,7 +217,7 @@ restart:
 		(*i)->queue_lock.unlock();
 	}
 }
-	
+
 
 void
 G3NetworkSender::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
@@ -326,4 +296,3 @@ G3NetworkSender::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	}
 	out.push_back(frame);
 }
-

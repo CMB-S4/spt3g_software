@@ -62,7 +62,7 @@ void get_ra_dec_map_cpp(G3SkyMapConstPtr m, G3SkyMapPtr ra, G3SkyMapPtr dec)
 }
 
 
-void reproj_map(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin)
+void reproj_map(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool interp)
 {
 
 	if (in_map->coord_ref != out_map->coord_ref) {
@@ -78,12 +78,18 @@ void reproj_map(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin)
 			std::vector<double> ra, dec;
 			out_map->get_rebin_angles(i, rebin, ra, dec);
 			for (size_t j = 0; j < ra.size(); j++) {
-				val += in_map->get_interp_value(ra[j], dec[j]);
+				if (interp)
+					val += in_map->get_interp_value(ra[j], dec[j]);
+				else
+					val += (*in_map)[in_map->angle_to_pixel(ra[j], dec[j])];
 			}
 			val /= ra.size();
 		} else {
 			std::vector<double> radec = out_map->pixel_to_angle(i);
-			val = in_map->get_interp_value(radec[0], radec[1]);
+			if (interp)
+				val = in_map->get_interp_value(radec[0], radec[1]);
+			else
+				val = (*in_map)[in_map->angle_to_pixel(radec[0], radec[1])];
 		}
 		(*out_map)[i] = val;
 	}
@@ -97,7 +103,7 @@ void reproj_map(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin)
 
 #if 0
 void reproj_fullsky_healpix_map(std::vector<double> in_map, G3SkyMapPtr out_map,
-    bool nest, int rebin)
+    bool nest, int rebin, bool interp)
 {
 	//grab our out ra dec values
 	out_map->EnsureAllocated();
@@ -117,21 +123,29 @@ void reproj_fullsky_healpix_map(std::vector<double> in_map, G3SkyMapPtr out_map,
 			std::vector<double> ra, dec;
 			out_map->get_rebin_angles(i, rebin, ra, dec);
 			for (size_t j = 0; j < ra.size(); j++) {
-				std::vector<long> pixels;
-				std::vector<double> weights;
-				hitpix.get_interp_pixels_weights(ra[j], dec[j], pixels, weights, false);
-				for (size_t k = 0; k < pixels.size(); k++) {
-					val += in_map[pixels[k]] * weights[k];
+				if (interp) {
+					std::vector<long> pixels;
+					std::vector<double> weights;
+					hitpix.get_interp_pixels_weights(ra[j], dec[j], pixels, weights, false);
+					for (size_t k = 0; k < pixels.size(); k++) {
+						val += in_map[pixels[k]] * weights[k];
+					}
+				} else {
+					val += in_map[hitpix.angle_to_pixel(ra[j], dec[j], false)];
 				}
 			}
 			val /= ra.size();
 		} else {
 			std::vector<double> radec = out_map->pixel_to_angle(i);
-			std::vector<long> pixels;
-			std::vector<double> weights;
-			hitpix.get_interp_pixels_weights(radec[0], radec[1], pixels, weights, false);
-			for (size_t j = 0; j < pixels.size(); j++) {
-				val += in_map[pixels[j]] * weights[j];
+			if (interp) {
+				std::vector<long> pixels;
+				std::vector<double> weights;
+				hitpix.get_interp_pixels_weights(radec[0], radec[1], pixels, weights, false);
+				for (size_t j = 0; j < pixels.size(); j++) {
+					val += in_map[pixels[j]] * weights[j];
+				}
+			} else {
+				val += in_map[hitpix.angle_to_pixel(radec[0], radec[1], false)];
 			}
 		}
 		(*out_map)[i] = val;
@@ -144,16 +158,16 @@ namespace bp = boost::python;
 void maputils_pybindings(void){
 	bp::def("get_ra_dec_map_cpp", get_ra_dec_map_cpp);
 	bp::def("reproj_map", reproj_map,
-		(bp::arg("in_map"), bp::arg("out_map"), bp::arg("rebin")=1),
+		(bp::arg("in_map"), bp::arg("out_map"), bp::arg("rebin")=1, bp::arg("interp")=false),
 		"Takes the data in in_map and reprojects it onto out_map.  out_map can\n"
 		"have a different projection, size, resolution, etc.  Optionally account\n"
-		"for sub-pixel structure in the interpolation by setting rebin > 1.");
 #if 0
 	bp::def("reproj_fullsky_healpix_map", reproj_fullsky_healpix_map,
-		( bp::arg("in_map"), bp::arg("out_map"), bp::arg("nest")=false, bp::arg("rebin")=1),
+		( bp::arg("in_map"), bp::arg("out_map"), bp::arg("nest")=false, bp::arg("rebin")=1, bp::arg("interp")=false),
 		"Takes the data in in_map (a full sky healpix map stored as a simple array)\n"
 		"and reprojects it onto out_map.  out_map can be any G3SkyMap instance.\n"
-		"Optionally account for sub-pixel structure in the interpolation by setting\n"
-		"rebin > 1");
+		"Optionally account for sub-pixel structure by setting rebin > 1m and/or\n"
+		"enable bilinear interpolation of values from the input map by setting\n"
+		"interp = true.");
 #endif
 }
