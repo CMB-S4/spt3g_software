@@ -373,6 +373,31 @@ StokesVector StokesVector::operator /(const MuellerMatrix &r) const
 	return v;
 }
 
+void G3SkyMapWithWeights::ApplyWeights(G3SkyMapWeightsPtr w)
+{
+	g3_assert(!IsWeighted());
+	g3_assert(this->T.IsCompatible(w->TT));
+
+	for (size_t pix = 0; pix < this->T.npix(); pix++) {
+		(*this)[pix] = (*w)[pix] * (*this)[pix];
+	}
+
+	// Store pointer to weights here
+	this->weights = w;
+}
+
+void G3SkyMapWithWeights::RemoveWeights()
+{
+	g3_assert(IsWeighted());
+
+	for (size_t pix = 0; pix < this->T.npix(); pix++) {
+		(*this)[pix] /= (*weights)[pix];
+	}
+
+	// Remove pointer to weights
+	this->weights = NULL;
+}
+
 PYBINDINGS("coordinateutils") {
 	bp::enum_<MapCoordReference>("MapCoordReference")
 	    .value("Local", Local)

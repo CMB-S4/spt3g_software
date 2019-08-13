@@ -58,8 +58,9 @@ public:
 	virtual double &operator [] (int i) = 0;
 	virtual double operator [] (int i) const = 0;
 
-	virtual size_t size(void) const = 0;
-	virtual std::vector<size_t> shape(void) const = 0;
+	virtual size_t size(void) const = 0;  // changes dynamically based on contents
+	virtual size_t npix(void) const = 0;  // fixed maximum size
+	virtual std::vector<size_t> shape(void) const = 0;  // fixed map shape
 
 	virtual bool IsCompatible(const G3SkyMap & other) const {
 		return (coord_ref == other.coord_ref);
@@ -311,7 +312,7 @@ public:
 	}
 
 	void RemoveWeights();
-	void ApplyWeights();
+	void ApplyWeights(G3SkyMapWeightsPtr weights);
 
 	StokesVector get_interp_value(double alpha, double delta) const;
 
