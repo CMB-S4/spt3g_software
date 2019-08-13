@@ -2,10 +2,6 @@
 #include <serialization.h>
 #include <coordinateutils/G3SkyMap.h>
 
-#ifdef OPENMP_FOUND
-#include <omp.h>
-#endif
-
 namespace bp=boost::python;
 
 template <class A> void
@@ -19,16 +15,17 @@ G3SkyMap::serialize(A &ar, unsigned v)
 		std::vector<double> dat;
 		ar & cereal::make_nvp("data", dat);
 		
-		ar & cereal::make_nvp("xpix", xpix_);
-		ar & cereal::make_nvp("ypix", ypix_);
-		
+		uint32_t xpix, ypix;
+		ar & cereal::make_nvp("xpix", xpix);
+		ar & cereal::make_nvp("ypix", ypix);
+		std::vector<size_t> dims;
+		dims.push_back(xpix);
+		dims.push_back(ypix);
+
 		overflow = dat[dat.size() - 1];
 		dat.resize(dat.size() - 1);
-		init_from_v1_data(dat);
+		init_from_v1_data(dims, dat);
 	} else {
-		ar & cereal::make_nvp("xpix", xpix_);
-		ar & cereal::make_nvp("ypix", ypix_);
-
 		ar & cereal::make_nvp("overflow", overflow);
 	}
 
@@ -52,6 +49,20 @@ G3SkyMapWeights::serialize(A &ar, unsigned v)
 	if (v > 1) {
 		ar & cereal::make_nvp("weight_type", weight_type);
 	}
+}
+
+template <class A> void
+G3SkyMapWithWeights::serialize(A &ar, unsigned v)
+{
+	G3_CHECK_VERSION(v);
+
+	ar & cereal::make_nvp("G3FrameObject",
+	    cereal::base_class<G3FrameObject>(this));
+	ar & cereal::make_nvp("map_id", map_id);
+	ar & cereal::make_nvp("T", T);
+        ar & cereal::make_nvp("Q", Q);
+        ar & cereal::make_nvp("U", U);
+        ar & cereal::make_nvp("weights", weights);
 }
 
 G3_SERIALIZABLE_CODE(G3SkyMap);
@@ -122,9 +133,7 @@ std::vector<int> G3SkyMap::angles_to_pixels(const std::vector<double> & alphas,
     const std::vector<double> & deltas) const
 {
 	std::vector<int> pixels(alphas.size());
-#ifdef OPENMP_FOUND
-#pragma omp parallel for
-#endif
+
 	for (size_t i = 0; i < alphas.size(); i++) {
 		pixels[i] = angle_to_pixel(alphas[i], deltas[i]);
 	}
@@ -141,9 +150,7 @@ void G3SkyMap::pixels_to_angles(const std::vector<int> & pixels,
 	if (deltas.size() != pixels.size()) {
 		deltas = std::vector<double>(pixels.size());
 	}
-#ifdef OPENMP_FOUND
-#pragma omp parallel for
-#endif
+
 	for (size_t i = 0; i < pixels.size(); i++) {
 		std::vector<double> ang;
 		ang = pixel_to_angle(pixels[i]);
@@ -176,9 +183,7 @@ std::vector<double> G3SkyMap::get_interp_values(const std::vector<double> & alph
     const std::vector<double> & deltas) const
 {
 	std::vector<double> outvals(alphas.size());
-#ifdef OPENMP_FOUND
-#pragma omp parallel for
-#endif
+
 	for (size_t i = 0; i < alphas.size(); i++) {
 		outvals[i] = get_interp_value(alphas[i], deltas[i]);
 	}
@@ -330,154 +335,43 @@ skymap_copy(G3SkyMap &r)
 	return r.Clone(true);
 }
 
-G3SkyMap &
-G3SkyMap::operator+=(const G3SkyMap & rhs)
-{
-	EnsureAllocated();
-	g3_assert(IsCompatible(rhs));
-	for (size_t i = 0; i < data_.size(); i++)
-		data_[i] += rhs.data_[i];
-	return *this;
-}
-
-G3SkyMap &
-G3SkyMap::operator+=(double rhs)
-{
-	EnsureAllocated();
-	for (size_t i = 0; i < data_.size(); i++)
-		data_[i] += rhs;
-	return *this;
-}
-
-G3SkyMap
-G3SkyMap::operator+(const G3SkyMap & rhs)
-{
-	EnsureAllocated();
-	G3SkyMap new_map(*this);
-	new_map += rhs;
-	return new_map;
-}
-
-G3SkyMap
-G3SkyMap::operator+(double rhs)
-{
-	EnsureAllocated();
-	G3SkyMap new_map(*this);
-	new_map += rhs;
-	return new_map;
-}
-
-G3SkyMap &
-G3SkyMap::operator-=(const G3SkyMap &rhs)
-{
-	EnsureAllocated();
-	g3_assert(IsCompatible(rhs));
-	for (size_t i = 0; i < data_.size(); i++)
-		data_[i] -= rhs.data_[i];
-	return *this;
-}
-
-G3SkyMap &
-G3SkyMap::operator-=(double rhs)
-{
-	EnsureAllocated();
-	for (size_t i = 0; i < data_.size(); i++)
-	data_[i] -= rhs;
-	return *this;
-}
-
-G3SkyMap
-G3SkyMap::operator-(const G3SkyMap & rhs)
-{
-	EnsureAllocated();
-	G3SkyMap new_map(*this);
-	new_map -= rhs;
-	return new_map;
-}
-
-G3SkyMap
-G3SkyMap::operator-(double rhs)
-{
-	EnsureAllocated();
-	G3SkyMap new_map(*this);
-	new_map -= rhs;
-	return new_map;
-}
-
-G3SkyMap &
-G3SkyMap::operator*=(const G3SkyMap & rhs)
-{
-	EnsureAllocated();
-	g3_assert(IsCompatible(rhs));
-	for (size_t i = 0; i < data_.size(); i++)
-		data_[i] *= rhs.data_[i];
-	return *this;
-}
-
-G3SkyMap &
-G3SkyMap::operator*=(double rhs)
-{
-	EnsureAllocated();
-	for (size_t i = 0; i < data_.size(); i++)
-		data_[i] *= rhs;
-	return *this;
-}
-
-G3SkyMap
-G3SkyMap::operator*(const G3SkyMap & rhs)
-{
-	EnsureAllocated();
-	G3SkyMap new_map(*this);
-	new_map *= rhs;
-	return new_map;
-}
-
-G3SkyMap
-G3SkyMap::operator*(double rhs)
-{
-	EnsureAllocated();
-	G3SkyMap new_map(*this);
-	new_map *= rhs;
-	return new_map;
-}
-
-G3SkyMap &
-G3SkyMap::operator/=(const G3SkyMap & rhs)
-{
-	EnsureAllocated();
-	g3_assert(IsCompatible(rhs));
-	for (size_t i = 0; i < data_.size(); i++)
-		data_[i] /= rhs.data_[i];
-	return *this;
-}
-
-G3SkyMap &
-G3SkyMap::operator/=(double rhs)
-{
-	EnsureAllocated();
-	for (size_t i = 0; i < data_.size(); i++)
-		data_[i] /= rhs;
-	return *this;
-}
-
-G3SkyMap
-G3SkyMap::operator/(const G3SkyMap & rhs)
-{
-	EnsureAllocated();
-	G3SkyMap new_map(*this);
-	new_map /= rhs;
-	return new_map;
-}
-
-G3SkyMap
-G3SkyMap::operator/(double rhs)
-{
-	EnsureAllocated();
-	G3SkyMap new_map(*this);
-	new_map /= rhs;
-	return new_map;
-}
 #endif
+
+StokesVector & StokesVector::operator /=(const MuellerMatrix &r)
+{
+	double det = r.det();
+	if (r.tt == 0 || det < 1e-12) {
+		if (det < 1e-12 && r.tt != 0) {
+			log_trace("Singular matrix found when inverting!  Det is %lE\n", det);
+		}
+		t = 0;
+		q = 0;
+		u = 0;
+		return *this;
+	}
+
+	double t_ = (t * (r.qq * r.uu - r.qu * r.qu) +
+		     -q * (r.tq * r.uu - r.tu * r.qu) +
+		     u * (r.tq * r.qu - r.tu * r.qq)) / det;
+	double q_ = (-t * (r.tq * r.uu - r.qu * r.tu) +
+		     q * (r.tt * r.uu - r.tu * r.tu) +
+		     -u * (r.tt * r.qu - r.tq * r.tu)) / det;
+	double u_ = (t * (r.tq * r.qu - r.tu * r.qq) +
+		     -q * (r.tt * r.qu - r.tu * r.tq) +
+		     u * (r.tt * r.qq - r.tq * r.tq)) / det;
+	t = t_;
+	q = q_;
+	u = u_;
+	return *this;
+}
+
+StokesVector StokesVector::operator /(const MuellerMatrix &r) const
+{
+	StokesVector v;
+	v += *this;
+	v /= r;
+	return v;
+}
 
 PYBINDINGS("coordinateutils") {
 	bp::enum_<MapCoordReference>("MapCoordReference")
@@ -516,9 +410,9 @@ PYBINDINGS("coordinateutils") {
 	      "Unit class (core.G3TimestreamUnits) of the map (e.g. "
 	      "core.G3TimestreamUnits.Tcmb). Within each unit class, further "
 	      "conversions, for example from K to uK, should use core.G3Units.")
-#if 0
 	    .def_readwrite("is_weighted", &G3SkyMap::is_weighted,
 	      "True if map is multiplied by weights")
+#if 0
 	    .add_property("size", &G3SkyMap::size, "Number of pixels in map")
 	    .add_property("shape", &skymap_shape, "Shape of map")
 #endif
@@ -548,10 +442,6 @@ PYBINDINGS("coordinateutils") {
 	      (bp::arg("pixels"), bp::arg("alphas"), bp::arg("deltas")),
 	       "Compute the sky coordinates of each of the given 1D pixels")
 	    .def("pixel_to_angle", 
-	      (std::vector<double> (G3SkyMap::*)(size_t, size_t) const) 
-	      &G3SkyMap::pixel_to_angle, (bp::arg("x_pix"), bp::arg("y_pix")),
-	      "Compute the sky coordinates of the given 2D pixel")
-	    .def("pixel_to_angle", 
 	      (std::vector<double> (G3SkyMap::*)(size_t) const) 
 	      &G3SkyMap::pixel_to_angle, bp::arg("pixel"),
 	      "Compute the sky coordinates of the given 1D pixel")
@@ -570,15 +460,6 @@ PYBINDINGS("coordinateutils") {
 	      "blocks of pixels together.  Returns a new map object. "
 	      "Map dimensions must be a multiple of the rebinning scale.")
 
-#if 0
-	    .def(bp::self + bp::self)
-	    .def(bp::self * bp::self)
-	    .def(bp::self - bp::self)
-	    .def(bp::self / bp::self)
-	    .def(bp::self + double())
-	    .def(bp::self * double())
-	    .def(bp::self - double())
-	    .def(bp::self / double())
 	    .def(bp::self += bp::self)
 	    .def(bp::self *= bp::self)
 	    .def(bp::self -= bp::self)
@@ -587,7 +468,6 @@ PYBINDINGS("coordinateutils") {
 	    .def(bp::self *= double())
 	    .def(bp::self -= double())
 	    .def(bp::self /= double())
-#endif
 	;
 
 #if 0
