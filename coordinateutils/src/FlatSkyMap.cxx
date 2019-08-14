@@ -406,6 +406,7 @@ PYBINDINGS("coordinateutils")
 		  bp::arg("coord_ref") = MapCoordReference::Equatorial,
 		  bp::arg("units") = G3Timestream::Tcmb,
 		  bp::arg("pol_type") = G3SkyMap::None, bp::arg("x_res") = 0)))
+#if 0
 	    .def(bp::init<boost::python::object, double, bool, MapProjection,
 	       double, double, MapCoordReference, G3Timestream::TimestreamUnits,
 	       G3SkyMap::MapPolType, double>(
@@ -417,6 +418,7 @@ PYBINDINGS("coordinateutils")
 		   bp::arg("units") = G3Timestream::Tcmb,
 		   bp::arg("pol_type") = G3SkyMap::None,
 		   bp::arg("x_res") = 0)))
+#endif
 
 	    .def(bp::init<const FlatSkyMap&>(bp::arg("flat_map")))
 	    .def(bp::init<>())

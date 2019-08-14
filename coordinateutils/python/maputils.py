@@ -1,7 +1,10 @@
 from spt3g import core
 
-from spt3g.coordinateutils import CutSkyHealpixMap, HealpixHitPix, FlatSkyMap
-from spt3g.coordinateutils import reproj_map, reproj_fullsky_healpix_map, get_ra_dec_map_cpp
+# XXX
+#from spt3g.coordinateutils import CutSkyHealpixMap, HealpixHitPix, FlatSkyMap
+from spt3g.coordinateutils import FlatSkyMap
+#from spt3g.coordinateutils import reproj_map, reproj_fullsky_healpix_map, get_ra_dec_map_cpp
+from spt3g.coordinateutils import reproj_map, get_ra_dec_map_cpp
 
 import numpy as np
 import copy
