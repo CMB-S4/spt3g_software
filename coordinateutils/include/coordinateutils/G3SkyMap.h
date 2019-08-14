@@ -103,11 +103,11 @@ public:
 	    std::vector<double> & alphas, std::vector<double> & deltas) const = 0;
 	virtual void get_interp_pixels_weights(double alpha, double delta,
 	    std::vector<long> & pixels, std::vector<double> & weights) const = 0;
-	virtual double get_interp_precalc(const std::vector<long> & pixels,
-	    const std::vector<double> & weights) const = 0;
-	virtual double get_interp_value(double alpha, double delta) const;
-	virtual std::vector<double> get_interp_values(const std::vector<double> & alphas,
-	    const std::vector<double> & deltas) const;
+	double get_interp_precalc(const std::vector<long> &pixels,
+	    const std::vector<double> &weights) const;
+	double get_interp_value(double alpha, double delta) const;
+	std::vector<double> get_interp_values(const std::vector<double> &alphas,
+	    const std::vector<double> &deltas) const;
 
 	virtual boost::shared_ptr<G3SkyMap> rebin(size_t scale) const = 0;
 
