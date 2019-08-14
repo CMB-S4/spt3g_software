@@ -46,12 +46,13 @@ FlatSkyMap::FlatSkyMap() :
 }
 
 FlatSkyMap::FlatSkyMap(const FlatSkyMap & fm) :
-    G3SkyMap(fm), proj_info(fm.proj_info)
+    G3SkyMap(fm), proj_info(fm.proj_info), xpix_(fm.xpix_), ypix_(fm.ypix_)
 {
 	if (fm.dense_)
 		dense_ = new DenseMapData(*fm.dense_);
 	else if (fm.sparse_)
 		sparse_ = new SparseMapData(*fm.sparse_);
+	// XXX accesses crash after copy construction
 }
 
 FlatSkyMap::~FlatSkyMap()

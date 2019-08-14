@@ -308,11 +308,11 @@ G3SkyMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 }
 
 static PyBufferProcs skymap_bufferprocs;
+#endif
 
 static double
 skymap_getitem(G3SkyMap &skymap, int i)
 {
-	skymap.EnsureAllocated();
 
 	if (i < 0)
 		i = skymap.size() + i;
@@ -324,6 +324,7 @@ skymap_getitem(G3SkyMap &skymap, int i)
 	return skymap[i];
 }
 
+#if 0
 static double
 skymap_getitem_2d(G3SkyMap &skymap, bp::tuple coords)
 {
@@ -346,11 +347,11 @@ skymap_getitem_2d(G3SkyMap &skymap, bp::tuple coords)
 
 	return skymap[skymap.pixat(x, y)];
 }
+#endif
 
 static void
 skymap_setitem(G3SkyMap &skymap, int i, double val)
 {
-	skymap.EnsureAllocated();
 
 	if (i < 0)
 		i = skymap.size() + i;
@@ -362,6 +363,7 @@ skymap_setitem(G3SkyMap &skymap, int i, double val)
 	skymap[i] = val;
 }
 
+#if 0
 static void
 skymap_setitem_2d(G3SkyMap &skymap, bp::tuple coords, double val)
 {
@@ -385,14 +387,12 @@ skymap_setitem_2d(G3SkyMap &skymap, bp::tuple coords, double val)
 
 	skymap[skymap.pixat(x, y)] = val;
 }
+#endif
 
 static bp::tuple
 skymap_shape(G3SkyMap &skymap)
 {
-	if (skymap.ydim() == 1)
-		return bp::make_tuple(skymap.xdim());
-	else
-		return bp::make_tuple(skymap.ydim(), skymap.xdim());
+	return bp::tuple(skymap.shape());
 }
 
 static G3SkyMapPtr
@@ -401,7 +401,6 @@ skymap_copy(G3SkyMap &r)
 	return r.Clone(true);
 }
 
-#endif
 
 StokesVector & StokesVector::operator /=(const MuellerMatrix &r)
 {
@@ -505,21 +504,21 @@ PYBINDINGS("coordinateutils") {
 	      "conversions, for example from K to uK, should use core.G3Units.")
 	    .def_readwrite("is_weighted", &G3SkyMap::is_weighted,
 	      "True if map is multiplied by weights")
-#if 0
 	    .add_property("size", &G3SkyMap::size, "Number of pixels in map")
 	    .add_property("shape", &skymap_shape, "Shape of map")
-#endif
+	    .add_property("npix_allocated", &G3SkyMap::npix_allocated,
+	      "Number of pixels in map currently stored in memory")
 	    .def_readwrite("overflow", &G3SkyMap::overflow,
               "Combined value of data processed by "
 	      "the map maker but outside of the map area")
-#if 0
 	    .def("__getitem__", &skymap_getitem)
 	    .def("__setitem__", &skymap_setitem)
+#if 0
 	    .def("__getitem__", &skymap_getitem_2d)
 	    .def("__setitem__", &skymap_setitem_2d)
+#endif
 	    .def("__copy__", &skymap_copy)
 	    .def("__deepcopy__", &skymap_copy)
-#endif
 	    .def("Clone", &G3SkyMap::Clone,
 	      ((bp::arg("copy_data")=true),
 	       "Return a map of the same type, populated with a copy of the data "
