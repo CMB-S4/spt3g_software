@@ -159,6 +159,74 @@ void G3SkyMap::pixels_to_angles(const std::vector<int> & pixels,
 	}
 }
 
+size_t G3SkyMap::size() const
+{
+	size_t s = 1;
+	for (size_t i : shape())
+		s *= i;
+	return s;
+}
+
+G3SkyMap &G3SkyMap::operator+=(const G3SkyMap & rhs)
+{
+	assert(IsCompatible(rhs));
+	for (size_t i = 0; i < rhs.size(); i++)
+		(*this)[i] += rhs[i];
+	return *this;
+}
+
+G3SkyMap &G3SkyMap::operator+=(double rhs)
+{
+	for (size_t i = 0; i < size(); i++)
+		(*this)[i] += rhs;
+	return *this;
+}
+
+G3SkyMap &G3SkyMap::operator-=(const G3SkyMap &rhs)
+{
+	assert(IsCompatible(rhs));
+	for (size_t i = 0; i < rhs.size(); i++)
+		(*this)[i] -= rhs[i];
+	return *this;
+}
+
+G3SkyMap &G3SkyMap::operator-=(double rhs)
+{
+	for (size_t i = 0; i < size(); i++)
+		(*this)[i] -= rhs;
+	return *this;
+}
+
+G3SkyMap &G3SkyMap::operator*=(const G3SkyMap &rhs)
+{
+	assert(IsCompatible(rhs));
+	for (size_t i = 0; i < rhs.size(); i++)
+		(*this)[i] *= rhs[i];
+	return *this;
+}
+
+G3SkyMap &G3SkyMap::operator*=(double rhs)
+{
+	for (size_t i = 0; i < size(); i++)
+		(*this)[i] *= rhs;
+	return *this;
+}
+
+G3SkyMap &G3SkyMap::operator/=(const G3SkyMap &rhs)
+{
+	assert(IsCompatible(rhs));
+	for (size_t i = 0; i < rhs.size(); i++)
+		(*this)[i] /= rhs[i];
+	return *this;
+}
+
+G3SkyMap &G3SkyMap::operator/=(double rhs)
+{
+	for (size_t i = 0; i < size(); i++)
+		(*this)[i] /= rhs;
+	return *this;
+}
+
 #if 0
 double G3SkyMap::get_interp_precalc(const std::vector<long> & pix,
     const std::vector<double> & weight) const
@@ -376,9 +444,10 @@ StokesVector StokesVector::operator /(const MuellerMatrix &r) const
 void G3SkyMapWithWeights::ApplyWeights(G3SkyMapWeightsPtr w)
 {
 	g3_assert(!IsWeighted());
-	g3_assert(T.IsCompatible(w->TT));
+	g3_assert(T->IsCompatible(*(w->TT)));
 
-	for (size_t pix = 0; pix < T.npix(); pix++) {
+	for (size_t pix = 0; pix < T->size(); pix++) {
+		// XXX implicitly densifies maps
 		(*this)[pix] = (*w)[pix] * (*this)[pix];
 	}
 
@@ -390,12 +459,13 @@ void G3SkyMapWithWeights::RemoveWeights()
 {
 	g3_assert(IsWeighted());
 
-	for (size_t pix = 0; pix < T.npix(); pix++) {
+	for (size_t pix = 0; pix < T->size(); pix++) {
+		// XXX implicitly densifies maps
 		(*this)[pix] /= (*weights)[pix];
 	}
 
 	// Remove pointer to weights
-	weights = NULL;
+	weights.reset();
 }
 
 PYBINDINGS("coordinateutils") {

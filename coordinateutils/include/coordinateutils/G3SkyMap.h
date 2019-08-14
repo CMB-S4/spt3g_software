@@ -58,31 +58,36 @@ public:
 	virtual double &operator [] (int i) = 0;
 	virtual double operator [] (int i) const = 0;
 
-	virtual size_t size(void) const = 0;  // changes dynamically based on contents
-	virtual size_t npix(void) const = 0;  // fixed maximum size
-	virtual std::vector<size_t> shape(void) const = 0;  // fixed map shape
+	virtual size_t size(void) const;  // total number of pixels
+	virtual size_t npix_allocated(void) const = 0;  // stored in RAM
+	virtual std::vector<size_t> shape(void) const = 0;  // map shape
 
 	virtual bool IsCompatible(const G3SkyMap & other) const {
+		if (shape().size() != other.shape().size())
+			return false;
+		for (size_t i = 0; i < shape().size(); i++)
+			if (shape()[i] != other.shape()[i])
+				return false;
 		return (coord_ref == other.coord_ref);
 	}
 
 	// Arithmetic operations:
 
 	// +
-	virtual G3SkyMap & operator+=(const G3SkyMap & rhs) = 0;
-	virtual G3SkyMap & operator+=(double rhs) = 0;
+	virtual G3SkyMap &operator+=(const G3SkyMap &rhs);
+	virtual G3SkyMap &operator+=(double rhs);
 
 	// -
-	virtual G3SkyMap & operator-=(const G3SkyMap & rhs) = 0;
-	virtual G3SkyMap & operator-=(double rhs) = 0;
+	virtual G3SkyMap &operator-=(const G3SkyMap &rhs);
+	virtual G3SkyMap &operator-=(double rhs);
 
 	// *
-	virtual G3SkyMap & operator*=(const G3SkyMap & rhs) = 0;
-	virtual G3SkyMap & operator*=(double rhs) = 0;
+	virtual G3SkyMap &operator*=(const G3SkyMap &rhs);
+	virtual G3SkyMap &operator*=(double rhs);
 
 	// /
-	virtual G3SkyMap & operator/=(const G3SkyMap & rhs) = 0;
-	virtual G3SkyMap & operator/=(double rhs) = 0;
+	virtual G3SkyMap &operator/=(const G3SkyMap &rhs);
+	virtual G3SkyMap &operator/=(double rhs);
 
 	// Pointing information
 	virtual std::vector<int> angles_to_pixels(const std::vector<double> & alphas,
@@ -321,7 +326,7 @@ public:
 private:
 	template <class A> void serialize(A &ar, const unsigned v);
 	friend class cereal::access;
-}
+};
 
 G3_POINTERS(G3SkyMapWithWeights);
 
