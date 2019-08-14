@@ -407,6 +407,53 @@ G3SkyMapPtr FlatSkyMap::rebin(size_t scale) const
 	return out;
 }
 
+static int
+FlatSkyMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
+{
+	namespace bp = boost::python;
+
+	if (view == NULL) {
+		PyErr_SetString(PyExc_ValueError, "NULL view");
+		return -1;
+	}
+
+	view->shape = NULL;
+
+	bp::handle<> self(bp::borrowed(obj));
+	bp::object selfobj(self);
+	FlatSkyMapPtr sm = bp::extract<FlatSkyMapPtr>(selfobj)();
+
+	sm->ConvertToDense();
+
+	view->obj = obj;
+	view->buf = (void*)&(*sm)[0];
+	view->len = sm->size() * sizeof(double);
+	view->readonly = 0;
+	view->itemsize = sizeof(double);
+	if (flags & PyBUF_FORMAT)
+		view->format = (char *)"d";
+	else
+		view->format = NULL;
+
+	// XXX: following leaks small amounts of memory!
+	view->shape = new Py_ssize_t[2];
+	view->strides = new Py_ssize_t[2];
+
+	view->ndim = 2;
+	view->shape[0] = sm->shape()[0];
+	view->shape[1] = sm->shape()[1];
+	view->strides[0] = sm->shape()[0]*view->itemsize;
+	view->strides[1] = view->itemsize;
+
+	view->suboffsets = NULL;
+
+	Py_INCREF(obj);
+
+	return 0;
+}
+
+static PyBufferProcs flatskymap_bufferprocs;
+
 static double
 flatskymap_getitem_2d(const FlatSkyMap &skymap, bp::tuple coords)
 {
@@ -513,7 +560,7 @@ PYBINDINGS("coordinateutils")
 
 	// Can't use the normal FRAMEOBJECT code since this inherits
 	// from an intermediate class. Expanded by hand here.
-	class_<FlatSkyMap, bases<G3SkyMap>, FlatSkyMapPtr>(
+	object fsm = class_<FlatSkyMap, bases<G3SkyMap>, FlatSkyMapPtr>(
 	  "FlatSkyMap", FLAT_SKY_MAP_DOCSTR, boost::python::no_init)
 	    .def(boost::python::init<const FlatSkyMap &>())
 	    .def_pickle(g3frameobject_picklesuite<FlatSkyMap>())
@@ -567,6 +614,14 @@ PYBINDINGS("coordinateutils")
 	    .def("__setitem__", flatskymap_setitem_2d)
 	;
 	register_pointer_conversions<FlatSkyMap>();
+
+	// Add buffer protocol interface
+	PyTypeObject *fsmclass = (PyTypeObject *)fsm.ptr();
+	flatskymap_bufferprocs.bf_getbuffer = FlatSkyMap_getbuffer;
+	fsmclass->tp_as_buffer = &flatskymap_bufferprocs;
+#if PY_MAJOR_VERSION < 3
+	fsmclass->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
+#endif
 
 	implicitly_convertible<FlatSkyMapPtr, G3SkyMapPtr>();
 	implicitly_convertible<FlatSkyMapConstPtr, G3SkyMapConstPtr>();

@@ -211,59 +211,6 @@ std::vector<double> G3SkyMap::get_interp_values(const std::vector<double> & alph
 	return outvals;
 }
 
-#if 0
-static int
-G3SkyMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
-{
-	if (view == NULL) {
-		PyErr_SetString(PyExc_ValueError, "NULL view");
-		return -1;
-	}
-
-	view->shape = NULL;
-
-	bp::handle<> self(bp::borrowed(obj));
-	bp::object selfobj(self);
-	G3SkyMapPtr sm = bp::extract<G3SkyMapPtr>(selfobj)();
-
-	sm->EnsureAllocated();
-
-	view->obj = obj;
-	view->buf = (void*)&(*sm)[0];
-	view->len = sm->size() * sizeof(double);
-	view->readonly = 0;
-	view->itemsize = sizeof(double);
-	if (flags & PyBUF_FORMAT)
-		view->format = (char *)"d";
-	else
-		view->format = NULL;
-
-	// XXX: following leaks small amounts of memory!
-	view->shape = new Py_ssize_t[2];
-	view->strides = new Py_ssize_t[2];
-
-	if (sm->ydim() == 1) {
-		view->ndim = 1;
-		view->shape[0] = sm->xdim();
-		view->strides[0] = view->itemsize;
-	} else {
-		view->ndim = 2;
-		view->shape[0] = sm->ydim();
-		view->shape[1] = sm->xdim();
-		view->strides[0] = sm->xdim()*view->itemsize;
-		view->strides[1] = view->itemsize;
-	}
-
-	view->suboffsets = NULL;
-
-	Py_INCREF(obj);
-
-	return 0;
-}
-
-static PyBufferProcs skymap_bufferprocs;
-#endif
-
 static double
 skymap_getitem(const G3SkyMap &skymap, int i)
 {
@@ -390,7 +337,7 @@ PYBINDINGS("coordinateutils") {
 	;
 	enum_none_converter::from_python<G3SkyMapWeights::WeightType>();
 
-	bp::object skymap = bp::class_<G3SkyMap, boost::noncopyable,
+	bp::class_<G3SkyMap, boost::noncopyable,
 	  G3SkyMapPtr>("G3SkyMap",
 	  "Base class for 1- and 2-D skymaps of various projections. Usually "
 	  "you want a subclass of this (e.g. FlatSkyMap) rather than using it "
@@ -460,16 +407,6 @@ PYBINDINGS("coordinateutils") {
 	    .def(bp::self -= double())
 	    .def(bp::self /= double())
 	;
-
-#if 0
-	// Add buffer protocol interface
-	PyTypeObject *smclass = (PyTypeObject *)skymap.ptr();
-	skymap_bufferprocs.bf_getbuffer = G3SkyMap_getbuffer;
-	smclass->tp_as_buffer = &skymap_bufferprocs;
-#if PY_MAJOR_VERSION < 3
-	smclass->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
-#endif
-#endif
 
 	EXPORT_FRAMEOBJECT(G3SkyMapWeights, init<>(), "generic sky weight")
 	    .def(bp::init<G3SkyMapConstPtr, G3SkyMapWeights::WeightType>(
