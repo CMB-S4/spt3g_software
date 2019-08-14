@@ -1,3 +1,6 @@
+#include <boost/make_shared.hpp>
+#include <serialization.h>
+
 #include "mapdata.h"
 
 DenseMapData *
@@ -30,7 +33,8 @@ SparseMapData::SparseMapData(const DenseMapData &dense_map) :
 }
 
 
-SparseMapData &operator+=(const SparseMapData &r)
+SparseMapData &
+SparseMapData::operator+=(const SparseMapData &r)
 {
 	assert(xlen_ == r.xlen_);
 	assert(ylen_ == r.ylen_);
@@ -49,7 +53,8 @@ SparseMapData &operator+=(const SparseMapData &r)
 	return *this;
 }
 
-SparseMapData &operator+=(const DenseMapData &r)
+SparseMapData &
+SparseMapData::operator+=(const DenseMapData &r)
 {
 	assert(xlen_ == r.xdim());
 	assert(ylen_ == r.ydim());
@@ -65,21 +70,8 @@ SparseMapData &operator+=(const DenseMapData &r)
 	return *this;
 }
 
-SparseMapData &operator+=(double r)
-{
-	if (r == 0)
-		return *this;
-
-	for (size_t x = 0; x < xlen_; x++) {
-		for (size_t y = 0; y < ylen_; y++) {
-			(*this)(x, y) += r;
-		}
-	}
-
-	return *this;
-}
-
-SparseMapData &operator-=(const SparseMapData &r)
+SparseMapData &
+SparseMapData::operator-=(const SparseMapData &r)
 {
 	assert(xlen_ == r.xlen_);
 	assert(ylen_ == r.ylen_);
@@ -98,7 +90,8 @@ SparseMapData &operator-=(const SparseMapData &r)
 	return *this;
 }
 
-SparseMapData &operator-=(const DenseMapData &r)
+SparseMapData &
+SparseMapData::operator-=(const DenseMapData &r)
 {
 	assert(xlen_ == r.xdim());
 	assert(ylen_ == r.ydim());
@@ -114,28 +107,15 @@ SparseMapData &operator-=(const DenseMapData &r)
 	return *this;
 }
 
-SparseMapData &operator-=(double r)
-{
-	if (r == 0)
-		return *this;
-
-	for (size_t x = 0; x < xlen_; x++) {
-		for (size_t y = 0; y < ylen_; y++) {
-			(*this)(x, y) -= r;
-		}
-	}
-
-	return *this;
-}
-
-SparseMapData &operator*=(const SparseMapData &r)
+SparseMapData &
+SparseMapData::operator*=(const SparseMapData &r)
 {
 	assert(xlen_ == r.xlen_);
 	assert(ylen_ == r.ylen_);
 
 	for (size_t ix = 0; ix < data_.size(); ix++) {
 		size_t x = offset_ + ix;
-		const data_element &column = data_[ix];
+		data_element &column = data_[ix];
 		for (size_t iy = 0; iy < column.second.size(); iy++) {
 			size_t y = column.first + iy;
 			column.second[iy] *= r(x, y);
@@ -145,14 +125,15 @@ SparseMapData &operator*=(const SparseMapData &r)
 	return *this;
 }
 
-SparseMapData &operator*=(const DenseMapData &r)
+SparseMapData &
+SparseMapData::operator*=(const DenseMapData &r)
 {
 	assert(xlen_ == r.xdim());
 	assert(ylen_ == r.ydim());
 
 	for (size_t ix = 0; ix < data_.size(); ix++) {
 		size_t x = offset_ + ix;
-		const data_element &column = data_[ix];
+		data_element &column = data_[ix];
 		for (size_t iy = 0; iy < column.second.size(); iy++) {
 			size_t y = column.first + iy;
 			column.second[iy] *= r(x, y);
@@ -162,11 +143,12 @@ SparseMapData &operator*=(const DenseMapData &r)
 	return *this;
 }
 
-SparseMapData &operator*=(double r)
+SparseMapData &
+SparseMapData::operator*=(double r)
 {
 	for (size_t ix = 0; ix < data_.size(); ix++) {
 		size_t x = offset_ + ix;
-		const data_element &column = data_[ix];
+		data_element &column = data_[ix];
 		for (size_t iy = 0; iy < column.second.size(); iy++) {
 			size_t y = column.first + iy;
 			column.second[iy] *= r;
@@ -176,14 +158,15 @@ SparseMapData &operator*=(double r)
 	return *this;
 }
 
-SparseMapData &operator/=(const SparseMapData &r)
+SparseMapData &
+SparseMapData::operator/=(const SparseMapData &r)
 {
 	assert(xlen_ == r.xlen_);
 	assert(ylen_ == r.ylen_);
 
 	for (size_t ix = 0; ix < data_.size(); ix++) {
 		size_t x = offset_ + ix;
-		const data_element &column = data_[ix];
+		data_element &column = data_[ix];
 		for (size_t iy = 0; iy < column.second.size(); iy++) {
 			size_t y = column.first + iy;
 			column.second[iy] /= r(x, y);
@@ -193,14 +176,15 @@ SparseMapData &operator/=(const SparseMapData &r)
 	return *this;
 }
 
-SparseMapData &operator/=(const DenseMapData &r)
+SparseMapData &
+SparseMapData::operator/=(const DenseMapData &r)
 {
 	assert(xlen_ == r.xdim());
 	assert(ylen_ == r.ydim());
 
 	for (size_t ix = 0; ix < data_.size(); ix++) {
 		size_t x = offset_ + ix;
-		const data_element &column = data_[ix];
+		data_element &column = data_[ix];
 		for (size_t iy = 0; iy < column.second.size(); iy++) {
 			size_t y = column.first + iy;
 			column.second[iy] /= r(x, y);
@@ -210,11 +194,12 @@ SparseMapData &operator/=(const DenseMapData &r)
 	return *this;
 }
 
-SparseMapData &operator/=(double r)
+SparseMapData &
+SparseMapData::operator/=(double r)
 {
 	for (size_t ix = 0; ix < data_.size(); ix++) {
 		size_t x = offset_ + ix;
-		const data_element &column = data_[ix];
+		data_element &column = data_[ix];
 		for (size_t iy = 0; iy < column.second.size(); iy++) {
 			size_t y = column.first + iy;
 			column.second[iy] /= r;
@@ -224,7 +209,8 @@ SparseMapData &operator/=(double r)
 	return *this;
 }
 
-DenseMapData &operator+=(const DenseMapData &r)
+DenseMapData &
+DenseMapData::operator+=(const DenseMapData &r)
 {
 	assert(xlen_ == r.xlen_);
 	assert(ylen_ == r.ylen_);
@@ -238,7 +224,8 @@ DenseMapData &operator+=(const DenseMapData &r)
 	return *this;
 }
 
-DenseMapData &operator+=(const SparseMapData &r)
+DenseMapData &
+DenseMapData::operator+=(const SparseMapData &r)
 {
 	assert(xlen_ == r.xdim());
 	assert(ylen_ == r.ydim());
@@ -252,7 +239,8 @@ DenseMapData &operator+=(const SparseMapData &r)
 	return *this;
 }
 
-DenseMapData &operator+=(double r)
+DenseMapData &
+DenseMapData::operator+=(double r)
 {
 	if (r == 0)
 		return *this;
@@ -266,7 +254,8 @@ DenseMapData &operator+=(double r)
 	return *this;
 }
 
-DenseMapData &operator-=(const DenseMapData &r)
+DenseMapData &
+DenseMapData::operator-=(const DenseMapData &r)
 {
 	assert(xlen_ == r.xlen_);
 	assert(ylen_ == r.ylen_);
@@ -280,7 +269,8 @@ DenseMapData &operator-=(const DenseMapData &r)
 	return *this;
 }
 
-DenseMapData &operator-=(const SparseMapData &r)
+DenseMapData &
+DenseMapData::operator-=(const SparseMapData &r)
 {
 	assert(xlen_ == r.xdim());
 	assert(ylen_ == r.ydim());
@@ -294,7 +284,8 @@ DenseMapData &operator-=(const SparseMapData &r)
 	return *this;
 }
 
-DenseMapData &operator-=(double r)
+DenseMapData &
+DenseMapData::operator-=(double r)
 {
 	if (r == 0)
 		return *this;
@@ -308,7 +299,8 @@ DenseMapData &operator-=(double r)
 	return *this;
 }
 
-DenseMapData &operator*=(const DenseMapData &r)
+DenseMapData &
+DenseMapData::operator*=(const DenseMapData &r)
 {
 	assert(xlen_ == r.xlen_);
 	assert(ylen_ == r.ylen_);
@@ -322,7 +314,8 @@ DenseMapData &operator*=(const DenseMapData &r)
 	return *this;
 }
 
-DenseMapData &operator*=(const SparseMapData &r)
+DenseMapData &
+DenseMapData::operator*=(const SparseMapData &r)
 {
 	assert(xlen_ == r.xdim());
 	assert(ylen_ == r.ydim());
@@ -336,11 +329,9 @@ DenseMapData &operator*=(const SparseMapData &r)
 	return *this;
 }
 
-DenseMapData &operator*=(double r)
+DenseMapData &
+DenseMapData::operator*=(double r)
 {
-	if (r == 0)
-		return *this;
-
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {
 			(*this)(x, y) *= r;
@@ -350,7 +341,8 @@ DenseMapData &operator*=(double r)
 	return *this;
 }
 
-DenseMapData &operator/=(const DenseMapData &r)
+DenseMapData &
+DenseMapData::operator/=(const DenseMapData &r)
 {
 	assert(xlen_ == r.xlen_);
 	assert(ylen_ == r.ylen_);
@@ -364,7 +356,8 @@ DenseMapData &operator/=(const DenseMapData &r)
 	return *this;
 }
 
-DenseMapData &operator/=(const SparseMapData &r)
+DenseMapData &
+DenseMapData::operator/=(const SparseMapData &r)
 {
 	assert(xlen_ == r.xdim());
 	assert(ylen_ == r.ydim());
@@ -378,11 +371,9 @@ DenseMapData &operator/=(const SparseMapData &r)
 	return *this;
 }
 
-DenseMapData &operator/=(double r)
+DenseMapData &
+DenseMapData::operator/=(double r)
 {
-	if (r == 0)
-		return *this;
-
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {
 			(*this)(x, y) /= r;
@@ -391,3 +382,4 @@ DenseMapData &operator/=(double r)
 
 	return *this;
 }
+

@@ -69,8 +69,6 @@ public:
 	SparseMapData &operator*=(const DenseMapData &r);
 	SparseMapData &operator/=(const DenseMapData &r);
 
-	SparseMapData &operator+=(double r);
-	SparseMapData &operator-=(double r);
 	SparseMapData &operator*=(double r);
 	SparseMapData &operator/=(double r);
 

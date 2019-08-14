@@ -11,6 +11,7 @@ add_library(coordinateutils SHARED
   #src/CutskyHealpixMap.cxx
   src/flatskyprojection.cxx
   src/FlatSkyMap.cxx
+  src/mapdata.cxx
   src/maputils.cxx
   src/quaternion.cxx
   src/python.cxx
