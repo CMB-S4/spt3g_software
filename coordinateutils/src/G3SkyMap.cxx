@@ -83,52 +83,6 @@ G3SkyMapWeights::G3SkyMapWeights(const G3SkyMapWeights &r) :
 {
 }
 
-#if 0
-G3SkyMap::G3SkyMap(bp::object v, MapCoordReference coords, bool is_weighted,
-    G3Timestream::TimestreamUnits u, G3SkyMap::MapPolType pol_type) :
-    coord_ref(coords), units(u), pol_type(pol_type), is_weighted(is_weighted)
-{
-	Py_buffer view;
-	if (PyObject_GetBuffer(v.ptr(), &view,
-	    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) != -1) {
-		if (view.ndim == 1){
-			xpix_ = view.shape[0];
-			ypix_ = 1;
-		} else if (view.ndim == 2) {
-			ypix_ = view.shape[0];
-			xpix_ = view.shape[1];
-		} else {
-			log_fatal("Only 1 and 2-D maps supported");
-		}
-		data_.resize(xpix_*ypix_+1);
-
-		if (strcmp(view.format, "d") == 0) {
-			memcpy(&(data_[0]), view.buf, view.len);
-		} else if (strcmp(view.format, "f") == 0) {
-			for (size_t i = 0; i < view.len/sizeof(float); i++)
-				data_[i] = ((float *)view.buf)[i];
-		} else if (strcmp(view.format, "i") == 0) {
-			for (size_t i = 0; i < view.len/sizeof(int); i++)
-				data_[i] = ((int *)view.buf)[i];
-		} else if (strcmp(view.format, "I") == 0) {
-			for (size_t i = 0; i < view.len/sizeof(int); i++)
-				data_[i] = ((unsigned int *)view.buf)[i];
-		} else if (strcmp(view.format, "l") == 0) {
-			for (size_t i = 0; i < view.len/sizeof(long); i++)
-				data_[i] = ((unsigned long *)view.buf)[i];
-		} else {
-			log_fatal("Unknown type code %s", view.format);
-		}
-		PyBuffer_Release(&view);
-
-		data_[data_.size()-1] = 0;
-		return;
-	}
-
-	throw bp::error_already_set();
-}
-#endif
-
 std::vector<int> G3SkyMap::angles_to_pixels(const std::vector<double> & alphas,
     const std::vector<double> & deltas) const
 {

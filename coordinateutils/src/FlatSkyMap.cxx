@@ -17,20 +17,55 @@ FlatSkyMap::FlatSkyMap(int x_len, int y_len, double res, bool is_weighted,
 {
 }
 
-#if 0
-// Needs to pass-through to G3SkyMap constructor, so can't be an
-// out-of-class make_constructor() thing
 FlatSkyMap::FlatSkyMap(boost::python::object v, double res,
     bool is_weighted, MapProjection proj,
     double alpha_center, double delta_center,
     MapCoordReference coord_ref, G3Timestream::TimestreamUnits u,
     G3SkyMap::MapPolType pol_type, double x_res) :
-      G3SkyMap(v, coord_ref, is_weighted, u, pol_type),
-      proj_info(xpix_, ypix_, res, alpha_center, delta_center, x_res, proj), 
+      G3SkyMap(coord_ref, is_weighted, u, pol_type),
       dense_(NULL), sparse_(NULL)
 {
+	Py_buffer view;
+	if (PyObject_GetBuffer(v.ptr(), &view,
+	    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) != -1) {
+		if (view.ndim == 1){
+			xpix_ = view.shape[0];
+			ypix_ = 1;
+		} else if (view.ndim == 2) {
+			ypix_ = view.shape[0];
+			xpix_ = view.shape[1];
+		} else {
+			log_fatal("Only 1 and 2-D maps supported");
+		}
+		proj_info = FlatSkyProjection(xpix_, ypix_, res, alpha_center,
+		    delta_center, x_res, proj);
+		ConvertToDense();
+
+		double *d = &(*dense_)(0,0);
+		if (strcmp(view.format, "d") == 0) {
+			memcpy(d, view.buf, view.len);
+		} else if (strcmp(view.format, "f") == 0) {
+			for (size_t i = 0; i < view.len/sizeof(float); i++)
+				d[i] = ((float *)view.buf)[i];
+		} else if (strcmp(view.format, "i") == 0) {
+			for (size_t i = 0; i < view.len/sizeof(int); i++)
+				d[i] = ((int *)view.buf)[i];
+		} else if (strcmp(view.format, "I") == 0) {
+			for (size_t i = 0; i < view.len/sizeof(int); i++)
+				d[i] = ((unsigned int *)view.buf)[i];
+		} else if (strcmp(view.format, "l") == 0) {
+			for (size_t i = 0; i < view.len/sizeof(long); i++)
+				d[i] = ((unsigned long *)view.buf)[i];
+		} else {
+			log_fatal("Unknown type code %s", view.format);
+		}
+		PyBuffer_Release(&view);
+
+		return;
+	}
+
+	throw bp::error_already_set();
 }
-#endif
 
 FlatSkyMap::FlatSkyMap(const FlatSkyProjection & fp,
     MapCoordReference coord_ref, bool is_weighted,
@@ -407,7 +442,6 @@ PYBINDINGS("coordinateutils")
 		  bp::arg("coord_ref") = MapCoordReference::Equatorial,
 		  bp::arg("units") = G3Timestream::Tcmb,
 		  bp::arg("pol_type") = G3SkyMap::None, bp::arg("x_res") = 0)))
-#if 0
 	    .def(bp::init<boost::python::object, double, bool, MapProjection,
 	       double, double, MapCoordReference, G3Timestream::TimestreamUnits,
 	       G3SkyMap::MapPolType, double>(
@@ -419,7 +453,6 @@ PYBINDINGS("coordinateutils")
 		   bp::arg("units") = G3Timestream::Tcmb,
 		   bp::arg("pol_type") = G3SkyMap::None,
 		   bp::arg("x_res") = 0)))
-#endif
 
 	    .def(bp::init<const FlatSkyMap&>(bp::arg("flat_map")))
 	    .def(bp::init<>())
