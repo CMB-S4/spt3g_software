@@ -161,6 +161,9 @@ void maputils_pybindings(void){
 		(bp::arg("in_map"), bp::arg("out_map"), bp::arg("rebin")=1, bp::arg("interp")=false),
 		"Takes the data in in_map and reprojects it onto out_map.  out_map can\n"
 		"have a different projection, size, resolution, etc.  Optionally account\n"
+		"for sub-pixel structure by setting rebin > 1m and/or\n"
+		"enable bilinear interpolation of values from the input map by setting\n"
+		"interp = true.");
 #if 0
 	bp::def("reproj_fullsky_healpix_map", reproj_fullsky_healpix_map,
 		( bp::arg("in_map"), bp::arg("out_map"), bp::arg("nest")=false, bp::arg("rebin")=1, bp::arg("interp")=false),
