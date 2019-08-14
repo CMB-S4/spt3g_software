@@ -58,6 +58,8 @@ public:
 	virtual G3SkyMapPtr Clone(bool copy_data = true) const override;
 	std::string Description() const override;
 
+	std::vector<size_t> shape() const override;
+	size_t npix_allocated() const override;
 	bool IsCompatible(const G3SkyMap & other) const override;
 
 	void set_proj(MapProjection proj);
@@ -77,7 +79,7 @@ public:
 
 	size_t angle_to_pixel(double alpha, double delta) const override;
 	std::vector<double> pixel_to_angle(size_t pixel) const override;
-        std::vector<double> pixel_to_angle(size_t x_pix, size_t y_pix) const override;
+        std::vector<double> pixel_to_angle(size_t x_pix, size_t y_pix) const;
 	std::vector<double> pixel_to_angle_wrap_ra(size_t pixel) const;
 	std::vector<double> angle_to_xy(double alpha, double delta) const;
 	std::vector<double> xy_to_angle(double x, double y) const;
@@ -93,13 +95,14 @@ public:
 	void ConvertToSparse();
 
 protected:
-	virtual void init_from_v1_data(const std::vector<double> &) override;
+	virtual void init_from_v1_data(std::vector<size_t>, const std::vector<double> &) override;
 
 private:
 	FlatSkyProjection proj_info; // projection parameters and functions
 
 	DenseMapData *dense_;
 	SparseMapData *sparse_;
+	size_t xpix_, ypix_;
 
 	SET_LOGGER("FlatSkyMap");
 };

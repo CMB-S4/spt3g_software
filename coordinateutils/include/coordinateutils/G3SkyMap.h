@@ -112,7 +112,8 @@ public:
 	virtual boost::shared_ptr<G3SkyMap> rebin(size_t scale) const = 0;
 
 protected:
-	virtual void init_from_v1_data(const std::vector<size_t> &, const std::vector<double> &) {
+	virtual void init_from_v1_data(std::vector<size_t>,
+	    const std::vector<double> &) {
 		throw std::runtime_error("Initializing from V1 not implemented");
 	}
 

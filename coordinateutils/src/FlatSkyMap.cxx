@@ -11,9 +11,9 @@ FlatSkyMap::FlatSkyMap(int x_len, int y_len, double res, bool is_weighted,
     MapProjection proj, double alpha_center, double delta_center,
     MapCoordReference coord_ref, G3Timestream::TimestreamUnits u,
     G3SkyMap::MapPolType pol_type, double x_res) :
-      G3SkyMap(coord_ref, x_len, y_len, is_weighted, u, pol_type),
+      G3SkyMap(coord_ref, is_weighted, u, pol_type),
       proj_info(x_len, y_len, res, alpha_center, delta_center, x_res, proj),
-      dense_(NULL), sparse_(NULL)
+      dense_(NULL), sparse_(NULL), xpix_(x_len), ypix_(y_len)
 {
 }
 
@@ -35,8 +35,8 @@ FlatSkyMap::FlatSkyMap(boost::python::object v, double res,
 FlatSkyMap::FlatSkyMap(const FlatSkyProjection & fp,
     MapCoordReference coord_ref, bool is_weighted,
     G3Timestream::TimestreamUnits u, G3SkyMap::MapPolType pol_type) :
-      G3SkyMap(coord_ref, fp.xdim(), fp.ydim(), is_weighted, u, pol_type),
-      proj_info(fp)
+      G3SkyMap(coord_ref, is_weighted, u, pol_type),
+      proj_info(fp), xpix_(fp.xdim()), ypix_(fp.ydim())
 {
 }
 
@@ -129,10 +129,10 @@ FlatSkyMap::load(A &ar, unsigned v)
 }
 
 void
-FlatSkyMap::init_from_v1_data(const std::vector<double> &data)
+FlatSkyMap::init_from_v1_data(std::vector<size_t> dims, const std::vector<double> &data)
 {
-	dense_ = new DenseMapData(xpix_, ypix_);
-	dense_->data_ = data;
+	dense_ = new DenseMapData(dims[0], dims[1]);
+	(*dense_) = data;
 }
 
 void
@@ -252,6 +252,18 @@ bool FlatSkyMap::IsCompatible(const G3SkyMap & other) const {
 	} catch(const std::bad_cast& e) {
 		return false;
 	}
+}
+
+std::vector<size_t> FlatSkyMap::shape() const {
+	return {xpix_, ypix_};
+}
+
+size_t FlatSkyMap::npix_allocated() const {
+	if (dense_)
+		return xpix_*ypix_;
+	if (sparse_)
+		return sparse_->nonzero();
+	return 0;
 }
 
 #define GETSET(name, type)                     \

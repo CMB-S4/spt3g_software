@@ -18,6 +18,12 @@ public:
 
 	size_t xdim() const { return xlen_; }
 	size_t ydim() const { return ylen_; }
+	size_t nonzero() const {
+		size_t nz = 0;
+		for (size_t i = 0; i < data_.size(); i++)
+			nz += data_[i].second.size();
+		return nz;
+	}
 
 	double operator()(size_t x, size_t y) const {
 		if (x < offset_ || x >= offset_ + data_.size())
@@ -123,6 +129,20 @@ public:
 		assert(y < ylen_);
 
 		return data_[idxat(x, y)];
+	}
+
+	DenseMapData &operator=(const DenseMapData &r)
+	{
+		xlen_ = r.xlen_;
+		ylen_ = r.ylen_;
+		data_ = r.data_;
+		return *this;
+	}
+	DenseMapData &operator=(const std::vector<double> &d)
+	{
+		assert(data_.size() == d.size());
+		data_ = d;
+		return *this;
 	}
 
 	DenseMapData &operator+=(const DenseMapData &r);
