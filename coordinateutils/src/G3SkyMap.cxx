@@ -278,31 +278,6 @@ skymap_getitem(const G3SkyMap &skymap, int i)
 	return skymap[i];
 }
 
-#if 0
-static double
-skymap_getitem_2d(G3SkyMap &skymap, bp::tuple coords)
-{
-	int y = bp::extract<int>(coords[0]);
-	int x = bp::extract<int>(coords[1]);
-	if (x < 0)
-		x = skymap.xdim() + x;
-	if (y < 0)
-		y = skymap.xdim() + y;
-	if (size_t(x) >= skymap.xdim()) {
-		PyErr_SetString(PyExc_IndexError, "X index out of range");
-		bp::throw_error_already_set();
-	}
-	if (size_t(y) >= skymap.ydim()) {
-		PyErr_SetString(PyExc_IndexError, "Y index out of range");
-		bp::throw_error_already_set();
-	}
-
-	skymap.EnsureAllocated();
-
-	return skymap[skymap.pixat(x, y)];
-}
-#endif
-
 static void
 skymap_setitem(G3SkyMap &skymap, int i, double val)
 {
@@ -316,32 +291,6 @@ skymap_setitem(G3SkyMap &skymap, int i, double val)
 
 	skymap[i] = val;
 }
-
-#if 0
-static void
-skymap_setitem_2d(G3SkyMap &skymap, bp::tuple coords, double val)
-{
-	int y = bp::extract<int>(coords[0]);
-	int x = bp::extract<int>(coords[1]);
-	if (x < 0)
-		x = skymap.xdim() + x;
-	if (y < 0)
-		y = skymap.xdim() + y;
-
-	skymap.EnsureAllocated();
-
-	if (size_t(x) >= skymap.xdim()) {
-		PyErr_SetString(PyExc_IndexError, "X index out of range");
-		bp::throw_error_already_set();
-	}
-	if (size_t(y) >= skymap.ydim()) {
-		PyErr_SetString(PyExc_IndexError, "Y index out of range");
-		bp::throw_error_already_set();
-	}
-
-	skymap[skymap.pixat(x, y)] = val;
-}
-#endif
 
 static bp::tuple
 skymap_shape(G3SkyMap &skymap)
@@ -467,10 +416,6 @@ PYBINDINGS("coordinateutils") {
 	      "the map maker but outside of the map area")
 	    .def("__getitem__", &skymap_getitem)
 	    .def("__setitem__", &skymap_setitem)
-#if 0
-	    .def("__getitem__", &skymap_getitem_2d)
-	    .def("__setitem__", &skymap_setitem_2d)
-#endif
 	    .def("__copy__", &skymap_copy)
 	    .def("__deepcopy__", &skymap_copy)
 	    .def("Clone", &G3SkyMap::Clone,

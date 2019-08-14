@@ -212,28 +212,41 @@ FlatSkyMap::Clone(bool copy_data) const
 }
 
 double
-FlatSkyMap::operator [] (int i) const
+FlatSkyMap::operator () (int x, int y) const
 {
 	if (dense_)
-		return (*dense_)(i % xpix_, i / xpix_);
+		return (*dense_)(x, y);
 	if (sparse_)
-		return (*sparse_)(i % xpix_, i / xpix_);
+		return (*sparse_)(x, y);
 	return 0;
+}
+
+double &
+FlatSkyMap::operator () (int x, int y)
+{
+	assert(x >= 0);
+	assert(y >= 0);
+	assert(x < xpix_);
+	assert(y < ypix_);
+
+	if (dense_)
+		return (*dense_)(x, y);
+	if (!sparse_)
+		sparse_ = new SparseMapData(xpix_, ypix_);
+	return (*sparse_)(x, y);
+}
+
+double
+FlatSkyMap::operator [] (int i) const
+{
+	return (*this)(i % xpix_, i / xpix_);
 }
 
 double &
 FlatSkyMap::operator [] (int i)
 {
-	assert(i >= 0);
-	assert(i < xpix_*ypix_);
-
-	if (dense_)
-		return (*dense_)(i % xpix_, i / xpix_);
-	if (!sparse_)
-		sparse_ = new SparseMapData(xpix_, ypix_);
-	return (*sparse_)(i % xpix_, i / xpix_);
+	return (*this)(i % xpix_, i / xpix_);
 }
-
 
 std::string
 FlatSkyMap::Description() const
@@ -394,6 +407,76 @@ G3SkyMapPtr FlatSkyMap::rebin(size_t scale) const
 	return out;
 }
 
+static double
+flatskymap_getitem_2d(const FlatSkyMap &skymap, bp::tuple coords)
+{
+	int y = bp::extract<int>(coords[0]);
+	int x = bp::extract<int>(coords[1]);
+	if (x < 0)
+		x = skymap.shape()[0] + x;
+	if (y < 0)
+		y = skymap.shape()[1] + y;
+	if (size_t(x) >= skymap.shape()[0]) {
+		PyErr_SetString(PyExc_IndexError, "X index out of range");
+		bp::throw_error_already_set();
+	}
+	if (size_t(y) >= skymap.shape()[1]) {
+		PyErr_SetString(PyExc_IndexError, "Y index out of range");
+		bp::throw_error_already_set();
+	}
+
+	return skymap(x, y);
+}
+
+static double
+flatskymap_setitem_2d(FlatSkyMap &skymap, bp::tuple coords, double val)
+{
+	int y = bp::extract<int>(coords[0]);
+	int x = bp::extract<int>(coords[1]);
+	if (x < 0)
+		x = skymap.shape()[0] + x;
+	if (y < 0)
+		y = skymap.shape()[1] + y;
+	if (size_t(x) >= skymap.shape()[0]) {
+		PyErr_SetString(PyExc_IndexError, "X index out of range");
+		bp::throw_error_already_set();
+	}
+	if (size_t(y) >= skymap.shape()[1]) {
+		PyErr_SetString(PyExc_IndexError, "Y index out of range");
+		bp::throw_error_already_set();
+	}
+
+	skymap(x, y) = val;
+	return val;
+}
+
+static double
+flatskymap_getitem_1d(const G3SkyMap &skymap, int i)
+{
+
+        if (i < 0)
+                i = skymap.size() + i;
+        if (size_t(i) >= skymap.size()) {
+                PyErr_SetString(PyExc_IndexError, "Index out of range");
+                bp::throw_error_already_set();
+        }
+
+        return skymap[i];
+}
+
+static void
+flatskymap_setitem_1d(G3SkyMap &skymap, int i, double val)
+{
+
+        if (i < 0)
+                i = skymap.size() + i;
+        if (size_t(i) >= skymap.size()) {
+                PyErr_SetString(PyExc_IndexError, "Index out of range");
+                bp::throw_error_already_set();
+        }
+
+        skymap[i] = val;
+}
 
 #define FLAT_SKY_MAP_DOCSTR \
         "FlatSkyMap is a G3SkyMap with the extra meta information about the" \
@@ -477,6 +560,11 @@ PYBINDINGS("coordinateutils")
 	    .def("angle_to_xy", &FlatSkyMap::angle_to_xy,
 	      (bp::arg("alpha"), bp::arg("delta")),
 	       "Compute the flat 2D coordinates of the input sky coordinates")
+
+	    .def("__getitem__", flatskymap_getitem_1d)
+	    .def("__setitem__", flatskymap_setitem_1d)
+	    .def("__getitem__", flatskymap_getitem_2d)
+	    .def("__setitem__", flatskymap_setitem_2d)
 	;
 	register_pointer_conversions<FlatSkyMap>();
 

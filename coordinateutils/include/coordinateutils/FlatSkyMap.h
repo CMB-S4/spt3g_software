@@ -53,6 +53,9 @@ public:
         double operator [] (int i) const override;
         double &operator [] (int i) override;
 
+        double operator () (int x, int y) const;
+        double &operator () (int i, int y);
+
 	template <class A> void load(A &ar, unsigned v);
 	template <class A> void save(A &ar, unsigned v) const;
 	virtual G3SkyMapPtr Clone(bool copy_data = true) const override;
