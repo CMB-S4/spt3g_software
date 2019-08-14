@@ -227,18 +227,6 @@ G3SkyMap &G3SkyMap::operator/=(double rhs)
 	return *this;
 }
 
-#if 0
-double G3SkyMap::get_interp_precalc(const std::vector<long> & pix,
-    const std::vector<double> & weight) const
-{
-	double outval = 0;
-	for (size_t i = 0; i < pix.size(); i++) {
-		outval += data_[pix[i]] * weight[i];
-	}
-	return outval;
-}
-#endif
-
 double G3SkyMap::get_interp_precalc(const std::vector<long> & pix,
     const std::vector<double> & weight) const
 {
