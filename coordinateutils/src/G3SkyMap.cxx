@@ -265,7 +265,7 @@ static PyBufferProcs skymap_bufferprocs;
 #endif
 
 static double
-skymap_getitem(G3SkyMap &skymap, int i)
+skymap_getitem(const G3SkyMap &skymap, int i)
 {
 
 	if (i < 0)
