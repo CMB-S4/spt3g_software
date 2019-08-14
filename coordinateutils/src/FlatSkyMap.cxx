@@ -71,23 +71,25 @@ FlatSkyMap::FlatSkyMap(const FlatSkyProjection & fp,
     MapCoordReference coord_ref, bool is_weighted,
     G3Timestream::TimestreamUnits u, G3SkyMap::MapPolType pol_type) :
       G3SkyMap(coord_ref, is_weighted, u, pol_type),
-      proj_info(fp), xpix_(fp.xdim()), ypix_(fp.ydim())
+      proj_info(fp), dense_(NULL), sparse_(NULL),
+      xpix_(fp.xdim()), ypix_(fp.ydim())
 {
 }
 
 FlatSkyMap::FlatSkyMap() :
-    G3SkyMap(MapCoordReference::Local, 0), proj_info(0, 0, 0)
+    G3SkyMap(MapCoordReference::Local, 0), proj_info(0, 0, 0),
+    dense_(NULL), sparse_(NULL), xpix_(0), ypix_(0)
 {
 }
 
 FlatSkyMap::FlatSkyMap(const FlatSkyMap & fm) :
-    G3SkyMap(fm), proj_info(fm.proj_info), xpix_(fm.xpix_), ypix_(fm.ypix_)
+    G3SkyMap(fm), proj_info(fm.proj_info), dense_(NULL), sparse_(NULL),
+    xpix_(fm.xpix_), ypix_(fm.ypix_)
 {
 	if (fm.dense_)
 		dense_ = new DenseMapData(*fm.dense_);
 	else if (fm.sparse_)
 		sparse_ = new SparseMapData(*fm.sparse_);
-	// XXX accesses crash after copy construction
 }
 
 FlatSkyMap::~FlatSkyMap()
