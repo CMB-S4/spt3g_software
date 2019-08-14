@@ -105,8 +105,11 @@ FlatSkyMap::save(A &ar, unsigned v) const
 {
 	using namespace cereal;
 
+	ar & make_nvp("G3FrameObject", base_class<G3FrameObject>(this));
 	ar & make_nvp("G3SkyMap", base_class<G3SkyMap>(this));
 	ar & make_nvp("proj_info", proj_info);
+	ar & make_nvp("xpix", xpix_);
+	ar & make_nvp("ypix", ypix_);
 	if (dense_) {
 		ar & make_nvp("store", 2);
 		ar & make_nvp("data", *dense_);
@@ -144,6 +147,8 @@ FlatSkyMap::load(A &ar, unsigned v)
 
 	if (v >= 3) {
 		int store;
+		ar & make_nvp("xpix", xpix_);
+		ar & make_nvp("ypix", ypix_);
 		ar & make_nvp("store", store);
 		if (dense_) {
 			delete dense_;
