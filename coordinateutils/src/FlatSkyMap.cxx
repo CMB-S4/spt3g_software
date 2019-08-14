@@ -28,10 +28,7 @@ FlatSkyMap::FlatSkyMap(boost::python::object v, double res,
 	Py_buffer view;
 	if (PyObject_GetBuffer(v.ptr(), &view,
 	    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) != -1) {
-		if (view.ndim == 1){
-			xpix_ = view.shape[0];
-			ypix_ = 1;
-		} else if (view.ndim == 2) {
+		if (view.ndim == 2) {
 			ypix_ = view.shape[0];
 			xpix_ = view.shape[1];
 		} else {
@@ -445,8 +442,8 @@ FlatSkyMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 	view->strides = new Py_ssize_t[2];
 
 	view->ndim = 2;
-	view->shape[0] = sm->shape()[0];
-	view->shape[1] = sm->shape()[1];
+	view->shape[0] = sm->shape()[1]; // Numpy has swapped indexing
+	view->shape[1] = sm->shape()[0];
 	view->strides[0] = sm->shape()[0]*view->itemsize;
 	view->strides[1] = view->itemsize;
 
@@ -462,7 +459,7 @@ static PyBufferProcs flatskymap_bufferprocs;
 static double
 flatskymap_getitem_2d(const FlatSkyMap &skymap, bp::tuple coords)
 {
-	int y = bp::extract<int>(coords[0]);
+	int y = bp::extract<int>(coords[0]); // Swapped to match numpy
 	int x = bp::extract<int>(coords[1]);
 	if (x < 0)
 		x = skymap.shape()[0] + x;
@@ -483,7 +480,7 @@ flatskymap_getitem_2d(const FlatSkyMap &skymap, bp::tuple coords)
 static double
 flatskymap_setitem_2d(FlatSkyMap &skymap, bp::tuple coords, double val)
 {
-	int y = bp::extract<int>(coords[0]);
+	int y = bp::extract<int>(coords[0]); // Swapped to match numpy
 	int x = bp::extract<int>(coords[1]);
 	if (x < 0)
 		x = skymap.shape()[0] + x;
