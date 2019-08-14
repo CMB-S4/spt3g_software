@@ -56,6 +56,8 @@ public:
         double operator () (int x, int y) const;
         double &operator () (int i, int y);
 
+	// XXX Usefully implement in-place operators for sparse maps
+
 	template <class A> void load(A &ar, unsigned v);
 	template <class A> void save(A &ar, unsigned v) const;
 	virtual G3SkyMapPtr Clone(bool copy_data = true) const override;
@@ -96,6 +98,7 @@ public:
 
 	void ConvertToDense();
 	void ConvertToSparse();
+	bool IsDense() const { return (dense_ != NULL); }
 
 protected:
 	virtual void init_from_v1_data(std::vector<size_t>, const std::vector<double> &) override;

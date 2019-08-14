@@ -527,6 +527,21 @@ flatskymap_setitem_1d(G3SkyMap &skymap, int i, double val)
         skymap[i] = val;
 }
 
+static bool
+flatskymap_pysparsity_get(const FlatSkyMap &fsm)
+{
+	return !fsm.IsDense();
+}
+
+static void
+flatskymap_pysparsity_set(FlatSkyMap &fsm, bool sparse)
+{
+	if (sparse)
+		fsm.ConvertToSparse();
+	else
+		fsm.ConvertToDense();
+}
+
 #define FLAT_SKY_MAP_DOCSTR \
         "FlatSkyMap is a G3SkyMap with the extra meta information about the" \
 	" particular flat sky projection included.  In practice it behaves\n" \
@@ -609,6 +624,11 @@ PYBINDINGS("coordinateutils")
 	    .def("angle_to_xy", &FlatSkyMap::angle_to_xy,
 	      (bp::arg("alpha"), bp::arg("delta")),
 	       "Compute the flat 2D coordinates of the input sky coordinates")
+
+	    .add_property("sparse", flatskymap_pysparsity_get, flatskymap_pysparsity_set,
+	       "True if the map is stored with column and row zero-suppression, False if "
+	       "every pixel is stored. Map sparsity can be changed by setting this to True "
+	       "(or False).")
 
 	    .def("__getitem__", flatskymap_getitem_1d)
 	    .def("__setitem__", flatskymap_setitem_1d)
