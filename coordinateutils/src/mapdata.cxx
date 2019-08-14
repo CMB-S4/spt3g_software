@@ -19,7 +19,7 @@ SparseMapData::to_dense() const
 }
 
 SparseMapData::SparseMapData(const DenseMapData &dense_map) :
-    xlen_(dense_map.xdim()), ylen_(dense_map.ydim())
+    xlen_(dense_map.xdim()), ylen_(dense_map.ydim()), offset_(0)
 {
 	double val;
 
