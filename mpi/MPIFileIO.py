@@ -25,11 +25,11 @@ class MPIFileReader(object):
         nextfilelist = self.files.pop(0)
         self.broadcast = False
         if isinstance(nextfilelist, str):
+            self.broadcast = True
             if self.comm.rank == 0:
-                self.broadcast = True
                 self.cur_reader = core.G3Reader(nextfilelist)
             else:
-                self.cur_reader = lambda fr: self.comm.bcast(None,root=0)
+                self.cur_reader = lambda fr: None
         else:
             toreadhere = nextfilelist[self.comm.rank::self.comm.size]
             self.cur_reader = core.G3Reader(toreadhere)
@@ -43,7 +43,7 @@ class MPIFileReader(object):
                 self.nextreader()
             out = self.cur_reader(frame)
             if self.broadcast:
-                self.comm.bcast(out,root=0)
+                out = self.comm.bcast(out,root=0)
             if len(out) == 0:
                 # Move to the next reader if this one is done
                 self.cur_reader = None
@@ -54,6 +54,9 @@ class MPIFrameParallelizer(object):
     Do parallel I/O and processing across an MPI communicator. The style of
     parallelism here is that a set of IO processes read files from disk
     and distribute frames round-robin-style across a worker communicator.
+    Frames will arrive in order on each process, with gaps between time
+    segments, but no guarantees are made about relative order between
+    processes. All CPU nodes receive all metadata frames.
 
     Rules to make this work:
     - First module on IO nodes must be MPIFileReader
@@ -64,6 +67,18 @@ class MPIFrameParallelizer(object):
     rules are followed.
     '''
     def __init__(self, iocomm, cpucomm, cpucomm_startrank, dataframetype=[core.G3FrameType.Timepoint, core.G3FrameType.Scan]):
+        '''
+        Parellizes a frame stream across a communicator, distributing frames
+        from M IO processes that are reading them to N CPU processes that
+        are analyzing them. iocomm is a communicator containing exactly the
+        set of IO nodes. cpucomm is a communicator containing (at least)
+        all the IO and all the CPU nodes that the IO and CPU nodes can use
+        to communicate with each other. The set of CPU nodes is the set of
+        processes in cpucomm with rank greater than or equal to
+        cpucomm_startrank. All frame types other than those in dataframetype
+        appear on all CPU nodes, while frames of types in dataframetype
+        are processed only by a single (random) CPU node.
+        '''
         self.iocomm = iocomm
         self.cpucomm = cpucomm
         self.cpucomm_startrank = cpucomm_startrank
@@ -72,13 +87,18 @@ class MPIFrameParallelizer(object):
         if frame is None:
             # Initial frame is None on CPU nodes
             frame = self.cpucomm.recv()
+
+            # This module (effectively) glues two G3Pipelines back-to-back.
+            # G3Pipeline signals completion to modules with EndProcessing,
+            # but completion is signaled *to* G3Pipeline with []. Translate
+            # one to the other if needed.
             if frame.type == core.G3FrameType.EndProcessing:
-                frame = [] # This is the start module
+                frame = []
+
             return frame
         if frame.type not in self.dataframes:
             # Synchronize and broadcast metadata; should be the same
             # in all streams
-            self.iocomm.barrier()
             if self.iocomm.rank == 0:
                 checkframe = self.iocomm.bcast(frame, root=0)
             else:
@@ -98,6 +118,14 @@ class MPIFrameParallelizer(object):
  
 @core.pipesegment
 def MPIIODistributor(pipe, mpicomm=MPI.COMM_WORLD, n_io=10, files=[]):
+    '''
+    Read files from disk using the first n_io processes in mpicomm, with
+    processing of frames in those files occurring on the other processes
+    in mpicomm. See documentation for MPIFileReader for the format of
+    the files argument and MPIFrameParallelizer for information on the
+    semantics of processing. Add this as the first module in your pipeline
+    in place of core.G3Reader.
+    '''
     subcomm = mpicomm.Split(mpicomm.rank < n_io, mpicomm.rank)
     if mpicomm.rank < n_io:
         pipe.Add(MPIFileReader, mpicomm=subcomm, files=files)

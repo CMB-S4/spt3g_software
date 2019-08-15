@@ -37,10 +37,12 @@ class MPIAccumulator(object):
           format understandable to Python) from the frame you expect to use
           later.
         Note that extractfunc is called on all frame types (including
-        calibration data) but *only the results from frames in dataframes*
-        are stored. Thus, it is the responsibility of extractfunc to cache
-        any applicable calibration, etc. information and store it in the
-        return value for data frames if needed.
+        calibration data) but *only the results if it returns non-None values*
+        are stored. Thus, it is the responsibility of extractfunc to either
+        cache any applicable calibration, etc. information and store it in the
+        return value for data frames if needed or explicitly return a value
+        for calibration data, if needed. The default extractfunc saves only
+        the frames in the "dataframes" argument.
 
         sorter is used, if defined, to sort the list of frame data in each
         group. This is passed to the Python sorted() function as a 'key'
@@ -54,22 +56,21 @@ class MPIAccumulator(object):
         def defaultextract(f):
             if f.type not in self.dataframes:
                 return
-            return ('%s-%d' % (f['SourceName'], f['ObservationID']), None, f)
+            return ('%s-%d' % (f['SourceName'], f['ObservationID']), None, core.G3Frame(f))
         if self.extractfunc is None:
             self.extractfunc = defaultextract
         self.sorter = sorter
-        self.dataframes = dataframes
         self.localdata = {}
     def __call__(self, frame):
         if frame.type == core.G3FrameType.EndProcessing:
             self.finalize()
             return
 
-        if frame.type not in self.dataframes:
-            self.extractfunc(frame) # Give it a chance to cache things
+        extracted = self.extractfunc(frame)
+        if extracted is None:
             return
 
-        obskey, metadata, data = self.extractfunc(frame)
+        obskey, metadata, data = extracted
         if obskey not in self.localdata:
             self.localdata[obskey] = []
         self.localdata[obskey].append((metadata, data))

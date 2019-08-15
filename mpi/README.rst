@@ -16,7 +16,7 @@ Parallelization in this sense can be achieved by replacement of G3Reader in a no
 Frame Accumulation
 ==================
 
-At the end of a sequence of parallel pipelines, you in general want to join the data from all the processes in the communicator back together again. Typical cases are stitching processed scans back together again, for example to feed to a maximum-likelihood map-maker or some other algorithm that needs very large quantities of distributed again, or doing a parallel reduction, for example by coadding map frames produced by N parallel map-makers.
+At the end of a sequence of parallel pipelines, you in general want to join the data from all the processes in the communicator back together again. Typical cases are stitching processed scans back together again, for example to feed to a maximum-likelihood map-maker or some other algorithm that needs very large quantities of distributed data, or doing a parallel reduction, for example by coadding map frames produced by N parallel map-makers.
 
 The first of these cases (restitching an observation processed on many parallel processes) is more complicated than the second, so this library provides a helper module (MPIAccumulator) that does it for you, placing the result in a member variable inspected after the pipelines end.
 
