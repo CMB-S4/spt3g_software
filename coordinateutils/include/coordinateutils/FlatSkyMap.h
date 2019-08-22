@@ -2,7 +2,6 @@
 #define _COORDINATEUTILS_FLATSKYMAP_H
 
 #include <G3Frame.h>
-#include <G3Map.h>
 #include <G3Logging.h>
 
 #include <vector>
