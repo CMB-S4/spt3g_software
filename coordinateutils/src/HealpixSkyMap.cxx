@@ -66,17 +66,18 @@ HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool is_weighted,
 			log_fatal("Only 1-D maps supported");
 		}
 
-		if (indexview.shape[0] != dataview.shape[0]) {
+		if (indexview.len/indexview.itemsize !=
+		    dataview.len/dataview.itemsize) {
 			PyBuffer_Release(&indexview);
 			PyBuffer_Release(&dataview);
 			log_fatal("Index and data must have matching shapes.");
 		}
 
-		if (strcmp(indexview.format, "I") != 0 ||
-		    strcmp(indexview.format, "i") != 0) {
+		if (strcmp(indexview.format, "l") != 0 &&
+		    strcmp(indexview.format, "L") != 0) {
 			PyBuffer_Release(&indexview);
 			PyBuffer_Release(&dataview);
-			log_fatal("Indices must be integers.");
+			log_fatal("Indices must be (long) integers.");
 		}
 
 		if (strcmp(dataview.format, "d") != 0) {
@@ -84,12 +85,11 @@ HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool is_weighted,
 			PyBuffer_Release(&dataview);
 			log_fatal("Data must be double-precision (float64).");
 		}
-		nside_ = npix2nside(dataview.shape[0]);
 		ring_info_ = init_map_info(nside_, 1);
 		indexed_sparse_ = new std::unordered_map<uint32_t, double>;
 
-		for (size_t i = 0; i < indexview.shape[0]; i++)
-			(*indexed_sparse_)[((unsigned int *)indexview.buf)[i]] =
+		for (size_t i = 0; i < indexview.len/indexview.itemsize; i++)
+			(*indexed_sparse_)[((unsigned long *)indexview.buf)[i]] =
 			    ((double *)dataview.buf)[i];
 		PyBuffer_Release(&indexview);
 		return;
@@ -268,6 +268,7 @@ HealpixSkyMap::operator [] (int i) const
 double &
 HealpixSkyMap::operator [] (int i)
 {
+	// XXX: bounds checking
 	if (dense_)
 		return (*dense_)[i];
 
