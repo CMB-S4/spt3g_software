@@ -27,8 +27,77 @@ HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool is_weighted,
 
 	is_nested_ = false;
 
+	if (boost::python::extract<size_t>(v).check()) {
+		// size_t from Python is also a bp::object,
+		// so a Python caller intending to call the above
+		// constructor can get here by accident since
+		// the signatures are degenerate. Handle the
+		// confusion gracefully.
+		nside_ = boost::python::extract<size_t>(v)();
+		ring_info_ = init_map_info(nside_, 1);
+		return;
+	}
+
+	if (PyTuple_Check(v.ptr()) && PyTuple_Size(v.ptr()) == 3) {
+		// One option is that we got passed a tuple of numpy
+		// arrays: first indices, next data, next nside.
+		Py_buffer indexview, dataview;
+		if (!PyLong_Check(PyTuple_GetItem(v.ptr(), 2))) {
+			PyErr_SetString(PyExc_TypeError,
+			    "Third tuple element for sparse maps needs to be "
+			    "nside");
+			throw bp::error_already_set();
+		}
+		nside_ = PyLong_AsSize_t(PyTuple_GetItem(v.ptr(), 2));
+
+		if (PyObject_GetBuffer(PyTuple_GetItem(v.ptr(), 0), &indexview,
+		    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) == -1)
+			throw bp::error_already_set();
+
+		if (PyObject_GetBuffer(PyTuple_GetItem(v.ptr(), 1), &dataview,
+		    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) == -1) {
+			PyBuffer_Release(&indexview);
+			throw bp::error_already_set();
+		}
+
+		if (indexview.ndim != 1 || dataview.ndim != 1) {
+			PyBuffer_Release(&indexview);
+			PyBuffer_Release(&dataview);
+			log_fatal("Only 1-D maps supported");
+		}
+
+		if (indexview.shape[0] != dataview.shape[0]) {
+			PyBuffer_Release(&indexview);
+			PyBuffer_Release(&dataview);
+			log_fatal("Index and data must have matching shapes.");
+		}
+
+		if (strcmp(indexview.format, "I") != 0 ||
+		    strcmp(indexview.format, "i") != 0) {
+			PyBuffer_Release(&indexview);
+			PyBuffer_Release(&dataview);
+			log_fatal("Indices must be integers.");
+		}
+
+		if (strcmp(dataview.format, "d") != 0) {
+			PyBuffer_Release(&indexview);
+			PyBuffer_Release(&dataview);
+			log_fatal("Data must be double-precision (float64).");
+		}
+		nside_ = npix2nside(dataview.shape[0]);
+		ring_info_ = init_map_info(nside_, 1);
+		indexed_sparse_ = new std::unordered_map<uint32_t, double>;
+
+		for (size_t i = 0; i < indexview.shape[0]; i++)
+			(*indexed_sparse_)[((unsigned int *)indexview.buf)[i]] =
+			    ((double *)dataview.buf)[i];
+		PyBuffer_Release(&indexview);
+		return;
+	}
+
 	if (PyObject_GetBuffer(v.ptr(), &view,
 	    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) != -1) {
+		// Fall back to just 1-D
 		if (view.ndim != 1)
 			log_fatal("Only 1-D maps supported");
 
@@ -61,62 +130,6 @@ HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool is_weighted,
 	}
 
 	throw bp::error_already_set();
-}
-
-HealpixSkyMap::HealpixSkyMap(boost::python::object index,
-    boost::python::object v, size_t nside, bool is_weighted,
-    MapCoordReference coord_ref, G3Timestream::TimestreamUnits u,
-    G3SkyMap::MapPolType pol_type) :
-      G3SkyMap(coord_ref, is_weighted, u, pol_type),
-      dense_(NULL), ring_sparse_(NULL), indexed_sparse_(NULL)
-{
-	Py_buffer indexview, dataview;
-
-	is_nested_ = false;
-
-	if (PyObject_GetBuffer(index.ptr(), &indexview,
-	    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) == -1)
-		throw bp::error_already_set();
-
-	if (PyObject_GetBuffer(v.ptr(), &dataview,
-	    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) == -1) {
-		PyBuffer_Release(&indexview);
-		throw bp::error_already_set();
-	}
-
-	if (indexview.ndim != 1 || dataview.ndim != 1) {
-		PyBuffer_Release(&indexview);
-		PyBuffer_Release(&dataview);
-		log_fatal("Only 1-D maps supported");
-	}
-
-	if (indexview.shape[0] != dataview.shape[0]) {
-		PyBuffer_Release(&indexview);
-		PyBuffer_Release(&dataview);
-		log_fatal("Index and data must have matching shapes.");
-	}
-
-	if (strcmp(indexview.format, "I") != 0 ||
-	    strcmp(indexview.format, "i") != 0) {
-		PyBuffer_Release(&indexview);
-		PyBuffer_Release(&dataview);
-		log_fatal("Indices must be integers.");
-	}
-
-	if (strcmp(dataview.format, "d") != 0) {
-		PyBuffer_Release(&indexview);
-		PyBuffer_Release(&dataview);
-		log_fatal("Data must be double-precision (float64).");
-	}
-	nside_ = npix2nside(dataview.shape[0]);
-	ring_info_ = init_map_info(nside_, 1);
-	indexed_sparse_ = new std::unordered_map<uint32_t, double>;
-
-	for (size_t i = 0; i < indexview.shape[0]; i++)
-		(*indexed_sparse_)[((unsigned int *)indexview.buf)[i]] =
-		    ((double *)dataview.buf)[i];
-	PyBuffer_Release(&indexview);
-	PyBuffer_Release(&dataview);
 }
 
 HealpixSkyMap::HealpixSkyMap() :
@@ -537,28 +550,23 @@ PYBINDINGS("coordinateutils")
 		  bp::args("is_weighted") = true,
 		  bp::arg("coord_ref") = MapCoordReference::Equatorial,
 		  bp::arg("units") = G3Timestream::Tcmb,
-		  bp::arg("pol_type") = G3SkyMap::None)))
-#if 0
+		  bp::arg("pol_type") = G3SkyMap::None),
+	       "Instantiate a HealpixSkyMap with given nside"))
 	    .def(bp::init<boost::python::object, bool,
 	       MapCoordReference, G3Timestream::TimestreamUnits,
 	       G3SkyMap::MapPolType>(
-		  (bp::arg("dense_healpix"),
+		  (bp::arg("data"),
 	           bp::args("is_weighted") = true,
 		   bp::arg("coord_ref") = MapCoordReference::Equatorial,
 		   bp::arg("units") = G3Timestream::Tcmb,
-		   bp::arg("pol_type") = G3SkyMap::None)))
-	    .def(bp::init<boost::python::object, boost::python::object, size_t,
-	       bool, MapCoordReference, G3Timestream::TimestreamUnits,
-	       G3SkyMap::MapPolType>(
-		  (bp::arg("indices"), bp::arg("data"), bp::arg("nside"),
-	           bp::args("is_weighted") = true,
-		   bp::arg("coord_ref") = MapCoordReference::Equatorial,
-		   bp::arg("units") = G3Timestream::Tcmb,
-		   bp::arg("pol_type") = G3SkyMap::None)))
-#endif
+		   bp::arg("pol_type") = G3SkyMap::None),
+	       "Instantiate a Healpix map from existing data. If the data are "
+	       "a single numpy array, assumes this is a dense map. Otherwise, "
+	       "pass an (indices, data, nside) tuple."))
 
 	    .def(bp::init<const HealpixSkyMap&>(bp::arg("healpix_map")))
 	    .def(bp::init<>())
+	    .add_property("nside", &HealpixSkyMap::nside)
 #if 0
 	    .add_property("sparse", flatskymap_pysparsity_get, flatskymap_pysparsity_set,
 	       "True if the map is stored with column and row zero-suppression, False if "

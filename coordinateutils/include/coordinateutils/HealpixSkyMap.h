@@ -14,26 +14,16 @@ class SparseMapData;
 
 class HealpixSkyMap : public G3FrameObject, public G3SkyMap {
 public:
-	// Construct an X by Y pixel flat map with pixel width res and the given
-	// units, center, and coordinate system. If x_res is set to something
-	// non-zero, will set the X resolution to a different number than res,
-	// creating a map with rectangular pixels.
+	// Construct a Healpix map with given nside, units, and coordinates.
 	HealpixSkyMap(size_t nside,
  	    bool is_weighted = true,
 	    MapCoordReference coord_ref = MapCoordReference::Equatorial,
 	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
 	    G3SkyMap::MapPolType pol_type = MapPolType::None);
 
-	// Constructor from a (dense) numpy array
+	// Constructor from a numpy array
 	HealpixSkyMap(boost::python::object v,
 	    bool is_weighted = true,
-	    MapCoordReference coord_ref = MapCoordReference::Equatorial,
-	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
-	    G3SkyMap::MapPolType pol_type = MapPolType::None);
-
-	// Constructor from a (sparse) numpy array
-	HealpixSkyMap(boost::python::object indices, boost::python::object v,
-	    size_t nside, bool is_weighted = true,
 	    MapCoordReference coord_ref = MapCoordReference::Equatorial,
 	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
 	    G3SkyMap::MapPolType pol_type = MapPolType::None);
@@ -57,7 +47,7 @@ public:
 	size_t npix_allocated() const override;
 	bool IsCompatible(const G3SkyMap & other) const override;
 
-	size_t nside() const;
+	size_t nside() const {return nside_;}
 
 	size_t angle_to_pixel(double alpha, double delta) const override;
 	std::vector<double> pixel_to_angle(size_t pixel) const override;
