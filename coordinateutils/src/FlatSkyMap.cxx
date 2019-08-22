@@ -32,7 +32,7 @@ FlatSkyMap::FlatSkyMap(boost::python::object v, double res,
 			ypix_ = view.shape[0];
 			xpix_ = view.shape[1];
 		} else {
-			log_fatal("Only 1 and 2-D maps supported");
+			log_fatal("Only 2-D maps supported");
 		}
 		proj_info = FlatSkyProjection(xpix_, ypix_, res, alpha_center,
 		    delta_center, x_res, proj);
