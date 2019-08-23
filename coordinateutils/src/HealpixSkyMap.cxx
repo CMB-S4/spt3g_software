@@ -14,7 +14,7 @@ HealpixSkyMap::HealpixSkyMap(size_t nside, bool is_weighted,
       nside_(nside), dense_(NULL), ring_sparse_(NULL), indexed_sparse_(NULL)
 {
 	ring_info_ = init_map_info(nside, 1);
-	is_nested_ = false;
+	is_nested_ = false; /* XXX Add nested-mode support */
 }
 
 HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool is_weighted,
@@ -575,7 +575,6 @@ HealpixSkyMap_setindexedsparse(HealpixSkyMap &m, bool v)
 		m.ConvertToRingSparse();
 }
 
-#if 0
 static int
 HealpixSkyMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 {
@@ -605,14 +604,12 @@ HealpixSkyMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 		view->format = NULL;
 
 	// XXX: following leaks small amounts of memory!
-	view->shape = new Py_ssize_t[2];
-	view->strides = new Py_ssize_t[2];
+	view->shape = new Py_ssize_t;
+	view->strides = new Py_ssize_t;
 
-	view->ndim = 2;
-	view->shape[0] = sm->shape()[1]; // Numpy has swapped indexing
-	view->shape[1] = sm->shape()[0];
-	view->strides[0] = sm->shape()[0]*view->itemsize;
-	view->strides[1] = view->itemsize;
+	view->ndim = 1;
+	view->shape[0] = sm->size();
+	view->strides[0] = view->itemsize;
 
 	view->suboffsets = NULL;
 
@@ -621,23 +618,7 @@ HealpixSkyMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 	return 0;
 }
 
-static PyBufferProcs flatskymap_bufferprocs;
-
-static bool
-flatskymap_pysparsity_get(const HealpixSkyMap &fsm)
-{
-	return !fsm.IsDense();
-}
-
-static void
-flatskymap_pysparsity_set(HealpixSkyMap &fsm, bool sparse)
-{
-	if (sparse)
-		fsm.ConvertToSparse();
-	else
-		fsm.ConvertToDense();
-}
-#endif
+static PyBufferProcs healpixskymap_bufferprocs;
 
 #define HEALPIX_SKY_MAP_DOCSTR \
         "HealpixSkyMap is a G3SkyMap with Healpix" \
@@ -658,7 +639,7 @@ PYBINDINGS("coordinateutils")
 
 	// Can't use the normal FRAMEOBJECT code since this inherits
 	// from an intermediate class. Expanded by hand here.
-	object fsm = class_<HealpixSkyMap, bases<G3SkyMap>, HealpixSkyMapPtr>(
+	object hsm = class_<HealpixSkyMap, bases<G3SkyMap>, HealpixSkyMapPtr>(
 	  "HealpixSkyMap", HEALPIX_SKY_MAP_DOCSTR, boost::python::no_init)
 	    .def(boost::python::init<const HealpixSkyMap &>())
 	    .def_pickle(g3frameobject_picklesuite<HealpixSkyMap>())
@@ -701,14 +682,12 @@ PYBINDINGS("coordinateutils")
 	;
 	register_pointer_conversions<HealpixSkyMap>();
 
-#if 0
 	// Add buffer protocol interface
-	PyTypeObject *fsmclass = (PyTypeObject *)fsm.ptr();
-	flatskymap_bufferprocs.bf_getbuffer = HealpixSkyMap_getbuffer;
-	fsmclass->tp_as_buffer = &flatskymap_bufferprocs;
+	PyTypeObject *hsmclass = (PyTypeObject *)hsm.ptr();
+	healpixskymap_bufferprocs.bf_getbuffer = HealpixSkyMap_getbuffer;
+	hsmclass->tp_as_buffer = &healpixskymap_bufferprocs;
 #if PY_MAJOR_VERSION < 3
-	fsmclass->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
-#endif
+	hsmclass->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
 #endif
 
 	implicitly_convertible<HealpixSkyMapPtr, G3SkyMapPtr>();

@@ -61,10 +61,14 @@ x = coordinateutils.HealpixSkyMap(a)
 for i in range(0, len(a)):
 	assert(x[i] == i)
 
+assert((numpy.asarray(x) == a).all())
+
 # Conersion to ring-sparse again (trickiest, this makes sure we get all rings)
 x.ringsparse = True
 assert(x.npix_allocated == len(a))
 for i in range(0, len(a)):
 	assert(x[i] == i)
 
+assert((numpy.asarray(x) == a).all())
+assert(x.dense) # Should be dense again
 
