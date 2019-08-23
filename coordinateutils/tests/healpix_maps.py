@@ -8,7 +8,7 @@ from spt3g import coordinateutils
 a = numpy.arange(1500,dtype='float')
 a[0] = -1
 b = numpy.arange(1500,dtype='int')
-x = coordinateutils.HealpixSkyMap((b, a, 64), True, coordinateutils.MapCoordReference.Equatorial)
+x = coordinateutils.HealpixSkyMap((b, a, 64), True, False, coordinateutils.MapCoordReference.Equatorial)
 assert(x.nside == 64)
 assert(x.npix_allocated == 1500)
 assert(x[1499] == 1499)

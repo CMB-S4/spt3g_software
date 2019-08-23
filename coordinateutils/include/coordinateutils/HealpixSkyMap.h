@@ -17,6 +17,7 @@ public:
 	// Construct a Healpix map with given nside, units, and coordinates.
 	HealpixSkyMap(size_t nside,
  	    bool is_weighted = true,
+ 	    bool is_nested = false,
 	    MapCoordReference coord_ref = MapCoordReference::Equatorial,
 	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
 	    G3SkyMap::MapPolType pol_type = MapPolType::None);
@@ -24,6 +25,7 @@ public:
 	// Constructor from a numpy array
 	HealpixSkyMap(boost::python::object v,
 	    bool is_weighted = true,
+ 	    bool is_nested = false,
 	    MapCoordReference coord_ref = MapCoordReference::Equatorial,
 	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
 	    G3SkyMap::MapPolType pol_type = MapPolType::None);
@@ -50,6 +52,7 @@ public:
 	    std::vector<double> &data) const; // Iterators better?
 
 	size_t nside() const {return nside_;}
+	bool nested() const {return is_nested_;}
 
 	size_t angle_to_pixel(double alpha, double delta) const override;
 	std::vector<double> pixel_to_angle(size_t pixel) const override;

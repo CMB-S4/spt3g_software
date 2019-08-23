@@ -7,25 +7,23 @@
 
 #include "mapdata.h"
 
-HealpixSkyMap::HealpixSkyMap(size_t nside, bool is_weighted,
+HealpixSkyMap::HealpixSkyMap(size_t nside, bool is_weighted, bool is_nested,
     MapCoordReference coord_ref, G3Timestream::TimestreamUnits u,
     G3SkyMap::MapPolType pol_type) :
       G3SkyMap(coord_ref, is_weighted, u, pol_type),
-      nside_(nside), dense_(NULL), ring_sparse_(NULL), indexed_sparse_(NULL)
+      nside_(nside), is_nested_(is_nested), dense_(NULL), ring_sparse_(NULL),
+      indexed_sparse_(NULL)
 {
 	ring_info_ = init_map_info(nside, 1);
-	is_nested_ = false; /* XXX Add nested-mode support */
 }
 
 HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool is_weighted,
-    MapCoordReference coord_ref, G3Timestream::TimestreamUnits u,
-    G3SkyMap::MapPolType pol_type) :
-      G3SkyMap(coord_ref, is_weighted, u, pol_type),
+    bool is_nested, MapCoordReference coord_ref,
+    G3Timestream::TimestreamUnits u, G3SkyMap::MapPolType pol_type) :
+      G3SkyMap(coord_ref, is_weighted, u, pol_type), is_nested_(is_nested),
       dense_(NULL), ring_sparse_(NULL), indexed_sparse_(NULL)
 {
 	Py_buffer view;
-
-	is_nested_ = false;
 
 	if (boost::python::extract<size_t>(v).check()) {
 		// size_t from Python is also a bp::object,
@@ -89,7 +87,7 @@ HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool is_weighted,
 		indexed_sparse_ = new std::unordered_map<uint32_t, double>;
 
 		for (size_t i = 0; i < indexview.len/indexview.itemsize; i++)
-			(*indexed_sparse_)[((unsigned long *)indexview.buf)[i]] =
+			(*indexed_sparse_)[((unsigned long *)indexview.buf)[i]]=
 			    ((double *)dataview.buf)[i];
 		PyBuffer_Release(&indexview);
 		return;
@@ -133,16 +131,15 @@ HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool is_weighted,
 }
 
 HealpixSkyMap::HealpixSkyMap() :
-    G3SkyMap(MapCoordReference::Local, false), nside_(0),
+    G3SkyMap(MapCoordReference::Local, false), nside_(0), is_nested_(false),
     dense_(NULL), ring_sparse_(NULL), indexed_sparse_(NULL)
 {
 	ring_info_ = init_map_info(nside_, 1);
-	is_nested_ = false;
 }
 
 HealpixSkyMap::HealpixSkyMap(const HealpixSkyMap & fm) :
-    G3SkyMap(fm), nside_(fm.nside_), dense_(NULL), ring_sparse_(NULL),
-    indexed_sparse_(NULL)
+    G3SkyMap(fm), nside_(fm.nside_), is_nested_(fm.is_nested_),
+    dense_(NULL), ring_sparse_(NULL), indexed_sparse_(NULL)
 {
 	if (fm.dense_)
 		dense_ = new std::vector<double>(*fm.dense_);
@@ -152,7 +149,6 @@ HealpixSkyMap::HealpixSkyMap(const HealpixSkyMap & fm) :
 		indexed_sparse_ = new std::unordered_map<uint32_t, double>(
 		    *fm.indexed_sparse_);
 	ring_info_ = init_map_info(nside_, 1);
-	is_nested_ = false;
 }
 
 HealpixSkyMap::~HealpixSkyMap()
@@ -265,7 +261,7 @@ HealpixSkyMap::ConvertToDense()
 void
 HealpixSkyMap::ConvertToRingSparse()
 {
-	if (ring_sparse_)
+	if (ring_sparse_ || is_nested_)
 		return;
 
 	size_t maxringpix = 0;
@@ -333,7 +329,7 @@ HealpixSkyMap::Clone(bool copy_data) const
 		return boost::make_shared<HealpixSkyMap>(*this);
 	else
 		return boost::make_shared<HealpixSkyMap>(nside_, is_weighted,
-		    coord_ref, units, pol_type);
+		    is_nested_, coord_ref, units, pol_type);
 }
 
 double
@@ -592,7 +588,7 @@ G3SkyMapPtr HealpixSkyMap::rebin(size_t scale) const
 		return Clone(true);
 
 	HealpixSkyMapPtr out(new HealpixSkyMap(nside_/scale, is_weighted,
-		    coord_ref, units, pol_type));
+	    is_nested_, coord_ref, units, pol_type));
 
 #if 0
 	size_t scale2 = scale * scale;
@@ -636,6 +632,13 @@ HealpixSkyMap_setdense(HealpixSkyMap &m, bool v)
 static void
 HealpixSkyMap_setringsparse(HealpixSkyMap &m, bool v)
 {
+	if (m.nested() && v) {
+		PyErr_SetString(PyExc_ValueError,
+		    "Cannot use ring-sparse representation with a "
+		    "nested-pixel Healpix map");
+		throw bp::error_already_set();
+	}
+
 	if (v)
 		m.ConvertToRingSparse();
 	else
@@ -730,19 +733,21 @@ PYBINDINGS("coordinateutils")
 	  "HealpixSkyMap", HEALPIX_SKY_MAP_DOCSTR, boost::python::no_init)
 	    .def(boost::python::init<const HealpixSkyMap &>())
 	    .def_pickle(g3frameobject_picklesuite<HealpixSkyMap>())
-	    .def(bp::init<size_t, bool, MapCoordReference,
+	    .def(bp::init<size_t, bool, bool, MapCoordReference,
 	       G3Timestream::TimestreamUnits, G3SkyMap::MapPolType>(
 	         (bp::arg("nside"),
 		  bp::args("is_weighted") = true,
+		  bp::args("is_nested") = false,
 		  bp::arg("coord_ref") = MapCoordReference::Equatorial,
 		  bp::arg("units") = G3Timestream::Tcmb,
 		  bp::arg("pol_type") = G3SkyMap::None),
 	       "Instantiate a HealpixSkyMap with given nside"))
-	    .def(bp::init<boost::python::object, bool,
+	    .def(bp::init<boost::python::object, bool, bool,
 	       MapCoordReference, G3Timestream::TimestreamUnits,
 	       G3SkyMap::MapPolType>(
 		  (bp::arg("data"),
 	           bp::args("is_weighted") = true,
+		   bp::args("is_nested") = false,
 		   bp::arg("coord_ref") = MapCoordReference::Equatorial,
 		   bp::arg("units") = G3Timestream::Tcmb,
 		   bp::arg("pol_type") = G3SkyMap::None),
@@ -753,13 +758,17 @@ PYBINDINGS("coordinateutils")
 	    .def(bp::init<const HealpixSkyMap&>(bp::arg("healpix_map")))
 	    .def(bp::init<>())
 	    .add_property("nside", &HealpixSkyMap::nside)
+	    .add_property("nested", &HealpixSkyMap::nested)
 	    .add_property("dense", &HealpixSkyMap::IsDense, HealpixSkyMap_setdense,
 	        "True if the map is stored with all elements, False otherwise. "
 
 	        "If set to True, converts the map to a dense representation." )
 	    .add_property("ringsparse", &HealpixSkyMap::IsRingSparse, HealpixSkyMap_setringsparse,
 	        "True if the map is stored as a dense 2D region using ring "
-	        "ordering (analogous to FlatSkyMap's sparse mode. "
+	        "ordering (analogous to FlatSkyMap's sparse mode). "
+	        "Ring-sparsity is efficient for dense blocks on a ring-ordered "
+	        "map (e.g. a continous sky region), but is inefficient "
+	        "otherwise. It applies only to non-nested maps. "
 	        "If set to True, converts the map to this representation." )
 	    .add_property("indexedsparse", &HealpixSkyMap::IsIndexedSparse, HealpixSkyMap_setindexedsparse,
 	        "True if the map is stored as a list of non-zero pixels "
