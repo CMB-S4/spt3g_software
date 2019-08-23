@@ -361,6 +361,7 @@ PYBINDINGS("coordinateutils") {
 	    .def_readwrite("is_weighted", &G3SkyMap::is_weighted,
 	      "True if map is multiplied by weights")
 	    .add_property("size", &G3SkyMap::size, "Number of pixels in map")
+	    .def("__len__", &G3SkyMap::size, "Number of pixels in map")
 	    .add_property("shape", &skymap_shape, "Shape of map")
 	    .add_property("npix_allocated", &G3SkyMap::npix_allocated,
 	      "Number of pixels in map currently stored in memory")
