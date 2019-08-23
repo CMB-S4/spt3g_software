@@ -34,17 +34,13 @@ G3Writer::~G3Writer()
 
 void G3Writer::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 {
-	if (streams_.size() > 0 &&
-	    std::find(streams_.begin(), streams_.end(), frame->type) ==
-	    streams_.end())
-		goto out;
-
 	if (frame->type == G3Frame::EndProcessing)
 		stream_.reset();
-	else
+	else if (streams_.size() == 0 ||
+	    std::find(streams_.begin(), streams_.end(), frame->type) !=
+	    streams_.end())
 		frame->save(stream_);
 
-out:
 	out.push_back(frame);
 }
 
