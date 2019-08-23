@@ -46,6 +46,8 @@ public:
 	std::vector<size_t> shape() const override;
 	size_t npix_allocated() const override;
 	bool IsCompatible(const G3SkyMap & other) const override;
+	void NonZeroPixels(std::vector<uint32_t> &indices,
+	    std::vector<double> &data) const; // Iterators better?
 
 	size_t nside() const {return nside_;}
 

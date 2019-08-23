@@ -438,6 +438,47 @@ HealpixSkyMap::IsCompatible(const G3SkyMap & other) const
 	}
 }
 
+void
+HealpixSkyMap::NonZeroPixels(std::vector<uint32_t> &indices,
+    std::vector<double> &data) const
+{
+	indices.clear();
+	data.clear();
+
+	indices.reserve(npix_allocated());
+	data.reserve(npix_allocated());
+
+	if (ring_sparse_) {
+		long i = 0;
+		/* XXX pretty inefficient */
+		for (long j = 0; j < ring_info_->nring; j++) {
+			for (long k = 0; k < ring_info_->rings[j].ringpix; k++){
+				double val = (*ring_sparse_)(j, k);
+				if (val != 0) {
+					indices.push_back(i);
+					data.push_back(val);
+				}
+				i++;
+			}
+		}
+	} else if (indexed_sparse_) {
+		for (auto i : *indexed_sparse_) {
+			if (i.second != 0) {
+				indices.push_back(i.first);
+				data.push_back(i.second);
+			}
+		}
+	} else if (dense_) {
+		for (size_t i = 0; i < dense_->size(); i++) {
+			if ((*dense_)[i] != 0) {
+				indices.push_back(i);
+				data.push_back((*dense_)[i]);
+			}
+		}
+	}
+}
+
+
 std::vector<size_t>
 HealpixSkyMap::shape() const
 {
@@ -575,6 +616,17 @@ HealpixSkyMap_setindexedsparse(HealpixSkyMap &m, bool v)
 		m.ConvertToRingSparse();
 }
 
+static boost::python::tuple
+HealpixSkyMap_nonzeropixels(const HealpixSkyMap &m)
+{
+	auto i = std::vector<uint32_t>(); // XXX pointers?
+	auto d = std::vector<double>();
+
+	m.NonZeroPixels(i, d);
+
+	return boost::python::make_tuple(i, d);
+}
+
 static int
 HealpixSkyMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 {
@@ -679,6 +731,10 @@ PYBINDINGS("coordinateutils")
 	        "and values. More efficient than ring-sparse for maps with "
                 "holes or very small filling factors. "
 	        "If set to True, converts the map to this representation." )
+
+	    .def("nonzero_pixels", &HealpixSkyMap_nonzeropixels,
+	        "Returns a list of the indices of the non-zero pixels in the "
+	        "map and a list of the values of those non-zero pixels.")
 	;
 	register_pointer_conversions<HealpixSkyMap>();
 

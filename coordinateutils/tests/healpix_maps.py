@@ -15,6 +15,8 @@ assert(x[1499] == 1499)
 assert(x[1501] == 0)
 
 # Test conversion between representations is lossless
+# Along the way, test nonzero_pixels() once for each
+# representation.
 
 x.dense = True # Indexed-sparse to dense
 assert(x.npix_allocated == x.size)
@@ -35,6 +37,10 @@ for i in range(1,1500):
 	assert(x[i] == i)
 assert(x[1501] == 0)
 
+k,v = x.nonzero_pixels()
+assert(len(k) == len(v) == 1500)
+assert(set(v) == set(a)) # Lazy test that doesn't care about order
+
 x.ringsparse = True # Indexed to ring
 assert(x.nside == 64)
 assert(x.npix_allocated == 1500)
@@ -47,12 +53,20 @@ assert(x.npix_allocated == x.size)
 assert(len({x[i] for i in range(x.size) if x[i] != 0}) == 1500)
 assert(x[1501] == 0)
 
+k,v = x.nonzero_pixels()
+assert(len(k) == len(v) == 1500)
+assert(set(v) == set(a))
+
 x.indexedsparse = True # Dense to indexed
 assert(x.nside == 64)
 assert(x.npix_allocated == 1500)
 for i in range(1,1500):
 	assert(x[i] == i)
 assert(x[1501] == 0)
+
+k,v = x.nonzero_pixels()
+assert(len(k) == len(v) == 1500)
+assert(set(v) == set(a))
 
 # Initialization from dense arrays
 a = numpy.arange(49152)
