@@ -236,6 +236,96 @@ HealpixSkyMap::load(A &ar, unsigned v)
 	}
 }
 
+void
+HealpixSkyMap::ConvertToDense()
+{
+	if (dense_)
+		return;
+
+	dense_ = new std::vector<double>(nside2npix(nside_), 0);
+
+	if (ring_sparse_) {
+		long i = 0;
+		/* XXX pretty inefficient */
+		for (long j = 0; j < ring_info_->nring; j++) {
+			for (long k = 0; k < ring_info_->rings[j].ringpix; k++)
+				(*dense_)[i++] = (*ring_sparse_)(j, k);
+		}
+		delete ring_sparse_;
+		ring_sparse_ = NULL;
+	} else if (indexed_sparse_) {
+		for (auto i : *indexed_sparse_)
+			(*dense_)[i.first] = i.second;
+		delete indexed_sparse_;
+		indexed_sparse_ = NULL;
+	}
+	/* otherwise leave it at zero since no data */
+}
+
+void
+HealpixSkyMap::ConvertToRingSparse()
+{
+	if (ring_sparse_)
+		return;
+
+	size_t maxringpix = 0;
+	for (long j = 0; j < ring_info_->nring; j++)
+		if (ring_info_->rings[j].ringpix > maxringpix)
+			maxringpix = ring_info_->rings[j].ringpix;
+	ring_sparse_ = new SparseMapData(ring_info_->nring, maxringpix);
+
+	if (dense_) {
+		auto *old_dense = dense_;
+		dense_ = NULL;
+
+		for (size_t i = 0; i < old_dense->size(); i++)
+			if ((*old_dense)[i] != 0)
+				(*this)[i] = (*old_dense)[i];
+		
+		delete old_dense;
+	} else if (indexed_sparse_) {
+		auto *oldis = indexed_sparse_;
+		indexed_sparse_ = NULL;
+
+		for (auto i : *oldis)
+			if (i.second != 0)
+				(*this)[i.first] = i.second;
+
+		delete oldis;
+	}
+}
+
+void
+HealpixSkyMap::ConvertToIndexedSparse()
+{
+	if (indexed_sparse_)
+		return;
+
+	indexed_sparse_ = new std::unordered_map<uint32_t, double>(
+	    nside2npix(nside_));
+
+	if (ring_sparse_) {
+		long i = 0;
+		/* XXX pretty inefficient */
+		for (long j = 0; j < ring_info_->nring; j++) {
+			for (long k = 0; k < ring_info_->rings[j].ringpix; k++){
+				double val = (*ring_sparse_)(j, k);
+				if (val != 0)
+					(*indexed_sparse_)[i] = val;
+				i++;
+			}
+		}
+		delete ring_sparse_;
+		ring_sparse_ = NULL;
+	} else if (dense_) {
+		for (size_t i = 0; i < dense_->size(); i++)
+			if ((*dense_)[i] != 0)
+				(*indexed_sparse_)[i] = (*dense_)[i];
+		delete dense_;
+		dense_ = NULL;
+	}
+}
+
 G3SkyMapPtr
 HealpixSkyMap::Clone(bool copy_data) const
 {
@@ -257,7 +347,7 @@ HealpixSkyMap::operator [] (int i) const
 			    i < ring_info_->rings[j].startpix +
 			    ring_info_->rings[j].ringpix)
 				return (*ring_sparse_)(j,
-				    ring_info_->rings[j].startpix);
+				    i - ring_info_->rings[j].startpix);
 		}
 	}
 	if (indexed_sparse_)
@@ -278,7 +368,7 @@ HealpixSkyMap::operator [] (int i)
 			    i < ring_info_->rings[j].startpix +
 			    ring_info_->rings[j].ringpix)
 				return (*ring_sparse_)(j,
-				    ring_info_->rings[j].startpix);
+				    i - ring_info_->rings[j].startpix);
 		}
 	}
 
@@ -458,6 +548,33 @@ G3SkyMapPtr HealpixSkyMap::rebin(size_t scale) const
 	return G3SkyMapPtr();
 }
 
+static void
+HealpixSkyMap_setdense(HealpixSkyMap &m, bool v)
+{
+	if (v)
+		m.ConvertToDense();
+	else
+		m.ConvertToIndexedSparse();
+}
+
+static void
+HealpixSkyMap_setringsparse(HealpixSkyMap &m, bool v)
+{
+	if (v)
+		m.ConvertToRingSparse();
+	else
+		m.ConvertToIndexedSparse();
+}
+
+static void
+HealpixSkyMap_setindexedsparse(HealpixSkyMap &m, bool v)
+{
+	if (v)
+		m.ConvertToIndexedSparse();
+	else
+		m.ConvertToRingSparse();
+}
+
 #if 0
 static int
 HealpixSkyMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
@@ -568,13 +685,19 @@ PYBINDINGS("coordinateutils")
 	    .def(bp::init<const HealpixSkyMap&>(bp::arg("healpix_map")))
 	    .def(bp::init<>())
 	    .add_property("nside", &HealpixSkyMap::nside)
-#if 0
-	    .add_property("sparse", flatskymap_pysparsity_get, flatskymap_pysparsity_set,
-	       "True if the map is stored with column and row zero-suppression, False if "
-	       "every pixel is stored. Map sparsity can be changed by setting this to True "
-	       "(or False).")
-#endif
+	    .add_property("dense", &HealpixSkyMap::IsDense, HealpixSkyMap_setdense,
+	        "True if the map is stored with all elements, False otherwise. "
 
+	        "If set to True, converts the map to a dense representation." )
+	    .add_property("ringsparse", &HealpixSkyMap::IsRingSparse, HealpixSkyMap_setringsparse,
+	        "True if the map is stored as a dense 2D region using ring "
+	        "ordering (analogous to FlatSkyMap's sparse mode. "
+	        "If set to True, converts the map to this representation." )
+	    .add_property("indexedsparse", &HealpixSkyMap::IsIndexedSparse, HealpixSkyMap_setindexedsparse,
+	        "True if the map is stored as a list of non-zero pixels "
+	        "and values. More efficient than ring-sparse for maps with "
+                "holes or very small filling factors. "
+	        "If set to True, converts the map to this representation." )
 	;
 	register_pointer_conversions<HealpixSkyMap>();
 

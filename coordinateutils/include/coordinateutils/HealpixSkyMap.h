@@ -60,8 +60,11 @@ public:
 	G3SkyMapPtr rebin(size_t scale) const override;
 
 	void ConvertToDense();
-	void ConvertToSparse();
+	void ConvertToRingSparse();
+	void ConvertToIndexedSparse();
 	bool IsDense() const { return (dense_ != NULL); }
+	bool IsRingSparse() const { return (indexed_sparse_ != NULL); }
+	bool IsIndexedSparse() const { return (indexed_sparse_ != NULL); }
 
 private:
 	uint32_t nside_;
