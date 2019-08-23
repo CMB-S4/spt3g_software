@@ -585,8 +585,43 @@ HealpixSkyMap::get_interp_pixels_weights(double alpha, double delta,
 
 G3SkyMapPtr HealpixSkyMap::rebin(size_t scale) const
 {
-	// XXX
+	if (nside_ % scale != 0)
+		log_fatal("Map nside must be a multiple of rebinning scale");
+
+	if (scale <= 1)
+		return Clone(true);
+
+	HealpixSkyMapPtr out(new HealpixSkyMap(nside_/scale, is_weighted,
+		    coord_ref, units, pol_type);
+
+#if 0
+	size_t scale2 = scale * scale;
+
+#ifdef OPENMP_FOUND
+#pragma omp parallel for
+#endif
+	for (long i = 0; i < out.size(); i++) {
+		long ipmin = out.hitpix->get_fullsky_index(i);
+		if (!is_nested_)
+			ring2nest(out.nside_, ipmin, &ipmin);
+		ipmin *= scale2;
+		double norm = 0;
+		for (size_t j = 0; j < scale2; j++) {
+			long ip = ipmin + j;
+			if (!is_nested_)
+				nest2ring(nside_, ip, &ip);
+			ip = hitpix->get_cutsky_index(ip);
+			if (ip >= size()) continue;
+			out[i] += data_[ip];
+			norm += 1.;
+		}
+		out[i] /= norm;
+	}
+
+	return out;
+#else
 	return G3SkyMapPtr();
+#endif
 }
 
 static void
