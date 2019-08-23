@@ -430,6 +430,29 @@ PYBINDINGS("coordinateutils") {
 	;
 	register_pointer_conversions<G3SkyMapWeights>();
 
+#if 0
+	EXPORT_FRAMEOBJECT(G3SkyMapWithWeights, init<>(), "Container for (potentially) polarized maps and weights")
+	    .def(bp::init<G3SkyMapPtr, G3SkyMapWeightsPtr>(
+	      (bp::arg("Tmap"),
+               bp::arg("Tweights") = G3SkyMapWeightsPtr())))
+	    .def(bp::init<G3SkyMapPtr, G3SkyMapPtr, G3SkyMapPtr, G3SkyMapWeightsPtr>(
+	      (bp::arg("T"), bp::arg("Q"), bp::arg("U"),
+               bp::arg("Tweights") = G3SkyMapWeightsPtr())))
+	    .def_readwrite("T",&G3SkyMapWithWeights::T)
+	    .def_readwrite("Q",&G3SkyMapWithWeights::Q)
+	    .def_readwrite("U",&G3SkyMapWithWeights::U)
+	    .def_readwrite("weights",&G3SkyMapWithWeights::weights)
+	    .def_readwrite("map_id",&G3SkyMapWithWeights::map_id)
+	    .add_property("weighted",&G3SkyMapWithWeights::IsWeighted)
+	    .add_property("polarized",&G3SkyMapWithWeights::IsPolarized)
+	    .def("remove_weights",&G3SkyMapWithWeights::RemoveWeights)
+	    .def("apply_weights",&G3SkyMapWithWeights::ApplyWeights)
+	    //.def("rebin", &G3SkyMapWithWeights::rebin) // XXX
+	    
+	    .def("Clone", &G3SkyMapWithWeights::Clone)
+	;
+	register_pointer_conversions<G3SkyMapWithWeights>();
+#endif
 
 }
 
