@@ -68,7 +68,7 @@ public:
 	void ConvertToRingSparse();
 	void ConvertToIndexedSparse();
 	bool IsDense() const { return (dense_ != NULL); }
-	bool IsRingSparse() const { return (indexed_sparse_ != NULL); }
+	bool IsRingSparse() const { return (ring_sparse_ != NULL); }
 	bool IsIndexedSparse() const { return (indexed_sparse_ != NULL); }
 
 private:
