@@ -592,7 +592,7 @@ G3SkyMapPtr HealpixSkyMap::rebin(size_t scale) const
 		return Clone(true);
 
 	HealpixSkyMapPtr out(new HealpixSkyMap(nside_/scale, is_weighted,
-		    coord_ref, units, pol_type);
+		    coord_ref, units, pol_type));
 
 #if 0
 	size_t scale2 = scale * scale;
