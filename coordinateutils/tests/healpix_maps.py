@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import numpy
-from spt3g import coordinateutils
+from spt3g import core, coordinateutils
 
 # Test initialization from sparse arrays
 
@@ -86,3 +86,12 @@ for i in range(0, len(a)):
 assert((numpy.asarray(x) == a).all())
 assert(x.dense) # Should be dense again
 
+# Conversion to/from flatsky maps
+fm_stub = coordinateutils.FlatSkyMap(
+        300, 300, core.G3Units.arcmin, proj=coordinateutils.MapProjection.ProjZEA
+)
+fm = coordinateutils.maputils.healpix_to_flatsky(x, map_stub=fm_stub)
+x2 = coordinateutils.maputils.flatsky_to_healpix(fm, map_stub=x.Clone(False))
+
+hitpix = numpy.asarray(x2) > 0
+assert(numpy.allclose(numpy.asarray(x)[hitpix], numpy.asarray(x2)[hitpix]))

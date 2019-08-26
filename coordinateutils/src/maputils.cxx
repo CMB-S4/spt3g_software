@@ -8,16 +8,12 @@
 #include <G3Logging.h>
 #include <G3Units.h>
 
-//#include <coordinateutils/CutSkyHealpixMap.h>
+#include <coordinateutils/HealpixSkyMap.h>
 #include <coordinateutils/FlatSkyMap.h>
 
 #include <coordinateutils/maputils.h>
 
 #include <iostream>
-
-#ifdef OPENMP_FOUND
-#include <omp.h>
-#endif
 
 using namespace G3Units;
 
@@ -42,9 +38,17 @@ void get_ra_dec_map_cpp(G3SkyMapConstPtr m, G3SkyMapPtr ra, G3SkyMapPtr dec)
 			xdec->ConvertToDense();
 	}
 
-#ifdef OPENMP_FOUND
-#pragma omp parallel for
-#endif
+	{
+		// These are going to be dense maps, so just start that way
+		HealpixSkyMapPtr xra = boost::dynamic_pointer_cast<HealpixSkyMap>(ra);
+		HealpixSkyMapPtr xdec = boost::dynamic_pointer_cast<HealpixSkyMap>(dec);
+
+		if (xra)
+			xra->ConvertToDense();
+		if (xdec)
+			xdec->ConvertToDense();
+	}
+
 	for (size_t i = 0; i < m->size(); i++) {
 		std::vector<double> radec = m->pixel_to_angle(i);
 		(*ra)[i] = radec[0];
@@ -69,9 +73,6 @@ void reproj_map(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool in
 		log_fatal("Input and output maps must use the same coordinates");
 	}
 
-#ifdef OPENMP_FOUND
-#pragma omp parallel for
-#endif
 	for (size_t i = 0; i < out_map->size(); i++) {
 		double val = 0;
 		if (rebin > 1) {
@@ -91,7 +92,8 @@ void reproj_map(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool in
 			else
 				val = (*in_map)[in_map->angle_to_pixel(radec[0], radec[1])];
 		}
-		(*out_map)[i] = val;
+		if (val != 0)
+			(*out_map)[i] = val;
 	}
 
 	out_map->coord_ref = in_map->coord_ref;
@@ -101,59 +103,6 @@ void reproj_map(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool in
 }
 
 
-#if 0
-void reproj_fullsky_healpix_map(std::vector<double> in_map, G3SkyMapPtr out_map,
-    bool nest, int rebin, bool interp)
-{
-	//grab our out ra dec values
-	out_map->EnsureAllocated();
-
-	long nside = npix2nside(in_map.size());
-	if (nside < 0) {
-		log_fatal("Input map has invalid size for a healpix map");
-	}
-	HealpixHitPix hitpix(nside, nest, out_map->coord_ref);
-
-#ifdef OPENMP_FOUND
-#pragma omp parallel for
-#endif
-	for (size_t i = 0; i < out_map->size(); i++) {
-		double val = 0;
-		if (rebin > 1) {
-			std::vector<double> ra, dec;
-			out_map->get_rebin_angles(i, rebin, ra, dec);
-			for (size_t j = 0; j < ra.size(); j++) {
-				if (interp) {
-					std::vector<long> pixels;
-					std::vector<double> weights;
-					hitpix.get_interp_pixels_weights(ra[j], dec[j], pixels, weights, false);
-					for (size_t k = 0; k < pixels.size(); k++) {
-						val += in_map[pixels[k]] * weights[k];
-					}
-				} else {
-					val += in_map[hitpix.angle_to_pixel(ra[j], dec[j], false)];
-				}
-			}
-			val /= ra.size();
-		} else {
-			std::vector<double> radec = out_map->pixel_to_angle(i);
-			if (interp) {
-				std::vector<long> pixels;
-				std::vector<double> weights;
-				hitpix.get_interp_pixels_weights(radec[0], radec[1], pixels, weights, false);
-				for (size_t j = 0; j < pixels.size(); j++) {
-					val += in_map[pixels[j]] * weights[j];
-				}
-			} else {
-				val += in_map[hitpix.angle_to_pixel(radec[0], radec[1], false)];
-			}
-		}
-		(*out_map)[i] = val;
-	}
-}
-#endif
-
-
 namespace bp = boost::python;
 void maputils_pybindings(void){
 	bp::def("get_ra_dec_map_cpp", get_ra_dec_map_cpp);
@@ -161,16 +110,6 @@ void maputils_pybindings(void){
 		(bp::arg("in_map"), bp::arg("out_map"), bp::arg("rebin")=1, bp::arg("interp")=false),
 		"Takes the data in in_map and reprojects it onto out_map.  out_map can\n"
 		"have a different projection, size, resolution, etc.  Optionally account\n"
-		"for sub-pixel structure by setting rebin > 1m and/or\n"
-		"enable bilinear interpolation of values from the input map by setting\n"
-		"interp = true.");
-#if 0
-	bp::def("reproj_fullsky_healpix_map", reproj_fullsky_healpix_map,
-		( bp::arg("in_map"), bp::arg("out_map"), bp::arg("nest")=false, bp::arg("rebin")=1, bp::arg("interp")=false),
-		"Takes the data in in_map (a full sky healpix map stored as a simple array)\n"
-		"and reprojects it onto out_map.  out_map can be any G3SkyMap instance.\n"
-		"Optionally account for sub-pixel structure by setting rebin > 1m and/or\n"
-		"enable bilinear interpolation of values from the input map by setting\n"
-		"interp = true.");
-#endif
+		"for sub-pixel structure by setting rebin > 1 and/or enable bilinear\n"
+		"interpolation of values from the input map by setting interp=True");
 }

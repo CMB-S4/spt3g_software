@@ -590,34 +590,29 @@ G3SkyMapPtr HealpixSkyMap::rebin(size_t scale) const
 	HealpixSkyMapPtr out(new HealpixSkyMap(nside_/scale, is_weighted,
 	    is_nested_, coord_ref, units, pol_type));
 
-#if 0
 	size_t scale2 = scale * scale;
 
-#ifdef OPENMP_FOUND
-#pragma omp parallel for
-#endif
-	for (long i = 0; i < out.size(); i++) {
-		long ipmin = out.hitpix->get_fullsky_index(i);
+	for (long i = 0; i < out->size(); i++) {
+		long ipmin = i;
 		if (!is_nested_)
-			ring2nest(out.nside_, ipmin, &ipmin);
+			ring2nest(out->nside_, ipmin, &ipmin);
 		ipmin *= scale2;
 		double norm = 0;
 		for (size_t j = 0; j < scale2; j++) {
 			long ip = ipmin + j;
 			if (!is_nested_)
 				nest2ring(nside_, ip, &ip);
-			ip = hitpix->get_cutsky_index(ip);
-			if (ip >= size()) continue;
-			out[i] += data_[ip];
+			double val = (*this)[ip];
+			if (val == 0)
+				continue;
+			(*out)[i] += val;
 			norm += 1.;
 		}
-		out[i] /= norm;
+		if (norm != 0)
+			(*out)[i] /= norm;
 	}
 
 	return out;
-#else
-	return G3SkyMapPtr();
-#endif
 }
 
 static void
@@ -767,7 +762,7 @@ PYBINDINGS("coordinateutils")
 	        "True if the map is stored as a dense 2D region using ring "
 	        "ordering (analogous to FlatSkyMap's sparse mode). "
 	        "Ring-sparsity is efficient for dense blocks on a ring-ordered "
-	        "map (e.g. a continous sky region), but is inefficient "
+	        "map (e.g. a continuous sky region), but is inefficient "
 	        "otherwise. It applies only to non-nested maps. "
 	        "If set to True, converts the map to this representation." )
 	    .add_property("indexedsparse", &HealpixSkyMap::IsIndexedSparse, HealpixSkyMap_setindexedsparse,
