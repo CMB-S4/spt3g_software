@@ -73,6 +73,7 @@ public:
 
 private:
 	uint32_t nside_;
+	uint32_t npix_;
 	bool is_nested_;
 	std::vector<double> *dense_;
 	SparseMapData *ring_sparse_;

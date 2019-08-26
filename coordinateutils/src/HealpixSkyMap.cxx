@@ -15,6 +15,7 @@ HealpixSkyMap::HealpixSkyMap(size_t nside, bool is_weighted, bool is_nested,
       indexed_sparse_(NULL)
 {
 	ring_info_ = init_map_info(nside, 1);
+	npix_ = nside2npix(nside);
 }
 
 HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool is_weighted,
@@ -33,6 +34,7 @@ HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool is_weighted,
 		// confusion gracefully.
 		nside_ = boost::python::extract<size_t>(v)();
 		ring_info_ = init_map_info(nside_, 1);
+		npix_ = nside2npix(nside_);
 		return;
 	}
 
@@ -84,6 +86,7 @@ HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool is_weighted,
 			log_fatal("Data must be double-precision (float64).");
 		}
 		ring_info_ = init_map_info(nside_, 1);
+		npix_ = nside2npix(nside_);
 		indexed_sparse_ = new std::unordered_map<uint32_t, double>;
 
 		for (size_t i = 0; i < indexview.len/indexview.itemsize; i++)
@@ -123,6 +126,7 @@ HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool is_weighted,
 		PyBuffer_Release(&view);
 
 		ring_info_ = init_map_info(nside_, 1);
+		npix_ = nside2npix(nside_);
 
 		return;
 	}
@@ -135,6 +139,7 @@ HealpixSkyMap::HealpixSkyMap() :
     dense_(NULL), ring_sparse_(NULL), indexed_sparse_(NULL)
 {
 	ring_info_ = init_map_info(nside_, 1);
+	npix_ = nside2npix(nside_);
 }
 
 HealpixSkyMap::HealpixSkyMap(const HealpixSkyMap & fm) :
@@ -149,6 +154,7 @@ HealpixSkyMap::HealpixSkyMap(const HealpixSkyMap & fm) :
 		indexed_sparse_ = new std::unordered_map<uint32_t, double>(
 		    *fm.indexed_sparse_);
 	ring_info_ = init_map_info(nside_, 1);
+	npix_ = nside2npix(nside_);
 }
 
 HealpixSkyMap::~HealpixSkyMap()
@@ -201,6 +207,7 @@ HealpixSkyMap::load(A &ar, unsigned v)
 
 	free_map_info(ring_info_);
 	ring_info_ = init_map_info(nside_, 1);
+	npix_ = nside2npix(nside_);
 
 	if (dense_) {
 		delete dense_;
@@ -238,7 +245,7 @@ HealpixSkyMap::ConvertToDense()
 	if (dense_)
 		return;
 
-	dense_ = new std::vector<double>(nside2npix(nside_), 0);
+	dense_ = new std::vector<double>(npix_, 0);
 
 	if (ring_sparse_) {
 		long i = 0;
@@ -297,8 +304,7 @@ HealpixSkyMap::ConvertToIndexedSparse()
 	if (indexed_sparse_)
 		return;
 
-	indexed_sparse_ = new std::unordered_map<uint32_t, double>(
-	    nside2npix(nside_));
+	indexed_sparse_ = new std::unordered_map<uint32_t, double>(npix_);
 
 	if (ring_sparse_) {
 		long i = 0;
@@ -335,6 +341,9 @@ HealpixSkyMap::Clone(bool copy_data) const
 double
 HealpixSkyMap::operator [] (int i) const
 {
+	if (i < 0 || i >= npix_)
+		return 0;
+
 	if (dense_)
 		return (*dense_)[i];
 	if (ring_sparse_) {
@@ -354,7 +363,9 @@ HealpixSkyMap::operator [] (int i) const
 double &
 HealpixSkyMap::operator [] (int i)
 {
-	// XXX: bounds checking
+	assert(i >= 0);
+	assert(i < npix_);
+
 	if (dense_)
 		return (*dense_)[i];
 
@@ -371,7 +382,7 @@ HealpixSkyMap::operator [] (int i)
 	if (indexed_sparse_)
 		return (*indexed_sparse_)[i];
 
-	indexed_sparse_ = new std::unordered_map<uint32_t, double>;
+	indexed_sparse_ = new std::unordered_map<uint32_t, double>(npix_);
 	return (*indexed_sparse_)[i];
 }
 
@@ -479,7 +490,7 @@ std::vector<size_t>
 HealpixSkyMap::shape() const
 {
 	std::vector<size_t> shape(1);
-	shape[0] = nside2npix(nside_);
+	shape[0] = npix_;
 	return shape;
 }
 
