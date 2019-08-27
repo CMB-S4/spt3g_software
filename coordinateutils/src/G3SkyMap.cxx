@@ -257,6 +257,23 @@ skymap_copy(G3SkyMap &r)
 	return r.Clone(true);
 }
 
+#define skymap_pynoninplace(name, oper, rhs_type) \
+static G3SkyMapPtr \
+pyskymap_##name(const G3SkyMap &a, const rhs_type b) \
+{ \
+	G3SkyMapPtr rv = a.Clone(true); \
+	(*rv) oper b; \
+	return rv; \
+}
+
+skymap_pynoninplace(add, +=, G3SkyMap &)
+skymap_pynoninplace(addd, +=, double)
+skymap_pynoninplace(sub, -=, G3SkyMap &)
+skymap_pynoninplace(subd, -=, double)
+skymap_pynoninplace(mult, *=, G3SkyMap &)
+skymap_pynoninplace(multd, *=, double)
+skymap_pynoninplace(div, /=, G3SkyMap &)
+skymap_pynoninplace(divd, /=, double)
 
 StokesVector & StokesVector::operator /=(const MuellerMatrix &r)
 {
@@ -413,6 +430,17 @@ PYBINDINGS("coordinateutils") {
 	    .def(bp::self *= double())
 	    .def(bp::self -= double())
 	    .def(bp::self /= double())
+
+	    .def("__add__", &pyskymap_add)
+	    .def("__add__", &pyskymap_addd)
+	    .def("__sub__", &pyskymap_sub)
+	    .def("__sub__", &pyskymap_subd)
+	    .def("__mult__", &pyskymap_mult)
+	    .def("__mult__", &pyskymap_multd)
+	    .def("__div__", &pyskymap_div)
+	    .def("__div__", &pyskymap_divd)
+	    .def("__truediv__", &pyskymap_div)
+	    .def("__truediv__", &pyskymap_divd)
 	;
 
 	EXPORT_FRAMEOBJECT(G3SkyMapWeights, init<>(), "generic sky weight")
