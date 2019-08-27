@@ -87,7 +87,7 @@ HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool is_weighted,
 		}
 		ring_info_ = init_map_info(nside_, 1);
 		npix_ = nside2npix(nside_);
-		indexed_sparse_ = new std::unordered_map<uint32_t, double>;
+		indexed_sparse_ = new std::unordered_map<uint64_t, double>;
 
 		for (size_t i = 0; i < indexview.len/indexview.itemsize; i++)
 			(*indexed_sparse_)[((unsigned long *)indexview.buf)[i]]=
@@ -151,7 +151,7 @@ HealpixSkyMap::HealpixSkyMap(const HealpixSkyMap & fm) :
 	else if (fm.ring_sparse_)
 		ring_sparse_ = new SparseMapData(*fm.ring_sparse_);
 	else if (fm.indexed_sparse_)
-		indexed_sparse_ = new std::unordered_map<uint32_t, double>(
+		indexed_sparse_ = new std::unordered_map<uint64_t, double>(
 		    *fm.indexed_sparse_);
 	ring_info_ = init_map_info(nside_, 1);
 	npix_ = nside2npix(nside_);
@@ -233,7 +233,7 @@ HealpixSkyMap::load(A &ar, unsigned v)
 		ar & make_nvp("data", *ring_sparse_);
 		break;
 	case 1:
-		indexed_sparse_ = new std::unordered_map<uint32_t, double>;
+		indexed_sparse_ = new std::unordered_map<uint64_t, double>;
 		ar & make_nvp("data", *indexed_sparse_);
 		break;
 	}
@@ -304,7 +304,7 @@ HealpixSkyMap::ConvertToIndexedSparse()
 	if (indexed_sparse_)
 		return;
 
-	indexed_sparse_ = new std::unordered_map<uint32_t, double>(npix_);
+	indexed_sparse_ = new std::unordered_map<uint64_t, double>(npix_);
 
 	if (ring_sparse_) {
 		long i = 0;
@@ -339,7 +339,7 @@ HealpixSkyMap::Clone(bool copy_data) const
 }
 
 double
-HealpixSkyMap::operator [] (int i) const
+HealpixSkyMap::operator [] (size_t i) const
 {
 	if (i < 0 || i >= npix_)
 		return 0;
@@ -361,7 +361,7 @@ HealpixSkyMap::operator [] (int i) const
 }
 
 double &
-HealpixSkyMap::operator [] (int i)
+HealpixSkyMap::operator [] (size_t i)
 {
 	assert(i >= 0);
 	assert(i < npix_);
@@ -382,7 +382,7 @@ HealpixSkyMap::operator [] (int i)
 	if (indexed_sparse_)
 		return (*indexed_sparse_)[i];
 
-	indexed_sparse_ = new std::unordered_map<uint32_t, double>(npix_);
+	indexed_sparse_ = new std::unordered_map<uint64_t, double>(npix_);
 	return (*indexed_sparse_)[i];
 }
 
@@ -446,7 +446,7 @@ HealpixSkyMap::IsCompatible(const G3SkyMap & other) const
 }
 
 void
-HealpixSkyMap::NonZeroPixels(std::vector<uint32_t> &indices,
+HealpixSkyMap::NonZeroPixels(std::vector<uint64_t> &indices,
     std::vector<double> &data) const
 {
 	indices.clear();
@@ -663,7 +663,7 @@ HealpixSkyMap_setindexedsparse(HealpixSkyMap &m, bool v)
 static boost::python::tuple
 HealpixSkyMap_nonzeropixels(const HealpixSkyMap &m)
 {
-	auto i = std::vector<uint32_t>(); // XXX pointers?
+	auto i = std::vector<uint64_t>(); // XXX pointers?
 	auto d = std::vector<double>();
 
 	m.NonZeroPixels(i, d);

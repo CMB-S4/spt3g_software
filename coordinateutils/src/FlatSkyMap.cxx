@@ -7,7 +7,7 @@
 
 #include "mapdata.h"
 
-FlatSkyMap::FlatSkyMap(int x_len, int y_len, double res, bool is_weighted,
+FlatSkyMap::FlatSkyMap(size_t x_len, size_t y_len, double res, bool is_weighted,
     MapProjection proj, double alpha_center, double delta_center,
     MapCoordReference coord_ref, G3Timestream::TimestreamUnits u,
     G3SkyMap::MapPolType pol_type, double x_res) :
@@ -214,7 +214,7 @@ FlatSkyMap::Clone(bool copy_data) const
 }
 
 double
-FlatSkyMap::operator () (int x, int y) const
+FlatSkyMap::operator () (size_t x, size_t y) const
 {
 	if (dense_)
 		return (*dense_)(x, y);
@@ -224,7 +224,7 @@ FlatSkyMap::operator () (int x, int y) const
 }
 
 double &
-FlatSkyMap::operator () (int x, int y)
+FlatSkyMap::operator () (size_t x, size_t y)
 {
 	assert(x >= 0);
 	assert(y >= 0);
@@ -239,13 +239,13 @@ FlatSkyMap::operator () (int x, int y)
 }
 
 double
-FlatSkyMap::operator [] (int i) const
+FlatSkyMap::operator [] (size_t i) const
 {
 	return (*this)(i % xpix_, i / xpix_);
 }
 
 double &
-FlatSkyMap::operator [] (int i)
+FlatSkyMap::operator [] (size_t i)
 {
 	return (*this)(i % xpix_, i / xpix_);
 }
@@ -459,8 +459,8 @@ static PyBufferProcs flatskymap_bufferprocs;
 static double
 flatskymap_getitem_2d(const FlatSkyMap &skymap, bp::tuple coords)
 {
-	int y = bp::extract<int>(coords[0]); // Swapped to match numpy
-	int x = bp::extract<int>(coords[1]);
+	size_t y = bp::extract<size_t>(coords[0]); // Swapped to match numpy
+	size_t x = bp::extract<size_t>(coords[1]);
 	if (x < 0)
 		x = skymap.shape()[0] + x;
 	if (y < 0)
@@ -480,8 +480,8 @@ flatskymap_getitem_2d(const FlatSkyMap &skymap, bp::tuple coords)
 static double
 flatskymap_setitem_2d(FlatSkyMap &skymap, bp::tuple coords, double val)
 {
-	int y = bp::extract<int>(coords[0]); // Swapped to match numpy
-	int x = bp::extract<int>(coords[1]);
+	size_t y = bp::extract<size_t>(coords[0]); // Swapped to match numpy
+	size_t x = bp::extract<size_t>(coords[1]);
 	if (x < 0)
 		x = skymap.shape()[0] + x;
 	if (y < 0)
@@ -500,7 +500,7 @@ flatskymap_setitem_2d(FlatSkyMap &skymap, bp::tuple coords, double val)
 }
 
 static double
-flatskymap_getitem_1d(const G3SkyMap &skymap, int i)
+flatskymap_getitem_1d(const G3SkyMap &skymap, size_t i)
 {
 
         if (i < 0)
@@ -514,7 +514,7 @@ flatskymap_getitem_1d(const G3SkyMap &skymap, int i)
 }
 
 static void
-flatskymap_setitem_1d(G3SkyMap &skymap, int i, double val)
+flatskymap_setitem_1d(G3SkyMap &skymap, size_t i, double val)
 {
 
         if (i < 0)
@@ -581,7 +581,7 @@ PYBINDINGS("coordinateutils")
 	  "FlatSkyMap", FLAT_SKY_MAP_DOCSTR, boost::python::no_init)
 	    .def(boost::python::init<const FlatSkyMap &>())
 	    .def_pickle(g3frameobject_picklesuite<FlatSkyMap>())
-	    .def(bp::init<int, int, double, bool, MapProjection, double,
+	    .def(bp::init<size_t, size_t, double, bool, MapProjection, double,
 	       double, MapCoordReference, G3Timestream::TimestreamUnits,
 	       G3SkyMap::MapPolType, double>(
 	         (bp::arg("x_len"), bp::arg("y_len"), bp::arg("res"),

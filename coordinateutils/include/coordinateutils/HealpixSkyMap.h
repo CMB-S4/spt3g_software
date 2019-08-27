@@ -35,8 +35,8 @@ public:
 
 	~HealpixSkyMap();
 
-        double operator [] (int i) const override;
-        double &operator [] (int i) override;
+        double operator [] (size_t i) const override;
+        double &operator [] (size_t i) override;
 
 	// XXX Usefully implement in-place operators for sparse maps
 
@@ -48,7 +48,7 @@ public:
 	std::vector<size_t> shape() const override;
 	size_t npix_allocated() const override;
 	bool IsCompatible(const G3SkyMap & other) const override;
-	void NonZeroPixels(std::vector<uint32_t> &indices,
+	void NonZeroPixels(std::vector<uint64_t> &indices,
 	    std::vector<double> &data) const; // Iterators better?
 
 	size_t nside() const {return nside_;}
@@ -77,7 +77,7 @@ private:
 	bool is_nested_;
 	std::vector<double> *dense_;
 	SparseMapData *ring_sparse_;
-	std::unordered_map<uint32_t, double> *indexed_sparse_;
+	std::unordered_map<uint64_t, double> *indexed_sparse_;
 	map_info *ring_info_;
 
 	SET_LOGGER("HealpixSkyMap");

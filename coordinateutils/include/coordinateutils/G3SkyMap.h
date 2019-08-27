@@ -55,8 +55,8 @@ public:
 	}
 
 	// Return a (modifiable) pixel value
-	virtual double &operator [] (int i) = 0;
-	virtual double operator [] (int i) const = 0;
+	virtual double &operator [] (size_t i) = 0;
+	virtual double operator [] (size_t i) const = 0;
 
 	virtual size_t size(void) const;  // total number of pixels
 	virtual size_t npix_allocated(void) const = 0;  // stored in RAM

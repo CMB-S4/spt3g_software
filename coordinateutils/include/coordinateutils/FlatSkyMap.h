@@ -19,7 +19,7 @@ public:
 	// units, center, and coordinate system. If x_res is set to something
 	// non-zero, will set the X resolution to a different number than res,
 	// creating a map with rectangular pixels.
-	FlatSkyMap(int x_len, int y_len, double res, 
+	FlatSkyMap(size_t x_len, size_t y_len, double res,
  	    bool is_weighted = true,
 	    MapProjection proj = MapProjection::ProjNone, 
 	    double alpha_center = 0, double delta_center = 0, 
@@ -49,11 +49,11 @@ public:
 
 	~FlatSkyMap();
 
-        double operator [] (int i) const override;
-        double &operator [] (int i) override;
+        double operator [] (size_t i) const override;
+        double &operator [] (size_t i) override;
 
-        double operator () (int x, int y) const;
-        double &operator () (int i, int y);
+        double operator () (size_t x, size_t y) const;
+        double &operator () (size_t x, size_t y);
 
 	// XXX Usefully implement in-place operators for sparse maps
 
