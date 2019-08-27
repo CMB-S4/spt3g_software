@@ -244,7 +244,7 @@ skymap_shape(G3SkyMap &skymap)
 {
 	// Swap to match numpy's convention for shape()
 	std::vector<size_t> shape = skymap.shape();
-	std::vector<size_t> pyshape;
+	std::vector<uint64_t> pyshape;
 	for (ssize_t i = shape.size() - 1; i >= 0; i--)
 		pyshape.push_back(shape[i]);
 	
