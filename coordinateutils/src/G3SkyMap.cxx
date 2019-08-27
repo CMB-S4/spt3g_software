@@ -12,6 +12,8 @@ G3SkyMap::serialize(A &ar, unsigned v)
 	ar & cereal::make_nvp("coord_ref", coord_ref);
 	ar & cereal::make_nvp("units", units);
 	if (v == 1) {
+		// Old versions had the buffer here instead of
+		// in the derived class.
 		std::vector<double> dat;
 		ar & cereal::make_nvp("data", dat);
 		

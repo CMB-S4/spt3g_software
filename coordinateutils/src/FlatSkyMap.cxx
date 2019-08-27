@@ -171,6 +171,8 @@ FlatSkyMap::load(A &ar, unsigned v)
 void
 FlatSkyMap::init_from_v1_data(std::vector<size_t> dims, const std::vector<double> &data)
 {
+	xpix_ = dims[0];
+	ypix_ = dims[1];
 	dense_ = new DenseMapData(dims[0], dims[1]);
 	(*dense_) = data;
 }
@@ -577,7 +579,8 @@ PYBINDINGS("coordinateutils")
 
 	// Can't use the normal FRAMEOBJECT code since this inherits
 	// from an intermediate class. Expanded by hand here.
-	object fsm = class_<FlatSkyMap, bases<G3SkyMap>, FlatSkyMapPtr>(
+	object fsm = class_<FlatSkyMap, bases<G3SkyMap, G3FrameObject>,
+	  FlatSkyMapPtr>(
 	  "FlatSkyMap", FLAT_SKY_MAP_DOCSTR, boost::python::no_init)
 	    .def(boost::python::init<const FlatSkyMap &>())
 	    .def_pickle(g3frameobject_picklesuite<FlatSkyMap>())

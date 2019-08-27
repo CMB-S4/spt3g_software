@@ -735,7 +735,8 @@ PYBINDINGS("coordinateutils")
 
 	// Can't use the normal FRAMEOBJECT code since this inherits
 	// from an intermediate class. Expanded by hand here.
-	object hsm = class_<HealpixSkyMap, bases<G3SkyMap>, HealpixSkyMapPtr>(
+	object hsm = class_<HealpixSkyMap, bases<G3SkyMap, G3FrameObject>,
+	  HealpixSkyMapPtr>(
 	  "HealpixSkyMap", HEALPIX_SKY_MAP_DOCSTR, boost::python::no_init)
 	    .def(boost::python::init<const HealpixSkyMap &>())
 	    .def_pickle(g3frameobject_picklesuite<HealpixSkyMap>())
