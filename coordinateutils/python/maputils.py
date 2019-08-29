@@ -310,7 +310,7 @@ def load_skymap_fits(filename, hdu=None):
 
                 for cidx, hcol in enumerate(H.data.names):
                     col = col_dict.get(hcol, hcol)
-                    data = np.array(H.data[hcol])
+                    data = np.array(H.data[hcol], dtype=float)
 
                     if col == 'PIXEL' or (partial and cidx == 0):
                         pix = np.array(data, dtype=int)
