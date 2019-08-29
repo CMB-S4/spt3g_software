@@ -35,7 +35,7 @@ public:
 	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
 	    MapPolType pol_type = None) :
 	    coord_ref(coords), units(u), pol_type(pol_type),
-	    is_weighted(isweighted) {}
+	    is_weighted(isweighted), overflow(0) {}
 	virtual ~G3SkyMap() {};
 
 	// Reimplement the following in subclasses
