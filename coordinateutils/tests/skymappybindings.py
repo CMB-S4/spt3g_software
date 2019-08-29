@@ -1,18 +1,18 @@
 #!/usr/bin/env python
 
 import numpy
-from spt3g.coordinateutils import G3SkyMap, MapCoordReference
+from spt3g import core
+from spt3g.coordinateutils import FlatSkyMap, MapCoordReference
 
 # 1D arrays
-m = G3SkyMap(MapCoordReference.Equatorial, xpixels=500)
-assert(len(m.shape) == 1)
+m = FlatSkyMap(1, 500, core.G3Units.arcmin)
 assert(m.shape[0] == 500)
 m[15] = 65.4
 assert(numpy.asarray(m)[15] == 65.4)
 assert(numpy.asarray(m).shape == m.shape)
 
 # 2D arrays
-m = G3SkyMap(MapCoordReference.Equatorial, xpixels=500, ypixels=20)
+m = FlatSkyMap(500, 20, core.G3Units.arcmin)
 assert(len(m.shape) == 2)
 assert(m.shape[0] == 20)
 assert(m.shape[1] == 500)
@@ -26,7 +26,7 @@ assert(numpy.asarray(m).shape == m.shape)
 
 # Reverse direction 2D arrays
 w = numpy.random.uniform(size=(300,50))
-m = G3SkyMap(w, MapCoordReference.Equatorial)
+m = FlatSkyMap(w, core.G3Units.arcmin, coord_ref=MapCoordReference.Equatorial)
 assert(len(m.shape) == 2)
 assert(m.shape[0] == w.shape[0])
 assert(m.shape[1] == w.shape[1])
