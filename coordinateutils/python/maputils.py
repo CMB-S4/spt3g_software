@@ -241,14 +241,14 @@ def load_skymap_fits(filename, hdu=None):
                 alpha_center = hdr.get('ALPHA0', alpha_center)
                 delta_center = hdr.get('DELTA0', delta_center)
                 res = hdr.get('RES', res)
-                xres = hdr.get('XRES', hdr.get('RES', xres))
+                x_res = hdr.get('XRES', hdr.get('RES', xres))
 
                 map_opts.update(
                     proj=getattr(MapProjection, proj),
                     alpha_center=alpha_center,
                     delta_center=delta_center,
                     res=res,
-                    xres=xres,
+                    x_res=x_res,
                 )
 
             elif map_type == 'healpix':
@@ -489,14 +489,24 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False, prima
         header['ALPHA0'] = T.alpha_center
         header['DELTA0'] = T.delta_center
         header['RES'] = T.res
-        header['XRES'] = T.xres
+        header['XRES'] = T.x_res
 
         wcs = create_wcs_dict(T)
         for k, v in wcs.items():
             header[k] = v
+
+        bitpix = {
+            np.dtype(np.int16): 16,
+            np.dtype(np.int32): 32,
+            np.dtype(np.float32): -32,
+            np.dtype(np.float64): -64,
+        }
+        header['BITPIX'] = bitpix[np.asarray(T).dtype]
+        header['NAXIS'] = 2
+
     else:
         header['PIXTYPE'] = 'HEALPIX'
-        header['ORDERING'] = 'NEST' if T.is_nested else 'RING'
+        header['ORDERING'] = 'NEST' if T.nested else 'RING'
         header['NSIDE'] = T.nside
         if T.dense:
             header['INDXSCHM'] = 'IMPLICIT'
