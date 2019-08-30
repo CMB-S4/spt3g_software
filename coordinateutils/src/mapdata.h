@@ -85,7 +85,6 @@ public:
 
 	template <class A> void serialize(A &ar, unsigned v) {
 		using namespace cereal;
-		// XXX: size_t vs. uint64_t
 		ar & make_nvp("xlen", xlen_);
 		ar & make_nvp("ylen", ylen_);
 		ar & make_nvp("offset", offset_);

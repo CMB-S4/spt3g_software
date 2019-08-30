@@ -164,14 +164,11 @@ SparseMapData::operator/=(const SparseMapData &r)
 	assert(xlen_ == r.xlen_);
 	assert(ylen_ == r.ylen_);
 
-	for (size_t ix = 0; ix < data_.size(); ix++) {
-		size_t x = offset_ + ix;
-		data_element &column = data_[ix];
-		for (size_t iy = 0; iy < column.second.size(); iy++) {
-			size_t y = column.first + iy;
-			column.second[iy] /= r(x, y);
-		}
-	}
+	// Division by zero is not the same as doing nothing.
+	// Have to do this the long and painful way
+	for (size_t x = 0; x < xlen_; x++)
+		for (size_t y = 0; y < ylen_; y++)
+			(*this)(x, y) /= r(x, y);
 
 	return *this;
 }
@@ -182,14 +179,11 @@ SparseMapData::operator/=(const DenseMapData &r)
 	assert(xlen_ == r.xdim());
 	assert(ylen_ == r.ydim());
 
-	for (size_t ix = 0; ix < data_.size(); ix++) {
-		size_t x = offset_ + ix;
-		data_element &column = data_[ix];
-		for (size_t iy = 0; iy < column.second.size(); iy++) {
-			size_t y = column.first + iy;
-			column.second[iy] /= r(x, y);
-		}
-	}
+	// Division by zero is not the same as doing nothing.
+	// Have to do this the long and painful way
+	for (size_t x = 0; x < xlen_; x++)
+		for (size_t y = 0; y < ylen_; y++)
+			(*this)(x, y) /= r(x, y);
 
 	return *this;
 }
@@ -197,6 +191,8 @@ SparseMapData::operator/=(const DenseMapData &r)
 SparseMapData &
 SparseMapData::operator/=(double r)
 {
+	assert(r != 0);
+
 	for (size_t ix = 0; ix < data_.size(); ix++) {
 		size_t x = offset_ + ix;
 		data_element &column = data_[ix];
