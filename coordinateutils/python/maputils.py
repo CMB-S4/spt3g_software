@@ -430,7 +430,8 @@ def create_wcs_dict(skymap):
 
 
 @core.usefulfunc
-def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False, primary_header=True):
+def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
+                     primary_header=True, compress=True):
     """
     Save G3 map objects to a fits file.
 
@@ -533,7 +534,10 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False, prima
 
     for m, name in zip(maps, names):
         if flat:
-            hdu = astropy.io.fits.CompImageHDU(np.asarray(m), header=header)
+            if compress:
+                hdu = astropy.io.fits.CompImageHDU(np.asarray(m), header=header)
+            else:
+                hdu = astropy.io.fits.ImageHDU(np.asarray(m), header=header)
             hdu.header['ISWEIGHT'] = False
             hdu.header['POLTYPE'] = name
             hdu.header['OVERFLOW'] = m.overflow
@@ -582,7 +586,10 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False, prima
             assert T.IsCompatible(m), 'Weight {} is not compatible with T'.format(wt)
 
             if flat:
-                hdu = astropy.io.fits.CompImageHDU(np.asarray(m), header=header)
+                if compress:
+                    hdu = astropy.io.fits.CompImageHDU(np.asarray(m), header=header)
+                else:
+                    hdu = astropy.io.fits.ImageHDU(np.asarray(m), header=header)
                 hdu.header['ISWEIGHT'] = True
                 hdu.header['WTYPE'] = wt
                 hdu.header['OVERFLOW'] = m.overflow
