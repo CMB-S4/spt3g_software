@@ -25,11 +25,11 @@ def numpycompat(a, b, op):
     return numpyinplace(a, numpy.ndarray.__dict__[op](numpy.asarray(a), numpy.asarray(b)))
 
 
-for x in ['__add__', '__and__', '__div__', '__divmod__', '__floordiv__', '__ge__', '__gt__', '__iadd__', '__iand__', '__idiv__', '__ifloordiv__', '__imod__', '__imul__', '__ior__', '__ipow__', '__isub__', '__itruediv__', '__le__', '__lt__', '__mul__', '__neg__', '__nonzero__', '__or__', '__pow__', '__radd__', '__rdiv__', '__rdivmod__', '__rmod__', '__rmul__', '__rpow__', '__rsub__', '__rtruediv__', '__truediv__']:
+for x in ['__and__', '__divmod__', '__floordiv__', '__ge__', '__gt__', '__iand__', '__ifloordiv__', '__imod__', '__ior__', '__ipow__', '__le__', '__lt__', '__nonzero__', '__or__', '__pow__', '__rdivmod__', '__rmod__', '__rpow__']:
     setattr(G3SkyMap, x, lambda a, b, op=x: numpycompat(a, b, op))
 
 # Bind all numpy unary operators to G3SkyMap
-for x in ['__neg__', '__pos__', '__invert__']:
+for x in ['__pos__', '__invert__']:
     setattr(G3SkyMap, x, lambda a, op=x: numpyinplace(a, numpy.ndarray.__dict__[op](numpy.asarray(a))))
 
 # And some special binary operators

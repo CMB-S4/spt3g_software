@@ -55,7 +55,21 @@ public:
         double operator () (size_t x, size_t y) const;
         double &operator () (size_t x, size_t y);
 
-	// XXX Usefully implement in-place operators for sparse maps
+	// +
+	virtual G3SkyMap &operator+=(const G3SkyMap &rhs) override;
+	virtual G3SkyMap &operator+=(double rhs) override;
+
+	// -
+	virtual G3SkyMap &operator-=(const G3SkyMap &rhs) override;
+	virtual G3SkyMap &operator-=(double rhs) override;
+
+	// *
+	virtual G3SkyMap &operator*=(const G3SkyMap &rhs) override;
+	virtual G3SkyMap &operator*=(double rhs) override;
+
+	// /
+	virtual G3SkyMap &operator/=(const G3SkyMap &rhs) override;
+	virtual G3SkyMap &operator/=(double rhs) override;
 
 	template <class A> void load(A &ar, unsigned v);
 	template <class A> void save(A &ar, unsigned v) const;

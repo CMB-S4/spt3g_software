@@ -252,6 +252,142 @@ FlatSkyMap::operator [] (size_t i)
 	return (*this)(i % xpix_, i / xpix_);
 }
 
+#define flatskymap_arithmetic(op, sparsenull) \
+G3SkyMap &FlatSkyMap::operator op(const G3SkyMap &rhs) {\
+	assert(IsCompatible(rhs)); \
+	try { \
+		const FlatSkyMap& b = dynamic_cast<const FlatSkyMap &>(rhs); \
+		if (dense_) { \
+			if (b.dense_) \
+				(*dense_) op (*b.dense_); \
+			else if (b.sparse_) \
+				(*dense_) op (*b.sparse_); \
+			else \
+				sparsenull \
+		} else if (sparse_) { \
+			if (b.dense_) \
+				(*sparse_) op (*b.dense_); \
+			else if (b.sparse_) \
+				(*sparse_) op (*b.sparse_); \
+			else \
+				sparsenull \
+		} else { \
+			if (b.dense_) { \
+				ConvertToDense(); \
+				(*dense_) op (*b.dense_); \
+			} else if (b.sparse_) { \
+				sparse_ = new SparseMapData(xpix_, ypix_); \
+				(*sparse_) op (*b.sparse_); \
+			} else { \
+				sparsenull \
+			} \
+		} \
+		return *this; \
+	} catch (const std::bad_cast& e) { \
+		return G3SkyMap::operator op(rhs); \
+	} \
+}
+
+flatskymap_arithmetic(+=, {})
+flatskymap_arithmetic(-=, {})
+flatskymap_arithmetic(/=, {ConvertToDense(); (*this->dense_) /= 0;})
+
+G3SkyMap &FlatSkyMap::operator *=(const G3SkyMap &rhs) {
+	assert(IsCompatible(rhs));
+	try {
+		const FlatSkyMap& b = dynamic_cast<const FlatSkyMap &>(rhs);
+		bool zero = false;
+		if (dense_) {
+			if (b.dense_)
+				(*dense_) *= (*b.dense_);
+			else if (b.sparse_)
+				(*dense_) *= (*b.sparse_);
+			else 
+				zero = true;
+		} else if (sparse_) {
+			if (b.dense_)
+				(*sparse_) *= (*b.dense_);
+			else if (b.sparse_)
+				(*sparse_) *= (*b.sparse_);
+			else
+				zero = true;
+		} else {
+			zero = true;
+		}
+
+		if (zero) {
+			if (sparse_)
+				delete sparse_;
+			if (dense_)
+				delete dense_;
+			dense_=NULL;
+			sparse_=NULL;
+		}
+
+		return *this;
+	} catch (const std::bad_cast& e) {
+		return G3SkyMap::operator *=(rhs);
+	}
+}
+
+G3SkyMap &
+FlatSkyMap::operator +=(double b)
+{
+	if (b == 0)
+		return *this;
+
+	if (!dense_)
+		ConvertToDense();
+	(*dense_) += b;
+	return *this;
+}
+
+G3SkyMap &
+FlatSkyMap::operator -=(double b)
+{
+	if (b == 0)
+		return *this;
+
+	if (!dense_)
+		ConvertToDense();
+	(*dense_) -= b;
+	return *this;
+}
+
+G3SkyMap &
+FlatSkyMap::operator *=(double b)
+{
+	if (b == 0) {
+		if (sparse_)
+			delete sparse_;
+		if (dense_)
+			delete dense_;
+		sparse_ = NULL;
+		dense_ = NULL;
+		return *this;
+	}
+
+	if (dense_)
+		(*dense_) *=  b;
+	else if (sparse_)
+		(*sparse_) *=  b;
+	return *this;
+}
+
+G3SkyMap &
+FlatSkyMap::operator /=(double b)
+{
+	if (b == 0)
+		ConvertToDense();
+
+	if (dense_)
+		(*dense_) /= b;
+	else if (sparse_)
+		(*sparse_) /= b;
+
+	return *this;
+}
+
 std::string
 FlatSkyMap::Description() const
 {
