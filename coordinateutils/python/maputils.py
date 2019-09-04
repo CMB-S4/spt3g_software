@@ -223,7 +223,11 @@ def load_skymap_fits(filename, hdu=None):
                     )
 
             polcconv = hdr.get('POLCCONV', polcconv)
-            units = hdr.get('UNITS', units)
+            if 'TUNIT' in hdr:
+                udict = {'k_cmb': 'Tcmb'}
+                units = udict.get(hdr['TUNIT'].lower(), units)
+            else:
+                units = hdr.get('UNITS', units)
             if 'COORDSYS' in hdr:
                 cdict = {'C': 'Equatorial', 'G': 'Galactic', 'L': 'Local'}
                 coord_ref = cdict.get(hdr['COORDSYS'], coord_ref)
@@ -296,6 +300,10 @@ def load_skymap_fits(filename, hdu=None):
                     'IU': 'TU',
                 }
 
+                unit_dict = {
+                    'k_cmb': 'Tcmb',
+                }
+
                 pix = None
 
                 partial = hdr.get('INDXSCHM') == 'EXPLICIT' or hdr.get('OBJECT') == 'PARTIAL'
@@ -308,6 +316,7 @@ def load_skymap_fits(filename, hdu=None):
                         pix = np.array(data, dtype=int)
                         continue
 
+                    units = unit_dict.get(hdr.get('TUNIT{:d}'.format(cidx + 1), units), units)
                     overflow = hdr.get('TOFLW{:d}'.format(cidx + 1), overflow)
 
                     is_weight = hdr.get(
