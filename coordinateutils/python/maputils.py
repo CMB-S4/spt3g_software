@@ -257,7 +257,7 @@ def load_skymap_fits(filename, hdu=None):
             if map_type not in ['flat', 'healpix']:
                 raise ValueError("Unknown map type in HDU {}".format(hidx))
 
-            if map_type == 'flat' and hdr['ISWEIGHT']:
+            if map_type == 'flat' and hdr.get('ISWEIGHT', None):
                 # flat map weights
                 assert('T' in output)
                 if weight_type is None:
@@ -266,18 +266,19 @@ def load_skymap_fits(filename, hdu=None):
                 weight_map = output.setdefault(
                     'W', G3SkyMapWeights(output['T'], weight_type)
                 )
-                fm = FlatSkyMap(data, **map_opts)
+                fm = FlatSkyMap(data.astype(float), **map_opts)
                 fm.overflow = overflow
                 setattr(weight_map, hdr['WTYPE'], fm)
 
-            elif map_type == 'flat' and not hdr['ISWEIGHT']:
+            elif map_type == 'flat' and not hdr.get('ISWEIGHT', None):
                 # flat map data
-                pol_type = getattr(MapPolType, hdr['POLTYPE'])
+                ptype = hdr.get('POLTYPE', 'T')
+                pol_type = getattr(MapPolType, ptype)
                 if pol_type == MapPolType.U and polcconv == 'COSMO':
                     data *= -1
-                fm = FlatSkyMap(data, pol_type=pol_type, **map_opts)
+                fm = FlatSkyMap(data.astype(float), pol_type=pol_type, **map_opts)
                 fm.overflow = overflow
-                output[hdr['POLTYPE']] = fm
+                output[ptype] = fm
 
             elif map_type == 'healpix':
                 # healpix map data
@@ -471,7 +472,10 @@ def parse_wcs_header(header):
         coord_ref = MapCoordReference.Galactic
 
     # parse resolution
-    cdelt = w.wcs.cdelt
+    if w.wcs.has_cd():
+        cdelt = np.diag(w.wcs.cd)
+    else:
+        cdelt = w.wcs.cdelt
     x_res = np.abs(cdelt[0]) * core.G3Units.deg
     res = np.abs(cdelt[1]) * core.G3Units.deg
 
@@ -479,8 +483,8 @@ def parse_wcs_header(header):
     crval = w.wcs.crval
     alpha_center = crval[0] * core.G3Units.deg
 
-    if wcsproj in ['CAR', 'SFL'] and 'YDIM' in header:
-        ydim = header['YDIM']
+    if wcsproj in ['CAR', 'SFL']:
+        ydim = header['NAXIS2']
         crpix = w.wcs.crpix[1]
         delta_center = (ydim / 2.0 + 0.5 - crpix) * res
     else:
@@ -560,8 +564,6 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
         header = create_wcs_header(T)
 
         header['PROJ'] = str(T.proj)
-        header['XDIM'] = T.shape[1]
-        header['YDIM'] = T.shape[0]
 
         bitpix = {
             np.dtype(np.int16): 16,
