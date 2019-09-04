@@ -15,7 +15,7 @@ __all__ = [
     'save_skymap_fits',
     'SaveMapFrame',
     'load_proj_dict',
-    'create_wcs_dict',
+    'create_wcs_header',
 ]
 
 def get_ra_dec_map(map_in):
@@ -201,7 +201,7 @@ def load_skymap_fits(filename, hdu=None):
             hdr = H.header
             mtype = hdr.get('MAPTYPE', None)
 
-            if mtype == 'FLAT' or 'PROJ' in hdr:
+            if mtype == 'FLAT' or 'PROJ' in hdr or 'WCSAXES' in hdr or 'CTYPE1' in hdr:
                 # flat map
                 if not map_type:
                     map_type = 'flat'
@@ -211,7 +211,7 @@ def load_skymap_fits(filename, hdu=None):
                             map_type, hidx
                         )
                     )
-            elif mtype == 'HEALPIX' or hdr.get('PIXTYPE', None) == 'HEALPIX':
+            elif mtype == 'HEALPIX' or hdr.get('PIXTYPE', None) == 'HEALPIX' or 'NSIDE' in hdr:
                 # healpix map
                 if not map_type:
                     map_type = 'healpix'
@@ -237,19 +237,7 @@ def load_skymap_fits(filename, hdu=None):
             )
 
             if map_type == 'flat':
-                proj = hdr.get('PROJ', proj)
-                alpha_center = hdr.get('ALPHA0', alpha_center)
-                delta_center = hdr.get('DELTA0', delta_center)
-                res = hdr.get('RES', res)
-                x_res = hdr.get('XRES', hdr.get('RES', xres))
-
-                map_opts.update(
-                    proj=getattr(MapProjection, proj),
-                    alpha_center=alpha_center,
-                    delta_center=delta_center,
-                    res=res,
-                    x_res=x_res,
-                )
+                map_opts.update(parse_wcs_header(hdr))
 
             elif map_type == 'healpix':
                 nside = hdr['NSIDE']
@@ -295,6 +283,9 @@ def load_skymap_fits(filename, hdu=None):
                 # healpix map data
 
                 col_dict = {
+                    'TEMPERATURE': 'T',
+                    'Q_POLARISATION': 'Q',
+                    'U_POLARISATION': 'U',
                     'I_STOKES': 'T',
                     'Q_STOKES': 'Q',
                     'U_STOKES': 'U',
@@ -310,7 +301,7 @@ def load_skymap_fits(filename, hdu=None):
 
                 for cidx, hcol in enumerate(H.data.names):
                     col = col_dict.get(hcol, hcol)
-                    data = np.array(H.data[hcol], dtype=float)
+                    data = np.array(H.data[hcol], dtype=float).ravel()
 
                     if col == 'PIXEL' or (partial and cidx == 0):
                         pix = np.array(data, dtype=int)
@@ -359,7 +350,7 @@ def load_skymap_fits(filename, hdu=None):
 
 
 @core.usefulfunc
-def load_proj_dict():
+def load_proj_dict(inverse=False):
     """
     Dictionary that associates projection names to their three-letter codes in WCS.
     """
@@ -390,65 +381,159 @@ def load_proj_dict():
         'ProjCylindricalEqualArea': 'CEA',
         'ProjCEA': 'CEA',
         'ProjBICEP': 'CAR',
-        'ProjHealpix': '!!!',
+        'ProjHealpix': 'HPX',
     }
+
+    if inverse:
+        projdict_inverse = {}
+        for k, v in projdict.items():
+            projdict_inverse.setdefault(v, []).append(k)
+        return projdict_inverse
 
     return projdict
 
 
 @core.usefulfunc
-def create_wcs_dict(skymap):
+def create_wcs_header(skymap):
     """
     Creates WCS (world coordinate system) information from information in the
-    input G3SkyMap object.
+    input FlatSkyMap object.
     """
 
     projdict = load_proj_dict()
     proj_abbr = projdict[str(skymap.proj)]
 
-    wcsdict = {
-        'CRVAL1': skymap.alpha_center / core.G3Units.deg,
-        'CRVAL2': skymap.delta_center / core.G3Units.deg,
-        'CRPIX1': skymap.shape[1] / 2.0 + 0.5,
-        'CRPIX2': skymap.shape[0] / 2.0 + 0.5,
-        'CD1_1': -skymap.x_res / core.G3Units.deg,
-        'CD2_2': skymap.res / core.G3Units.deg,
-        'CD2_1': 0.,
-        'CD1_2': 0.,
-        'CTYPE1': 'RA---' + proj_abbr,
-        'CTYPE2': 'DEC--' + proj_abbr,
-        'CUNIT1': 'DEG',
-        'CUNIT2': 'DEG',
-    }
+    from astropy.wcs import WCS
 
-    # special voodoo for proj0 and proj1
-    if str(skymap.proj) in ['Proj0', 'Proj1', 'ProjSansonFlamsteed']:
-        wcsdict['CRVAL2'] = 0.
-        wcsdict['CRPIX2'] -= skymap.delta_center / skymap.res
+    w = WCS(naxis=2)
 
-    return wcsdict
+    if skymap.coord_ref == MapCoordReference.Equatorial:
+        w.wcs.ctype = ['RA---{}'.format(proj_abbr), 'DEC--{}'.format(proj_abbr)]
+        w.wcs.radesys = 'FK5'
+        w.wcs.equinox = 2000
+    elif skymap.coord_ref == MapCoordReference.Galactic:
+        w.wcs.ctype = ['GLON-{}'.format(proj_abbr), 'GLAT-{}'.format(proj_abbr)]
+    elif skymap.coord_ref == MapCoordReference.Local:
+        w.wcs.ctype = ['RA---{}'.format(proj_abbr), 'DEC--{}'.format(proj_abbr)]
+        w.wcs.radesys = 'ALTAZ'
+
+    w.wcs.cdelt = [
+        -skymap.x_res / core.G3Units.deg,
+        skymap.res / core.G3Units.deg,
+    ]
+    w.wcs.cunit = ['deg', 'deg']
+
+    crpix = [skymap.shape[1] / 2.0 + 0.5, skymap.shape[0] / 2.0 + 0.5]
+    crval = [
+        skymap.alpha_center / core.G3Units.deg,
+        skymap.delta_center / core.G3Units.deg,
+    ]
+    if proj_abbr in ['CAR', 'SFL']:
+        crpix[1] -= skymap.delta_center / skymap.res
+        crval[1] = 0.0
+    w.wcs.crpix = crpix
+    w.wcs.crval = crval
+
+    return w.to_header()
+
+
+@core.usefulfunc
+def parse_wcs_header(header):
+    """
+    Extract flat sky map keywords from a WCS fits header.  Raises an error if
+    the header is malformed.
+    """
+
+    from astropy.wcs import WCS
+    w = WCS(header)
+
+    # parse projection
+    ctype = w.wcs.ctype
+    wcsproj = ctype[0][-3:]
+    proj = header.get('PROJ', None)
+    projdict = load_proj_dict(inverse=True)
+    if wcsproj not in projdict or wcsproj == '!!!':
+        raise ValueError('Unknown WCS projection {}'.format(wcsproj))
+    projopts = projdict[wcsproj]
+    if proj is None:
+        proj = projopts[0]
+    elif proj not in projopts:
+        raise ValueError('PROJ keyword inconsistent with WCS coordinate type')
+
+    # parse coordinate system
+    coord_ref = None
+    if ctype[0].startswith('RA-'):
+        if w.wcs.radesys == 'FK5':
+            coord_ref = MapCoordReference.Equatorial
+        elif w.wcs.radesys == 'ALTAZ':
+            coord_ref = MapCoordReference.Local
+    elif ctype[0].startswith('GLON-'):
+        coord_ref = MapCoordReference.Galactic
+
+    # parse resolution
+    cdelt = w.wcs.cdelt
+    x_res = np.abs(cdelt[0]) * core.G3Units.deg
+    res = np.abs(cdelt[1]) * core.G3Units.deg
+
+    # parse map center
+    crval = w.wcs.crval
+    alpha_center = crval[0] * core.G3Units.deg
+
+    if wcsproj in ['CAR', 'SFL'] and 'YDIM' in header:
+        ydim = header['YDIM']
+        crpix = w.wcs.crpix[1]
+        delta_center = (ydim / 2.0 + 0.5 - crpix) * res
+    else:
+        delta_center = crval[1] * core.G3Units.deg
+
+    # construct arguments
+    map_opts = dict(
+        proj=getattr(MapProjection, proj),
+        res=res,
+        x_res=x_res,
+        alpha_center=alpha_center,
+        delta_center=delta_center,
+    )
+    if coord_ref is not None:
+        map_opts.update(coord_ref=coord_ref)
+
+    return map_opts
 
 
 @core.usefulfunc
 def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
-                     primary_header=True, compress=True):
+                     compress=True):
     """
     Save G3 map objects to a fits file.
+
+    `FlatSkyMap` objects are stored in a series of (optionally compressed)
+    `ImageHDU` entries, in which each HDU contains the projection information in
+    its header in standard WCS format, along with the image data for a single
+    map (one of the Stokes maps or a weight map component).
+
+    `HealpixSkyMap` objects are stored in a `BinTableHDU` extension, which
+    contains the necessary header information for compatiblity with healpix map
+    readers (e.g. `healpix.read_map`), and a single table with one column per
+    Stokes map or weight map component.  Sparse maps are stored as cut-sky
+    pixel-indexed tables, while dense maps are stored with implicit indexing
+    over all pixels.  The former produces output that is equivalent to using
+    `healpy.write_map` with the `partial=True` option.
 
     Arguments
     ---------
     filename : str
         Path to output file.  Must not exist, unless overwrite is True.
-    T[, Q, U] : G3SkyMap
+    T[, Q, U] : FlatSkyMap or HealpixSkyMap
         Maps to save
     W : G3SkyMapWeights
         Weights to save with the maps
     overwrite : bool
         If True, any existing file with the same name will be ovewritten.
-    primary_header : bool
-        If True, use the first (primary) HDU as a header, and store
-        map data in extensions.  Otherwise, the T map is written directly to the
-        primary HDU.  Use False to store a T-only map in an IDL-compatible file format.
+    compress : bool
+        If True, and if input maps are FlatSkyMap objects, store these in a
+        series of compressed image HDUs, one per map.  Otherwise, store input
+        maps in a series of standard ImageHDUs, which are readable with older
+        FITS readers (e.g. idlastro).
     """
 
     import astropy.io.fits
@@ -471,30 +556,12 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
         maps = [T]
         names = ['T']
 
-    header = astropy.io.fits.Header()
-    header['MAPTYPE'] = 'FLAT' if flat else 'HEALPIX'
-
-    header['COORDREF'] = str(T.coord_ref)
-    header['RADESYS'] = 'FK5'
-    header['EQUINOX'] = '2000'
-    header['POLCCONV'] = 'IAU'
-    header['UNITS'] = str(T.units)
-    header['WEIGHTED'] = T.is_weighted
-    if W is not None:
-        header['WGTTYPE'] = str(W.weight_type)
-
     if flat:
+        header = create_wcs_header(T)
+
+        header['PROJ'] = str(T.proj)
         header['XDIM'] = T.shape[1]
         header['YDIM'] = T.shape[0]
-        header['PROJ'] = str(T.proj)
-        header['ALPHA0'] = T.alpha_center
-        header['DELTA0'] = T.delta_center
-        header['RES'] = T.res
-        header['XRES'] = T.x_res
-
-        wcs = create_wcs_dict(T)
-        for k, v in wcs.items():
-            header[k] = v
 
         bitpix = {
             np.dtype(np.int16): 16,
@@ -506,6 +573,8 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
         header['NAXIS'] = 2
 
     else:
+        header = astropy.io.fits.Header()
+
         header['PIXTYPE'] = 'HEALPIX'
         header['ORDERING'] = 'NEST' if T.nested else 'RING'
         header['NSIDE'] = T.nside
@@ -515,6 +584,12 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
         else:
             header['INDXSCHM'] = 'EXPLICIT'
             header['OBJECT'] = 'PARTIAL'
+
+        cdict = {'Equatorial': 'C', 'Galactic': 'G', 'Local': 'L'}
+        header['COORDSYS'] = cdict[str(T.coord_ref)]
+        if header['COORDSYS'] == 'C':
+            header['RADESYS'] = 'FK5'
+            header['EQUINOX'] = 2000.0
 
         conv = {
             np.dtype(np.int16): 'I',
@@ -526,11 +601,15 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
         cols = []
         pix = None
 
-    hdulist = astropy.io.fits.HDUList()
+    header['MAPTYPE'] = 'FLAT' if flat else 'HEALPIX'
+    header['COORDREF'] = str(T.coord_ref)
+    header['POLCCONV'] = 'IAU'
+    header['UNITS'] = str(T.units)
+    header['WEIGHTED'] = T.is_weighted
+    if W is not None:
+        header['WGTTYPE'] = str(W.weight_type)
 
-    if primary_header:
-        hdu = astropy.io.fits.PrimaryHDU(header=header)
-        hdulist.append(hdu)
+    hdulist = astropy.io.fits.HDUList()
 
     for m, name in zip(maps, names):
         if flat:
@@ -597,6 +676,7 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
             else:
                 if not T.dense:
                     pix1, data = m.nonzero_pixels()
+                    pix1 = np.asarray(pix1)
                     data = np.asarray(data)
                     assert(len(pix) == len(pix1) and (pix == pix1).all())
                 else:
@@ -626,7 +706,7 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
 
 
 @core.indexmod
-def SaveMapFrame(frame, map_id, output_file, overwrite=False, primary_header=True):
+def SaveMapFrame(frame, map_id, output_file, overwrite=False):
     """
     Save the map with Id map_id into output_file.
     """
@@ -649,5 +729,4 @@ def SaveMapFrame(frame, map_id, output_file, overwrite=False, primary_header=Tru
         U=U,
         W=W,
         overwrite=overwrite,
-        primary_header=primary_header,
     )

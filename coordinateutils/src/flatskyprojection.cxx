@@ -119,10 +119,10 @@ bool FlatSkyProjection::IsCompatible(const FlatSkyProjection & other) const
 	return ((xpix_ == other.xpix_) &&
 		(ypix_ == other.ypix_) &&
 		(proj_ == other.proj_) &&
-		(alpha0_ == other.alpha0_) &&
-		(delta0_ == other.delta0_) &&
-		(x_res_ == other.x_res_) &&
-		(y_res_ == other.y_res_));
+		(fabs(alpha0_ - other.alpha0_) < 1e-12) &&
+		(fabs(delta0_ - other.delta0_) < 1e-12) &&
+		(fabs(x_res_ - other.x_res_) < 1e-12) &&
+		(fabs(y_res_ - other.y_res_) < 1e-12));
 }
 
 void FlatSkyProjection::initialize(size_t xpix, size_t ypix, double res,
@@ -132,6 +132,8 @@ void FlatSkyProjection::initialize(size_t xpix, size_t ypix, double res,
 	ypix_ = ypix;
 	set_proj(proj);
 	set_center(alpha_center, delta_center);
+	if (proj == Proj9)
+		x_res = (x_res > 0 ? x_res : res) / cosdelta0_;
 	set_res(res, x_res);
 }
 
@@ -211,6 +213,7 @@ FlatSkyProjection::xy_to_angle(double x, double y, bool wrap_alpha) const
 		alpha = x / COS(delta / rad) + alpha0_;
 		break;
 	}
+	case Proj9:
 	case Proj1: {
 		delta = delta0_ - y;
 		alpha = x + alpha0_;
@@ -299,11 +302,6 @@ FlatSkyProjection::xy_to_angle(double x, double y, bool wrap_alpha) const
 		delta = ASIN(k * SIN(h)) * rad;
 		break;
 	}
-	case Proj9: {
-		delta = delta0_ - y;
-		alpha = x / cosdelta0_ + alpha0_;
-		break;
-	}
 	default:
 		log_fatal("Proj %d not implemented", proj_);
 		break;
@@ -346,6 +344,7 @@ FlatSkyProjection::angle_to_xy(double alpha, double delta) const
 		y = delta0_ - delta;
 		break;
 	}
+	case Proj9:
 	case Proj1: {
 		x = dalpha;
 		y = delta0_ - delta;
@@ -398,11 +397,6 @@ FlatSkyProjection::angle_to_xy(double alpha, double delta) const
 		double cosdelta = COS(delta);
 		y = 90 * deg + delta0_ - ATAN2(COS(dalpha) * cosdelta, -SIN(delta)) * rad;
 		x = cosdelta * SIN(dalpha) * rad;
-		break;
-	}
-	case Proj9: {
-		x = dalpha * cosdelta0_;
-		y = delta0_ - delta;
 		break;
 	}
 	default:
