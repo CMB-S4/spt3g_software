@@ -18,7 +18,7 @@
 
 void
 g3_istream_from_path(boost::iostreams::filtering_istream &stream,
-    const std::string &path)
+                     const std::string &path, float timeout)
 {
 	stream.reset();
 	if (boost::algorithm::ends_with(path, ".gz"))
@@ -118,6 +118,16 @@ g3_istream_from_path(boost::iostreams::filtering_istream &stream,
 			if (fd == -1)
 				log_fatal("Could not connect to %s (%s)",
 				    path.c_str(), strerror(errno));
+
+                        if (timeout >= 0) {
+                                struct timeval tv;
+                                tv.tv_sec = (int)timeout;
+                                tv.tv_usec = (int)(1e6 * (timeout - tv.tv_sec));
+                                if (setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO,
+                                               (char *)&tv, sizeof(tv)) < 0)
+                                        log_fatal("Failed to set timeout on socket; errno=%i",
+                                                  errno);
+                        }
 
 			if (info != NULL)
 				freeaddrinfo(info);

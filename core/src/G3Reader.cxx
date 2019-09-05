@@ -4,9 +4,10 @@
 
 #include <boost/filesystem.hpp>
 
-G3Reader::G3Reader(std::string filename, int n_frames_to_read) : 
+G3Reader::G3Reader(std::string filename, int n_frames_to_read,
+    float timeout) :
     prefix_file_(false), n_frames_to_read_(n_frames_to_read),
-    n_frames_read_(0)
+    n_frames_read_(0), timeout_(timeout)
 {
 	boost::filesystem::path fpath(filename);
 	if (filename.find("://") == -1 &&
@@ -16,9 +17,10 @@ G3Reader::G3Reader(std::string filename, int n_frames_to_read) :
 	StartFile(filename);
 }
 
-G3Reader::G3Reader(std::vector<std::string> filename, int n_frames_to_read) :
+G3Reader::G3Reader(std::vector<std::string> filename, int n_frames_to_read,
+    float timeout) :
     prefix_file_(false), n_frames_to_read_(n_frames_to_read),
-    n_frames_read_(0)
+    n_frames_read_(0), timeout_(timeout)
 {
 	if (filename.size() == 0)
 		log_fatal("Empty file list provided to G3Reader");
@@ -39,7 +41,7 @@ void G3Reader::StartFile(std::string path)
 {
 	log_info("Starting file %s\n", path.c_str());
 	cur_file_ = path;
-	g3_istream_from_path(stream_, path);
+	g3_istream_from_path(stream_, path, timeout_);
 }
 
 void G3Reader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
@@ -98,11 +100,14 @@ PYBINDINGS("core") {
 	      "Read frames from disk. Takes either the path to a file to read "
 	      "or an iterable of files to be read in sequence. If "
 	      "n_frames_to_read is greater than zero, will stop after "
-	      "n_frames_to_read frames rather than at the end of the file[s].",
-	    init<std::string, int>((arg("filename"),
-	      arg("n_frames_to_read")=0)))
-		.def(init<std::vector<std::string>, int>((arg("filename"), 
-		  arg("n_frames_to_read")=0)))
+	      "n_frames_to_read frames rather than at the end of the file[s]. "
+              "The timeout parameter can used to enable socket timeout for tcp "
+              "streams, resulting in EOF behavior on expiry; unfortunately this "
+              "cannot be used for polling, you have to close the connection.",
+              init<std::string, int, float>((arg("filename"),
+                arg("n_frames_to_read")=0,arg("timeout")=-1.)))
+                .def(init<std::vector<std::string>, int, float>((arg("filename"), 
+                  arg("n_frames_to_read")=0, arg("timeout")=-1.)))
 		.def_readonly("__g3module__", true)
 	;
 }
