@@ -252,7 +252,7 @@ HealpixSkyMap::ConvertToDense()
 		/* XXX pretty inefficient */
 		for (long j = 0; j < ring_info_->nring; j++) {
 			for (long k = 0; k < ring_info_->rings[j].ringpix; k++)
-				(*dense_)[i++] = (*ring_sparse_).at(j, k);
+				(*dense_)[i++] = ring_sparse_->at(j, k);
 		}
 		delete ring_sparse_;
 		ring_sparse_ = NULL;
@@ -311,7 +311,7 @@ HealpixSkyMap::ConvertToIndexedSparse()
 		/* XXX pretty inefficient */
 		for (long j = 0; j < ring_info_->nring; j++) {
 			for (long k = 0; k < ring_info_->rings[j].ringpix; k++){
-				double val = (*ring_sparse_).at(j, k);
+				double val = ring_sparse_->at(j, k);
 				if (val != 0)
 					(*indexed_sparse_)[i] = val;
 				i++;
@@ -351,13 +351,13 @@ HealpixSkyMap::operator [] (size_t i) const
 			if (i >= ring_info_->rings[j].startpix &&
 			    i < ring_info_->rings[j].startpix +
 			    ring_info_->rings[j].ringpix)
-				return (*ring_sparse_).at(j,
+				return ring_sparse_->at(j,
 				    i - ring_info_->rings[j].startpix);
 		}
 	}
 	if (indexed_sparse_) {
 		try {
-			return (*indexed_sparse_).at(i);
+			return indexed_sparse_->at(i);
 		} catch (const std::out_of_range& e) {
 			return 0;
 		}
@@ -482,7 +482,7 @@ G3SkyMap &HealpixSkyMap::operator *=(const G3SkyMap &rhs) {
 				/* XXX pretty inefficient */
 				for (long j = 0; j < ring_info_->nring; j++) {
 					for (long k = 0; k < ring_info_->rings[j].ringpix; k++) {
-						double val = (*ring_sparse_).at(j, k);
+						double val = ring_sparse_->at(j, k);
 						if (val != 0)
 							(*ring_sparse_)(j, k) *= b[i];
 						i++;
@@ -537,7 +537,7 @@ G3SkyMap &HealpixSkyMap::operator /=(const G3SkyMap &rhs) {
 				/* XXX pretty inefficient */
 				for (long j = 0; j < ring_info_->nring; j++) {
 					for (long k = 0; k < ring_info_->rings[j].ringpix; k++) {
-						double val = (*ring_sparse_).at(j, k);
+						double val = ring_sparse_->at(j, k);
 						double valb = b[i];
 						if (valb == 0 || val != 0)
 							(*ring_sparse_)(j, k) /= valb;
@@ -565,7 +565,7 @@ G3SkyMap &HealpixSkyMap::operator /=(const G3SkyMap &rhs) {
 				ConvertToRingSparse();
 				for (long j = 0; j < ring_info_->nring; j++) {
 					for (long k = 0; k < ring_info_->rings[j].ringpix; k++)
-						(*ring_sparse_)(j, k) /= (*b.ring_sparse_).at(j, k);
+						(*ring_sparse_)(j, k) /= b.ring_sparse_->at(j, k);
 				}
 			} else if (b.indexed_sparse_) {
 				ConvertToIndexedSparse();
@@ -583,7 +583,7 @@ G3SkyMap &HealpixSkyMap::operator /=(const G3SkyMap &rhs) {
 
 		return *this;
 	} catch (const std::bad_cast& e) {
-		return G3SkyMap::operator *=(rhs);
+		return G3SkyMap::operator /=(rhs);
 	}
 	return *this;
 }
@@ -728,7 +728,7 @@ HealpixSkyMap::NonZeroPixels(std::vector<uint64_t> &indices,
 		/* XXX pretty inefficient */
 		for (long j = 0; j < ring_info_->nring; j++) {
 			for (long k = 0; k < ring_info_->rings[j].ringpix; k++){
-				double val = (*ring_sparse_).at(j, k);
+				double val = ring_sparse_->at(j, k);
 				if (val != 0) {
 					indices.push_back(i);
 					data.push_back(val);
