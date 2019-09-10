@@ -25,7 +25,7 @@ public:
 		return nz;
 	}
 
-	double operator()(size_t x, size_t y) const {
+	double at(size_t x, size_t y) const {
 		if (x < offset_ || x >= offset_ + data_.size())
 			return 0;
 		const data_element &column = data_[x-offset_];
@@ -34,6 +34,8 @@ public:
 			return 0;
 		return column.second[y-column.first];
 	}
+
+	double operator()(size_t x, size_t y) const { return at(x, y); }
 
 	double &operator()(size_t x, size_t y) {
 		assert(x >= 0);
