@@ -348,11 +348,9 @@ HealpixSkyMap::operator [] (size_t i) const
 		return (*dense_)[i];
 	if (ring_sparse_) {
 		for (long j = 0; j < ring_info_->nring; j++) {
-			if (i >= ring_info_->rings[j].startpix &&
-			    i < ring_info_->rings[j].startpix +
-			    ring_info_->rings[j].ringpix)
-				return ring_sparse_->at(j,
-				    i - ring_info_->rings[j].startpix);
+			long k = i - ring_info_->rings[j].startpix;
+			if (k >= 0 && k < ring_info_->rings[j].ringpix)
+				return ring_sparse_->at(j, k);
 		}
 	}
 	if (indexed_sparse_) {
@@ -377,11 +375,9 @@ HealpixSkyMap::operator [] (size_t i)
 
 	if (ring_sparse_) {
 		for (long j = 0; j < ring_info_->nring; j++) {
-			if (i >= ring_info_->rings[j].startpix &&
-			    i < ring_info_->rings[j].startpix +
-			    ring_info_->rings[j].ringpix)
-				return (*ring_sparse_)(j,
-				    i - ring_info_->rings[j].startpix);
+			long k = i - ring_info_->rings[j].startpix;
+			if (k >= 0 && k < ring_info_->rings[j].ringpix)
+				return (*ring_sparse_)(j, k);
 		}
 	}
 
