@@ -536,7 +536,7 @@ G3SkyMapPtr FlatSkyMap::rebin(size_t scale) const
 			double val;
 			for (size_t i = 0; i < xpix_; i++)
 				for (size_t j = 0; j < ypix_; j++) {
-					val = (*sparse_)(i, j);
+					val = sparse_->at(i, j);
 					if (val == 0) // XXX: more efficient?
 						continue;
 					(*out->sparse_)(i / scale, j / scale) +=
