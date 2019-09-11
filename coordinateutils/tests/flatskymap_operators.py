@@ -24,18 +24,27 @@ assert(m[15] == -9)
 assert(not m.sparse)
 assert(m[16] == -11)
 
+n = 1 - m
+assert(n[15] == 10)
+assert(n[16] == 12)
+
 a = -11 * np.ones(m.shape)
 a[0, 15] += 2
 assert((m == a).all()) # Implicitly tests numpy conversions too
 
 assert((m*0).npix_allocated == 0)
 
-# Map-by-map operations, with two sparse maps, one dense and one sparse,
-# and two dense
-
 m += 11
 m.sparse = True
 assert(m.npix_allocated == 1)
+
+n = 2. / m
+assert(n[15] == 1)
+assert(np.isinf(n[16]))
+assert(n.npix_allocated == n.size)
+
+# Map-by-map operations, with two sparse maps, one dense and one sparse,
+# and two dense
 
 m *= 2 # Get numbers bigger
 

@@ -279,6 +279,24 @@ skymap_pynoninplace(div, /=, G3SkyMap &)
 skymap_pynoninplace(divd, /=, double)
 
 static G3SkyMapPtr
+pyskymap_rsubd(const G3SkyMap &a, const double b)
+{
+	G3SkyMapPtr rv = pyskymap_subd(a, b);
+	(*rv) *= -1;
+	return rv;
+}
+
+static G3SkyMapPtr
+pyskymap_rdivd(const G3SkyMap &a, const double b)
+{
+	// XXX this is pretty inefficient
+	G3SkyMapPtr rv = a.Clone(false);
+	(*rv) += b;
+	(*rv) /= a;
+	return rv;
+}
+
+static G3SkyMapPtr
 pyskymap_neg(G3SkyMap &a)
 {
 	G3SkyMapPtr rv = a.Clone(true);
@@ -447,16 +465,16 @@ PYBINDINGS("coordinateutils") {
 	    .def("__radd__", &pyskymap_addd)
 	    .def("__sub__", &pyskymap_sub)
 	    .def("__sub__", &pyskymap_subd)
-	    .def("__rsub__", &pyskymap_subd)
+	    .def("__rsub__", &pyskymap_rsubd)
 	    .def("__mul__", &pyskymap_mult)
 	    .def("__mul__", &pyskymap_multd)
 	    .def("__rmul__", &pyskymap_multd)
 	    .def("__div__", &pyskymap_div)
 	    .def("__div__", &pyskymap_divd)
-	    .def("__rdiv__", &pyskymap_divd)
+	    .def("__rdiv__", &pyskymap_rdivd)
 	    .def("__truediv__", &pyskymap_div)
 	    .def("__truediv__", &pyskymap_divd)
-	    .def("__rtruediv__", &pyskymap_divd)
+	    .def("__rtruediv__", &pyskymap_rdivd)
 	    .def("__neg__", &pyskymap_neg)
 	;
 
