@@ -69,6 +69,7 @@ G3SkyMapWithWeights::serialize(A &ar, unsigned v)
 
 G3_SERIALIZABLE_CODE(G3SkyMap);
 G3_SERIALIZABLE_CODE(G3SkyMapWeights);
+G3_SERIALIZABLE_CODE(G3SkyMapWithWeights);
 
 G3SkyMapWeights::G3SkyMapWeights(G3SkyMapConstPtr ref, 
   G3SkyMapWeights::WeightType wt = G3SkyMapWeights::Wpol) :
