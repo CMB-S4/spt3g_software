@@ -16,6 +16,7 @@ __all__ = [
     'SaveMapFrame',
     'load_proj_dict',
     'create_wcs_header',
+    'parse_wcs_header',
 ]
 
 def get_ra_dec_map(map_in):
@@ -92,8 +93,11 @@ def healpix_to_flatsky(map_in, nest=False, map_stub=None, rebin=1, interp=False,
 
     # Populate output map pixels with interpolation and rebinning
     if not isinstance(map_in, HealpixSkyMap):
-        map_in = HealpixSkyMap(map_in, nside=nside, is_nested=nest,
-                               coord_ref=map_out.coord_ref)
+        map_in = HealpixSkyMap(map_in, is_nested=nest,
+                               coord_ref=map_out.coord_ref,
+                               is_weighted=map_out.is_weighted,
+                               units=map_out.units,
+                               pol_type=map_out.pol_type)
     reproj_map(map_in, map_out, rebin=rebin, interp=interp)
 
     return map_out
