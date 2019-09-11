@@ -444,8 +444,10 @@ PYBINDINGS("coordinateutils") {
 
 	    .def("__add__", &pyskymap_add)
 	    .def("__add__", &pyskymap_addd)
+	    .def("__radd__", &pyskymap_addd)
 	    .def("__sub__", &pyskymap_sub)
 	    .def("__sub__", &pyskymap_subd)
+	    .def("__rsub__", &pyskymap_subd)
 	    .def("__mul__", &pyskymap_mult)
 	    .def("__mul__", &pyskymap_multd)
 	    .def("__rmul__", &pyskymap_multd)
