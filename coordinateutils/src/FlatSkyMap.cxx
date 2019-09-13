@@ -510,9 +510,9 @@ void FlatSkyMap::get_interp_pixels_weights(double alpha, double delta,
 	proj_info.get_interp_pixels_weights(alpha, delta, pixels, weights);
 }
 
-G3SkyMapPtr FlatSkyMap::rebin(size_t scale) const
+G3SkyMapPtr FlatSkyMap::Rebin(size_t scale, bool norm) const
 {
-	const double sqscal = scale*scale;
+	const double sqscal = norm ? scale*scale : 1.0;
 	if ((xpix_ % scale != 0) || (ypix_ % scale != 0)) {
 		log_fatal("Map dimensions must be a multiple of rebinning scale");
 	}

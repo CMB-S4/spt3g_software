@@ -854,7 +854,7 @@ HealpixSkyMap::get_interp_pixels_weights(double alpha, double delta,
 	}
 }
 
-G3SkyMapPtr HealpixSkyMap::rebin(size_t scale) const
+G3SkyMapPtr HealpixSkyMap::Rebin(size_t scale, bool norm) const
 {
 	if (nside_ % scale != 0)
 		log_fatal("Map nside must be a multiple of rebinning scale");
@@ -865,26 +865,27 @@ G3SkyMapPtr HealpixSkyMap::rebin(size_t scale) const
 	HealpixSkyMapPtr out(new HealpixSkyMap(nside_/scale, is_weighted,
 	    is_nested_, coord_ref, units, pol_type));
 
-	size_t scale2 = scale * scale;
+	const size_t scale2 = scale * scale;
 
 	for (long i = 0; i < out->size(); i++) {
 		long ipmin = i;
 		if (!is_nested_)
 			ring2nest(out->nside_, ipmin, &ipmin);
 		ipmin *= scale2;
-		double norm = 0;
+		double n = 0;
 		for (size_t j = 0; j < scale2; j++) {
 			long ip = ipmin + j;
 			if (!is_nested_)
 				nest2ring(nside_, ip, &ip);
-			double val = (*this)[ip];
+			double val = this->at(ip);
 			if (val == 0)
 				continue;
 			(*out)[i] += val;
-			norm += 1.;
+                        if (norm)
+				n += 1.;
 		}
-		if (norm != 0)
-			(*out)[i] /= norm;
+		if (n != 0)
+			(*out)[i] /= n;
 	}
 
 	return out;

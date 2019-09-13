@@ -91,9 +91,9 @@ public:
 	virtual G3SkyMap &operator/=(double rhs);
 
 	// Pointing information
-	virtual std::vector<int> angles_to_pixels(const std::vector<double> & alphas,
+	std::vector<int> angles_to_pixels(const std::vector<double> & alphas,
 	    const std::vector<double> & deltas) const;
-	virtual void pixels_to_angles(const std::vector<int> & pixels,
+	void pixels_to_angles(const std::vector<int> & pixels,
 	    std::vector<double> & alphas, std::vector<double> & deltas) const;
 
 	virtual std::vector<double> pixel_to_angle(size_t pixel) const = 0;
@@ -110,7 +110,7 @@ public:
 	std::vector<double> get_interp_values(const std::vector<double> &alphas,
 	    const std::vector<double> &deltas) const;
 
-	virtual boost::shared_ptr<G3SkyMap> rebin(size_t scale) const = 0;
+	virtual boost::shared_ptr<G3SkyMap> Rebin(size_t scale, bool norm = true) const = 0;
 
 protected:
 	virtual void init_from_v1_data(std::vector<size_t>,
@@ -140,6 +140,7 @@ class StokesVector {
 public:
 	StokesVector(double &t_, double &q_, double &u_) :
 	    t(t_), q(q_), u(u_) {}
+	StokesVector(double &t_) : t(t_), q(backing[1]), u(backing[2]) {}
 	StokesVector(const StokesVector &r) : t(r.t), q(r.q), u(r.u) {}
 
 	// Note: the default constructor uses an internal buffer. This lets
@@ -183,6 +184,8 @@ public:
 	MuellerMatrix(double &tt_, double &tq_, double &tu_, double &qq_,
 	    double &qu_, double &uu_) : tt(tt_), tq(tq_), tu(tu_), qq(qq_),
 	    qu(qu_), uu(uu_) {}
+	MuellerMatrix(double &tt_) : tt(tt_), tq(backing[1]), tu(backing[2]),
+	    qq(backing[3]), qu(backing[4]), uu(backing[5]) {}
 	MuellerMatrix(const MuellerMatrix &r) : tt(r.tt), tq(r.tq), tu(r.tu),
 	    qq(r.qq), qu(r.qu), uu(r.uu) {}
 
@@ -252,14 +255,25 @@ public:
 	WeightType weight_type;
 
 	MuellerMatrix operator [] (int i) {
-		return MuellerMatrix((*TT)[i], (*TQ)[i], (*TU)[i], (*QQ)[i],
-		    (*QU)[i], (*UU)[i]);
+		return (weight_type == Wunpol) ? MuellerMatrix((*TT)[i]) :
+		    MuellerMatrix((*TT)[i], (*TQ)[i], (*TU)[i], (*QQ)[i],
+		        (*QU)[i], (*UU)[i]);
 	}
 
 	const MuellerMatrix at (int i) const {
-		return MuellerMatrix((*TT)[i], (*TQ)[i], (*TU)[i], (*QQ)[i],
-		    (*QU)[i], (*UU)[i]);
+		MuellerMatrix m;
+		m.tt = TT->at(i);
+		if (weight_type == Wpol) {
+			m.tq = TQ->at(i);
+			m.tu = TU->at(i);
+			m.qq = QQ->at(i);
+			m.qu = QU->at(i);
+			m.uu = UU->at(i);
+		}
+		return m;
 	}
+
+	boost::shared_ptr<G3SkyMapWeights> Rebin(size_t scale) const;
 
 	boost::shared_ptr<G3SkyMapWeights> Clone(bool copy_data) const {
 		if (copy_data)
@@ -281,25 +295,24 @@ public:
 	G3SkyMapWithWeights(G3SkyMapConstPtr ref_map, bool isweighted = true,
 	    bool ispolarized = true, std::string map_id = "");
 
-	G3SkyMapWithWeights(G3SkyMapPtr T, G3SkyMapWeightsPtr weights,
-	    bool isweighted = true, std::string map_id = "");
-	G3SkyMapWithWeights(G3SkyMapPtr T, G3SkyMapPtr Q, G3SkyMapPtr U,
-	    G3SkyMapWeightsPtr weights, bool isweighted = true,
-	    std::string map_id = "");
-
 	G3SkyMapWithWeights(const G3SkyMapWithWeights &r);
-
-	std::string map_id;
 
 	G3SkyMapPtr T, Q, U;
 	G3SkyMapWeightsPtr weights;
 
+	std::string map_id;
+
 	StokesVector operator [] (int i) {
-		return StokesVector((*T)[i], (*Q)[i], (*U)[i]);
+		return IsPolarized() ? StokesVector((*T)[i], (*Q)[i], (*U)[i]) :
+		    StokesVector((*T)[i]);
 	}
 
 	const StokesVector at (int i) const {
-		return StokesVector((*T)[i], (*Q)[i], (*U)[i]);
+		StokesVector v;
+		v.t = T->at(i);
+		v.q = !Q ? 0 : Q->at(i);
+		v.u = !U ? 0 : U->at(i);
+		return v;
 	}
 
 	bool IsWeighted() const {
@@ -318,12 +331,12 @@ public:
 			    this->IsWeighted(), this->IsPolarized());
 	}
 
-	void RemoveWeights();
+	G3SkyMapWeightsPtr RemoveWeights();
 	void ApplyWeights(G3SkyMapWeightsPtr weights);
 
 	StokesVector get_interp_value(double alpha, double delta) const;
 
-	boost::shared_ptr<G3SkyMapWithWeights> rebin(size_t scale) const;
+	boost::shared_ptr<G3SkyMapWithWeights> Rebin(size_t scale) const;
 
 private:
 	template <class A> void serialize(A &ar, const unsigned v);

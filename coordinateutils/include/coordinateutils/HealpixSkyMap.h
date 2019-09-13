@@ -76,7 +76,7 @@ public:
 	void get_interp_pixels_weights(double alpha, double delta,
 	    std::vector<long> & pixels, std::vector<double> & weights) const override;
 
-	G3SkyMapPtr rebin(size_t scale) const override;
+	G3SkyMapPtr Rebin(size_t scale, bool norm = true) const override;
 
 	void ConvertToDense();
 	void ConvertToRingSparse();

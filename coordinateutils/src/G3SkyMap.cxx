@@ -62,9 +62,9 @@ G3SkyMapWithWeights::serialize(A &ar, unsigned v)
 	    cereal::base_class<G3FrameObject>(this));
 	ar & cereal::make_nvp("map_id", map_id);
 	ar & cereal::make_nvp("T", T);
-        ar & cereal::make_nvp("Q", Q);
-        ar & cereal::make_nvp("U", U);
-        ar & cereal::make_nvp("weights", weights);
+	ar & cereal::make_nvp("Q", Q);
+	ar & cereal::make_nvp("U", U);
+	ar & cereal::make_nvp("weights", weights);
 }
 
 G3_SERIALIZABLE_CODE(G3SkyMap);
@@ -83,6 +83,24 @@ G3SkyMapWeights::G3SkyMapWeights(const G3SkyMapWeights &r) :
     TT(r.TT->Clone(true)), TQ(r.TQ->Clone(true)), TU(r.TU->Clone(true)),
     QQ(r.QQ->Clone(true)), QU(r.QU->Clone(true)), UU(r.UU->Clone(true)),
     weight_type(r.weight_type)
+{
+}
+
+G3SkyMapWithWeights::G3SkyMapWithWeights(G3SkyMapConstPtr ref,
+  bool isweighted, bool ispolarized, std::string map_id_) :
+    T(ref->Clone(false)), Q(ispolarized ? ref->Clone(false) : NULL),
+    U(ispolarized ? ref->Clone(false) : NULL),
+    weights(isweighted ? new G3SkyMapWeights(ref, ispolarized ?
+        G3SkyMapWeights::Wpol : G3SkyMapWeights::Wunpol) : NULL),
+    map_id(map_id_)
+{
+}
+
+G3SkyMapWithWeights::G3SkyMapWithWeights(const G3SkyMapWithWeights &r) :
+    T(r.T->Clone(true)), Q(!r.Q ? NULL : r.Q->Clone(true)),
+    U(!r.U ? NULL : r.U->Clone(true)),
+    weights(!r.weights ? NULL : r.weights->Clone(true)),
+    map_id(r.map_id)
 {
 }
 
@@ -346,25 +364,66 @@ void G3SkyMapWithWeights::ApplyWeights(G3SkyMapWeightsPtr w)
 	g3_assert(T->IsCompatible(*(w->TT)));
 
 	for (size_t pix = 0; pix < T->size(); pix++) {
-		// XXX implicitly densifies maps
-		(*this)[pix] = (*w)[pix] * (*this)[pix];
+		StokesVector v = this->at(pix);
+		if (IsPolarized() && !(v.t == 0 && v.q == 0 && v.u == 0))
+			(*this)[pix] = w->at(pix) * v;
+		else if (v.t != 0)
+			(*T)[pix] = w->TT->at(pix) * v.t;
 	}
 
 	// Store pointer to weights here
 	weights = w;
 }
 
-void G3SkyMapWithWeights::RemoveWeights()
+G3SkyMapWeightsPtr G3SkyMapWithWeights::RemoveWeights()
 {
 	g3_assert(IsWeighted());
 
 	for (size_t pix = 0; pix < T->size(); pix++) {
-		// XXX implicitly densifies maps
-		(*this)[pix] /= (*weights)[pix];
+		StokesVector v = this->at(pix);
+		if (IsPolarized() && !(v.t == 0 && v.q == 0 && v.u == 0))
+			(*this)[pix] /= weights->at(pix);
+		else if (v.t != 0)
+			(*T)[pix] = v.t / weights->TT->at(pix);
 	}
 
 	// Remove pointer to weights
+	G3SkyMapWeightsPtr wout = weights;
 	weights.reset();
+
+	return wout;
+}
+
+G3SkyMapWeightsPtr G3SkyMapWeights::Rebin(size_t scale) const
+{
+	G3SkyMapWeightsPtr out(new G3SkyMapWeights());
+
+	out->weight_type = weight_type;
+	out->TT = TT->Rebin(scale, false);
+	if (weight_type == Wpol) {
+		out->TQ = TQ->Rebin(scale, false);
+		out->TU = TU->Rebin(scale, false);
+		out->QQ = QQ->Rebin(scale, false);
+		out->QU = QU->Rebin(scale, false);
+		out->UU = UU->Rebin(scale, false);
+	}
+
+	return out;
+}
+
+G3SkyMapWithWeightsPtr G3SkyMapWithWeights::Rebin(size_t scale) const
+{
+	G3SkyMapWithWeightsPtr out(new G3SkyMapWithWeights());
+
+	bool w = IsWeighted();
+	bool p = IsPolarized();
+	out->T = T->Rebin(scale, !w);
+	out->Q = p ? Q->Rebin(scale, !w) : NULL;
+	out->U = p ? U->Rebin(scale, !w) : NULL;
+	out->weights = w ? weights->Rebin(scale) : NULL;
+	out->map_id = map_id;
+
+	return out;
 }
 
 PYBINDINGS("coordinateutils") {
@@ -446,10 +505,11 @@ PYBINDINGS("coordinateutils") {
 	       "Computes each value using bilinear interpolation over the "
 	       "map pixels.")
 
-	    .def("rebin", &G3SkyMap::rebin, bp::arg("scale"),
-	      "Rebin the map into larger pixels by averaging scale-x-scale "
-	      "blocks of pixels together.  Returns a new map object. "
-	      "Map dimensions must be a multiple of the rebinning scale.")
+	    .def("rebin", &G3SkyMap::Rebin, (bp::arg("scale"), bp::arg("norm")),
+	      "Rebin the map into larger pixels by summing (if norm is false) "
+	      "or averaging (if norm is true) scale-x-scale blocks of pixels "
+	      "together.  Returns a new map object.  Map dimensions must be a "
+	      "multiple of the rebinning scale.")
 
 	    .def(bp::self += bp::self)
 	    .def(bp::self *= bp::self)
@@ -489,19 +549,18 @@ PYBINDINGS("coordinateutils") {
 	    .def_readwrite("QU",&G3SkyMapWeights::QU)
 	    .def_readwrite("UU",&G3SkyMapWeights::UU)
 	    .def_readwrite("weight_type", &G3SkyMapWeights::weight_type)
+	    .def("rebin", &G3SkyMapWeights::Rebin)
 	    
 	    .def("Clone", &G3SkyMapWeights::Clone)
 	;
 	register_pointer_conversions<G3SkyMapWeights>();
 
-#if 0
 	EXPORT_FRAMEOBJECT(G3SkyMapWithWeights, init<>(), "Container for (potentially) polarized maps and weights")
-	    .def(bp::init<G3SkyMapPtr, G3SkyMapWeightsPtr>(
-	      (bp::arg("Tmap"),
-               bp::arg("Tweights") = G3SkyMapWeightsPtr())))
-	    .def(bp::init<G3SkyMapPtr, G3SkyMapPtr, G3SkyMapPtr, G3SkyMapWeightsPtr>(
-	      (bp::arg("T"), bp::arg("Q"), bp::arg("U"),
-               bp::arg("Tweights") = G3SkyMapWeightsPtr())))
+	    .def(bp::init<G3SkyMapPtr, bool, bool, std::string>(
+	      (bp::arg("stub_map"),
+               bp::arg("isweighted"),
+               bp::arg("ispolarized"),
+               bp::arg("map_id") = "")))
 	    .def_readwrite("T",&G3SkyMapWithWeights::T)
 	    .def_readwrite("Q",&G3SkyMapWithWeights::Q)
 	    .def_readwrite("U",&G3SkyMapWithWeights::U)
@@ -511,12 +570,11 @@ PYBINDINGS("coordinateutils") {
 	    .add_property("polarized",&G3SkyMapWithWeights::IsPolarized)
 	    .def("remove_weights",&G3SkyMapWithWeights::RemoveWeights)
 	    .def("apply_weights",&G3SkyMapWithWeights::ApplyWeights)
-	    //.def("rebin", &G3SkyMapWithWeights::rebin) // XXX
+	    .def("rebin", &G3SkyMapWithWeights::Rebin)
 	    
 	    .def("Clone", &G3SkyMapWithWeights::Clone)
 	;
 	register_pointer_conversions<G3SkyMapWithWeights>();
-#endif
 
 }
 
