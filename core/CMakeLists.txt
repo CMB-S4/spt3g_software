@@ -22,7 +22,7 @@ add_library(core SHARED
 	src/G3TriggeredBuilder.cxx src/G3MultiFileWriter.cxx src/dataio.cxx
 	src/crc32.c ${CORE_EXTRA_SRCS}
 	src/G3NetworkSender.cxx src/G3SyslogLogger.cxx
-	src/G3PipelineInfo.cxx
+	src/G3PipelineInfo.cxx src/G3Quat.cxx
 )
 target_link_libraries(core pthread ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${FLAC_LIBRARIES})
 link_python_dir()
@@ -63,4 +63,4 @@ add_spt3g_test(returnvals)
 add_spt3g_test(timestream_2d)
 add_spt3g_test(cached_frame)
 add_spt3g_test(pipelineinfo)
-
+add_spt3g_test(quaternions)

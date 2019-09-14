@@ -1,10 +1,12 @@
 from spt3g import core
 
+from spt3g.core import G3VectorQuat
+
 from spt3g.coordinateutils.azel import convert_azel_to_radec
 
 from spt3g.coordinateutils import MapCoordReference
 from spt3g.coordinateutils import create_det_az_el_trans, create_lazy_det_ra_dec_trans
-from spt3g.coordinateutils import create_det_ra_dec_trans, G3VectorQuat, convert_ra_dec_trans_to_gal
+from spt3g.coordinateutils import create_det_ra_dec_trans, convert_ra_dec_trans_to_gal
 
 from copy import copy
 import numpy as np

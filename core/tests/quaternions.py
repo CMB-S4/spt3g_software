@@ -1,15 +1,15 @@
 #!/usr/bin/env python
-from spt3g import core, coordinateutils
+from spt3g import core
 import numpy as np
 
-a = coordinateutils.quat(2,3,4,5)
+a = core.quat(2,3,4,5)
 
 assert(a+a == 2*a)
 assert(a+a == a*2)
 assert(a*a == a**2)
 assert(a*a*a == a**3)
 
-b = coordinateutils.G3VectorQuat([a, a**2, 2*a])
+b = core.G3VectorQuat([a, a**2, 2*a])
 
 assert(b[0].a == 2)
 assert(b[0].b == 3)
@@ -27,11 +27,11 @@ c = np.asarray(b)
 
 assert(c.shape == (3,4))
 
-assert(coordinateutils.quat(*c[0]) == a)
-assert(coordinateutils.quat(*c[1]) == b[1])
-assert(coordinateutils.quat(*c[1]) != b[2])
+assert(core.quat(*c[0]) == a)
+assert(core.quat(*c[1]) == b[1])
+assert(core.quat(*c[1]) != b[2])
 
-d = coordinateutils.G3VectorQuat(c)
+d = core.G3VectorQuat(c)
 
 assert(d[0] == b[0])
 assert(d[1] == b[1])
@@ -46,5 +46,5 @@ assert((2*np.asarray(b) == np.asarray(e)).all())
 e = b/2
 assert((np.asarray(b)/2 == np.asarray(e)).all())
 
-assert((np.asarray(b*b) == np.asarray(coordinateutils.G3VectorQuat([x**2 for x in b]))).all())
+assert((np.asarray(b*b) == np.asarray(core.G3VectorQuat([x**2 for x in b]))).all())
 

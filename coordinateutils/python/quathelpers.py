@@ -1,5 +1,4 @@
-from spt3g.coordinateutils import quat, G3VectorQuat
-from spt3g.core import G3Units
+from spt3g.core import G3Units, quat, G3VectorQuat
 import numpy
 
 def quat_to_ang(q):
