@@ -207,7 +207,7 @@ double G3SkyMap::get_interp_precalc(const std::vector<long> & pix,
 {
 	double outval = 0;
 	for (size_t i = 0; i < pix.size(); i++) {
-		outval += (*this)[pix[i]] * weight[i];
+		outval += this->at(pix[i]) * weight[i];
 	}
 	return outval;
 }
@@ -243,7 +243,7 @@ skymap_getitem(const G3SkyMap &skymap, int i)
 		bp::throw_error_already_set();
 	}
 
-	return skymap[i];
+	return skymap->at(i);
 }
 
 static void
