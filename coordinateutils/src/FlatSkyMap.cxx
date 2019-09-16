@@ -157,12 +157,16 @@ FlatSkyMap::load(A &ar, unsigned v)
 		}
 		switch (store) {
 		case 2:
-			dense_ = new DenseMapData(xpix_, ypix_);
+			dense_ = new DenseMapData(0, 0);
 			ar & make_nvp("dense", *dense_);
+			assert(sparse_->xdim() == xpix_);
+			assert(sparse_->ydim() == ypix_);
 			break;
 		case 1:
-			sparse_ = new SparseMapData(xpix_, ypix_);
+			sparse_ = new SparseMapData(0, 0);
 			ar & make_nvp("sparse", *sparse_);
+			assert(sparse_->xdim() == xpix_);
+			assert(sparse_->ydim() == ypix_);
 			break;
 		}
 	}
