@@ -66,6 +66,7 @@ def pop(self, key, default=None):
 G3FrameType.from_string = str_to_frame_types
 G3FrameType.key = type_enum_key
 G3Frame.iteritems = iteritems
+G3Frame.items = iteritems
 G3Frame.__iter__ = __iter__
 G3Frame.get = get
 G3Frame.setdefault = setdefault
