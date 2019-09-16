@@ -574,7 +574,7 @@ G3SkyMap &HealpixSkyMap::operator /=(const G3SkyMap &rhs) {
 		if (zero) {
 			ConvertToDense();
 			for (size_t i = 0; i < dense_->size(); i++)
-				(*dense_)[i] /= 0;
+				(*dense_)[i] /= 0.0;
 		}
 
 		return *this;

@@ -290,7 +290,7 @@ G3SkyMap &FlatSkyMap::operator op(const G3SkyMap &rhs) {\
 
 flatskymap_arithmetic(+=, {})
 flatskymap_arithmetic(-=, {})
-flatskymap_arithmetic(/=, {ConvertToDense(); (*this->dense_) /= 0;})
+flatskymap_arithmetic(/=, {ConvertToDense(); (*this->dense_) /= 0.0;})
 
 G3SkyMap &FlatSkyMap::operator *=(const G3SkyMap &rhs) {
 	assert(IsCompatible(rhs));
