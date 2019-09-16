@@ -27,7 +27,7 @@ FlatSkyMap::FlatSkyMap(boost::python::object v, double res,
 {
 	Py_buffer view;
 	if (PyObject_GetBuffer(v.ptr(), &view,
-	    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) != -1) {
+	    PyBUF_FORMAT | PyBUF_C_CONTIGUOUS) != -1) {
 		if (view.ndim == 2) {
 			ypix_ = view.shape[0];
 			xpix_ = view.shape[1];
