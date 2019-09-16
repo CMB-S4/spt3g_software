@@ -273,6 +273,16 @@ public:
 		return m;
 	}
 
+	// Coadd
+	G3SkyMapWeights &operator+=(const G3SkyMapWeights &rhs);
+
+	// Scale
+	G3SkyMapWeights &operator*=(double rhs);
+	G3SkyMapWeights &operator/=(double rhs);
+
+	// Mask
+	G3SkyMapWeights &operator*=(const G3SkyMap &rhs);
+
 	boost::shared_ptr<G3SkyMapWeights> Rebin(size_t scale) const;
 
 	boost::shared_ptr<G3SkyMapWeights> Clone(bool copy_data) const {
@@ -314,6 +324,16 @@ public:
 		v.u = !U ? 0 : U->at(i);
 		return v;
 	}
+
+	// Coadd
+	G3SkyMapWithWeights &operator+=(const G3SkyMapWithWeights &rhs);
+
+	// Scale
+	G3SkyMapWithWeights &operator*=(double rhs);
+	G3SkyMapWithWeights &operator/=(double rhs);
+
+	// Mask
+	G3SkyMapWithWeights &operator*=(const G3SkyMap &rhs);
 
 	bool IsWeighted() const {
 		return !!weights;

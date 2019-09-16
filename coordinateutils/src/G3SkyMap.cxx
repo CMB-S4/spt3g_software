@@ -1,6 +1,8 @@
 #include <pybindings.h>
 #include <serialization.h>
 #include <coordinateutils/G3SkyMap.h>
+#include <coordinateutils/FlatSkyMap.h>
+#include <coordinateutils/HealpixSkyMap.h>
 
 namespace bp=boost::python;
 
@@ -322,6 +324,113 @@ pyskymap_neg(G3SkyMap &a)
 	return rv;
 }
 
+G3SkyMapWeights &
+G3SkyMapWeights::operator+=(const G3SkyMapWeights &rhs)
+{
+	g3_assert(weight_type == rhs.weight_type);
+
+	*TT += *(rhs.TT);
+
+	if (weight_type == Wpol) {
+		*TQ += *rhs.TQ;
+		*TU += *rhs.TU;
+		*QQ += *rhs.QQ;
+		*QU += *rhs.QU;
+		*UU += *rhs.UU;
+	}
+
+	return *this;
+}
+
+#define skymapweights_inplace(op, rhs_type) \
+G3SkyMapWeights &G3SkyMapWeights::operator op(rhs_type rhs) \
+{ \
+	*TT op rhs; \
+	if (weight_type == Wpol) { \
+		*TQ op rhs; \
+		*TU op rhs; \
+		*QQ op rhs; \
+		*QU op rhs; \
+		*UU op rhs; \
+	} \
+	return *this; \
+}
+
+skymapweights_inplace(*=, const G3SkyMap &);
+skymapweights_inplace(*=, double);
+skymapweights_inplace(/=, double);
+
+#define skymapweights_pynoninplace(name, oper, rhs_type) \
+static G3SkyMapWeightsPtr \
+pyskymapweights_##name(const G3SkyMapWeights &a, const rhs_type b) \
+{ \
+	G3SkyMapWeightsPtr rv = a.Clone(true); \
+	(*rv) oper b; \
+	return rv; \
+}
+
+skymapweights_pynoninplace(add, +=, G3SkyMapWeights &);
+skymapweights_pynoninplace(multm, *=, G3SkyMap &);
+skymapweights_pynoninplace(multd, *=, double);
+skymapweights_pynoninplace(divd, /=, double);
+
+G3SkyMapWithWeights &
+G3SkyMapWithWeights::operator+=(const G3SkyMapWithWeights &rhs)
+{
+	g3_assert(IsPolarized() == rhs.IsPolarized());
+	g3_assert(IsWeighted() == rhs.IsWeighted());
+
+	*T += *rhs.T;
+
+	if (IsPolarized()) {
+		*Q += *rhs.Q;
+		*U += *rhs.U;
+	}
+
+	if (IsWeighted())
+		*weights += *rhs.weights;
+
+	return *this;
+}
+
+#define skymapwithweights_inplace(op, rhs_type) \
+G3SkyMapWithWeights &G3SkyMapWithWeights::operator op(rhs_type rhs) \
+{ \
+	*T op rhs; \
+	if (IsPolarized()) { \
+		*Q op rhs; \
+		*U op rhs; \
+	} \
+	if (IsWeighted()) \
+		*weights op rhs; \
+	return *this; \
+}
+
+skymapwithweights_inplace(*=, const G3SkyMap &);
+skymapwithweights_inplace(*=, double);
+skymapwithweights_inplace(/=, double);
+
+static G3SkyMapWithWeightsPtr
+skymapwithweights_inplace_divd(G3SkyMapWithWeights &a, double rhs)
+{
+  a /= rhs;
+  return boost::make_shared<G3SkyMapWithWeights>(a);
+}
+
+#define skymapwithweights_pynoninplace(name, oper, rhs_type) \
+static G3SkyMapWithWeightsPtr \
+pyskymapwithweights_##name(const G3SkyMapWithWeights &a, const rhs_type b) \
+{ \
+	G3SkyMapWithWeightsPtr rv = a.Clone(true); \
+	(*rv) oper b; \
+	return rv; \
+}
+
+skymapwithweights_pynoninplace(add, +=, G3SkyMapWithWeights &);
+skymapwithweights_pynoninplace(multm, *=, G3SkyMap &);
+skymapwithweights_pynoninplace(multd, *=, double);
+skymapwithweights_pynoninplace(divd, /=, double);
+
 StokesVector & StokesVector::operator /=(const MuellerMatrix &r)
 {
 	double det = r.det();
@@ -367,7 +476,7 @@ void G3SkyMapWithWeights::ApplyWeights(G3SkyMapWeightsPtr w)
 		StokesVector v = this->at(pix);
 		if (IsPolarized() && !(v.t == 0 && v.q == 0 && v.u == 0))
 			(*this)[pix] = w->at(pix) * v;
-		else if (v.t != 0)
+		else if (!IsPolarized() && v.t != 0)
 			(*T)[pix] = w->TT->at(pix) * v.t;
 	}
 
@@ -383,7 +492,7 @@ G3SkyMapWeightsPtr G3SkyMapWithWeights::RemoveWeights()
 		StokesVector v = this->at(pix);
 		if (IsPolarized() && !(v.t == 0 && v.q == 0 && v.u == 0))
 			(*this)[pix] /= weights->at(pix);
-		else if (v.t != 0)
+		else if (!IsPolarized() && v.t != 0)
 			(*T)[pix] = v.t / weights->TT->at(pix);
 	}
 
@@ -552,6 +661,19 @@ PYBINDINGS("coordinateutils") {
 	    .def("rebin", &G3SkyMapWeights::Rebin)
 	    
 	    .def("Clone", &G3SkyMapWeights::Clone)
+
+	    .def(bp::self += bp::self)
+	    .def(bp::self *= FlatSkyMap())
+	    .def(bp::self *= HealpixSkyMap())
+	    .def(bp::self *= double())
+	    .def(bp::self /= double())
+
+	    .def("__add__", &pyskymapweights_add)
+	    .def("__mul__", &pyskymapweights_multm)
+	    .def("__mul__", &pyskymapweights_multd)
+	    .def("__rmul__", &pyskymapweights_multd)
+	    .def("__div__", &pyskymapweights_divd)
+	    .def("__truediv__", &pyskymapweights_divd)
 	;
 	register_pointer_conversions<G3SkyMapWeights>();
 
@@ -573,6 +695,21 @@ PYBINDINGS("coordinateutils") {
 	    .def("rebin", &G3SkyMapWithWeights::Rebin)
 	    
 	    .def("Clone", &G3SkyMapWithWeights::Clone)
+
+	    .def(bp::self += bp::self)
+	    .def(bp::self *= FlatSkyMap())
+	    .def(bp::self *= HealpixSkyMap())
+	    .def(bp::self *= double())
+	    .def(bp::self /= double())
+
+	    .def("__add__", &pyskymapwithweights_add)
+	    .def("__mul__", &pyskymapwithweights_multm)
+	    .def("__mul__", &pyskymapwithweights_multd)
+	    .def("__rmul__", &pyskymapwithweights_multd)
+	    .def("__div__", &pyskymapwithweights_divd)
+	    .def("__idiv__", &skymapwithweights_inplace_divd)
+	    .def("__truediv__", &pyskymapweights_divd)
+	    .def("__itruediv__", &skymapwithweights_inplace_divd)
 	;
 	register_pointer_conversions<G3SkyMapWithWeights>();
 
