@@ -57,7 +57,7 @@ Sparsity
 
 By default, both Healpix and flat-sky maps are initialized in sparse mode. This imposes a slight performance penalty but will result in the map storing only non-zero portions (with caveats, see details above), substantially reducing RAM usage. Some map operations, in particular casting to numpy arrays, will result in the implicit conversion of the map to dense storage, which can result in sudden increases in RAM usage. The current sparsity mode can be examined or changed with the ``dense`` property (flat sky maps) or the ``dense``, ``ringsparse``, or ``indexedsparse`` properties (Healpix maps). Serialization will maintain the current sparsity scheme, as do arithmetic operators where possible. The current number of stored pixels can be obtained using the ``npix_allocated`` property.
 
-Beyond paying attention to implicit conversions to dense storage and the performance impact of sparse storage (which is small), users of this code do not need to worry about the storage mode--all interfaces are identically.
+Beyond paying attention to implicit conversions to dense storage and the performance impact of sparse storage (which is small), users of this code do not need to worry about the storage mode--all interfaces are identical in all modes.
 
 Map Interpolation
 =================
