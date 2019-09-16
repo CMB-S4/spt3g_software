@@ -43,7 +43,10 @@ public:
 		assert(y >= 0);
 		assert(y < ylen_);
 
-		if (x < offset_) {
+		if (data_.size() == 0) {
+			data_.resize(1);
+			offset_ = x;
+		} else if (x < offset_) {
 			data_.insert(data_.begin(), offset_-x, data_element());
 			offset_ = x;
 		} else if (x >= offset_ + data_.size()) {
@@ -51,7 +54,10 @@ public:
 		}
 		data_element &column = data_[x-offset_];
 
-		if (y < column.first) {
+		if (column.second.size() == 0) {
+			column.first = y;
+			column.second.resize(1, double(0));
+		} else if (y < column.first) {
 			column.second.insert(column.second.begin(),
 			    y-column.first, double(0));
 			column.first = y;
@@ -169,7 +175,6 @@ public:
 
 	template <class A> void serialize(A &ar, unsigned v) {
 		using namespace cereal;
-		// XXX: size_t vs. uint64_t
 		ar & make_nvp("xlen", xlen_);
 		ar & make_nvp("ylen", ylen_);
 		ar & make_nvp("data", data_);
