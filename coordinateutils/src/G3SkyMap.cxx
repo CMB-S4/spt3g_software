@@ -243,7 +243,7 @@ skymap_getitem(const G3SkyMap &skymap, int i)
 		bp::throw_error_already_set();
 	}
 
-	return skymap->at(i);
+	return skymap.at(i);
 }
 
 static void
