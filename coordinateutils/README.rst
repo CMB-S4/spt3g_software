@@ -22,7 +22,7 @@ ProjSansonFlamsteed
   Sanson-Flamsteed (also called the sinusoidal projection). It has equal-area pixels, defined by multiplying azimuth distances by cos(latitude). Mercator-esque in that lines of constant latitude are transformed to lines of constant y. Distances are not preserved. Also known as "proj 0".
 
 ProjPlateCarree
-  The Plate-Carree projection just plots latitude and longitude on a grid: latitude lines are at constant y and equally spaced, while longitude lines are at constant x and equally spaced. Pixels are not equal-area. Also known as "proj 1".
+  The Plate-Carree projection just plots latitude and longitude on a grid: latitude lines are at constant y and equally spaced, while longitude lines are at constant x and equally spaced. Pixels are not equal-area. Also known as "proj 1".  A variant of this projection, called ProjBICEP (or "proj 9"), adjusts the resolution along x to scale with the cosine of the latitude of the center of the map.
 
 ProjOrthographic
   The projection of the sphere onto a plane -- the sky looks like a circle. Can only show one hemisphere. Lines drawn on the map do not correspond to latitude or longitude. Pixels are not equal-area. Also known as "proj 2".
@@ -43,7 +43,11 @@ ProjCylindricalEqualArea
 File Format Conversions
 =======================
 
-We support writing maps into FITS files that can be read with other tools (such as DS9).
+We support writing maps into FITS files that can be read with other tools (such as DS9), using the ``maputils.save_skymap_fits`` function.
+
+T, Q, U and corresponding G3SkyMapWeights objects are written to a single file as a sequence of HDUs.  FlatSkyMap objects are stored in dense format (see below) to CompImageHDU objects if compression is enabled, and otherwise stored in dense format to standard ImageHDU objects.  The latter can be loaded using "old style" fits readers, such as the ``idlastro`` fits utilities.
+
+HealpixSkyMap objects are stored in a sequence of BinTableHDU objects, a format that is compatible with the ``healpy.read_map`` function.  Dense maps (see below) are stored using implicit indexing, and sparse maps are stored using explicit indexing with an additional pixel index column.
 
 Indexing
 ========
@@ -55,12 +59,15 @@ Note that sky maps *do not* support numpy-style slicing operations. These are il
 Sparsity
 ========
 
-By default, both Healpix and flat-sky maps are initialized in sparse mode. This imposes a slight performance penalty but will result in the map storing only non-zero portions (with caveats, see details above), substantially reducing RAM usage. Some map operations, in particular casting to numpy arrays, will result in the implicit conversion of the map to dense storage, which can result in sudden increases in RAM usage. The current sparsity mode can be examined or changed with the ``dense`` property (flat sky maps) or the ``dense``, ``ringsparse``, or ``indexedsparse`` properties (Healpix maps). Serialization will maintain the current sparsity scheme, as do arithmetic operators where possible. The current number of stored pixels can be obtained using the ``npix_allocated`` property.
+By default, both Healpix and flat-sky maps are initialized in sparse mode. This imposes a slight performance penalty but will result in the map storing only non-zero portions (with caveats, see details above), substantially reducing RAM usage. Some map operations, in particular casting to numpy arrays, will result in the implicit conversion of the map to dense storage, which can result in sudden increases in RAM usage. The current sparsity mode can be examined or changed with the ``sparse`` property (flat sky maps) or the ``dense``, ``ringsparse``, or ``indexedsparse`` properties (Healpix maps). Serialization to ``.g3`` files will maintain the current sparsity scheme, as do arithmetic operators where possible. Serialization to ``.fits`` files implicitly converts flat sky maps to dense mode, but preserves the sparsity of Healpix maps.  The current number of stored pixels can be obtained using the ``npix_allocated`` property.
 
 Beyond paying attention to implicit conversions to dense storage and the performance impact of sparse storage (which is small), users of this code do not need to worry about the storage mode--all interfaces are identical in all modes.
 
 Map Interpolation
 =================
 
-Needs documentation. Apologies.
+Several interpolation and rebinning utilities are provided.  The method ``G3SkyMap.get_interp_values`` can be used for extracting map values at arbitrary sky positions.  The method ``G3SkyMap.rebin`` can be used to downgrade the map resolution in a way that preserves the total power within each map pixel.
 
+The functions ``maputils.healpix_to_flatsky`` and ``maputils.flatsky_to_healpix`` functions are provided to reproject maps between flat sky and curved sky systems, with options to use interpolation or rebinning to improve the accuracy of the reprojection.
+
+The more general ``maputils.reproj`` function can also be used to convert between flat sky projections.
