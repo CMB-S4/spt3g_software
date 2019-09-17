@@ -71,3 +71,14 @@ Several interpolation and rebinning utilities are provided.  The method ``G3SkyM
 The functions ``maputils.healpix_to_flatsky`` and ``maputils.flatsky_to_healpix`` functions are provided to reproject maps between flat sky and curved sky systems, with options to use interpolation or rebinning to improve the accuracy of the reprojection.
 
 The more general ``maputils.reproj`` function can also be used to convert between flat sky projections.
+
+Stokes Vectors and Mueller Matrices
+===================================
+
+We provide two additional map classes that combine T/Q/U Stokes maps and Mueller weight matrices into a single structure.
+
+The G3SkyMapWeights class combines the six unique components of the Mueller weight matrix into one object.  The individual matrix terms can be accessed using the attributes G3SkyMapWeights.TT, etc.  The full matrix for an individual pixel can be accessed using the standard ``[]`` operator.  In python, this returns a symmetric 3x3 numpy array that is a copy of the values in the underlying maps, and in C++ this returns a MuellerMatrix object, with scalar attributes MuellerMatrix.tt, etc that are writable references to elements of the underlying map objects.
+
+Analogously, the G3SkyMapWithWeights class combines the T, Q and U Stokes maps and the corresponding weight matrix into a single structure.  The individual Stokes components can be accessed using the attributes G3SkyMapWithWeights.T etc, and the 3-element StokesVector can be accessed with the standard ``[]`` operator.  In python, this returns a numpy array of length 3 that is a copy of the values in the underlying maps, and in C++ this returns a StokesVector object with scalar attributes StokesVector.t etc, that are writable references to elements of the underlying map objects.  Weights can be applied to or removed from the Stokes maps using the ``G3SkyMapWithWeights.apply_weights`` and ``G3SkyMapWithWeights.remove_weights`` methods.  The attribute ``G3SkyMapWithWeights.weighted`` is True if the Stokes components are weighted, and the attribute ``G3SkyMapWithWeights.polarized`` is True if the structure contains Q and U Stokes components.
+
+Several convenience functions and operators are provided for the StokesVector and MuellerMatrix objects in C++, including typical matrix operations that are performed with these two structures.  A limited set of operators are also provided in both C++ and python for the G3SkyMapWeights and G3SkyMapWithWeights objects (addition of two such objects [e.g. for coadding], multiplication/division by a scalar, and multiplication by a G3SkyMap object [e.g. for masking]).
