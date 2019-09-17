@@ -601,8 +601,8 @@ static PyBufferProcs flatskymap_bufferprocs;
 static double
 flatskymap_getitem_2d(const FlatSkyMap &skymap, bp::tuple coords)
 {
-	size_t y = bp::extract<size_t>(coords[0]); // Swapped to match numpy
-	size_t x = bp::extract<size_t>(coords[1]);
+	ssize_t y = bp::extract<ssize_t>(coords[0]); // Swapped to match numpy
+	ssize_t x = bp::extract<ssize_t>(coords[1]);
 	if (x < 0)
 		x = skymap.shape()[0] + x;
 	if (y < 0)
@@ -622,8 +622,8 @@ flatskymap_getitem_2d(const FlatSkyMap &skymap, bp::tuple coords)
 static double
 flatskymap_setitem_2d(FlatSkyMap &skymap, bp::tuple coords, double val)
 {
-	size_t y = bp::extract<size_t>(coords[0]); // Swapped to match numpy
-	size_t x = bp::extract<size_t>(coords[1]);
+	ssize_t y = bp::extract<ssize_t>(coords[0]); // Swapped to match numpy
+	ssize_t x = bp::extract<ssize_t>(coords[1]);
 	if (x < 0)
 		x = skymap.shape()[0] + x;
 	if (y < 0)

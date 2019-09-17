@@ -122,7 +122,7 @@ private:
 
 	DenseMapData *dense_;
 	SparseMapData *sparse_;
-	size_t xpix_, ypix_;
+	uint64_t xpix_, ypix_;
 
 	SET_LOGGER("FlatSkyMap");
 };
