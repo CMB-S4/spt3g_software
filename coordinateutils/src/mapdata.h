@@ -59,7 +59,7 @@ public:
 			column.second.resize(1, double(0));
 		} else if (y < column.first) {
 			column.second.insert(column.second.begin(),
-			    y-column.first, double(0));
+			    column.first-y, double(0));
 			column.first = y;
 		} else if (y >= column.first + column.second.size()) {
 			column.second.resize(y - column.first + 1, double(0));

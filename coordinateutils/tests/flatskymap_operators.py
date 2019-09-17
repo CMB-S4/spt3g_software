@@ -4,6 +4,18 @@ import numpy as np
 from spt3g import core
 from spt3g.coordinateutils import FlatSkyMap
 
+# Sparse extension operators
+m = FlatSkyMap(500, 20, core.G3Units.arcmin)
+m[7345] = 4
+m[7345-500] = 4 # Backward
+m[7345+500] = 4 # Forward
+assert(m.sparse)
+assert(m.npix_allocated == 3)
+m[7345-4*500] = 4 # Several steps back
+assert(m.npix_allocated == 6)
+m[7345+3*500] = 4 # Several steps forward
+assert(m.npix_allocated == 8)
+
 # Simple in-place operators
 m = FlatSkyMap(500, 20, core.G3Units.arcmin)
 m[15] = 10
