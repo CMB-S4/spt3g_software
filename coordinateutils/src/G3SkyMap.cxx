@@ -480,6 +480,12 @@ void G3SkyMapWithWeights::ApplyWeights(G3SkyMapWeightsPtr w)
 			(*T)[pix] = w->TT->at(pix) * v.t;
 	}
 
+	T->is_weighted = true;
+	if (IsPolarized()) {
+		Q->is_weighted = true;
+		U->is_weighted = true;
+	}
+
 	// Store pointer to weights here
 	weights = w;
 }
@@ -494,6 +500,12 @@ G3SkyMapWeightsPtr G3SkyMapWithWeights::RemoveWeights()
 			(*this)[pix] /= weights->at(pix);
 		else if (!IsPolarized() && v.t != 0)
 			(*T)[pix] = v.t / weights->TT->at(pix);
+	}
+
+	T->is_weighted = false;
+	if (IsPolarized()) {
+		Q->is_weighted = false;
+		U->is_weighted = false;
 	}
 
 	// Remove pointer to weights
