@@ -112,6 +112,9 @@ def load_skymap_fits(filename, hdu=None):
                 continue
 
             data = np.array(H.data)
+            if map_type == 'flat':
+                if map_opts.pop('transpose', False):
+                    data = np.array(data.T)
 
             # map type must be known if the HDU contains map data
             if map_type not in ['flat', 'healpix']:
@@ -328,29 +331,39 @@ def parse_wcs_header(header):
 
     # parse coordinate system
     coord_ref = None
-    if ctype[0].startswith('RA-'):
+    if ctype[0].startswith('RA-') or ctype[0].startswith('DEC-'):
         if w.wcs.radesys == 'FK5':
             coord_ref = MapCoordReference.Equatorial
         elif w.wcs.radesys == 'ALTAZ':
             coord_ref = MapCoordReference.Local
-    elif ctype[0].startswith('GLON-'):
+    elif ctype[0].startswith('GLON-') or ctype[0].startswith('GLAT-'):
         coord_ref = MapCoordReference.Galactic
+
+    # parse coordinate order
+    if ctype[0].startswith('RA-') or ctype[0].startswith('GLON-'):
+        order = [0, 1]
+        transpose = False
+    elif ctype[0].startswith('DEC-') or ctype[0].startswith('GLAT-'):
+        order = [1, 0]
+        transpose = True
+    else:
+        raise ValueError('Unable to determine WCS coordinate axes')
 
     # parse resolution
     cdelt = w.wcs.get_cdelt() * np.diag(w.wcs.get_pc())
-    x_res = np.abs(cdelt[0]) * core.G3Units.deg
-    res = np.abs(cdelt[1]) * core.G3Units.deg
+    x_res = np.abs(cdelt[order[0]]) * core.G3Units.deg
+    res = np.abs(cdelt[order[1]]) * core.G3Units.deg
 
     # parse map center
     crval = w.wcs.crval
-    alpha_center = crval[0] * core.G3Units.deg
+    alpha_center = crval[order[0]] * core.G3Units.deg
 
     if wcsproj in ['CAR', 'SFL', 'CEA']:
-        ydim = header['NAXIS2']
-        crpix = w.wcs.crpix[1]
+        ydim = header['NAXIS{}'.format(order.index(1) + 1)]
+        crpix = w.wcs.crpix[order[1]]
         delta_center = (ydim / 2.0 + 0.5 - crpix) * res
     else:
-        delta_center = crval[1] * core.G3Units.deg
+        delta_center = crval[order[1]] * core.G3Units.deg
 
     # construct arguments
     map_opts = dict(
@@ -359,6 +372,7 @@ def parse_wcs_header(header):
         x_res=x_res,
         alpha_center=alpha_center,
         delta_center=delta_center,
+        transpose=transpose,
     )
     if coord_ref is not None:
         map_opts.update(coord_ref=coord_ref)
