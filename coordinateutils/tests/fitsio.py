@@ -17,8 +17,8 @@ for p in [0, 1, 2, 4, 5, 6, 7, 9]:
                                      alpha_center=20 * core.G3Units.deg,
                                      delta_center=-50 * core.G3Units.deg)
 
-    coordinateutils.maputils.save_skymap_fits('test_map.fits', fm1, overwrite=True)
-    fm2 = coordinateutils.maputils.load_skymap_fits('test_map.fits')['T']
+    coordinateutils.fitsio.save_skymap_fits('test_map.fits', fm1, overwrite=True)
+    fm2 = coordinateutils.fitsio.load_skymap_fits('test_map.fits')['T']
 
     assert(fm1.IsCompatible(fm2))
     assert(np.allclose(fm1, fm2))
@@ -34,8 +34,8 @@ for p in [0, 1, 2, 4, 5, 6, 7, 9]:
 
 print('Checking Healpix')
 hm1 = coordinateutils.HealpixSkyMap(np.arange(12 * 64 * 64))
-coordinateutils.maputils.save_skymap_fits('test_map.fits', hm1, overwrite=True)
-hm2 = coordinateutils.maputils.load_skymap_fits('test_map.fits')['T']
+coordinateutils.fitsio.save_skymap_fits('test_map.fits', hm1, overwrite=True)
+hm2 = coordinateutils.fitsio.load_skymap_fits('test_map.fits')['T']
 
 assert(hm1.IsCompatible(hm2))
 assert(np.allclose(hm1, hm2))
@@ -49,7 +49,7 @@ assert(np.allclose(hm1, hm3))
 print('Checking healpy.write_map')
 os.remove('test_map.fits')
 hp.write_map('test_map.fits', np.asarray(hm3))
-hm4 = coordinateutils.maputils.load_skymap_fits('test_map.fits')['T']
+hm4 = coordinateutils.fitsio.load_skymap_fits('test_map.fits')['T']
 assert(hm1.IsCompatible(hm4))
 assert(np.allclose(hm1, hm4))
 

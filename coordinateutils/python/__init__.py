@@ -7,6 +7,7 @@ from .skymapaddons import *
 from . import azel
 from . import map_modules
 from . import coordsysmodules
+from . import fitsio
 from . import maputils
 from .quathelpers import ang_to_quat, quat_to_ang
 
