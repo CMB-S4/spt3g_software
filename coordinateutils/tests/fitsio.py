@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 import numpy as np
+import healpy as hp
+import os
 from spt3g import core, coordinateutils
 
 arr = np.arange(300 * 300).reshape(300, 300)
@@ -26,14 +28,16 @@ assert(hm1.IsCompatible(hm2))
 assert(np.allclose(hm1, hm2))
 
 print('Checking healpy.read_map')
-import healpy as hp
 hm3 = hp.read_map('test_map.fits')
 hm3 = coordinateutils.HealpixSkyMap(hm3)
 assert(hm1.IsCompatible(hm3))
 assert(np.allclose(hm1, hm3))
 
 print('Checking healpy.write_map')
-hp.write_map('test_map.fits', np.asarray(hm3), overwrite=True)
+os.remove('test_map.fits')
+hp.write_map('test_map.fits', np.asarray(hm3))
 hm4 = coordinateutils.maputils.load_skymap_fits('test_map.fits')['T']
 assert(hm1.IsCompatible(hm4))
 assert(np.allclose(hm1, hm4))
+
+os.remove('test_map.fits')
