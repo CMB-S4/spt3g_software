@@ -337,10 +337,7 @@ def parse_wcs_header(header):
         coord_ref = MapCoordReference.Galactic
 
     # parse resolution
-    if w.wcs.has_cd():
-        cdelt = np.diag(w.wcs.cd)
-    else:
-        cdelt = w.wcs.cdelt
+    cdelt = w.wcs.get_cdelt() * np.diag(w.wcs.get_pc())
     x_res = np.abs(cdelt[0]) * core.G3Units.deg
     res = np.abs(cdelt[1]) * core.G3Units.deg
 
