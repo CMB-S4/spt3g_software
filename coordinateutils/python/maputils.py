@@ -442,7 +442,7 @@ def create_wcs_header(skymap):
         skymap.alpha_center / core.G3Units.deg,
         skymap.delta_center / core.G3Units.deg,
     ]
-    if proj_abbr in ['CAR', 'SFL']:
+    if proj_abbr in ['CAR', 'SFL', 'CEA']:
         crpix[1] -= skymap.delta_center / skymap.res
         crval[1] = 0.0
     w.wcs.crpix = crpix
@@ -496,7 +496,7 @@ def parse_wcs_header(header):
     crval = w.wcs.crval
     alpha_center = crval[0] * core.G3Units.deg
 
-    if wcsproj in ['CAR', 'SFL']:
+    if wcsproj in ['CAR', 'SFL', 'CEA']:
         ydim = header['NAXIS2']
         crpix = w.wcs.crpix[1]
         delta_center = (ydim / 2.0 + 0.5 - crpix) * res

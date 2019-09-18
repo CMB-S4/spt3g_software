@@ -132,8 +132,6 @@ void FlatSkyProjection::initialize(size_t xpix, size_t ypix, double res,
 	ypix_ = ypix;
 	set_proj(proj);
 	set_center(alpha_center, delta_center);
-	if (proj == Proj9)
-		x_res = (x_res > 0 ? x_res : res) / cosdelta0_;
 	set_res(res, x_res);
 }
 
@@ -162,6 +160,8 @@ void FlatSkyProjection::set_center(double alpha, double delta)
 
 void FlatSkyProjection::set_xres(double res)
 {
+	if (res <= 0)
+		res = (proj_ == Proj9) ? (y_res_ / cosdelta0_) : y_res_;
 	x_res_ = res;
 	x_min_ = -0.5 * (xpix_ - 1) * x_res_;
 }
@@ -175,7 +175,7 @@ void FlatSkyProjection::set_yres(double res)
 void FlatSkyProjection::set_res(double res, double x_res)
 {
 	set_yres(res);
-	set_xres(x_res > 0 ? x_res : res);
+	set_xres(x_res);
 }
 
 long
@@ -295,11 +295,8 @@ FlatSkyProjection::xy_to_angle(double x, double y, bool wrap_alpha) const
 		break;
 	}
 	case Proj7: {
-		x /= rad;
-		double h = (delta0_ - y) / rad;
-		double k = sqrt(1. - x * x);
-		alpha = ATAN2(x, k * COS(h)) * rad + alpha0_;
-		delta = ASIN(k * SIN(h)) * rad;
+		delta = ASIN((delta0_ - y) / rad) * rad;
+		alpha = x + alpha0_;
 		break;
 	}
 	default:
@@ -392,11 +389,8 @@ FlatSkyProjection::angle_to_xy(double alpha, double delta) const
 		break;
 	}
 	case Proj7: {
-		dalpha /= rad;
-		delta /= rad;
-		double cosdelta = COS(delta);
-		y = 90 * deg + delta0_ - ATAN2(COS(dalpha) * cosdelta, -SIN(delta)) * rad;
-		x = cosdelta * SIN(dalpha) * rad;
+		x = dalpha;
+		y = SIN(delta0_ - delta) * rad;
 		break;
 	}
 	default:
