@@ -262,12 +262,14 @@ def load_proj_dict(inverse=False):
     return projdict
 
 
-@core.usefulfunc
-def create_wcs_header(skymap):
+def get_wcs(skymap):
     """
     Creates WCS (world coordinate system) information from information in the
     input FlatSkyMap object.
     """
+
+    if hasattr(skymap, '_wcs'):
+        return skymap._wcs
 
     projdict = load_proj_dict()
     proj_abbr = projdict[str(skymap.proj)]
@@ -297,13 +299,26 @@ def create_wcs_header(skymap):
         skymap.alpha_center / core.G3Units.deg,
         skymap.delta_center / core.G3Units.deg,
     ]
-    if proj_abbr in ['CAR', 'SFL', 'CEA']:
+    if proj_abbr in ['CAR', 'SFL']:
         crpix[1] -= skymap.delta_center / skymap.res
+        crval[1] = 0.0
+    elif proj_abbr in ['CEA']:
+        v = skymap.delta_center / core.G3Units.rad
+        w.wcs.set_pv([(2, 1, np.cos(v) ** 2)])
         crval[1] = 0.0
     w.wcs.crpix = crpix
     w.wcs.crval = crval
 
-    return w.to_header()
+    skymap._wcs = w
+    return w
+
+# set property
+setattr(FlatSkyMap, 'wcs', property(get_wcs))
+
+
+@core.usefulfunc
+def create_wcs_header(skymap):
+    return skymap.wcs.to_header()
 
 
 @core.usefulfunc
@@ -357,13 +372,16 @@ def parse_wcs_header(header):
     # parse map center
     crval = w.wcs.crval
     alpha_center = crval[order[0]] * core.G3Units.deg
+    delta_center = crval[order[1]] * core.G3Units.deg
 
-    if wcsproj in ['CAR', 'SFL', 'CEA']:
+    if wcsproj in ['CAR', 'SFL']:
         ydim = header['NAXIS{}'.format(order.index(1) + 1)]
         crpix = w.wcs.crpix[order[1]]
         delta_center = (ydim / 2.0 + 0.5 - crpix) * res
-    else:
-        delta_center = crval[order[1]] * core.G3Units.deg
+    elif wcsproj in ['CEA']:
+        for i, m, v in w.wcs.get_pv():
+            if i == order[1] + 1 and m == 1:
+                delta_center = np.arccos(np.sqrt(v)) * core.G3Units.rad
 
     # construct arguments
     map_opts = dict(

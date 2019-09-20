@@ -120,7 +120,7 @@ bool FlatSkyProjection::IsCompatible(const FlatSkyProjection & other) const
 		(ypix_ == other.ypix_) &&
 		(proj_ == other.proj_) &&
 		(fabs(alpha0_ - other.alpha0_) < 1e-12) &&
-		(fabs(delta0_ - other.delta0_) < 1e-12) &&
+		(fabs(cosdelta0_ - other.cosdelta0_) < 1e-12) &&
 		(fabs(x_res_ - other.x_res_) < 1e-12) &&
 		(fabs(y_res_ - other.y_res_) < 1e-12));
 }
@@ -295,7 +295,7 @@ FlatSkyProjection::xy_to_angle(double x, double y, bool wrap_alpha) const
 		break;
 	}
 	case Proj7: {
-		delta = ASIN((delta0_ - y) / rad) * rad;
+		delta = -ASIN(y * cosdelta0_ * cosdelta0_ / rad) * rad;
 		alpha = x + alpha0_;
 		break;
 	}
@@ -390,7 +390,7 @@ FlatSkyProjection::angle_to_xy(double alpha, double delta) const
 	}
 	case Proj7: {
 		x = dalpha;
-		y = SIN(delta0_ - delta) * rad;
+		y = -SIN(delta / rad) * rad / (cosdelta0_ * cosdelta0_);
 		break;
 	}
 	default:

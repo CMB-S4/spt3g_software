@@ -7,30 +7,42 @@ from spt3g import core, coordinateutils
 from astropy.wcs import WCS
 from astropy.io import fits
 
-arr = np.arange(300 * 300).reshape(300, 300)
+dim = 300
+arr = np.arange(dim * dim).reshape(dim, dim)
+res = core.G3Units.arcmin
+deg = core.G3Units.deg
+a0 = 20 * deg
+d0 = -50 * deg
 
 for p in [0, 1, 2, 4, 5, 6, 7, 9]:
     print('Checking Proj{}'.format(p))
 
     proj = getattr(coordinateutils.MapProjection, 'Proj{}'.format(p))
-    fm1 = coordinateutils.FlatSkyMap(arr, core.G3Units.arcmin, proj=proj,
-                                     alpha_center=20 * core.G3Units.deg,
-                                     delta_center=-50 * core.G3Units.deg)
+    fm1 = coordinateutils.FlatSkyMap(arr, res, proj=proj,
+                                     alpha_center=a0, delta_center=d0)
 
     coordinateutils.fitsio.save_skymap_fits('test_map.fits', fm1, overwrite=True)
     fm2 = coordinateutils.fitsio.load_skymap_fits('test_map.fits')['T']
 
     assert(fm1.IsCompatible(fm2))
     assert(np.allclose(fm1, fm2))
+    assert(fm1.wcs.to_header() == fm2.wcs.to_header())
 
-    with fits.open('test_map.fits') as hdulist:
-        pixs = np.asarray([[0, 0], [0, 300], [150, 150], [300, 0], [300, 300]], dtype=float)
-        w = WCS(hdulist[-1].header)
-        for pix in pixs:
-            wcs_ang = np.asarray(w.wcs_pix2world([pix], 0))
-            wcs_ang[wcs_ang > 180] -= 360
-            g3_ang = np.asarray(fm1.xy_to_angle(*pix)) / core.G3Units.deg
-            assert(np.allclose(wcs_ang, g3_ang))
+    w = fm2.wcs
+    print(repr(w.to_header()))
+    pixs = np.array([[0, 0], [0, 1], [0.5, 0.5], [1, 0], [1, 1]]) * dim
+    for pix in pixs:
+        wcs_ang = np.asarray(w.all_pix2world(pix[0], pix[1], 0))
+        wcs_ang[wcs_ang > 180] -= 360
+        g3_ang = np.asarray(fm2.xy_to_angle(*pix)) / deg
+        assert(np.allclose(wcs_ang, g3_ang))
+
+    angs = (np.array([[0, 0], [-1, 1], [-1, -1], [1, -1], [1, 1]]) * dim * res / 2.0 +
+            np.array([a0, d0]))
+    for ang in angs:
+        wcs_pix = np.asarray(w.all_world2pix(ang[0] / deg, ang[1] / deg, 0))
+        g3_pix = np.asarray(fm2.angle_to_xy(*ang))
+        assert(np.allclose(wcs_pix, g3_pix))
 
 print('Checking Healpix')
 hm1 = coordinateutils.HealpixSkyMap(np.arange(12 * 64 * 64))
