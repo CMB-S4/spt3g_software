@@ -26,7 +26,8 @@ public:
 	    MapCoordReference coord_ref = MapCoordReference::Equatorial,
 	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
 	    G3SkyMap::MapPolType pol_type = MapPolType::None,
-	    double x_res = 0 /* if different from res */);
+	    double x_res = 0, /* if different from res */
+	    double x_center = 0.0 / 0.0, double y_center = 0.0 / 0.0);
 
 	// Constructor from a numpy array
 	FlatSkyMap(boost::python::object v, double res, 
@@ -36,7 +37,8 @@ public:
 	    MapCoordReference coord_ref = MapCoordReference::Equatorial,
 	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
 	    G3SkyMap::MapPolType pol_type = MapPolType::None,
-	    double x_res = 0);
+	    double x_res = 0, double x_center = 0.0 / 0.0,
+	    double y_center = 0.0 / 0.0);
 
 	FlatSkyMap(const FlatSkyProjection & fp,
 	    MapCoordReference coord_ref = MapCoordReference::Equatorial,
@@ -84,7 +86,8 @@ public:
 	void set_proj(MapProjection proj);
 	void set_alpha_center(double alpha);
 	void set_delta_center(double delta);
-	void set_center(double alpha, double delta);
+	void set_x_center(double y);
+	void set_y_center(double y);
 	void set_xres(double res);
 	void set_yres(double res);
 	void set_res(double res);
@@ -92,6 +95,8 @@ public:
 	MapProjection proj() const;
 	double alpha_center() const;
 	double delta_center() const;
+	double x_center() const;
+	double y_center() const;
 	double xres() const;
 	double yres() const;
 	double res() const;

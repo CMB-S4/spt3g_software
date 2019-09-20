@@ -45,14 +45,16 @@ public:
 	FlatSkyProjection(size_t xpix, size_t ypix, double res,
 			  double alpha_center = 0, double delta_center = 0,
 			  double x_res = 0,
-			  MapProjection proj = MapProjection::ProjNone);
+			  MapProjection proj = MapProjection::ProjNone,
+			  double x_center = 0.0 / 0.0, double y_center = 0.0 / 0.0);
 
 	FlatSkyProjection();
 	FlatSkyProjection(const FlatSkyProjection & fp);
 
 	void initialize(size_t xpix, size_t ypix, double res,
 	    double alpha_center = 0, double delta_center = 0, double x_res = 0,
-	    MapProjection proj = MapProjection::ProjNone);
+	    MapProjection proj = MapProjection::ProjNone,
+	    double x_center = 0.0 / 0.0, double y_center = 0.0 / 0.0);
 
 	template <class A> void load(A &ar, unsigned v);
 	template <class A> void save(A &ar, unsigned v) const;
@@ -62,7 +64,10 @@ public:
 	void set_proj(MapProjection proj);
 	void set_alpha_center(double alpha);
 	void set_delta_center(double delta);
-	void set_center(double alpha, double delta);
+	void set_angle_center(double alpha, double delta);
+	void set_xy_center(double x, double y);
+	void set_x_center(double x);
+	void set_y_center(double y);
 	void set_xres(double res);
 	void set_yres(double res);
 	void set_res(double res, double x_res=0);
@@ -72,6 +77,8 @@ public:
 	MapProjection proj() const { return proj_; };
 	double alpha_center() const { return alpha0_; };
 	double delta_center() const { return delta0_; };
+	double x_center() const { return x0_; };
+	double y_center() const { return y0_; };
 	double xres() const { return x_res_; };
 	double yres() const { return y_res_; };
 	double res() const { return y_res_; };
@@ -98,6 +105,8 @@ private:
 	MapProjection proj_;
 	double alpha0_;
 	double delta0_;
+	double x0_;
+	double y0_;
 	double x_res_;
 	double y_res_;
 
@@ -116,6 +125,6 @@ namespace cereal {
   template <class A> struct specialize<A, FlatSkyProjection, cereal::specialization::member_load_save> {};
 }
 
-G3_SERIALIZABLE(FlatSkyProjection, 2);
+G3_SERIALIZABLE(FlatSkyProjection, 3);
 
 #endif //#ifndef _COORDINATEUTILS_FLATSKYPROJECTION_H

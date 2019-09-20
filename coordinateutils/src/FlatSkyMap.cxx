@@ -10,9 +10,9 @@
 FlatSkyMap::FlatSkyMap(size_t x_len, size_t y_len, double res, bool is_weighted,
     MapProjection proj, double alpha_center, double delta_center,
     MapCoordReference coord_ref, G3Timestream::TimestreamUnits u,
-    G3SkyMap::MapPolType pol_type, double x_res) :
+    G3SkyMap::MapPolType pol_type, double x_res, double x_center, double y_center) :
       G3SkyMap(coord_ref, is_weighted, u, pol_type),
-      proj_info(x_len, y_len, res, alpha_center, delta_center, x_res, proj),
+      proj_info(x_len, y_len, res, alpha_center, delta_center, x_res, proj, x_center, y_center),
       dense_(NULL), sparse_(NULL), xpix_(x_len), ypix_(y_len)
 {
 }
@@ -21,7 +21,7 @@ FlatSkyMap::FlatSkyMap(boost::python::object v, double res,
     bool is_weighted, MapProjection proj,
     double alpha_center, double delta_center,
     MapCoordReference coord_ref, G3Timestream::TimestreamUnits u,
-    G3SkyMap::MapPolType pol_type, double x_res) :
+    G3SkyMap::MapPolType pol_type, double x_res, double x_center, double y_center) :
       G3SkyMap(coord_ref, is_weighted, u, pol_type),
       dense_(NULL), sparse_(NULL)
 {
@@ -35,7 +35,7 @@ FlatSkyMap::FlatSkyMap(boost::python::object v, double res,
 			log_fatal("Only 2-D maps supported");
 		}
 		proj_info = FlatSkyProjection(xpix_, ypix_, res, alpha_center,
-		    delta_center, x_res, proj);
+		    delta_center, x_res, proj, x_center, y_center);
 		ConvertToDense();
 
 		double *d = &(*dense_)(0,0);
@@ -474,6 +474,8 @@ size_t FlatSkyMap::npix_allocated() const {
 GETSET(proj, MapProjection);
 GETSET(alpha_center, double);
 GETSET(delta_center, double);
+GETSET(x_center, double);
+GETSET(y_center, double);
 GETSET(xres, double);
 GETSET(yres, double);
 GETSET(res, double);
@@ -726,17 +728,18 @@ PYBINDINGS("coordinateutils")
 	    .def_pickle(g3frameobject_picklesuite<FlatSkyMap>())
 	    .def(bp::init<size_t, size_t, double, bool, MapProjection, double,
 	       double, MapCoordReference, G3Timestream::TimestreamUnits,
-	       G3SkyMap::MapPolType, double>(
+	       G3SkyMap::MapPolType, double, double, double>(
 	         (bp::arg("x_len"), bp::arg("y_len"), bp::arg("res"),
 		  bp::args("is_weighted") = true,
 		  bp::arg("proj") = MapProjection::ProjNone,
 		  bp::arg("alpha_center") = 0, bp::arg("delta_center") = 0,
 		  bp::arg("coord_ref") = MapCoordReference::Equatorial,
 		  bp::arg("units") = G3Timestream::Tcmb,
-		  bp::arg("pol_type") = G3SkyMap::None, bp::arg("x_res") = 0)))
+		  bp::arg("pol_type") = G3SkyMap::None, bp::arg("x_res") = 0,
+		  bp::arg("x_center") = 0.0 / 0.0, bp::arg("y_center") = 0.0 / 0.0)))
 	    .def(bp::init<boost::python::object, double, bool, MapProjection,
 	       double, double, MapCoordReference, G3Timestream::TimestreamUnits,
-	       G3SkyMap::MapPolType, double>(
+	       G3SkyMap::MapPolType, double, double, double>(
 		  (bp::arg("obj"), bp::arg("res"),
 	           bp::args("is_weighted") = true,
 		   bp::arg("proj") = MapProjection::ProjNone,
@@ -744,7 +747,8 @@ PYBINDINGS("coordinateutils")
 		   bp::arg("coord_ref") = MapCoordReference::Equatorial,
 		   bp::arg("units") = G3Timestream::Tcmb,
 		   bp::arg("pol_type") = G3SkyMap::None,
-		   bp::arg("x_res") = 0)))
+		   bp::arg("x_res") = 0,
+		   bp::arg("x_center") = 0.0 / 0.0, bp::arg("y_center") = 0.0 / 0.0)))
 
 	    .def(bp::init<const FlatSkyMap&>(bp::arg("flat_map")))
 	    .def(bp::init<>())
@@ -754,6 +758,10 @@ PYBINDINGS("coordinateutils")
 	      &FlatSkyMap::set_alpha_center, "Horizontal axis center position")
 	    .add_property("delta_center", &FlatSkyMap::delta_center,
 	      &FlatSkyMap::set_delta_center, "Vertical axis center position")
+	    .add_property("x_center", &FlatSkyMap::x_center,
+	      &FlatSkyMap::set_x_center, "Horizontal axis center pixel position")
+	    .add_property("y_center", &FlatSkyMap::y_center,
+	      &FlatSkyMap::set_y_center, "Vertical axis center pixel position")
 	    .add_property("res", &FlatSkyMap::res, &FlatSkyMap::set_res,
 	      "Map resolution in angular units for maps with square pixels")
 	    .add_property("x_res", &FlatSkyMap::xres, &FlatSkyMap::set_xres,

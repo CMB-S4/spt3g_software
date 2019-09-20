@@ -294,15 +294,15 @@ def get_wcs(skymap):
     ]
     w.wcs.cunit = ['deg', 'deg']
 
-    crpix = [skymap.shape[1] / 2.0 + 0.5, skymap.shape[0] / 2.0 + 0.5]
+    crpix = [
+        skymap.shape[1] - skymap.x_center + 1,
+        skymap.shape[0] - skymap.y_center + 1
+    ]
     crval = [
         skymap.alpha_center / core.G3Units.deg,
         skymap.delta_center / core.G3Units.deg,
     ]
-    if proj_abbr in ['CAR', 'SFL']:
-        crpix[1] -= skymap.delta_center / skymap.res
-        crval[1] = 0.0
-    elif proj_abbr in ['CEA']:
+    if proj_abbr in ['CEA']:
         v = skymap.delta_center / core.G3Units.rad
         w.wcs.set_pv([(2, 1, np.cos(v) ** 2)])
         crval[1] = 0.0
@@ -374,11 +374,11 @@ def parse_wcs_header(header):
     alpha_center = crval[order[0]] * core.G3Units.deg
     delta_center = crval[order[1]] * core.G3Units.deg
 
-    if wcsproj in ['CAR', 'SFL']:
-        ydim = header['NAXIS{}'.format(order.index(1) + 1)]
-        crpix = w.wcs.crpix[order[1]]
-        delta_center = (ydim / 2.0 + 0.5 - crpix) * res
-    elif wcsproj in ['CEA']:
+    crpix = w.wcs.crpix
+    x_center = header['NAXIS{}'.format(order[0] + 1)] - crpix[order[0]] + 1
+    y_center = header['NAXIS{}'.format(order[1] + 1)] - crpix[order[1]] + 1
+
+    if wcsproj in ['CEA']:
         for i, m, v in w.wcs.get_pv():
             if i == order[1] + 1 and m == 1:
                 delta_center = np.arccos(np.sqrt(v)) * core.G3Units.rad
@@ -390,6 +390,8 @@ def parse_wcs_header(header):
         x_res=x_res,
         alpha_center=alpha_center,
         delta_center=delta_center,
+        x_center=x_center,
+        y_center=y_center,
         transpose=transpose,
     )
     if coord_ref is not None:
