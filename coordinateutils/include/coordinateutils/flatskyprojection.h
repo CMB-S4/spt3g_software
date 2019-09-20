@@ -115,6 +115,7 @@ private:
 	double y_min_;
 	double sindelta0_;
 	double cosdelta0_;
+	std::vector<double> pv_;
 
 	SET_LOGGER("FlatSkyProjection");
 };
