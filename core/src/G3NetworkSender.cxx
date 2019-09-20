@@ -40,7 +40,7 @@
  */
 
 
-EXPORT_G3MODULE("core", G3NetworkSender,
+EXPORT_G3MODULE_AND("core", G3NetworkSender,
     (init<std::string, int, int>((arg("hostname"), arg("port"),
       arg("max_queue_size")=0))),
     "Writes frames to a network socket. If hostname is set to '*', will listen "
@@ -51,7 +51,9 @@ EXPORT_G3MODULE("core", G3NetworkSender,
     "and Timepoint frames will be broadcasted live to all connected clients. "
     "If max_queue_size is set to a non-zero value, Scan and Timepoint frames "
     "may be dropped if more than max_queue_size frames are queued for "
-    "transmission.");
+    "transmission.",
+    .def("Close", &G3NetworkSender::Close));
+
 
 G3NetworkSender::G3NetworkSender(std::string hostname, int port, int max_queue)
 {
@@ -295,4 +297,19 @@ G3NetworkSender::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		}
 	}
 	out.push_back(frame);
+}
+
+void
+G3NetworkSender::Close()
+{
+	if (listening_) {
+                close(fd_);
+                fd_ = -1;
+	}
+
+        // Ask all threads to please die now.
+	for (auto i = threads_.begin(); i != threads_.end(); i++)
+                (*i)->die = 1;
+
+        ReapDeadThreads();
 }
