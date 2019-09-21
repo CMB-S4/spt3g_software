@@ -239,6 +239,48 @@ HealpixSkyMap::load(A &ar, unsigned v)
 	}
 }
 
+double
+RingMapIterator::operator*() const
+{
+	if (!map_.ring_sparse_)
+		return 0;
+	return map_.ring_sparse_->at(j, k);
+}
+
+RingMapIterator &
+RingMapIterator::operator++(int)
+{
+	SparseMapIterator iter(*map_.ring_sparse_, j, k);
+	iter++;
+	j = iter.x;
+	k = iter.y;
+	setp();
+	return *this;
+}
+
+void RingMapIterator::setp()
+{
+	p = k + map_.ring_info_->rings[j].startpix;
+}
+
+RingMapIterator
+HealpixSkyMap::ring_begin() const
+{
+	if (!ring_sparse_)
+		return RingMapIterator(*this, 0, 0);
+	auto begin(ring_sparse_->begin());
+	return RingMapIterator(*this, begin.x, begin.y);
+}
+
+RingMapIterator
+HealpixSkyMap::ring_end() const
+{
+	if (!ring_sparse_)
+		return RingMapIterator(*this, 0, 0);
+	auto end(ring_sparse_->end());
+	return RingMapIterator(*this, end.x, end.y);
+}
+
 void
 HealpixSkyMap::ConvertToDense()
 {
@@ -248,12 +290,8 @@ HealpixSkyMap::ConvertToDense()
 	dense_ = new std::vector<double>(npix_, 0);
 
 	if (ring_sparse_) {
-		long i = 0;
-		/* XXX pretty inefficient */
-		for (long j = 0; j < ring_info_->nring; j++) {
-			for (long k = 0; k < ring_info_->rings[j].ringpix; k++)
-				(*dense_)[i++] = ring_sparse_->at(j, k);
-		}
+		for (auto i = ring_begin(); i != ring_end(); i++)
+			(*dense_)[i.p] = (*i);
 		delete ring_sparse_;
 		ring_sparse_ = NULL;
 	} else if (indexed_sparse_) {
@@ -307,16 +345,8 @@ HealpixSkyMap::ConvertToIndexedSparse()
 	indexed_sparse_ = new std::unordered_map<uint64_t, double>(npix_);
 
 	if (ring_sparse_) {
-		long i = 0;
-		/* XXX pretty inefficient */
-		for (long j = 0; j < ring_info_->nring; j++) {
-			for (long k = 0; k < ring_info_->rings[j].ringpix; k++){
-				double val = ring_sparse_->at(j, k);
-				if (val != 0)
-					(*indexed_sparse_)[i] = val;
-				i++;
-			}
-		}
+		for (auto i = ring_begin(); i != ring_end(); i++)
+			(*indexed_sparse_)[i.p] = (*i);
 		delete ring_sparse_;
 		ring_sparse_ = NULL;
 	} else if (dense_) {
@@ -399,15 +429,13 @@ G3SkyMap &HealpixSkyMap::operator op(const G3SkyMap &rhs) { \
 				for (size_t i = 0; i < dense_->size(); i++) \
 					(*dense_)[i] op (*b.dense_)[i]; \
 			} else if (b.ring_sparse_) { \
-				/* XXX pretty inefficient */ \
-				for (size_t i = 0; i < dense_->size(); i++) \
-					(*dense_)[i] op b[i]; \
+				for (auto i = b.ring_begin(); i != b.ring_end(); i++) \
+					(*dense_)[i.p] op (*i); \
 			} else if (b.indexed_sparse_) { \
 				for (auto i : *b.indexed_sparse_) \
 					(*dense_)[i.first] op i.second; \
 			} \
 		} else if (ring_sparse_) { \
-			/* XXX pretty inefficient */ \
 			if (b.dense_) { \
 				for (size_t i = 0; i < b.dense_->size(); i++) { \
 					double val = (*b.dense_)[i]; \
@@ -428,12 +456,8 @@ G3SkyMap &HealpixSkyMap::operator op(const G3SkyMap &rhs) { \
 						(*indexed_sparse_)[i] op val; \
 				} \
 			} else if (b.ring_sparse_) { \
-				/* XXX pretty inefficient */ \
-				for (size_t i = 0; i < b.size(); i++) { \
-					double val = b[i]; \
-					if (val != 0) \
-						(*indexed_sparse_)[i] op val; \
-				} \
+				for (auto i = b.ring_begin(); i != b.ring_end(); i++) \
+					(*indexed_sparse_)[i.p] op (*i); \
 			} else if (b.indexed_sparse_) { \
 				for (auto i : *b.indexed_sparse_) \
 					(*indexed_sparse_)[i.first] op i.second; \
@@ -473,24 +497,15 @@ G3SkyMap &HealpixSkyMap::operator *=(const G3SkyMap &rhs) {
 			} else
 				zero = true;
 		} else if (ring_sparse_) {
-			long i = 0;
 			if (b.dense_ || b.ring_sparse_ || b.indexed_sparse_) {
-				/* XXX pretty inefficient */
-				for (long j = 0; j < ring_info_->nring; j++) {
-					for (long k = 0; k < ring_info_->rings[j].ringpix; k++) {
-						double val = ring_sparse_->at(j, k);
-						if (val != 0)
-							(*ring_sparse_)(j, k) *= b[i];
-						i++;
-					}
-				}
+				for (auto i = ring_begin(); i != ring_end(); i++)
+					(*ring_sparse_)(i.j, i.k) *= b[i.p];
 			} else
 				zero = true;
 		} else if (indexed_sparse_) {
 			if (b.dense_ || b.ring_sparse_ || b.indexed_sparse_) {
-                          for (auto i : *indexed_sparse_) {
+                          for (auto i : *indexed_sparse_)
 					(*indexed_sparse_)[i.first] *= b[i.first];
-                          }
 			} else
 				zero = true;
 		} else {
@@ -530,7 +545,6 @@ G3SkyMap &HealpixSkyMap::operator /=(const G3SkyMap &rhs) {
 		} else if (ring_sparse_) {
 			long i = 0;
 			if (b.dense_ || b.ring_sparse_ || b.indexed_sparse_) {
-				/* XXX pretty inefficient */
 				for (long j = 0; j < ring_info_->nring; j++) {
 					for (long k = 0; k < ring_info_->rings[j].ringpix; k++) {
 						double val = ring_sparse_->at(j, k);
@@ -648,8 +662,6 @@ HealpixSkyMap::operator /=(double b)
 	return *this;
 }
 
-// XXX scalar operators
-
 std::string
 HealpixSkyMap::Description() const
 {
@@ -720,16 +732,11 @@ HealpixSkyMap::NonZeroPixels(std::vector<uint64_t> &indices,
 	data.reserve(npix_allocated());
 
 	if (ring_sparse_) {
-		long i = 0;
-		/* XXX pretty inefficient */
-		for (long j = 0; j < ring_info_->nring; j++) {
-			for (long k = 0; k < ring_info_->rings[j].ringpix; k++){
-				double val = ring_sparse_->at(j, k);
-				if (val != 0) {
-					indices.push_back(i);
-					data.push_back(val);
-				}
-				i++;
+		for (auto i = ring_begin(); i != ring_end(); i++) {
+			double val = (*i);
+			if (val!= 0) {
+				indices.push_back(i.p);
+				data.push_back(val);
 			}
 		}
 	} else if (indexed_sparse_) {

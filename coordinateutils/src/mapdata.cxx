@@ -3,6 +3,50 @@
 
 #include "mapdata.h"
 
+double
+SparseMapIterator::operator*() const {
+	return sparse_.at(x, y);
+}
+
+SparseMapIterator &
+SparseMapIterator::operator++(int) {
+	SparseMapIterator end(sparse_.end());
+
+	if (x > end.x || sparse_.data_.size() == 0) {
+		x = end.x;
+		y = end.y;
+		return *this;
+	}
+
+	if (x < sparse_.offset_) {
+		x = sparse_.offset_;
+		y = sparse_.data_[0].first;
+		return  *this;
+	}
+
+	const SparseMapData::data_element &column = sparse_.data_[x - sparse_.offset_];
+	if (y < column.first) {
+		y = column.first;
+		return *this;
+	}
+	if (y < column.first + column.second.size() - 1) {
+		y++;
+		return *this;
+	}
+
+	x++;
+
+	if (x > end.x) {
+		x = end.x;
+		y = end.y;
+		return *this;
+	}
+
+	y = sparse_.data_[x - sparse_.offset_].first;
+
+	return *this;
+}
+
 DenseMapData *
 SparseMapData::to_dense() const
 {

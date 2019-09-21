@@ -6,6 +6,29 @@
 class SparseMapData;
 class DenseMapData;
 
+
+class SparseMapIterator {
+public:
+	SparseMapIterator(const SparseMapData &sparse, size_t x_, size_t y_) :
+	    x(x_), y(y_), sparse_(sparse) {}
+
+	SparseMapIterator(const SparseMapIterator &iter) :
+	    x(iter.x), y(iter.y), sparse_(iter.sparse_) {}
+
+	size_t x, y;
+
+	bool operator!=(const SparseMapIterator & other) const {
+		return ((x != other.x) || (y != other.y));
+	}
+
+	double operator*() const;
+	SparseMapIterator & operator++(int);
+
+private:
+	const SparseMapData & sparse_;
+};
+
+
 class SparseMapData {
 public:
 	SparseMapData(size_t xlen, size_t ylen) :
@@ -99,11 +122,28 @@ public:
 		ar & make_nvp("data", data_);
 	}
 
+	SparseMapIterator begin() const {
+		if (data_.size() == 0)
+			return SparseMapIterator(*this, 0, 0);
+		return SparseMapIterator(*this, offset_, data_[0].first);
+	}
+
+	SparseMapIterator end() const {
+		if (data_.size() == 0)
+			return SparseMapIterator(*this, 0, 0);
+		size_t x = offset_ + data_.size() - 1;
+		const data_element &column = data_[x - offset_];
+		size_t y = column.first + column.second.size();
+		return SparseMapIterator(*this, x, y);
+	}
+
 private:
 	uint64_t xlen_, ylen_;
 	typedef std::pair<int, std::vector<double> > data_element;
 	std::vector<data_element> data_;
 	uint64_t offset_;
+
+	friend class SparseMapIterator;
 };
 
 

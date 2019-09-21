@@ -540,14 +540,12 @@ G3SkyMapPtr FlatSkyMap::Rebin(size_t scale, bool norm) const
 					    (*dense_)(i, j) / sqscal;
 		} else {
 			double val;
-			for (size_t i = 0; i < xpix_; i++)
-				for (size_t j = 0; j < ypix_; j++) {
-					val = sparse_->at(i, j);
-					if (val == 0) // XXX: more efficient?
-						continue;
-					(*out->sparse_)(i / scale, j / scale) +=
-					    val / sqscal;
-				}
+			for (auto i = sparse_->begin(); i != sparse_->end(); i++) {
+				val = (*i);
+				if (val == 0)
+					continue;
+				(*out->sparse_)(i.x / scale, i.y / scale) += val / sqscal;
+			}
 		}
 	}
 	return out;

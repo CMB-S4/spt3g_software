@@ -11,6 +11,32 @@
 #include <coordinateutils/chealpix.h>
 
 class SparseMapData;
+class HealpixSkyMap;
+
+
+class RingMapIterator {
+public:
+	RingMapIterator(const HealpixSkyMap &map, size_t j_, size_t k_) :
+            j(j_), k(k_), map_(map) { setp(); }
+
+	RingMapIterator(const RingMapIterator &iter) :
+	    j(iter.j), k(iter.k), p(iter.p), map_(iter.map_) {}
+
+	size_t j, k, p;
+
+	void setp();
+
+	bool operator!=(const RingMapIterator & other) const {
+		return ((j != other.j) || (k != other.k));
+	}
+
+	double operator*() const;
+	RingMapIterator & operator++(int);
+
+private:
+	const HealpixSkyMap & map_;
+};
+
 
 class HealpixSkyMap : public G3FrameObject, public G3SkyMap {
 public:
@@ -93,6 +119,11 @@ private:
 	SparseMapData *ring_sparse_;
 	std::unordered_map<uint64_t, double> *indexed_sparse_;
 	map_info *ring_info_;
+
+	RingMapIterator ring_begin() const;
+	RingMapIterator ring_end() const;
+
+	friend class RingMapIterator;
 
 	SET_LOGGER("HealpixSkyMap");
 };
