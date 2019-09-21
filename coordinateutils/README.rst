@@ -43,7 +43,7 @@ ProjCylindricalEqualArea
 File Format Conversions
 =======================
 
-We support writing maps into FITS files that can be read with other tools (such as DS9), using the ``maputils.save_skymap_fits`` function.
+We support writing maps into FITS files that can be read with other tools (such as DS9), using the ``fitsio.save_skymap_fits`` function.  FITS files with compatible headers can be read in using the ``fitsio.load_skymap_fits`` function.
 
 T, Q, U and corresponding G3SkyMapWeights objects are written to a single file as a sequence of HDUs.  FlatSkyMap objects are stored in dense format (see below) to CompImageHDU objects if compression is enabled, and otherwise stored in dense format to standard ImageHDU objects.  The latter can be loaded using "old style" fits readers, such as the ``idlastro`` fits utilities.
 
