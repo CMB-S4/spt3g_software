@@ -82,6 +82,8 @@ public:
 	std::vector<size_t> shape() const override;
 	size_t npix_allocated() const override;
 	bool IsCompatible(const G3SkyMap & other) const override;
+	void NonZeroPixels(std::vector<uint64_t> &indices,
+	    std::vector<double> &data) const;
 
 	void set_proj(MapProjection proj);
 	void set_alpha_center(double alpha);
@@ -118,6 +120,41 @@ public:
 	void ConvertToDense();
 	void ConvertToSparse();
 	bool IsDense() const { return (dense_ != NULL); }
+
+	class iterator {
+	public:
+		typedef std::pair<uint64_t, double> value_type;
+		typedef value_type & reference;
+		typedef value_type * pointer;
+
+		iterator(const FlatSkyMap &map, bool begin);
+
+		bool operator==(const iterator & other) const {
+			return ((x_ == other.x_) && (y_ == other.y_));
+		}
+		bool operator!=(const iterator & other) const {
+			return ((x_ != other.x_) || (y_ != other.y_));;
+		}
+
+		reference operator*() { return value_; };
+		pointer operator->() { return &value_; };
+
+		iterator operator++();
+		iterator operator++(int) { iterator i = *this; ++(*this); return i; }
+
+	private:
+		size_t x_, y_;
+		value_type value_;
+		const FlatSkyMap &map_;
+
+		void set_value() {
+			value_.first = x_ + y_ * map_.xpix_;
+			value_.second = map_.at(x_, y_);
+		}
+	};
+
+	iterator begin() const { return iterator(*this, true); };
+	iterator end() const { return iterator(*this, false); };
 
 protected:
 	virtual void init_from_v1_data(std::vector<size_t>, const std::vector<double> &) override;

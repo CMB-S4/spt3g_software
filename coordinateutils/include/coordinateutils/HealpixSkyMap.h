@@ -11,7 +11,6 @@
 #include <coordinateutils/chealpix.h>
 
 class SparseMapData;
-class SparseMapIterator;
 
 
 class HealpixSkyMap : public G3FrameObject, public G3SkyMap {

@@ -105,9 +105,6 @@ public:
 		iterator(const SparseMapData &sparse, size_t x_, size_t y_) :
 		    x(x_), y(y_), sparse_(sparse) {}
 
-		iterator(const iterator &iter) :
-		    x(iter.x), y(iter.y), sparse_(iter.sparse_) {}
-
 		size_t x, y;
 
 		bool operator==(const iterator & other) const {
@@ -117,7 +114,7 @@ public:
 			return ((x != other.x) || (y != other.y));
 		}
 
-		double operator*() const;
+		double operator*() const { return sparse_.at(x, y); }
 
 		iterator operator++();
 		iterator operator++(int) { iterator i = *this; ++(*this); return i; }
@@ -220,6 +217,48 @@ public:
 		ar & make_nvp("xlen", xlen_);
 		ar & make_nvp("ylen", ylen_);
 		ar & make_nvp("data", data_);
+	}
+
+	class iterator {
+	public:
+		iterator(const DenseMapData &dense, size_t x_, size_t y_) :
+		    x(x_), y(y_), dense_(dense) {}
+
+		size_t x, y;
+
+		bool operator==(const iterator & other) const {
+			return ((x == other.x) && (y == other.y));
+		}
+		bool operator!=(const iterator & other) const {
+			return ((x != other.x) || (y != other.y));
+		}
+
+		double operator*() const {
+			return dense_.data_[dense_.idxat(x, y)];
+		}
+
+		iterator operator++() {
+			size_t idx = dense_.idxat(x, y);
+			if (idx < dense_.data_.size()) {
+				++idx;
+				x = idx % dense_.xlen_;
+				y = idx / dense_.xlen_;
+			}
+			return *this;
+		}
+
+		iterator operator++(int) { iterator i = *this; ++(*this); return i; }
+
+	private:
+		const DenseMapData & dense_;
+	};
+
+	iterator begin() const {
+		return iterator(*this, 0, 0);
+	}
+
+	iterator end() const {
+		return iterator(*this, 0, ylen_);
 	}
 
 private:

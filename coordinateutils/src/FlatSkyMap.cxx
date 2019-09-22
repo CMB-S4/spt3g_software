@@ -181,6 +181,44 @@ FlatSkyMap::init_from_v1_data(std::vector<size_t> dims, const std::vector<double
 	(*dense_) = data;
 }
 
+FlatSkyMap::iterator::iterator(const FlatSkyMap &map, bool begin) :
+    map_(map)
+{
+	if (map_.dense_) {
+		auto iter = begin ? map_.dense_->begin() : map_.dense_->end();
+		x_ = iter.x;
+		y_ = iter.y;
+	} else if (map_.sparse_) {
+		auto iter = begin ? map_.sparse_->begin() : map_.sparse_->end();
+		x_ = iter.x;
+		y_ = iter.y;
+	} else {
+		x_ = 0;
+		y_ = 0;
+	}
+
+	set_value();
+}
+
+FlatSkyMap::iterator
+FlatSkyMap::iterator::operator++()
+{
+	if (map_.dense_) {
+		DenseMapData::iterator iter(*map_.dense_, x_, y_);
+		++iter;
+		x_ = iter.x;
+		y_ = iter.y;
+	} else if (map_.sparse_) {
+		SparseMapData::iterator iter(*map_.sparse_, x_, y_);
+		++iter;
+		x_ = iter.x;
+		y_ = iter.y;
+	}
+
+	set_value();
+	return *this;
+}
+
 void
 FlatSkyMap::ConvertToDense()
 {
@@ -449,6 +487,28 @@ bool FlatSkyMap::IsCompatible(const G3SkyMap & other) const {
 	}
 }
 
+void
+FlatSkyMap::NonZeroPixels(std::vector<uint64_t> &indices,
+    std::vector<double> &data) const
+{
+	indices.clear();
+	data.clear();
+
+	size_t npix = npix_allocated();
+	if (npix == 0)
+		return;
+
+	indices.reserve(npix);
+	data.reserve(npix);
+
+	for (auto i : *this) {
+		if (i.second != 0) {
+			indices.push_back(i.first);
+			data.push_back(i.second);
+		}
+	}
+}
+
 std::vector<size_t> FlatSkyMap::shape() const {
 	return {xpix_, ypix_};
 }
@@ -684,6 +744,17 @@ flatskymap_pysparsity_set(FlatSkyMap &fsm, bool sparse)
 		fsm.ConvertToDense();
 }
 
+static boost::python::tuple
+flatskymap_nonzeropixels(const FlatSkyMap &m)
+{
+	auto i = std::vector<uint64_t>(); // XXX pointers?
+	auto d = std::vector<double>();
+
+	m.NonZeroPixels(i, d);
+
+	return boost::python::make_tuple(i, d);
+}
+
 #define FLAT_SKY_MAP_DOCSTR \
         "FlatSkyMap is a G3SkyMap with the extra meta information about the" \
 	" particular flat sky projection included.  In practice it behaves\n" \
@@ -778,6 +849,10 @@ PYBINDINGS("coordinateutils")
 	       "True if the map is stored with column and row zero-suppression, False if "
 	       "every pixel is stored. Map sparsity can be changed by setting this to True "
 	       "(or False).")
+
+	    .def("nonzero_pixels", &flatskymap_nonzeropixels,
+	        "Returns a list of the indices of the non-zero pixels in the "
+	        "map and a list of the values of those non-zero pixels.")
 
 	    .def("__getitem__", flatskymap_getitem_1d)
 	    .def("__setitem__", flatskymap_setitem_1d)

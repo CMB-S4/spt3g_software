@@ -3,11 +3,6 @@
 
 #include "mapdata.h"
 
-double
-SparseMapData::iterator::operator*() const {
-	return sparse_.at(x, y);
-}
-
 SparseMapData::iterator
 SparseMapData::iterator::operator++() {
 	iterator end(sparse_.end());

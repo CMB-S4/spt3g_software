@@ -33,3 +33,41 @@ assert(m.shape[1] == w.shape[1])
 assert(w[17,32] == m[17,32])
 assert((w == m).all())
 
+# Test conversion between representations is lossless
+# Along the way, test nonzero_pixels() once for each
+# representation
+
+a = numpy.arange(1500, dtype=float)
+a[0] = -1
+v = numpy.zeros((50, 50), dtype=float)
+v.ravel()[:1500] = a
+x = FlatSkyMap(v, core.G3Units.arcmin)
+
+assert(not x.sparse)
+assert(x.npix_allocated == x.size)
+assert(x[1499] == 1499)
+assert(x[1501] == 0)
+
+k, v = x.nonzero_pixels()
+assert(len(k) == len(v) == 1500)
+assert(set(v) == set(a))
+
+x.sparse = True
+assert(x.npix_allocated == 1500)
+for i in range(1, 1500):
+    assert(x[i] == i)
+assert(x[1501] == 0)
+
+k, v = x.nonzero_pixels()
+assert(len(k) == len(v) == 1500)
+assert(set(v) == set(a))
+
+x.sparse = False
+assert(x.npix_allocated == x.size)
+for i in range(1, 1500):
+    assert(x[i] == i)
+assert(x[1501] == 0)
+
+k, v = x.nonzero_pixels()
+assert(len(k) == len(v) == 1500)
+assert(set(v) == set(a))

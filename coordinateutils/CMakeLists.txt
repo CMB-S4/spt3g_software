@@ -22,7 +22,7 @@ execute_process(COMMAND ln -fsn ${CMAKE_CURRENT_SOURCE_DIR}/python ${CMAKE_LIBRA
 
 add_spt3g_test(quatangtest)
 add_spt3g_test(transtest SLOWTEST)
-add_spt3g_test(skymappybindings)
+add_spt3g_test(flatsky_maps)
 add_spt3g_test(flatskymap_operators)
 add_spt3g_test(healpixskymap_operators)
 add_spt3g_test(weights_operators)
