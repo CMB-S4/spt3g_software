@@ -4,13 +4,13 @@
 #include "mapdata.h"
 
 double
-SparseMapIterator::operator*() const {
+SparseMapData::iterator::operator*() const {
 	return sparse_.at(x, y);
 }
 
-SparseMapIterator &
-SparseMapIterator::operator++(int) {
-	SparseMapIterator end(sparse_.end());
+SparseMapData::iterator
+SparseMapData::iterator::operator++() {
+	iterator end(sparse_.end());
 
 	if (x > end.x || sparse_.data_.size() == 0) {
 		x = end.x;

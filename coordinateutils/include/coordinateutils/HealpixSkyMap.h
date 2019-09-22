@@ -11,31 +11,7 @@
 #include <coordinateutils/chealpix.h>
 
 class SparseMapData;
-class HealpixSkyMap;
-
-
-class RingMapIterator {
-public:
-	RingMapIterator(const HealpixSkyMap &map, size_t j_, size_t k_) :
-            j(j_), k(k_), map_(map) { setp(); }
-
-	RingMapIterator(const RingMapIterator &iter) :
-	    j(iter.j), k(iter.k), p(iter.p), map_(iter.map_) {}
-
-	size_t j, k, p;
-
-	void setp();
-
-	bool operator!=(const RingMapIterator & other) const {
-		return ((j != other.j) || (k != other.k));
-	}
-
-	double operator*() const;
-	RingMapIterator & operator++(int);
-
-private:
-	const HealpixSkyMap & map_;
-};
+class SparseMapIterator;
 
 
 class HealpixSkyMap : public G3FrameObject, public G3SkyMap {
@@ -111,6 +87,42 @@ public:
 	bool IsRingSparse() const { return (ring_sparse_ != NULL); }
 	bool IsIndexedSparse() const { return (indexed_sparse_ != NULL); }
 
+	class iterator {
+	public:
+		typedef std::pair<uint64_t, double> value_type;
+		typedef value_type & reference;
+		typedef value_type * pointer;
+
+		iterator(const HealpixSkyMap &map, bool begin);
+		iterator(const iterator &iter);
+
+		bool operator==(const iterator & other) const {
+			return (index_ == other.index_);
+		}
+		bool operator!=(const iterator & other) const {
+			return (index_ != other.index_);
+		}
+
+		reference operator*() { return value_; };
+		pointer operator->() { return &value_; };
+
+		iterator operator++();
+		iterator operator++(int) { iterator i = *this; ++(*this); return i; }
+
+	private:
+		uint64_t index_;
+		value_type value_;
+		const HealpixSkyMap &map_;
+		std::unordered_map<uint64_t, double>::iterator it_indexed_sparse_;
+		std::vector<double>::iterator it_dense_;
+		size_t j_, k_;
+
+		void set_value();
+	};
+
+	iterator begin() const { return iterator(*this, true); };
+	iterator end() const { return iterator(*this, false); };
+
 private:
 	uint32_t nside_;
 	size_t npix_;
@@ -119,11 +131,6 @@ private:
 	SparseMapData *ring_sparse_;
 	std::unordered_map<uint64_t, double> *indexed_sparse_;
 	map_info *ring_info_;
-
-	RingMapIterator ring_begin() const;
-	RingMapIterator ring_end() const;
-
-	friend class RingMapIterator;
 
 	SET_LOGGER("HealpixSkyMap");
 };
