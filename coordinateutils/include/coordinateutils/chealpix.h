@@ -70,6 +70,7 @@ typedef struct {
 
 map_info * init_map_info(size_t nside, int populate);
 void free_map_info(map_info *minfo);
+int get_ring_index(map_info *minfo, long pix, long *iring, long *ringpix);
 int get_interp_weights(map_info *minfo, double theta, double phi,
                        long pix[4], double weight[4]);
 
