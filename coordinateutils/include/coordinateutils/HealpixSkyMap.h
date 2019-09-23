@@ -86,41 +86,41 @@ public:
 	bool IsRingSparse() const { return (ring_sparse_ != NULL); }
 	bool IsIndexedSparse() const { return (indexed_sparse_ != NULL); }
 
-	class iterator {
+	class const_iterator {
 	public:
 		typedef std::pair<uint64_t, double> value_type;
 		typedef value_type & reference;
 		typedef value_type * pointer;
 
-		iterator(const HealpixSkyMap &map, bool begin);
-		iterator(const iterator &iter);
+		const_iterator(const HealpixSkyMap &map, bool begin);
+		const_iterator(const const_iterator &iter);
 
-		bool operator==(const iterator & other) const {
+		bool operator==(const const_iterator & other) const {
 			return (index_ == other.index_);
 		}
-		bool operator!=(const iterator & other) const {
+		bool operator!=(const const_iterator & other) const {
 			return (index_ != other.index_);
 		}
 
 		reference operator*() { return value_; };
 		pointer operator->() { return &value_; };
 
-		iterator operator++();
-		iterator operator++(int) { iterator i = *this; ++(*this); return i; }
+		const_iterator operator++();
+		const_iterator operator++(int) { const_iterator i = *this; ++(*this); return i; }
 
 	private:
 		uint64_t index_;
 		value_type value_;
 		const HealpixSkyMap &map_;
-		std::unordered_map<uint64_t, double>::iterator it_indexed_sparse_;
-		std::vector<double>::iterator it_dense_;
+		std::unordered_map<uint64_t, double>::const_iterator it_indexed_sparse_;
+		std::vector<double>::const_iterator it_dense_;
 		size_t j_, k_;
 
 		void set_value();
 	};
 
-	iterator begin() const { return iterator(*this, true); };
-	iterator end() const { return iterator(*this, false); };
+	const_iterator begin() const { return const_iterator(*this, true); };
+	const_iterator end() const { return const_iterator(*this, false); };
 
 private:
 	uint32_t nside_;

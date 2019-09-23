@@ -100,42 +100,42 @@ public:
 		ar & make_nvp("data", data_);
 	}
 
-	class iterator {
+	class const_iterator {
 	public:
-		iterator(const SparseMapData &sparse, size_t x_, size_t y_) :
+		const_iterator(const SparseMapData &sparse, size_t x_, size_t y_) :
 		    x(x_), y(y_), sparse_(sparse) {}
 
 		size_t x, y;
 
-		bool operator==(const iterator & other) const {
+		bool operator==(const const_iterator & other) const {
 			return ((x == other.x) && (y == other.y));
 		}
-		bool operator!=(const iterator & other) const {
+		bool operator!=(const const_iterator & other) const {
 			return ((x != other.x) || (y != other.y));
 		}
 
 		double operator*() const { return sparse_.at(x, y); }
 
-		iterator operator++();
-		iterator operator++(int) { iterator i = *this; ++(*this); return i; }
+		const_iterator operator++();
+		const_iterator operator++(int) { const_iterator i = *this; ++(*this); return i; }
 
 	private:
 		const SparseMapData & sparse_;
 	};
 
-	iterator begin() const {
+	const_iterator begin() const {
 		if (data_.size() == 0)
-			return iterator(*this, 0, 0);
-		return iterator(*this, offset_, data_[0].first);
+			return const_iterator(*this, 0, 0);
+		return const_iterator(*this, offset_, data_[0].first);
 	}
 
-	iterator end() const {
+	const_iterator end() const {
 		if (data_.size() == 0)
-			return iterator(*this, 0, 0);
+			return const_iterator(*this, 0, 0);
 		size_t x = offset_ + data_.size() - 1;
 		const data_element &column = data_[x - offset_];
 		size_t y = column.first + column.second.size();
-		return iterator(*this, x, y);
+		return const_iterator(*this, x, y);
 	}
 
 private:
@@ -219,17 +219,17 @@ public:
 		ar & make_nvp("data", data_);
 	}
 
-	class iterator {
+	class const_iterator {
 	public:
-		iterator(const DenseMapData &dense, size_t x_, size_t y_) :
+		const_iterator(const DenseMapData &dense, size_t x_, size_t y_) :
 		    x(x_), y(y_), dense_(dense) {}
 
 		size_t x, y;
 
-		bool operator==(const iterator & other) const {
+		bool operator==(const const_iterator & other) const {
 			return ((x == other.x) && (y == other.y));
 		}
-		bool operator!=(const iterator & other) const {
+		bool operator!=(const const_iterator & other) const {
 			return ((x != other.x) || (y != other.y));
 		}
 
@@ -237,7 +237,7 @@ public:
 			return dense_.data_[dense_.idxat(x, y)];
 		}
 
-		iterator operator++() {
+		const_iterator operator++() {
 			size_t idx = dense_.idxat(x, y);
 			if (idx < dense_.data_.size()) {
 				++idx;
@@ -247,18 +247,18 @@ public:
 			return *this;
 		}
 
-		iterator operator++(int) { iterator i = *this; ++(*this); return i; }
+		const_iterator operator++(int) { const_iterator i = *this; ++(*this); return i; }
 
 	private:
 		const DenseMapData & dense_;
 	};
 
-	iterator begin() const {
-		return iterator(*this, 0, 0);
+	const_iterator begin() const {
+		return const_iterator(*this, 0, 0);
 	}
 
-	iterator end() const {
-		return iterator(*this, 0, ylen_);
+	const_iterator end() const {
+		return const_iterator(*this, 0, ylen_);
 	}
 
 private:

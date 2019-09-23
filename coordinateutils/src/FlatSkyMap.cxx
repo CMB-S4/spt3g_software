@@ -181,7 +181,7 @@ FlatSkyMap::init_from_v1_data(std::vector<size_t> dims, const std::vector<double
 	(*dense_) = data;
 }
 
-FlatSkyMap::iterator::iterator(const FlatSkyMap &map, bool begin) :
+FlatSkyMap::const_iterator::const_iterator(const FlatSkyMap &map, bool begin) :
     map_(map)
 {
 	if (map_.dense_) {
@@ -200,16 +200,16 @@ FlatSkyMap::iterator::iterator(const FlatSkyMap &map, bool begin) :
 	set_value();
 }
 
-FlatSkyMap::iterator
-FlatSkyMap::iterator::operator++()
+FlatSkyMap::const_iterator
+FlatSkyMap::const_iterator::operator++()
 {
 	if (map_.dense_) {
-		DenseMapData::iterator iter(*map_.dense_, x_, y_);
+		DenseMapData::const_iterator iter(*map_.dense_, x_, y_);
 		++iter;
 		x_ = iter.x;
 		y_ = iter.y;
 	} else if (map_.sparse_) {
-		SparseMapData::iterator iter(*map_.sparse_, x_, y_);
+		SparseMapData::const_iterator iter(*map_.sparse_, x_, y_);
 		++iter;
 		x_ = iter.x;
 		y_ = iter.y;

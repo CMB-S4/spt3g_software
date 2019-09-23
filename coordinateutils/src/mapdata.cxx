@@ -3,9 +3,9 @@
 
 #include "mapdata.h"
 
-SparseMapData::iterator
-SparseMapData::iterator::operator++() {
-	iterator end(sparse_.end());
+SparseMapData::const_iterator
+SparseMapData::const_iterator::operator++() {
+	const_iterator end(sparse_.end());
 
 	if (x > end.x || sparse_.data_.size() == 0) {
 		x = end.x;

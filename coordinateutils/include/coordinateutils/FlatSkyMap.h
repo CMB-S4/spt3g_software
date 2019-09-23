@@ -121,26 +121,26 @@ public:
 	void ConvertToSparse();
 	bool IsDense() const { return (dense_ != NULL); }
 
-	class iterator {
+	class const_iterator {
 	public:
 		typedef std::pair<uint64_t, double> value_type;
 		typedef value_type & reference;
 		typedef value_type * pointer;
 
-		iterator(const FlatSkyMap &map, bool begin);
+		const_iterator(const FlatSkyMap &map, bool begin);
 
-		bool operator==(const iterator & other) const {
+		bool operator==(const const_iterator & other) const {
 			return ((x_ == other.x_) && (y_ == other.y_));
 		}
-		bool operator!=(const iterator & other) const {
+		bool operator!=(const const_iterator & other) const {
 			return ((x_ != other.x_) || (y_ != other.y_));;
 		}
 
 		reference operator*() { return value_; };
 		pointer operator->() { return &value_; };
 
-		iterator operator++();
-		iterator operator++(int) { iterator i = *this; ++(*this); return i; }
+		const_iterator operator++();
+		const_iterator operator++(int) { const_iterator i = *this; ++(*this); return i; }
 
 	private:
 		size_t x_, y_;
@@ -153,8 +153,8 @@ public:
 		}
 	};
 
-	iterator begin() const { return iterator(*this, true); };
-	iterator end() const { return iterator(*this, false); };
+	const_iterator begin() const { return const_iterator(*this, true); };
+	const_iterator end() const { return const_iterator(*this, false); };
 
 protected:
 	virtual void init_from_v1_data(std::vector<size_t>, const std::vector<double> &) override;

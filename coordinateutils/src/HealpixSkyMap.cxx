@@ -239,7 +239,7 @@ HealpixSkyMap::load(A &ar, unsigned v)
 	}
 }
 
-HealpixSkyMap::iterator::iterator(const HealpixSkyMap &map, bool begin) :
+HealpixSkyMap::const_iterator::const_iterator(const HealpixSkyMap &map, bool begin) :
     map_(map)
 {
 	if (map_.dense_) {
@@ -257,7 +257,7 @@ HealpixSkyMap::iterator::iterator(const HealpixSkyMap &map, bool begin) :
 	set_value();
 }
 
-HealpixSkyMap::iterator::iterator(const HealpixSkyMap::iterator & iter) :
+HealpixSkyMap::const_iterator::const_iterator(const HealpixSkyMap::const_iterator & iter) :
     index_(iter.index_), value_(iter.value_), map_(iter.map_)
 {
 	if (map_.dense_)
@@ -270,7 +270,7 @@ HealpixSkyMap::iterator::iterator(const HealpixSkyMap::iterator & iter) :
 }
 
 void
-HealpixSkyMap::iterator::set_value()
+HealpixSkyMap::const_iterator::set_value()
 {
 	if (map_.dense_) {
 		value_.second = index_ < map_.size() ? *it_dense_ : 0;
@@ -290,14 +290,14 @@ HealpixSkyMap::iterator::set_value()
 	value_.first = index_;
 }
 
-HealpixSkyMap::iterator
-HealpixSkyMap::iterator::operator++()
+HealpixSkyMap::const_iterator
+HealpixSkyMap::const_iterator::operator++()
 {
 	if (map_.dense_) {
 		++index_;
 		++it_dense_;
 	} else if (map_.ring_sparse_) {
-		SparseMapData::iterator iter(*map_.ring_sparse_, j_, k_);
+		SparseMapData::const_iterator iter(*map_.ring_sparse_, j_, k_);
 		++iter;
 		j_ = iter.x;
 		k_ = iter.y;
