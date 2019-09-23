@@ -26,8 +26,12 @@ G3SkyMap::serialize(A &ar, unsigned v)
 		dims.push_back(xpix);
 		dims.push_back(ypix);
 
-		overflow = dat[dat.size() - 1];
-		dat.resize(dat.size() - 1);
+		if (dat.size() > 0) {
+			overflow = dat[dat.size() - 1];
+			dat.resize(dat.size() - 1);
+		} else {
+			overflow = 0;
+		}
 		init_from_v1_data(dims, dat);
 	} else {
 		ar & cereal::make_nvp("overflow", overflow);

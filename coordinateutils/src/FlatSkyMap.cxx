@@ -177,8 +177,11 @@ FlatSkyMap::init_from_v1_data(std::vector<size_t> dims, const std::vector<double
 {
 	xpix_ = dims[0];
 	ypix_ = dims[1];
-	dense_ = new DenseMapData(dims[0], dims[1]);
-	(*dense_) = data;
+
+	if (data.size() > 0) {
+		dense_ = new DenseMapData(dims[0], dims[1]);
+		(*dense_) = data;
+	}
 }
 
 FlatSkyMap::const_iterator::const_iterator(const FlatSkyMap &map, bool begin) :
