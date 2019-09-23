@@ -109,6 +109,38 @@ void free_map_info(map_info *minfo) {
 }
 
 /*
+  Return the ring index and pixel offset of the given pixel number.
+  Assumes ring pixel ordering.
+
+  minfo : initialized map_info structure
+  pix : healpix pixel
+  iring, ringpix : corresponding ring index and pixel offset within the ring
+*/
+int get_ring_index(map_info *minfo, long pix, long *iring, long *ringpix) {
+  long ncap = minfo->ncap;
+  long npix = minfo->npix;
+  long nside = minfo->nside;
+  long nring = minfo->nring;
+
+  if (pix < 0 || pix >= npix)
+    return -1;
+
+  if (pix < ncap) /* North Polar cap */
+    *iring = (long)(0.5 * (1 + sqrt(1.5 + 2 * pix)));
+  else if (pix < (npix - ncap)) /* Equatorial region */
+    *iring = (long)((pix - ncap) / nring + nside);
+  else /* South Polar cap */
+    *iring = nring - (long)(0.5 * (1 + sqrt(2 * (npix - pix) - 0.5)));
+
+  *ringpix = pix - minfo->rings[*iring].startpix;
+
+  if (*ringpix < 0 || *ringpix >= minfo->rings[*iring].ringpix)
+    return -1;
+
+  return 0;
+}
+
+/*
   Return pixel numbers and weights for bilinear lat/lon interpolation.
   Assumes ring pixel ordering.
 

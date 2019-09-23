@@ -1,5 +1,5 @@
 import numpy
-from spt3g.core import G3SkyMapWeights, G3SkyMap, WeightType
+from spt3g.coordinateutils import G3SkyMapWeights, G3SkyMapWithWeights, G3SkyMap, WeightType
 
 # This file adds extra functionality to the python interface to G3SkyMap and
 # G3SkyMapWeights. This is done in ways that exploit a large fraction of
@@ -25,11 +25,11 @@ def numpycompat(a, b, op):
     return numpyinplace(a, numpy.ndarray.__dict__[op](numpy.asarray(a), numpy.asarray(b)))
 
 
-for x in ['__add__', '__and__', '__div__', '__divmod__', '__floordiv__', '__ge__', '__gt__', '__iadd__', '__iand__', '__idiv__', '__ifloordiv__', '__imod__', '__imul__', '__ior__', '__ipow__', '__isub__', '__itruediv__', '__le__', '__lt__', '__mul__', '__neg__', '__nonzero__', '__or__', '__pow__', '__radd__', '__rdiv__', '__rdivmod__', '__rmod__', '__rmul__', '__rpow__', '__rsub__', '__rtruediv__', '__truediv__']:
+for x in ['__and__', '__divmod__', '__floordiv__', '__ge__', '__gt__', '__iand__', '__ifloordiv__', '__imod__', '__ior__', '__ipow__', '__le__', '__lt__', '__nonzero__', '__or__', '__pow__', '__rdivmod__', '__rmod__', '__rpow__']:
     setattr(G3SkyMap, x, lambda a, b, op=x: numpycompat(a, b, op))
 
 # Bind all numpy unary operators to G3SkyMap
-for x in ['__neg__', '__pos__', '__invert__']:
+for x in ['__pos__', '__invert__']:
     setattr(G3SkyMap, x, lambda a, op=x: numpyinplace(a, numpy.ndarray.__dict__[op](numpy.asarray(a))))
 
 # And some special binary operators
@@ -38,13 +38,16 @@ setattr(G3SkyMap, '__getslice__', lambda a, *args: numpy.ndarray.__getslice__(nu
 # Make weight maps so that you can index them and get the full 3x3 weight matrix
 
 def skymapweights_getitem(self, x):
+    if self.weight_type == WeightType.Wunpol:
+        return self.TT[x]
+
     mat = numpy.zeros((3,3))
     mat[0,0] = self.TT[x]
     mat[0,1] = mat[1,0] = self.TQ[x]
     mat[0,2] = mat[2,0] = self.TU[x]
     mat[1,1] = self.QQ[x]
     mat[1,2] = mat[2,1] = self.QU[x]
-    mat[2,2] = self.QU[x]
+    mat[2,2] = self.UU[x]
 
     return mat
 
@@ -52,7 +55,14 @@ G3SkyMapWeights.__getitem__ = skymapweights_getitem
 del skymapweights_getitem
 
 def skymapweights_setitem(self, x, mat):
-    # Check for symmetry, shape?
+    if self.weight_type == WeightType.Wunpol:
+        assert(numpy.isscalar(mat))
+        self.TT[x] = mat
+        return
+
+    mat = numpy.asarray(mat, dtype=float)
+    assert(mat.shape == (3, 3))
+    assert(numpy.allclose(mat, mat.T))
     self.TT[x] = mat[0,0]
     self.TQ[x] = mat[0,1]
     self.TU[x] = mat[0,2]
@@ -73,28 +83,60 @@ def skymapweights_setattr(self, x, val):
         oldsetattr(self, x, val)
     except AttributeError:
         setattr(self.TT, x, val)
-        setattr(self.TQ, x, val)
-        setattr(self.TU, x, val)
-        setattr(self.QQ, x, val)
-        setattr(self.QU, x, val)
-        setattr(self.UU, x, val)
+        if self.weight_type == WeightType.Wpol:
+            setattr(self.TQ, x, val)
+            setattr(self.TU, x, val)
+            setattr(self.QQ, x, val)
+            setattr(self.QU, x, val)
+            setattr(self.UU, x, val)
 G3SkyMapWeights.__setattr__ = skymapweights_setattr
 del skymapweights_setattr
 
-# Bind addition to weights
-def add_skymapweights(w1,w2):
-    w3 = G3SkyMapWeights(w1.TT,w1.weight_type)
-    w3.TT = w1.TT + w2.TT
+# Make maps with weights so that you can index them and get the full 1x3 Stokes vector
 
-    if w1.weight_type == WeightType.Wpol:
-        w3.TQ = w1.TQ + w2.TQ
-        w3.TU = w1.TU + w2.TU
-        w3.QQ = w1.QQ + w2.QQ
-        w3.QU = w1.QU + w2.QU
-        w3.UU = w1.UU + w2.UU
+def skymapwithweights_getitem(self, x):
+    if not self.polarized:
+        return self.T[x]
 
-    return w3
+    vec = numpy.zeros(3)
+    vec[0] = self.T[x]
+    vec[1] = self.Q[x]
+    vec[2] = self.U[x]
+    return vec
 
-G3SkyMapWeights.__add__ = add_skymapweights
-del add_skymapweights
+G3SkyMapWithWeights.__getitem__ = skymapwithweights_getitem
+del skymapwithweights_getitem
+
+def skymapwithweights_setitem(self, x, vec):
+    if not self.polarized:
+        assert(numpy.isscalar(vec))
+        self.T[x] = vec
+        return
+
+    vec = numpy.asarray(vec, dtype=float)
+    assert(len(vec) == 3)
+    self.T[x] = vec[0]
+    self.Q[x] = vec[1]
+    self.U[x] = vec[2]
+
+G3SkyMapWithWeights.__setitem__ = skymapwithweights_setitem
+del skymapwithweights_setitem
+
+# Pass through attributes to submaps. This is not ideal because the properties
+# are hidden and not visible by tab completion. A better solution would use
+# __getattribute__
+G3SkyMapWithWeights.__getattr__ = lambda self, x: getattr(self.T, x)
+oldsetattr = G3SkyMapWithWeights.__setattr__
+def skymapwithweights_setattr(self, x, val):
+    try:
+        oldsetattr(self, x, val)
+    except AttributeError:
+        setattr(self.T, x, val)
+        if self.polarized:
+            setattr(self.Q, x, val)
+            setattr(self.U, x, val)
+        if self.weighted:
+            setattr(self.weights, x, val)
+G3SkyMapWithWeights.__setattr__ = skymapwithweights_setattr
+del skymapwithweights_setattr
 

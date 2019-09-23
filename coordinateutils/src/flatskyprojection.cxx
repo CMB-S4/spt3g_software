@@ -18,9 +18,11 @@
 using namespace G3Units;
 
 FlatSkyProjection::FlatSkyProjection(size_t xpix, size_t ypix, double res,
-    double alpha_center, double delta_center, double x_res, MapProjection proj)
+    double alpha_center, double delta_center, double x_res, MapProjection proj,
+    double x_center, double y_center)
 {
-	initialize(xpix, ypix, res, alpha_center, delta_center, x_res, proj);
+	initialize(xpix, ypix, res, alpha_center, delta_center, x_res, proj,
+	    x_center, y_center);
 }
 
 FlatSkyProjection::FlatSkyProjection()
@@ -31,7 +33,7 @@ FlatSkyProjection::FlatSkyProjection()
 FlatSkyProjection::FlatSkyProjection(const FlatSkyProjection & fp)
 {
 	initialize(fp.xpix_, fp.ypix_, fp.y_res_, fp.alpha0_, fp.delta0_,
-	    fp.x_res_, fp.proj_);
+	    fp.x_res_, fp.proj_, fp.x0_, fp.y0_);
 }
 
 template <class A> void FlatSkyProjection::load(A &ar, unsigned v)
@@ -55,7 +57,15 @@ template <class A> void FlatSkyProjection::load(A &ar, unsigned v)
 		ar & make_nvp("y_res", y_res_);
 	}
 
-	initialize(xpix_, ypix_, y_res_, alpha0_, delta0_, x_res_, proj_);
+	if (v > 2) {
+		ar & make_nvp("x_center", x0_);
+		ar & make_nvp("y_center", y0_);
+	} else {
+		x0_ = 0.0 / 0.0;
+		y0_ = 0.0 / 0.0;
+	}
+
+	initialize(xpix_, ypix_, y_res_, alpha0_, delta0_, x_res_, proj_, x0_, y0_);
 }
 
 template <class A> void FlatSkyProjection::save(A &ar, unsigned v) const
@@ -70,6 +80,8 @@ template <class A> void FlatSkyProjection::save(A &ar, unsigned v) const
 	ar & make_nvp("delta_center", delta0_);
 	ar & make_nvp("x_res", x_res_);
 	ar & make_nvp("y_res", y_res_);
+	ar & make_nvp("x_center", x0_);
+	ar & make_nvp("y_center", y0_);
 }
 
 std::string FlatSkyProjection::Description() const
@@ -119,20 +131,24 @@ bool FlatSkyProjection::IsCompatible(const FlatSkyProjection & other) const
 	return ((xpix_ == other.xpix_) &&
 		(ypix_ == other.ypix_) &&
 		(proj_ == other.proj_) &&
-		(alpha0_ == other.alpha0_) &&
-		(delta0_ == other.delta0_) &&
-		(x_res_ == other.x_res_) &&
-		(y_res_ == other.y_res_));
+		(fabs(alpha0_ - other.alpha0_) < 1e-12) &&
+		(fabs(delta0_ - other.delta0_) < 1e-12) &&
+		(fabs(x_res_ - other.x_res_) < 1e-12) &&
+		(fabs(y_res_ - other.y_res_) < 1e-12) &&
+		(fabs(x0_ - other.x0_) < 1e-12) &&
+		(fabs(y0_ - other.y0_) < 1e-12));
 }
 
 void FlatSkyProjection::initialize(size_t xpix, size_t ypix, double res,
-    double alpha_center, double delta_center, double x_res, MapProjection proj)
+    double alpha_center, double delta_center, double x_res, MapProjection proj,
+    double x_center, double y_center)
 {
 	xpix_ = xpix;
 	ypix_ = ypix;
 	set_proj(proj);
-	set_center(alpha_center, delta_center);
+	set_angle_center(alpha_center, delta_center);
 	set_res(res, x_res);
+	set_xy_center(x_center, y_center);
 }
 
 void FlatSkyProjection::set_proj(MapProjection proj)
@@ -150,30 +166,57 @@ void FlatSkyProjection::set_delta_center(double delta)
 	delta0_ = delta;
 	sindelta0_ = SIN(delta0_ / rad);
 	cosdelta0_ = COS(delta0_ / rad);
+	if (proj_ == Proj7) {
+		delta0_ = fabs(delta0_);
+		pv_.resize(1);
+		pv_[0] = cosdelta0_ * cosdelta0_ / rad;
+	}
 }
 
-void FlatSkyProjection::set_center(double alpha, double delta)
+void FlatSkyProjection::set_angle_center(double alpha, double delta)
 {
 	set_alpha_center(alpha);
 	set_delta_center(delta);
 }
 
+void FlatSkyProjection::set_x_center(double x)
+{
+	x0_ = (x != x) ? (xpix_ / 2.0 + 0.5) : x;
+	x_min_ = (x0_ - xpix_) * x_res_;
+}
+
+void FlatSkyProjection::set_y_center(double y)
+{
+	y0_ = (y != y) ? (ypix_ / 2.0 + 0.5) : y;
+	if (proj_ == Proj0 || proj_ == Proj1 || proj_ == Proj9) {
+		y0_ += delta0_ / y_res_;
+		set_delta_center(0.0);
+	}
+	y_min_ = (y0_ - ypix_) * y_res_;
+}
+
+void FlatSkyProjection::set_xy_center(double x, double y)
+{
+	set_x_center(x);
+	set_y_center(y);
+}
+
 void FlatSkyProjection::set_xres(double res)
 {
+	if (res <= 0)
+		res = (proj_ == Proj9) ? (y_res_ / cosdelta0_) : y_res_;
 	x_res_ = res;
-	x_min_ = -0.5 * (xpix_ - 1) * x_res_;
 }
 
 void FlatSkyProjection::set_yres(double res)
 {
 	y_res_ = res;
-	y_min_ = -0.5 * (ypix_ - 1) * y_res_;
 }
 
 void FlatSkyProjection::set_res(double res, double x_res)
 {
 	set_yres(res);
-	set_xres(x_res > 0 ? x_res : res);
+	set_xres(x_res);
 }
 
 long
@@ -211,6 +254,7 @@ FlatSkyProjection::xy_to_angle(double x, double y, bool wrap_alpha) const
 		alpha = x / COS(delta / rad) + alpha0_;
 		break;
 	}
+	case Proj9:
 	case Proj1: {
 		delta = delta0_ - y;
 		alpha = x + alpha0_;
@@ -292,16 +336,8 @@ FlatSkyProjection::xy_to_angle(double x, double y, bool wrap_alpha) const
 		break;
 	}
 	case Proj7: {
-		x /= rad;
-		double h = (delta0_ - y) / rad;
-		double k = sqrt(1. - x * x);
-		alpha = ATAN2(x, k * COS(h)) * rad + alpha0_;
-		delta = ASIN(k * SIN(h)) * rad;
-		break;
-	}
-	case Proj9: {
-		delta = delta0_ - y;
-		alpha = x / cosdelta0_ + alpha0_;
+		delta = -ASIN(y * pv_[0]) * rad;
+		alpha = x + alpha0_;
 		break;
 	}
 	default:
@@ -346,6 +382,7 @@ FlatSkyProjection::angle_to_xy(double alpha, double delta) const
 		y = delta0_ - delta;
 		break;
 	}
+	case Proj9:
 	case Proj1: {
 		x = dalpha;
 		y = delta0_ - delta;
@@ -393,16 +430,8 @@ FlatSkyProjection::angle_to_xy(double alpha, double delta) const
 		break;
 	}
 	case Proj7: {
-		dalpha /= rad;
-		delta /= rad;
-		double cosdelta = COS(delta);
-		y = 90 * deg + delta0_ - ATAN2(COS(dalpha) * cosdelta, -SIN(delta)) * rad;
-		x = cosdelta * SIN(dalpha) * rad;
-		break;
-	}
-	case Proj9: {
-		x = dalpha * cosdelta0_;
-		y = delta0_ - delta;
+		x = dalpha;
+		y = -SIN(delta / rad) / pv_[0];
 		break;
 	}
 	default:

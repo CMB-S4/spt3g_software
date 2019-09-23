@@ -24,9 +24,6 @@ except ImportError:
 	pass
 from spt3g.core.util import *
 
-# Just run this, no symbols we need though
-from spt3g.core.skymapaddons import *
-
 from spt3g.core.docparser import *
 from spt3g.core.dataextensions import *
 from spt3g.core.frameextensions import *

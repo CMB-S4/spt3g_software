@@ -273,6 +273,7 @@ BOOST_PYTHON_MODULE(core)
 	// Some POD types
 	register_vector_of<bool>("Bool");
 	register_vector_of<int64_t>("Int64");
+	register_vector_of<uint64_t>("Uint64");
 	numpy_vector_of(int32_t, "Int");
 	register_vector_of<uint32_t>("UInt");
 	numpy_vector_of(double, "Double");

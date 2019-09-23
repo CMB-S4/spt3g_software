@@ -20,9 +20,9 @@ add_library(core SHARED
 	src/G3InfiniteSource.cxx src/G3Logging.cxx src/G3PrintfLogger.cxx
 	src/G3Data.cxx src/G3Vector.cxx src/G3Map.cxx src/G3Timestream.cxx
 	src/G3TriggeredBuilder.cxx src/G3MultiFileWriter.cxx src/dataio.cxx
-	src/G3SkyMap.cxx src/crc32.c ${CORE_EXTRA_SRCS}
+	src/crc32.c ${CORE_EXTRA_SRCS}
 	src/G3NetworkSender.cxx src/G3SyslogLogger.cxx
-	src/G3PipelineInfo.cxx
+	src/G3PipelineInfo.cxx src/G3Quat.cxx
 )
 target_link_libraries(core pthread ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${FLAC_LIBRARIES})
 link_python_dir()
@@ -51,7 +51,6 @@ add_spt3g_test(compressedfileio)
 add_spt3g_test(portability)
 add_spt3g_test(ts_bufferprotocol)
 add_spt3g_test(timestream_slicing)
-add_spt3g_test(skymappybindings)
 add_spt3g_test(timestream_times)
 add_spt3g_test(deduplicate)
 add_spt3g_test(timestrings)
@@ -64,4 +63,4 @@ add_spt3g_test(returnvals)
 add_spt3g_test(timestream_2d)
 add_spt3g_test(cached_frame)
 add_spt3g_test(pipelineinfo)
-
+add_spt3g_test(quaternions)
