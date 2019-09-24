@@ -238,24 +238,20 @@ private:
 
 class G3SkyMapWeights : public G3FrameObject {
 public:
-	enum WeightType {
-		Wpol = 3,
-		Wunpol = 4,
-		None = 5
-	};
-
-	G3SkyMapWeights() : weight_type(None) {}
+	G3SkyMapWeights() {}
 
 	// Instantiate weight maps based on the metadata of a reference map
-	G3SkyMapWeights(G3SkyMapConstPtr ref_map, WeightType wt);
+	G3SkyMapWeights(G3SkyMapConstPtr ref_map, bool ispolarized = true);
 
 	G3SkyMapWeights(const G3SkyMapWeights &r);
 	G3SkyMapPtr TT, TQ, TU, QQ, QU, UU;
 
-	WeightType weight_type;
+	bool IsPolarized() const {
+		return !!TQ && !!TU && !!QQ && !!QU && !!UU;
+	}
 
 	MuellerMatrix operator [] (int i) {
-		return (weight_type == Wunpol) ? MuellerMatrix((*TT)[i]) :
+		return (!IsPolarized()) ? MuellerMatrix((*TT)[i]) :
 		    MuellerMatrix((*TT)[i], (*TQ)[i], (*TU)[i], (*QQ)[i],
 		        (*QU)[i], (*UU)[i]);
 	}
@@ -263,7 +259,7 @@ public:
 	const MuellerMatrix at (int i) const {
 		MuellerMatrix m;
 		m.tt = TT->at(i);
-		if (weight_type == Wpol) {
+		if (IsPolarized()) {
 			m.tq = TQ->at(i);
 			m.tu = TU->at(i);
 			m.qq = QQ->at(i);
@@ -289,7 +285,7 @@ public:
 		if (copy_data)
 			return boost::make_shared<G3SkyMapWeights>(*this);
 		else
-			return boost::make_shared<G3SkyMapWeights>(this->TT, this->weight_type);
+			return boost::make_shared<G3SkyMapWeights>(this->TT, this->IsPolarized());
 	}
 private:
 	template <class A> void serialize(A &ar, const unsigned v);
@@ -366,7 +362,7 @@ private:
 G3_POINTERS(G3SkyMapWithWeights);
 
 G3_SERIALIZABLE(G3SkyMap, 2);
-G3_SERIALIZABLE(G3SkyMapWeights, 2);
+G3_SERIALIZABLE(G3SkyMapWeights, 3);
 G3_SERIALIZABLE(G3SkyMapWithWeights, 1);
 
 #endif

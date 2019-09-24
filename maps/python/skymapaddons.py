@@ -1,5 +1,5 @@
 import numpy
-from spt3g.maps import G3SkyMapWeights, G3SkyMapWithWeights, G3SkyMap, WeightType
+from spt3g.maps import G3SkyMapWeights, G3SkyMapWithWeights, G3SkyMap
 
 # This file adds extra functionality to the python interface to G3SkyMap and
 # G3SkyMapWeights. This is done in ways that exploit a large fraction of
@@ -38,7 +38,7 @@ setattr(G3SkyMap, '__getslice__', lambda a, *args: numpy.ndarray.__getslice__(nu
 # Make weight maps so that you can index them and get the full 3x3 weight matrix
 
 def skymapweights_getitem(self, x):
-    if self.weight_type == WeightType.Wunpol:
+    if not self.polarized:
         return self.TT[x]
 
     mat = numpy.zeros((3,3))
@@ -55,7 +55,7 @@ G3SkyMapWeights.__getitem__ = skymapweights_getitem
 del skymapweights_getitem
 
 def skymapweights_setitem(self, x, mat):
-    if self.weight_type == WeightType.Wunpol:
+    if not self.polarized:
         assert(numpy.isscalar(mat))
         self.TT[x] = mat
         return
@@ -83,7 +83,7 @@ def skymapweights_setattr(self, x, val):
         oldsetattr(self, x, val)
     except AttributeError:
         setattr(self.TT, x, val)
-        if self.weight_type == WeightType.Wpol:
+        if self.polarized:
             setattr(self.TQ, x, val)
             setattr(self.TU, x, val)
             setattr(self.QQ, x, val)

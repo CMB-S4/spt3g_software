@@ -1,6 +1,6 @@
 from spt3g import core
 from spt3g.maps import HealpixSkyMap, FlatSkyMap, G3SkyMapWeights
-from spt3g.maps import MapPolType, WeightType, MapCoordReference, MapProjection
+from spt3g.maps import MapPolType, MapCoordReference, MapProjection
 
 import numpy as np
 import os
@@ -36,7 +36,7 @@ def load_skymap_fits(filename, hdu=None):
     assert(os.path.exists(filename))
 
     map_type = None
-    weight_type = None
+    pol = None
     map_opts = {}
     output = {}
 
@@ -123,11 +123,10 @@ def load_skymap_fits(filename, hdu=None):
             if map_type == 'flat' and hdr.get('ISWEIGHT', None):
                 # flat map weights
                 assert('T' in output)
-                if weight_type is None:
-                    weight_type = 'Wpol' if ('Q' in output and 'U' in output) else 'Wunpol'
-                    weight_type = getattr(WeightType, hdr.get('WGTTYPE', weight_type))
+                if pol is None:
+                    pol = True if ('Q' in output and 'U' in output) else False
                 weight_map = output.setdefault(
-                    'W', G3SkyMapWeights(output['T'], weight_type)
+                    'W', G3SkyMapWeights(output['T'], ispolarized=pol)
                 )
                 fm = FlatSkyMap(data.astype(float), **map_opts)
                 fm.overflow = overflow
@@ -184,11 +183,10 @@ def load_skymap_fits(filename, hdu=None):
                     )
                     if is_weight:
                         assert('T' in output)
-                        if weight_type is None:
-                            weight_type = 'Wpol' if ('Q' in output and 'U' in output) else 'Wunpol'
-                            weight_type = getattr(WeightType, hdr.get('WGTTYPE', weight_type))
+                        if pol is None:
+                            pol = True if ('Q' in output and 'U' in output) else False
                         weight_map = output.setdefault(
-                            'W', G3SkyMapWeights(output['T'], weight_type)
+                            'W', G3SkyMapWeights(output['T'], ispolarized=pol)
                         )
 
                         if pix is not None:
@@ -504,8 +502,6 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
     header['POLCCONV'] = 'IAU'
     header['UNITS'] = str(T.units)
     header['WEIGHTED'] = T.is_weighted
-    if W is not None:
-        header['WGTTYPE'] = str(W.weight_type)
 
     hdulist = astropy.io.fits.HDUList()
 
@@ -552,10 +548,10 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
 
     if W is not None:
         if pol:
-            assert(W.weight_type == WeightType.Wpol)
+            assert(W.polarized)
             wnames = ['TT', 'TQ', 'TU', 'QQ', 'QU', 'UU']
         else:
-            assert(W.weight_type == WeightType.Wunpol)
+            assert(not W.polarized)
             wnames = ['TT']
 
         for wt in wnames:

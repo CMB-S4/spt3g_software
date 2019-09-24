@@ -54,8 +54,22 @@ G3SkyMapWeights::serialize(A &ar, unsigned v)
 	ar & cereal::make_nvp("QQ", QQ);
 	ar & cereal::make_nvp("QU", QU);
 	ar & cereal::make_nvp("UU", UU);
-	if (v > 1) {
+
+	if (v == 2) {
+		enum WeightType {
+			Wpol = 3,
+			Wunpol = 4,
+			None = 5
+		};
+		WeightType weight_type = None;
 		ar & cereal::make_nvp("weight_type", weight_type);
+		if (weight_type == Wunpol) {
+			TQ.reset();
+			TU.reset();
+			QQ.reset();
+			QU.reset();
+			UU.reset();
+		}
 	}
 }
 
@@ -77,18 +91,21 @@ G3_SERIALIZABLE_CODE(G3SkyMap);
 G3_SERIALIZABLE_CODE(G3SkyMapWeights);
 G3_SERIALIZABLE_CODE(G3SkyMapWithWeights);
 
-G3SkyMapWeights::G3SkyMapWeights(G3SkyMapConstPtr ref, 
-  G3SkyMapWeights::WeightType wt = G3SkyMapWeights::Wpol) :
-   TT(ref->Clone(false)), TQ(ref->Clone(false)), TU(ref->Clone(false)),
-   QQ(ref->Clone(false)), QU(ref->Clone(false)), UU(ref->Clone(false)),
-   weight_type(wt)
+G3SkyMapWeights::G3SkyMapWeights(G3SkyMapConstPtr ref, bool ispolarized) :
+    TT(ref->Clone(false)), TQ(ispolarized ? ref->Clone(false) : NULL),
+    TU(ispolarized ? ref->Clone(false) : NULL),
+    QQ(ispolarized ? ref->Clone(false) : NULL),
+    QU(ispolarized ? ref->Clone(false) : NULL),
+    UU(ispolarized ? ref->Clone(false) : NULL)
 {
 }
 
 G3SkyMapWeights::G3SkyMapWeights(const G3SkyMapWeights &r) :
-    TT(r.TT->Clone(true)), TQ(r.TQ->Clone(true)), TU(r.TU->Clone(true)),
-    QQ(r.QQ->Clone(true)), QU(r.QU->Clone(true)), UU(r.UU->Clone(true)),
-    weight_type(r.weight_type)
+    TT(r.TT->Clone(true)), TQ(!r.TQ ? NULL : r.TQ->Clone(true)),
+    TU(!r.TU ? NULL : r.TU->Clone(true)),
+    QQ(!r.QQ ? NULL : r.QQ->Clone(true)),
+    QU(!r.QU ? NULL : r.QU->Clone(true)),
+    UU(!r.UU ? NULL : r.UU->Clone(true))
 {
 }
 
@@ -96,8 +113,7 @@ G3SkyMapWithWeights::G3SkyMapWithWeights(G3SkyMapConstPtr ref,
   bool isweighted, bool ispolarized, std::string map_id_) :
     T(ref->Clone(false)), Q(ispolarized ? ref->Clone(false) : NULL),
     U(ispolarized ? ref->Clone(false) : NULL),
-    weights(isweighted ? new G3SkyMapWeights(ref, ispolarized ?
-        G3SkyMapWeights::Wpol : G3SkyMapWeights::Wunpol) : NULL),
+    weights(isweighted ? new G3SkyMapWeights(ref, ispolarized) : NULL),
     map_id(map_id_)
 {
 }
@@ -331,11 +347,11 @@ pyskymap_neg(G3SkyMap &a)
 G3SkyMapWeights &
 G3SkyMapWeights::operator+=(const G3SkyMapWeights &rhs)
 {
-	g3_assert(weight_type == rhs.weight_type);
+	g3_assert(IsPolarized() == rhs.IsPolarized());
 
 	*TT += *(rhs.TT);
 
-	if (weight_type == Wpol) {
+	if (IsPolarized()) {
 		*TQ += *rhs.TQ;
 		*TU += *rhs.TU;
 		*QQ += *rhs.QQ;
@@ -350,7 +366,7 @@ G3SkyMapWeights::operator+=(const G3SkyMapWeights &rhs)
 G3SkyMapWeights &G3SkyMapWeights::operator op(rhs_type rhs) \
 { \
 	*TT op rhs; \
-	if (weight_type == Wpol) { \
+	if (IsPolarized()) { \
 		*TQ op rhs; \
 		*TU op rhs; \
 		*QQ op rhs; \
@@ -523,14 +539,19 @@ G3SkyMapWeightsPtr G3SkyMapWeights::Rebin(size_t scale) const
 {
 	G3SkyMapWeightsPtr out(new G3SkyMapWeights());
 
-	out->weight_type = weight_type;
 	out->TT = TT->Rebin(scale, false);
-	if (weight_type == Wpol) {
+	if (IsPolarized()) {
 		out->TQ = TQ->Rebin(scale, false);
 		out->TU = TU->Rebin(scale, false);
 		out->QQ = QQ->Rebin(scale, false);
 		out->QU = QU->Rebin(scale, false);
 		out->UU = UU->Rebin(scale, false);
+	} else {
+		out->TQ = NULL;
+		out->TU = NULL;
+		out->QQ = NULL;
+		out->QU = NULL;
+		out->UU = NULL;
 	}
 
 	return out;
@@ -565,13 +586,6 @@ PYBINDINGS("maps") {
 	    .value("none", G3SkyMap::None) // "None" is reserved in python
 	;
 	enum_none_converter::from_python<G3SkyMap::MapPolType>();
-
-	bp::enum_<G3SkyMapWeights::WeightType>("WeightType")
-	    .value("Wpol", G3SkyMapWeights::Wpol)
-	    .value("Wunpol", G3SkyMapWeights::Wunpol)
-	    .value("None", G3SkyMapWeights::None)
-	;
-	enum_none_converter::from_python<G3SkyMapWeights::WeightType>();
 
 	bp::class_<G3SkyMap, boost::noncopyable,
 	  G3SkyMapPtr>("G3SkyMap",
@@ -664,16 +678,16 @@ PYBINDINGS("maps") {
 	;
 
 	EXPORT_FRAMEOBJECT(G3SkyMapWeights, init<>(), "generic sky weight")
-	    .def(bp::init<G3SkyMapConstPtr, G3SkyMapWeights::WeightType>(
+	    .def(bp::init<G3SkyMapConstPtr, bool>(
 	      (bp::arg("skymap"),
-               bp::arg("weight_type") = G3SkyMapWeights::Wpol)))
+               bp::arg("ispolarized") = true)))
 	    .def_readwrite("TT",&G3SkyMapWeights::TT)
 	    .def_readwrite("TQ",&G3SkyMapWeights::TQ)
 	    .def_readwrite("TU",&G3SkyMapWeights::TU)
 	    .def_readwrite("QQ",&G3SkyMapWeights::QQ)
 	    .def_readwrite("QU",&G3SkyMapWeights::QU)
 	    .def_readwrite("UU",&G3SkyMapWeights::UU)
-	    .def_readwrite("weight_type", &G3SkyMapWeights::weight_type)
+	    .add_property("polarized", &G3SkyMapWeights::IsPolarized)
 	    .def("rebin", &G3SkyMapWeights::Rebin)
 	    
 	    .def("Clone", &G3SkyMapWeights::Clone)
