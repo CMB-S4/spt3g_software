@@ -65,10 +65,9 @@ def healpix_to_flatsky(map_in, nest=False, map_stub=None, rebin=1, interp=False,
         If True, use bilinear interpolation to extract values from the input
         map.  Otherwise, the nearest-neighbor value is used.
 
-    **kwargs:
-        All additional keyword arguments are passed to FlatSkyMap to construct
-        the output map object.  Required if `map_stub` is not supplied,
-        otherwise ignored.
+    All additional keyword arguments are passed to FlatSkyMap to construct
+    the output map object.  Required if `map_stub` is not supplied,
+    otherwise ignored.
 
     Returns:
     --------
@@ -127,10 +126,9 @@ def flatsky_to_healpix(map_in, map_stub=None, rebin=1, interp=False,
         Otherwise, a HealpixSkyMap instance is returned, containing only the
         pixels that overlap with the input map.
 
-    **kwargs:
-        All additional keyword arguments are passed to FlatSkyMap to construct
-        the output map object.  Required if `map_stub` is not supplied,
-        otherwise ignored.
+    All additional keyword arguments are passed to FlatSkyMap to construct
+    the output map object.  Required if `map_stub` is not supplied,
+    otherwise ignored.
 
     Returns:
     --------
