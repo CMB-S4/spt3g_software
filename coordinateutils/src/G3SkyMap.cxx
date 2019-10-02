@@ -477,8 +477,6 @@ void G3SkyMapWithWeights::ApplyWeights(G3SkyMapWeightsPtr w)
 	g3_assert(T->IsCompatible(*(w->TT)));
 
 	for (size_t pix = 0; pix < T->size(); pix++) {
-		if (w->TT->at(pix) == 0)
-			continue;
 		StokesVector v = this->at(pix);
 		if (IsPolarized() && !(v.t == 0 && v.q == 0 && v.u == 0))
 			(*this)[pix] = w->at(pix) * v;
@@ -501,8 +499,6 @@ G3SkyMapWeightsPtr G3SkyMapWithWeights::RemoveWeights()
 	g3_assert(IsWeighted());
 
 	for (size_t pix = 0; pix < T->size(); pix++) {
-		if (weights->TT->at(pix) == 0)
-			continue;
 		StokesVector v = this->at(pix);
 		if (IsPolarized() && !(v.t == 0 && v.q == 0 && v.u == 0))
 			(*this)[pix] /= weights->at(pix);
