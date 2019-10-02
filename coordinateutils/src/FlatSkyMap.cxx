@@ -592,25 +592,20 @@ G3SkyMapPtr FlatSkyMap::Rebin(size_t scale, bool norm) const
 	FlatSkyProjection p(proj_info.rebin(scale));
 	FlatSkyMapPtr out(new FlatSkyMap(p, coord_ref, is_weighted, units, pol_type));
 
-	if (dense_ || sparse_) {
-		if (dense_)
-			out->ConvertToDense();
+	if (dense_)
+		out->ConvertToDense();
+	else if (!sparse_)
+		return out;
 
-		if (dense_) {
-			for (size_t i = 0; i < xpix_; i++)
-				for (size_t j = 0; j < ypix_; j++)
-					(*out->dense_)(i / scale, j / scale) +=
-					    (*dense_)(i, j) / sqscal;
-		} else {
-			double val;
-			for (auto i = sparse_->begin(); i != sparse_->end(); i++) {
-				val = (*i);
-				if (val == 0)
-					continue;
-				(*out->sparse_)(i.x / scale, i.y / scale) += val / sqscal;
-			}
-		}
+	for (auto i : *this) {
+		if (i.second == 0)
+			continue;
+		size_t x = (i.first % xpix_) / scale;
+		size_t y = ((size_t)(i.first / xpix_)) / scale;
+		size_t ip = x + y * out->xpix_;
+		(*out)[ip] += i.second / sqscal;
 	}
+
 	return out;
 }
 

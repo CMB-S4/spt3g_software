@@ -34,7 +34,7 @@ assert(w[17,32] == m[17,32])
 assert((w == m).all())
 
 # Test conversion between representations is lossless
-# Along the way, test nonzero_pixels() once for each
+# Along the way, test nonzero_pixels() and rebin() once for each
 # representation
 
 a = numpy.arange(1500, dtype=float)
@@ -52,6 +52,12 @@ k, v = x.nonzero_pixels()
 assert(len(k) == len(v) == 1500)
 assert(set(v) == set(a))
 
+v0 = x[0, 0] + x[0, 1] + x[1, 0] + x[1, 1]
+
+x2 = x.rebin(2, norm=False)
+assert(x2[0] == v0)
+assert(numpy.sum(x2) == numpy.sum(v))
+
 x.sparse = True
 assert(x.npix_allocated == 1500)
 for i in range(1, 1500):
@@ -62,6 +68,10 @@ k, v = x.nonzero_pixels()
 assert(len(k) == len(v) == 1500)
 assert(set(v) == set(a))
 
+x2 = x.rebin(2, norm=False)
+assert(x2[0] == v0)
+assert(numpy.sum(x2) == numpy.sum(v))
+
 x.sparse = False
 assert(x.npix_allocated == x.size)
 for i in range(1, 1500):
@@ -71,3 +81,7 @@ assert(x[1501] == 0)
 k, v = x.nonzero_pixels()
 assert(len(k) == len(v) == 1500)
 assert(set(v) == set(a))
+
+x2 = x.rebin(2, norm=False)
+assert(x2[0] == v0)
+assert(numpy.sum(x2) == numpy.sum(v))
