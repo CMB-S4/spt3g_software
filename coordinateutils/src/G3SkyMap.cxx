@@ -442,9 +442,9 @@ StokesVector & StokesVector::operator /=(const MuellerMatrix &r)
 		if (det < 1e-12 && r.tt != 0) {
 			log_trace("Singular matrix found when inverting!  Det is %lE\n", det);
 		}
-		t = 0;
-		q = 0;
-		u = 0;
+		t = 0.0 / 0.0;
+		q = 0.0 / 0.0;
+		u = 0.0 / 0.0;
 		return *this;
 	}
 
