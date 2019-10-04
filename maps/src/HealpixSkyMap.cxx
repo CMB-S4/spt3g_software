@@ -868,27 +868,26 @@ G3SkyMapPtr HealpixSkyMap::Rebin(size_t scale, bool norm) const
 	HealpixSkyMapPtr out(new HealpixSkyMap(nside_/scale, is_weighted,
 	    is_nested_, coord_ref, units, pol_type));
 
-	const size_t scale2 = scale * scale;
+	if (dense_)
+		out->ConvertToDense();
+	else if (ring_sparse_)
+		out->ConvertToRingSparse();
+	else if (!indexed_sparse_)
+		return out;
 
-	for (long i = 0; i < out->size(); i++) {
-		long ipmin = i;
+	const size_t scale2 = scale * scale;
+	const double sqscal = norm ? scale2 : 1.0;
+
+	for (auto i : *this) {
+		if (i.second == 0)
+			continue;
+		long ip = i.first;
 		if (!is_nested_)
-			ring2nest(out->nside_, ipmin, &ipmin);
-		ipmin *= scale2;
-		double n = 0;
-		for (size_t j = 0; j < scale2; j++) {
-			long ip = ipmin + j;
-			if (!is_nested_)
-				nest2ring(nside_, ip, &ip);
-			double val = this->at(ip);
-			if (val == 0)
-				continue;
-			(*out)[i] += val;
-			if (norm)
-				n += 1.;
-		}
-		if (n != 0)
-			(*out)[i] /= n;
+			ring2nest(nside_, ip, &ip);
+		ip /= scale2;
+		if (!is_nested_)
+			nest2ring(out->nside_, ip, &ip);
+		(*out)[ip] += i.second / sqscal;
 	}
 
 	return out;

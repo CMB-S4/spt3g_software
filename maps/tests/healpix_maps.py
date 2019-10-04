@@ -15,7 +15,7 @@ assert(x[1499] == 1499)
 assert(x[1501] == 0)
 
 # Test conversion between representations is lossless
-# Along the way, test nonzero_pixels() once for each
+# Along the way, test nonzero_pixels() and rebin() once for each
 # representation.
 
 x.dense = True # Indexed-sparse to dense
@@ -41,6 +41,14 @@ k,v = x.nonzero_pixels()
 assert(len(k) == len(v) == 1500)
 assert(set(v) == set(a)) # Lazy test that doesn't care about order
 
+import healpy as hp
+p0 = hp.nest2ring(64, (hp.ring2nest(32, 0) * 4 + numpy.arange(4)).astype(int))
+v0 = sum([x[int(i)] for i in p0])
+
+x2 = x.rebin(2, norm=False)
+assert(x2[0] == v0)
+assert(numpy.sum(x2) == numpy.sum(v))
+
 x.ringsparse = True # Indexed to ring
 assert(x.nside == 64)
 assert(x.npix_allocated == 1500)
@@ -57,6 +65,10 @@ k,v = x.nonzero_pixels()
 assert(len(k) == len(v) == 1500)
 assert(set(v) == set(a))
 
+x2 = x.rebin(2, norm=False)
+assert(x2[0] == v0)
+assert(numpy.sum(x2) == numpy.sum(v))
+
 x.indexedsparse = True # Dense to indexed
 assert(x.nside == 64)
 assert(x.npix_allocated == 1500)
@@ -67,6 +79,10 @@ assert(x[1501] == 0)
 k,v = x.nonzero_pixels()
 assert(len(k) == len(v) == 1500)
 assert(set(v) == set(a))
+
+x2 = x.rebin(2, norm=False)
+assert(x2[0] == v0)
+assert(numpy.sum(x2) == numpy.sum(v))
 
 # Initialization from dense arrays
 a = numpy.arange(49152)

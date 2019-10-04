@@ -592,25 +592,20 @@ G3SkyMapPtr FlatSkyMap::Rebin(size_t scale, bool norm) const
 	FlatSkyProjection p(proj_info.rebin(scale));
 	FlatSkyMapPtr out(new FlatSkyMap(p, coord_ref, is_weighted, units, pol_type));
 
-	if (dense_ || sparse_) {
-		if (dense_)
-			out->ConvertToDense();
+	if (dense_)
+		out->ConvertToDense();
+	else if (!sparse_)
+		return out;
 
-		if (dense_) {
-			for (size_t i = 0; i < xpix_; i++)
-				for (size_t j = 0; j < ypix_; j++)
-					(*out->dense_)(i / scale, j / scale) +=
-					    (*dense_)(i, j) / sqscal;
-		} else {
-			double val;
-			for (auto i = sparse_->begin(); i != sparse_->end(); i++) {
-				val = (*i);
-				if (val == 0)
-					continue;
-				(*out->sparse_)(i.x / scale, i.y / scale) += val / sqscal;
-			}
-		}
+	for (auto i : *this) {
+		if (i.second == 0)
+			continue;
+		size_t x = (i.first % xpix_) / scale;
+		size_t y = ((size_t)(i.first / xpix_)) / scale;
+		size_t ip = x + y * out->xpix_;
+		(*out)[ip] += i.second / sqscal;
 	}
+
 	return out;
 }
 
@@ -763,14 +758,14 @@ flatskymap_nonzeropixels(const FlatSkyMap &m)
 	" particular flat sky projection included.  In practice it behaves\n" \
 	" (mostly) like a 2d numpy array.\n\n"				\
         "Meta Information Stored: \n\n" \
-        "    x_len (int) x (ra/az)  dimension length \n" \
-        "    y_len (int) y (dec/el) dimension  length \n" \
-        "    alpha_center : (double)  Ra (or Az) of the center of the map \n" \
-        "    delta_center : (double)  Dec (or El) of the center of the map \n" \
+        "    x_len (int) x (ra/az)  dimension length \n\n" \
+        "    y_len (int) y (dec/el) dimension  length \n\n" \
+        "    alpha_center : (double)  Ra (or Az) of the center of the map \n\n" \
+        "    delta_center : (double)  Dec (or El) of the center of the map \n\n" \
         "    res : (double) approximate resolution of the pixel\n" \
-	"          (the actual shape of a pixel is projection dependent)\n"\
+	"    (the actual shape of a pixel is projection dependent)\n\n"	\
         "    proj : (MapProjection)  proj is a MapProjection enum that specifies\n"\
-	"           the flat sky projection \n"	\
+	"    the flat sky projection \n\n"	\
         "\n\n" \
         "The other meta information is inherited from G3SkyMap that lives in core. \n\n" \
         "For reasons (skymap __setitem__ has to handle both 1d and 2d \n"\

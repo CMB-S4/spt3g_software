@@ -262,8 +262,7 @@ def load_proj_dict(inverse=False):
 
 def get_wcs(skymap):
     """
-    Creates WCS (world coordinate system) information from information in the
-    input FlatSkyMap object.
+    Creates WCS (world coordinate system) information from information in the input FlatSkyMap object.
     """
 
     if hasattr(skymap, '_wcs'):

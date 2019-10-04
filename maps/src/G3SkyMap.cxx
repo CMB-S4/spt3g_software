@@ -458,9 +458,9 @@ StokesVector & StokesVector::operator /=(const MuellerMatrix &r)
 		if (det < 1e-12 && r.tt != 0) {
 			log_trace("Singular matrix found when inverting!  Det is %lE\n", det);
 		}
-		t = 0;
-		q = 0;
-		u = 0;
+		t = 0.0 / 0.0;
+		q = 0.0 / 0.0;
+		u = 0.0 / 0.0;
 		return *this;
 	}
 
@@ -644,7 +644,7 @@ PYBINDINGS("maps") {
 	       "Computes each value using bilinear interpolation over the "
 	       "map pixels.")
 
-	    .def("rebin", &G3SkyMap::Rebin, (bp::arg("scale"), bp::arg("norm")),
+	    .def("rebin", &G3SkyMap::Rebin, (bp::arg("scale"), bp::arg("norm")=true),
 	      "Rebin the map into larger pixels by summing (if norm is false) "
 	      "or averaging (if norm is true) scale-x-scale blocks of pixels "
 	      "together.  Returns a new map object.  Map dimensions must be a "
