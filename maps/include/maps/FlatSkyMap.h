@@ -117,9 +117,9 @@ public:
 
 	G3SkyMapPtr Rebin(size_t scale, bool norm = true) const override;
 
-	void ConvertToDense();
+	void ConvertToDense() override;
 	void ConvertToSparse();
-	bool IsDense() const { return (dense_ != NULL); }
+	bool IsDense() const override { return (dense_ != NULL); }
 
 	class const_iterator {
 	public:

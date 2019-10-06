@@ -79,10 +79,10 @@ public:
 
 	G3SkyMapPtr Rebin(size_t scale, bool norm = true) const override;
 
-	void ConvertToDense();
+	void ConvertToDense() override;
 	void ConvertToRingSparse();
 	void ConvertToIndexedSparse();
-	bool IsDense() const { return (dense_ != NULL); }
+	bool IsDense() const override { return (dense_ != NULL); }
 	bool IsRingSparse() const { return (ring_sparse_ != NULL); }
 	bool IsIndexedSparse() const { return (indexed_sparse_ != NULL); }
 

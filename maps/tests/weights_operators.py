@@ -13,6 +13,7 @@ for pol in [True, False]:
     assert(mw.polarized == pol)
     assert(mw.weights.polarized == pol)
     assert(mw.weighted)
+    assert(mw.congruent)
 
     if not pol:
         assert(mw.Q is None)
@@ -62,9 +63,13 @@ for pol in [True, False]:
     assert(np.allclose(weights[15], mat * 5))
     ivec = np.linalg.solve(mat * 5, vec * 10) if pol else vec * 2 / mat
     assert(np.allclose(mw[15], ivec))
-    assert(mw.npix_allocated == 1)
+    assert(np.isnan(mw[16]).all())
+    assert(not mw.sparse)
+    assert(mw.npix_allocated == mw.size)
 
     mw.apply_weights(weights)
     assert(mw.weighted)
     assert(np.allclose(mw[15], vec * 10))
-    assert(mw.npix_allocated == 1)
+    assert(np.isnan(mw[16]).all())
+    assert(not mw.sparse)
+    assert(mw.npix_allocated == mw.size)

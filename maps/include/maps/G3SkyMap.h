@@ -112,6 +112,13 @@ public:
 
 	virtual boost::shared_ptr<G3SkyMap> Rebin(size_t scale, bool norm = true) const = 0;
 
+	virtual bool IsDense() const {
+		throw std::runtime_error("Checking array density not implemented");
+	}
+	virtual void ConvertToDense() {
+		throw std::runtime_error("Conversion to dense array not implemented");
+	}
+
 protected:
 	virtual void init_from_v1_data(std::vector<size_t>,
 	    const std::vector<double> &) {
@@ -252,6 +259,16 @@ public:
 		return !!TQ && !!TU && !!QQ && !!QU && !!UU;
 	}
 
+	bool IsCongruent() const {
+		if (!TT || !IsPolarized())
+			return true;
+		return (TT->IsCompatible(*TQ) &&
+			TT->IsCompatible(*TU) &&
+			TT->IsCompatible(*QQ) &&
+			TT->IsCompatible(*QU) &&
+			TT->IsCompatible(*UU));
+	}
+
 	MuellerMatrix operator [] (int i) {
 		return (!IsPolarized()) ? MuellerMatrix((*TT)[i]) :
 		    MuellerMatrix((*TT)[i], (*TQ)[i], (*TU)[i], (*QQ)[i],
@@ -334,11 +351,29 @@ public:
 	G3SkyMapWithWeights &operator*=(const G3SkyMap &rhs);
 
 	bool IsWeighted() const {
-		return !!weights;
+		return !!weights && !!weights->TT;
 	}
 
 	bool IsPolarized() const {
 		return !!Q && !!U;
+	}
+
+	bool IsCongruent() const {
+		if (!T)
+			return true;
+		if (IsWeighted()) {
+			if  (!(weights->TT))
+				return  false;
+			if (!(T->IsCompatible(*(weights->TT))))
+				return false;
+			if (IsPolarized() != weights->IsPolarized())
+				return false;
+			if (!(weights->IsCongruent()))
+				return false;
+                }
+		if (IsPolarized())
+			return T->IsCompatible(*Q) && T->IsCompatible(*U);
+		return true;
 	}
 
 	boost::shared_ptr<G3SkyMapWithWeights> Clone(bool copy_data) const {

@@ -8,46 +8,21 @@
 #include <G3Logging.h>
 #include <G3Units.h>
 
-#include <maps/HealpixSkyMap.h>
-#include <maps/FlatSkyMap.h>
-
 #include <maps/maputils.h>
 
 #include <iostream>
 
 using namespace G3Units;
 
-void get_ra_dec_map_cpp(G3SkyMapConstPtr m, G3SkyMapPtr ra, G3SkyMapPtr dec)
+boost::python::tuple get_ra_dec_map(G3SkyMapConstPtr m)
 {
 
-	if (!m->IsCompatible(*ra)) {
-		log_fatal("Output ra map must match coordinates and dimensions of input sky map");
-	}
-	if (!m->IsCompatible(*dec)) {
-		log_fatal("Output ra map must match coordinates and dimensions of input sky map");
-	}
+	G3SkyMapPtr ra = m->Clone(false);
+	G3SkyMapPtr dec = m->Clone(false);
 
-	{
-		// These are going to be dense maps, so just start that way
-		FlatSkyMapPtr xra = boost::dynamic_pointer_cast<FlatSkyMap>(ra);
-		FlatSkyMapPtr xdec = boost::dynamic_pointer_cast<FlatSkyMap>(dec);
-
-		if (xra)
-			xra->ConvertToDense();
-		if (xdec)
-			xdec->ConvertToDense();
-	}
-
-	{
-		// These are going to be dense maps, so just start that way
-		HealpixSkyMapPtr xra = boost::dynamic_pointer_cast<HealpixSkyMap>(ra);
-		HealpixSkyMapPtr xdec = boost::dynamic_pointer_cast<HealpixSkyMap>(dec);
-
-		if (xra)
-			xra->ConvertToDense();
-		if (xdec)
-			xdec->ConvertToDense();
-	}
+	// These are going to be dense maps, so just start that way
+	ra->ConvertToDense();
+	dec->ConvertToDense();
 
 	for (size_t i = 0; i < m->size(); i++) {
 		std::vector<double> radec = m->pixel_to_angle(i);
@@ -62,7 +37,7 @@ void get_ra_dec_map_cpp(G3SkyMapConstPtr m, G3SkyMapPtr ra, G3SkyMapPtr dec)
 	dec->units = G3Timestream::None;
 	dec->pol_type = G3SkyMap::None;
 
-	// XXX return tuple directly
+	return boost::python::make_tuple(ra, dec);
 }
 
 
@@ -105,7 +80,9 @@ void reproj_map(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool in
 
 namespace bp = boost::python;
 void maputils_pybindings(void){
-	bp::def("get_ra_dec_map_cpp", get_ra_dec_map_cpp);
+	bp::def("get_ra_dec_map", get_ra_dec_map, (bp::arg("map_in")),
+		"Returns maps of the ra and dec angles for each pixel in the input map");
+
 	bp::def("reproj_map", reproj_map,
 		(bp::arg("in_map"), bp::arg("out_map"), bp::arg("rebin")=1, bp::arg("interp")=false),
 		"Takes the data in in_map and reprojects it onto out_map.  out_map can\n"

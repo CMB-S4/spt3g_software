@@ -41,11 +41,17 @@ for p in [0, 1, 2, 4, 5, 6, 7, 9]:
     w = fm2.wcs
     print(repr(w.to_header()))
     pixs = np.array([[0, 0], [0, 1], [0.5, 0.5], [1, 0], [1, 1]]) * dim
+    ra, dec = maps.get_ra_dec_map(fm2)
     for pix in pixs:
         wcs_ang = np.asarray(w.all_pix2world(pix[0], pix[1], 0))
         wcs_ang[wcs_ang > 180] -= 360
         g3_ang = np.asarray(fm2.xy_to_angle(*pix)) / deg
+        idx = (int(pix[1]), int(pix[0]))
         try:
+            try:
+                assert(np.allclose(g3_ang, [ra[idx] / deg, dec[idx] / deg]))
+            except IndexError:
+                pass
             assert(np.allclose(wcs_ang, g3_ang))
         except AssertionError:
             print(pix, g3_ang, wcs_ang, np.abs(g3_ang - wcs_ang))

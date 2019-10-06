@@ -486,6 +486,8 @@ StokesVector StokesVector::operator /(const MuellerMatrix &r) const
 void G3SkyMapWithWeights::ApplyWeights(G3SkyMapWeightsPtr w)
 {
 	g3_assert(!IsWeighted());
+	g3_assert(IsCongruent());
+	g3_assert(w->IsCongruent());
 	g3_assert(T->IsCompatible(*(w->TT)));
 
 	for (size_t pix = 0; pix < T->size(); pix++) {
@@ -509,12 +511,20 @@ void G3SkyMapWithWeights::ApplyWeights(G3SkyMapWeightsPtr w)
 G3SkyMapWeightsPtr G3SkyMapWithWeights::RemoveWeights()
 {
 	g3_assert(IsWeighted());
+	g3_assert(IsCongruent());
+
+	// Dividing by empty weights fills with nans
+	T->ConvertToDense();
+	if (IsPolarized()) {
+		Q->ConvertToDense();
+		U->ConvertToDense();
+	}
 
 	for (size_t pix = 0; pix < T->size(); pix++) {
 		StokesVector v = this->at(pix);
-		if (IsPolarized() && !(v.t == 0 && v.q == 0 && v.u == 0))
+		if (IsPolarized())
 			(*this)[pix] /= weights->at(pix);
-		else if (!IsPolarized() && v.t != 0)
+		else if (!IsPolarized())
 			(*T)[pix] = v.t / weights->TT->at(pix);
 	}
 
@@ -533,6 +543,7 @@ G3SkyMapWeightsPtr G3SkyMapWithWeights::RemoveWeights()
 
 G3SkyMapWeightsPtr G3SkyMapWeights::Rebin(size_t scale) const
 {
+	g3_assert(IsCongruent());
 	G3SkyMapWeightsPtr out(new G3SkyMapWeights());
 
 	out->TT = TT->Rebin(scale, false);
@@ -555,6 +566,7 @@ G3SkyMapWeightsPtr G3SkyMapWeights::Rebin(size_t scale) const
 
 G3SkyMapWithWeightsPtr G3SkyMapWithWeights::Rebin(size_t scale) const
 {
+	g3_assert(IsCongruent());
 	G3SkyMapWithWeightsPtr out(new G3SkyMapWithWeights());
 
 	bool w = IsWeighted();
@@ -684,6 +696,7 @@ PYBINDINGS("maps") {
 	    .def_readwrite("QU",&G3SkyMapWeights::QU)
 	    .def_readwrite("UU",&G3SkyMapWeights::UU)
 	    .add_property("polarized", &G3SkyMapWeights::IsPolarized)
+	    .add_property("congruent", &G3SkyMapWeights::IsCongruent)
 	    .def("rebin", &G3SkyMapWeights::Rebin)
 	    
 	    .def("Clone", &G3SkyMapWeights::Clone)
@@ -716,6 +729,7 @@ PYBINDINGS("maps") {
 	    .def_readwrite("map_id",&G3SkyMapWithWeights::map_id)
 	    .add_property("weighted",&G3SkyMapWithWeights::IsWeighted)
 	    .add_property("polarized",&G3SkyMapWithWeights::IsPolarized)
+	    .add_property("congruent",&G3SkyMapWithWeights::IsCongruent)
 	    .def("remove_weights",&G3SkyMapWithWeights::RemoveWeights)
 	    .def("apply_weights",&G3SkyMapWithWeights::ApplyWeights)
 	    .def("rebin", &G3SkyMapWithWeights::Rebin)

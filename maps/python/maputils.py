@@ -1,40 +1,14 @@
 from spt3g import core
 from spt3g.maps import HealpixSkyMap, FlatSkyMap
-from spt3g.maps import reproj_map, get_ra_dec_map_cpp
+from spt3g.maps import reproj_map
 
 import numpy as np
 import copy
 
 __all__ = [
-    'get_ra_dec_map',
     'flatsky_to_healpix',
     'healpix_to_flatsky',
 ]
-
-
-@core.usefulfunc
-def get_ra_dec_map(map_in):
-    """
-    Compute the position of each pixel in the map and return maps of ra and dec.
-
-    Parameters:
-    -----------
-    map_in: G3SkyMap or derived object thereof
-        Input map
-
-    Returns:
-    --------
-    ra, dec: G3SkyMap
-        Maps of the coordinates for each pixel, with the same map parameters
-        as the input map.
-    """
-
-    # store in map objects
-    ra = copy.copy(map_in)
-    dec = copy.copy(map_in)
-    get_ra_dec_map_cpp(map_in, ra, dec)
-
-    return ra, dec
 
 
 @core.usefulfunc
