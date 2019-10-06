@@ -232,6 +232,8 @@ public:
 			tu * (tq * qu - qq * tu));
 	}
 
+	MuellerMatrix inv() const;
+
 private:
 	double backing[6];
 };

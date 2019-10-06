@@ -430,13 +430,6 @@ skymapwithweights_inplace(*=, const G3SkyMap &);
 skymapwithweights_inplace(*=, double);
 skymapwithweights_inplace(/=, double);
 
-static G3SkyMapWithWeightsPtr
-skymapwithweights_inplace_divd(G3SkyMapWithWeights &a, double rhs)
-{
-  a /= rhs;
-  return boost::make_shared<G3SkyMapWithWeights>(a);
-}
-
 #define skymapwithweights_pynoninplace(name, oper, rhs_type) \
 static G3SkyMapWithWeightsPtr \
 pyskymapwithweights_##name(const G3SkyMapWithWeights &a, const rhs_type b) \
@@ -451,31 +444,34 @@ skymapwithweights_pynoninplace(multm, *=, G3SkyMap &);
 skymapwithweights_pynoninplace(multd, *=, double);
 skymapwithweights_pynoninplace(divd, /=, double);
 
-StokesVector & StokesVector::operator /=(const MuellerMatrix &r)
+MuellerMatrix MuellerMatrix::inv() const
 {
-	double det = r.det();
-	if (r.tt == 0 || det < 1e-12) {
-		if (det < 1e-12 && r.tt != 0) {
-			log_trace("Singular matrix found when inverting!  Det is %lE\n", det);
-		}
-		t = 0.0 / 0.0;
-		q = 0.0 / 0.0;
-		u = 0.0 / 0.0;
-		return *this;
+	MuellerMatrix m;
+	double d = det();
+	if (tt == 0 || d < 1e-12) {
+		if (d < 1e-12 && tt != 0)
+			log_trace("Singular matrix found when inverting!  Det is %lE\n", d);
+		m.tt = m.tq = m.tu = m.qq = m.qu = m.uu = 0.0 / 0.0;
+		return m;
 	}
 
-	double t_ = (t * (r.qq * r.uu - r.qu * r.qu) +
-		     -q * (r.tq * r.uu - r.tu * r.qu) +
-		     u * (r.tq * r.qu - r.tu * r.qq)) / det;
-	double q_ = (-t * (r.tq * r.uu - r.qu * r.tu) +
-		     q * (r.tt * r.uu - r.tu * r.tu) +
-		     -u * (r.tt * r.qu - r.tq * r.tu)) / det;
-	double u_ = (t * (r.tq * r.qu - r.tu * r.qq) +
-		     -q * (r.tt * r.qu - r.tu * r.tq) +
-		     u * (r.tt * r.qq - r.tq * r.tq)) / det;
-	t = t_;
-	q = q_;
-	u = u_;
+	m.tt = (qq * uu - qu * qu) / d;
+	m.tq = (tu * qu - tq * uu) / d;
+	m.tu = (tq * qu - tu * qq) / d;
+	m.qq = (tt * uu - tu * tu) / d;
+	m.qu = (tq * tu - tt * qu) / d;
+	m.uu = (tt * qq - tq * tq) / d;
+
+	return m;
+}
+
+StokesVector & StokesVector::operator /=(const MuellerMatrix &r)
+{
+	MuellerMatrix ir = r.inv();
+	if (ir.tt != ir.tt)
+		t = q = u = 0.0 / 0.0;
+	else
+		(*this) = ir * (*this);
 	return *this;
 }
 
@@ -737,9 +733,7 @@ PYBINDINGS("maps") {
 	    .def("__mul__", &pyskymapwithweights_multd)
 	    .def("__rmul__", &pyskymapwithweights_multd)
 	    .def("__div__", &pyskymapwithweights_divd)
-	    .def("__idiv__", &skymapwithweights_inplace_divd)
-	    .def("__truediv__", &pyskymapweights_divd)
-	    .def("__itruediv__", &skymapwithweights_inplace_divd)
+	    .def("__truediv__", &pyskymapwithweights_divd)
 	;
 	register_pointer_conversions<G3SkyMapWithWeights>();
 
