@@ -490,12 +490,14 @@ void G3SkyMapWithWeights::ApplyWeights(G3SkyMapWeightsPtr w)
 	g3_assert(w->IsCongruent());
 	g3_assert(T->IsCompatible(*(w->TT)));
 
-	for (size_t pix = 0; pix < T->size(); pix++) {
-		StokesVector v = this->at(pix);
-		if (IsPolarized() && !(v.t == 0 && v.q == 0 && v.u == 0))
-			(*this)[pix] = w->at(pix) * v;
-		else if (!IsPolarized() && v.t != 0)
-			(*T)[pix] = w->TT->at(pix) * v.t;
+        if (IsPolarized()) {
+		for (size_t pix = 0; pix < T->size(); pix++) {
+			StokesVector v = this->at(pix);
+			if (!(v.t == 0 && v.q == 0 && v.u == 0))
+				(*this)[pix] = w->at(pix) * v;
+		}
+	} else {
+		(*T) *= *(w->TT);
 	}
 
 	T->is_weighted = true;
@@ -518,14 +520,10 @@ G3SkyMapWeightsPtr G3SkyMapWithWeights::RemoveWeights()
 	if (IsPolarized()) {
 		Q->ConvertToDense();
 		U->ConvertToDense();
-	}
-
-	for (size_t pix = 0; pix < T->size(); pix++) {
-		StokesVector v = this->at(pix);
-		if (IsPolarized())
+		for (size_t pix = 0; pix < T->size(); pix++)
 			(*this)[pix] /= weights->at(pix);
-		else if (!IsPolarized())
-			(*T)[pix] = v.t / weights->TT->at(pix);
+	} else {
+		(*T) /= *(weights->TT);
 	}
 
 	T->is_weighted = false;
