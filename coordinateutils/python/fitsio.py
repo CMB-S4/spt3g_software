@@ -111,8 +111,8 @@ def load_skymap_fits(filename, hdu=None):
             if map_type is not None and hdu is not None and hidx != hdu:
                 continue
 
-            data = np.array(H.data)
             if map_type == 'flat':
+                data = np.array(H.data, dtype=float)
                 if map_opts.pop('transpose', False):
                     data = np.array(data.T)
 
@@ -129,9 +129,10 @@ def load_skymap_fits(filename, hdu=None):
                 weight_map = output.setdefault(
                     'W', G3SkyMapWeights(output['T'], weight_type)
                 )
-                fm = FlatSkyMap(data.astype(float), **map_opts)
+                fm = FlatSkyMap(data, **map_opts)
                 fm.overflow = overflow
                 setattr(weight_map, hdr['WTYPE'], fm)
+                del data
 
             elif map_type == 'flat' and not hdr.get('ISWEIGHT', None):
                 # flat map data
@@ -139,9 +140,10 @@ def load_skymap_fits(filename, hdu=None):
                 pol_type = getattr(MapPolType, ptype)
                 if pol_type == MapPolType.U and polcconv == 'COSMO':
                     data *= -1
-                fm = FlatSkyMap(data.astype(float), pol_type=pol_type, **map_opts)
+                fm = FlatSkyMap(data, pol_type=pol_type, **map_opts)
                 fm.overflow = overflow
                 output[ptype] = fm
+                del data
 
             elif map_type == 'healpix':
                 # healpix map data
@@ -191,9 +193,8 @@ def load_skymap_fits(filename, hdu=None):
                             'W', G3SkyMapWeights(output['T'], weight_type)
                         )
 
-                        if pix is not None:
-                            data = (pix, data, nside)
-                        hm = HealpixSkyMap(data, **map_opts)
+                        mdata = (pix, data, nside) if pix is not None else data
+                        hm = HealpixSkyMap(mdata, **map_opts)
                         hm.overflow = overflow
 
                         setattr(weight_map, col, hm)
@@ -202,12 +203,14 @@ def load_skymap_fits(filename, hdu=None):
                         pol_type = getattr(MapPolType, col)
                         if pol_type == MapPolType.U and polcconv == 'COSMO':
                             data *= -1
-                        if pix is not None:
-                            data = (pix, data, nside)
+                        mdata = (pix, data, nside) if pix is not None else data
 
-                        hm = HealpixSkyMap(data, pol_type=pol_type, **map_opts)
+                        hm = HealpixSkyMap(mdata, pol_type=pol_type, **map_opts)
                         output[col] = hm
 
+                    del mdata, data
+
+                del pix
                 break
 
     for k, m in output.items():
@@ -535,6 +538,7 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
                 else:
                     # XXX different sparse maps can have different nonzero pixels
                     assert(len(pix) == len(pix1) and (pix == pix1).all())
+                del pix1
 
             else:
                 data = np.asarray(m)
@@ -544,6 +548,7 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
                 name=name, format=fmt, array=data, unit=str(m.units)
             )
             cols.append(col)
+            del data
 
             idx = len(cols)
             header['TISWGT{:d}'.format(idx)] = False
@@ -576,6 +581,7 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
                     pix1 = np.asarray(pix1)
                     data = np.asarray(data)
                     assert(len(pix) == len(pix1) and (pix == pix1).all())
+                    del pix1
                 else:
                     data = np.asarray(m)
 
@@ -584,12 +590,14 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
                     name=wt, format=fmt, array=data, unit=str(m.units)
                 )
                 cols.append(col)
+                del data
 
                 idx = len(cols)
                 header['TISWGT{:d}'.format(idx)] = False
                 header['TOFLW{:d}'.format(idx)] = m.overflow
 
     if not flat:
+        del pix
         hdu = astropy.io.fits.BinTableHDU.from_columns(cols, header=header)
         hdulist.append(hdu)
 
