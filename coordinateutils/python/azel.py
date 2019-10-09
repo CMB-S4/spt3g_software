@@ -1,9 +1,51 @@
 import numpy
+import os
 import astropy.coordinates, astropy.units, astropy.time
 
 from spt3g import core
 
 spt = astropy.coordinates.EarthLocation(lat=-89.991066*astropy.units.deg,lon=-44.65*astropy.units.deg, height=2835.0*astropy.units.meter)
+
+@core.usefulfunc
+def check_iers(g3_time):
+    '''
+    Check whether IERS calculations will work, and load a
+    IERS database file from backup if all else fails.
+
+    Arguments
+    ---------
+    g3_time : G3Time instance
+        Most recent time for which an IERS calculation must be computed.
+    '''
+    t = astropy.time.Time(g3_time.mjd, format='mjd')
+
+    from astropy.utils import iers
+
+    # check if accessing the IERS table outright works.
+    try:
+        t.ut1
+        return
+    except:
+        pass
+
+    # if that fails, allow extrapolation
+    iers.conf.auto_max_age = None
+    try:
+        t.ut1
+        core.log_warn('IERS auto update failed, allowing extrapolation', unit='IERS')
+        return
+    except:
+        pass
+
+    # and if that fails, use a locally cached file that is hopefully setup correctly.
+    fname = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), 'finals2000A.all'
+    )
+    iers.conf.auto_download = False
+    iers.IERS.iers_table = iers.IERS_A.open(fname)
+    t.ut1
+    core.log_warn('Using IERS table from local cache {}'.format(fname), unit='IERS')
+
 
 @core.usefulfunc
 def convert_azel_to_radec(az, el, location=spt):
@@ -20,6 +62,7 @@ def convert_azel_to_radec(az, el, location=spt):
     assert(az.start == el.start)
     assert(az.stop == el.stop)
     assert(az.n_samples == el.n_samples)
+    check_iers(az.stop)
 
     # record locations of bad elevation values to mark them later
     badel_inds = numpy.where((el < -90. * core.G3Units.deg) | (el > 90. * core.G3Units.deg))
@@ -55,6 +98,7 @@ def convert_radec_to_azel(ra, dec, location=spt):
     assert(ra.start == dec.start)
     assert(ra.stop == dec.stop)
     assert(ra.n_samples == dec.n_samples)
+    check_iers(ra.stop)
 
     t = astropy.time.Time(numpy.asarray([i.mjd for i in ra.times()]), format='mjd')
     
