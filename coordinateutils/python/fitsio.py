@@ -213,6 +213,8 @@ def load_skymap_fits(filename, hdu=None):
                 del pix
                 break
 
+            del H.data
+
     for k, m in output.items():
         if k == 'W':
             continue
