@@ -30,6 +30,7 @@ def check_iers(g3_time):
 
     # if that fails, allow extrapolation
     iers.conf.auto_max_age = None
+    t = astropy.time.Time(g3_time.mjd, format='mjd')
     try:
         t.ut1
         core.log_warn('IERS auto update failed, allowing extrapolation', unit='IERS')
@@ -43,6 +44,7 @@ def check_iers(g3_time):
     )
     iers.conf.auto_download = False
     iers.IERS.iers_table = iers.IERS_A.open(fname)
+    t = astropy.time.Time(g3_time.mjd, format='mjd')
     t.ut1
     core.log_warn('Using IERS table from local cache {}'.format(fname), unit='IERS')
 
