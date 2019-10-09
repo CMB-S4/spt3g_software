@@ -369,7 +369,8 @@ HealpixSkyMap::ConvertToIndexedSparse()
 
 	if (ring_sparse_) {
 		for (auto i : *this)
-			(*indexed_sparse_)[i.first] = i.second;
+			if (i.second != 0)
+				(*indexed_sparse_)[i.first] = i.second;
 		delete ring_sparse_;
 		ring_sparse_ = NULL;
 	} else if (dense_) {
