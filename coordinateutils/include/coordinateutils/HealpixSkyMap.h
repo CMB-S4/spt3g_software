@@ -30,8 +30,7 @@ public:
  	    bool is_nested = false,
 	    MapCoordReference coord_ref = MapCoordReference::Equatorial,
 	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
-	    G3SkyMap::MapPolType pol_type = MapPolType::None,
-	    bool shift_ra = false);
+	    G3SkyMap::MapPolType pol_type = MapPolType::None);
 
 	HealpixSkyMap();
 	HealpixSkyMap(const HealpixSkyMap& fm);
