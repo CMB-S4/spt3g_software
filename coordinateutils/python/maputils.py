@@ -126,7 +126,7 @@ def flatsky_to_healpix(map_in, map_stub=None, rebin=1, interp=False,
         Otherwise, a HealpixSkyMap instance is returned, containing only the
         pixels that overlap with the input map.
 
-    All additional keyword arguments are passed to FlatSkyMap to construct
+    All additional keyword arguments are passed to HealpixSkyMap to construct
     the output map object.  Required if `map_stub` is not supplied,
     otherwise ignored.
 
@@ -148,6 +148,16 @@ def flatsky_to_healpix(map_in, map_stub=None, rebin=1, interp=False,
         if not isinstance(map_stub, HealpixSkyMap):
             raise TypeError('Output stub must be a HealpixSkyMap')
         map_out = map_stub.Clone(False)
+
+    # optimize ringsparse storage
+    a0 = map_in.alpha_center
+    da = map_in.x_res * map_in.shape[1]
+    circ = 2 * np.pi * core.G3Units.rad
+    amin = np.mod(a0 - da + circ, circ)
+    amax = np.mod(a0 + da + circ, circ)
+    amin_shift = np.mod(a0 - da + circ + circ / 2, circ)
+    amax_shift = np.mod(a0 + da + circ + circ / 2, circ)
+    map_out.shift_ra = bool(np.abs(amax - amin) > np.abs(amax_shift - amin_shift))
 
     # Populate output map pixels with interpolation and rebinning
     reproj_map(map_in, map_out, rebin=rebin, interp=interp)
