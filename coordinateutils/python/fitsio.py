@@ -169,12 +169,16 @@ def load_skymap_fits(filename, hdu=None):
 
                 partial = hdr.get('INDXSCHM') == 'EXPLICIT' or hdr.get('OBJECT') == 'PARTIAL'
 
-                for cidx, hcol in enumerate(H.data.names):
+                for cidx, hcol in enumerate(list(H.data.names)):
                     col = col_dict.get(hcol, hcol)
                     data = np.array(H.data[hcol], dtype=float).ravel()
+                    # cleanup as we go to avoid excessive memory use
+                    del H.columns[hcol].array
+                    H.columns.del_col(hcol)
 
                     if col == 'PIXEL' or (partial and cidx == 0):
                         pix = np.array(data, dtype=int).ravel()
+                        del data
                         # check if the range in phi is tighter with a shift by 180 deg
                         # if so, then set shift_ra = True for better memory use
                         # with the (default) ring sparse representation
