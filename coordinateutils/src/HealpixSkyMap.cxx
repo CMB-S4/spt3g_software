@@ -9,20 +9,21 @@
 
 HealpixSkyMap::HealpixSkyMap(size_t nside, bool is_weighted, bool is_nested,
     MapCoordReference coord_ref, G3Timestream::TimestreamUnits u,
-    G3SkyMap::MapPolType pol_type) :
+    G3SkyMap::MapPolType pol_type, bool shift_ra) :
       G3SkyMap(coord_ref, is_weighted, u, pol_type),
       nside_(nside), is_nested_(is_nested), dense_(NULL), ring_sparse_(NULL),
-      indexed_sparse_(NULL)
+      indexed_sparse_(NULL), shift_ra_(shift_ra)
 {
-	ring_info_ = init_map_info(nside, 1);
+	ring_info_ = init_map_info(nside, shift_ra, 1);
 	npix_ = nside2npix(nside);
 }
 
 HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool is_weighted,
     bool is_nested, MapCoordReference coord_ref,
-    G3Timestream::TimestreamUnits u, G3SkyMap::MapPolType pol_type) :
+    G3Timestream::TimestreamUnits u, G3SkyMap::MapPolType pol_type,
+    bool shift_ra) :
       G3SkyMap(coord_ref, is_weighted, u, pol_type), is_nested_(is_nested),
-      dense_(NULL), ring_sparse_(NULL), indexed_sparse_(NULL)
+      dense_(NULL), ring_sparse_(NULL), indexed_sparse_(NULL), shift_ra_(shift_ra)
 {
 	Py_buffer view;
 
@@ -33,7 +34,7 @@ HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool is_weighted,
 		// the signatures are degenerate. Handle the
 		// confusion gracefully.
 		nside_ = boost::python::extract<size_t>(v)();
-		ring_info_ = init_map_info(nside_, 1);
+		ring_info_ = init_map_info(nside_, shift_ra_, 1);
 		npix_ = nside2npix(nside_);
 		return;
 	}
@@ -85,7 +86,7 @@ HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool is_weighted,
 			PyBuffer_Release(&dataview);
 			log_fatal("Data must be double-precision (float64).");
 		}
-		ring_info_ = init_map_info(nside_, 1);
+		ring_info_ = init_map_info(nside_, shift_ra_, 1);
 		npix_ = nside2npix(nside_);
 		indexed_sparse_ = new std::unordered_map<uint64_t, double>;
 
@@ -125,7 +126,7 @@ HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool is_weighted,
 		}
 		PyBuffer_Release(&view);
 
-		ring_info_ = init_map_info(nside_, 1);
+		ring_info_ = init_map_info(nside_, shift_ra_, 1);
 		npix_ = nside2npix(nside_);
 
 		return;
@@ -136,15 +137,15 @@ HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool is_weighted,
 
 HealpixSkyMap::HealpixSkyMap() :
     G3SkyMap(MapCoordReference::Local, false), nside_(0), is_nested_(false),
-    dense_(NULL), ring_sparse_(NULL), indexed_sparse_(NULL)
+    dense_(NULL), ring_sparse_(NULL), indexed_sparse_(NULL), shift_ra_(false)
 {
-	ring_info_ = init_map_info(nside_, 1);
+	ring_info_ = init_map_info(nside_, shift_ra_, 1);
 	npix_ = nside2npix(nside_);
 }
 
 HealpixSkyMap::HealpixSkyMap(const HealpixSkyMap & fm) :
     G3SkyMap(fm), nside_(fm.nside_), is_nested_(fm.is_nested_),
-    dense_(NULL), ring_sparse_(NULL), indexed_sparse_(NULL)
+    dense_(NULL), ring_sparse_(NULL), indexed_sparse_(NULL), shift_ra_(fm.shift_ra_)
 {
 	if (fm.dense_)
 		dense_ = new std::vector<double>(*fm.dense_);
@@ -153,7 +154,7 @@ HealpixSkyMap::HealpixSkyMap(const HealpixSkyMap & fm) :
 	else if (fm.indexed_sparse_)
 		indexed_sparse_ = new std::unordered_map<uint64_t, double>(
 		    *fm.indexed_sparse_);
-	ring_info_ = init_map_info(nside_, 1);
+	ring_info_ = init_map_info(nside_, shift_ra_, 1);
 	npix_ = nside2npix(nside_);
 }
 
@@ -190,6 +191,7 @@ HealpixSkyMap::save(A &ar, unsigned v) const
 	} else {
 		ar & make_nvp("store", 0);
 	}
+	ar & make_nvp("shift_ra", shift_ra_);
 }
 
 template <class A> void
@@ -204,10 +206,6 @@ HealpixSkyMap::load(A &ar, unsigned v)
 	ar & make_nvp("G3SkyMap", base_class<G3SkyMap>(this));
 	ar & make_nvp("nside", nside_);
 	ar & make_nvp("nested", is_nested_);
-
-	free_map_info(ring_info_);
-	ring_info_ = init_map_info(nside_, 1);
-	npix_ = nside2npix(nside_);
 
 	if (dense_) {
 		delete dense_;
@@ -237,6 +235,13 @@ HealpixSkyMap::load(A &ar, unsigned v)
 		ar & make_nvp("data", *indexed_sparse_);
 		break;
 	}
+
+	if (v > 1)
+		ar & make_nvp("shift_ra", shift_ra_);
+
+	free_map_info(ring_info_);
+	ring_info_ = init_map_info(nside_, shift_ra_, 1);
+	npix_ = nside2npix(nside_);
 }
 
 HealpixSkyMap::const_iterator::const_iterator(const HealpixSkyMap &map, bool begin) :
@@ -275,7 +280,9 @@ HealpixSkyMap::const_iterator::set_value()
 	if (map_.dense_) {
 		value_.second = index_ < map_.size() ? *it_dense_ : 0;
 	} else if (map_.ring_sparse_) {
-		index_ = k_ + map_.ring_info_->rings[j_].startpix;
+		long idx;
+		get_pixel_index(map_.ring_info_, j_, k_, &idx);
+		index_ = idx;
 		value_.second = map_.ring_sparse_->at(j_, k_);
 	} else if (map_.indexed_sparse_) {
 		if (it_indexed_sparse_ != map_.indexed_sparse_->end()) {
@@ -317,8 +324,11 @@ HealpixSkyMap::ConvertToDense()
 	dense_ = new std::vector<double>(npix_, 0);
 
 	if (ring_sparse_) {
-		for (auto i = ring_sparse_->begin(); i != ring_sparse_->end(); ++i)
-			(*dense_)[i.y + ring_info_->rings[i.x].startpix] = (*i);
+		long idx;
+		for (auto i = ring_sparse_->begin(); i != ring_sparse_->end(); ++i) {
+			get_pixel_index(ring_info_, i.x, i.y, &idx);
+			(*dense_)[idx] = (*i);
+		}
 		delete ring_sparse_;
 		ring_sparse_ = NULL;
 	} else if (indexed_sparse_) {
@@ -894,6 +904,24 @@ G3SkyMapPtr HealpixSkyMap::Rebin(size_t scale, bool norm) const
 	return out;
 }
 
+void HealpixSkyMap::SetShiftRa(bool shift)
+{
+	assert(!IsRingSparse());
+
+	if (shift == shift_ra_)
+		return;
+
+	shift_ra_ = shift;
+	free(ring_info_);
+	ring_info_ = init_map_info(nside_, shift_ra_, 1);
+}
+
+static void
+HealpixSkyMap_setshiftra(HealpixSkyMap &m, bool v)
+{
+	m.SetShiftRa(v);
+}
+
 static void
 HealpixSkyMap_setdense(HealpixSkyMap &m, bool v)
 {
@@ -1009,23 +1037,25 @@ PYBINDINGS("coordinateutils")
 	    .def(boost::python::init<const HealpixSkyMap &>())
 	    .def_pickle(g3frameobject_picklesuite<HealpixSkyMap>())
 	    .def(bp::init<size_t, bool, bool, MapCoordReference,
-	       G3Timestream::TimestreamUnits, G3SkyMap::MapPolType>(
+	       G3Timestream::TimestreamUnits, G3SkyMap::MapPolType, bool>(
 	         (bp::arg("nside"),
 		  bp::args("is_weighted") = true,
 		  bp::args("is_nested") = false,
 		  bp::arg("coord_ref") = MapCoordReference::Equatorial,
 		  bp::arg("units") = G3Timestream::Tcmb,
-		  bp::arg("pol_type") = G3SkyMap::None),
+		  bp::arg("pol_type") = G3SkyMap::None,
+		  bp::arg("shift_ra") = false),
 	       "Instantiate a HealpixSkyMap with given nside"))
 	    .def(bp::init<boost::python::object, bool, bool,
 	       MapCoordReference, G3Timestream::TimestreamUnits,
-	       G3SkyMap::MapPolType>(
+	       G3SkyMap::MapPolType, bool>(
 		  (bp::arg("data"),
 		   bp::args("is_weighted") = true,
 		   bp::args("is_nested") = false,
 		   bp::arg("coord_ref") = MapCoordReference::Equatorial,
 		   bp::arg("units") = G3Timestream::Tcmb,
-		   bp::arg("pol_type") = G3SkyMap::None),
+		   bp::arg("pol_type") = G3SkyMap::None,
+		   bp::arg("shift_ra") = false),
 	       "Instantiate a Healpix map from existing data. If the data are "
 	       "a single numpy array, assumes this is a dense map. Otherwise, "
 	       "pass an (indices, data, nside) tuple."))
@@ -1034,9 +1064,13 @@ PYBINDINGS("coordinateutils")
 	    .def(bp::init<>())
 	    .add_property("nside", &HealpixSkyMap::nside)
 	    .add_property("nested", &HealpixSkyMap::nested)
+	    .add_property("shift_ra", &HealpixSkyMap::IsShiftRa, HealpixSkyMap_setshiftra,
+		"True if the ringsparse representation of the map is stored "
+		"with the rings centered at ra = 0 deg, rather than ra = 180 deg. "
+		"This property can be changed only when the map is not in the "
+		"ringsparse representation, and may improve ringsparse memory use.")
 	    .add_property("dense", &HealpixSkyMap::IsDense, HealpixSkyMap_setdense,
 	        "True if the map is stored with all elements, False otherwise. "
-
 	        "If set to True, converts the map to a dense representation." )
 	    .add_property("ringsparse", &HealpixSkyMap::IsRingSparse, HealpixSkyMap_setringsparse,
 	        "True if the map is stored as a dense 2D region using ring "
