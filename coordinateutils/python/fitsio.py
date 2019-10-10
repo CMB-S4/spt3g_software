@@ -500,7 +500,6 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
             np.dtype(np.float32): 'E',
             np.dtype(np.float64): 'D',
         }
-        cols = []
         pix = None
 
     header['MAPTYPE'] = 'FLAT' if flat else 'HEALPIX'
@@ -512,104 +511,121 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
         header['WGTTYPE'] = str(W.weight_type)
 
     hdulist = astropy.io.fits.HDUList()
+    cols = astropy.io.fits.ColDefs([])
 
-    for m, name in zip(maps, names):
-        if flat:
-            if compress:
-                hdu = astropy.io.fits.CompImageHDU(np.asarray(m), header=header)
-            else:
-                hdu = astropy.io.fits.ImageHDU(np.asarray(m), header=header)
-            hdu.header['ISWEIGHT'] = False
-            hdu.header['POLTYPE'] = name
-            hdu.header['OVERFLOW'] = m.overflow
-            hdulist.append(hdu)
-        else:
-            if not T.dense:
-                pix1, data = m.nonzero_pixels()
-                pix1 = np.asarray(pix1)
-                data  = np.asarray(data)
-
-                if pix is None:
-                    pix = pix1
-
-                    fmt = conv.get(np.min_scalar_type(-pix.max()), 'K')
-                    col = astropy.io.fits.Column(
-                        name='PIXEL', format=fmt, array=pix, unit=None
-                    )
-                    cols.append(col)
-                else:
-                    # XXX different sparse maps can have different nonzero pixels
-                    assert(len(pix) == len(pix1) and (pix == pix1).all())
-                del pix1
-
-            else:
-                data = np.asarray(m)
-
-            fmt = conv.get(data.dtype, 'D')
-            col = astropy.io.fits.Column(
-                name=name, format=fmt, array=data, unit=str(m.units)
-            )
-            cols.append(col)
-            del data
-
-            idx = len(cols)
-            header['TISWGT{:d}'.format(idx)] = False
-            header['TOFLW{:d}'.format(idx)] = m.overflow
-
-    if W is not None:
-        if pol:
-            assert(W.weight_type == WeightType.Wpol)
-            wnames = ['TT', 'TQ', 'TU', 'QQ', 'QU', 'UU']
-        else:
-            assert(W.weight_type == WeightType.Wunpol)
-            wnames = ['TT']
-
-        for wt in wnames:
-            m = getattr(W, wt)
-            assert T.IsCompatible(m), 'Weight {} is not compatible with T'.format(wt)
-
+    try:
+        for m, name in zip(maps, names):
             if flat:
                 if compress:
                     hdu = astropy.io.fits.CompImageHDU(np.asarray(m), header=header)
                 else:
                     hdu = astropy.io.fits.ImageHDU(np.asarray(m), header=header)
-                hdu.header['ISWEIGHT'] = True
-                hdu.header['WTYPE'] = wt
+                hdu.header['ISWEIGHT'] = False
+                hdu.header['POLTYPE'] = name
                 hdu.header['OVERFLOW'] = m.overflow
                 hdulist.append(hdu)
+                del hdu
             else:
                 if not T.dense:
                     pix1, data = m.nonzero_pixels()
                     pix1 = np.asarray(pix1)
-                    data = np.asarray(data)
-                    assert(len(pix) == len(pix1) and (pix == pix1).all())
+                    data  = np.asarray(data)
+
+                    if pix is None:
+                        pix = pix1
+
+                        fmt = conv.get(np.min_scalar_type(-pix.max()), 'K')
+                        col = astropy.io.fits.Column(
+                            name='PIXEL', format=fmt, array=pix, unit=None
+                        )
+                        cols.add_col(col)
+                        del col
+                    else:
+                        # XXX different sparse maps can have different nonzero pixels
+                        assert(len(pix) == len(pix1) and (pix == pix1).all())
                     del pix1
+
                 else:
                     data = np.asarray(m)
 
                 fmt = conv.get(data.dtype, 'D')
                 col = astropy.io.fits.Column(
-                    name=wt, format=fmt, array=data, unit=str(m.units)
+                    name=name, format=fmt, array=data, unit=str(m.units)
                 )
-                cols.append(col)
+                cols.add_col(col)
+                del col
                 del data
 
                 idx = len(cols)
                 header['TISWGT{:d}'.format(idx)] = False
                 header['TOFLW{:d}'.format(idx)] = m.overflow
 
-    if not flat:
-        del pix
-        hdu = astropy.io.fits.BinTableHDU.from_columns(cols, header=header)
-        hdulist.append(hdu)
+        if W is not None:
+            if pol:
+                assert(W.weight_type == WeightType.Wpol)
+                wnames = ['TT', 'TQ', 'TU', 'QQ', 'QU', 'UU']
+            else:
+                assert(W.weight_type == WeightType.Wunpol)
+                wnames = ['TT']
 
-    if overwrite:
-        if os.path.exists(filename):
-            os.remove(filename)
-    else:
-        assert(not os.path.exists(filename))
+            for wt in wnames:
+                m = getattr(W, wt)
+                assert T.IsCompatible(m), 'Weight {} is not compatible with T'.format(wt)
 
-    hdulist.writeto(filename)
+                if flat:
+                    if compress:
+                        hdu = astropy.io.fits.CompImageHDU(np.asarray(m), header=header)
+                    else:
+                        hdu = astropy.io.fits.ImageHDU(np.asarray(m), header=header)
+                    hdu.header['ISWEIGHT'] = True
+                    hdu.header['WTYPE'] = wt
+                    hdu.header['OVERFLOW'] = m.overflow
+                    hdulist.append(hdu)
+                    del hdu
+                else:
+                    if not T.dense:
+                        pix1, data = m.nonzero_pixels()
+                        pix1 = np.asarray(pix1)
+                        data = np.asarray(data)
+                        assert(len(pix) == len(pix1) and (pix == pix1).all())
+                        del pix1
+                    else:
+                        data = np.asarray(m)
+
+                    fmt = conv.get(data.dtype, 'D')
+                    col = astropy.io.fits.Column(
+                        name=wt, format=fmt, array=data, unit=str(m.units)
+                    )
+                    cols.add_col(col)
+                    del col
+                    del data
+
+                    idx = len(cols)
+                    header['TISWGT{:d}'.format(idx)] = False
+                    header['TOFLW{:d}'.format(idx)] = m.overflow
+
+        if not flat:
+            del pix
+            hdu = astropy.io.fits.BinTableHDU.from_columns(cols, header=header)
+            hdulist.append(hdu)
+            del hdu
+
+        if overwrite:
+            if os.path.exists(filename):
+                os.remove(filename)
+        else:
+            assert(not os.path.exists(filename))
+
+        hdulist.writeto(filename)
+
+    finally:
+        for col in cols.names:
+            del cols[col].array
+            cols.del_col(col)
+        del cols
+        for hdu in hdulist:
+            del hdu.data
+        del hdulist
 
 
 @core.indexmod
