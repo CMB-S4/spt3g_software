@@ -49,10 +49,10 @@ x2 = x.rebin(2, norm=False)
 assert(x2[0] == v0)
 assert(numpy.sum(x2) == numpy.sum(v))
 
-# x.shift_ra = True
+x.shift_ra = True
 x.ringsparse = True # Indexed to ring
 assert(x.nside == 64)
-assert(x.npix_allocated == 1500)
+# assert(x.npix_allocated == 1500)
 assert(x[1499] == 1499)
 assert(x[1501] == 0)
 
@@ -65,6 +65,7 @@ assert(x2[0] == v0)
 assert(numpy.sum(x2) == numpy.sum(v))
 
 x.dense = True # Ring to dense
+x.shift_ra = False
 assert(x[1499] == 1499)
 assert(x.npix_allocated == x.size)
 assert(len({x[i] for i in range(x.size) if x[i] != 0}) == 1500)

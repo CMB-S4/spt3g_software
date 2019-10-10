@@ -101,10 +101,12 @@ public:
 		const_iterator(const const_iterator &iter);
 
 		bool operator==(const const_iterator & other) const {
-			return (index_ == other.index_);
+			return map_.ring_sparse_ ? (j_ == other.j_ && k_ == other.k_) :
+			    index_ == other.index_;
 		}
 		bool operator!=(const const_iterator & other) const {
-			return (index_ != other.index_);
+			return map_.ring_sparse_ ? (j_ != other.j_ || k_ != other.k_) :
+			    index_ != other.index_;
 		}
 
 		reference operator*() { return value_; };
