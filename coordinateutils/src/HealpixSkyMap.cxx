@@ -88,10 +88,10 @@ HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool is_weighted,
 		}
 		ring_info_ = init_map_info(nside_, shift_ra_, 1);
 		npix_ = nside2npix(nside_);
-		indexed_sparse_ = new std::unordered_map<uint64_t, double>;
+		ring_sparse_ = new SparseMapData(ring_info_->nring, ring_info_->nring);
 
 		for (size_t i = 0; i < indexview.len/indexview.itemsize; i++)
-			(*indexed_sparse_)[((unsigned long *)indexview.buf)[i]]=
+			(*this)[((unsigned long *)indexview.buf)[i]]=
 			    ((double *)dataview.buf)[i];
 		PyBuffer_Release(&indexview);
 		return;
@@ -378,9 +378,12 @@ HealpixSkyMap::ConvertToIndexedSparse()
 	indexed_sparse_ = new std::unordered_map<uint64_t, double>;
 
 	if (ring_sparse_) {
-		for (auto i : *this)
-			if (i.second != 0)
-				(*indexed_sparse_)[i.first] = i.second;
+		long idx;
+		for (auto i = ring_sparse_->begin(); i != ring_sparse_->end(); ++i) {
+			get_pixel_index(ring_info_, i.x, i.y, &idx);
+			if ((*i) != 0)
+				(*indexed_sparse_)[idx] = (*i);
+		}
 		delete ring_sparse_;
 		ring_sparse_ = NULL;
 	} else if (dense_) {
@@ -436,18 +439,16 @@ HealpixSkyMap::operator [] (size_t i)
 	if (dense_)
 		return (*dense_)[i];
 
-	if (ring_sparse_) {
-		long j, k;
-		int check = get_ring_index(ring_info_, i, &j, &k);
-		assert(!check);
-		return (*ring_sparse_)(j, k);
-	}
-
 	if (indexed_sparse_)
 		return (*indexed_sparse_)[i];
 
-	indexed_sparse_ = new std::unordered_map<uint64_t, double>;
-	return (*indexed_sparse_)[i];
+	if (!ring_sparse_)
+		ring_sparse_ = new SparseMapData(ring_info_->nring, ring_info_->nring);
+
+	long j, k;
+	int check = get_ring_index(ring_info_, i, &j, &k);
+	assert(!check);
+	return (*ring_sparse_)(j, k);
 }
 
 

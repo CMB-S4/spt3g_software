@@ -174,7 +174,15 @@ def load_skymap_fits(filename, hdu=None):
                     data = np.array(H.data[hcol], dtype=float).ravel()
 
                     if col == 'PIXEL' or (partial and cidx == 0):
-                        pix = np.array(data, dtype=int)
+                        pix = np.array(data, dtype=int).ravel()
+                        # check if the range in phi is tighter with a shift by 180 deg
+                        # if so, then set shift_ra = True for better memory use
+                        # with the (default) ring sparse representation
+                        import healpy as hp
+                        _, phi = hp.pix2ang(nside, pix)
+                        shift_ra = bool(np.ptp(phi) > np.ptp((phi + np.pi) % (2 * np.pi)))
+                        del phi
+                        map_opts.update(shift_ra=shift_ra)
                         continue
 
                     units = unit_dict.get(hdr.get('TUNIT{:d}'.format(cidx + 1), units), units)
