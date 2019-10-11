@@ -962,7 +962,7 @@ HealpixSkyMap_setdense(HealpixSkyMap &m, bool v)
 	if (v)
 		m.ConvertToDense();
 	else
-		m.ConvertToIndexedSparse();
+		m.ConvertToRingSparse();
 }
 
 static void
