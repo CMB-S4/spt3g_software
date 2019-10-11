@@ -49,13 +49,23 @@ x2 = x.rebin(2, norm=False)
 assert(x2[0] == v0)
 assert(numpy.sum(x2) == numpy.sum(v))
 
+x.shift_ra = True
 x.ringsparse = True # Indexed to ring
 assert(x.nside == 64)
-assert(x.npix_allocated == 1500)
+assert(x.npix_allocated == 1512) # shifted ringsparse is less efficient
 assert(x[1499] == 1499)
 assert(x[1501] == 0)
 
+k,v = x.nonzero_pixels()
+assert(len(k) == len(v) == 1500)
+assert(set(v) == set(a))
+
+x2 = x.rebin(2, norm=False)
+assert(x2[0] == v0)
+assert(numpy.sum(x2) == numpy.sum(v))
+
 x.dense = True # Ring to dense
+x.shift_ra = False
 assert(x[1499] == 1499)
 assert(x.npix_allocated == x.size)
 assert(len({x[i] for i in range(x.size) if x[i] != 0}) == 1500)
@@ -76,14 +86,6 @@ for i in range(1,1500):
 	assert(x[i] == i)
 assert(x[1501] == 0)
 
-k,v = x.nonzero_pixels()
-assert(len(k) == len(v) == 1500)
-assert(set(v) == set(a))
-
-x2 = x.rebin(2, norm=False)
-assert(x2[0] == v0)
-assert(numpy.sum(x2) == numpy.sum(v))
-
 # Initialization from dense arrays
 a = numpy.arange(49152)
 x = coordinateutils.HealpixSkyMap(a)
@@ -101,6 +103,31 @@ for i in range(0, len(a)):
 
 assert((numpy.asarray(x) == a).all())
 assert(x.dense) # Should be dense again
+
+# test ra shifting
+x.shift_ra = False
+x.ringsparse = True
+ki, vi = x.nonzero_pixels()
+ii = numpy.argsort(ki)
+ki = numpy.asarray(ki)[ii]
+vi = numpy.asarray(vi)[ii]
+
+x.shift_ra = True
+kr, vr = x.nonzero_pixels()
+ii = numpy.argsort(kr)
+kr = numpy.asarray(kr)[ii]
+vr = numpy.asarray(vr)[ii]
+assert((ki == kr).all())
+assert((vi == vr).all())
+
+x.shift_ra = False
+ki, vi = x.nonzero_pixels()
+ii = numpy.argsort(ki)
+ki = numpy.asarray(ki)[ii]
+vi = numpy.asarray(vi)[ii]
+assert((ki == kr).all())
+assert((vi == vr).all())
+
 
 # Conversion to/from flatsky maps
 fm_stub = coordinateutils.FlatSkyMap(

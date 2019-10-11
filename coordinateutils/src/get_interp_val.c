@@ -80,9 +80,10 @@ void get_ring_info(map_info *minfo, long iring, long *startpix,
   Allocate and initialize map_info structure.
 
   nside : map dimension
+  shift_phi : if 1, center rings at phi = 0 instead of phi = pi
   populate : if 1, populate all ring parameters
 */
-map_info * init_map_info(size_t nside, int populate) {
+map_info * init_map_info(size_t nside, int nest, int shift_phi, int populate) {
   map_info *minfo = malloc(sizeof(*minfo));
   int iring;
   minfo->nside = nside;
@@ -92,6 +93,8 @@ map_info * init_map_info(size_t nside, int populate) {
   minfo->nring = 4 * minfo->nside;
   minfo->fact2 = 4. / minfo->npix;
   minfo->fact1 = (minfo->nside << 1) * minfo->fact2;
+  minfo->nest = nest;
+  minfo->shift_phi = shift_phi;
 
   minfo->rings = calloc(minfo->nring, sizeof(ring_info));
   if (populate) {
@@ -122,6 +125,9 @@ int get_ring_index(map_info *minfo, long pix, long *iring, long *ringpix) {
   long nside = minfo->nside;
   long nring = minfo->nring;
 
+  if (minfo->nest)
+    nest2ring(nside, pix, &pix);
+
   if (pix < 0 || pix >= npix)
     return -1;
 
@@ -136,6 +142,33 @@ int get_ring_index(map_info *minfo, long pix, long *iring, long *ringpix) {
 
   if (*ringpix < 0 || *ringpix >= minfo->rings[*iring].ringpix)
     return -1;
+
+  if (minfo->shift_phi)
+    *ringpix = (*ringpix + minfo->rings[*iring].ringpix / 2) % minfo->rings[*iring].ringpix;
+
+  return 0;
+}
+
+/*
+  Return the pixel index of the given ring index and pixel offset.
+  Assumes ring pixel ordering.
+
+  minfo : initialized map_info structure
+  iring, ringpix : ring index and pixel offset within the ring
+  pix : corresponding healpix pixel
+ */
+int get_pixel_index(map_info *minfo, long iring, long ringpix, long *pix)
+{
+  if (minfo->shift_phi)
+    ringpix = (ringpix + minfo->rings[iring].ringpix / 2) % minfo->rings[iring].ringpix;
+
+  *pix = minfo->rings[iring].startpix + ringpix;
+
+  if (*pix < 0 || *pix > minfo->npix)
+    return -1;
+
+  if (minfo->nest)
+    ring2nest(minfo->nside, *pix, pix);
 
   return 0;
 }
@@ -234,6 +267,13 @@ int get_interp_weights(map_info *minfo, double theta, double phi,
     weight[3] *= wtheta;
   }
 
+  if (minfo->nest) {
+    ring2nest(nside, pix[0], pix + 0);
+    ring2nest(nside, pix[1], pix + 1);
+    ring2nest(nside, pix[2], pix + 2);
+    ring2nest(nside, pix[3], pix + 3);
+  }
+
   return 0;
 }
 
@@ -270,9 +310,9 @@ double get_interp_val(map_info *minfo, double *map,
   val : output array of interpolated values
   n : number of interpolation points
 */
-void get_interp_valn(int nside, double *map, double *theta, double *phi,
+void get_interp_valn(int nside, int nest, double *map, double *theta, double *phi,
                      double *val, int n) {
-  map_info *minfo = init_map_info(nside, 0);
+  map_info *minfo = init_map_info(nside, nest, 0, 0);
   int ii;
   for (ii = 0; ii < n; ii++) {
     val[ii] = get_interp_val(minfo, map, theta[ii], phi[ii]);
@@ -302,7 +342,7 @@ int main(int argc, char *argv[]) {
 
 
   double val[100];
-  get_interp_valn(nside, map, theta, phi, val, 100);
+  get_interp_valn(nside, 0, map, theta, phi, val, 100);
 
   for (int ii = 0; ii < 100; ii ++) {
     printf("theta: %6f, phi: %6f, val: %6f\n", theta[ii], phi[ii], val[ii]);
