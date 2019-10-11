@@ -64,13 +64,16 @@ typedef struct {
   long nring;
   double fact1;
   double fact2;
+  int nest;
+  int shift_phi;
   ring_info *rings;
 } map_info;
 
 
-map_info * init_map_info(size_t nside, int populate);
+map_info * init_map_info(size_t nside, int nest, int shift_phi, int populate);
 void free_map_info(map_info *minfo);
 int get_ring_index(map_info *minfo, long pix, long *iring, long *ringpix);
+int get_pixel_index(map_info *minfo, long iring, long ringpix, long *pix);
 int get_interp_weights(map_info *minfo, double theta, double phi,
                        long pix[4], double weight[4]);
 

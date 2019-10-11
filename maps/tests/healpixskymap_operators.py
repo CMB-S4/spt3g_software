@@ -7,21 +7,21 @@ from spt3g.maps import HealpixSkyMap
 # Simple in-place operators
 m = HealpixSkyMap(64)
 m[15] = 10
-assert(m.indexedsparse)
+assert(m.ringsparse)
 
 m *= 5
 m /= 25
 assert(m[15] == 2)
-assert(m.indexedsparse)
+assert(m.ringsparse)
 assert(m[16] == 0)
 
-assert((-m).indexedsparse)
+assert((-m).ringsparse)
 assert((-m)[15] == -2)
 
 m += 3
 m -=14
 assert(m[15] == -9)
-assert(not m.indexedsparse)
+assert(not m.ringsparse)
 assert(m[16] == -11)
 
 n = 1 - m

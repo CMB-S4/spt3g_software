@@ -173,7 +173,7 @@ def load_skymap_fits(filename, hdu=None):
                     data = np.array(H.data[hcol], dtype=float).ravel()
 
                     if col == 'PIXEL' or (partial and cidx == 0):
-                        pix = np.array(data, dtype=int)
+                        pix = np.array(data, dtype=int).ravel()
                         del data
                         continue
 

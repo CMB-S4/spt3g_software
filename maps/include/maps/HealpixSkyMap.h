@@ -21,7 +21,8 @@ public:
  	    bool is_nested = false,
 	    MapCoordReference coord_ref = MapCoordReference::Equatorial,
 	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
-	    G3SkyMap::MapPolType pol_type = MapPolType::None);
+	    G3SkyMap::MapPolType pol_type = MapPolType::None,
+	    bool shift_ra = false);
 
 	// Constructor from a numpy array
 	HealpixSkyMap(boost::python::object v,
@@ -86,6 +87,9 @@ public:
 	bool IsRingSparse() const { return (ring_sparse_ != NULL); }
 	bool IsIndexedSparse() const { return (indexed_sparse_ != NULL); }
 
+	bool IsRaShifted() const { return shift_ra_; }
+	void SetShiftRa(bool shift);
+
 	class const_iterator {
 	public:
 		typedef std::pair<uint64_t, double> value_type;
@@ -96,10 +100,12 @@ public:
 		const_iterator(const const_iterator &iter);
 
 		bool operator==(const const_iterator & other) const {
-			return (index_ == other.index_);
+			return map_.ring_sparse_ ? (j_ == other.j_ && k_ == other.k_) :
+			    index_ == other.index_;
 		}
 		bool operator!=(const const_iterator & other) const {
-			return (index_ != other.index_);
+			return map_.ring_sparse_ ? (j_ != other.j_ || k_ != other.k_) :
+			    index_ != other.index_;
 		}
 
 		reference operator*() { return value_; };
@@ -130,6 +136,7 @@ private:
 	SparseMapData *ring_sparse_;
 	std::unordered_map<uint64_t, double> *indexed_sparse_;
 	map_info *ring_info_;
+	bool shift_ra_;
 
 	SET_LOGGER("HealpixSkyMap");
 };
@@ -140,7 +147,7 @@ namespace cereal {
   template <class A> struct specialize<A, HealpixSkyMap, cereal::specialization::member_load_save> {};
 }
 
-G3_SERIALIZABLE(HealpixSkyMap, 1);
+G3_SERIALIZABLE(HealpixSkyMap, 2);
 
 #endif //_MAPS_HEALPIXSKYMAP_H
 
