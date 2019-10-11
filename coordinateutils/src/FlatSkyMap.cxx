@@ -836,6 +836,16 @@ PYBINDINGS("coordinateutils")
 	    .add_property("y_res", &FlatSkyMap::yres, &FlatSkyMap::set_yres,
 	      "Resolution in Y direction for maps with rectangular pixels")
 
+	    .def("pixel_to_angle",
+	      (std::vector<double> (FlatSkyMap::*)(size_t) const)
+	      &FlatSkyMap::pixel_to_angle, bp::arg("pixel"),
+	      "Compute the sky coordinates of the given 1D pixel")
+	    .def("pixel_to_angle",
+	      (std::vector<double> (FlatSkyMap::*)(size_t, size_t) const)
+	      &FlatSkyMap::pixel_to_angle, (bp::arg("x"), bp::arg("y")),
+	      "Compute the sky coordinates of the given 2D pixel (also see "
+	      "xy_to_angle()")
+
 	    .def("xy_to_angle", &FlatSkyMap::xy_to_angle,
 	      (bp::arg("x"), bp::arg("y")),
 	       "Compute the sky coordinates of the input flat 2D coordinates")
