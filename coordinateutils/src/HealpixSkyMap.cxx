@@ -259,6 +259,8 @@ HealpixSkyMap::load(A &ar, unsigned v)
 
 	if (v > 1)
 		ar & make_nvp("shift_ra", shift_ra_);
+	else
+		shift_ra_ = false;
 
 	free_map_info(ring_info_);
 	ring_info_ = init_map_info(nside_, is_nested_, shift_ra_, 1);
@@ -1072,7 +1074,7 @@ PYBINDINGS("coordinateutils")
 	    .def(bp::init<>())
 	    .add_property("nside", &HealpixSkyMap::nside)
 	    .add_property("nested", &HealpixSkyMap::nested)
-	    .add_property("shift_ra", &HealpixSkyMap::IsShiftRa, HealpixSkyMap_setshiftra,
+	    .add_property("shift_ra", &HealpixSkyMap::IsRaShifted, HealpixSkyMap_setshiftra,
 		"True if the ringsparse representation of the map is stored "
 		"with the rings centered at ra = 0 deg, rather than ra = 180 deg. "
 		"This property can be changed only when the map is not in the "

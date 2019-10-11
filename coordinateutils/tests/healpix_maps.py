@@ -52,7 +52,7 @@ assert(numpy.sum(x2) == numpy.sum(v))
 x.shift_ra = True
 x.ringsparse = True # Indexed to ring
 assert(x.nside == 64)
-# assert(x.npix_allocated == 1500)
+assert(x.npix_allocated == 1512) # shifted ringsparse is less efficient
 assert(x[1499] == 1499)
 assert(x[1501] == 0)
 
