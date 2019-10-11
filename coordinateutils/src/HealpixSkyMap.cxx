@@ -924,14 +924,30 @@ G3SkyMapPtr HealpixSkyMap::Rebin(size_t scale, bool norm) const
 
 void HealpixSkyMap::SetShiftRa(bool shift)
 {
-	assert(!IsRingSparse());
-
 	if (shift == shift_ra_)
 		return;
 
-	shift_ra_ = shift;
+	if (!IsRingSparse()) {
+		shift_ra_ = shift;
+		free(ring_info_);
+		ring_info_ = init_map_info(nside_, is_nested_, shift, 1);
+		return;
+	}
+
+	map_info *ring_info = init_map_info(nside_, is_nested_, shift, 1);
+	SparseMapData *ring_sparse = new SparseMapData(ring_info->nring, ring_info->nring);
+	long iring, ringpix;
+	for (auto i : *this) {
+		if (i.second != 0) {
+			get_ring_index(ring_info, i.first, &iring, &ringpix);
+			(*ring_sparse)(iring, ringpix) = i.second;
+		}
+	}
+
 	free(ring_info_);
-	ring_info_ = init_map_info(nside_, is_nested_, shift, 1);
+	delete ring_sparse_;
+	ring_info_ = ring_info;
+	ring_sparse_ = ring_sparse;
 }
 
 static void
@@ -1076,9 +1092,7 @@ PYBINDINGS("coordinateutils")
 	    .add_property("nested", &HealpixSkyMap::nested)
 	    .add_property("shift_ra", &HealpixSkyMap::IsRaShifted, HealpixSkyMap_setshiftra,
 		"True if the ringsparse representation of the map is stored "
-		"with the rings centered at ra = 0 deg, rather than ra = 180 deg. "
-		"This property can be changed only when the map is not in the "
-		"ringsparse representation, and may improve ringsparse memory use.")
+		"with the rings centered at ra = 0 deg, rather than ra = 180 deg.")
 	    .add_property("dense", &HealpixSkyMap::IsDense, HealpixSkyMap_setdense,
 	        "True if the map is stored with all elements, False otherwise. "
 	        "If set to True, converts the map to a dense representation." )

@@ -105,14 +105,14 @@ assert((numpy.asarray(x) == a).all())
 assert(x.dense) # Should be dense again
 
 # test ra shifting
-x.indexedsparse = True
-x.shift_ra = True
+x.shift_ra = False
+x.ringsparse = True
 ki, vi = x.nonzero_pixels()
 ii = numpy.argsort(ki)
 ki = numpy.asarray(ki)[ii]
 vi = numpy.asarray(vi)[ii]
 
-x.ringsparse == True
+x.shift_ra = True
 kr, vr = x.nonzero_pixels()
 ii = numpy.argsort(kr)
 kr = numpy.asarray(kr)[ii]
@@ -120,7 +120,6 @@ vr = numpy.asarray(vr)[ii]
 assert((ki == kr).all())
 assert((vi == vr).all())
 
-x.indexedsparse = True
 x.shift_ra = False
 ki, vi = x.nonzero_pixels()
 ii = numpy.argsort(ki)
