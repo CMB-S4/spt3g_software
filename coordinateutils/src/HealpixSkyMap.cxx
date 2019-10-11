@@ -961,8 +961,12 @@ HealpixSkyMap_setdense(HealpixSkyMap &m, bool v)
 {
 	if (v)
 		m.ConvertToDense();
-	else
-		m.ConvertToRingSparse();
+	else {
+		PyErr_SetString(PyExc_ValueError,
+		    "Cannot set dense to False. Set ringsparse or "
+		    "indexedsparse to True to convert from dense.");
+		throw boost::python::error_already_set();
+	}
 }
 
 static void
@@ -970,8 +974,12 @@ HealpixSkyMap_setringsparse(HealpixSkyMap &m, bool v)
 {
 	if (v)
 		m.ConvertToRingSparse();
-	else
-		m.ConvertToIndexedSparse();
+	else {
+		PyErr_SetString(PyExc_ValueError,
+		    "Cannot set ringsparse to False. Set indexedsparse or "
+		    "dense to True to convert from ringsparse.");
+		throw boost::python::error_already_set();
+	}
 }
 
 static void
@@ -979,8 +987,12 @@ HealpixSkyMap_setindexedsparse(HealpixSkyMap &m, bool v)
 {
 	if (v)
 		m.ConvertToIndexedSparse();
-	else
-		m.ConvertToRingSparse();
+	else {
+		PyErr_SetString(PyExc_ValueError,
+		    "Cannot set indexedsparse to False. Set ringsparse or "
+		    "dense to True to convert from indexedsparse.");
+		throw boost::python::error_already_set();
+	}
 }
 
 static boost::python::tuple
