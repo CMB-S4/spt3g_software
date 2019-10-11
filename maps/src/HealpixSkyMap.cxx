@@ -365,11 +365,12 @@ HealpixSkyMap::ConvertToIndexedSparse()
 	if (indexed_sparse_)
 		return;
 
-	indexed_sparse_ = new std::unordered_map<uint64_t, double>(npix_);
+	indexed_sparse_ = new std::unordered_map<uint64_t, double>;
 
 	if (ring_sparse_) {
 		for (auto i : *this)
-			(*indexed_sparse_)[i.first] = i.second;
+			if (i.second != 0)
+				(*indexed_sparse_)[i.first] = i.second;
 		delete ring_sparse_;
 		ring_sparse_ = NULL;
 	} else if (dense_) {
@@ -435,7 +436,7 @@ HealpixSkyMap::operator [] (size_t i)
 	if (indexed_sparse_)
 		return (*indexed_sparse_)[i];
 
-	indexed_sparse_ = new std::unordered_map<uint64_t, double>(npix_);
+	indexed_sparse_ = new std::unordered_map<uint64_t, double>;
 	return (*indexed_sparse_)[i];
 }
 
