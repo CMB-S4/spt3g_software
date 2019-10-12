@@ -63,6 +63,16 @@ for pol in [True, False]:
     assert(np.allclose(weights[15], mat * 5))
     ivec = np.linalg.solve(mat * 5, vec * 10) if pol else vec * 2 / mat
     assert(np.allclose(mw[15], ivec))
+
+    if pol:
+        idet = np.linalg.det(mat * 5)
+        det = weights.det()
+        assert(np.allclose(det[15], idet))
+
+        icond = np.linalg.cond(mat * 5)
+        cond = weights.cond()
+        assert(np.allclose(cond[15], icond))
+
     assert(np.isnan(mw[16]).all())
     assert(not mw.sparse)
     assert(mw.npix_allocated == mw.size)

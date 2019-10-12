@@ -1,10 +1,14 @@
 #include <pybindings.h>
 #include <serialization.h>
+#include <G3Units.h>
 #include <maps/G3SkyMap.h>
 #include <maps/FlatSkyMap.h>
 #include <maps/HealpixSkyMap.h>
 
 namespace bp=boost::python;
+
+#define ACOS acos
+#define COS cos
 
 template <class A> void
 G3SkyMap::serialize(A &ar, unsigned v)
@@ -474,6 +478,55 @@ MuellerMatrix MuellerMatrix::inv() const
 	return m;
 }
 
+double MuellerMatrix::cond() const
+{
+	// Compute eigenvalues of a symmetrix 3x3 matrix
+	// See https://en.wikipedia.org/wiki/Eigenvalue_algorithm#3%C3%973_matrices
+	double lmax, lmin;
+
+	double p1 = tq * tq + tu * tu + qu * qu;
+	if (p1 < 1e-12) {
+		// matrix is empty
+		if ((tt + qq + uu) == 0)
+			return 0.0 / 0.0;
+
+		// matrix is diagonal
+		lmax = lmin = tt;
+		if (qq > lmax)
+			lmax = qq;
+		if (qq < lmin)
+			lmin = qq;
+		if (uu > lmax)
+			lmax = uu;
+		if (uu < lmin)
+			lmin = uu;
+		return lmax / lmin;
+	}
+
+	double q = (tt + qq + uu) / 3.;
+	double p = (tt - q)*(tt - q) + (qq - q)*(qq - q) + (uu - q)*(uu - q) + 2.*p1;
+	p = sqrt(p / 6.0);
+
+	MuellerMatrix Q;
+	Q.tt = Q.qq = Q.uu = q;
+        MuellerMatrix B = *this;
+        B -= Q;
+        B /= p;
+	double r = B.det() / 2.0;
+
+	double phi;
+	if (r <= -1)
+		phi = 60 * G3Units::deg;
+	else if (r >= 1)
+		phi = 0;
+	else
+		phi = ACOS(r) / 3.0;
+
+	lmax = q + 2. * p * COS(phi);
+	lmin = q + 2. * p * COS(phi + 120 * G3Units::deg);
+	return lmax / lmin;
+}
+
 StokesVector & StokesVector::operator /=(const MuellerMatrix &r)
 {
 	MuellerMatrix ir = r.inv();
@@ -490,6 +543,30 @@ StokesVector StokesVector::operator /(const MuellerMatrix &r) const
 	v += *this;
 	v /= r;
 	return v;
+}
+
+G3SkyMapPtr G3SkyMapWeights::Det() const
+{
+	G3SkyMapPtr D = TT->Clone(false);
+
+	for (size_t i = 0; i < TT->size(); i++) {
+		double det = this->at(i).det();
+		if (det != 0)
+			(*D)[i] = det;
+	}
+
+	return D;
+}
+
+G3SkyMapPtr G3SkyMapWeights::Cond() const
+{
+	G3SkyMapPtr C = TT->Clone(false);
+	C->ConvertToDense();
+
+	for (size_t i = 0; i < TT->size(); i++)
+		(*C)[i] = this->at(i).cond();
+
+	return C;
 }
 
 void G3SkyMapWithWeights::ApplyWeights(G3SkyMapWeightsPtr w)
@@ -705,6 +782,8 @@ PYBINDINGS("maps") {
 	    .add_property("polarized", &G3SkyMapWeights::IsPolarized)
 	    .add_property("congruent", &G3SkyMapWeights::IsCongruent)
 	    .def("rebin", &G3SkyMapWeights::Rebin)
+	    .def("det", &G3SkyMapWeights::Det)
+	    .def("cond", &G3SkyMapWeights::Cond)
 	    
 	    .def("Clone", &G3SkyMapWeights::Clone)
 

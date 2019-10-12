@@ -174,6 +174,11 @@ public:
 		return *this;
 	}
 
+	StokesVector &operator /=(const double r) {
+		t /= r; q /= r; u /= r;
+		return *this;
+	}
+
 	StokesVector &operator /=(const MuellerMatrix &r);
 	StokesVector operator /(const MuellerMatrix &r) const;
 
@@ -225,6 +230,12 @@ public:
 		return *this;
 	}
 
+	MuellerMatrix &operator /=(const double r) {
+		tt /= r; tq /= r; tu /= r;
+		qq /= r; qu /= r; uu /= r;
+		return *this;
+	}
+
 	StokesVector operator *(const StokesVector &r) const {
 		StokesVector s;
 		s.t = tt * r.t + tq * r.q + tu * r.u;
@@ -240,6 +251,7 @@ public:
 	}
 
 	MuellerMatrix inv() const;
+	double cond() const;
 
 private:
 	double backing[6];
@@ -297,6 +309,9 @@ public:
 
 	// Mask
 	G3SkyMapWeights &operator*=(const G3SkyMap &rhs);
+
+	G3SkyMapPtr Det() const;
+	G3SkyMapPtr Cond() const;
 
 	boost::shared_ptr<G3SkyMapWeights> Rebin(size_t scale) const;
 
