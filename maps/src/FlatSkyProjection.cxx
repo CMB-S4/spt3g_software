@@ -493,6 +493,46 @@ void FlatSkyProjection::get_rebin_angles(long pixel, size_t scale,
 	}
 }
 
+std::vector<double>
+FlatSkyProjection::xy_to_angle_grad(double x, double y, double h) const
+{
+	// step size
+	double hh = 2 * h;
+        const double circ = 360 * deg;
+        const double halfcirc = 180 * deg;
+
+	// gradient along x
+	std::vector<double> ang1 = xy_to_angle(x - h, y, false);
+	std::vector<double> ang2 = xy_to_angle(x + h, y, false);
+	if (fabs(ang2[0] - ang1[0]) > halfcirc) {
+		ang1[0] = fmod(ang1[0] + halfcirc, circ);
+		ang2[0] = fmod(ang2[0] + halfcirc, circ);
+	}
+	double dax = (ang2[0] - ang1[0]) / hh;
+	double ddx = (ang2[1] - ang1[1]) / hh;
+
+	// gradient along y
+	std::vector<double> ang3 = xy_to_angle(x, y - h, false);
+	std::vector<double> ang4 = xy_to_angle(x, y + h, false);
+	if (fabs(ang4[0] - ang3[0]) > halfcirc) {
+		ang3[0] = fmod(ang3[0] + halfcirc, circ);
+		ang4[0] = fmod(ang4[0] + halfcirc, circ);
+	}
+	double day = (ang4[0] - ang3[0]) / hh;
+	double ddy = (ang4[1] - ang3[1]) / hh;
+
+	return {dax, day, ddx, ddy};
+}
+
+std::vector<double>
+FlatSkyProjection::pixel_to_angle_grad(long pixel, double h) const
+{
+	if (pixel < 0 || pixel >= xpix_ * ypix_)
+		return std::vector<double>(4, 0);
+	std::vector<double> xy = pixel_to_xy(pixel);
+	return xy_to_angle_grad(xy[0], xy[1], h);
+}
+
 void FlatSkyProjection::get_interp_pixels_weights(double alpha, double delta,
     std::vector<long> & pixels, std::vector<double> & weights) const
 {

@@ -90,6 +90,9 @@ public:
 	std::vector<double> pixel_to_angle(long pixel, bool wrap_alpha=false) const;
 	long angle_to_pixel(double alpha, double delta) const;
 
+	std::vector<double> xy_to_angle_grad(double x, double y, double h=0.001) const;
+	std::vector<double> pixel_to_angle_grad(long pixel, double h=0.001) const;
+
         void get_rebin_angles(long pixel, size_t scale,
 	    std::vector<double> & alphas, std::vector<double> & deltas,
 	    bool wrap_alpha=false) const;

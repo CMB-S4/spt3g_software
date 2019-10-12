@@ -12,6 +12,10 @@
 
 #include <iostream>
 
+#define COS cos
+#define SIN sin
+#define ATAN2 atan2
+
 using namespace G3Units;
 
 boost::python::tuple get_ra_dec_map(G3SkyMapConstPtr m)
@@ -38,6 +42,38 @@ boost::python::tuple get_ra_dec_map(G3SkyMapConstPtr m)
 	dec->pol_type = G3SkyMap::None;
 
 	return boost::python::make_tuple(ra, dec);
+}
+
+
+void flatten_pol(FlatSkyMapPtr Q, FlatSkyMapPtr U, double h, bool invert)
+{
+	assert(Q->IsCompatible(*U));
+	assert(Q->IsPolFlat() == U->IsPolFlat());
+
+	if (Q->IsPolFlat() && !invert)
+		return;
+	if (!Q->IsPolFlat() && invert)
+		return;
+
+	for (auto i : *Q) {
+		double q = i.second;
+		double u = U->G3SkyMap::at(i.first);
+		if (q == 0 && u == 0)
+			continue;
+
+		std::vector<double> grad = Q->pixel_to_angle_grad(i.first, h);
+		double rot = ATAN2(-grad[0], grad[1]) + ATAN2(-grad[3], -grad[2]);
+		if (invert)
+			rot *= -1.0;
+		double cr = COS(rot);
+		double sr = SIN(rot);
+
+		(*Q)[i.first] = cr * q - sr * u;
+		(*U)[i.first] = sr * q + cr * u;
+	}
+
+	Q->SetFlatPol(!invert);
+	U->SetFlatPol(!invert);
 }
 
 
@@ -82,6 +118,17 @@ namespace bp = boost::python;
 void maputils_pybindings(void){
 	bp::def("get_ra_dec_map", get_ra_dec_map, (bp::arg("map_in")),
 		"Returns maps of the ra and dec angles for each pixel in the input map");
+
+	bp::def("flatten_pol", flatten_pol,
+		(bp::arg("Q"), bp::arg("U"), bp::arg("h")=0.001, bp::arg("invert")=false),
+		"For maps defined on the sphere the direction of the polarization angle is "
+		"is defined relative to the direction of North.  When making maps we follow "
+		"this definition.\n\nFor any flat sky estimators, the polarization angle is "
+		"defined relative to the vertical axis.  For some map projections the "
+		"direction of north is not the same as the vertical axis.  This function "
+		"applies a rotation to the Q and U values to switch the curved sky Q/U "
+		"definition to the flat sky Q/U definition.\n\nIf for whatever reason you "
+		"want to reverse the process set the invert argument to True.");
 
 	bp::def("reproj_map", reproj_map,
 		(bp::arg("in_map"), bp::arg("out_map"), bp::arg("rebin")=1, bp::arg("interp")=false),

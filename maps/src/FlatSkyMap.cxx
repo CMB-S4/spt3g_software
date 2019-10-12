@@ -567,6 +567,10 @@ std::vector<double> FlatSkyMap::pixel_to_angle_wrap_ra(size_t pixel) const {
 	return proj_info.pixel_to_angle(pixel, true);
 }
 
+std::vector<double> FlatSkyMap::pixel_to_angle_grad(size_t pixel, double h) const {
+	return proj_info.pixel_to_angle_grad(pixel, h);
+}
+
 void FlatSkyMap::get_rebin_angles(long pixel, size_t scale,
     std::vector<double> & alphas, std::vector<double> & deltas) const
 {
@@ -861,6 +865,9 @@ PYBINDINGS("maps")
 	    .def("nonzero_pixels", &flatskymap_nonzeropixels,
 	        "Returns a list of the indices of the non-zero pixels in the "
 	        "map and a list of the values of those non-zero pixels.")
+
+	    .add_property("flat_pol", &FlatSkyMap::IsPolFlat,
+		"True if the flatten_pol function has been run on this map.")
 
 	    .def("__getitem__", flatskymap_getitem_1d)
 	    .def("__setitem__", flatskymap_setitem_1d)

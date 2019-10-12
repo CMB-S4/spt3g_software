@@ -110,6 +110,8 @@ public:
 	std::vector<double> angle_to_xy(double alpha, double delta) const;
 	std::vector<double> xy_to_angle(double x, double y) const;
 
+	std::vector<double> pixel_to_angle_grad(size_t pixel, double h=0.001) const;
+
 	void get_rebin_angles(long pixel, size_t scale,
 	    std::vector<double> & alphas, std::vector<double> & deltas) const override;
 	void get_interp_pixels_weights(double alpha, double delta,
@@ -120,6 +122,9 @@ public:
 	void ConvertToDense() override;
 	void ConvertToSparse();
 	bool IsDense() const override { return (dense_ != NULL); }
+
+	bool IsPolFlat() const { return flat_pol_; }
+	void SetFlatPol(bool flat) { flat_pol_ = flat; }
 
 	class const_iterator {
 	public:
@@ -165,6 +170,7 @@ private:
 	DenseMapData *dense_;
 	SparseMapData *sparse_;
 	uint64_t xpix_, ypix_;
+	bool flat_pol_;
 
 	SET_LOGGER("FlatSkyMap");
 };
