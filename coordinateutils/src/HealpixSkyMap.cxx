@@ -42,17 +42,23 @@ HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool is_weighted,
 		// One option is that we got passed a tuple of numpy
 		// arrays: first indices, next data, next nside.
 		Py_buffer indexview, dataview;
-		if (!PyLong_Check(PyTuple_GetItem(v.ptr(), 2))) {
+#if PY_MAJOR_VERSION < 3
+		if (PyInt_Check(PyTuple_GetItem(v.ptr(), 2))) {
+			nside_ = PyInt_AsSsize_t(PyTuple_GetItem(v.ptr(), 2));
+		} else 
+#endif
+		if (PyLong_Check(PyTuple_GetItem(v.ptr(), 2))) {
+#if PY_MAJOR_VERSION < 3
+			nside_ = PyLong_AsUnsignedLong(PyTuple_GetItem(v.ptr(), 2));
+#else
+			nside_ = PyLong_AsSize_t(PyTuple_GetItem(v.ptr(), 2));
+#endif
+		} else {
 			PyErr_SetString(PyExc_TypeError,
 			    "Third tuple element for sparse maps needs to be "
 			    "nside");
 			throw bp::error_already_set();
 		}
-#if PY_MAJOR_VERSION < 3
-		nside_ = PyLong_AsUnsignedLong(PyTuple_GetItem(v.ptr(), 2));
-#else
-		nside_ = PyLong_AsSize_t(PyTuple_GetItem(v.ptr(), 2));
-#endif
 
 		if (PyObject_GetBuffer(PyTuple_GetItem(v.ptr(), 0), &indexview,
 		    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) == -1)
