@@ -867,7 +867,7 @@ PYBINDINGS("maps")
 	        "map and a list of the values of those non-zero pixels.")
 
 	    .add_property("flat_pol", &FlatSkyMap::IsPolFlat,
-		"True if the flatten_pol function has been run on this map.")
+		"True if this map has been flattened using flatten_pol.")
 
 	    .def("__getitem__", flatskymap_getitem_1d)
 	    .def("__setitem__", flatskymap_setitem_1d)

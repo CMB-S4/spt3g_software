@@ -498,8 +498,8 @@ FlatSkyProjection::xy_to_angle_grad(double x, double y, double h) const
 {
 	// step size
 	double hh = 2 * h;
-        const double circ = 360 * deg;
-        const double halfcirc = 180 * deg;
+	const double circ = 360 * deg;
+	const double halfcirc = 180 * deg;
 
 	// gradient along x
 	std::vector<double> ang1 = xy_to_angle(x - h, y, false);
