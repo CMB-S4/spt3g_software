@@ -1,4 +1,5 @@
-from spt3g import core, coordinateutils
+from spt3g import core
+from spt3g.coordinateutils import G3SkyMapWeights, WeightType
 import numpy as np
 
 @core.indexmod
@@ -18,7 +19,7 @@ def ConvertTMapsToPolarized(frame):
     frame['Q'] = np.zeros_like(frame['T'])
     frame['U'] = np.zeros_like(frame['T'])
 
-    wgt_out = coordinateutils.G3SkyMapWeights(frame['T'], weight_type=coordinateutils.WeightType.Wpol)
+    wgt_out = G3SkyMapWeights(frame['T'], weight_type=WeightType.Wpol)
     wgt_out.TT = wgt
     wgt_out.TQ = np.zeros_like(wgt)
     wgt_out.TU = np.zeros_like(wgt)
@@ -41,7 +42,7 @@ def ConvertPolarizedMapsToT(frame):
     del frame['Q']
     del frame['U']
 
-    wgt_out = coordinateutils.G3SkyMapWeights(frame['T'], weight_type=coordinateutils.WeightType.Wunpol)
+    wgt_out = G3SkyMapWeights(frame['T'], weight_type=WeightType.Wunpol)
     wgt_out.TT = wgt
 
     frame['Wunpol'] = wgt_out
