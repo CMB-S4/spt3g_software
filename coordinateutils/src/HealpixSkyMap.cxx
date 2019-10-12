@@ -48,7 +48,11 @@ HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool is_weighted,
 			    "nside");
 			throw bp::error_already_set();
 		}
+#if PY_MAJOR_VERSION < 3
+		nside_ = PyLong_AsUnsignedLong(PyTuple_GetItem(v.ptr(), 2));
+#else
 		nside_ = PyLong_AsSize_t(PyTuple_GetItem(v.ptr(), 2));
+#endif
 
 		if (PyObject_GetBuffer(PyTuple_GetItem(v.ptr(), 0), &indexview,
 		    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) == -1)
