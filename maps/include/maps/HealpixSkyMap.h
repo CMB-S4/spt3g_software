@@ -37,8 +37,8 @@ public:
 
 	~HealpixSkyMap();
 
-        double operator [] (size_t i) const override;
-        double &operator [] (size_t i) override;
+	double operator [] (size_t i) const override;
+	double &operator [] (size_t i) override;
 
 	// +
 	virtual G3SkyMap &operator+=(const G3SkyMap &rhs) override;
@@ -144,7 +144,7 @@ private:
 G3_POINTERS(HealpixSkyMap);
 
 namespace cereal {
-  template <class A> struct specialize<A, HealpixSkyMap, cereal::specialization::member_load_save> {};
+	template <class A> struct specialize<A, HealpixSkyMap, cereal::specialization::member_load_save> {};
 }
 
 G3_SERIALIZABLE(HealpixSkyMap, 2);

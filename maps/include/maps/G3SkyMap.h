@@ -97,7 +97,7 @@ public:
 	    std::vector<double> & alphas, std::vector<double> & deltas) const;
 
 	virtual std::vector<double> pixel_to_angle(size_t pixel) const = 0;
-	virtual size_t angle_to_pixel(double alpha, double delta) const  = 0;
+	virtual size_t angle_to_pixel(double alpha, double delta) const = 0;
 
 	// Rebinning and interpolation
 	virtual void get_rebin_angles(long pixel, size_t scale,
@@ -385,7 +385,7 @@ public:
 				return false;
 			if (!(weights->IsCongruent()))
 				return false;
-                }
+		}
 		if (IsPolarized())
 			return T->IsCompatible(*Q) && T->IsCompatible(*U);
 		return true;

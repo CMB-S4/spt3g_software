@@ -413,9 +413,9 @@ FlatSkyMap::operator *=(double b)
 	}
 
 	if (dense_)
-		(*dense_) *=  b;
+		(*dense_) *= b;
 	else if (sparse_)
-		(*sparse_) *=  b;
+		(*sparse_) *= b;
 	return *this;
 }
 
@@ -707,28 +707,28 @@ static double
 flatskymap_getitem_1d(const G3SkyMap &skymap, size_t i)
 {
 
-        if (i < 0)
-                i = skymap.size() + i;
-        if (size_t(i) >= skymap.size()) {
-                PyErr_SetString(PyExc_IndexError, "Index out of range");
-                bp::throw_error_already_set();
-        }
+	if (i < 0)
+		i = skymap.size() + i;
+	if (size_t(i) >= skymap.size()) {
+		PyErr_SetString(PyExc_IndexError, "Index out of range");
+		bp::throw_error_already_set();
+	}
 
-        return skymap[i];
+	return skymap[i];
 }
 
 static void
 flatskymap_setitem_1d(G3SkyMap &skymap, size_t i, double val)
 {
 
-        if (i < 0)
-                i = skymap.size() + i;
-        if (size_t(i) >= skymap.size()) {
-                PyErr_SetString(PyExc_IndexError, "Index out of range");
-                bp::throw_error_already_set();
-        }
+	if (i < 0)
+		i = skymap.size() + i;
+	if (size_t(i) >= skymap.size()) {
+		PyErr_SetString(PyExc_IndexError, "Index out of range");
+		bp::throw_error_already_set();
+	}
 
-        skymap[i] = val;
+	skymap[i] = val;
 }
 
 static bool
@@ -758,24 +758,24 @@ flatskymap_nonzeropixels(const FlatSkyMap &m)
 }
 
 #define FLAT_SKY_MAP_DOCSTR \
-        "FlatSkyMap is a G3SkyMap with the extra meta information about the" \
+	"FlatSkyMap is a G3SkyMap with the extra meta information about the" \
 	" particular flat sky projection included.  In practice it behaves\n" \
 	" (mostly) like a 2d numpy array.\n\n"				\
-        "Meta Information Stored: \n\n" \
-        "    x_len (int) x (ra/az)  dimension length \n\n" \
-        "    y_len (int) y (dec/el) dimension  length \n\n" \
-        "    alpha_center : (double)  Ra (or Az) of the center of the map \n\n" \
-        "    delta_center : (double)  Dec (or El) of the center of the map \n\n" \
-        "    res : (double) approximate resolution of the pixel\n" \
+	"Meta Information Stored: \n\n" \
+	"    x_len (int) x (ra/az)  dimension length \n\n" \
+	"    y_len (int) y (dec/el) dimension  length \n\n" \
+	"    alpha_center : (double)  Ra (or Az) of the center of the map \n\n" \
+	"    delta_center : (double)  Dec (or El) of the center of the map \n\n" \
+	"    res : (double) approximate resolution of the pixel\n" \
 	"    (the actual shape of a pixel is projection dependent)\n\n"	\
-        "    proj : (MapProjection)  proj is a MapProjection enum that specifies\n"\
+	"    proj : (MapProjection)  proj is a MapProjection enum that specifies\n"\
 	"    the flat sky projection \n\n"	\
-        "\n\n" \
-        "The other meta information is inherited from G3SkyMap that lives in core. \n\n" \
-        "For reasons (skymap __setitem__ has to handle both 1d and 2d \n"\
+	"\n\n" \
+	"The other meta information is inherited from G3SkyMap that lives in core. \n\n" \
+	"For reasons (skymap __setitem__ has to handle both 1d and 2d \n"\
 	" semantics) the FlatSkyMap has a slightly unintuitive way of \n"\
 	" setting values when using a slicing operator.  Instead of being\n"\
-	" able to  slice directly you need to cast it to be an array first: \n\n" \
+	" able to slice directly you need to cast it to be an array first: \n\n" \
 	"    np.asarray(your_flat_sky_map)[:] = the_numpy_array_you_are_assigning\n\n\n"\
 	"If you find that you need numpy functionality from a FlatSkyMap,\n"\
 	" using np.asarray will convert it to a numpy array without copying the data.\n" \
@@ -812,7 +812,7 @@ PYBINDINGS("maps")
 	       double, double, MapCoordReference, G3Timestream::TimestreamUnits,
 	       G3SkyMap::MapPolType, double, double, double>(
 		  (bp::arg("obj"), bp::arg("res"),
-	           bp::args("is_weighted") = true,
+		   bp::args("is_weighted") = true,
 		   bp::arg("proj") = MapProjection::ProjNone,
 		   bp::arg("alpha_center") = 0, bp::arg("delta_center") = 0,
 		   bp::arg("coord_ref") = MapCoordReference::Equatorial,

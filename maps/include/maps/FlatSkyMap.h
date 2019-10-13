@@ -51,12 +51,12 @@ public:
 
 	~FlatSkyMap();
 
-        double operator [] (size_t i) const override;
-        double &operator [] (size_t i) override;
+	double operator [] (size_t i) const override;
+	double &operator [] (size_t i) override;
 
-        double operator () (size_t x, size_t y) const;
-        double &operator () (size_t x, size_t y);
-        double at(size_t x, size_t y) const { return (*this)(x, y); }
+	double operator () (size_t x, size_t y) const;
+	double &operator () (size_t x, size_t y);
+	double at(size_t x, size_t y) const { return (*this)(x, y); }
 
 	// +
 	virtual G3SkyMap &operator+=(const G3SkyMap &rhs) override;
@@ -105,7 +105,7 @@ public:
 
 	size_t angle_to_pixel(double alpha, double delta) const override;
 	std::vector<double> pixel_to_angle(size_t pixel) const override;
-        std::vector<double> pixel_to_angle(size_t x_pix, size_t y_pix) const;
+	std::vector<double> pixel_to_angle(size_t x_pix, size_t y_pix) const;
 	std::vector<double> pixel_to_angle_wrap_ra(size_t pixel) const;
 	std::vector<double> angle_to_xy(double alpha, double delta) const;
 	std::vector<double> xy_to_angle(double x, double y) const;
@@ -178,7 +178,7 @@ private:
 G3_POINTERS(FlatSkyMap);
 
 namespace cereal {
-  template <class A> struct specialize<A, FlatSkyMap, cereal::specialization::member_load_save> {};
+	template <class A> struct specialize<A, FlatSkyMap, cereal::specialization::member_load_save> {};
 }
 
 G3_SERIALIZABLE(FlatSkyMap, 3);

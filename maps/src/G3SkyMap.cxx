@@ -509,9 +509,9 @@ double MuellerMatrix::cond() const
 
 	MuellerMatrix Q;
 	Q.tt = Q.qq = Q.uu = q;
-        MuellerMatrix B = *this;
-        B -= Q;
-        B /= p;
+	MuellerMatrix B = *this;
+	B -= Q;
+	B /= p;
 	double r = B.det() / 2.0;
 
 	double phi;
@@ -576,7 +576,7 @@ void G3SkyMapWithWeights::ApplyWeights(G3SkyMapWeightsPtr w)
 	g3_assert(w->IsCongruent());
 	g3_assert(T->IsCompatible(*(w->TT)));
 
-        if (IsPolarized()) {
+	if (IsPolarized()) {
 		for (size_t pix = 0; pix < T->size(); pix++) {
 			StokesVector v = this->at(pix);
 			if (!(v.t == 0 && v.q == 0 && v.u == 0))
@@ -702,7 +702,7 @@ PYBINDINGS("maps") {
 	    .add_property("npix_allocated", &G3SkyMap::npix_allocated,
 	      "Number of pixels in map currently stored in memory")
 	    .def_readwrite("overflow", &G3SkyMap::overflow,
-              "Combined value of data processed by "
+	      "Combined value of data processed by "
 	      "the map maker but outside of the map area")
 	    .def("__getitem__", &skymap_getitem)
 	    .def("__setitem__", &skymap_setitem)
@@ -771,8 +771,7 @@ PYBINDINGS("maps") {
 
 	EXPORT_FRAMEOBJECT(G3SkyMapWeights, init<>(), "generic sky weight")
 	    .def(bp::init<G3SkyMapConstPtr, bool>(
-	      (bp::arg("skymap"),
-               bp::arg("ispolarized") = true)))
+	      (bp::arg("skymap"), bp::arg("ispolarized") = true)))
 	    .def_readwrite("TT",&G3SkyMapWeights::TT)
 	    .def_readwrite("TQ",&G3SkyMapWeights::TQ)
 	    .def_readwrite("TU",&G3SkyMapWeights::TU)
@@ -805,9 +804,9 @@ PYBINDINGS("maps") {
 	EXPORT_FRAMEOBJECT(G3SkyMapWithWeights, init<>(), "Container for (potentially) polarized maps and weights")
 	    .def(bp::init<G3SkyMapPtr, bool, bool, std::string>(
 	      (bp::arg("stub_map"),
-               bp::arg("isweighted"),
-               bp::arg("ispolarized"),
-               bp::arg("map_id") = "")))
+	       bp::arg("isweighted"),
+	       bp::arg("ispolarized"),
+	       bp::arg("map_id") = "")))
 	    .def_readwrite("T",&G3SkyMapWithWeights::T)
 	    .def_readwrite("Q",&G3SkyMapWithWeights::Q)
 	    .def_readwrite("U",&G3SkyMapWithWeights::U)

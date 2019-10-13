@@ -1087,7 +1087,7 @@ PYBINDINGS("maps")
 	    .def_pickle(g3frameobject_picklesuite<HealpixSkyMap>())
 	    .def(bp::init<size_t, bool, bool, MapCoordReference,
 	       G3Timestream::TimestreamUnits, G3SkyMap::MapPolType, bool>(
-	         (bp::arg("nside"),
+		 (bp::arg("nside"),
 		  bp::args("is_weighted") = true,
 		  bp::args("is_nested") = false,
 		  bp::arg("coord_ref") = MapCoordReference::Equatorial,
