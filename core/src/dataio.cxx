@@ -18,7 +18,7 @@
 
 void
 g3_istream_from_path(boost::iostreams::filtering_istream &stream,
-                     const std::string &path, float timeout)
+    const std::string &path, float timeout)
 {
 	stream.reset();
 	if (boost::algorithm::ends_with(path, ".gz"))

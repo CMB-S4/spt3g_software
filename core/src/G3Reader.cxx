@@ -72,16 +72,22 @@ void G3Reader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 
 	// For python threaded contexts, release the GIL while
 	// blocking for data (which can occur on stream.peek as well
-	// as load(stream_)).  All paths out of this function must
-	// reacquire the lock!
-	PyThreadState *_save = PyEval_SaveThread();
+	// as load(stream_)).  Only do this if we're actually in a
+	// Python interpreter (pure C++ applications will fail the
+	// Py_IsInitialized test).  Make sure all paths out of this
+	// function reacquire the lock, if it was released.
+	PyThreadState *_save = nullptr;
+	if (Py_IsInitialized())
+		_save = PyEval_SaveThread();
+
 	if (stream_.peek() == EOF) {
 		if (filename_.size() > 0) {
 			StartFile(filename_.front());
 			filename_.pop_front();
 		} else {
 			// Stop processing
-			PyEval_RestoreThread(_save);
+			if (_save != nullptr)
+				PyEval_RestoreThread(_save);
 			return;
 		}
 	}
@@ -91,10 +97,12 @@ void G3Reader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	} catch (...) {
 		log_error("Exception raised while reading file %s",
 		    cur_file_.c_str());
-		PyEval_RestoreThread(_save);
+		if (_save != nullptr)
+			PyEval_RestoreThread(_save);
 		throw;
 	}
-        PyEval_RestoreThread(_save);
+	if (_save != nullptr)
+		PyEval_RestoreThread(_save);
 
 	out.push_back(frame);
 	n_frames_read_++;
