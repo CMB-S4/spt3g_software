@@ -211,15 +211,20 @@ public:
 	static void CallRegistrarsFor(const char *mod);
 };
 
-#define EXPORT_G3MODULE(mod, T, init, docstring) \
+#define EXPORT_G3MODULE_AND(mod, T, init, docstring, other_defs)   \
 	static void registerfunc##T() { \
 		using namespace boost::python; \
 		class_<T, bases<G3Module>, boost::shared_ptr<T>, \
 		  boost::noncopyable>(#T, docstring, init) \
 		    .def_readonly("__g3module__", true) \
+                other_defs \
 		; \
 	} \
 	static G3ModuleRegistrator register##T(mod, registerfunc##T);
+
+#define EXPORT_G3MODULE(mod, T, init, docstring) \
+    EXPORT_G3MODULE_AND(mod, T, init, docstring, )
+
 
 #define PYBINDINGS(mod) \
 	static void ___pybindings_registerfunc(); \
