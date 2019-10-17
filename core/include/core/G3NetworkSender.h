@@ -12,6 +12,7 @@ public:
 	G3NetworkSender(std::string hostname, int port, int max_queue_size);
 	virtual ~G3NetworkSender();
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
+	void Close(void);
 private:
 	int fd_;
 	int max_queue_size_;

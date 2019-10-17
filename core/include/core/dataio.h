@@ -9,7 +9,7 @@
 // read files from disk, and from network sockets
 
 void g3_istream_from_path(boost::iostreams::filtering_istream &stream,
-    const std::string &path);
+    const std::string &path, float timeout=-1.0);
 
 #endif
 

@@ -3,6 +3,9 @@ if(POLICY CMP0060) # Avoid cmake misfeature that can link the wrong libraries
 	cmake_policy(SET CMP0060 NEW)
 endif()
 cmake_policy(SET CMP0012 NEW) # Allow use of true in boolean expressions
+if(POLICY CMP0042) # Enable RPATH on OSX
+	cmake_policy(SET CMP0042 NEW)
+endif()
 
 project(spt3g)
 enable_testing()
