@@ -107,7 +107,7 @@ macro(link_python_dir)
 	endif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/python)
 endmacro(link_python_dir)
 macro(add_spt3g_test test_name)
-	add_test(${PROJECT}/${test_name} ${CMAKE_CURRENT_SOURCE_DIR}/tests/${test_name}.py)
+	add_test(${PROJECT}/${test_name} ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/${test_name}.py)
 
     set (extra_macro_args ${ARGN})
     list(LENGTH extra_macro_args num_extra_args)
