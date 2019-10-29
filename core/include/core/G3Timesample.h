@@ -16,8 +16,8 @@ class G3TimesampleMap : public G3MapFrameObject {
 	// properly.
 public:
 	G3VectorTime times;
-	const G3TimesampleMap Concatenate(const G3TimesampleMap other);
-	bool Check();
+	G3TimesampleMap Concatenate(const G3TimesampleMap &other) const;
+	bool Check() const;
 
 	string Description() const;
 	string Summary() const;

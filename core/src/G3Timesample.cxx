@@ -5,43 +5,57 @@
 
 #include <container_pybindings.h>
 #include <G3Timesample.h>
-//#include <exceptions.h>
 
-// Templates for vector operations.  g3vectype might be, for example,
-// G3VectorDouble.  One could go all the way and SFINAE this... but
-// perhaps not everything should require a black belt.
 
+// Templates for vector operations.  These work on any std::vector,
+// and thus on any G3Vector.
+
+// Returns the vector size if the type matches, and -1 otherwise.
 template <typename g3vectype>
 inline
-int g3_vect_size(const G3FrameObjectPtr vp)
+ssize_t vect_size(const G3FrameObjectPtr &vp)
 {
 	auto v = boost::dynamic_pointer_cast<const g3vectype>(vp);
 	return v == nullptr ? -1 : v->size();
 }
 
-template <typename g3vectype>
+// Concatenates two compatible vectors.
+template <typename vectype>
 inline
-void g3_concat(g3vectype &output, const g3vectype &src1, const g3vectype &src2)
+vectype vect_concat(const vectype &src1, const vectype &src2)
 {
-	auto dest = output.begin();
-	for (auto p1: src1)
-		*(dest++) = p1;
-	for (auto p2: src2)
-		*(dest++) = p2;
+	vectype output;
+	output.reserve(src1.size() + src2.size());
+	output.insert(output.end(), src1.begin(), src1.end());
+	output.insert(output.end(), src2.begin(), src2.end());
+	return output;
 }
 
+// This returns the length of the vector if it's a valid type (within
+// the context of G3Timesample).  For invalid types, it returns -1.
+inline
+ssize_t g3_vect_test_and_size(const G3FrameObjectPtr &vp)
+{
+	ssize_t vsize = -1;
+	if ((vsize = vect_size<G3VectorDouble>(vp)) < 0 &&
+	    (vsize = vect_size<G3VectorInt   >(vp)) < 0 &&
+	    (vsize = vect_size<G3VectorString>(vp)) < 0)
+		return -1;
+	return vsize;
+}
+
+// Concatenates two compatible vectors and returns the result.
+// Returns nullptr on any incompatibility.
 template <typename g3vectype>
 inline
-G3FrameObjectPtr test_and_concat(const G3FrameObjectPtr src1, const G3FrameObjectPtr src2)
+G3FrameObjectPtr test_and_concat(const G3FrameObjectPtr &src1, const G3FrameObjectPtr &src2)
 {
 	auto v1 = boost::dynamic_pointer_cast<const g3vectype>(src1);
 	auto v2 = boost::dynamic_pointer_cast<const g3vectype>(src2);
 	if (v1 == nullptr || v2 == nullptr)
 		return nullptr;
-	boost::shared_ptr<g3vectype> outputp(new g3vectype());
-	outputp->resize(v1->size() + v2->size());
-	g3_concat(*outputp, *v1, *v2);
-	return outputp;
+	auto output = vect_concat(*v1, *v2);
+	return boost::shared_ptr<g3vectype>(new g3vectype(output));
 }
 
 
@@ -72,22 +86,16 @@ template <class A> void G3TimesampleMap::serialize(A &ar, unsigned v)
 	ar & make_nvp("times", times);
 }
 
-bool G3TimesampleMap::Check()
+bool G3TimesampleMap::Check() const
 {
 	int n = times.size();
 
-	// How to polymorph?  This is how.
 	for (auto item = begin(); item != end(); ++item) {
 		auto name = item->first;
 		auto el = item->second;
 
-		int check_type = 0;
-		int check_len = -1;
-
-		// Try to get a length...
-		if ((check_len = g3_vect_size<G3VectorDouble>(el)) < 0 &&
-		    (check_len = g3_vect_size<G3VectorInt   >(el)) < 0 &&
-		    (check_len = g3_vect_size<G3VectorString>(el)) < 0) {
+		int check_len;
+		if ((check_len = g3_vect_test_and_size(el)) < 0) {
 			std::ostringstream s;
 			s << "Vector type not supported for key: " << name << "\n";
 			throw g3timesample_exception(s.str());
@@ -102,8 +110,7 @@ bool G3TimesampleMap::Check()
 	return true;
 }
 
-const
-G3TimesampleMap G3TimesampleMap::Concatenate(const G3TimesampleMap other)
+G3TimesampleMap G3TimesampleMap::Concatenate(const G3TimesampleMap &other) const
 {
 	// Check that all keys in other are in this.
 	for (auto item = other.begin(); item != other.end(); ++item) {
@@ -116,8 +123,7 @@ G3TimesampleMap G3TimesampleMap::Concatenate(const G3TimesampleMap other)
 
 	int n_cat = times.size() + other.times.size();
 	G3TimesampleMap output;
-	output.times.resize(n_cat);
-	g3_concat(output.times, times, other.times);
+	output.times = vect_concat(times, other.times);
 
 	for (auto item = begin(); item != end(); ++item) {
 		auto oitem = other.find(item->first);
@@ -148,6 +154,48 @@ G3TimesampleMap G3TimesampleMap::Concatenate(const G3TimesampleMap other)
 }
 
 
+// Safety-ized for python.
+
+static
+void safe_set_item(G3TimesampleMap &self, std::string key, G3FrameObjectPtr value)
+{
+	int check_len = g3_vect_test_and_size(value);
+	if (check_len < 0) {
+		std::ostringstream s;
+		s << "Cannot add member (" << key << "): "
+		  << "not a supported vector type.";
+		throw g3timesample_exception(s.str());
+	}
+	if (check_len != self.times.size()) {
+		std::ostringstream s;
+		s << "Cannot add member (" << key << "): "
+		  << "not the same length as .times.";
+		throw g3timesample_exception(s.str());
+	}
+	self[key] = value;
+}
+
+static
+void safe_set_times(G3TimesampleMap &self, G3VectorTime _times)
+{
+	// Only allow this if it doesn't upset consistency.  We will
+	// assume that, coming in, we're internally consistent.
+	if (_times.size() != self.times.size() && self.size() != 0) {
+		std::ostringstream s;
+		s << "Cannot set .times because it conflicts with "
+		  << "the established number of samples (" << self.times.size() << ").";
+		throw g3timesample_exception(s.str());
+	}
+	self.times = _times;
+}
+
+static
+G3VectorTime safe_get_times(const G3TimesampleMap &self)
+{
+	return self.times;
+}
+
+
 G3_SERIALIZABLE_CODE(G3TimesampleMap);
 
 static void translate_ValueError(g3timesample_exception const& e)
@@ -168,9 +216,10 @@ PYBINDINGS("core")
               "co-sampled vectors with a single set of (irregular) timestamps.")
 	.def(bp::init<const G3TimesampleMap &>())
 	.def(bp::std_map_indexing_suite<G3TimesampleMap, true>())
+	.def("__setitem__", &safe_set_item)
 	.def_pickle(g3frameobject_picklesuite<G3TimesampleMap>())
 	// Extensions for G3TimesampleMap are here:
-	.def_readwrite("times", &G3TimesampleMap::times, "Timestamp vector.")
+	.add_property("times", &safe_get_times, &safe_set_times, "Times vector.")
 	.def("Check", &G3TimesampleMap::Check, "Check for internal "
           "consistency.  Raises ValueError if there are problems.")
 	.def("Concatenate", &G3TimesampleMap::Concatenate,

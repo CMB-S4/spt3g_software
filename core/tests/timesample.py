@@ -23,24 +23,37 @@ def get_test_block(length, keys, offset=0):
     return m
 
 
-class TestIrregBlock(unittest.TestCase):
+class TestTimesampleMap(unittest.TestCase):
     def test_00_internal_checks(self):
         # Valid block.
         m = get_test_block(100, ['x', 'y', 'z'])
         m.Check()
 
-        # Construct invalid blocks.
-        m = core.G3TimesampleMap()
-        t0 = core.G3Time('2019-01-01T12:30:00')
-        m.times = core.G3VectorTime([t0, t0 + 10*SEC, t0 + 20*SEC])
-        m['x'] = core.G3VectorDouble([1, 2])
+    def test_10_safety(self):
+        m0 = get_test_block(100, ['x', 'y', 'z'])
+        m1 = get_test_block(101, ['x', 'y', 'z'])
+        # Try to add an incompatible element.
         with self.assertRaises(ValueError):
-            m.Check()
+            m0.times = m1.times
+        with self.assertRaises(ValueError):
+            m0['A'] = m1['x']
+        # But we should be able to change times in an empty vector.
+        m0 = get_test_block(100, [])
+        m1 = get_test_block(101, ['x', 'y', 'z'])
+        m0.times = m1.times
+        m0['x'] = m1['x']
 
-    def test_10_concat(self):
+    def test_20_concat(self):
         # Test concatenation.
         key_list = ['x', 'y', 'z']
         m0 = get_test_block(100, key_list)
+        m1 = get_test_block(200, key_list, offset=100)
+        m01 = m0.Concatenate(m1)
+        self.assertTrue(np.all(
+            np.hstack([np.array(m0.times), np.array(m1.times)]) == np.array(m01.times)))
+        for k in key_list:
+            self.assertTrue(np.all(
+                np.hstack([np.array(m0[k]), np.array(m1[k])]) == np.array(m01[k])))
         for fail_vec in [
                 get_test_block(200, key_list + ['extra'], 100),
                 get_test_block(200, key_list[:-1], 100),
@@ -48,7 +61,7 @@ class TestIrregBlock(unittest.TestCase):
             with self.assertRaises(ValueError):
                 m0.Concatenate(fail_vec)
 
-    def test_20_serialization(self):
+    def test_30_serialization(self):
         m0 = get_test_block(100, ['x', 'y', 'z', 'A'])
         m1 = get_test_block(200, ['x', 'y', 'z', 'A'], 100)
         m2 = m0.Concatenate(m1)
