@@ -22,13 +22,12 @@ ssize_t vect_size(const G3FrameObjectPtr &vp)
 // Concatenates two compatible vectors.
 template <typename vectype>
 inline
-vectype vect_concat(const vectype &src1, const vectype &src2)
+void vect_concat(vectype &dest, const vectype &src1, const vectype &src2)
 {
-	vectype output;
-	output.reserve(src1.size() + src2.size());
-	output.insert(output.end(), src1.begin(), src1.end());
-	output.insert(output.end(), src2.begin(), src2.end());
-	return output;
+	dest.clear();
+	dest.reserve(src1.size() + src2.size());
+	dest.insert(dest.end(), src1.begin(), src1.end());
+	dest.insert(dest.end(), src2.begin(), src2.end());
 }
 
 // This returns the length of the vector if it's a valid type (within
@@ -48,14 +47,16 @@ ssize_t g3_vect_test_and_size(const G3FrameObjectPtr &vp)
 // Returns nullptr on any incompatibility.
 template <typename g3vectype>
 inline
-G3FrameObjectPtr test_and_concat(const G3FrameObjectPtr &src1, const G3FrameObjectPtr &src2)
+G3FrameObjectPtr test_and_concat(const G3FrameObjectPtr &src1,
+				 const G3FrameObjectPtr &src2)
 {
 	auto v1 = boost::dynamic_pointer_cast<const g3vectype>(src1);
 	auto v2 = boost::dynamic_pointer_cast<const g3vectype>(src2);
 	if (v1 == nullptr || v2 == nullptr)
 		return nullptr;
-	auto output = vect_concat(*v1, *v2);
-	return boost::shared_ptr<g3vectype>(new g3vectype(output));
+	auto output = boost::shared_ptr<g3vectype>(new g3vectype());
+	vect_concat(*output, *v1, *v2);
+	return output;
 }
 
 
@@ -123,7 +124,7 @@ G3TimesampleMap G3TimesampleMap::Concatenate(const G3TimesampleMap &other) const
 
 	int n_cat = times.size() + other.times.size();
 	G3TimesampleMap output;
-	output.times = vect_concat(times, other.times);
+	vect_concat(output.times, times, other.times);
 
 	for (auto item = begin(); item != end(); ++item) {
 		auto oitem = other.find(item->first);
@@ -157,7 +158,8 @@ G3TimesampleMap G3TimesampleMap::Concatenate(const G3TimesampleMap &other) const
 // Safety-ized for python.
 
 static
-void safe_set_item(G3TimesampleMap &self, std::string key, G3FrameObjectPtr value)
+void safe_set_item(G3TimesampleMap &self, const std::string key,
+		   G3FrameObjectPtr value)
 {
 	int check_len = g3_vect_test_and_size(value);
 	if (check_len < 0) {
@@ -183,16 +185,11 @@ void safe_set_times(G3TimesampleMap &self, G3VectorTime _times)
 	if (_times.size() != self.times.size() && self.size() != 0) {
 		std::ostringstream s;
 		s << "Cannot set .times because it conflicts with "
-		  << "the established number of samples (" << self.times.size() << ").";
+		  << "the established number of samples (" << self.times.size()
+		  << ").";
 		throw g3timesample_exception(s.str());
 	}
 	self.times = _times;
-}
-
-static
-G3VectorTime safe_get_times(const G3TimesampleMap &self)
-{
-	return self.times;
 }
 
 
@@ -219,7 +216,8 @@ PYBINDINGS("core")
 	.def("__setitem__", &safe_set_item)
 	.def_pickle(g3frameobject_picklesuite<G3TimesampleMap>())
 	// Extensions for G3TimesampleMap are here:
-	.add_property("times", &safe_get_times, &safe_set_times, "Times vector.")
+	.add_property("times", &G3TimesampleMap::times, &safe_set_times,
+	  "Times vector.  Setting this stores a copy, but getting returns a reference.")
 	.def("Check", &G3TimesampleMap::Check, "Check for internal "
           "consistency.  Raises ValueError if there are problems.")
 	.def("Concatenate", &G3TimesampleMap::Concatenate,
