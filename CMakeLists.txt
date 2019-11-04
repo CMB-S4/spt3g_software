@@ -28,7 +28,7 @@ else()
 	message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler (GCC > 4.7, Clang).")
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-unknown-warning-option -Wno-unused -Wno-unused-result -Wno-deprecated-register -Wno-sign-compare -Werror -Wno-constant-conversion -Wno-self-assign-overloaded")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-unknown-warning-option -Wno-unused -Wno-unused-result -Wno-deprecated-register -Wno-sign-compare -Werror -Wno-constant-conversion -Wno-self-assign-overloaded -Wno-deprecated-declarations")
 
 # Fix bugs in GCC 4.4's strict aliasing code by turning it off
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
