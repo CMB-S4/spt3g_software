@@ -30,13 +30,13 @@
 #ifndef CEREAL_TYPES_POLYMORPHIC_HPP_
 #define CEREAL_TYPES_POLYMORPHIC_HPP_
 
-#include <cereal/cereal.hpp>
-#include <cereal/types/memory.hpp>
+#include "cereal/cereal.hpp"
+#include "cereal/types/memory.hpp"
 
-#include <cereal/details/util.hpp>
-#include <cereal/details/helpers.hpp>
-#include <cereal/details/traits.hpp>
-#include <cereal/details/polymorphic_impl.hpp>
+#include "cereal/details/util.hpp"
+#include "cereal/details/helpers.hpp"
+#include "cereal/details/traits.hpp"
+#include "cereal/details/polymorphic_impl.hpp"
 
 #ifdef _MSC_VER
 #define CEREAL_STATIC_CONSTEXPR static
@@ -165,17 +165,19 @@
     See CEREAL_REGISTER_DYNAMIC_INIT for detailed explanation
     of how this macro should be used.  The name used should
     match that for CEREAL_REGISTER_DYNAMIC_INIT. */
-#define CEREAL_FORCE_DYNAMIC_INIT(LibName)              \
-  namespace cereal {                                    \
-  namespace detail {                                    \
-    void dynamic_init_dummy_##LibName();                \
-  } /* end detail */                                    \
-  namespace {                                           \
-    void dynamic_init_##LibName()                       \
-    {                                                   \
-      ::cereal::detail::dynamic_init_dummy_##LibName(); \
-    }                                                   \
-  } } /* end namespaces */
+#define CEREAL_FORCE_DYNAMIC_INIT(LibName)                 \
+  namespace cereal {                                       \
+  namespace detail {                                       \
+    void CEREAL_DLL_EXPORT dynamic_init_dummy_##LibName(); \
+  } /* end detail */                                       \
+  } /* end cereal */                                       \
+  namespace {                                              \
+    struct dynamic_init_##LibName {                        \
+      dynamic_init_##LibName() {                           \
+        ::cereal::detail::dynamic_init_dummy_##LibName();  \
+      }                                                    \
+    } dynamic_init_instance_##LibName;                     \
+  } /* end anonymous namespace */
 
 namespace cereal
 {

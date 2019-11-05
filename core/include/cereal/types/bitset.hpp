@@ -30,8 +30,8 @@
 #ifndef CEREAL_TYPES_BITSET_HPP_
 #define CEREAL_TYPES_BITSET_HPP_
 
-#include <cereal/cereal.hpp>
-#include <cereal/types/string.hpp>
+#include "cereal/cereal.hpp"
+#include "cereal/types/string.hpp"
 #include <bitset>
 
 namespace cereal
@@ -67,7 +67,7 @@ namespace cereal
       if( bits[i] )
         chunk |= mask;
 
-      mask >>= 1;
+      mask = static_cast<std::uint8_t>(mask >> 1);
 
       // output current chunk when mask is empty (8 bits)
       if( mask == 0 )
@@ -148,6 +148,8 @@ namespace cereal
         std::uint8_t chunk = 0;
         std::uint8_t mask  = 0;
 
+        bits.reset();
+
         // Load one chunk at a time, rotating through the chunk
         // to set bits in the bitset
         for( std::size_t i = 0; i < N; ++i )
@@ -161,7 +163,7 @@ namespace cereal
           if( chunk & mask )
             bits[i] = 1;
 
-          mask >>= 1;
+          mask = static_cast<std::uint8_t>(mask >> 1);
         }
         break;
       }
