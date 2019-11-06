@@ -17,11 +17,8 @@ add_spt3g_library(core SHARED
 	src/G3PipelineInfo.cxx src/G3Quat.cxx
 )
 
-# Ignore known warnings
-target_compile_options(core PUBLIC -Wno-unknown-warning-option -Wno-unused -Wno-unused-result -Wno-deprecated-register -Wno-sign-compare -Wno-constant-conversion -Wno-self-assign-overloaded -Wno-deprecated-declarations)
-
-# Fix bugs in GCC 4.4's strict aliasing code by turning it off
-target_compile_options(core PUBLIC -fno-strict-aliasing)
+# Link dependencies
+target_link_libraries(core spt3g)
 
 # Make core includes available without directories
 target_include_directories(core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/core)
@@ -33,49 +30,6 @@ if(FLAC_FOUND)
 	target_include_directories(core PRIVATE ${FLAC_INCLUDE_DIR})
 	target_link_libraries(core ${FLAC_LIBRARIES})
 endif()
-
-# Boost bits we need
-find_package(PythonInterp)
-find_package(PythonLibs ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
-
-set(Boost_USE_STATIC_LIBS OFF)
-set(Boost_USE_MULTITHREADED ON)
-set(Boost_USE_STATIC_RUNTIME OFF)
-set(Boost_NO_BOOST_CMAKE ON)
-
-if(NOT DEFINED Boost_PYTHON_TYPE)
-	set(Boost_PYTHON_TYPE python)
-
-	# Detect attempts to be clever with the naming of the Boost Python library
-	string(REGEX REPLACE ".*libpython([0-9])\\.[0-9]+.*\\..*" "\\1" PYTHONMAJORVER ${PYTHON_LIBRARIES})
-	string(REGEX REPLACE ".*libpython[0-9]\\.([0-9]+).*\\..*" "\\1" PYTHONMINORVER ${PYTHON_LIBRARIES})
-
-	# Hack for some old Boost CMake modules
-	set(_Boost_PYTHON${PYTHONMAJORVER}_HEADERS "boost/python.hpp")
-	set(_Boost_PYTHON${PYTHONMAJORVER}${PYTHONMINORVER}_HEADERS "boost/python.hpp")
-
-	find_package(Boost QUIET COMPONENTS python${PYTHONMAJORVER}${PYTHONMINORVER})
-	if (${Boost_PYTHON${PYTHONMAJORVER}${PYTHONMINORVER}_FOUND})
-		set(Boost_PYTHON_TYPE python${PYTHONMAJORVER}${PYTHONMINORVER})
-	else()
-		find_package(Boost QUIET COMPONENTS python${PYTHONMAJORVER})
-		if (${Boost_PYTHON${PYTHONMAJORVER}_FOUND})
-			set(Boost_PYTHON_TYPE python${PYTHONMAJORVER})
-		endif()
-	endif()
-endif()
-
-find_package(Boost COMPONENTS system iostreams filesystem ${Boost_PYTHON_TYPE} REQUIRED)
-if(Boost_VERSION EQUAL 104700 OR Boost_VERSION GREATER 104700)
-	set(Boost_GEOMETRY_AVAIL ON)
-	message(STATUS "Boost Geometry Available")
-endif()
-
-target_include_directories(core PUBLIC ${Boost_INCLUDE_DIR} ${PYTHON_INCLUDE_DIRS} ${PYTHON_INCLUDE_PATH})
-target_link_libraries(core pthread ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
-
-# Work around yet more bugs in GCC 4.4, this time with C++ 11 support
-target_compile_definitions(core PUBLIC -DBOOST_NO_CXX11_SMART_PTR=1)
 
 link_python_dir()
 

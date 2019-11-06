@@ -39,6 +39,58 @@ set(CMAKE_SHARED_LIBRARY_PREFIX "")
 # (use target-specific options to disable particular warnings)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror")
 
+# Interface library for flags and library dependencies
+add_library(spt3g INTERFACE)
+
+# Ignore known warnings
+target_compile_options(spt3g INTERFACE -Wno-unknown-warning-option -Wno-unused -Wno-unused-result -Wno-deprecated-register -Wno-sign-compare -Wno-constant-conversion -Wno-self-assign-overloaded -Wno-deprecated-declarations)
+
+# Fix bugs in GCC 4.4's strict aliasing code by turning it off
+target_compile_options(spt3g INTERFACE -fno-strict-aliasing)
+
+# Boost bits we need
+find_package(PythonInterp)
+find_package(PythonLibs ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
+
+set(Boost_USE_STATIC_LIBS OFF)
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
+set(Boost_NO_BOOST_CMAKE ON)
+
+if(NOT DEFINED Boost_PYTHON_TYPE)
+	set(Boost_PYTHON_TYPE python)
+
+	# Detect attempts to be clever with the naming of the Boost Python library
+	string(REGEX REPLACE ".*libpython([0-9])\\.[0-9]+.*\\..*" "\\1" PYTHONMAJORVER ${PYTHON_LIBRARIES})
+	string(REGEX REPLACE ".*libpython[0-9]\\.([0-9]+).*\\..*" "\\1" PYTHONMINORVER ${PYTHON_LIBRARIES})
+
+	# Hack for some old Boost CMake modules
+	set(_Boost_PYTHON${PYTHONMAJORVER}_HEADERS "boost/python.hpp")
+	set(_Boost_PYTHON${PYTHONMAJORVER}${PYTHONMINORVER}_HEADERS "boost/python.hpp")
+
+	find_package(Boost QUIET COMPONENTS python${PYTHONMAJORVER}${PYTHONMINORVER})
+	if (${Boost_PYTHON${PYTHONMAJORVER}${PYTHONMINORVER}_FOUND})
+		set(Boost_PYTHON_TYPE python${PYTHONMAJORVER}${PYTHONMINORVER})
+	else()
+		find_package(Boost QUIET COMPONENTS python${PYTHONMAJORVER})
+		if (${Boost_PYTHON${PYTHONMAJORVER}_FOUND})
+			set(Boost_PYTHON_TYPE python${PYTHONMAJORVER})
+		endif()
+	endif()
+endif()
+
+find_package(Boost COMPONENTS system iostreams filesystem ${Boost_PYTHON_TYPE} REQUIRED)
+if(Boost_VERSION EQUAL 104700 OR Boost_VERSION GREATER 104700)
+	set(Boost_GEOMETRY_AVAIL ON)
+	message(STATUS "Boost Geometry Available")
+endif()
+
+target_include_directories(spt3g INTERFACE ${Boost_INCLUDE_DIR} ${PYTHON_INCLUDE_DIRS} ${PYTHON_INCLUDE_PATH})
+target_link_libraries(spt3g INTERFACE pthread ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
+
+# Work around yet more bugs in GCC 4.4, this time with C++ 11 support
+target_compile_definitions(spt3g INTERFACE -DBOOST_NO_CXX11_SMART_PTR=1)
+
 # Shell script to set environment variables
 configure_file(${CMAKE_SOURCE_DIR}/cmake/env-shell.sh.in ${CMAKE_BINARY_DIR}/env-shell.sh @ONLY)
 
@@ -54,6 +106,7 @@ foreach(d ${cmake_projects})
 	set(SUBDIRS ${SUBDIRS} ${proj})
 endforeach(d ${cmake_projects})
 
+set(SPT3G_LIBRARIES spt3g)
 list(SORT SUBDIRS)
 foreach(subdir ${SUBDIRS})
 	get_filename_component(pname ${subdir} NAME_WE)
