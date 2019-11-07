@@ -28,6 +28,7 @@ endif()
 macro(link_openmp lib_name)
 	if (OPENMP_FOUND)
 		target_link_libraries(${lib_name} OpenMP::OpenMP_CXX)
+		target_compile_definitions(${lib_name} -DOPENMP_FOUND)
 	endif()
 endmacro(link_openmp lib_name)
 
