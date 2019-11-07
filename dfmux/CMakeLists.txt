@@ -7,7 +7,7 @@ else()
 	set(DFMUX_LIB_EXTRA_LIB "")
 endif()
 
-add_library(dfmux SHARED
+add_spt3g_library(dfmux SHARED
 	src/DfMuxBuilder.cxx src/DfMuxCollector.cxx src/DfMuxSample.cxx
 	src/LegacyDfMuxCollector.cxx src/HardwareMap.cxx src/DfMuxCollator.cxx
 	src/Housekeeping.cxx src/python.cxx

@@ -1,0 +1,14 @@
+set(SPT3G_SOURCE_DIR @CMAKE_SOURCE_DIR@)
+set(SPT3G_BUILD_DIR @CMAKE_BINARY_DIR@)
+
+set(SPT3G_INCLUDE_DIRS ${SPT3G_SOURCE_DIR}/core/include/core)
+foreach(lib @SPT3G_LIBRARIES@)
+	set(SPT3G_LIBRARIES ${SPT3G_LIBRARIES} spt3g::${lib})
+	set(SPT3G_INCLUDE_DIRS ${SPT3G_SOURCE_DIR}/${lib}/include)
+endforeach(lib @SPT3G_LIBRARIES@)
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SPT3G_BUILD_DIR}/cmake)
+include(Spt3gIncludes)
+include(Spt3gTargets)
+
+set(SPT3G_FOUND true)

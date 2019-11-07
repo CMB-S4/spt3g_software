@@ -1,4 +1,4 @@
-add_library(calibration SHARED
+add_spt3g_library(calibration SHARED
 	src/BoloProperties.cxx src/PointingProperties.cxx src/python.cxx
 )
 target_link_libraries(calibration core)

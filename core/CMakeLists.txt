@@ -1,12 +1,3 @@
-find_package(FLAC)
-
-if(FLAC_FOUND)
-	add_definitions(-DG3_HAS_FLAC)
-	include_directories(${FLAC_INCLUDE_DIR})
-else()
-	set(FLAC_LIBRARIES "")
-endif()
-
 # OS X has a broken implementatin of pthreads.
 if(APPLE)
 	set(CORE_EXTRA_SRCS src/ApplePthreadBarrier.cxx)
@@ -14,7 +5,7 @@ else(APPLE)
 	set(CORE_EXTRA_SRCS "")
 endif(APPLE)
 
-add_library(core SHARED
+add_spt3g_library(core SHARED
 	src/G3EventBuilder.cxx src/G3Frame.cxx src/G3TimeStamp.cxx
 	src/G3Pipeline.cxx src/G3Writer.cxx src/G3Reader.cxx src/python.cxx
 	src/G3InfiniteSource.cxx src/G3Logging.cxx src/G3PrintfLogger.cxx
@@ -25,8 +16,23 @@ add_library(core SHARED
 	src/G3NetworkSender.cxx src/G3SyslogLogger.cxx
 	src/G3PipelineInfo.cxx src/G3Quat.cxx
 )
-target_link_libraries(core pthread ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${FLAC_LIBRARIES})
+
+# Link dependencies
+target_link_libraries(core spt3g)
+
+# Make core includes available without directories
+target_include_directories(core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include/core)
+
+# Link against FLAC library
+find_package(FLAC)
+if(FLAC_FOUND)
+	target_compile_definitions(core PRIVATE -DG3_HAS_FLAC)
+	target_include_directories(core PRIVATE ${FLAC_INCLUDE_DIR})
+	target_link_libraries(core ${FLAC_LIBRARIES})
+endif()
+
 link_python_dir()
+
 execute_process(COMMAND ln -fsn ${CMAKE_CURRENT_SOURCE_DIR}/bin/spt3g-dump ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 execute_process(COMMAND ln -fsn ${CMAKE_CURRENT_SOURCE_DIR}/bin/spt3g-verify ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 execute_process(COMMAND ln -fsn ${CMAKE_CURRENT_SOURCE_DIR}/bin/spt3g-inspect ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
