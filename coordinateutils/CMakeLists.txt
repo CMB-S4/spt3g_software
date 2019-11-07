@@ -11,14 +11,9 @@ add_spt3g_library(coordinateutils SHARED
   src/python.cxx
 )
 
-set(OpenMP_FIND_QUIETLY TRUE)
-find_package(OpenMP)
-if(OPENMP_FOUND)
-	target_compile_definitions(coordinateutils PUBLIC -DOPENMP_FOUND)
-	target_compile_options(coordinateutils PUBLIC ${OpenMP_CXX_FLAGS})
-endif()
-
 target_link_libraries(coordinateutils core)
+
+link_openmp(coordinateutils)
 
 link_python_dir()
 
