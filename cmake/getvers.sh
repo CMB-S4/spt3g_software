@@ -85,14 +85,14 @@ if [ -d .svn ]; then
 		echo versionname=\"$(echo $relurl | sed 's/.*\/tags\///g')\"
 	elif echo $url | grep -q '/releases/'; then
 		echo versionname=\"$(echo $relurl | sed 's/.*\/releases\///g')\"
-		if (echo $localdiffs | grep True); then
+		if (echo $localdiffs | grep -q True); then
 			echo fullversion=\"$(echo $versionname-$revision-dirty)\"
 		else
 			echo fullversion=\"$(echo $versionname-$revision)\"
 		fi
 	else
 		echo versionname=\"\"
-		if (echo $localdiffs | grep True); then
+		if (echo $localdiffs | grep -q True); then
 			echo fullversion=\"$(echo $revision-dirty)\"
 		else
 			echo fullversion=\"$(echo $revision)\"
