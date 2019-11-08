@@ -85,8 +85,18 @@ if [ -d .svn ]; then
 		echo versionname=\"$(echo $relurl | sed 's/.*\/tags\///g')\"
 	elif echo $url | grep -q '/releases/'; then
 		echo versionname=\"$(echo $relurl | sed 's/.*\/releases\///g')\"
+		if (echo $localdiffs | grep True); then
+			echo fullversion=\"$(echo $versionname-$revision-dirty)\"
+		else
+			echo fullversion=\"$(echo $versionname-$revision)\"
+		fi
 	else
 		echo versionname=\"\"
+		if (echo $localdiffs | grep True); then
+			echo fullversion=\"$(echo $revision-dirty)\"
+		else
+			echo fullversion=\"$(echo $revision)\"
+		fi
 	fi
 elif [ -d .git ]; then
 	if (git rev-parse --abbrev-ref --symbolic-full-name @{u}>/dev/null 2>/dev/null); then
@@ -109,6 +119,7 @@ elif [ -d .git ]; then
 		echo localdiffs=False
 	fi
 	echo versionname=\"$(git tag -l --points-at HEAD 2>/dev/null)\"
+	echo fullversion=\"$(git describe --always --tags --dirty 2>/dev/null)\"
 else
 	echo upstream_url=\"UNKNOWN VCS\"
 	echo upstream_branch=\"UNKNOWN VCS\"
@@ -116,5 +127,6 @@ else
 	echo gitrevision=\"UNKNOWN\"
 	echo localdiffs=True
 	echo versionname=\"UNKNOWN\"
+	echo fullversion=\"UNKNOWN\"
 fi
 

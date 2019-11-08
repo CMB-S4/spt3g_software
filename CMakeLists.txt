@@ -130,8 +130,9 @@ configure_file(${CMAKE_SOURCE_DIR}/cmake/CTestCustom.cmake.in ${CMAKE_BINARY_DIR
 
 # Target for version string
 add_custom_target(version ALL
-	COMMAND sh ${CMAKE_SOURCE_DIR}/cmake/getvers.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}/spt3g/__version__.py
-	BYPRODUCTS ${CMAKE_BINARY_DIR}/spt3g/__version__.py
+	COMMAND sh ${CMAKE_SOURCE_DIR}/cmake/getvers.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}/spt3g/version.py
+	COMMAND cmake -P ${CMAKE_SOURCE_DIR}/cmake/version.cmake ${CMAKE_BINARY_DIR}
+	BYPRODUCTS ${CMAKE_BINARY_DIR}/spt3g/version.py ${CMAKE_BINARY_DIR}/cmake/Spt3gConfigVersion.cmake
 	COMMENT "Regenerating VCS version information"
 )
 
