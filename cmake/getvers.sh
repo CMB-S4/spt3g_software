@@ -125,8 +125,12 @@ else
 	echo upstream_branch=\"UNKNOWN VCS\"
 	echo revision=\"UNKNOWN VCS\"
 	echo gitrevision=\"UNKNOWN\"
-	echo localdiffs=True
 	echo versionname=\"UNKNOWN\"
-	echo fullversion=\"UNKNOWN\"
+	if [ -z "$(cat VERSION)" ]; then
+		echo localdiffs=True
+		echo fullversion=\"UNKNOWN\"
+	else
+		echo localdiffs=False
+		echo fullversion=\"$(cat VERSION)\"
+	fi
 fi
-
