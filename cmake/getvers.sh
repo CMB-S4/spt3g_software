@@ -131,6 +131,6 @@ else
 		echo fullversion=\"UNKNOWN\"
 	else
 		echo localdiffs=False
-		echo fullversion=\"$(cat VERSION)\"
+		echo fullversion=\"$(cat VERSION | sed -E 's/\$Version: (.*)\$/\1/g')\"
 	fi
 fi

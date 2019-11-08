@@ -73,6 +73,18 @@ To build the documentation in the build directory type:
 
 This will construct an html version of the documentation.  This builds the documentation in the build/docs folder.  Open build/docs/index.html in your favorite web browser.  You should at least read the quick start portion of the documentation before getting started.
 
+To export the source tree to a separate archive, run the following command in the source directory to ensure that the source version is correctly exported:
+
+.. code-block:: shell
+
+	cmake/config_export.sh
+
+Then archive the source tree to a compressed file:
+
+.. code-block:: shell
+
+	git archive --format=tar.gz master >spt3g_software.tar.gz
+
 Version Control Hygiene
 -----------------------
 
