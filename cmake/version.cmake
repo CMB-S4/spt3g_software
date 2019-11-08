@@ -3,13 +3,13 @@ set(CMAKE_BINARY_DIR ${CMAKE_ARGV4})
 
 file(READ ${CMAKE_SOURCE_DIR}/VERSION GIT_VERSION)
 string(REGEX REPLACE "\\$Version: (.*)\\$" "\\1" GIT_VERSION "${GIT_VERSION}")
+string(REPLACE "$Version$" "" GIT_VERSION "${GIT_VERSION}")
 string(STRIP "${GIT_VERSION}" GIT_VERSION)
 
 if (NOT GIT_VERSION)
     find_package(Git QUIET)
 
     if (NOT GIT_EXECUTABLE)
-        message(WARNING "Cannot determine project version: Missing git executable")
         return()
     endif()
 
@@ -22,7 +22,6 @@ if (NOT GIT_VERSION)
         )
 
     if (GIT_VERSION_ERROR)
-        message(WARNING "Cannot determine project version: ${GIT_VERSION_ERROR}")
         return()
     endif()
 
@@ -32,9 +31,10 @@ string(REGEX REPLACE "^v([0-9\\.]+).*" "\\1" VERSION "${GIT_VERSION}")
 string(REGEX MATCH "^([0-9\\.]+)$" TEST_VERSION ${VERSION})
 
 if (NOT TEST_VERSION)
-    message(WARNING "Incompatible git version string: ${GIT_VERSION}")
     return()
 endif()
+
+message(STATUS "Building version ${VERSION}")
 
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
