@@ -49,7 +49,8 @@ target_compile_options(spt3g INTERFACE -Wno-unknown-warning-option -Wno-unused -
 target_compile_options(spt3g INTERFACE -fno-strict-aliasing)
 
 # Boost bits we need
-find_package(Python COMPONENTS Interpreter Development)
+find_package(PythonInterp)
+find_package(PythonLibs ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
 
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
@@ -60,18 +61,20 @@ if(NOT DEFINED Boost_PYTHON_TYPE)
 	set(Boost_PYTHON_TYPE python)
 
 	# Detect attempts to be clever with the naming of the Boost Python library
+	string(REGEX REPLACE ".*libpython([0-9])\\.[0-9]+.*\\..*" "\\1" PYTHONMAJORVER ${PYTHON_LIBRARIES})
+	string(REGEX REPLACE ".*libpython[0-9]\\.([0-9]+).*\\..*" "\\1" PYTHONMINORVER ${PYTHON_LIBRARIES})
 
 	# Hack for some old Boost CMake modules
-	set(_Boost_PYTHON${Python_VERSION_MAJOR}_HEADERS "boost/python.hpp")
-	set(_Boost_PYTHON${Python_VERSION_MAJOR}${Python_VERSION_MINOR}_HEADERS "boost/python.hpp")
+	set(_Boost_PYTHON${PYTHONMAJORVER}_HEADERS "boost/python.hpp")
+	set(_Boost_PYTHON${PYTHONMAJORVER}${PYTHONMINORVER}_HEADERS "boost/python.hpp")
 
-	find_package(Boost QUIET COMPONENTS python${Python_VERSION_MAJOR}${Python_VERSION_MINOR})
-	if (${Boost_PYTHON${Python_VERSION_MAJOR}${Python_VERSION_MINOR}_FOUND})
-		set(Boost_PYTHON_TYPE python${Python_VERSION_MAJOR}${Python_VERSION_MINOR})
+	find_package(Boost QUIET COMPONENTS python${PYTHONMAJORVER}${PYTHONMINORVER})
+	if (${Boost_PYTHON${PYTHONMAJORVER}${PYTHONMINORVER}_FOUND})
+		set(Boost_PYTHON_TYPE python${PYTHONMAJORVER}${PYTHONMINORVER})
 	else()
-		find_package(Boost QUIET COMPONENTS python${Python_VERSION_MAJOR})
-		if (${Boost_PYTHON${Python_VERSION_MAJOR}_FOUND})
-			set(Boost_PYTHON_TYPE python${Python_VERSION_MAJOR})
+		find_package(Boost QUIET COMPONENTS python${PYTHONMAJORVER})
+		if (${Boost_PYTHON${PYTHONMAJORVER}_FOUND})
+			set(Boost_PYTHON_TYPE python${PYTHONMAJORVER})
 		endif()
 	endif()
 endif()
@@ -82,8 +85,8 @@ if(Boost_VERSION EQUAL 104700 OR Boost_VERSION GREATER 104700)
 	message(STATUS "Boost Geometry Available")
 endif()
 
-target_include_directories(spt3g INTERFACE ${Boost_INCLUDE_DIR} ${Python_INCLUDE_DIRS})
-target_link_libraries(spt3g INTERFACE pthread ${Boost_LIBRARIES} ${Python_LIBRARIES})
+target_include_directories(spt3g INTERFACE ${Boost_INCLUDE_DIR} ${PYTHON_INCLUDE_DIRS} ${PYTHON_INCLUDE_PATH})
+target_link_libraries(spt3g INTERFACE pthread ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
 
 # Work around yet more bugs in GCC 4.4, this time with C++ 11 support
 target_compile_definitions(spt3g INTERFACE -DBOOST_NO_CXX11_SMART_PTR=1)
@@ -140,7 +143,7 @@ add_custom_target(tarball
 	COMMAND rm -rf ${CMAKE_BINARY_DIR}/tarball ${CMAKE_BINARY_DIR}/spt3g.tgz
 	COMMAND mkdir ${CMAKE_BINARY_DIR}/tarball
 	COMMAND ${CMAKE_SOURCE_DIR}/cmake/copy_build_dir.sh ${CMAKE_BINARY_DIR}
-	COMMAND ${Python_EXECUTABLE} -m compileall -fq ${CMAKE_BINARY_DIR}/tarball
+	COMMAND ${PYTHON_EXECUTABLE} -m compileall -fq ${CMAKE_BINARY_DIR}/tarball
 	COMMAND tar -C ${CMAKE_BINARY_DIR}/tarball/ -czf ${CMAKE_BINARY_DIR}/spt3g.tgz .
 	COMMENT "Build a tarball to run on the grid in spt3g.tgz")
 
