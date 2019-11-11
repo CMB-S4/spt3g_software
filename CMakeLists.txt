@@ -42,6 +42,14 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror")
 # Interface library for flags and library dependencies
 add_library(spt3g INTERFACE)
 
+# get version info
+include(Spt3gVersion)
+get_spt3g_version()
+if (SPT3G_VERSION)
+	message(STATUS "Building SPT3G software version ${SPT3G_VERSION}")
+	target_compile_definitions(spt3g INTERFACE -DSPT3G_VERSION="${SPT3G_VERSION}")
+endif()
+
 # Ignore known warnings
 target_compile_options(spt3g INTERFACE -Wno-unknown-warning-option -Wno-unused -Wno-unused-result -Wno-deprecated-register -Wno-sign-compare -Wno-constant-conversion -Wno-self-assign-overloaded -Wno-deprecated-declarations)
 
@@ -134,7 +142,7 @@ configure_file(${CMAKE_SOURCE_DIR}/cmake/CTestCustom.cmake.in ${CMAKE_BINARY_DIR
 # Target for version string
 add_custom_target(version ALL
 	COMMAND sh ${CMAKE_SOURCE_DIR}/cmake/getvers.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}/spt3g/version.py
-	COMMAND cmake -P ${CMAKE_SOURCE_DIR}/cmake/version.cmake ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}
+	COMMAND cmake -P ${CMAKE_SOURCE_DIR}/cmake/Spt3gVersion.cmake ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}
 	BYPRODUCTS ${CMAKE_BINARY_DIR}/spt3g/version.py ${CMAKE_BINARY_DIR}/cmake/Spt3gConfigVersion.cmake
 	COMMENT "Regenerating VCS version information"
 )
