@@ -19,7 +19,7 @@ Minimum versions:
 
 	- GCC >= 4.7 or clang >= 3.3
 	- Boost >= 1.48
-	- cmake >= 2.6
+	- cmake >= 3.1
 	- Python >= 2.7
 
 On Ubuntu/Debian, you can install the non-Python dependencies, including the optional ones, by doing:
@@ -72,6 +72,24 @@ To build the documentation in the build directory type:
 	./env-shell.sh make docs
 
 This will construct an html version of the documentation.  This builds the documentation in the build/docs folder.  Open build/docs/index.html in your favorite web browser.  You should at least read the quick start portion of the documentation before getting started.
+
+Release Version Tracking
+------------------------
+
+Use git tags to keep track of release versions.  Tags should be of the form "v0.1.2" for release with major version 0, minor version 1 and patch version 2.
+If such a tag is defined, cmake will populate the following outputs:
+
+ * A `cmake/Spt3gConfigVersion.cmake` file that contains the version number to be checked when including the Spt3g libraries in another cmake project
+ * A `spt3g/version.py` file containing VCS parameters for access in python and stored in PipelineInfo frames
+ * Add a `SPT3G_VERSION` compiler definition for accessing the version string in C++ code
+
+When exporting the source tree to a standalone archive, run the following command in the source directory to ensure that the source version is correctly exported:
+
+.. code-block:: shell
+
+	cmake/config_export.sh
+
+Then archive the source tree using  `git archive` as usual.
 
 Version Control Hygiene
 -----------------------

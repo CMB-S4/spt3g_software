@@ -1,2 +1,2 @@
-from . import __version__
-
+from . import version
+__version__ = version.fullversion

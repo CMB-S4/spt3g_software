@@ -124,6 +124,9 @@ template <class A> void G3PipelineInfo::serialize(A &ar, unsigned v)
 	ar & make_nvp("user", user);
 
 	ar & make_nvp("modules", modules);
+
+	if (v > 1)
+		ar & make_nvp("vcs_fullversion", vcs_fullversion);
 }
 
 std::string
@@ -143,6 +146,8 @@ G3PipelineInfo::Description() const
 	rv << "Revision: " << vcs_revision << "\n";
 	if (vcs_versionname.size() != 0)
 		rv << "Version: " << vcs_versionname << "\n";
+	if (vcs_fullversion.size() != 0)
+		rv << "Full version: " << vcs_fullversion << "\n";
 	rv << "Run by: " << user << " on " << hostname << "\n";
 
 	rv << modules.size();
@@ -188,6 +193,7 @@ PYBINDINGS("core") {
 	    .def_readwrite("vcs_revision", &G3PipelineInfo::vcs_revision)
 	    .def_readwrite("vcs_localdiffs", &G3PipelineInfo::vcs_localdiffs)
 	    .def_readwrite("vcs_versionname", &G3PipelineInfo::vcs_versionname)
+	    .def_readwrite("vcs_fullversion", &G3PipelineInfo::vcs_fullversion)
 	    .def_readwrite("vcs_githash", &G3PipelineInfo::vcs_githash)
 	    .def_readwrite("hostname", &G3PipelineInfo::hostname)
 	    .def_readwrite("user", &G3PipelineInfo::user)

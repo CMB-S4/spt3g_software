@@ -1,0 +1,3 @@
+VERSION filter=exportversion
+.gitattributes export-ignore
+.gitignore export-ignore

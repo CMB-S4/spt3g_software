@@ -28,6 +28,7 @@ public:
 	std::string vcs_revision;
 	bool vcs_localdiffs;
 	std::string vcs_versionname;
+	std::string vcs_fullversion;
 	std::string vcs_githash; // If available
 
 	std::string hostname;
@@ -48,7 +49,7 @@ namespace cereal {
 }
 
 G3_SERIALIZABLE(G3ModuleConfig, 1);
-G3_SERIALIZABLE(G3PipelineInfo, 1);
+G3_SERIALIZABLE(G3PipelineInfo, 2);
 
 #endif
 
