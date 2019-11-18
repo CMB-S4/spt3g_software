@@ -30,8 +30,8 @@
 #ifndef CEREAL_TYPES_BASE_CLASS_HPP_
 #define CEREAL_TYPES_BASE_CLASS_HPP_
 
-#include <cereal/details/traits.hpp>
-#include <cereal/details/polymorphic_impl_fwd.hpp>
+#include "cereal/details/traits.hpp"
+#include "cereal/details/polymorphic_impl_fwd.hpp"
 
 namespace cereal
 {
@@ -63,7 +63,8 @@ namespace cereal
 
       This also automatically registers polymorphic relation between the base and derived class, assuming they
       are indeed polymorphic. Note this is not the same as polymorphic type registration. For more information
-      see the documentation on polymorphism.
+      see the documentation on polymorphism. If using a polymorphic class, be sure to include support for
+      polymorphism (cereal/types/polymorphic.hpp).
 
       \sa virtual_base_class
 
@@ -120,7 +121,8 @@ namespace cereal
 
       This also automatically registers polymorphic relation between the base and derived class, assuming they
       are indeed polymorphic. Note this is not the same as polymorphic type registration. For more information
-      see the documentation on polymorphism.
+      see the documentation on polymorphism. If using a polymorphic class, be sure to include support for
+      polymorphism (cereal/types/polymorphic.hpp).
 
       \sa base_class
 

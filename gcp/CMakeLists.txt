@@ -1,4 +1,4 @@
-add_library(gcp SHARED
+add_spt3g_library(gcp SHARED
 	src/ARCFileReader.cxx src/python.cxx
 	src/ACUStatus.cxx src/TrackerStatus.cxx src/TrackerPointing.cxx
 	src/GCPMuxDataDecoder.cxx src/GCPLogger.cxx

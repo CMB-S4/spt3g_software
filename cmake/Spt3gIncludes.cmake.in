@@ -1,0 +1,52 @@
+# Use cmake directory for packages
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} $ENV{SITE_CMAKE_DIR} "${SPT3G_SOURCE_DIR}/cmake")
+
+# Convenience variables
+set(SPT3G_LIBRARY_DIR ${SPT3G_BUILD_DIR}/spt3g)
+set(SPT3G_RUNTIME_DIR ${SPT3G_BUILD_DIR}/bin)
+
+# Convenience macros
+macro(link_python_dir)
+	execute_process(COMMAND mkdir -p ${SPT3G_LIBRARY_DIR})
+	if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/python)
+		execute_process(COMMAND ln -fsn ${CMAKE_CURRENT_SOURCE_DIR}/python ${SPT3G_LIBRARY_DIR}/${PROJECT})
+	else(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/python)
+		execute_process(COMMAND ln -fsn ${CMAKE_CURRENT_SOURCE_DIR} ${SPT3G_LIBRARY_DIR}/${PROJECT})
+	endif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/python)
+endmacro(link_python_dir)
+
+find_package(OpenMP QUIET)
+if(OPENMP_FOUND AND NOT TARGET OpenMP::OpenMP_CXX)
+	find_package(Threads REQUIRED)
+	add_library(OpenMP::OpenMP_CXX IMPORTED INTERFACE)
+	set_property(TARGET OpenMP::OpenMP_CXX
+		PROPERTY INTERFACE_COMPILE_OPTIONS ${OpenMP_CXX_FLAGS})
+	# Only works if the same flag is passed to the linker; use CMake 3.9+ otherwise (Intel, AppleClang)
+	set_property(TARGET OpenMP::OpenMP_CXX
+		PROPERTY INTERFACE_LINK_LIBRARIES ${OpenMP_CXX_FLAGS} Threads::Threads)
+endif()
+macro(link_openmp lib_name)
+	if (OPENMP_FOUND)
+		target_link_libraries(${lib_name} OpenMP::OpenMP_CXX)
+		target_compile_definitions(${lib_name} PUBLIC -DOPENMP_FOUND)
+	endif()
+endmacro(link_openmp lib_name)
+
+macro(add_spt3g_library lib_name)
+	add_library(${lib_name} ${ARGN})
+	target_compile_features(${lib_name} PUBLIC cxx_std_11)
+	if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/include)
+		target_include_directories(${lib_name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+	endif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/include)
+endmacro(add_spt3g_library lib_name)
+
+macro(add_spt3g_test test_name)
+	add_test(${PROJECT}/${test_name} ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/${test_name}.py)
+
+	set(extra_macro_args ${ARGN})
+	list(LENGTH extra_macro_args num_extra_args)
+	if (${num_extra_args} GREATER 0)
+		list(GET extra_macro_args 0 test_labels)
+		set_tests_properties(${PROJECT}/${test_name} PROPERTIES LABELS ${test_labels})
+	endif ()
+endmacro(add_spt3g_test test_name)

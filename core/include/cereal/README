@@ -1,4 +1,4 @@
-This is the cereal library, as of 5/23/2016. The following patches have been applied:
+This is the cereal library, as of 11/4/2019. The following patches have been applied:
 - All std::shared_ptr and friends replaced by boost::shared_ptr and friends using sed for compatibility with boost::python.
 - Instances of nullptr removed when initializing boost::shared_ptr for compatibility with ancient boost versions
 
