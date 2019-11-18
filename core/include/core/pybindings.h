@@ -43,15 +43,19 @@ std::string vec_repr(boost::python::object self)
 	    << "([";
 
 	std::vector<T> &selfobject = extract<std::vector<T> &>(self)();
-	if (selfobject.size() == 1) {
+
+	int ellip_pos = -1; // Position at which to insert "..."
+	if (selfobject.size() > 100)
+		ellip_pos = 3;
+
+	if (selfobject.size() > 0)
 		s << selfobject[0];
-	} else if (selfobject.size() > 1){
-		auto i = selfobject.begin();
-		while (i != selfobject.end() - 1) {
-			s << *i << ", ";
-			i++;
-		}
-		s << *i;
+	for (int i=1; i<selfobject.size(); ++i) {
+		if (i == ellip_pos) {
+			s << ", ...";
+			i = selfobject.size() - ellip_pos - 1;
+		} else
+			s << ", " << selfobject[i];
 	}
 	s << "])";
 
