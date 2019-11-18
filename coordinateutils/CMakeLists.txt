@@ -13,8 +13,6 @@ add_spt3g_library(coordinateutils SHARED
 
 target_link_libraries(coordinateutils core)
 
-link_openmp(coordinateutils)
-
 link_python_dir()
 
 add_spt3g_test(quatangtest)
