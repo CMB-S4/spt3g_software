@@ -62,8 +62,8 @@ if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.12)
 else()
 	find_package(PythonInterp)
 	find_package(PythonLibs ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
-	string(REGEX REPLACE ".*libpython([0-9])\\.[0-9]+.*\\..*" "\\1" PYTHONMAJORVER ${PYTHON_LIBRARIES})
-	string(REGEX REPLACE ".*libpython[0-9]\\.([0-9]+).*\\..*" "\\1" PYTHONMINORVER ${PYTHON_LIBRARIES})
+	string(REGEX REPLACE ".*libpython([0-9])\\.[0-9]+.*\\..*" "\\1" Python_VERSION_MAJOR ${PYTHON_LIBRARIES})
+	string(REGEX REPLACE ".*libpython[0-9]\\.([0-9]+).*\\..*" "\\1" Python_VERSION_MINOR ${PYTHON_LIBRARIES})
 	set(Python_INCLUDE_DIRS ${PYTHON_INCLUDE_DIRS} ${PYTHON_INCLUDE_PATH})
 	set(Python_LIBRARIES ${PYTHON_LIBRARIES})
 	set(Python_EXECUTABLE ${PYTHON_EXECUTABLE})
@@ -77,10 +77,6 @@ set(Boost_NO_BOOST_CMAKE ON)
 
 if(NOT DEFINED Boost_PYTHON_TYPE)
 	set(Boost_PYTHON_TYPE python)
-
-	# Detect attempts to be clever with the naming of the Boost Python library
-	string(REGEX REPLACE ".*libpython([0-9])\\.[0-9]+.*\\..*" "\\1" PYTHONMAJORVER ${PYTHON_LIBRARIES})
-	string(REGEX REPLACE ".*libpython[0-9]\\.([0-9]+).*\\..*" "\\1" PYTHONMINORVER ${PYTHON_LIBRARIES})
 
 	# Hack for some old Boost CMake modules
 	set(_Boost_PYTHON${Python_VERSION_MAJOR}_HEADERS "boost/python.hpp")
