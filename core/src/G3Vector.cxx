@@ -103,32 +103,6 @@ static PyBufferProcs vecdouble_bufferprocs;
 static PyBufferProcs veccomplexdouble_bufferprocs;
 static PyBufferProcs vecint_bufferprocs;
 
-template<>
-std::string vec_repr<G3FrameObjectPtr>(boost::python::object self)
-{
-	using namespace boost::python;
-	std::stringstream s;
-
-	s << extract<std::string>(self.attr("__class__").attr("__module__"))()
-	    << "." << extract<std::string>(self.attr("__class__").attr("__name__"))()
-	    << "([";
-
-	std::vector<G3FrameObjectPtr> &selfobject = extract<std::vector<G3FrameObjectPtr> &>(self)();
-	if (selfobject.size() == 1) {
-		s << selfobject[0]->Summary();
-	} else if (selfobject.size() > 1){
-		auto i = selfobject.begin();
-		while (i != selfobject.end() - 1) {
-			s << (*i)->Summary() << ", ";
-			i++;
-		}
-		s << (*i)->Summary();
-	}
-	s << "])";
-
-	return s.str();
-}
-
 PYBINDINGS("core") {
 	boost::python::object vecdouble = register_g3vector<double>(
 	    "G3VectorDouble", "Array of floats. Treat as a serializable "
