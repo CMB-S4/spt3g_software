@@ -358,7 +358,8 @@ HealpixSkyMap::ConvertToDense()
 
 	if (ring_sparse_) {
 		long idx;
-		for (auto i = ring_sparse_->begin(); i != ring_sparse_->end(); ++i) {
+		for (auto i = ring_sparse_->begin(); i != ring_sparse_->end();
+		    i++) {
 			get_pixel_index(ring_info_, i.x, i.y, &idx);
 			(*dense_)[idx] = (*i);
 		}
@@ -412,7 +413,8 @@ HealpixSkyMap::ConvertToIndexedSparse()
 
 	if (ring_sparse_) {
 		long idx;
-		for (auto i = ring_sparse_->begin(); i != ring_sparse_->end(); ++i) {
+		for (auto i = ring_sparse_->begin(); i != ring_sparse_->end();
+		    i++) {
 			get_pixel_index(ring_info_, i.x, i.y, &idx);
 			if ((*i) != 0)
 				(*indexed_sparse_)[idx] = (*i);
