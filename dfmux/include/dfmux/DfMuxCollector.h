@@ -25,13 +25,19 @@ G3_POINTERS(DfMuxSamplePacket);
 
 /*
  * DfMuxCollector: Listens to multicast data from ICE board streamers
- * and forwards to a DfMuxBuilder. Prefixlen (default 24) sets filtering
- * of off-network bogons that can happen sometimes on Linux. DfMuxCollector
- * will bind to the interface specified by listenaddr.
+ * and forwards to a DfMuxBuilder. 
  */
 
 class DfMuxCollector {
 public:
+	// Listen for SCTP data arriving from the hostnames/IPs given
+	// in the boards_to_listen_for argument.
+	DfMuxCollector(G3EventBuilderPtr builder,
+	    std::vector<std::string> boards_to_listen_for);
+
+	// Listen for multicast UDP data arriving on listenaddr from the
+	// boards listed. If no boards are listed, will forward data
+	// from all boards transmitting to listenaddr.
 	DfMuxCollector(const char *listenaddr, G3EventBuilderPtr builder,
 	    std::vector<int32_t> boards_to_listen_for);
 
@@ -45,7 +51,8 @@ public:
 	int Stop();	// Stop listening thread
 
 private:
-	int SetupSocket(const char *listenaddr);
+	int SetupUDPSocket(const char *listenaddr);
+	int SetupSCTPSocket(std::vector<std::string> hosts);
 	static void Listen(DfMuxCollector *collector);
 	std::thread listen_thread_;
 
