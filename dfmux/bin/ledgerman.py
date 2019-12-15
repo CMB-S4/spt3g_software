@@ -10,6 +10,9 @@ parser.add_argument('output', metavar='output.nc', help='Path to output NetCDF f
 
 parser.add_argument('-v', dest='verbose', action='store_true',
                     help='Verbose mode (print all frames)')
+parser.add_argument('-u', dest='udp', action='store_true',
+                    help='Use multicast UDP for data collection instead of '
+                    'SCTP for compatibility with old firmware.')
 parser.add_argument('-a', dest='align', action='store_true',
                     help='Align sampling. This has to happen once, but'
                     ' will break any existing DAN loops when run.')
@@ -61,20 +64,27 @@ serial_list = np.unique(np.array([cm.iceboard.serial for cm in chan_map_query]))
 pipe = core.G3Pipeline()
 builder = dfmux.DfMuxBuilder([int(serial) for serial in serial_list])
 
-# Get the local IP(s) to use to connect to the boards by opening test
-# connections. Using a set rather than a list deduplicates the results.
-local_ips = set()
-for board in hwm.query(pydfmux.core.dfmux.IceBoard):
-    testsock = socket.create_connection(('iceboard' + board.serial + '.local', 80))
-    local_ips.add(testsock.getsockname()[0])
-    testsock.close()
-core.log_notice('Creating listeners for %d boards on interfaces: %s' % (hwm.query(pydfmux.core.dfmux.IceBoard).count(), ', '.join(local_ips)), unit='Ledgerman')
+if args.udp:
+    # Get the local IP(s) to use to connect to the boards by opening test
+    # connections. Using a set rather than a list deduplicates the results.
+    local_ips = set()
+    for board in hwm.query(pydfmux.core.dfmux.IceBoard):
+        testsock = socket.create_connection(('iceboard' + board.serial + '.local', 80))
+        local_ips.add(testsock.getsockname()[0])
+        testsock.close()
+    core.log_notice('Creating listeners for %d boards on interfaces: %s' % (hwm.query(pydfmux.core.dfmux.IceBoard).count(), ', '.join(local_ips)), unit='Ledgerman')
 
-# Build mapping dictionary for old (64x) firmware
-v2_mapping = {'iceboard' + str(serial) + '.local': int(serial) for serial in serial_list}
+    # Build mapping dictionary for old (64x) firmware
+    v2_mapping = {'iceboard' + str(serial) + '.local': int(serial) for serial in serial_list}
 
-# Set up listeners per network segment and point them at the event builder
-collectors = [dfmux.DfMuxCollector(ip, builder, v2_mapping) for ip in local_ips]
+    # Set up listeners per network segment and point them at the event builder
+    collectors = [dfmux.DfMuxCollector(ip, builder, v2_mapping) for ip in local_ips]
+else:
+    hosts = ['iceboard' + str(serial) + '.local' for serial in serial_list]
+
+    # XXX: multiple threads? one per N boards?
+    collectors = [dfmux.DfMuxCollector(builder, hosts),]
+
 pipe.Add(builder)
 
 # Insert current hardware map into data stream. This is critical to get the
