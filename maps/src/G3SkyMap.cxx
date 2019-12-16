@@ -504,13 +504,16 @@ double MuellerMatrix::Cond() const
 	}
 
 	double q = (tt + qq + uu) / 3.;
-	double p = (tt - q)*(tt - q) + (qq - q)*(qq - q) + (uu - q)*(uu - q) + 2.*p1;
+	double ttq = tt - q;
+	double qqq = qq - q;
+	double uuq = uu - q;
+	double p = ttq * ttq + qqq * qqq + uuq * uuq + 2. * p1;
 	p = sqrt(p / 6.0);
 
-	MuellerMatrix Q;
-	Q.tt = Q.qq = Q.uu = q;
 	MuellerMatrix B = *this;
-	B -= Q;
+	B.tt = ttq;
+	B.qq = qqq;
+	B.uu = uuq;
 	B /= p;
 	double r = B.Det() / 2.0;
 
