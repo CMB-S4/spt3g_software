@@ -1,6 +1,5 @@
 #include <vector>
 
-#include <G3Logging.h>
 #include <cereal/types/vector.hpp>
 #include <cereal/types/utility.hpp>
 
@@ -40,10 +39,10 @@ public:
 	double operator()(size_t x, size_t y) const { return at(x, y); }
 
 	double &operator()(size_t x, size_t y) {
-		g3_assert(x >= 0);
-		g3_assert(x < xlen_);
-		g3_assert(y >= 0);
-		g3_assert(y < ylen_);
+		assert(x >= 0);
+		assert(x < xlen_);
+		assert(y >= 0);
+		assert(y < ylen_);
 
 		if (data_.size() == 0) {
 			data_.resize(1);
@@ -170,10 +169,10 @@ public:
 	double operator()(size_t x, size_t y) const { return at(x, y); }
 
 	double &operator()(size_t x, size_t y) {
-		g3_assert(x >= 0);
-		g3_assert(x < xlen_);
-		g3_assert(y >= 0);
-		g3_assert(y < ylen_);
+		assert(x >= 0);
+		assert(x < xlen_);
+		assert(y >= 0);
+		assert(y < ylen_);
 
 		return data_[idxat(x, y)];
 	}
@@ -187,7 +186,7 @@ public:
 	}
 	DenseMapData &operator=(const std::vector<double> &d)
 	{
-		g3_assert(data_.size() == d.size());
+		assert(data_.size() == d.size());
 		data_ = d;
 		return *this;
 	}
