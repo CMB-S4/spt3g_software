@@ -2,7 +2,7 @@
 
 import numpy
 from spt3g import core
-from spt3g.coordinateutils import FlatSkyMap, MapCoordReference
+from spt3g.coordinateutils import FlatSkyMap, MapCoordReference, MapProjection
 
 # 1D arrays
 m = FlatSkyMap(1, 500, core.G3Units.arcmin)
@@ -41,7 +41,7 @@ a = numpy.arange(1500, dtype=float)
 a[0] = -1
 v = numpy.zeros((50, 50), dtype=float)
 v.ravel()[:1500] = a
-x = FlatSkyMap(v, core.G3Units.arcmin)
+x = FlatSkyMap(v, core.G3Units.arcmin, proj=MapProjection.ProjZEA)
 
 assert(not x.sparse)
 assert(x.npix_allocated == x.size)
@@ -57,6 +57,7 @@ v0 = x[0, 0] + x[0, 1] + x[1, 0] + x[1, 1]
 x2 = x.rebin(2, norm=False)
 assert(x2[0] == v0)
 assert(numpy.sum(x2) == numpy.sum(v))
+assert(numpy.allclose(x.xy_to_angle(-0.5, -0.5), x2.xy_to_angle(-0.5, -0.5)))
 
 x.sparse = True
 assert(x.npix_allocated == 1500)
