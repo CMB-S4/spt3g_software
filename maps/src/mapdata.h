@@ -1,5 +1,6 @@
 #include <vector>
 
+#include <G3Logging.h>
 #include <cereal/types/vector.hpp>
 #include <cereal/types/utility.hpp>
 
@@ -39,10 +40,10 @@ public:
 	double operator()(size_t x, size_t y) const { return at(x, y); }
 
 	double &operator()(size_t x, size_t y) {
-		assert(x >= 0);
-		assert(x < xlen_);
-		assert(y >= 0);
-		assert(y < ylen_);
+		g3_assert(x >= 0);
+		g3_assert(x < xlen_);
+		g3_assert(y >= 0);
+		g3_assert(y < ylen_);
 
 		if (data_.size() == 0) {
 			data_.resize(1);
@@ -160,17 +161,19 @@ public:
 	size_t xdim() const { return xlen_; }
 	size_t ydim() const { return ylen_; }
 
-	double operator()(size_t x, size_t y) const {
+	double at(size_t x, size_t y) const {
 		if (!in_bounds(x, y))
 			return 0;
 		return data_[idxat(x, y)];
 	}
 
+	double operator()(size_t x, size_t y) const { return at(x, y); }
+
 	double &operator()(size_t x, size_t y) {
-		assert(x >= 0);
-		assert(x < xlen_);
-		assert(y >= 0);
-		assert(y < ylen_);
+		g3_assert(x >= 0);
+		g3_assert(x < xlen_);
+		g3_assert(y >= 0);
+		g3_assert(y < ylen_);
 
 		return data_[idxat(x, y)];
 	}
@@ -184,7 +187,7 @@ public:
 	}
 	DenseMapData &operator=(const std::vector<double> &d)
 	{
-		assert(data_.size() == d.size());
+		g3_assert(data_.size() == d.size());
 		data_ = d;
 		return *this;
 	}
@@ -234,7 +237,7 @@ public:
 		}
 
 		double operator*() const {
-			return dense_.data_[dense_.idxat(x, y)];
+			return dense_.at(x, y);
 		}
 
 		const_iterator operator++() {

@@ -2,7 +2,6 @@
 #include <serialization.h>
 
 #include <math.h>
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <G3Logging.h>

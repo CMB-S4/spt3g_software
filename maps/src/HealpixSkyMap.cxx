@@ -468,8 +468,8 @@ HealpixSkyMap::operator [] (size_t i) const
 double &
 HealpixSkyMap::operator [] (size_t i)
 {
-	assert(i >= 0);
-	assert(i < npix_);
+	g3_assert(i >= 0);
+	g3_assert(i < npix_);
 
 	if (dense_)
 		return (*dense_)[i];
@@ -482,14 +482,14 @@ HealpixSkyMap::operator [] (size_t i)
 
 	long j, k;
 	int check = get_ring_index(ring_info_, i, &j, &k);
-	assert(!check);
+	g3_assert(!check);
 	return (*ring_sparse_)(j, k);
 }
 
 
 #define healpixskymap_arithmetic(op) \
 G3SkyMap &HealpixSkyMap::operator op(const G3SkyMap &rhs) { \
-	assert(IsCompatible(rhs)); \
+	g3_assert(IsCompatible(rhs)); \
 	try { \
 		const HealpixSkyMap& b = dynamic_cast<const HealpixSkyMap &>(rhs); \
 		if (dense_) { \
@@ -554,7 +554,7 @@ healpixskymap_arithmetic(+=)
 healpixskymap_arithmetic(-=)
 
 G3SkyMap &HealpixSkyMap::operator *=(const G3SkyMap &rhs) {
-	assert(IsCompatible(rhs));
+	g3_assert(IsCompatible(rhs));
 	try {
 		const HealpixSkyMap& b = dynamic_cast<const HealpixSkyMap &>(rhs);
 		bool zero = false;
@@ -588,7 +588,7 @@ G3SkyMap &HealpixSkyMap::operator *=(const G3SkyMap &rhs) {
 }
 
 G3SkyMap &HealpixSkyMap::operator /=(const G3SkyMap &rhs) {
-	assert(IsCompatible(rhs));
+	g3_assert(IsCompatible(rhs));
 	try {
 		const HealpixSkyMap& b = dynamic_cast<const HealpixSkyMap &>(rhs);
 		bool zero = false;

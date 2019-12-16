@@ -159,14 +159,14 @@ FlatSkyMap::load(A &ar, unsigned v)
 		case 2:
 			dense_ = new DenseMapData(0, 0);
 			ar & make_nvp("dense", *dense_);
-			assert(dense_->xdim() == xpix_);
-			assert(dense_->ydim() == ypix_);
+			g3_assert(dense_->xdim() == xpix_);
+			g3_assert(dense_->ydim() == ypix_);
 			break;
 		case 1:
 			sparse_ = new SparseMapData(0, 0);
 			ar & make_nvp("sparse", *sparse_);
-			assert(sparse_->xdim() == xpix_);
-			assert(sparse_->ydim() == ypix_);
+			g3_assert(sparse_->xdim() == xpix_);
+			g3_assert(sparse_->ydim() == ypix_);
 			break;
 		}
 	}
@@ -264,7 +264,7 @@ double
 FlatSkyMap::operator () (size_t x, size_t y) const
 {
 	if (dense_)
-		return (*dense_)(x, y);
+		return dense_->at(x, y);
 	if (sparse_)
 		return sparse_->at(x, y);
 	return 0;
@@ -273,10 +273,10 @@ FlatSkyMap::operator () (size_t x, size_t y) const
 double &
 FlatSkyMap::operator () (size_t x, size_t y)
 {
-	assert(x >= 0);
-	assert(y >= 0);
-	assert(x < xpix_);
-	assert(y < ypix_);
+	g3_assert(x >= 0);
+	g3_assert(y >= 0);
+	g3_assert(x < xpix_);
+	g3_assert(y < ypix_);
 
 	if (dense_)
 		return (*dense_)(x, y);
@@ -299,7 +299,7 @@ FlatSkyMap::operator [] (size_t i)
 
 #define flatskymap_arithmetic(op, sparsenull) \
 G3SkyMap &FlatSkyMap::operator op(const G3SkyMap &rhs) {\
-	assert(IsCompatible(rhs)); \
+	g3_assert(IsCompatible(rhs)); \
 	try { \
 		const FlatSkyMap& b = dynamic_cast<const FlatSkyMap &>(rhs); \
 		if (dense_) { \
@@ -338,7 +338,7 @@ flatskymap_arithmetic(-=, {})
 flatskymap_arithmetic(/=, {ConvertToDense(); (*this->dense_) /= 0.0;})
 
 G3SkyMap &FlatSkyMap::operator *=(const G3SkyMap &rhs) {
-	assert(IsCompatible(rhs));
+	g3_assert(IsCompatible(rhs));
 	try {
 		const FlatSkyMap& b = dynamic_cast<const FlatSkyMap &>(rhs);
 		bool zero = false;

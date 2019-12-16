@@ -75,8 +75,8 @@ SparseMapData::SparseMapData(const DenseMapData &dense_map) :
 SparseMapData &
 SparseMapData::operator+=(const SparseMapData &r)
 {
-	assert(xlen_ == r.xlen_);
-	assert(ylen_ == r.ylen_);
+	g3_assert(xlen_ == r.xlen_);
+	g3_assert(ylen_ == r.ylen_);
 
 	for (size_t ix = 0; ix < r.data_.size(); ix++) {
 		size_t x = r.offset_ + ix;
@@ -95,8 +95,8 @@ SparseMapData::operator+=(const SparseMapData &r)
 SparseMapData &
 SparseMapData::operator+=(const DenseMapData &r)
 {
-	assert(xlen_ == r.xdim());
-	assert(ylen_ == r.ydim());
+	g3_assert(xlen_ == r.xdim());
+	g3_assert(ylen_ == r.ydim());
 
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {
@@ -112,8 +112,8 @@ SparseMapData::operator+=(const DenseMapData &r)
 SparseMapData &
 SparseMapData::operator-=(const SparseMapData &r)
 {
-	assert(xlen_ == r.xlen_);
-	assert(ylen_ == r.ylen_);
+	g3_assert(xlen_ == r.xlen_);
+	g3_assert(ylen_ == r.ylen_);
 
 	for (size_t ix = 0; ix < r.data_.size(); ix++) {
 		size_t x = r.offset_ + ix;
@@ -132,8 +132,8 @@ SparseMapData::operator-=(const SparseMapData &r)
 SparseMapData &
 SparseMapData::operator-=(const DenseMapData &r)
 {
-	assert(xlen_ == r.xdim());
-	assert(ylen_ == r.ydim());
+	g3_assert(xlen_ == r.xdim());
+	g3_assert(ylen_ == r.ydim());
 
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {
@@ -149,8 +149,8 @@ SparseMapData::operator-=(const DenseMapData &r)
 SparseMapData &
 SparseMapData::operator*=(const SparseMapData &r)
 {
-	assert(xlen_ == r.xlen_);
-	assert(ylen_ == r.ylen_);
+	g3_assert(xlen_ == r.xlen_);
+	g3_assert(ylen_ == r.ylen_);
 
 	for (size_t ix = 0; ix < data_.size(); ix++) {
 		size_t x = offset_ + ix;
@@ -167,8 +167,8 @@ SparseMapData::operator*=(const SparseMapData &r)
 SparseMapData &
 SparseMapData::operator*=(const DenseMapData &r)
 {
-	assert(xlen_ == r.xdim());
-	assert(ylen_ == r.ydim());
+	g3_assert(xlen_ == r.xdim());
+	g3_assert(ylen_ == r.ydim());
 
 	for (size_t ix = 0; ix < data_.size(); ix++) {
 		size_t x = offset_ + ix;
@@ -200,8 +200,8 @@ SparseMapData::operator*=(double r)
 SparseMapData &
 SparseMapData::operator/=(const SparseMapData &r)
 {
-	assert(xlen_ == r.xlen_);
-	assert(ylen_ == r.ylen_);
+	g3_assert(xlen_ == r.xlen_);
+	g3_assert(ylen_ == r.ylen_);
 
 	// Division by zero is not the same as doing nothing.
 	// Have to do this the long and painful way
@@ -215,8 +215,8 @@ SparseMapData::operator/=(const SparseMapData &r)
 SparseMapData &
 SparseMapData::operator/=(const DenseMapData &r)
 {
-	assert(xlen_ == r.xdim());
-	assert(ylen_ == r.ydim());
+	g3_assert(xlen_ == r.xdim());
+	g3_assert(ylen_ == r.ydim());
 
 	// Division by zero is not the same as doing nothing.
 	// Have to do this the long and painful way
@@ -230,7 +230,7 @@ SparseMapData::operator/=(const DenseMapData &r)
 SparseMapData &
 SparseMapData::operator/=(double r)
 {
-	assert(r != 0);
+	g3_assert(r != 0);
 
 	for (size_t ix = 0; ix < data_.size(); ix++) {
 		size_t x = offset_ + ix;
@@ -247,8 +247,8 @@ SparseMapData::operator/=(double r)
 DenseMapData &
 DenseMapData::operator+=(const DenseMapData &r)
 {
-	assert(xlen_ == r.xlen_);
-	assert(ylen_ == r.ylen_);
+	g3_assert(xlen_ == r.xlen_);
+	g3_assert(ylen_ == r.ylen_);
 
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {
@@ -262,8 +262,8 @@ DenseMapData::operator+=(const DenseMapData &r)
 DenseMapData &
 DenseMapData::operator+=(const SparseMapData &r)
 {
-	assert(xlen_ == r.xdim());
-	assert(ylen_ == r.ydim());
+	g3_assert(xlen_ == r.xdim());
+	g3_assert(ylen_ == r.ydim());
 
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {
@@ -292,8 +292,8 @@ DenseMapData::operator+=(double r)
 DenseMapData &
 DenseMapData::operator-=(const DenseMapData &r)
 {
-	assert(xlen_ == r.xlen_);
-	assert(ylen_ == r.ylen_);
+	g3_assert(xlen_ == r.xlen_);
+	g3_assert(ylen_ == r.ylen_);
 
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {
@@ -307,8 +307,8 @@ DenseMapData::operator-=(const DenseMapData &r)
 DenseMapData &
 DenseMapData::operator-=(const SparseMapData &r)
 {
-	assert(xlen_ == r.xdim());
-	assert(ylen_ == r.ydim());
+	g3_assert(xlen_ == r.xdim());
+	g3_assert(ylen_ == r.ydim());
 
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {
@@ -337,8 +337,8 @@ DenseMapData::operator-=(double r)
 DenseMapData &
 DenseMapData::operator*=(const DenseMapData &r)
 {
-	assert(xlen_ == r.xlen_);
-	assert(ylen_ == r.ylen_);
+	g3_assert(xlen_ == r.xlen_);
+	g3_assert(ylen_ == r.ylen_);
 
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {
@@ -352,8 +352,8 @@ DenseMapData::operator*=(const DenseMapData &r)
 DenseMapData &
 DenseMapData::operator*=(const SparseMapData &r)
 {
-	assert(xlen_ == r.xdim());
-	assert(ylen_ == r.ydim());
+	g3_assert(xlen_ == r.xdim());
+	g3_assert(ylen_ == r.ydim());
 
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {
@@ -379,8 +379,8 @@ DenseMapData::operator*=(double r)
 DenseMapData &
 DenseMapData::operator/=(const DenseMapData &r)
 {
-	assert(xlen_ == r.xlen_);
-	assert(ylen_ == r.ylen_);
+	g3_assert(xlen_ == r.xlen_);
+	g3_assert(ylen_ == r.ylen_);
 
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {
@@ -394,8 +394,8 @@ DenseMapData::operator/=(const DenseMapData &r)
 DenseMapData &
 DenseMapData::operator/=(const SparseMapData &r)
 {
-	assert(xlen_ == r.xdim());
-	assert(ylen_ == r.ydim());
+	g3_assert(xlen_ == r.xdim());
+	g3_assert(ylen_ == r.ydim());
 
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {

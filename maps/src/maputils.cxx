@@ -2,7 +2,6 @@
 
 #include <vector>
 #include <math.h>
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <G3Logging.h>
@@ -47,8 +46,8 @@ boost::python::tuple GetRaDecMap(G3SkyMapConstPtr m)
 
 void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, double h, bool invert)
 {
-	assert(Q->IsCompatible(*U));
-	assert(Q->IsPolFlat() == U->IsPolFlat());
+	g3_assert(Q->IsCompatible(*U));
+	g3_assert(Q->IsPolFlat() == U->IsPolFlat());
 
 	if (Q->IsPolFlat() && !invert)
 		return;
