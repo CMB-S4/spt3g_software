@@ -468,8 +468,7 @@ HealpixSkyMap::operator [] (size_t i) const
 double &
 HealpixSkyMap::operator [] (size_t i)
 {
-	g3_assert(i >= 0);
-	g3_assert(i < npix_);
+	g3_assert(!(i < 0 || i >= npix_));
 
 	if (dense_)
 		return (*dense_)[i];

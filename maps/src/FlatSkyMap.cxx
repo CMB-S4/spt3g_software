@@ -273,10 +273,7 @@ FlatSkyMap::operator () (size_t x, size_t y) const
 double &
 FlatSkyMap::operator () (size_t x, size_t y)
 {
-	g3_assert(x >= 0);
-	g3_assert(y >= 0);
-	g3_assert(x < xpix_);
-	g3_assert(y < ypix_);
+	g3_assert(!(x < 0 || x >= xpix_ || y < 0 || y >= ypix_));
 
 	if (dense_)
 		return (*dense_)(x, y);
