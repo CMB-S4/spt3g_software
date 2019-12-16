@@ -18,7 +18,7 @@
 
 using namespace G3Units;
 
-boost::python::tuple get_ra_dec_map(G3SkyMapConstPtr m)
+boost::python::tuple GetRaDecMap(G3SkyMapConstPtr m)
 {
 
 	G3SkyMapPtr ra = m->Clone(false);
@@ -29,15 +29,15 @@ boost::python::tuple get_ra_dec_map(G3SkyMapConstPtr m)
 	dec->ConvertToDense();
 
 	for (size_t i = 0; i < m->size(); i++) {
-		std::vector<double> radec = m->pixel_to_angle(i);
+		std::vector<double> radec = m->PixelToAngle(i);
 		(*ra)[i] = radec[0];
 		(*dec)[i] = radec[1];
 	}
 
-	ra->is_weighted = false;
+	ra->weighted = false;
 	ra->units = G3Timestream::None;
 	ra->pol_type = G3SkyMap::None;
-	dec->is_weighted = false;
+	dec->weighted = false;
 	dec->units = G3Timestream::None;
 	dec->pol_type = G3SkyMap::None;
 
@@ -45,7 +45,7 @@ boost::python::tuple get_ra_dec_map(G3SkyMapConstPtr m)
 }
 
 
-void flatten_pol(FlatSkyMapPtr Q, FlatSkyMapPtr U, double h, bool invert)
+void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, double h, bool invert)
 {
 	assert(Q->IsCompatible(*U));
 	assert(Q->IsPolFlat() == U->IsPolFlat());
@@ -61,7 +61,7 @@ void flatten_pol(FlatSkyMapPtr Q, FlatSkyMapPtr U, double h, bool invert)
 		if (q == 0 && u == 0)
 			continue;
 
-		std::vector<double> grad = Q->pixel_to_angle_grad(i.first, h);
+		std::vector<double> grad = Q->PixelToAngleGrad(i.first, h);
 		double rot = ATAN2(-grad[0], grad[1]) + ATAN2(-grad[3], -grad[2]);
 		if (invert)
 			rot *= -1.0;
@@ -77,7 +77,7 @@ void flatten_pol(FlatSkyMapPtr Q, FlatSkyMapPtr U, double h, bool invert)
 }
 
 
-void reproj_map(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool interp)
+void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool interp)
 {
 
 	if (in_map->coord_ref != out_map->coord_ref) {
@@ -88,27 +88,27 @@ void reproj_map(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool in
 		double val = 0;
 		if (rebin > 1) {
 			std::vector<double> ra, dec;
-			out_map->get_rebin_angles(i, rebin, ra, dec);
+			out_map->GetRebinAngles(i, rebin, ra, dec);
 			for (size_t j = 0; j < ra.size(); j++) {
 				if (interp)
-					val += in_map->get_interp_value(ra[j], dec[j]);
+					val += in_map->GetInterpValue(ra[j], dec[j]);
 				else
-					val += (*in_map)[in_map->angle_to_pixel(ra[j], dec[j])];
+					val += (*in_map)[in_map->AngleToPixel(ra[j], dec[j])];
 			}
 			val /= ra.size();
 		} else {
-			std::vector<double> radec = out_map->pixel_to_angle(i);
+			std::vector<double> radec = out_map->PixelToAngle(i);
 			if (interp)
-				val = in_map->get_interp_value(radec[0], radec[1]);
+				val = in_map->GetInterpValue(radec[0], radec[1]);
 			else
-				val = (*in_map)[in_map->angle_to_pixel(radec[0], radec[1])];
+				val = (*in_map)[in_map->AngleToPixel(radec[0], radec[1])];
 		}
 		if (val != 0)
 			(*out_map)[i] = val;
 	}
 
 	out_map->coord_ref = in_map->coord_ref;
-	out_map->is_weighted = in_map->is_weighted;
+	out_map->weighted = in_map->weighted;
 	out_map->units = in_map->units;
 	out_map->pol_type = in_map->pol_type;
 }
@@ -116,10 +116,10 @@ void reproj_map(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool in
 
 namespace bp = boost::python;
 void maputils_pybindings(void){
-	bp::def("get_ra_dec_map", get_ra_dec_map, (bp::arg("map_in")),
+	bp::def("get_ra_dec_map", GetRaDecMap, (bp::arg("map_in")),
 		"Returns maps of the ra and dec angles for each pixel in the input map");
 
-	bp::def("flatten_pol", flatten_pol,
+	bp::def("flatten_pol", FlattenPol,
 		(bp::arg("Q"), bp::arg("U"), bp::arg("h")=0.001, bp::arg("invert")=false),
 		"For maps defined on the sphere the direction of the polarization angle is "
 		"is defined relative to the direction of North.  When making maps we follow "
@@ -130,7 +130,7 @@ void maputils_pybindings(void){
 		"definition to the flat sky Q/U definition.\n\nIf for whatever reason you "
 		"want to reverse the process set the invert argument to True.");
 
-	bp::def("reproj_map", reproj_map,
+	bp::def("reproj_map", ReprojMap,
 		(bp::arg("in_map"), bp::arg("out_map"), bp::arg("rebin")=1, bp::arg("interp")=false),
 		"Takes the data in in_map and reprojects it onto out_map.  out_map can\n"
 		"have a different projection, size, resolution, etc.  Optionally account\n"

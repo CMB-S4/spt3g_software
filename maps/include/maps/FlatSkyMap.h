@@ -20,7 +20,7 @@ public:
 	// non-zero, will set the X resolution to a different number than res,
 	// creating a map with rectangular pixels.
 	FlatSkyMap(size_t x_len, size_t y_len, double res,
- 	    bool is_weighted = true,
+	    bool weighted = true,
 	    MapProjection proj = MapProjection::ProjNone, 
 	    double alpha_center = 0, double delta_center = 0, 
 	    MapCoordReference coord_ref = MapCoordReference::Equatorial,
@@ -31,7 +31,7 @@ public:
 
 	// Constructor from a numpy array
 	FlatSkyMap(boost::python::object v, double res, 
-	    bool is_weighted = true,
+	    bool weighted = true,
 	    MapProjection proj = MapProjection::ProjNone, 
 	    double alpha_center = 0, double delta_center = 0, 
 	    MapCoordReference coord_ref = MapCoordReference::Equatorial,
@@ -42,7 +42,7 @@ public:
 
 	FlatSkyMap(const FlatSkyProjection & fp,
 	    MapCoordReference coord_ref = MapCoordReference::Equatorial,
-	    bool is_weighted = true,
+	    bool weighted = true,
 	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
 	    G3SkyMap::MapPolType pol_type = MapPolType::None);
 
@@ -80,19 +80,19 @@ public:
 	std::string Description() const override;
 
 	std::vector<size_t> shape() const override;
-	size_t npix_allocated() const override;
+	size_t NpixAllocated() const override;
 	bool IsCompatible(const G3SkyMap & other) const override;
 	void NonZeroPixels(std::vector<uint64_t> &indices,
 	    std::vector<double> &data) const;
 
-	void set_proj(MapProjection proj);
-	void set_alpha_center(double alpha);
-	void set_delta_center(double delta);
-	void set_x_center(double y);
-	void set_y_center(double y);
-	void set_xres(double res);
-	void set_yres(double res);
-	void set_res(double res);
+	void SetProj(MapProjection proj);
+	void SetAlphaCenter(double alpha);
+	void SetDeltaCenter(double delta);
+	void SetXCenter(double y);
+	void SetYCenter(double y);
+	void SetXRes(double res);
+	void SetYRes(double res);
+	void SetRes(double res);
 
 	MapProjection proj() const;
 	double alpha_center() const;
@@ -103,18 +103,18 @@ public:
 	double yres() const;
 	double res() const;
 
-	size_t angle_to_pixel(double alpha, double delta) const override;
-	std::vector<double> pixel_to_angle(size_t pixel) const override;
-	std::vector<double> pixel_to_angle(size_t x_pix, size_t y_pix) const;
-	std::vector<double> pixel_to_angle_wrap_ra(size_t pixel) const;
-	std::vector<double> angle_to_xy(double alpha, double delta) const;
-	std::vector<double> xy_to_angle(double x, double y) const;
+	size_t AngleToPixel(double alpha, double delta) const override;
+	std::vector<double> PixelToAngle(size_t pixel) const override;
+	std::vector<double> PixelToAngle(size_t x_pix, size_t y_pix) const;
+	std::vector<double> PixelToAngleWrapRa(size_t pixel) const;
+	std::vector<double> AngleToXY(double alpha, double delta) const;
+	std::vector<double> XYToAngle(double x, double y) const;
 
-	std::vector<double> pixel_to_angle_grad(size_t pixel, double h=0.001) const;
+	std::vector<double> PixelToAngleGrad(size_t pixel, double h=0.001) const;
 
-	void get_rebin_angles(long pixel, size_t scale,
+	void GetRebinAngles(long pixel, size_t scale,
 	    std::vector<double> & alphas, std::vector<double> & deltas) const override;
-	void get_interp_pixels_weights(double alpha, double delta,
+	void GetInterpPixelsWeights(double alpha, double delta,
 	    std::vector<long> & pixels, std::vector<double> & weights) const override;
 
 	G3SkyMapPtr Rebin(size_t scale, bool norm = true) const override;
@@ -162,7 +162,7 @@ public:
 	const_iterator end() const { return const_iterator(*this, false); };
 
 protected:
-	virtual void init_from_v1_data(std::vector<size_t>, const std::vector<double> &) override;
+	virtual void InitFromV1Data(std::vector<size_t>, const std::vector<double> &) override;
 
 private:
 	FlatSkyProjection proj_info; // projection parameters and functions

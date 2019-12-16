@@ -7,22 +7,22 @@
 
 #include "mapdata.h"
 
-FlatSkyMap::FlatSkyMap(size_t x_len, size_t y_len, double res, bool is_weighted,
+FlatSkyMap::FlatSkyMap(size_t x_len, size_t y_len, double res, bool weighted,
     MapProjection proj, double alpha_center, double delta_center,
     MapCoordReference coord_ref, G3Timestream::TimestreamUnits u,
     G3SkyMap::MapPolType pol_type, double x_res, double x_center, double y_center) :
-      G3SkyMap(coord_ref, is_weighted, u, pol_type),
+      G3SkyMap(coord_ref, weighted, u, pol_type),
       proj_info(x_len, y_len, res, alpha_center, delta_center, x_res, proj, x_center, y_center),
       dense_(NULL), sparse_(NULL), xpix_(x_len), ypix_(y_len)
 {
 }
 
 FlatSkyMap::FlatSkyMap(boost::python::object v, double res,
-    bool is_weighted, MapProjection proj,
+    bool weighted, MapProjection proj,
     double alpha_center, double delta_center,
     MapCoordReference coord_ref, G3Timestream::TimestreamUnits u,
     G3SkyMap::MapPolType pol_type, double x_res, double x_center, double y_center) :
-      G3SkyMap(coord_ref, is_weighted, u, pol_type),
+      G3SkyMap(coord_ref, weighted, u, pol_type),
       dense_(NULL), sparse_(NULL)
 {
 	Py_buffer view;
@@ -65,9 +65,9 @@ FlatSkyMap::FlatSkyMap(boost::python::object v, double res,
 }
 
 FlatSkyMap::FlatSkyMap(const FlatSkyProjection & fp,
-    MapCoordReference coord_ref, bool is_weighted,
+    MapCoordReference coord_ref, bool weighted,
     G3Timestream::TimestreamUnits u, G3SkyMap::MapPolType pol_type) :
-      G3SkyMap(coord_ref, is_weighted, u, pol_type),
+      G3SkyMap(coord_ref, weighted, u, pol_type),
       proj_info(fp), dense_(NULL), sparse_(NULL),
       xpix_(fp.xdim()), ypix_(fp.ydim())
 {
@@ -173,7 +173,7 @@ FlatSkyMap::load(A &ar, unsigned v)
 }
 
 void
-FlatSkyMap::init_from_v1_data(std::vector<size_t> dims, const std::vector<double> &data)
+FlatSkyMap::InitFromV1Data(std::vector<size_t> dims, const std::vector<double> &data)
 {
 	xpix_ = dims[0];
 	ypix_ = dims[1];
@@ -257,7 +257,7 @@ FlatSkyMap::Clone(bool copy_data) const
 		return boost::make_shared<FlatSkyMap>(*this);
 	else
 		return boost::make_shared<FlatSkyMap>(proj_info,
-		    coord_ref, is_weighted, units, pol_type);
+		    coord_ref, weighted, units, pol_type);
 }
 
 double
@@ -497,7 +497,7 @@ FlatSkyMap::NonZeroPixels(std::vector<uint64_t> &indices,
 	indices.clear();
 	data.clear();
 
-	size_t npix = npix_allocated();
+	size_t npix = NpixAllocated();
 	if (npix == 0)
 		return;
 
@@ -516,7 +516,7 @@ std::vector<size_t> FlatSkyMap::shape() const {
 	return {xpix_, ypix_};
 }
 
-size_t FlatSkyMap::npix_allocated() const {
+size_t FlatSkyMap::NpixAllocated() const {
 	if (dense_)
 		return xpix_*ypix_;
 	if (sparse_)
@@ -524,63 +524,63 @@ size_t FlatSkyMap::npix_allocated() const {
 	return 0;
 }
 
-#define GETSET(name, type)                     \
+#define GETSET(name, cname, type)              \
 	type FlatSkyMap::name() const          \
 	{                                      \
 		return proj_info.name();       \
 	}                                      \
-	void FlatSkyMap::set_##name(type name) \
+	void FlatSkyMap::Set##cname(type name) \
 	{                                      \
-		proj_info.set_##name(name);    \
+		proj_info.Set##cname(name);    \
 	}
 
-GETSET(proj, MapProjection);
-GETSET(alpha_center, double);
-GETSET(delta_center, double);
-GETSET(x_center, double);
-GETSET(y_center, double);
-GETSET(xres, double);
-GETSET(yres, double);
-GETSET(res, double);
+GETSET(proj, Proj, MapProjection);
+GETSET(alpha_center, AlphaCenter, double);
+GETSET(delta_center, DeltaCenter, double);
+GETSET(x_center, XCenter, double);
+GETSET(y_center, YCenter, double);
+GETSET(xres, XRes, double);
+GETSET(yres, YRes, double);
+GETSET(res, Res, double);
 
-std::vector<double> FlatSkyMap::angle_to_xy(double alpha, double delta) const {
-	return proj_info.angle_to_xy(alpha, delta);
+std::vector<double> FlatSkyMap::AngleToXY(double alpha, double delta) const {
+	return proj_info.AngleToXY(alpha, delta);
 }
 
-std::vector<double> FlatSkyMap::xy_to_angle(double x, double y) const {
-	return proj_info.xy_to_angle(x, y, false);
+std::vector<double> FlatSkyMap::XYToAngle(double x, double y) const {
+	return proj_info.XYToAngle(x, y, false);
 }
 
-size_t FlatSkyMap::angle_to_pixel(double alpha, double delta) const {
-	return proj_info.angle_to_pixel(alpha, delta);
+size_t FlatSkyMap::AngleToPixel(double alpha, double delta) const {
+	return proj_info.AngleToPixel(alpha, delta);
 }
 
-std::vector<double> FlatSkyMap::pixel_to_angle(size_t pixel) const {
-	return proj_info.pixel_to_angle(pixel, false);
+std::vector<double> FlatSkyMap::PixelToAngle(size_t pixel) const {
+	return proj_info.PixelToAngle(pixel, false);
 }
 
-std::vector<double> FlatSkyMap::pixel_to_angle(size_t x, size_t y) const {
-	return proj_info.pixel_to_angle(y*xpix_ + x, false);
+std::vector<double> FlatSkyMap::PixelToAngle(size_t x, size_t y) const {
+	return proj_info.PixelToAngle(y*xpix_ + x, false);
 }
 
-std::vector<double> FlatSkyMap::pixel_to_angle_wrap_ra(size_t pixel) const {
-	return proj_info.pixel_to_angle(pixel, true);
+std::vector<double> FlatSkyMap::PixelToAngleWrapRa(size_t pixel) const {
+	return proj_info.PixelToAngle(pixel, true);
 }
 
-std::vector<double> FlatSkyMap::pixel_to_angle_grad(size_t pixel, double h) const {
-	return proj_info.pixel_to_angle_grad(pixel, h);
+std::vector<double> FlatSkyMap::PixelToAngleGrad(size_t pixel, double h) const {
+	return proj_info.PixelToAngleGrad(pixel, h);
 }
 
-void FlatSkyMap::get_rebin_angles(long pixel, size_t scale,
+void FlatSkyMap::GetRebinAngles(long pixel, size_t scale,
     std::vector<double> & alphas, std::vector<double> & deltas) const
 {
-	proj_info.get_rebin_angles(pixel, scale, alphas, deltas, false);
+	proj_info.GetRebinAngles(pixel, scale, alphas, deltas, false);
 }
 
-void FlatSkyMap::get_interp_pixels_weights(double alpha, double delta,
+void FlatSkyMap::GetInterpPixelsWeights(double alpha, double delta,
     std::vector<long> & pixels, std::vector<double> & weights) const
 {
-	proj_info.get_interp_pixels_weights(alpha, delta, pixels, weights);
+	proj_info.GetInterpPixelsWeights(alpha, delta, pixels, weights);
 }
 
 G3SkyMapPtr FlatSkyMap::Rebin(size_t scale, bool norm) const
@@ -593,8 +593,8 @@ G3SkyMapPtr FlatSkyMap::Rebin(size_t scale, bool norm) const
 	if (scale <= 1)
 		return Clone(true);
 
-	FlatSkyProjection p(proj_info.rebin(scale));
-	FlatSkyMapPtr out(new FlatSkyMap(p, coord_ref, is_weighted, units, pol_type));
+	FlatSkyProjection p(proj_info.Rebin(scale));
+	FlatSkyMapPtr out(new FlatSkyMap(p, coord_ref, weighted, units, pol_type));
 
 	if (dense_)
 		out->ConvertToDense();
@@ -801,7 +801,7 @@ PYBINDINGS("maps")
 	       double, MapCoordReference, G3Timestream::TimestreamUnits,
 	       G3SkyMap::MapPolType, double, double, double>(
 	         (bp::arg("x_len"), bp::arg("y_len"), bp::arg("res"),
-		  bp::args("is_weighted") = true,
+		  bp::arg("weighted") = true,
 		  bp::arg("proj") = MapProjection::ProjNone,
 		  bp::arg("alpha_center") = 0, bp::arg("delta_center") = 0,
 		  bp::arg("coord_ref") = MapCoordReference::Equatorial,
@@ -812,7 +812,7 @@ PYBINDINGS("maps")
 	       double, double, MapCoordReference, G3Timestream::TimestreamUnits,
 	       G3SkyMap::MapPolType, double, double, double>(
 		  (bp::arg("obj"), bp::arg("res"),
-		   bp::args("is_weighted") = true,
+		   bp::arg("weighted") = true,
 		   bp::arg("proj") = MapProjection::ProjNone,
 		   bp::arg("alpha_center") = 0, bp::arg("delta_center") = 0,
 		   bp::arg("coord_ref") = MapCoordReference::Equatorial,
@@ -823,37 +823,37 @@ PYBINDINGS("maps")
 
 	    .def(bp::init<const FlatSkyMap&>(bp::arg("flat_map")))
 	    .def(bp::init<>())
-	    .add_property("proj", &FlatSkyMap::proj, &FlatSkyMap::set_proj,
+	    .add_property("proj", &FlatSkyMap::proj, &FlatSkyMap::SetProj,
 	      "Map projection (one of maps.MapProjection)")
 	    .add_property("alpha_center", &FlatSkyMap::alpha_center,
-	      &FlatSkyMap::set_alpha_center, "Horizontal axis center position")
+	      &FlatSkyMap::SetAlphaCenter, "Horizontal axis center position")
 	    .add_property("delta_center", &FlatSkyMap::delta_center,
-	      &FlatSkyMap::set_delta_center, "Vertical axis center position")
+	      &FlatSkyMap::SetDeltaCenter, "Vertical axis center position")
 	    .add_property("x_center", &FlatSkyMap::x_center,
-	      &FlatSkyMap::set_x_center, "Horizontal axis center pixel position")
+	      &FlatSkyMap::SetXCenter, "Horizontal axis center pixel position")
 	    .add_property("y_center", &FlatSkyMap::y_center,
-	      &FlatSkyMap::set_y_center, "Vertical axis center pixel position")
-	    .add_property("res", &FlatSkyMap::res, &FlatSkyMap::set_res,
+	      &FlatSkyMap::SetYCenter, "Vertical axis center pixel position")
+	    .add_property("res", &FlatSkyMap::res, &FlatSkyMap::SetRes,
 	      "Map resolution in angular units for maps with square pixels")
-	    .add_property("x_res", &FlatSkyMap::xres, &FlatSkyMap::set_xres,
+	    .add_property("x_res", &FlatSkyMap::xres, &FlatSkyMap::SetXRes,
 	      "Resolution in X direction for maps with rectangular pixels")
-	    .add_property("y_res", &FlatSkyMap::yres, &FlatSkyMap::set_yres,
+	    .add_property("y_res", &FlatSkyMap::yres, &FlatSkyMap::SetYRes,
 	      "Resolution in Y direction for maps with rectangular pixels")
 
 	    .def("pixel_to_angle",
 	      (std::vector<double> (FlatSkyMap::*)(size_t) const)
-	      &FlatSkyMap::pixel_to_angle, bp::arg("pixel"),
+	      &FlatSkyMap::PixelToAngle, bp::arg("pixel"),
 	      "Compute the sky coordinates of the given 1D pixel")
 	    .def("pixel_to_angle",
 	      (std::vector<double> (FlatSkyMap::*)(size_t, size_t) const)
-	      &FlatSkyMap::pixel_to_angle, (bp::arg("x"), bp::arg("y")),
+	      &FlatSkyMap::PixelToAngle, (bp::arg("x"), bp::arg("y")),
 	      "Compute the sky coordinates of the given 2D pixel (also see "
 	      "xy_to_angle()")
 
-	    .def("xy_to_angle", &FlatSkyMap::xy_to_angle,
+	    .def("xy_to_angle", &FlatSkyMap::XYToAngle,
 	      (bp::arg("x"), bp::arg("y")),
 	       "Compute the sky coordinates of the input flat 2D coordinates")
-	    .def("angle_to_xy", &FlatSkyMap::angle_to_xy,
+	    .def("angle_to_xy", &FlatSkyMap::AngleToXY,
 	      (bp::arg("alpha"), bp::arg("delta")),
 	       "Compute the flat 2D coordinates of the input sky coordinates")
 

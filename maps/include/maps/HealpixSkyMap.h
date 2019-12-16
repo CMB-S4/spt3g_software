@@ -17,8 +17,8 @@ class HealpixSkyMap : public G3FrameObject, public G3SkyMap {
 public:
 	// Construct a Healpix map with given nside, units, and coordinates.
 	HealpixSkyMap(size_t nside,
- 	    bool is_weighted = true,
- 	    bool is_nested = false,
+	    bool weighted = true,
+	    bool nested = false,
 	    MapCoordReference coord_ref = MapCoordReference::Equatorial,
 	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
 	    G3SkyMap::MapPolType pol_type = MapPolType::None,
@@ -26,8 +26,8 @@ public:
 
 	// Constructor from a numpy array
 	HealpixSkyMap(boost::python::object v,
-	    bool is_weighted = true,
- 	    bool is_nested = false,
+	    bool weighted = true,
+	    bool nested = false,
 	    MapCoordReference coord_ref = MapCoordReference::Equatorial,
 	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
 	    G3SkyMap::MapPolType pol_type = MapPolType::None);
@@ -62,20 +62,20 @@ public:
 	std::string Description() const override;
 
 	std::vector<size_t> shape() const override;
-	size_t npix_allocated() const override;
+	size_t NpixAllocated() const override;
 	bool IsCompatible(const G3SkyMap & other) const override;
 	void NonZeroPixels(std::vector<uint64_t> &indices,
 	    std::vector<double> &data) const; // Iterators better?
 
 	size_t nside() const {return nside_;}
-	bool nested() const {return is_nested_;}
+	bool nested() const {return nested_;}
 
-	size_t angle_to_pixel(double alpha, double delta) const override;
-	std::vector<double> pixel_to_angle(size_t pixel) const override;
+	size_t AngleToPixel(double alpha, double delta) const override;
+	std::vector<double> PixelToAngle(size_t pixel) const override;
 
-	void get_rebin_angles(long pixel, size_t scale,
+	void GetRebinAngles(long pixel, size_t scale,
 	    std::vector<double> & alphas, std::vector<double> & deltas) const override;
-	void get_interp_pixels_weights(double alpha, double delta,
+	void GetInterpPixelsWeights(double alpha, double delta,
 	    std::vector<long> & pixels, std::vector<double> & weights) const override;
 
 	G3SkyMapPtr Rebin(size_t scale, bool norm = true) const override;
@@ -131,7 +131,7 @@ public:
 private:
 	uint32_t nside_;
 	size_t npix_;
-	bool is_nested_;
+	bool nested_;
 	std::vector<double> *dense_;
 	SparseMapData *ring_sparse_;
 	std::unordered_map<uint64_t, double> *indexed_sparse_;

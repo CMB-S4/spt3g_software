@@ -31,11 +31,11 @@ public:
 		None = 7
 	};
 
-	G3SkyMap(MapCoordReference coords, bool isweighted = true,
+	G3SkyMap(MapCoordReference coords, bool weighted_ = true,
 	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
 	    MapPolType pol_type = None) :
 	    coord_ref(coords), units(u), pol_type(pol_type),
-	    is_weighted(isweighted), overflow(0) {}
+	    weighted(weighted_), overflow(0) {}
 	virtual ~G3SkyMap() {};
 
 	// Reimplement the following in subclasses
@@ -44,7 +44,7 @@ public:
 	MapCoordReference coord_ref;
 	G3Timestream::TimestreamUnits units;
 	MapPolType pol_type;
-	bool is_weighted;
+	bool weighted;
 	double overflow;
 
 	void SetOverflow(double val) __attribute__((deprecated)) {
@@ -60,7 +60,7 @@ public:
 	double at(size_t i) const { return (*this)[i]; };
 
 	virtual size_t size(void) const;  // total number of pixels
-	virtual size_t npix_allocated(void) const = 0;  // stored in RAM
+	virtual size_t NpixAllocated(void) const = 0;  // stored in RAM
 	virtual std::vector<size_t> shape(void) const = 0;  // map shape
 
 	virtual bool IsCompatible(const G3SkyMap & other) const {
@@ -91,23 +91,23 @@ public:
 	virtual G3SkyMap &operator/=(double rhs);
 
 	// Pointing information
-	std::vector<int> angles_to_pixels(const std::vector<double> & alphas,
+	std::vector<int> AnglesToPixels(const std::vector<double> & alphas,
 	    const std::vector<double> & deltas) const;
-	void pixels_to_angles(const std::vector<int> & pixels,
+	void PixelsToAngles(const std::vector<int> & pixels,
 	    std::vector<double> & alphas, std::vector<double> & deltas) const;
 
-	virtual std::vector<double> pixel_to_angle(size_t pixel) const = 0;
-	virtual size_t angle_to_pixel(double alpha, double delta) const = 0;
+	virtual std::vector<double> PixelToAngle(size_t pixel) const = 0;
+	virtual size_t AngleToPixel(double alpha, double delta) const = 0;
 
 	// Rebinning and interpolation
-	virtual void get_rebin_angles(long pixel, size_t scale,
+	virtual void GetRebinAngles(long pixel, size_t scale,
 	    std::vector<double> & alphas, std::vector<double> & deltas) const = 0;
-	virtual void get_interp_pixels_weights(double alpha, double delta,
+	virtual void GetInterpPixelsWeights(double alpha, double delta,
 	    std::vector<long> & pixels, std::vector<double> & weights) const = 0;
-	double get_interp_precalc(const std::vector<long> &pixels,
+	double GetInterpPrecalc(const std::vector<long> &pixels,
 	    const std::vector<double> &weights) const;
-	double get_interp_value(double alpha, double delta) const;
-	std::vector<double> get_interp_values(const std::vector<double> &alphas,
+	double GetInterpValue(double alpha, double delta) const;
+	std::vector<double> GetInterpValues(const std::vector<double> &alphas,
 	    const std::vector<double> &deltas) const;
 
 	virtual boost::shared_ptr<G3SkyMap> Rebin(size_t scale, bool norm = true) const = 0;
@@ -120,7 +120,7 @@ public:
 	}
 
 protected:
-	virtual void init_from_v1_data(std::vector<size_t>,
+	virtual void InitFromV1Data(std::vector<size_t>,
 	    const std::vector<double> &) {
 		throw std::runtime_error("Initializing from V1 not implemented");
 	}
@@ -244,14 +244,14 @@ public:
 		return s;
 	}
 
-	double det() const {
+	double Det() const {
 		return (tt * (qq * uu - qu * qu) -
 			tq * (tq * uu - qu * tu) +
 			tu * (tq * qu - qq * tu));
 	}
 
-	MuellerMatrix inv() const;
-	double cond() const;
+	MuellerMatrix Inv() const;
+	double Cond() const;
 
 private:
 	double backing[6];
@@ -262,7 +262,7 @@ public:
 	G3SkyMapWeights() {}
 
 	// Instantiate weight maps based on the metadata of a reference map
-	G3SkyMapWeights(G3SkyMapConstPtr ref_map, bool ispolarized = true);
+	G3SkyMapWeights(G3SkyMapConstPtr ref_map, bool polarized = true);
 
 	G3SkyMapWeights(const G3SkyMapWeights &r);
 	G3SkyMapPtr TT, TQ, TU, QQ, QU, UU;
@@ -332,8 +332,8 @@ class G3SkyMapWithWeights : public G3FrameObject {
 public:
 	G3SkyMapWithWeights() {}
 
-	G3SkyMapWithWeights(G3SkyMapConstPtr ref_map, bool isweighted = true,
-	    bool ispolarized = true, std::string map_id = "");
+	G3SkyMapWithWeights(G3SkyMapConstPtr ref_map, bool weighted = true,
+	    bool polarized = true, std::string map_id = "");
 
 	G3SkyMapWithWeights(const G3SkyMapWithWeights &r);
 

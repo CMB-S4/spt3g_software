@@ -7,7 +7,7 @@ from spt3g.maps import G3SkyMapWithWeights, G3SkyMapWeights, FlatSkyMap
 for pol in [True, False]:
     # allocation
     m = FlatSkyMap(500, 20, core.G3Units.arcmin)
-    mw = G3SkyMapWithWeights(m, isweighted=True, ispolarized=pol)
+    mw = G3SkyMapWithWeights(m, weighted=True, polarized=pol)
     assert(mw.shape == m.shape)
     assert(mw.npix_allocated == 0)
     assert(mw.polarized == pol)

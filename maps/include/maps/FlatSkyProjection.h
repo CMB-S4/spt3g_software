@@ -61,16 +61,16 @@ public:
 	bool IsCompatible(const FlatSkyProjection & other) const;
 	std::string Description() const override;
 
-	void set_proj(MapProjection proj);
-	void set_alpha_center(double alpha);
-	void set_delta_center(double delta);
-	void set_angle_center(double alpha, double delta);
-	void set_xy_center(double x, double y);
-	void set_x_center(double x);
-	void set_y_center(double y);
-	void set_xres(double res);
-	void set_yres(double res);
-	void set_res(double res, double x_res=0);
+	void SetProj(MapProjection proj);
+	void SetAlphaCenter(double alpha);
+	void SetDeltaCenter(double delta);
+	void SetAngleCenter(double alpha, double delta);
+	void SetXYCenter(double x, double y);
+	void SetXCenter(double x);
+	void SetYCenter(double y);
+	void SetXRes(double res);
+	void SetYRes(double res);
+	void SetRes(double res, double x_res=0);
 
 	size_t xdim() const { return xpix_; };
 	size_t ydim() const { return ypix_; };
@@ -83,23 +83,23 @@ public:
 	double yres() const { return y_res_; };
 	double res() const { return y_res_; };
 
-	long xy_to_pixel(double x, double y) const;
-	std::vector<double> pixel_to_xy(long pixel) const;
-	std::vector<double> xy_to_angle(double x, double y, bool wrap_alpha=false) const;
-	std::vector<double> angle_to_xy(double alpha, double delta) const;
-	std::vector<double> pixel_to_angle(long pixel, bool wrap_alpha=false) const;
-	long angle_to_pixel(double alpha, double delta) const;
+	long XYToPixel(double x, double y) const;
+	std::vector<double> PixelToXY(long pixel) const;
+	std::vector<double> XYToAngle(double x, double y, bool wrap_alpha=false) const;
+	std::vector<double> AngleToXY(double alpha, double delta) const;
+	std::vector<double> PixelToAngle(long pixel, bool wrap_alpha=false) const;
+	long AngleToPixel(double alpha, double delta) const;
 
-	std::vector<double> xy_to_angle_grad(double x, double y, double h=0.001) const;
-	std::vector<double> pixel_to_angle_grad(long pixel, double h=0.001) const;
+	std::vector<double> XYToAngleGrad(double x, double y, double h=0.001) const;
+	std::vector<double> PixelToAngleGrad(long pixel, double h=0.001) const;
 
-        void get_rebin_angles(long pixel, size_t scale,
+        void GetRebinAngles(long pixel, size_t scale,
 	    std::vector<double> & alphas, std::vector<double> & deltas,
 	    bool wrap_alpha=false) const;
-	void get_interp_pixels_weights(double alpha, double delta,
+	void GetInterpPixelsWeights(double alpha, double delta,
 	    std::vector<long> & pixels, std::vector<double> & weights) const;
 
-	FlatSkyProjection rebin(size_t scale, double x_center = 0.0 / 0.0,
+	FlatSkyProjection Rebin(size_t scale, double x_center = 0.0 / 0.0,
 	    double y_center = 0.0 / 0.0) const;
 
 private:

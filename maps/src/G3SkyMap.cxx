@@ -36,13 +36,13 @@ G3SkyMap::serialize(A &ar, unsigned v)
 		} else {
 			overflow = 0;
 		}
-		init_from_v1_data(dims, dat);
+		InitFromV1Data(dims, dat);
 	} else {
 		ar & cereal::make_nvp("overflow", overflow);
 	}
 
 	ar & cereal::make_nvp("pol_type", pol_type);
-	ar & cereal::make_nvp("is_weighted", is_weighted);
+	ar & cereal::make_nvp("weighted", weighted);
 }
 
 template <class A> void
@@ -95,12 +95,12 @@ G3_SERIALIZABLE_CODE(G3SkyMap);
 G3_SERIALIZABLE_CODE(G3SkyMapWeights);
 G3_SERIALIZABLE_CODE(G3SkyMapWithWeights);
 
-G3SkyMapWeights::G3SkyMapWeights(G3SkyMapConstPtr ref, bool ispolarized) :
-    TT(ref->Clone(false)), TQ(ispolarized ? ref->Clone(false) : NULL),
-    TU(ispolarized ? ref->Clone(false) : NULL),
-    QQ(ispolarized ? ref->Clone(false) : NULL),
-    QU(ispolarized ? ref->Clone(false) : NULL),
-    UU(ispolarized ? ref->Clone(false) : NULL)
+G3SkyMapWeights::G3SkyMapWeights(G3SkyMapConstPtr ref, bool polarized) :
+    TT(ref->Clone(false)), TQ(polarized ? ref->Clone(false) : NULL),
+    TU(polarized ? ref->Clone(false) : NULL),
+    QQ(polarized ? ref->Clone(false) : NULL),
+    QU(polarized ? ref->Clone(false) : NULL),
+    UU(polarized ? ref->Clone(false) : NULL)
 {
 }
 
@@ -114,10 +114,10 @@ G3SkyMapWeights::G3SkyMapWeights(const G3SkyMapWeights &r) :
 }
 
 G3SkyMapWithWeights::G3SkyMapWithWeights(G3SkyMapConstPtr ref,
-  bool isweighted, bool ispolarized, std::string map_id_) :
-    T(ref->Clone(false)), Q(ispolarized ? ref->Clone(false) : NULL),
-    U(ispolarized ? ref->Clone(false) : NULL),
-    weights(isweighted ? new G3SkyMapWeights(ref, ispolarized) : NULL),
+  bool weighted, bool polarized, std::string map_id_) :
+    T(ref->Clone(false)), Q(polarized ? ref->Clone(false) : NULL),
+    U(polarized ? ref->Clone(false) : NULL),
+    weights(weighted ? new G3SkyMapWeights(ref, polarized) : NULL),
     map_id(map_id_)
 {
 }
@@ -130,19 +130,19 @@ G3SkyMapWithWeights::G3SkyMapWithWeights(const G3SkyMapWithWeights &r) :
 {
 }
 
-std::vector<int> G3SkyMap::angles_to_pixels(const std::vector<double> & alphas,
+std::vector<int> G3SkyMap::AnglesToPixels(const std::vector<double> & alphas,
     const std::vector<double> & deltas) const
 {
 	std::vector<int> pixels(alphas.size());
 
 	for (size_t i = 0; i < alphas.size(); i++) {
-		pixels[i] = angle_to_pixel(alphas[i], deltas[i]);
+		pixels[i] = AngleToPixel(alphas[i], deltas[i]);
 	}
 
 	return pixels;
 }
 
-void G3SkyMap::pixels_to_angles(const std::vector<int> & pixels,
+void G3SkyMap::PixelsToAngles(const std::vector<int> & pixels,
     std::vector<double> & alphas, std::vector<double> & deltas) const
 {
 	if (alphas.size() != pixels.size()) {
@@ -154,7 +154,7 @@ void G3SkyMap::pixels_to_angles(const std::vector<int> & pixels,
 
 	for (size_t i = 0; i < pixels.size(); i++) {
 		std::vector<double> ang;
-		ang = pixel_to_angle(pixels[i]);
+		ang = PixelToAngle(pixels[i]);
 		alphas[i] = ang[0];
 		deltas[i] = ang[1];
 	}
@@ -164,7 +164,7 @@ static boost::python::tuple
 skymap_pixels_to_angles(const G3SkyMap & skymap, const std::vector<int> & pixels)
 {
 	std::vector<double> alphas, deltas;
-	skymap.pixels_to_angles(pixels, alphas, deltas);
+	skymap.PixelsToAngles(pixels, alphas, deltas);
 
 	return boost::python::make_tuple(alphas, deltas);
 }
@@ -237,7 +237,7 @@ G3SkyMap &G3SkyMap::operator/=(double rhs)
 	return *this;
 }
 
-double G3SkyMap::get_interp_precalc(const std::vector<long> & pix,
+double G3SkyMap::GetInterpPrecalc(const std::vector<long> & pix,
     const std::vector<double> & weight) const
 {
 	double outval = 0;
@@ -247,21 +247,21 @@ double G3SkyMap::get_interp_precalc(const std::vector<long> & pix,
 	return outval;
 }
 
-double G3SkyMap::get_interp_value(double alpha, double delta) const
+double G3SkyMap::GetInterpValue(double alpha, double delta) const
 {
 	std::vector<long> pix;
 	std::vector<double> weight;
-	get_interp_pixels_weights(alpha, delta, pix, weight);
-	return get_interp_precalc(pix, weight);
+	GetInterpPixelsWeights(alpha, delta, pix, weight);
+	return GetInterpPrecalc(pix, weight);
 }
 
-std::vector<double> G3SkyMap::get_interp_values(const std::vector<double> & alphas,
+std::vector<double> G3SkyMap::GetInterpValues(const std::vector<double> & alphas,
     const std::vector<double> & deltas) const
 {
 	std::vector<double> outvals(alphas.size());
 
 	for (size_t i = 0; i < alphas.size(); i++) {
-		outvals[i] = get_interp_value(alphas[i], deltas[i]);
+		outvals[i] = GetInterpValue(alphas[i], deltas[i]);
 	}
 
 	return outvals;
@@ -457,10 +457,10 @@ skymapwithweights_pynoninplace(multm, *=, G3SkyMap &);
 skymapwithweights_pynoninplace(multd, *=, double);
 skymapwithweights_pynoninplace(divd, /=, double);
 
-MuellerMatrix MuellerMatrix::inv() const
+MuellerMatrix MuellerMatrix::Inv() const
 {
 	MuellerMatrix m;
-	double d = det();
+	double d = Det();
 	if (tt == 0 || d < 1e-12) {
 		if (d < 1e-12 && tt != 0)
 			log_trace("Singular matrix found when inverting!  Det is %lE\n", d);
@@ -478,7 +478,7 @@ MuellerMatrix MuellerMatrix::inv() const
 	return m;
 }
 
-double MuellerMatrix::cond() const
+double MuellerMatrix::Cond() const
 {
 	// Compute eigenvalues of a symmetrix 3x3 matrix
 	// See https://en.wikipedia.org/wiki/Eigenvalue_algorithm#3%C3%973_matrices
@@ -512,7 +512,7 @@ double MuellerMatrix::cond() const
 	MuellerMatrix B = *this;
 	B -= Q;
 	B /= p;
-	double r = B.det() / 2.0;
+	double r = B.Det() / 2.0;
 
 	double phi;
 	if (r <= -1)
@@ -529,7 +529,7 @@ double MuellerMatrix::cond() const
 
 StokesVector & StokesVector::operator /=(const MuellerMatrix &r)
 {
-	MuellerMatrix ir = r.inv();
+	MuellerMatrix ir = r.Inv();
 	if (ir.tt != ir.tt)
 		t = q = u = 0.0 / 0.0;
 	else
@@ -550,7 +550,7 @@ G3SkyMapPtr G3SkyMapWeights::Det() const
 	G3SkyMapPtr D = TT->Clone(false);
 
 	for (size_t i = 0; i < TT->size(); i++) {
-		double det = this->at(i).det();
+		double det = this->at(i).Det();
 		if (det != 0)
 			(*D)[i] = det;
 	}
@@ -564,7 +564,7 @@ G3SkyMapPtr G3SkyMapWeights::Cond() const
 	C->ConvertToDense();
 
 	for (size_t i = 0; i < TT->size(); i++)
-		(*C)[i] = this->at(i).cond();
+		(*C)[i] = this->at(i).Cond();
 
 	return C;
 }
@@ -586,10 +586,10 @@ void G3SkyMapWithWeights::ApplyWeights(G3SkyMapWeightsPtr w)
 		(*T) *= *(w->TT);
 	}
 
-	T->is_weighted = true;
+	T->weighted = true;
 	if (IsPolarized()) {
-		Q->is_weighted = true;
-		U->is_weighted = true;
+		Q->weighted = true;
+		U->weighted = true;
 	}
 
 	// Store pointer to weights here
@@ -612,10 +612,10 @@ G3SkyMapWeightsPtr G3SkyMapWithWeights::RemoveWeights()
 		(*T) /= *(weights->TT);
 	}
 
-	T->is_weighted = false;
+	T->weighted = false;
 	if (IsPolarized()) {
-		Q->is_weighted = false;
-		U->is_weighted = false;
+		Q->weighted = false;
+		U->weighted = false;
 	}
 
 	// Remove pointer to weights
@@ -694,12 +694,12 @@ PYBINDINGS("maps") {
 	      "Unit class (core.G3TimestreamUnits) of the map (e.g. "
 	      "core.G3TimestreamUnits.Tcmb). Within each unit class, further "
 	      "conversions, for example from K to uK, should use core.G3Units.")
-	    .def_readwrite("is_weighted", &G3SkyMap::is_weighted,
+	    .def_readwrite("weighted", &G3SkyMap::weighted,
 	      "True if map is multiplied by weights")
 	    .add_property("size", &G3SkyMap::size, "Number of pixels in map")
 	    .def("__len__", &G3SkyMap::size, "Number of pixels in map")
 	    .add_property("shape", &skymap_shape, "Shape of map")
-	    .add_property("npix_allocated", &G3SkyMap::npix_allocated,
+	    .add_property("npix_allocated", &G3SkyMap::NpixAllocated,
 	      "Number of pixels in map currently stored in memory")
 	    .def_readwrite("overflow", &G3SkyMap::overflow,
 	      "Combined value of data processed by "
@@ -716,7 +716,7 @@ PYBINDINGS("maps") {
 	      "Returns true if the input argument is a map with matching dimensions "
 	      "and boundaries on the sky.")
 
-	    .def("angles_to_pixels", &G3SkyMap::angles_to_pixels,
+	    .def("angles_to_pixels", &G3SkyMap::AnglesToPixels,
 	      (bp::arg("alphas"), bp::arg("deltas")),
 	       "Compute the 1D pixel location for each of the sky coordinates")
 	    .def("pixels_to_angles", &skymap_pixels_to_angles,
@@ -724,13 +724,13 @@ PYBINDINGS("maps") {
 	       "Compute the sky coordinates of each of the given 1D pixels")
 	    .def("pixel_to_angle", 
 	      (std::vector<double> (G3SkyMap::*)(size_t) const) 
-	      &G3SkyMap::pixel_to_angle, bp::arg("pixel"),
+	      &G3SkyMap::PixelToAngle, bp::arg("pixel"),
 	      "Compute the sky coordinates of the given 1D pixel")
-	    .def("angle_to_pixel", &G3SkyMap::angle_to_pixel,
+	    .def("angle_to_pixel", &G3SkyMap::AngleToPixel,
 	      (bp::arg("alpha"), bp::arg("delta")),
 	       "Compute the 1D pixel location of the given sky coordinates.")
 
-	    .def("get_interp_values", &G3SkyMap::get_interp_values,
+	    .def("get_interp_values", &G3SkyMap::GetInterpValues,
 	      (bp::arg("alphas"), bp::arg("deltas")),
 	       "Return the values at each of the input coordinate locations. "
 	       "Computes each value using bilinear interpolation over the "
@@ -771,7 +771,7 @@ PYBINDINGS("maps") {
 
 	EXPORT_FRAMEOBJECT(G3SkyMapWeights, init<>(), "generic sky weight")
 	    .def(bp::init<G3SkyMapConstPtr, bool>(
-	      (bp::arg("skymap"), bp::arg("ispolarized") = true)))
+	      (bp::arg("skymap"), bp::arg("polarized") = true)))
 	    .def_readwrite("TT",&G3SkyMapWeights::TT)
 	    .def_readwrite("TQ",&G3SkyMapWeights::TQ)
 	    .def_readwrite("TU",&G3SkyMapWeights::TU)
@@ -804,8 +804,8 @@ PYBINDINGS("maps") {
 	EXPORT_FRAMEOBJECT(G3SkyMapWithWeights, init<>(), "Container for (potentially) polarized maps and weights")
 	    .def(bp::init<G3SkyMapPtr, bool, bool, std::string>(
 	      (bp::arg("stub_map"),
-	       bp::arg("isweighted"),
-	       bp::arg("ispolarized"),
+	       bp::arg("weighted"),
+	       bp::arg("polarized"),
 	       bp::arg("map_id") = "")))
 	    .def_readwrite("T",&G3SkyMapWithWeights::T)
 	    .def_readwrite("Q",&G3SkyMapWithWeights::Q)

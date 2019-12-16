@@ -45,7 +45,7 @@ def load_skymap_fits(filename, hdu=None):
     units = 'Tcmb'
     coord_ref = 'Equatorial'
     proj = 'Proj5'
-    is_weighted = False
+    weighted = False
     alpha_center = None
     delta_center = None
     res = None
@@ -101,7 +101,7 @@ def load_skymap_fits(filename, hdu=None):
 
             elif map_type == 'healpix':
                 nside = hdr['NSIDE']
-                map_opts.update(is_nested=(hdr['ORDERING'] == 'nest'))
+                map_opts.update(nested=(hdr['ORDERING'] == 'nest'))
 
             # primary HDU
             if H.data is None:
@@ -180,11 +180,11 @@ def load_skymap_fits(filename, hdu=None):
                     units = unit_dict.get(hdr.get('TUNIT{:d}'.format(cidx + 1), units), units)
                     overflow = hdr.get('TOFLW{:d}'.format(cidx + 1), overflow)
 
-                    is_weight = hdr.get(
+                    weighted = hdr.get(
                         'TISWGT{:d}'.format(cidx + 1),
                         col in ['TT', 'TQ', 'TU', 'QQ', 'QU', 'UU'],
                     )
-                    if is_weight:
+                    if weighted:
                         assert('T' in output)
                         if pol is None:
                             pol = True if ('Q' in output and 'U' in output) else False
@@ -217,7 +217,7 @@ def load_skymap_fits(filename, hdu=None):
     for k, m in output.items():
         if k == 'W':
             continue
-        m.is_weighted = 'W' in output
+        m.weighted = 'W' in output
 
     return output
 
@@ -508,7 +508,7 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
     header['COORDREF'] = str(T.coord_ref)
     header['POLCCONV'] = 'IAU'
     header['UNITS'] = str(T.units)
-    header['WEIGHTED'] = T.is_weighted
+    header['WEIGHTED'] = T.weighted
 
     hdulist = astropy.io.fits.HDUList()
     cols = astropy.io.fits.ColDefs([])
