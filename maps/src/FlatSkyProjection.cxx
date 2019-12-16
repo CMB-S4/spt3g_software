@@ -558,7 +558,7 @@ void FlatSkyProjection::get_interp_pixels_weights(double alpha, double delta,
 	pixels[3] = x_2 + y_2 * xpix_;  weights[3] = (x - x_1) * (y - y_1);
 }
 
-FlatSkyProjection FlatSkyProjection::rebin(size_t scale) const
+FlatSkyProjection FlatSkyProjection::rebin(size_t scale, double x_center, double y_center) const
 {
 	FlatSkyProjection fp(*this);
 
@@ -568,6 +568,7 @@ FlatSkyProjection FlatSkyProjection::rebin(size_t scale) const
 	fp.xpix_ /= scale;
 	fp.ypix_ /= scale;
 	fp.set_res(y_res_ * scale, x_res_ * scale);
+	fp.set_xy_center(x_center, y_center);
 
 	return fp;
 }

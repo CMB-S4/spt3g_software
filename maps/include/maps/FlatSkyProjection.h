@@ -99,7 +99,8 @@ public:
 	void get_interp_pixels_weights(double alpha, double delta,
 	    std::vector<long> & pixels, std::vector<double> & weights) const;
 
-	FlatSkyProjection rebin(size_t scale) const;
+	FlatSkyProjection rebin(size_t scale, double x_center = 0.0 / 0.0,
+	    double y_center = 0.0 / 0.0) const;
 
 private:
 	// projection parameters
