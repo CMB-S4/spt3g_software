@@ -198,8 +198,7 @@ int DfMuxCollector::SetupSCTPSocket(std::vector<std::string> hosts)
 
 	fd_ = socket(AF_INET, SOCK_SEQPACKET, IPPROTO_SCTP);
 
-	// XXX cache for reconnect events? are disconnects fatal?
-	
+	// Connect the socket to every board in our list. Errors are fatal.
 	for (auto i : hosts) {
 		struct addrinfo hints, *res;
 		struct sockaddr_in addr;
