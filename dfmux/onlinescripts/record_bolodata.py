@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from spt3g import core, dfmux, gcp, auxdaq
+from spt3g import core, dfmux, gcp
 import socket, argparse, os, syslog
 
 parser = argparse.ArgumentParser(description='Record dfmux data to disk')
@@ -9,6 +9,8 @@ parser.add_argument('boards', nargs='*', metavar='serial', help='IceBoard serial
 parser.add_argument('output', metavar='/path/to/files/', help='Directory in which to place output files')
 
 parser.add_argument('-v', dest='verbose', action='store_true', help='Verbose mode (print all frames)')
+parser.add_argument('-u', dest='udp', action='store_true', help='Use UDP multicast instead of SCTP')
+parser.add_argument('--daq-threads', default=2, help='Number of listener threads to use (applies only for SCTP)')
 parser.add_argument('--max-file-size', default=1024, help='Maximum file size in MB (default 1024)')
 parser.add_argument('--no-calibrator', dest='calibrator', default=True, action='store_false',
                     help='Disable calibrator DAQ')
@@ -47,23 +49,31 @@ core.log_notice('Beginning data acquisition', unit='Data Acquisition')
 pipe = core.G3Pipeline()
 builder = dfmux.DfMuxBuilder([int(board) for board in boards])
 
-# Get the local IP(s) to use to connect to the boards by opening test
-# connections. Using a set rather than a list deduplicates the results.
-local_ips = {}
-for board in boards:
-    testsock = socket.create_connection(('iceboard' + board + '.local', 80))
-    local_ip = testsock.getsockname()[0]
-    if local_ip not in local_ips:
-        local_ips[local_ip] = set()
-    local_ips[local_ip].add(int(board))
-    testsock.close()
-core.log_notice('Creating listeners for %d boards on interfaces: %s' %
-                (len(boards), ', '.join(local_ips.keys())),
-                unit='Data Acquisition')
+if args.udp:
+    # Set up listeners per thread and point them at the event builder
+    # Get the local IP(s) to use to connect to the boards by opening test
+    # connections. Using a set rather than a list deduplicates the results.
+    local_ips = {}
+    for board in boards:
+        testsock = socket.create_connection(('iceboard' + board + '.local', 80))
+        local_ip = testsock.getsockname()[0]
+        if local_ip not in local_ips:
+            local_ips[local_ip] = set()
+        local_ips[local_ip].add(int(board))
+        testsock.close()
+    core.log_notice('Creating listeners for %d boards on interfaces: %s' %
+                    (len(boards), ', '.join(local_ips.keys())),
+                    unit='Data Acquisition')
 
-# Set up listeners per network segment and point them at the event builder
-collectors = [dfmux.DfMuxCollector(ip, builder, list(local_boards))
-              for ip, local_boards in local_ips.items()]
+    # Set up listeners per network segment and point them at the event builder
+    collectors = [dfmux.DfMuxCollector(ip, builder, list(local_boards))
+                  for ip, local_boards in local_ips.items()]
+else:
+    iceboard_hosts = ['iceboard' + board + '.local' for board in boards]
+    if args.daq_threads > len(iceboard_hosts):
+        args.daq_threads = len(iceboard_hosts)
+    collectors = [dfmux.DfMuxCollector(builder, iceboard_hosts[i::args.daq_threads])
+                  for i in range(args.daq_threads)]
 pipe.Add(builder)
 
 # Catch errors if samples have become misaligned. Don't even bother processing
@@ -139,6 +149,7 @@ pipe.Add(core.G3ThrottledNetworkSender, hostname='*', port=5451, max_queue_size=
 
 # Collect data from the chopped calibration source
 if args.calibrator:
+    from spt3g import auxdaq
     pipe.Add(auxdaq.CalibratorDAQ)
 
 if args.verbose:
