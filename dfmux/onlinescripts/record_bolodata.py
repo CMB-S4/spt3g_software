@@ -3,12 +3,36 @@
 from spt3g import core, dfmux, gcp
 import socket, argparse, os
 
-parser = argparse.ArgumentParser(description='Record dfmux data to disk')
+parser = argparse.ArgumentParser(description='''
+Record dfmux data to disk.
+
+Two modes of operation are suppored.
+
+The standard mode is to supply a hardware map from which to determine which
+IceBoards to communicate with.
+
+An alternative mode is to also supply a list of IceBoard serial numbers.  In
+that case, the HWM is not loaded from disk (saving as much as several minutes,
+depending on the size of the HWM), and the serial numbers are used directly to
+initialize the DAQ.  The hardware map file path is instead used to find a
+nominal_online_cal.g3 file in the same directory as the YAML file, which is
+injected into the DAQ stream for teeing to live visualization tools like
+Lyrebird.
+
+Optional auxiliary modules such as the SPT calibrator or the Polarbear WHWP
+encoder stream are not enabled by default.
+
+Two methods of error monitoring are also available: enabling the syslog logger
+sends all output log messages to a central rsyslog database (e.g. as set up by
+SPT), and enabling the GCP watchdog module pings the SPT pager server
+periodically to indicate normal operation.
+'''
+)
 parser.add_argument('hardware_map', metavar='/path/to/hwm.yaml', help='Path to hardware map YAML file')
 parser.add_argument('boards', nargs='*', metavar='serial', help='IceBoard serial(s) from which to collect data')
 parser.add_argument('output', metavar='/path/to/files/', help='Directory in which to place output files')
 
-parser.add_argument('-v', dest='verbose', action='store_true', help='Verbose mode (print all frames)')
+parser.add_argument('-v', '--verbose', action='store_true', help='Verbose mode (print all frames)')
 parser.add_argument('--max-file-size', default=1024, help='Maximum file size in MB (default 1024)')
 parser.add_argument('--calibrator', action='store_true', help='Enable SPT calibrator DAQ')
 parser.add_argument('--whwp', action='store_true', help='Enable Polarbear HWP DAQ')
