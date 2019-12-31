@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-from spt3g import core, dfmux, gcp, auxdaq
-import socket, argparse, os, syslog
+from spt3g import core, dfmux, gcp
+import socket, argparse, os
 
 parser = argparse.ArgumentParser(description='Record dfmux data to disk')
 parser.add_argument('hardware_map', metavar='/path/to/hwm.yaml', help='Path to hardware map YAML file')
@@ -10,14 +10,23 @@ parser.add_argument('output', metavar='/path/to/files/', help='Directory in whic
 
 parser.add_argument('-v', dest='verbose', action='store_true', help='Verbose mode (print all frames)')
 parser.add_argument('--max-file-size', default=1024, help='Maximum file size in MB (default 1024)')
-parser.add_argument('--no-calibrator', dest='calibrator', default=True, action='store_false',
-                    help='Disable calibrator DAQ')
+parser.add_argument('--calibrator', action='store_true', help='Enable SPT calibrator DAQ')
+parser.add_argument('--whwp', action='store_true', help='Enable Polarbear HWP DAQ')
+parser.add_argument('--syslog', action='store_true', help='Enable syslog logger')
+parser.add_argument('--watchdog', action='store_true', help='Enable GCP watchdog ping')
 args = parser.parse_args()
 
 # Tee log messages to both log file and GCP socket
 console_logger = core.G3PrintfLogger()
 console_logger.timestamps = True # Make sure to get timestamps in the logs
-core.G3Logger.global_logger = core.G3MultiLogger([console_logger, core.G3SyslogLogger("dfmuxdaq: ", syslog.LOG_USER)])
+
+if args.syslog:
+    import syslog
+    core.G3Logger.global_logger = core.G3MultiLogger(
+        [console_logger, core.G3SyslogLogger("dfmuxdaq: ", syslog.LOG_USER)]
+    )
+else:
+    core.G3Logger.global_logger = console_logger
 
 args.hardware_map = os.path.realpath(args.hardware_map)
 
@@ -104,6 +113,10 @@ pipe.Add(gcp.GCPSignalledHousekeeping)
 pipe.Add(dfmux.HousekeepingConsumer)
 pipe.Add(gcp.GCPHousekeepingTee)
 
+# Issue a periodic watchdog ping to the SPT pager system
+if args.watchdog:
+    pipe.Add(gcp.GCPWatchdog)
+
 # For visualization, add nominal pointing
 if hwm is None:
     # Get the bolometer properties map from disk (written separately by pydfmux)
@@ -137,9 +150,15 @@ else:
 # in the calibrator DAQ code
 pipe.Add(core.G3ThrottledNetworkSender, hostname='*', port=5451, max_queue_size=1000)
 
-# Collect data from the chopped calibration source
+# Collect data from the SPT chopped calibration source
 if args.calibrator:
+    from spt3g import auxdaq
     pipe.Add(auxdaq.CalibratorDAQ)
+
+# Collect data from the Polarbear warm half wave plate angular encoder
+if args.whwp:
+    from spt3g import whwp
+    pipe.Add(whwp.WHWPConsumer)
 
 if args.verbose:
     pipe.Add(core.Dump)
