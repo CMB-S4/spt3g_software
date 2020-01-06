@@ -73,6 +73,19 @@ void reproj_map(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool in
 		log_fatal("Input and output maps must use the same coordinates");
 	}
 
+	// These are going to be dense maps, so just start that way
+	{
+		FlatSkyMapPtr xout = boost::dynamic_pointer_cast<FlatSkyMap>(out_map);
+		if (xout)
+			xout->ConvertToDense();
+	}
+
+	{
+		HealpixSkyMapPtr xout = boost::dynamic_pointer_cast<HealpixSkyMap>(out_map);
+		if (xout)
+			xout->ConvertToDense();
+	}
+
 	for (size_t i = 0; i < out_map->size(); i++) {
 		double val = 0;
 		if (rebin > 1) {
