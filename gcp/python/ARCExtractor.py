@@ -184,8 +184,9 @@ def UnpackACUData(f):
 @core.indexmod
 def UnpackTrackerMinimal(f, rewrite_source_from_feature_bits=True):
     '''
-    Construct SourceName and ObservationId keys from frame. If
-    rewrite_source_from_feature_bits is True (the default), will try to
+    Construct SourceName and ObservationId keys from frame.
+
+    If rewrite_source_from_feature_bits is True (the default), will try to
     rewrite source names if DecryptFeatureBit() has been run and either
     "elnod", "calibrator", or "noise" is present in the feature bit list
     to that value.
@@ -218,8 +219,10 @@ def UnpackTrackerMinimal(f, rewrite_source_from_feature_bits=True):
 @core.indexmod
 def UnpackTrackerData(f, rewrite_source_from_feature_bits=True):
     '''
-    Extracts tracker status information to frame. If
-    rewrite_source_from_feature_bits is True (the default), will try to
+    Extracts tracker status information to frame into the TrackerStatus key,
+    along with the observation processing handled by UnpackTrackerMinimal.
+
+    If rewrite_source_from_feature_bits is True (the default), will try to
     rewrite source names if DecryptFeatureBit() has been run and either
     "elnod", "calibrator", or "noise" is present in the feature bit list
     to that value.
