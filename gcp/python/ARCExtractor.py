@@ -228,6 +228,9 @@ def UnpackTrackerData(f, rewrite_source_from_feature_bits=True):
     to that value.
     '''
 
+    if f.type != core.G3FrameType.GcpSlow:
+        return
+
     UnpackTrackerMinimal(f, rewrite_source_from_feature_bits)
 
     t = TrackerStatus()
