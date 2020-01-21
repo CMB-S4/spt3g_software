@@ -49,6 +49,11 @@ enum {
 };
 
 enum {
+	ARC_REGSET_MSG = 0,
+	ARC_INTERVAL_MSG = 1
+};
+
+enum {
 	/* Flags */
 	REG_EXC = 0x100,
 
@@ -98,6 +103,8 @@ private:
 
 	off_t frame_length_;
 	uint64_t ms_jiffie_base_;
+	int fd_;
+	int32_t revision_;
 
 	void ParseArrayMap(uint8_t *buffer, size_t size);
 	G3FrameObjectPtr GCPToFrameObject(uint8_t *buffer,
@@ -169,8 +176,9 @@ void ARCFileReader::StartFile(const std::string & path)
 
 	// Open file, including whatever decompression/network access/etc.
 	// may be required
-	g3_istream_from_path(stream_, path);
+	fd_ = g3_istream_from_path(stream_, path);
 	cur_file_ = path;
+	revision_ = 0;
 
 	/*
 	 * GCP ARC file header:
@@ -181,16 +189,18 @@ void ARCFileReader::StartFile(const std::string & path)
 
 	// First size record
 	stream_.read((char *)&size, sizeof(size));
-	size = ntohl(size);
+	size = ntohl(size) - 8;
 	stream_.read((char *)&opcode, sizeof(opcode));
 	opcode = ntohl(opcode);
 
 	if (opcode != ARC_SIZE_RECORD)
 		log_fatal("No ARC_SIZE_RECORD at beginning of %s",
 		    path.c_str());
-	if (size != 12)
+	if ((fd_ < 0 && size != 4) || (fd_ >= 0 && size != 8))
 		log_fatal("Incorrectly sized ARC_SIZE_RECORD (%d)", size);
 	stream_.read((char *)&size, sizeof(size)); /* Skip size field */
+	if (fd_ >= 0)
+		stream_.read((char *)&size, sizeof(size)); /* Skip size field (net stream) */
 
 	// Get array map
 	stream_.read((char *)&size, sizeof(size));
@@ -219,11 +229,20 @@ void ARCFileReader::StartFile(const std::string & path)
 }
 
 
+#define ADD_REG(w)  \
+	nregs += 1;  \
+	regset.push_back(block_offset);  \
+	block_offset += w;  \
+	regset.push_back(block_offset - 1)
+
+
 void ARCFileReader::ParseArrayMap(uint8_t *buf, size_t size)
 {
 	int32_t version;
 	uint16_t ntemplates;
-	off_t off = 0, block_offset = 0;
+	off_t off = 0, block_offset = 0, block_width;
+	int32_t nregs = 0;
+	std::vector<int32_t> regset;
 
 	// Check serialization version
 	memcpy(&version, buf + off, sizeof(version));
@@ -266,37 +285,37 @@ void ARCFileReader::ParseArrayMap(uint8_t *buf, size_t size)
 			block_info.axes_help = "";
 
 			block_info.offset = block_offset;
-			block_info.flags = REG_UINT; block_offset += 4;
+			block_info.flags = REG_UINT; ADD_REG(4);
 			board["status"] = block_info;
 
 			block_info.offset = block_offset;
-			block_info.flags = REG_UCHAR; block_offset += 1;
+			block_info.flags = REG_UCHAR; ADD_REG(1);
 			board["received"] = block_info;
 
 			block_info.offset = block_offset;
-			block_info.flags = REG_UINT; block_offset += 4;
+			block_info.flags = REG_UINT; ADD_REG(4);
 			board["nsnap"] = block_info;
 
 			block_info.offset = block_offset;
-			block_info.flags = REG_UINT; block_offset += 4;
+			block_info.flags = REG_UINT; ADD_REG(4);
 			board["record"] = block_info;
 
 			block_info.offset = block_offset;
-			block_info.flags = REG_UTC; block_offset += 8;
+			block_info.flags = REG_UTC; ADD_REG(8);
 			board["utc"] = block_info;
 
 			if (experiment == Experiment::BK) {
 				block_info.offset = block_offset;
-				block_info.flags = REG_UINT; block_offset += 4;
+				block_info.flags = REG_UINT; ADD_REG(4);
 				board["lst"] = block_info;
 			}
 
 			block_info.offset = block_offset;
-			block_info.flags = REG_UINT; block_offset += 4;
+			block_info.flags = REG_UINT; ADD_REG(4);
 			board["features"] = block_info;
 
 			block_info.offset = block_offset;
-			block_info.flags = REG_UINT; block_offset += 4;
+			block_info.flags = REG_UINT; ADD_REG(4);
 			board["markSeq"] = block_info;
 
 			templ["frame"] = board;
@@ -332,7 +351,7 @@ void ARCFileReader::ParseArrayMap(uint8_t *buf, size_t size)
 				block_info.dim[2] = 0;
 				block_info.axes_help = "";
 				block_info.offset = block_offset;
-				block_info.flags = REG_UINT; block_offset += 4;
+				block_info.flags = REG_UINT; ADD_REG(4);
 				board["status"] = block_info;
 			}
 
@@ -401,16 +420,16 @@ void ARCFileReader::ParseArrayMap(uint8_t *buf, size_t size)
 					    cur_file_.c_str());
 				}
 
-				/* Skip unarchived registers */
-				if (!(block_info.flags & REG_EXC)) {
+				/* Skip unarchived registers (file streams only) */
+				if (fd_ >= 0 || !(block_info.flags & REG_EXC)) {
 					if (experiment == Experiment::BK) {
-						block_offset += block_info.width *
+						block_width = block_info.width *
 							((block_info.dim[0] == 0) ? 1 :
 							  block_info.dim[0]) *
 							((block_info.dim[1] == 0) ? 1 :
 							  block_info.dim[1]);
 					} else {
-						block_offset += block_info.width *
+						block_width = block_info.width *
 							((block_info.dim[0] == 0) ? 1 :
 							  block_info.dim[0]) *
 							((block_info.dim[1] == 0) ? 1 :
@@ -418,6 +437,7 @@ void ARCFileReader::ParseArrayMap(uint8_t *buf, size_t size)
 							((block_info.dim[2] == 0) ? 1 :
 							  block_info.dim[2]);
 					}
+					ADD_REG(block_width);
 				}
 
 				if ((experiment == Experiment::SPT) ||
@@ -433,8 +453,8 @@ void ARCFileReader::ParseArrayMap(uint8_t *buf, size_t size)
 					block_info.axes_help = "";
 				}
 
-				/* Add to map iff actually archived */
-				if (!(block_info.flags & REG_EXC))
+				/* Add to map iff actually archived (file streams only) */
+				if (fd_ >= 0 || !(block_info.flags & REG_EXC))
 					board[block_name] = block_info;
 			}
 
@@ -455,6 +475,80 @@ void ARCFileReader::ParseArrayMap(uint8_t *buf, size_t size)
 	}
 
 	frame_length_ = block_offset;
+
+	if (fd_ >= 0) {
+		int32_t opcode, buffer_size, data;
+		uint8_t *buffer;
+
+		// Tell network source (e.g. GCP) to send all registers
+		off = 0;
+		buffer_size = (4 + 2 * nregs) * sizeof(int32_t);
+		buffer = new uint8_t[buffer_size];
+
+		buffer_size = htonl(buffer_size);
+		memcpy(buffer + off, &buffer_size, sizeof(buffer_size));
+		off += sizeof(buffer_size);
+
+		opcode = ARC_REGSET_MSG;
+		opcode = htonl(opcode);
+		memcpy(buffer + off, &opcode, sizeof(opcode));
+		off += sizeof(opcode);
+
+		// revision
+		data = revision_;
+		data = htonl(data);
+		memcpy(buffer + off, &data, sizeof(data));
+		off += sizeof(data);
+
+		// number of registers
+		data = nregs;
+		data = htonl(data);
+		memcpy(buffer + off, &data, sizeof(data));
+		off += sizeof(data);
+
+		// range for each register
+		for (auto &v : regset) {
+			data = htonl(v);
+			memcpy(buffer + off, &data, sizeof(data));
+			off += sizeof(data);
+		}
+
+		if (write(fd_, buffer, off) <= 0) {
+			delete [] buffer;
+			log_fatal("Error sending ARC_REGSET_MSG to %s",
+			    cur_file_.c_str());
+		}
+
+		delete [] buffer;
+
+		// Tell network source (e.g. GCP) to send all frames
+		off = 0;
+		buffer_size = 3 * sizeof(int32_t);
+		buffer = new uint8_t[buffer_size];
+
+		buffer_size = htonl(buffer_size);
+		memcpy(buffer + off, &buffer_size, sizeof(buffer_size));
+		off += sizeof(buffer_size);
+
+		opcode = ARC_INTERVAL_MSG;
+		opcode = htonl(opcode);
+		memcpy(buffer + off, &opcode, sizeof(opcode));
+		off += sizeof(opcode);
+
+		// send every frame
+		data = 1;
+		data = htonl(data);
+		memcpy(buffer + off, &data, sizeof(data));
+		off += sizeof(data);
+
+		if (write(fd_, buffer, off) <= 0) {
+			delete [] buffer;
+			log_fatal("Error sending ARC_INTERVAL_MSG to %s",
+			    cur_file_.c_str());
+		}
+
+		delete [] buffer;
+	}
 }
 
 G3TimePtr ARCFileReader::GCPToTime(uint8_t *buffer, off_t offset)
@@ -666,6 +760,17 @@ void ARCFileReader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	opcode = ntohl(opcode);
 	if (opcode != ARC_FRAME_RECORD)
 		log_fatal("Message not an ARC_FRAME_RECORD mid-file");
+	if (fd_ >= 0) {
+		// network source (e.g. GCP) can support changing register selection on the fly
+		int32_t rev;
+		stream_.read((char *)&rev, sizeof(rev));
+		rev = ntohl(rev);
+		if (rev != revision_)
+			log_fatal("Frame regset revision %d does not match expected revision (%d)",
+			    rev, revision_);
+		stream_.read((char *)&size, sizeof(size));
+		size = ntohl(size);
+	}
 	if (size != frame_length_)
 		log_fatal("%zd-byte frame does not match expected length (%zd)",
 		    (size_t)size, (size_t)frame_length_);

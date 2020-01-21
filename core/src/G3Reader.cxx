@@ -41,7 +41,7 @@ void G3Reader::StartFile(std::string path)
 {
 	log_info("Starting file %s\n", path.c_str());
 	cur_file_ = path;
-	g3_istream_from_path(stream_, path, timeout_);
+	(void) g3_istream_from_path(stream_, path, timeout_);
 }
 
 void G3Reader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
