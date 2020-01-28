@@ -55,7 +55,13 @@ enum {
 
 enum {
 	/* Flags */
+	REG_PREAVG  = 0x10,
+	REG_POSTAVG = 0x20,
+	REG_SUM = 0x40, 
+	REG_UNION = 0x80,
 	REG_EXC = 0x100,
+	REG_FAST = 0x200000,
+	REG_STRING = 0x800000,
 
 	/* Types */
 	REG_UTC = 0x200, /* MJD + ms */
@@ -101,6 +107,7 @@ private:
 	typedef std::map<std::string, board_params> arr_template;
 	std::map<std::string, arr_template> array_map_;
 
+	bool has_string_flag_;
 	off_t frame_length_;
 	uint64_t ms_jiffie_base_;
 	int fd_;
@@ -108,8 +115,8 @@ private:
 
 	void ParseArrayMap(uint8_t *buffer, size_t size);
 	G3FrameObjectPtr GCPToFrameObject(uint8_t *buffer,
-	    const struct block_stats &block, int depth = 0,
-	    int base_offset = 0);
+	    const struct block_stats &block, bool has_string_flag,
+	    int depth = 0, int base_offset = 0);
 	std::deque<std::string> filename_;
 	std::string cur_file_;
 
@@ -179,6 +186,7 @@ void ARCFileReader::StartFile(const std::string & path)
 	fd_ = g3_istream_from_path(stream_, path);
 	cur_file_ = path;
 	revision_ = 0;
+	has_string_flag_ = false;
 
 	/*
 	 * GCP ARC file header:
@@ -389,6 +397,13 @@ void ARCFileReader::ParseArrayMap(uint8_t *buf, size_t size)
 					block_info.dim[2] = 0;
 				}
 				block_info.offset = block_offset;
+
+				/*
+				 * Check if this version of GCP marks strings
+				 * usefully.
+				 */
+				if (block_info.flags & REG_STRING)
+					has_string_flag_ = true;
 
 				/* Get type width */
 				switch (block_info.flags & REG_TYPEMASK) {
@@ -618,7 +633,8 @@ static double GCP64ToFloat(uint8_t *buffer, off_t offset)
 }
 
 G3FrameObjectPtr ARCFileReader::GCPToFrameObject(uint8_t *buffer,
-    const struct ARCFileReader::block_stats &block, int depth, int base_offset)
+    const struct ARCFileReader::block_stats &block, bool has_string_flag,
+    int depth, int base_offset)
 {
 	if (base_offset == 0)
 		base_offset = block.offset;
@@ -637,8 +653,8 @@ G3FrameObjectPtr ARCFileReader::GCPToFrameObject(uint8_t *buffer,
 				stride *= block.dim[i];
 
 		for (int i = 0; i < block.dim[depth]; i++) {
-			root->push_back(GCPToFrameObject(buffer, block, depth+1,
-			    base_offset));
+			root->push_back(GCPToFrameObject(buffer, block,
+			    has_string_flag, depth+1, base_offset));
 			base_offset += block.width*stride;
 		}
 
@@ -656,10 +672,44 @@ G3FrameObjectPtr ARCFileReader::GCPToFrameObject(uint8_t *buffer,
 			}
 			return root; }
 		case REG_CHAR: 
-		case REG_UCHAR:
-			if (buffer[base_offset + block.dim[depth] - 1] == '\0')
+		case REG_UCHAR: {
+			/*
+			 * Not all versions of GCP usefully mark whether
+			 * characters strings are text. Try to guess as
+			 * best we can.
+			 */
+			bool is_a_string = false;
+			if (has_string_flag) {
+				// Are we lucky enough that GCP tells us?
+				is_a_string = (block.flags & REG_STRING);
+			} else if (block.flags & REG_FAST) {
+				// Marked as a time-dependent variable: not text
+				is_a_string = false;
+			} else if (block.flags & (REG_SUM |
+			    REG_UNION | REG_PREAVG | REG_POSTAVG)) {
+				// Math done on it? Not text
+				is_a_string = false;
+			} else {
+				// Only printable ASCII and null characters?
+				// If so: probably a string?
+				int i = 0;
+				for (i = 0; i < block.dim[depth]-1; i++) {
+					if (!isprint(buffer[base_offset + i]))
+						break;
+				}
+				for (; i < block.dim[depth]; i++) {
+					if (buffer[base_offset + i] != '\0')
+						break;
+				}	
+				if (i == block.dim[depth])
+					is_a_string = true;
+			}
+				
+			if (is_a_string)
 				return G3StringPtr(new G3String(
 				    (char *)&buffer[base_offset]));
+			}
+			
 			// else fallthrough
 		case REG_BOOL: {
 			G3VectorIntPtr vec(new G3VectorInt);
@@ -785,7 +835,7 @@ void ARCFileReader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 			for (auto reg = board->second.begin();
 			    reg != board->second.end(); reg++) {
 				(*boarddat)[reg->first] = GCPToFrameObject(
-				    buffer, reg->second);
+				    buffer, reg->second, has_string_flag_);
 			}
 			(*templ)[board->first] = boarddat;
 		}
