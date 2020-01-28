@@ -16,7 +16,7 @@
 #include <netdb.h>
 #include <stdlib.h>
 
-void
+int
 g3_istream_from_path(boost::iostreams::filtering_istream &stream,
     const std::string &path, float timeout)
 {
@@ -26,6 +26,8 @@ g3_istream_from_path(boost::iostreams::filtering_istream &stream,
 	if (boost::algorithm::ends_with(path, ".bz2"))
 		stream.push(boost::iostreams::bzip2_decompressor());
 
+	int fd = -1;
+
 	// Figure out what kind of ultimate data source this is
 	if (path.find("tcp://") == 0) {
 		// TCP Socket. Two syntaxes:
@@ -34,7 +36,6 @@ g3_istream_from_path(boost::iostreams::filtering_istream &stream,
 		// - tcp://*:port -> listen on "port" for the first connection
 		//   and read until EOF
 
-		int fd;
 		std::string host = path.substr(path.find("://") + 3);
 		if (host.find(":") == -1)
 			log_fatal("Could not open URL %s: unspecified port",
@@ -140,6 +141,7 @@ g3_istream_from_path(boost::iostreams::filtering_istream &stream,
 		// Simple file case
 		stream.push(boost::iostreams::file_source(path,
 		    std::ios::binary));
-	}	
-}
+	}
 
+	return fd;
+}
