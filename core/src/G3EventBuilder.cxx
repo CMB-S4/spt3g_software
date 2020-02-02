@@ -1,5 +1,6 @@
 #include <G3EventBuilder.h>
 #include <G3Pipeline.h>
+#include <pybindings.h>
 
 #ifdef __FreeBSD__
 #include <pthread_np.h>
@@ -43,6 +44,10 @@ void G3EventBuilder::AddPolledDataModule(G3ModulePtr mod)
 
 void G3EventBuilder::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 {
+	PyThreadState *_save = nullptr;
+	if (Py_IsInitialized())
+		_save = PyEval_SaveThread();
+
 	std::unique_lock<std::mutex> lock(out_queue_lock_);
 
 	while (out_queue_.empty() && !dead_)
@@ -50,6 +55,10 @@ void G3EventBuilder::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 
 	// If dead, out_queue_ will be empty, putting nothing in the queue
 	// and ending processing.
+
+	if (_save != nullptr)
+		PyEval_RestoreThread(_save);
+
 	out.swap(out_queue_);
 }
 

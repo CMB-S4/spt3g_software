@@ -39,10 +39,10 @@ antenna0.tracker.az_limits                      0.0000  3.600000e+06  deg
 antenna0.tracker.el_limits                      0.0000  3.600000e+06  deg
 antenna0.tracker.encoder_off                    0.0000  3.600000e+06  deg
 antenna0.tracker.eqneqx                         0.0000  1.000000e+03  sec
-antenna0.tracker.equat_geoc[0]                  0.0000  5.400000e+07  hours
+antenna0.tracker.equat_geoc[0]                  0.0000  5.400000e+07  rahr
 antenna0.tracker.equat_geoc[1]                  0.0000  3.600000e+06  deg
 antenna0.tracker.equat_geoc[2]                  0.0000  1.000000e+06  AU
-antenna0.tracker.equat_off[0]                   0.0000  5.400000e+07  hours
+antenna0.tracker.equat_off[0]                   0.0000  5.400000e+07  rahr
 antenna0.tracker.equat_off[1]                   0.0000  3.600000e+06  deg
 antenna0.tracker.errors                         0.0000  1.745329e-02  deg
 antenna0.tracker.expected                       0.0000  1.745329e-02  deg

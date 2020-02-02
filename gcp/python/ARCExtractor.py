@@ -182,10 +182,11 @@ def UnpackACUData(f):
     f['ACUStatus'] = a
 
 @core.indexmod
-def UnpackTrackerData(f, rewrite_source_from_feature_bits=True):
+def UnpackTrackerMinimal(f, rewrite_source_from_feature_bits=True):
     '''
-    Extracts tracker status information to frame. If
-    rewrite_source_from_feature_bits is True (the default), will try to
+    Construct SourceName and ObservationId keys from frame.
+
+    If rewrite_source_from_feature_bits is True (the default), will try to
     rewrite source names if DecryptFeatureBit() has been run and either
     "elnod", "calibrator", or "noise" is present in the feature bit list
     to that value.
@@ -213,6 +214,24 @@ def UnpackTrackerData(f, rewrite_source_from_feature_bits=True):
     # And observation ID, if present
     if 'obs_id' in f['antenna0']['tracker']:
         f['ObservationID'] = f['antenna0']['tracker']['obs_id']
+
+
+@core.indexmod
+def UnpackTrackerData(f, rewrite_source_from_feature_bits=True):
+    '''
+    Extracts tracker status information to frame into the TrackerStatus key,
+    along with the observation processing handled by UnpackTrackerMinimal.
+
+    If rewrite_source_from_feature_bits is True (the default), will try to
+    rewrite source names if DecryptFeatureBit() has been run and either
+    "elnod", "calibrator", or "noise" is present in the feature bit list
+    to that value.
+    '''
+
+    if f.type != core.G3FrameType.GcpSlow:
+        return
+
+    UnpackTrackerMinimal(f, rewrite_source_from_feature_bits)
 
     t = TrackerStatus()
     # List comprehensions are due to funny business with G3VectorFrameObject
@@ -363,5 +382,16 @@ def ARCExtract(pipe):
     pipe.Add(DecryptFeatureBit)
     pipe.Add(UnpackTrackerData)
     pipe.Add(AddBenchData)
+
+
+@core.pipesegment
+def ARCExtractMinimal(pipe):
+    '''Extract bare minimum GCP registers into native objects.
+
+    Includes only GCPFeatureBits, SourceName and ObservationID keys.
+    Use ARCExtract to calibrate and extract the complete frame.
+    '''
+    pipe.Add(DecryptFeatureBit)
+    pipe.Add(UnpackTrackerMinimal)
 
 # Need tool for tilt meter next
