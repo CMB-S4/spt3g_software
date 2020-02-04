@@ -9,8 +9,8 @@ parser.add_argument('boards', nargs='*', metavar='serial', help='IceBoard serial
 parser.add_argument('output', metavar='/path/to/files/', help='Directory in which to place output files')
 
 parser.add_argument('-v', dest='verbose', action='store_true', help='Verbose mode (print all frames)')
-parser.add_argument('-u', dest='udp', action='store_true', help='Use UDP multicast instead of SCTP')
-parser.add_argument('--daq-threads', default=2, help='Number of listener threads to use (applies only for SCTP)')
+parser.add_argument('-u', '--udp', action='store_true', help='Use UDP multicast instead of SCTP')
+parser.add_argument('--daq-threads', default=None, type=int, help='Number of listener threads to use (applies only for SCTP)')
 parser.add_argument('--max-file-size', default=1024, help='Maximum file size in MB (default 1024)')
 parser.add_argument('--no-calibrator', dest='calibrator', default=True, action='store_false',
                     help='Disable calibrator DAQ')
@@ -20,6 +20,9 @@ args = parser.parse_args()
 console_logger = core.G3PrintfLogger()
 console_logger.timestamps = True # Make sure to get timestamps in the logs
 core.G3Logger.global_logger = core.G3MultiLogger([console_logger, core.G3SyslogLogger("dfmuxdaq: ", syslog.LOG_USER)])
+
+core.set_log_level(core.G3LogLevel.LOG_ERROR, 'DfMuxBuilder')
+core.set_log_level(core.G3LogLevel.LOG_ERROR, 'DfMuxCollector')
 
 args.hardware_map = os.path.realpath(args.hardware_map)
 
@@ -70,6 +73,8 @@ if args.udp:
                   for ip, local_boards in local_ips.items()]
 else:
     iceboard_hosts = ['iceboard' + board + '.local' for board in boards]
+    if args.daq_threads is None:
+        args.daq_threads = len(iceboard_hosts)
     if args.daq_threads > len(iceboard_hosts):
         args.daq_threads = len(iceboard_hosts)
     collectors = [dfmux.DfMuxCollector(builder, iceboard_hosts[i::args.daq_threads])
@@ -113,6 +118,13 @@ pipe.Add(yellanddrop)
 pipe.Add(gcp.GCPSignalledHousekeeping)
 pipe.Add(dfmux.HousekeepingConsumer)
 pipe.Add(gcp.GCPHousekeepingTee)
+
+def WaitForWiring(frame):
+    if frame.type == core.G3FrameType.Wiring:
+        core.set_log_level(core.G3LogLevel.LOG_NOTICE, 'DfMuxBuilder')
+        core.set_log_level(core.G3LogLevel.LOG_NOTICE, 'DfMuxCollector')
+        core.log_notice('Got a wiring frame, ready for data acquisition.', unit='Data Acquisition')
+pipe.Add(WaitForWiring)
 
 # For visualization, add nominal pointing
 if hwm is None:
