@@ -268,12 +268,12 @@ def load_proj_dict(inverse=False):
     return projdict
 
 
-def get_wcs(skymap):
+def get_wcs(skymap, reset=False):
     """
     Creates WCS (world coordinate system) information from information in the input FlatSkyMap object.
     """
 
-    if hasattr(skymap, '_wcs'):
+    if hasattr(skymap, '_wcs') and not reset:
         return skymap._wcs
 
     projdict = load_proj_dict()
@@ -323,6 +323,9 @@ setattr(FlatSkyMap, 'wcs', property(get_wcs))
 
 @core.usefulfunc
 def create_wcs_header(skymap):
+    """
+    Return a FITS header for the WCS information in the FlatSkyMap object.
+    """
     return skymap.wcs.to_header()
 
 

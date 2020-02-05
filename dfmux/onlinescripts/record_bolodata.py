@@ -1,25 +1,58 @@
 #!/usr/bin/env python
 
 from spt3g import core, dfmux, gcp
-import socket, argparse, os, syslog
+import socket, argparse, os
 
-parser = argparse.ArgumentParser(description='Record dfmux data to disk')
+parser = argparse.ArgumentParser(description='''
+Record dfmux data to disk.
+
+Two modes of operation are suppored.
+
+The standard mode is to supply a hardware map from which to determine which
+IceBoards to communicate with.
+
+An alternative mode is to also supply a list of IceBoard serial numbers.  In
+that case, the HWM is not loaded from disk (saving as much as several minutes,
+depending on the size of the HWM), and the serial numbers are used directly to
+initialize the DAQ.  The hardware map file path is instead used to find a
+nominal_online_cal.g3 file in the same directory as the YAML file, which is
+injected into the DAQ stream for teeing to live visualization tools like
+Lyrebird.
+
+Optional auxiliary modules such as the SPT calibrator or the Polarbear WHWP
+encoder stream are not enabled by default.
+
+Two methods of error monitoring are also available: enabling the syslog logger
+sends all output log messages to a central rsyslog database (e.g. as set up by
+SPT), and enabling the GCP watchdog module pings the SPT pager server
+periodically to indicate normal operation.
+'''
+)
 parser.add_argument('hardware_map', metavar='/path/to/hwm.yaml', help='Path to hardware map YAML file')
 parser.add_argument('boards', nargs='*', metavar='serial', help='IceBoard serial(s) from which to collect data')
 parser.add_argument('output', metavar='/path/to/files/', help='Directory in which to place output files')
 
-parser.add_argument('-v', dest='verbose', action='store_true', help='Verbose mode (print all frames)')
+parser.add_argument('-v', '--verbose', action='store_true', help='Verbose mode (print all frames)')
 parser.add_argument('-u', '--udp', action='store_true', help='Use UDP multicast instead of SCTP')
 parser.add_argument('--daq-threads', default=None, type=int, help='Number of listener threads to use (applies only for SCTP)')
-parser.add_argument('--max-file-size', default=1024, help='Maximum file size in MB (default 1024)')
-parser.add_argument('--no-calibrator', dest='calibrator', default=True, action='store_false',
-                    help='Disable calibrator DAQ')
+parser.add_argument('--max-file-size', default=1024, type=int, help='Maximum file size in MB (default 1024)')
+parser.add_argument('--calibrator', action='store_true', help='Enable SPT calibrator DAQ')
+parser.add_argument('--whwp', action='store_true', help='Enable Polarbear HWP DAQ')
+parser.add_argument('--syslog', action='store_true', help='Enable syslog logger')
+parser.add_argument('--watchdog', action='store_true', help='Enable GCP watchdog ping')
 args = parser.parse_args()
 
 # Tee log messages to both log file and GCP socket
 console_logger = core.G3PrintfLogger()
 console_logger.timestamps = True # Make sure to get timestamps in the logs
-core.G3Logger.global_logger = core.G3MultiLogger([console_logger, core.G3SyslogLogger("dfmuxdaq: ", syslog.LOG_USER)])
+
+if args.syslog:
+    import syslog
+    core.G3Logger.global_logger = core.G3MultiLogger(
+        [console_logger, core.G3SyslogLogger("dfmuxdaq: ", syslog.LOG_USER)]
+    )
+else:
+    core.G3Logger.global_logger = console_logger
 
 core.set_log_level(core.G3LogLevel.LOG_ERROR, 'DfMuxBuilder')
 core.set_log_level(core.G3LogLevel.LOG_ERROR, 'DfMuxCollector')
@@ -34,11 +67,9 @@ if not len(args.boards):
                     unit='Data Acquisition')
     import pydfmux
     hwm = pydfmux.load_session(open(args.hardware_map, 'r'))['hardware_map']
-    crates = hwm.query(pydfmux.core.dfmux.IceCrate)
-    if crates.count() > 0:
-        crates.resolve()
-
-    boards = [board.serial for board in hwm.query(pydfmux.IceBoard)]
+    boards = hwm.query(pydfmux.Dfmux)
+    boards.resolve()
+    boards = boards.serial
 
 else:
     # Otherwise assume the input is a list of board serials
@@ -126,6 +157,10 @@ def WaitForWiring(frame):
         core.log_notice('Got a wiring frame, ready for data acquisition.', unit='Data Acquisition')
 pipe.Add(WaitForWiring)
 
+# Issue a periodic watchdog ping to the SPT pager system
+if args.watchdog:
+    pipe.Add(gcp.GCPWatchdog)
+
 # For visualization, add nominal pointing
 if hwm is None:
     # Get the bolometer properties map from disk (written separately by pydfmux)
@@ -159,10 +194,15 @@ else:
 # in the calibrator DAQ code
 pipe.Add(core.G3ThrottledNetworkSender, hostname='*', port=5451, max_queue_size=1000)
 
-# Collect data from the chopped calibration source
+# Collect data from the SPT chopped calibration source
 if args.calibrator:
     from spt3g import auxdaq
     pipe.Add(auxdaq.CalibratorDAQ)
+
+# Collect data from the Polarbear warm half wave plate angular encoder
+if args.whwp:
+    from spt3g import whwp
+    pipe.Add(whwp.WHWPConsumer)
 
 if args.verbose:
     pipe.Add(core.Dump)

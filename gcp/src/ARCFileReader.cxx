@@ -49,8 +49,19 @@ enum {
 };
 
 enum {
+	ARC_REGSET_MSG = 0,
+	ARC_INTERVAL_MSG = 1
+};
+
+enum {
 	/* Flags */
+	REG_PREAVG  = 0x10,
+	REG_POSTAVG = 0x20,
+	REG_SUM = 0x40, 
+	REG_UNION = 0x80,
 	REG_EXC = 0x100,
+	REG_FAST = 0x200000,
+	REG_STRING = 0x800000,
 
 	/* Types */
 	REG_UTC = 0x200, /* MJD + ms */
@@ -96,13 +107,16 @@ private:
 	typedef std::map<std::string, board_params> arr_template;
 	std::map<std::string, arr_template> array_map_;
 
+	bool has_string_flag_;
 	off_t frame_length_;
 	uint64_t ms_jiffie_base_;
+	int fd_;
+	int32_t revision_;
 
 	void ParseArrayMap(uint8_t *buffer, size_t size);
 	G3FrameObjectPtr GCPToFrameObject(uint8_t *buffer,
-	    const struct block_stats &block, int depth = 0,
-	    int base_offset = 0);
+	    const struct block_stats &block, bool has_string_flag,
+	    int depth = 0, int base_offset = 0);
 	std::deque<std::string> filename_;
 	std::string cur_file_;
 
@@ -125,8 +139,8 @@ ARCFileReader::ARCFileReader(const std::string &path,
 	}
 
 	boost::filesystem::path fpath(path);
-	if (!boost::filesystem::exists(fpath) ||
-	    !boost::filesystem::is_regular_file(fpath))
+	if (path.find("://") == -1 && (!boost::filesystem::exists(fpath) ||
+	    !boost::filesystem::is_regular_file(fpath)))
 		log_fatal("Could not find file %s", path.c_str());
 	StartFile(path);
 }
@@ -169,8 +183,10 @@ void ARCFileReader::StartFile(const std::string & path)
 
 	// Open file, including whatever decompression/network access/etc.
 	// may be required
-	g3_istream_from_path(stream_, path);
+	fd_ = g3_istream_from_path(stream_, path);
 	cur_file_ = path;
+	revision_ = 0;
+	has_string_flag_ = false;
 
 	/*
 	 * GCP ARC file header:
@@ -181,16 +197,18 @@ void ARCFileReader::StartFile(const std::string & path)
 
 	// First size record
 	stream_.read((char *)&size, sizeof(size));
-	size = ntohl(size);
+	size = ntohl(size) - 8;
 	stream_.read((char *)&opcode, sizeof(opcode));
 	opcode = ntohl(opcode);
 
 	if (opcode != ARC_SIZE_RECORD)
 		log_fatal("No ARC_SIZE_RECORD at beginning of %s",
 		    path.c_str());
-	if (size != 12)
+	if ((fd_ < 0 && size != 4) || (fd_ >= 0 && size != 8))
 		log_fatal("Incorrectly sized ARC_SIZE_RECORD (%d)", size);
 	stream_.read((char *)&size, sizeof(size)); /* Skip size field */
+	if (fd_ >= 0)
+		stream_.read((char *)&size, sizeof(size)); /* Skip size field (net stream) */
 
 	// Get array map
 	stream_.read((char *)&size, sizeof(size));
@@ -219,11 +237,20 @@ void ARCFileReader::StartFile(const std::string & path)
 }
 
 
+#define ADD_REG(w)  \
+	nregs += 1;  \
+	regset.push_back(block_offset);  \
+	block_offset += w;  \
+	regset.push_back(block_offset - 1)
+
+
 void ARCFileReader::ParseArrayMap(uint8_t *buf, size_t size)
 {
 	int32_t version;
 	uint16_t ntemplates;
-	off_t off = 0, block_offset = 0;
+	off_t off = 0, block_offset = 0, block_width;
+	int32_t nregs = 0;
+	std::vector<int32_t> regset;
 
 	// Check serialization version
 	memcpy(&version, buf + off, sizeof(version));
@@ -266,37 +293,37 @@ void ARCFileReader::ParseArrayMap(uint8_t *buf, size_t size)
 			block_info.axes_help = "";
 
 			block_info.offset = block_offset;
-			block_info.flags = REG_UINT; block_offset += 4;
+			block_info.flags = REG_UINT; ADD_REG(4);
 			board["status"] = block_info;
 
 			block_info.offset = block_offset;
-			block_info.flags = REG_UCHAR; block_offset += 1;
+			block_info.flags = REG_UCHAR; ADD_REG(1);
 			board["received"] = block_info;
 
 			block_info.offset = block_offset;
-			block_info.flags = REG_UINT; block_offset += 4;
+			block_info.flags = REG_UINT; ADD_REG(4);
 			board["nsnap"] = block_info;
 
 			block_info.offset = block_offset;
-			block_info.flags = REG_UINT; block_offset += 4;
+			block_info.flags = REG_UINT; ADD_REG(4);
 			board["record"] = block_info;
 
 			block_info.offset = block_offset;
-			block_info.flags = REG_UTC; block_offset += 8;
+			block_info.flags = REG_UTC; ADD_REG(8);
 			board["utc"] = block_info;
 
 			if (experiment == Experiment::BK) {
 				block_info.offset = block_offset;
-				block_info.flags = REG_UINT; block_offset += 4;
+				block_info.flags = REG_UINT; ADD_REG(4);
 				board["lst"] = block_info;
 			}
 
 			block_info.offset = block_offset;
-			block_info.flags = REG_UINT; block_offset += 4;
+			block_info.flags = REG_UINT; ADD_REG(4);
 			board["features"] = block_info;
 
 			block_info.offset = block_offset;
-			block_info.flags = REG_UINT; block_offset += 4;
+			block_info.flags = REG_UINT; ADD_REG(4);
 			board["markSeq"] = block_info;
 
 			templ["frame"] = board;
@@ -332,7 +359,7 @@ void ARCFileReader::ParseArrayMap(uint8_t *buf, size_t size)
 				block_info.dim[2] = 0;
 				block_info.axes_help = "";
 				block_info.offset = block_offset;
-				block_info.flags = REG_UINT; block_offset += 4;
+				block_info.flags = REG_UINT; ADD_REG(4);
 				board["status"] = block_info;
 			}
 
@@ -371,6 +398,13 @@ void ARCFileReader::ParseArrayMap(uint8_t *buf, size_t size)
 				}
 				block_info.offset = block_offset;
 
+				/*
+				 * Check if this version of GCP marks strings
+				 * usefully.
+				 */
+				if (block_info.flags & REG_STRING)
+					has_string_flag_ = true;
+
 				/* Get type width */
 				switch (block_info.flags & REG_TYPEMASK) {
 				case REG_UTC:
@@ -401,16 +435,16 @@ void ARCFileReader::ParseArrayMap(uint8_t *buf, size_t size)
 					    cur_file_.c_str());
 				}
 
-				/* Skip unarchived registers */
-				if (!(block_info.flags & REG_EXC)) {
+				/* Skip unarchived registers (file streams only) */
+				if (fd_ >= 0 || !(block_info.flags & REG_EXC)) {
 					if (experiment == Experiment::BK) {
-						block_offset += block_info.width *
+						block_width = block_info.width *
 							((block_info.dim[0] == 0) ? 1 :
 							  block_info.dim[0]) *
 							((block_info.dim[1] == 0) ? 1 :
 							  block_info.dim[1]);
 					} else {
-						block_offset += block_info.width *
+						block_width = block_info.width *
 							((block_info.dim[0] == 0) ? 1 :
 							  block_info.dim[0]) *
 							((block_info.dim[1] == 0) ? 1 :
@@ -418,6 +452,7 @@ void ARCFileReader::ParseArrayMap(uint8_t *buf, size_t size)
 							((block_info.dim[2] == 0) ? 1 :
 							  block_info.dim[2]);
 					}
+					ADD_REG(block_width);
 				}
 
 				if ((experiment == Experiment::SPT) ||
@@ -433,8 +468,8 @@ void ARCFileReader::ParseArrayMap(uint8_t *buf, size_t size)
 					block_info.axes_help = "";
 				}
 
-				/* Add to map iff actually archived */
-				if (!(block_info.flags & REG_EXC))
+				/* Add to map iff actually archived (file streams only) */
+				if (fd_ >= 0 || !(block_info.flags & REG_EXC))
 					board[block_name] = block_info;
 			}
 
@@ -455,6 +490,80 @@ void ARCFileReader::ParseArrayMap(uint8_t *buf, size_t size)
 	}
 
 	frame_length_ = block_offset;
+
+	if (fd_ >= 0) {
+		int32_t opcode, buffer_size, data;
+		uint8_t *buffer;
+
+		// Tell network source (e.g. GCP) to send all registers
+		off = 0;
+		buffer_size = (4 + 2 * nregs) * sizeof(int32_t);
+		buffer = new uint8_t[buffer_size];
+
+		buffer_size = htonl(buffer_size);
+		memcpy(buffer + off, &buffer_size, sizeof(buffer_size));
+		off += sizeof(buffer_size);
+
+		opcode = ARC_REGSET_MSG;
+		opcode = htonl(opcode);
+		memcpy(buffer + off, &opcode, sizeof(opcode));
+		off += sizeof(opcode);
+
+		// revision
+		data = revision_;
+		data = htonl(data);
+		memcpy(buffer + off, &data, sizeof(data));
+		off += sizeof(data);
+
+		// number of registers
+		data = nregs;
+		data = htonl(data);
+		memcpy(buffer + off, &data, sizeof(data));
+		off += sizeof(data);
+
+		// range for each register
+		for (auto &v : regset) {
+			data = htonl(v);
+			memcpy(buffer + off, &data, sizeof(data));
+			off += sizeof(data);
+		}
+
+		if (write(fd_, buffer, off) <= 0) {
+			delete [] buffer;
+			log_fatal("Error sending ARC_REGSET_MSG to %s",
+			    cur_file_.c_str());
+		}
+
+		delete [] buffer;
+
+		// Tell network source (e.g. GCP) to send all frames
+		off = 0;
+		buffer_size = 3 * sizeof(int32_t);
+		buffer = new uint8_t[buffer_size];
+
+		buffer_size = htonl(buffer_size);
+		memcpy(buffer + off, &buffer_size, sizeof(buffer_size));
+		off += sizeof(buffer_size);
+
+		opcode = ARC_INTERVAL_MSG;
+		opcode = htonl(opcode);
+		memcpy(buffer + off, &opcode, sizeof(opcode));
+		off += sizeof(opcode);
+
+		// send every frame
+		data = 1;
+		data = htonl(data);
+		memcpy(buffer + off, &data, sizeof(data));
+		off += sizeof(data);
+
+		if (write(fd_, buffer, off) <= 0) {
+			delete [] buffer;
+			log_fatal("Error sending ARC_INTERVAL_MSG to %s",
+			    cur_file_.c_str());
+		}
+
+		delete [] buffer;
+	}
 }
 
 G3TimePtr ARCFileReader::GCPToTime(uint8_t *buffer, off_t offset)
@@ -524,7 +633,8 @@ static double GCP64ToFloat(uint8_t *buffer, off_t offset)
 }
 
 G3FrameObjectPtr ARCFileReader::GCPToFrameObject(uint8_t *buffer,
-    const struct ARCFileReader::block_stats &block, int depth, int base_offset)
+    const struct ARCFileReader::block_stats &block, bool has_string_flag,
+    int depth, int base_offset)
 {
 	if (base_offset == 0)
 		base_offset = block.offset;
@@ -543,8 +653,8 @@ G3FrameObjectPtr ARCFileReader::GCPToFrameObject(uint8_t *buffer,
 				stride *= block.dim[i];
 
 		for (int i = 0; i < block.dim[depth]; i++) {
-			root->push_back(GCPToFrameObject(buffer, block, depth+1,
-			    base_offset));
+			root->push_back(GCPToFrameObject(buffer, block,
+			    has_string_flag, depth+1, base_offset));
 			base_offset += block.width*stride;
 		}
 
@@ -562,10 +672,44 @@ G3FrameObjectPtr ARCFileReader::GCPToFrameObject(uint8_t *buffer,
 			}
 			return root; }
 		case REG_CHAR: 
-		case REG_UCHAR:
-			if (buffer[base_offset + block.dim[depth] - 1] == '\0')
+		case REG_UCHAR: {
+			/*
+			 * Not all versions of GCP usefully mark whether
+			 * characters strings are text. Try to guess as
+			 * best we can.
+			 */
+			bool is_a_string = false;
+			if (has_string_flag) {
+				// Are we lucky enough that GCP tells us?
+				is_a_string = (block.flags & REG_STRING);
+			} else if (block.flags & REG_FAST) {
+				// Marked as a time-dependent variable: not text
+				is_a_string = false;
+			} else if (block.flags & (REG_SUM |
+			    REG_UNION | REG_PREAVG | REG_POSTAVG)) {
+				// Math done on it? Not text
+				is_a_string = false;
+			} else {
+				// Only printable ASCII and null characters?
+				// Ends with a null character?
+				// If so: probably a string?
+				int i = 0;
+				for (i = 0; i < block.dim[depth]-1; i++) {
+					if (!isprint(buffer[base_offset + i]) &&
+					    buffer[base_offset + i] != '\0')
+						break;
+				}
+				if (buffer[base_offset + i] == '\0')
+					i++;
+				if (i == block.dim[depth])
+					is_a_string = true;
+			}
+				
+			if (is_a_string)
 				return G3StringPtr(new G3String(
 				    (char *)&buffer[base_offset]));
+			}
+			
 			// else fallthrough
 		case REG_BOOL: {
 			G3VectorIntPtr vec(new G3VectorInt);
@@ -666,6 +810,17 @@ void ARCFileReader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	opcode = ntohl(opcode);
 	if (opcode != ARC_FRAME_RECORD)
 		log_fatal("Message not an ARC_FRAME_RECORD mid-file");
+	if (fd_ >= 0) {
+		// network source (e.g. GCP) can support changing register selection on the fly
+		int32_t rev;
+		stream_.read((char *)&rev, sizeof(rev));
+		rev = ntohl(rev);
+		if (rev != revision_)
+			log_fatal("Frame regset revision %d does not match expected revision (%d)",
+			    rev, revision_);
+		stream_.read((char *)&size, sizeof(size));
+		size = ntohl(size);
+	}
 	if (size != frame_length_)
 		log_fatal("%zd-byte frame does not match expected length (%zd)",
 		    (size_t)size, (size_t)frame_length_);
@@ -680,7 +835,7 @@ void ARCFileReader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 			for (auto reg = board->second.begin();
 			    reg != board->second.end(); reg++) {
 				(*boarddat)[reg->first] = GCPToFrameObject(
-				    buffer, reg->second);
+				    buffer, reg->second, has_string_flag_);
 			}
 			(*templ)[board->first] = boarddat;
 		}
