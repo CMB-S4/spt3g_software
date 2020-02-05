@@ -691,16 +691,16 @@ G3FrameObjectPtr ARCFileReader::GCPToFrameObject(uint8_t *buffer,
 				is_a_string = false;
 			} else {
 				// Only printable ASCII and null characters?
+				// Ends with a null character?
 				// If so: probably a string?
 				int i = 0;
 				for (i = 0; i < block.dim[depth]-1; i++) {
-					if (!isprint(buffer[base_offset + i]))
+					if (!isprint(buffer[base_offset + i]) &&
+					    buffer[base_offset + i] != '\0')
 						break;
 				}
-				for (; i < block.dim[depth]; i++) {
-					if (buffer[base_offset + i] != '\0')
-						break;
-				}	
+				if (buffer[base_offset + i] == '\0')
+					i++;
 				if (i == block.dim[depth])
 					is_a_string = true;
 			}

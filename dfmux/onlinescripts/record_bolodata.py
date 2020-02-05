@@ -33,7 +33,7 @@ parser.add_argument('boards', nargs='*', metavar='serial', help='IceBoard serial
 parser.add_argument('output', metavar='/path/to/files/', help='Directory in which to place output files')
 
 parser.add_argument('-v', '--verbose', action='store_true', help='Verbose mode (print all frames)')
-parser.add_argument('--max-file-size', default=1024, help='Maximum file size in MB (default 1024)')
+parser.add_argument('--max-file-size', default=1024, type=int, help='Maximum file size in MB (default 1024)')
 parser.add_argument('--calibrator', action='store_true', help='Enable SPT calibrator DAQ')
 parser.add_argument('--whwp', action='store_true', help='Enable Polarbear HWP DAQ')
 parser.add_argument('--syslog', action='store_true', help='Enable syslog logger')
@@ -62,11 +62,9 @@ if not len(args.boards):
                     unit='Data Acquisition')
     import pydfmux
     hwm = pydfmux.load_session(open(args.hardware_map, 'r'))['hardware_map']
-    crates = hwm.query(pydfmux.core.dfmux.IceCrate)
-    if crates.count() > 0:
-        crates.resolve()
-
-    boards = [board.serial for board in hwm.query(pydfmux.IceBoard)]
+    boards = hwm.query(pydfmux.Dfmux)
+    boards.resolve()
+    boards = boards.serial
 
 else:
     # Otherwise assume the input is a list of board serials
