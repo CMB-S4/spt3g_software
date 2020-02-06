@@ -13,6 +13,8 @@ parser.add_argument('-v', dest='verbose', action='store_true',
 parser.add_argument('-u', dest='udp', action='store_true',
                     help='Use multicast UDP for data collection instead of '
                     'SCTP for compatibility with old firmware.')
+parser.add_argument('-t', dest='threads', type=int, default=None,
+                    help='Number of listener threads to use (SCTP only)')
 parser.add_argument('-a', dest='align', action='store_true',
                     help='Align sampling. This has to happen once, but'
                     ' will break any existing DAN loops when run.')
@@ -82,8 +84,12 @@ if args.udp:
 else:
     hosts = ['iceboard' + str(serial) + '.local' for serial in serial_list]
 
-    # XXX: multiple threads? one per N boards?
-    collectors = [dfmux.DfMuxCollector(builder, hosts),]
+    if args.threads is None:
+        args.threads = len(hosts)
+    if args.threads > len(hosts):
+        args.threads = len(hosts)
+    collectors = [dfmux.DfMuxCollector(builder, hosts[i::args.threads])
+                  for i in range(args.threads)]
 
 pipe.Add(builder)
 
