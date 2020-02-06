@@ -201,7 +201,6 @@ int DfMuxCollector::SetupSCTPSocket(std::vector<std::string> hosts)
 	// Connect the socket to every board in our list. Errors are fatal.
 	for (auto i : hosts) {
 		struct addrinfo hints, *res;
-		struct sockaddr_in addr;
 		bzero(&hints, sizeof(hints));
 		hints.ai_family = AF_INET;
 		hints.ai_socktype = SOCK_SEQPACKET;
