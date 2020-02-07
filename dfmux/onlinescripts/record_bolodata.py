@@ -33,6 +33,8 @@ parser.add_argument('boards', nargs='*', metavar='serial', help='IceBoard serial
 parser.add_argument('output', metavar='/path/to/files/', help='Directory in which to place output files')
 
 parser.add_argument('-v', '--verbose', action='store_true', help='Verbose mode (print all frames)')
+parser.add_argument('-u', '--udp', action='store_true', help='Use UDP multicast instead of SCTP')
+parser.add_argument('--daq-threads', default=None, type=int, help='Number of listener threads to use (applies only for SCTP)')
 parser.add_argument('--max-file-size', default=1024, type=int, help='Maximum file size in MB (default 1024)')
 parser.add_argument('--calibrator', action='store_true', help='Enable SPT calibrator DAQ')
 parser.add_argument('--whwp', action='store_true', help='Enable Polarbear HWP DAQ')
@@ -51,6 +53,9 @@ if args.syslog:
     )
 else:
     core.G3Logger.global_logger = console_logger
+
+core.set_log_level(core.G3LogLevel.LOG_ERROR, 'DfMuxBuilder')
+core.set_log_level(core.G3LogLevel.LOG_ERROR, 'DfMuxCollector')
 
 args.hardware_map = os.path.realpath(args.hardware_map)
 
@@ -78,23 +83,33 @@ core.log_notice('Beginning data acquisition', unit='Data Acquisition')
 pipe = core.G3Pipeline()
 builder = dfmux.DfMuxBuilder([int(board) for board in boards])
 
-# Get the local IP(s) to use to connect to the boards by opening test
-# connections. Using a set rather than a list deduplicates the results.
-local_ips = {}
-for board in boards:
-    testsock = socket.create_connection(('iceboard' + board + '.local', 80))
-    local_ip = testsock.getsockname()[0]
-    if local_ip not in local_ips:
-        local_ips[local_ip] = set()
-    local_ips[local_ip].add(int(board))
-    testsock.close()
-core.log_notice('Creating listeners for %d boards on interfaces: %s' %
-                (len(boards), ', '.join(local_ips.keys())),
-                unit='Data Acquisition')
+if args.udp:
+    # Set up listeners per thread and point them at the event builder
+    # Get the local IP(s) to use to connect to the boards by opening test
+    # connections. Using a set rather than a list deduplicates the results.
+    local_ips = {}
+    for board in boards:
+        testsock = socket.create_connection(('iceboard' + board + '.local', 80))
+        local_ip = testsock.getsockname()[0]
+        if local_ip not in local_ips:
+            local_ips[local_ip] = set()
+        local_ips[local_ip].add(int(board))
+        testsock.close()
+    core.log_notice('Creating listeners for %d boards on interfaces: %s' %
+                    (len(boards), ', '.join(local_ips.keys())),
+                    unit='Data Acquisition')
 
-# Set up listeners per network segment and point them at the event builder
-collectors = [dfmux.DfMuxCollector(ip, builder, list(local_boards))
-              for ip, local_boards in local_ips.items()]
+    # Set up listeners per network segment and point them at the event builder
+    collectors = [dfmux.DfMuxCollector(ip, builder, list(local_boards))
+                  for ip, local_boards in local_ips.items()]
+else:
+    iceboard_hosts = ['iceboard' + board + '.local' for board in boards]
+    if args.daq_threads is None:
+        args.daq_threads = len(iceboard_hosts)
+    if args.daq_threads > len(iceboard_hosts):
+        args.daq_threads = len(iceboard_hosts)
+    collectors = [dfmux.DfMuxCollector(builder, iceboard_hosts[i::args.daq_threads])
+                  for i in range(args.daq_threads)]
 pipe.Add(builder)
 
 # Catch errors if samples have become misaligned. Don't even bother processing
@@ -134,6 +149,13 @@ pipe.Add(yellanddrop)
 pipe.Add(gcp.GCPSignalledHousekeeping)
 pipe.Add(dfmux.HousekeepingConsumer)
 pipe.Add(gcp.GCPHousekeepingTee)
+
+def WaitForWiring(frame):
+    if frame.type == core.G3FrameType.Wiring:
+        core.set_log_level(core.G3LogLevel.LOG_NOTICE, 'DfMuxBuilder')
+        core.set_log_level(core.G3LogLevel.LOG_NOTICE, 'DfMuxCollector')
+        core.log_notice('Got a wiring frame, ready for data acquisition.', unit='Data Acquisition')
+pipe.Add(WaitForWiring)
 
 # Issue a periodic watchdog ping to the SPT pager system
 if args.watchdog:

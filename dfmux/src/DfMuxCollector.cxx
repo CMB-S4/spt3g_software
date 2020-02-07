@@ -122,12 +122,20 @@ RawTimestampToTimeCode(RawTimestamp stamp)
 	return last_code;
 }
 
+DfMuxCollector::DfMuxCollector(G3EventBuilderPtr builder,
+    std::vector<std::string> hosts) :
+     builder_(builder), success_(false), stop_listening_(false)
+{
+
+	success_ = (SetupSCTPSocket(hosts) != 0);
+}
+
 DfMuxCollector::DfMuxCollector(const char *listenaddr,
    G3EventBuilderPtr builder, std::vector<int32_t> board_list) :
     builder_(builder), success_(false), stop_listening_(false),
     board_list_(board_list)
 {
-	success_ = (SetupSocket(listenaddr) != 0);
+	success_ = (SetupUDPSocket(listenaddr) != 0);
 }
 
 DfMuxCollector::DfMuxCollector(const char *listenaddr,
@@ -138,10 +146,10 @@ DfMuxCollector::DfMuxCollector(const char *listenaddr,
 	for (auto i : board_serials_)
 		board_list_.push_back(i.second);
 
-	success_ = (SetupSocket(listenaddr) != 0);
+	success_ = (SetupUDPSocket(listenaddr) != 0);
 }
 
-int DfMuxCollector::SetupSocket(const char *listenaddr)
+int DfMuxCollector::SetupUDPSocket(const char *listenaddr)
 {
 	struct sockaddr_in addr;
 	struct ip_mreq mcast;
@@ -176,6 +184,38 @@ int DfMuxCollector::SetupSocket(const char *listenaddr)
 	    sizeof(mcast)) < 0) {
 		perror(NULL);
 		return errno;
+	}
+
+	int rcvbuf = 80000 * sizeof(struct DfmuxPacket);
+	if (setsockopt(fd_, SOL_SOCKET, SO_RCVBUF, &rcvbuf, sizeof(rcvbuf)) < 0)
+		perror("Error setting receive queue length");
+
+	return 0;
+}
+
+int DfMuxCollector::SetupSCTPSocket(std::vector<std::string> hosts)
+{
+
+	fd_ = socket(AF_INET, SOCK_SEQPACKET, IPPROTO_SCTP);
+
+	// Connect the socket to every board in our list. Errors are fatal.
+	for (auto i : hosts) {
+		struct addrinfo hints, *res;
+		bzero(&hints, sizeof(hints));
+		hints.ai_family = AF_INET;
+		hints.ai_socktype = SOCK_SEQPACKET;
+		hints.ai_protocol = 0;
+
+		if (getaddrinfo(i.c_str(), "9876", &hints, &res))
+			log_fatal("Could not resolve board \"%s\"", i.c_str());
+
+		if (connect(fd_, res->ai_addr, res->ai_addrlen) != 0)
+			log_fatal("Could not connect to board \"%s\" by SCTP "
+			          "(%s). Maybe it has UDP-only firmware or is "
+				  "not connected/powered?",
+				  i.c_str(), strerror(errno));
+
+		freeaddrinfo(res);
 	}
 
 	int rcvbuf = 80000 * sizeof(struct DfmuxPacket);
@@ -379,7 +419,9 @@ PYBINDINGS("dfmux")
 {
 	namespace bp = boost::python;
 
-	bp::class_<DfMuxCollector, DfMuxCollectorPtr, boost::noncopyable>("DfMuxCollector", "Listener object that collects IceBoard packets from a single network interface and decodes and forwards them to a DfMuxBuilder object for insertion into the data stream. Takes the IP address of the interface on the host computer on which to listen as well as the builder object to which the data should be sent.", bp::init<const char *, G3EventBuilderPtr, std::vector<int32_t> >((bp::arg("interface"), bp::arg("builder"), bp::arg("boardlist")=std::vector<int32_t>()), "Create a DfMuxCollector listening on \"interface\" for multicasted packets and forwards it to DfMuxBuilder \"builder\". Filters to only the boards specified in \"boardlist\" (by default empty, implying all boards)."))
+	bp::class_<DfMuxCollector, DfMuxCollectorPtr, boost::noncopyable>("DfMuxCollector", "Listener object that collects IceBoard packets from a single network interface and decodes and forwards them to a DfMuxBuilder object for insertion into the data stream. Takes the builder object to which the data should be sent. Uses either multicast UDP or SCTP depending on which constructor is used.", bp::no_init)
+	    .def(bp::init<G3EventBuilderPtr, std::vector<std::string> >((bp::arg("builder"), bp::arg("hostnames")), "Create a DfMuxCollector listening for SCTP packets from the listed hosts (e.g. [\"iceboard0062.local\", ...]) and forwards it to DfMuxBuilder \"builder\"."))
+	    .def(bp::init<const char *, G3EventBuilderPtr, std::vector<int32_t> >((bp::arg("interface"), bp::arg("builder"), bp::arg("boardlist")=std::vector<int32_t>()), "Create a DfMuxCollector listening on \"interface\" for multicasted UDP packets and forwards it to DfMuxBuilder \"builder\". Filters to only the boards specified in \"boardlist\" (by default empty, implying all boards)."))
 	    .def("__init__", bp::make_constructor(make_dfmux_collector_v2_from_dict, bp::default_call_policies(), (bp::arg("interface"), bp::arg("builder"), bp::arg("board_serial_map"))), "Crate a DfMuxCollector that can parse V2 (64x) data. Pass a mapping from board IP address (strings or integers) to serial numbers as the last argument")
 	    .def("Start", &DfMuxCollector::Start)
 	    .def("Stop", &DfMuxCollector::Stop)
