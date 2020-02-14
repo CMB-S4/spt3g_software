@@ -444,6 +444,9 @@ def UnpackCryoData(f):
     if f.type != core.G3FrameType.GcpSlow:
         return
 
+    if 'cryo' not in f['array']:
+        return
+
     t = core.G3MapDouble()
     t.time = f['array']['cryo']['utc']
     t.cryo_is_valid = f['array']['cryo']['cryoIsValid'][0]
@@ -520,6 +523,9 @@ def UnpackPTData(f):
     if f.type != core.G3FrameType.GcpSlow:
         return
 
+    if 'pt415' not in f['array']:
+        return
+
     p = core.G3MapDouble()
 
     p.time = f['array']['pt415']['utc']
@@ -582,6 +588,9 @@ def UnpackWeatherData(f):
     in frame'''
 
     if f.type != core.G3FrameType.GcpSlow:
+        return
+
+    if 'weather' not in f['array']:
         return
 
     t = core.G3MapDouble()
