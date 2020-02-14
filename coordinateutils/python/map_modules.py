@@ -10,7 +10,7 @@ def ConvertTMapsToPolarized(frame):
     This module is only a shim that creates null Q and U maps and populates
     a properly invertible Wpol array from the TT Wunpol weights.
     '''
-    if frame.type != core.G3FrameType.Map:
+    if frame.type != core.G3FrameType.Map or 'Wunpol' not in frame:
         return
 
     wgt = frame['Wunpol'].TT
@@ -34,7 +34,7 @@ def ConvertPolarizedMapsToT(frame):
     '''
     Converts individual polarized maps to temperature-only versions of the same map.
     '''
-    if frame.type != core.G3FrameType.Map:
+    if frame.type != core.G3FrameType.Map or 'Wpol' not in frame:
         return
 
     wgt = frame['Wpol'].TT
