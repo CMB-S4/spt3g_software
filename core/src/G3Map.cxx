@@ -77,6 +77,7 @@ G3_SERIALIZABLE_CODE(G3MapString);
 G3_SERIALIZABLE_CODE(G3MapVectorInt);
 G3_SERIALIZABLE_CODE(G3MapVectorDouble);
 G3_SERIALIZABLE_CODE(G3MapVectorString);
+G3_SERIALIZABLE_CODE(G3MapVectorVectorString);
 G3_SERIALIZABLE_CODE(G3MapVectorComplexDouble);
 G3_SERIALIZABLE_CODE(G3MapVectorTime);
 
@@ -101,6 +102,8 @@ PYBINDINGS("core") {
 	    "strings to arrays of integers.");
 	register_g3map<G3MapVectorString>("G3MapVectorString", "Mapping from "
 	    "strings to lists of strings.");
+	register_g3map<G3MapVectorVectorString>("G3MapVectorVectorString",
+	    "Mapping from strings to lists of lists of strings.");
 	register_g3map<G3MapVectorTime>("G3MapVectorTime", "Mapping from "
 	    "strings to lists of G3 time objects.");
 
