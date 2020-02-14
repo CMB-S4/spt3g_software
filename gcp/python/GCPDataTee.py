@@ -6,7 +6,8 @@ class GCPWatchdog(object):
     '''
     Module that sends a watchdog (ping) message to the GCP pager when it is operational.
     '''
-    def __init__(self, interval=1200, host='sptnet.spt', port=50040, timeout=20, sim=False):
+    def __init__(self, interval=600, host='sptnet.spt', port=50040, timeout=20, sim=False,
+                 calibrator=False):
         self.host = host
         self.port = port
         self.interval = interval
@@ -14,7 +15,11 @@ class GCPWatchdog(object):
         self.sim = sim
         self.last_ping = None
         self.last_missing = None
-        self.thread = None
+        self.last_missing_calibrator = None
+        self.calibrator = calibrator
+        # ping on startup
+        self.thread = threading.Thread(target=self.ping)
+        self.thread.start()
 
     def ping(self):
         # send a watchdog command to the pager server port
@@ -68,6 +73,18 @@ class GCPWatchdog(object):
                 # only ping if normal data acquisition has been going for a bit
                 if self.last_missing and now - self.last_missing < 10:
                     return
+
+            # only ping if calibrator is returning data
+            if self.calibrator:
+                if 'CalibratorOn' not in frame:
+                    core.log_error("Missing calibrator signal in DAQ data stream",
+                                   unit='GCPWatchdog')
+                    self.last_missing_calibrator = now
+                    return
+                else:
+                    # only ping if normal data acquisition has been going for a bit
+                    if self.last_missing_calibrator and now - self.last_missing_calibrator < 10:
+                        return
 
         # spawn thread
         self.thread = threading.Thread(target=self.ping)

@@ -157,10 +157,6 @@ def WaitForWiring(frame):
         core.log_notice('Got a wiring frame, ready for data acquisition.', unit='Data Acquisition')
 pipe.Add(WaitForWiring)
 
-# Issue a periodic watchdog ping to the SPT pager system
-if args.watchdog:
-    pipe.Add(gcp.GCPWatchdog)
-
 # For visualization, add nominal pointing
 if hwm is None:
     # Get the bolometer properties map from disk (written separately by pydfmux)
@@ -203,6 +199,10 @@ if args.calibrator:
 if args.whwp:
     from spt3g import whwp
     pipe.Add(whwp.WHWPConsumer)
+
+# Issue a periodic watchdog ping to the SPT pager system
+if args.watchdog:
+    pipe.Add(gcp.GCPWatchdog, calibrator=args.calibrator)
 
 if args.verbose:
     pipe.Add(core.Dump)
