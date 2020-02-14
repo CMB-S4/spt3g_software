@@ -4,4 +4,4 @@ load_pybindings(__name__, __path__)
 from .ARCExtractor import UnpackACUData, UnpackTrackerData, DecryptFeatureBit, ARCExtract, ARCExtractMinimal
 from .ARCHKExtractor import UnpackSPTpolHKData
 from .GCPDataTee import GCPHousekeepingTee, GCPSignalledHousekeeping, GCPBoloDataTee, GCPWatchdog
-
+from .InfluxDB import UpdateDB
