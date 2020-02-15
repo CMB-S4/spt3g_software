@@ -152,6 +152,8 @@ def load_skymap_fits(filename, hdu=None):
                     'TEMPERATURE': 'T',
                     'Q_POLARISATION': 'Q',
                     'U_POLARISATION': 'U',
+                    'Q-POLARISATION': 'Q',
+                    'U-POLARISATION': 'U',
                     'I_STOKES': 'T',
                     'Q_STOKES': 'Q',
                     'U_STOKES': 'U',
@@ -457,12 +459,15 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
         assert(T.IsCompatible(U))
         pol = True
         maps = [T, Q, U]
-        names = ['T', 'Q', 'U']
+        if flat:
+            names = ['T', 'Q', 'U']
+        else:
+            names = ['TEMPERATURE', 'Q_POLARISATION', 'U_POLARISATION']
     else:
         assert(U is None)
         pol = False
         maps = [T]
-        names = ['T']
+        names = ['T' if flat else 'TEMPERATURE']
 
     if flat:
         header = create_wcs_header(T)
@@ -509,6 +514,7 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
     header['MAPTYPE'] = 'FLAT' if flat else 'HEALPIX'
     header['COORDREF'] = str(T.coord_ref)
     header['POLCCONV'] = 'IAU'
+    header['POLAR'] = 'T' if pol else 'F'
     header['UNITS'] = str(T.units)
     header['WEIGHTED'] = T.is_weighted
     if W is not None:
