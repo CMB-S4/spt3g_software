@@ -12,35 +12,54 @@ DfMux
 Bolometer Data
 ~~~~~~~~~~~~~~
 
-The ``dfmux`` project provides two classes that can be used for event-driven acquisition of bolometer timestreams from IceBoards. The core class, ``dfmux.DfMuxCollector``, listens for multicast packets on an interface given by its first argument. Its second argument is a ``dfmux.DfMuxBuilder`` object to which the collected data is reported. The ``dfmux.DfMuxBuilder`` is a subclass of ``G3EventBuilder`` (see G3EventBuilder_ below) that assembles mux packets into frames, with one sample from each readout channel per frame. To do this, it is passed the number of boards to expect for a complete sample.
+The ``dfmux`` project provides two classes that can be used for event-driven acquisition of bolometer timestreams from IceBoards. The core class, ``dfmux.DfMuxCollector``, listens for data from one or more IceBoards, passing the resulting data to a ``dfmux.DfMuxBuilder`` object to which the collected data is reported. The ``dfmux.DfMuxBuilder`` is a subclass of ``G3EventBuilder`` (see G3EventBuilder_ below) that assembles mux packets from one or more ``DfMuxCollector`` objects into frames, with one sample from each readout channel per frame. To do this, it is passed either the number of boards to expect for a complete sample or a list of the serial numbers of boards to use.
 
 .. code-block:: python
 
 	pipe = core.G3Pipeline()
-	builder = dfmux.DfMuxBuilder(len(hwm.query(pydfmux.core.dfmux.IceBoard).all()))
-	collector = dfmux.DfMuxCollector("192.168.1.4", builder)
+	builder = dfmux.DfMuxBuilder([136])
+	collector = dfmux.DfMuxCollector(builder, ["iceboard0136.local"])
 	collector.Start()
 	pipe.Add(builder)
 
-The above example listens for the number of boards included in the specified pydfmux hardware map on the host computer's interface with IP address 192.168.1.4 and then emits frames into the processing queue. Note that this listens to all boards reachable via the specified network interface and that the IP address is *not* a board IP.
-
-As an alternative, you can specify a specific list of boards to listen for. This is useful when using a hardware map containing only a subset of the boards on the network, which would otherwise trigger dropped packet errors. An equivalent example to the above code follows:
+The above example listens for data from the IceBoard with serial number 136 using SCTP (see below), passing the resulting data to the specified DfMuxBuilder. A list of serial numbers in a given pydfmux hardware map can be obtained using a command like this:
 
 .. code-block:: python
 
-	pipe = core.G3Pipeline()
-	builder = dfmux.DfMuxBuilder([int(board.serial) for board in hwm.query(pydfmux.IceBoard)])
-	collector = dfmux.DfMuxCollector("192.168.1.4", builder)
-	collector.Start()
-	pipe.Add(builder)
+        serials = [int(board.serial) for board in hwm.query(pydfmux.IceBoard)]
 
-.. note::
 
-	The mux system can deliver large numbers of UDP packets rapidly. If you see warnings about missed samples, you may need to increase the maximum size of the kernel UDP receive queue. On Linux, this can be accomplished by changing the value in ``/proc/sys/net/core/rmem_max``. On FreeBSD and Mac OS X, the maximum is in the sysctl ``kern.ipc.maxsockbuf``. A value of 5000000000 seems to work well.
+This library supports data acquisition using either of two data transport mechanisms: SCTP (newer firmware than 11.3 only) and multicast UDP.
 
-.. note::
+SCTP
+____
 
-	On some versions of Linux with 128x DfMux firmware, you will need to disable strict reverse-path validation in the kernel to take data. This can be accomplished by setting the sysctl ``net.ipv4.conf.all.rp_filter`` to 0. Depending on our system configuration, you may also need to set the corresponding per-interface sysctl (replace ``all`` with an interface name) corresponding to the network interface to which the DfMux boards are connected.
+Extremely new (as-yet unreleased) IceBoard firmwares support using SCTP as a data transport. In this mode, a ``DfMuxCollector`` object connects to the IceBoard, opening a data connection over which streaming samples are transported to the DAQ computer. This connection is error-tolerant and point-to-point, so the collector must be passed a list of boards to listen to. SCTP is used when the collector is created with a list of board hostnames and the builder argument *first*:
+
+.. code-block:: python
+
+	collector = dfmux.DfMuxCollector(builder, ["iceboard0136.local"])
+
+Note that, when using SCTP for data transport on Linux, you may need to load the sctp kernel module by running ``modprobe sctp``. On versions of the Linux kernel earlier than 4.16, you may also need to instantiate one DfMuxCollector per board. (This is the default behavior of ``record_bolodata.py``).
+
+
+UDP
+___
+
+The default mode of data acquisition is multicast UDP, which makes the data acquisition system passive. When using multicast UDP (mandatory on firmwares 11.3 and earlier, otherwise optional), the ``DfMuxCollector`` must be passed the IP address of an interface *on the DAQ computer* on which to listen for detector data and, optionally, a list of board serial numbers. (The list of board serial numbers is optional when using only one Ethernet interface, but *must* be passed if using Linux on a system with multiple Ethernet interfaces as a result of a Linux kernel multicast socket routing bug.) UDP mode is activated when passing a single listening IP address and the builder object *second*:
+
+.. code-block:: python
+
+	collector = dfmux.DfMuxCollector("192.168.1.4", builder, [136])
+
+If using multicast UDP for data transport, note that the mux system can deliver large numbers of UDP packets rapidly. If you see warnings about missed samples, you may need to increase the maximum size of the kernel UDP receive queue. On Linux, this can be accomplished by changing the value in ``/proc/sys/net/core/rmem_max``. On FreeBSD and Mac OS X, the maximum is in the sysctl ``kern.ipc.maxsockbuf``. A value of 5000000000 seems to work well.
+
+On some versions of Linux with 128x DfMux firmware and multicast UDP for data transport, you will need to disable strict reverse-path validation in the kernel to take data. This can be accomplished by setting the sysctl ``net.ipv4.conf.all.rp_filter`` to 0. Depending on our system configuration, you may also need to set the corresponding per-interface sysctl (replace ``all`` with an interface name) corresponding to the network interface to which the DfMux boards are connected.
+
+Lower data-loss rates with UDP can also often be achieved by setting the Qualityof-Service rules ("QoS") on your ethernet switch to respect DSCP indications (just look for the acronym).
+
+Legacy Boards
+_____________
 
 This code can also be used to collect data from legacy boards with DAN firmware if you are so inclined by using the ``dfmux.LegacyDfMuxCollector`` class in place of ``dfmux.DfMuxCollector``.
 

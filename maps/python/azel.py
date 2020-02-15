@@ -1,10 +1,19 @@
 import numpy
 import os
 import astropy.coordinates, astropy.units, astropy.time
+from astropy.utils import iers
 
 from spt3g import core
 
 spt = astropy.coordinates.EarthLocation(lat=-89.991066*astropy.units.deg,lon=-44.65*astropy.units.deg, height=2835.0*astropy.units.meter)
+
+try:
+    if os.getenv("SPT3G_IERS_AUTO_URL"):
+        iers.conf.iers_auto_url = os.getenv("SPT3G_IERS_AUTO_URL")
+    if os.getenv("SPT3G_IERS_REMOTE_TIMEOUT"):
+        iers.conf.remote_timeout = float(os.getenv("SPT3G_IERS_REMOTE_TIMEOUT"))
+except:
+    pass
 
 @core.usefulfunc
 def check_iers(g3_time):
@@ -18,8 +27,6 @@ def check_iers(g3_time):
         Most recent time for which an IERS calculation must be computed.
     '''
     t = astropy.time.Time(g3_time.mjd, format='mjd')
-
-    from astropy.utils import iers
 
     # check if accessing the IERS table outright works.
     try:

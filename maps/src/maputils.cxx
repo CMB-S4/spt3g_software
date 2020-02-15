@@ -83,6 +83,9 @@ void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool int
 		log_fatal("Input and output maps must use the same coordinates");
 	}
 
+        // These are going to be dense maps, so just start that way
+        out_map->ConvertToDense();
+
 	for (size_t i = 0; i < out_map->size(); i++) {
 		double val = 0;
 		if (rebin > 1) {
