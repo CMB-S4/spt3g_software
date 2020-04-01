@@ -42,11 +42,15 @@ _vabs(const G3VectorQuat &a)
 	return out;
 }
 
+namespace boost {
+namespace math {
 quat
 operator ~(quat a)
 {
 	return conj(a);
 }
+};
+};
 
 G3VectorQuat
 operator ~(const G3VectorQuat &a)
