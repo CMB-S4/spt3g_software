@@ -33,11 +33,21 @@ double dot3(quat a, quat b);
 
 G3VECTOR_OF(quat, G3VectorQuat);
 
+namespace boost {
+namespace math {
+	quat operator ~(quat);
+};
+};
+G3VectorQuat operator ~ (const G3VectorQuat &);
 G3VectorQuat operator * (const G3VectorQuat &, double);
 G3VectorQuat &operator *= (G3VectorQuat &, double);
 G3VectorQuat operator / (const G3VectorQuat &, double);
+G3VectorQuat operator / (double , const G3VectorQuat &);
+G3VectorQuat operator / (const G3VectorQuat &, const quat &);
+G3VectorQuat operator / (const quat &, const G3VectorQuat &);
 G3VectorQuat operator / (const G3VectorQuat &, const G3VectorQuat &);
 G3VectorQuat &operator /= (G3VectorQuat &, double);
+G3VectorQuat &operator /= (G3VectorQuat &, const quat &);
 G3VectorQuat &operator /= (G3VectorQuat &, const G3VectorQuat &);
 G3VectorQuat operator * (const G3VectorQuat &, const G3VectorQuat &);
 G3VectorQuat &operator *= (G3VectorQuat &, const G3VectorQuat &);

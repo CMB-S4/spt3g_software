@@ -104,6 +104,7 @@ HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool weighted,
 		for (size_t i = 0; i < sz; i++) {
 			unsigned long pix = ((unsigned long *)indexview.buf)[i];
 			double ang = PixelToAngle(pix)[0];
+			ang = fmod(ang, 2 * M_PI * G3Units::rad);
 			if (ang < phi_min)
 				phi_min = ang;
 			if (ang > phi_max)
@@ -825,6 +826,8 @@ HealpixSkyMap::AngleToPixel(double alpha, double delta) const
 	double theta = (90 * G3Units::deg - delta) / G3Units::rad;
 
 	alpha /= G3Units::rad;
+	if (alpha < 0)
+		alpha += 2 * M_PI;
 
 	if ( std::isnan(theta) || std::isnan(alpha) ) {
 		return -1;
@@ -846,6 +849,9 @@ HealpixSkyMap::PixelToAngle(size_t pixel) const
 		pix2ang_nest(nside_, pixel, &delta, &alpha);
 	else
 		pix2ang_ring(nside_, pixel, &delta, &alpha);
+
+	if (alpha > M_PI)
+		alpha -= 2 * M_PI;
 
 	alpha *= G3Units::rad;
 	delta = 90 * G3Units::deg - delta * G3Units::rad;
@@ -872,6 +878,8 @@ void HealpixSkyMap::GetRebinAngles(long pixel, size_t scale,
 		long p = pixmin + i;
 		double theta, phi;
 		pix2ang_nest(nside_rebin, p, &theta, &phi);
+		if (phi > M_PI)
+			phi -= 2 * M_PI;
 		alphas[i] = phi * G3Units::rad;
 		deltas[i] = 90 * G3Units::deg - theta * G3Units::rad;
 	}
@@ -885,9 +893,10 @@ HealpixSkyMap::GetInterpPixelsWeights(double alpha, double delta,
 	delta /= G3Units::rad;
 
 	double theta = M_PI/2.0 - delta;
+	double phi = (alpha < 0) ? (alpha + 2 * M_PI) : alpha;
 	double w[4];
 	long fullpix[4];
-	get_interp_weights(ring_info_, theta, alpha, fullpix, w);
+	get_interp_weights(ring_info_, theta, phi, fullpix, w);
 
 	pixels = std::vector<long>(4, -1);
 	weights = std::vector<double>(4, 0);

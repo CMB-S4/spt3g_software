@@ -27,6 +27,40 @@ dot3(quat a, quat b)
 		a.R_component_4()*b.R_component_4());
 }
 
+static double
+_abs(const quat &a)
+{
+	return sqrt(norm(a));
+}
+
+static G3VectorDouble
+_vabs(const G3VectorQuat &a)
+{
+	G3VectorDouble out(a.size());
+	for (unsigned i = 0; i < a.size(); i++)
+                out[i] = _abs(a[i]);
+	return out;
+}
+
+namespace boost {
+namespace math {
+quat
+operator ~(quat a)
+{
+	return conj(a);
+}
+};
+};
+
+G3VectorQuat
+operator ~(const G3VectorQuat &a)
+{
+	G3VectorQuat out(a.size());
+        for (unsigned i = 0; i < a.size(); i++)
+		out[i] = conj(a[i]);
+	return out;
+}
+
 G3VectorQuat
 operator *(const G3VectorQuat &a, double b)
 {
@@ -60,6 +94,33 @@ operator /(const G3VectorQuat &a, double b)
 }
 
 G3VectorQuat
+operator /(double a, const G3VectorQuat &b)
+{
+	G3VectorQuat out(b.size());
+	for (unsigned i = 0; i < b.size(); i++)
+		out[i] = a/b[i];
+	return out;
+}
+
+G3VectorQuat
+operator /(const G3VectorQuat &a, const quat &b)
+{
+	G3VectorQuat out(a.size());
+	for (unsigned i = 0; i < a.size(); i++)
+		out[i] = a[i]/b;
+	return out;
+}
+
+G3VectorQuat
+operator /(const quat &a, const G3VectorQuat &b)
+{
+	G3VectorQuat out(b.size());
+	for (unsigned i = 0; i < b.size(); i++)
+		out[i] = a/b[i];
+	return out;
+}
+
+G3VectorQuat
 operator /(const G3VectorQuat &a, const G3VectorQuat &b)
 {
 	g3_assert(a.size() == b.size());
@@ -74,6 +135,14 @@ operator /=(G3VectorQuat &a, double b)
 {
 	for (quat &i: a)
 		i /= b;
+	return a;
+}
+
+G3VectorQuat &
+operator /=(G3VectorQuat &a, const quat &b)
+{
+	for (unsigned i = 0; i < a.size(); i++)
+		a[i] /= b;
 	return a;
 }
 
@@ -268,6 +337,7 @@ PYBINDINGS("core")
 	     .add_property("b", &quat::R_component_2)
 	     .add_property("c", &quat::R_component_3)
 	     .add_property("d", &quat::R_component_4)
+	     .def(~self)
 	     .def(self == self)
 	     .def(self != self)
 	     .def(self + self)
@@ -283,8 +353,10 @@ PYBINDINGS("core")
 	     .def(pow(self, long()))
 	     .def(self / self)
 	     .def(self / double())
+	     .def(double() / self)
 	     .def(self /= self)
 	     .def(self /= double())
+	     .def("__abs__", _abs)
 	     .def("__str__", quat_str)
 	     .def("__repr__", quat_repr)
 	     .def("dot3", dot3, "Dot product of last three entries")
@@ -293,6 +365,7 @@ PYBINDINGS("core")
 	register_vector_of<quat>("QuatVector");
 	object vq =
 	    register_g3vector<quat>("G3VectorQuat", "List of quaternions")
+	     .def(~self)
 	     .def(self * double())
 	     .def(double() * self)
 	     .def(self * self)
@@ -302,11 +375,16 @@ PYBINDINGS("core")
 	     .def(self *= quat())
 	     .def(self *= self)
 	     .def(self / double())
+	     .def(double() / self)
 	     .def(self /= double())
 	     .def(self / self)
 	     .def(self /= self)
+	     .def(self / quat())
+	     .def(self /= quat())
+	     .def(quat() / self)
 	     .def(pow(self, double()))
-	     .def(pow(self, int()));
+	     .def(pow(self, int()))
+	     .def("__abs__", _vabs);
 	PyTypeObject *vqclass = (PyTypeObject *)vq.ptr();
 	vectorquat_bufferprocs.bf_getbuffer = G3VectorQuat_getbuffer;
 	vqclass->tp_as_buffer = &vectorquat_bufferprocs;

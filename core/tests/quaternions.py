@@ -48,3 +48,8 @@ assert((np.asarray(b)/2 == np.asarray(e)).all())
 
 assert((np.asarray(b*b) == np.asarray(core.G3VectorQuat([x**2 for x in b]))).all())
 
+assert(1./a == core.quat(1.,0,0,0)/a)
+assert(1./a == (~a) / abs(a)**2)
+assert((np.asarray(abs(b) - abs(~b)) == 0).all())
+assert(a/b[0] == (a/b)[0])
+assert(b[1]/a == (b/a)[1])

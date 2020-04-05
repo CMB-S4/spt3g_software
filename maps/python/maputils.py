@@ -127,6 +127,7 @@ def flatsky_to_healpix(map_in, map_stub=None, rebin=1, interp=False,
     a0 = map_in.alpha_center
     da = map_in.x_res * map_in.shape[1]
     circ = 2 * np.pi * core.G3Units.rad
+    a0 = np.mod(a0 + circ, circ)
     amin = np.mod(a0 - da + circ, circ)
     amax = np.mod(a0 + da + circ, circ)
     amin_shift = np.mod(a0 - da + circ + circ / 2, circ)
