@@ -967,6 +967,7 @@ void HealpixSkyMap::SetShiftRa(bool shift)
 
 	free(ring_info_);
 	delete ring_sparse_;
+	shift_ra_ = shift;
 	ring_info_ = ring_info;
 	ring_sparse_ = ring_sparse;
 }
