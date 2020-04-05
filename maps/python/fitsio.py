@@ -126,7 +126,7 @@ def load_skymap_fits(filename, hdu=None):
                 if pol is None:
                     pol = True if ('Q' in output and 'U' in output) else False
                 weight_map = output.setdefault(
-                    'W', G3SkyMapWeights(output['T'], ispolarized=pol)
+                    'W', G3SkyMapWeights(output['T'], polarized=pol)
                 )
                 fm = FlatSkyMap(data, **map_opts)
                 fm.overflow = overflow
@@ -191,7 +191,7 @@ def load_skymap_fits(filename, hdu=None):
                         if pol is None:
                             pol = True if ('Q' in output and 'U' in output) else False
                         weight_map = output.setdefault(
-                            'W', G3SkyMapWeights(output['T'], ispolarized=pol)
+                            'W', G3SkyMapWeights(output['T'], polarized=pol)
                         )
 
                         mdata = (pix, data, nside) if pix is not None else data

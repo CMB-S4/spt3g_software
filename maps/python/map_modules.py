@@ -19,7 +19,7 @@ def ConvertTMapsToPolarized(frame):
     frame['Q'] = 0 * frame['T']
     frame['U'] = 0 * frame['T']
 
-    wgt_out = G3SkyMapWeights(frame['T'], ispolarized=True)
+    wgt_out = G3SkyMapWeights(frame['T'], polarized=True)
     wgt_out.TT = wgt
     wgt_out.TQ = 0 * wgt
     wgt_out.TU = 0 * wgt
@@ -42,7 +42,7 @@ def ConvertPolarizedMapsToT(frame):
     del frame['Q']
     del frame['U']
 
-    wgt_out = G3SkyMapWeights(frame['T'], ispolarized=False)
+    wgt_out = G3SkyMapWeights(frame['T'], polarized=False)
     wgt_out.TT = wgt
 
     frame['Wunpol'] = wgt_out
