@@ -56,7 +56,7 @@ void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, double h, bool invert)
 
 	for (auto i : *Q) {
 		double q = i.second;
-		double u = U->G3SkyMap::at(i.first);
+		double u = U->at(i.first);
 		if (q == 0 && u == 0)
 			continue;
 
@@ -95,7 +95,7 @@ void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool int
 				if (interp)
 					val += in_map->GetInterpValue(ra[j], dec[j]);
 				else
-					val += (*in_map)[in_map->AngleToPixel(ra[j], dec[j])];
+					val += in_map->at(in_map->AngleToPixel(ra[j], dec[j]));
 			}
 			val /= ra.size();
 		} else {
@@ -103,7 +103,7 @@ void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool int
 			if (interp)
 				val = in_map->GetInterpValue(radec[0], radec[1]);
 			else
-				val = (*in_map)[in_map->AngleToPixel(radec[0], radec[1])];
+				val = in_map->at(in_map->AngleToPixel(radec[0], radec[1]));
 		}
 		if (val != 0)
 			(*out_map)[i] = val;

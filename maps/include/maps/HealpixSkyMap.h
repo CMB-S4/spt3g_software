@@ -37,7 +37,7 @@ public:
 
 	~HealpixSkyMap();
 
-	double operator [] (size_t i) const override;
+	double at(size_t i) const override;
 	double &operator [] (size_t i) override;
 
 	// +
