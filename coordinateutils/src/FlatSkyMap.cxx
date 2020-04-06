@@ -264,7 +264,7 @@ double
 FlatSkyMap::operator () (size_t x, size_t y) const
 {
 	if (dense_)
-		return (*dense_)(x, y);
+		return dense_->at(x, y);
 	if (sparse_)
 		return sparse_->at(x, y);
 	return 0;

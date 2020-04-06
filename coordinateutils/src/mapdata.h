@@ -160,11 +160,13 @@ public:
 	size_t xdim() const { return xlen_; }
 	size_t ydim() const { return ylen_; }
 
-	double operator()(size_t x, size_t y) const {
+	double at(size_t x, size_t y) const {
 		if (!in_bounds(x, y))
 			return 0;
 		return data_[idxat(x, y)];
 	}
+
+	double operator()(size_t x, size_t y) const { return at(x, y); }
 
 	double &operator()(size_t x, size_t y) {
 		assert(x >= 0);
@@ -234,7 +236,7 @@ public:
 		}
 
 		double operator*() const {
-			return dense_.data_[dense_.idxat(x, y)];
+			return dense_.at(x, y);
 		}
 
 		const_iterator operator++() {
