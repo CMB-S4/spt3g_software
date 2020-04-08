@@ -10,7 +10,7 @@ set (GSL_FIND_QUIETLY TRUE)
 endif (GSL_INCLUDES)
 find_path (GSL_INCLUDES gsl/gsl_math.h)
 find_library (GSL_LIB NAMES gsl)
-find_library (GSL_CBLAS_LIB NAMES gslcblas)
+find_library (GSL_CBLAS_LIB NAMES openblas gslcblas)
 set (GSL_LIBRARIES "${GSL_LIB}" "${GSL_CBLAS_LIB}")
 # handle the QUIETLY and REQUIRED arguments and set GSL_FOUND to TRUE if
 # all listed variables are TRUE
