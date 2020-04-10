@@ -17,6 +17,19 @@
 
 using namespace G3Units;
 
+G3SkyMapPtr GetMaskMap(G3SkyMapConstPtr m)
+{
+	G3SkyMapPtr mask = m->Clone(false);
+
+	for (size_t i = 0; i < m->size(); i++) {
+		if (m->at(i) == 0)
+			continue;
+		(*mask)[i] = 1.0;
+	}
+
+	return mask;
+}
+
 boost::python::tuple GetRaDecMap(G3SkyMapConstPtr m)
 {
 
@@ -83,9 +96,6 @@ void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool int
 		log_fatal("Input and output maps must use the same coordinates");
 	}
 
-        // These are going to be dense maps, so just start that way
-        out_map->ConvertToDense();
-
 	for (size_t i = 0; i < out_map->size(); i++) {
 		double val = 0;
 		if (rebin > 1) {
@@ -118,6 +128,9 @@ void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool int
 
 namespace bp = boost::python;
 void maputils_pybindings(void){
+	bp::def("get_mask_map", GetMaskMap, (bp::arg("map_in")),
+		"Returns a map that is 1 where the input map is nonzero.");
+
 	bp::def("get_ra_dec_map", GetRaDecMap, (bp::arg("map_in")),
 		"Returns maps of the ra and dec angles for each pixel in the input map");
 

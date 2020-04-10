@@ -1,5 +1,5 @@
 from spt3g import core
-from spt3g.maps import G3SkyMapWeights
+from spt3g.maps import G3SkyMapWeights, get_mask_map
 import numpy as np
 
 @core.indexmod
@@ -16,16 +16,17 @@ def ConvertTMapsToPolarized(frame):
     wgt = frame['Wunpol'].TT
     del frame['Wunpol']
 
-    frame['Q'] = 0 * frame['T']
-    frame['U'] = 0 * frame['T']
+    frame['Q'] = frame['T'].Clone(False)
+    frame['U'] = frame['T'].Clone(False)
+    mask = get_mask_map(wgt)
 
     wgt_out = G3SkyMapWeights(frame['T'], polarized=True)
     wgt_out.TT = wgt
-    wgt_out.TQ = 0 * wgt
-    wgt_out.TU = 0 * wgt
-    wgt_out.QQ = 0 * wgt + 1.0
-    wgt_out.QU = 0 * wgt
-    wgt_out.UU = 0 * wgt + 1.0
+    wgt_out.TQ = wgt.Clone(False)
+    wgt_out.TU = wgt.Clone(False)
+    wgt_out.QQ = mask
+    wgt_out.QU = wgt.Clone(False)
+    wgt_out.UU = mask.Clone(True)
 
     frame['Wpol'] = wgt_out
 
