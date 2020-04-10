@@ -1098,7 +1098,7 @@ PYBINDINGS("coordinateutils")
 	    .def_pickle(g3frameobject_picklesuite<HealpixSkyMap>())
 	    .def(bp::init<size_t, bool, bool, MapCoordReference,
 	       G3Timestream::TimestreamUnits, G3SkyMap::MapPolType, bool>(
-	         (bp::arg("nside"),
+		 (bp::arg("nside"),
 		  bp::args("is_weighted") = true,
 		  bp::args("is_nested") = false,
 		  bp::arg("coord_ref") = MapCoordReference::Equatorial,
@@ -1127,24 +1127,24 @@ PYBINDINGS("coordinateutils")
 		"True if the ringsparse representation of the map is stored "
 		"with the rings centered at ra = 0 deg, rather than ra = 180 deg.")
 	    .add_property("dense", &HealpixSkyMap::IsDense, HealpixSkyMap_setdense,
-	        "True if the map is stored with all elements, False otherwise. "
-	        "If set to True, converts the map to a dense representation." )
+		"True if the map is stored with all elements, False otherwise. "
+		"If set to True, converts the map to a dense representation." )
 	    .add_property("ringsparse", &HealpixSkyMap::IsRingSparse, HealpixSkyMap_setringsparse,
-	        "True if the map is stored as a dense 2D region using ring "
-	        "ordering (analogous to FlatSkyMap's sparse mode). "
-	        "Ring-sparsity is efficient for dense blocks on a ring-ordered "
-	        "map (e.g. a continuous sky region), but is inefficient "
-	        "otherwise. It applies only to non-nested maps. "
-	        "If set to True, converts the map to this representation." )
+		"True if the map is stored as a dense 2D region using ring "
+		"ordering (analogous to FlatSkyMap's sparse mode). "
+		"Ring-sparsity is efficient for dense blocks on a ring-ordered "
+		"map (e.g. a continuous sky region), but is inefficient "
+		"otherwise. It applies only to non-nested maps. "
+		"If set to True, converts the map to this representation." )
 	    .add_property("indexedsparse", &HealpixSkyMap::IsIndexedSparse, HealpixSkyMap_setindexedsparse,
-	        "True if the map is stored as a list of non-zero pixels "
-	        "and values. More efficient than ring-sparse for maps with "
-	        "holes or very small filling factors. "
-	        "If set to True, converts the map to this representation." )
+		"True if the map is stored as a list of non-zero pixels "
+		"and values. More efficient than ring-sparse for maps with "
+		"holes or very small filling factors. "
+		"If set to True, converts the map to this representation." )
 
 	    .def("nonzero_pixels", &HealpixSkyMap_nonzeropixels,
-	        "Returns a list of the indices of the non-zero pixels in the "
-	        "map and a list of the values of those non-zero pixels.")
+		"Returns a list of the indices of the non-zero pixels in the "
+		"map and a list of the values of those non-zero pixels.")
 	;
 	register_pointer_conversions<HealpixSkyMap>();
 

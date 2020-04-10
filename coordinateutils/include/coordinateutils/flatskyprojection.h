@@ -90,7 +90,7 @@ public:
 	std::vector<double> pixel_to_angle(long pixel, bool wrap_alpha=false) const;
 	long angle_to_pixel(double alpha, double delta) const;
 
-        void get_rebin_angles(long pixel, size_t scale,
+	void get_rebin_angles(long pixel, size_t scale,
 	    std::vector<double> & alphas, std::vector<double> & deltas,
 	    bool wrap_alpha=false) const;
 	void get_interp_pixels_weights(double alpha, double delta,

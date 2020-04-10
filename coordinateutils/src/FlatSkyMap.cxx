@@ -410,9 +410,9 @@ FlatSkyMap::operator *=(double b)
 	}
 
 	if (dense_)
-		(*dense_) *=  b;
+		(*dense_) *= b;
 	else if (sparse_)
-		(*sparse_) *=  b;
+		(*sparse_) *= b;
 	return *this;
 }
 
@@ -751,21 +751,21 @@ flatskymap_nonzeropixels(const FlatSkyMap &m)
 }
 
 #define FLAT_SKY_MAP_DOCSTR \
-        "FlatSkyMap is a G3SkyMap with the extra meta information about the" \
+	"FlatSkyMap is a G3SkyMap with the extra meta information about the" \
 	" particular flat sky projection included.  In practice it behaves\n" \
 	" (mostly) like a 2d numpy array.\n\n"				\
-        "Meta Information Stored: \n\n" \
-        "    x_len (int) x (ra/az)  dimension length \n\n" \
-        "    y_len (int) y (dec/el) dimension  length \n\n" \
-        "    alpha_center : (double)  Ra (or Az) of the center of the map \n\n" \
-        "    delta_center : (double)  Dec (or El) of the center of the map \n\n" \
-        "    res : (double) approximate resolution of the pixel\n" \
+	"Meta Information Stored: \n\n" \
+	"    x_len (int) x (ra/az)  dimension length \n\n" \
+	"    y_len (int) y (dec/el) dimension  length \n\n" \
+	"    alpha_center : (double)  Ra (or Az) of the center of the map \n\n" \
+	"    delta_center : (double)  Dec (or El) of the center of the map \n\n" \
+	"    res : (double) approximate resolution of the pixel\n" \
 	"    (the actual shape of a pixel is projection dependent)\n\n"	\
-        "    proj : (MapProjection)  proj is a MapProjection enum that specifies\n"\
+	"    proj : (MapProjection)  proj is a MapProjection enum that specifies\n"\
 	"    the flat sky projection \n\n"	\
-        "\n\n" \
-        "The other meta information is inherited from G3SkyMap that lives in core. \n\n" \
-        "For reasons (skymap __setitem__ has to handle both 1d and 2d \n"\
+	"\n\n" \
+	"The other meta information is inherited from G3SkyMap that lives in core. \n\n" \
+	"For reasons (skymap __setitem__ has to handle both 1d and 2d \n"\
 	" semantics) the FlatSkyMap has a slightly unintuitive way of \n"\
 	" setting values when using a slicing operator.  Instead of being\n"\
 	" able to  slice directly you need to cast it to be an array first: \n\n" \
@@ -793,7 +793,7 @@ PYBINDINGS("coordinateutils")
 	    .def(bp::init<size_t, size_t, double, bool, MapProjection, double,
 	       double, MapCoordReference, G3Timestream::TimestreamUnits,
 	       G3SkyMap::MapPolType, double, double, double>(
-	         (bp::arg("x_len"), bp::arg("y_len"), bp::arg("res"),
+		 (bp::arg("x_len"), bp::arg("y_len"), bp::arg("res"),
 		  bp::args("is_weighted") = true,
 		  bp::arg("proj") = MapProjection::ProjNone,
 		  bp::arg("alpha_center") = 0, bp::arg("delta_center") = 0,
@@ -805,7 +805,7 @@ PYBINDINGS("coordinateutils")
 	       double, double, MapCoordReference, G3Timestream::TimestreamUnits,
 	       G3SkyMap::MapPolType, double, double, double>(
 		  (bp::arg("obj"), bp::arg("res"),
-	           bp::args("is_weighted") = true,
+		   bp::args("is_weighted") = true,
 		   bp::arg("proj") = MapProjection::ProjNone,
 		   bp::arg("alpha_center") = 0, bp::arg("delta_center") = 0,
 		   bp::arg("coord_ref") = MapCoordReference::Equatorial,
@@ -856,8 +856,8 @@ PYBINDINGS("coordinateutils")
 	       "(or False).")
 
 	    .def("nonzero_pixels", &flatskymap_nonzeropixels,
-	        "Returns a list of the indices of the non-zero pixels in the "
-	        "map and a list of the values of those non-zero pixels.")
+		"Returns a list of the indices of the non-zero pixels in the "
+		"map and a list of the values of those non-zero pixels.")
 
 	    .def("__getitem__", flatskymap_getitem_1d)
 	    .def("__setitem__", flatskymap_setitem_1d)

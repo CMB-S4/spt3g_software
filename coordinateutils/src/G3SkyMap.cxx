@@ -596,7 +596,7 @@ PYBINDINGS("coordinateutils") {
 	    .add_property("npix_allocated", &G3SkyMap::npix_allocated,
 	      "Number of pixels in map currently stored in memory")
 	    .def_readwrite("overflow", &G3SkyMap::overflow,
-              "Combined value of data processed by "
+	      "Combined value of data processed by "
 	      "the map maker but outside of the map area")
 	    .def("__getitem__", &skymap_getitem)
 	    .def("__setitem__", &skymap_setitem)
@@ -666,7 +666,7 @@ PYBINDINGS("coordinateutils") {
 	EXPORT_FRAMEOBJECT(G3SkyMapWeights, init<>(), "generic sky weight")
 	    .def(bp::init<G3SkyMapConstPtr, G3SkyMapWeights::WeightType>(
 	      (bp::arg("skymap"),
-               bp::arg("weight_type") = G3SkyMapWeights::Wpol)))
+	       bp::arg("weight_type") = G3SkyMapWeights::Wpol)))
 	    .def_readwrite("TT",&G3SkyMapWeights::TT)
 	    .def_readwrite("TQ",&G3SkyMapWeights::TQ)
 	    .def_readwrite("TU",&G3SkyMapWeights::TU)
@@ -696,9 +696,9 @@ PYBINDINGS("coordinateutils") {
 	EXPORT_FRAMEOBJECT(G3SkyMapWithWeights, init<>(), "Container for (potentially) polarized maps and weights")
 	    .def(bp::init<G3SkyMapPtr, bool, bool, std::string>(
 	      (bp::arg("stub_map"),
-               bp::arg("isweighted"),
-               bp::arg("ispolarized"),
-               bp::arg("map_id") = "")))
+	       bp::arg("isweighted"),
+	       bp::arg("ispolarized"),
+	       bp::arg("map_id") = "")))
 	    .def_readwrite("T",&G3SkyMapWithWeights::T)
 	    .def_readwrite("Q",&G3SkyMapWithWeights::Q)
 	    .def_readwrite("U",&G3SkyMapWithWeights::U)
