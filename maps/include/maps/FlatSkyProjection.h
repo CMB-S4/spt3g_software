@@ -93,7 +93,7 @@ public:
 	std::vector<double> XYToAngleGrad(double x, double y, double h=0.001) const;
 	std::vector<double> PixelToAngleGrad(long pixel, double h=0.001) const;
 
-        void GetRebinAngles(long pixel, size_t scale,
+	void GetRebinAngles(long pixel, size_t scale,
 	    std::vector<double> & alphas, std::vector<double> & deltas,
 	    bool wrap_alpha=false) const;
 	void GetInterpPixelsWeights(double alpha, double delta,

@@ -797,7 +797,7 @@ PYBINDINGS("maps")
 	    .def(bp::init<size_t, size_t, double, bool, MapProjection, double,
 	       double, MapCoordReference, G3Timestream::TimestreamUnits,
 	       G3SkyMap::MapPolType, double, double, double>(
-	         (bp::arg("x_len"), bp::arg("y_len"), bp::arg("res"),
+		 (bp::arg("x_len"), bp::arg("y_len"), bp::arg("res"),
 		  bp::arg("weighted") = true,
 		  bp::arg("proj") = MapProjection::ProjNone,
 		  bp::arg("alpha_center") = 0, bp::arg("delta_center") = 0,
@@ -860,8 +860,8 @@ PYBINDINGS("maps")
 	       "(or False).")
 
 	    .def("nonzero_pixels", &flatskymap_nonzeropixels,
-	        "Returns a list of the indices of the non-zero pixels in the "
-	        "map and a list of the values of those non-zero pixels.")
+		"Returns a list of the indices of the non-zero pixels in the "
+		"map and a list of the values of those non-zero pixels.")
 
 	    .add_property("flat_pol", &FlatSkyMap::IsPolFlat,
 		"True if this map has been flattened using flatten_pol.")
