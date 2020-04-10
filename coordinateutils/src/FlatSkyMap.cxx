@@ -273,10 +273,7 @@ FlatSkyMap::operator () (size_t x, size_t y) const
 double &
 FlatSkyMap::operator () (size_t x, size_t y)
 {
-	assert(x >= 0);
-	assert(y >= 0);
-	assert(x < xpix_);
-	assert(y < ypix_);
+	g3_assert(!(x < 0 || x >= xpix_ || y < 0 || y >= ypix_));
 
 	if (dense_)
 		return (*dense_)(x, y);
@@ -299,7 +296,7 @@ FlatSkyMap::operator [] (size_t i)
 
 #define flatskymap_arithmetic(op, sparsenull) \
 G3SkyMap &FlatSkyMap::operator op(const G3SkyMap &rhs) {\
-	assert(IsCompatible(rhs)); \
+	g3_assert(IsCompatible(rhs)); \
 	try { \
 		const FlatSkyMap& b = dynamic_cast<const FlatSkyMap &>(rhs); \
 		if (dense_) { \
@@ -338,7 +335,7 @@ flatskymap_arithmetic(-=, {})
 flatskymap_arithmetic(/=, {ConvertToDense(); (*this->dense_) /= 0.0;})
 
 G3SkyMap &FlatSkyMap::operator *=(const G3SkyMap &rhs) {
-	assert(IsCompatible(rhs));
+	g3_assert(IsCompatible(rhs));
 	try {
 		const FlatSkyMap& b = dynamic_cast<const FlatSkyMap &>(rhs);
 		bool zero = false;

@@ -150,7 +150,7 @@ size_t G3SkyMap::size() const
 
 G3SkyMap &G3SkyMap::operator+=(const G3SkyMap & rhs)
 {
-	assert(IsCompatible(rhs));
+	g3_assert(IsCompatible(rhs));
 	for (size_t i = 0; i < rhs.size(); i++)
 		(*this)[i] += rhs[i];
 	return *this;
@@ -165,7 +165,7 @@ G3SkyMap &G3SkyMap::operator+=(double rhs)
 
 G3SkyMap &G3SkyMap::operator-=(const G3SkyMap &rhs)
 {
-	assert(IsCompatible(rhs));
+	g3_assert(IsCompatible(rhs));
 	for (size_t i = 0; i < rhs.size(); i++)
 		(*this)[i] -= rhs[i];
 	return *this;
@@ -180,7 +180,7 @@ G3SkyMap &G3SkyMap::operator-=(double rhs)
 
 G3SkyMap &G3SkyMap::operator*=(const G3SkyMap &rhs)
 {
-	assert(IsCompatible(rhs));
+	g3_assert(IsCompatible(rhs));
 	for (size_t i = 0; i < rhs.size(); i++)
 		(*this)[i] *= rhs[i];
 	return *this;
@@ -195,7 +195,7 @@ G3SkyMap &G3SkyMap::operator*=(double rhs)
 
 G3SkyMap &G3SkyMap::operator/=(const G3SkyMap &rhs)
 {
-	assert(IsCompatible(rhs));
+	g3_assert(IsCompatible(rhs));
 	for (size_t i = 0; i < rhs.size(); i++)
 		(*this)[i] /= rhs[i];
 	return *this;
