@@ -51,12 +51,12 @@ public:
 
 	~FlatSkyMap();
 
-        double operator [] (size_t i) const override;
-        double &operator [] (size_t i) override;
+	double at(size_t i) const override;
+	double &operator [] (size_t i) override;
 
-        double operator () (size_t x, size_t y) const;
-        double &operator () (size_t x, size_t y);
-        double at(size_t x, size_t y) const { return (*this)(x, y); }
+	double at(size_t x, size_t y) const;
+	double operator () (size_t x, size_t y) const { return this->at(x, y); };
+	double &operator () (size_t x, size_t y);
 
 	// +
 	virtual G3SkyMap &operator+=(const G3SkyMap &rhs) override;

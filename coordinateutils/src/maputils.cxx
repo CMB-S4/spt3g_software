@@ -95,7 +95,7 @@ void reproj_map(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool in
 				if (interp)
 					val += in_map->get_interp_value(ra[j], dec[j]);
 				else
-					val += (*in_map)[in_map->angle_to_pixel(ra[j], dec[j])];
+					val += in_map->at(in_map->angle_to_pixel(ra[j], dec[j]));
 			}
 			val /= ra.size();
 		} else {
@@ -103,7 +103,7 @@ void reproj_map(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool in
 			if (interp)
 				val = in_map->get_interp_value(radec[0], radec[1]);
 			else
-				val = (*in_map)[in_map->angle_to_pixel(radec[0], radec[1])];
+				val = in_map->at(in_map->angle_to_pixel(radec[0], radec[1]));
 		}
 		if (val != 0)
 			(*out_map)[i] = val;

@@ -442,7 +442,7 @@ HealpixSkyMap::Clone(bool copy_data) const
 }
 
 double
-HealpixSkyMap::operator [] (size_t i) const
+HealpixSkyMap::at(size_t i) const
 {
 	if (i < 0 || i >= npix_)
 		return 0;
@@ -561,7 +561,7 @@ G3SkyMap &HealpixSkyMap::operator *=(const G3SkyMap &rhs) {
 		if (dense_ || ring_sparse_ || indexed_sparse_) {
 			if (b.dense_ || b.ring_sparse_ || b.indexed_sparse_) {
 				for (auto i : *this)
-					(*this)[i.first] *= b[i.first];
+					(*this)[i.first] *= b.at(i.first);
 			} else
 				zero = true;
 		} else {
@@ -595,7 +595,7 @@ G3SkyMap &HealpixSkyMap::operator /=(const G3SkyMap &rhs) {
 		if (dense_) {
 			if (b.dense_ || b.ring_sparse_ || b.indexed_sparse_) {
 				for (size_t i = 0; i < dense_->size(); i++)
-					(*dense_)[i] /= b[i];
+					(*dense_)[i] /= b.at(i);
 			} else
 				zero = true;
 		} else if (ring_sparse_) {
@@ -604,7 +604,7 @@ G3SkyMap &HealpixSkyMap::operator /=(const G3SkyMap &rhs) {
 				for (long j = 0; j < ring_info_->nring; j++) {
 					for (long k = 0; k < ring_info_->rings[j].ringpix; k++) {
 						double val = ring_sparse_->at(j, k);
-						double valb = b[i];
+						double valb = b.at(i);
 						if (valb == 0 || val != 0)
 							(*ring_sparse_)(j, k) /= valb;
 						i++;
@@ -615,8 +615,8 @@ G3SkyMap &HealpixSkyMap::operator /=(const G3SkyMap &rhs) {
 		} else if (indexed_sparse_) {
 			if (b.dense_ || b.ring_sparse_ || b.indexed_sparse_) {
 				for (size_t i = 0; i < size(); i++) {
-					double val = (*this)[i];
-					double valb = b[i];
+					double val = this->at(i);
+					double valb = b.at(i);
 					if (valb == 0 || val != 0)
 						(*indexed_sparse_)[i] /= valb;
 				}
@@ -636,7 +636,7 @@ G3SkyMap &HealpixSkyMap::operator /=(const G3SkyMap &rhs) {
 			} else if (b.indexed_sparse_) {
 				ConvertToIndexedSparse();
 				for (size_t i = 0; i < size(); i++)
-					(*indexed_sparse_)[i] /= b[i];
+					(*indexed_sparse_)[i] /= b.at(i);
 			} else
 				zero = true;
 		}

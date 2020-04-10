@@ -261,7 +261,7 @@ FlatSkyMap::Clone(bool copy_data) const
 }
 
 double
-FlatSkyMap::operator () (size_t x, size_t y) const
+FlatSkyMap::at(size_t x, size_t y) const
 {
 	if (dense_)
 		return dense_->at(x, y);
@@ -283,9 +283,9 @@ FlatSkyMap::operator () (size_t x, size_t y)
 }
 
 double
-FlatSkyMap::operator [] (size_t i) const
+FlatSkyMap::at(size_t i) const
 {
-	return (*this)(i % xpix_, i / xpix_);
+	return this->at(i % xpix_, i / xpix_);
 }
 
 double &
@@ -671,7 +671,7 @@ flatskymap_getitem_2d(const FlatSkyMap &skymap, bp::tuple coords)
 		bp::throw_error_already_set();
 	}
 
-	return skymap(x, y);
+	return skymap.at(x, y);
 }
 
 static double
@@ -700,28 +700,28 @@ static double
 flatskymap_getitem_1d(const G3SkyMap &skymap, size_t i)
 {
 
-        if (i < 0)
-                i = skymap.size() + i;
-        if (size_t(i) >= skymap.size()) {
-                PyErr_SetString(PyExc_IndexError, "Index out of range");
-                bp::throw_error_already_set();
-        }
+	if (i < 0)
+		i = skymap.size() + i;
+	if (size_t(i) >= skymap.size()) {
+		PyErr_SetString(PyExc_IndexError, "Index out of range");
+		bp::throw_error_already_set();
+	}
 
-        return skymap[i];
+	return skymap.at(i);
 }
 
 static void
 flatskymap_setitem_1d(G3SkyMap &skymap, size_t i, double val)
 {
 
-        if (i < 0)
-                i = skymap.size() + i;
-        if (size_t(i) >= skymap.size()) {
-                PyErr_SetString(PyExc_IndexError, "Index out of range");
-                bp::throw_error_already_set();
-        }
+	if (i < 0)
+		i = skymap.size() + i;
+	if (size_t(i) >= skymap.size()) {
+		PyErr_SetString(PyExc_IndexError, "Index out of range");
+		bp::throw_error_already_set();
+	}
 
-        skymap[i] = val;
+	skymap[i] = val;
 }
 
 static bool

@@ -37,8 +37,8 @@ public:
 
 	~HealpixSkyMap();
 
-        double operator [] (size_t i) const override;
-        double &operator [] (size_t i) override;
+	double at(size_t i) const override;
+	double &operator [] (size_t i) override;
 
 	// +
 	virtual G3SkyMap &operator+=(const G3SkyMap &rhs) override;
