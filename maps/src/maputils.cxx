@@ -43,6 +43,113 @@ G3SkyMapPtr GetMaskMap(G3SkyMapConstPtr m)
 	return mask;
 }
 
+void RemoveWeights(G3SkyMapPtr T, G3SkyMapPtr Q, G3SkyMapPtr U, G3SkyMapWeightsConstPtr W,
+    bool zero_nans)
+{
+	bool pol = W->IsPolarized();
+
+	g3_assert(T->weighted);
+	g3_assert(W->IsCongruent());
+	g3_assert(T->IsCompatible(*(W->TT)));
+
+	if (pol) {
+		g3_assert(!!Q && !!U);
+		g3_assert(T->IsCompatible(*Q));
+		g3_assert(T->IsCompatible(*U));
+		g3_assert(Q->weighted);
+		g3_assert(U->weighted);
+	}
+
+	if (!zero_nans) {
+		T->ConvertToDense();
+		if (pol) {
+			Q->ConvertToDense();
+			U->ConvertToDense();
+			for (size_t pix = 0; pix < T->size(); pix++) {
+				StokesVector v((*T)[pix], (*Q)[pix], (*U)[pix]);
+				v /= W->at(pix);
+			}
+		} else {
+			(*T) /= *(W->TT);
+		}
+	} else {
+		for (size_t pix = 0; pix < W->size(); pix++) {
+			double v = T->at(pix);
+			MuellerMatrix m = W->at(pix);
+			bool empty;
+
+			// skip empty pixels
+			if (!pol) {
+				empty = (m.tt == 0);
+				if (empty && v == 0)
+					continue;
+			} else {
+				empty = (m.Det() < 1e-12);
+				if (empty && v == 0 && Q->at(pix) == 0 && U->at(pix) == 0)
+					continue;
+			}
+
+			// set bad pixels to 0
+			if (empty) {
+				(*T)[pix] = 0;
+				if (pol) {
+					(*Q)[pix] = 0;
+					(*U)[pix] = 0;
+				}
+				continue;
+			}
+
+			// remove weights
+			if (pol) {
+				StokesVector v((*T)[pix], (*Q)[pix], (*U)[pix]);
+				v /= m;
+			} else {
+				(*T)[pix] /= (*(W->TT))[pix];
+			}
+		}
+	}
+
+	T->weighted = false;
+	if (pol) {
+		Q->weighted = false;
+		U->weighted = false;
+	}
+}
+
+void ApplyWeights(G3SkyMapPtr T, G3SkyMapPtr Q, G3SkyMapPtr U, G3SkyMapWeightsConstPtr W)
+{
+	bool pol = W->IsPolarized();
+
+	g3_assert(!T->weighted);
+	g3_assert(W->IsCongruent());
+	g3_assert(T->IsCompatible(*(W->TT)));
+
+	if (pol) {
+		g3_assert(!!Q && !!U);
+		g3_assert(T->IsCompatible(*Q));
+		g3_assert(T->IsCompatible(*U));
+		g3_assert(!Q->weighted);
+		g3_assert(!U->weighted);
+	}
+
+	if (pol) {
+		for (size_t pix = 0; pix < T->size(); pix++) {
+			if (T->at(pix) == 0 && Q->at(pix) == 0 && U->at(pix) == 0)
+				continue;
+			StokesVector v((*T)[pix], (*Q)[pix], (*U)[pix]);
+			v = W->at(pix) * v;
+		}
+	} else {
+		(*T) *= *(W->TT);
+	}
+
+	T->weighted = true;
+	if (pol) {
+		Q->weighted = true;
+		U->weighted = true;
+	}
+}
+
 boost::python::tuple GetRaDecMap(G3SkyMapConstPtr m)
 {
 
@@ -146,6 +253,16 @@ void maputils_pybindings(void){
 
 	bp::def("get_mask_map", GetMaskMap, (bp::arg("map_in")),
 		"Returns a map that is 1 where the input map is nonzero.");
+
+	bp::def("remove_weights", RemoveWeights,
+		(bp::arg("T"), bp::arg("Q"), bp::arg("U"), bp::arg("W"), bp::arg("zero_nans")=false),
+		"Remove weights from polarized or unpolarized maps. "
+		"If zero_nans is true, empty pixels are skipped, and pixels "
+		"with zero weight are set to 0 instead of nan.");
+
+	bp::def("apply_weights", ApplyWeights,
+		(bp::arg("T"), bp::arg("Q"), bp::arg("U"), bp::arg("W")),
+		"Remove weights from polarized or unpolarized maps.");
 
 	bp::def("get_ra_dec_map", GetRaDecMap, (bp::arg("map_in")),
 		"Returns maps of the ra and dec angles for each pixel in the input map");

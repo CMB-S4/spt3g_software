@@ -300,6 +300,9 @@ public:
 		return m;
 	}
 
+	size_t size(void) const { return TT->size(); };  // total number of pixels
+	std::vector<size_t> shape(void) const { return TT->shape(); };  // map shape
+
 	// Coadd
 	G3SkyMapWeights &operator+=(const G3SkyMapWeights &rhs);
 
@@ -354,6 +357,9 @@ public:
 		v.u = !U ? 0 : U->at(i);
 		return v;
 	}
+
+	size_t size(void) const { return T->size(); };  // total number of pixels
+	std::vector<size_t> shape(void) const { return T->shape(); };  // map shape
 
 	// Coadd
 	G3SkyMapWithWeights &operator+=(const G3SkyMapWithWeights &rhs);

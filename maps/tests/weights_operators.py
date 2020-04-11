@@ -3,13 +3,16 @@
 import numpy as np
 from spt3g import core
 from spt3g.maps import G3SkyMapWithWeights, G3SkyMapWeights, FlatSkyMap
-from spt3g.maps import zero_map_nans, get_mask_map
+from spt3g.maps import zero_map_nans, get_mask_map, remove_weights, apply_weights
 
 for pol in [True, False]:
     # allocation
     m = FlatSkyMap(500, 20, core.G3Units.arcmin)
     mw = G3SkyMapWithWeights(m, weighted=True, polarized=pol)
+    assert(mw.size == m.size)
+    assert(mw.weights.size == m.size)
     assert(mw.shape == m.shape)
+    assert(mw.weights.shape == m.shape)
     assert(mw.npix_allocated == 0)
     assert(mw.polarized == pol)
     assert(mw.weights.polarized == pol)
@@ -91,3 +94,18 @@ for pol in [True, False]:
     mask = get_mask_map(tmap)
     assert(mask[15] == 1)
     assert(mask.npix_allocated == 1)
+
+    # compress maps back to sparse
+    if pol:
+        qmap = zero_map_nans(mw.Q)
+        umap = zero_map_nans(mw.U)
+    else:
+        qmap = umap = None
+
+    # check memory-efficient weights functions
+    remove_weights(tmap, qmap, umap, weights, zero_nans=True)
+    assert(tmap.npix_allocated == 1)
+
+    apply_weights(tmap, qmap, umap, weights)
+    assert(tmap.npix_allocated == 1)
+    assert(tmap[15] == mw.T[15])

@@ -307,6 +307,18 @@ skymap_shape(G3SkyMap &skymap)
 	return bp::tuple(pyshape);
 }
 
+static bp::tuple
+skymapweights_shape(G3SkyMapWeights &weights)
+{
+	return skymap_shape(*(weights.TT));
+}
+
+static bp::tuple
+skymapwithweights_shape(G3SkyMapWithWeights &skymap)
+{
+	return skymap_shape(*(skymap.T));
+}
+
 static G3SkyMapPtr
 skymap_copy(G3SkyMap &r)
 {
@@ -781,6 +793,9 @@ PYBINDINGS("maps") {
 	    .def_readwrite("QQ",&G3SkyMapWeights::QQ)
 	    .def_readwrite("QU",&G3SkyMapWeights::QU)
 	    .def_readwrite("UU",&G3SkyMapWeights::UU)
+	    .add_property("size", &G3SkyMapWeights::size, "Number of pixels in weights")
+	    .def("__len__", &G3SkyMapWeights::size, "Number of pixels in weights")
+	    .add_property("shape", &skymapweights_shape, "Shape of weights")
 	    .add_property("polarized", &G3SkyMapWeights::IsPolarized)
 	    .add_property("congruent", &G3SkyMapWeights::IsCongruent)
 	    .def("rebin", &G3SkyMapWeights::Rebin)
@@ -815,6 +830,9 @@ PYBINDINGS("maps") {
 	    .def_readwrite("U",&G3SkyMapWithWeights::U)
 	    .def_readwrite("weights",&G3SkyMapWithWeights::weights)
 	    .def_readwrite("map_id",&G3SkyMapWithWeights::map_id)
+	    .add_property("size", &G3SkyMapWithWeights::size, "Number of pixels in map")
+	    .def("__len__", &G3SkyMapWithWeights::size, "Number of pixels in map")
+	    .add_property("shape", &skymapwithweights_shape, "Shape of map")
 	    .add_property("weighted",&G3SkyMapWithWeights::IsWeighted)
 	    .add_property("polarized",&G3SkyMapWithWeights::IsPolarized)
 	    .add_property("congruent",&G3SkyMapWithWeights::IsCongruent)

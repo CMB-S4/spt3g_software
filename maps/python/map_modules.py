@@ -53,6 +53,62 @@ def ZeroMapNans(frame, check_weights=False):
         frame['Wpol'] = m
 
 @core.indexmod
+def RemoveWeights(frame, zero_nans=False):
+    '''
+    Remove weights from input maps.  If zero_nans is `True`, empty pixles are
+    skipped and pixels with zero weight are set to 0 instead of NaN.
+    '''
+    if frame.type != core.G3FrameType.Map:
+        return
+
+    if 'Wpol' not in frame and 'Wunpol' not in frame:
+        return
+
+    tmap = frame.pop('T')
+
+    if 'Wpol' in frame:
+        wmap = frame['Wpol']
+        qmap = frame.pop('Q')
+        umap = frame.pop('U')
+    else:
+        wmap = frame['Wunpol']
+        qmap = None
+        umap = None
+
+    remove_weights(tmap, qmap, umap, wmap, zero_nans=zero_nans)
+
+    frame['T'] = tmap
+    if 'Wpol' in frame:
+        frame['Q'] = qmap
+        frame['U'] = umap
+
+@core.indexmod
+def ApplyWeights(frame):
+    if frame.type != core.G3FrameType.Map:
+        return
+
+    if 'Wpol' not in frame and 'Wunpol' not in frame:
+        return
+
+    tmap = frame.pop('T')
+
+    if 'Wpol' in frame:
+        wmap = frame['Wpol']
+        qmap = frame.pop('Q')
+        umap = frame.pop('U')
+    else:
+        wmap = frame['Wunpol']
+        qmap = None
+        umap = None
+
+    apply_weights(tmap, qmap, umap, wmap)
+
+    frame['T'] = tmap
+    if 'Wpol' in frame:
+        frame['Q'] = qmap
+        frame['U'] = umap
+
+@core.indexmod
 def ConvertTMapsToPolarized(frame):
     '''
     Converts individual unpolarized maps to polarized versions of the same map.
