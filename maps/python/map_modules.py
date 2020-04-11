@@ -3,6 +3,29 @@ from spt3g.maps import G3SkyMapWeights, get_mask_map
 import numpy as np
 
 @core.indexmod
+def MakeMapsSparse(frame):
+    '''
+    Makes all maps in a frame sparse.
+    '''
+    if frame.type != core.G3FrameType.Map:
+        return
+
+    for s in ['T', 'Q', 'U']:
+        if s in frame:
+            m = frame.pop(s)
+            m.sparse = True
+            frame[s] = m
+    if 'Wunpol' in frame:
+        m = frame.pop('Wunpol')
+        m.TT.sparse = True
+        frame['Wunpol'] = m
+    if 'Wpol' in frame:
+        m = frame.pop('Wpol')
+        for s in ['TT', 'QQ', 'UU', 'TQ', 'TU', 'QU']:
+            getattr(m, s).sparse = True
+	frame['Wpol'] = m
+
+@core.indexmod
 def ConvertTMapsToPolarized(frame):
     '''
     Converts individual unpolarized maps to polarized versions of the same map.
