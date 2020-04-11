@@ -3,6 +3,7 @@
 import numpy as np
 from spt3g import core
 from spt3g.maps import G3SkyMapWithWeights, G3SkyMapWeights, FlatSkyMap
+from spt3g.maps import zero_map_nans, get_mask_map
 
 for pol in [True, False]:
     # allocation
@@ -83,3 +84,10 @@ for pol in [True, False]:
     assert(np.isnan(mw[16]).all())
     assert(not mw.sparse)
     assert(mw.npix_allocated == mw.size)
+
+    tmap = zero_map_nans(mw.T)
+    assert(tmap.npix_allocated == 1)
+    assert(np.allclose(tmap[15], np.atleast_1d(vec * 10)[0]))
+    mask = get_mask_map(tmap)
+    assert(mask[15] == 1)
+    assert(mask.npix_allocated == 1)

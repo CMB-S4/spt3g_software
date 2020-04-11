@@ -1,5 +1,5 @@
 from spt3g import core
-from spt3g.maps import G3SkyMapWeights, get_mask_map
+from spt3g.maps import G3SkyMapWeights, get_mask_map, zero_map_nans
 import numpy as np
 
 @core.indexmod
@@ -23,7 +23,34 @@ def MakeMapsSparse(frame):
         m = frame.pop('Wpol')
         for s in ['TT', 'QQ', 'UU', 'TQ', 'TU', 'QU']:
             getattr(m, s).sparse = True
-	frame['Wpol'] = m
+        frame['Wpol'] = m
+
+@core.indexmod
+def ZeroMapNans(frame, check_weights=False):
+    '''
+    Convert NaN values in the input maps and (optionally) weights to zeros.
+    '''
+    if frame.type != core.G3FrameType.Map:
+        return
+
+    for s in ['T', 'Q', 'U']:
+        if s in frame:
+            m = frame.pop(s)
+            frame[s] = zero_map_nans(m)
+
+    if not check_weights:
+        return
+
+    if 'Wunpol' in frame:
+        m = frame.pop('Wunpol')
+        m.TT = zero_map_nans(m.TT)
+        frame['Wunpol'] = m
+
+    if 'Wpol' in frame:
+        m = frame.pop('Wpol')
+        for s in ['TT', 'QQ', 'UU', 'TQ', 'TU', 'QU']:
+            setattr(m, s, zero_map_nans(getattr(m, s)))
+        frame['Wpol'] = m
 
 @core.indexmod
 def ConvertTMapsToPolarized(frame):
