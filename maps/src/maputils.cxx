@@ -30,6 +30,11 @@ G3SkyMapPtr GetMaskMap(G3SkyMapConstPtr m)
 	return mask;
 }
 
+void RemoveWeightsT(G3SkyMapPtr T, G3SkyMapWeightsConstPtr W, bool zero_nans)
+{
+	RemoveWeights(T, NULL, NULL, W, zero_nans);
+}
+
 void RemoveWeights(G3SkyMapPtr T, G3SkyMapPtr Q, G3SkyMapPtr U, G3SkyMapWeightsConstPtr W,
     bool zero_nans)
 {
@@ -101,6 +106,11 @@ void RemoveWeights(G3SkyMapPtr T, G3SkyMapPtr Q, G3SkyMapPtr U, G3SkyMapWeightsC
 		Q->weighted = false;
 		U->weighted = false;
 	}
+}
+
+void ApplyWeightsT(G3SkyMapPtr T, G3SkyMapWeightsConstPtr W)
+{
+	ApplyWeights(T, NULL, NULL, W);
 }
 
 void ApplyWeights(G3SkyMapPtr T, G3SkyMapPtr Q, G3SkyMapPtr U, G3SkyMapWeightsConstPtr W)
@@ -238,15 +248,23 @@ void maputils_pybindings(void){
 	bp::def("get_mask_map", GetMaskMap, (bp::arg("map_in")),
 		"Returns a map that is 1 where the input map is nonzero.");
 
+	bp::def("remove_weights_t", RemoveWeightsT,
+		(bp::arg("T"), bp::arg("W"), bp::arg("zero_nans")=false),
+		"Remove weights from unpolarized maps.  If zero_nans is true, empty pixels "
+		"are skipped, and pixels with zero weight are set to 0 instead of nan.");
+
 	bp::def("remove_weights", RemoveWeights,
 		(bp::arg("T"), bp::arg("Q"), bp::arg("U"), bp::arg("W"), bp::arg("zero_nans")=false),
-		"Remove weights from polarized or unpolarized maps. "
-		"If zero_nans is true, empty pixels are skipped, and pixels "
-		"with zero weight are set to 0 instead of nan.");
+		"Remove weights from polarized maps.  If zero_nans is true, empty pixels "
+		"are skipped, and pixels with zero weight are set to 0 instead of nan.");
+
+	bp::def("apply_weights_t", ApplyWeightsT,
+		(bp::arg("T"), bp::arg("W")),
+		"Apply weights to unpolarized maps.");
 
 	bp::def("apply_weights", ApplyWeights,
 		(bp::arg("T"), bp::arg("Q"), bp::arg("U"), bp::arg("W")),
-		"Remove weights from polarized or unpolarized maps.");
+		"Apply weights to polarized maps.");
 
 	bp::def("get_ra_dec_map", GetRaDecMap, (bp::arg("map_in")),
 		"Returns maps of the ra and dec angles for each pixel in the input map");

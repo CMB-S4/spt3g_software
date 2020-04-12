@@ -45,12 +45,10 @@ def RemoveWeights(frame, zero_nans=False):
         wmap = frame['Wpol']
         qmap = frame.pop('Q')
         umap = frame.pop('U')
+        remove_weights(tmap, qmap, umap, wmap, zero_nans=zero_nans)
     else:
         wmap = frame['Wunpol']
-        qmap = None
-        umap = None
-
-    remove_weights(tmap, qmap, umap, wmap, zero_nans=zero_nans)
+        remove_weights_t(tmap, wmap, zero_nans=zero_nans)
 
     frame['T'] = tmap
     if 'Wpol' in frame:
@@ -71,12 +69,10 @@ def ApplyWeights(frame):
         wmap = frame['Wpol']
         qmap = frame.pop('Q')
         umap = frame.pop('U')
+        apply_weights(tmap, qmap, umap, wmap)
     else:
         wmap = frame['Wunpol']
-        qmap = None
-        umap = None
-
-    apply_weights(tmap, qmap, umap, wmap)
+        apply_weights_t(tmap, wmap)
 
     frame['T'] = tmap
     if 'Wpol' in frame:

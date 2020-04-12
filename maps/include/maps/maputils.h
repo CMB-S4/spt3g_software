@@ -10,9 +10,11 @@
 
 G3SkyMapPtr GetMaskMap(G3SkyMapConstPtr m);
 
+void RemoveWeightsT(G3SkyMapPtr T, G3SkyMapWeightsConstPtr W, bool zero_nans = false);
 void RemoveWeights(G3SkyMapPtr T, G3SkyMapPtr Q, G3SkyMapPtr U, G3SkyMapWeightsConstPtr W,
     bool zero_nans = false);
 
+void ApplyWeightsT(G3SkyMapPtr T, G3SkyMapWeightsConstPtr W);
 void ApplyWeights(G3SkyMapPtr T, G3SkyMapPtr Q, G3SkyMapPtr U, G3SkyMapWeightsConstPtr W);
 
 boost::python::tuple GetRaDecMap(G3SkyMapConstPtr m);
