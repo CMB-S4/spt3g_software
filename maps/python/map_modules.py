@@ -1,6 +1,14 @@
-from spt3g import core
-from spt3g.maps import G3SkyMapWeights, get_mask_map
+from spt3g import core, maps
 import numpy as np
+
+__all__ = [
+    'CompressMaps',
+    'RemoveWeights',
+    'ApplyWeights',
+    'FlattenPol',
+    'ConvertTMapsToPolarized',
+    'ConvertPolarizedMapsToT',
+]
 
 @core.indexmod
 def CompressMaps(frame, zero_nans=False):
@@ -8,9 +16,6 @@ def CompressMaps(frame, zero_nans=False):
     Compress all maps in a frame to their default sparse representation.
     Optionally remove NaN values as well.
     '''
-    if frame.type != core.G3FrameType.Map:
-        return
-
     for s in ['T', 'Q', 'U']:
         if s in frame:
             m = frame.pop(s)
@@ -31,11 +36,9 @@ def CompressMaps(frame, zero_nans=False):
 def RemoveWeights(frame, zero_nans=False):
     '''
     Remove weights from input maps.  If zero_nans is `True`, empty pixles are
-    skipped and pixels with zero weight are set to 0 instead of NaN.
+    skipped and pixels with zero weight are set to 0 instead of NaN.  Operation
+    is performed in place to minimuze memory use.
     '''
-    if frame.type != core.G3FrameType.Map:
-        return
-
     if 'Wpol' not in frame and 'Wunpol' not in frame:
         return
 
@@ -45,10 +48,10 @@ def RemoveWeights(frame, zero_nans=False):
         wmap = frame['Wpol']
         qmap = frame.pop('Q')
         umap = frame.pop('U')
-        remove_weights(tmap, qmap, umap, wmap, zero_nans=zero_nans)
+        maps.remove_weights(tmap, qmap, umap, wmap, zero_nans=zero_nans)
     else:
         wmap = frame['Wunpol']
-        remove_weights_t(tmap, wmap, zero_nans=zero_nans)
+        maps.remove_weights_t(tmap, wmap, zero_nans=zero_nans)
 
     frame['T'] = tmap
     if 'Wpol' in frame:
@@ -57,9 +60,10 @@ def RemoveWeights(frame, zero_nans=False):
 
 @core.indexmod
 def ApplyWeights(frame):
-    if frame.type != core.G3FrameType.Map:
-        return
-
+    '''
+    Apply weights to the input maps.  The operation is performed in place to
+    minimize memory use.
+    '''
     if 'Wpol' not in frame and 'Wunpol' not in frame:
         return
 
@@ -69,15 +73,42 @@ def ApplyWeights(frame):
         wmap = frame['Wpol']
         qmap = frame.pop('Q')
         umap = frame.pop('U')
-        apply_weights(tmap, qmap, umap, wmap)
+        maps.apply_weights(tmap, qmap, umap, wmap)
     else:
         wmap = frame['Wunpol']
-        apply_weights_t(tmap, wmap)
+        maps.apply_weights_t(tmap, wmap)
 
     frame['T'] = tmap
     if 'Wpol' in frame:
         frame['Q'] = qmap
         frame['U'] = umap
+
+@core.indexmod
+def FlattenPol(frame, invert=False):
+    """
+    For maps defined on the sphere the direction of the polarization angle is
+    is defined relative to the direction of North.  When making maps we follow
+    this definition.
+
+    For any flat sky estimators, the polarization angle is defined relative to
+    the vertical axis.  For some map projections the direction of north is not
+    the same as the vertical axis.  This function applies a rotation to the Q
+    and U values to switch the curved sky Q/U definition to the flat sky Q/U
+    definition.
+
+    If for whatever reason you want to reverse the process set the invert
+    argument to True.
+    """
+
+    if 'Q' not in frame or 'U' not in frame:
+        return
+
+    qmap, umap = frame['Q'], frame['U']
+    if not isinstance(qmap, maps.FlatSkyMap) or not isinstance(umap, maps.FlatSkyMap):
+        return
+
+    maps.flatten_pol(qmap, umap, invert=invert)
+    return frame
 
 @core.indexmod
 def ConvertTMapsToPolarized(frame):
@@ -95,9 +126,9 @@ def ConvertTMapsToPolarized(frame):
 
     frame['Q'] = frame['T'].Clone(False)
     frame['U'] = frame['T'].Clone(False)
-    mask = get_mask_map(wgt)
+    mask = maps.get_mask_map(wgt)
 
-    wgt_out = G3SkyMapWeights(frame['T'], polarized=True)
+    wgt_out = maps.G3SkyMapWeights(frame['T'], polarized=True)
     wgt_out.TT = wgt
     wgt_out.TQ = wgt.Clone(False)
     wgt_out.TU = wgt.Clone(False)
@@ -120,7 +151,7 @@ def ConvertPolarizedMapsToT(frame):
     del frame['Q']
     del frame['U']
 
-    wgt_out = G3SkyMapWeights(frame['T'], polarized=False)
+    wgt_out = maps.G3SkyMapWeights(frame['T'], polarized=False)
     wgt_out.TT = wgt
 
     frame['Wunpol'] = wgt_out

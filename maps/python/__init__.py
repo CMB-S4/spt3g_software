@@ -5,9 +5,8 @@ load_pybindings(__name__, __path__)
 from .skymapaddons import *
 
 from . import azel
-from . import map_modules
 from . import coordsysmodules
-from . import fitsio
-from . import maputils
 from .quathelpers import ang_to_quat, quat_to_ang
-
+from .map_modules import *
+from .fitsio import *
+from .maputils import *

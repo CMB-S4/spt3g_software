@@ -9,9 +9,6 @@ __all__ = [
     'load_skymap_fits',
     'save_skymap_fits',
     'SaveMapFrame',
-    'load_proj_dict',
-    'create_wcs_header',
-    'parse_wcs_header',
 ]
 
 
