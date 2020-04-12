@@ -452,10 +452,11 @@ void HealpixSkyMap::Compress(bool zero_nans)
 		for (auto i : *oldis) {
 			if (i.second == 0 || (zero_nans && i.second != i.second))
 				continue;
-			(*this)[i.first] = i.second;
+			(*indexed_sparse_)[i.first] = i.second;
 		}
 
 		delete oldis;
+		return;
 	}
 
 	if (!ring_sparse_)

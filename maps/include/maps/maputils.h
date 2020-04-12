@@ -8,6 +8,13 @@
 #include <maps/G3SkyMap.h>
 #include <maps/FlatSkyMap.h>
 
+G3SkyMapPtr GetMaskMap(G3SkyMapConstPtr m);
+
+void RemoveWeights(G3SkyMapPtr T, G3SkyMapPtr Q, G3SkyMapPtr U, G3SkyMapWeightsConstPtr W,
+    bool zero_nans = false);
+
+void ApplyWeights(G3SkyMapPtr T, G3SkyMapPtr Q, G3SkyMapPtr U, G3SkyMapWeightsConstPtr W);
+
 boost::python::tuple GetRaDecMap(G3SkyMapConstPtr m);
 
 void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin=1, bool interp=false);

@@ -3,32 +3,10 @@ from spt3g.maps import G3SkyMapWeights, get_mask_map
 import numpy as np
 
 @core.indexmod
-def MakeMapsSparse(frame):
+def CompressMaps(frame, zero_nans=False):
     '''
-    Makes all maps in a frame sparse.
-    '''
-    if frame.type != core.G3FrameType.Map:
-        return
-
-    for s in ['T', 'Q', 'U']:
-        if s in frame:
-            m = frame.pop(s)
-            m.sparse = True
-            frame[s] = m
-    if 'Wunpol' in frame:
-        m = frame.pop('Wunpol')
-        m.TT.sparse = True
-        frame['Wunpol'] = m
-    if 'Wpol' in frame:
-        m = frame.pop('Wpol')
-        for s in ['TT', 'QQ', 'UU', 'TQ', 'TU', 'QU']:
-            getattr(m, s).sparse = True
-        frame['Wpol'] = m
-
-@core.indexmod
-def ZeroMapNans(frame, check_weights=False):
-    '''
-    Convert NaN values in the input maps and (optionally) weights to zeros.
+    Compress all maps in a frame to their default sparse representation.
+    Optionally remove NaN values as well.
     '''
     if frame.type != core.G3FrameType.Map:
         return
@@ -36,21 +14,17 @@ def ZeroMapNans(frame, check_weights=False):
     for s in ['T', 'Q', 'U']:
         if s in frame:
             m = frame.pop(s)
-            m.compress(zero_nans=True)
+            m.compress(zero_nans=zero_nans)
             frame[s] = m
-
-    if not check_weights:
-        return
-
     if 'Wunpol' in frame:
         m = frame.pop('Wunpol')
-        m.TT.compress(zero_nans=True)
+        m.TT.compress(zero_nans=zero_nans)
         frame['Wunpol'] = m
-
     if 'Wpol' in frame:
         m = frame.pop('Wpol')
         for s in ['TT', 'QQ', 'UU', 'TQ', 'TU', 'QU']:
-            getattr(m, s).compress(zero_nans=True)
+            mm = getattr(m, s)
+            mm.compress(zero_nans=zero_nans)
         frame['Wpol'] = m
 
 @core.indexmod
