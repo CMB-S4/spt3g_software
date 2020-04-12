@@ -250,6 +250,34 @@ FlatSkyMap::ConvertToSparse()
 	dense_ = NULL;
 }
 
+void FlatSkyMap::Compress(bool zero_nans)
+{
+	if (dense_) {
+		if (zero_nans) {
+			for (auto i =  dense_->begin(); i != dense_->end(); i++) {
+				if ((*i) != (*i))
+					(*dense_)(i.x, i.y) = 0;
+			}
+		}
+
+		ConvertToSparse();
+		return;
+	}
+
+	if (!sparse_)
+		return;
+
+	auto *old_sparse = sparse_;
+	sparse_ = new SparseMapData(xpix_, ypix_);
+	for (auto i = old_sparse->begin(); i != old_sparse->end(); i++) {
+		if ((*i) == 0 || (zero_nans && (*i) != (*i)))
+			continue;
+		(*sparse_)(i.x, i.y) = (*i);
+	}
+
+	delete old_sparse;
+}
+
 G3SkyMapPtr
 FlatSkyMap::Clone(bool copy_data) const
 {

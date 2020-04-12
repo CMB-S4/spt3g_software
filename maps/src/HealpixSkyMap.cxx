@@ -431,6 +431,48 @@ HealpixSkyMap::ConvertToIndexedSparse()
 	}
 }
 
+void HealpixSkyMap::Compress(bool zero_nans)
+{
+	if (dense_) {
+		if (zero_nans) {
+			for (auto i : *this) {
+				if (i.second != i.second)
+					(*dense_)[i.first] = 0;
+			}
+		}
+
+		ConvertToRingSparse();
+		return;
+	}
+
+	if (indexed_sparse_) {
+		auto *oldis = indexed_sparse_;
+		indexed_sparse_ = new std::unordered_map<uint64_t, double>;
+
+		for (auto i : *oldis) {
+			if (i.second == 0 || (zero_nans && i.second != i.second))
+				continue;
+			(*this)[i.first] = i.second;
+		}
+
+		delete oldis;
+	}
+
+	if (!ring_sparse_)
+		return;
+
+	auto *oldrs = ring_sparse_;
+	ring_sparse_ = new SparseMapData(ring_info_->nring, ring_info_->nring);
+
+	for (auto i = oldrs->begin(); i != oldrs->end(); i++) {
+		if ((*i) == 0 || (zero_nans && (*i) != (*i)))
+			continue;
+		(*ring_sparse_)(i.x, i.y) = (*i);
+	}
+
+	delete oldrs;
+}
+
 G3SkyMapPtr
 HealpixSkyMap::Clone(bool copy_data) const
 {

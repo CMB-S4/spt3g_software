@@ -17,19 +17,6 @@
 
 using namespace G3Units;
 
-G3SkyMapPtr ZeroMapNans(G3SkyMapConstPtr m)
-{
-	G3SkyMapPtr out = m->Clone(false);
-
-	for (size_t i = 0; i < m->size(); i++) {
-		double v = m->at(i);
-		if (isfinite(v) && v != 0)
-			(*out)[i] = v;
-	}
-
-	return out;
-}
-
 G3SkyMapPtr GetMaskMap(G3SkyMapConstPtr m)
 {
 	G3SkyMapPtr mask = m->Clone(false);
@@ -248,9 +235,6 @@ void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool int
 
 namespace bp = boost::python;
 void maputils_pybindings(void){
-	bp::def("zero_map_nans", ZeroMapNans, (bp::arg("map_in")),
-		"Return a copy of the input map with all NaN pixels set to 0.");
-
 	bp::def("get_mask_map", GetMaskMap, (bp::arg("map_in")),
 		"Returns a map that is 1 where the input map is nonzero.");
 

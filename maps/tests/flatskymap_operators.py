@@ -55,13 +55,19 @@ assert(n[15] == 1)
 assert(np.isinf(n[16]))
 assert(n.npix_allocated == n.size)
 
+# compression
+np.asarray(n)[np.isinf(n)] = np.nan
+n.compress(zero_nans=True)
+assert(n[16] == 0)
+assert(n.npix_allocated == 1)
+
 # Map-by-map operations, with two sparse maps, one dense and one sparse,
 # and two dense
 
 m *= 2 # Get numbers bigger
 
 m1 = m
-m2 = m.Clone(True)
+m2 = m.copy()
 m2.sparse = False
 
 nm1 = m1.npix_allocated

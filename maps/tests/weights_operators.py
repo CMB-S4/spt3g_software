@@ -3,7 +3,7 @@
 import numpy as np
 from spt3g import core
 from spt3g.maps import G3SkyMapWithWeights, G3SkyMapWeights, FlatSkyMap
-from spt3g.maps import zero_map_nans, get_mask_map, remove_weights, apply_weights
+from spt3g.maps import get_mask_map, remove_weights, apply_weights
 
 for pol in [True, False]:
     # allocation
@@ -88,7 +88,8 @@ for pol in [True, False]:
     assert(not mw.sparse)
     assert(mw.npix_allocated == mw.size)
 
-    tmap = zero_map_nans(mw.T)
+    tmap = mw.T.copy()
+    tmap.compress(zero_nans=True)
     assert(tmap.npix_allocated == 1)
     assert(np.allclose(tmap[15], np.atleast_1d(vec * 10)[0]))
     mask = get_mask_map(tmap)
@@ -97,8 +98,10 @@ for pol in [True, False]:
 
     # compress maps back to sparse
     if pol:
-        qmap = zero_map_nans(mw.Q)
-        umap = zero_map_nans(mw.U)
+        qmap = mw.Q.copy()
+        qmap.compress(zero_nans=True)
+        umap = mw.U.copy()
+        umap.compress(zero_nans=True)
     else:
         qmap = umap = None
 

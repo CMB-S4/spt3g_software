@@ -1,5 +1,5 @@
 from spt3g import core
-from spt3g.maps import G3SkyMapWeights, get_mask_map, zero_map_nans
+from spt3g.maps import G3SkyMapWeights, get_mask_map
 import numpy as np
 
 @core.indexmod
@@ -36,20 +36,21 @@ def ZeroMapNans(frame, check_weights=False):
     for s in ['T', 'Q', 'U']:
         if s in frame:
             m = frame.pop(s)
-            frame[s] = zero_map_nans(m)
+            m.compress(zero_nans=True)
+            frame[s] = m
 
     if not check_weights:
         return
 
     if 'Wunpol' in frame:
         m = frame.pop('Wunpol')
-        m.TT = zero_map_nans(m.TT)
+        m.TT.compress(zero_nans=True)
         frame['Wunpol'] = m
 
     if 'Wpol' in frame:
         m = frame.pop('Wpol')
         for s in ['TT', 'QQ', 'UU', 'TQ', 'TU', 'QU']:
-            setattr(m, s, zero_map_nans(getattr(m, s)))
+            getattr(m, s).compress(zero_nans=True)
         frame['Wpol'] = m
 
 @core.indexmod

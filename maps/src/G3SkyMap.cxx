@@ -723,6 +723,7 @@ PYBINDINGS("maps") {
 	    .def("__setitem__", &skymap_setitem)
 	    .def("__copy__", &skymap_copy)
 	    .def("__deepcopy__", &skymap_copy)
+	    .def("copy", &skymap_copy)
 	    .def("Clone", &G3SkyMap::Clone,
 	      ((bp::arg("copy_data")=true),
 	       "Return a map of the same type, populated with a copy of the data "
@@ -756,6 +757,10 @@ PYBINDINGS("maps") {
 	      "or averaging (if norm is true) scale-x-scale blocks of pixels "
 	      "together.  Returns a new map object.  Map dimensions must be a "
 	      "multiple of the rebinning scale.")
+
+	    .def("compress", &G3SkyMap::Compress, (bp::arg("zero_nans")=false),
+	      "Convert the map to its default sparse representation, excluding "
+	      "empty pixels, and optionally converting NaN values to zeroes.")
 
 	    .def(bp::self += bp::self)
 	    .def(bp::self *= bp::self)

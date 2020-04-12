@@ -118,6 +118,9 @@ public:
 	virtual void ConvertToDense() {
 		throw std::runtime_error("Conversion to dense array not implemented");
 	}
+	virtual void Compress(bool zero_nans = false) {
+		throw std::runtime_error("Compression not implemented");
+	}
 
 protected:
 	virtual void InitFromV1Data(std::vector<size_t>,

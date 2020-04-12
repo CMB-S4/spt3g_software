@@ -43,14 +43,21 @@ assert(n[15] == 1)
 assert(np.isinf(n[16]))
 assert(n.npix_allocated == n.size)
 
+# compression
+np.asarray(n)[np.isinf(n)] = np.nan
+n.compress(zero_nans=True)
+assert(n.ringsparse)
+assert(n[16] == 0)
+assert(n.npix_allocated == 1)
+
 # Map-by-map operations, with pairs of maps of any kind of density
 
 m *= 2 # Get numbers bigger
 
 m1 = m
-m2 = m.Clone(True)
+m2 = m.copy()
 m2.ringsparse = True
-m3 = m.Clone(True)
+m3 = m.copy()
 m3.dense = True
 
 nm1  = m1.npix_allocated

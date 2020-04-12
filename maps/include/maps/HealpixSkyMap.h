@@ -86,6 +86,7 @@ public:
 	bool IsDense() const override { return (dense_ != NULL); }
 	bool IsRingSparse() const { return (ring_sparse_ != NULL); }
 	bool IsIndexedSparse() const { return (indexed_sparse_ != NULL); }
+	void Compress(bool zero_nans = false) override;
 
 	bool IsRaShifted() const { return shift_ra_; }
 	void SetShiftRa(bool shift);
