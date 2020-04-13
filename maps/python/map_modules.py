@@ -16,21 +16,11 @@ def CompressMaps(frame, zero_nans=False):
     Compress all maps in a frame to their default sparse representation.
     Optionally remove NaN values as well.
     '''
-    for s in ['T', 'Q', 'U']:
+    for s in ['T', 'Q', 'U', 'Wunpol', 'Wpol']:
         if s in frame:
             m = frame.pop(s)
             m.compress(zero_nans=zero_nans)
             frame[s] = m
-    if 'Wunpol' in frame:
-        m = frame.pop('Wunpol')
-        m.TT.compress(zero_nans=zero_nans)
-        frame['Wunpol'] = m
-    if 'Wpol' in frame:
-        m = frame.pop('Wpol')
-        for s in ['TT', 'QQ', 'UU', 'TQ', 'TU', 'QU']:
-            mm = getattr(m, s)
-            mm.compress(zero_nans=zero_nans)
-        frame['Wpol'] = m
 
 @core.indexmod
 def RemoveWeights(frame, zero_nans=False):

@@ -321,6 +321,8 @@ public:
 
 	boost::shared_ptr<G3SkyMapWeights> Rebin(size_t scale) const;
 
+	void Compress(bool zero_nans = false);
+
 	boost::shared_ptr<G3SkyMapWeights> Clone(bool copy_data) const {
 		if (copy_data)
 			return boost::make_shared<G3SkyMapWeights>(*this);
@@ -411,9 +413,9 @@ public:
 	G3SkyMapWeightsPtr RemoveWeights();
 	void ApplyWeights(G3SkyMapWeightsPtr weights);
 
-	StokesVector get_interp_value(double alpha, double delta) const;
-
 	boost::shared_ptr<G3SkyMapWithWeights> Rebin(size_t scale) const;
+
+	void Compress(bool zero_nans = false);
 
 private:
 	template <class A> void serialize(A &ar, const unsigned v);

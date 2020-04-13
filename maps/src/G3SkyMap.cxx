@@ -663,6 +663,20 @@ G3SkyMapWeightsPtr G3SkyMapWeights::Rebin(size_t scale) const
 	return out;
 }
 
+void G3SkyMapWeights::Compress(bool zero_nans)
+{
+	g3_assert(IsCongruent());
+
+	TT->Compress(zero_nans);
+	if (IsPolarized()) {
+		TQ->Compress(zero_nans);
+		TU->Compress(zero_nans);
+		QQ->Compress(zero_nans);
+		QU->Compress(zero_nans);
+		UU->Compress(zero_nans);
+	}
+}
+
 G3SkyMapWithWeightsPtr G3SkyMapWithWeights::Rebin(size_t scale) const
 {
 	g3_assert(IsCongruent());
@@ -677,6 +691,19 @@ G3SkyMapWithWeightsPtr G3SkyMapWithWeights::Rebin(size_t scale) const
 	out->map_id = map_id;
 
 	return out;
+}
+
+void G3SkyMapWithWeights::Compress(bool zero_nans)
+{
+	g3_assert(IsCongruent());
+
+	T->Compress(zero_nans);
+	if (IsPolarized()) {
+		Q->Compress(zero_nans);
+		U->Compress(zero_nans);
+	}
+
+	weights->Compress(zero_nans);
 }
 
 PYBINDINGS("maps") {
@@ -810,6 +837,9 @@ PYBINDINGS("maps") {
 	      "Rebin the weights into larger pixels by summing scale-x-scale blocks "
 	      "of pixels together.  Returns a new weights object.  Map dimensions "
 	      "must be a multiple of the  rebinning scale.")
+	    .def("compress", &G3SkyMapWeights::Compress, (bp::arg("zero_nans")=false),
+	      "Convert the map to its default sparse representation, excluding "
+	      "empty pixels, and optionally converting NaN values to zeroes.")
 	    .def("det", &G3SkyMapWeights::Det,
 	      "Return the determinant of the Mueller matrix for each pixel")
 	    .def("cond", &G3SkyMapWeights::Cond,
@@ -865,6 +895,9 @@ PYBINDINGS("maps") {
 	      "or averaging (if unweighted) scale-x-scale blocks of pixels "
 	      "together.  Returns a new map object.  Map dimensions must be a "
 	      "multiple of the rebinning scale.")
+	    .def("compress", &G3SkyMapWithWeights::Compress, (bp::arg("zero_nans")=false),
+	      "Convert the map to its default sparse representation, excluding "
+	      "empty pixels, and optionally converting NaN values to zeroes.")
 
 	    .def("Clone", &G3SkyMapWithWeights::Clone, ((bp::arg("copy_data")=true),
 	       "Return a map of the same type, populated with a copy of the data "
