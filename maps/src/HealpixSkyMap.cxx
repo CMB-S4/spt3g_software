@@ -378,7 +378,7 @@ HealpixSkyMap::ConvertToDense()
 void
 HealpixSkyMap::ConvertToRingSparse()
 {
-	if (ring_sparse_ || nested_)
+	if (ring_sparse_)
 		return;
 
 	ring_sparse_ = new SparseMapData(ring_info_->nring, ring_info_->nring);
@@ -1174,7 +1174,7 @@ PYBINDINGS("maps")
 		"ordering (analogous to FlatSkyMap's sparse mode). "
 		"Ring-sparsity is efficient for dense blocks on a ring-ordered "
 		"map (e.g. a continuous sky region), but is inefficient "
-		"otherwise. It applies only to non-nested maps. "
+		"otherwise (e.g. nested pixel ordering or discontinous coverage). "
 		"If set to True, converts the map to this representation." )
 	    .add_property("indexedsparse", &HealpixSkyMap::IsIndexedSparse,
 		HealpixSkyMap_setindexedsparse,
