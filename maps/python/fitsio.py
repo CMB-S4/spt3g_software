@@ -94,6 +94,7 @@ def load_skymap_fits(filename, hdu=None):
             )
 
             if map_type == 'flat':
+                map_opts.update(flat_pol=hdr.get('FLATPOL', False))
                 map_opts.update(parse_wcs_header(hdr))
 
             elif map_type == 'healpix':
@@ -526,6 +527,7 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
                 hdu.header['ISWEIGHT'] = False
                 hdu.header['POLTYPE'] = name
                 hdu.header['OVERFLOW'] = m.overflow
+                hdu.header['FLATPOL'] = m.flat_pol
                 hdulist.append(hdu)
                 del hdu
             else:
