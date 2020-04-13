@@ -789,25 +789,35 @@ PYBINDINGS("maps") {
 	    .def("__neg__", &pyskymap_neg)
 	;
 
-	EXPORT_FRAMEOBJECT(G3SkyMapWeights, init<>(), "generic sky weight")
+	EXPORT_FRAMEOBJECT(G3SkyMapWeights, init<>(),
+	    "Polarized (Mueller matrix) or unpolarized (scalar) map pixel weights.")
 	    .def(bp::init<G3SkyMapConstPtr, bool>(
 	      (bp::arg("skymap"), bp::arg("polarized") = true)))
-	    .def_readwrite("TT",&G3SkyMapWeights::TT)
-	    .def_readwrite("TQ",&G3SkyMapWeights::TQ)
-	    .def_readwrite("TU",&G3SkyMapWeights::TU)
-	    .def_readwrite("QQ",&G3SkyMapWeights::QQ)
-	    .def_readwrite("QU",&G3SkyMapWeights::QU)
-	    .def_readwrite("UU",&G3SkyMapWeights::UU)
+	    .def_readwrite("TT",&G3SkyMapWeights::TT, "Mueller matrix component map")
+	    .def_readwrite("TQ",&G3SkyMapWeights::TQ, "Mueller matrix component map")
+	    .def_readwrite("TU",&G3SkyMapWeights::TU, "Mueller matrix component map")
+	    .def_readwrite("QQ",&G3SkyMapWeights::QQ, "Mueller matrix component map")
+	    .def_readwrite("QU",&G3SkyMapWeights::QU, "Mueller matrix component map")
+	    .def_readwrite("UU",&G3SkyMapWeights::UU, "Mueller matrix component map")
 	    .add_property("size", &G3SkyMapWeights::size, "Number of pixels in weights")
 	    .def("__len__", &G3SkyMapWeights::size, "Number of pixels in weights")
 	    .add_property("shape", &skymapweights_shape, "Shape of weights")
-	    .add_property("polarized", &G3SkyMapWeights::IsPolarized)
-	    .add_property("congruent", &G3SkyMapWeights::IsCongruent)
-	    .def("rebin", &G3SkyMapWeights::Rebin)
-	    .def("det", &G3SkyMapWeights::Det)
-	    .def("cond", &G3SkyMapWeights::Cond)
-	    
-	    .def("Clone", &G3SkyMapWeights::Clone)
+	    .add_property("polarized", &G3SkyMapWeights::IsPolarized,
+	      "True if all components are set, False if only the TT component is set")
+	    .add_property("congruent", &G3SkyMapWeights::IsCongruent,
+	      "True if all components are internally compatible with each other")
+	    .def("rebin", &G3SkyMapWeights::Rebin, (bp::arg("scale")),
+	      "Rebin the weights into larger pixels by summing scale-x-scale blocks "
+	      "of pixels together.  Returns a new weights object.  Map dimensions "
+	      "must be a multiple of the  rebinning scale.")
+	    .def("det", &G3SkyMapWeights::Det,
+	      "Return the determinant of the Mueller matrix for each pixel")
+	    .def("cond", &G3SkyMapWeights::Cond,
+	      "Return the condition number of the Mueller matrix for each pixel")
+
+	    .def("Clone", &G3SkyMapWeights::Clone, ((bp::arg("copy_data")=true),
+	       "Return weights of the same type, populated with a copy of the data "
+	       "if the argument is true (default), empty otherwise."))
 
 	    .def(bp::self += bp::self)
 	    .def(bp::self *= FlatSkyMap())
@@ -830,22 +840,35 @@ PYBINDINGS("maps") {
 	       bp::arg("weighted"),
 	       bp::arg("polarized"),
 	       bp::arg("map_id") = "")))
-	    .def_readwrite("T",&G3SkyMapWithWeights::T)
-	    .def_readwrite("Q",&G3SkyMapWithWeights::Q)
-	    .def_readwrite("U",&G3SkyMapWithWeights::U)
-	    .def_readwrite("weights",&G3SkyMapWithWeights::weights)
-	    .def_readwrite("map_id",&G3SkyMapWithWeights::map_id)
+	    .def_readwrite("T",&G3SkyMapWithWeights::T, "Stokes component map")
+	    .def_readwrite("Q",&G3SkyMapWithWeights::Q, "Stokes component map")
+	    .def_readwrite("U",&G3SkyMapWithWeights::U, "Stokes component map")
+	    .def_readwrite("weights",&G3SkyMapWithWeights::weights, "Weights object")
+	    .def_readwrite("map_id",&G3SkyMapWithWeights::map_id, "Map identifier")
 	    .add_property("size", &G3SkyMapWithWeights::size, "Number of pixels in map")
 	    .def("__len__", &G3SkyMapWithWeights::size, "Number of pixels in map")
 	    .add_property("shape", &skymapwithweights_shape, "Shape of map")
-	    .add_property("weighted",&G3SkyMapWithWeights::IsWeighted)
-	    .add_property("polarized",&G3SkyMapWithWeights::IsPolarized)
-	    .add_property("congruent",&G3SkyMapWithWeights::IsCongruent)
-	    .def("remove_weights",&G3SkyMapWithWeights::RemoveWeights)
-	    .def("apply_weights",&G3SkyMapWithWeights::ApplyWeights)
-	    .def("rebin", &G3SkyMapWithWeights::Rebin)
-	    
-	    .def("Clone", &G3SkyMapWithWeights::Clone)
+	    .add_property("weighted",&G3SkyMapWithWeights::IsWeighted,
+	      "True if weights are set")
+	    .add_property("polarized",&G3SkyMapWithWeights::IsPolarized,
+	      "True if Q and U maps are set")
+	    .add_property("congruent",&G3SkyMapWithWeights::IsCongruent,
+	      "True if all components are internally compatible with each other")
+	    .def("remove_weights",&G3SkyMapWithWeights::RemoveWeights,
+	      "Decouple Stokes components by applying the inverse of the "
+	      "Mueller matrix for each pixel")
+	    .def("apply_weights",&G3SkyMapWithWeights::ApplyWeights,
+	      "Couple the Stokes components by applying the Mueller matrix "
+	      "for each pixel")
+	    .def("rebin", &G3SkyMapWithWeights::Rebin, (bp::arg("scale")),
+	      "Rebin the map into larger pixels by summing (if weighted) "
+	      "or averaging (if unweighted) scale-x-scale blocks of pixels "
+	      "together.  Returns a new map object.  Map dimensions must be a "
+	      "multiple of the rebinning scale.")
+
+	    .def("Clone", &G3SkyMapWithWeights::Clone, ((bp::arg("copy_data")=true),
+	       "Return a map of the same type, populated with a copy of the data "
+	       "if the argument is true (default), empty otherwise."))
 
 	    .def(bp::self += bp::self)
 	    .def(bp::self *= FlatSkyMap())

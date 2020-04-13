@@ -792,32 +792,6 @@ flatskymap_nonzeropixels(const FlatSkyMap &m)
 	return boost::python::make_tuple(i, d);
 }
 
-#define FLAT_SKY_MAP_DOCSTR \
-	"FlatSkyMap is a G3SkyMap with the extra meta information about the" \
-	" particular flat sky projection included.  In practice it behaves\n" \
-	" (mostly) like a 2d numpy array.\n\n"				\
-	"Meta Information Stored: \n\n" \
-	"    x_len (int) x (ra/az)  dimension length \n\n" \
-	"    y_len (int) y (dec/el) dimension  length \n\n" \
-	"    alpha_center : (double)  Ra (or Az) of the center of the map \n\n" \
-	"    delta_center : (double)  Dec (or El) of the center of the map \n\n" \
-	"    res : (double) approximate resolution of the pixel\n" \
-	"    (the actual shape of a pixel is projection dependent)\n\n"	\
-	"    proj : (MapProjection)  proj is a MapProjection enum that specifies\n"\
-	"    the flat sky projection \n\n"	\
-	"\n\n" \
-	"The other meta information is inherited from G3SkyMap that lives in core. \n\n" \
-	"For reasons (skymap __setitem__ has to handle both 1d and 2d \n"\
-	" semantics) the FlatSkyMap has a slightly unintuitive way of \n"\
-	" setting values when using a slicing operator.  Instead of being\n"\
-	" able to slice directly you need to cast it to be an array first: \n\n" \
-	"    np.asarray(your_flat_sky_map)[:] = the_numpy_array_you_are_assigning\n\n\n"\
-	"If you find that you need numpy functionality from a FlatSkyMap,\n"\
-	" using np.asarray will convert it to a numpy array without copying the data.\n" \
-	" any changes to the resulting numpy array will affect the data stored in the\n" \
-	" FlatSkyMap."
-
-
 
 G3_SPLIT_SERIALIZABLE_CODE(FlatSkyMap);
 
@@ -828,8 +802,15 @@ PYBINDINGS("maps")
 	// Can't use the normal FRAMEOBJECT code since this inherits
 	// from an intermediate class. Expanded by hand here.
 	object fsm = class_<FlatSkyMap, bases<G3SkyMap, G3FrameObject>,
-	  FlatSkyMapPtr>(
-	  "FlatSkyMap", FLAT_SKY_MAP_DOCSTR, boost::python::no_init)
+	  FlatSkyMapPtr>("FlatSkyMap",
+	  "FlatSkyMap is a G3SkyMap with the extra meta information about the "
+	  "particular flat sky projection included.  In practice it behaves "
+	  "(mostly) like a 2d numpy array.  The pixels are normally indexed with "
+	  "an 1d pixel index.  If you find that you need numpy functionality from "
+	  "a FlatSkyMap, e.g. for slicing across the two dimensions, you can "
+	  "access a numpy representation of the map using `np.asarray(m)`. This "
+	  "does not copy the data, so any changes to the resulting array will "
+	  "affect the data stored in the map.", boost::python::no_init)
 	    .def(boost::python::init<const FlatSkyMap &>())
 	    .def_pickle(g3frameobject_picklesuite<FlatSkyMap>())
 	    .def(bp::init<size_t, size_t, double, bool, MapProjection, double,

@@ -1115,16 +1115,6 @@ HealpixSkyMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 
 static PyBufferProcs healpixskymap_bufferprocs;
 
-#define HEALPIX_SKY_MAP_DOCSTR \
-	"HealpixSkyMap is a G3SkyMap with Healpix" \
-	"\n\n" \
-	"The other meta information is inherited from G3SkyMap that lives in core. \n\n" \
-	"If you find that you need numpy functionality from a HealpixSkyMap,\n"\
-	" using np.asarray will convert it to a numpy array without copying the data.\n" \
-	" any changes to the resulting numpy array will affect the data stored in the\n" \
-	" HealpixSkyMap."
-
-
 
 G3_SPLIT_SERIALIZABLE_CODE(HealpixSkyMap);
 
@@ -1135,8 +1125,14 @@ PYBINDINGS("maps")
 	// Can't use the normal FRAMEOBJECT code since this inherits
 	// from an intermediate class. Expanded by hand here.
 	object hsm = class_<HealpixSkyMap, bases<G3SkyMap, G3FrameObject>,
-	  HealpixSkyMapPtr>(
-	  "HealpixSkyMap", HEALPIX_SKY_MAP_DOCSTR, boost::python::no_init)
+	  HealpixSkyMapPtr>("HealpixSkyMap",
+	  "HealpixSkyMap is a G3SkyMap with the extra meta information about the "
+	  "particular Healpix pixelization used.  In practice it behaves "
+	  "(mostly) like a 1d numpy array.  If you find that you need numpy "
+	  "functionality from a HealpixSkyMap, e.g. for slicing across the array, "
+	  "you can access a numpy representation of the map using `np.asarray(m)`. "
+	  "This does not copy the data, so any changes to the resulting array will "
+	  "affect the data stored in the map.", boost::python::no_init)
 	    .def(boost::python::init<const HealpixSkyMap &>())
 	    .def_pickle(g3frameobject_picklesuite<HealpixSkyMap>())
 	    .def(bp::init<size_t, bool, bool, MapCoordReference,
@@ -1164,8 +1160,9 @@ PYBINDINGS("maps")
 
 	    .def(bp::init<const HealpixSkyMap&>(bp::arg("healpix_map")))
 	    .def(bp::init<>())
-	    .add_property("nside", &HealpixSkyMap::nside)
-	    .add_property("nested", &HealpixSkyMap::nested)
+	    .add_property("nside", &HealpixSkyMap::nside, "Healpix resolution")
+	    .add_property("nested", &HealpixSkyMap::nested,
+		"True if pixel ordering is nested, False if ring-ordered")
 	    .add_property("shift_ra", &HealpixSkyMap::IsRaShifted, HealpixSkyMap_setshiftra,
 		"True if the ringsparse representation of the map is stored "
 		"with the rings centered at ra = 0 deg, rather than ra = 180 deg.")
@@ -1179,7 +1176,8 @@ PYBINDINGS("maps")
 		"map (e.g. a continuous sky region), but is inefficient "
 		"otherwise. It applies only to non-nested maps. "
 		"If set to True, converts the map to this representation." )
-	    .add_property("indexedsparse", &HealpixSkyMap::IsIndexedSparse, HealpixSkyMap_setindexedsparse,
+	    .add_property("indexedsparse", &HealpixSkyMap::IsIndexedSparse,
+		HealpixSkyMap_setindexedsparse,
 		"True if the map is stored as a list of non-zero pixels "
 		"and values. More efficient than ring-sparse for maps with "
 		"holes or very small filling factors. "
