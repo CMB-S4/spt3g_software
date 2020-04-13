@@ -834,7 +834,7 @@ PYBINDINGS("maps")
 	    .def_pickle(g3frameobject_picklesuite<FlatSkyMap>())
 	    .def(bp::init<size_t, size_t, double, bool, MapProjection, double,
 	       double, MapCoordReference, G3Timestream::TimestreamUnits,
-	       G3SkyMap::MapPolType, double, double, double>(
+	       G3SkyMap::MapPolType, double, double, double, bool>(
 		 (bp::arg("x_len"), bp::arg("y_len"), bp::arg("res"),
 		  bp::arg("weighted") = true,
 		  bp::arg("proj") = MapProjection::ProjNone,
@@ -842,10 +842,11 @@ PYBINDINGS("maps")
 		  bp::arg("coord_ref") = MapCoordReference::Equatorial,
 		  bp::arg("units") = G3Timestream::Tcmb,
 		  bp::arg("pol_type") = G3SkyMap::None, bp::arg("x_res") = 0,
-		  bp::arg("x_center") = 0.0 / 0.0, bp::arg("y_center") = 0.0 / 0.0)))
+		  bp::arg("x_center") = 0.0 / 0.0, bp::arg("y_center") = 0.0 / 0.0,
+		  bp::arg("flat_pol") = false)))
 	    .def(bp::init<boost::python::object, double, bool, MapProjection,
 	       double, double, MapCoordReference, G3Timestream::TimestreamUnits,
-	       G3SkyMap::MapPolType, double, double, double>(
+	       G3SkyMap::MapPolType, double, double, double, bool>(
 		  (bp::arg("obj"), bp::arg("res"),
 		   bp::arg("weighted") = true,
 		   bp::arg("proj") = MapProjection::ProjNone,
@@ -854,7 +855,8 @@ PYBINDINGS("maps")
 		   bp::arg("units") = G3Timestream::Tcmb,
 		   bp::arg("pol_type") = G3SkyMap::None,
 		   bp::arg("x_res") = 0,
-		   bp::arg("x_center") = 0.0 / 0.0, bp::arg("y_center") = 0.0 / 0.0)))
+		   bp::arg("x_center") = 0.0 / 0.0, bp::arg("y_center") = 0.0 / 0.0,
+		   bp::arg("flat_pol") = false)))
 
 	    .def(bp::init<const FlatSkyMap&>(bp::arg("flat_map")))
 	    .def(bp::init<>())
