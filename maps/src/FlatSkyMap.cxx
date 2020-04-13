@@ -10,10 +10,11 @@
 FlatSkyMap::FlatSkyMap(size_t x_len, size_t y_len, double res, bool weighted,
     MapProjection proj, double alpha_center, double delta_center,
     MapCoordReference coord_ref, G3Timestream::TimestreamUnits u,
-    G3SkyMap::MapPolType pol_type, double x_res, double x_center, double y_center) :
+    G3SkyMap::MapPolType pol_type, double x_res, double x_center, double y_center,
+    bool flat_pol) :
       G3SkyMap(coord_ref, weighted, u, pol_type),
       proj_info(x_len, y_len, res, alpha_center, delta_center, x_res, proj, x_center, y_center),
-      dense_(NULL), sparse_(NULL), xpix_(x_len), ypix_(y_len)
+      dense_(NULL), sparse_(NULL), xpix_(x_len), ypix_(y_len), flat_pol_(flat_pol)
 {
 }
 
@@ -21,9 +22,10 @@ FlatSkyMap::FlatSkyMap(boost::python::object v, double res,
     bool weighted, MapProjection proj,
     double alpha_center, double delta_center,
     MapCoordReference coord_ref, G3Timestream::TimestreamUnits u,
-    G3SkyMap::MapPolType pol_type, double x_res, double x_center, double y_center) :
+    G3SkyMap::MapPolType pol_type, double x_res, double x_center, double y_center,
+    bool flat_pol) :
       G3SkyMap(coord_ref, weighted, u, pol_type),
-      dense_(NULL), sparse_(NULL)
+      dense_(NULL), sparse_(NULL), flat_pol_(flat_pol)
 {
 	Py_buffer view;
 	if (PyObject_GetBuffer(v.ptr(), &view,
@@ -66,22 +68,23 @@ FlatSkyMap::FlatSkyMap(boost::python::object v, double res,
 
 FlatSkyMap::FlatSkyMap(const FlatSkyProjection & fp,
     MapCoordReference coord_ref, bool weighted,
-    G3Timestream::TimestreamUnits u, G3SkyMap::MapPolType pol_type) :
+    G3Timestream::TimestreamUnits u, G3SkyMap::MapPolType pol_type,
+    bool flat_pol) :
       G3SkyMap(coord_ref, weighted, u, pol_type),
       proj_info(fp), dense_(NULL), sparse_(NULL),
-      xpix_(fp.xdim()), ypix_(fp.ydim())
+      xpix_(fp.xdim()), ypix_(fp.ydim()), flat_pol_(flat_pol)
 {
 }
 
 FlatSkyMap::FlatSkyMap() :
     G3SkyMap(MapCoordReference::Local, 0), proj_info(0, 0, 0),
-    dense_(NULL), sparse_(NULL), xpix_(0), ypix_(0)
+    dense_(NULL), sparse_(NULL), xpix_(0), ypix_(0), flat_pol_(false)
 {
 }
 
 FlatSkyMap::FlatSkyMap(const FlatSkyMap & fm) :
     G3SkyMap(fm), proj_info(fm.proj_info), dense_(NULL), sparse_(NULL),
-    xpix_(fm.xpix_), ypix_(fm.ypix_)
+    xpix_(fm.xpix_), ypix_(fm.ypix_), flat_pol_(fm.flat_pol_)
 {
 	if (fm.dense_)
 		dense_ = new DenseMapData(*fm.dense_);
@@ -116,6 +119,7 @@ FlatSkyMap::save(A &ar, unsigned v) const
 	} else {
 		ar & make_nvp("store", 0);
 	}
+	ar & make_nvp("flat_pol", flat_pol_);
 }
 
 template <class A> void
@@ -169,6 +173,12 @@ FlatSkyMap::load(A &ar, unsigned v)
 			assert(sparse_->ydim() == ypix_);
 			break;
 		}
+	}
+
+	if (v >= 4) {
+		ar & make_nvp("flat_pol", flat_pol_);
+	} else {
+		flat_pol_ = false;
 	}
 }
 
@@ -891,7 +901,7 @@ PYBINDINGS("maps")
 		"Returns a list of the indices of the non-zero pixels in the "
 		"map and a list of the values of those non-zero pixels.")
 
-	    .add_property("flat_pol", &FlatSkyMap::IsPolFlat,
+	    .add_property("flat_pol", &FlatSkyMap::IsPolFlat, &FlatSkyMap::SetFlatPol,
 		"True if this map has been flattened using flatten_pol.")
 
 	    .def("__getitem__", flatskymap_getitem_1d)

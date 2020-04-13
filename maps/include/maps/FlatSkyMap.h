@@ -27,7 +27,8 @@ public:
 	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
 	    G3SkyMap::MapPolType pol_type = MapPolType::None,
 	    double x_res = 0, /* if different from res */
-	    double x_center = 0.0 / 0.0, double y_center = 0.0 / 0.0);
+	    double x_center = 0.0 / 0.0, double y_center = 0.0 / 0.0,
+	    bool flat_pol = false);
 
 	// Constructor from a numpy array
 	FlatSkyMap(boost::python::object v, double res, 
@@ -38,13 +39,14 @@ public:
 	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
 	    G3SkyMap::MapPolType pol_type = MapPolType::None,
 	    double x_res = 0, double x_center = 0.0 / 0.0,
-	    double y_center = 0.0 / 0.0);
+	    double y_center = 0.0 / 0.0, bool flat_pol = false);
 
 	FlatSkyMap(const FlatSkyProjection & fp,
 	    MapCoordReference coord_ref = MapCoordReference::Equatorial,
 	    bool weighted = true,
 	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
-	    G3SkyMap::MapPolType pol_type = MapPolType::None);
+	    G3SkyMap::MapPolType pol_type = MapPolType::None,
+	    bool flat_pol = false);
 
 	FlatSkyMap();
 	FlatSkyMap(const FlatSkyMap & fm);
@@ -182,7 +184,7 @@ namespace cereal {
 	template <class A> struct specialize<A, FlatSkyMap, cereal::specialization::member_load_save> {};
 }
 
-G3_SERIALIZABLE(FlatSkyMap, 3);
+G3_SERIALIZABLE(FlatSkyMap, 4);
 
 #endif //_MAPS_FLATSKYMAP_H
 
