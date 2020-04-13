@@ -295,7 +295,7 @@ FlatSkyMap::Clone(bool copy_data) const
 		return boost::make_shared<FlatSkyMap>(*this);
 	else
 		return boost::make_shared<FlatSkyMap>(proj_info,
-		    coord_ref, weighted, units, pol_type);
+		    coord_ref, weighted, units, pol_type, flat_pol_);
 }
 
 double
@@ -629,7 +629,7 @@ G3SkyMapPtr FlatSkyMap::Rebin(size_t scale, bool norm) const
 		return Clone(true);
 
 	FlatSkyProjection p(proj_info.Rebin(scale));
-	FlatSkyMapPtr out(new FlatSkyMap(p, coord_ref, weighted, units, pol_type));
+	FlatSkyMapPtr out(new FlatSkyMap(p, coord_ref, weighted, units, pol_type, flat_pol_));
 
 	if (dense_)
 		out->ConvertToDense();
