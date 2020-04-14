@@ -16,26 +16,27 @@ SparseMapData::const_iterator::operator++() {
 	if (x < sparse_.offset_) {
 		x = sparse_.offset_;
 		y = sparse_.data_[0].first;
-		return  *this;
+		return *this;
 	}
 
 	const SparseMapData::data_element &column = sparse_.data_[x - sparse_.offset_];
-	if (y < column.first) {
+	if (column.second.size() > 0 && y < column.first) {
 		y = column.first;
 		return *this;
 	}
-	if (y < column.first + column.second.size() - 1) {
+	if (column.second.size() > 0 && y < column.first + column.second.size() - 1) {
 		y++;
 		return *this;
 	}
 
-	x++;
-
-	if (x > end.x) {
-		x = end.x;
-		y = end.y;
-		return *this;
-	}
+	do {
+		x++;
+		if (x > end.x) {
+			x = end.x;
+			y = end.y;
+			return *this;
+		}
+	} while (sparse_.data_[x - sparse_.offset_].second.size() == 0);
 
 	y = sparse_.data_[x - sparse_.offset_].first;
 
