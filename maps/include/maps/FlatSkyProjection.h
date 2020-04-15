@@ -101,6 +101,8 @@ public:
 
 	FlatSkyProjection Rebin(size_t scale, double x_center = 0.0 / 0.0,
 	    double y_center = 0.0 / 0.0) const;
+	FlatSkyProjection ExtractPatch(size_t x0, size_t y0, size_t width,
+	    size_t height) const;
 
 private:
 	// projection parameters

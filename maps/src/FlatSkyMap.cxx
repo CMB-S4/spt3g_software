@@ -648,6 +648,22 @@ G3SkyMapPtr FlatSkyMap::Rebin(size_t scale, bool norm) const
 	return out;
 }
 
+G3SkyMapPtr FlatSkyMap::ExtractPatch(size_t x0, size_t y0, size_t width, size_t height) const
+{
+	FlatSkyProjection p(proj_info.ExtractPatch(x0, y0, width, height));
+	FlatSkyMapPtr out(new FlatSkyMap(p, coord_ref, weighted, units, pol_type, flat_pol_));
+
+	for (size_t x = 0; x < width; x++) {
+		for (size_t y = 0; y < height; y++) {
+			double v = this->at(x + x0, y + y0);
+			if (v != 0)
+				(*out)(x, y) = v;
+		}
+	}
+
+	return out;
+}
+
 static int
 FlatSkyMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 {
@@ -883,6 +899,13 @@ PYBINDINGS("maps")
 	    .def("nonzero_pixels", &flatskymap_nonzeropixels,
 		"Returns a list of the indices of the non-zero pixels in the "
 		"map and a list of the values of those non-zero pixels.")
+
+	    .def("extract_patch", &FlatSkyMap::ExtractPatch,
+		(bp::arg("x0"), bp::arg("y0"), bp::arg("width"), bp::arg("height")),
+		"Returns a map of shape (width, height) containing a rectangular patch "
+		"of the parent map.  The (0,0) pixel in the output map corresponds to "
+		"(x0, y0) in the parent map, and the angular location of each pixel on "
+		"the sky is maintained.")
 
 	    .add_property("flat_pol", &FlatSkyMap::IsPolFlat, &FlatSkyMap::SetFlatPol,
 		"True if this map has been flattened using flatten_pol.")

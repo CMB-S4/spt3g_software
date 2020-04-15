@@ -572,6 +572,20 @@ FlatSkyProjection FlatSkyProjection::Rebin(size_t scale, double x_center, double
 	return fp;
 }
 
+FlatSkyProjection FlatSkyProjection::ExtractPatch(size_t x0, size_t y0,
+    size_t width, size_t height) const
+{
+	g3_assert(x0 > 0 && x0 + width <= xpix_);
+	g3_assert(y0 > 0 && y0 + height <= ypix_);
+
+	FlatSkyProjection fp(*this);
+
+	fp.xpix_ = width;
+	fp.ypix_ = height;
+	fp.SetXYCenter(x0 - x0_ + width + 1, y0 - y0_ + height + 1);
+
+	return fp;
+}
 
 G3_SPLIT_SERIALIZABLE_CODE(FlatSkyProjection);
 

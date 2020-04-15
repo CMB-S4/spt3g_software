@@ -2,7 +2,7 @@
 
 import numpy as np
 from spt3g import core
-from spt3g.maps import FlatSkyMap
+from spt3g.maps import FlatSkyMap, MapProjection, get_ra_dec_map
 
 # Sparse extension operators
 m = FlatSkyMap(500, 20, core.G3Units.arcmin)
@@ -140,3 +140,11 @@ for pair in [(m1, m3), (m2, m3), (m3, m2), (m3, m1)]:
     assert(m1.npix_allocated == nm1)
     assert(m2.npix_allocated == nm2)
     assert(m3.npix_allocated == 0)
+
+# patch extraction
+m = FlatSkyMap(500, 20, core.G3Units.arcmin, proj=MapProjection.ProjZEA)
+p = m.extract_patch(20, 8, 50, 10)
+malpha, mdelta = get_ra_dec_map(m)
+palpha, pdelta = get_ra_dec_map(p)
+assert(np.allclose(np.asarray(malpha)[8:18, 20:70], palpha))
+assert(np.allclose(np.asarray(mdelta)[8:18, 20:70], pdelta))

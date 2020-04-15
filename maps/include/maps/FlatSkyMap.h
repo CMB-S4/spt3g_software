@@ -120,6 +120,7 @@ public:
 	    std::vector<long> & pixels, std::vector<double> & weights) const override;
 
 	G3SkyMapPtr Rebin(size_t scale, bool norm = true) const override;
+	G3SkyMapPtr ExtractPatch(size_t x0, size_t y0, size_t width, size_t height) const;
 
 	void ConvertToDense() override;
 	void ConvertToSparse();
