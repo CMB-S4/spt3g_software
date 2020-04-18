@@ -128,13 +128,20 @@ std::string FlatSkyProjection::Description() const
 
 bool FlatSkyProjection::IsCompatible(const FlatSkyProjection & other) const
 {
-	return ((xpix_ == other.xpix_) &&
-		(ypix_ == other.ypix_) &&
+	bool check = ((xpix_ == other.xpix_) &&
+		      (ypix_ == other.ypix_) &&
+		      (fabs(x_res_ - other.x_res_) < 1e-12) &&
+		      (fabs(y_res_ - other.y_res_) < 1e-12));
+	if (proj_ != other.proj_ && (proj_ == ProjNone || other.proj_ == ProjNone)) {
+		log_warn("Checking compatibility of maps with projections %d and %d. "
+			 "In the future, comparison to a map with projection %d "
+			 "(ProjNone) will raise an error.", proj_, other.proj_, ProjNone);
+		return check;
+	}
+	return (check &&
 		(proj_ == other.proj_) &&
 		(fabs(alpha0_ - other.alpha0_) < 1e-12) &&
 		(fabs(delta0_ - other.delta0_) < 1e-12) &&
-		(fabs(x_res_ - other.x_res_) < 1e-12) &&
-		(fabs(y_res_ - other.y_res_) < 1e-12) &&
 		(fabs(x0_ - other.x0_) < 1e-12) &&
 		(fabs(y0_ - other.y0_) < 1e-12));
 }
