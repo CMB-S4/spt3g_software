@@ -21,6 +21,7 @@ def CompressMaps(frame, zero_nans=False):
             m = frame.pop(s)
             m.compress(zero_nans=zero_nans)
             frame[s] = m
+    return frame
 
 @core.indexmod
 def RemoveWeights(frame, zero_nans=False):
@@ -48,6 +49,8 @@ def RemoveWeights(frame, zero_nans=False):
         frame['Q'] = qmap
         frame['U'] = umap
 
+    return frame
+
 @core.indexmod
 def ApplyWeights(frame):
     '''
@@ -72,6 +75,8 @@ def ApplyWeights(frame):
     if 'Wpol' in frame:
         frame['Q'] = qmap
         frame['U'] = umap
+
+    return frame
 
 @core.indexmod
 def FlattenPol(frame, invert=False):
@@ -128,6 +133,8 @@ def ConvertTMapsToPolarized(frame):
 
     frame['Wpol'] = wgt_out
 
+    return frame
+
 @core.indexmod
 def ConvertPolarizedMapsToT(frame):
     '''
@@ -145,3 +152,5 @@ def ConvertPolarizedMapsToT(frame):
     wgt_out.TT = wgt
 
     frame['Wunpol'] = wgt_out
+
+    return frame
