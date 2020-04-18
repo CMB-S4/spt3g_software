@@ -103,6 +103,7 @@ public:
 	    double y_center = 0.0 / 0.0) const;
 	FlatSkyProjection ExtractPatch(size_t x0, size_t y0, size_t width,
 	    size_t height) const;
+	std::vector<size_t> GetPatchLocation(const FlatSkyProjection &proj) const;
 
 private:
 	// projection parameters

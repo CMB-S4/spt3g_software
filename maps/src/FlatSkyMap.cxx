@@ -664,6 +664,19 @@ G3SkyMapPtr FlatSkyMap::ExtractPatch(size_t x0, size_t y0, size_t width, size_t 
 	return out;
 }
 
+void FlatSkyMap::InsertPatch(const FlatSkyMap &patch)
+{
+	std::vector<size_t> loc = proj_info.GetPatchLocation(patch.proj_info);
+	size_t x0 = loc[0];
+	size_t y0 = loc[1];
+
+	for (auto i : patch) {
+		size_t x = (size_t)(i.first % patch.xpix_) + x0;
+		size_t y = (size_t)(i.first / patch.xpix_) + y0;
+		(*this)(x, y) = i.second;
+        }
+}
+
 static int
 FlatSkyMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 {
@@ -906,6 +919,11 @@ PYBINDINGS("maps")
 		"of the parent map.  The (0,0) pixel in the output map corresponds to "
 		"(x0, y0) in the parent map, and the angular location of each pixel on "
 		"the sky is maintained.")
+
+	    .def("insert_patch", &FlatSkyMap::InsertPatch, (bp::arg("patch")),
+		"Inserts a patch (e.g. as extracted using extract_patch) into the "
+		"parent map.  The coordinate system and angular center of the patch "
+		"must match that of the parent map.")
 
 	    .add_property("flat_pol", &FlatSkyMap::IsPolFlat, &FlatSkyMap::SetFlatPol,
 		"True if this map has been flattened using flatten_pol.")

@@ -594,6 +594,24 @@ FlatSkyProjection FlatSkyProjection::ExtractPatch(size_t x0, size_t y0,
 	return fp;
 }
 
+std::vector<size_t> FlatSkyProjection::GetPatchLocation(const FlatSkyProjection &proj) const
+{
+	// check that input projection is compatible aside from patch location
+	FlatSkyProjection fp(proj);
+	fp.xpix_ = xpix_;
+	fp.ypix_ = ypix_;
+	fp.SetXYCenter(x0_, y0_);
+	g3_assert(IsCompatible(fp));
+
+	// check that patch fits in the map
+	size_t x0 = (size_t)(proj.x0_ + x0_ - proj.xpix_ - 1);
+	size_t y0 = (size_t)(proj.y0_ + y0_ - proj.ypix_ - 1);
+	g3_assert(x0 > 0 && x0 + proj.xpix_ <= xpix_);
+	g3_assert(y0 > 0 && y0 + proj.ypix_ <= ypix_);
+
+	return {x0, y0};
+}
+
 G3_SPLIT_SERIALIZABLE_CODE(FlatSkyProjection);
 
 PYBINDINGS("maps")

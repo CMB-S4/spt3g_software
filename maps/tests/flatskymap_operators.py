@@ -141,7 +141,7 @@ for pair in [(m1, m3), (m2, m3), (m3, m2), (m3, m1)]:
     assert(m2.npix_allocated == nm2)
     assert(m3.npix_allocated == 0)
 
-# patch extraction
+# patch extraction / insertion
 m = FlatSkyMap(500, 20, core.G3Units.arcmin, proj=MapProjection.ProjZEA)
 np.asarray(m)[:] = np.random.randn(*m.shape)
 p = m.extract_patch(20, 8, 50, 10)
@@ -150,3 +150,7 @@ palpha, pdelta = get_ra_dec_map(p)
 assert(np.allclose(np.asarray(m)[8:18, 20:70], p))
 assert(np.allclose(np.asarray(malpha)[8:18, 20:70], palpha))
 assert(np.allclose(np.asarray(mdelta)[8:18, 20:70], pdelta))
+
+m2 = m.Clone(False)
+m2.insert_patch(p)
+assert(np.allclose(np.asarray(m)[8:18, 20:70], np.asarray(m2)[8:18, 20:70]))
