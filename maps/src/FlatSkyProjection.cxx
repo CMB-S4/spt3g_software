@@ -649,4 +649,5 @@ PYBINDINGS("maps")
 	    .value("ProjBICEP", ProjBICEP)
 	    .value("ProjNone", ProjNone)
 	;
+	enum_none_converter::from_python<MapProjection, ProjNone>();
 }
