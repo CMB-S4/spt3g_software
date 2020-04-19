@@ -554,6 +554,7 @@ G3SkyMap &HealpixSkyMap::operator op(const G3SkyMap &rhs) { \
 						(*this)[i] op val; \
 				} \
 			} else if (b.ring_sparse_) { \
+				SetShiftRa(b.shift_ra_); \
 				(*ring_sparse_) op (*b.ring_sparse_); \
 			} else if (b.indexed_sparse_) { \
 				for (auto i : *b.indexed_sparse_) \
@@ -579,6 +580,7 @@ G3SkyMap &HealpixSkyMap::operator op(const G3SkyMap &rhs) { \
 				for (size_t i = 0; i < dense_->size(); i++) \
 					(*dense_)[i] op (*b.dense_)[i]; \
 			} else if (b.ring_sparse_) { \
+				SetShiftRa(b.shift_ra_); \
 				ConvertToRingSparse(); \
 				(*ring_sparse_) op (*b.ring_sparse_); \
 			} else if (b.indexed_sparse_) { \
@@ -671,6 +673,7 @@ G3SkyMap &HealpixSkyMap::operator /=(const G3SkyMap &rhs) {
 				for (size_t i = 0; i < dense_->size(); i++)
 					(*dense_)[i] /= (*b.dense_)[i];
 			} else if (b.ring_sparse_) {
+				SetShiftRa(b.shift_ra_);
 				ConvertToRingSparse();
 				for (long j = 0; j < ring_info_->nring; j++) {
 					for (long k = 0; k < ring_info_->rings[j].ringpix; k++)
