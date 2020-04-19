@@ -53,6 +53,8 @@ def healpix_to_flatsky(map_in, nest=False, map_stub=None, rebin=1, interp=False,
     if map_stub is None:
         if isinstance(map_in, HealpixSkyMap):
             kwargs.setdefault('coord_ref', map_in.coord_ref)
+            kwargs.setdefault('pol_type', map_in.pol_type)
+            kwargs.setdefault('pol_conv', map_in.pol_conv)
         map_out = FlatSkyMap(**kwargs)
     else:
         if not isinstance(map_stub, FlatSkyMap):
@@ -65,7 +67,8 @@ def healpix_to_flatsky(map_in, nest=False, map_stub=None, rebin=1, interp=False,
                                coord_ref=map_out.coord_ref,
                                weighted=map_out.weighted,
                                units=map_out.units,
-                               pol_type=map_out.pol_type)
+                               pol_type=map_out.pol_type,
+                               pol_conv=map_out.pol_conv)
     reproj_map(map_in, map_out, rebin=rebin, interp=interp)
 
     return map_out
@@ -117,6 +120,8 @@ def flatsky_to_healpix(map_in, map_stub=None, rebin=1, interp=False,
     # Construct the output map
     if map_stub is None:
         kwargs.setdefault('coord_ref', map_in.coord_ref)
+        kwargs.setdefault('pol_type', map_in.pol_type)
+        kwargs.setdefault('pol_conv', map_in.pol_conv)
         map_out = HealpixSkyMap(**kwargs)
     else:
         if not isinstance(map_stub, HealpixSkyMap):

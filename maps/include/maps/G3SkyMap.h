@@ -31,11 +31,15 @@ public:
 		None = 7
 	};
 
+	enum MapPolConv {
+		IAU = 0,
+		COSMO = 1,
+		ConvNone = 2
+	};
+
 	G3SkyMap(MapCoordReference coords, bool weighted_ = true,
 	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
-	    MapPolType pol_type = None) :
-	    coord_ref(coords), units(u), pol_type(pol_type),
-	    weighted(weighted_), overflow(0) {}
+	    MapPolType pol_type = None, MapPolConv pol_conv = ConvNone);
 	virtual ~G3SkyMap() {};
 
 	// Reimplement the following in subclasses
@@ -44,6 +48,7 @@ public:
 	MapCoordReference coord_ref;
 	G3Timestream::TimestreamUnits units;
 	MapPolType pol_type;
+	MapPolConv pol_conv;
 	bool weighted;
 	double overflow;
 
@@ -424,7 +429,7 @@ private:
 
 G3_POINTERS(G3SkyMapWithWeights);
 
-G3_SERIALIZABLE(G3SkyMap, 2);
+G3_SERIALIZABLE(G3SkyMap, 3);
 G3_SERIALIZABLE(G3SkyMapWeights, 3);
 G3_SERIALIZABLE(G3SkyMapWithWeights, 1);
 

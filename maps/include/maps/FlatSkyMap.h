@@ -25,10 +25,11 @@ public:
 	    double alpha_center = 0, double delta_center = 0, 
 	    MapCoordReference coord_ref = MapCoordReference::Equatorial,
 	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
-	    G3SkyMap::MapPolType pol_type = MapPolType::None,
+	    G3SkyMap::MapPolType pol_type = G3SkyMap::None,
 	    double x_res = 0, /* if different from res */
 	    double x_center = 0.0 / 0.0, double y_center = 0.0 / 0.0,
-	    bool flat_pol = false);
+	    bool flat_pol = false,
+	    G3SkyMap::MapPolConv pol_conv = G3SkyMap::ConvNone);
 
 	// Constructor from a numpy array
 	FlatSkyMap(boost::python::object v, double res, 
@@ -37,16 +38,18 @@ public:
 	    double alpha_center = 0, double delta_center = 0, 
 	    MapCoordReference coord_ref = MapCoordReference::Equatorial,
 	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
-	    G3SkyMap::MapPolType pol_type = MapPolType::None,
+	    G3SkyMap::MapPolType pol_type = G3SkyMap::None,
 	    double x_res = 0, double x_center = 0.0 / 0.0,
-	    double y_center = 0.0 / 0.0, bool flat_pol = false);
+	    double y_center = 0.0 / 0.0, bool flat_pol = false,
+	    G3SkyMap::MapPolConv pol_conv = G3SkyMap::ConvNone);
 
 	FlatSkyMap(const FlatSkyProjection & fp,
 	    MapCoordReference coord_ref = MapCoordReference::Equatorial,
 	    bool weighted = true,
 	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
-	    G3SkyMap::MapPolType pol_type = MapPolType::None,
-	    bool flat_pol = false);
+	    G3SkyMap::MapPolType pol_type = G3SkyMap::None,
+	    bool flat_pol = false,
+	    G3SkyMap::MapPolConv pol_conv = G3SkyMap::ConvNone);
 
 	FlatSkyMap();
 	FlatSkyMap(const FlatSkyMap & fm);

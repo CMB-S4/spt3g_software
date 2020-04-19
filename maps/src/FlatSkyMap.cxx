@@ -11,8 +11,8 @@ FlatSkyMap::FlatSkyMap(size_t x_len, size_t y_len, double res, bool weighted,
     MapProjection proj, double alpha_center, double delta_center,
     MapCoordReference coord_ref, G3Timestream::TimestreamUnits u,
     G3SkyMap::MapPolType pol_type, double x_res, double x_center, double y_center,
-    bool flat_pol) :
-      G3SkyMap(coord_ref, weighted, u, pol_type),
+    bool flat_pol, G3SkyMap::MapPolConv pol_conv) :
+      G3SkyMap(coord_ref, weighted, u, pol_type, pol_conv),
       proj_info(x_len, y_len, res, alpha_center, delta_center, x_res, proj, x_center, y_center),
       dense_(NULL), sparse_(NULL), xpix_(x_len), ypix_(y_len), flat_pol_(flat_pol)
 {
@@ -23,8 +23,8 @@ FlatSkyMap::FlatSkyMap(boost::python::object v, double res,
     double alpha_center, double delta_center,
     MapCoordReference coord_ref, G3Timestream::TimestreamUnits u,
     G3SkyMap::MapPolType pol_type, double x_res, double x_center, double y_center,
-    bool flat_pol) :
-      G3SkyMap(coord_ref, weighted, u, pol_type),
+    bool flat_pol, G3SkyMap::MapPolConv pol_conv) :
+      G3SkyMap(coord_ref, weighted, u, pol_type, pol_conv),
       dense_(NULL), sparse_(NULL), flat_pol_(flat_pol)
 {
 	Py_buffer view;
@@ -69,8 +69,8 @@ FlatSkyMap::FlatSkyMap(boost::python::object v, double res,
 FlatSkyMap::FlatSkyMap(const FlatSkyProjection & fp,
     MapCoordReference coord_ref, bool weighted,
     G3Timestream::TimestreamUnits u, G3SkyMap::MapPolType pol_type,
-    bool flat_pol) :
-      G3SkyMap(coord_ref, weighted, u, pol_type),
+    bool flat_pol, G3SkyMap::MapPolConv pol_conv) :
+      G3SkyMap(coord_ref, weighted, u, pol_type, pol_conv),
       proj_info(fp), dense_(NULL), sparse_(NULL),
       xpix_(fp.xdim()), ypix_(fp.ydim()), flat_pol_(flat_pol)
 {
@@ -295,7 +295,7 @@ FlatSkyMap::Clone(bool copy_data) const
 		return boost::make_shared<FlatSkyMap>(*this);
 	else
 		return boost::make_shared<FlatSkyMap>(proj_info,
-		    coord_ref, weighted, units, pol_type, flat_pol_);
+		    coord_ref, weighted, units, pol_type, flat_pol_, pol_conv);
 }
 
 double
@@ -629,7 +629,8 @@ G3SkyMapPtr FlatSkyMap::Rebin(size_t scale, bool norm) const
 		return Clone(true);
 
 	FlatSkyProjection p(proj_info.Rebin(scale));
-	FlatSkyMapPtr out(new FlatSkyMap(p, coord_ref, weighted, units, pol_type, flat_pol_));
+	FlatSkyMapPtr out(new FlatSkyMap(p, coord_ref, weighted, units, pol_type,
+	    flat_pol_, pol_conv));
 
 	if (dense_)
 		out->ConvertToDense();
@@ -651,7 +652,8 @@ G3SkyMapPtr FlatSkyMap::Rebin(size_t scale, bool norm) const
 G3SkyMapPtr FlatSkyMap::ExtractPatch(size_t x0, size_t y0, size_t width, size_t height) const
 {
 	FlatSkyProjection p(proj_info.ExtractPatch(x0, y0, width, height));
-	FlatSkyMapPtr out(new FlatSkyMap(p, coord_ref, weighted, units, pol_type, flat_pol_));
+	FlatSkyMapPtr out(new FlatSkyMap(p, coord_ref, weighted, units, pol_type,
+	    flat_pol_, pol_conv));
 
 	for (size_t x = 0; x < width; x++) {
 		for (size_t y = 0; y < height; y++) {
@@ -844,7 +846,8 @@ PYBINDINGS("maps")
 	    .def_pickle(g3frameobject_picklesuite<FlatSkyMap>())
 	    .def(bp::init<size_t, size_t, double, bool, MapProjection, double,
 	       double, MapCoordReference, G3Timestream::TimestreamUnits,
-	       G3SkyMap::MapPolType, double, double, double, bool>(
+	       G3SkyMap::MapPolType, double, double, double, bool,
+	       G3SkyMap::MapPolConv>(
 		 (bp::arg("x_len"), bp::arg("y_len"), bp::arg("res"),
 		  bp::arg("weighted") = true,
 		  bp::arg("proj") = MapProjection::ProjNone,
@@ -853,10 +856,12 @@ PYBINDINGS("maps")
 		  bp::arg("units") = G3Timestream::Tcmb,
 		  bp::arg("pol_type") = G3SkyMap::None, bp::arg("x_res") = 0,
 		  bp::arg("x_center") = 0.0 / 0.0, bp::arg("y_center") = 0.0 / 0.0,
-		  bp::arg("flat_pol") = false)))
+		  bp::arg("flat_pol") = false,
+		  bp::arg("pol_conv") = G3SkyMap::ConvNone)))
 	    .def(bp::init<boost::python::object, double, bool, MapProjection,
 	       double, double, MapCoordReference, G3Timestream::TimestreamUnits,
-	       G3SkyMap::MapPolType, double, double, double, bool>(
+	       G3SkyMap::MapPolType, double, double, double, bool,
+	       G3SkyMap::MapPolConv>(
 		  (bp::arg("obj"), bp::arg("res"),
 		   bp::arg("weighted") = true,
 		   bp::arg("proj") = MapProjection::ProjNone,
@@ -866,7 +871,8 @@ PYBINDINGS("maps")
 		   bp::arg("pol_type") = G3SkyMap::None,
 		   bp::arg("x_res") = 0,
 		   bp::arg("x_center") = 0.0 / 0.0, bp::arg("y_center") = 0.0 / 0.0,
-		   bp::arg("flat_pol") = false)))
+		   bp::arg("flat_pol") = false,
+		   bp::arg("pol_conv") = G3SkyMap::ConvNone)))
 
 	    .def(bp::init<const FlatSkyMap&>(bp::arg("flat_map")))
 	    .def(bp::init<>())

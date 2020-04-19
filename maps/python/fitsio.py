@@ -1,6 +1,6 @@
 from spt3g import core
 from spt3g.maps import HealpixSkyMap, FlatSkyMap, G3SkyMapWeights
-from spt3g.maps import MapPolType, MapCoordReference, MapProjection
+from spt3g.maps import MapPolType, MapPolConv, MapCoordReference, MapProjection
 
 import numpy as np
 import os
@@ -38,7 +38,7 @@ def load_skymap_fits(filename, hdu=None):
     output = {}
 
     # defaults for missing header entries
-    polcconv = 'COSMO'
+    pol_conv = None
     units = 'Tcmb'
     coord_ref = 'Equatorial'
     proj = 'Proj5'
@@ -64,6 +64,9 @@ def load_skymap_fits(filename, hdu=None):
                             map_type, hidx
                         )
                     )
+                # expect that flat sky maps on disk are probably in IAU
+                if not pol_conv:
+                    pol_conv = 'IAU'
             elif mtype == 'HEALPIX' or hdr.get('PIXTYPE', None) == 'HEALPIX' or 'NSIDE' in hdr:
                 # healpix map
                 if not map_type:
@@ -74,8 +77,14 @@ def load_skymap_fits(filename, hdu=None):
                             map_type, hidx
                         )
                     )
+                # expect that healpix maps on disk are probably in COSMO
+                if not pol_conv:
+                    pol_conv = 'COSMO'
 
-            polcconv = hdr.get('POLCCONV', polcconv)
+            if hdr.get('POLCCONV', '').upper() not in ['IAU', 'COSMO']:
+                warnings.warn('Polarization convention not set, assuming %s' % pol_conv)
+            else:
+                pol_conv = hdr['POLCCONV'].upper()
             if 'TUNIT' in hdr:
                 udict = {'k_cmb': 'Tcmb'}
                 units = udict.get(hdr['TUNIT'].lower(), units)
@@ -91,6 +100,7 @@ def load_skymap_fits(filename, hdu=None):
             map_opts.update(
                 units=getattr(core.G3TimestreamUnits, units),
                 coord_ref=getattr(MapCoordReference, coord_ref),
+                pol_conv=getattr(MapPolConv, pol_conv) if pol_conv else None,
             )
 
             if map_type == 'flat':
@@ -135,8 +145,9 @@ def load_skymap_fits(filename, hdu=None):
                 # flat map data
                 ptype = hdr.get('POLTYPE', 'T')
                 pol_type = getattr(MapPolType, ptype)
-                if pol_type == MapPolType.U and polcconv == 'COSMO':
+                if pol_type == MapPolType.U and str(pol_conv) == 'COSMO':
                     data *= -1
+                    map_opts.update(pol_conv='IAU')
                 fm = FlatSkyMap(data, pol_type=pol_type, **map_opts)
                 fm.overflow = overflow
                 output[ptype] = fm
@@ -200,8 +211,9 @@ def load_skymap_fits(filename, hdu=None):
 
                     else:
                         pol_type = getattr(MapPolType, col)
-                        if pol_type == MapPolType.U and polcconv == 'COSMO':
+                        if pol_type == MapPolType.U and str(pol_conv) == 'COSMO':
                             data *= -1
+                            map_opts.update(pol_conv='IAU')
                         mdata = (pix, data, nside) if pix is not None else data
 
                         hm = HealpixSkyMap(mdata, pol_type=pol_type, **map_opts)
@@ -451,6 +463,8 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
 
     if Q is not None:
         assert(U is not None)
+        assert(U.pol_conv in [MapPolConv.IAU, MapPolConv.COSMO],
+               'U map polarization convention must be IAU or COSMO')
         assert(T.IsCompatible(Q))
         assert(T.IsCompatible(U))
         pol = True
@@ -509,7 +523,7 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
 
     header['MAPTYPE'] = 'FLAT' if flat else 'HEALPIX'
     header['COORDREF'] = str(T.coord_ref)
-    header['POLCCONV'] = 'IAU'
+    header['POLCCONV'] = str(U.pol_conv) if pol else 'IAU'
     header['POLAR'] = 'T' if pol else 'F'
     header['UNITS'] = str(T.units)
     header['WEIGHTED'] = T.weighted

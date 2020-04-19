@@ -21,8 +21,9 @@ public:
 	    bool nested = false,
 	    MapCoordReference coord_ref = MapCoordReference::Equatorial,
 	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
-	    G3SkyMap::MapPolType pol_type = MapPolType::None,
-	    bool shift_ra = false);
+	    G3SkyMap::MapPolType pol_type = G3SkyMap::None,
+	    bool shift_ra = false,
+	    G3SkyMap::MapPolConv pol_conv = G3SkyMap::ConvNone);
 
 	// Constructor from a numpy array
 	HealpixSkyMap(boost::python::object v,
@@ -30,7 +31,8 @@ public:
 	    bool nested = false,
 	    MapCoordReference coord_ref = MapCoordReference::Equatorial,
 	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
-	    G3SkyMap::MapPolType pol_type = MapPolType::None);
+	    G3SkyMap::MapPolType pol_type = G3SkyMap::None,
+	    G3SkyMap::MapPolConv pol_conv = G3SkyMap::ConvNone);
 
 	HealpixSkyMap();
 	HealpixSkyMap(const HealpixSkyMap& fm);
