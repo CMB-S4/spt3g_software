@@ -154,5 +154,7 @@ m2 = m.Clone(False)
 m2.insert_patch(p)
 assert(np.allclose(np.asarray(m)[8:18, 20:70], np.asarray(m2)[8:18, 20:70]))
 
-mpad = m.pad(600, 40)
-assert(np.allclose(np.asarray(mpad)[10:30, 50:550], np.asarray(m)))
+pad = 10
+mpad = m.pad(m.shape[1] + 2 * pad, m.shape[0] + 2 * pad)
+assert(mpad.npix_allocated == m.npix_allocated)
+assert(np.allclose(np.asarray(mpad)[pad:-pad, pad:-pad], np.asarray(m)))

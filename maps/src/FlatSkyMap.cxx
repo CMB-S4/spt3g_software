@@ -684,7 +684,7 @@ void FlatSkyMap::InsertPatch(const FlatSkyMap &patch)
 	}
 }
 
-G3SkyMapPtr FlatSkyMap::Pad(size_t width, size_t height) const
+G3SkyMapPtr FlatSkyMap::Pad(size_t width, size_t height, double fill) const
 {
 	g3_assert(width > xpix_);
 	g3_assert(height > ypix_);
@@ -695,10 +695,13 @@ G3SkyMapPtr FlatSkyMap::Pad(size_t width, size_t height) const
 	FlatSkyMapPtr out(new FlatSkyMap(p, coord_ref, weighted, units, pol_type,
 	    flat_pol_, pol_conv));
 
+	if (fill != 0)
+		(*out) += fill;
+
 	for (auto i : *this) {
 		size_t x = (size_t)(i.first % xpix_) + x0;
 		size_t y = (size_t)(i.first / xpix_) + y0;
-		if (i.second != 0)
+		if (i.second != fill)
 			(*out)(x, y) = i.second;
 	}
 
@@ -957,10 +960,11 @@ PYBINDINGS("maps")
 		"parent map.  The coordinate system and angular center of the patch "
 		"must match that of the parent map.")
 
-	    .def("pad", &FlatSkyMap::Pad, (bp::arg("width"), bp::arg("height")),
+	    .def("pad", &FlatSkyMap::Pad,
+		(bp::arg("width"), bp::arg("height"), bp::arg("fill") = 0),
 		"Returns a map of shape (width, height) containing the parent map "
 		"centered within it.  The angular location of each pixel on the sky "
-		"is maintained.")
+		"is maintained.  Empty pixels can be optionally filled.")
 
 	    .add_property("flat_pol", &FlatSkyMap::IsPolFlat, &FlatSkyMap::SetFlatPol,
 		"True if this map has been flattened using flatten_pol.")
