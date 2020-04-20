@@ -33,6 +33,9 @@ def RemoveWeights(frame, zero_nans=False):
     if 'Wpol' not in frame and 'Wunpol' not in frame:
         return
 
+    if not frame['T'].weighted:
+        return frame
+
     tmap = frame.pop('T')
 
     if 'Wpol' in frame:
@@ -59,6 +62,9 @@ def ApplyWeights(frame):
     '''
     if 'Wpol' not in frame and 'Wunpol' not in frame:
         return
+
+    if frame['T'].weighted:
+        return frame
 
     tmap = frame.pop('T')
 
