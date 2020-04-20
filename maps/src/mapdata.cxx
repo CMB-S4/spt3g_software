@@ -101,7 +101,7 @@ SparseMapData::operator+=(const DenseMapData &r)
 
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {
-			double val = r(x, y);
+			double val = r.at(x, y);
 			if (val != 0)
 				(*this)(x, y) += val;
 		}
@@ -138,7 +138,7 @@ SparseMapData::operator-=(const DenseMapData &r)
 
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {
-			double val = r(x, y);
+			double val = r.at(x, y);
 			if (val != 0)
 				(*this)(x, y) -= val;
 		}
@@ -158,7 +158,7 @@ SparseMapData::operator*=(const SparseMapData &r)
 		data_element &column = data_[ix];
 		for (size_t iy = 0; iy < column.second.size(); iy++) {
 			size_t y = column.first + iy;
-			column.second[iy] *= r(x, y);
+			column.second[iy] *= r.at(x, y);
 		}
 	}
 
@@ -176,7 +176,7 @@ SparseMapData::operator*=(const DenseMapData &r)
 		data_element &column = data_[ix];
 		for (size_t iy = 0; iy < column.second.size(); iy++) {
 			size_t y = column.first + iy;
-			column.second[iy] *= r(x, y);
+			column.second[iy] *= r.at(x, y);
 		}
 	}
 
@@ -206,9 +206,14 @@ SparseMapData::operator/=(const SparseMapData &r)
 
 	// Division by zero is not the same as doing nothing.
 	// Have to do this the long and painful way
-	for (size_t x = 0; x < xlen_; x++)
-		for (size_t y = 0; y < ylen_; y++)
-			(*this)(x, y) /= r(x, y);
+	for (size_t x = 0; x < xlen_; x++) {
+		for (size_t y = 0; y < ylen_; y++) {
+			double val = this->at(x, y);
+			double valr = r.at(x, y);
+			if (valr == 0 || valr != valr || val != 0)
+				(*this)(x, y) /= valr;
+		}
+	}
 
 	return *this;
 }
@@ -221,9 +226,14 @@ SparseMapData::operator/=(const DenseMapData &r)
 
 	// Division by zero is not the same as doing nothing.
 	// Have to do this the long and painful way
-	for (size_t x = 0; x < xlen_; x++)
-		for (size_t y = 0; y < ylen_; y++)
-			(*this)(x, y) /= r(x, y);
+	for (size_t x = 0; x < xlen_; x++) {
+		for (size_t y = 0; y < ylen_; y++) {
+			double val = this->at(x, y);
+			double valr = r.at(x, y);
+			if (valr == 0 || valr != valr || val != 0)
+				(*this)(x, y) /= valr;
+		}
+	}
 
 	return *this;
 }
@@ -253,7 +263,7 @@ DenseMapData::operator+=(const DenseMapData &r)
 
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {
-			(*this)(x, y) += r(x, y);
+			(*this)(x, y) += r.at(x, y);
 		}
 	}
 
@@ -268,7 +278,7 @@ DenseMapData::operator+=(const SparseMapData &r)
 
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {
-			(*this)(x, y) += r(x, y);
+			(*this)(x, y) += r.at(x, y);
 		}
 	}
 
@@ -298,7 +308,7 @@ DenseMapData::operator-=(const DenseMapData &r)
 
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {
-			(*this)(x, y) -= r(x, y);
+			(*this)(x, y) -= r.at(x, y);
 		}
 	}
 
@@ -313,7 +323,7 @@ DenseMapData::operator-=(const SparseMapData &r)
 
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {
-			(*this)(x, y) -= r(x, y);
+			(*this)(x, y) -= r.at(x, y);
 		}
 	}
 
@@ -343,7 +353,7 @@ DenseMapData::operator*=(const DenseMapData &r)
 
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {
-			(*this)(x, y) *= r(x, y);
+			(*this)(x, y) *= r.at(x, y);
 		}
 	}
 
@@ -358,7 +368,7 @@ DenseMapData::operator*=(const SparseMapData &r)
 
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {
-			(*this)(x, y) *= r(x, y);
+			(*this)(x, y) *= r.at(x, y);
 		}
 	}
 
@@ -385,7 +395,7 @@ DenseMapData::operator/=(const DenseMapData &r)
 
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {
-			(*this)(x, y) /= r(x, y);
+			(*this)(x, y) /= r.at(x, y);
 		}
 	}
 
@@ -400,7 +410,7 @@ DenseMapData::operator/=(const SparseMapData &r)
 
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {
-			(*this)(x, y) /= r(x, y);
+			(*this)(x, y) /= r.at(x, y);
 		}
 	}
 

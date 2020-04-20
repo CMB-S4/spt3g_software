@@ -118,7 +118,6 @@ for pair in [(m1, m4), (m2, m4), (m3, m4),
     assert(m4.npix_allocated == 0)
 
     t = pair[0] / pair[1]
-    assert(t.npix_allocated == t.size)
     assert(not np.isfinite(t[12]))
     if pair[0] is m4:
         assert(t[15] == 0)
