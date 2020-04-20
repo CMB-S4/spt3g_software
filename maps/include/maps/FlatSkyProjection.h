@@ -101,9 +101,9 @@ public:
 
 	FlatSkyProjection Rebin(size_t scale, double x_center = 0.0 / 0.0,
 	    double y_center = 0.0 / 0.0) const;
-	FlatSkyProjection ExtractPatch(size_t x0, size_t y0, size_t width,
+	FlatSkyProjection OverlayPatch(double x0, double y0, size_t width,
 	    size_t height) const;
-	std::vector<size_t> GetPatchLocation(const FlatSkyProjection &proj) const;
+	std::vector<double> GetPatchLocation(const FlatSkyProjection &proj) const;
 
 private:
 	// projection parameters

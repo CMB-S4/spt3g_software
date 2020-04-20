@@ -579,12 +579,9 @@ FlatSkyProjection FlatSkyProjection::Rebin(size_t scale, double x_center, double
 	return fp;
 }
 
-FlatSkyProjection FlatSkyProjection::ExtractPatch(size_t x0, size_t y0,
+FlatSkyProjection FlatSkyProjection::OverlayPatch(double x0, double y0,
     size_t width, size_t height) const
 {
-	g3_assert(x0 > 0 && x0 + width <= xpix_);
-	g3_assert(y0 > 0 && y0 + height <= ypix_);
-
 	FlatSkyProjection fp(*this);
 
 	fp.xpix_ = width;
@@ -594,7 +591,7 @@ FlatSkyProjection FlatSkyProjection::ExtractPatch(size_t x0, size_t y0,
 	return fp;
 }
 
-std::vector<size_t> FlatSkyProjection::GetPatchLocation(const FlatSkyProjection &proj) const
+std::vector<double> FlatSkyProjection::GetPatchLocation(const FlatSkyProjection &proj) const
 {
 	// check that input projection is compatible aside from patch location
 	FlatSkyProjection fp(proj);
@@ -604,10 +601,8 @@ std::vector<size_t> FlatSkyProjection::GetPatchLocation(const FlatSkyProjection 
 	g3_assert(IsCompatible(fp));
 
 	// check that patch fits in the map
-	size_t x0 = (size_t)(proj.x0_ + x0_ - proj.xpix_ - 1);
-	size_t y0 = (size_t)(proj.y0_ + y0_ - proj.ypix_ - 1);
-	g3_assert(x0 > 0 && x0 + proj.xpix_ <= xpix_);
-	g3_assert(y0 > 0 && y0 + proj.ypix_ <= ypix_);
+	double x0 = proj.x0_ + x0_ - proj.xpix_ - 1;
+	double y0 = proj.y0_ + y0_ - proj.ypix_ - 1;
 
 	return {x0, y0};
 }

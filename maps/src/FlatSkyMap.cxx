@@ -651,7 +651,10 @@ G3SkyMapPtr FlatSkyMap::Rebin(size_t scale, bool norm) const
 
 G3SkyMapPtr FlatSkyMap::ExtractPatch(size_t x0, size_t y0, size_t width, size_t height) const
 {
-	FlatSkyProjection p(proj_info.ExtractPatch(x0, y0, width, height));
+	g3_assert(x0 >= 0 && x0 + width <= xpix_);
+	g3_assert(y0 >= 0 && y0 + height <= ypix_);
+
+	FlatSkyProjection p(proj_info.OverlayPatch(x0, y0, width, height));
 	FlatSkyMapPtr out(new FlatSkyMap(p, coord_ref, weighted, units, pol_type,
 	    flat_pol_, pol_conv));
 
@@ -668,15 +671,38 @@ G3SkyMapPtr FlatSkyMap::ExtractPatch(size_t x0, size_t y0, size_t width, size_t 
 
 void FlatSkyMap::InsertPatch(const FlatSkyMap &patch)
 {
-	std::vector<size_t> loc = proj_info.GetPatchLocation(patch.proj_info);
-	size_t x0 = loc[0];
-	size_t y0 = loc[1];
+	std::vector<double> loc = proj_info.GetPatchLocation(patch.proj_info);
+	double x0 = loc[0];
+	double y0 = loc[1];
+	g3_assert(x0 >= 0 && x0 + patch.xpix_ <= xpix_);
+	g3_assert(y0 >= 0 && y0 + patch.ypix_ <= ypix_);
 
 	for (auto i : patch) {
 		size_t x = (size_t)(i.first % patch.xpix_) + x0;
 		size_t y = (size_t)(i.first / patch.xpix_) + y0;
 		(*this)(x, y) = i.second;
-        }
+	}
+}
+
+G3SkyMapPtr FlatSkyMap::Pad(size_t width, size_t height) const
+{
+	g3_assert(width > xpix_);
+	g3_assert(height > ypix_);
+
+	double x0 = (width - xpix_) / 2;
+	double y0 = (height - ypix_) / 2;
+	FlatSkyProjection p(proj_info.OverlayPatch(x0, y0, width, height));
+	FlatSkyMapPtr out(new FlatSkyMap(p, coord_ref, weighted, units, pol_type,
+	    flat_pol_, pol_conv));
+
+	for (auto i : *this) {
+		size_t x = (size_t)(i.first % xpix_) + x0;
+		size_t y = (size_t)(i.first / xpix_) + y0;
+		if (i.second != 0)
+			(*out)(x, y) = i.second;
+	}
+
+	return out;
 }
 
 static int
@@ -930,6 +956,11 @@ PYBINDINGS("maps")
 		"Inserts a patch (e.g. as extracted using extract_patch) into the "
 		"parent map.  The coordinate system and angular center of the patch "
 		"must match that of the parent map.")
+
+	    .def("pad", &FlatSkyMap::Pad, (bp::arg("width"), bp::arg("height")),
+		"Returns a map of shape (width, height) containing the parent map "
+		"centered within it.  The angular location of each pixel on the sky "
+		"is maintained.")
 
 	    .add_property("flat_pol", &FlatSkyMap::IsPolFlat, &FlatSkyMap::SetFlatPol,
 		"True if this map has been flattened using flatten_pol.")
