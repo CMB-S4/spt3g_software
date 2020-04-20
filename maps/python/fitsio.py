@@ -4,6 +4,7 @@ from spt3g.maps import MapPolType, MapPolConv, MapCoordReference, MapProjection
 
 import numpy as np
 import os
+import warnings
 
 __all__ = [
     'load_skymap_fits',
@@ -81,10 +82,14 @@ def load_skymap_fits(filename, hdu=None):
                 if not pol_conv:
                     pol_conv = 'COSMO'
 
-            if hdr.get('POLCCONV', '').upper() not in ['IAU', 'COSMO']:
-                warnings.warn('Polarization convention not set, assuming %s' % pol_conv)
-            else:
-                pol_conv = hdr['POLCCONV'].upper()
+            if 'POLAR' in hdr:
+                pdict = {'T': True, 'F': False}
+                pol = pdict.get(hdr['POLAR'], hdr['POLAR'])
+            if pol and map_type is not None:
+                if hdr.get('POLCCONV', '').upper() not in ['IAU', 'COSMO']:
+                    warnings.warn('Polarization convention not set, assuming %s' % pol_conv)
+                else:
+                    pol_conv = hdr['POLCCONV'].upper()
             if 'TUNIT' in hdr:
                 udict = {'k_cmb': 'Tcmb'}
                 units = udict.get(hdr['TUNIT'].lower(), units)
@@ -463,8 +468,7 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
 
     if Q is not None:
         assert(U is not None)
-        assert(U.pol_conv in [MapPolConv.IAU, MapPolConv.COSMO],
-               'U map polarization convention must be IAU or COSMO')
+        assert(U.pol_conv == MapPolConv.IAU or U.pol_conv == MapPolConv.COSMO)
         assert(T.IsCompatible(Q))
         assert(T.IsCompatible(U))
         pol = True
@@ -524,7 +528,7 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
     header['MAPTYPE'] = 'FLAT' if flat else 'HEALPIX'
     header['COORDREF'] = str(T.coord_ref)
     header['POLCCONV'] = str(U.pol_conv) if pol else 'IAU'
-    header['POLAR'] = 'T' if pol else 'F'
+    header['POLAR'] = pol
     header['UNITS'] = str(T.units)
     header['WEIGHTED'] = T.weighted
 
