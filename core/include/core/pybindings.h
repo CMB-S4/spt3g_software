@@ -1,9 +1,6 @@
 #ifndef _G3_PYBINDINGS_H
 #define _G3_PYBINDINGS_H
 
-// maximum number of arguments to bound functions
-#define BOOST_PYTHON_MAX_ARITY 20
-
 #include <G3.h>
 #include <G3Frame.h>
 
