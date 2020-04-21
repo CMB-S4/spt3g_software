@@ -806,6 +806,8 @@ PYBINDINGS("maps") {
 	    .add_property("shape", &skymap_shape, "Shape of map")
 	    .add_property("npix_allocated", &G3SkyMap::NpixAllocated,
 	      "Number of pixels in map currently stored in memory")
+	    .add_property("npix_nonzero", &G3SkyMap::NpixNonZero,
+	      "Number of nonzero pixels in map currently stored in memory")
 	    .def_readwrite("overflow", &G3SkyMap::overflow,
 	      "Combined value of data processed by "
 	      "the map maker but outside of the map area")

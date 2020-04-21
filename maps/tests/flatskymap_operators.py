@@ -11,10 +11,13 @@ m[7345-500] = 4 # Backward
 m[7345+500] = 4 # Forward
 assert(m.sparse)
 assert(m.npix_allocated == 3)
+assert(m.npix_nonzero == 3)
 m[7345-4*500] = 4 # Several steps back
 assert(m.npix_allocated == 6)
+assert(m.npix_nonzero == 4)
 m[7345+3*500] = 4 # Several steps forward
 assert(m.npix_allocated == 8)
+assert(m.npix_nonzero == 5)
 
 # Simple in-place operators
 m = FlatSkyMap(500, 20, core.G3Units.arcmin)

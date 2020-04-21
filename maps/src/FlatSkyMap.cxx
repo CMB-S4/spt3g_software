@@ -555,6 +555,14 @@ size_t FlatSkyMap::NpixAllocated() const {
 	if (dense_)
 		return xpix_*ypix_;
 	if (sparse_)
+		return sparse_->allocated();
+	return 0;
+}
+
+size_t FlatSkyMap::NpixNonZero() const {
+	if (dense_)
+		return dense_->nonzero();
+	if (sparse_)
 		return sparse_->nonzero();
 	return 0;
 }

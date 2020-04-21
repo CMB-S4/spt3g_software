@@ -66,6 +66,7 @@ public:
 
 	virtual size_t size(void) const;  // total number of pixels
 	virtual size_t NpixAllocated(void) const = 0;  // stored in RAM
+	virtual size_t NpixNonZero(void) const = 0;  // nonzero
 	virtual std::vector<size_t> shape(void) const = 0;  // map shape
 
 	virtual bool IsCompatible(const G3SkyMap & other) const {

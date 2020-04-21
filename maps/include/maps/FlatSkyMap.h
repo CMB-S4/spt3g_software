@@ -86,6 +86,7 @@ public:
 
 	std::vector<size_t> shape() const override;
 	size_t NpixAllocated() const override;
+	size_t NpixNonZero() const override;
 	bool IsCompatible(const G3SkyMap & other) const override;
 	void NonZeroPixels(std::vector<uint64_t> &indices,
 	    std::vector<double> &data) const;

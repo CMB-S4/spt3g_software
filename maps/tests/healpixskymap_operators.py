@@ -37,6 +37,7 @@ assert((m * 0).npix_allocated == 0)
 m += 11
 m.indexedsparse = True
 assert(m.npix_allocated == 1)
+assert(m.npix_nonzero == 1)
 
 n = 2. / m
 assert(n[15] == 1)
@@ -49,6 +50,7 @@ n.compress(zero_nans=True)
 assert(n.ringsparse)
 assert(n[16] == 0)
 assert(n.npix_allocated == 1)
+assert(n.npix_nonzero == 1)
 
 # Map-by-map operations, with pairs of maps of any kind of density
 
@@ -60,7 +62,7 @@ m2.ringsparse = True
 m3 = m.copy()
 m3.dense = True
 
-nm1  = m1.npix_allocated
+nm1 = m1.npix_allocated
 nm2 = m2.npix_allocated
 nm3 = m3.npix_allocated
 

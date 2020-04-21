@@ -19,10 +19,18 @@ public:
 
 	size_t xdim() const { return xlen_; }
 	size_t ydim() const { return ylen_; }
-	size_t nonzero() const {
+	size_t allocated() const {
 		size_t nz = 0;
 		for (size_t i = 0; i < data_.size(); i++)
 			nz += data_[i].second.size();
+		return nz;
+	}
+	size_t nonzero() const {
+		size_t nz = 0;
+		for (size_t i = 0; i < data_.size(); i++)
+			for (auto v : data_[i].second)
+				if (v != 0)
+					nz++;
 		return nz;
 	}
 
@@ -159,6 +167,13 @@ public:
 
 	size_t xdim() const { return xlen_; }
 	size_t ydim() const { return ylen_; }
+	size_t nonzero() const {
+		size_t nz = 0;
+		for (auto v : data_)
+			if (v != 0)
+				nz++;
+		return nz;
+	}
 
 	double at(size_t x, size_t y) const {
 		if (!in_bounds(x, y))

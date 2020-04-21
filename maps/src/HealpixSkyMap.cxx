@@ -830,10 +830,27 @@ size_t HealpixSkyMap::NpixAllocated() const
 	if (dense_)
 		return dense_->size();
 	if (ring_sparse_)
-		return ring_sparse_->nonzero();
+		return ring_sparse_->allocated();
 	if (indexed_sparse_)
 		return indexed_sparse_->size();
 	return 0;
+}
+
+size_t HealpixSkyMap::NpixNonZero() const
+{
+	size_t sz = 0;
+	if (dense_) {
+		for (auto v: *dense_)
+			if (v != 0)
+				sz++;
+	} else if (ring_sparse_) {
+		return ring_sparse_->nonzero();
+	} else if (indexed_sparse_) {
+		for (auto i : *indexed_sparse_)
+			if (i.second != 0)
+				sz++;
+	}
+	return sz;
 }
 
 size_t
