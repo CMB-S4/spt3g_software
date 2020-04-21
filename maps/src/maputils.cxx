@@ -249,6 +249,52 @@ void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool int
 	out_map->pol_type = in_map->pol_type;
 }
 
+// algorithm from https://www.johndcook.com/blog/skewness_kurtosis/
+std::vector<double> GetMapStats(G3SkyMapConstPtr m, int order,
+    bool ignore_zeros, bool ignore_nans)
+{
+	size_t n = 0;
+	double m1 = 0;
+	double m2 = 0;
+	double m3 = 0;
+	double m4 = 0;
+	double a, b, c;
+
+	for (size_t i = 0; i < m->size(); i++) {
+		double v = m->at(i);
+		if (ignore_zeros && v == 0)
+			continue;
+		if (ignore_nans && v != v)
+			continue;
+
+		n++;
+		a = (v - m1) / n;
+		if (order > 1) {
+			b = a * a;
+			c = b * n * (n - 1);
+		}
+
+		m1 += a;
+		if (order > 3)
+			m4 += c * b * (n * n - 3 * n + 3) + 6 * b * m2 - 4 * a * m3;
+		if (order > 2)
+			m3 += c * a * (n - 2) - 3 * a * m2;
+		if (order > 1)
+			m2 += c;
+	}
+
+	std::vector<double> out = {m1};
+
+	if (order > 1)
+		out.push_back(m2 / n);
+	if (order > 2)
+		out.push_back(sqrt((double)n) * m3/ pow(m2, 1.5));
+	if (order > 3)
+		out.push_back(n * m4 / (m2 * m2) - 3.0);
+
+	return out;
+}
+
 
 namespace bp = boost::python;
 void maputils_pybindings(void){
@@ -289,8 +335,16 @@ void maputils_pybindings(void){
 
 	bp::def("reproj_map", ReprojMap,
 		(bp::arg("in_map"), bp::arg("out_map"), bp::arg("rebin")=1, bp::arg("interp")=false),
-		"Takes the data in in_map and reprojects it onto out_map.  out_map can\n"
-		"have a different projection, size, resolution, etc.  Optionally account\n"
-		"for sub-pixel structure by setting rebin > 1 and/or enable bilinear\n"
+		"Takes the data in in_map and reprojects it onto out_map.  out_map can "
+		"have a different projection, size, resolution, etc.  Optionally account "
+		"for sub-pixel structure by setting rebin > 1 and/or enable bilinear "
 		"interpolation of values from the input map by setting interp=True");
+
+	bp::def("get_map_stats", GetMapStats,
+		(bp::arg("map"), bp::arg("order")=2, bp::arg("ignore_zeros")=false,
+		 bp::arg("ignore_nans")=false),
+		"Computes moment statistics of the input map, optionally ignoring "
+		"zero and/or nan values in the map.  If order = 1, only the mean is "
+		"returned.  If order = 2, 3 or 4 then the variance, skew and kurtosis "
+		"are also included, respectively.");
 }

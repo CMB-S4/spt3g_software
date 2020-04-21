@@ -23,6 +23,9 @@ void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin=1, bool i
 
 void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, double h=0.001, bool invert=false);
 
+std::vector<double> GetMapStats(G3SkyMapConstPtr m, int order=2,
+    bool ignore_zeros=false, bool ignore_nans=false);
+
 void maputils_pybindings(void);
 
 #endif //_MAPS_MAPUTILS_H

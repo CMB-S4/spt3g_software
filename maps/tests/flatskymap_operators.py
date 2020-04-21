@@ -2,7 +2,8 @@
 
 import numpy as np
 from spt3g import core
-from spt3g.maps import FlatSkyMap, MapProjection, get_ra_dec_map
+from spt3g.maps import FlatSkyMap, MapProjection, get_ra_dec_map, get_map_stats
+from scipy.stats import skew, kurtosis
 
 # Sparse extension operators
 m = FlatSkyMap(500, 20, core.G3Units.arcmin)
@@ -161,3 +162,16 @@ pad = 10
 mpad = m.pad(m.shape[1] + 2 * pad, m.shape[0] + 2 * pad)
 assert(mpad.npix_allocated == m.npix_allocated)
 assert(np.allclose(np.asarray(mpad)[pad:-pad, pad:-pad], np.asarray(m)))
+
+# statistics
+m1 = np.asarray(m).ravel()
+stats0 = [np.mean(m1), np.var(m1), skew(m1), kurtosis(m1)]
+stats1 = get_map_stats(m, order=4)
+assert(np.allclose(stats1, stats0))
+
+stats2 = get_map_stats(mpad, order=4, ignore_zeros=True)
+assert(np.allclose(stats2, stats0))
+
+np.asarray(mpad)[np.asarray(mpad) == 0] = np.nan
+stats3 = get_map_stats(mpad, order=4, ignore_nans=True)
+assert(np.allclose(stats3, stats0))
