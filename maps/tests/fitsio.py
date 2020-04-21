@@ -42,6 +42,8 @@ for p in [0, 1, 2, 4, 5, 6, 7, 9]:
     print(repr(w.to_header()))
     pixs = np.array([[0, 0], [0, 1], [0.5, 0.5], [1, 0], [1, 1]]) * dim
     ra, dec = maps.get_ra_dec_map(fm2)
+
+    angs = []
     for pix in pixs:
         wcs_ang = np.asarray(w.all_pix2world(pix[0], pix[1], 0))
         wcs_ang[wcs_ang > 180] -= 360
@@ -56,13 +58,14 @@ for p in [0, 1, 2, 4, 5, 6, 7, 9]:
         except AssertionError:
             print(pix, g3_ang, wcs_ang, np.abs(g3_ang - wcs_ang))
             error += '\nProj{}: xy_to_angle error'.format(p)
+        angs.append(g3_ang * deg)
 
-    angs = (np.array([[0, 0], [-1, 1], [-1, -1], [1, -1], [1, 1]]) * dim * res / 2.0 +
-            np.array([a0, d0]))
-    for ang in angs:
+    for ang, pix in zip(angs, pixs):
+        print(ang)
         wcs_pix = np.asarray(w.all_world2pix(ang[0] / deg, ang[1] / deg, 0))
         g3_pix = np.asarray(fm2.angle_to_xy(*ang))
         try:
+            assert(np.allclose(g3_pix, pix)) # round trip
             assert(np.allclose(wcs_pix, g3_pix))
         except AssertionError:
             print(ang / deg, g3_pix, wcs_pix, np.abs(g3_pix - wcs_pix))
