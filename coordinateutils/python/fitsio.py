@@ -137,7 +137,7 @@ def load_skymap_fits(filename, hdu=None):
             elif map_type == 'flat' and not hdr.get('ISWEIGHT', None):
                 # flat map data
                 ptype = hdr.get('POLTYPE', 'T')
-                pol_type = getattr(MapPolType, ptype)
+                pol_type = getattr(MapPolType, ptype, None)
                 if pol_type == MapPolType.U and polcconv == 'COSMO':
                     data *= -1
                 fm = FlatSkyMap(data, pol_type=pol_type, **map_opts)
@@ -203,7 +203,7 @@ def load_skymap_fits(filename, hdu=None):
                         setattr(weight_map, col, hm)
 
                     else:
-                        pol_type = getattr(MapPolType, col)
+                        pol_type = getattr(MapPolType, col, None)
                         if pol_type == MapPolType.U and polcconv == 'COSMO':
                             data *= -1
                         mdata = (pix, data, nside) if pix is not None else data
