@@ -48,7 +48,6 @@ public:
 	MapCoordReference coord_ref;
 	G3Timestream::TimestreamUnits units;
 	MapPolType pol_type;
-	MapPolConv pol_conv;
 	bool weighted;
 	double overflow;
 
@@ -68,6 +67,9 @@ public:
 	virtual size_t NpixAllocated(void) const = 0;  // stored in RAM
 	virtual size_t NpixNonZero(void) const = 0;  // nonzero
 	virtual std::vector<size_t> shape(void) const = 0;  // map shape
+
+	MapPolConv GetPolConv() const { return pol_conv_; };
+	void SetPolConv(MapPolConv pol_conv);
 
 	virtual bool IsCompatible(const G3SkyMap & other) const {
 		if (shape().size() != other.shape().size())
@@ -129,6 +131,8 @@ public:
 	}
 
 protected:
+	MapPolConv pol_conv_;
+
 	virtual void InitFromV1Data(std::vector<size_t>,
 	    const std::vector<double> &) {
 		throw std::runtime_error("Initializing from V1 not implemented");

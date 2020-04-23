@@ -295,7 +295,7 @@ FlatSkyMap::Clone(bool copy_data) const
 		return boost::make_shared<FlatSkyMap>(*this);
 	else
 		return boost::make_shared<FlatSkyMap>(proj_info,
-		    coord_ref, weighted, units, pol_type, flat_pol_, pol_conv);
+		    coord_ref, weighted, units, pol_type, flat_pol_, pol_conv_);
 }
 
 double
@@ -638,7 +638,7 @@ G3SkyMapPtr FlatSkyMap::Rebin(size_t scale, bool norm) const
 
 	FlatSkyProjection p(proj_info.Rebin(scale));
 	FlatSkyMapPtr out(new FlatSkyMap(p, coord_ref, weighted, units, pol_type,
-	    flat_pol_, pol_conv));
+	    flat_pol_, pol_conv_));
 
 	if (dense_)
 		out->ConvertToDense();
@@ -664,7 +664,7 @@ G3SkyMapPtr FlatSkyMap::ExtractPatch(size_t x0, size_t y0, size_t width, size_t 
 
 	FlatSkyProjection p(proj_info.OverlayPatch(x0, y0, width, height));
 	FlatSkyMapPtr out(new FlatSkyMap(p, coord_ref, weighted, units, pol_type,
-	    flat_pol_, pol_conv));
+	    flat_pol_, pol_conv_));
 
 	for (size_t x = 0; x < width; x++) {
 		for (size_t y = 0; y < height; y++) {
@@ -704,7 +704,7 @@ G3SkyMapPtr FlatSkyMap::Pad(size_t width, size_t height, double fill) const
 	double y0 = -(double)(height - ypix_) / 2.0;
 	FlatSkyProjection p(proj_info.OverlayPatch(x0, y0, width, height));
 	FlatSkyMapPtr out(new FlatSkyMap(p, coord_ref, weighted, units, pol_type,
-	    flat_pol_, pol_conv));
+	    flat_pol_, pol_conv_));
 
 	if (fill != 0)
 		(*out) += fill;

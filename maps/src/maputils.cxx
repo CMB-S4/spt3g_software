@@ -176,7 +176,7 @@ boost::python::tuple GetRaDecMap(G3SkyMapConstPtr m)
 
 void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, double h, bool invert)
 {
-	if (U->pol_conv == G3SkyMap::ConvNone)
+	if (U->GetPolConv() == G3SkyMap::ConvNone)
 		log_warn("Missing pol_conv attribute for flatten_pol, assuming "
 			 "U.pol_conv is set to IAU. This will raise an error "
 			 "in the future.");
@@ -199,7 +199,7 @@ void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, double h, bool invert)
 		double rot = ATAN2(-grad[0], grad[1]) + ATAN2(-grad[3], -grad[2]);
 		if (invert)
 			rot *= -1.0;
-		if (U->pol_conv == G3SkyMap::COSMO)
+		if (U->GetPolConv() == G3SkyMap::COSMO)
 			rot *= -1.0;
 		double cr = COS(rot);
 		double sr = SIN(rot);
