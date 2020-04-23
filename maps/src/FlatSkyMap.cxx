@@ -694,11 +694,14 @@ void FlatSkyMap::InsertPatch(const FlatSkyMap &patch)
 
 G3SkyMapPtr FlatSkyMap::Pad(size_t width, size_t height, double fill) const
 {
-	g3_assert(width > xpix_);
-	g3_assert(height > ypix_);
+	g3_assert(width >= xpix_);
+	g3_assert(height >= ypix_);
 
-	double x0 = (width - xpix_) / 2;
-	double y0 = (height - ypix_) / 2;
+	if (width == xpix_ && height == ypix_)
+		return boost::make_shared<FlatSkyMap>(*this);
+
+	double x0 = -(double)(width - xpix_) / 2.0;
+	double y0 = -(double)(height - ypix_) / 2.0;
 	FlatSkyProjection p(proj_info.OverlayPatch(x0, y0, width, height));
 	FlatSkyMapPtr out(new FlatSkyMap(p, coord_ref, weighted, units, pol_type,
 	    flat_pol_, pol_conv));
@@ -707,8 +710,8 @@ G3SkyMapPtr FlatSkyMap::Pad(size_t width, size_t height, double fill) const
 		(*out) += fill;
 
 	for (auto i : *this) {
-		size_t x = (size_t)(i.first % xpix_) + x0;
-		size_t y = (size_t)(i.first / xpix_) + y0;
+		size_t x = (size_t)(i.first % xpix_) - x0;
+		size_t y = (size_t)(i.first / xpix_) - y0;
 		if (i.second != fill)
 			(*out)(x, y) = i.second;
 	}

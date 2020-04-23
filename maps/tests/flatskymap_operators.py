@@ -161,6 +161,18 @@ assert(np.allclose(np.asarray(m)[8:18, 20:70], np.asarray(m2)[8:18, 20:70]))
 pad = 10
 mpad = m.pad(m.shape[1] + 2 * pad, m.shape[0] + 2 * pad)
 assert(mpad.npix_allocated == m.npix_allocated)
+a0 = np.array([m.alpha_center, m.delta_center])
+a1 = np.array([mpad.alpha_center, mpad.delta_center])
+assert(np.allclose(a0, a1))
+x0 = np.array([m.x_center, m.y_center])
+x1 = np.array([mpad.x_center, mpad.y_center])
+assert(all(x0 + pad == x1))
+v1 = m[m.angle_to_pixel(*a0)]
+v2 = mpad[mpad.angle_to_pixel(*a1)]
+assert(v1 == v2)
+palpha, pdelta = get_ra_dec_map(mpad)
+assert(np.allclose(np.asarray(palpha)[pad:-pad, pad:-pad], malpha))
+assert(np.allclose(np.asarray(pdelta)[pad:-pad, pad:-pad], mdelta))
 assert(np.allclose(np.asarray(mpad)[pad:-pad, pad:-pad], np.asarray(m)))
 
 # statistics
