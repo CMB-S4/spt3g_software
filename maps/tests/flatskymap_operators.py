@@ -65,6 +65,12 @@ n.compact(zero_nans=True)
 assert(n[16] == 0)
 assert(n.npix_allocated == 1)
 
+np.asarray(n)[np.isinf(n)] = np.nan
+n.sparse = True
+n.compact(zero_nans=True)
+assert(n[16] == 0)
+assert(n.npix_allocated == 1)
+
 # Map-by-map operations, with two sparse maps, one dense and one sparse,
 # and two dense
 

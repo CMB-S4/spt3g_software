@@ -52,6 +52,22 @@ assert(n[16] == 0)
 assert(n.npix_allocated == 1)
 assert(n.npix_nonzero == 1)
 
+np.asarray(n)[np.isinf(n)] = np.nan
+n.ringsparse = True
+n.compact(zero_nans=True)
+assert(n.ringsparse)
+assert(n[16] == 0)
+assert(n.npix_allocated == 1)
+assert(n.npix_nonzero == 1)
+
+np.asarray(n)[np.isinf(n)] = np.nan
+n.indexedsparse = True
+n.compact(zero_nans=True)
+assert(n.indexedsparse)
+assert(n[16] == 0)
+assert(n.npix_allocated == 1)
+assert(n.npix_nonzero == 1)
+
 # Map-by-map operations, with pairs of maps of any kind of density
 
 m *= 2 # Get numbers bigger

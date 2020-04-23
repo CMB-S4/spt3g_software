@@ -72,6 +72,37 @@ SparseMapData::SparseMapData(const DenseMapData &dense_map) :
 	}
 }
 
+void
+SparseMapData::compact()
+{
+	if (data_.size() == 0)
+		return;
+
+	for (size_t ix = 0; ix < data_.size(); ix++) {
+		data_element &column = data_[ix];
+		if (column.second.size() == 0)
+			continue;
+		while (column.second.size() > 0 && column.second[column.second.size() - 1] == 0)
+			column.second.pop_back();
+		while (column.second.size() > 0 && column.second[0] == 0) {
+			column.second.erase(column.second.begin());
+			column.first++;
+		}
+		if (column.second.size() == 0)
+			column.first = 0;
+	}
+
+	while (data_.size() > 0 && data_[data_.size() - 1].second.size() == 0)
+		data_.pop_back();
+	while (data_.size() > 0 && data_[0].second.size() == 0) {
+		data_.erase(data_.begin());
+		offset_++;
+	}
+
+	if (data_.size() == 0)
+		offset_ = 0;
+}
+
 
 SparseMapData &
 SparseMapData::operator+=(const SparseMapData &r)

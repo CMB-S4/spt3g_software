@@ -841,8 +841,10 @@ PYBINDINGS("maps") {
 	      "multiple of the rebinning scale.")
 
 	    .def("compact", &G3SkyMap::Compact, (bp::arg("zero_nans")=false),
-	      "Convert the map to its default sparse representation, excluding "
-	      "empty pixels, and optionally converting NaN values to zeroes.")
+	      "Convert the map to its default sparse representation, removing "
+	      "empty pixels, and optionally also removing NaN values. A map "
+	      "that is already sparse will be compactified in place in its "
+	      "current representation without additional memory overhead.")
 
 	    .def(bp::self += bp::self)
 	    .def(bp::self *= bp::self)

@@ -99,6 +99,7 @@ public:
 	}
 
 	DenseMapData *to_dense() const;
+	void compact();
 
 	template <class A> void serialize(A &ar, unsigned v) {
 		using namespace cereal;

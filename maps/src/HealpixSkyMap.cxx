@@ -434,45 +434,28 @@ HealpixSkyMap::ConvertToIndexedSparse()
 
 void HealpixSkyMap::Compact(bool zero_nans)
 {
+	if (!dense_ && !indexed_sparse_ && !ring_sparse_)
+		return;
+
+	if (zero_nans) {
+		for (auto i : *this) {
+			if (i.second != i.second)
+				(*this)[i.first] = 0;
+		}
+	}
+
 	if (dense_) {
-		if (zero_nans) {
-			for (auto i : *this) {
-				if (i.second != i.second)
-					(*dense_)[i.first] = 0;
-			}
-		}
-
 		ConvertToRingSparse();
-		return;
-	}
-
-	if (indexed_sparse_) {
-		auto *oldis = indexed_sparse_;
-		indexed_sparse_ = new std::unordered_map<uint64_t, double>;
-
-		for (auto i : *oldis) {
-			if (i.second == 0 || (zero_nans && i.second != i.second))
-				continue;
-			(*indexed_sparse_)[i.first] = i.second;
+	} else if (indexed_sparse_) {
+		for (auto i = indexed_sparse_->begin(); i != indexed_sparse_->end(); ) {
+			if (i->second == 0)
+				i = indexed_sparse_->erase(i);
+			else
+				i++;
 		}
-
-		delete oldis;
-		return;
+	} else if (ring_sparse_) {
+		ring_sparse_->compact();
 	}
-
-	if (!ring_sparse_)
-		return;
-
-	auto *oldrs = ring_sparse_;
-	ring_sparse_ = new SparseMapData(ring_info_->nring, ring_info_->nring);
-
-	for (auto i = oldrs->begin(); i != oldrs->end(); i++) {
-		if ((*i) == 0 || (zero_nans && (*i) != (*i)))
-			continue;
-		(*ring_sparse_)(i.x, i.y) = (*i);
-	}
-
-	delete oldrs;
 }
 
 G3SkyMapPtr
