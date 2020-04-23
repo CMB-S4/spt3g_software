@@ -432,7 +432,7 @@ HealpixSkyMap::ConvertToIndexedSparse()
 	}
 }
 
-void HealpixSkyMap::Compress(bool zero_nans)
+void HealpixSkyMap::Compact(bool zero_nans)
 {
 	if (dense_) {
 		if (zero_nans) {

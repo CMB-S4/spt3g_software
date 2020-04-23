@@ -89,19 +89,19 @@ for pol in [True, False]:
     assert(mw.npix_allocated == mw.size)
 
     tmap = mw.T.copy()
-    tmap.compress(zero_nans=True)
+    tmap.compact(zero_nans=True)
     assert(tmap.npix_allocated == 1)
     assert(np.allclose(tmap[15], np.atleast_1d(vec * 10)[0]))
     mask = get_mask_map(tmap)
     assert(mask[15] == 1)
     assert(mask.npix_allocated == 1)
 
-    # compress maps back to sparse
+    # compactify maps back to sparse
     if pol:
         qmap = mw.Q.copy()
-        qmap.compress(zero_nans=True)
+        qmap.compact(zero_nans=True)
         umap = mw.U.copy()
-        umap.compress(zero_nans=True)
+        umap.compact(zero_nans=True)
     else:
         qmap = umap = None
 

@@ -2,7 +2,7 @@ from spt3g import core, maps
 import numpy as np
 
 __all__ = [
-    'CompressMaps',
+    'CompactMaps',
     'RemoveWeights',
     'ApplyWeights',
     'FlattenPol',
@@ -11,24 +11,27 @@ __all__ = [
 ]
 
 @core.indexmod
-def CompressMaps(frame, zero_nans=False):
+def CompactMaps(frame, zero_nans=False):
     '''
-    Compress all maps in a frame to their default sparse representation.
-    Optionally remove NaN values as well.
+    Compact all maps in a frame to their default sparse representation.
+    Optionally remove NaN values as well.  Removing NaN values will reduce
+    memory use, but will remove the distinction in unweighted (or
+    weight-removed) maps between unobserved regions and regions with zero
+    temperature.
     '''
     for s in ['T', 'Q', 'U', 'Wunpol', 'Wpol']:
         if s in frame:
             m = frame.pop(s)
-            m.compress(zero_nans=zero_nans)
+            m.compact(zero_nans=zero_nans)
             frame[s] = m
     return frame
 
 @core.indexmod
 def RemoveWeights(frame, zero_nans=False):
     '''
-    Remove weights from input maps.  If zero_nans is `True`, empty pixles are
+    Remove weights from input maps.  If zero_nans is `True`, empty pixels are
     skipped and pixels with zero weight are set to 0 instead of NaN.  Operation
-    is performed in place to minimuze memory use.
+    is performed in place to minimize memory use.
     '''
     if 'Wpol' not in frame and 'Wunpol' not in frame:
         return

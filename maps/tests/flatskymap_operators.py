@@ -59,9 +59,9 @@ assert(n[15] == 1)
 assert(np.isinf(n[16]))
 assert(n.npix_allocated == n.size)
 
-# compression
+# compactification
 np.asarray(n)[np.isinf(n)] = np.nan
-n.compress(zero_nans=True)
+n.compact(zero_nans=True)
 assert(n[16] == 0)
 assert(n.npix_allocated == 1)
 

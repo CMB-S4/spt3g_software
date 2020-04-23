@@ -124,8 +124,8 @@ public:
 	virtual void ConvertToDense() {
 		throw std::runtime_error("Conversion to dense array not implemented");
 	}
-	virtual void Compress(bool zero_nans = false) {
-		throw std::runtime_error("Compression not implemented");
+	virtual void Compact(bool zero_nans = false) {
+		throw std::runtime_error("Compactification not implemented");
 	}
 
 protected:
@@ -327,7 +327,7 @@ public:
 
 	boost::shared_ptr<G3SkyMapWeights> Rebin(size_t scale) const;
 
-	void Compress(bool zero_nans = false);
+	void Compact(bool zero_nans = false);
 
 	boost::shared_ptr<G3SkyMapWeights> Clone(bool copy_data) const {
 		if (copy_data)
@@ -421,7 +421,7 @@ public:
 
 	boost::shared_ptr<G3SkyMapWithWeights> Rebin(size_t scale) const;
 
-	void Compress(bool zero_nans = false);
+	void Compact(bool zero_nans = false);
 
 private:
 	template <class A> void serialize(A &ar, const unsigned v);

@@ -713,17 +713,17 @@ G3SkyMapWeightsPtr G3SkyMapWeights::Rebin(size_t scale) const
 	return out;
 }
 
-void G3SkyMapWeights::Compress(bool zero_nans)
+void G3SkyMapWeights::Compact(bool zero_nans)
 {
 	g3_assert(IsCongruent());
 
-	TT->Compress(zero_nans);
+	TT->Compact(zero_nans);
 	if (IsPolarized()) {
-		TQ->Compress(zero_nans);
-		TU->Compress(zero_nans);
-		QQ->Compress(zero_nans);
-		QU->Compress(zero_nans);
-		UU->Compress(zero_nans);
+		TQ->Compact(zero_nans);
+		TU->Compact(zero_nans);
+		QQ->Compact(zero_nans);
+		QU->Compact(zero_nans);
+		UU->Compact(zero_nans);
 	}
 }
 
@@ -743,17 +743,17 @@ G3SkyMapWithWeightsPtr G3SkyMapWithWeights::Rebin(size_t scale) const
 	return out;
 }
 
-void G3SkyMapWithWeights::Compress(bool zero_nans)
+void G3SkyMapWithWeights::Compact(bool zero_nans)
 {
 	g3_assert(IsCongruent());
 
-	T->Compress(zero_nans);
+	T->Compact(zero_nans);
 	if (IsPolarized()) {
-		Q->Compress(zero_nans);
-		U->Compress(zero_nans);
+		Q->Compact(zero_nans);
+		U->Compact(zero_nans);
 	}
 
-	weights->Compress(zero_nans);
+	weights->Compact(zero_nans);
 }
 
 PYBINDINGS("maps") {
@@ -850,7 +850,7 @@ PYBINDINGS("maps") {
 	      "together.  Returns a new map object.  Map dimensions must be a "
 	      "multiple of the rebinning scale.")
 
-	    .def("compress", &G3SkyMap::Compress, (bp::arg("zero_nans")=false),
+	    .def("compact", &G3SkyMap::Compact, (bp::arg("zero_nans")=false),
 	      "Convert the map to its default sparse representation, excluding "
 	      "empty pixels, and optionally converting NaN values to zeroes.")
 
@@ -902,7 +902,7 @@ PYBINDINGS("maps") {
 	      "Rebin the weights into larger pixels by summing scale-x-scale blocks "
 	      "of pixels together.  Returns a new weights object.  Map dimensions "
 	      "must be a multiple of the  rebinning scale.")
-	    .def("compress", &G3SkyMapWeights::Compress, (bp::arg("zero_nans")=false),
+	    .def("compact", &G3SkyMapWeights::Compact, (bp::arg("zero_nans")=false),
 	      "Convert the map to its default sparse representation, excluding "
 	      "empty pixels, and optionally converting NaN values to zeroes.")
 	    .def("det", &G3SkyMapWeights::Det,
@@ -960,9 +960,12 @@ PYBINDINGS("maps") {
 	      "or averaging (if unweighted) scale-x-scale blocks of pixels "
 	      "together.  Returns a new map object.  Map dimensions must be a "
 	      "multiple of the rebinning scale.")
-	    .def("compress", &G3SkyMapWithWeights::Compress, (bp::arg("zero_nans")=false),
+	    .def("compact", &G3SkyMapWithWeights::Compact, (bp::arg("zero_nans")=false),
 	      "Convert the map to its default sparse representation, excluding "
-	      "empty pixels, and optionally converting NaN values to zeroes.")
+	      "empty pixels, and optionally converting NaN values to zeroes. "
+	      "Converting NaNs to zeros will reduce memory use, but will "
+	      "remove the distinction in unweighted (or weight-removed) maps "
+	      "between unobserved regions and regions with zero temperature.")
 
 	    .def("Clone", &G3SkyMapWithWeights::Clone, ((bp::arg("copy_data")=true),
 	       "Return a map of the same type, populated with a copy of the data "

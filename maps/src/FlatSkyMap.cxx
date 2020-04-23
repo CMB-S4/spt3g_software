@@ -260,7 +260,7 @@ FlatSkyMap::ConvertToSparse()
 	dense_ = NULL;
 }
 
-void FlatSkyMap::Compress(bool zero_nans)
+void FlatSkyMap::Compact(bool zero_nans)
 {
 	if (dense_) {
 		if (zero_nans) {

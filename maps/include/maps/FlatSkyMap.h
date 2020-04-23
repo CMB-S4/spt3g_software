@@ -131,7 +131,7 @@ public:
 	void ConvertToDense() override;
 	void ConvertToSparse();
 	bool IsDense() const override { return (dense_ != NULL); }
-	void Compress(bool zero_nans = false) override;
+	void Compact(bool zero_nans = false) override;
 
 	bool IsPolFlat() const { return flat_pol_; }
 	void SetFlatPol(bool flat) { flat_pol_ = flat; }
