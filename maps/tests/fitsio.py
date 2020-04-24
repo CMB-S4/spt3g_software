@@ -16,10 +16,15 @@ d0 = -50 * deg
 x0 = 120
 y0 = 180
 
+verbose = False
 error = ''
 
+print('Checking projections')
+if verbose:
+    print('-' * 80)
 for p in [0, 1, 2, 4, 5, 6, 7, 9]:
-    print('Checking Proj{}'.format(p))
+    if verbose:
+        print('Checking Proj{}'.format(p))
 
     proj = getattr(maps.MapProjection, 'Proj{}'.format(p))
     fm1 = maps.FlatSkyMap(arr, res, proj=proj,
@@ -39,7 +44,8 @@ for p in [0, 1, 2, 4, 5, 6, 7, 9]:
     assert(fm1.wcs.to_header() == fm2.wcs.to_header())
 
     w = fm2.wcs
-    print(repr(w.to_header()))
+    if verbose:
+        print(repr(w.to_header()))
     pixs = np.array([[0, 0], [0, 1], [0.5, 0.5], [1, 0], [1, 1]]) * dim
     ra, dec = maps.get_ra_dec_map(fm2)
 
@@ -61,7 +67,6 @@ for p in [0, 1, 2, 4, 5, 6, 7, 9]:
         angs.append(g3_ang * deg)
 
     for ang, pix in zip(angs, pixs):
-        print(ang)
         wcs_pix = np.asarray(w.all_world2pix(ang[0] / deg, ang[1] / deg, 0))
         g3_pix = np.asarray(fm2.angle_to_xy(*ang))
         try:
@@ -71,7 +76,8 @@ for p in [0, 1, 2, 4, 5, 6, 7, 9]:
             print(ang / deg, g3_pix, wcs_pix, np.abs(g3_pix - wcs_pix))
             error += '\nProj{}: angle_to_xy error'.format(p)
 
-    print('-' * 80)
+    if verbose:
+        print('-' * 80)
 
 if error:
     os.remove('test_map.fits')
@@ -79,12 +85,15 @@ if error:
 
 try:
     print('Checking Healpix')
-    hm1 = maps.HealpixSkyMap(np.arange(12 * 64 * 64))
-    maps.fitsio.save_skymap_fits('test_map.fits', hm1, overwrite=True)
-    hm2 = maps.fitsio.load_skymap_fits('test_map.fits')['T']
+    hm1 = maps.HealpixSkyMap(np.arange(12 * 64 * 64), pol_conv=maps.MapPolConv.COSMO)
+    maps.fitsio.save_skymap_fits('test_map.fits', hm1, hm1, hm1, overwrite=True)
+    hm2 = maps.fitsio.load_skymap_fits('test_map.fits')
 
-    assert(hm1.IsCompatible(hm2))
-    assert(np.allclose(hm1, hm2))
+    assert(hm2['T'].pol_conv == hm2['U'].pol_conv)
+    assert(hm2['U'].pol_conv == maps.MapPolConv.IAU)
+    assert(hm1.IsCompatible(hm2['T']))
+    assert(np.allclose(hm1, hm2['T']))
+    assert(np.allclose(hm1, -hm2['U']))
 
     print('Checking healpy.read_map')
     hm3 = hp.read_map('test_map.fits')

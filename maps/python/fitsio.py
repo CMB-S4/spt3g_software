@@ -87,7 +87,8 @@ def load_skymap_fits(filename, hdu=None):
                 pol = pdict.get(hdr['POLAR'], hdr['POLAR'])
             if pol and map_type is not None:
                 if hdr.get('POLCCONV', '').upper() not in ['IAU', 'COSMO']:
-                    warnings.warn('Polarization convention not set, assuming %s' % pol_conv)
+                    core.log_warn('Polarization convention not set, assuming %s' % pol_conv,
+                                  unit='load_skymap_fits')
                 else:
                     pol_conv = hdr['POLCCONV'].upper()
             if 'TUNIT' in hdr:
@@ -151,8 +152,9 @@ def load_skymap_fits(filename, hdu=None):
                 ptype = hdr.get('POLTYPE', 'T')
                 pol_type = getattr(MapPolType, ptype, None)
                 if pol_type == MapPolType.U and str(pol_conv) == 'COSMO':
+                    core.log_warn('Switching COSMO input maps to IAU', unit='load_skymap_fits')
                     data *= -1
-                    map_opts.update(pol_conv='IAU')
+                    map_opts.update(pol_conv=MapPolConv.IAU)
                 fm = FlatSkyMap(data, pol_type=pol_type, **map_opts)
                 fm.overflow = overflow
                 output[ptype] = fm
@@ -217,8 +219,9 @@ def load_skymap_fits(filename, hdu=None):
                     else:
                         pol_type = getattr(MapPolType, col, None)
                         if pol_type == MapPolType.U and str(pol_conv) == 'COSMO':
+                            core.log_warn('Switching COSMO input maps to IAU', unit='load_skymap_fits')
                             data *= -1
-                            map_opts.update(pol_conv='IAU')
+                            map_opts.update(pol_conv=MapPolConv.IAU)
                         mdata = (pix, data, nside) if pix is not None else data
 
                         hm = HealpixSkyMap(mdata, pol_type=pol_type, **map_opts)
@@ -232,6 +235,7 @@ def load_skymap_fits(filename, hdu=None):
             del H.data
 
     for k, m in output.items():
+        m.pol_conv = map_opts['pol_conv']
         if k == 'W':
             continue
         m.weighted = 'W' in output
@@ -527,7 +531,8 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
 
     header['MAPTYPE'] = 'FLAT' if flat else 'HEALPIX'
     header['COORDREF'] = str(T.coord_ref)
-    header['POLCCONV'] = str(U.pol_conv) if pol else 'IAU'
+    if pol:
+        header['POLCCONV'] = str(U.pol_conv)
     header['POLAR'] = pol
     header['UNITS'] = str(T.units)
     header['WEIGHTED'] = T.weighted
