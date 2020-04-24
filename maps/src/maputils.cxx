@@ -8,6 +8,7 @@
 #include <G3Units.h>
 
 #include <maps/maputils.h>
+#include <maps/pointing.h>
 
 #include <iostream>
 
@@ -166,9 +167,11 @@ boost::python::tuple GetRaDecMap(G3SkyMapConstPtr m)
 	ra->weighted = false;
 	ra->units = G3Timestream::None;
 	ra->pol_type = G3SkyMap::None;
+	ra->SetPolConv(G3SkyMap::ConvNone);
 	dec->weighted = false;
 	dec->units = G3Timestream::None;
 	dec->pol_type = G3SkyMap::None;
+	dec->SetPolConv(G3SkyMap::ConvNone);
 
 	return boost::python::make_tuple(ra, dec);
 }
@@ -215,9 +218,15 @@ void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, double h, bool invert)
 
 void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool interp)
 {
-
-	if (in_map->coord_ref != out_map->coord_ref) {
-		log_fatal("Input and output maps must use the same coordinates");
+	bool rotate = false; // no transform
+	quat q_rot; // quaternion for rotating from output to input coordinate system
+	if (in_map->coord_ref != out_map->coord_ref &&
+	    in_map->coord_ref != MapCoordReference::Local &&
+	    out_map->coord_ref != MapCoordReference::Local) {
+		rotate = true;
+		q_rot = get_fk5_j2000_to_gal_quat();
+		if (in_map->coord_ref == MapCoordReference::Equatorial)
+			q_rot = 1. / q_rot;
 	}
 
 	for (size_t i = 0; i < out_map->size(); i++) {
@@ -226,6 +235,11 @@ void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool int
 			std::vector<double> ra, dec;
 			out_map->GetRebinAngles(i, rebin, ra, dec);
 			for (size_t j = 0; j < ra.size(); j++) {
+				if (rotate) {
+					quat q = ang_to_quat(ra[j], dec[j]);
+					q = q_rot * q / q_rot;
+					quat_to_ang(q, ra[j], dec[j]);
+				}
 				if (interp)
 					val += in_map->GetInterpValue(ra[j], dec[j]);
 				else
@@ -234,6 +248,11 @@ void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool int
 			val /= ra.size();
 		} else {
 			std::vector<double> radec = out_map->PixelToAngle(i);
+			if (rotate) {
+				quat q = ang_to_quat(radec[0], radec[1]);
+				q = q_rot * q / q_rot;
+				quat_to_ang(q, radec[0], radec[1]);
+			}
 			if (interp)
 				val = in_map->GetInterpValue(radec[0], radec[1]);
 			else
@@ -243,10 +262,10 @@ void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool int
 			(*out_map)[i] = val;
 	}
 
-	out_map->coord_ref = in_map->coord_ref;
 	out_map->weighted = in_map->weighted;
 	out_map->units = in_map->units;
 	out_map->pol_type = in_map->pol_type;
+	out_map->SetPolConv(in_map->GetPolConv());
 }
 
 // algorithm from https://www.johndcook.com/blog/skewness_kurtosis/
@@ -338,7 +357,9 @@ void maputils_pybindings(void){
 		"Takes the data in in_map and reprojects it onto out_map.  out_map can "
 		"have a different projection, size, resolution, etc.  Optionally account "
 		"for sub-pixel structure by setting rebin > 1 and/or enable bilinear "
-		"interpolation of values from the input map by setting interp=True");
+		"interpolation of values from the input map by setting interp=True. "
+		"Use the maps' coord_ref attributes to rotate between Equatorial and "
+		"Galactic coordinate systems.");
 
 	bp::def("get_map_stats", GetMapStats,
 		(bp::arg("map"), bp::arg("order")=2, bp::arg("ignore_zeros")=false,
