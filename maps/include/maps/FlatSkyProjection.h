@@ -118,8 +118,6 @@ private:
 	double y_res_;
 
 	// derived values
-	double x_min_;
-	double y_min_;
 	double sindelta0_;
 	double cosdelta0_;
 	std::vector<double> pv_;
@@ -133,6 +131,6 @@ namespace cereal {
   template <class A> struct specialize<A, FlatSkyProjection, cereal::specialization::member_load_save> {};
 }
 
-G3_SERIALIZABLE(FlatSkyProjection, 3);
+G3_SERIALIZABLE(FlatSkyProjection, 4);
 
 #endif //#ifndef _MAPS_FLATSKYPROJECTION_H

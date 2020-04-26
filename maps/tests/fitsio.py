@@ -47,7 +47,7 @@ for dim in [300, 301]:
         w = fm2.wcs
         if verbose:
             print(repr(w.to_header()))
-        pixs = (np.array([[0, 0], [0, 1], [0.5, 0.5], [1, 0], [1, 1]]) * dim).astype(int).astype(float)
+        pixs = np.array([[0, 0], [0, dim - 1], [dim // 2, dim // 2], [dim - 1, 0], [dim - 1, dim - 1]]).astype(float)
         ra, dec = maps.get_ra_dec_map(fm2)
 
         angs = []
@@ -63,7 +63,8 @@ for dim in [300, 301]:
                     pass
                 assert(np.allclose(wcs_ang, g3_ang))
             except AssertionError:
-                print(pix, [ra[idx] / deg, dec[idx] / deg], g3_ang, wcs_ang, np.abs(g3_ang - wcs_ang))
+                print('pix', pix, 'pix2ang', [ra[idx] / deg, dec[idx] / deg],
+                      'g3', g3_ang, 'wcs', wcs_ang, 'diff', np.abs(g3_ang - wcs_ang))
                 error += '\nProj{}: xy_to_angle error'.format(p)
             angs.append(g3_ang * deg)
 
@@ -74,7 +75,8 @@ for dim in [300, 301]:
                 assert(np.allclose(g3_pix, pix)) # round trip
                 assert(np.allclose(wcs_pix, g3_pix))
             except AssertionError:
-                print(ang / deg, g3_pix, wcs_pix, np.abs(g3_pix - wcs_pix))
+                print('ang', ang / deg, 'pix', pix, 'g3', g3_pix, 'wcs', wcs_pix,
+                      'diff', np.abs(g3_pix - wcs_pix))
                 error += '\nProj{}: angle_to_xy error'.format(p)
 
         if verbose:

@@ -59,6 +59,10 @@ template <class A> void FlatSkyProjection::load(A &ar, unsigned v)
 	if (v > 2) {
 		ar & make_nvp("x_center", x0_);
 		ar & make_nvp("y_center", y0_);
+		if (v == 3) {
+			x0_ -= 1;
+			y0_ -= 1;
+		}
 	} else {
 		x0_ = 0.0 / 0.0;
 		y0_ = 0.0 / 0.0;
@@ -187,18 +191,16 @@ void FlatSkyProjection::SetAngleCenter(double alpha, double delta)
 
 void FlatSkyProjection::SetXCenter(double x)
 {
-	x0_ = (x != x) ? (xpix_ / 2.0 + 0.5) : x;
-	x_min_ = (x0_ - xpix_) * x_res_;
+	x0_ = (x != x) ? (xpix_ / 2.0 - 0.5) : x;
 }
 
 void FlatSkyProjection::SetYCenter(double y)
 {
-	y0_ = (y != y) ? (ypix_ / 2.0 + 0.5) : y;
+	y0_ = (y != y) ? (ypix_ / 2.0 - 0.5) : y;
 	if (proj_ == Proj0 || proj_ == Proj1 || proj_ == Proj9) {
 		y0_ += delta0_ / y_res_;
 		SetDeltaCenter(0.0);
 	}
-	y_min_ = (y0_ - ypix_) * y_res_;
 }
 
 void FlatSkyProjection::SetXYCenter(double x, double y)
@@ -249,8 +251,8 @@ FlatSkyProjection::PixelToXY(long pixel) const
 std::vector<double>
 FlatSkyProjection::XYToAngle(double x, double y, bool wrap_alpha) const
 {
-	x = -1. * (x * x_res_ + x_min_);
-	y = -1. * (y * y_res_ + y_min_);
+	x = (x0_ - x) * x_res_;
+	y = (y0_ - y) * y_res_;
 
 	double alpha, delta;
 
@@ -445,11 +447,8 @@ FlatSkyProjection::AngleToXY(double alpha, double delta) const
 		break;
 	}
 
-	x *= -1;
-	y *= -1;
-
-	x = (x - x_min_) / x_res_;
-	y = (y - y_min_) / y_res_;
+	x = x0_ - x / x_res_;
+	y = y0_ - y / y_res_;
 
 	return {x, y};
 }

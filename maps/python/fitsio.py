@@ -317,11 +317,8 @@ def get_wcs(skymap, reset=False):
         skymap.res / core.G3Units.deg,
     ]
     w.wcs.cunit = ['deg', 'deg']
+    w.wcs.crpix = [skymap.x_center + 1, skymap.y_center + 1]
 
-    crpix = [
-        skymap.shape[1] - skymap.x_center + 1,
-        skymap.shape[0] - skymap.y_center + 1
-    ]
     crval = [
         skymap.alpha_center / core.G3Units.deg,
         skymap.delta_center / core.G3Units.deg,
@@ -330,7 +327,6 @@ def get_wcs(skymap, reset=False):
         v = skymap.delta_center / core.G3Units.rad
         w.wcs.set_pv([(2, 1, np.cos(v) ** 2)])
         crval[1] = 0.0
-    w.wcs.crpix = crpix
     w.wcs.crval = crval
 
     skymap._wcs = w
@@ -402,8 +398,8 @@ def parse_wcs_header(header):
     delta_center = crval[order[1]] * core.G3Units.deg
 
     crpix = w.wcs.crpix
-    x_center = header['NAXIS{}'.format(order[0] + 1)] - crpix[order[0]] + 1
-    y_center = header['NAXIS{}'.format(order[1] + 1)] - crpix[order[1]] + 1
+    x_center = crpix[order[0]] - 1
+    y_center = crpix[order[1]] - 1
 
     if wcsproj in ['CEA']:
         for i, m, v in w.wcs.get_pv():
