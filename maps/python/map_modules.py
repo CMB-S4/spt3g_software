@@ -2,90 +2,98 @@ from spt3g import core, maps
 import numpy as np
 
 __all__ = [
-    'CompactMaps',
-    'RemoveWeights',
-    'ApplyWeights',
-    'FlattenPol',
-    'ConvertTMapsToPolarized',
-    'ConvertPolarizedMapsToT',
+    "CompactMaps",
+    "RemoveWeights",
+    "ApplyWeights",
+    "FlattenPol",
+    "MakeMapsPolarized",
+    "MakeMapsUnpolarized",
+    "ValidateMaps",
+    "ExtractMaps",
+    "InjectMaps",
+    "ReplicateMaps",
 ]
+
 
 @core.indexmod
 def CompactMaps(frame, zero_nans=False):
-    '''
+    """
     Compact all maps in a frame to their default sparse representation.
     Optionally remove NaN values as well.  Removing NaN values will reduce
     memory use, but will remove the distinction in unweighted (or
     weight-removed) maps between unobserved regions and regions with zero
     temperature.
-    '''
-    for s in ['T', 'Q', 'U', 'Wunpol', 'Wpol']:
+    """
+    for s in ["T", "Q", "U", "Wunpol", "Wpol"]:
         if s in frame:
             m = frame.pop(s)
             m.compact(zero_nans=zero_nans)
             frame[s] = m
     return frame
 
+
 @core.indexmod
 def RemoveWeights(frame, zero_nans=False):
-    '''
+    """
     Remove weights from input maps.  If zero_nans is `True`, empty pixels are
     skipped and pixels with zero weight are set to 0 instead of NaN.  Operation
     is performed in place to minimize memory use.
-    '''
-    if 'Wpol' not in frame and 'Wunpol' not in frame:
+    """
+    if "Wpol" not in frame and "Wunpol" not in frame:
         return
 
-    if not frame['T'].weighted:
+    if not frame["T"].weighted:
         return frame
 
-    tmap = frame.pop('T')
+    tmap = frame.pop("T")
 
-    if 'Wpol' in frame:
-        wmap = frame['Wpol']
-        qmap = frame.pop('Q')
-        umap = frame.pop('U')
+    if "Wpol" in frame:
+        wmap = frame["Wpol"]
+        qmap = frame.pop("Q")
+        umap = frame.pop("U")
         maps.remove_weights(tmap, qmap, umap, wmap, zero_nans=zero_nans)
     else:
-        wmap = frame['Wunpol']
+        wmap = frame["Wunpol"]
         maps.remove_weights_t(tmap, wmap, zero_nans=zero_nans)
 
-    frame['T'] = tmap
-    if 'Wpol' in frame:
-        frame['Q'] = qmap
-        frame['U'] = umap
+    frame["T"] = tmap
+    if "Wpol" in frame:
+        frame["Q"] = qmap
+        frame["U"] = umap
 
     return frame
+
 
 @core.indexmod
 def ApplyWeights(frame):
-    '''
+    """
     Apply weights to the input maps.  The operation is performed in place to
     minimize memory use.
-    '''
-    if 'Wpol' not in frame and 'Wunpol' not in frame:
+    """
+    if "Wpol" not in frame and "Wunpol" not in frame:
         return
 
-    if frame['T'].weighted:
+    if frame["T"].weighted:
         return frame
 
-    tmap = frame.pop('T')
+    tmap = frame.pop("T")
 
-    if 'Wpol' in frame:
-        wmap = frame['Wpol']
-        qmap = frame.pop('Q')
-        umap = frame.pop('U')
+    if "Wpol" in frame:
+        wmap = frame["Wpol"]
+        qmap = frame.pop("Q")
+        umap = frame.pop("U")
         maps.apply_weights(tmap, qmap, umap, wmap)
     else:
-        wmap = frame['Wunpol']
+        wmap = frame["Wunpol"]
         maps.apply_weights_t(tmap, wmap)
 
-    frame['T'] = tmap
-    if 'Wpol' in frame:
-        frame['Q'] = qmap
-        frame['U'] = umap
+    frame["T"] = tmap
+    if "Wpol" in frame:
+        frame["Q"] = qmap
+        frame["U"] = umap
 
     return frame
+
 
 @core.indexmod
 def FlattenPol(frame, invert=False):
@@ -104,35 +112,46 @@ def FlattenPol(frame, invert=False):
     argument to True.
     """
 
-    if 'Q' not in frame or 'U' not in frame:
+    if "Q" not in frame or "U" not in frame:
         return
 
-    qmap, umap = frame['Q'], frame['U']
+    qmap, umap = frame.pop("Q"), frame.pop("U")
     if not isinstance(qmap, maps.FlatSkyMap) or not isinstance(umap, maps.FlatSkyMap):
         return
 
     maps.flatten_pol(qmap, umap, invert=invert)
+
+    frame["Q"] = qmap
+    frame["U"] = umap
+
     return frame
 
+
 @core.indexmod
-def ConvertTMapsToPolarized(frame):
-    '''
-    Converts individual unpolarized maps to polarized versions of the same map.
+def MakeMapsPolarized(frame, pol_conv=maps.MapPolConv.IAU):
+    """
+    Converts individual unpolarized maps to polarized versions of the same map,
+    with the given polarization convention
 
     This module is only a shim that creates null Q and U maps and populates
     a properly invertible Wpol array from the TT Wunpol weights.
-    '''
-    if frame.type != core.G3FrameType.Map or 'Wunpol' not in frame:
+    """
+    if frame.type != core.G3FrameType.Map or "Wunpol" not in frame:
         return
 
-    wgt = frame['Wunpol'].TT
-    del frame['Wunpol']
+    wgt = frame["Wunpol"].TT
+    del frame["Wunpol"]
 
-    frame['Q'] = frame['T'].Clone(False)
-    frame['U'] = frame['T'].Clone(False)
+    qmap = frame["T"].Clone(False)
+    qmap.pol_type = maps.MapPolType.Q
+    frame["Q"] = qmap
+    umap = frame["T"].Clone(False)
+    umap.pol_type = maps.MapPolType.U
+    umap.pol_conv = pol_conv
+    frame["U"] = umap
     mask = maps.get_mask_map(wgt)
 
-    wgt_out = maps.G3SkyMapWeights(frame['T'], polarized=True)
+    wgt_out = maps.G3SkyMapWeights(frame["T"], polarized=True)
     wgt_out.TT = wgt
     wgt_out.TQ = wgt.Clone(False)
     wgt_out.TU = wgt.Clone(False)
@@ -140,26 +159,242 @@ def ConvertTMapsToPolarized(frame):
     wgt_out.QU = wgt.Clone(False)
     wgt_out.UU = mask.Clone(True)
 
-    frame['Wpol'] = wgt_out
+    frame["Wpol"] = wgt_out
 
     return frame
+
 
 @core.indexmod
-def ConvertPolarizedMapsToT(frame):
-    '''
+def MakeMapsUnpolarized(frame):
+    """
     Converts individual polarized maps to temperature-only versions of the same map.
-    '''
-    if frame.type != core.G3FrameType.Map or 'Wpol' not in frame:
+    """
+    if frame.type != core.G3FrameType.Map or "Wpol" not in frame:
         return
 
-    wgt = frame['Wpol'].TT
-    del frame['Wpol']
-    del frame['Q']
-    del frame['U']
+    wgt = frame["Wpol"].TT
+    del frame["Wpol"]
+    del frame["Q"]
+    del frame["U"]
 
-    wgt_out = maps.G3SkyMapWeights(frame['T'], polarized=False)
+    wgt_out = maps.G3SkyMapWeights(frame["T"], polarized=False)
     wgt_out.TT = wgt
 
-    frame['Wunpol'] = wgt_out
+    frame["Wunpol"] = wgt_out
 
     return frame
+
+
+@core.indexmod
+def ValidateMaps(frame):
+    """
+    Validate that the input map frame has all the necessary keys.
+    """
+
+    if isinstance(frame, core.G3Frame) and frame.type != core.G3FrameType.Map:
+        return
+
+    if "T" not in frame:
+        core.log_fatal("Missing T map", unit="ValidateMaps")
+    if ("Q" in frame and not "U" in frame) or ("U" in frame and not "Q" in frame):
+        core.log_fatal("Missing Q or U map", unit="ValidateMaps")
+    if "Wpol" in frame and "Wunpol" in frame:
+        core.log_fatal(
+            "Found both polarized and unpolarized weights", unit="ValidateMaps"
+        )
+
+    stub = frame["T"].Clone(False)
+    for k in ["T", "Q", "U", "Wpol", "Wunpol"]:
+        if k not in frame:
+            continue
+        if not frame[k].IsCompatible(stub):
+            core.log_fatal(
+                "Map %s not compatible with the T map" % k, unit="ValidateMaps"
+            )
+        if k in "TQU":
+            if k == "U" and frame[k].pol_conv is maps.MapPolConv.none:
+                core.log_warn(
+                    "U map polarization convention not set", unit="ValidateMaps"
+                )
+            if frame[k].weighted:
+                if "Wpol" not in frame and "Wunpol" not in frame:
+                    core.log_fatal("Missing weights", unit="ValidateMaps")
+                if k in "QU" and "Wpol" not in frame:
+                    core.log_fatal("Missing polarized weights")
+        else:
+            if frame[k].polarized and ("Q" not in frame or "U" not in frame):
+                core.log_fatal("Missing Q or U maps", unit="ValidateMaps")
+            elif not frame[k].polarized and ("Q" in frame or "U" in frame):
+                core.log_fatal(
+                    "Found polarized maps with unpolarized weights", unit="ValidateMaps"
+                )
+
+
+@core.indexmod
+class ExtractMaps(object):
+    """
+    Cache maps that come through the pipeline. Initialize an instance of this
+    module before adding to a pipeline..  Any maps that pass through the pipe
+    are stored in the .maps attribute of the object after the pipeline is run.
+
+    Arguments
+    ---------
+    map_id : string
+        If supplied, select only map frames that match this ID.
+    copy : bool
+        If True, make a copy of the map on extraction.
+    """
+
+    def __init__(self, map_id=None, copy=False):
+        self.map_id = map_id
+        self.copy_ = copy
+        self.maps = {}
+
+    def __call__(self, frame):
+        if frame.type != core.G3FrameType.Map:
+            return
+        if self.map_id and frame["Id"] != self.map_id:
+            return
+
+        ValidateMaps(frame)
+
+        mid = frame["Id"]
+        mdict = {}
+        for k in ["T", "Q", "U", "Wpol", "Wunpol"]:
+            if k not in frame:
+                continue
+            mdict[k] = frame[k] if not self.copy_ else frame[k].copy()
+
+        if mid not in self.maps:
+            self.maps[mid] = mdict
+            return
+
+        if isinstance(self.maps[mid], dict):
+            self.maps[mid] = [self.maps[mid], mdict]
+            return
+
+        self.maps[mid].append(mdict)
+
+
+@core.indexmod
+class InjectMaps(object):
+    """
+    Inject a set of maps into a new map frame.
+
+    Arguments
+    ---------
+    map_id : string
+        Id to assign to the new map frame
+    maps_in : G3SkyMap instance, list or dict
+        Maps to add to the frame.  If a G3SkyMap instance, this is assumed to be
+        a map stub to be used to create stubs for the appropriate Stokes maps
+        and weights.  If a list, contains Stokes maps with valid pol_type and
+        weights.  If a dict, contains Stokes and weights maps keyed by the
+        standard map frame names.
+    polarized : bool
+        If True, add Q and U maps to stub frame, and ensure that weights are
+        polarized.  Only used if the input argument is a G3SkyMap instance to be
+        Cloned.
+    weighted : bool
+        If True, add weights to the stub frame.  Only used if the input argument
+        is a G3SkyMap instance to be Cloned.
+    """
+
+    def __init__(self, map_id, maps_in, polarized=True, weighted=True):
+        self.map_frame = core.G3Frame(core.G3FrameType.Map)
+        self.map_frame["Id"] = map_id
+
+        if isinstance(maps_in, maps.G3SkyMap):
+            # stub frame
+            T = maps_in.Clone(False)
+            T.pol_type = maps.MapPolType.T
+            self.map_frame["T"] = T
+            if polarized:
+                Q = maps_in.Clone(False)
+                Q.pol_type = maps.MapPolType.Q
+                self.map_frame["Q"] = Q
+                U = maps_in.Clone(False)
+                U.pol_type = maps.MapPolType.U
+                self.map_frame["U"] = U
+            if weighted:
+                W = maps.G3SkyMapWeights(maps_in, polarized)
+                self.map_frame["Wpol" if polarized else "Wunpol"] = W
+
+        elif isinstance(maps_in, list):
+            for m in maps_in:
+                if isinstance(m, maps.G3SkyMap):
+                    k = str(m.pol_type)
+                    if k not in "TQU":
+                        raise ValueError("Input map has invalid pol_type %s" % k)
+                    self.map_frame[k] = m
+                elif isinstance(m, maps.G3SkyMapWeights):
+                    self.map_frame["Wpol" if m.polarized else "Wunpol"] = m
+                else:
+                    raise TypeError("maps_in must be G3SkyMap or G3SkyMapWeights")
+
+        elif isinstance(maps_in, dict):
+            for k, m in maps_in.items():
+                if k not in ["T", "Q", "U", "Wpol", "Wunpol"]:
+                    continue
+                self.map_frame[k] = m
+
+        else:
+            raise TypeError("maps_in must be a G3SkyMap instance, list or dict")
+
+        ValidateMaps(self.map_frame)
+
+    def __call__(self, frame):
+        if self.map_frame is None:
+            return
+
+        map_frame = self.map_frame
+        self.map_frame = None
+        return [map_frame, frame]
+
+
+@core.indexmod
+def ReplicateMaps(frame, input_map_id, output_map_ids, copy_weights=False):
+    """
+    Clone the input map frame with Id input_map_id into new stub frames, one for
+    each Id listed in output_map_ids.
+
+    Arguments
+    ---------
+    input_map_id : string
+        ID of the map frame to replicate.  The input frame is discarded after
+        replication.
+    output_map_ids : list of strings
+        List of IDs to assign to replicated map frames.
+    copy_weights : bool
+        If False, only the first output frame in the list includes a weights key
+        (Wpol or Wunpol).  If True, all output frames include a weights key.
+    """
+
+    if frame.type != core.G3FrameType.Map:
+        return
+
+    if frame["Id"] != input_map_id:
+        return
+
+    ValidateMaps(frame)
+
+    frames = []
+
+    first = True
+    for oid in output_map_ids:
+        fr = core.G3Frame(core.G3FrameType.Map)
+        fr["Id"] = oid
+        if copy_weights or first:
+            map_keys = ["T", "Q", "U", "Wpol", "Wunpol"]
+            first = False
+        else:
+            map_keys = ["T", "Q", "U"]
+
+        for k in map_keys:
+            if k not in frame:
+                continue
+            fr[k] = frame[k].Clone(False)
+
+        frames.append(fr)
+
+    return frames
