@@ -75,7 +75,9 @@ The more general ``maputils.reproj_map`` function can also be used to convert be
 Map Weights
 ===========
 
-Map weights are stored in a ``G3SkyMapWeights`` object with attributes `TT`, `TQ`, etc.  Unpolarized weights have just the `TT` element set, while polarized weights define all six unique matrix elements of the weights matrix for each pixel.  Each attribute is itself ``G3SkyMap`` object, and can be accessed as an object attribute (e.g. ``weights.TT``) or as a dictionary key (e.g. ``weights['TT']``).
+The ``G3SkyMapWeights`` class combines the six unique components of the Mueller weight matrix into one object.  The individual matrix terms can be accessed using the attributes ``G3SkyMapWeights.TT``, etc, or as keyed elements (e.g. ``weights['TT']``).  The full matrix for an individual map pixel can be accessed using the standard ``[]`` operator.  In python, this returns a symmetric 3x3 numpy array that is a copy of the values in the underlying maps, and in C++ this returns a MuellerMatrix object, with scalar attributes ``MuellerMatrix.tt``, etc that are writable references to elements of the underlying map objects.  The ``G3SkyMapWeights.polarized`` attribute determines whether the weight structure contains polarization information.  For unpolarized weights, only the ``TT`` element is set, and the ``[]`` operator returns a scalar value in python, and a MuellerMatrix with just the TT element set in C++.
+
+In C++ there is also a StokesVector object that is analogous to the MuellerMatrix object.  It has scalar attributes StokesVector.t etc, that are writable references to elements of map objects.  Matrix operations on the StokesVector and MuellerMatrix objects are well defined.
 
 Maps and associated weights are generally stored on disk in in `G3Frames` of type `G3FrameType.Map`, with keys ``'T', 'Q', 'U', 'Wpol'`` defined for polarized maps, and ``'T', 'Wunpol'`` defined for unpolarized maps.  Weights can be applied or removed from their corresponding Stokes maps using the ``ApplyWeights`` or ``RemoveWeights`` pipeline modules.
 
@@ -87,15 +89,3 @@ Flat sky maps have additional functions defined for efficient manipulation in me
 The ``FlattenPol`` pipeline module flattens the Q and U stokes parameters to align with the pixel coordinate grid, which is necessary for computing power spectra in the flat sky approximation.
 
 Small patches can be extracted from and inserted into larger flat sky maps using the ``FlatSkyMap.extract_patch`` and ``FlatSkyMap.insert_patch`` methods, respectively.  Also, maps can be padded and cropped using the ``FlatSkyMap.pad`` and ``FlatSkyMap.crop`` methods.  All of these preserve the map pixelization and correspondence to angle on the sky.
-
-Stokes Vectors and Mueller Matrices
-===================================
-
-We provide two additional map classes that combine T/Q/U Stokes maps and Mueller weight matrices into a single structure.
-
-The G3SkyMapWeights class combines the six unique components of the Mueller weight matrix into one object.  The individual matrix terms can be accessed using the attributes G3SkyMapWeights.TT, etc.  The full matrix for an individual pixel can be accessed using the standard ``[]`` operator.  In python, this returns a symmetric 3x3 numpy array that is a copy of the values in the underlying maps, and in C++ this returns a MuellerMatrix object, with scalar attributes MuellerMatrix.tt, etc that are writable references to elements of the underlying map objects.
-
-Analogously, the G3SkyMapWithWeights class combines the T, Q and U Stokes maps and the corresponding weight matrix into a single structure.  The individual Stokes components can be accessed using the attributes G3SkyMapWithWeights.T etc, and the 3-element StokesVector can be accessed with the standard ``[]`` operator.  In python, this returns a numpy array of length 3 that is a copy of the values in the underlying maps, and in C++ this returns a StokesVector object with scalar attributes StokesVector.t etc, that are writable references to elements of the underlying map objects.  Weights can be applied to or removed from the Stokes maps using the ``G3SkyMapWithWeights.apply_weights`` and ``G3SkyMapWithWeights.remove_weights`` methods.  The attribute ``G3SkyMapWithWeights.weighted`` is True if the Stokes components are weighted, and the attribute ``G3SkyMapWithWeights.polarized`` is True if the structure contains Q and U Stokes components.
-
-Several convenience functions and operators are provided for the StokesVector and MuellerMatrix objects in C++, including typical matrix operations that are performed with these two structures.  A limited set of operators are also provided in both C++ and python for the G3SkyMapWeights and G3SkyMapWithWeights objects (addition of two such objects [e.g. for coadding], multiplication/division by a scalar, and multiplication by a G3SkyMap object [e.g. for masking]).
-
