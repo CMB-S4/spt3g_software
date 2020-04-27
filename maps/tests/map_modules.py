@@ -6,8 +6,7 @@ pipe = core.G3Pipeline()
 m = maps.FlatSkyMap(300, 300, core.G3Units.arcmin, proj=maps.MapProjection.ProjZEA)
 
 pipe.Add(core.G3InfiniteSource, type=core.G3FrameType.Observation, n=1)
-pipe.Add(maps.InjectMaps, map_id="test_map", maps_in=m, polarized=False, weighted=True)
-
+pipe.Add(maps.InjectMapStub, map_id="test_map", map_stub=m, polarized=False, weighted=True)
 
 def RandomMap(frame):
     if frame.type != core.G3FrameType.Map:
@@ -41,9 +40,20 @@ pipe.Add(
     copy_weights=True,
 )
 
-mex = maps.ExtractMaps()
+mex2 = maps.ExtractMaps()
+pipe.Add(mex2)
 
-pipe.Add(mex)
+pipe.Add(maps.MakeMapsUnpolarized)
+
+mex3 = maps.ExtractMaps()
+pipe.Add(mex3)
+
+tmap = m.Clone(False)
+np.asarray(tmap)[:] = np.random.randn(*m.shape)
+tmap.pol_type = maps.MapPolType.T
+tmap.weighted = False
+pipe.Add(maps.InjectMaps, map_id="test_map", maps_in=[tmap])
+
 pipe.Run()
 
 # check that mex0 and mex1 are nearly (but not exactly) identical
@@ -51,14 +61,20 @@ assert np.max(mex0.maps["test_map"]["T"] - mex1.maps["test_map"]["T"]) != 0
 assert np.allclose(mex0.maps["test_map"]["T"], mex1.maps["test_map"]["T"])
 
 # check that replication dropped the test map
-assert "test_map" not in mex.maps
+assert "test_map" not in mex2.maps
+assert "test_map" not in mex3.maps
 
 # check that replicated maps are properly populated
 for map_id in ["test_map1", "test_map2"]:
-    assert map_id in mex.maps
+    assert map_id in mex2.maps
+    assert map_id in mex3.maps
 
-    mdict = mex.maps[map_id]
-
+    mdict = mex2.maps[map_id]
     for k in ["T", "Q", "U", "Wpol"]:
+        assert k in mdict
+        assert mdict[k].IsCompatible(m)
+
+    mdict = mex3.maps[map_id]
+    for k in ["T", "Wunpol"]:
         assert k in mdict
         assert mdict[k].IsCompatible(m)
