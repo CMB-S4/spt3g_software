@@ -87,23 +87,8 @@ G3SkyMapWeights::serialize(A &ar, unsigned v)
 	}
 }
 
-template <class A> void
-G3SkyMapWithWeights::serialize(A &ar, unsigned v)
-{
-	G3_CHECK_VERSION(v);
-
-	ar & cereal::make_nvp("G3FrameObject",
-	    cereal::base_class<G3FrameObject>(this));
-	ar & cereal::make_nvp("map_id", map_id);
-	ar & cereal::make_nvp("T", T);
-	ar & cereal::make_nvp("Q", Q);
-	ar & cereal::make_nvp("U", U);
-	ar & cereal::make_nvp("weights", weights);
-}
-
 G3_SERIALIZABLE_CODE(G3SkyMap);
 G3_SERIALIZABLE_CODE(G3SkyMapWeights);
-G3_SERIALIZABLE_CODE(G3SkyMapWithWeights);
 
 G3SkyMap::G3SkyMap(MapCoordReference coords, bool weighted,
     G3Timestream::TimestreamUnits units, MapPolType pol_type,
@@ -131,23 +116,6 @@ G3SkyMapWeights::G3SkyMapWeights(const G3SkyMapWeights &r) :
     QQ(!r.QQ ? NULL : r.QQ->Clone(true)),
     QU(!r.QU ? NULL : r.QU->Clone(true)),
     UU(!r.UU ? NULL : r.UU->Clone(true))
-{
-}
-
-G3SkyMapWithWeights::G3SkyMapWithWeights(G3SkyMapConstPtr ref,
-  bool weighted, bool polarized, std::string map_id_) :
-    T(ref->Clone(false)), Q(polarized ? ref->Clone(false) : NULL),
-    U(polarized ? ref->Clone(false) : NULL),
-    weights(weighted ? new G3SkyMapWeights(ref, polarized) : NULL),
-    map_id(map_id_)
-{
-}
-
-G3SkyMapWithWeights::G3SkyMapWithWeights(const G3SkyMapWithWeights &r) :
-    T(r.T->Clone(true)), Q(!r.Q ? NULL : r.Q->Clone(true)),
-    U(!r.U ? NULL : r.U->Clone(true)),
-    weights(!r.weights ? NULL : r.weights->Clone(true)),
-    map_id(r.map_id)
 {
 }
 
@@ -354,12 +322,6 @@ skymapweights_shape(G3SkyMapWeights &weights)
 	return skymap_shape(*(weights.TT));
 }
 
-static bp::tuple
-skymapwithweights_shape(G3SkyMapWithWeights &skymap)
-{
-	return skymap_shape(*(skymap.T));
-}
-
 static G3SkyMapPtr
 skymap_copy(G3SkyMap &r)
 {
@@ -459,56 +421,6 @@ skymapweights_pynoninplace(add, +=, G3SkyMapWeights &);
 skymapweights_pynoninplace(multm, *=, G3SkyMap &);
 skymapweights_pynoninplace(multd, *=, double);
 skymapweights_pynoninplace(divd, /=, double);
-
-G3SkyMapWithWeights &
-G3SkyMapWithWeights::operator+=(const G3SkyMapWithWeights &rhs)
-{
-	g3_assert(IsPolarized() == rhs.IsPolarized());
-	g3_assert(IsWeighted() == rhs.IsWeighted());
-
-	*T += *rhs.T;
-
-	if (IsPolarized()) {
-		*Q += *rhs.Q;
-		*U += *rhs.U;
-	}
-
-	if (IsWeighted())
-		*weights += *rhs.weights;
-
-	return *this;
-}
-
-#define skymapwithweights_inplace(op, rhs_type) \
-G3SkyMapWithWeights &G3SkyMapWithWeights::operator op(rhs_type rhs) \
-{ \
-	*T op rhs; \
-	if (IsPolarized()) { \
-		*Q op rhs; \
-		*U op rhs; \
-	} \
-	if (IsWeighted()) \
-		*weights op rhs; \
-	return *this; \
-}
-
-skymapwithweights_inplace(*=, const G3SkyMap &);
-skymapwithweights_inplace(*=, double);
-skymapwithweights_inplace(/=, double);
-
-#define skymapwithweights_pynoninplace(name, oper, rhs_type) \
-static G3SkyMapWithWeightsPtr \
-pyskymapwithweights_##name(const G3SkyMapWithWeights &a, const rhs_type b) \
-{ \
-	G3SkyMapWithWeightsPtr rv = a.Clone(true); \
-	(*rv) oper b; \
-	return rv; \
-}
-
-skymapwithweights_pynoninplace(add, +=, G3SkyMapWithWeights &);
-skymapwithweights_pynoninplace(multm, *=, G3SkyMap &);
-skymapwithweights_pynoninplace(multd, *=, double);
-skymapwithweights_pynoninplace(divd, /=, double);
 
 MuellerMatrix MuellerMatrix::Inv() const
 {
@@ -625,62 +537,6 @@ G3SkyMapPtr G3SkyMapWeights::Cond() const
 	return C;
 }
 
-void G3SkyMapWithWeights::ApplyWeights(G3SkyMapWeightsPtr w)
-{
-	g3_assert(!IsWeighted());
-	g3_assert(IsCongruent());
-	g3_assert(w->IsCongruent());
-	g3_assert(T->IsCompatible(*(w->TT)));
-
-	if (IsPolarized()) {
-		for (size_t pix = 0; pix < T->size(); pix++) {
-			StokesVector v = this->at(pix);
-			if (!(v.t == 0 && v.q == 0 && v.u == 0))
-				(*this)[pix] = w->at(pix) * v;
-		}
-	} else {
-		(*T) *= *(w->TT);
-	}
-
-	T->weighted = true;
-	if (IsPolarized()) {
-		Q->weighted = true;
-		U->weighted = true;
-	}
-
-	// Store pointer to weights here
-	weights = w;
-}
-
-G3SkyMapWeightsPtr G3SkyMapWithWeights::RemoveWeights()
-{
-	g3_assert(IsWeighted());
-	g3_assert(IsCongruent());
-
-	// Dividing by empty weights fills with nans
-	T->ConvertToDense();
-	if (IsPolarized()) {
-		Q->ConvertToDense();
-		U->ConvertToDense();
-		for (size_t pix = 0; pix < T->size(); pix++)
-			(*this)[pix] /= weights->at(pix);
-	} else {
-		(*T) /= *(weights->TT);
-	}
-
-	T->weighted = false;
-	if (IsPolarized()) {
-		Q->weighted = false;
-		U->weighted = false;
-	}
-
-	// Remove pointer to weights
-	G3SkyMapWeightsPtr wout = weights;
-	weights.reset();
-
-	return wout;
-}
-
 G3SkyMapWeightsPtr G3SkyMapWeights::Rebin(size_t scale) const
 {
 	g3_assert(IsCongruent());
@@ -716,35 +572,6 @@ void G3SkyMapWeights::Compact(bool zero_nans)
 		QU->Compact(zero_nans);
 		UU->Compact(zero_nans);
 	}
-}
-
-G3SkyMapWithWeightsPtr G3SkyMapWithWeights::Rebin(size_t scale) const
-{
-	g3_assert(IsCongruent());
-	G3SkyMapWithWeightsPtr out(new G3SkyMapWithWeights());
-
-	bool w = IsWeighted();
-	bool p = IsPolarized();
-	out->T = T->Rebin(scale, !w);
-	out->Q = p ? Q->Rebin(scale, !w) : NULL;
-	out->U = p ? U->Rebin(scale, !w) : NULL;
-	out->weights = w ? weights->Rebin(scale) : NULL;
-	out->map_id = map_id;
-
-	return out;
-}
-
-void G3SkyMapWithWeights::Compact(bool zero_nans)
-{
-	g3_assert(IsCongruent());
-
-	T->Compact(zero_nans);
-	if (IsPolarized()) {
-		Q->Compact(zero_nans);
-		U->Compact(zero_nans);
-	}
-
-	weights->Compact(zero_nans);
 }
 
 PYBINDINGS("maps") {
@@ -920,63 +747,6 @@ PYBINDINGS("maps") {
 	    .def("__truediv__", &pyskymapweights_divd)
 	;
 	register_pointer_conversions<G3SkyMapWeights>();
-
-	EXPORT_FRAMEOBJECT(G3SkyMapWithWeights, init<>(), "Container for (potentially) polarized maps and weights")
-	    .def(bp::init<G3SkyMapPtr, bool, bool, std::string>(
-	      (bp::arg("stub_map"),
-	       bp::arg("weighted"),
-	       bp::arg("polarized"),
-	       bp::arg("map_id") = "")))
-	    .def_readwrite("T",&G3SkyMapWithWeights::T, "Stokes component map")
-	    .def_readwrite("Q",&G3SkyMapWithWeights::Q, "Stokes component map")
-	    .def_readwrite("U",&G3SkyMapWithWeights::U, "Stokes component map")
-	    .def_readwrite("weights",&G3SkyMapWithWeights::weights, "Weights object")
-	    .def_readwrite("map_id",&G3SkyMapWithWeights::map_id, "Map identifier")
-	    .add_property("size", &G3SkyMapWithWeights::size, "Number of pixels in map")
-	    .def("__len__", &G3SkyMapWithWeights::size, "Number of pixels in map")
-	    .add_property("shape", &skymapwithweights_shape, "Shape of map")
-	    .add_property("weighted",&G3SkyMapWithWeights::IsWeighted,
-	      "True if weights are set")
-	    .add_property("polarized",&G3SkyMapWithWeights::IsPolarized,
-	      "True if Q and U maps are set")
-	    .add_property("congruent",&G3SkyMapWithWeights::IsCongruent,
-	      "True if all components are internally compatible with each other")
-	    .def("remove_weights",&G3SkyMapWithWeights::RemoveWeights,
-	      "Decouple Stokes components by applying the inverse of the "
-	      "Mueller matrix for each pixel")
-	    .def("apply_weights",&G3SkyMapWithWeights::ApplyWeights,
-	      "Couple the Stokes components by applying the Mueller matrix "
-	      "for each pixel")
-	    .def("rebin", &G3SkyMapWithWeights::Rebin, (bp::arg("scale")),
-	      "Rebin the map into larger pixels by summing (if weighted) "
-	      "or averaging (if unweighted) scale-x-scale blocks of pixels "
-	      "together.  Returns a new map object.  Map dimensions must be a "
-	      "multiple of the rebinning scale.")
-	    .def("compact", &G3SkyMapWithWeights::Compact, (bp::arg("zero_nans")=false),
-	      "Convert the map to its default sparse representation, excluding "
-	      "empty pixels, and optionally converting NaN values to zeroes. "
-	      "Converting NaNs to zeros will reduce memory use, but will "
-	      "remove the distinction in unweighted (or weight-removed) maps "
-	      "between unobserved regions and regions with zero temperature.")
-
-	    .def("Clone", &G3SkyMapWithWeights::Clone, ((bp::arg("copy_data")=true),
-	       "Return a map of the same type, populated with a copy of the data "
-	       "if the argument is true (default), empty otherwise."))
-
-	    .def(bp::self += bp::self)
-	    .def(bp::self *= FlatSkyMap())
-	    .def(bp::self *= HealpixSkyMap())
-	    .def(bp::self *= double())
-	    .def(bp::self /= double())
-
-	    .def("__add__", &pyskymapwithweights_add)
-	    .def("__mul__", &pyskymapwithweights_multm)
-	    .def("__mul__", &pyskymapwithweights_multd)
-	    .def("__rmul__", &pyskymapwithweights_multd)
-	    .def("__div__", &pyskymapwithweights_divd)
-	    .def("__truediv__", &pyskymapwithweights_divd)
-	;
-	register_pointer_conversions<G3SkyMapWithWeights>();
 
 }
 

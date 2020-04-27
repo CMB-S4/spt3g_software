@@ -1,5 +1,5 @@
 import numpy
-from spt3g.maps import G3SkyMapWeights, G3SkyMapWithWeights, G3SkyMap
+from spt3g.maps import G3SkyMapWeights, G3SkyMap
 
 # This file adds extra functionality to the python interface to G3SkyMap and
 # G3SkyMapWeights. This is done in ways that exploit a large fraction of
@@ -98,59 +98,3 @@ def skymapweights_setattr(self, x, val):
             setattr(self.UU, x, val)
 G3SkyMapWeights.__setattr__ = skymapweights_setattr
 del skymapweights_setattr
-
-# Make maps with weights so that you can index them and get the full 1x3 Stokes vector
-
-def skymapwithweights_getitem(self, x):
-    if isinstance(x, str) and x in ['T', 'Q', 'U']:
-        return getattr(self, x)
-
-    if not self.polarized:
-        return self.T[x]
-
-    vec = numpy.zeros(3)
-    vec[0] = self.T[x]
-    vec[1] = self.Q[x]
-    vec[2] = self.U[x]
-    return vec
-
-G3SkyMapWithWeights.__getitem__ = skymapwithweights_getitem
-del skymapwithweights_getitem
-
-def skymapwithweights_setitem(self, x, vec):
-    if isinstance(x, str) and x in ['T', 'Q', 'U']:
-        setattr(self, x, vec)
-        return
-
-    if not self.polarized:
-        assert(numpy.isscalar(vec))
-        self.T[x] = vec
-        return
-
-    vec = numpy.asarray(vec, dtype=float)
-    assert(len(vec) == 3)
-    self.T[x] = vec[0]
-    self.Q[x] = vec[1]
-    self.U[x] = vec[2]
-
-G3SkyMapWithWeights.__setitem__ = skymapwithweights_setitem
-del skymapwithweights_setitem
-
-# Pass through attributes to submaps. This is not ideal because the properties
-# are hidden and not visible by tab completion. A better solution would use
-# __getattribute__
-G3SkyMapWithWeights.__getattr__ = lambda self, x: getattr(self.T, x)
-oldsetattr = G3SkyMapWithWeights.__setattr__
-def skymapwithweights_setattr(self, x, val):
-    try:
-        oldsetattr(self, x, val)
-    except AttributeError:
-        setattr(self.T, x, val)
-        if self.polarized:
-            setattr(self.Q, x, val)
-            setattr(self.U, x, val)
-        if self.weighted:
-            setattr(self.weights, x, val)
-G3SkyMapWithWeights.__setattr__ = skymapwithweights_setattr
-del skymapwithweights_setattr
-
