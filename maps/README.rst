@@ -59,7 +59,7 @@ Note that sky maps *do not* support numpy-style slicing operations. These are il
 Sparsity
 ========
 
-By default, both Healpix and flat-sky maps are initialized in sparse mode. This imposes a slight performance penalty but will result in the map storing only non-zero portions (with caveats, see details above), substantially reducing RAM usage. Some map operations, in particular casting to numpy arrays, will result in the implicit conversion of the map to dense storage, which can result in sudden increases in RAM usage. The current sparsity mode can be examined or changed with the ``sparse`` property (flat sky maps) or the ``dense``, ``ringsparse``, or ``indexedsparse`` properties (Healpix maps). Serialization to ``.g3`` files will maintain the current sparsity scheme, as do arithmetic operators where possible. Serialization to ``.fits`` files implicitly converts flat sky maps to dense mode, but preserves the sparsity of Healpix maps.  The current number of stored pixels can be obtained using the ``npix_allocated`` property.
+By default, both Healpix and flat-sky maps are initialized in sparse mode. This imposes a slight performance penalty but will result in the map storing only non-zero portions (with caveats, see details above), substantially reducing RAM usage. Some map operations, in particular casting to numpy arrays, will result in the implicit conversion of the map to dense storage, which can result in sudden increases in RAM usage. The current sparsity mode can be examined or changed with the ``sparse`` property (flat sky maps) or the ``dense``, ``ringsparse``, or ``indexedsparse`` properties (Healpix maps). Serialization to ``.g3`` files will maintain the current sparsity scheme, as do arithmetic operators where possible. Serialization to ``.fits`` files implicitly converts flat sky maps to dense mode, but preserves the sparsity of Healpix maps.  The current number of stored pixels can be obtained using the ``npix_allocated`` property, and the number of non-zero pixels can be obtained using the ``npix_nonzero`` property.  Dense maps can be efficiently compactified in memory using the ``G3SkyMap.compact`` method, or the ``CompactMaps`` pipeline module.
 
 Beyond paying attention to implicit conversions to dense storage and the performance impact of sparse storage (which is small), users of this code do not need to worry about the storage mode--all interfaces are identical in all modes.
 
@@ -70,7 +70,23 @@ Several interpolation and rebinning utilities are provided.  The method ``G3SkyM
 
 The functions ``maputils.healpix_to_flatsky`` and ``maputils.flatsky_to_healpix`` functions are provided to reproject maps between flat sky and curved sky systems, with options to use interpolation or rebinning to improve the accuracy of the reprojection.
 
-The more general ``maputils.reproj`` function can also be used to convert between flat sky projections.
+The more general ``maputils.reproj_map`` function can also be used to convert between flat sky projections.
+
+Map Weights
+===========
+
+Map weights are stored in a ``G3SkyMapWeights`` object with attributes `TT`, `TQ`, etc.  Unpolarized weights have just the `TT` element set, while polarized weights define all six unique matrix elements of the weights matrix for each pixel.  Each attribute is itself ``G3SkyMap`` object, and can be accessed as an object attribute (e.g. ``weights.TT``) or as a dictionary key (e.g. ``weights['TT']``).
+
+Maps and associated weights are generally stored on disk in in `G3Frames` of type `G3FrameType.Map`, with keys ``'T', 'Q', 'U', 'Wpol'`` defined for polarized maps, and ``'T', 'Wunpol'`` defined for unpolarized maps.  Weights can be applied or removed from their corresponding Stokes maps using the ``ApplyWeights`` or ``RemoveWeights`` pipeline modules.
+
+FlatSkyMap Manipulation
+=======================
+
+Flat sky maps have additional functions defined for efficient manipulation in memory.
+
+The ``FlattenPol`` pipeline module flattens the Q and U stokes parameters to align with the pixel coordinate grid, which is necessary for computing power spectra in the flat sky approximation.
+
+Small patches can be extracted from and inserted into larger flat sky maps using the ``FlatSkyMap.extract_patch`` and ``FlatSkyMap.insert_patch`` methods, respectively.  Also, maps can be padded and cropped using the ``FlatSkyMap.pad`` and ``FlatSkyMap.crop`` methods.  All of these preserve the map pixelization and correspondence to angle on the sky.
 
 Stokes Vectors and Mueller Matrices
 ===================================
