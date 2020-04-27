@@ -387,7 +387,7 @@ class InjectMaps(object):
                 self.map_frame[k] = m
 
         else:
-            raise TypeError("maps_in must be a G3SkyMap instance, list or dict")
+            raise TypeError("maps_in must be a list or dict")
 
         ValidateMaps(self.map_frame)
 
