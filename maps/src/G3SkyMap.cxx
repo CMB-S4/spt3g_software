@@ -328,6 +328,12 @@ skymap_copy(G3SkyMap &r)
 	return r.Clone(true);
 }
 
+static G3SkyMapWeightsPtr
+skymapweights_copy(G3SkyMapWeights &r)
+{
+	return r.Clone(true);
+}
+
 #define skymap_pynoninplace(name, oper, rhs_type) \
 static G3SkyMapPtr \
 pyskymap_##name(const G3SkyMap &a, const rhs_type b) \
@@ -712,6 +718,9 @@ PYBINDINGS("maps") {
 	    .def_readwrite("UU",&G3SkyMapWeights::UU, "Mueller matrix component map")
 	    .add_property("size", &G3SkyMapWeights::size, "Number of pixels in weights")
 	    .def("__len__", &G3SkyMapWeights::size, "Number of pixels in weights")
+	    .def("__copy__", &skymapweights_copy)
+	    .def("__deepcopy__", &skymapweights_copy)
+	    .def("copy", &skymapweights_copy)
 	    .add_property("shape", &skymapweights_shape, "Shape of weights")
 	    .add_property("polarized", &G3SkyMapWeights::IsPolarized,
 	      "True if all components are set, False if only the TT component is set")
