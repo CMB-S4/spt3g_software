@@ -127,6 +127,7 @@ public:
 	G3SkyMapPtr ExtractPatch(size_t x0, size_t y0, size_t width, size_t height) const;
 	void InsertPatch(const FlatSkyMap &patch);
 	G3SkyMapPtr Pad(size_t width, size_t height, double fill = 0) const;
+	G3SkyMapPtr Crop(size_t width, size_t height) const;
 
 	void ConvertToDense() override;
 	void ConvertToSparse();

@@ -585,12 +585,12 @@ FlatSkyProjection FlatSkyProjection::OverlayPatch(double x0, double y0,
 
 	fp.xpix_ = width;
 	fp.ypix_ = height;
-	fp.SetXYCenter(x0 - x0_ + width + 1, y0 - y0_ + height + 1);
+	fp.SetXYCenter(x0_ - x0 + width / 2, y0_ - y0 + height / 2);
 
 	return fp;
 }
 
-std::vector<double> FlatSkyProjection::GetPatchLocation(const FlatSkyProjection &proj) const
+std::vector<double> FlatSkyProjection::GetPatchCenter(const FlatSkyProjection &proj) const
 {
 	// check that input projection is compatible aside from patch location
 	FlatSkyProjection fp(proj);
@@ -599,9 +599,8 @@ std::vector<double> FlatSkyProjection::GetPatchLocation(const FlatSkyProjection 
 	fp.SetXYCenter(x0_, y0_);
 	g3_assert(IsCompatible(fp));
 
-	// check that patch fits in the map
-	double x0 = proj.x0_ + x0_ - proj.xpix_ - 1;
-	double y0 = proj.y0_ + y0_ - proj.ypix_ - 1;
+	double x0 = x0_ - proj.x0_ + proj.xpix_ / 2;
+	double y0 = y0_ - proj.y0_ + proj.ypix_ / 2;
 
 	return {x0, y0};
 }

@@ -103,7 +103,7 @@ public:
 	    double y_center = 0.0 / 0.0) const;
 	FlatSkyProjection OverlayPatch(double x0, double y0, size_t width,
 	    size_t height) const;
-	std::vector<double> GetPatchLocation(const FlatSkyProjection &proj) const;
+	std::vector<double> GetPatchCenter(const FlatSkyProjection &proj) const;
 
 private:
 	// projection parameters

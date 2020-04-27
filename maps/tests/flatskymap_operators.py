@@ -150,46 +150,78 @@ for pair in [(m1, m3), (m2, m3), (m3, m2), (m3, m1)]:
     assert(m2.npix_allocated == nm2)
     assert(m3.npix_allocated == 0)
 
-# patch extraction / insertion
-m = FlatSkyMap(500, 20, core.G3Units.arcmin, proj=MapProjection.ProjZEA)
-np.asarray(m)[:] = np.random.randn(*m.shape)
-p = m.extract_patch(20, 8, 50, 10)
-malpha, mdelta = get_ra_dec_map(m)
-palpha, pdelta = get_ra_dec_map(p)
-assert(np.allclose(np.asarray(m)[8:18, 20:70], p))
-assert(np.allclose(np.asarray(malpha)[8:18, 20:70], palpha))
-assert(np.allclose(np.asarray(mdelta)[8:18, 20:70], pdelta))
 
-m2 = m.Clone(False)
-m2.insert_patch(p)
-assert(np.allclose(np.asarray(m)[8:18, 20:70], np.asarray(m2)[8:18, 20:70]))
+for shape in [(20, 500), (21, 501)]:
+    print('shape', shape)
 
-pad = 10
-mpad = m.pad(m.shape[1] + 2 * pad, m.shape[0] + 2 * pad)
-assert(mpad.npix_allocated == m.npix_allocated)
-a0 = np.array([m.alpha_center, m.delta_center])
-a1 = np.array([mpad.alpha_center, mpad.delta_center])
-assert(np.allclose(a0, a1))
-x0 = np.array([m.x_center, m.y_center])
-x1 = np.array([mpad.x_center, mpad.y_center])
-assert(all(x0 + pad == x1))
-v1 = m[m.angle_to_pixel(*a0)]
-v2 = mpad[mpad.angle_to_pixel(*a1)]
-assert(v1 == v2)
-palpha, pdelta = get_ra_dec_map(mpad)
-assert(np.allclose(np.asarray(palpha)[pad:-pad, pad:-pad], malpha))
-assert(np.allclose(np.asarray(pdelta)[pad:-pad, pad:-pad], mdelta))
-assert(np.allclose(np.asarray(mpad)[pad:-pad, pad:-pad], np.asarray(m)))
+    # patch extraction / insertion
+    m = FlatSkyMap(shape[1], shape[0], core.G3Units.arcmin, proj=MapProjection.ProjZEA)
+    np.asarray(m)[:] = np.random.randn(*m.shape)
+    malpha, mdelta = get_ra_dec_map(m)
 
-# statistics
-m1 = np.asarray(m).ravel()
-stats0 = [np.mean(m1), np.var(m1), skew(m1), kurtosis(m1)]
-stats1 = get_map_stats(m, order=4)
-assert(np.allclose(stats1, stats0))
+    x0 = 45
+    y0 = 13
 
-stats2 = get_map_stats(mpad, order=4, ignore_zeros=True)
-assert(np.allclose(stats2, stats0))
+    for dy, dx in [[10, 50], [11, 51]]:
+        print('    patch', (dy, dx))
+        p = m.extract_patch(45, 13, dx, dy)
+        palpha, pdelta = get_ra_dec_map(p)
+        x1 = x0 - dx // 2
+        y1 = y0 - dy // 2
+        sx = slice(x1, x1 + dx)
+        sy = slice(y1, y1 + dy)
+        assert(np.allclose(np.asarray(malpha)[sy, sx], palpha))
+        assert(np.allclose(np.asarray(mdelta)[sy, sx], pdelta))
+        assert(np.allclose(np.asarray(m)[sy, sx], p))
 
-np.asarray(mpad)[np.asarray(mpad) == 0] = np.nan
-stats3 = get_map_stats(mpad, order=4, ignore_nans=True)
-assert(np.allclose(stats3, stats0))
+        m2 = m.Clone(False)
+        m2.insert_patch(p)
+        assert(np.allclose(np.asarray(m)[sy, sx], np.asarray(m2)[sy, sx]))
+
+    # padding / cropping, with even and odd changes in dimension
+    pad = 10
+    for off in [0, 1]:
+        print('    padding', 2 * pad + off)
+
+        mpad = m.pad(m.shape[1] + 2 * pad + off, m.shape[0] + 2 * pad + off)
+        assert(mpad.npix_allocated == m.npix_allocated)
+        a0 = np.array([m.alpha_center, m.delta_center])
+        a1 = np.array([mpad.alpha_center, mpad.delta_center])
+        assert(np.allclose(a0, a1))
+        x0 = np.array([m.y_center, m.x_center])
+        x1 = np.array([mpad.y_center, mpad.x_center])
+        v0 = m[m.angle_to_pixel(*a0)]
+        v1 = mpad[mpad.angle_to_pixel(*a1)]
+        assert(v0 == v1)
+        palpha, pdelta = get_ra_dec_map(mpad)
+        sx = slice(mpad.shape[1] // 2 - m.shape[1] // 2, mpad.shape[1] // 2 - m.shape[1] // 2 + m.shape[1])
+        sy = slice(mpad.shape[0] // 2 - m.shape[0] // 2, mpad.shape[0] // 2 - m.shape[0] // 2 + m.shape[0])
+        assert(np.allclose(np.asarray(palpha)[sy, sx], malpha))
+        assert(np.allclose(np.asarray(pdelta)[sy, sx], mdelta))
+        assert(np.allclose(np.asarray(mpad)[sy, sx], np.asarray(m)))
+
+        mcrop = mpad.crop(m.shape[1], m.shape[0])
+        calpha, cdelta = get_ra_dec_map(mcrop)
+        a2 = np.array([mcrop.alpha_center, mcrop.delta_center])
+        assert(np.allclose(a0, a2))
+        x2 = np.array([mcrop.y_center, mcrop.x_center])
+        assert(np.allclose(x0, x2))
+        v2 = mcrop[mcrop.angle_to_pixel(*a2)]
+        assert(v0 == v2)
+        assert(np.allclose(calpha, malpha))
+        assert(np.allclose(cdelta, mdelta))
+        assert(np.allclose(mcrop, m))
+        assert(m.IsCompatible(mcrop))
+
+        # statistics
+        m1 = np.asarray(m).ravel()
+        stats0 = [np.mean(m1), np.var(m1), skew(m1), kurtosis(m1)]
+        stats1 = get_map_stats(m, order=4)
+        assert(np.allclose(stats1, stats0))
+
+        stats2 = get_map_stats(mpad, order=4, ignore_zeros=True)
+        assert(np.allclose(stats2, stats0))
+
+        np.asarray(mpad)[np.asarray(mpad) == 0] = np.nan
+        stats3 = get_map_stats(mpad, order=4, ignore_nans=True)
+        assert(np.allclose(stats3, stats0))
