@@ -19,6 +19,9 @@ for pol in [True, False]:
     assert(mw.weighted)
     assert(mw.congruent)
 
+    assert(np.all(mw['T'].IsCompatible(mw.T)))
+    assert(np.all(mw.weights['TT'].IsCompatible(mw.weights.TT)))
+
     if not pol:
         assert(mw.Q is None)
         assert(mw.U is None)

@@ -38,6 +38,9 @@ setattr(G3SkyMap, '__getslice__', lambda a, *args: numpy.ndarray.__getslice__(nu
 # Make weight maps so that you can index them and get the full 3x3 weight matrix
 
 def skymapweights_getitem(self, x):
+    if isinstance(x, str) and x in ['TT', 'TQ', 'TU', 'QQ', 'QU', 'UU']:
+        return getattr(self, x)
+
     if not self.polarized:
         return self.TT[x]
 
@@ -55,6 +58,10 @@ G3SkyMapWeights.__getitem__ = skymapweights_getitem
 del skymapweights_getitem
 
 def skymapweights_setitem(self, x, mat):
+    if isinstance(x, str) and x in ['TT', 'TQ', 'TU', 'QQ', 'QU', 'UU']:
+        setattr(self, x, mat)
+        return
+
     if not self.polarized:
         assert(numpy.isscalar(mat))
         self.TT[x] = mat
@@ -95,6 +102,9 @@ del skymapweights_setattr
 # Make maps with weights so that you can index them and get the full 1x3 Stokes vector
 
 def skymapwithweights_getitem(self, x):
+    if isinstance(x, str) and x in ['T', 'Q', 'U']:
+        return getattr(self, x)
+
     if not self.polarized:
         return self.T[x]
 
@@ -108,6 +118,10 @@ G3SkyMapWithWeights.__getitem__ = skymapwithweights_getitem
 del skymapwithweights_getitem
 
 def skymapwithweights_setitem(self, x, vec):
+    if isinstance(x, str) and x in ['T', 'Q', 'U']:
+        setattr(self, x, vec)
+        return
+
     if not self.polarized:
         assert(numpy.isscalar(vec))
         self.T[x] = vec
