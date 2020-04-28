@@ -658,6 +658,10 @@ G3SkyMapPtr FlatSkyMap::ExtractPatch(size_t x0, size_t y0, size_t width, size_t 
 	FlatSkyMapPtr out(new FlatSkyMap(p, coord_ref, weighted, units, pol_type,
 	    flat_pol_, pol_conv_));
 
+	// short circuit for empty maps
+	if (!dense_ && !sparse_)
+		return out;
+
 	for (size_t x = 0; x < width; x++) {
 		for (size_t y = 0; y < height; y++) {
 			double v = this->at(x + x0, y + y0);
