@@ -38,7 +38,11 @@ ProjGnomonic
 
 ProjCylindricalEqualArea
   The Lambert cylindrical equal-area projection (CEA) maps the sphere to a rectangle. Has equal-area pixels. Lines of constant x correspond to constant longitude; lines of constant y are constant latitude. Latitudes get closer together (by sin(latitude)) at the poles. Also known as "proj 7".
-  
+
+Polarization Convention
+=======================
+
+All G3SkyMap objects have a ``pol_conv`` attribute of type ``MapPolConv``, which can be either ``IAU`` or ``COSMO``.  Both IAU and COSMO polarization conventions are supported in polarization-aware functions, but most default to using the IAU convention.  Warnings will be raised when a polarized map is used without a polarization convention set.  Changing the polarization convention between IAU and COSMO on a ``U`` map results in flipping the sign of all pixels in the map. 
 
 File Format Conversions
 =======================
@@ -79,7 +83,14 @@ The ``G3SkyMapWeights`` class combines the six unique components of the Mueller 
 
 In C++ there is also a StokesVector object that is analogous to the MuellerMatrix object.  It has scalar attributes StokesVector.t etc, that are writable references to elements of map objects.  Matrix operations on the StokesVector and MuellerMatrix objects are well defined.
 
-Maps and associated weights are generally stored on disk in in `G3Frames` of type `G3FrameType.Map`, with keys ``'T', 'Q', 'U', 'Wpol'`` defined for polarized maps, and ``'T', 'Wunpol'`` defined for unpolarized maps.  Weights can be applied or removed from their corresponding Stokes maps using the ``ApplyWeights`` or ``RemoveWeights`` pipeline modules.
+Map Frames and Pipelines
+========================
+
+Maps and associated weights are generally stored in memory and on disk in `G3Frames` of type `G3FrameType.Map`, with keys ``'T', 'Q', 'U', 'Wpol'`` defined for polarized maps, and ``'T', 'Wunpol'`` defined for unpolarized maps.  Map frames can be checked for validity using the ``ValidateFrames`` pipeline module, which raises errors or warnings for missing keys or attributes.
+
+Map frames can be manipulated in a pipeline using some memory-efficient pipeline modules.  Weights can be applied or removed from their corresponding Stokes maps using the ``ApplyWeights`` or ``RemoveWeights`` pipeline modules.  Maps can be converted to polarized or unpolarized versions using the ``MakeMapPolarized`` and ``MakeMapUnpolarized`` modules.  They can also be compactified to their most sparse representation using the ``CompactMaps`` module.
+
+Existing maps can be injected into a pipeline using the ``InjectMaps`` module, and map stubs can be injected using ``InjectStubMap`` or ``ReplicateMaps``.  Maps can also be extracted from a pipeline using the ``ExtractMaps`` module.
 
 FlatSkyMap Manipulation
 =======================
