@@ -47,7 +47,7 @@ Indexing
 
 Values in maps can be set and retrieved using the standard python (or C++) ``[]`` operator. Both flat and Healpix maps support a 1-D indexing convention. For flat-sky maps, this 1-D index follows C ordering; for Healpix maps, this is the normal 1-D Healpix pixel number. Flat-sky maps also accept 2-D indices, which have ordering following normal language conventions for 2-D indices ((y, x) in Python, (x, y) in C++).
 
-Note that sky maps *do not* support numpy-style slicing operations. These are ill-defined in the case of flat-sky maps (they don't preserve invariants of the projections) and of dubious utility for Healpix. If you want to take one anyway, use ``numpy.asarray`` and numpy operations. For dense maps (see below), this will access the map's internal buffer directly and so requires no meaningful CPU time or memory -- ``numpy.asarray`` also provides read/write access.
+Note that sky maps *do not* support numpy-style slicing operations, except for 2-D indexing of flat-sky maps (see below), which makes a copy of the underlying map data.  To perform operations with other numpy arrays, use ``numpy.asarray``, which will convert the map to its dense representation (see below) and provides read-write access the map's internal buffer, which requires no meaningful CPU time or memory.
 
 Sparsity
 ========
