@@ -186,7 +186,7 @@ for shape in [(20, 500), (21, 501)]:
     # Try setting things
     old_chunk = m[10:17,320:482]
     m[10:17,320:482] = old_chunk*2
-    assert((np.asarray(m)[10:17,320:482] == np.asarray(old_chunk)*2).all())
+    assert((np.asarray(m.copy())[10:17,320:482] == np.asarray(old_chunk)*2).all())
     m[10:17,320:482] = old_chunk
 
     # Make sure inserting it in the wrong place (where coordinates don't make sense, but numpy
