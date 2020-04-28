@@ -31,7 +31,7 @@ The following attributes are common to all G3SkyMap subclasses:
   The units system in which the map is computed, stored as an instance of the ``G3TimestreamUnits`` enum, which can have the value ``Tcmb``, ``Counts``, ``Current``, ``Power``, ``Resistance`` or None.
   
 ``weighted``
-  A boolean attribute indicating whether the data in the map have been normalized by the inverse of the appropriate Mueller matrix (``weighted=False``) or not (``weighted=True``). 
+  A boolean attribute indicating whether the data in the map have been normalized by the inverse of the appropriate Mueller matrix (``weighted=False``) or not (``weighted=True``).  See more information on map weights below.
 
 File Format Conversions
 =======================
