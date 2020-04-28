@@ -125,7 +125,7 @@ public:
 
 	G3SkyMapPtr Rebin(size_t scale, bool norm = true) const override;
 	G3SkyMapPtr ExtractPatch(size_t x0, size_t y0, size_t width, size_t height) const;
-	void InsertPatch(const FlatSkyMap &patch);
+	void InsertPatch(const FlatSkyMap &patch, bool ignore_zeros = false);
 	G3SkyMapPtr Pad(size_t width, size_t height, double fill = 0) const;
 	G3SkyMapPtr Crop(size_t width, size_t height) const;
 

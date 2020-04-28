@@ -673,7 +673,7 @@ G3SkyMapPtr FlatSkyMap::ExtractPatch(size_t x0, size_t y0, size_t width, size_t 
 	return out;
 }
 
-void FlatSkyMap::InsertPatch(const FlatSkyMap &patch)
+void FlatSkyMap::InsertPatch(const FlatSkyMap &patch, bool ignore_zeros)
 {
 	std::vector<double> loc = proj_info.GetPatchCenter(patch.proj_info);
 	double x0 = loc[0] - patch.xpix_ / 2;
@@ -681,12 +681,13 @@ void FlatSkyMap::InsertPatch(const FlatSkyMap &patch)
 	g3_assert(x0 >= 0 && x0 + patch.xpix_ <= xpix_);
 	g3_assert(y0 >= 0 && y0 + patch.ypix_ <= ypix_);
 
-	for (auto i : patch) {
-		if (i.second == 0)
-			continue;
-		size_t x = (size_t)(i.first % patch.xpix_) + x0;
-		size_t y = (size_t)(i.first / patch.xpix_) + y0;
-		(*this)(x, y) = i.second;
+	for (size_t x = 0; x < patch.xpix_; x++) {
+		for (size_t y = 0; y < patch.ypix_; y++) {
+			double v = patch.at(x, y);
+			if (ignore_zeros && v == 0)
+				continue;
+			(*this)(x + x0, y + y0) = v;
+		}
 	}
 }
 
@@ -706,7 +707,7 @@ G3SkyMapPtr FlatSkyMap::Pad(size_t width, size_t height, double fill) const
 	if (fill != 0)
 		(*out) += fill;
 
-	out->InsertPatch(*this);
+	out->InsertPatch(*this, true);
 
 	return out;
 }
@@ -1025,10 +1026,13 @@ PYBINDINGS("maps")
 		"corresponds to pixel (x0, y0) in the parent map, and the angular "
 		"location of each pixel on the sky is maintained.")
 
-	    .def("insert_patch", &FlatSkyMap::InsertPatch, (bp::arg("patch")),
+	    .def("insert_patch", &FlatSkyMap::InsertPatch,
+		(bp::arg("patch"), bp::arg("ignore_zeros") = false),
 		"Inserts a patch (e.g. as extracted using extract_patch) into the "
 		"parent map.  The coordinate system and angular center of the patch "
-		"must match that of the parent map.")
+		"must match that of the parent map.  If ignore_zeros is True, "
+		"zero-valued pixels in the patch are not inserted.  This is useful "
+		"for preserving the sparsity of the parent map.")
 
 	    .def("pad", &FlatSkyMap::Pad,
 		(bp::arg("width"), bp::arg("height"), bp::arg("fill") = 0),
