@@ -48,9 +48,6 @@ G3SkyMap::serialize(A &ar, unsigned v)
 		ar & cereal::make_nvp("pol_conv", pol_conv_);
 	} else {
 		pol_conv_ = ConvNone;
-		if (pol_type == U)
-			log_warn("Map object has pol_type U and unknown pol_conv. "
-				 "Set the pol_conv attribute to IAU or COSMO.");
 	}
 
 }
