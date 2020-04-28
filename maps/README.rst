@@ -81,7 +81,7 @@ Maps and associated weights are generally stored in memory and on disk in `G3Fra
 
 Map frames can be manipulated in a pipeline using some memory-efficient pipeline modules.  Weights can be applied or removed from their corresponding Stokes maps using the ``ApplyWeights`` or ``RemoveWeights`` pipeline modules.  Maps can be converted to polarized or unpolarized versions using the ``MakeMapPolarized`` and ``MakeMapUnpolarized`` modules.  They can also be compactified to their most sparse representation using the ``CompactMaps`` module.
 
-Existing maps can be injected into a pipeline using the ``InjectMaps`` module, and map stubs can be injected using ``InjectStubMap`` or ``ReplicateMaps``.  Maps can also be extracted from a pipeline using the ``ExtractMaps`` module.
+Existing maps can be injected into a pipeline using the ``InjectMaps`` module, and map stubs can be injected using ``InjectMapStub`` or ``ReplicateMaps``.  Maps can also be extracted from a pipeline using the ``ExtractMaps`` module.
 
 Flat Sky Map Projections
 ========================
