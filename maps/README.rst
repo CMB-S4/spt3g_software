@@ -13,36 +13,25 @@ HealpixSkyMap
 FlatSkyMap
   Implements a flat-sky map (similar to a 2D numpy array) in any of the supported projections. The stored map is either a dense 2D array, or a locally dense region (a set of neighboring columns containing non-zero values, each of which contains a single contiguous block of non-zero values).
 
-Description of Map Projections
-==============================
+Map Attributes
+==============
 
-For flat-sky maps, we support the following map projections:
+The following attributes are common to all G3SkyMap subclasses:
 
-ProjSansonFlamsteed
-  Sanson-Flamsteed (also called the sinusoidal projection). It has equal-area pixels, defined by multiplying azimuth distances by cos(latitude). Mercator-esque in that lines of constant latitude are transformed to lines of constant y. Distances are not preserved. Also known as "proj 0".
+``coord_ref``
+  The coordinate system on the sky to which each map pixel is referenced, stored as an instance of the ``MapCoordReference`` enum.  Currently supported coordinate systems are ``Equatorial`` (FK5 J2000), ``Galactic`` and ``Local`` (telescope azimuth and elevation).
 
-ProjPlateCarree
-  The Plate-Carree projection just plots latitude and longitude on a grid: latitude lines are at constant y and equally spaced, while longitude lines are at constant x and equally spaced. Pixels are not equal-area. Also known as "proj 1".  A variant of this projection, called ProjBICEP (or "proj 9"), adjusts the resolution along x to scale with the cosine of the latitude of the center of the map.
+``pol_type``
+  The Stokes polarization of the map object, which is an instance of the ``MapPolType`` enum, and can have the value ``T``, ``Q``, ``U`` or None.
 
-ProjOrthographic
-  The projection of the sphere onto a plane -- the sky looks like a circle. Can only show one hemisphere. Lines drawn on the map do not correspond to latitude or longitude. Pixels are not equal-area. Also known as "proj 2".
-
-ProjStereographic
-  Another projection of the sphere onto a plane that makes it look like a circle. Differs from an orthographic projection in that it lets you see both hemispheres. Popularized in the form of the UN logo. Lines drawn on the map do not correspond to latitude or longitude. Pixels are not equal-area. Also known as "proj 4".
-
-ProjLambertAzimuthalEqualArea
-  Yet another mapping of the sphere to a circle, but this one has equal-area pixels. Largely distance-preserving, which makes it particularly useful for power-spectrum analyses. Also known as "proj 5".
-
-ProjGnomonic
-  Another projection of the sphere onto a circle. This one has the property that straight lines correspond to geodesics. Does not have equal-area pixels. Can show less than half a sphere. Also known as a "tangent projection" or "proj 6".
-
-ProjCylindricalEqualArea
-  The Lambert cylindrical equal-area projection (CEA) maps the sphere to a rectangle. Has equal-area pixels. Lines of constant x correspond to constant longitude; lines of constant y are constant latitude. Latitudes get closer together (by sin(latitude)) at the poles. Also known as "proj 7".
-
-Polarization Convention
-=======================
-
-All G3SkyMap objects have a ``pol_conv`` attribute of type ``MapPolConv``, which can be either ``IAU`` or ``COSMO``.  Both IAU and COSMO polarization conventions are supported in polarization-aware functions, but most default to using the IAU convention.  Warnings will be raised when a polarized map is used without a polarization convention set.  Changing the polarization convention between IAU and COSMO on a ``U`` map results in flipping the sign of all pixels in the map. 
+``pol_conv``
+  The polarization convention used to encode the Q and U Stokes orientations relative to the coordinate axes.  This attribute is an instance of the ``MapPolConv`` enum, which can have the value ``IAU``, ``COSMO`` or None.  Both IAU and COSMO polarization conventions are supported in polarization-aware functions (e.g. ``FlattenPol``), but most default to using the IAU convention.  Warnings will be raised when a polarized map is used without a polarization convention set.  Changing the polarization convention between IAU and COSMO on a ``U`` map results in flipping the sign of all pixels in the map.
+  
+``units``
+  The units system in which the map is computed, stored as an instance of the ``G3TimestreamUnits`` enum, which can have the value ``Tcmb``, ``Counts``, ``Current``, ``Power``, ``Resistance`` or None.
+  
+``weighted``
+  A boolean attribute indicating whether the data in the map have been normalized by the inverse of the appropriate Mueller matrix (``weighted=False``) or not (``weighted=True``). 
 
 File Format Conversions
 =======================
@@ -83,6 +72,8 @@ The ``G3SkyMapWeights`` class combines the six unique components of the Mueller 
 
 In C++ there is also a StokesVector object that is analogous to the MuellerMatrix object.  It has scalar attributes StokesVector.t etc, that are writable references to elements of map objects.  Matrix operations on the StokesVector and MuellerMatrix objects are well defined.
 
+Weights are removed from or applied to a set of Stokes T/Q/U maps simultaneously, using the ``remove_weights`` or ``apply_weights`` functions, or their corresponding pipeline modules.
+
 Map Frames and Pipelines
 ========================
 
@@ -92,8 +83,34 @@ Map frames can be manipulated in a pipeline using some memory-efficient pipeline
 
 Existing maps can be injected into a pipeline using the ``InjectMaps`` module, and map stubs can be injected using ``InjectStubMap`` or ``ReplicateMaps``.  Maps can also be extracted from a pipeline using the ``ExtractMaps`` module.
 
-FlatSkyMap Manipulation
-=======================
+Flat Sky Map Projections
+========================
+
+For flat-sky maps, we support the following map projections:
+
+ProjSansonFlamsteed
+  Sanson-Flamsteed (also called the sinusoidal projection). It has equal-area pixels, defined by multiplying azimuth distances by cos(latitude). Mercator-esque in that lines of constant latitude are transformed to lines of constant y. Distances are not preserved. Also known as "proj 0".
+
+ProjPlateCarree
+  The Plate-Carree projection just plots latitude and longitude on a grid: latitude lines are at constant y and equally spaced, while longitude lines are at constant x and equally spaced. Pixels are not equal-area. Also known as "proj 1".  A variant of this projection, called ProjBICEP (or "proj 9"), adjusts the resolution along x to scale with the cosine of the latitude of the center of the map.
+
+ProjOrthographic
+  The projection of the sphere onto a plane -- the sky looks like a circle. Can only show one hemisphere. Lines drawn on the map do not correspond to latitude or longitude. Pixels are not equal-area. Also known as "proj 2".
+
+ProjStereographic
+  Another projection of the sphere onto a plane that makes it look like a circle. Differs from an orthographic projection in that it lets you see both hemispheres. Popularized in the form of the UN logo. Lines drawn on the map do not correspond to latitude or longitude. Pixels are not equal-area. Also known as "proj 4".
+
+ProjLambertAzimuthalEqualArea
+  Yet another mapping of the sphere to a circle, but this one has equal-area pixels. Largely distance-preserving, which makes it particularly useful for power-spectrum analyses. Also known as "proj 5".
+
+ProjGnomonic
+  Another projection of the sphere onto a circle. This one has the property that straight lines correspond to geodesics. Does not have equal-area pixels. Can show less than half a sphere. Also known as a "tangent projection" or "proj 6".
+
+ProjCylindricalEqualArea
+  The Lambert cylindrical equal-area projection (CEA) maps the sphere to a rectangle. Has equal-area pixels. Lines of constant x correspond to constant longitude; lines of constant y are constant latitude. Latitudes get closer together (by sin(latitude)) at the poles. Also known as "proj 7".
+
+Flat Sky Map Manipulation
+=========================
 
 Flat sky maps have additional functions defined for efficient manipulation in memory.
 
