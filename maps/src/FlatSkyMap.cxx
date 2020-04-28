@@ -961,9 +961,9 @@ PYBINDINGS("maps")
 	    .def("extract_patch", &FlatSkyMap::ExtractPatch,
 		(bp::arg("x0"), bp::arg("y0"), bp::arg("width"), bp::arg("height")),
 		"Returns a map of shape (width, height) containing a rectangular patch "
-		"of the parent map.  The center of the output map corresponds to pixel "
-		"(x0, y0) in the parent map, and the angular location of each pixel on "
-		"the sky is maintained.")
+		"of the parent map.  Pixel (width // 2, height // 2) of the output map "
+		"corresponds to pixel (x0, y0) in the parent map, and the angular "
+		"location of each pixel on the sky is maintained.")
 
 	    .def("insert_patch", &FlatSkyMap::InsertPatch, (bp::arg("patch")),
 		"Inserts a patch (e.g. as extracted using extract_patch) into the "
