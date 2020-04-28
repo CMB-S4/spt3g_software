@@ -842,6 +842,32 @@ flatskymap_setitem_2d(FlatSkyMap &skymap, bp::tuple coords, double val)
 	return val;
 }
 
+static void
+flatskymap_setslice_2d(FlatSkyMap &skymap, bp::tuple coords,
+    const FlatSkyMap &val)
+{
+	// This one is kind of weird in that there is precisely one set of
+	// valid coords. Check that they work in a sneaky way: extract
+	// the given part of a null-data copy of the big map, then check with
+	// IsCompatible() that has all the properties of val except data.
+	// This has the nice side-effect that all the irritating parsing of
+	// slice dimensions is done only once, in getitem().
+
+	FlatSkyMapPtr shallowclone =
+	    boost::dynamic_pointer_cast<FlatSkyMap>(skymap.Clone(false));
+	FlatSkyMapPtr dummy_subpatch = bp::extract<FlatSkyMapPtr>(
+	    flatskymap_getitem_2d(*shallowclone, coords));
+	if (!dummy_subpatch->IsCompatible(val)) {
+		PyErr_SetString(PyExc_ValueError, "Provided patch to insert is "
+		    "not compatible with the given subregion of the map into "
+		    "which it is being inserted. Check that your coordinates "
+		    "are right.");
+		bp::throw_error_already_set();
+	}
+
+	skymap.InsertPatch(val);
+}
+
 static double
 flatskymap_getitem_1d(const G3SkyMap &skymap, size_t i)
 {
@@ -1023,6 +1049,7 @@ PYBINDINGS("maps")
 	    .def("__setitem__", flatskymap_setitem_1d)
 	    .def("__getitem__", flatskymap_getitem_2d)
 	    .def("__setitem__", flatskymap_setitem_2d)
+	    .def("__setitem__", flatskymap_setslice_2d)
 	;
 	register_pointer_conversions<FlatSkyMap>();
 

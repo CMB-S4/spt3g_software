@@ -179,9 +179,26 @@ for shape in [(20, 500), (21, 501)]:
         assert(np.allclose(np.asarray(m)[sy, sx], np.asarray(m2)[sy, sx]))
 
     # Slice operators: make sure they work like numpy slicing
-    assert((np.asarray(m[10:17,320:482]) == np.asarray(m)[10:17,320:482]).all())
+    assert((np.asarray(m[10:17,320:482]) == np.asarray(m.copy())[10:17,320:482]).all())
     # But give the right type...
     assert(m[10:17,320:482].__class__ == m.__class__)
+
+    # Try setting things
+    old_chunk = m[10:17,320:482]
+    m[10:17,320:482] = old_chunk*2
+    assert((np.asarray(m)[10:17,320:482] == np.asarray(old_chunk)*2).all())
+    m[10:17,320:482] = old_chunk
+
+    # Make sure inserting it in the wrong place (where coordinates don't make sense, but numpy
+    # would allow it) fails
+    failed = False
+    try:
+        m[11:18,320:482] = old_chunk
+    except ValueError:
+        failed = True
+    assert(failed)
+
+    
 
     # padding / cropping, with even and odd changes in dimension
     pad = 10
