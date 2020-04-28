@@ -781,19 +781,25 @@ flatskymap_getitem_2d(const FlatSkyMap &skymap, bp::tuple coords)
 		int ystart(0), ystop(skymap.shape()[1]);
 		int xstart(0), xstop(skymap.shape()[0]);
 
-		// XXX Need to wrap properly on negative slice bounds
-
 		// Normalize and check slice boundaries
 		if (yslice.start().ptr() != Py_None)
 			ystart = bp::extract<int>(yslice.start())();
+		if (ystart < 0)
+			ystart += skymap.shape()[1];
 		if (yslice.stop().ptr() != Py_None)
 			ystop = bp::extract<int>(yslice.stop())();
+		if (ystop < 0)
+			ystop += skymap.shape()[1];
 		if (yslice.step().ptr() != Py_None)
 			log_fatal("Slicing with non-unity steps unsupported");
 		if (xslice.start().ptr() != Py_None)
 			xstart = bp::extract<int>(xslice.start())();
+		if (xstart < 0)
+			xstart += skymap.shape()[0];
 		if (xslice.stop().ptr() != Py_None)
 			xstop = bp::extract<int>(xslice.stop())();
+		if (xstop < 0)
+			xstop += skymap.shape()[0];
 		if (xslice.step().ptr() != Py_None)
 			log_fatal("Slicing with non-unity steps unsupported");
 

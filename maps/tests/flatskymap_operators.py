@@ -198,7 +198,8 @@ for shape in [(20, 500), (21, 501)]:
         failed = True
     assert(failed)
 
-    
+    # negative slice indices
+    assert((np.asarray(m.copy())[-10:-3, -180:-18] == np.asarray(m.copy())[-10:-3, -180:-18]).all())
 
     # padding / cropping, with even and odd changes in dimension
     pad = 10
