@@ -263,7 +263,6 @@ def load_skymap_fits(filename, hdu=None, keys=None, memmap=False):
     return output
 
 
-@core.usefulfunc
 def load_proj_dict(inverse=False):
     """
     Dictionary that associates projection names to their three-letter codes in WCS.
@@ -353,10 +352,10 @@ def get_wcs(skymap, reset=False):
     return w
 
 # set property
-setattr(FlatSkyMap, 'wcs', property(get_wcs))
+wcs_doc = "astropy.wcs.WCS instance containing projection information"
+setattr(FlatSkyMap, 'wcs', property(get_wcs, doc=wcs_doc))
 
 
-@core.usefulfunc
 def create_wcs_header(skymap):
     """
     Return a FITS header for the WCS information in the FlatSkyMap object.
@@ -364,7 +363,6 @@ def create_wcs_header(skymap):
     return skymap.wcs.to_header()
 
 
-@core.usefulfunc
 def parse_wcs_header(header):
     """
     Extract flat sky map keywords from a WCS fits header.  Raises an error if
