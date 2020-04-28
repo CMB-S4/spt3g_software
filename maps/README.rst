@@ -61,9 +61,9 @@ Map Interpolation
 
 Several interpolation and rebinning utilities are provided.  The method ``G3SkyMap.get_interp_values`` can be used for extracting map values at arbitrary sky positions.  The method ``G3SkyMap.rebin`` can be used to downgrade the map resolution in a way that preserves the total power within each map pixel.
 
-The functions ``maputils.healpix_to_flatsky`` and ``maputils.flatsky_to_healpix`` functions are provided to reproject maps between flat sky and curved sky systems, with options to use interpolation or rebinning to improve the accuracy of the reprojection.
+The functions ``healpix_to_flatsky`` and ``flatsky_to_healpix`` functions are provided to reproject maps between flat sky and curved sky systems, with options to use interpolation or rebinning to improve the accuracy of the reprojection.
 
-The more general ``maputils.reproj_map`` function can also be used to convert between flat sky projections.
+The more general ``reproj_map`` function can also be used to convert between flat sky projections.
 
 Map Weights
 ===========
@@ -77,7 +77,7 @@ Weights are removed from or applied to a set of Stokes T/Q/U maps simultaneously
 Map Frames and Pipelines
 ========================
 
-Maps and associated weights are generally stored in memory and on disk in `G3Frames` of type `G3FrameType.Map`, with keys ``'T', 'Q', 'U', 'Wpol'`` defined for polarized maps, and ``'T', 'Wunpol'`` defined for unpolarized maps.  Map frames can be checked for validity using the ``ValidateFrames`` pipeline module, which raises errors or warnings for missing keys or attributes.
+Maps and associated weights are generally stored in memory and on disk in `G3Frames` of type `G3FrameType.Map`, with keys ``'T', 'Q', 'U', 'Wpol'`` defined for polarized maps, and ``'T', 'Wunpol'`` defined for unpolarized maps.  Map frames can be checked for validity using the ``ValidateFrames`` pipeline module, which raises errors or warnings for missing keys or inconsistent attributes.
 
 Map frames can be manipulated in a pipeline using some memory-efficient pipeline modules.  Weights can be applied or removed from their corresponding Stokes maps using the ``ApplyWeights`` or ``RemoveWeights`` pipeline modules.  Maps can be converted to polarized or unpolarized versions using the ``MakeMapPolarized`` and ``MakeMapUnpolarized`` modules.  They can also be compactified to their most sparse representation using the ``CompactMaps`` module.
 
