@@ -14,7 +14,7 @@ __all__ = [
 
 
 @core.usefulfunc
-def load_skymap_fits(filename, hdu=None, keys=None):
+def load_skymap_fits(filename, hdu=None, keys=None, memmap=False):
     """
     Load a fits file containing a sky map.
 
@@ -22,11 +22,14 @@ def load_skymap_fits(filename, hdu=None, keys=None):
     ---------
     filename : str
         Path to fits file
-    hdu : int
+    hdu : int, optional
         If supplied, the data are extract from the given HDU index.
-    keys : list of strings
+    keys : list of strings, optional
         If supplied, return only these keys in the output dictionary.
         Options are: T, Q, U, W.
+    memmap : bool, optional
+      Argument passed to astropy.io.fits.open. If True, the map is not read into
+      memory, but only the required pixels are read when needed. Default: False.
 
     Returns
     -------
@@ -55,7 +58,7 @@ def load_skymap_fits(filename, hdu=None, keys=None):
     if keys is None:
         keys = ['T', 'Q', 'U', 'W']
 
-    with astropy.io.fits.open(filename) as hdulist:
+    with astropy.io.fits.open(filename, memmap=memmap) as hdulist:
         for hidx, H in enumerate(hdulist):
 
             hdr = H.header
