@@ -1010,7 +1010,7 @@ PYBINDINGS("maps")
 	      (std::vector<double> (FlatSkyMap::*)(size_t, size_t) const)
 	      &FlatSkyMap::PixelToAngle, (bp::arg("x"), bp::arg("y")),
 	      "Compute the sky coordinates of the given 2D pixel (also see "
-	      "xy_to_angle()")
+	      "xy_to_angle()).")
 
 	    .def("xy_to_angle", &FlatSkyMap::XYToAngle,
 	      (bp::arg("x"), bp::arg("y")),

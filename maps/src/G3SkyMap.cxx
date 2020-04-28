@@ -604,6 +604,7 @@ PYBINDINGS("maps") {
 	  "Base class for 1- and 2-D skymaps of various projections. Usually "
 	  "you want a subclass of this (e.g. FlatSkyMap) rather than using it "
 	  "directly.", bp::no_init)
+	    .def_readonly("__g3frameobject__", true)
 	    .def_readwrite("coord_ref", &G3SkyMap::coord_ref,
 	      "Coordinate system (maps.MapCoordReference) of the map (e.g. "
 	      "Galactic, Equatorial, etc.)")
@@ -635,11 +636,11 @@ PYBINDINGS("maps") {
 	    .def("__setitem__", &skymap_setitem)
 	    .def("__copy__", &skymap_copy)
 	    .def("__deepcopy__", &skymap_copy)
-	    .def("copy", &skymap_copy)
+	    .def("copy", &skymap_copy, "Return a copy of the map object")
 	    .def("Clone", &G3SkyMap::Clone,
-	      ((bp::arg("copy_data")=true),
+	      (bp::arg("copy_data")=true),
 	       "Return a map of the same type, populated with a copy of the data "
-	       "if the argument is true (default), empty otherwise."))
+	       "if the argument is true (default), empty otherwise.")
 	    .def("IsCompatible", &G3SkyMap::IsCompatible,
 	      "Returns true if the input argument is a map with matching dimensions "
 	      "and boundaries on the sky.")
@@ -717,7 +718,7 @@ PYBINDINGS("maps") {
 	    .def("__len__", &G3SkyMapWeights::size, "Number of pixels in weights")
 	    .def("__copy__", &skymapweights_copy)
 	    .def("__deepcopy__", &skymapweights_copy)
-	    .def("copy", &skymapweights_copy)
+	    .def("copy", &skymapweights_copy, "Return a copy of the weights object")
 	    .add_property("shape", &skymapweights_shape, "Shape of weights")
 	    .add_property("polarized", &G3SkyMapWeights::IsPolarized,
 	      "True if all components are set, False if only the TT component is set")
@@ -735,9 +736,9 @@ PYBINDINGS("maps") {
 	    .def("cond", &G3SkyMapWeights::Cond,
 	      "Return the condition number of the Mueller matrix for each pixel")
 
-	    .def("Clone", &G3SkyMapWeights::Clone, ((bp::arg("copy_data")=true),
+	    .def("Clone", &G3SkyMapWeights::Clone, (bp::arg("copy_data")=true),
 	       "Return weights of the same type, populated with a copy of the data "
-	       "if the argument is true (default), empty otherwise."))
+	       "if the argument is true (default), empty otherwise.")
 
 	    .def(bp::self += bp::self)
 	    .def(bp::self *= FlatSkyMap())

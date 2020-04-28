@@ -1,7 +1,7 @@
 import sys, inspect, re
 from spt3g.core import G3Module, G3FrameObject
 
-def format_doc(x):
+def format_doc(x, simple=False):
     """
     Apply some formatting cleanup to a docstring to make it play nice with the sphinx layout.
     """
@@ -28,6 +28,8 @@ def format_doc(x):
                     hdr += ':'
                 doclines[-1] = '*{}*'.format(hdr)
         else:
+            if simple and '->' in line and not line.startswith('    '):
+                line = '``{}``'.format(line)
             doclines.append('\t' * head + line)
     return '\n'.join(doclines)
 
@@ -42,7 +44,10 @@ def get_doc_for_module(module_path, include_link_list = True):
         print(e)
         sys.exit(1)
     
-    
+
+    def format_object(modname, x):
+        name = '%s.%s' % (modname, x)
+        return '\n.. _%s:\n\n%s\n%s\n' % (name, name, '_' * len(name))
     def format_name(modname, x):
         return '\n.. _%s.%s:\n\n**%s.%s**\n' % (modname, x, modname, x)
     def format_arguments(s0,s1):
@@ -139,7 +144,7 @@ def get_doc_for_module(module_path, include_link_list = True):
                 continue
             subclasstest = False
             try:
-                subclasstest = str(type(mod.__dict__[x])) == "<type 'Boost.Python.function'>"
+                subclasstest = 'Boost.Python.function' in str(type(mod.__dict__[x]))
             except TypeError:
                 pass
             if hasattr(mod.__dict__[x], '__g3usefulfunc__') or subclasstest:
@@ -147,9 +152,7 @@ def get_doc_for_module(module_path, include_link_list = True):
                 mod_lst.append('%s.%s'%(modname, x))
                 if format_doc(mod.__dict__[x]) is not None:
                     if subclasstest:
-                        tmp_str = '``' + format_doc(mod.__dict__[x]).strip().replace(':\n',':``\n')
-                        if (tmp_str.count('``') <2):
-                            tmp_str += '``'
+                        tmp_str = format_doc(mod.__dict__[x], simple=True)
                         out_str = out_str +tmp_str
                     else:
                         tmp_str = format_doc(mod.__dict__[x])
@@ -190,24 +193,38 @@ def get_doc_for_module(module_path, include_link_list = True):
                 subclasstest = issubclass( mod.__dict__[x], G3FrameObject)
             except TypeError:
                 pass
-            if subclasstest:
-                out_str = add_str(out_str, format_name(modname, x))
+            if hasattr(mod.__dict__[x], '__g3frameobject__') or subclasstest:
+                out_str = add_str(out_str, format_object(modname, x))
                 mod_lst.append('%s.%s'%(modname, x))
                 if format_doc(mod.__dict__[x]) is not None:
                     tmp_str = format_doc(mod.__dict__[x]).strip()
                     out_str = out_str + tmp_str
                     #after we have gotten the documention, find the properties and load their documentation
-                    out_str += '\n\n    Members:\n'
+                    prop_str = ''
                     for p_name, p_obj in mod.__dict__[x].__dict__.items():
                         if isinstance( p_obj, property):
-                            if p_name == 'value':
+                            if p_name in ['value', '__g3frameobject__']:
                                 continue
-                            out_str += '\n'
+                            prop_str += '\n'
                             tmp_doc = format_doc(p_obj)
                             if tmp_doc is None:
                                 tmp_doc = 'No Doc (Shame!)'
-                            out_str += '    * **%s**: %s\n' % (p_name, tmp_doc.strip() )
-                    
+                            prop_str += '* **%s**: %s\n' % (p_name, tmp_doc.strip() )
+                    if prop_str:
+                        out_str += '\n\n*Members:*\n'
+                        out_str += prop_str
+                    meth_str = ''
+                    for p_name, p_obj in mod.__dict__[x].__dict__.items():
+                        if p_name.startswith('_'):
+                            continue
+                        if 'Boost.Python.function' in str(type(p_obj)):
+                            meth_str = add_str(meth_str, format_name('%s.%s' % (modname, x), p_name))
+                            tmp_doc = format_doc(p_obj, simple=True)
+                            meth_str += tmp_doc.strip()
+                            meth_str = add_str(meth_str, '')
+                    if meth_str:
+                        out_str += '\n\n*Methods:*\n'
+                        out_str += meth_str
                 out_str = add_str(out_str, '')
             elif hasattr(mod.__dict__[x], '__dict__'):
                 out_str_tmp, mod_lst_tmp = iterate_through_frame_object(mod.__dict__[x], modname + '.' + x)
