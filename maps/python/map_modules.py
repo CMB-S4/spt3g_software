@@ -187,7 +187,7 @@ def MakeMapsUnpolarized(frame):
 
 
 @core.indexmod
-def ValidateMaps(frame):
+def ValidateMaps(frame, ignore_missing_weights=False):
     """
     Validate that the input map frame has all the necessary keys.
     """
@@ -222,7 +222,7 @@ def ValidateMaps(frame):
                     "Map frame %s: U map polarization convention not set" % map_id,
                     unit="ValidateMaps",
                 )
-            if frame[k].weighted:
+            if frame[k].weighted and not ignore_missing_weights:
                 if "Wpol" not in frame and "Wunpol" not in frame:
                     core.log_warn(
                         "Map frame %s: Missing weights" % map_id, unit="ValidateMaps"
@@ -260,9 +260,10 @@ class ExtractMaps(object):
         If True, make a copy of the map on extraction.
     """
 
-    def __init__(self, map_id=None, copy=False):
+    def __init__(self, map_id=None, copy=False, ignore_missing_weights=False):
         self.map_id = map_id
         self.copy_ = copy
+        self.ignore_missing_weights=ignore_missing_weights
         self.maps = {}
 
     def __call__(self, frame):
@@ -271,7 +272,7 @@ class ExtractMaps(object):
         if self.map_id and frame["Id"] != self.map_id:
             return
 
-        ValidateMaps(frame)
+        ValidateMaps(frame, ignore_missing_weights=self.ignore_missing_weights)
 
         mid = frame["Id"]
         mdict = {}
