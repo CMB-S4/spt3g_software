@@ -14,7 +14,7 @@ __all__ = [
 
 
 @core.usefulfunc
-def load_skymap_fits(filename, hdu=None):
+def load_skymap_fits(filename, hdu=None, keys=None):
     """
     Load a fits file containing a sky map.
 
@@ -24,6 +24,9 @@ def load_skymap_fits(filename, hdu=None):
         Path to fits file
     hdu : int
         If supplied, the data are extract from the given HDU index.
+    keys : list of strings
+        If supplied, return only these keys in the output dictionary.
+        Options are: T, Q, U, W.
 
     Returns
     -------
@@ -48,6 +51,9 @@ def load_skymap_fits(filename, hdu=None):
     delta_center = None
     res = None
     xres = None
+
+    if keys is None:
+        keys = ['T', 'Q', 'U', 'W']
 
     with astropy.io.fits.open(filename) as hdulist:
         for hidx, H in enumerate(hdulist):
@@ -126,6 +132,12 @@ def load_skymap_fits(filename, hdu=None):
                 continue
 
             if map_type == 'flat':
+                if hdr.get('ISWEIGHT', None):
+                    if 'W' not in keys:
+                        continue
+                else:
+                    if hdr.get('POLTYPE', 'T') not in keys:
+                        continue
                 data = np.array(H.data, dtype=float)
                 if map_opts.pop('transpose', False):
                     data = np.array(data.T)
@@ -188,6 +200,11 @@ def load_skymap_fits(filename, hdu=None):
 
                 for cidx, hcol in enumerate(H.data.names):
                     col = col_dict.get(hcol, hcol)
+                    if col in 'TQU' and col not in keys:
+                        continue
+                    elif col in ['TT', 'TQ', 'TU', 'QQ', 'QU', 'UU'] and 'W' not in keys:
+                        continue
+
                     data = np.array(H.data[hcol], dtype=float).ravel()
 
                     if col == 'PIXEL' or (partial and cidx == 0):
