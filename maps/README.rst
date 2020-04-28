@@ -117,3 +117,6 @@ Flat sky maps have additional functions defined for efficient manipulation in me
 The ``FlattenPol`` pipeline module flattens the Q and U stokes parameters to align with the pixel coordinate grid, which is necessary for computing power spectra in the flat sky approximation.
 
 Small patches can be extracted from and inserted into larger flat sky maps using the ``FlatSkyMap.extract_patch`` and ``FlatSkyMap.insert_patch`` methods, respectively.  Also, maps can be padded and cropped using the ``FlatSkyMap.pad`` and ``FlatSkyMap.crop`` methods.  All of these preserve the map pixelization and correspondence to angle on the sky.
+
+As an equivalent and more Pythonic alternative, you can also extract portions of the map using numpy-style slicing operations (e.g. ``map[45:130,114:182]``), which will produce a map with the same contents as the numpy operation but without converting it to a dense map and with all the coordinate information set appropriately (and is equivalent to ``extract_patch``).
+

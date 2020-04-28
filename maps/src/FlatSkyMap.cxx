@@ -765,9 +765,39 @@ FlatSkyMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 
 static PyBufferProcs flatskymap_bufferprocs;
 
-static double
+static bp::object
 flatskymap_getitem_2d(const FlatSkyMap &skymap, bp::tuple coords)
 {
+
+	if (bp::extract<bp::slice>(coords[0]).check()) {
+		// Slicing time!
+		bp::slice yslice = bp::extract<bp::slice>(coords[0]);
+		bp::slice xslice = bp::extract<bp::slice>(coords[1]);
+		int ystart(0), ystop(skymap.shape()[1]);
+		int xstart(0), xstop(skymap.shape()[0]);
+
+		// XXX Need to wrap properly on negative slice bounds
+
+		// Normalize and check slice boundaries
+		if (yslice.start().ptr() != Py_None)
+			ystart = bp::extract<int>(yslice.start())();
+		if (yslice.stop().ptr() != Py_None)
+			ystop = bp::extract<int>(yslice.stop())();
+		if (yslice.step().ptr() != Py_None)
+			log_fatal("Slicing with non-unity steps unsupported");
+		if (xslice.start().ptr() != Py_None)
+			xstart = bp::extract<int>(xslice.start())();
+		if (xslice.stop().ptr() != Py_None)
+			xstop = bp::extract<int>(xslice.stop())();
+		if (xslice.step().ptr() != Py_None)
+			log_fatal("Slicing with non-unity steps unsupported");
+
+		return bp::object(skymap.ExtractPatch(
+		    (xstop + xstart)/2, (ystop + ystart)/2,
+		    xstop - xstart, ystop - ystart
+		));
+	}
+
 	ssize_t y = bp::extract<ssize_t>(coords[0]); // Swapped to match numpy
 	ssize_t x = bp::extract<ssize_t>(coords[1]);
 	if (x < 0)
@@ -783,7 +813,7 @@ flatskymap_getitem_2d(const FlatSkyMap &skymap, bp::tuple coords)
 		bp::throw_error_already_set();
 	}
 
-	return skymap.at(x, y);
+	return bp::object(skymap.at(x, y));
 }
 
 static double

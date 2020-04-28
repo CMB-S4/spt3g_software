@@ -178,6 +178,11 @@ for shape in [(20, 500), (21, 501)]:
         m2.insert_patch(p)
         assert(np.allclose(np.asarray(m)[sy, sx], np.asarray(m2)[sy, sx]))
 
+    # Slice operators: make sure they work like numpy slicing
+    assert((np.asarray(m[10:17,320:482]) == np.asarray(m)[10:17,320:482]).all())
+    # But give the right type...
+    assert(m[10:17,320:482].__class__ == m.__class__)
+
     # padding / cropping, with even and odd changes in dimension
     pad = 10
     for off in [0, 1]:
