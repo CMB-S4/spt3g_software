@@ -947,7 +947,10 @@ PYBINDINGS("maps")
 	  "a FlatSkyMap, e.g. for slicing across the two dimensions, you can "
 	  "access a numpy representation of the map using `np.asarray(m)`. This "
 	  "does not copy the data, so any changes to the resulting array will "
-	  "affect the data stored in the map.", boost::python::no_init)
+	  "affect the data stored in the map.  Alternatively, you can use 2d "
+	  "slice indexing directly on the map to access a copy of the data with "
+	  "the coordinate representation intact.  The latter method is most efficient "
+	  "for extracting small patches from sparse maps.", boost::python::no_init)
 	    .def(boost::python::init<const FlatSkyMap &>())
 	    .def_pickle(g3frameobject_picklesuite<FlatSkyMap>())
 	    .def(bp::init<size_t, size_t, double, bool, MapProjection, double,
