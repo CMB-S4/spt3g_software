@@ -1,6 +1,6 @@
 from toast.tod import TODCache
 from toast import qarray as qa
-from spt3g import core, calibration, dfmux, coordinateutils
+from spt3g import core, calibration, dfmux
 import numpy
 from .MPIAccumulator import MPIAccumulator
 import pickle
