@@ -1,0 +1,184 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Logging &#8212; SPT3G Software  documentation</title>
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="File IO" href="fileio.html" />
+    <link rel="prev" title="Frames" href="frames.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="fileio.html" title="File IO"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="frames.html" title="Frames"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="logging">
+<h1>Logging<a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h1>
+<p>This software includes a logging framework similar to the standard python logging that can be used from both Python and C++. There are seven log <strong>levels</strong> (below) that can be set for each logging <strong>unit</strong>. The default log level is <code class="docutils literal notranslate"><span class="pre">log_notice</span></code>.</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>log_trace</dt>
+<dd>Messages of the type “At line 75” that no one really ever wants to see except in the deepest throes of debugging. In C++ code, these messages are compiled out unless <code class="docutils literal notranslate"><span class="pre">CMAKE_BUILD_TYPE</span></code> is set to Debug.</dd>
+<dt>log_debug</dt>
+<dd>Messages of the type “Configuration parameters: Foo Bar” that almost no one really ever wants to see except while debugging. In C++ code, these messages are compiled out unless <code class="docutils literal notranslate"><span class="pre">CMAKE_BUILD_TYPE</span></code> is set to Debug.</dd>
+<dt>log_info</dt>
+<dd>Messages slightly more interesting than <code class="docutils literal notranslate"><span class="pre">log_debug</span></code> (for example: “Opening file X.h5”). Always available, but not shown by default.</dd>
+<dt>log_notice</dt>
+<dd>Messages that do not indicate a potential problem but that it is good for humans to see. For example, “Starting new output file X”. Shown by default, so please limit the use of messages this level and above.</dd>
+<dt>log_warn</dt>
+<dd>Messages that indicate a potential problem such as “No data from boards in 30 seconds”.</dd>
+<dt>log_error</dt>
+<dd>Serious recoverable data problem. For example, “Scan does not have input key”. Printed in bold red so you know it is serious.</dd>
+<dt>log_fatal</dt>
+<dd>An unrecoverable problem such as a bad configuration. Throws an exception (RuntimeError) and stop all data processing.</dd>
+</dl>
+</div></blockquote>
+<div class="section" id="setting-log-levels">
+<h2>Setting Log Levels<a class="headerlink" href="#setting-log-levels" title="Permalink to this headline">¶</a></h2>
+<p>The global logging level can be set to any of the above values as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">core</span><span class="o">.</span><span class="n">set_log_level</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">G3LogLevel</span><span class="o">.</span><span class="n">LOG_WARN</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The log level for an individual section of the code can be set as well, which is useful if you want to increase (or decrease) the verbosity of a specific module for debugging.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">core</span><span class="o">.</span><span class="n">set_log_level_for_unit</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">G3LogLevel</span><span class="o">.</span><span class="n">LOG_WARN</span><span class="p">,</span> <span class="s1">&#39;NoisyThing&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="using-logging-from-python">
+<h2>Using Logging from Python<a class="headerlink" href="#using-logging-from-python" title="Permalink to this headline">¶</a></h2>
+<p>From Python, you can emit log messages using the <code class="docutils literal notranslate"><span class="pre">core.log_*</span></code> family of functions. For example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">core</span><span class="o">.</span><span class="n">log_error</span><span class="p">(</span><span class="s1">&#39;Everything is on fire&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>By default, all log messages from Python are assigned to the log unit “Python”. If you pass a second argument, you can set the log unit to something else:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">core</span><span class="o">.</span><span class="n">log_error</span><span class="p">(</span><span class="s1">&#39;Everything is on fire&#39;</span><span class="p">,</span> <span class="s1">&#39;FireWarden&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Then you could selectively disable “FireWarden” if you don’t want to see such messages by setting FireWarden’s log level to log_fatal (see <a class="reference internal" href="#setting-log-levels">Setting Log Levels</a>).</p>
+</div>
+<div class="section" id="using-logging-from-c">
+<h2>Using Logging from C++<a class="headerlink" href="#using-logging-from-c" title="Permalink to this headline">¶</a></h2>
+<p>The C++ interface to logging mirrors the Python one. For a C++ version of the FireWarden above, we can do the following:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">log_error</span><span class="p">(</span><span class="s">&quot;Everything is on fire&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>In C++, the log functions know how to do <code class="docutils literal notranslate"><span class="pre">printf()</span></code> formatting. For example:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">log_error</span><span class="p">(</span><span class="s">&quot;%d things are on fire&quot;</span><span class="p">,</span> <span class="mi">15</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Log units in C++ are set for a particular scope rather than in the call to the log function. This is done using the <code class="docutils literal notranslate"><span class="pre">SET_LOGGER()</span></code> macro. For example:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">WardFire</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">SET_LOGGER</span><span class="p">(</span><span class="s">&quot;FireWarden&quot;</span><span class="p">);</span>
+
+        <span class="n">log_error</span><span class="p">(</span><span class="s">&quot;%d things are on fire&quot;</span><span class="p">,</span> <span class="mi">15</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>A common idiom for this is to put <code class="docutils literal notranslate"><span class="pre">SET_LOGGER()</span></code> into the class definition so that it applies to all log messages emitted by class member functions. As an example:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">FireWarden</span> <span class="o">:</span> <span class="k">public</span> <span class="n">G3Module</span> <span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+        <span class="kt">void</span> <span class="n">Process</span><span class="p">(</span><span class="n">G3FramePtr</span> <span class="n">frame</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">deque</span><span class="o">&lt;</span><span class="n">G3FramePtr</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">out</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">log_error</span><span class="p">(</span><span class="s">&quot;%d things are on fire&quot;</span><span class="p">,</span> <span class="n">frame</span><span class="o">-&gt;</span><span class="n">Get</span><span class="o">&lt;</span><span class="n">G3Int</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;ThingsOnFire&quot;</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">value</span><span class="p">);</span>
+                <span class="n">out</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">frame</span><span class="p">);</span>
+        <span class="p">}</span>
+<span class="k">private</span><span class="o">:</span>
+        <span class="n">SET_LOGGER</span><span class="p">(</span><span class="s">&quot;FireWarden&quot;</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Logging</a><ul>
+<li><a class="reference internal" href="#setting-log-levels">Setting Log Levels</a></li>
+<li><a class="reference internal" href="#using-logging-from-python">Using Logging from Python</a></li>
+<li><a class="reference internal" href="#using-logging-from-c">Using Logging from C++</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="frames.html"
+                        title="previous chapter">Frames</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="fileio.html"
+                        title="next chapter">File IO</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/logging.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="fileio.html" title="File IO"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="frames.html" title="Frames"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.2.
+    </div>
+  </body>
+</html>

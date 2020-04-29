@@ -1,0 +1,204 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Units &#8212; SPT3G Software  documentation</title>
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Data Acquisition" href="dataacquisition.html" />
+    <link rel="prev" title="File IO" href="fileio.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="dataacquisition.html" title="Data Acquisition"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="fileio.html" title="File IO"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="units">
+<h1>Units<a class="headerlink" href="#units" title="Permalink to this headline">¶</a></h1>
+<p>This software includes a units system that is meant to end wondering whether a given function takes radians or degrees as an argument, or whether a stored time is in milliseconds or seconds. The support code is accessible to both C++ and Python as part of the <code class="docutils literal notranslate"><span class="pre">G3Units</span></code> namespace (<code class="docutils literal notranslate"><span class="pre">core.G3Units.X</span></code> in Python and <code class="docutils literal notranslate"><span class="pre">G3Units::X</span></code> in C++).</p>
+<div class="section" id="defining-a-quantity-with-units">
+<h2>Defining a quantity with units<a class="headerlink" href="#defining-a-quantity-with-units" title="Permalink to this headline">¶</a></h2>
+<p>Defining a quantity with units is meant to work the way you would write it down. The period of time 5 seconds would be represented in Python as:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="mi">5</span><span class="o">*</span><span class="n">core</span><span class="o">.</span><span class="n">G3Units</span><span class="o">.</span><span class="n">s</span>
+</pre></div>
+</div>
+<p>Under the hood, these are multiplicative constants that have the appropriate scalings relative to one another (e.g. <code class="docutils literal notranslate"><span class="pre">core.G3Units.s</span></code> is a thousand times larger than <code class="docutils literal notranslate"><span class="pre">core.G3Units.ms</span></code>).</p>
+</div>
+<div class="section" id="converting-to-different-units">
+<h2>Converting to different units<a class="headerlink" href="#converting-to-different-units" title="Permalink to this headline">¶</a></h2>
+<p>If you want a numeric quantity in specific units, you divide by the unit you want (think of doing unit analysis in freshman physics courses).</p>
+<p>For example, to take a passed angle and return its sin, irrespective of the user’s preferred units:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">sinofstuff</span><span class="p">(</span><span class="n">angle</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="o">/</span><span class="n">core</span><span class="o">.</span><span class="n">G3Units</span><span class="o">.</span><span class="n">rad</span><span class="p">)</span>
+
+<span class="k">print</span><span class="p">(</span><span class="s1">&#39;sin(5 degrees): </span><span class="si">%f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sinoffstuff</span><span class="p">(</span><span class="mi">5</span><span class="o">*</span><span class="n">core</span><span class="o">.</span><span class="n">G3Units</span><span class="o">.</span><span class="n">deg</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="available-units">
+<h2>Available units<a class="headerlink" href="#available-units" title="Permalink to this headline">¶</a></h2>
+<p>We currently define units for times, angles, lengths, power, voltage, current, and temperature. Some of these have aliases with abbreviated names (e.g. both ms and millisecond). Where this occurs, all names for a unit are separated with commas. For a value <code class="docutils literal notranslate"><span class="pre">X</span></code> in the following lists, it is exposed to Python as <code class="docutils literal notranslate"><span class="pre">core.G3Units.X</span></code> and to C++ as <code class="docutils literal notranslate"><span class="pre">G3Units::X</span></code>.</p>
+<p>Time:</p>
+<ul class="simple">
+<li>nanosecond, ns</li>
+<li>microsecond, us</li>
+<li>millisecond, ms</li>
+<li>second, s</li>
+<li>minute, min</li>
+<li>hour, h</li>
+<li>day</li>
+</ul>
+<p>Frequency:</p>
+<ul class="simple">
+<li>Hz, hz</li>
+<li>MHz</li>
+<li>GHz</li>
+</ul>
+<p>Angles:</p>
+<ul class="simple">
+<li>rad</li>
+<li>deg</li>
+<li>arcmin</li>
+<li>arcsec</li>
+<li>rahour, rahr</li>
+</ul>
+<p>Length:</p>
+<ul class="simple">
+<li>nanometer, nm</li>
+<li>micron</li>
+<li>millimeter, mm</li>
+<li>centimeter, cm</li>
+<li>inch, in</li>
+<li>foot, ft</li>
+<li>meter, m</li>
+<li>kilometer, m</li>
+<li>au</li>
+<li>parsec, pc</li>
+</ul>
+<p>Power:</p>
+<ul class="simple">
+<li>attowatt, aW</li>
+<li>picowatt, pW</li>
+<li>nanowatt, nW</li>
+<li>microwatt, uW</li>
+<li>milliwatt, mW</li>
+<li>watt, W</li>
+<li>horsepower, hp</li>
+</ul>
+<p>Voltage:</p>
+<ul class="simple">
+<li>volt, V</li>
+<li>millivolt, mV</li>
+<li>microvolt, uV</li>
+</ul>
+<p>Current:</p>
+<ul class="simple">
+<li>amp, ampere, A</li>
+<li>milliamp, mA</li>
+<li>microamp, uA</li>
+<li>nanoamp, nA</li>
+</ul>
+<p>Temperature:</p>
+<ul class="simple">
+<li>picokelvin, pK</li>
+<li>nanokelvin, nK</li>
+<li>microkelvin, uK</li>
+<li>millikelvin, mK</li>
+<li>kelvin, K</li>
+<li>rankine, R</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Units</a><ul>
+<li><a class="reference internal" href="#defining-a-quantity-with-units">Defining a quantity with units</a></li>
+<li><a class="reference internal" href="#converting-to-different-units">Converting to different units</a></li>
+<li><a class="reference internal" href="#available-units">Available units</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="fileio.html"
+                        title="previous chapter">File IO</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="dataacquisition.html"
+                        title="next chapter">Data Acquisition</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/units.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="dataacquisition.html" title="Data Acquisition"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="fileio.html" title="File IO"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.2.
+    </div>
+  </body>
+</html>

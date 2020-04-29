@@ -1,0 +1,689 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>dfmux &#8212; SPT3G Software  documentation</title>
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="gcp" href="moddoc_gcp.html" />
+    <link rel="prev" title="core" href="moddoc_core.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="moddoc_gcp.html" title="gcp"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="moddoc_core.html" title="core"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="dfmux">
+<h1>dfmux<a class="headerlink" href="#dfmux" title="Permalink to this headline">¶</a></h1>
+<p>dfmux contains code and dataclasses to collect and store data from the DfMux system, particulary focusing on the ICE system used for SPT3G and PB2. A general overview of how the modules here interact can be found in the <a class="reference internal" href="dataacquisition.html"><span class="doc">Data Acquisition</span></a> section of the manual.</p>
+<div class="section" id="frame-objects-in-spt3g-dfmux">
+<h2>Frame Objects in spt3g.dfmux<a class="headerlink" href="#frame-objects-in-spt3g-dfmux" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference internal" href="#spt3g-dfmux-dfmuxboardsamples">spt3g.dfmux.DfMuxBoardSamples</a></li>
+<li><a class="reference internal" href="#spt3g-dfmux-dfmuxchannelmapping">spt3g.dfmux.DfMuxChannelMapping</a></li>
+<li><a class="reference internal" href="#spt3g-dfmux-dfmuxhousekeepingmap">spt3g.dfmux.DfMuxHousekeepingMap</a></li>
+<li><a class="reference internal" href="#spt3g-dfmux-dfmuxmetasample">spt3g.dfmux.DfMuxMetaSample</a></li>
+<li><a class="reference internal" href="#spt3g-dfmux-dfmuxsample">spt3g.dfmux.DfMuxSample</a></li>
+<li><a class="reference internal" href="#spt3g-dfmux-dfmuxwiringmap">spt3g.dfmux.DfMuxWiringMap</a></li>
+<li><a class="reference internal" href="#spt3g-dfmux-hkboardinfo">spt3g.dfmux.HkBoardInfo</a></li>
+<li><a class="reference internal" href="#spt3g-dfmux-hkchannelinfo">spt3g.dfmux.HkChannelInfo</a></li>
+<li><a class="reference internal" href="#spt3g-dfmux-hkmezzanineinfo">spt3g.dfmux.HkMezzanineInfo</a></li>
+<li><a class="reference internal" href="#spt3g-dfmux-hkmoduleinfo">spt3g.dfmux.HkModuleInfo</a></li>
+</ul>
+<div class="section" id="spt3g-dfmux-dfmuxboardsamples">
+<span id="id1"></span><h3>spt3g.dfmux.DfMuxBoardSamples<a class="headerlink" href="#spt3g-dfmux-dfmuxboardsamples" title="Permalink to this headline">¶</a></h3>
+<p>Container structure for samples from modules on one board, mapping 0-indexed module IDs to a dfmux.DfMuxSample.</p>
+<p><em>Members:</em></p>
+<ul class="simple">
+<li><strong>nmodules</strong>: Number of modules expected to report from this board</li>
+</ul>
+<p><em>Methods:</em></p>
+<p id="spt3g-dfmux-dfmuxboardsamples-keys"><strong>spt3g.dfmux.DfMuxBoardSamples.keys</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">keys(</span> <span class="pre">(DfMuxBoardSamples)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt>
+<dd>D.keys() -&gt; list of D’s keys</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxboardsamples-has-key"><strong>spt3g.dfmux.DfMuxBoardSamples.has_key</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">has_key(</span> <span class="pre">(DfMuxBoardSamples)arg1,</span> <span class="pre">(int)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span> <span class="pre">:</span></code></dt>
+<dd>D.has_key(k) -&gt; True if D has a key k, else False</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxboardsamples-values"><strong>spt3g.dfmux.DfMuxBoardSamples.values</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">values(</span> <span class="pre">(DfMuxBoardSamples)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt>
+<dd>D.values() -&gt; list of D’s values</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxboardsamples-items"><strong>spt3g.dfmux.DfMuxBoardSamples.items</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">items(</span> <span class="pre">(DfMuxBoardSamples)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt>
+<dd>D.items() -&gt; list of D’s (key, value) pairs, as 2-tuples</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxboardsamples-clear"><strong>spt3g.dfmux.DfMuxBoardSamples.clear</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">clear(</span> <span class="pre">(DfMuxBoardSamples)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt>
+<dd>D.clear() -&gt; None.  Remove all items from D.</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxboardsamples-copy"><strong>spt3g.dfmux.DfMuxBoardSamples.copy</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">copy(</span> <span class="pre">(DfMuxBoardSamples)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">DfMuxBoardSamples</span> <span class="pre">:</span></code></dt>
+<dd>D.copy() -&gt; a shallow copy of D</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxboardsamples-get"><strong>spt3g.dfmux.DfMuxBoardSamples.get</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">get(</span> <span class="pre">(DfMuxBoardSamples)arg1,</span> <span class="pre">(int)arg2</span> <span class="pre">[,</span> <span class="pre">(object)default_val])</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
+<dd>D.get(k[,d]) -&gt; D[k] if k in D, else d.  d defaults to None.</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxboardsamples-pop"><strong>spt3g.dfmux.DfMuxBoardSamples.pop</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(DfMuxBoardSamples)arg1,</span> <span class="pre">(int)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">object</span></code></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(DfMuxBoardSamples)arg1,</span> <span class="pre">(int)arg2,</span> <span class="pre">(object)arg3)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
+<dd>D.pop(k[,d]) -&gt; v, remove specified key and return the corresponding value
+If key is not found, d is returned if given, otherwise KeyError is raised</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxboardsamples-popitem"><strong>spt3g.dfmux.DfMuxBoardSamples.popitem</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">popitem(</span> <span class="pre">(DfMuxBoardSamples)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
+<dd>D.popitem() -&gt; (k, v), remove and return some (key, value) pair as a
+2-tuple; but raise KeyError if D is empty</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxboardsamples-update"><strong>spt3g.dfmux.DfMuxBoardSamples.update</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">update(</span> <span class="pre">(object)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt>
+<dd>D.update(E) -&gt; None.  Update D from E: for k in E: D[k] = E[k]</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxboardsamples-iteritems"><strong>spt3g.dfmux.DfMuxBoardSamples.iteritems</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">iteritems(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
+<dd>D.iteritems() -&gt; an iterator over the (key, value) items of D</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxboardsamples-iterkeys"><strong>spt3g.dfmux.DfMuxBoardSamples.iterkeys</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">iterkeys(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
+<dd>D.iterkeys() -&gt; an iterator over the keys of D</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxboardsamples-itervalues"><strong>spt3g.dfmux.DfMuxBoardSamples.itervalues</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">itervalues(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
+<dd>D.itervalues() -&gt; an iterator over the values of D</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxboardsamples-complete"><strong>spt3g.dfmux.DfMuxBoardSamples.Complete</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">Complete(</span> <span class="pre">(DfMuxBoardSamples)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span> <span class="pre">:</span></code></dt>
+<dd>True if this structure contains data from all expected modules</dd>
+</dl>
+</div>
+<div class="section" id="spt3g-dfmux-dfmuxchannelmapping">
+<span id="id2"></span><h3>spt3g.dfmux.DfMuxChannelMapping<a class="headerlink" href="#spt3g-dfmux-dfmuxchannelmapping" title="Permalink to this headline">¶</a></h3>
+<p>Bolometer wiring information. Module and channel IDs are stored zero-indexed, but be aware that they often printed one-indexed for compatibility with pydfmux.</p>
+<p><em>Members:</em></p>
+<ul class="simple">
+<li><strong>board_ip</strong>: IP Address of the board, encoded as an int using struct</li>
+<li><strong>board_serial</strong>: Serial number of the readout board to which this channel is attached.</li>
+<li><strong>board_slot</strong>: Crate slot of the board to which this channel is attached or -1 if the board is not in a crate.</li>
+<li><strong>crate_serial</strong>: Serial number of the crate in which the readout board is housed or -1 if the board is not in a crate.</li>
+<li><strong>module</strong>: 0-indexed module/SQUID ID of the channel</li>
+<li><strong>channel</strong>: 0-indexed channel number on the parent module/SQUID</li>
+</ul>
+</div>
+<div class="section" id="spt3g-dfmux-dfmuxhousekeepingmap">
+<span id="id3"></span><h3>spt3g.dfmux.DfMuxHousekeepingMap<a class="headerlink" href="#spt3g-dfmux-dfmuxhousekeepingmap" title="Permalink to this headline">¶</a></h3>
+<p>Container structure for housekeeping data from all DfMux boards, indexed by board serial number.</p>
+<p><em>Methods:</em></p>
+<p id="spt3g-dfmux-dfmuxhousekeepingmap-keys"><strong>spt3g.dfmux.DfMuxHousekeepingMap.keys</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">keys(</span> <span class="pre">(DfMuxHousekeepingMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt>
+<dd>D.keys() -&gt; list of D’s keys</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxhousekeepingmap-has-key"><strong>spt3g.dfmux.DfMuxHousekeepingMap.has_key</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">has_key(</span> <span class="pre">(DfMuxHousekeepingMap)arg1,</span> <span class="pre">(int)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span> <span class="pre">:</span></code></dt>
+<dd>D.has_key(k) -&gt; True if D has a key k, else False</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxhousekeepingmap-values"><strong>spt3g.dfmux.DfMuxHousekeepingMap.values</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">values(</span> <span class="pre">(DfMuxHousekeepingMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt>
+<dd>D.values() -&gt; list of D’s values</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxhousekeepingmap-items"><strong>spt3g.dfmux.DfMuxHousekeepingMap.items</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">items(</span> <span class="pre">(DfMuxHousekeepingMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt>
+<dd>D.items() -&gt; list of D’s (key, value) pairs, as 2-tuples</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxhousekeepingmap-clear"><strong>spt3g.dfmux.DfMuxHousekeepingMap.clear</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">clear(</span> <span class="pre">(DfMuxHousekeepingMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt>
+<dd>D.clear() -&gt; None.  Remove all items from D.</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxhousekeepingmap-copy"><strong>spt3g.dfmux.DfMuxHousekeepingMap.copy</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">copy(</span> <span class="pre">(DfMuxHousekeepingMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">DfMuxHousekeepingMap</span> <span class="pre">:</span></code></dt>
+<dd>D.copy() -&gt; a shallow copy of D</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxhousekeepingmap-get"><strong>spt3g.dfmux.DfMuxHousekeepingMap.get</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">get(</span> <span class="pre">(DfMuxHousekeepingMap)arg1,</span> <span class="pre">(int)arg2</span> <span class="pre">[,</span> <span class="pre">(object)default_val])</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
+<dd>D.get(k[,d]) -&gt; D[k] if k in D, else d.  d defaults to None.</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxhousekeepingmap-pop"><strong>spt3g.dfmux.DfMuxHousekeepingMap.pop</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(DfMuxHousekeepingMap)arg1,</span> <span class="pre">(int)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">object</span></code></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(DfMuxHousekeepingMap)arg1,</span> <span class="pre">(int)arg2,</span> <span class="pre">(object)arg3)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
+<dd>D.pop(k[,d]) -&gt; v, remove specified key and return the corresponding value
+If key is not found, d is returned if given, otherwise KeyError is raised</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxhousekeepingmap-popitem"><strong>spt3g.dfmux.DfMuxHousekeepingMap.popitem</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">popitem(</span> <span class="pre">(DfMuxHousekeepingMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
+<dd>D.popitem() -&gt; (k, v), remove and return some (key, value) pair as a
+2-tuple; but raise KeyError if D is empty</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxhousekeepingmap-update"><strong>spt3g.dfmux.DfMuxHousekeepingMap.update</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">update(</span> <span class="pre">(object)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt>
+<dd>D.update(E) -&gt; None.  Update D from E: for k in E: D[k] = E[k]</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxhousekeepingmap-iteritems"><strong>spt3g.dfmux.DfMuxHousekeepingMap.iteritems</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">iteritems(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
+<dd>D.iteritems() -&gt; an iterator over the (key, value) items of D</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxhousekeepingmap-iterkeys"><strong>spt3g.dfmux.DfMuxHousekeepingMap.iterkeys</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">iterkeys(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
+<dd>D.iterkeys() -&gt; an iterator over the keys of D</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxhousekeepingmap-itervalues"><strong>spt3g.dfmux.DfMuxHousekeepingMap.itervalues</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">itervalues(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
+<dd>D.itervalues() -&gt; an iterator over the values of D</dd>
+</dl>
+</div>
+<div class="section" id="spt3g-dfmux-dfmuxmetasample">
+<span id="id4"></span><h3>spt3g.dfmux.DfMuxMetaSample<a class="headerlink" href="#spt3g-dfmux-dfmuxmetasample" title="Permalink to this headline">¶</a></h3>
+<p>Container structure for coincident samples from all boards. Individual board data, stored in dfmux.DfMuxBoardSamples classes, is contained indexed by board serial number.</p>
+<p><em>Methods:</em></p>
+<p id="spt3g-dfmux-dfmuxmetasample-keys"><strong>spt3g.dfmux.DfMuxMetaSample.keys</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">keys(</span> <span class="pre">(DfMuxMetaSample)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt>
+<dd>D.keys() -&gt; list of D’s keys</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxmetasample-has-key"><strong>spt3g.dfmux.DfMuxMetaSample.has_key</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">has_key(</span> <span class="pre">(DfMuxMetaSample)arg1,</span> <span class="pre">(int)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span> <span class="pre">:</span></code></dt>
+<dd>D.has_key(k) -&gt; True if D has a key k, else False</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxmetasample-values"><strong>spt3g.dfmux.DfMuxMetaSample.values</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">values(</span> <span class="pre">(DfMuxMetaSample)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt>
+<dd>D.values() -&gt; list of D’s values</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxmetasample-items"><strong>spt3g.dfmux.DfMuxMetaSample.items</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">items(</span> <span class="pre">(DfMuxMetaSample)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt>
+<dd>D.items() -&gt; list of D’s (key, value) pairs, as 2-tuples</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxmetasample-clear"><strong>spt3g.dfmux.DfMuxMetaSample.clear</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">clear(</span> <span class="pre">(DfMuxMetaSample)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt>
+<dd>D.clear() -&gt; None.  Remove all items from D.</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxmetasample-copy"><strong>spt3g.dfmux.DfMuxMetaSample.copy</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">copy(</span> <span class="pre">(DfMuxMetaSample)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">DfMuxMetaSample</span> <span class="pre">:</span></code></dt>
+<dd>D.copy() -&gt; a shallow copy of D</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxmetasample-get"><strong>spt3g.dfmux.DfMuxMetaSample.get</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">get(</span> <span class="pre">(DfMuxMetaSample)arg1,</span> <span class="pre">(int)arg2</span> <span class="pre">[,</span> <span class="pre">(object)default_val])</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
+<dd>D.get(k[,d]) -&gt; D[k] if k in D, else d.  d defaults to None.</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxmetasample-pop"><strong>spt3g.dfmux.DfMuxMetaSample.pop</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(DfMuxMetaSample)arg1,</span> <span class="pre">(int)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">object</span></code></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(DfMuxMetaSample)arg1,</span> <span class="pre">(int)arg2,</span> <span class="pre">(object)arg3)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
+<dd>D.pop(k[,d]) -&gt; v, remove specified key and return the corresponding value
+If key is not found, d is returned if given, otherwise KeyError is raised</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxmetasample-popitem"><strong>spt3g.dfmux.DfMuxMetaSample.popitem</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">popitem(</span> <span class="pre">(DfMuxMetaSample)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
+<dd>D.popitem() -&gt; (k, v), remove and return some (key, value) pair as a
+2-tuple; but raise KeyError if D is empty</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxmetasample-update"><strong>spt3g.dfmux.DfMuxMetaSample.update</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">update(</span> <span class="pre">(object)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt>
+<dd>D.update(E) -&gt; None.  Update D from E: for k in E: D[k] = E[k]</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxmetasample-iteritems"><strong>spt3g.dfmux.DfMuxMetaSample.iteritems</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">iteritems(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
+<dd>D.iteritems() -&gt; an iterator over the (key, value) items of D</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxmetasample-iterkeys"><strong>spt3g.dfmux.DfMuxMetaSample.iterkeys</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">iterkeys(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
+<dd>D.iterkeys() -&gt; an iterator over the keys of D</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxmetasample-itervalues"><strong>spt3g.dfmux.DfMuxMetaSample.itervalues</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">itervalues(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
+<dd>D.itervalues() -&gt; an iterator over the values of D</dd>
+</dl>
+</div>
+<div class="section" id="spt3g-dfmux-dfmuxsample">
+<span id="id5"></span><h3>spt3g.dfmux.DfMuxSample<a class="headerlink" href="#spt3g-dfmux-dfmuxsample" title="Permalink to this headline">¶</a></h3>
+<p>Samples from all channels on one readout module, stored with I and Q interleaved, such that the first element is channel 1 I, followed by channel 1 Q, followed by channel 2 I, etc.</p>
+<p><em>Members:</em></p>
+<ul class="simple">
+<li><strong>Timestamp</strong>: No Doc (Shame!)</li>
+</ul>
+</div>
+<div class="section" id="spt3g-dfmux-dfmuxwiringmap">
+<span id="id6"></span><h3>spt3g.dfmux.DfMuxWiringMap<a class="headerlink" href="#spt3g-dfmux-dfmuxwiringmap" title="Permalink to this headline">¶</a></h3>
+<p>Mapping from logical detector ID string (same as used in timestreams) to wiring information (the board, module, and channel to which a given detector is connected)</p>
+<p><em>Methods:</em></p>
+<p id="spt3g-dfmux-dfmuxwiringmap-keys"><strong>spt3g.dfmux.DfMuxWiringMap.keys</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">keys(</span> <span class="pre">(DfMuxWiringMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt>
+<dd>D.keys() -&gt; list of D’s keys</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxwiringmap-has-key"><strong>spt3g.dfmux.DfMuxWiringMap.has_key</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">has_key(</span> <span class="pre">(DfMuxWiringMap)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span> <span class="pre">:</span></code></dt>
+<dd>D.has_key(k) -&gt; True if D has a key k, else False</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxwiringmap-values"><strong>spt3g.dfmux.DfMuxWiringMap.values</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">values(</span> <span class="pre">(DfMuxWiringMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt>
+<dd>D.values() -&gt; list of D’s values</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxwiringmap-items"><strong>spt3g.dfmux.DfMuxWiringMap.items</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">items(</span> <span class="pre">(DfMuxWiringMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt>
+<dd>D.items() -&gt; list of D’s (key, value) pairs, as 2-tuples</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxwiringmap-clear"><strong>spt3g.dfmux.DfMuxWiringMap.clear</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">clear(</span> <span class="pre">(DfMuxWiringMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt>
+<dd>D.clear() -&gt; None.  Remove all items from D.</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxwiringmap-copy"><strong>spt3g.dfmux.DfMuxWiringMap.copy</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">copy(</span> <span class="pre">(DfMuxWiringMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">DfMuxWiringMap</span> <span class="pre">:</span></code></dt>
+<dd>D.copy() -&gt; a shallow copy of D</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxwiringmap-get"><strong>spt3g.dfmux.DfMuxWiringMap.get</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">get(</span> <span class="pre">(DfMuxWiringMap)arg1,</span> <span class="pre">(str)arg2</span> <span class="pre">[,</span> <span class="pre">(object)default_val])</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
+<dd>D.get(k[,d]) -&gt; D[k] if k in D, else d.  d defaults to None.</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxwiringmap-pop"><strong>spt3g.dfmux.DfMuxWiringMap.pop</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(DfMuxWiringMap)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">object</span></code></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(DfMuxWiringMap)arg1,</span> <span class="pre">(str)arg2,</span> <span class="pre">(object)arg3)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
+<dd>D.pop(k[,d]) -&gt; v, remove specified key and return the corresponding value
+If key is not found, d is returned if given, otherwise KeyError is raised</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxwiringmap-popitem"><strong>spt3g.dfmux.DfMuxWiringMap.popitem</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">popitem(</span> <span class="pre">(DfMuxWiringMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
+<dd>D.popitem() -&gt; (k, v), remove and return some (key, value) pair as a
+2-tuple; but raise KeyError if D is empty</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxwiringmap-update"><strong>spt3g.dfmux.DfMuxWiringMap.update</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">update(</span> <span class="pre">(object)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt>
+<dd>D.update(E) -&gt; None.  Update D from E: for k in E: D[k] = E[k]</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxwiringmap-iteritems"><strong>spt3g.dfmux.DfMuxWiringMap.iteritems</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">iteritems(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
+<dd>D.iteritems() -&gt; an iterator over the (key, value) items of D</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxwiringmap-iterkeys"><strong>spt3g.dfmux.DfMuxWiringMap.iterkeys</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">iterkeys(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
+<dd>D.iterkeys() -&gt; an iterator over the keys of D</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxwiringmap-itervalues"><strong>spt3g.dfmux.DfMuxWiringMap.itervalues</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">itervalues(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
+<dd>D.itervalues() -&gt; an iterator over the values of D</dd>
+</dl>
+</div>
+<div class="section" id="spt3g-dfmux-hkboardinfo">
+<span id="id7"></span><h3>spt3g.dfmux.HkBoardInfo<a class="headerlink" href="#spt3g-dfmux-hkboardinfo" title="Permalink to this headline">¶</a></h3>
+<p>Mux board status. Includes both configuration and sensor readings for board generic quantities and a list of quantities for the mezzanines.</p>
+<p><em>Members:</em></p>
+<ul class="simple">
+<li><strong>timestamp</strong>: Time at which housekeeping data collected</li>
+<li><strong>timestamp_port</strong>: Source of timestamps on board</li>
+<li><strong>serial</strong>: Board serial number</li>
+<li><strong>fir_stage</strong>: Sample rate encoded as the “FIR Stage”. Smaller numbers are faster and grow by factors of two with each decrement</li>
+<li><strong>is128x</strong>: Boolean for whether 128x firmware is running</li>
+<li><strong>currents</strong>: Dictionary of data from on-board current sensors</li>
+<li><strong>voltages</strong>: Dictionary of data from on-board voltage sensors</li>
+<li><strong>temperatures</strong>: Dictionary of data from on-board temperature sensors (C)</li>
+<li><strong>mezz</strong>: 1-indexed mapping from mezzanine ID to mezzanine-specific data</li>
+</ul>
+</div>
+<div class="section" id="spt3g-dfmux-hkchannelinfo">
+<span id="id8"></span><h3>spt3g.dfmux.HkChannelInfo<a class="headerlink" href="#spt3g-dfmux-hkchannelinfo" title="Permalink to this headline">¶</a></h3>
+<p>Mux channel status (configuration and sensors). Usually a part of an HkModuleInfo.</p>
+<p><em>Members:</em></p>
+<ul class="simple">
+<li><strong>channel_number</strong>: 1-indexed channel number.</li>
+<li><strong>carrier_amplitude</strong>: Carrier amplitude in normalized units (0-1).</li>
+<li><strong>carrier_frequency</strong>: Carrier frequency in standard frequency units</li>
+<li><strong>dan_accumulator_enable</strong>: True if DAN accumulator enabled</li>
+<li><strong>dan_feedback_enable</strong>: True if DAN control of the nuller is enabled</li>
+<li><strong>dan_streaming_enable</strong>: True if streamer packets are from DAN rather than demod</li>
+<li><strong>dan_gain</strong>: DAN gain in board units</li>
+<li><strong>demod_frequency</strong>: Frequency of the demodulator in standard frequency units.</li>
+<li><strong>nuller_amplitude</strong>: Nuller amplitude in normalized units (0-1)</li>
+<li><strong>dan_railed</strong>: True if DAN has railed.</li>
+<li><strong>state</strong>: String code (“latched”, “tuned” etc.) describing the state of this detector stored by the control software</li>
+<li><strong>rlatched</strong>: Resistance of the detector when latched in standard impedance units as stored by the control software tuning script.</li>
+<li><strong>rnormal</strong>: Resistance of the detector when normal in standard impedance units as stored by the control software tuning script.</li>
+<li><strong>rfrac_achieved</strong>: Achieved resistance of the detector when tuned as a fraction of rnormal, as stored by the control software tuning script.</li>
+<li><strong>loopgain</strong>: Measured loopgain of the detector as stored by the control software tuning script.</li>
+</ul>
+</div>
+<div class="section" id="spt3g-dfmux-hkmezzanineinfo">
+<span id="id9"></span><h3>spt3g.dfmux.HkMezzanineInfo<a class="headerlink" href="#spt3g-dfmux-hkmezzanineinfo" title="Permalink to this headline">¶</a></h3>
+<p>Mux mezzanine status</p>
+<p><em>Members:</em></p>
+<ul class="simple">
+<li><strong>power</strong>: True if on</li>
+<li><strong>present</strong>: True if exists</li>
+<li><strong>serial</strong>: Mezzanine serial number</li>
+<li><strong>part_number</strong>: Mezzanine part ID (usually “MGMEZZ04”)</li>
+<li><strong>revision</strong>: Mezzanine revision number</li>
+<li><strong>currents</strong>: Dictionary of measured currents on mezzanine</li>
+<li><strong>voltages</strong>: Dictionary of measured voltages on mezzanine</li>
+<li><strong>modules</strong>: 1-indexed list of housekeeping data from readout modules on this mezzanine</li>
+<li><strong>temperature</strong>: Mezzanine temperature (C)</li>
+<li><strong>squid_controller_temperature</strong>: Measured temperature of SQUID controller board (C)</li>
+<li><strong>squid_controller_power</strong>: True if SQUID controller board powered up</li>
+<li><strong>squid_heater</strong>: Power level of SQUID header control</li>
+</ul>
+</div>
+<div class="section" id="spt3g-dfmux-hkmoduleinfo">
+<span id="id10"></span><h3>spt3g.dfmux.HkModuleInfo<a class="headerlink" href="#spt3g-dfmux-hkmoduleinfo" title="Permalink to this headline">¶</a></h3>
+<p>Mux module status</p>
+<p><em>Members:</em></p>
+<ul class="simple">
+<li><strong>module_number</strong>: 1-indexed module number on this mezzanine</li>
+<li><strong>carrier_gain</strong>: Carrier gain code, in board-specific units</li>
+<li><strong>nuller_gain</strong>: Nuller gain code, in board-specific units</li>
+<li><strong>demod_gain</strong>: Demod gain code, in board-specific units</li>
+<li><strong>carrier_railed</strong>: True if carrier has recently hit a DAC rail</li>
+<li><strong>nuller_railed</strong>: True if nuller has recently hit a DAC rail</li>
+<li><strong>demod_railed</strong>: True if demod input has recently hit one of the ADC rails</li>
+<li><strong>squid_flux_bias</strong>: Flux bias, in board-specific units (XXX)</li>
+<li><strong>squid_current_bias</strong>: SQUID current bias, in board-specific units (XXX)</li>
+<li><strong>squid_stage1_offset</strong>: Offset voltage applied to SQUID output before first-stage amp</li>
+<li><strong>squid_p2p</strong>: Peak-to-peak voltage difference in V-Phi curve stored by tuning script</li>
+<li><strong>squid_transimpedance</strong>: Measured SQUID transimpedance, in resistance units</li>
+<li><strong>squid_state</strong>: Descriptive string (e.g. “Tuned”) stored by control system tuning script to describe SQUID state</li>
+<li><strong>squid_feedback</strong>: SQUID feedback mechanism employed</li>
+<li><strong>routing_type</strong>: Whether DAC are routed directly to ADCs or to the cryostat</li>
+<li><strong>channels</strong>: Mapping from 1-indexed channel numbers to channel housekeeping data</li>
+</ul>
+</div>
+</div>
+<div class="section" id="modules-in-spt3g-dfmux">
+<h2>Modules in spt3g.dfmux<a class="headerlink" href="#modules-in-spt3g-dfmux" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference internal" href="#spt3g-dfmux-dfmuxbuilder">spt3g.dfmux.DfMuxBuilder</a></li>
+<li><a class="reference internal" href="#spt3g-dfmux-dfmuxcollator">spt3g.dfmux.DfMuxCollator</a></li>
+<li><a class="reference internal" href="#spt3g-dfmux-hardwaremaptools-dfmlhardwaremapinjector">spt3g.dfmux.HardwareMapTools.DfmlHardwareMapInjector</a></li>
+<li><a class="reference internal" href="#spt3g-dfmux-hardwaremaptools-generatefakehardwaremap">spt3g.dfmux.HardwareMapTools.GenerateFakeHardwareMap</a></li>
+<li><a class="reference internal" href="#spt3g-dfmux-hardwaremaptools-pydfmuxbolometerpropertiesinjector">spt3g.dfmux.HardwareMapTools.PyDfMuxBolometerPropertiesInjector</a></li>
+<li><a class="reference internal" href="#spt3g-dfmux-hardwaremaptools-pydfmuxwiringmapinjector">spt3g.dfmux.HardwareMapTools.PyDfMuxWiringMapInjector</a></li>
+<li><a class="reference internal" href="#spt3g-dfmux-housekeeping-housekeepingconsumer">spt3g.dfmux.Housekeeping.HousekeepingConsumer</a></li>
+<li><a class="reference internal" href="#spt3g-dfmux-housekeeping-periodichousekeepingcollector">spt3g.dfmux.Housekeeping.PeriodicHousekeepingCollector</a></li>
+<li><a class="reference internal" href="#spt3g-dfmux-legacyhousekeeping-legacyhousekeepingconsumer">spt3g.dfmux.LegacyHousekeeping.LegacyHousekeepingConsumer</a></li>
+<li><a class="reference internal" href="#spt3g-dfmux-netcdfdump">spt3g.dfmux.NetCDFDump</a></li>
+<li><a class="reference internal" href="#spt3g-dfmux-scantools-fixedlengthscans">spt3g.dfmux.ScanTools.FixedLengthScans</a></li>
+<li><a class="reference internal" href="#spt3g-dfmux-unittransforms-converttimestreamunits">spt3g.dfmux.unittransforms.ConvertTimestreamUnits</a></li>
+</ul>
+<p id="spt3g-dfmux-dfmuxbuilder"><strong>spt3g.dfmux.DfMuxBuilder</strong></p>
+<p>Processing module for data from DfMux boards. Reads data from boards data acquisition boards, requiring that data from all be timestamped to within collation_tolerance (default 10 microseconds) to be considered part of a single sample. If boards is an integer, listens for that number. If a list of integers, DfMuxBuilder will filter for only boards with serial numbers in the list.</p>
+<p id="spt3g-dfmux-dfmuxcollator"><strong>spt3g.dfmux.DfMuxCollator</strong></p>
+<p>Collects DfMux timepoints into scan frames using a provided wiring map. Scan frames are created when an empty Scan frame appears in the data stream. This frame will contain all subsequent timepoints until either the next Scan frame is detected or the stream ends. In addition to dfmux timestreams, any scalar floating numbers that recur in every input Timepoint frame will be combined into a G3Timestream of the same name stored in the output scan frame.</p>
+<p id="spt3g-dfmux-hardwaremaptools-dfmlhardwaremapinjector"><strong>spt3g.dfmux.HardwareMapTools.DfmlHardwareMapInjector</strong></p>
+<dl class="docutils">
+<dt><em>Constructor:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">DfmlHardwareMapInjector(self,</span> <span class="pre">dfml_hwm)</span></code></dd>
+</dl>
+<p id="spt3g-dfmux-hardwaremaptools-generatefakehardwaremap"><strong>spt3g.dfmux.HardwareMapTools.GenerateFakeHardwareMap</strong></p>
+<p>Inserts a fake hardware map into the data stream. Takes a wiring frame as an argument to the constructor, which it will inject before any other frames.</p>
+<dl class="docutils">
+<dt><em>Constructor:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">GenerateFakeHardwareMap(self,</span> <span class="pre">frame)</span></code></dd>
+</dl>
+<p id="spt3g-dfmux-hardwaremaptools-pydfmuxbolometerpropertiesinjector"><strong>spt3g.dfmux.HardwareMapTools.PyDfMuxBolometerPropertiesInjector</strong></p>
+<p>Insert a calibration frame following any wiring frame containing a
+BolometerPropertiesMap named “NominalBolometerProperties” that has
+the properties of each bolometer as defined by the given pydfmux
+hardware map.</p>
+<dl class="docutils">
+<dt><em>Definition:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">PyDfMuxBolometerPropertiesInjector(frame,</span> <span class="pre">pydfmux_hwm=None,</span> <span class="pre">angle_per_mm=7.305948248848263e-05)</span></code></dd>
+</dl>
+<p id="spt3g-dfmux-hardwaremaptools-pydfmuxwiringmapinjector"><strong>spt3g.dfmux.HardwareMapTools.PyDfMuxWiringMapInjector</strong></p>
+<p>Insert a wiring map derived from a pydfmux hardware map into the data
+stream ahead of what would otherwise be the first frame.</p>
+<p>Optionally filter for detectors described by the mask in &lt;pathstring&gt;
+(see pydfmux documentation for hwm.channel_maps_from_pstring()) and
+detectors in one of the states identified by the state argument.</p>
+<dl class="docutils">
+<dt><em>Constructor:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">PyDfMuxWiringMapInjector(self,</span> <span class="pre">pydfmux_hwm,</span> <span class="pre">pathstring=None,</span> <span class="pre">state=[])</span></code></dd>
+</dl>
+<p id="spt3g-dfmux-housekeeping-housekeepingconsumer"><strong>spt3g.dfmux.Housekeeping.HousekeepingConsumer</strong></p>
+<p>Collect housekeeping data from the mux boards defined in the wiring map.
+Will add a key called ‘DfMuxHousekeeping’ to any housekeeping frame that
+goes by containing the data as of the arrival of the housekeeping frame.
+Use in conjunction with a dfmux.PeriodicHousekeepingCollector to get
+data at fixed intervals.</p>
+<p>Also emits a Wiring frame from the housekeeping data.  This requires a
+recent (as of November 2018) version of pydfmux in order to read mapped
+channel names from each board.</p>
+<p>If collecting real-time data, you may want to set subprocess=True when
+adding this module.</p>
+<dl class="docutils">
+<dt><em>Constructor:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">HousekeepingConsumer(self)</span></code></dd>
+</dl>
+<p id="spt3g-dfmux-housekeeping-periodichousekeepingcollector"><strong>spt3g.dfmux.Housekeeping.PeriodicHousekeepingCollector</strong></p>
+<p>Inserts housekeeping frames every N timepoints.</p>
+<dl class="docutils">
+<dt><em>Constructor:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">PeriodicHousekeepingCollector(self,</span> <span class="pre">N=15200)</span></code></dd>
+</dl>
+<p id="spt3g-dfmux-legacyhousekeeping-legacyhousekeepingconsumer"><strong>spt3g.dfmux.LegacyHousekeeping.LegacyHousekeepingConsumer</strong></p>
+<p>Collect housekeeping data from the legacy (i.e. SPTpol-ish) mux boards
+defined in the wiring map. Will add a key called ‘DfMuxHousekeeping’ to
+any housekeeping frame that goes by containing the data as of the arrival
+of the housekeeping frame. Use in conjunction with a
+dfmux.PeriodicHousekeepingCollector to get data at fixed intervals.</p>
+<p>If collecting real-time data, you may want to set subprocess=True when
+adding this module.</p>
+<dl class="docutils">
+<dt><em>Constructor:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">LegacyHousekeepingConsumer(self)</span></code></dd>
+</dl>
+<p id="spt3g-dfmux-netcdfdump"><strong>spt3g.dfmux.NetCDFDump</strong></p>
+<p>Writes DfMux streamer data to a NetCDF file</p>
+<p id="spt3g-dfmux-scantools-fixedlengthscans"><strong>spt3g.dfmux.ScanTools.FixedLengthScans</strong></p>
+<p>Makes scans of length N timepoints.</p>
+<dl class="docutils">
+<dt><em>Constructor:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">FixedLengthScans(self,</span> <span class="pre">N=1000)</span></code></dd>
+</dl>
+<p id="spt3g-dfmux-unittransforms-converttimestreamunits"><strong>spt3g.dfmux.unittransforms.ConvertTimestreamUnits</strong></p>
+<p>Changes timestream units from one set of units (e.g. ADC counts) to
+another (e.g. Power). Currents and power are time averaged quantities
+(i.e. currents give RMS values).</p>
+<p>Note that this does not handle conversions to on-sky quantities (e.g. K_cmb)</p>
+<dl class="docutils">
+<dt><em>Constructor:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">ConvertTimestreamUnits(self,</span> <span class="pre">Input='RawTimestreams',</span> <span class="pre">Output='CalTimestreams',</span> <span class="pre">Units=spt3g.core.G3TimestreamUnits.Power,</span> <span class="pre">SkipUncalibratable=False,</span> <span class="pre">KeepConversionsForObservation=True)</span></code></dd>
+<dt><em>Constructor:</em></dt>
+<dd><p class="first">Copy data in the timestream map Input to the timestream map Output,
+converting the units from whatever they were to those specified by
+Units.</p>
+<p>If SkipUncalibratable is true, copy timestreams for which the
+unit conversions could not be evaluated into the output timestream
+in their original units. If false, throws an exception if this occurs.</p>
+<p class="last">If KeepConversionsForObservation is True (default), conversion factors
+will only be evaluated once per observation. Note that this will cause
+the wrong conversions to be applied if any parameters of the mux system
+are modified during the observation but will substantially increase
+performance.</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="functions-in-spt3g-dfmux">
+<h2>Functions in spt3g.dfmux<a class="headerlink" href="#functions-in-spt3g-dfmux" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference internal" href="#spt3g-dfmux-hardwaremaptools-pathstringforbolo">spt3g.dfmux.HardwareMapTools.PathStringForBolo</a></li>
+<li><a class="reference internal" href="#spt3g-dfmux-housekeeping-housekeepingforbolo">spt3g.dfmux.Housekeeping.HousekeepingForBolo</a></li>
+<li><a class="reference internal" href="#spt3g-dfmux-unittransforms-get-timestream-unit-conversion">spt3g.dfmux.unittransforms.get_timestream_unit_conversion</a></li>
+</ul>
+<p id="spt3g-dfmux-hardwaremaptools-pathstringforbolo"><strong>spt3g.dfmux.HardwareMapTools.PathStringForBolo</strong></p>
+<p>Obtain the channel pathstring for a bolometer named “bolo”
+using the passed wiring map.</p>
+<dl class="docutils">
+<dt><em>Definition:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">PathStringForBolo(wiringmap,</span> <span class="pre">bolo)</span></code></dd>
+</dl>
+<p id="spt3g-dfmux-housekeeping-housekeepingforbolo"><strong>spt3g.dfmux.Housekeeping.HousekeepingForBolo</strong></p>
+<p>Obtain the channel housekeeping information for a bolometer named “bolo”
+using the passed housekeeping and wiring maps.</p>
+<p>If all_hk is True, returns a tuple of the (board, mezz, module, channel)
+HK data instead of just the channel.</p>
+<dl class="docutils">
+<dt><em>Definition:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">HousekeepingForBolo(hkmap,</span> <span class="pre">wiringmap,</span> <span class="pre">bolo,</span> <span class="pre">all_hk=False)</span></code></dd>
+</dl>
+<p id="spt3g-dfmux-unittransforms-get-timestream-unit-conversion"><strong>spt3g.dfmux.unittransforms.get_timestream_unit_conversion</strong></p>
+<p>Return the scalar conversion factor to move timestream data from a
+given system of units (Power, Resistance, Current, Counts) to another one.
+Requires a wiring map and recent housekeeping data.
+Returned quantities are RMS for currents and time-averaged for power.</p>
+<p>Note that this does not handle conversions to on-sky quantities (e.g. K_cmb)</p>
+<dl class="docutils">
+<dt><em>Definition:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">get_timestream_unit_conversion(from_units,</span> <span class="pre">to_units,</span> <span class="pre">bolo,</span> <span class="pre">wiringmap=None,</span> <span class="pre">hkmap=None,</span> <span class="pre">system=None,</span> <span class="pre">tf=None)</span></code></dd>
+</dl>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">dfmux</a><ul>
+<li><a class="reference internal" href="#frame-objects-in-spt3g-dfmux">Frame Objects in spt3g.dfmux</a><ul>
+<li><a class="reference internal" href="#spt3g-dfmux-dfmuxboardsamples">spt3g.dfmux.DfMuxBoardSamples</a></li>
+<li><a class="reference internal" href="#spt3g-dfmux-dfmuxchannelmapping">spt3g.dfmux.DfMuxChannelMapping</a></li>
+<li><a class="reference internal" href="#spt3g-dfmux-dfmuxhousekeepingmap">spt3g.dfmux.DfMuxHousekeepingMap</a></li>
+<li><a class="reference internal" href="#spt3g-dfmux-dfmuxmetasample">spt3g.dfmux.DfMuxMetaSample</a></li>
+<li><a class="reference internal" href="#spt3g-dfmux-dfmuxsample">spt3g.dfmux.DfMuxSample</a></li>
+<li><a class="reference internal" href="#spt3g-dfmux-dfmuxwiringmap">spt3g.dfmux.DfMuxWiringMap</a></li>
+<li><a class="reference internal" href="#spt3g-dfmux-hkboardinfo">spt3g.dfmux.HkBoardInfo</a></li>
+<li><a class="reference internal" href="#spt3g-dfmux-hkchannelinfo">spt3g.dfmux.HkChannelInfo</a></li>
+<li><a class="reference internal" href="#spt3g-dfmux-hkmezzanineinfo">spt3g.dfmux.HkMezzanineInfo</a></li>
+<li><a class="reference internal" href="#spt3g-dfmux-hkmoduleinfo">spt3g.dfmux.HkModuleInfo</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#modules-in-spt3g-dfmux">Modules in spt3g.dfmux</a></li>
+<li><a class="reference internal" href="#functions-in-spt3g-dfmux">Functions in spt3g.dfmux</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="moddoc_core.html"
+                        title="previous chapter">core</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="moddoc_gcp.html"
+                        title="next chapter">gcp</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/moddoc_dfmux.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="moddoc_gcp.html" title="gcp"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="moddoc_core.html" title="core"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.2.
+    </div>
+  </body>
+</html>

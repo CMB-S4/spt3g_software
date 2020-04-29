@@ -1,0 +1,439 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>gcp &#8212; SPT3G Software  documentation</title>
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="maps" href="moddoc_maps.html" />
+    <link rel="prev" title="dfmux" href="moddoc_dfmux.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="moddoc_maps.html" title="maps"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="moddoc_dfmux.html" title="dfmux"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="gcp">
+<h1>gcp<a class="headerlink" href="#gcp" title="Permalink to this headline">¶</a></h1>
+<p>The GCP package contains tools for interacting with the telescope control system (GCP). This includes both offline tools for processing data products from the GCP (ARCFileReader) and associated container classes (ACUStatus, TrackerStatus), as well as online tools designed for coordination of data taking with the control system (the various data tees and signalling modules).</p>
+<div class="section" id="frame-objects-in-spt3g-gcp">
+<h2>Frame Objects in spt3g.gcp<a class="headerlink" href="#frame-objects-in-spt3g-gcp" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference internal" href="#spt3g-gcp-acustatus">spt3g.gcp.ACUStatus</a></li>
+<li><a class="reference internal" href="#spt3g-gcp-acustatusvector">spt3g.gcp.ACUStatusVector</a></li>
+<li><a class="reference internal" href="#spt3g-gcp-trackerpointing">spt3g.gcp.TrackerPointing</a></li>
+<li><a class="reference internal" href="#spt3g-gcp-trackerstatus">spt3g.gcp.TrackerStatus</a></li>
+</ul>
+<div class="section" id="spt3g-gcp-acustatus">
+<span id="id1"></span><h3>spt3g.gcp.ACUStatus<a class="headerlink" href="#spt3g-gcp-acustatus" title="Permalink to this headline">¶</a></h3>
+<p>ACU Status information, as reported by the ACU</p>
+<p><em>Members:</em></p>
+<ul class="simple">
+<li><strong>time</strong>: No Doc (Shame!)</li>
+<li><strong>az_pos</strong>: No Doc (Shame!)</li>
+<li><strong>el_pos</strong>: No Doc (Shame!)</li>
+<li><strong>az_rate</strong>: No Doc (Shame!)</li>
+<li><strong>el_rate</strong>: No Doc (Shame!)</li>
+<li><strong>px_checksum_error_count</strong>: No Doc (Shame!)</li>
+<li><strong>px_resync_count</strong>: No Doc (Shame!)</li>
+<li><strong>px_resync_timeout_count</strong>: No Doc (Shame!)</li>
+<li><strong>px_timeout_count</strong>: No Doc (Shame!)</li>
+<li><strong>restart_count</strong>: No Doc (Shame!)</li>
+<li><strong>px_resyncing</strong>: No Doc (Shame!)</li>
+<li><strong>state</strong>: No Doc (Shame!)</li>
+<li><strong>acu_status</strong>: No Doc (Shame!)</li>
+</ul>
+</div>
+<div class="section" id="spt3g-gcp-acustatusvector">
+<span id="id2"></span><h3>spt3g.gcp.ACUStatusVector<a class="headerlink" href="#spt3g-gcp-acustatusvector" title="Permalink to this headline">¶</a></h3>
+<p>Array of ACUStatus objects, usually time-ordered</p>
+<p><em>Methods:</em></p>
+<p id="spt3g-gcp-acustatusvector-append"><strong>spt3g.gcp.ACUStatusVector.append</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">append(</span> <span class="pre">(ACUStatusVector)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
+<p id="spt3g-gcp-acustatusvector-extend"><strong>spt3g.gcp.ACUStatusVector.extend</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">extend(</span> <span class="pre">(ACUStatusVector)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
+</div>
+<div class="section" id="spt3g-gcp-trackerpointing">
+<span id="id3"></span><h3>spt3g.gcp.TrackerPointing<a class="headerlink" href="#spt3g-gcp-trackerpointing" title="Permalink to this headline">¶</a></h3>
+<p>GCP Tracker Pointing</p>
+<p><em>Members:</em></p>
+<ul class="simple">
+<li><strong>time</strong>: No Doc (Shame!)</li>
+<li><strong>scu_temp</strong>: No Doc (Shame!)</li>
+<li><strong>features</strong>: No Doc (Shame!)</li>
+<li><strong>encoder_off_x</strong>: No Doc (Shame!)</li>
+<li><strong>encoder_off_y</strong>: No Doc (Shame!)</li>
+<li><strong>horiz_mount_x</strong>: No Doc (Shame!)</li>
+<li><strong>horiz_mount_y</strong>: No Doc (Shame!)</li>
+<li><strong>horiz_off_x</strong>: No Doc (Shame!)</li>
+<li><strong>horiz_off_y</strong>: No Doc (Shame!)</li>
+<li><strong>tilts_x</strong>: No Doc (Shame!)</li>
+<li><strong>tilts_y</strong>: No Doc (Shame!)</li>
+<li><strong>linsens_avg_l1</strong>: No Doc (Shame!)</li>
+<li><strong>linsens_avg_l2</strong>: No Doc (Shame!)</li>
+<li><strong>linsens_avg_r1</strong>: No Doc (Shame!)</li>
+<li><strong>linsens_avg_r2</strong>: No Doc (Shame!)</li>
+<li><strong>telescope_temp</strong>: No Doc (Shame!)</li>
+<li><strong>telescope_pressure</strong>: No Doc (Shame!)</li>
+<li><strong>refraction</strong>: No Doc (Shame!)</li>
+</ul>
+</div>
+<div class="section" id="spt3g-gcp-trackerstatus">
+<span id="id4"></span><h3>spt3g.gcp.TrackerStatus<a class="headerlink" href="#spt3g-gcp-trackerstatus" title="Permalink to this headline">¶</a></h3>
+<p>GCP Tracker Status</p>
+<p><em>Members:</em></p>
+<ul class="simple">
+<li><strong>time</strong>: No Doc (Shame!)</li>
+<li><strong>az_pos</strong>: No Doc (Shame!)</li>
+<li><strong>el_pos</strong>: No Doc (Shame!)</li>
+<li><strong>az_rate</strong>: No Doc (Shame!)</li>
+<li><strong>el_rate</strong>: No Doc (Shame!)</li>
+<li><strong>az_command</strong>: No Doc (Shame!)</li>
+<li><strong>el_command</strong>: No Doc (Shame!)</li>
+<li><strong>az_rate_command</strong>: No Doc (Shame!)</li>
+<li><strong>el_rate_command</strong>: No Doc (Shame!)</li>
+<li><strong>state</strong>: No Doc (Shame!)</li>
+<li><strong>acu_seq</strong>: No Doc (Shame!)</li>
+<li><strong>in_control</strong>: No Doc (Shame!)</li>
+<li><strong>scan_flag</strong>: No Doc (Shame!)</li>
+</ul>
+</div>
+</div>
+<div class="section" id="modules-in-spt3g-gcp">
+<h2>Modules in spt3g.gcp<a class="headerlink" href="#modules-in-spt3g-gcp" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference internal" href="#spt3g-gcp-arcextractor-arcextract">spt3g.gcp.ARCExtractor.ARCExtract</a></li>
+<li><a class="reference internal" href="#spt3g-gcp-arcextractor-arcextractminimal">spt3g.gcp.ARCExtractor.ARCExtractMinimal</a></li>
+<li><a class="reference internal" href="#spt3g-gcp-arcextractor-addbenchdata">spt3g.gcp.ARCExtractor.AddBenchData</a></li>
+<li><a class="reference internal" href="#spt3g-gcp-arcextractor-calibrateframe">spt3g.gcp.ARCExtractor.CalibrateFrame</a></li>
+<li><a class="reference internal" href="#spt3g-gcp-arcextractor-decryptfeaturebit">spt3g.gcp.ARCExtractor.DecryptFeatureBit</a></li>
+<li><a class="reference internal" href="#spt3g-gcp-arcextractor-unitvalue">spt3g.gcp.ARCExtractor.UnitValue</a></li>
+<li><a class="reference internal" href="#spt3g-gcp-arcextractor-unpackacudata">spt3g.gcp.ARCExtractor.UnpackACUData</a></li>
+<li><a class="reference internal" href="#spt3g-gcp-arcextractor-unpackcryodata">spt3g.gcp.ARCExtractor.UnpackCryoData</a></li>
+<li><a class="reference internal" href="#spt3g-gcp-arcextractor-unpackmuxdata">spt3g.gcp.ARCExtractor.UnpackMuxData</a></li>
+<li><a class="reference internal" href="#spt3g-gcp-arcextractor-unpackptdata">spt3g.gcp.ARCExtractor.UnpackPTData</a></li>
+<li><a class="reference internal" href="#spt3g-gcp-arcextractor-unpacktrackerdata">spt3g.gcp.ARCExtractor.UnpackTrackerData</a></li>
+<li><a class="reference internal" href="#spt3g-gcp-arcextractor-unpacktrackerminimal">spt3g.gcp.ARCExtractor.UnpackTrackerMinimal</a></li>
+<li><a class="reference internal" href="#spt3g-gcp-arcextractor-unpacktrackerpointingdata">spt3g.gcp.ARCExtractor.UnpackTrackerPointingData</a></li>
+<li><a class="reference internal" href="#spt3g-gcp-arcextractor-unpackweatherdata">spt3g.gcp.ARCExtractor.UnpackWeatherData</a></li>
+<li><a class="reference internal" href="#spt3g-gcp-arcfilereader">spt3g.gcp.ARCFileReader</a></li>
+<li><a class="reference internal" href="#spt3g-gcp-archkextractor-unpacksptpolhkdata">spt3g.gcp.ARCHKExtractor.UnpackSPTpolHKData</a></li>
+<li><a class="reference internal" href="#spt3g-gcp-calfile-calfilereader">spt3g.gcp.CalFile.CalFileReader</a></li>
+<li><a class="reference internal" href="#spt3g-gcp-gcpdatatee-gcpbolodatatee">spt3g.gcp.GCPDataTee.GCPBoloDataTee</a></li>
+<li><a class="reference internal" href="#spt3g-gcp-gcpdatatee-gcphousekeepingtee">spt3g.gcp.GCPDataTee.GCPHousekeepingTee</a></li>
+<li><a class="reference internal" href="#spt3g-gcp-gcpdatatee-gcpsignalledhousekeeping">spt3g.gcp.GCPDataTee.GCPSignalledHousekeeping</a></li>
+<li><a class="reference internal" href="#spt3g-gcp-gcpdatatee-gcpwatchdog">spt3g.gcp.GCPDataTee.GCPWatchdog</a></li>
+<li><a class="reference internal" href="#spt3g-gcp-gcpmuxdatadecoder">spt3g.gcp.GCPMuxDataDecoder</a></li>
+<li><a class="reference internal" href="#spt3g-gcp-influxdb-updatedb">spt3g.gcp.InfluxDB.UpdateDB</a></li>
+<li><a class="reference internal" href="#spt3g-gcp-influxdb-writedb">spt3g.gcp.InfluxDB.WriteDB</a></li>
+</ul>
+<p id="spt3g-gcp-arcextractor-arcextract"><strong>spt3g.gcp.ARCExtractor.ARCExtract</strong></p>
+<p>Extract GCP registers into native objects</p>
+<p>Equivalent to:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">CalibrateFrame</span><span class="p">)</span>
+<span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UnpackACUData</span><span class="p">)</span>
+<span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UnpackTrackerPointingData</span><span class="p">)</span>
+<span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">DecryptFeatureBit</span><span class="p">)</span>
+<span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UnpackTrackerData</span><span class="p">)</span>
+<span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">AddBenchData</span><span class="p">)</span>
+<span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UnpackCryoData</span><span class="p">)</span>
+<span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UnpackPTData</span><span class="p">)</span>
+<span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UnpackMuxData</span><span class="p">)</span>
+<span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UnpackWeatherData</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt><em>Definition:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">ARCExtract(pipe)</span></code></dd>
+</dl>
+<p id="spt3g-gcp-arcextractor-arcextractminimal"><strong>spt3g.gcp.ARCExtractor.ARCExtractMinimal</strong></p>
+<p>Extract bare minimum GCP registers into native objects.</p>
+<blockquote>
+<div>Includes only GCPFeatureBits, SourceName and ObservationID keys.
+Use ARCExtract to calibrate and extract the complete frame.</div></blockquote>
+<p>Equivalent to:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">DecryptFeatureBit</span><span class="p">)</span>
+<span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UnpackTrackerMinimal</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt><em>Definition:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">ARCExtractMinimal(pipe)</span></code></dd>
+</dl>
+<p id="spt3g-gcp-arcextractor-addbenchdata"><strong>spt3g.gcp.ARCExtractor.AddBenchData</strong></p>
+<p>Add the optical bench positions to the frame.</p>
+<dl class="docutils">
+<dt><em>Definition:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">AddBenchData(f)</span></code></dd>
+</dl>
+<p id="spt3g-gcp-arcextractor-calibrateframe"><strong>spt3g.gcp.ARCExtractor.CalibrateFrame</strong></p>
+<p>Apply gain / offset / units from G3 cal file</p>
+<dl class="docutils">
+<dt><em>Definition:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">CalibrateFrame(f,</span> <span class="pre">calibration_file=None)</span></code></dd>
+</dl>
+<p id="spt3g-gcp-arcextractor-decryptfeaturebit"><strong>spt3g.gcp.ARCExtractor.DecryptFeatureBit</strong></p>
+<p>Unpacks the GCP feature flags</p>
+<dl class="docutils">
+<dt><em>Definition:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">DecryptFeatureBit(f)</span></code></dd>
+</dl>
+<p id="spt3g-gcp-arcextractor-unitvalue"><strong>spt3g.gcp.ARCExtractor.UnitValue</strong></p>
+<p>Turn unit name into floating point unit value</p>
+<dl class="docutils">
+<dt><em>Definition:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">UnitValue(caldict_entry)</span></code></dd>
+</dl>
+<p id="spt3g-gcp-arcextractor-unpackacudata"><strong>spt3g.gcp.ARCExtractor.UnpackACUData</strong></p>
+<p>Extracts ACU status information to ACUStatus key in frame</p>
+<dl class="docutils">
+<dt><em>Definition:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">UnpackACUData(f)</span></code></dd>
+</dl>
+<p id="spt3g-gcp-arcextractor-unpackcryodata"><strong>spt3g.gcp.ARCExtractor.UnpackCryoData</strong></p>
+<p>Extracts cryo information into CryoStatus key</p>
+<dl class="docutils">
+<dt><em>Definition:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">UnpackCryoData(f)</span></code></dd>
+</dl>
+<p id="spt3g-gcp-arcextractor-unpackmuxdata"><strong>spt3g.gcp.ARCExtractor.UnpackMuxData</strong></p>
+<p>Add the DFMux data to the frame.</p>
+<dl class="docutils">
+<dt><em>Definition:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">UnpackMuxData(f)</span></code></dd>
+</dl>
+<p id="spt3g-gcp-arcextractor-unpackptdata"><strong>spt3g.gcp.ARCExtractor.UnpackPTData</strong></p>
+<p>Extracts pulse tube status information to PTStatus key
+in frame</p>
+<dl class="docutils">
+<dt><em>Definition:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">UnpackPTData(f)</span></code></dd>
+</dl>
+<p id="spt3g-gcp-arcextractor-unpacktrackerdata"><strong>spt3g.gcp.ARCExtractor.UnpackTrackerData</strong></p>
+<p>Extracts tracker status information to frame into the TrackerStatus key,
+along with the observation processing handled by UnpackTrackerMinimal.</p>
+<p>If rewrite_source_from_feature_bits is True (the default), will try to
+rewrite source names if DecryptFeatureBit() has been run and either
+“elnod”, “calibrator”, or “noise” is present in the feature bit list
+to that value.</p>
+<dl class="docutils">
+<dt><em>Definition:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">UnpackTrackerData(f,</span> <span class="pre">rewrite_source_from_feature_bits=True)</span></code></dd>
+</dl>
+<p id="spt3g-gcp-arcextractor-unpacktrackerminimal"><strong>spt3g.gcp.ARCExtractor.UnpackTrackerMinimal</strong></p>
+<p>Construct SourceName and ObservationId keys from frame.</p>
+<p>If rewrite_source_from_feature_bits is True (the default), will try to
+rewrite source names if DecryptFeatureBit() has been run and either
+“elnod”, “calibrator”, or “noise” is present in the feature bit list
+to that value.</p>
+<dl class="docutils">
+<dt><em>Definition:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">UnpackTrackerMinimal(f,</span> <span class="pre">rewrite_source_from_feature_bits=True)</span></code></dd>
+</dl>
+<p id="spt3g-gcp-arcextractor-unpacktrackerpointingdata"><strong>spt3g.gcp.ARCExtractor.UnpackTrackerPointingData</strong></p>
+<p>Extracts tracker registers relevant to online and offline pointing.
+Calibration values (offsets and multiplicative constants) are from
+gcp/control/conf/spt/cal.</p>
+<dl class="docutils">
+<dt><em>Definition:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">UnpackTrackerPointingData(f)</span></code></dd>
+</dl>
+<p id="spt3g-gcp-arcextractor-unpackweatherdata"><strong>spt3g.gcp.ARCExtractor.UnpackWeatherData</strong></p>
+<p>Extracts weather status information to Weather key
+in frame</p>
+<dl class="docutils">
+<dt><em>Definition:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">UnpackWeatherData(f)</span></code></dd>
+</dl>
+<p id="spt3g-gcp-arcfilereader"><strong>spt3g.gcp.ARCFileReader</strong></p>
+<p>Read GCP archive file (or files if you pass an iterable of paths). For non-SPT ARC file formats, please set Experiment to the  appropriate value.</p>
+<p id="spt3g-gcp-archkextractor-unpacksptpolhkdata"><strong>spt3g.gcp.ARCHKExtractor.UnpackSPTpolHKData</strong></p>
+<p>Extracts SPTpol housekeeping information from ARC files</p>
+<dl class="docutils">
+<dt><em>Constructor:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">UnpackSPTpolHKData(self)</span></code></dd>
+</dl>
+<p id="spt3g-gcp-calfile-calfilereader"><strong>spt3g.gcp.CalFile.CalFileReader</strong></p>
+<p>For now just reads a G3 calibration file and loads the contents into
+a dictionary</p>
+<dl class="docutils">
+<dt><em>Constructor:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">CalFileReader(self,</span> <span class="pre">calibration_file=None)</span></code></dd>
+</dl>
+<p id="spt3g-gcp-gcpdatatee-gcpbolodatatee"><strong>spt3g.gcp.GCPDataTee.GCPBoloDataTee</strong></p>
+<p>Module that serves bolometer data to GCP when asked. Once a second,
+will serve the data from the previous second of bolometer data.</p>
+<p>If a boolean key appears in the timepoint frames named “DataOK”,
+this will be sent to GCP as a data quality indicator for paging.</p>
+<dl class="docutils">
+<dt><em>Constructor:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">GCPBoloDataTee(self,</span> <span class="pre">port=50020,</span> <span class="pre">verbose=False,</span> <span class="pre">bolometers=[])</span></code></dd>
+<dt><em>Constructor:</em></dt>
+<dd>Send data from the given list of bolometer logical IDs to the GCP.</dd>
+</dl>
+<p id="spt3g-gcp-gcpdatatee-gcphousekeepingtee"><strong>spt3g.gcp.GCPDataTee.GCPHousekeepingTee</strong></p>
+<p>Module that serves housekeeping information to GCP when asked. If a key
+named “DataOK” exists in the housekeeping frames, will also transmit
+that information to GCP for paging purposes.</p>
+<dl class="docutils">
+<dt><em>Constructor:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">GCPHousekeepingTee(self,</span> <span class="pre">port=50010,</span> <span class="pre">verbose=False)</span></code></dd>
+</dl>
+<p id="spt3g-gcp-gcpdatatee-gcpsignalledhousekeeping"><strong>spt3g.gcp.GCPDataTee.GCPSignalledHousekeeping</strong></p>
+<p>Module that collects housekeeping data when connected to. If
+collect_on_start is True (the default), injects an HK frame
+unconditionally at startup.</p>
+<dl class="docutils">
+<dt><em>Constructor:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">GCPSignalledHousekeeping(self,</span> <span class="pre">port=50011,</span> <span class="pre">collect_on_start=True)</span></code></dd>
+</dl>
+<p id="spt3g-gcp-gcpdatatee-gcpwatchdog"><strong>spt3g.gcp.GCPDataTee.GCPWatchdog</strong></p>
+<p>Module that sends a watchdog (ping) message to the GCP pager when it is operational.</p>
+<dl class="docutils">
+<dt><em>Constructor:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">GCPWatchdog(self,</span> <span class="pre">interval=600,</span> <span class="pre">host='sptnet.spt',</span> <span class="pre">port=50040,</span> <span class="pre">timeout=20,</span> <span class="pre">sim=False,</span> <span class="pre">calibrator=False)</span></code></dd>
+</dl>
+<p id="spt3g-gcp-gcpmuxdatadecoder"><strong>spt3g.gcp.GCPMuxDataDecoder</strong></p>
+<p>Extracts contents of receiver registers in SPTpol-style ARC files into a wiring map and timepoint frames. This is designed to convert SPTpol-style data in which GCP records bolometer data into the ARC files into a format equivalent to that for SPT-3G.</p>
+<p>For old (100d SPTpol) data not containing wiring information, insert a wiring map into the pipeline ahead of this module. The board_serial should be set to a real (positive) value for all bolometer channels and -1 for the calibrator sync readout.</p>
+<p id="spt3g-gcp-influxdb-updatedb"><strong>spt3g.gcp.InfluxDB.UpdateDB</strong></p>
+<blockquote>
+<div>Update InfluxDB with data in frame</div></blockquote>
+<dl class="docutils">
+<dt><em>Args:</em></dt>
+<dd><blockquote class="first">
+<div>client: InfluxDB client
+fields: Which gcp fields to add to database. See
+parse_field for options. If None, add all.</div></blockquote>
+<p class="last">Equivalent to:</p>
+</dd>
+</dl>
+<p>Exception evaluating equivalence (UpdateDB() missing 1 required positional argument: ‘client’)</p>
+<dl class="docutils">
+<dt><em>Definition:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">UpdateDB(pipe,</span> <span class="pre">client,</span> <span class="pre">fields=None)</span></code></dd>
+</dl>
+<p id="spt3g-gcp-influxdb-writedb"><strong>spt3g.gcp.InfluxDB.WriteDB</strong></p>
+<p>Write points to the database for each field</p>
+<dl class="docutils">
+<dt><em>Definition:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">WriteDB(fr,</span> <span class="pre">client,</span> <span class="pre">fields=None)</span></code></dd>
+</dl>
+</div>
+<div class="section" id="functions-in-spt3g-gcp">
+<h2>Functions in spt3g.gcp<a class="headerlink" href="#functions-in-spt3g-gcp" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference internal" href="#spt3g-gcp-calfile-create-g3-cal-file">spt3g.gcp.CalFile.create_g3_cal_file</a></li>
+</ul>
+<p id="spt3g-gcp-calfile-create-g3-cal-file"><strong>spt3g.gcp.CalFile.create_g3_cal_file</strong></p>
+<p>Create a G3 register calibration file. Usually reads in
+calibration and units from a GCP cal file then adds extra
+information that isn’t in the GCP one. This extra information can
+be handed to the routine as a dict (note format below); otherwise,
+the hard-coded extra info will be used. (Feel free to edit this
+hard-coded info.)</p>
+<dl class="docutils">
+<dt><em>Definition:</em></dt>
+<dd><code class="docutils literal notranslate"><span class="pre">create_g3_cal_file(path,</span> <span class="pre">read_from_gcp=True,</span> <span class="pre">extra_dict=None,</span> <span class="pre">use_extra_info=True,</span> <span class="pre">gcp_cal_file=None)</span></code></dd>
+</dl>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">gcp</a><ul>
+<li><a class="reference internal" href="#frame-objects-in-spt3g-gcp">Frame Objects in spt3g.gcp</a><ul>
+<li><a class="reference internal" href="#spt3g-gcp-acustatus">spt3g.gcp.ACUStatus</a></li>
+<li><a class="reference internal" href="#spt3g-gcp-acustatusvector">spt3g.gcp.ACUStatusVector</a></li>
+<li><a class="reference internal" href="#spt3g-gcp-trackerpointing">spt3g.gcp.TrackerPointing</a></li>
+<li><a class="reference internal" href="#spt3g-gcp-trackerstatus">spt3g.gcp.TrackerStatus</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#modules-in-spt3g-gcp">Modules in spt3g.gcp</a></li>
+<li><a class="reference internal" href="#functions-in-spt3g-gcp">Functions in spt3g.gcp</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="moddoc_dfmux.html"
+                        title="previous chapter">dfmux</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="moddoc_maps.html"
+                        title="next chapter">maps</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/moddoc_gcp.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="moddoc_maps.html" title="maps"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="moddoc_dfmux.html" title="dfmux"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.2.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,546 @@
+-----------
+calibration
+-----------
+
+The calibration project contains data classes and analysis code for storing the following things:
+
+*Physical properties of the bolometers*
+	This includes the relative pointing offsets of the detectors on the focal plane, their polarization angles and efficiences, their bands, and the fabrication name (physical name) of the detector to which the channel corresponds. It does *not* include tuning-dependent parameters like time constants or responsivity. This information is stored in a ``BolometerPropertiesMap``, indexed by logical bolometer ID, in the Calibration frame. The standard name for this object is "BolometerProperties" and it is created from a composite of other calibration information.
+
+Frame Objects in spt3g.calibration
+==================================
+* spt3g.calibration.BolometerProperties_
+
+* spt3g.calibration.BolometerPropertiesMap_
+
+* spt3g.calibration.PointingProperties_
+
+* spt3g.calibration.PointingPropertiesMap_
+
+
+.. _spt3g.calibration.BolometerProperties:
+
+spt3g.calibration.BolometerProperties
+_____________________________________
+
+Physical bolometer properties, such as detector angular offsets. Does not include tuning-dependent properties of the detectors.
+
+*Members:*
+
+* **physical_name**: Physical name of the detector (e.g. some polarization at some particular pixel on the wafer)
+
+* **x_offset**: Horizontal pointing offset relative to boresight in angular units.
+
+* **y_offset**: Vertical pointing offset relative to boresight in angular units.
+
+* **band**: Center of detector observing band in frequency units
+
+* **pol_angle**: Polarization angle in angular units
+
+* **pol_efficiency**: Polarization efficiency (0-1)
+
+* **coupling**: Optical coupling type
+
+* **wafer_id**: Name of the name this detector is on
+
+* **pixel_id**: Name of the pixel of which this detector is a part
+
+* **pixel_type**: Name of the pixel type of which this detector is a part
+
+
+
+.. _spt3g.calibration.BolometerPropertiesMap:
+
+spt3g.calibration.BolometerPropertiesMap
+________________________________________
+
+Container for bolometer properties for focal plane, mapping logical bolometer IDs to their physical properties.
+
+*Methods:*
+
+.. _spt3g.calibration.BolometerPropertiesMap.keys:
+
+**spt3g.calibration.BolometerPropertiesMap.keys**
+
+``keys( (BolometerPropertiesMap)arg1) -> list :``
+    D.keys() -> list of D's keys
+
+.. _spt3g.calibration.BolometerPropertiesMap.has_key:
+
+**spt3g.calibration.BolometerPropertiesMap.has_key**
+
+``has_key( (BolometerPropertiesMap)arg1, (str)arg2) -> bool :``
+    D.has_key(k) -> True if D has a key k, else False
+
+.. _spt3g.calibration.BolometerPropertiesMap.values:
+
+**spt3g.calibration.BolometerPropertiesMap.values**
+
+``values( (BolometerPropertiesMap)arg1) -> list :``
+    D.values() -> list of D's values
+
+.. _spt3g.calibration.BolometerPropertiesMap.items:
+
+**spt3g.calibration.BolometerPropertiesMap.items**
+
+``items( (BolometerPropertiesMap)arg1) -> list :``
+    D.items() -> list of D's (key, value) pairs, as 2-tuples
+
+.. _spt3g.calibration.BolometerPropertiesMap.clear:
+
+**spt3g.calibration.BolometerPropertiesMap.clear**
+
+``clear( (BolometerPropertiesMap)arg1) -> None :``
+    D.clear() -> None.  Remove all items from D.
+
+.. _spt3g.calibration.BolometerPropertiesMap.copy:
+
+**spt3g.calibration.BolometerPropertiesMap.copy**
+
+``copy( (BolometerPropertiesMap)arg1) -> BolometerPropertiesMap :``
+    D.copy() -> a shallow copy of D
+
+.. _spt3g.calibration.BolometerPropertiesMap.get:
+
+**spt3g.calibration.BolometerPropertiesMap.get**
+
+``get( (BolometerPropertiesMap)arg1, (str)arg2 [, (object)default_val]) -> object :``
+    D.get(k[,d]) -> D[k] if k in D, else d.  d defaults to None.
+
+.. _spt3g.calibration.BolometerPropertiesMap.pop:
+
+**spt3g.calibration.BolometerPropertiesMap.pop**
+
+``pop( (BolometerPropertiesMap)arg1, (str)arg2) -> object``
+
+``pop( (BolometerPropertiesMap)arg1, (str)arg2, (object)arg3) -> object :``
+    D.pop(k[,d]) -> v, remove specified key and return the corresponding value
+    If key is not found, d is returned if given, otherwise KeyError is raised
+
+.. _spt3g.calibration.BolometerPropertiesMap.popitem:
+
+**spt3g.calibration.BolometerPropertiesMap.popitem**
+
+``popitem( (BolometerPropertiesMap)arg1) -> object :``
+    D.popitem() -> (k, v), remove and return some (key, value) pair as a
+    2-tuple; but raise KeyError if D is empty
+
+.. _spt3g.calibration.BolometerPropertiesMap.update:
+
+**spt3g.calibration.BolometerPropertiesMap.update**
+
+``update( (object)arg1, (object)arg2) -> None :``
+    D.update(E) -> None.  Update D from E: for k in E: D[k] = E[k]
+
+.. _spt3g.calibration.BolometerPropertiesMap.iteritems:
+
+**spt3g.calibration.BolometerPropertiesMap.iteritems**
+
+``iteritems( (object)arg1) -> object :``
+    D.iteritems() -> an iterator over the (key, value) items of D
+
+.. _spt3g.calibration.BolometerPropertiesMap.iterkeys:
+
+**spt3g.calibration.BolometerPropertiesMap.iterkeys**
+
+``iterkeys( (object)arg1) -> object :``
+    D.iterkeys() -> an iterator over the keys of D
+
+.. _spt3g.calibration.BolometerPropertiesMap.itervalues:
+
+**spt3g.calibration.BolometerPropertiesMap.itervalues**
+
+``itervalues( (object)arg1) -> object :``
+    D.itervalues() -> an iterator over the values of D
+
+
+
+.. _spt3g.calibration.PointingProperties:
+
+spt3g.calibration.PointingProperties
+____________________________________
+
+Pointing model parameters to be used for offline pointing corrections.
+
+*Members:*
+
+* **tiltLat**: Azimuth lateral tilt parameter.
+
+* **tiltHA**: Azimuth hour angle tilt parameter.
+
+* **tiltMag**: Magnitude of azimuth tilt.
+
+* **tiltAngle**: Orientation of azimuth tilt.
+
+
+
+.. _spt3g.calibration.PointingPropertiesMap:
+
+spt3g.calibration.PointingPropertiesMap
+_______________________________________
+
+Container for pointing model parameters for offline pointing.
+
+*Methods:*
+
+.. _spt3g.calibration.PointingPropertiesMap.keys:
+
+**spt3g.calibration.PointingPropertiesMap.keys**
+
+``keys( (PointingPropertiesMap)arg1) -> list :``
+    D.keys() -> list of D's keys
+
+.. _spt3g.calibration.PointingPropertiesMap.has_key:
+
+**spt3g.calibration.PointingPropertiesMap.has_key**
+
+``has_key( (PointingPropertiesMap)arg1, (str)arg2) -> bool :``
+    D.has_key(k) -> True if D has a key k, else False
+
+.. _spt3g.calibration.PointingPropertiesMap.values:
+
+**spt3g.calibration.PointingPropertiesMap.values**
+
+``values( (PointingPropertiesMap)arg1) -> list :``
+    D.values() -> list of D's values
+
+.. _spt3g.calibration.PointingPropertiesMap.items:
+
+**spt3g.calibration.PointingPropertiesMap.items**
+
+``items( (PointingPropertiesMap)arg1) -> list :``
+    D.items() -> list of D's (key, value) pairs, as 2-tuples
+
+.. _spt3g.calibration.PointingPropertiesMap.clear:
+
+**spt3g.calibration.PointingPropertiesMap.clear**
+
+``clear( (PointingPropertiesMap)arg1) -> None :``
+    D.clear() -> None.  Remove all items from D.
+
+.. _spt3g.calibration.PointingPropertiesMap.copy:
+
+**spt3g.calibration.PointingPropertiesMap.copy**
+
+``copy( (PointingPropertiesMap)arg1) -> PointingPropertiesMap :``
+    D.copy() -> a shallow copy of D
+
+.. _spt3g.calibration.PointingPropertiesMap.get:
+
+**spt3g.calibration.PointingPropertiesMap.get**
+
+``get( (PointingPropertiesMap)arg1, (str)arg2 [, (object)default_val]) -> object :``
+    D.get(k[,d]) -> D[k] if k in D, else d.  d defaults to None.
+
+.. _spt3g.calibration.PointingPropertiesMap.pop:
+
+**spt3g.calibration.PointingPropertiesMap.pop**
+
+``pop( (PointingPropertiesMap)arg1, (str)arg2) -> object``
+
+``pop( (PointingPropertiesMap)arg1, (str)arg2, (object)arg3) -> object :``
+    D.pop(k[,d]) -> v, remove specified key and return the corresponding value
+    If key is not found, d is returned if given, otherwise KeyError is raised
+
+.. _spt3g.calibration.PointingPropertiesMap.popitem:
+
+**spt3g.calibration.PointingPropertiesMap.popitem**
+
+``popitem( (PointingPropertiesMap)arg1) -> object :``
+    D.popitem() -> (k, v), remove and return some (key, value) pair as a
+    2-tuple; but raise KeyError if D is empty
+
+.. _spt3g.calibration.PointingPropertiesMap.update:
+
+**spt3g.calibration.PointingPropertiesMap.update**
+
+``update( (object)arg1, (object)arg2) -> None :``
+    D.update(E) -> None.  Update D from E: for k in E: D[k] = E[k]
+
+.. _spt3g.calibration.PointingPropertiesMap.iteritems:
+
+**spt3g.calibration.PointingPropertiesMap.iteritems**
+
+``iteritems( (object)arg1) -> object :``
+    D.iteritems() -> an iterator over the (key, value) items of D
+
+.. _spt3g.calibration.PointingPropertiesMap.iterkeys:
+
+**spt3g.calibration.PointingPropertiesMap.iterkeys**
+
+``iterkeys( (object)arg1) -> object :``
+    D.iterkeys() -> an iterator over the keys of D
+
+.. _spt3g.calibration.PointingPropertiesMap.itervalues:
+
+**spt3g.calibration.PointingPropertiesMap.itervalues**
+
+``itervalues( (object)arg1) -> object :``
+    D.itervalues() -> an iterator over the values of D
+
+
+Modules in spt3g.calibration
+============================
+* spt3g.calibration.bolopropertiesutils.SplitByBand_
+
+* spt3g.calibration.bolopropertiesutils.SplitByPixelType_
+
+* spt3g.calibration.bolopropertiesutils.SplitByProperty_
+
+* spt3g.calibration.bolopropertiesutils.SplitByWafer_
+
+* spt3g.calibration.bolopropertiesutils.SplitTimestreamsByBand_
+
+* spt3g.calibration.build_cal_frames.BuildBoloPropertiesMap_
+
+* spt3g.calibration.build_cal_frames.BuildPointingProperties_
+
+* spt3g.calibration.build_cal_frames.ExplodeBolometerProperties_
+
+* spt3g.calibration.build_cal_frames.MergeCalibrationFrames_
+
+
+.. _spt3g.calibration.bolopropertiesutils.SplitByBand:
+
+**spt3g.calibration.bolopropertiesutils.SplitByBand**
+
+Take an input G3FrameObject-derivative Map keyed by bolometer name and
+split it into several based on the bands of the detectors as given by
+the BolometerProperties key.
+Return the same type of maps as the one it was handed, e.g.
+G3TimestreamMap, G3MapInt, etc.
+
+*Constructor:*
+	``SplitByBand(self, input='CalTimestreams', output_root=None, bands=None, bpm='BolometerProperties')``
+
+
+*Constructor:*
+	Split the input map given by input into several output
+	maps named output_root + band + GHz (e.g. CalTimestreams150GHz with
+	the default options). If bands is not None, use only the bands in the
+	list (possibly writing empty timestream maps to the frame). Otherwise,
+	creates maps for every band that exists in the input. Setting bpm
+	to a non-default value causes this to get its band mapping from an
+	alternative data source.
+
+
+
+
+.. _spt3g.calibration.bolopropertiesutils.SplitByPixelType:
+
+**spt3g.calibration.bolopropertiesutils.SplitByPixelType**
+
+Take an input G3FrameObject-derivative Map keyed by bolometer name and
+split it into several based on the pixel types of the detectors as given by
+the BolometerProperties key.
+Return the same type of maps as the one it was handed, e.g.
+G3TimestreamMap, G3MapInt, etc.
+
+*Constructor:*
+	``SplitByPixelType(self, input='CalTimestreams', output_root=None, types=None, bpm='BolometerProperties')``
+
+
+*Constructor:*
+	Split the input map given by input into several output
+	maps named output_root + wafer (e.g. CalTimestreamsW172 with
+	the default options). If wafers is not None, use only the wafers in the
+	list (possibly writing empty timestream maps to the frame). Otherwise,
+	creates maps for every wafer that exists in the input. Setting bpm
+	to a non-default value causes this to get its wafer mapping from an
+	alternative data source.
+
+
+
+
+.. _spt3g.calibration.bolopropertiesutils.SplitByProperty:
+
+**spt3g.calibration.bolopropertiesutils.SplitByProperty**
+
+Take an input G3FrameObject-derivative Map keyed by bolometer name and
+split it into several based on the property of the detectors as given by
+the BolometerProperties key.
+Return the same type of maps as the one it was handed, e.g.
+G3TimestreamMap, G3MapInt, etc.
+
+*Constructor:*
+	``SplitByProperty(self, input='CalTimestreams', property=None, property_list=None, output_root=None, bpm='BolometerProperties')``
+
+
+*Constructor:*
+	Split the input map given by input into several output
+	maps named output_root + key (e.g. CalTimestreams + str(property)) with
+	the default options).
+	
+	*Arguments:*
+		input : str
+		    Key name of the input map to split.
+		property : str
+		    Attribute name to extract from the BolometerProperties object.
+		    Required.
+		property_list : list of properties
+		    Properties to include in the output keys.  Entries that are not strings
+		    will be converted to strings using the `SplitByProperty.converter` method.
+		    If property_list is not None, use only the names in the
+		    list (possibly writing empty timestream maps to the frame). Otherwise,
+		    creates maps for every that exists in the input.
+		output_root : str
+		    Prefix for the output keys.
+		    If None (default), use `input` as the output root.
+		bpm : str
+		    The key name of the BolometerPropertiesMap from which to extract
+		    the requested `property` for splitting the input map.
+
+
+
+
+.. _spt3g.calibration.bolopropertiesutils.SplitByWafer:
+
+**spt3g.calibration.bolopropertiesutils.SplitByWafer**
+
+Take an input G3FrameObject-derivative Map keyed by bolometer name and
+split it into several based on the wafers of the detectors as given by
+the BolometerProperties key.
+Return the same type of maps as the one it was handed, e.g.
+G3TimestreamMap, G3MapInt, etc.
+
+*Constructor:*
+	``SplitByWafer(self, input='CalTimestreams', output_root=None, wafers=None, bpm='BolometerProperties')``
+
+
+*Constructor:*
+	Split the input map given by input into several output
+	maps named output_root + wafer (e.g. CalTimestreamsW172 with
+	the default options). If wafers is not None, use only the wafers in the
+	list (possibly writing empty timestream maps to the frame). Otherwise,
+	creates maps for every wafer that exists in the input. Setting bpm
+	to a non-default value causes this to get its wafer mapping from an
+	alternative data source.
+
+
+
+
+.. _spt3g.calibration.bolopropertiesutils.SplitTimestreamsByBand:
+
+**spt3g.calibration.bolopropertiesutils.SplitTimestreamsByBand**
+
+Take an input G3FrameObject-derivative Map keyed by bolometer name and
+split it into several based on the bands of the detectors as given by
+the BolometerProperties key.
+Return the same type of maps as the one it was handed, e.g.
+G3TimestreamMap, G3MapInt, etc.
+
+*Constructor:*
+	``SplitTimestreamsByBand(self, input='CalTimestreams', output_root=None, bands=None, bpm='BolometerProperties')``
+
+
+*Constructor:*
+	Split the input map given by input into several output
+	maps named output_root + band + GHz (e.g. CalTimestreams150GHz with
+	the default options). If bands is not None, use only the bands in the
+	list (possibly writing empty timestream maps to the frame). Otherwise,
+	creates maps for every band that exists in the input. Setting bpm
+	to a non-default value causes this to get its band mapping from an
+	alternative data source.
+
+
+
+
+.. _spt3g.calibration.build_cal_frames.BuildBoloPropertiesMap:
+
+**spt3g.calibration.build_cal_frames.BuildBoloPropertiesMap**
+
+Build bolometer properties map from raw calibration sub-frames emitted
+by other processing scripts. Input data are maps of bolo ID to floats
+or, in the case of names, strings. If multiple instance of each data
+class appear, the final bolometer properties map will be the median
+of the input values.
+
+Expects to be passed frames from:
+- RCW38 Relative Pointing Offset Calibration (Keys: 'PointingOffsetX', 'PointingOffsetY')
+- CenA Angle Calibration (Keys: 'PolarizationAngle', 'PolarizationEfficiency')
+- Band Calibration (Key: 'BoloBands')
+- Physical Name Data (Key: 'PhysicalBoloIDs')
+
+*Constructor:*
+	``BuildBoloPropertiesMap(self, drop_original_frames=True, fiducial_detectors=[], bpm_name='NominalBolometerProperties', use_bpm_pointing=False)``
+
+
+*Constructor:*
+	If drop_original_frames is True, will drop all input Calibration frames.
+	
+	If fiducial_detectors is set, will use the average of the position[s] of 
+	whatever detector[s] are specified to center each set of relative offsets
+	encountered (NB: this recentering is done in a Cartesian way). If it is
+	*not* specified, five detectors near the middle of the focal plane present
+	in every observation given will be chosen automatically and printed to the
+	console.
+	
+	bpm_name is the name of the key containing the input BolometerPropertiesMap
+	that will be merged into the output map.
+	
+	If use_bpm_pointing is True, then the pointing information is extracted
+	from the input BolometerPropertiesMap.  If False, pointing information
+	must be supplied in an additional input frame.
+
+
+
+
+.. _spt3g.calibration.build_cal_frames.BuildPointingProperties:
+
+**spt3g.calibration.build_cal_frames.BuildPointingProperties**
+
+Build pointing properties from raw calibration sub-frames emitted
+by other processing scripts. Input data are floats, including
+tilt information, and eventually other pointing model values.
+
+Expects to be passed frames from:
+- Az tilt fit parameters (Keys: 'tiltAngle', 'tiltHA', 'tiltLat', 'tiltMag')
+
+*Constructor:*
+	``BuildPointingProperties(self, drop_original_frames=True)``
+
+
+*Constructor:*
+	If drop_original_frames is True, will drop all input Calibration frames.
+
+
+
+
+.. _spt3g.calibration.build_cal_frames.ExplodeBolometerProperties:
+
+**spt3g.calibration.build_cal_frames.ExplodeBolometerProperties**
+
+Take a bolometer properties map (usually the nominal one) and convert it
+into its constituent keys as though they came from real calibration. This
+is the inverse of BuildBoloPropertiesMap and mostly is useful when combining
+hardware map information with real calibration.
+
+
+*Definition:*
+        ``ExplodeBolometerProperties(frame, bpmname='NominalBolometerProperties')``
+
+
+
+
+.. _spt3g.calibration.build_cal_frames.MergeCalibrationFrames:
+
+**spt3g.calibration.build_cal_frames.MergeCalibrationFrames**
+
+Merge the keys from a sequence of calibration frames. Will throw an
+exception if a key recurs in more than one calibration frame. The merged
+calibration frame will be emitted before the first non-calibration frame
+that follows a calibration frame or at the end of processing, whichever
+comes first. Other non-calibration frames will be ignored.
+
+*Constructor:*
+	``MergeCalibrationFrames(self, KeysToIgnore=['PointingOffsetX', 'PointingOffsetY'])``
+
+
+*Constructor:*
+	Ignores keys in the KeysToIgnore list during merging. By default, set
+	to values written by the flux/pointing calibration that are stored to
+	the BolometerPropertiesMap.
+
+
+
+
