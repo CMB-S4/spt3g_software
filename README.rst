@@ -1,9 +1,11 @@
 About
 -----
 
-This repository contains the public portions of the analysis software developed by the SPT-3G collaboration. It includes the IO libraries, data acquisition code for McGill's DfMux readout boards, and pipeline glue code and defines all the APIs used by the project. For more detail on the intended processing architecture, please see the Quick Start chapter of the documentation.
+This repository contains the public portions of the analysis software developed by the SPT-3G collaboration. It includes the IO libraries, data acquisition code for McGill's DfMux readout boards, and pipeline glue code and defines all the APIs used by the project. For more detail on the intended processing architecture, please see the Quick Start chapter of the `documentation`_.
 
 Except where otherwise noted, all files are distributed under the 2-clause BSD license. Acknowledgments and patches are appreciated.
+
+.. _documentation: https://cmb-s4.github.io/spt3g_software/
 
 Documentation
 -------------
