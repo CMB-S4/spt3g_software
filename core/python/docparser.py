@@ -1,4 +1,4 @@
-import sys, inspect, re
+import sys, inspect, re, textwrap
 from spt3g.core import G3Module, G3FrameObject
 
 def format_doc(x, simple=False):
@@ -16,6 +16,7 @@ def format_doc(x, simple=False):
             return None
     except:
         pass
+    doc = textwrap.dedent(doc)
     lines = doc.split('\n')
     doclines = []
     head = False

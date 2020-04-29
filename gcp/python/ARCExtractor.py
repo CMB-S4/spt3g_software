@@ -624,7 +624,8 @@ def ARCExtract(pipe):
 
 @core.pipesegment
 def ARCExtractMinimal(pipe):
-    '''Extract bare minimum GCP registers into native objects.
+    '''
+    Extract bare minimum GCP registers into native objects.
 
     Includes only GCPFeatureBits, SourceName and ObservationID keys.
     Use ARCExtract to calibrate and extract the complete frame.

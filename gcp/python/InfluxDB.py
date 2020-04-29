@@ -322,6 +322,14 @@ def make_lines(measurement, field, time, dat, tags=None):
 def WriteDB(fr, client, fields=None):
     '''
     Write points to the database for each field
+
+    Arguments
+    ---------
+    client :
+        InfluxDB client
+    fields :
+        Which gcp fields to add to database. See parse_field for options. If
+        None, add all.
     '''
     from influxdb.exceptions import InfluxDBClientError
     from influxdb.exceptions import InfluxDBServerError
@@ -462,11 +470,13 @@ def UpdateDB(pipe, client, fields=None):
     '''
     Update InfluxDB with data in frame
     
-    Args
-    ----
-    client: InfluxDB client
-    fields: Which gcp fields to add to database. See
-    parse_field for options. If None, add all.
+    Arguments
+    ---------
+    client :
+        InfluxDB client
+    fields :
+        Which gcp fields to add to database. See parse_field for options. If
+        None, add all.
     '''
     pipe.Add(ARCExtractor.ARCExtract)
     pipe.Add(WriteDB, client=client, fields=fields)
