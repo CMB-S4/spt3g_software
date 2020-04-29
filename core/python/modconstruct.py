@@ -34,7 +34,7 @@ def pipesegment(func, autodoc=True):
         from .docparser import format_doc
         rstintrodoc = format_doc(introdoc)
         introdoc += 'Equivalent to:\n'
-        rstintrodoc += '*Equivalent to:*\n\n'
+        rstintrodoc += '\n*Equivalent to:*\n\n'
         doclines = []
         class PotemkinPipe(object):
             def Add(self, thing, *args, **kwargs):
@@ -48,13 +48,12 @@ def pipesegment(func, autodoc=True):
         fake = PotemkinPipe()
         try:
             func(fake)
-            introdoc += '\n'.join(doclines)
-            rstintrodoc += '.. code-block:: python\n\n    '
-            rstintrodoc += '\n    '.join(doclines)
-            rstintrodoc += '\n'
         except Exception as e:
-            introdoc += 'Exception evaluating equivalence (%s)' % (str(e), )
-            rstintrodoc += 'Exception evaluating equivalence (%s)' % (str(e), )
+            doclines.append('Exception evaluating equivalence (%s)' % (str(e), ))
+        introdoc += '\n'.join(doclines)
+        rstintrodoc += '.. code-block:: python\n\n    '
+        rstintrodoc += '\n    '.join(doclines)
+        rstintrodoc += '\n'
         func.__doc__ = introdoc
         func.__rstdoc__ = rstintrodoc
 
