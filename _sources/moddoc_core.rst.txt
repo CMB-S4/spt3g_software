@@ -2034,6 +2034,7 @@ Emulation of old G3NetworkReceiver class. Equivalent to pointing
 G3Reader at a TCP URL.
 
 
+
 *Equivalent to:*
 
 .. code-block:: python

@@ -215,6 +215,7 @@ Modules in spt3g.gcp
 
 Extract GCP registers into native objects
 
+
 *Equivalent to:*
 
 .. code-block:: python
@@ -246,6 +247,7 @@ Extract bare minimum GCP registers into native objects.
 
 Includes only GCPFeatureBits, SourceName and ObservationID keys.
 Use ARCExtract to calibrate and extract the complete frame.
+
 
 
 *Equivalent to:*
@@ -551,9 +553,13 @@ Update InfluxDB with data in frame
 	    None, add all.
 	
 	
-	*Equivalent to:*
+	
+*Equivalent to:*
 
-Exception evaluating equivalence (UpdateDB() missing 1 required positional argument: 'client')
+.. code-block:: python
+
+    Exception evaluating equivalence (UpdateDB() missing 1 required positional argument: 'client')
+
 
 
 *Definition:*
