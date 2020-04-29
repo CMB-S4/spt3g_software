@@ -494,25 +494,26 @@ PYBINDINGS("maps")
 {
 	using namespace boost::python;
 
-	// XXX: All of these need doc strings
-	def("test_trans", test_trans);
-	def("test_gal_trans", test_gal_trans);
-	def("test_gal_trans_rot", test_gal_trans_rot);
-	def("print_fk5_j2000_to_gal_quat", print_fk5_j2000_to_gal_quat);
+	def("test_trans_", test_trans);
+	def("test_gal_trans_", test_gal_trans);
+	def("test_gal_trans_rot_", test_gal_trans_rot);
+	def("print_fk5_j2000_to_gal_quat_", print_fk5_j2000_to_gal_quat);
+	def("c_quat_to_ang_", py_quat_to_ang);
+	def("c_ang_to_quat_", ang_to_quat);
 
-	def("create_det_az_el_trans", create_det_az_el_trans);
-	def("create_lazy_det_ra_dec_trans", create_lazy_det_ra_dec_trans);
-	def("create_det_ra_dec_trans", create_det_ra_dec_trans);
-	def("convert_ra_dec_trans_to_gal", convert_ra_dec_trans_to_gal);
-	def("c_quat_to_ang", py_quat_to_ang);
-	def("c_ang_to_quat", ang_to_quat);
-	def("get_detector_pointing", get_detector_pointing);
-	def("get_detector_rotation", get_detector_rotation);
-	def("get_origin_rotator", get_origin_rotator);
-
-	def("convert_celestial_offsets_to_local_offsets", 
-	    convert_celestial_offsets_to_local_offsets);
-
-	def("get_closest_transform", get_closest_transform);
+	def("create_det_az_el_trans", create_det_az_el_trans,
+	    "Construct a quaternion vector from timestreams of detector "
+	    "azimuth and elevation. Equivalent to ``R_z(az) * R_y(-el)``.");
+	def("create_lazy_det_ra_dec_trans", create_lazy_det_ra_dec_trans,
+	    "Construct a quaternion vector from timestreams of detector "
+	    "RA and declination.  Equivalent to ``R_z(ra) * R_y(dec)``");
+	def("create_det_ra_dec_trans", create_det_ra_dec_trans,
+	    "Construct a quaternion vector from timestreams of detector "
+	    "coordinates.  Computes the transformation from local "
+	    "(az_0, el_0) coordinates to celestial (ra_0, dec_0), "
+	    "accounting for rotation about the boresight by including "
+	    "the second set of points.");
+	def("convert_ra_dec_trans_to_gal", convert_ra_dec_trans_to_gal,
+	    "Rotate a vector of quaternions from Equatorial to Galactic "
+	    "coordinates");
 }
-

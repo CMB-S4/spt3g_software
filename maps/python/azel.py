@@ -20,7 +20,16 @@ except:
     pass
 
 
-@core.usefulfunc
+__all__ = [
+    "convert_azel_to_radec",
+    "convert_radec_to_azel",
+    "convert_radec_to_gal",
+    "convert_gal_to_radec",
+    "LocalToAstronomicalPointing",
+    "EquatorialToGalacticPointing",
+]
+
+
 def check_iers(g3_time):
     """
     Check whether IERS calculations will work, and load an IERS database file
@@ -60,7 +69,7 @@ def check_iers(g3_time):
 
 
 @core.usefulfunc
-def convert_azel_to_radec(az, el, location=spt):
+def convert_azel_to_radec(az, el, location=spt, mjd=None):
     """
     Convert timestreams of local azimuth and elevation to right ascension and
     declination.
@@ -70,6 +79,11 @@ def convert_azel_to_radec(az, el, location=spt):
     az, el : np.ndarray or G3Timestream
         Array of local coordinates. If inputs are G3Timestream objects,
         G3Timestreams are also returned.
+    location : astropy.coordinates.EarthLocation instance
+        The telescope location on Earth.
+    mjd : np.ndarray
+        An array of times for each az/el sample.  If input az and el
+        are not G3Timestreams, this argument is required.
 
     Returns
     -------
@@ -80,8 +94,10 @@ def convert_azel_to_radec(az, el, location=spt):
         assert az.start == el.start
         assert az.stop == el.stop
         assert az.n_samples == el.n_samples
+        t = astropy.time.Time(np.asarray([i.mjd for i in az.times()]), format="mjd")
     else:
         assert len(az) == len(el)
+        t = astropy.time.Time(mjd, format="mjd")
 
     check_iers(az.stop)
 
@@ -90,8 +106,6 @@ def convert_azel_to_radec(az, el, location=spt):
         (el < -90.0 * core.G3Units.deg) | (el > 90.0 * core.G3Units.deg)
     )
     el[badel_inds] = 0.0 * core.G3Units.deg
-
-    t = astropy.time.Time(np.asarray([i.mjd for i in az.times()]), format="mjd")
 
     k = astropy.coordinates.AltAz(
         az=np.asarray(az) / core.G3Units.deg * astropy.units.deg,
@@ -116,7 +130,7 @@ def convert_azel_to_radec(az, el, location=spt):
 
 
 @core.usefulfunc
-def convert_radec_to_azel(ra, dec, location=spt):
+def convert_radec_to_azel(ra, dec, location=spt, mjd=None):
     """
     Convert timestreams of right ascension and declination to local
     azimuth and elevation.
@@ -126,6 +140,11 @@ def convert_radec_to_azel(ra, dec, location=spt):
     ra, dec : np.ndarray or G3Timestream
         Array of Equatorial sky coordinates. If inputs are G3Timestream
         objects, G3Timestreams are also returned.
+    location : astropy.coordinates.EarthLocation instance
+        The telescope location on Earth.
+    mjd : np.ndarray
+        An array of times for each ra/dec sample.  If input ra and dec
+        are not G3Timestreams, this argument is required.
 
     Returns
     -------
@@ -136,11 +155,11 @@ def convert_radec_to_azel(ra, dec, location=spt):
         assert ra.start == dec.start
         assert ra.stop == dec.stop
         assert ra.n_samples == dec.n_samples
+        t = astropy.time.Time(np.asarray([i.mjd for i in ra.times()]), format="mjd")
     else:
         assert len(ra) == len(dec)
+        t = astropy.time.Time(mjd, format="mjd")
     check_iers(ra.stop)
-
-    t = astropy.time.Time(np.asarray([i.mjd for i in ra.times()]), format="mjd")
 
     k = astropy.coordinates.FK5(
         ra=np.asarray(ra) / core.G3Units.deg * astropy.units.deg,

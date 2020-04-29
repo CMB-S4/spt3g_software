@@ -41,7 +41,7 @@ def sloppy_eq(f,g, eps = 1e-5):
 
 
 for i in range(n_samps):
-    t_ra_0, t_dec_0 = maps.test_trans( az_0[i], el_0[i], ra_0[i], dec_0[i], 
+    t_ra_0, t_dec_0 = maps.test_trans_( az_0[i], el_0[i], ra_0[i], dec_0[i], 
                                             az_1[i], el_1[i], ra_1[i], dec_1[i],
                                             az_0[i], el_0[i])
     if t_ra_0 <0:
@@ -59,7 +59,7 @@ for i in range(n_samps):
               az_0[i], el_0[i])
         assert(0)        
 
-    t_ra_1, t_dec_1 = maps.test_trans( az_0[i], el_0[i], ra_0[i], dec_0[i], 
+    t_ra_1, t_dec_1 = maps.test_trans_( az_0[i], el_0[i], ra_0[i], dec_0[i], 
                                                    az_1[i], el_1[i], ra_1[i], dec_1[i],
                                                    az_1[i], el_1[i])
     if t_ra_1 <0:
@@ -76,7 +76,7 @@ for i in range(n_samps):
               az_1[i], el_1[i], ra_1[i], dec_1[i])
         assert(0)        
 
-    t_ra_o, t_dec_o = maps.test_trans( az_0[i], el_0[i], ra_0[i], dec_0[i], 
+    t_ra_o, t_dec_o = maps.test_trans_( az_0[i], el_0[i], ra_0[i], dec_0[i], 
                                            az_1[i], el_1[i], ra_1[i], dec_1[i],
                                            o_az_0[i], o_el_0[i])
     if t_ra_o <0:
@@ -90,7 +90,7 @@ for i in range(n_samps):
 
 
         
-    t_l_o, t_b_o = maps.test_gal_trans( az_0[i], el_0[i], ra_0[i], dec_0[i], 
+    t_l_o, t_b_o = maps.test_gal_trans_( az_0[i], el_0[i], ra_0[i], dec_0[i], 
                                             az_1[i], el_1[i], ra_1[i], dec_1[i],
                                             o_az_0[i], o_el_0[i])
 

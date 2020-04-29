@@ -1,20 +1,15 @@
-from spt3g import core
-from spt3g.maps import HealpixSkyMap, FlatSkyMap
-from spt3g.maps import reproj_map
+from spt3g import core, maps
 
 import numpy as np
-import copy
 
-__all__ = [
-    'flatsky_to_healpix',
-    'healpix_to_flatsky',
-]
+__all__ = ["flatsky_to_healpix", "healpix_to_flatsky"]
 
 
 @core.usefulfunc
-def healpix_to_flatsky(map_in, nest=False, map_stub=None, rebin=1, interp=False,
-                       **kwargs):
-    '''
+def healpix_to_flatsky(
+    map_in, nest=False, map_stub=None, rebin=1, interp=False, **kwargs
+):
+    """
     Re-pixelize a map from Healpix to one of the flat sky projections.
 
     Parameters:
@@ -47,37 +42,41 @@ def healpix_to_flatsky(map_in, nest=False, map_stub=None, rebin=1, interp=False,
     --------
     output_map: FlatSkyMap
         The reprojected map
-    '''
+    """
 
     # Construct the output map
     if map_stub is None:
-        if isinstance(map_in, HealpixSkyMap):
-            kwargs.setdefault('coord_ref', map_in.coord_ref)
-            kwargs.setdefault('pol_type', map_in.pol_type)
-            kwargs.setdefault('pol_conv', map_in.pol_conv)
-        map_out = FlatSkyMap(**kwargs)
+        if isinstance(map_in, maps.HealpixSkyMap):
+            kwargs.setdefault("coord_ref", map_in.coord_ref)
+            kwargs.setdefault("pol_type", map_in.pol_type)
+            kwargs.setdefault("pol_conv", map_in.pol_conv)
+        map_out = maps.FlatSkyMap(**kwargs)
     else:
-        if not isinstance(map_stub, FlatSkyMap):
-            raise TypeError('Output stub must be a FlatSkyMap')
+        if not isinstance(map_stub, maps.FlatSkyMap):
+            raise TypeError("Output stub must be a FlatSkyMap")
         map_out = map_stub.Clone(False)
 
     # Populate output map pixels with interpolation and rebinning
-    if not isinstance(map_in, HealpixSkyMap):
-        map_in = HealpixSkyMap(map_in, nested=nest,
-                               coord_ref=map_out.coord_ref,
-                               weighted=map_out.weighted,
-                               units=map_out.units,
-                               pol_type=map_out.pol_type,
-                               pol_conv=map_out.pol_conv)
-    reproj_map(map_in, map_out, rebin=rebin, interp=interp)
+    if not isinstance(map_in, maps.HealpixSkyMap):
+        map_in = maps.HealpixSkyMap(
+            map_in,
+            nested=nest,
+            coord_ref=map_out.coord_ref,
+            weighted=map_out.weighted,
+            units=map_out.units,
+            pol_type=map_out.pol_type,
+            pol_conv=map_out.pol_conv,
+        )
+    maps.reproj_map(map_in, map_out, rebin=rebin, interp=interp)
 
     return map_out
 
 
 @core.usefulfunc
-def flatsky_to_healpix(map_in, map_stub=None, rebin=1, interp=False,
-                       fullsky=False, **kwargs):
-    '''
+def flatsky_to_healpix(
+    map_in, map_stub=None, rebin=1, interp=False, fullsky=False, **kwargs
+):
+    """
     Re-pixelize a map to Healpix from one of the flat projections.
 
     Parameters:
@@ -113,19 +112,19 @@ def flatsky_to_healpix(map_in, map_stub=None, rebin=1, interp=False,
         The array containing the healpix map
         If `fullsky` is True, this is a numpy array, otherwise a
         HealpixSkyMap instance.
-    '''
-    if not isinstance(map_in, FlatSkyMap):
-        raise TypeError('Input must be a FlatSkyMap')
+    """
+    if not isinstance(map_in, maps.FlatSkyMap):
+        raise TypeError("Input must be a FlatSkyMap")
 
     # Construct the output map
     if map_stub is None:
-        kwargs.setdefault('coord_ref', map_in.coord_ref)
-        kwargs.setdefault('pol_type', map_in.pol_type)
-        kwargs.setdefault('pol_conv', map_in.pol_conv)
-        map_out = HealpixSkyMap(**kwargs)
+        kwargs.setdefault("coord_ref", map_in.coord_ref)
+        kwargs.setdefault("pol_type", map_in.pol_type)
+        kwargs.setdefault("pol_conv", map_in.pol_conv)
+        map_out = maps.HealpixSkyMap(**kwargs)
     else:
-        if not isinstance(map_stub, HealpixSkyMap):
-            raise TypeError('Output stub must be a HealpixSkyMap')
+        if not isinstance(map_stub, maps.HealpixSkyMap):
+            raise TypeError("Output stub must be a HealpixSkyMap")
         map_out = map_stub.Clone(False)
 
     # optimize ringsparse storage
@@ -140,7 +139,7 @@ def flatsky_to_healpix(map_in, map_stub=None, rebin=1, interp=False,
     map_out.shift_ra = bool(np.abs(amax - amin) > np.abs(amax_shift - amin_shift))
 
     # Populate output map pixels with interpolation and rebinning
-    reproj_map(map_in, map_out, rebin=rebin, interp=interp)
+    maps.reproj_map(map_in, map_out, rebin=rebin, interp=interp)
 
     if fullsky:
         map_out.dense = True

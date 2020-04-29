@@ -150,7 +150,7 @@ alpha, delta = maps.get_ra_dec_map(x)
 xgal = x.Clone(False)
 x.coord_ref = maps.MapCoordReference.Equatorial
 xgal.coord_ref = maps.MapCoordReference.Galactic
-maps.maputils.reproj_map(x, xgal)
+maps.reproj_map(x, xgal)
 ra, dec = maps.azel.convert_gal_to_radec(alpha, delta)
 pix = xgal.angles_to_pixels(ra, dec)
 assert(np.allclose(np.asarray(pix), np.asarray(xgal)))
@@ -159,7 +159,7 @@ assert(np.allclose(np.asarray(pix), np.asarray(xgal)))
 xeq = x.Clone(False)
 x.coord_ref = maps.MapCoordReference.Galactic
 xeq.coord_ref = maps.MapCoordReference.Equatorial
-maps.maputils.reproj_map(x, xeq)
+maps.reproj_map(x, xeq)
 lon, lat = maps.azel.convert_radec_to_gal(alpha, delta)
 pix = xeq.angles_to_pixels(lon, lat)
 assert(np.allclose(np.asarray(pix), np.asarray(xeq)))

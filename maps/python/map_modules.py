@@ -190,6 +190,11 @@ def MakeMapsUnpolarized(frame):
 def ValidateMaps(frame, ignore_missing_weights=False):
     """
     Validate that the input map frame has all the necessary keys.
+
+    If ignore_missing_weights is False (default), a warning is issued when the
+    frame contains weighted Stokes maps without a weights map.  Set this option
+    to True when feeding single bolometer map frames with common weights through
+    a pipeline.
     """
 
     if isinstance(frame, core.G3Frame) and frame.type != core.G3FrameType.Map:
@@ -258,6 +263,10 @@ class ExtractMaps(object):
         If supplied, select only map frames that match this ID.
     copy : bool
         If True, make a copy of the map on extraction.
+    ignore_missing_weights : bool
+        If False (default), a warning is issued when the frame contains weighted
+        Stokes maps without a weights map.  Set this option to True when feeding
+        single bolometer map frames with common weights through a pipeline.
     """
 
     def __init__(self, map_id=None, copy=False, ignore_missing_weights=False):
