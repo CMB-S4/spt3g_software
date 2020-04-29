@@ -1070,9 +1070,9 @@ over all pixels.  The former produces output that is equivalent to using
 
 ``flatten_pol( (FlatSkyMap)Q, (FlatSkyMap)U [, (float)h=0.001 [, (bool)invert=False]]) -> None :``
     For maps defined on the sphere the direction of the polarization angle is is defined relative to the direction of North.  When making maps we follow this definition.
-    
+
     For any flat sky estimators, the polarization angle is defined relative to the vertical axis.  For some map projections the direction of north is not the same as the vertical axis.  This function applies a rotation to the Q and U values to switch the curved sky Q/U definition to the flat sky Q/U definition.
-    
+
     If for whatever reason you want to reverse the process set the invert argument to True.
 
 

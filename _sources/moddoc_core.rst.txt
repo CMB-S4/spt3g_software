@@ -2030,11 +2030,11 @@ Prints frames to console. If optional type specified, only acts on frames of the
 **spt3g.core.util.G3NetworkReceiver**
 
 
-    Emulation of old G3NetworkReceiver class. Equivalent to pointing
-    G3Reader at a TCP URL.
-    
+Emulation of old G3NetworkReceiver class. Equivalent to pointing
+G3Reader at a TCP URL.
 
-Equivalent to:
+
+*Equivalent to:*
 
 .. code-block:: python
 
@@ -2071,7 +2071,7 @@ The frame data is stored in the variable names "frame".
 
 If debug_start_func is not None, only starts a debug session when 
         debug_start_func(frame) == True
-    
+
 
 
 *Definition:*

@@ -155,7 +155,7 @@
 </ul>
 <p id="spt3g-gcp-arcextractor-arcextract"><strong>spt3g.gcp.ARCExtractor.ARCExtract</strong></p>
 <p>Extract GCP registers into native objects</p>
-<p>Equivalent to:</p>
+<p><em>Equivalent to:</em></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">CalibrateFrame</span><span class="p">)</span>
 <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UnpackACUData</span><span class="p">)</span>
 <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UnpackTrackerPointingData</span><span class="p">)</span>
@@ -174,10 +174,9 @@
 </dl>
 <p id="spt3g-gcp-arcextractor-arcextractminimal"><strong>spt3g.gcp.ARCExtractor.ARCExtractMinimal</strong></p>
 <p>Extract bare minimum GCP registers into native objects.</p>
-<blockquote>
-<div>Includes only GCPFeatureBits, SourceName and ObservationID keys.
-Use ARCExtract to calibrate and extract the complete frame.</div></blockquote>
-<p>Equivalent to:</p>
+<p>Includes only GCPFeatureBits, SourceName and ObservationID keys.
+Use ARCExtract to calibrate and extract the complete frame.</p>
+<p><em>Equivalent to:</em></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">DecryptFeatureBit</span><span class="p">)</span>
 <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UnpackTrackerMinimal</span><span class="p">)</span>
 </pre></div>
@@ -323,15 +322,17 @@ unconditionally at startup.</p>
 <p>Extracts contents of receiver registers in SPTpol-style ARC files into a wiring map and timepoint frames. This is designed to convert SPTpol-style data in which GCP records bolometer data into the ARC files into a format equivalent to that for SPT-3G.</p>
 <p>For old (100d SPTpol) data not containing wiring information, insert a wiring map into the pipeline ahead of this module. The board_serial should be set to a real (positive) value for all bolometer channels and -1 for the calibrator sync readout.</p>
 <p id="spt3g-gcp-influxdb-updatedb"><strong>spt3g.gcp.InfluxDB.UpdateDB</strong></p>
-<blockquote>
-<div>Update InfluxDB with data in frame</div></blockquote>
+<p>Update InfluxDB with data in frame</p>
 <dl class="docutils">
-<dt><em>Args:</em></dt>
-<dd><blockquote class="first">
-<div>client: InfluxDB client
-fields: Which gcp fields to add to database. See
-parse_field for options. If None, add all.</div></blockquote>
-<p class="last">Equivalent to:</p>
+<dt><em>Arguments:</em></dt>
+<dd><dl class="first docutils">
+<dt>client :</dt>
+<dd>InfluxDB client</dd>
+<dt>fields :</dt>
+<dd>Which gcp fields to add to database. See parse_field for options. If
+None, add all.</dd>
+</dl>
+<p class="last"><em>Equivalent to:</em></p>
 </dd>
 </dl>
 <p>Exception evaluating equivalence (UpdateDB() missing 1 required positional argument: ‘client’)</p>
@@ -342,6 +343,15 @@ parse_field for options. If None, add all.</div></blockquote>
 <p id="spt3g-gcp-influxdb-writedb"><strong>spt3g.gcp.InfluxDB.WriteDB</strong></p>
 <p>Write points to the database for each field</p>
 <dl class="docutils">
+<dt><em>Arguments:</em></dt>
+<dd><dl class="first last docutils">
+<dt>client :</dt>
+<dd>InfluxDB client</dd>
+<dt>fields :</dt>
+<dd>Which gcp fields to add to database. See parse_field for options. If
+None, add all.</dd>
+</dl>
+</dd>
 <dt><em>Definition:</em></dt>
 <dd><code class="docutils literal notranslate"><span class="pre">WriteDB(fr,</span> <span class="pre">client,</span> <span class="pre">fields=None)</span></code></dd>
 </dl>
