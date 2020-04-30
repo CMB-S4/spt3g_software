@@ -124,10 +124,10 @@ public:
 	    std::vector<long> & pixels, std::vector<double> & weights) const override;
 
 	G3SkyMapPtr Rebin(size_t scale, bool norm = true) const override;
-	G3SkyMapPtr ExtractPatch(size_t x0, size_t y0, size_t width, size_t height) const;
+	G3SkyMapPtr ExtractPatch(size_t x0, size_t y0, size_t width, size_t height,
+	    double fill = 0) const;
 	void InsertPatch(const FlatSkyMap &patch, bool ignore_zeros = false);
-	G3SkyMapPtr Pad(size_t width, size_t height, double fill = 0) const;
-	G3SkyMapPtr Crop(size_t width, size_t height) const;
+	G3SkyMapPtr Reshape(size_t width, size_t height, double fill = 0) const;
 
 	void ConvertToDense() override;
 	void ConvertToSparse();

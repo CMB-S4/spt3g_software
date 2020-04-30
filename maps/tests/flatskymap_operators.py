@@ -206,7 +206,7 @@ for shape in [(20, 500), (21, 501)]:
     for off in [0, 1]:
         print('    padding', 2 * pad + off)
 
-        mpad = m.pad(m.shape[1] + 2 * pad + off, m.shape[0] + 2 * pad + off)
+        mpad = m.reshape(m.shape[1] + 2 * pad + off, m.shape[0] + 2 * pad + off)
         assert(mpad.npix_allocated == m.npix_allocated)
         a0 = np.array([m.alpha_center, m.delta_center])
         a1 = np.array([mpad.alpha_center, mpad.delta_center])
@@ -223,7 +223,7 @@ for shape in [(20, 500), (21, 501)]:
         assert(np.allclose(np.asarray(pdelta)[sy, sx], mdelta))
         assert(np.allclose(np.asarray(mpad)[sy, sx], np.asarray(m)))
 
-        mcrop = mpad.crop(m.shape[1], m.shape[0])
+        mcrop = mpad.reshape(m.shape[1], m.shape[0])
         calpha, cdelta = get_ra_dec_map(mcrop)
         a2 = np.array([mcrop.alpha_center, mcrop.delta_center])
         assert(np.allclose(a0, a2))

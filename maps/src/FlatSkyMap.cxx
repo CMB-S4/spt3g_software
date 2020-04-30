@@ -647,64 +647,18 @@ G3SkyMapPtr FlatSkyMap::Rebin(size_t scale, bool norm) const
 	return out;
 }
 
-G3SkyMapPtr FlatSkyMap::ExtractPatch(size_t x0, size_t y0, size_t width, size_t height) const
+G3SkyMapPtr FlatSkyMap::ExtractPatch(size_t x0, size_t y0, size_t width, size_t height,
+    double fill) const
 {
+	// short circuit copy
+	if (x0 == width / 2 && y0 == height / 2 && width == xpix_ && height == ypix_)
+		return Clone(true);
+
 	FlatSkyProjection p(proj_info.OverlayPatch(x0, y0, width, height));
-	x0 -= width / 2;
-	y0 -= height / 2;
-	g3_assert(x0 >= 0 && x0 + width <= xpix_);
-	g3_assert(y0 >= 0 && y0 + height <= ypix_);
-
 	FlatSkyMapPtr out(new FlatSkyMap(p, coord_ref, weighted, units, pol_type,
 	    flat_pol_, pol_conv_));
 
-	// short circuit for empty maps
-	if (!dense_ && !sparse_)
-		return out;
-
-	for (size_t x = 0; x < width; x++) {
-		for (size_t y = 0; y < height; y++) {
-			double v = this->at(x + x0, y + y0);
-			if (v != 0)
-				(*out)(x, y) = v;
-		}
-	}
-
-	return out;
-}
-
-void FlatSkyMap::InsertPatch(const FlatSkyMap &patch, bool ignore_zeros)
-{
-	std::vector<double> loc = proj_info.GetPatchCenter(patch.proj_info);
-	double x0 = loc[0] - patch.xpix_ / 2;
-	double y0 = loc[1] - patch.ypix_ / 2;
-	g3_assert(x0 >= 0 && x0 + patch.xpix_ <= xpix_);
-	g3_assert(y0 >= 0 && y0 + patch.ypix_ <= ypix_);
-
-	for (size_t x = 0; x < patch.xpix_; x++) {
-		for (size_t y = 0; y < patch.ypix_; y++) {
-			double v = patch.at(x, y);
-			if (ignore_zeros && v == 0)
-				continue;
-			(*this)(x + x0, y + y0) = v;
-		}
-	}
-}
-
-G3SkyMapPtr FlatSkyMap::Pad(size_t width, size_t height, double fill) const
-{
-	g3_assert(width >= xpix_);
-	g3_assert(height >= ypix_);
-
-	if (width == xpix_ && height == ypix_)
-		return boost::make_shared<FlatSkyMap>(*this);
-
-	FlatSkyProjection p(proj_info.OverlayPatch(xpix_ / 2, ypix_ / 2,
-	    width, height));
-	FlatSkyMapPtr out(new FlatSkyMap(p, coord_ref, weighted, units, pol_type,
-	    flat_pol_, pol_conv_));
-
-	if (fill != 0)
+	if (fill != 0 && (width > xpix_ || height > ypix_))
 		(*out) += fill;
 
 	out->InsertPatch(*this, true);
@@ -712,15 +666,40 @@ G3SkyMapPtr FlatSkyMap::Pad(size_t width, size_t height, double fill) const
 	return out;
 }
 
-G3SkyMapPtr FlatSkyMap::Crop(size_t width, size_t height) const
+void FlatSkyMap::InsertPatch(const FlatSkyMap &patch, bool ignore_zeros)
 {
-	g3_assert(width <= xpix_);
-	g3_assert(height <= ypix_);
+	g3_assert(coord_ref == patch.coord_ref);
+	std::vector<double> loc = proj_info.GetPatchCenter(patch.proj_info);
+	double x0 = loc[0] - patch.xpix_ / 2;
+	double y0 = loc[1] - patch.ypix_ / 2;
 
-	if (width == xpix_ && height == ypix_)
-		return boost::make_shared<FlatSkyMap>(*this);
+	// short circuit for patches out of range
+	if (x0 + patch.xpix_ < 0 || x0 >= xpix_ || y0 + patch.ypix_ < 0 || y0 >= ypix_)
+		return;
 
-	return ExtractPatch(xpix_ / 2, ypix_ / 2, width, height);
+	// short circuit for empty maps
+	if (ignore_zeros && !patch.dense_ && !patch.sparse_)
+		return;
+
+	for (size_t x = 0; x < patch.xpix_; x++) {
+		for (size_t y = 0; y < patch.ypix_; y++) {
+			ssize_t ix = x + x0;
+			ssize_t iy = y + y0;
+			if (ix < 0 || ix >= xpix_)
+				continue;
+			if (iy < 0 || iy >= ypix_)
+				continue;
+			double v = patch.at(x, y);
+			if (ignore_zeros && v == 0)
+				continue;
+			(*this)(ix, iy) = v;
+		}
+	}
+}
+
+G3SkyMapPtr FlatSkyMap::Reshape(size_t width, size_t height, double fill) const
+{
+	return ExtractPatch(xpix_ / 2, ypix_ / 2, width, height, fill);
 }
 
 static int
@@ -1029,11 +1008,13 @@ PYBINDINGS("maps")
 		"map and a list of the values of those non-zero pixels.")
 
 	    .def("extract_patch", &FlatSkyMap::ExtractPatch,
-		(bp::arg("x0"), bp::arg("y0"), bp::arg("width"), bp::arg("height")),
+		(bp::arg("x0"), bp::arg("y0"), bp::arg("width"), bp::arg("height"),
+		 bp::arg("fill") = 0),
 		"Returns a map of shape (width, height) containing a rectangular patch "
 		"of the parent map.  Pixel (width // 2, height // 2) of the output map "
 		"corresponds to pixel (x0, y0) in the parent map, and the angular "
-		"location of each pixel on the sky is maintained.")
+		"location of each pixel on the sky is maintained.  Surrounding empty "
+		"pixels can be optionally filled.")
 
 	    .def("insert_patch", &FlatSkyMap::InsertPatch,
 		(bp::arg("patch"), bp::arg("ignore_zeros") = false),
@@ -1043,17 +1024,11 @@ PYBINDINGS("maps")
 		"zero-valued pixels in the patch are not inserted.  This is useful "
 		"for preserving the sparsity of the parent map.")
 
-	    .def("pad", &FlatSkyMap::Pad,
+	    .def("reshape", &FlatSkyMap::Reshape,
 		(bp::arg("width"), bp::arg("height"), bp::arg("fill") = 0),
 		"Returns a map of shape (width, height) containing the parent map "
 		"centered within it.  The angular location of each pixel on the sky "
 		"is maintained.  Surrounding empty pixels can be optionally filled.")
-
-	    .def("crop", &FlatSkyMap::Crop,
-		(bp::arg("width"), bp::arg("height")),
-		"Returns a map of shape (width, height) containing the cropped parent "
-		"map centered within it.  The angular location of each pixel on the sky "
-		"is maintained.")
 
 	    .add_property("flat_pol", &FlatSkyMap::IsPolFlat, &FlatSkyMap::SetFlatPol,
 		"True if this map has been flattened using flatten_pol.")
