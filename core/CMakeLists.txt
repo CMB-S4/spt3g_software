@@ -33,10 +33,10 @@ endif()
 
 link_python_dir()
 
-execute_process(COMMAND ln -fsn ${CMAKE_CURRENT_SOURCE_DIR}/bin/spt3g-dump ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-execute_process(COMMAND ln -fsn ${CMAKE_CURRENT_SOURCE_DIR}/bin/spt3g-verify ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-execute_process(COMMAND ln -fsn ${CMAKE_CURRENT_SOURCE_DIR}/bin/spt3g-inspect ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-execute_process(COMMAND ln -fsn ${CMAKE_CURRENT_SOURCE_DIR}/bin/gen-analysis-doc ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+add_spt3g_program(bin/spt3g-dump)
+add_spt3g_program(bin/spt3g-verify)
+add_spt3g_program(bin/spt3g-inspect)
+add_spt3g_program(bin/gen-analysis-doc)
 
 #Tests
 add_spt3g_test(copycons)

@@ -16,7 +16,7 @@ add_spt3g_library(dfmux SHARED
 target_link_libraries(dfmux core ${DFMUX_LIB_EXTRA_LIB})
 
 if (NETCDF_FOUND)
-	execute_process(COMMAND ln -fsn ${CMAKE_CURRENT_SOURCE_DIR}/bin/ledgerman.py ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/ledgerman)
+	add_spt3g_program(bin/ledgerman.py ledgerman)
 endif()
 
 link_python_dir()
