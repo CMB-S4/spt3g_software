@@ -116,7 +116,7 @@ Flat sky maps have additional functions defined for efficient manipulation in me
 
 The ``FlattenPol`` pipeline module flattens the Q and U stokes parameters to align with the pixel coordinate grid, which is necessary for computing power spectra in the flat sky approximation.
 
-Small patches can be extracted from and inserted into larger flat sky maps using the ``FlatSkyMap.extract_patch`` and ``FlatSkyMap.insert_patch`` methods, respectively.  Also, maps can be padded and cropped using the ``FlatSkyMap.pad`` and ``FlatSkyMap.crop`` methods.  All of these preserve the map pixelization and correspondence to angle on the sky.
+Small patches can be extracted from and inserted into larger flat sky maps using the ``FlatSkyMap.extract_patch`` and ``FlatSkyMap.insert_patch`` methods, respectively.  Also, maps can be padded and cropped using the ``FlatSkyMap.reshape`` method, which keeps the patch centered in the output map.  All of these preserve the map pixelization and correspondence to angle on the sky.
 
 As an equivalent and more Pythonic alternative, you can also extract portions of the map using numpy-style slicing operations (e.g. ``map[45:130,114:182]``), which will produce a map with the same contents as the numpy operation but without converting it to a dense map and with all the coordinate information set appropriately (and is equivalent to ``extract_patch()``). This also works with setting, but the coordinates have to match the sub-subcoordinates (as you would have gotten them from getting a slice or ``extract_patch()``).  Note that this slicing creates a copy of the underlying data, so in-place operations (e.g. ``map[45:130,114:182] += 5``) will work, but are not necessarily memory efficient.
 
@@ -200,8 +200,8 @@ FlatSkyMap is a G3SkyMap with the extra meta information about the particular fl
 
 **spt3g.maps.FlatSkyMap.extract_patch**
 
-``extract_patch( (FlatSkyMap)arg1, (int)x0, (int)y0, (int)width, (int)height) -> G3SkyMap :``
-    Returns a map of shape (width, height) containing a rectangular patch of the parent map.  Pixel (width // 2, height // 2) of the output map corresponds to pixel (x0, y0) in the parent map, and the angular location of each pixel on the sky is maintained.
+``extract_patch( (FlatSkyMap)arg1, (int)x0, (int)y0, (int)width, (int)height [, (float)fill=0]) -> G3SkyMap :``
+    Returns a map of shape (width, height) containing a rectangular patch of the parent map.  Pixel (width // 2, height // 2) of the output map corresponds to pixel (x0, y0) in the parent map, and the angular location of each pixel on the sky is maintained.  Surrounding empty pixels can be optionally filled.
 
 .. _spt3g.maps.FlatSkyMap.insert_patch:
 
@@ -210,19 +210,12 @@ FlatSkyMap is a G3SkyMap with the extra meta information about the particular fl
 ``insert_patch( (FlatSkyMap)arg1, (FlatSkyMap)patch [, (bool)ignore_zeros=False]) -> None :``
     Inserts a patch (e.g. as extracted using extract_patch) into the parent map.  The coordinate system and angular center of the patch must match that of the parent map.  If ignore_zeros is True, zero-valued pixels in the patch are not inserted.  This is useful for preserving the sparsity of the parent map.
 
-.. _spt3g.maps.FlatSkyMap.pad:
+.. _spt3g.maps.FlatSkyMap.reshape:
 
-**spt3g.maps.FlatSkyMap.pad**
+**spt3g.maps.FlatSkyMap.reshape**
 
-``pad( (FlatSkyMap)arg1, (int)width, (int)height [, (float)fill=0]) -> G3SkyMap :``
+``reshape( (FlatSkyMap)arg1, (int)width, (int)height [, (float)fill=0]) -> G3SkyMap :``
     Returns a map of shape (width, height) containing the parent map centered within it.  The angular location of each pixel on the sky is maintained.  Surrounding empty pixels can be optionally filled.
-
-.. _spt3g.maps.FlatSkyMap.crop:
-
-**spt3g.maps.FlatSkyMap.crop**
-
-``crop( (FlatSkyMap)arg1, (int)width, (int)height) -> G3SkyMap :``
-    Returns a map of shape (width, height) containing the cropped parent map centered within it.  The angular location of each pixel on the sky is maintained.
 
 
 

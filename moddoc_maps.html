@@ -123,7 +123,7 @@
 <h2>Flat Sky Map Manipulation<a class="headerlink" href="#flat-sky-map-manipulation" title="Permalink to this headline">¶</a></h2>
 <p>Flat sky maps have additional functions defined for efficient manipulation in memory.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">FlattenPol</span></code> pipeline module flattens the Q and U stokes parameters to align with the pixel coordinate grid, which is necessary for computing power spectra in the flat sky approximation.</p>
-<p>Small patches can be extracted from and inserted into larger flat sky maps using the <code class="docutils literal notranslate"><span class="pre">FlatSkyMap.extract_patch</span></code> and <code class="docutils literal notranslate"><span class="pre">FlatSkyMap.insert_patch</span></code> methods, respectively.  Also, maps can be padded and cropped using the <code class="docutils literal notranslate"><span class="pre">FlatSkyMap.pad</span></code> and <code class="docutils literal notranslate"><span class="pre">FlatSkyMap.crop</span></code> methods.  All of these preserve the map pixelization and correspondence to angle on the sky.</p>
+<p>Small patches can be extracted from and inserted into larger flat sky maps using the <code class="docutils literal notranslate"><span class="pre">FlatSkyMap.extract_patch</span></code> and <code class="docutils literal notranslate"><span class="pre">FlatSkyMap.insert_patch</span></code> methods, respectively.  Also, maps can be padded and cropped using the <code class="docutils literal notranslate"><span class="pre">FlatSkyMap.reshape</span></code> method, which keeps the patch centered in the output map.  All of these preserve the map pixelization and correspondence to angle on the sky.</p>
 <p>As an equivalent and more Pythonic alternative, you can also extract portions of the map using numpy-style slicing operations (e.g. <code class="docutils literal notranslate"><span class="pre">map[45:130,114:182]</span></code>), which will produce a map with the same contents as the numpy operation but without converting it to a dense map and with all the coordinate information set appropriately (and is equivalent to <code class="docutils literal notranslate"><span class="pre">extract_patch()</span></code>). This also works with setting, but the coordinates have to match the sub-subcoordinates (as you would have gotten them from getting a slice or <code class="docutils literal notranslate"><span class="pre">extract_patch()</span></code>).  Note that this slicing creates a copy of the underlying data, so in-place operations (e.g. <code class="docutils literal notranslate"><span class="pre">map[45:130,114:182]</span> <span class="pre">+=</span> <span class="pre">5</span></code>) will work, but are not necessarily memory efficient.</p>
 </div>
 <div class="section" id="frame-objects-in-spt3g-maps">
@@ -176,23 +176,18 @@
 </dl>
 <p id="spt3g-maps-flatskymap-extract-patch"><strong>spt3g.maps.FlatSkyMap.extract_patch</strong></p>
 <dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">extract_patch(</span> <span class="pre">(FlatSkyMap)arg1,</span> <span class="pre">(int)x0,</span> <span class="pre">(int)y0,</span> <span class="pre">(int)width,</span> <span class="pre">(int)height)</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMap</span> <span class="pre">:</span></code></dt>
-<dd>Returns a map of shape (width, height) containing a rectangular patch of the parent map.  Pixel (width // 2, height // 2) of the output map corresponds to pixel (x0, y0) in the parent map, and the angular location of each pixel on the sky is maintained.</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">extract_patch(</span> <span class="pre">(FlatSkyMap)arg1,</span> <span class="pre">(int)x0,</span> <span class="pre">(int)y0,</span> <span class="pre">(int)width,</span> <span class="pre">(int)height</span> <span class="pre">[,</span> <span class="pre">(float)fill=0])</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMap</span> <span class="pre">:</span></code></dt>
+<dd>Returns a map of shape (width, height) containing a rectangular patch of the parent map.  Pixel (width // 2, height // 2) of the output map corresponds to pixel (x0, y0) in the parent map, and the angular location of each pixel on the sky is maintained.  Surrounding empty pixels can be optionally filled.</dd>
 </dl>
 <p id="spt3g-maps-flatskymap-insert-patch"><strong>spt3g.maps.FlatSkyMap.insert_patch</strong></p>
 <dl class="docutils">
 <dt><code class="docutils literal notranslate"><span class="pre">insert_patch(</span> <span class="pre">(FlatSkyMap)arg1,</span> <span class="pre">(FlatSkyMap)patch</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_zeros=False])</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt>
 <dd>Inserts a patch (e.g. as extracted using extract_patch) into the parent map.  The coordinate system and angular center of the patch must match that of the parent map.  If ignore_zeros is True, zero-valued pixels in the patch are not inserted.  This is useful for preserving the sparsity of the parent map.</dd>
 </dl>
-<p id="spt3g-maps-flatskymap-pad"><strong>spt3g.maps.FlatSkyMap.pad</strong></p>
+<p id="spt3g-maps-flatskymap-reshape"><strong>spt3g.maps.FlatSkyMap.reshape</strong></p>
 <dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">pad(</span> <span class="pre">(FlatSkyMap)arg1,</span> <span class="pre">(int)width,</span> <span class="pre">(int)height</span> <span class="pre">[,</span> <span class="pre">(float)fill=0])</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMap</span> <span class="pre">:</span></code></dt>
+<dt><code class="docutils literal notranslate"><span class="pre">reshape(</span> <span class="pre">(FlatSkyMap)arg1,</span> <span class="pre">(int)width,</span> <span class="pre">(int)height</span> <span class="pre">[,</span> <span class="pre">(float)fill=0])</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMap</span> <span class="pre">:</span></code></dt>
 <dd>Returns a map of shape (width, height) containing the parent map centered within it.  The angular location of each pixel on the sky is maintained.  Surrounding empty pixels can be optionally filled.</dd>
-</dl>
-<p id="spt3g-maps-flatskymap-crop"><strong>spt3g.maps.FlatSkyMap.crop</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">crop(</span> <span class="pre">(FlatSkyMap)arg1,</span> <span class="pre">(int)width,</span> <span class="pre">(int)height)</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMap</span> <span class="pre">:</span></code></dt>
-<dd>Returns a map of shape (width, height) containing the cropped parent map centered within it.  The angular location of each pixel on the sky is maintained.</dd>
 </dl>
 </div>
 <div class="section" id="spt3g-maps-g3skymap">
