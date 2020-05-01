@@ -203,6 +203,8 @@ G3Pipeline_halt_processing()
     (watt)(W)(milliwatt)(mW)(microwatt)(uW)(nanowatt)(nW)(picowatt)(pW) \
     (attowatt)(aW)(horsepower)(hp) \
     \
+    (jansky)(Jy)(millijansky)(mJy)(megajansky)(MJy) \
+    \
     (volt)(V)(millivolt)(mV)(microvolt)(uV) \
     \
     (ampere)(amp)(A)(milliamp)(mA)(microamp)(uA)(nanoamp)(nA) \
@@ -453,6 +455,11 @@ BOOST_PYTHON_MODULE(core)
 	    .value("Power",  G3Timestream::Power)
 	    .value("Resistance",  G3Timestream::Resistance)
 	    .value("Tcmb",  G3Timestream::Tcmb)
+	    .value("Angle",  G3Timestream::Angle)
+	    .value("Distance",  G3Timestream::Distance)
+	    .value("Voltage",  G3Timestream::Voltage)
+	    .value("Pressure",  G3Timestream::Pressure)
+	    .value("FluxDensity",  G3Timestream::FluxDensity)
 	;
 	enum_none_converter::from_python<G3Timestream::TimestreamUnits>();
 

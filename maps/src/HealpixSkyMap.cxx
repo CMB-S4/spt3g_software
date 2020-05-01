@@ -758,6 +758,21 @@ HealpixSkyMap::Description() const
 	case G3Timestream::Tcmb:
 		os << " (Tcmb)";
 		break;
+	case G3Timestream::Angle:
+		os << " (Angle)";
+		break;
+	case G3Timestream::Distance:
+		os << " (Distance)";
+		break;
+	case G3Timestream::Voltage:
+		os << " (Voltage)";
+		break;
+	case G3Timestream::Pressure:
+		os << " (Pressure)";
+		break;
+	case G3Timestream::FluxDensity:
+		os << " (FluxDensity)";
+		break;
 	default:
 		break;
 	}

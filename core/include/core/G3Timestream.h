@@ -16,6 +16,11 @@ public:
 		Power = 3,
 		Resistance = 5,
 		Tcmb = 4,
+		Angle = 6,
+		Distance = 7,
+		Voltage = 8,
+		Pressure = 9,
+		FluxDensity = 10,
 	};
 
 	G3Timestream() : G3Vector<double>(), units(None), use_flac_(0) {}

@@ -427,6 +427,21 @@ std::string G3Timestream::Description() const
 	case Tcmb:
 		desc << " (Tcmb)";
 		break;
+	case Angle:
+		desc << " (Angle)";
+		break;
+	case Distance:
+		desc << " (Distance)";
+		break;
+	case Voltage:
+		desc << " (Voltage)";
+		break;
+	case Pressure:
+		desc << " (Pressure)";
+		break;
+	case FluxDensity:
+		desc << " (FluxDensity)";
+		break;
 	default:
 		break;
 	}

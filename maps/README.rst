@@ -28,7 +28,7 @@ The following attributes are common to all G3SkyMap subclasses:
   The polarization convention used to encode the Q and U Stokes orientations relative to the coordinate axes.  This attribute is an instance of the ``MapPolConv`` enum, which can have the value ``IAU``, ``COSMO`` or None.  Both IAU and COSMO polarization conventions are supported in polarization-aware functions (e.g. ``FlattenPol``), but most default to using the IAU convention.  Warnings will be raised when a polarized map is used without a polarization convention set.  Changing the polarization convention between IAU and COSMO on a ``U`` map results in flipping the sign of all pixels in the map.
   
 ``units``
-  The units system in which the map is computed, stored as an instance of the ``G3TimestreamUnits`` enum, which can have the value ``Tcmb``, ``Counts``, ``Current``, ``Power``, ``Resistance`` or None.
+  The units system in which the map is computed, stored as an instance of the ``G3TimestreamUnits`` enum, typically ``Tcmb``.
   
 ``weighted``
   A boolean attribute indicating whether the data in the map have been normalized by the inverse of the appropriate Mueller matrix (``weighted=False``) or not (``weighted=True``).  See more information on map weights below.
@@ -77,7 +77,7 @@ Weights are removed from or applied to a set of Stokes T/Q/U maps simultaneously
 Map Frames and Pipelines
 ========================
 
-Maps and associated weights are generally stored in memory and on disk in `G3Frames` of type `G3FrameType.Map`, with keys ``'T', 'Q', 'U', 'Wpol'`` defined for polarized maps, and ``'T', 'Wunpol'`` defined for unpolarized maps.  Map frames can be checked for validity using the ``ValidateFrames`` pipeline module, which raises errors or warnings for missing keys or inconsistent attributes.
+Maps and associated weights are generally stored in memory and on disk in ``G3Frames`` of type ``G3FrameType.Map``, with keys ``'T', 'Q', 'U', 'Wpol'`` defined for polarized maps, and ``'T', 'Wunpol'`` defined for unpolarized maps.  Map frames can be checked for validity using the ``ValidateFrames`` pipeline module, which raises errors or warnings for missing keys or inconsistent attributes.
 
 Map frames can be manipulated in a pipeline using some memory-efficient pipeline modules.  Weights can be applied or removed from their corresponding Stokes maps using the ``ApplyWeights`` or ``RemoveWeights`` pipeline modules.  Maps can be converted to polarized or unpolarized versions using the ``MakeMapPolarized`` and ``MakeMapUnpolarized`` modules.  They can also be compactified to their most sparse representation using the ``CompactMaps`` module.
 

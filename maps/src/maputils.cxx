@@ -165,11 +165,11 @@ boost::python::tuple GetRaDecMap(G3SkyMapConstPtr m)
 	}
 
 	ra->weighted = false;
-	ra->units = G3Timestream::None;
+	ra->units = G3Timestream::Angle;
 	ra->pol_type = G3SkyMap::None;
 	ra->SetPolConv(G3SkyMap::ConvNone);
 	dec->weighted = false;
-	dec->units = G3Timestream::None;
+	dec->units = G3Timestream::Angle;
 	dec->pol_type = G3SkyMap::None;
 	dec->SetPolConv(G3SkyMap::ConvNone);
 
