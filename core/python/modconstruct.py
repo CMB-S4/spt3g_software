@@ -9,7 +9,10 @@ import types
 
 def pipesegment(func, autodoc=True):
     '''
-    Use as a decorator for a pre-assembled set of pipeline modules. Makes a pseudo-module consisting of several inputs. If autodoc is True (the default), will attempt to introspect the segment to find out what it does. Set this to False if your module does anything complicated.
+    Use as a decorator for a pre-assembled set of pipeline modules. Makes a
+    pseudo-module consisting of several inputs. If autodoc is True (the
+    default), will attempt to introspect the segment to find out what it
+    does. Set this to False if your module does anything complicated.
 
     For example:
 
@@ -38,7 +41,11 @@ def pipesegment(func, autodoc=True):
         doclines = []
         class PotemkinPipe(object):
             def Add(self, thing, *args, **kwargs):
-                doc = 'pipe.Add(%s.%s' % (thing.__module__, thing.__name__)
+                if hasattr(thing, '__wrapped__'):
+                    modname = thing.__wrapped__.__module__
+                else:
+                    modname = thing.__module__
+                doc = 'pipe.Add(%s.%s' % (modname, thing.__name__)
                 for arg in args:
                     doc += ', %s' % repr(arg)
                 for arg in kwargs:
