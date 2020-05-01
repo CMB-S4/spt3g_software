@@ -67,8 +67,11 @@ def get_doc_for_module(module_path, include_link_list = True):
             out_str = ''
             try:
                 if hasattr(obj, '__module__'):
-                    itemname = '%s.%s' % (obj.__module__, obj.__name__)
-                    modname = obj.__module__
+                    if hasattr(obj, '__wrapped__'):
+                        modname = obj.__wrapped__.__module__
+                    else:
+                        modname = obj.__module__
+                    itemname = '%s.%s' % (modname, obj.__name__)
                 else:
                     itemname = obj.__name__ #helps with files imported in __init__
                 if not itemname.startswith(module_path):
