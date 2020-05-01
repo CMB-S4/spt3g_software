@@ -823,6 +823,12 @@ HealpixSkyMap::shape() const
 	return shape;
 }
 
+double
+HealpixSkyMap::res() const
+{
+	return sqrt(4.0 * M_PI / npix_) * G3Units::rad;
+}
+
 size_t HealpixSkyMap::NpixAllocated() const
 {
 	if (dense_)
@@ -1152,7 +1158,8 @@ PYBINDINGS("maps")
 
 	    .def(bp::init<const HealpixSkyMap&>(bp::arg("healpix_map")))
 	    .def(bp::init<>())
-	    .add_property("nside", &HealpixSkyMap::nside, "Healpix resolution")
+	    .add_property("nside", &HealpixSkyMap::nside, "Healpix resolution parameter")
+	    .add_property("res", &HealpixSkyMap::nside, "Map resolution in angular units")
 	    .add_property("nested", &HealpixSkyMap::nested,
 		"True if pixel ordering is nested, False if ring-ordered")
 	    .add_property("shift_ra", &HealpixSkyMap::IsRaShifted, HealpixSkyMap_setshiftra,

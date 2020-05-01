@@ -72,6 +72,7 @@ public:
 
 	size_t nside() const {return nside_;}
 	bool nested() const {return nested_;}
+	double res() const;
 
 	size_t AngleToPixel(double alpha, double delta) const override;
 	std::vector<double> PixelToAngle(size_t pixel) const override;
