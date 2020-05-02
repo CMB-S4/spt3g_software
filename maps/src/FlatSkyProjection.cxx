@@ -133,8 +133,8 @@ bool FlatSkyProjection::IsCompatible(const FlatSkyProjection & other) const
 {
 	bool check = ((xpix_ == other.xpix_) &&
 		      (ypix_ == other.ypix_) &&
-		      (fabs(x_res_ - other.x_res_) < 1e-12) &&
-		      (fabs(y_res_ - other.y_res_) < 1e-12));
+		      (fabs(x_res_ - other.x_res_) < 1e-8) &&
+		      (fabs(y_res_ - other.y_res_) < 1e-8));
 	if (proj_ != other.proj_ && (proj_ == ProjNone || other.proj_ == ProjNone)) {
 		log_warn("Checking compatibility of maps with projections %d and %d. "
 			 "In the future, comparison to a map with projection %d "
@@ -143,10 +143,10 @@ bool FlatSkyProjection::IsCompatible(const FlatSkyProjection & other) const
 	}
 	return (check &&
 		(proj_ == other.proj_) &&
-		(fabs(alpha0_ - other.alpha0_) < 1e-12) &&
-		(fabs(delta0_ - other.delta0_) < 1e-12) &&
-		(fabs(x0_ - other.x0_) < 1e-12) &&
-		(fabs(y0_ - other.y0_) < 1e-12));
+		(fabs(alpha0_ - other.alpha0_) < 1e-8) &&
+		(fabs(delta0_ - other.delta0_) < 1e-8) &&
+		(fabs(x0_ - other.x0_) < 1e-8) &&
+		(fabs(y0_ - other.y0_) < 1e-8));
 }
 
 void FlatSkyProjection::initialize(size_t xpix, size_t ypix, double res,
@@ -176,11 +176,6 @@ void FlatSkyProjection::SetDeltaCenter(double delta)
 	delta0_ = delta;
 	sindelta0_ = SIN(delta0_ / rad);
 	cosdelta0_ = COS(delta0_ / rad);
-	if (proj_ == Proj7) {
-		delta0_ = fabs(delta0_);
-		pv_.resize(1);
-		pv_[0] = cosdelta0_ * cosdelta0_ / rad;
-	}
 }
 
 void FlatSkyProjection::SetAngleCenter(double alpha, double delta)
@@ -197,8 +192,8 @@ void FlatSkyProjection::SetXCenter(double x)
 void FlatSkyProjection::SetYCenter(double y)
 {
 	y0_ = (y != y) ? (ypix_ / 2.0 - 0.5) : y;
-	if (proj_ == Proj0 || proj_ == Proj1 || proj_ == Proj9) {
-		y0_ += delta0_ / y_res_;
+	if (proj_ == Proj0 || proj_ == Proj1 || proj_ == Proj7 || proj_ == Proj9) {
+		y0_ -= (proj_ == Proj7 ? sindelta0_ : delta0_) / y_res_;
 		SetDeltaCenter(0.0);
 	}
 }
@@ -344,7 +339,7 @@ FlatSkyProjection::XYToAngle(double x, double y, bool wrap_alpha) const
 		break;
 	}
 	case Proj7: {
-		delta = -ASIN(y * pv_[0]) * rad;
+		delta = delta0_ - ASIN(y) * rad;
 		alpha = x + alpha0_;
 		break;
 	}
@@ -439,7 +434,7 @@ FlatSkyProjection::AngleToXY(double alpha, double delta) const
 	}
 	case Proj7: {
 		x = dalpha;
-		y = -SIN(delta / rad) / pv_[0];
+		y = SIN((delta0_ - delta) / rad);
 		break;
 	}
 	default:

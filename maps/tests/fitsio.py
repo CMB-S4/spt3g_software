@@ -31,6 +31,8 @@ for dim in [300, 301]:
         fm1 = maps.FlatSkyMap(arr, res, proj=proj,
                               alpha_center=a0, delta_center=d0,
                               x_center=x0, y_center=y0)
+        assert(np.allclose(fm1.angle_to_xy(a0, d0), (x0, y0)))
+        assert(np.allclose(fm1.xy_to_angle(x0, y0), (a0, d0)))
 
         maps.fitsio.save_skymap_fits('test_map.fits', fm1, overwrite=True)
         fm2 = maps.fitsio.load_skymap_fits('test_map.fits')['T']
@@ -51,6 +53,7 @@ for dim in [300, 301]:
         ra, dec = maps.get_ra_dec_map(fm2)
 
         angs = []
+        bad = False
         for pix in pixs:
             wcs_ang = np.asarray(w.all_pix2world(pix[0], pix[1], 0))
             wcs_ang[wcs_ang > 180] -= 360
@@ -62,7 +65,15 @@ for dim in [300, 301]:
                 except IndexError:
                     pass
                 assert(np.allclose(wcs_ang, g3_ang))
+                if verbose:
+                    raise AssertionError
             except AssertionError:
+                if not bad and not verbose:
+                    print('ERROR: Proj{}'.format(p))
+                    print('-' * 80)
+                    print(repr(fm2.wcs.to_header()))
+                    print('-' * 80)
+                bad = True
                 print('pix', pix, 'pix2ang', [ra[idx] / deg, dec[idx] / deg],
                       'g3', g3_ang, 'wcs', wcs_ang, 'diff', np.abs(g3_ang - wcs_ang))
                 error += '\nProj{}: xy_to_angle error'.format(p)
@@ -74,12 +85,20 @@ for dim in [300, 301]:
             try:
                 assert(np.allclose(g3_pix, pix)) # round trip
                 assert(np.allclose(wcs_pix, g3_pix))
+                if verbose:
+                    raise AssertionError
             except AssertionError:
+                if not bad and not verbose:
+                    print('ERROR: Proj{}'.format(p))
+                    print('-' * 80)
+                    print(repr(fm2.wcs.to_header()))
+                    print('-' * 80)
+                bad = True
                 print('ang', ang / deg, 'pix', pix, 'g3', g3_pix, 'wcs', wcs_pix,
                       'diff', np.abs(g3_pix - wcs_pix))
                 error += '\nProj{}: angle_to_xy error'.format(p)
 
-        if verbose:
+        if bad or verbose:
             print('-' * 80)
 
 if error:

@@ -337,16 +337,10 @@ def get_wcs(skymap, reset=False):
     ]
     w.wcs.cunit = ['deg', 'deg']
     w.wcs.crpix = [skymap.x_center + 1, skymap.y_center + 1]
-
-    crval = [
+    w.wcs.crval = [
         skymap.alpha_center / core.G3Units.deg,
         skymap.delta_center / core.G3Units.deg,
     ]
-    if proj_abbr in ['CEA']:
-        v = skymap.delta_center / core.G3Units.rad
-        w.wcs.set_pv([(2, 1, np.cos(v) ** 2)])
-        crval[1] = 0.0
-    w.wcs.crval = crval
 
     skymap._wcs = w
     return w
@@ -422,7 +416,11 @@ def parse_wcs_header(header):
     if wcsproj in ['CEA']:
         for i, m, v in w.wcs.get_pv():
             if i == order[1] + 1 and m == 1:
-                delta_center = np.arccos(np.sqrt(v)) * core.G3Units.rad
+                if not np.isclose(v, 1):
+                    raise ValueError(
+                        "CEA projection with non-conformal scaling parameter "
+                        "PV%d_1 not supported" % i
+                    )
 
     # construct arguments
     map_opts = dict(
