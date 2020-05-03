@@ -20,6 +20,10 @@ for dim in [300, 301]:
     verbose = False
     error = ''
 
+    fm0 = maps.FlatSkyMap(dim, dim, res, proj=maps.MapProjection.ProjZEA,
+                          alpha_center=a0, delta_center=d0,
+                          x_center=x0, y_center=y0)
+
     print('Checking projections for dim {}'.format(dim))
     if verbose:
         print('-' * 80)
@@ -33,6 +37,14 @@ for dim in [300, 301]:
                               x_center=x0, y_center=y0)
         assert(np.allclose(fm1.angle_to_xy(a0, d0), (x0, y0)))
         assert(np.allclose(fm1.xy_to_angle(x0, y0), (a0, d0)))
+        assert(fm1.alpha_center == a0)
+        assert(fm1.delta_center == d0)
+        assert(fm1.x_center == x0)
+        assert(fm1.y_center == y0)
+
+        fmc = fm0.Clone(False)
+        fmc.proj = proj
+        assert(fmc.IsCompatible(fm1))
 
         maps.fitsio.save_skymap_fits('test_map.fits', fm1, overwrite=True)
         fm2 = maps.fitsio.load_skymap_fits('test_map.fits')['T']
@@ -44,11 +56,15 @@ for dim in [300, 301]:
                 print(attr, getattr(fm1, attr), getattr(fm2, attr))
             error += '\nProj{}: fits error'.format(p)
         assert(np.allclose(fm1, fm2))
-        assert(fm1.wcs.to_header() == fm2.wcs.to_header())
+        assert(np.allclose(fm1.wcs.wcs.crpix, fm2.wcs.wcs.crpix))
+        assert(np.allclose(fm1.wcs.wcs.crval, fm2.wcs.wcs.crval))
+        assert(np.allclose(fm1.wcs.wcs.cdelt, fm2.wcs.wcs.cdelt))
+        assert(np.allclose(fm1.wcs.wcs.pc, fm2.wcs.wcs.pc))
 
         w = fm2.wcs
+        hdr = maps.fitsio.create_wcs_header(fm2)
         if verbose:
-            print(repr(w.to_header()))
+            print(repr(hdr))
         pixs = np.array([[0, 0], [0, dim - 1], [dim // 2, dim // 2], [dim - 1, 0], [dim - 1, dim - 1]]).astype(float)
         ra, dec = maps.get_ra_dec_map(fm2)
 
@@ -71,7 +87,7 @@ for dim in [300, 301]:
                 if not bad and not verbose:
                     print('ERROR: Proj{}'.format(p))
                     print('-' * 80)
-                    print(repr(fm2.wcs.to_header()))
+                    print(repr(hdr))
                     print('-' * 80)
                 bad = True
                 print('pix', pix, 'pix2ang', [ra[idx] / deg, dec[idx] / deg],
@@ -91,7 +107,7 @@ for dim in [300, 301]:
                 if not bad and not verbose:
                     print('ERROR: Proj{}'.format(p))
                     print('-' * 80)
-                    print(repr(fm2.wcs.to_header()))
+                    print(repr(hdr))
                     print('-' * 80)
                 bad = True
                 print('ang', ang / deg, 'pix', pix, 'g3', g3_pix, 'wcs', wcs_pix,

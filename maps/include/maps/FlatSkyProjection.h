@@ -44,7 +44,7 @@ class FlatSkyProjection : public G3FrameObject {
 public:
 	FlatSkyProjection(size_t xpix, size_t ypix, double res,
 			  double alpha_center = 0, double delta_center = 0,
-			  double x_res = 0,
+			  double x_res = 0.0 / 0.0,
 			  MapProjection proj = MapProjection::ProjNone,
 			  double x_center = 0.0 / 0.0, double y_center = 0.0 / 0.0);
 
@@ -52,7 +52,7 @@ public:
 	FlatSkyProjection(const FlatSkyProjection & fp);
 
 	void initialize(size_t xpix, size_t ypix, double res,
-	    double alpha_center = 0, double delta_center = 0, double x_res = 0,
+	    double alpha_center = 0, double delta_center = 0, double x_res = 0.0 / 0.0,
 	    MapProjection proj = MapProjection::ProjNone,
 	    double x_center = 0.0 / 0.0, double y_center = 0.0 / 0.0);
 
@@ -70,15 +70,15 @@ public:
 	void SetYCenter(double y);
 	void SetXRes(double res);
 	void SetYRes(double res);
-	void SetRes(double res, double x_res=0);
+	void SetRes(double res, double x_res = 0.0 / 0.0);
 
 	size_t xdim() const { return xpix_; };
 	size_t ydim() const { return ypix_; };
 	MapProjection proj() const { return proj_; };
-	double alpha_center() const { return alpha0_; };
-	double delta_center() const { return delta0_; };
-	double x_center() const { return x0_; };
-	double y_center() const { return y0_; };
+	double alpha_center() const { return alphac_; };
+	double delta_center() const { return deltac_; };
+	double x_center() const { return xc_; };
+	double y_center() const { return yc_; };
 	double xres() const { return x_res_; };
 	double yres() const { return y_res_; };
 	double res() const { return y_res_; };
@@ -110,17 +110,25 @@ private:
 	size_t xpix_;
 	size_t ypix_;
 	MapProjection proj_;
+	double alphac_;
+	double deltac_;
+	double xc_;
+	double yc_;
+	double x_res_;
+	double y_res_;
+
+	// projection reference points
+	// differ from center points for cylindrical projections
 	double alpha0_;
 	double delta0_;
 	double x0_;
 	double y0_;
-	double x_res_;
-	double y_res_;
 
 	// derived values
 	double sindelta0_;
 	double cosdelta0_;
 	std::vector<double> pv_;
+	std::vector<double> pc_;
 
 	SET_LOGGER("FlatSkyProjection");
 };

@@ -957,7 +957,7 @@ PYBINDINGS("maps")
 		  bp::arg("alpha_center") = 0, bp::arg("delta_center") = 0,
 		  bp::arg("coord_ref") = MapCoordReference::Equatorial,
 		  bp::arg("units") = G3Timestream::Tcmb,
-		  bp::arg("pol_type") = G3SkyMap::None, bp::arg("x_res") = 0,
+		  bp::arg("pol_type") = G3SkyMap::None, bp::arg("x_res") = 0.0 / 0.0,
 		  bp::arg("x_center") = 0.0 / 0.0, bp::arg("y_center") = 0.0 / 0.0,
 		  bp::arg("flat_pol") = false,
 		  bp::arg("pol_conv") = G3SkyMap::ConvNone)))
@@ -972,7 +972,7 @@ PYBINDINGS("maps")
 		   bp::arg("coord_ref") = MapCoordReference::Equatorial,
 		   bp::arg("units") = G3Timestream::Tcmb,
 		   bp::arg("pol_type") = G3SkyMap::None,
-		   bp::arg("x_res") = 0,
+		   bp::arg("x_res") = 0.0 / 0.0,
 		   bp::arg("x_center") = 0.0 / 0.0, bp::arg("y_center") = 0.0 / 0.0,
 		   bp::arg("flat_pol") = false,
 		   bp::arg("pol_conv") = G3SkyMap::ConvNone)))

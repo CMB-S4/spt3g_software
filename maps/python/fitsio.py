@@ -308,7 +308,8 @@ def load_proj_dict(inverse=False):
 
 def get_wcs(skymap, reset=False):
     """
-    Creates WCS (world coordinate system) information from information in the input FlatSkyMap object.
+    Creates WCS (world coordinate system) information from information in the
+    input FlatSkyMap object.
     """
 
     if hasattr(skymap, '_wcs') and not reset:
@@ -342,6 +343,16 @@ def get_wcs(skymap, reset=False):
         skymap.delta_center / core.G3Units.deg,
     ]
 
+    if proj_abbr in ['SFL', 'CAR', 'CEA']:
+        w.wcs.crval[1] = 0.0
+        if proj_abbr == 'CEA':
+            v = np.sin(skymap.delta_center / core.G3Units.rad) / skymap.y_res
+        else:
+            v = skymap.delta_center / skymap.y_res
+        w.wcs.crpix[1] -= v
+        if str(skymap.proj) == 'ProjBICEP':
+            w.wcs.pc[0][0] = 1. / np.cos(skymap.delta_center / core.G3Units.rad)
+
     skymap._wcs = w
     return w
 
@@ -354,7 +365,13 @@ def create_wcs_header(skymap):
     """
     Return a FITS header for the WCS information in the FlatSkyMap object.
     """
-    return skymap.wcs.to_header()
+    header = skymap.wcs.to_header()
+    header['PROJ'] = str(skymap.proj)
+    header['ALPHA0'] = skymap.alpha_center / core.G3Units.deg
+    header['DELTA0'] = skymap.delta_center / core.G3Units.deg
+    header['X0'] = skymap.x_center
+    header['Y0'] = skymap.y_center
+    return header
 
 
 def parse_wcs_header(header):
@@ -400,20 +417,25 @@ def parse_wcs_header(header):
         raise ValueError('Unable to determine WCS coordinate axes')
 
     # parse resolution
-    cdelt = w.wcs.get_cdelt() * np.diag(w.wcs.get_pc())
-    x_res = np.abs(cdelt[order[0]]) * core.G3Units.deg
-    res = np.abs(cdelt[order[1]]) * core.G3Units.deg
+    cdelt = w.wcs.get_cdelt()
+    x_res = -cdelt[order[0]] * core.G3Units.deg
+    res = cdelt[order[1]] * core.G3Units.deg
 
     # parse map center
     crval = w.wcs.crval
-    alpha_center = crval[order[0]] * core.G3Units.deg
-    delta_center = crval[order[1]] * core.G3Units.deg
+    alpha_center = header.get('ALPHA0', crval[order[0]]) * core.G3Units.deg
+    delta_center = header.get('DELTA0', crval[order[1]]) * core.G3Units.deg
 
     crpix = w.wcs.crpix
-    x_center = crpix[order[0]] - 1
-    y_center = crpix[order[1]] - 1
+    x_center = header.get('X0', crpix[order[0]] - 1)
+    y_center = header.get('Y0', crpix[order[1]] - 1)
 
-    if wcsproj in ['CEA']:
+    if proj == 'ProjBICEP':
+        v = 1. / np.cos(delta_center / core.G3Units.rad)
+        if not np.isclose(v, w.wcs.pc[order[0]][order[0]]):
+            raise ValueError("Inconsistent BICEP projection resolution")
+
+    if wcsproj  == 'CEA':
         for i, m, v in w.wcs.get_pv():
             if i == order[1] + 1 and m == 1:
                 if not np.isclose(v, 1):
@@ -501,8 +523,6 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
 
     if flat:
         header = create_wcs_header(T)
-
-        header['PROJ'] = str(T.proj)
 
         bitpix = {
             np.dtype(np.int16): 16,
