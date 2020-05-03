@@ -68,9 +68,16 @@ assert(n[16] == 0)
 assert(n.npix_allocated == 1)
 assert(n.npix_nonzero == 1)
 
+n = m ** 2
+assert(n[15] == 4)
+assert(n.npix_allocated == 1)
+
 # Map-by-map operations, with pairs of maps of any kind of density
 
 m *= 2 # Get numbers bigger
+assert((m == n).all())
+assert((m > 0).any())
+assert((m > 0).npix_allocated == 1)
 
 m1 = m
 m2 = m.copy()

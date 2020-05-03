@@ -25,15 +25,8 @@ def numpycompat(a, b, op):
     return numpyinplace(a, numpy.ndarray.__dict__[op](numpy.asarray(a), numpy.asarray(b)))
 
 
-for x in ['__and__', '__divmod__', '__floordiv__', '__ge__', '__gt__', '__iand__', '__ifloordiv__', '__imod__', '__ior__', '__ipow__', '__le__', '__lt__', '__nonzero__', '__or__', '__pow__', '__rdivmod__', '__rmod__', '__rpow__']:
+for x in ['__and__', '__divmod__', '__floordiv__', '__iand__', '__ifloordiv__', '__imod__', '__ior__', '__mod__', '__or__', '__rdivmod__', '__rmod__', '__rpow__']:
     setattr(G3SkyMap, x, lambda a, b, op=x: numpycompat(a, b, op))
-
-# Bind all numpy unary operators to G3SkyMap
-for x in ['__pos__', '__invert__']:
-    setattr(G3SkyMap, x, lambda a, op=x: numpyinplace(a, numpy.ndarray.__dict__[op](numpy.asarray(a))))
-
-# And some special binary operators
-setattr(G3SkyMap, '__getslice__', lambda a, *args: numpy.ndarray.__getslice__(numpy.asarray(a), *args))
 
 # Make weight maps so that you can index them and get the full 3x3 weight matrix
 

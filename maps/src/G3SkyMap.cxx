@@ -375,6 +375,123 @@ pyskymap_neg(G3SkyMap &a)
 	return rv;
 }
 
+static void
+pyskymap_ipowd(G3SkyMap &a, double b)
+{
+	if (b == 0) {
+		a *= 0;
+		a += 1;
+	} else {
+		for (size_t i = 0; i < a.size(); i++) {
+			double v = a.at(i);
+			if (v != 0)
+				a[i] = pow(v, b);
+		}
+	}
+}
+
+static G3SkyMapPtr
+pyskymap_powd(const G3SkyMap &a, double b)
+{
+	G3SkyMapPtr rv;
+	if (b == 0) {
+		rv = a.Clone(false);
+		(*rv) += 1;
+	} else {
+		rv = a.Clone(true);
+		pyskymap_ipowd(*rv, b);
+	}
+	return rv;
+}
+
+static void
+pyskymap_ipow(G3SkyMap &a, const G3SkyMap &b)
+{
+	g3_assert(a.IsCompatible(b));
+	for (size_t i = 0; i < a.size(); i++) {
+		double va = a.at(i);
+		double vb = b.at(i);
+		if (va != 0 || vb == 0) {
+			a[i] = pow(va, vb);
+		}
+	}
+}
+
+static G3SkyMapPtr
+pyskymap_pow(const G3SkyMap &a, const G3SkyMap &b)
+{
+	G3SkyMapPtr rv = a.Clone(true);
+	pyskymap_ipow(*rv, b);
+	return rv;
+}
+
+#define skymap_comp(name, oper) \
+static G3SkyMapPtr \
+pyskymap_##name(const G3SkyMap &a, const G3SkyMap &b) \
+{ \
+	g3_assert(a.IsCompatible(b)); \
+	G3SkyMapPtr rv = a.Clone(false); \
+	for (size_t i = 0; i < a.size(); i++) { \
+		if (a.at(i) oper b.at(i)) \
+			(*rv)[i] = 1; \
+	} \
+	return rv; \
+}
+
+skymap_comp(lt, <)
+skymap_comp(le, <=)
+skymap_comp(eq, ==)
+skymap_comp(ne, !=)
+skymap_comp(ge, >=)
+skymap_comp(gt, >)
+
+#define skymap_compd(name, oper) \
+static G3SkyMapPtr \
+pyskymap_##name(const G3SkyMap &a, const double b) \
+{ \
+	G3SkyMapPtr rv = a.Clone(false); \
+	for (size_t i = 0; i < a.size(); i++) { \
+		if (a.at(i) oper b) \
+			(*rv)[i] = 1; \
+	} \
+	return rv; \
+}
+
+skymap_compd(ltd, <)
+skymap_compd(led, <=)
+skymap_compd(eqd, ==)
+skymap_compd(ned, !=)
+skymap_compd(ged, >=)
+skymap_compd(gtd, >)
+
+static bool
+pyskymap_all(const G3SkyMap &a)
+{
+	for (size_t i = 0; i < a.size(); i++)
+		if (a.at(i) == 0)
+			return false;
+	return true;
+}
+
+static bool
+pyskymap_any(const G3SkyMap &a)
+{
+	for (size_t i = 0; i < a.size(); i++)
+		if (a.at(i) != 0)
+			return true;
+	return false;
+}
+
+static bool
+pyskymap_bool(G3SkyMap &skymap)
+{
+	PyErr_SetString(PyExc_ValueError,
+	    "ValueError: The truth value of a G3SkyMap is ambiguous. Use m.any() or m.all()");
+	bp::throw_error_already_set();
+
+	return false;
+}
+
 G3SkyMapWeights &
 G3SkyMapWeights::operator+=(const G3SkyMapWeights &rhs)
 {
@@ -702,6 +819,27 @@ PYBINDINGS("maps") {
 	    .def("__truediv__", &pyskymap_divd)
 	    .def("__rtruediv__", &pyskymap_rdivd)
 	    .def("__neg__", &pyskymap_neg)
+	    .def("__pos__", &skymap_copy)
+	    .def("__pow__", &pyskymap_pow)
+	    .def("__pow__", &pyskymap_powd)
+	    .def("__ipow__", &pyskymap_ipow)
+	    .def("__ipow__", &pyskymap_ipowd)
+
+	    .def("__lt__", &pyskymap_lt)
+	    .def("__lt__", &pyskymap_ltd)
+	    .def("__le__", &pyskymap_le)
+	    .def("__le__", &pyskymap_led)
+	    .def("__eq__", &pyskymap_eq)
+	    .def("__eq__", &pyskymap_eqd)
+	    .def("__ne__", &pyskymap_ne)
+	    .def("__ne__", &pyskymap_ned)
+	    .def("__ge__", &pyskymap_ge)
+	    .def("__ge__", &pyskymap_ged)
+	    .def("__gt__", &pyskymap_gt)
+	    .def("__gt__", &pyskymap_gtd)
+	    .def("__bool__", &pyskymap_bool)
+	    .def("any", &pyskymap_any)
+	    .def("all", &pyskymap_all)
 	;
 
 	EXPORT_FRAMEOBJECT(G3SkyMapWeights, init<>(),
