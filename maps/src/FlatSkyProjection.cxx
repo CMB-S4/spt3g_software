@@ -91,7 +91,7 @@ std::string FlatSkyProjection::Description() const
 {
 	std::ostringstream os;
 
-	os.precision(1);
+	os.precision(4);
 
 	os << xpix_ << " x " << ypix_ <<
 	    " (" << xpix_ * x_res_ / deg << " x "
@@ -126,10 +126,8 @@ std::string FlatSkyProjection::Description() const
 		os << "other (" << proj_ << ")";
 	}
 
-	os << " referenced at (" << xc_ <<
+	os << " centered at (" << xc_ <<
 	    ", " << yc_ << ") ";
-
-	os.precision(3);
 
 	os << " = (" << alphac_ / deg << ", "
 	    << deltac_ / deg << " deg) ";

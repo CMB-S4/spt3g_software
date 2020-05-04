@@ -822,8 +822,6 @@ PYBINDINGS("maps") {
 	    .def("__pos__", &skymap_copy)
 	    .def("__pow__", &pyskymap_pow)
 	    .def("__pow__", &pyskymap_powd)
-	    .def("__ipow__", &pyskymap_ipow)
-	    .def("__ipow__", &pyskymap_ipowd)
 
 	    .def("__lt__", &pyskymap_lt)
 	    .def("__lt__", &pyskymap_ltd)
