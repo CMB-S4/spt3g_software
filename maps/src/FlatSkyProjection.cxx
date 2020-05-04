@@ -127,10 +127,10 @@ std::string FlatSkyProjection::Description() const
 	}
 
 	os << " centered at (" << xc_ <<
-	    ", " << yc_ << ") ";
+	    ", " << yc_ << ")";
 
 	os << " = (" << alphac_ / deg << ", "
-	    << deltac_ / deg << " deg) ";
+	    << deltac_ / deg << " deg)";
 
 	return os.str();
 }
