@@ -26,6 +26,8 @@ void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, double h=0.001, bool invert=fa
 std::vector<double> GetMapStats(G3SkyMapConstPtr m, int order=2,
     bool ignore_zeros=false, bool ignore_nans=false);
 
+double GetMapMedian(G3SkyMapConstPtr m, bool ignore_zeros=false, bool ignore_nans=false);
+
 void maputils_pybindings(void);
 
 #endif //_MAPS_MAPUTILS_H

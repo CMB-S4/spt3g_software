@@ -1,6 +1,7 @@
 #include <pybindings.h>
 
 #include <vector>
+#include <algorithm>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -315,6 +316,41 @@ std::vector<double> GetMapStats(G3SkyMapConstPtr m, int order,
 }
 
 
+double
+GetMapMedian(G3SkyMapConstPtr m, bool ignore_zeros, bool ignore_nans)
+{
+
+	std::vector<double> data;
+	size_t npix = ignore_zeros ? m->NpixAllocated() : m->size();
+	if (npix == 0)
+		return 0;
+
+	data.reserve(npix);
+
+	for (size_t i = 0; i < m->size(); i++) {
+		double v = m->at(i);
+		if (ignore_zeros && v == 0)
+			continue;
+		if (ignore_nans && v != v)
+			continue;
+		data.push_back(v);
+	}
+
+	npix = data.size();
+	size_t n = npix / 2;
+	std::nth_element(data.begin(), data.begin() + n, data.end());
+
+	// odd-length array
+	if (npix % 2)
+		return data[n];
+
+	// even-length array
+	double median = data[n];
+	std::nth_element(data.begin(), data.begin() + n - 1, data.end());
+	return (median + data[n - 1]) / 2.;
+}
+
+
 namespace bp = boost::python;
 void maputils_pybindings(void){
 	bp::def("get_mask_map", GetMaskMap, (bp::arg("map_in")),
@@ -368,4 +404,9 @@ void maputils_pybindings(void){
 		"zero and/or nan values in the map.  If order = 1, only the mean is "
 		"returned.  If order = 2, 3 or 4 then the variance, skew and kurtosis "
 		"are also included, respectively.");
+
+	bp::def("get_map_median", GetMapMedian,
+		(bp::arg("map"), bp::arg("ignore_zeros")=false, bp::arg("ignore_nans")=false),
+		"Computes the median of the input map, optionally ignoring zero and/or nan "
+		"values in the map.  Requires making a copy of the data.");
 }
