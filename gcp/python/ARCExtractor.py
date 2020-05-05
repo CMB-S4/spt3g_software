@@ -8,7 +8,7 @@ def UnitValue(caldict_entry):
 
     try: 
         uname = caldict_entry['UnitName']
-        if uname is not 'None':
+        if uname and uname != 'None':
             try:
                 if '/' in uname:
                     unames = list(filter(None,uname.split('/')))
