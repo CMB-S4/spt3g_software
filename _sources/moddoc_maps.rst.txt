@@ -28,7 +28,7 @@ The following attributes are common to all G3SkyMap subclasses:
   The polarization convention used to encode the Q and U Stokes orientations relative to the coordinate axes.  This attribute is an instance of the ``MapPolConv`` enum, which can have the value ``IAU``, ``COSMO`` or None.  Both IAU and COSMO polarization conventions are supported in polarization-aware functions (e.g. ``FlattenPol``), but most default to using the IAU convention.  Warnings will be raised when a polarized map is used without a polarization convention set.  Changing the polarization convention between IAU and COSMO on a ``U`` map results in flipping the sign of all pixels in the map.
   
 ``units``
-  The units system in which the map is computed, stored as an instance of the ``G3TimestreamUnits`` enum, which can have the value ``Tcmb``, ``Counts``, ``Current``, ``Power``, ``Resistance`` or None.
+  The units system in which the map is computed, stored as an instance of the ``G3TimestreamUnits`` enum, typically ``Tcmb``.
   
 ``weighted``
   A boolean attribute indicating whether the data in the map have been normalized by the inverse of the appropriate Mueller matrix (``weighted=False``) or not (``weighted=True``).  See more information on map weights below.
@@ -77,7 +77,7 @@ Weights are removed from or applied to a set of Stokes T/Q/U maps simultaneously
 Map Frames and Pipelines
 ========================
 
-Maps and associated weights are generally stored in memory and on disk in `G3Frames` of type `G3FrameType.Map`, with keys ``'T', 'Q', 'U', 'Wpol'`` defined for polarized maps, and ``'T', 'Wunpol'`` defined for unpolarized maps.  Map frames can be checked for validity using the ``ValidateFrames`` pipeline module, which raises errors or warnings for missing keys or inconsistent attributes.
+Maps and associated weights are generally stored in memory and on disk in ``G3Frames`` of type ``G3FrameType.Map``, with keys ``'T', 'Q', 'U', 'Wpol'`` defined for polarized maps, and ``'T', 'Wunpol'`` defined for unpolarized maps.  Map frames can be checked for validity using the ``ValidateFrames`` pipeline module, which raises errors or warnings for missing keys or inconsistent attributes.
 
 Map frames can be manipulated in a pipeline using some memory-efficient pipeline modules.  Weights can be applied or removed from their corresponding Stokes maps using the ``ApplyWeights`` or ``RemoveWeights`` pipeline modules.  Maps can be converted to polarized or unpolarized versions using the ``MakeMapPolarized`` and ``MakeMapUnpolarized`` modules.  They can also be compactified to their most sparse representation using the ``CompactMaps`` module.
 
@@ -321,6 +321,18 @@ Base class for 1- and 2-D skymaps of various projections. Usually you want a sub
 ``compact( (G3SkyMap)arg1 [, (bool)zero_nans=False]) -> None :``
     Convert the map to its default sparse representation, removing empty pixels, and optionally also removing NaN values. A map that is already sparse will be compactified in place in its current representation without additional memory overhead.
 
+.. _spt3g.maps.G3SkyMap.any:
+
+**spt3g.maps.G3SkyMap.any**
+
+``any( (G3SkyMap)arg1) -> bool``
+
+.. _spt3g.maps.G3SkyMap.all:
+
+**spt3g.maps.G3SkyMap.all**
+
+``all( (G3SkyMap)arg1) -> bool``
+
 
 
 .. _spt3g.maps.G3SkyMapWeights:
@@ -408,7 +420,9 @@ HealpixSkyMap is a G3SkyMap with the extra meta information about the particular
 
 *Members:*
 
-* **nside**: Healpix resolution
+* **nside**: Healpix resolution parameter
+
+* **res**: Map resolution in angular units
 
 * **nested**: True if pixel ordering is nested, False if ring-ordered
 
@@ -827,6 +841,8 @@ Functions in spt3g.maps
 
 * spt3g.maps.flatten_pol_
 
+* spt3g.maps.get_map_median_
+
 * spt3g.maps.get_map_stats_
 
 * spt3g.maps.get_mask_map_
@@ -1067,6 +1083,14 @@ over all pixels.  The former produces output that is equivalent to using
     For any flat sky estimators, the polarization angle is defined relative to the vertical axis.  For some map projections the direction of north is not the same as the vertical axis.  This function applies a rotation to the Q and U values to switch the curved sky Q/U definition to the flat sky Q/U definition.
 
     If for whatever reason you want to reverse the process set the invert argument to True.
+
+
+.. _spt3g.maps.get_map_median:
+
+**spt3g.maps.get_map_median**
+
+``get_map_median( (object)map [, (bool)ignore_zeros=False [, (bool)ignore_nans=False]]) -> float :``
+    Computes the median of the input map, optionally ignoring zero and/or nan values in the map.  Requires making a copy of the data.
 
 
 .. _spt3g.maps.get_map_stats:

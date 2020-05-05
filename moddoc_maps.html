@@ -60,7 +60,7 @@
 <dt><code class="docutils literal notranslate"><span class="pre">pol_conv</span></code></dt>
 <dd>The polarization convention used to encode the Q and U Stokes orientations relative to the coordinate axes.  This attribute is an instance of the <code class="docutils literal notranslate"><span class="pre">MapPolConv</span></code> enum, which can have the value <code class="docutils literal notranslate"><span class="pre">IAU</span></code>, <code class="docutils literal notranslate"><span class="pre">COSMO</span></code> or None.  Both IAU and COSMO polarization conventions are supported in polarization-aware functions (e.g. <code class="docutils literal notranslate"><span class="pre">FlattenPol</span></code>), but most default to using the IAU convention.  Warnings will be raised when a polarized map is used without a polarization convention set.  Changing the polarization convention between IAU and COSMO on a <code class="docutils literal notranslate"><span class="pre">U</span></code> map results in flipping the sign of all pixels in the map.</dd>
 <dt><code class="docutils literal notranslate"><span class="pre">units</span></code></dt>
-<dd>The units system in which the map is computed, stored as an instance of the <code class="docutils literal notranslate"><span class="pre">G3TimestreamUnits</span></code> enum, which can have the value <code class="docutils literal notranslate"><span class="pre">Tcmb</span></code>, <code class="docutils literal notranslate"><span class="pre">Counts</span></code>, <code class="docutils literal notranslate"><span class="pre">Current</span></code>, <code class="docutils literal notranslate"><span class="pre">Power</span></code>, <code class="docutils literal notranslate"><span class="pre">Resistance</span></code> or None.</dd>
+<dd>The units system in which the map is computed, stored as an instance of the <code class="docutils literal notranslate"><span class="pre">G3TimestreamUnits</span></code> enum, typically <code class="docutils literal notranslate"><span class="pre">Tcmb</span></code>.</dd>
 <dt><code class="docutils literal notranslate"><span class="pre">weighted</span></code></dt>
 <dd>A boolean attribute indicating whether the data in the map have been normalized by the inverse of the appropriate Mueller matrix (<code class="docutils literal notranslate"><span class="pre">weighted=False</span></code>) or not (<code class="docutils literal notranslate"><span class="pre">weighted=True</span></code>).  See more information on map weights below.</dd>
 </dl>
@@ -95,7 +95,7 @@
 </div>
 <div class="section" id="map-frames-and-pipelines">
 <h2>Map Frames and Pipelines<a class="headerlink" href="#map-frames-and-pipelines" title="Permalink to this headline">¶</a></h2>
-<p>Maps and associated weights are generally stored in memory and on disk in <cite>G3Frames</cite> of type <cite>G3FrameType.Map</cite>, with keys <code class="docutils literal notranslate"><span class="pre">'T',</span> <span class="pre">'Q',</span> <span class="pre">'U',</span> <span class="pre">'Wpol'</span></code> defined for polarized maps, and <code class="docutils literal notranslate"><span class="pre">'T',</span> <span class="pre">'Wunpol'</span></code> defined for unpolarized maps.  Map frames can be checked for validity using the <code class="docutils literal notranslate"><span class="pre">ValidateFrames</span></code> pipeline module, which raises errors or warnings for missing keys or inconsistent attributes.</p>
+<p>Maps and associated weights are generally stored in memory and on disk in <code class="docutils literal notranslate"><span class="pre">G3Frames</span></code> of type <code class="docutils literal notranslate"><span class="pre">G3FrameType.Map</span></code>, with keys <code class="docutils literal notranslate"><span class="pre">'T',</span> <span class="pre">'Q',</span> <span class="pre">'U',</span> <span class="pre">'Wpol'</span></code> defined for polarized maps, and <code class="docutils literal notranslate"><span class="pre">'T',</span> <span class="pre">'Wunpol'</span></code> defined for unpolarized maps.  Map frames can be checked for validity using the <code class="docutils literal notranslate"><span class="pre">ValidateFrames</span></code> pipeline module, which raises errors or warnings for missing keys or inconsistent attributes.</p>
 <p>Map frames can be manipulated in a pipeline using some memory-efficient pipeline modules.  Weights can be applied or removed from their corresponding Stokes maps using the <code class="docutils literal notranslate"><span class="pre">ApplyWeights</span></code> or <code class="docutils literal notranslate"><span class="pre">RemoveWeights</span></code> pipeline modules.  Maps can be converted to polarized or unpolarized versions using the <code class="docutils literal notranslate"><span class="pre">MakeMapPolarized</span></code> and <code class="docutils literal notranslate"><span class="pre">MakeMapUnpolarized</span></code> modules.  They can also be compactified to their most sparse representation using the <code class="docutils literal notranslate"><span class="pre">CompactMaps</span></code> module.</p>
 <p>Existing maps can be injected into a pipeline using the <code class="docutils literal notranslate"><span class="pre">InjectMaps</span></code> module, and map stubs can be injected using <code class="docutils literal notranslate"><span class="pre">InjectMapStub</span></code> or <code class="docutils literal notranslate"><span class="pre">ReplicateMaps</span></code>.  Maps can also be extracted from a pipeline using the <code class="docutils literal notranslate"><span class="pre">ExtractMaps</span></code> module.</p>
 </div>
@@ -257,6 +257,10 @@
 <dt><code class="docutils literal notranslate"><span class="pre">compact(</span> <span class="pre">(G3SkyMap)arg1</span> <span class="pre">[,</span> <span class="pre">(bool)zero_nans=False])</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt>
 <dd>Convert the map to its default sparse representation, removing empty pixels, and optionally also removing NaN values. A map that is already sparse will be compactified in place in its current representation without additional memory overhead.</dd>
 </dl>
+<p id="spt3g-maps-g3skymap-any"><strong>spt3g.maps.G3SkyMap.any</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">any(</span> <span class="pre">(G3SkyMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span></code></p>
+<p id="spt3g-maps-g3skymap-all"><strong>spt3g.maps.G3SkyMap.all</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">all(</span> <span class="pre">(G3SkyMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span></code></p>
 </div>
 <div class="section" id="spt3g-maps-g3skymapweights">
 <span id="id3"></span><h3>spt3g.maps.G3SkyMapWeights<a class="headerlink" href="#spt3g-maps-g3skymapweights" title="Permalink to this headline">¶</a></h3>
@@ -311,7 +315,8 @@
 <p>HealpixSkyMap is a G3SkyMap with the extra meta information about the particular Healpix pixelization used.  In practice it behaves (mostly) like a 1d numpy array.  If you find that you need numpy functionality from a HealpixSkyMap, e.g. for slicing across the array, you can access a numpy representation of the map using <cite>np.asarray(m)</cite>. This does not copy the data, so any changes to the resulting array will affect the data stored in the map.</p>
 <p><em>Members:</em></p>
 <ul class="simple">
-<li><strong>nside</strong>: Healpix resolution</li>
+<li><strong>nside</strong>: Healpix resolution parameter</li>
+<li><strong>res</strong>: Map resolution in angular units</li>
 <li><strong>nested</strong>: True if pixel ordering is nested, False if ring-ordered</li>
 <li><strong>shift_ra</strong>: True if the ringsparse representation of the map is stored with the rings centered at ra = 0 deg, rather than ra = 180 deg.</li>
 <li><strong>dense</strong>: True if the map is stored with all elements, False otherwise. If set to True, converts the map to a dense representation.</li>
@@ -584,6 +589,7 @@ a pipeline.</p>
 <li><a class="reference internal" href="#spt3g-maps-fitsio-load-skymap-fits">spt3g.maps.fitsio.load_skymap_fits</a></li>
 <li><a class="reference internal" href="#spt3g-maps-fitsio-save-skymap-fits">spt3g.maps.fitsio.save_skymap_fits</a></li>
 <li><a class="reference internal" href="#spt3g-maps-flatten-pol">spt3g.maps.flatten_pol</a></li>
+<li><a class="reference internal" href="#spt3g-maps-get-map-median">spt3g.maps.get_map_median</a></li>
 <li><a class="reference internal" href="#spt3g-maps-get-map-stats">spt3g.maps.get_map_stats</a></li>
 <li><a class="reference internal" href="#spt3g-maps-get-mask-map">spt3g.maps.get_mask_map</a></li>
 <li><a class="reference internal" href="#spt3g-maps-get-ra-dec-map">spt3g.maps.get_ra_dec_map</a></li>
@@ -762,6 +768,11 @@ FITS readers (e.g. idlastro).</dd>
 <p>For any flat sky estimators, the polarization angle is defined relative to the vertical axis.  For some map projections the direction of north is not the same as the vertical axis.  This function applies a rotation to the Q and U values to switch the curved sky Q/U definition to the flat sky Q/U definition.</p>
 <p class="last">If for whatever reason you want to reverse the process set the invert argument to True.</p>
 </dd>
+</dl>
+<p id="spt3g-maps-get-map-median"><strong>spt3g.maps.get_map_median</strong></p>
+<dl class="docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">get_map_median(</span> <span class="pre">(object)map</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_zeros=False</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_nans=False]])</span> <span class="pre">-&gt;</span> <span class="pre">float</span> <span class="pre">:</span></code></dt>
+<dd>Computes the median of the input map, optionally ignoring zero and/or nan values in the map.  Requires making a copy of the data.</dd>
 </dl>
 <p id="spt3g-maps-get-map-stats"><strong>spt3g.maps.get_map_stats</strong></p>
 <dl class="docutils">
