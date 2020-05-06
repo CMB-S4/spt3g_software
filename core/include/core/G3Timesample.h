@@ -33,6 +33,7 @@ namespace cereal {
 	    A, G3TimesampleMap, cereal::specialization::member_serialize> {};
 }
 
+G3_POINTERS(G3TimesampleMap);
 G3_SERIALIZABLE(G3TimesampleMap, 0);
 
 class g3timesample_exception : std::exception
