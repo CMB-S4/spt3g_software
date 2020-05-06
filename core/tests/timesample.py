@@ -4,17 +4,21 @@ from spt3g import core
 import unittest
 
 import numpy as np
+import copy
 
 SEC = core.G3Units.sec
 
 
-def get_test_block(length, keys, offset=0):
+def get_test_block(length, keys, offset=0, ordered=True):
     type_cycle = [(core.G3VectorDouble, float),
                   (core.G3VectorInt, int),
                   (core.G3VectorString, str)]
     t0 = core.G3Time('2019-01-01T12:30:00') + offset*SEC
     m = core.G3TimesampleMap()
-    m.times = core.G3VectorTime([t0 + t*SEC for t in np.arange(length)])
+    times = np.arange(length)
+    if not ordered:
+        np.random.shuffle(times)
+    m.times = core.G3VectorTime([t0 + t*SEC for t in times])
     for i, k in enumerate(keys):
         y = (np.random.uniform(size=length) * 100).astype(int)
         constructor, cast_func = type_cycle[i % len(type_cycle)]
@@ -76,6 +80,15 @@ class TestTimesampleMap(unittest.TestCase):
         f['irreg0'].Check()
         f['irreg1'].Check()
         f['irreg0'].Concatenate(f['irreg1'])['x']
+
+    def test_40_sort(self):
+        m0 = get_test_block(100, ['x', 'y', 'z'], ordered=False)
+        m1 = copy.deepcopy(m0)
+        m0.Sort()
+        idx = np.argsort(m1.times)
+        self.assertTrue((np.asarray(m1.times)[idx] == np.asarray(m0.times)).all())
+        for k in ['x', 'y', 'z']:
+            self.assertTrue((np.asarray(m1[k])[idx] == np.asarray(m0[k])).all())
 
 
 if __name__ == '__main__':

@@ -18,6 +18,7 @@ public:
 	G3VectorTime times;
 	G3TimesampleMap Concatenate(const G3TimesampleMap &other) const;
 	bool Check() const;
+	void Sort();
 
 	string Description() const;
 	string Summary() const;
