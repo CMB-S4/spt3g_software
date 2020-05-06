@@ -277,11 +277,11 @@ PYBINDINGS("core")
 	// Extensions for G3TimesampleMap are here:
 	.add_property("times", &G3TimesampleMap::times, &safe_set_times,
 	  "Times vector.  Setting this stores a copy, but getting returns a reference.")
-	.def("Check", &G3TimesampleMap::Check, "Check for internal "
+	.def("check", &G3TimesampleMap::Check, "Check for internal "
           "consistency.  Raises ValueError if there are problems.")
-	.def("Concatenate", &G3TimesampleMap::Concatenate,
+	.def("concatenate", &G3TimesampleMap::Concatenate,
           "Concatenate two compatible G3TimesampleMap.")
-	.def("Sort", &G3TimesampleMap::Sort,
+	.def("sort", &G3TimesampleMap::Sort,
           "Sort all element vectors by time, in-place.")
 	;
 	register_pointer_conversions<G3TimesampleMap>();

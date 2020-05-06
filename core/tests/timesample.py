@@ -31,7 +31,7 @@ class TestTimesampleMap(unittest.TestCase):
     def test_00_internal_checks(self):
         # Valid block.
         m = get_test_block(100, ['x', 'y', 'z'])
-        m.Check()
+        m.check()
 
     def test_10_safety(self):
         m0 = get_test_block(100, ['x', 'y', 'z'])
@@ -52,7 +52,7 @@ class TestTimesampleMap(unittest.TestCase):
         key_list = ['x', 'y', 'z']
         m0 = get_test_block(100, key_list)
         m1 = get_test_block(200, key_list, offset=100)
-        m01 = m0.Concatenate(m1)
+        m01 = m0.concatenate(m1)
         self.assertTrue(np.all(
             np.hstack([np.array(m0.times), np.array(m1.times)]) == np.array(m01.times)))
         for k in key_list:
@@ -63,28 +63,28 @@ class TestTimesampleMap(unittest.TestCase):
                 get_test_block(200, key_list[:-1], 100),
                 ]:
             with self.assertRaises(ValueError):
-                m0.Concatenate(fail_vec)
+                m0.concatenate(fail_vec)
 
     def test_30_serialization(self):
         m0 = get_test_block(100, ['x', 'y', 'z', 'A'])
         m1 = get_test_block(200, ['x', 'y', 'z', 'A'], 100)
-        m2 = m0.Concatenate(m1)
-        m0.Check()
-        m1.Check()
-        m2.Check()
+        m2 = m0.concatenate(m1)
+        m0.check()
+        m1.check()
+        m2.check()
         f = core.G3Frame()
         f['irreg0'] = m0
         f['irreg1'] = m1
         core.G3Writer('test.g3').Process(f)
         f = core.G3Reader('test.g3').Process(None)[0]
-        f['irreg0'].Check()
-        f['irreg1'].Check()
-        f['irreg0'].Concatenate(f['irreg1'])['x']
+        f['irreg0'].check()
+        f['irreg1'].check()
+        f['irreg0'].concatenate(f['irreg1'])['x']
 
     def test_40_sort(self):
         m0 = get_test_block(100, ['x', 'y', 'z'], ordered=False)
         m1 = copy.deepcopy(m0)
-        m0.Sort()
+        m0.sort()
         idx = np.argsort(m1.times)
         self.assertTrue((np.asarray(m1.times)[idx] == np.asarray(m0.times)).all())
         for k in ['x', 'y', 'z']:
