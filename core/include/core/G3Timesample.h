@@ -18,6 +18,7 @@ public:
 	G3VectorTime times;
 	G3TimesampleMap Concatenate(const G3TimesampleMap &other) const;
 	bool Check() const;
+	void Sort();
 
 	string Description() const;
 	string Summary() const;
@@ -32,6 +33,7 @@ namespace cereal {
 	    A, G3TimesampleMap, cereal::specialization::member_serialize> {};
 }
 
+G3_POINTERS(G3TimesampleMap);
 G3_SERIALIZABLE(G3TimesampleMap, 0);
 
 class g3timesample_exception : std::exception

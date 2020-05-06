@@ -1,5 +1,7 @@
 #include <pybindings.h>
 
+#include <numeric>
+#include <algorithm>
 #include <iostream>
 #include <boost/python.hpp>
 
@@ -57,6 +59,32 @@ G3FrameObjectPtr test_and_concat(const G3FrameObjectPtr &src1,
 	auto output = boost::shared_ptr<g3vectype>(new g3vectype());
 	vect_concat(*output, *v1, *v2);
 	return output;
+}
+
+// Reorders elements of a vector.
+template <typename vectype>
+inline
+void vect_reorder(vectype &dest, vectype &src, const std::vector<size_t> &idx)
+{
+	dest.clear();
+	dest.resize(src.size());
+	assert(src.size() == idx.size());
+	for (size_t i = 0; i < idx.size(); i++)
+		dest[i] = src[idx[i]];
+}
+
+// Reorders elements of a vector, in place.
+// Returns false on any incompatibility.
+template <typename g3vectype>
+inline
+bool test_and_reorder(G3FrameObjectPtr &src, const std::vector<size_t> &idx)
+{
+	auto v = boost::dynamic_pointer_cast<g3vectype>(src);
+	if (v == nullptr)
+		return false;
+	g3vectype v2 = *v; // copy
+	vect_reorder(*v, v2, idx);
+	return true;
 }
 
 
@@ -154,6 +182,37 @@ G3TimesampleMap G3TimesampleMap::Concatenate(const G3TimesampleMap &other) const
 	return output;
 }
 
+void G3TimesampleMap::Sort()
+{
+	Check();
+
+	// Short circuit no-op
+	if (std::is_sorted(times.begin(), times.end()))
+		return;
+
+	// Get time vector sort order
+	std::vector<size_t> idx(times.size());
+	std::iota(idx.begin(), idx.end(), 0);
+	std::stable_sort(idx.begin(), idx.end(),
+	    [this](size_t i1, size_t i2) { return times[i1] < times[i2]; });
+
+	// Sort all the things
+	G3VectorTime oldtimes = times;
+	vect_reorder(times, oldtimes, idx);
+
+	for (auto item = begin(); item != end(); item++) {
+		if (
+			!test_and_reorder<G3VectorDouble>(item->second, idx) &&
+			!test_and_reorder<G3VectorInt>(item->second, idx) &&
+			!test_and_reorder<G3VectorString>(item->second, idx)
+			) {
+			std::ostringstream s;
+			s << "Vector type not supported for key: " << item->first << "\n";
+			throw g3timesample_exception(s.str());
+		}
+	}
+}
+
 
 // Safety-ized for python.
 
@@ -218,10 +277,12 @@ PYBINDINGS("core")
 	// Extensions for G3TimesampleMap are here:
 	.add_property("times", &G3TimesampleMap::times, &safe_set_times,
 	  "Times vector.  Setting this stores a copy, but getting returns a reference.")
-	.def("Check", &G3TimesampleMap::Check, "Check for internal "
+	.def("check", &G3TimesampleMap::Check, "Check for internal "
           "consistency.  Raises ValueError if there are problems.")
-	.def("Concatenate", &G3TimesampleMap::Concatenate,
+	.def("concatenate", &G3TimesampleMap::Concatenate,
           "Concatenate two compatible G3TimesampleMap.")
+	.def("sort", &G3TimesampleMap::Sort,
+          "Sort all element vectors by time, in-place.")
 	;
 	register_pointer_conversions<G3TimesampleMap>();
 
