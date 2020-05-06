@@ -74,17 +74,17 @@ void vect_reorder(vectype &dest, vectype &src, const std::vector<size_t> &idx)
 }
 
 // Reorders elements of a vector, in place.
-// Returns -1 on any incompatibility.
+// Returns false on any incompatibility.
 template <typename g3vectype>
 inline
-int test_and_reorder(G3FrameObjectPtr &src, const std::vector<size_t> &idx)
+bool test_and_reorder(G3FrameObjectPtr &src, const std::vector<size_t> &idx)
 {
 	auto v = boost::dynamic_pointer_cast<g3vectype>(src);
 	if (v == nullptr)
-		return -1;
+		return false;
 	g3vectype v2 = *v; // copy
 	vect_reorder(*v, v2, idx);
-	return 0;
+	return true;
 }
 
 
@@ -202,9 +202,9 @@ void G3TimesampleMap::Sort()
 
 	for (auto item = begin(); item != end(); item++) {
 		if (
-			test_and_reorder<G3VectorDouble>(item->second, idx) &&
-			test_and_reorder<G3VectorInt>(item->second, idx) &&
-			test_and_reorder<G3VectorString>(item->second, idx)
+			!test_and_reorder<G3VectorDouble>(item->second, idx) &&
+			!test_and_reorder<G3VectorInt>(item->second, idx) &&
+			!test_and_reorder<G3VectorString>(item->second, idx)
 			) {
 			std::ostringstream s;
 			s << "Vector type not supported for key: " << item->first << "\n";
