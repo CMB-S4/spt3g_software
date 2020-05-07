@@ -501,6 +501,13 @@ PYBINDINGS("maps")
 	def("c_quat_to_ang_", py_quat_to_ang);
 	def("c_ang_to_quat_", ang_to_quat);
 
+        def("get_origin_rotator", get_origin_rotator, (arg("alpha"), arg("delta")),
+            "Compute the transformation quaternion that would rotate the "
+            "vector (1, 0, 0) to point in the given direction.");
+        def("offsets_to_quat", offsets_to_quat, (arg("x"), arg("y")),
+            "Returns the vector quaternion (0,1,0,0) rotated by the given "
+            "x and y offsets.  Equivalent to ``t * quat(0,1,0,0) / t``, where "
+            "``t = get_origin_rotator(x, -y)``");
 	def("create_det_az_el_trans", create_det_az_el_trans,
 	    "Construct a quaternion vector from timestreams of detector "
 	    "azimuth and elevation. Equivalent to ``R_z(az) * R_y(-el)``.");
