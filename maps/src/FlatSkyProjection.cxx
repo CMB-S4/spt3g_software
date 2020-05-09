@@ -182,6 +182,8 @@ void FlatSkyProjection::SetAlphaCenter(double alpha)
 
 void FlatSkyProjection::SetDeltaCenter(double delta)
 {
+	if (fabs(deltac_) > 90 * deg)
+		log_fatal("Delta center out of range");
 	deltac_ = delta;
 	delta0_ = delta;
 	if (proj_ == Proj0 || proj_ == Proj1 || proj_ == Proj7 || proj_ == Proj9)
@@ -189,6 +191,8 @@ void FlatSkyProjection::SetDeltaCenter(double delta)
 	sindelta0_ = SIN(delta0_ / rad);
 	cosdelta0_ = COS(delta0_ / rad);
 	if (proj_ == Proj9) {
+		if (fabs(90 * deg - fabs(deltac_)) < 1e-12)
+			log_fatal("Projection %d is not valid at the poles", proj_);
 		pc_.resize(1);
 		pc_[0] = 1. / COS(deltac_ / rad);
 	} else {
