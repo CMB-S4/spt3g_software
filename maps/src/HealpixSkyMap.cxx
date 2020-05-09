@@ -863,13 +863,15 @@ HealpixSkyMap::AngleToPixel(double alpha, double delta) const
 	long outpix = -1;
 	double theta = (90 * G3Units::deg - delta) / G3Units::rad;
 
+	if (theta < 0 || theta > 180 * G3Units::deg)
+		return -1;
+
 	alpha /= G3Units::rad;
 	if (alpha < 0)
 		alpha += 2 * M_PI;
 
-	if ( std::isnan(theta) || std::isnan(alpha) ) {
+	if ( std::isnan(theta) || std::isnan(alpha) )
 		return -1;
-	}
 
 	if (nested_)
 		ang2pix_nest(nside_, theta, alpha, &outpix);
@@ -882,6 +884,9 @@ HealpixSkyMap::AngleToPixel(double alpha, double delta) const
 std::vector<double>
 HealpixSkyMap::PixelToAngle(size_t pixel) const
 {
+	if (pixel < 0 || pixel >= npix_)
+		return {0., 0.};
+
 	double alpha, delta;
 	if (nested_)
 		pix2ang_nest(nside_, pixel, &delta, &alpha);
@@ -894,8 +899,7 @@ HealpixSkyMap::PixelToAngle(size_t pixel) const
 	alpha *= G3Units::rad;
 	delta = 90 * G3Units::deg - delta * G3Units::rad;
 
-	std::vector<double> out = {alpha, delta};
-	return out;
+	return {alpha, delta};
 }
 
 void HealpixSkyMap::GetRebinAngles(long pixel, size_t scale,

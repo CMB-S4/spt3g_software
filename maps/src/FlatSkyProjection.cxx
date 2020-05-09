@@ -389,7 +389,11 @@ FlatSkyProjection::AngleToXY(double alpha, double delta) const
 {
 	static const double circ = 360 * deg;
 	static const double halfcirc = 180 * deg;
+	static const double quartercirc = 90 * deg;
 	double dalpha = alpha - alpha0_;
+
+	if (fabs(delta) > quartercirc)
+		return {-1, -1};
 
 	if (dalpha > halfcirc)
 		alpha -= circ;
@@ -476,7 +480,7 @@ std::vector<double>
 FlatSkyProjection::PixelToAngle(long pixel, bool wrap_alpha) const
 {
 	if (pixel < 0 || pixel >= xpix_ * ypix_)
-		return std::vector<double>(2, 0);
+		return {0., 0.};
 	std::vector<double> xy = PixelToXY(pixel);
 	return XYToAngle(xy[0], xy[1], wrap_alpha);
 }
@@ -552,7 +556,7 @@ std::vector<double>
 FlatSkyProjection::PixelToAngleGrad(long pixel, double h) const
 {
 	if (pixel < 0 || pixel >= xpix_ * ypix_)
-		return std::vector<double>(4, 0);
+		return {0., 0., 0., 0.};
 	std::vector<double> xy = PixelToXY(pixel);
 	return XYToAngleGrad(xy[0], xy[1], h);
 }
