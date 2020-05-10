@@ -182,7 +182,7 @@ void FlatSkyProjection::SetAlphaCenter(double alpha)
 
 void FlatSkyProjection::SetDeltaCenter(double delta)
 {
-	if (fabs(deltac_) > 90 * deg)
+	if (fabs(delta) > 90 * deg)
 		log_fatal("Delta center out of range");
 	deltac_ = delta;
 	delta0_ = delta;
