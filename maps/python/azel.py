@@ -90,12 +90,21 @@ def convert_azel_to_radec(az, el, location=spt, mjd=None):
     ra, dec : np.ndarray or G3Timestream
     """
 
+    singleton = False
     if isinstance(az, core.G3Timestream):
         assert az.start == el.start
         assert az.stop == el.stop
         assert az.n_samples == el.n_samples
         t = astropy.time.Time(np.asarray([i.mjd for i in az.times()]), format="mjd")
     else:
+        try:
+            len(az)
+        except TypeError:
+            singleton = True
+        if singleton:
+            az = np.atleast_1d(az)
+            el = np.atleast_1d(el)
+            mjd = np.atleast_1d(mjd)
         assert len(az) == len(el)
         t = astropy.time.Time(mjd, format="mjd")
 
@@ -125,6 +134,9 @@ def convert_azel_to_radec(az, el, location=spt, mjd=None):
         dec = core.G3Timestream(dec)
         ra.start = dec.start = az.start
         ra.stop = dec.stop = az.stop
+    elif singleton:
+        ra = ra[0]
+        dec = dec[0]
 
     return (ra, dec)
 
@@ -151,12 +163,21 @@ def convert_radec_to_azel(ra, dec, location=spt, mjd=None):
     az, el : np.ndarray or G3Timestream
     """
 
+    singleton = False
     if isinstance(ra, core.G3Timestream):
         assert ra.start == dec.start
         assert ra.stop == dec.stop
         assert ra.n_samples == dec.n_samples
         t = astropy.time.Time(np.asarray([i.mjd for i in ra.times()]), format="mjd")
     else:
+        try:
+            len(ra)
+        except TypeError:
+            singleton = True
+        if singleton:
+            ra = np.atleast_1d(ra)
+            dec = np.atleast_1d(dec)
+            mjd = np.atleast_1d(mjd)
         assert len(ra) == len(dec)
         t = astropy.time.Time(mjd, format="mjd")
     check_iers(ra.stop)
@@ -177,6 +198,9 @@ def convert_radec_to_azel(ra, dec, location=spt, mjd=None):
         el = core.G3Timestream(el)
         az.start = el.start = ra.start
         az.stop = el.stop = ra.stop
+    elif singleton:
+        az = az[0]
+        el = el[0]
 
     return (az, el)
 
@@ -198,11 +222,19 @@ def convert_radec_to_gal(ra, dec):
     glon, glat : np.ndarray or G3Timestream
     """
 
+    singleton = False
     if isinstance(ra, core.G3Timestream):
         assert ra.start == dec.start
         assert ra.stop == dec.stop
         assert ra.n_samples == dec.n_samples
     else:
+        try:
+            len(ra)
+        except TypeError:
+            singleton = True
+        if singleton:
+            ra = np.atleast_1d(ra)
+            dec = np.atleast_1d(dec)
         assert len(ra) == len(dec)
 
     k = astropy.coordinates.FK5(
@@ -219,6 +251,9 @@ def convert_radec_to_gal(ra, dec):
         glat = core.G3Timestream(glat)
         glon.start = glat.start = ra.start
         glon.stop = glat.stop = ra.stop
+    elif singleton:
+        glon = glon[0]
+        glat = glat[0]
 
     return (glon, glat)
 
@@ -240,11 +275,19 @@ def convert_gal_to_radec(glon, glat):
     ra, dec : np.ndarray or G3Timestream
     """
 
+    singleton = False
     if isinstance(glon, core.G3Timestream):
         assert glon.start == glat.start
         assert glon.stop == glat.stop
         assert glon.n_samples == glat.n_samples
     else:
+        try:
+            len(glon)
+        except TypeError:
+            singleton = True
+        if singleton:
+            glon = np.atleast_1d(glon)
+            glat = np.atleast_1d(glat)
         assert len(glon) == len(glat)
 
     k = astropy.coordinates.Galactic(
@@ -261,6 +304,9 @@ def convert_gal_to_radec(glon, glat):
         dec = core.G3Timestream(dec)
         ra.start = dec.start = glon.start
         ra.stop = dec.stop = glon.stop
+    elif singleton:
+        ra = ra[0]
+        dec = dec[0]
 
     return (ra, dec)
 
