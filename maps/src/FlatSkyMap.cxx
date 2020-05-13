@@ -187,8 +187,8 @@ FlatSkyMap::FillFromBuffer(boost::python::object v)
 			size_t ypix = view.shape[0];
 			size_t xpix = view.shape[1];
 			if (xpix != xpix_ || ypix != ypix_)
-				log_fatal("Got array of shape (%zu, %zu), expected (%llu, %llu)",
-				    ypix, xpix, ypix_, xpix_);
+				log_fatal("Got array of shape (%zu, %zu), expected (%zu, %zu)",
+				    ypix, xpix, (size_t) ypix_, (size_t) xpix_);
 		} else {
 			log_fatal("Only 2-D maps supported");
 		}
@@ -847,28 +847,6 @@ flatskymap_getitem_2d(const FlatSkyMap &skymap, bp::tuple coords)
 	return bp::object(skymap.at(x, y));
 }
 
-static double
-flatskymap_setitem_2d(FlatSkyMap &skymap, bp::tuple coords, double val)
-{
-	ssize_t y = bp::extract<ssize_t>(coords[0]); // Swapped to match numpy
-	ssize_t x = bp::extract<ssize_t>(coords[1]);
-	if (x < 0)
-		x = skymap.shape()[0] + x;
-	if (y < 0)
-		y = skymap.shape()[1] + y;
-	if (size_t(x) >= skymap.shape()[0]) {
-		PyErr_SetString(PyExc_IndexError, "X index out of range");
-		bp::throw_error_already_set();
-	}
-	if (size_t(y) >= skymap.shape()[1]) {
-		PyErr_SetString(PyExc_IndexError, "Y index out of range");
-		bp::throw_error_already_set();
-	}
-
-	skymap(x, y) = val;
-	return val;
-}
-
 static void
 flatskymap_setslice_1d(FlatSkyMap &skymap, bp::slice coords,
     bp::object val)
@@ -880,9 +858,30 @@ flatskymap_setslice_1d(FlatSkyMap &skymap, bp::slice coords,
 }
 
 static void
-flatskymap_setslice_2d(FlatSkyMap &skymap, bp::tuple coords,
+flatskymap_setitem_2d(FlatSkyMap &skymap, bp::tuple coords,
     bp::object val)
 {
+	if (bp::extract<ssize_t>(coords[0]).check()) {
+		ssize_t y = bp::extract<ssize_t>(coords[0]); // Swapped to match numpy
+		ssize_t x = bp::extract<ssize_t>(coords[1]);
+		if (x < 0)
+			x = skymap.shape()[0] + x;
+		if (y < 0)
+			y = skymap.shape()[1] + y;
+		if (size_t(x) >= skymap.shape()[0]) {
+			PyErr_SetString(PyExc_IndexError, "X index out of range");
+			bp::throw_error_already_set();
+		}
+		if (size_t(y) >= skymap.shape()[1]) {
+			PyErr_SetString(PyExc_IndexError, "Y index out of range");
+			bp::throw_error_already_set();
+		}
+
+		double dval = bp::extract<double>(val);
+		skymap(x, y) = dval;
+		return;
+	}
+
 	// This one is kind of weird in that there is precisely one set of
 	// valid coords. Check that they work in a sneaky way: extract
 	// the given part of a null-data copy of the big map, then check with
@@ -1096,7 +1095,6 @@ PYBINDINGS("maps")
 	    .def("__getitem__", flatskymap_getitem_2d)
 	    .def("__setitem__", flatskymap_setitem_2d)
 	    .def("__setitem__", flatskymap_setslice_1d)
-	    .def("__setitem__", flatskymap_setslice_2d)
 	;
 	register_pointer_conversions<FlatSkyMap>();
 
