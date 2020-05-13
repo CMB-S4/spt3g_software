@@ -36,29 +36,12 @@ FlatSkyMap::FlatSkyMap(boost::python::object v, double res,
 		} else {
 			log_fatal("Only 2-D maps supported");
 		}
+		PyBuffer_Release(&view);
+
 		proj_info = FlatSkyProjection(xpix_, ypix_, res, alpha_center,
 		    delta_center, x_res, proj, x_center, y_center);
-		ConvertToDense();
 
-		double *d = &(*dense_)(0,0);
-		if (strcmp(view.format, "d") == 0) {
-			memcpy(d, view.buf, view.len);
-		} else if (strcmp(view.format, "f") == 0) {
-			for (size_t i = 0; i < view.len/sizeof(float); i++)
-				d[i] = ((float *)view.buf)[i];
-		} else if (strcmp(view.format, "i") == 0) {
-			for (size_t i = 0; i < view.len/sizeof(int); i++)
-				d[i] = ((int *)view.buf)[i];
-		} else if (strcmp(view.format, "I") == 0) {
-			for (size_t i = 0; i < view.len/sizeof(int); i++)
-				d[i] = ((unsigned int *)view.buf)[i];
-		} else if (strcmp(view.format, "l") == 0) {
-			for (size_t i = 0; i < view.len/sizeof(long); i++)
-				d[i] = ((unsigned long *)view.buf)[i];
-		} else {
-			log_fatal("Unknown type code %s", view.format);
-		}
-		PyBuffer_Release(&view);
+		FillFromBuffer(v);
 
 		return;
 	}
@@ -192,6 +175,49 @@ FlatSkyMap::InitFromV1Data(std::vector<size_t> dims, const std::vector<double> &
 		dense_ = new DenseMapData(dims[0], dims[1]);
 		(*dense_) = data;
 	}
+}
+
+void
+FlatSkyMap::FillFromBuffer(boost::python::object v)
+{
+	Py_buffer view;
+	if (PyObject_GetBuffer(v.ptr(), &view,
+	    PyBUF_FORMAT | PyBUF_C_CONTIGUOUS) != -1) {
+		if (view.ndim == 2) {
+			size_t ypix = view.shape[0];
+			size_t xpix = view.shape[1];
+			if (xpix != xpix_ || ypix != ypix_)
+				log_fatal("Got array of shape (%zu, %zu), expected (%llu, %llu)",
+				    ypix, xpix, ypix_, xpix_);
+		} else {
+			log_fatal("Only 2-D maps supported");
+		}
+		ConvertToDense();
+
+		double *d = &(*dense_)(0,0);
+		if (strcmp(view.format, "d") == 0) {
+			memcpy(d, view.buf, view.len);
+		} else if (strcmp(view.format, "f") == 0) {
+			for (size_t i = 0; i < view.len/sizeof(float); i++)
+				d[i] = ((float *)view.buf)[i];
+		} else if (strcmp(view.format, "i") == 0) {
+			for (size_t i = 0; i < view.len/sizeof(int); i++)
+				d[i] = ((int *)view.buf)[i];
+		} else if (strcmp(view.format, "I") == 0) {
+			for (size_t i = 0; i < view.len/sizeof(int); i++)
+				d[i] = ((unsigned int *)view.buf)[i];
+		} else if (strcmp(view.format, "l") == 0) {
+			for (size_t i = 0; i < view.len/sizeof(long); i++)
+				d[i] = ((unsigned long *)view.buf)[i];
+		} else {
+			log_fatal("Unknown type code %s", view.format);
+		}
+		PyBuffer_Release(&view);
+
+		return;
+	}
+
+	throw bp::error_already_set();
 }
 
 FlatSkyMap::const_iterator::const_iterator(const FlatSkyMap &map, bool begin) :
@@ -844,8 +870,18 @@ flatskymap_setitem_2d(FlatSkyMap &skymap, bp::tuple coords, double val)
 }
 
 static void
+flatskymap_setslice_1d(FlatSkyMap &skymap, bp::slice coords,
+    bp::object val)
+{
+	if (coords.start().ptr() != Py_None || coords.stop().ptr() != Py_None)
+		log_fatal("1D slicing not supported");
+
+	skymap.FillFromBuffer(val);
+}
+
+static void
 flatskymap_setslice_2d(FlatSkyMap &skymap, bp::tuple coords,
-    const FlatSkyMap &val)
+    bp::object val)
 {
 	// This one is kind of weird in that there is precisely one set of
 	// valid coords. Check that they work in a sneaky way: extract
@@ -858,15 +894,22 @@ flatskymap_setslice_2d(FlatSkyMap &skymap, bp::tuple coords,
 	    boost::dynamic_pointer_cast<FlatSkyMap>(skymap.Clone(false));
 	FlatSkyMapPtr dummy_subpatch = bp::extract<FlatSkyMapPtr>(
 	    flatskymap_getitem_2d(*shallowclone, coords));
-	if (!dummy_subpatch->IsCompatible(val)) {
-		PyErr_SetString(PyExc_ValueError, "Provided patch to insert is "
-		    "not compatible with the given subregion of the map into "
-		    "which it is being inserted. Check that your coordinates "
-		    "are right.");
-		bp::throw_error_already_set();
-	}
 
-	skymap.InsertPatch(val);
+	if (bp::extract<FlatSkyMap>(val).check()) {
+		const FlatSkyMap &patch = bp::extract<FlatSkyMap>(val)();
+		if (!dummy_subpatch->IsCompatible(patch)) {
+			PyErr_SetString(PyExc_ValueError, "Provided patch to insert is "
+			    "not compatible with the given subregion of the map into "
+			    "which it is being inserted. Check that your coordinates "
+			    "are right.");
+			bp::throw_error_already_set();
+		}
+
+		skymap.InsertPatch(patch);
+	} else {
+		dummy_subpatch->FillFromBuffer(val);
+		skymap.InsertPatch(*dummy_subpatch);
+	}
 }
 
 static double
@@ -1052,6 +1095,7 @@ PYBINDINGS("maps")
 	    .def("__setitem__", flatskymap_setitem_1d)
 	    .def("__getitem__", flatskymap_getitem_2d)
 	    .def("__setitem__", flatskymap_setitem_2d)
+	    .def("__setitem__", flatskymap_setslice_1d)
 	    .def("__setitem__", flatskymap_setslice_2d)
 	;
 	register_pointer_conversions<FlatSkyMap>();
