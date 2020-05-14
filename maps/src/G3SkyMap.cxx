@@ -295,8 +295,12 @@ G3SkyMap::SetPolConv(G3SkyMap::MapPolConv pol_conv)
 		return;
 	}
 
-	if (pol_conv != pol_conv_)
+	if (pol_conv != pol_conv_) {
+		log_warn("Sign of U map flipped in changing pol_conv from %s to %s",
+		    pol_conv == G3SkyMap::IAU ? "COSMO" : "IAU",
+		    pol_conv == G3SkyMap::IAU ? "IAU" : "COSMO");
 		(*this) *= -1;
+        }
 
 	pol_conv_ = pol_conv;
 }
