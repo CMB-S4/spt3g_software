@@ -34,6 +34,18 @@ def skymapweights_getitem(self, x):
     if isinstance(x, str) and x in ['TT', 'TQ', 'TU', 'QQ', 'QU', 'UU']:
         return getattr(self, x)
 
+    if (isinstance(x, tuple) and any(isinstance(xx, slice) for xx in x)) \
+       or isinstance(x, slice):
+        out = self.__class__()
+        out.TT = self.TT[x]
+        if self.polarized:
+            out.TQ = self.TQ[x]
+            out.TU = self.TU[x]
+            out.QQ = self.QQ[x]
+            out.QU = self.QU[x]
+            out.UU = self.UU[x]
+        return out
+
     if not self.polarized:
         return self.TT[x]
 
@@ -54,6 +66,10 @@ def skymapweights_setitem(self, x, mat):
     if isinstance(x, str) and x in ['TT', 'TQ', 'TU', 'QQ', 'QU', 'UU']:
         setattr(self, x, mat)
         return
+
+    if (isinstance(x, tuple) and any(isinstance(xx, slice) for xx in x)) \
+       or isinstance(x, slice):
+        raise NotImplementedError
 
     if not self.polarized:
         assert(numpy.isscalar(mat))
