@@ -768,10 +768,16 @@ PYBINDINGS("maps") {
 
 	    .def("angles_to_pixels", &G3SkyMap::AnglesToPixels,
 	      (bp::arg("alphas"), bp::arg("deltas")),
-	       "Compute the 1D pixel location for each of the sky coordinates")
+	       "Compute the 1D pixel location for each of the sky coordinates (vectorized)")
 	    .def("pixels_to_angles", &skymap_pixels_to_angles,
 	      (bp::arg("pixels")),
-	       "Compute the sky coordinates of each of the given 1D pixels")
+	       "Compute the sky coordinates of each of the given 1D pixels (vectorized)")
+	    .def("angle_to_pixel", &G3SkyMap::AnglesToPixels,
+	      (bp::arg("alphas"), bp::arg("deltas")),
+	       "Compute the 1D pixel location for each of the sky coordinates (vectorized)")
+	    .def("pixel_to_angle", &skymap_pixels_to_angles,
+	      (bp::arg("pixels")),
+	       "Compute the sky coordinates of each of the given 1D pixels (vectorized)")
 	    .def("pixel_to_angle", 
 	      (std::vector<double> (G3SkyMap::*)(size_t) const) 
 	      &G3SkyMap::PixelToAngle, bp::arg("pixel"),

@@ -965,6 +965,38 @@ flatskymap_nonzeropixels(const FlatSkyMap &m)
 	return boost::python::make_tuple(i, d);
 }
 
+static boost::python::tuple
+flatskymap_angles_to_xy(const FlatSkyMap & skymap, const std::vector<double> &alpha,
+    const std::vector<double> &delta)
+{
+	g3_assert(alpha.size() == delta.size());
+
+	std::vector<double> x(alpha.size()), y(alpha.size());
+	for (size_t i = 0; i < alpha.size(); i++) {
+		auto xy = skymap.AngleToXY(alpha[i], delta[i]);
+		x[i] = xy[0];
+		y[i] = xy[1];
+	}
+
+	return boost::python::make_tuple(x, y);
+}
+
+static boost::python::tuple
+flatskymap_xy_to_angles(const FlatSkyMap & skymap, const std::vector<double> &x,
+    const std::vector<double> &y)
+{
+	g3_assert(x.size() == y.size());
+
+	std::vector<double> alpha(x.size()), delta(x.size());
+	for (size_t i = 0; i < x.size(); i++) {
+		auto ad = skymap.XYToAngle(x[i], y[i]);
+		alpha[i] = ad[0];
+		delta[i] = ad[1];
+	}
+
+	return boost::python::make_tuple(alpha, delta);
+}
+
 
 G3_SPLIT_SERIALIZABLE_CODE(FlatSkyMap);
 
@@ -1051,9 +1083,15 @@ PYBINDINGS("maps")
 	    .def("xy_to_angle", &FlatSkyMap::XYToAngle,
 	      (bp::arg("x"), bp::arg("y")),
 	       "Compute the sky coordinates of the input flat 2D coordinates")
+	    .def("xy_to_angle", flatskymap_xy_to_angles,
+	      (bp::arg("x"), bp::arg("y")),
+	       "Compute the sky coordinates of the input flat 2D coordinates (vectorized)")
 	    .def("angle_to_xy", &FlatSkyMap::AngleToXY,
 	      (bp::arg("alpha"), bp::arg("delta")),
 	       "Compute the flat 2D coordinates of the input sky coordinates")
+	    .def("angle_to_xy", flatskymap_angles_to_xy,
+	      (bp::arg("alpha"), bp::arg("delta")),
+	       "Compute the flat 2D coordinates of the input sky coordinates (vectorized)")
 
 	    .add_property("sparse", flatskymap_pysparsity_get, flatskymap_pysparsity_set,
 	       "True if the map is stored with column and row zero-suppression, False if "
