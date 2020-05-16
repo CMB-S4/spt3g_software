@@ -351,6 +351,62 @@ GetMapMedian(G3SkyMapConstPtr m, bool ignore_zeros, bool ignore_nans)
 }
 
 
+FlatSkyMapPtr
+ConvolveMap(FlatSkyMapConstPtr map, FlatSkyMapConstPtr kernel)
+{
+	int xdim = map->shape()[0];
+	int ydim = map->shape()[1];
+	int nx = kernel->shape()[0];
+	int ny = kernel->shape()[1];
+	if ((nx % 2 == 0) || (ny % 2 == 0))
+		log_fatal("Kernel must have odd map dimensions");
+
+	FlatSkyMapPtr outmap = boost::dynamic_pointer_cast<FlatSkyMap>(map->Clone(false));
+	if (map->IsDense())
+		outmap->ConvertToDense();
+
+	// loop over only non-zero kernel values
+	std::vector<int> xk, yk;
+	std::vector<double> vk;
+	for (auto i: *kernel) {
+		if (i.second == 0)
+			continue;
+		vk.push_back(i.second);
+		xk.push_back(nx / 2 - (i.first % nx));
+		yk.push_back(ny / 2 - (i.first / nx));
+	}
+	size_t nk = vk.size();
+
+	for (size_t y = 0; y < ydim; y++) {
+		for (size_t x = 0; x < xdim; x++) {
+			double v = 0;
+			for (size_t j = 0; j < nk; j++) {
+				double m = map->at(x + xk[j], y + yk[j]);
+				if (m != 0)
+					v += vk[j] * m;
+			}
+			if (v != 0)
+				(*outmap)(x, y) = v;
+		}
+	}
+
+	return outmap;
+}
+
+
+static FlatSkyMapPtr
+pyconvolve_map(FlatSkyMapConstPtr map, bp::object val)
+{
+
+	FlatSkyMapConstPtr kernel;
+	if (bp::extract<FlatSkyMap>(val).check())
+		kernel = bp::extract<FlatSkyMapConstPtr>(val)();
+	else
+		kernel = FlatSkyMapConstPtr(new FlatSkyMap(val, map->yres()));
+	return ConvolveMap(map, kernel);
+}
+
+
 namespace bp = boost::python;
 void maputils_pybindings(void){
 	bp::def("get_mask_map", GetMaskMap, (bp::arg("map_in")),
@@ -358,7 +414,7 @@ void maputils_pybindings(void){
 
 	bp::def("remove_weights_t", RemoveWeightsT,
 		(bp::arg("T"), bp::arg("W"), bp::arg("zero_nans")=false),
-		"Remove weights from unpolarized maps.  If zero_nans is true, empty pixels "
+		"Remove weights from unpolarized maps.	If zero_nans is true, empty pixels "
 		"are skipped, and pixels with zero weight are set to 0 instead of nan.");
 
 	bp::def("remove_weights", RemoveWeights,
@@ -409,4 +465,8 @@ void maputils_pybindings(void){
 		(bp::arg("map"), bp::arg("ignore_zeros")=false, bp::arg("ignore_nans")=false),
 		"Computes the median of the input map, optionally ignoring zero and/or nan "
 		"values in the map.  Requires making a copy of the data.");
+
+	bp::def("convolve_map", pyconvolve_map, (bp::arg("map"), bp::arg("kernel")),
+		"Convolve the input flat sky map with the given map-space kernel. The "
+		"kernel must have odd dimensions and the same resolution as the map.");
 }

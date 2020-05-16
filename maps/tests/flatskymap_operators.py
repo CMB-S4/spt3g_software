@@ -268,3 +268,12 @@ for shape in [(20, 500), (21, 501)]:
         assert(np.allclose(stats3, stats0))
         med3 = get_map_median(mpad, ignore_nans=True)
         assert(np.allclose(med3, med0))
+
+# convolution
+from scipy.signal import convolve2d
+from spt3g.maps import convolve_map
+
+kernel = FlatSkyMap(np.random.randn(5, 5), m.res)
+mconv = convolve2d(m, kernel, mode='same')
+mconv2 = convolve_map(m, kernel)
+assert(np.allclose(mconv, mconv2))

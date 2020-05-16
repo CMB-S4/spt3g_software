@@ -28,6 +28,8 @@ std::vector<double> GetMapStats(G3SkyMapConstPtr m, int order=2,
 
 double GetMapMedian(G3SkyMapConstPtr m, bool ignore_zeros=false, bool ignore_nans=false);
 
+FlatSkyMapPtr ConvolveMap(FlatSkyMapConstPtr map, FlatSkyMapConstPtr kernel);
+
 void maputils_pybindings(void);
 
 #endif //_MAPS_MAPUTILS_H
