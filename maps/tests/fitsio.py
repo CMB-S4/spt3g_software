@@ -27,7 +27,7 @@ for dim in [300, 301]:
     print('Checking projections for dim {}'.format(dim))
     if verbose:
         print('-' * 80)
-    for p in [0, 1, 2, 4, 5, 6, 7, 9]:
+    for p in [0, 1, 2, 3, 4, 5, 6, 7, 9]:
         if verbose:
             print('Checking Proj{}'.format(p))
 

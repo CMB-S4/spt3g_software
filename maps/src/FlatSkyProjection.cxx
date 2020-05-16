@@ -300,6 +300,25 @@ FlatSkyProjection::XYToAngle(double x, double y, bool wrap_alpha) const
 		alpha = a + alpha0_;
 		break;
 	}
+	case Proj3: {
+		x /= rad;
+		y /= rad;
+		double rho = sqrt(x * x + y * y);
+		double a, b;
+		if (rho < 1e-8) {
+			a = 0;
+			b = delta0_;
+		} else {
+			double c = rho;
+			double cc = COS(c);
+			double sc = SIN(c);
+			a = ATAN2(x * sc, rho * cc * cosdelta0_ + y * sc * sindelta0_) * rad;
+			b = ASIN(cc * sindelta0_ - y * sc / rho * cosdelta0_) * rad;
+		}
+		delta = b;
+		alpha = a + alpha0_;
+		break;
+	}
 	case Proj4: {
 		x /= rad;
 		y /= rad;
@@ -424,6 +443,18 @@ FlatSkyProjection::AngleToXY(double alpha, double delta) const
 		double cosdelta = COS(delta);
 		y = (cosdelta * sindelta0_ * COS(dalpha) - cosdelta0_ * SIN(delta)) * rad;
 		x = cosdelta * SIN(dalpha) * rad;
+		break;
+	}
+	case Proj3: {
+		dalpha /= rad;
+		delta /= rad;
+		double cosdelta = COS(delta);
+		double sindelta = SIN(delta);
+		double cosdalpha = COS(dalpha);
+		double c = ASIN(sindelta0_ * sindelta + cosdelta0_ * cosdelta * cosdalpha);
+		double k = (90 * deg - rad * c) / COS(c);
+		y = k * (cosdelta * sindelta0_ * cosdalpha - cosdelta0_ * sindelta);
+		x = k * cosdelta * SIN(dalpha);
 		break;
 	}
 	case Proj4: {

@@ -15,6 +15,8 @@ enum MapProjection {
 	ProjCAR = 1,
 	ProjOrthographic = 2,
 	ProjSIN = 2,
+	ProjZenithalEquidistant = 3,
+	ProjARC = 3,
 	ProjStereographic = 4,
 	ProjSTG = 4,
 	ProjLambertAzimuthalEqualArea = 5,
