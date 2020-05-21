@@ -41,12 +41,13 @@ endif()
 
 ## look for scipy
 execute_process(COMMAND ${Python_EXECUTABLE} -c "import scipy"
-	RESULT_VARIABLE SCIPY_FOUND)
+	RESULT_VARIABLE SCIPY_FOUND OUTPUT_QUIET ERROR_QUIET)
 if(SCIPY_FOUND EQUAL 0)
 	set(Python_SciPy_FOUND TRUE CACHE BOOL "SciPy Found")
 	message(STATUS "Found SciPy: FOUND")
 else()
 	set(Python_SciPy_FOUND FALSE CACHE BOOL "SciPy Found")
+	message(STATUS "Found SciPy: NOT FOUND")
 endif()
 
 if(NOT DEFINED Boost_PYTHON_TYPE)
