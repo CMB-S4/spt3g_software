@@ -54,7 +54,7 @@ def healpix_to_flatsky(
     else:
         if not isinstance(map_stub, maps.FlatSkyMap):
             raise TypeError("Output stub must be a FlatSkyMap")
-        map_out = map_stub.Clone(False)
+        map_out = map_stub.clone(False)
 
     # Populate output map pixels with interpolation and rebinning
     if not isinstance(map_in, maps.HealpixSkyMap):
@@ -125,7 +125,7 @@ def flatsky_to_healpix(
     else:
         if not isinstance(map_stub, maps.HealpixSkyMap):
             raise TypeError("Output stub must be a HealpixSkyMap")
-        map_out = map_stub.Clone(False)
+        map_out = map_stub.clone(False)
 
     # optimize ringsparse storage
     a0 = map_in.alpha_center

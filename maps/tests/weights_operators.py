@@ -8,12 +8,12 @@ from spt3g.maps import get_mask_map, remove_weights, apply_weights
 for pol in [True, False]:
     # allocation
     m = FlatSkyMap(500, 20, core.G3Units.arcmin, pol_conv=MapPolConv.IAU)
-    mt = m.Clone(False)
+    mt = m.clone(False)
     mt.pol_type = MapPolType.T
     if pol:
-        mq = m.Clone(False)
+        mq = m.clone(False)
         mq.pol_type = MapPolType.Q
-        mu = m.Clone(False)
+        mu = m.clone(False)
         mu.pol_type = MapPolType.U
     mw = G3SkyMapWeights(m, polarized=pol)
     assert(mw.size == m.size)
@@ -22,8 +22,8 @@ for pol in [True, False]:
     assert(mw.polarized == pol)
     assert(mw.congruent)
 
-    assert(mw.IsCompatible(m))
-    assert(mw['TT'].IsCompatible(mw.TT))
+    assert(mw.compatible(m))
+    assert(mw['TT'].compatible(mw.TT))
 
     if not pol:
         assert(mw.QQ is None)

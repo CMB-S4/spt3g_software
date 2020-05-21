@@ -762,7 +762,14 @@ PYBINDINGS("maps") {
 	      (bp::arg("copy_data")=true),
 	       "Return a map of the same type, populated with a copy of the data "
 	       "if the argument is true (default), empty otherwise.")
+	    .def("clone", &G3SkyMap::Clone,
+	      (bp::arg("copy_data")=true),
+	       "Return a map of the same type, populated with a copy of the data "
+	       "if the argument is true (default), empty otherwise.")
 	    .def("IsCompatible", &G3SkyMap::IsCompatible,
+	      "Returns true if the input argument is a map with matching dimensions "
+	      "and boundaries on the sky.")
+	    .def("compatible", &G3SkyMap::IsCompatible,
 	      "Returns true if the input argument is a map with matching dimensions "
 	      "and boundaries on the sky.")
 
@@ -883,6 +890,9 @@ PYBINDINGS("maps") {
 	      "Return the condition number of the Mueller matrix for each pixel")
 
 	    .def("Clone", &G3SkyMapWeights::Clone, (bp::arg("copy_data")=true),
+	       "Return weights of the same type, populated with a copy of the data "
+	       "if the argument is true (default), empty otherwise.")
+	    .def("clone", &G3SkyMapWeights::Clone, (bp::arg("copy_data")=true),
 	       "Return weights of the same type, populated with a copy of the data "
 	       "if the argument is true (default), empty otherwise.")
 

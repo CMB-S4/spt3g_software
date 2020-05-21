@@ -135,7 +135,7 @@ fm_stub = maps.FlatSkyMap(
     300, 300, core.G3Units.arcmin, proj=maps.MapProjection.ProjZEA
 )
 fm = maps.maputils.healpix_to_flatsky(x, map_stub=fm_stub)
-x2 = maps.maputils.flatsky_to_healpix(fm, map_stub=x.Clone(False))
+x2 = maps.maputils.flatsky_to_healpix(fm, map_stub=x.clone(False))
 
 hitpix = np.asarray(x2) > 0
 assert(np.allclose(np.asarray(x)[hitpix], np.asarray(x2)[hitpix]))
@@ -147,7 +147,7 @@ x = maps.HealpixSkyMap(a)
 alpha, delta = maps.get_ra_dec_map(x)
 
 # equatorial to galactic
-xgal = x.Clone(False)
+xgal = x.clone(False)
 x.coord_ref = maps.MapCoordReference.Equatorial
 xgal.coord_ref = maps.MapCoordReference.Galactic
 maps.reproj_map(x, xgal)
@@ -156,7 +156,7 @@ pix = xgal.angles_to_pixels(ra, dec)
 assert(np.allclose(np.asarray(pix), np.asarray(xgal)))
 
 # ... and back
-xeq = x.Clone(False)
+xeq = x.clone(False)
 x.coord_ref = maps.MapCoordReference.Galactic
 xeq.coord_ref = maps.MapCoordReference.Equatorial
 maps.reproj_map(x, xeq)

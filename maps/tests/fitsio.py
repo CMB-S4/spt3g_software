@@ -42,15 +42,15 @@ for dim in [300, 301]:
         assert(fm1.x_center == x0)
         assert(fm1.y_center == y0)
 
-        fmc = fm0.Clone(False)
+        fmc = fm0.clone(False)
         fmc.proj = proj
-        assert(fmc.IsCompatible(fm1))
+        assert(fmc.compatible(fm1))
 
         maps.fitsio.save_skymap_fits('test_map.fits', fm1, overwrite=True)
         fm2 = maps.fitsio.load_skymap_fits('test_map.fits')['T']
 
         try:
-            assert(fm1.IsCompatible(fm2))
+            assert(fm1.compatible(fm2))
         except AssertionError:
             for attr in ['alpha_center', 'delta_center', 'x_center', 'y_center']:
                 print(attr, getattr(fm1, attr), getattr(fm2, attr))
@@ -129,21 +129,21 @@ try:
 
     assert(hm2['T'].pol_conv == hm2['U'].pol_conv)
     assert(hm2['U'].pol_conv == maps.MapPolConv.IAU)
-    assert(hm1.IsCompatible(hm2['T']))
+    assert(hm1.compatible(hm2['T']))
     assert(np.allclose(hm1, hm2['T']))
     assert(np.allclose(hm1, -hm2['U']))
 
     print('Checking healpy.read_map')
     hm3 = hp.read_map('test_map.fits')
     hm3 = maps.HealpixSkyMap(hm3)
-    assert(hm1.IsCompatible(hm3))
+    assert(hm1.compatible(hm3))
     assert(np.allclose(hm1, hm3))
 
     print('Checking healpy.write_map')
     os.remove('test_map.fits')
     hp.write_map('test_map.fits', np.asarray(hm3))
     hm4 = maps.fitsio.load_skymap_fits('test_map.fits')['T']
-    assert(hm1.IsCompatible(hm4))
+    assert(hm1.compatible(hm4))
     assert(np.allclose(hm1, hm4))
 
 finally:

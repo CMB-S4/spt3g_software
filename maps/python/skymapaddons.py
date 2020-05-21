@@ -20,7 +20,7 @@ def numpyinplace(skymap, array):
     return rv
 
 def numpycompat(a, b, op):
-    if isinstance(b, G3SkyMap) and not a.IsCompatible(b):
+    if isinstance(b, G3SkyMap) and not a.compatible(b):
         raise TypeError("Map of type <{}> is incompatible with map of type <{}>".format(a, b))
     return numpyinplace(a, numpy.ndarray.__dict__[op](numpy.asarray(a), numpy.asarray(b)))
 

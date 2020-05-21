@@ -143,10 +143,10 @@ def MakeMapsPolarized(frame, pol_conv=maps.MapPolConv.IAU):
     wgt = frame["Wunpol"].TT
     del frame["Wunpol"]
 
-    qmap = frame["T"].Clone(False)
+    qmap = frame["T"].clone(False)
     qmap.pol_type = maps.MapPolType.Q
     frame["Q"] = qmap
-    umap = frame["T"].Clone(False)
+    umap = frame["T"].clone(False)
     umap.pol_type = maps.MapPolType.U
     umap.pol_conv = pol_conv
     frame["U"] = umap
@@ -154,11 +154,11 @@ def MakeMapsPolarized(frame, pol_conv=maps.MapPolConv.IAU):
 
     wgt_out = maps.G3SkyMapWeights(frame["T"], polarized=True)
     wgt_out.TT = wgt
-    wgt_out.TQ = wgt.Clone(False)
-    wgt_out.TU = wgt.Clone(False)
+    wgt_out.TQ = wgt.clone(False)
+    wgt_out.TU = wgt.clone(False)
     wgt_out.QQ = mask
-    wgt_out.QU = wgt.Clone(False)
-    wgt_out.UU = mask.Clone(True)
+    wgt_out.QU = wgt.clone(False)
+    wgt_out.UU = mask.clone(True)
 
     frame["Wpol"] = wgt_out
 
@@ -212,11 +212,11 @@ def ValidateMaps(frame, ignore_missing_weights=False):
             unit="ValidateMaps",
         )
 
-    stub = frame["T"].Clone(False)
+    stub = frame["T"].clone(False)
     for k in ["T", "Q", "U", "Wpol", "Wunpol"]:
         if k not in frame:
             continue
-        if not frame[k].IsCompatible(stub):
+        if not frame[k].compatible(stub):
             core.log_fatal(
                 "Map frame %s: Map %s not compatible with T map" % (map_id, k),
                 unit="ValidateMaps",
@@ -311,7 +311,7 @@ class InjectMapStub(object):
     map_id : string
         Id to assign to the new map frame
     map_stub : G3SkyMap instance
-        Map stub from which to Clone the Stokes maps and weights.
+        Map stub from which to clone the Stokes maps and weights.
     polarized : bool
         If True, add Q and U maps to stub frame, and ensure that weights are
         polarized.  Otherwise, only a T map is created.
@@ -332,18 +332,18 @@ class InjectMapStub(object):
         self.map_frame = core.G3Frame(core.G3FrameType.Map)
         self.map_frame["Id"] = map_id
 
-        map_stub = map_stub.Clone(False)
+        map_stub = map_stub.clone(False)
         map_stub.weighted = weighted
         map_stub.pol_conv = pol_conv
 
-        T = map_stub.Clone(False)
+        T = map_stub.clone(False)
         T.pol_type = maps.MapPolType.T
         self.map_frame["T"] = T
         if polarized:
-            Q = map_stub.Clone(False)
+            Q = map_stub.clone(False)
             Q.pol_type = maps.MapPolType.Q
             self.map_frame["Q"] = Q
-            U = map_stub.Clone(False)
+            U = map_stub.clone(False)
             U.pol_type = maps.MapPolType.U
             self.map_frame["U"] = U
         if weighted:
@@ -451,7 +451,7 @@ def ReplicateMaps(frame, input_map_id, output_map_ids, copy_weights=False):
         for k in map_keys:
             if k not in frame:
                 continue
-            fr[k] = frame[k].Clone(False)
+            fr[k] = frame[k].clone(False)
 
         frames.append(fr)
 

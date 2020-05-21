@@ -13,11 +13,11 @@ def RandomMap(frame):
         return
 
     tmap = frame.pop("T")
-    np.asarray(tmap)[:] = np.random.randn(*m.shape)
+    tmap[:] = np.random.randn(*m.shape)
     frame["T"] = tmap
 
     wmap = frame.pop("Wunpol")
-    np.asarray(wmap.TT)[:] = 10 * np.ones(m.shape)
+    wmap.TT[:] = 10 * np.ones(m.shape)
     frame["Wunpol"] = wmap
 
 
@@ -48,8 +48,8 @@ pipe.Add(maps.MakeMapsUnpolarized)
 mex3 = maps.ExtractMaps()
 pipe.Add(mex3)
 
-tmap = m.Clone(False)
-np.asarray(tmap)[:] = np.random.randn(*m.shape)
+tmap = m.clone(False)
+tmap[:] = np.random.randn(*m.shape)
 tmap.pol_type = maps.MapPolType.T
 tmap.weighted = False
 pipe.Add(maps.InjectMaps, map_id="test_map", maps_in=[tmap])
@@ -72,9 +72,9 @@ for map_id in ["test_map1", "test_map2"]:
     mdict = mex2.maps[map_id]
     for k in ["T", "Q", "U", "Wpol"]:
         assert k in mdict
-        assert mdict[k].IsCompatible(m)
+        assert mdict[k].compatible(m)
 
     mdict = mex3.maps[map_id]
     for k in ["T", "Wunpol"]:
         assert k in mdict
-        assert mdict[k].IsCompatible(m)
+        assert mdict[k].compatible(m)

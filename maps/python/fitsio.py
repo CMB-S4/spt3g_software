@@ -509,8 +509,8 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
     if Q is not None:
         assert(U is not None)
         assert(U.pol_conv == MapPolConv.IAU or U.pol_conv == MapPolConv.COSMO)
-        assert(T.IsCompatible(Q))
-        assert(T.IsCompatible(U))
+        assert(T.compatible(Q))
+        assert(T.compatible(U))
         pol = True
         maps = [T, Q, U]
         if flat:
@@ -632,7 +632,7 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
 
             for wt in wnames:
                 m = getattr(W, wt)
-                assert T.IsCompatible(m), 'Weight {} is not compatible with T'.format(wt)
+                assert T.compatible(m), 'Weight {} is not compatible with T'.format(wt)
 
                 if flat:
                     if compress:

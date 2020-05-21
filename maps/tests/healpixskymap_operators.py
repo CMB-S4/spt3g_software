@@ -121,7 +121,7 @@ for pair in [(m1, m1), (m1, m2), (m1, m3),
     assert(not np.isfinite(t[12]))
 
 # With a null map
-m4 = m.Clone(False)
+m4 = m.clone(False)
 
 for pair in [(m1, m4), (m2, m4), (m3, m4),
              (m4, m1), (m4, m2), (m4, m3)]:

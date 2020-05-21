@@ -121,7 +121,7 @@ for pair in [(m1, m1), (m1, m2), (m2, m1), (m2, m2)]:
     assert(m2.npix_allocated == nm2)
 
 # With a null map
-m3 = m.Clone(False)
+m3 = m.clone(False)
 
 for pair in [(m1, m3), (m2, m3), (m3, m2), (m3, m1)]:
     nonnull = pair[1] if pair[0] is m3 else pair[0]
@@ -181,7 +181,7 @@ for shape in [(20, 500), (21, 501)]:
         assert(np.allclose(np.asarray(mdelta)[sy, sx], pdelta))
         assert(np.allclose(np.asarray(m)[sy, sx], p))
 
-        m2 = m.Clone(False)
+        m2 = m.clone(False)
         m2.insert_patch(p)
         assert(np.allclose(np.asarray(m)[sy, sx], np.asarray(m2)[sy, sx]))
 
@@ -247,7 +247,7 @@ for shape in [(20, 500), (21, 501)]:
         assert(np.allclose(calpha, malpha))
         assert(np.allclose(cdelta, mdelta))
         assert(np.allclose(mcrop, m))
-        assert(m.IsCompatible(mcrop))
+        assert(m.compatible(mcrop))
 
         # statistics
         m1 = np.asarray(m).ravel()
