@@ -41,7 +41,7 @@ FlatSkyMap::FlatSkyMap(boost::python::object v, double res,
 		proj_info = FlatSkyProjection(xpix_, ypix_, res, alpha_center,
 		    delta_center, x_res, proj, x_center, y_center);
 
-		FillFromBuffer(v);
+		FillFromArray(v);
 
 		return;
 	}
@@ -178,7 +178,7 @@ FlatSkyMap::InitFromV1Data(std::vector<size_t> dims, const std::vector<double> &
 }
 
 void
-FlatSkyMap::FillFromBuffer(boost::python::object v)
+FlatSkyMap::FillFromArray(boost::python::object v)
 {
 	Py_buffer view;
 	if (PyObject_GetBuffer(v.ptr(), &view,
@@ -218,6 +218,15 @@ FlatSkyMap::FillFromBuffer(boost::python::object v)
 	}
 
 	throw bp::error_already_set();
+}
+
+G3SkyMapPtr
+FlatSkyMap::ArrayClone(boost::python::object val)
+{
+
+	FlatSkyMapPtr skymap = boost::dynamic_pointer_cast<FlatSkyMap>(Clone(false));
+	skymap->FillFromArray(val);
+	return skymap;
 }
 
 FlatSkyMap::const_iterator::const_iterator(const FlatSkyMap &map, bool begin) :
@@ -854,7 +863,7 @@ flatskymap_setslice_1d(FlatSkyMap &skymap, bp::slice coords,
 	if (coords.start().ptr() != Py_None || coords.stop().ptr() != Py_None)
 		log_fatal("1D slicing not supported");
 
-	skymap.FillFromBuffer(val);
+	skymap.FillFromArray(val);
 }
 
 static void
@@ -906,7 +915,7 @@ flatskymap_setitem_2d(FlatSkyMap &skymap, bp::tuple coords,
 
 		skymap.InsertPatch(patch);
 	} else {
-		dummy_subpatch->FillFromBuffer(val);
+		dummy_subpatch->FillFromArray(val);
 		skymap.InsertPatch(*dummy_subpatch);
 	}
 }
@@ -1053,6 +1062,10 @@ PYBINDINGS("maps")
 
 	    .def(bp::init<const FlatSkyMap&>(bp::arg("flat_map")))
 	    .def(bp::init<>())
+	    .def("array_clone", &FlatSkyMap::ArrayClone,
+	      (bp::arg("array")),
+	       "Return a map of the same type, populated with a copy of the input "
+	       "numpy array")
 	    .add_property("proj", &FlatSkyMap::proj, &FlatSkyMap::SetProj,
 	      "Map projection (one of maps.MapProjection)")
 	    .add_property("alpha_center", &FlatSkyMap::alpha_center,

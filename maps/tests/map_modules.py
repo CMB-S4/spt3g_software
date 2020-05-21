@@ -48,8 +48,7 @@ pipe.Add(maps.MakeMapsUnpolarized)
 mex3 = maps.ExtractMaps()
 pipe.Add(mex3)
 
-tmap = m.clone(False)
-tmap[:] = np.random.randn(*m.shape)
+tmap = m.array_clone(np.random.randn(*m.shape))
 tmap.pol_type = maps.MapPolType.T
 tmap.weighted = False
 pipe.Add(maps.InjectMaps, map_id="test_map", maps_in=[tmap])
