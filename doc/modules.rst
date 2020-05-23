@@ -93,6 +93,18 @@ The examples above return ``None`` and so implicitly pass their input frame to t
 
   Something with truth value (e.g. ``True`` or ``False``)
     A return value of ``True`` will cause the input frame to be passed to the next module and is equivalent to returning ``None``. Returning ``False`` will cause the input frame to be dropped and is equivalent to returning ``[]``. This can be used to implement cuts by returning the value of a conditional expression.
+    
+(Im)mutability of frame objects
+_______________________________
+
+Objects stored in a G3Frame are *immutable* -- once added to a frame, they should not be modified. If you want to change the contents of a frame object, delete it from the frame, modify a copy, and add the copy to be frame. (In C++, the compiler will prevent in-place modifications since ``G3Frame::Get()`` returns a const pointer, but Python doesn't have a concept of ``const`` so you just have to pay attention to the rules yourself and don't get the compiler's help). Copying the most common objects (e.g. G3TimestreamMaps) is designed to be particularly lightweight to facilitate this. 
+
+The immutability allows two particularly useful features of the software:
+
+ * Any pipeline module can cache an object (e.g. calibration data) by reference, without using excess memory. If later modules had the ability to modify frame objects, this could change the past in some sense by changing previous pipeline stages' view of the data after it was cached.
+ * Serialization and deserialization of frame objects happens when frames are read from or written to disk and every time they pass through an MPI communicator or between members of a multiprocess group. To amortize this cost, G3Frame saves the original serialized copy of small (< 128 MB) frame objects when deserialized and restores that copy to disk/MPI/etc. when the frame is saved again rather than pointlessly reserializing the unchanged object. If an object read from disk/MPI is modified in place and the frame is re-serialized, it will save the *original version* of the object, leading to a great deal of puzzling down the line.
+ 
+CAUTION: An astute reader will notice that there are a few patterns that, while illegal in the strictest sense of the rules (they change frame-objects in place and a C++ compiler would reject them), will not create causality paradoxes (e.g. changing an object that a function has just added to a frame). Please proceed with great caution when writing such code.
 
 The first module
 ________________
