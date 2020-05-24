@@ -116,10 +116,10 @@ G3SkyMapWeights::G3SkyMapWeights(const G3SkyMapWeights &r) :
 {
 }
 
-std::vector<int> G3SkyMap::AnglesToPixels(const std::vector<double> & alphas,
+std::vector<size_t> G3SkyMap::AnglesToPixels(const std::vector<double> & alphas,
     const std::vector<double> & deltas) const
 {
-	std::vector<int> pixels(alphas.size());
+	std::vector<size_t> pixels(alphas.size());
 
 	for (size_t i = 0; i < alphas.size(); i++) {
 		pixels[i] = AngleToPixel(alphas[i], deltas[i]);
@@ -128,7 +128,7 @@ std::vector<int> G3SkyMap::AnglesToPixels(const std::vector<double> & alphas,
 	return pixels;
 }
 
-void G3SkyMap::PixelsToAngles(const std::vector<int> & pixels,
+void G3SkyMap::PixelsToAngles(const std::vector<size_t> & pixels,
     std::vector<double> & alphas, std::vector<double> & deltas) const
 {
 	if (alphas.size() != pixels.size()) {
@@ -147,13 +147,23 @@ void G3SkyMap::PixelsToAngles(const std::vector<int> & pixels,
 }
 
 static boost::python::tuple
-skymap_pixels_to_angles(const G3SkyMap & skymap, const std::vector<int> & pixels)
+skymap_pixels_to_angles(const G3SkyMap & skymap,
+    const std::vector<size_t> & pixels)
 {
 	std::vector<double> alphas, deltas;
 	skymap.PixelsToAngles(pixels, alphas, deltas);
 
 	return boost::python::make_tuple(alphas, deltas);
 }
+
+static boost::python::tuple
+skymap_pixel_to_angle(const G3SkyMap & skymap, size_t pixel)
+{
+	std::vector<double> alphadelta = skymap.PixelToAngle(pixel);
+
+	return boost::python::make_tuple(alphadelta[0], alphadelta[1]);
+}
+
 
 size_t G3SkyMap::size() const
 {
@@ -779,19 +789,23 @@ PYBINDINGS("maps") {
 	    .def("pixels_to_angles", &skymap_pixels_to_angles,
 	      (bp::arg("pixels")),
 	       "Compute the sky coordinates of each of the given 1D pixels (vectorized)")
-	    .def("angle_to_pixel", &G3SkyMap::AnglesToPixels,
-	      (bp::arg("alphas"), bp::arg("deltas")),
-	       "Compute the 1D pixel location for each of the sky coordinates (vectorized)")
-	    .def("pixel_to_angle", &skymap_pixels_to_angles,
-	      (bp::arg("pixels")),
-	       "Compute the sky coordinates of each of the given 1D pixels (vectorized)")
-	    .def("pixel_to_angle", 
-	      (std::vector<double> (G3SkyMap::*)(size_t) const) 
-	      &G3SkyMap::PixelToAngle, bp::arg("pixel"),
-	      "Compute the sky coordinates of the given 1D pixel")
+	    .def("quat_angles_to_pixels", &G3SkyMap::QuatAnglesToPixels,
+	       "Compute the 1D pixel location for each of the sky coordinates "
+	       "(vectorized), expressed as quaternion rotations from the pole.")
+	    .def("pixels_to_quat_angles_to_pixels", &G3SkyMap::PixelsToQuatAngles,
+	       "Compute the sky coordinates, expressed as quaternion rotations "
+	       "from the pole, for each of the given 1-D pixel coordinates.")
 	    .def("angle_to_pixel", &G3SkyMap::AngleToPixel,
 	      (bp::arg("alpha"), bp::arg("delta")),
-	       "Compute the 1D pixel location of the given sky coordinates.")
+	       "Compute the 1D pixel location of the given sky position.")
+	    .def("pixel_to_angle", &skymap_pixel_to_angle, (bp::arg("pixel")),
+	       "Compute the sky coordinates (alpha, delta) of the given 1D pixel")
+	    .def("quat_angle_to_pixel", &G3SkyMap::QuatAngleToPixel,
+	       "Compute the 1D pixel location of the given sky position, "
+	       "expressed as a quaternion rotation from the pole.")
+	    .def("pixel_to_quat_angle", &G3SkyMap::PixelToQuatAngle,
+	       "Compute the quaternion rotation from the pole corresponding to "
+	       "the given 1D pixel.")
 
 	    .def("get_interp_values", &G3SkyMap::GetInterpValues,
 	      (bp::arg("alphas"), bp::arg("deltas")),
