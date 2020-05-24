@@ -1,8 +1,8 @@
 #include <pybindings.h>
 
 #include <G3Module.h>
-#include <G3TimestreamMap.h>
-#include <G3SkyMap.h>
+#include <G3Timestream.h>
+#include <maps/G3SkyMap.h>
 
 class MapBinner : public G3Module {
 public:
@@ -14,7 +14,7 @@ public:
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
 
 private:
-	std::string output_id_,
+	std::string output_id_;
 	std::string timestreams_;
 	std::string weights_;
 	std::string boloprops_name_;
