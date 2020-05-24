@@ -13,6 +13,7 @@ add_spt3g_library(maps SHARED
 )
 
 target_link_libraries(maps core calibration)
+link_openmp(maps)
 
 link_python_dir()
 
