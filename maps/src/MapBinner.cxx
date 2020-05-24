@@ -107,6 +107,10 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		return;
 	}
 
+	if (!boloprops_)
+		log_fatal("Need bolometer properties before detector data "
+		    "can be processed.");
+
 	G3VectorQuatConstPtr pointing =
 	    frame->Get<G3VectorQuat>(pointing_);
 	if (!pointing) {
@@ -120,6 +124,11 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	G3MapDoubleConstPtr weights = frame->Get<G3MapDouble>(weights_);
 	if (!timestreams) {
 		log_error("Missing timestreams %s", timestreams_.c_str());
+		out.push_back(frame);
+		return;
+	}
+	if (!weights) {
+		log_error("Missing weights %s", weights_.c_str());
 		out.push_back(frame);
 		return;
 	}
