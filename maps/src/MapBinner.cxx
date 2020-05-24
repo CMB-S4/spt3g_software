@@ -1,4 +1,5 @@
 #include <pybindings.h>
+#include <omp.h>
 
 #include <G3Module.h>
 #include <G3Timestream.h>
@@ -69,9 +70,71 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		boloprops_ = frame->Get<BolometerPropertiesMap>(
 		    boloprops_name_);
 
+	if (frame->type == G3Frame::EndProcessing) {
+		// Emit map frame
+		out.push_back(frame);
+		return;
+	}
+
 	if (frame->type != G3Frame::Scan) {
 		out.push_back(frame);
 		return;
+	}
+
+	G3SkyMapPtr scanT, scanQ, scanU;
+	G3SkyMapWeightsPtr scanW;
+
+	struct chunk {
+		G3SkyMapPtr scanT, scanQ, scanU;
+		G3SkyMapWeightsPtr scanW;
+	};
+	std::vector<struct chunk> chunk_array;
+
+	G3TimestreamMapConstPtr timestreams =
+	    frame->Get<G3TimestreamMap>(timestreams_);
+	if (!timestreams) {
+		log_warn("Missing timestreams %s", timestreams_.c_str());
+		out.push_back(frame);
+		return;
+	}
+
+	// Create a list of detectors to satisfy OpenMP's need for scalar
+	// iteration
+	std::vector<std::string> dets;
+	for (auto i : *timestreams)
+		dets.push_back(i.first);
+
+	// Clamp num_threads to prevent memory balloon?
+	#pragma omp parallel private(scanT, scanQ, scanU, scanW) shared(chunk_array)
+	{
+		#pragma omp single
+		if (omp_get_thread_num() == 0)
+			chunk_array.resize(omp_get_num_threads());
+		#pragma omp barrier
+
+		chunk_array[omp_get_thread_num()].scanT = scanT =
+		    T_->Clone(false);
+		if (Q_)
+			chunk_array[omp_get_thread_num()].scanQ =
+			    scanQ = Q_->Clone(false);
+		if (U_)
+			chunk_array[omp_get_thread_num()].scanU =
+			    scanU = U_->Clone(false);
+		chunk_array[omp_get_thread_num()].scanW = scanW =
+		    map_weights_->Clone(false);
+
+		#pragma omp for
+		for (size_t i = 0; i < dets.size(); i++) {
+			printf("Detector %zd: %s\n", i, dets[i].c_str());
+		}
+	}
+	for (auto i : chunk_array) {
+		(*T_) += *i.scanT;
+		if (Q_)
+			(*Q_) += *i.scanQ;
+		if (U_)
+			(*U_) += *i.scanU;
+		(*map_weights_) += *i.scanW;
 	}
 
 	out.push_back(frame);
