@@ -83,6 +83,7 @@ public:
 	G3Time GetStopTime() const;
 	double GetSampleRate() const;
 	size_t NSamples() const;
+	G3Timestream::TimestreamUnits GetUnits() const;
 
 	template <class A> void serialize(A &ar, unsigned v);
 	std::string Description() const;

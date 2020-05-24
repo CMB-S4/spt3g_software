@@ -549,6 +549,14 @@ size_t G3TimestreamMap::NSamples() const
 	return begin()->second->size();
 }
 
+G3Timestream::TimestreamUnits G3TimestreamMap::GetUnits() const
+{
+	if (begin() == end())
+		return G3Timestream::None;
+
+	return begin()->second->units;
+}
+
 G3_SPLIT_SERIALIZABLE_CODE(G3Timestream);
 G3_SERIALIZABLE_CODE(G3TimestreamMap);
 
@@ -903,6 +911,9 @@ PYBINDINGS("core") {
 	    .add_property("n_samples", &G3TimestreamMap::NSamples,
 	      "Number of samples in the timestream. Equivalent to the length "
 	      "of one of the timestreams.")
+	    .add_property("units", &G3TimestreamMap::GetUnits,
+	      "Units of the data in the timestream, stored as one of the "
+	      "members of core.G3TimestreamUnits.")
 	;
 	register_pointer_conversions<G3TimestreamMap>();
 
