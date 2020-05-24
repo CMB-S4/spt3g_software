@@ -52,9 +52,9 @@ EXPORT_G3MODULE("maps", MapBinner,
 "set to None, T/Q/U are made if set to IAU or Cosmo. If <detector_weights> is "
 "set, the given frameobject (a G3MapDouble indexed by detector ID) will be "
 "used to weight the detectors when mapped; otherwise, detectors will be "
-"weighted equally. Boresight pointingDetector pointing offsets and polarization angles and "
-"efficiencies are obtained from the specified BolometerPropertiesMap, which "
-"can generally be left at its default value.");
+"weighted equally. Boresight pointingDetector pointing offsets and "
+"polarization angles and efficiencies are obtained from the specified "
+"BolometerPropertiesMap, which can generally be left at its default value.");
 
 MapBinner::MapBinner(std::string output_map_id, const G3SkyMap &stub_map,
     std::string pointing, std::string timestreams, std::string detector_weights,
