@@ -49,8 +49,6 @@ SingleDetectorBoresightBinner::SingleDetectorBoresightBinner(
 {
 	template_ = stub_map.Clone(false);
 	template_->pol_type = G3SkyMap::T;
-	map_weights_ = G3SkyMapWeightsPtr(
-	    new G3SkyMapWeights(template_, false));
 }
 
 void
@@ -103,6 +101,8 @@ SingleDetectorBoresightBinner::Process(G3FramePtr frame,
 		template_->units = timestreams->GetUnits();
 		for (auto i : *timestreams)
 			maps_[i.first] = template_->Clone(false);
+		map_weights_ = G3SkyMapWeightsPtr(
+		    new G3SkyMapWeights(template_, false));
 	} else {
 		if (template_->units != timestreams->GetUnits())
 			log_fatal("Timestreams have units that do not match "
