@@ -5,6 +5,7 @@ add_spt3g_library(maps SHARED
   src/HealpixSkyMap.cxx
   src/FlatSkyProjection.cxx
   src/FlatSkyMap.cxx
+  src/MapBinner.cxx
   src/mapdata.cxx
   src/maputils.cxx
   src/pointing.cxx
