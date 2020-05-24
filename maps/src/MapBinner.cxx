@@ -3,6 +3,7 @@
 #include <G3Module.h>
 #include <G3Timestream.h>
 #include <maps/G3SkyMap.h>
+#include <calibration/BoloProperties.h>
 
 class MapBinner : public G3Module {
 public:
@@ -21,6 +22,8 @@ private:
 
 	G3SkyMapPtr T_, Q_, U_;
 	G3SkyMapWeightsPtr map_weights_;
+
+	BolometerPropertiesMapConstPtr boloprops_;
 
 	SET_LOGGER("MapBinner");
 };
@@ -58,4 +61,20 @@ MapBinner::MapBinner(std::string output_map_id, const G3SkyMap &stub_map,
 		U_->pol_type = G3SkyMap::U;
 	}
 }
+
+void
+MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
+{
+	if (frame->Has(boloprops_name_))
+		boloprops_ = frame->Get<BolometerPropertiesMap>(
+		    boloprops_name_);
+
+	if (frame->type != G3Frame::Scan) {
+		out.push_back(frame);
+		return;
+	}
+
+	out.push_back(frame);
+}
+
 

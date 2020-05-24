@@ -12,7 +12,7 @@ add_spt3g_library(maps SHARED
   src/python.cxx
 )
 
-target_link_libraries(maps core)
+target_link_libraries(maps core calibration)
 
 link_python_dir()
 
