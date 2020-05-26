@@ -126,7 +126,7 @@ SingleDetectorBoresightBinner::Process(G3FramePtr frame,
 
 	// Calculate common pointing
 	g3_assert(timestreams->NSamples() == pointing->size());
-	std::vector<size_t> pixels = template_->QuatAnglesToPixels(*pointing);
+	std::vector<size_t> pixels = template_->QuatsToPixels(*pointing);
 	for (size_t i = 0; i < pixels.size(); i++)
 		(*map_weights_->TT)[i] += 1;
 

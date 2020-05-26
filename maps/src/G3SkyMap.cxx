@@ -4,6 +4,7 @@
 #include <maps/G3SkyMap.h>
 #include <maps/FlatSkyMap.h>
 #include <maps/HealpixSkyMap.h>
+#include <maps/pointing.h>
 
 namespace bp=boost::python;
 
@@ -116,7 +117,8 @@ G3SkyMapWeights::G3SkyMapWeights(const G3SkyMapWeights &r) :
 {
 }
 
-std::vector<size_t> G3SkyMap::AnglesToPixels(const std::vector<double> & alphas,
+std::vector<size_t>
+G3SkyMap::AnglesToPixels(const std::vector<double> & alphas,
     const std::vector<double> & deltas) const
 {
 	std::vector<size_t> pixels(alphas.size());
@@ -128,7 +130,8 @@ std::vector<size_t> G3SkyMap::AnglesToPixels(const std::vector<double> & alphas,
 	return pixels;
 }
 
-void G3SkyMap::PixelsToAngles(const std::vector<size_t> & pixels,
+void
+G3SkyMap::PixelsToAngles(const std::vector<size_t> & pixels,
     std::vector<double> & alphas, std::vector<double> & deltas) const
 {
 	if (alphas.size() != pixels.size()) {
@@ -145,6 +148,48 @@ void G3SkyMap::PixelsToAngles(const std::vector<size_t> & pixels,
 		deltas[i] = ang[1];
 	}
 }
+
+size_t
+G3SkyMap::QuatToPixel(quat q) const
+{
+	double alpha, delta;
+	quat_to_ang(q, alpha, delta);
+	if (coord_ref == Local)
+		delta *= -1;
+
+	return AngleToPixel(alpha, delta);
+}
+
+quat
+G3SkyMap::PixelToQuat(size_t pixel) const
+{
+	std::vector<double> alphadelta = PixelToAngle(pixel);
+	if (coord_ref == Local)
+		alphadelta[1] *= -1;
+
+	return ang_to_quat(alphadelta[0], alphadelta[1]);
+}
+
+std::vector<size_t>
+G3SkyMap::QuatsToPixels(const G3VectorQuat &quats) const
+{
+	std::vector<size_t> pixels(quats.size());
+	for (size_t i = 0; i < quats.size(); i++)
+		pixels[i] = QuatToPixel(quats[i]);
+
+	return pixels;
+}
+
+G3VectorQuat
+G3SkyMap::PixelsToQuats(const std::vector<size_t> &pixels) const
+{
+	G3VectorQuat quats(pixels.size());
+	for (size_t i = 0; i < pixels.size(); i++)
+		quats[i] = PixelToQuat(pixels[i]);
+
+	return quats;
+}
+
 
 static boost::python::tuple
 skymap_pixels_to_angles(const G3SkyMap & skymap,
@@ -233,7 +278,38 @@ G3SkyMap &G3SkyMap::operator/=(double rhs)
 	return *this;
 }
 
-double G3SkyMap::GetInterpPrecalc(const std::vector<long> & pix,
+
+void
+G3SkyMap::GetInterpPixelsWeights(quat q, std::vector<long> & pixels,
+    std::vector<double> & weights) const
+{
+	double alpha, delta;
+	quat_to_ang(q, alpha, delta);
+	if (coord_ref == Local)
+		delta *= -1;
+
+	GetInterpPixelsWeights(alpha, delta, pixels, weights);
+}
+
+G3VectorQuat
+G3SkyMap::GetRebinQuats(long pixel, size_t scale) const
+{
+	std::vector<double> alphas, deltas;
+
+	GetRebinAngles(pixel, scale, alphas, deltas);
+
+	G3VectorQuat q(alphas.size());
+	for (size_t i = 0; i < alphas.size(); i++) {
+		if (coord_ref == Local)
+			deltas[i] *= -1;
+		q[i] = ang_to_quat(alphas[i], deltas[i]);
+	}
+
+	return q;
+}
+
+double
+G3SkyMap::GetInterpPrecalc(const std::vector<long> & pix,
     const std::vector<double> & weight) const
 {
 	double outval = 0;
@@ -243,7 +319,8 @@ double G3SkyMap::GetInterpPrecalc(const std::vector<long> & pix,
 	return outval;
 }
 
-double G3SkyMap::GetInterpValue(double alpha, double delta) const
+double
+G3SkyMap::GetInterpValue(double alpha, double delta) const
 {
 	std::vector<long> pix;
 	std::vector<double> weight;
@@ -251,7 +328,8 @@ double G3SkyMap::GetInterpValue(double alpha, double delta) const
 	return GetInterpPrecalc(pix, weight);
 }
 
-std::vector<double> G3SkyMap::GetInterpValues(const std::vector<double> & alphas,
+std::vector<double>
+G3SkyMap::GetInterpValues(const std::vector<double> & alphas,
     const std::vector<double> & deltas) const
 {
 	std::vector<double> outvals(alphas.size());
@@ -262,6 +340,29 @@ std::vector<double> G3SkyMap::GetInterpValues(const std::vector<double> & alphas
 
 	return outvals;
 }
+
+double
+G3SkyMap::GetInterpValue(quat q) const
+{
+	double alpha, delta;
+	quat_to_ang(q, alpha, delta);
+	if (coord_ref == Local)
+		delta *= -1;
+
+	return GetInterpValue(alpha, delta);
+}
+
+std::vector<double>
+G3SkyMap::GetInterpValues(const G3VectorQuat & quats) const
+{
+	std::vector<double> outvals(quats.size());
+
+	for (size_t i = 0; i < quats.size(); i++)
+		outvals[i] = GetInterpValue(quats[i]);
+
+	return outvals;
+}
+
 
 static double
 skymap_getitem(const G3SkyMap &skymap, int i)
@@ -799,10 +900,10 @@ PYBINDINGS("maps") {
 	      (bp::arg("pixels")),
 	       "Compute the sky coordinates of each of the given 1D pixels "
 	       "(vectorized)")
-	    .def("quat_angles_to_pixels", &G3SkyMap::QuatAnglesToPixels,
+	    .def("quats_to_pixels", &G3SkyMap::QuatsToPixels,
 	       "Compute the 1D pixel location for each of the sky coordinates "
 	       "(vectorized), expressed as quaternion rotations from the pole.")
-	    .def("pixels_to_quat_angles_to_pixels", &G3SkyMap::PixelsToQuatAngles,
+	    .def("pixels_to_quats", &G3SkyMap::PixelsToQuats,
 	       "Compute the sky coordinates, expressed as quaternion rotations "
 	       "from the pole, for each of the given 1-D pixel coordinates.")
 	    .def("angle_to_pixel", &G3SkyMap::AngleToPixel,
@@ -810,15 +911,30 @@ PYBINDINGS("maps") {
 	       "Compute the 1D pixel location of the given sky position.")
 	    .def("pixel_to_angle", &skymap_pixel_to_angle, (bp::arg("pixel")),
 	       "Compute the sky coordinates (alpha, delta) of the given 1D pixel")
-	    .def("quat_angle_to_pixel", &G3SkyMap::QuatAngleToPixel,
+	    .def("quat_to_pixel", &G3SkyMap::QuatToPixel,
 	       "Compute the 1D pixel location of the given sky position, "
 	       "expressed as a quaternion rotation from the pole.")
-	    .def("pixel_to_quat_angle", &G3SkyMap::PixelToQuatAngle,
+	    .def("pixel_to_quat", &G3SkyMap::PixelToQuat,
 	       "Compute the quaternion rotation from the pole corresponding to "
 	       "the given 1D pixel.")
+	    .def("quat_to_pixel", &G3SkyMap::QuatsToPixels,
+	       "Compute the 1D pixel location for each of the sky coordinates "
+	       "(vectorized), expressed as quaternion rotations from the pole.")
+	    .def("pixel_to_quat", &G3SkyMap::PixelsToQuats,
+	       "Compute the sky coordinates, expressed as quaternion rotations "
+	       "from the pole, for each of the given 1-D pixel coordinates.")
 
-	    .def("get_interp_values", &G3SkyMap::GetInterpValues,
+	    .def("get_interp_values",
+	      (std::vector<double> (G3SkyMap::*)(const std::vector<double> &,
+		const std::vector<double> &) const) &G3SkyMap::GetInterpValues,
 	      (bp::arg("alphas"), bp::arg("deltas")),
+	       "Return the values at each of the input coordinate locations. "
+	       "Computes each value using bilinear interpolation over the "
+	       "map pixels.")
+
+	    .def("get_interp_values",
+	      (std::vector<double> (G3SkyMap::*)(const G3VectorQuat &) const)
+	      &G3SkyMap::GetInterpValues, (bp::arg("quats")),
 	       "Return the values at each of the input coordinate locations. "
 	       "Computes each value using bilinear interpolation over the "
 	       "map pixels.")

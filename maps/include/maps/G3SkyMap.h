@@ -104,24 +104,29 @@ public:
 	    const std::vector<double> & deltas) const;
 	void PixelsToAngles(const std::vector<size_t> & pixels,
 	    std::vector<double> & alphas, std::vector<double> & deltas) const;
-	std::vector<size_t> QuatAnglesToPixels(const G3VectorQuat &angles) const;
-	G3VectorQuat PixelsToQuatAngles(const std::vector<size_t> &pixels) const;
+	std::vector<size_t> QuatsToPixels(const G3VectorQuat &quats) const;
+	G3VectorQuat PixelsToQuats(const std::vector<size_t> &pixels) const;
 
 	virtual std::vector<double> PixelToAngle(size_t pixel) const = 0;
 	virtual size_t AngleToPixel(double alpha, double delta) const = 0;
-	quat PixelToQuatAngle(size_t pixel) const;
-	size_t QuatAngleToPixel(quat angle) const;
+	quat PixelToQuat(size_t pixel) const;
+	size_t QuatToPixel(quat q) const;
 
 	// Rebinning and interpolation
 	virtual void GetRebinAngles(long pixel, size_t scale,
 	    std::vector<double> & alphas, std::vector<double> & deltas) const = 0;
+	G3VectorQuat GetRebinQuats(long pixel, size_t scale) const;
 	virtual void GetInterpPixelsWeights(double alpha, double delta,
 	    std::vector<long> & pixels, std::vector<double> & weights) const = 0;
+	void GetInterpPixelsWeights(quat q, std::vector<long> & pixels,
+	    std::vector<double> & weights) const;
 	double GetInterpPrecalc(const std::vector<long> &pixels,
 	    const std::vector<double> &weights) const;
 	double GetInterpValue(double alpha, double delta) const;
+	double GetInterpValue(quat q) const;
 	std::vector<double> GetInterpValues(const std::vector<double> &alphas,
 	    const std::vector<double> &deltas) const;
+	std::vector<double> GetInterpValues(const G3VectorQuat & quats) const;
 
 	virtual boost::shared_ptr<G3SkyMap> Rebin(size_t scale, bool norm = true) const = 0;
 
