@@ -752,6 +752,14 @@ G3SkyMapPtr FlatSkyMap::Reshape(size_t width, size_t height, double fill) const
 	return ExtractPatch(xpix_ / 2, ypix_ / 2, width, height, fill);
 }
 
+static boost::python::tuple
+flatskymap_pixel_to_angle(const G3SkyMap & skymap, size_t pixel)
+{
+	std::vector<double> alphadelta = skymap.PixelToAngle(pixel);
+
+	return boost::python::make_tuple(alphadelta[0], alphadelta[1]);
+}
+
 static int
 FlatSkyMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 {
@@ -1084,8 +1092,7 @@ PYBINDINGS("maps")
 	      "Resolution in Y direction for maps with rectangular pixels")
 
 	    .def("pixel_to_angle",
-	      (std::vector<double> (FlatSkyMap::*)(size_t) const)
-	      &FlatSkyMap::PixelToAngle, bp::arg("pixel"),
+	      &flatskymap_pixel_to_angle, bp::arg("pixel"),
 	      "Compute the sky coordinates of the given 1D pixel")
 	    .def("pixel_to_angle",
 	      (std::vector<double> (FlatSkyMap::*)(size_t, size_t) const)
