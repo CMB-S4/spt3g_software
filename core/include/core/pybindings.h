@@ -142,22 +142,10 @@ numpy_container_from_object(boost::python::object v)
 			x->resize(view.len/sizeof(double));
 			for (size_t i = 0; i < view.len/sizeof(double); i++)
 				(*x)[i] = ((double *)view.buf)[i];
-#if 0
-		} else if (strcmp(view.format, "Zd") == 0) {
-			x->resize(view.len/sizeof(std::complex<double>));
-			for (size_t i = 0; i < view.len/sizeof(std::complex<double>); i++)
-				(*x)[i] = ((std::complex<double> *)view.buf)[i];
-#endif
 		} else if (strcmp(view.format, "f") == 0) {
 			x->resize(view.len/sizeof(float));
 			for (size_t i = 0; i < view.len/sizeof(float); i++)
 				(*x)[i] = ((float *)view.buf)[i];
-#if 0
-		} else if (strcmp(view.format, "Zf") == 0) {
-			x->resize(view.len/sizeof(std::complex<float>));
-			for (size_t i = 0; i < view.len/sizeof(std::complex<float>); i++)
-				(*x)[i] = ((std::complex<float> *)view.buf)[i];
-#endif
 		} else if (strcmp(view.format, "i") == 0) {
 			x->resize(view.len/sizeof(int));
 			for (size_t i = 0; i < view.len/sizeof(int); i++)
@@ -166,14 +154,6 @@ numpy_container_from_object(boost::python::object v)
 			x->resize(view.len/sizeof(int));
 			for (size_t i = 0; i < view.len/sizeof(int); i++)
 				(*x)[i] = ((unsigned int *)view.buf)[i];
-		} else if (strcmp(view.format, "l") == 0) {
-			x->resize(view.len/sizeof(long));
-			for (size_t i = 0; i < view.len/sizeof(long); i++)
-				(*x)[i] = ((long *)view.buf)[i];
-		} else if (strcmp(view.format, "L") == 0) {
-			x->resize(view.len/sizeof(unsigned long));
-			for (size_t i = 0; i < view.len/sizeof(unsigned long); i++)
-				(*x)[i] = ((unsigned long *)view.buf)[i];
 		} else if (strcmp(view.format, "q") == 0) {
 			x->resize(view.len/sizeof(int64_t));
 			for (size_t i = 0; i < view.len/sizeof(int64_t); i++)

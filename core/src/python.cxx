@@ -260,10 +260,56 @@ numpy_vector_infrastructure(int64_t, int64_t, "q")
 numpy_vector_infrastructure(uint64_t, uint64_t, "Q")
 numpy_vector_infrastructure(int32_t, int32_t, "i")
 numpy_vector_infrastructure(uint32_t, uint32_t, "I")
-numpy_vector_infrastructure(long, long, "l")
-numpy_vector_infrastructure(unsigned long, u_long, "L")
 numpy_vector_infrastructure(double, double, "d")
 numpy_vector_infrastructure(float, float, "f")
+
+
+// Some special handling is needed for complex vectors
+
+template <typename T>
+boost::shared_ptr<T>
+complex_numpy_container_from_object(boost::python::object v)
+{
+	boost::shared_ptr<T> x(new T);
+	Py_buffer view;
+	if (PyObject_GetBuffer(v.ptr(), &view,
+	    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) != -1) {
+		if (strcmp(view.format, "Zd") == 0) {
+			x->resize(view.len/sizeof(std::complex<double>));
+			for (size_t i = 0; i < view.len/sizeof(std::complex<double>); i++)
+				(*x)[i] = ((std::complex<double> *)view.buf)[i];
+		} else if (strcmp(view.format, "Zf") == 0) {
+			x->resize(view.len/sizeof(std::complex<float>));
+			for (size_t i = 0; i < view.len/sizeof(std::complex<float>); i++)
+				(*x)[i] = ((std::complex<float> *)view.buf)[i];
+		} else {
+			// Fall back to scalar case otherwise
+			auto scalar =
+			   numpy_container_from_object<std::vector<double> >(v);
+			x->resize(scalar->size());
+			for (size_t i = 0; i < scalar->size(); i++)
+				(*x)[i] = (*scalar)[i];
+		}
+		PyBuffer_Release(&view);
+	} else {
+		PyErr_Clear();
+		boost::python::container_utils::extend_container(*x, v);
+	}
+
+	return x;
+}
+
+template <> boost::shared_ptr<std::vector<std::complex<float> > >
+numpy_container_from_object(boost::python::object v)
+{
+	return complex_numpy_container_from_object<std::vector<std::complex<float> > >(v);
+}
+template <> boost::shared_ptr<std::vector<std::complex<double> > >
+numpy_container_from_object(boost::python::object v)
+{
+	return complex_numpy_container_from_object<std::vector<std::complex<double> > >(v);
+}
+
 numpy_vector_infrastructure(std::complex<double>, cxdouble, "Zd");
 numpy_vector_infrastructure(std::complex<float>, cxfloat, "Zf");
 
@@ -285,8 +331,7 @@ BOOST_PYTHON_MODULE(core)
 	numpy_vector_of(uint64_t, uint64_t, "Uint64");
 	numpy_vector_of(int32_t, int32_t, "Int");
 	numpy_vector_of(uint32_t, uint32_t, "UInt");
-	numpy_vector_of(long, long, "Long");
-	numpy_vector_of(unsigned long, u_long, "ULong");
+
 	numpy_vector_of(double, double, "Double");
 	numpy_vector_of(std::complex<double>, cxdouble, "ComplexDouble");
 	numpy_vector_of(float, float, "Float");
