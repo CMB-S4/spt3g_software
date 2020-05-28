@@ -26,17 +26,25 @@ def healpix_to_flatsky(
         supplied, one will be constructed using the remaining keyword arguments.
 
     rebin[1]: int
-        If supplied and >1, account for sub-pixel structure by integrating
-        over a sub-grid on each pixel of the given dimension.  This avoids
-        aliasing of power at angular scales beyond the map resolution.
+        If supplied and >1, account for sub-pixel structure by integrating over
+        a sub-grid on each pixel of the given dimension.  This avoids aliasing
+        of power at angular scales beyond the map resolution.
 
     interp[false]: bool
         If True, use bilinear interpolation to extract values from the input
         map.  Otherwise, the nearest-neighbor value is used.
 
-    All additional keyword arguments are passed to FlatSkyMap to construct
-    the output map object.  Required if `map_stub` is not supplied,
-    otherwise ignored.
+    All additional keyword arguments are passed to FlatSkyMap to construct the
+    output map object.  Required if `map_stub` is not supplied, otherwise
+    ignored.
+
+    Maps can be rotated between Equatorial and Galactic coordinates, and/or
+    change polarization convention between COSMO and IAU, by setting the
+    appropriate attributes of the input and output maps.  Note that if the input
+    map is a numpy array representation of a healpix map, the coordinate system
+    and polarization convention are assumed to be that of the output map.
+    Conversely, attributes not defined in the output map are assumed to be
+    that of the input map.
 
     Returns:
     --------
@@ -89,9 +97,9 @@ def flatsky_to_healpix(
         supplied, one will be constructed using the remaining keyword arguments.
 
     rebin[1]: int
-        If supplied and >1, account for sub-pixel structure by integrating
-        over a sub-grid on each pixel of the given dimension.  This avoids
-        aliasing of power at angular scales beyond the map resolution.
+        If supplied and >1, account for sub-pixel structure by integrating over
+        a sub-grid on each pixel of the given dimension.  This avoids aliasing
+        of power at angular scales beyond the map resolution.
 
     interp[false]: bool
         If True, use bilinear interpolation to extract values from the input
@@ -106,12 +114,16 @@ def flatsky_to_healpix(
     the output map object.  Required if `map_stub` is not supplied,
     otherwise ignored.
 
+    Maps can be rotated between Equatorial and Galactic coordinates, and/or
+    change polarization convention between COSMO and IAU, by setting the
+    appropriate attributes of the input and output maps.  Attributes not defined
+    in the output map are assumed to be that of the input map.
+
     Returns:
     --------
     output_map: numpy array or HealpixSkyMap
-        The array containing the healpix map
-        If `fullsky` is True, this is a numpy array, otherwise a
-        HealpixSkyMap instance.
+        The array containing the healpix map.  If `fullsky` is True, this is a
+        numpy array, otherwise a HealpixSkyMap instance.
     """
     if not isinstance(map_in, maps.FlatSkyMap):
         raise TypeError("Input must be a FlatSkyMap")
