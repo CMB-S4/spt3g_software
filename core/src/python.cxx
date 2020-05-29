@@ -235,11 +235,38 @@ vector_getbuffer_##name(PyObject *obj, Py_buffer *view, int flags) \
 { \
 	return pyvector_getbuffer<T>(obj, view, flags, conv); \
 } \
-static PyBufferProcs vec_bufferprocs_##name;
+static PyBufferProcs vec_bufferprocs_##name; \
+struct numpy_vector_from_python_##name { \
+	numpy_vector_from_python_##name() { \
+		boost::python::converter::registry::push_back( \
+		    &convertible, &construct, \
+		    boost::python::type_id<std::vector<T> >()); \
+	} \
+	static void *convertible(PyObject* obj_ptr) { \
+		Py_buffer view; \
+		if (PyObject_GetBuffer(obj_ptr, &view, \
+		    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) == -1) { \
+			PyErr_Clear(); \
+			return NULL; \
+		} \
+		PyBuffer_Release(&view); \
+		return obj_ptr; \
+	} \
+	static void construct(PyObject* obj_ptr, \
+	    boost::python::converter::rvalue_from_python_stage1_data* data) { \
+		void* storage = ( \
+		    (boost::python::converter::rvalue_from_python_storage<std::vector<T> >*)data)->storage.bytes; \
+		new (storage) std::vector<T>; \
+		boost::shared_ptr<std::vector<T> > swap_storage = numpy_container_from_object<std::vector<T> >(boost::python::object(boost::python::handle<>(boost::python::borrowed(obj_ptr)))); \
+		((std::vector<T> *)(storage))->swap(*swap_storage); \
+		data->convertible = storage; \
+	} \
+};
 
 #if PY_MAJOR_VERSION < 3
 #define numpy_vector_of(T, name, desc) \
 { \
+	numpy_vector_from_python_##name(); \
 	boost::python::object cls = register_vector_of<T>(desc); \
 	PyTypeObject *vdclass = (PyTypeObject *)cls.ptr(); \
 	vec_bufferprocs_##name.bf_getbuffer = vector_getbuffer_##name; \
@@ -249,6 +276,7 @@ static PyBufferProcs vec_bufferprocs_##name;
 #else
 #define numpy_vector_of(T, name, desc) \
 { \
+	numpy_vector_from_python_##name(); \
 	boost::python::object cls = register_vector_of<T>(desc); \
 	PyTypeObject *vdclass = (PyTypeObject *)cls.ptr(); \
 	vec_bufferprocs_##name.bf_getbuffer = vector_getbuffer_##name; \
