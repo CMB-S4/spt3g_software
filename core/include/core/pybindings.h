@@ -154,16 +154,22 @@ numpy_container_from_object(boost::python::object v)
 			x->resize(view.len/sizeof(size_t));
 			for (size_t i = 0; i < view.len/sizeof(size_t); i++)
 				(*x)[i] = ((size_t *)view.buf)[i];
-		} else if (strcmp(view.format, "i") == 0 ||
-		     strcmp(view.format, "l") == 0) {
+		} else if (strcmp(view.format, "i") == 0) { 
 			x->resize(view.len/sizeof(int));
 			for (size_t i = 0; i < view.len/sizeof(int); i++)
 				(*x)[i] = ((int *)view.buf)[i];
-		} else if (strcmp(view.format, "I") == 0 ||
-		     strcmp(view.format, "L") == 0) {
+		} else if (strcmp(view.format, "I") == 0) { 
 			x->resize(view.len/sizeof(int));
 			for (size_t i = 0; i < view.len/sizeof(int); i++)
 				(*x)[i] = ((unsigned int *)view.buf)[i];
+		} else if (strcmp(view.format, "l") == 0) {
+			x->resize(view.len/sizeof(long));
+			for (size_t i = 0; i < view.len/sizeof(long); i++)
+				(*x)[i] = ((long *)view.buf)[i];
+		} else if (strcmp(view.format, "L") == 0) {
+			x->resize(view.len/sizeof(long));
+			for (size_t i = 0; i < view.len/sizeof(long); i++)
+				(*x)[i] = ((unsigned long *)view.buf)[i];
 		} else if (strcmp(view.format, "q") == 0) {
 			x->resize(view.len/sizeof(int64_t));
 			for (size_t i = 0; i < view.len/sizeof(int64_t); i++)
