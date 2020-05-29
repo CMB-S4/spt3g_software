@@ -249,6 +249,10 @@ struct numpy_vector_from_python_##name { \
 			PyErr_Clear(); \
 			return NULL; \
 		} \
+		if (view.ndim == 0) { \
+			PyBuffer_Release(&view); \
+			return NULL; \
+		} \
 		PyBuffer_Release(&view); \
 		return obj_ptr; \
 	} \
