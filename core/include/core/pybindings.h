@@ -192,6 +192,41 @@ numpy_container_from_object(boost::python::object v)
         return x;
 }
 
+// Some special handling is needed for complex vectors
+
+template <typename T>
+boost::shared_ptr<T>
+complex_numpy_container_from_object(boost::python::object v)
+{
+	boost::shared_ptr<T> x(new T);
+	Py_buffer view;
+	if (PyObject_GetBuffer(v.ptr(), &view,
+	    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) != -1) {
+		if (strcmp(view.format, "Zd") == 0) {
+			x->resize(view.len/sizeof(std::complex<double>));
+			for (size_t i = 0; i < view.len/sizeof(std::complex<double>); i++)
+				(*x)[i] = ((std::complex<double> *)view.buf)[i];
+		} else if (strcmp(view.format, "Zf") == 0) {
+			x->resize(view.len/sizeof(std::complex<float>));
+			for (size_t i = 0; i < view.len/sizeof(std::complex<float>); i++)
+				(*x)[i] = ((std::complex<float> *)view.buf)[i];
+		} else {
+			// Fall back to scalar case otherwise
+			auto scalar =
+			   numpy_container_from_object<std::vector<double> >(v);
+			x->resize(scalar->size());
+			for (size_t i = 0; i < scalar->size(); i++)
+				(*x)[i] = (*scalar)[i];
+		}
+		PyBuffer_Release(&view);
+	} else {
+		PyErr_Clear();
+		boost::python::container_utils::extend_container(*x, v);
+	}
+
+	return x;
+}
+
 template <typename T, bool proxy=true>
 void
 register_map(std::string name, const char *docstring)
