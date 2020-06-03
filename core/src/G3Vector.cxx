@@ -31,51 +31,7 @@ template <>
 G3VectorComplexDoublePtr
 container_from_object(boost::python::object v)
 {
-	G3VectorComplexDoublePtr x(new (G3VectorComplexDouble));
-	Py_buffer view;
-	if (PyObject_GetBuffer(v.ptr(), &view,
-	    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) != -1) {
-		if (strcmp(view.format, "Zd") == 0) {
-			x->insert(x->begin(), (std::complex<double> *)view.buf,
-			    (std::complex<double> *)view.buf +
-			    view.len/sizeof(std::complex<double>));
-		} else if (strcmp(view.format, "Zf") == 0) {
-			x->resize(view.len/sizeof(std::complex<float>));
-			for (size_t i = 0;
-			    i < view.len/sizeof(std::complex<float>); i++)
-				(*x)[i] = ((std::complex<float> *)view.buf)[i];
-		} else if (strcmp(view.format, "d") == 0) {
-			x->resize(view.len/sizeof(double));
-			for (size_t i = 0; i < view.len/sizeof(double); i++)
-				(*x)[i] = ((double *)view.buf)[i];
-		} else if (strcmp(view.format, "f") == 0) {
-			x->resize(view.len/sizeof(float));
-			for (size_t i = 0; i < view.len/sizeof(float); i++)
-				(*x)[i] = ((float *)view.buf)[i];
-		} else if (strcmp(view.format, "i") == 0) {
-			x->resize(view.len/sizeof(int));
-			for (size_t i = 0; i < view.len/sizeof(int); i++)
-				(*x)[i] = ((int *)view.buf)[i];
-		} else if (strcmp(view.format, "I") == 0) {
-			x->resize(view.len/sizeof(int));
-			for (size_t i = 0; i < view.len/sizeof(int); i++)
-				(*x)[i] = ((unsigned int *)view.buf)[i];
-		} else if (strcmp(view.format, "l") == 0) {
-			x->resize(view.len/sizeof(long));
-			for (size_t i = 0; i < view.len/sizeof(long); i++)
-				(*x)[i] = ((unsigned long *)view.buf)[i];
-		} else {
-			// We could add more types, but why do that?
-			// Let Python do the work for obscure cases
-			boost::python::container_utils::extend_container(*x, v);
-		}
-		PyBuffer_Release(&view);
-	} else {
-		PyErr_Clear();
-		boost::python::container_utils::extend_container(*x, v);
-	}
-
-	return x;
+	return complex_numpy_container_from_object<G3VectorComplexDouble>(v);
 }
 
 static int
