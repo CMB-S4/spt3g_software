@@ -372,9 +372,11 @@ class InjectMaps(object):
         Maps to add to the frame.  If a list, contains Stokes maps with valid
         pol_type and weights.  If a dict, contains Stokes and weights maps keyed
         by the standard map frame names.
+    ignore_missing_weights [False] : bool
+        Skip warning about missing weights.  Useful for masks.
     """
 
-    def __init__(self, map_id, maps_in):
+    def __init__(self, map_id, maps_in, ignore_missing_weights=False):
         self.map_frame = core.G3Frame(core.G3FrameType.Map)
         self.map_frame["Id"] = map_id
 
@@ -399,7 +401,9 @@ class InjectMaps(object):
         else:
             raise TypeError("maps_in must be a list or dict")
 
-        ValidateMaps(self.map_frame)
+        ValidateMaps(
+            self.map_frame, ignore_missing_weights=ignore_missing_weights
+        )
 
     def __call__(self, frame):
         if self.map_frame is None:
