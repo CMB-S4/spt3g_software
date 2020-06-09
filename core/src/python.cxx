@@ -295,6 +295,32 @@ numpy_vector_infrastructure(uint32_t, uint32_t, "I")
 numpy_vector_infrastructure(double, double, "d")
 numpy_vector_infrastructure(float, float, "f")
 
+// Apple, for their own insane reasons, defines uint64_t as
+// "unsigned long long" even on LP64 systems where longs are
+// 64-bit. Because "long long" (not a standard C type!) is not
+// actually the same type as "long", even when both are 64-bit
+// integers, the uint64_t definition above does not do the right
+// thing for size_t on 64-bit Apple systems.
+//
+// Thanks, Apple. "Think Different!"
+#if defined(__APPLE__) && defined(__LP64__)
+numpy_vector_infrastructure(size_t, size_t, "L")
+numpy_vector_infrastructure(ssize_t, ssize_t, "l")
+struct apple_size
+{
+	static PyObject* convert(const std::vector<size_t> &arg) {
+		return boost::python::to_python_value<std::vector<uint64_t> >()(*(std::vector<uint64_t> *)(uintptr_t)(&arg));
+	}
+};
+
+struct apple_ssize
+{
+	static PyObject* convert(const std::vector<ssize_t> &arg) {
+		return boost::python::to_python_value<std::vector<int64_t> >()(*(std::vector<int64_t> *)(intptr_t)(&arg));
+	}
+};
+#endif
+
 template <> boost::shared_ptr<std::vector<std::complex<float> > >
 numpy_container_from_object(boost::python::object v)
 {
@@ -327,6 +353,13 @@ BOOST_PYTHON_MODULE(core)
 	numpy_vector_of(uint64_t, uint64_t, "UInt64");
 	numpy_vector_of(int32_t, int32_t, "Int");
 	numpy_vector_of(uint32_t, uint32_t, "UInt");
+
+#if defined(__APPLE__) && defined(__LP64__)
+	numpy_vector_from_python_size_t();
+	numpy_vector_from_python_ssize_t();
+	bp::to_python_converter<std::vector<size_t>, apple_size, false>();
+	bp::to_python_converter<std::vector<ssize_t>, apple_ssize, false>();
+#endif
 
 	numpy_vector_of(double, double, "Double");
 	numpy_vector_of(std::complex<double>, cxdouble, "ComplexDouble");
