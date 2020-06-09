@@ -592,6 +592,8 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
                     pix1, data = m.nonzero_pixels()
                     pix1 = np.asarray(pix1)
                     data  = np.asarray(data)
+                    data = data[np.argsort(pix1)]
+                    pix1.sort()
 
                     if pix is None:
                         pix = pix1
@@ -649,6 +651,8 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
                         pix1, data = m.nonzero_pixels()
                         pix1 = np.asarray(pix1)
                         data = np.asarray(data)
+                        data = data[np.argsort(pix1)]
+                        pix1.sort()
                         assert(len(pix) == len(pix1) and (pix == pix1).all())
                         del pix1
                     else:

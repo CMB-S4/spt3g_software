@@ -228,6 +228,24 @@ void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool int
 		q_rot = get_fk5_j2000_to_gal_quat();
 		if (in_map->coord_ref == MapCoordReference::Equatorial)
 			q_rot = 1. / q_rot;
+	} else if (in_map->coord_ref != out_map->coord_ref) {
+		log_fatal("Cannot convert input coord_ref %d to output coord_ref %d",
+		    in_map->coord_ref, out_map->coord_ref);
+	}
+
+	if (out_map->pol_type != G3SkyMap::None && out_map->pol_type != in_map->pol_type) {
+		log_fatal("Cannot convert input pol_type %d to output pol_type %d",
+		    in_map->pol_type, out_map->pol_type);
+	} else {
+		out_map->pol_type = in_map->pol_type;
+	}
+
+	double s = 1.;
+	if (out_map->GetPolConv() != G3SkyMap::ConvNone && in_map->GetPolConv() != G3SkyMap::ConvNone) {
+		if (out_map->pol_type == G3SkyMap::U && out_map->GetPolConv() != in_map->GetPolConv())
+			s = -1.;
+	} else if (out_map->GetPolConv() == G3SkyMap::ConvNone) {
+		out_map->SetPolConv(in_map->GetPolConv());
 	}
 
 	for (size_t i = 0; i < out_map->size(); i++) {
@@ -260,13 +278,11 @@ void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool int
 				val = in_map->at(in_map->AngleToPixel(radec[0], radec[1]));
 		}
 		if (val != 0)
-			(*out_map)[i] = val;
+			(*out_map)[i] = s * val;
 	}
 
 	out_map->weighted = in_map->weighted;
 	out_map->units = in_map->units;
-	out_map->pol_type = in_map->pol_type;
-	out_map->SetPolConv(in_map->GetPolConv());
 }
 
 // algorithm from https://www.johndcook.com/blog/skewness_kurtosis/
@@ -446,12 +462,14 @@ void maputils_pybindings(void){
 
 	bp::def("reproj_map", ReprojMap,
 		(bp::arg("in_map"), bp::arg("out_map"), bp::arg("rebin")=1, bp::arg("interp")=false),
-		"Takes the data in in_map and reprojects it onto out_map.  out_map can "
-		"have a different projection, size, resolution, etc.  Optionally account "
-		"for sub-pixel structure by setting rebin > 1 and/or enable bilinear "
-		"interpolation of values from the input map by setting interp=True. "
-		"Use the maps' coord_ref attributes to rotate between Equatorial and "
-		"Galactic coordinate systems.");
+		"Reprojects the data from in_map onto out_map.  out_map can have a different "
+		"projection, size, resolution, etc.  Optionally account for sub-pixel "
+		"structure by setting rebin > 1 and/or enable bilinear interpolation of "
+		"values from the input map by setting interp=True.  Use the maps' coord_ref "
+		"attributes to rotate between Equatorial and Galactic coordinate systems.  "
+		"Use the maps' pol_conv attributes to switch between COSMO and IAU "
+		"polarization conventions.  If output attributes are not set, they will be "
+		"copied from the input map.");
 
 	bp::def("get_map_stats", GetMapStats,
 		(bp::arg("map"), bp::arg("order")=2, bp::arg("ignore_zeros")=false,
