@@ -306,7 +306,7 @@ G3SkyMap::SetPolConv(G3SkyMap::MapPolConv pol_conv)
 }
 
 static bp::tuple
-skymap_shape(G3SkyMap &skymap)
+skymap_shape(const G3SkyMap &skymap)
 {
 	// Swap to match numpy's convention for shape()
 	std::vector<size_t> shape = skymap.shape();
@@ -318,19 +318,19 @@ skymap_shape(G3SkyMap &skymap)
 }
 
 static bp::tuple
-skymapweights_shape(G3SkyMapWeights &weights)
+skymapweights_shape(const G3SkyMapWeights &weights)
 {
 	return skymap_shape(*(weights.TT));
 }
 
 static G3SkyMapPtr
-skymap_copy(G3SkyMap &r)
+skymap_copy(const G3SkyMap &r)
 {
 	return r.Clone(true);
 }
 
 static G3SkyMapWeightsPtr
-skymapweights_copy(G3SkyMapWeights &r)
+skymapweights_copy(const G3SkyMapWeights &r)
 {
 	return r.Clone(true);
 }
@@ -756,7 +756,6 @@ PYBINDINGS("maps") {
 	    .def("__getitem__", &skymap_getitem)
 	    .def("__setitem__", &skymap_setitem)
 	    .def("__copy__", &skymap_copy)
-	    .def("__deepcopy__", &skymap_copy)
 	    .def("copy", &skymap_copy, "Return a copy of the map object")
 	    .def("Clone", &G3SkyMap::Clone,
 	      (bp::arg("copy_data")=true),
@@ -870,7 +869,6 @@ PYBINDINGS("maps") {
 	    .add_property("size", &G3SkyMapWeights::size, "Number of pixels in weights")
 	    .def("__len__", &G3SkyMapWeights::size, "Number of pixels in weights")
 	    .def("__copy__", &skymapweights_copy)
-	    .def("__deepcopy__", &skymapweights_copy)
 	    .def("copy", &skymapweights_copy, "Return a copy of the weights object")
 	    .add_property("shape", &skymapweights_shape, "Shape of weights")
 	    .add_property("polarized", &G3SkyMapWeights::IsPolarized,
