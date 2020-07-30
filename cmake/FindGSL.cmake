@@ -8,9 +8,9 @@ if (GSL_INCLUDES)
 # Already in cache, be silent
 set (GSL_FIND_QUIETLY TRUE)
 endif (GSL_INCLUDES)
-find_path (GSL_INCLUDES gsl/gsl_math.h)
-find_library (GSL_LIB NAMES gsl)
-find_library (GSL_CBLAS_LIB NAMES openblas gslcblas)
+find_path (GSL_INCLUDES gsl/gsl_math.h HINTS ENV GSL_DIR)
+find_library (GSL_LIB NAMES gsl HINTS ENV GSL_DIR)
+find_library (GSL_CBLAS_LIB NAMES openblas gslcblas HINTS ENV GSL_DIR)
 set (GSL_LIBRARIES "${GSL_LIB}" "${GSL_CBLAS_LIB}")
 # handle the QUIETLY and REQUIRED arguments and set GSL_FOUND to TRUE if
 # all listed variables are TRUE
