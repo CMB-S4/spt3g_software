@@ -64,7 +64,7 @@ Additionally, below when you get to the ``cmake ..`` command, replace it with:
 
 .. code-block:: sh
 
-    FFTW_LIBRARIES=$FFTW_DIR FFTW_INCLUDES=$FFTW_INC CC=gcc CXX=g++ cmake .. -DGSL_INCLUDES=$GSL_DIR/include/ -DGSL_LIB=$GSL_DIR/lib/libgsl.so
+    CC=gcc CXX=g++ cmake ..
 
 
 Compilation
