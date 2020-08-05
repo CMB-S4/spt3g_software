@@ -556,8 +556,6 @@ G3SkyMap &HealpixSkyMap::operator *=(const G3SkyMap &rhs) {
 	g3_assert(IsCompatible(rhs));
 	if (units == G3Timestream::None)
 		units = rhs.units;
-	else if (rhs.units != G3Timestream::None)
-		g3_assert(units == rhs.units);
 	try {
 		const HealpixSkyMap& b = dynamic_cast<const HealpixSkyMap &>(rhs);
 		bool zero = false;
@@ -594,8 +592,6 @@ G3SkyMap &HealpixSkyMap::operator /=(const G3SkyMap &rhs) {
 	g3_assert(IsCompatible(rhs));
 	if (units == G3Timestream::None)
 		units = rhs.units;
-	else if (rhs.units != G3Timestream::None)
-		g3_assert(units == rhs.units);
 	try {
 		const HealpixSkyMap& b = dynamic_cast<const HealpixSkyMap &>(rhs);
 		bool zero = false;

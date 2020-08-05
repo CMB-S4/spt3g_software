@@ -397,14 +397,12 @@ G3SkyMap &FlatSkyMap::operator op(const G3SkyMap &rhs) {\
 flatskymap_arithmetic(+=, {}, {g3_assert(units == rhs.units);})
 flatskymap_arithmetic(-=, {}, {g3_assert(units == rhs.units);})
 flatskymap_arithmetic(/=, {ConvertToDense(); (*this->dense_) /= 0.0;},
-    {if (units == G3Timestream::None) units = rhs.units; else if (rhs.units != G3Timestream::None) g3_assert(units == rhs.units);})
+    {if (units == G3Timestream::None) units = rhs.units;})
 
 G3SkyMap &FlatSkyMap::operator *=(const G3SkyMap &rhs) {
 	g3_assert(IsCompatible(rhs));
 	if (units == G3Timestream::None)
 		units = rhs.units;
-	else if (rhs.units != G3Timestream::None)
-		g3_assert(units == rhs.units);
 	try {
 		const FlatSkyMap& b = dynamic_cast<const FlatSkyMap &>(rhs);
 		bool zero = false;
