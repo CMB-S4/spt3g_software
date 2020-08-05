@@ -200,6 +200,8 @@ G3SkyMap &G3SkyMap::operator*=(const G3SkyMap &rhs)
 	g3_assert(IsCompatible(rhs));
 	if (units == G3Timestream::None)
 		units = rhs.units;
+	else if (rhs.units != G3Timestream::None)
+		g3_assert(units == rhs.units);
 
 	for (size_t i = 0; i < rhs.size(); i++)
 		(*this)[i] *= rhs[i];
@@ -218,6 +220,8 @@ G3SkyMap &G3SkyMap::operator/=(const G3SkyMap &rhs)
 	g3_assert(IsCompatible(rhs));
 	if (units == G3Timestream::None)
 		units = rhs.units;
+	else if (rhs.units != G3Timestream::None)
+		g3_assert(units == rhs.units);
 
 	for (size_t i = 0; i < rhs.size(); i++)
 		(*this)[i] /= rhs[i];
