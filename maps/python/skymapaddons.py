@@ -1,4 +1,5 @@
 import numpy
+import warnings
 from spt3g.maps import G3SkyMapWeights, G3SkyMap
 
 # This file adds extra functionality to the python interface to G3SkyMap and
@@ -107,3 +108,31 @@ def skymapweights_setattr(self, x, val):
             setattr(self.UU, x, val)
 G3SkyMapWeights.__setattr__ = skymapweights_setattr
 del skymapweights_setattr
+
+
+def skymap_clone(self, copy_data=True):
+    with warnings.catch_warnings():
+        warnings.simplefilter("default")
+        warnings.warn(
+            "{0}.Clone is deprecated, use {0}.clone instead".format(
+                self.__class__.__name__
+            ),
+            DeprecationWarning,
+        )
+    return self.clone(copy_data)
+G3SkyMap.Clone = skymap_clone
+G3SkyMapWeights.Clone = skymap_clone
+del skymap_clone
+
+def skymap_compat(self, other):
+    with warnings.catch_warnings():
+        warnings.simplefilter("default")
+        warnings.warn(
+            "{0}.IsCompatible is deprecated, use {0}.compatible instead".format(
+                self.__class__.__name__
+            ),
+            DeprecationWarning,
+        )
+    return self.compatible(other)
+G3SkyMap.IsCompatible = skymap_compat
+del skymap_compat
