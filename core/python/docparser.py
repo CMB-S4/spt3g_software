@@ -52,6 +52,8 @@ def get_doc_for_module(module_path, include_link_list = True):
     def format_name(modname, x):
         return '\n.. _%s.%s:\n\n**%s.%s**\n' % (modname, x, modname, x)
     def format_arguments(s0,s1):
+        # remove object hashes
+        s1 = re.sub('<(.*) at (.*)>', '<\\1>', s1)
         argdef = '%s%s'%(s0,s1)
         return '\n\n*Definition:*\n        ``%s``\n' % argdef.strip()
     def add_str(s0, s1):

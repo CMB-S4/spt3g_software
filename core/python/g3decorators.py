@@ -2,6 +2,7 @@ from spt3g.core import G3FrameType
 from copy import copy
 import inspect
 import textwrap
+import re
 
 def get_function_signature(f, replacement_kwargs = None):
     '''
@@ -34,7 +35,9 @@ def get_function_signature(f, replacement_kwargs = None):
         if i != 0:
             func_string += ' ,'
         if i < len(d):
-            func_string += str(d[i])[::-1]+'='
+            # remove object hashes
+            s = re.sub('<(.*) at (.*)>', '<\\1>', repr(d[i]))
+            func_string += s[::-1]+'='
         func_string += str(a)[::-1]
     #and now things are forwards
     func_string = name+'('+func_string[::-1]
