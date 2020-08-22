@@ -55,6 +55,8 @@ endmacro(add_spt3g_library lib_name)
 
 macro(add_spt3g_test test_name)
 	add_test(${PROJECT}/${test_name} ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/${test_name}.py)
+	set_tests_properties(${PROJECT}/${test_name} PROPERTIES
+		ENVIRONMENT PYTHONPATH=${SPT3G_BUILD_DIR}:$ENV{PYTHONPATH})
 
 	set(extra_macro_args ${ARGN})
 	list(LENGTH extra_macro_args num_extra_args)
