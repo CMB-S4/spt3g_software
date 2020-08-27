@@ -32,6 +32,11 @@ for x in ['__and__', '__divmod__', '__floordiv__', '__iand__', '__ifloordiv__', 
 # Make weight maps so that you can index them and get the full 3x3 weight matrix
 
 def skymapweights_keys(self):
+    """
+    Return the list of string names of valid weight attributes.  For unpolarized
+    weights, this list includes only TT.  Otherwise, the list includes all six
+    unique weight attributes in row major order: TT, TQ, TU, QQ, QU, UU.
+    """
     if self.polarized:
         return ['TT', 'TQ', 'TU', 'QQ', 'QU', 'UU']
     return ['TT']
