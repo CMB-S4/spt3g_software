@@ -23,7 +23,8 @@ for pol in [True, False]:
     assert(mw.congruent)
 
     assert(mw.compatible(m))
-    assert(mw['TT'].compatible(mw.TT))
+    for k in mw.keys():
+        assert(mw[k].compatible(mw.TT))
 
     if not pol:
         assert(mw.QQ is None)
