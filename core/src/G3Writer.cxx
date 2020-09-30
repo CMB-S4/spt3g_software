@@ -63,7 +63,8 @@ PYBINDINGS("core") {
 	      "types to the second optional argument (streams). If no streams argument "
 	      "is given, writes all types of frames. If append is set to True, will "
 	      "append frames to its output file rather than overwriting it.",
-        init<std::string, optional<std::vector<G3Frame::FrameType>, bool> >((arg("filename"), arg("streams"), arg("append"))))
+        init<std::string, std::vector<G3Frame::FrameType>, bool>((arg("filename"),
+	    arg("streams")=std::vector<G3Frame::FrameType>(), arg("append")=false)))
         .def("Flush", &G3Writer::Flush)
         .def_readonly("__g3module__", true)
 	;
