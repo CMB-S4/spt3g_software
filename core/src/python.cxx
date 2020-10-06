@@ -31,6 +31,25 @@ void G3ModuleRegistrator::CallRegistrarsFor(const char *mod)
 		(*i)();
 }
 
+G3FramePtr
+g3frame_char_constructor(std::string max_4_chars)
+{
+	if (max_4_chars.size() > 4) {
+		PyErr_SetString(PyExc_ValueError, "Ad-hoc frame type must be 4 "
+		    "or fewer characters.");
+		bp::throw_error_already_set();
+	}
+
+	// Right-justify the character string in the constant in native
+	// endianness, such that code = max_4_chars[0] for a 1-character
+	// code.
+	uint32_t code = 0;
+	for (int i = max_4_chars.size()-1, j = 0; i >= 0; i--, j += 8)
+		code |= (uint32_t(max_4_chars[i]) << j);
+
+	return G3FramePtr(new G3Frame(G3Frame::FrameType(code)));
+}
+
 // Use G3Frame::save()/G3Frame::load() to provide a pickle interface for frames
 struct g3frame_picklesuite : boost::python::pickle_suite
 {
@@ -413,6 +432,7 @@ BOOST_PYTHON_MODULE(core)
 	  "different rates.")
 	    .def(bp::init<G3Frame::FrameType>())
 	    .def(bp::init<G3Frame>())
+	    .def("__init__", bp::make_constructor(g3frame_char_constructor, bp::default_call_policies(), bp::args("adhoctypecode")), "Create a frame with an ad-hoc (non-standard) type code. Use sparingly and with care.")
 	    .def_readwrite("type", &G3Frame::type, "Type code for frame. "
 	      "See general G3Frame docstring.")
 	    .def("__setitem__", &g3frame_python_put)

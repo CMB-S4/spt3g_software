@@ -1,4 +1,5 @@
 import numpy
+import warnings
 from spt3g.maps import G3SkyMapWeights, G3SkyMap
 
 # This file adds extra functionality to the python interface to G3SkyMap and
@@ -30,8 +31,21 @@ for x in ['__and__', '__divmod__', '__floordiv__', '__iand__', '__ifloordiv__', 
 
 # Make weight maps so that you can index them and get the full 3x3 weight matrix
 
+def skymapweights_keys(self):
+    """
+    Return the list of string names of valid weight attributes.  For unpolarized
+    weights, this list includes only TT.  Otherwise, the list includes all six
+    unique weight attributes in row major order: TT, TQ, TU, QQ, QU, UU.
+    """
+    if self.polarized:
+        return ['TT', 'TQ', 'TU', 'QQ', 'QU', 'UU']
+    return ['TT']
+
+G3SkyMapWeights.keys = skymapweights_keys
+del skymapweights_keys
+
 def skymapweights_getitem(self, x):
-    if isinstance(x, str) and x in ['TT', 'TQ', 'TU', 'QQ', 'QU', 'UU']:
+    if isinstance(x, str) and x in self.keys():
         return getattr(self, x)
 
     if (isinstance(x, tuple) and any(isinstance(xx, slice) for xx in x)) \
@@ -63,7 +77,7 @@ G3SkyMapWeights.__getitem__ = skymapweights_getitem
 del skymapweights_getitem
 
 def skymapweights_setitem(self, x, mat):
-    if isinstance(x, str) and x in ['TT', 'TQ', 'TU', 'QQ', 'QU', 'UU']:
+    if isinstance(x, str) and x in self.keys():
         setattr(self, x, mat)
         return
 
@@ -107,3 +121,31 @@ def skymapweights_setattr(self, x, val):
             setattr(self.UU, x, val)
 G3SkyMapWeights.__setattr__ = skymapweights_setattr
 del skymapweights_setattr
+
+
+def skymap_clone(self, copy_data=True):
+    with warnings.catch_warnings():
+        warnings.simplefilter("default")
+        warnings.warn(
+            "{0}.Clone is deprecated, use {0}.clone instead".format(
+                self.__class__.__name__
+            ),
+            DeprecationWarning,
+        )
+    return self.clone(copy_data)
+G3SkyMap.Clone = skymap_clone
+G3SkyMapWeights.Clone = skymap_clone
+del skymap_clone
+
+def skymap_compat(self, other):
+    with warnings.catch_warnings():
+        warnings.simplefilter("default")
+        warnings.warn(
+            "{0}.IsCompatible is deprecated, use {0}.compatible instead".format(
+                self.__class__.__name__
+            ),
+            DeprecationWarning,
+        )
+    return self.compatible(other)
+G3SkyMap.IsCompatible = skymap_compat
+del skymap_compat

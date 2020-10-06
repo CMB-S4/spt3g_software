@@ -224,7 +224,14 @@ std::ostream& operator<<(std::ostream& os, const G3Frame::FrameType &frame_type)
 		ft_str = "None";
 		break;
 	default:
-		ft_str = frame_type;
+		// Right-justify the character string in the constant in native
+		// endianness.
+		for (int j = 24; j >= 0; j -= 8) {
+			char c = char((uint32_t(frame_type) >> j) & 0xff);
+			if (c == 0)
+				continue;
+			ft_str += c;
+		}
 	}
 
 	os << ft_str;

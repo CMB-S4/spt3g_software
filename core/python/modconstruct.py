@@ -6,6 +6,7 @@ except ImportError:
     multiproc_avail = False
     pass
 import types
+import re
 
 def pipesegment(func, autodoc=True):
     '''
@@ -49,7 +50,9 @@ def pipesegment(func, autodoc=True):
                 for arg in args:
                     doc += ', %s' % repr(arg)
                 for arg in kwargs:
-                    doc += ', %s=%s' % (arg, repr(kwargs[arg]))
+                    # remove object hashes
+                    s = re.sub('<(.*) at (.*)>', '<\\1>', repr(kwargs[arg]))
+                    doc += ', %s=%s' % (arg, s)
                 doc += ')'
                 doclines.append(doc)
         fake = PotemkinPipe()

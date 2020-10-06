@@ -51,7 +51,7 @@ if (SPT3G_VERSION)
 endif()
 
 # Ignore known warnings
-target_compile_options(spt3g INTERFACE -Wno-unknown-warning-option -Wno-unused -Wno-unused-result -Wno-deprecated-register -Wno-sign-compare -Wno-constant-conversion -Wno-self-assign-overloaded -Wno-deprecated-declarations)
+target_compile_options(spt3g INTERFACE -Wno-unknown-warning-option -Wno-unused -Wno-unused-result -Wno-deprecated-register -Wno-sign-compare -Wno-constant-conversion -Wno-self-assign-overloaded -Wno-deprecated-declarations -Wno-maybe-uninitialized)
 
 # Fix bugs in GCC 4.4's strict aliasing code by turning it off
 target_compile_options(spt3g INTERFACE -fno-strict-aliasing)

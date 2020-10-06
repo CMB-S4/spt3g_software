@@ -9,7 +9,7 @@ Quick Start
 How to Install
 --------------
 
-This depends on Boost and cmake, as well as the usual Python packages. Some additional packages (NetCDF, in particular) will activate optional components of the code if installed. You also need a C++11 compiler. This software is designed to run and work on a variety of operating systems (all Linuxes, Mac OS X, and FreeBSD) and architectures (at least 64-bit x86 and POWER).
+spt3g_software depends on Boost and cmake, as well as the usual Python packages. Some additional packages (FFTW, GSL, and NetCDF, in particular) will activate optional components of the code if installed. You also need a C++11 compiler. This software is designed to run and work on a variety of operating systems (all Linuxes, Mac OS X, and FreeBSD) and architectures (at least 64-bit x86 and POWER).
 
 Minimum versions:
 
@@ -18,10 +18,9 @@ Minimum versions:
 	- cmake >= 2.6
 	- Python >= 2.7
 
-Do *not* install *anything* with Anaconda!
 
-Installing Dependencies on a Personal System
-============================================
+Installing on a Personal System
+===============================
 
 On Ubuntu/Debian, you can install the non-Python dependencies, including the optional ones, by doing:
 
@@ -37,8 +36,8 @@ On RHEL-type systems (SL, CentOS, etc.), do this:
 
 Note that on RHEL/SL versions before 7, you will need a newer compiler than ships with the OS. Please see the clustertools repository for a script in this case.
 
-Installation on the Open Science Grid
-=====================================
+Installing on the Open Science Grid
+===================================
 
 On an OSG or other system with OASIS configured, run this before anything else:
 
@@ -47,6 +46,26 @@ On an OSG or other system with OASIS configured, run this before anything else:
 	eval `/cvmfs/spt.opensciencegrid.org/py3-v2/setup.sh`
 
 This sets up a software environment with all the packages installed by yum, etc. above that you need for the SPT3G software environment, as well as a variety of standard cosmology and astrophysics tasks. You will obtain best results if you place the line above in your ``.bash_profile``. Do *not* put it in ``.bashrc`` and make *sure* that this is the *only* software installation set up in your bash profile. In particular, take care that there are no references to other python installations (Anaconda, etc.).
+
+Installing on NERSC
+===================
+
+
+On NERSC, all dependencies can be installed by ensuring the following `modules <https://docs.nersc.gov/environment/#nersc-modules-environment>`_ are loaded with these exact versions (other version combinations may work, but this combination has been tested):
+
+.. code-block:: sh
+
+    PrgEnv-gnu/6.0.5 python/3.7-anaconda-2019.07 gcc/8.2.0 boost/1.72.0 fftw/3.3.8 gsl/2.5
+
+Python dependencies like Numpy or others can be installed with pip or conda (the ``python/3.7-anaconda-2019.07`` module above will give you a ``pip`` or ``conda`` command you can use). 
+
+
+Additionally, below when you get to the ``cmake ..`` command, replace it with:
+
+.. code-block:: sh
+
+    CC=gcc CXX=g++ cmake ..
+
 
 Compilation
 ===========

@@ -26,9 +26,16 @@ def healpix_to_flatsky(
         supplied, one will be constructed using the remaining keyword arguments.
 
     rebin[1]: int
-        If supplied and >1, account for sub-pixel structure by integrating over
-        a sub-grid on each pixel of the given dimension.  This avoids aliasing
-        of power at angular scales beyond the map resolution.
+        If supplied and >1, subdivide the output pixel by n x n with each 
+        sub-pixel taking on the input map values at pixel center (with interp
+        or nearest neighbor). The output pixel takes on the average of the sub-pixel
+        values.
+        In the case that the input map has higher resolution than the output
+        map (and that the input map is not low-pass filtered to remove
+        information above the Nyquist freq. of the output map pixel), this
+        reduces aliasing compared with direct sampling. But there would still be
+        aliased power from the input map from freq above the ouput map pixel's
+        Nyquist. 
 
     interp[false]: bool
         If True, use bilinear interpolation to extract values from the input
@@ -97,9 +104,16 @@ def flatsky_to_healpix(
         supplied, one will be constructed using the remaining keyword arguments.
 
     rebin[1]: int
-        If supplied and >1, account for sub-pixel structure by integrating over
-        a sub-grid on each pixel of the given dimension.  This avoids aliasing
-        of power at angular scales beyond the map resolution.
+        If supplied and >1, subdivide the output pixel by n x n with each 
+        sub-pixel taking on the input map values at pixel center (with interp
+        or nearest neighbor). The output pixel takes on the average of the sub-pixel
+        values.
+        In the case that the input map has higher resolution than the output
+        map (and that the input map is not low-pass filtered to remove
+        information above the Nyquist freq. of the output map pixel), this
+        reduces aliasing compared with direct sampling. But there would still be
+        aliased power from the input map from freq above the ouput map pixel's
+        Nyquist. 
 
     interp[false]: bool
         If True, use bilinear interpolation to extract values from the input
