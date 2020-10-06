@@ -10,6 +10,9 @@
 #include <G3Map.h>
 #include <maps/G3SkyMap.h>
 
+// XXX delete this
+#include <maps/pointing.h>
+
 class SingleDetectorBoresightBinner : public G3Module {
 public:
 	SingleDetectorBoresightBinner(const G3SkyMap &stub_map,
@@ -126,9 +129,18 @@ SingleDetectorBoresightBinner::Process(G3FramePtr frame,
 
 	// Calculate common pointing
 	g3_assert(timestreams->NSamples() == pointing->size());
+#ifdef NOTYET
 	std::vector<size_t> pixels = template_->QuatsToPixels(*pointing);
+	// This produces nonsense at present.
+#else
+	std::vector<double> alpha, delta;
+	get_detector_pointing(0, 0,
+	    *pointing, template_->coord_ref, alpha, delta);
+	auto pixels = template_->AnglesToPixels(alpha, delta);
+#endif
+
 	for (size_t i = 0; i < pixels.size(); i++)
-		(*map_weights_->TT)[i] += 1;
+		(*map_weights_->TT)[pixels[i]] += 1;
 
 #ifdef OPENMP_FOUND
 	// Clamp num_threads to prevent memory balloon?
