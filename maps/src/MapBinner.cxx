@@ -160,7 +160,8 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		G3SkyMapPtr scanT, scanQ, scanU;
 		G3SkyMapWeightsPtr scanW;
 	};
-	std::vector<struct chunk> chunk_array;
+	struct chunk *chunk_array;
+	size_t nchunks;
 
 	// Create a list of detectors to satisfy OpenMP's need for scalar
 	// iteration
@@ -169,11 +170,14 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		dets.push_back(i.first);
 
 	// Clamp num_threads to prevent memory balloon?
-	#pragma omp parallel private(scanT, scanQ, scanU, scanW) shared(chunk_array)
+	#pragma omp parallel private(scanT, scanQ, scanU, scanW) shared(chunk_array,nchunks)
 	{
 		#pragma omp single
-		if (omp_get_thread_num() == 0)
-			chunk_array.resize(omp_get_num_threads());
+		{
+			chunk_array = new struct chunk[omp_get_num_threads()];
+			nchunks = omp_get_num_threads();
+		}
+
 		#pragma omp barrier
 
 		chunk_array[omp_get_thread_num()].scanT = scanT =
@@ -195,7 +199,8 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 			    scanT, scanQ, scanU, scanW);
 		}
 	}
-	for (auto i : chunk_array) {
+	for (size_t j = 0; j < nchunks; j++) {
+		struct chunk &i = chunk_array[j];
 		(*T_) += *i.scanT;
 		if (Q_)
 			(*Q_) += *i.scanQ;
@@ -203,6 +208,7 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 			(*U_) += *i.scanU;
 		(*map_weights_) += *i.scanW;
 	}
+	delete [] chunk_array;
 #else
 	for (auto ts : *timestreams) {
 		BinTimestream(*ts.second,
