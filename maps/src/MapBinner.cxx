@@ -272,12 +272,13 @@ MapBinner::BinTimestream(const G3Timestream &det, double weight,
 
 		MuellerMatrix mueller;
 		fill_mueller_matrix_from_stokes_coupling(pcoupling, mueller);
+		mueller *= weight;
 
 		for (size_t i = 0; i < det.size(); i++) {
 			(*T)[detpointing[i]] += pcoupling.t*weight*det[i];
 			(*Q)[detpointing[i]] += pcoupling.q*weight*det[i];
 			(*U)[detpointing[i]] += pcoupling.u*weight*det[i];
-			(*W)[detpointing[i]] += mueller * weight;
+			(*W)[detpointing[i]] += mueller;
 		}
 	} else {
 		for (size_t i = 0; i < det.size(); i++) {
