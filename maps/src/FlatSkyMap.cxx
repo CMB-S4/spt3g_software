@@ -354,6 +354,9 @@ FlatSkyMap::at(size_t i) const
 double &
 FlatSkyMap::operator [] (size_t i)
 {
+	if (i == (size_t)-1)
+		return overflow;
+
 	return (*this)(i % xpix_, i / xpix_);
 }
 

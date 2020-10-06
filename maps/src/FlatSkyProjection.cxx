@@ -247,7 +247,7 @@ FlatSkyProjection::XYToPixel(double x, double y) const
 {
 	long ix = (long) (x + 0.5);
 	long iy = (long) (y + 0.5);
-	return (ix < 0 || iy < 0 || ix >= xpix_ || iy >= ypix_) ? xpix_ * ypix_ : ix + iy * xpix_;
+	return (ix < 0 || iy < 0 || ix >= xpix_ || iy >= ypix_) ? -1 : ix + iy * xpix_;
 }
 
 std::vector<double>
