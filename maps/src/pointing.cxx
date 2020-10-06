@@ -355,10 +355,10 @@ get_detector_pointing(double x_offset, double y_offset,
 	// For a detector x/y offset and a boresight position specified by
 	// trans_quat with a given coordinate system coord_sys,
 	// computes the individual detector pointing coordinates.
-	//
-	// Assumes alpha and delta have already been allocated.
 
 	quat det_pos = offsets_to_quat(x_offset, y_offset);
+	delta.resize(trans_quat.size());
+	alpha.resize(trans_quat.size());
 
 	if ((!std::isfinite(x_offset)) || (!std::isfinite(y_offset))){
 		log_debug("Found non-finite (inf or nan) offsets");
