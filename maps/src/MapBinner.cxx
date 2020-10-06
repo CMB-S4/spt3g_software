@@ -9,6 +9,7 @@
 #include <G3Data.h>
 #include <G3Map.h>
 #include <maps/G3SkyMap.h>
+#include <maps/pointing.h>
 #include <calibration/BoloProperties.h>
 
 class MapBinner : public G3Module {
@@ -214,28 +215,69 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	out.push_back(frame);
 }
 
+// Following two utility functions copied from the old map-maker and need to
+// be re-tooled -- either moved into the constructors of the relevant objects
+// and/or improved to handle things like boresight rotation.
+static void
+fill_mueller_matrix_from_stokes_coupling(
+    const StokesVector &stokes_coupling, MuellerMatrix &pcm)
+{
+	pcm.tt = stokes_coupling.t * stokes_coupling.t;
+	pcm.tq = stokes_coupling.t * stokes_coupling.q;
+	pcm.tu = stokes_coupling.t * stokes_coupling.u;
+	pcm.qq = stokes_coupling.q * stokes_coupling.q;
+	pcm.qu = stokes_coupling.q * stokes_coupling.u;
+	pcm.uu = stokes_coupling.u * stokes_coupling.u;
+}
+
+static void
+set_stokes_coupling(double pol_ang, double pol_eff,
+    StokesVector &stokes_coupling)
+{
+	stokes_coupling.t = 1.0;
+	stokes_coupling.q = cos(pol_ang/G3Units::rad *2.)*pol_eff/(2.0-pol_eff);
+	stokes_coupling.u = sin(pol_ang/G3Units::rad *2.)*pol_eff/(2.0-pol_eff);
+
+	if (fabs(stokes_coupling.q) < 1e-12)
+		stokes_coupling.q = 0;
+	if (fabs(stokes_coupling.u) < 1e-12)
+		stokes_coupling.u = 0;
+}
+
 void
 MapBinner::BinTimestream(const G3Timestream &det, double weight,
     const BolometerProperties &bp, const G3VectorQuat &pointing,
     G3SkyMapPtr T, G3SkyMapPtr Q, G3SkyMapPtr U, G3SkyMapWeightsPtr W)
     // Do shared pointers add too much overhead here? Probably not...
 {
-	// XXX Get per-detector pointing timestream and Mueller matrices
+	// Get per-detector pointing timestream
 
-#ifdef NOTYET
+	std::vector<double> alpha, delta;
+	get_detector_pointing(bp.x_offset, bp.y_offset, pointing, T->coord_ref,
+	    alpha, delta);
+
+	auto detpointing = T->AnglesToPixels(alpha, delta);
+
 	if (Q) {
-		for (int i = 0; i < det.size(); i++) {
-			(*T)[detpointing[i]] += tcoupling[i]*weight*det[i];
-			(*Q)[detpointing[i]] += qcoupling[i]*weight*det[i];
-			(*U)[detpointing[i]] += ucoupling[i]*weight*det[i];
-			(*W)[detpointing[i]] += weight * mueller[i];
+		// And polarization coupling
+		// XXX: does not handle focal-plane rotation
+		StokesVector pcoupling;
+		set_stokes_coupling(bp.pol_angle, bp.pol_efficiency, pcoupling);
+
+		MuellerMatrix mueller;
+		fill_mueller_matrix_from_stokes_coupling(pcoupling, mueller);
+
+		for (size_t i = 0; i < det.size(); i++) {
+			(*T)[detpointing[i]] += pcoupling.t*weight*det[i];
+			(*Q)[detpointing[i]] += pcoupling.q*weight*det[i];
+			(*U)[detpointing[i]] += pcoupling.u*weight*det[i];
+			(*W)[detpointing[i]] += mueller * weight;
 		}
 	} else {
-		for (int i = 0; i < det.size(); ++) {
+		for (size_t i = 0; i < det.size(); i++) {
 			(*T)[detpointing[i]] += weight*det[i];
 			(*W->TT)[detpointing[i]] += weight;
 		}
 	}
-#endif
 }
 

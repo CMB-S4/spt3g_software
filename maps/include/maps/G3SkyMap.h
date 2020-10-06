@@ -252,11 +252,21 @@ public:
 		qq *= r; qu *= r; uu *= r;
 		return *this;
 	}
+	MuellerMatrix operator *(const double r) {
+		MuellerMatrix ret(*this);
+		ret *= r;
+		return ret;
+	}
 
 	MuellerMatrix &operator /=(const double r) {
 		tt /= r; tq /= r; tu /= r;
 		qq /= r; qu /= r; uu /= r;
 		return *this;
+	}
+	MuellerMatrix operator /(const double r) {
+		MuellerMatrix ret(*this);
+		ret /= r;
+		return ret;
 	}
 
 	StokesVector operator *(const StokesVector &r) const {
