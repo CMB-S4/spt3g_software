@@ -9,6 +9,7 @@
 #include <G3Data.h>
 #include <G3Map.h>
 #include <maps/G3SkyMap.h>
+#include <maps/pointing.h>
 #include <calibration/BoloProperties.h>
 
 class SingleDetectorMapBinner : public G3Module {
@@ -146,8 +147,16 @@ SingleDetectorMapBinner::Process(G3FramePtr frame,
 #endif
 		G3TimestreamConstPtr ts = timestreams->at(det);
 	
-		// XXX Compute pixels for this detector!
-		std::vector<size_t> pixels;
+		// Get per-detector pointing timestream
+        	std::vector<double> alpha, delta;
+		auto bp = boloprops_->find(det);
+		if (bp == boloprops_->end())
+			log_fatal("Missing bolometer properties for %s",
+			    det.c_str());
+		get_detector_pointing(bp->second.x_offset, bp->second.y_offset,
+		    *pointing, m->coord_ref, alpha, delta);
+		auto pixels = m->AnglesToPixels(alpha, delta);
+
 		g3_assert(ts->size() == pixels.size());
 		for (size_t j = 0; j < ts->size(); j++) {
 			(*m)[pixels[j]] += (*ts)[j];
