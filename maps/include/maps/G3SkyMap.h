@@ -253,8 +253,9 @@ public:
 		return *this;
 	}
 	MuellerMatrix operator *(const double r) {
-		MuellerMatrix ret(*this);
-		ret *= r;
+		MuellerMatrix ret; // No copy to initialize to backing
+		ret.tt = tt*r; ret.tq = tq*r; ret.tu = tu*r;
+		ret.qq = qq*r; ret.qu = qu*r; ret.uu = uu*r;
 		return ret;
 	}
 
@@ -264,8 +265,9 @@ public:
 		return *this;
 	}
 	MuellerMatrix operator /(const double r) {
-		MuellerMatrix ret(*this);
-		ret /= r;
+		MuellerMatrix ret; // No copy to initialize to backing
+		ret.tt = tt/r; ret.tq = tq/r; ret.tu = tu/r;
+		ret.qq = qq/r; ret.qu = qu/r; ret.uu = uu/r;
 		return ret;
 	}
 
