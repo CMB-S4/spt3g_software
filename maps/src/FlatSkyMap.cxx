@@ -1,7 +1,10 @@
 #include <pybindings.h>
 #include <serialization.h>
-#include <sys/endian.h>
 #include <typeinfo>
+#include <sys/types.h>
+#ifdef __FreeBSD__
+#include <sys/endian.h>
+#endif
 
 #include <maps/FlatSkyMap.h>
 #include <maps/FlatSkyProjection.h>
