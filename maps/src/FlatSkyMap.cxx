@@ -208,7 +208,7 @@ FlatSkyMap::FillFromArray(boost::python::object v)
 			log_fatal("Does not support big-endian numpy arrays");
 #else
 		else if (format[0] == '<')
-			log_fatal("Does not support big-endian numpy arrays");
+			log_fatal("Does not support little-endian numpy arrays");
 		else if (format[0] == '>' || format[0] == '!')
 			format++;
 #endif
