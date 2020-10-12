@@ -280,7 +280,7 @@ get_fk5_j2000_to_gal_quat()
 
 static void
 create_det_az_el_trans(const G3Timestream &az, const G3Timestream &el,
-    G3VectorQuat &trans_quats)
+    G3VectorQuat &trans_quats) // XXX: switch to G3TimestreamQuat?
 {
 	// Creates the transform that takes (1,0,0) to az, -el 
 	// for why it's -el see the comment at the top of this document
