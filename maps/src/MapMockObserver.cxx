@@ -92,22 +92,23 @@ MapMockObserver::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		log_fatal("Need bolometer properties before detector data "
 		    "can be processed.");
 
+	// NB: First error (wrong type) is regarded as more severe
+	// than the pointing simply being absent, since it is a
+	// configuration error rather than a data error, so it is
+	// guaranteed nothing will ever work.
+	if (!frame->Has<G3TimestreamQuat>(pointing_) &&
+	    frame->Has<G3VectorQuat>(pointing_))
+		log_fatal("Pointing %s is a G3VectorQuat, but must "
+		    "contain timing information for simulation. "
+		    "Please turn it into a G3TimestreamQuat before "
+		    "running this module, for example by adding the "
+		    "shim module maps.AddTimingToPointingQuats.",
+		    pointing_.c_str());
+
 	G3TimestreamQuatConstPtr pointing =
 	    frame->Get<G3TimestreamQuat>(pointing_);
 	if (!pointing) {
-		// NB: First error (wrong type) is regarded as more severe
-		// than the pointing simply being absent, since it is a
-		// configuration error rather than a data error, so it is
-		// guaranteed nothing will ever work.
-		if (frame->Has<G3VectorQuat>(pointing_))
-			log_fatal("Pointing %s is a G3VectorQuat, but must "
-			    "contain timing information for simulation. "
-			    "Please turn it into a G3TimestreamQuat before "
-			    "running this module, for example by adding the "
-			    "shim module maps.AddTimingToPointingQuats.",
-			    pointing_.c_str());
-		else
-			log_error("Missing pointing %s", pointing_.c_str());
+		log_error("Missing pointing %s", pointing_.c_str());
 		out.push_back(frame);
 		return;
 	}
