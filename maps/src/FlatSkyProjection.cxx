@@ -159,12 +159,14 @@ void FlatSkyProjection::initialize(size_t xpix, size_t ypix, double res,
     double alpha_center, double delta_center, double x_res, MapProjection proj,
     double x_center, double y_center)
 {
+	init_ = false;
 	xpix_ = xpix;
 	ypix_ = ypix;
 	proj_ = proj;
-	SetAngleCenter(alpha_center, delta_center);
 	SetRes(res, x_res);
+	SetAngleCenter(alpha_center, delta_center);
 	SetXYCenter(x_center, y_center);
+	init_ = true;
 }
 
 void FlatSkyProjection::SetProj(MapProjection proj)
@@ -198,6 +200,8 @@ void FlatSkyProjection::SetDeltaCenter(double delta)
 	} else {
 		pc_.clear();
 	}
+	if (init_)
+		SetYCenter(yc_);
 }
 
 void FlatSkyProjection::SetAngleCenter(double alpha, double delta)

@@ -132,6 +132,8 @@ private:
 	std::vector<double> pv_;
 	std::vector<double> pc_;
 
+	bool init_;
+
 	SET_LOGGER("FlatSkyProjection");
 };
 

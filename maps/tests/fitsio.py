@@ -14,6 +14,7 @@ for dim in [300, 301]:
     deg = core.G3Units.deg
     a0 = 20 * deg
     d0 = -50 * deg
+    d1 = -51 * deg
     x0 = 120
     y0 = 180
 
@@ -23,6 +24,9 @@ for dim in [300, 301]:
     fm0 = maps.FlatSkyMap(dim, dim, res, proj=maps.MapProjection.ProjZEA,
                           alpha_center=a0, delta_center=d0,
                           x_center=x0, y_center=y0)
+    fm0b = maps.FlatSkyMap(dim, dim, res, proj=maps.MapProjection.ProjZEA,
+                           alpha_center=a0, delta_center=d1,
+                           x_center=x0, y_center=y0)
 
     print('Checking projections for dim {}'.format(dim))
     if verbose:
@@ -45,6 +49,12 @@ for dim in [300, 301]:
         fmc = fm0.clone(False)
         fmc.proj = proj
         assert(fmc.compatible(fm1))
+
+        fmcb = fm0b.clone(False)
+        fmcb.proj = proj
+        fmc.delta_center = d1
+        assert(fmcb.compatible(fmc))
+        assert(np.all(np.array(fmcb.angle_to_xy(a0, d0)) == np.array(fmc.angle_to_xy(a0, d0))))
 
         maps.fitsio.save_skymap_fits('test_map.fits', fm1, overwrite=True)
         fm2 = maps.fitsio.load_skymap_fits('test_map.fits')['T']
