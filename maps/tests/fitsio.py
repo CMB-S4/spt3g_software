@@ -138,10 +138,10 @@ try:
     hm2 = maps.fitsio.load_skymap_fits('test_map.fits')
 
     assert(hm2['T'].pol_conv == hm2['U'].pol_conv)
-    assert(hm2['U'].pol_conv == maps.MapPolConv.IAU)
+    assert(hm1.pol_conv == hm2['U'].pol_conv)
     assert(hm1.compatible(hm2['T']))
     assert(np.allclose(hm1, hm2['T']))
-    assert(np.allclose(hm1, -hm2['U']))
+    assert(np.allclose(hm1, hm2['U']))
 
     print('Checking healpy.read_map')
     hm3 = hp.read_map('test_map.fits')

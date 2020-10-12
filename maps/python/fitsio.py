@@ -166,10 +166,6 @@ def load_skymap_fits(filename, hdu=None, keys=None, memmap=False):
                 # flat map data
                 ptype = hdr.get('POLTYPE', 'T')
                 pol_type = getattr(MapPolType, ptype, None)
-                if pol_type == MapPolType.U and str(pol_conv) == 'COSMO':
-                    core.log_warn('Switching COSMO input maps to IAU', unit='load_skymap_fits')
-                    data *= -1
-                    map_opts.update(pol_conv=MapPolConv.IAU)
                 fm = FlatSkyMap(data, pol_type=pol_type, **map_opts)
                 fm.overflow = overflow
                 output[ptype] = fm
@@ -238,10 +234,6 @@ def load_skymap_fits(filename, hdu=None, keys=None, memmap=False):
 
                     else:
                         pol_type = getattr(MapPolType, col, None)
-                        if pol_type == MapPolType.U and str(pol_conv) == 'COSMO':
-                            core.log_warn('Switching COSMO input maps to IAU', unit='load_skymap_fits')
-                            data *= -1
-                            map_opts.update(pol_conv=MapPolConv.IAU)
                         mdata = (pix, data, nside) if pix is not None else data
 
                         hm = HealpixSkyMap(mdata, pol_type=pol_type, **map_opts)
