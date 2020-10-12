@@ -218,8 +218,219 @@ pow(const G3VectorQuat &a, int b)
 	return out;
 }
 
+double G3TimestreamQuat::GetSampleRate() const
+{
+	return double(size() - 1)/double(stop.time - start.time);
+}
+
+std::string
+G3TimestreamQuat::Description() const
+{
+	std::ostringstream desc;
+	desc.precision(1);
+	desc << std::fixed;
+	desc << size() << " quaternions at " << GetSampleRate()/G3Units::Hz <<
+	    " Hz";
+
+	return desc.str();
+}
+
+template <class A>
+void G3TimestreamQuat::serialize(A &ar, const unsigned v)
+{
+        G3_CHECK_VERSION(v);
+
+        ar & cereal::make_nvp("G3VectorQuat",
+            cereal::base_class<G3VectorQuat>(this));
+        ar & cereal::make_nvp("start", start);
+        ar & cereal::make_nvp("stop", stop);
+}
+
+// Following duplicates above precisely because of return types. This should
+// probably use templates or pre-processor macros but that seemed to
+// take almost as much work as copying, especially given the need to copy
+// start/stop times in the non-in-place operators.
+G3TimestreamQuat
+operator ~(const G3TimestreamQuat &a)
+{
+	G3TimestreamQuat out(a.size());
+	out.start = a.start; out.stop = a.stop;
+        for (unsigned i = 0; i < a.size(); i++)
+		out[i] = conj(a[i]);
+	return out;
+}
+
+G3TimestreamQuat
+operator *(const G3TimestreamQuat &a, double b)
+{
+	G3TimestreamQuat out(a.size());
+	out.start = a.start; out.stop = a.stop;
+	for (unsigned i = 0; i < a.size(); i++)
+		out[i] = a[i]*b;
+	return out;
+}
+
+G3TimestreamQuat
+operator *(double b, const G3TimestreamQuat &a)
+{
+	return a*b;
+}
+
+G3TimestreamQuat &
+operator *=(G3TimestreamQuat &a, double b)
+{
+	for (quat &i: a)
+		i *= b;
+	return a;
+}
+
+G3TimestreamQuat
+operator /(const G3TimestreamQuat &a, double b)
+{
+	G3TimestreamQuat out(a.size());
+	out.start = a.start; out.stop = a.stop;
+	for (unsigned i = 0; i < a.size(); i++)
+		out[i] = a[i]/b;
+	return out;
+}
+
+G3TimestreamQuat
+operator /(double a, const G3TimestreamQuat &b)
+{
+	G3TimestreamQuat out(b.size());
+	out.start = b.start; out.stop = b.stop;
+	for (unsigned i = 0; i < b.size(); i++)
+		out[i] = a/b[i];
+	return out;
+}
+
+G3TimestreamQuat
+operator /(const G3TimestreamQuat &a, const quat &b)
+{
+	G3TimestreamQuat out(a.size());
+	out.start = a.start; out.stop = a.stop;
+	for (unsigned i = 0; i < a.size(); i++)
+		out[i] = a[i]/b;
+	return out;
+}
+
+G3TimestreamQuat
+operator /(const quat &a, const G3TimestreamQuat &b)
+{
+	G3TimestreamQuat out(b.size());
+	out.start = b.start; out.stop = b.stop;
+	for (unsigned i = 0; i < b.size(); i++)
+		out[i] = a/b[i];
+	return out;
+}
+
+G3TimestreamQuat
+operator /(const G3TimestreamQuat &a, const G3VectorQuat &b)
+{
+	g3_assert(a.size() == b.size());
+	G3TimestreamQuat out(a.size());
+	out.start = a.start; out.stop = a.stop;
+	for (unsigned i = 0; i < a.size(); i++)
+		out[i] = a[i]/b[i];
+	return out;
+}
+
+G3TimestreamQuat &
+operator /=(G3TimestreamQuat &a, double b)
+{
+	for (quat &i: a)
+		i /= b;
+	return a;
+}
+
+G3TimestreamQuat &
+operator /=(G3TimestreamQuat &a, const quat &b)
+{
+	for (unsigned i = 0; i < a.size(); i++)
+		a[i] /= b;
+	return a;
+}
+
+G3TimestreamQuat &
+operator /=(G3TimestreamQuat &a, const G3VectorQuat &b)
+{
+	g3_assert(a.size() == b.size());
+	for (unsigned i = 0; i < a.size(); i++)
+		a[i] /= b[i];
+	return a;
+}
+
+G3TimestreamQuat
+operator *(const G3TimestreamQuat &a, const G3VectorQuat &b)
+{
+	g3_assert(a.size() == b.size());
+	G3TimestreamQuat out(a.size());
+	out.start = a.start; out.stop = a.stop;
+	for (unsigned i = 0; i < a.size(); i++)
+		out[i] = a[i]*b[i];
+	return out;
+}
+
+G3TimestreamQuat &
+operator *=(G3TimestreamQuat &a, const G3VectorQuat &b)
+{
+	g3_assert(a.size() == b.size());
+	for (unsigned i = 0; i < a.size(); i++)
+		a[i] *= b[i];
+	return a;
+}
+
+G3TimestreamQuat
+operator *(const G3TimestreamQuat &a, quat b)
+{
+	G3TimestreamQuat out(a.size());
+	out.start = a.start; out.stop = a.stop;
+	for (unsigned i = 0; i < a.size(); i++)
+		out[i] = a[i]*b;
+	return out;
+}
+
+G3TimestreamQuat
+operator *(quat b, const G3TimestreamQuat &a)
+{
+	G3TimestreamQuat out(a.size());
+	out.start = a.start; out.stop = a.stop;
+	for (unsigned i = 0; i < a.size(); i++)
+		out[i] = b*a[i];
+	return out;
+}
+
+G3TimestreamQuat &
+operator *=(G3TimestreamQuat &a, quat b)
+{
+	for (quat &i: a)
+		i *= b;
+	return a;
+}
+
+G3TimestreamQuat
+pow(const G3TimestreamQuat &a, double b)
+{
+	G3TimestreamQuat out(a.size());
+	out.start = a.start; out.stop = a.stop;
+	for (unsigned i = 0; i < a.size(); i++)
+		out[i] = pow(a[i], b);
+	return out;
+}
+
+G3TimestreamQuat
+pow(const G3TimestreamQuat &a, int b)
+{
+	G3TimestreamQuat out(a.size());
+	out.start = a.start; out.stop = a.stop;
+	for (unsigned i = 0; i < a.size(); i++)
+		out[i] = pow(a[i], b);
+	return out;
+}
+
 
 G3_SERIALIZABLE_CODE(G3VectorQuat);
+G3_SERIALIZABLE_CODE(G3TimestreamQuat);
 
 namespace {
 static int
@@ -264,6 +475,7 @@ G3VectorQuat_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 }
 
 static PyBufferProcs vectorquat_bufferprocs;
+static PyBufferProcs timestreamquat_bufferprocs;
 
 static std::string
 quat_str(const quat &q)
@@ -282,11 +494,11 @@ quat_repr(const quat &q)
 }
 }
 
-template <>
-G3VectorQuatPtr
-container_from_object(boost::python::object v)
+template <typename T>
+boost::shared_ptr<T>
+quat_vec_container_from_object(boost::python::object v)
 {
-        G3VectorQuatPtr x(new (G3VectorQuat));
+        boost::shared_ptr<T> x(new (T));
 	Py_buffer view;
 	if (PyObject_GetBuffer(v.ptr(), &view,
 	    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) != -1) {
@@ -325,6 +537,23 @@ container_from_object(boost::python::object v)
 	return x;
 }
 
+template <>
+G3VectorQuatPtr container_from_object(boost::python::object v)
+{
+	return quat_vec_container_from_object<G3VectorQuat>(v);
+}
+
+template <>
+G3TimestreamQuatPtr container_from_object(boost::python::object v)
+{
+	return quat_vec_container_from_object<G3TimestreamQuat>(v);
+}
+
+static int
+G3TimestreamQuat_nsamples(const G3TimestreamQuat &r)
+{
+        return r.size();
+}
 
 PYBINDINGS("core")
 {
@@ -364,7 +593,11 @@ PYBINDINGS("core")
 	;
 	register_vector_of<quat>("QuatVector");
 	object vq =
-	    register_g3vector<quat>("G3VectorQuat", "List of quaternions")
+	    register_g3vector<quat>("G3VectorQuat",
+	     "List of quaternions. Convertible to a 4xN numpy array. "
+	     "Arithmetic operations on this object are fast and provide "
+	     "results given proper quaternion math rather than "
+	     "element-by-element numpy-ish results.")
 	     .def(~self)
 	     .def(self * double())
 	     .def(double() * self)
@@ -392,4 +625,54 @@ PYBINDINGS("core")
 	vqclass->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
 #endif
 
+	object tq =
+	    class_<G3TimestreamQuat, bases<G3VectorQuat>, G3TimestreamQuatPtr>(
+	      "G3TimestreamQuat",
+	      "Timestream of quaternions. Identical to a G3VectorQuat except "
+	      "for the addition of start and stop times.",
+	      init<>()
+             )
+	     .def("__init__", make_constructor(container_from_object<G3TimestreamQuat>))
+	     .def(boost::python::init<const G3TimestreamQuat &>())
+	     .def_pickle(g3frameobject_picklesuite<G3TimestreamQuat>())
+	     .def(~self)
+	     .def(self * double())
+	     .def(double() * self)
+	     .def(self * G3VectorQuat())
+	     .def(self * quat())
+	     .def(quat() * self)
+	     .def(self *= double())
+	     .def(self *= quat())
+	     .def(self *= G3VectorQuat())
+	     .def(self / double())
+	     .def(double() / self)
+	     .def(self /= double())
+	     .def(self / G3VectorQuat())
+	     .def(self /= G3VectorQuat())
+	     .def(self / quat())
+	     .def(self /= quat())
+	     .def(quat() / self)
+	     .def(pow(self, double()))
+	     .def(pow(self, int()))
+	     .def("__abs__", _vabs)
+	    .def_readwrite("start", &G3TimestreamQuat::start,
+	      "Time of the first sample in the time stream")
+	    .def_readwrite("stop", &G3TimestreamQuat::stop,
+	      "Time of the final sample in the timestream")
+	    .add_property("sample_rate", &G3TimestreamQuat::GetSampleRate,
+	       "Computed sample rate of the timestream.")
+	    .add_property("n_samples", &G3TimestreamQuat_nsamples,
+	      "Number of samples in the timestream. Equivalent to len(ts)")
+	;
+	PyTypeObject *tqclass = (PyTypeObject *)tq.ptr();
+	timestreamquat_bufferprocs.bf_getbuffer = G3VectorQuat_getbuffer;
+	tqclass->tp_as_buffer = &timestreamquat_bufferprocs;
+#if PY_MAJOR_VERSION < 3
+	tqclass->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
+#endif
+
+	scitbx::boost_python::container_conversions::from_python_sequence<G3TimestreamQuat, scitbx::boost_python::container_conversions::variable_capacity_policy>();
+	register_pointer_conversions<G3TimestreamQuat>();
+	implicitly_convertible<G3TimestreamQuatPtr, G3VectorQuatPtr>();
+	implicitly_convertible<G3TimestreamQuatPtr, G3VectorQuatConstPtr>();
 }

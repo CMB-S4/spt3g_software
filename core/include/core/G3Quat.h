@@ -33,16 +33,46 @@ double dot3(quat a, quat b);
 
 G3VECTOR_OF(quat, G3VectorQuat);
 
+class G3TimestreamQuat : public G3VectorQuat
+{
+public:
+	G3TimestreamQuat() : G3VectorQuat() {}
+        G3TimestreamQuat(std::vector<quat>::size_type s) : G3VectorQuat(s) {}
+        G3TimestreamQuat(std::vector<quat>::size_type s,
+            const quat &val) : G3VectorQuat(s, val) {}
+        G3TimestreamQuat(const G3TimestreamQuat &r) : G3VectorQuat(r),
+            start(r.start), stop(r.stop) {}
+        G3TimestreamQuat(const G3VectorQuat &r) : G3VectorQuat(r) {}
+        template <typename Iterator> G3TimestreamQuat(Iterator l, Iterator r) :
+            G3VectorQuat(l, r) {}
+
+	G3Time start, stop;
+	double GetSampleRate() const;
+
+	template <class A> void serialize(A &ar, unsigned v);
+
+	std::string Description() const;
+        std::string Summary() const { return Description(); };
+};
+
+namespace cereal {
+	template <class A> struct specialize<A, G3TimestreamQuat, cereal::specialization::member_serialize> {};
+}
+
+G3_POINTERS(G3TimestreamQuat);
+G3_SERIALIZABLE(G3TimestreamQuat, 1);
+
 namespace boost {
 namespace math {
 	quat operator ~(quat);
 };
 };
+
 G3VectorQuat operator ~ (const G3VectorQuat &);
 G3VectorQuat operator * (const G3VectorQuat &, double);
 G3VectorQuat &operator *= (G3VectorQuat &, double);
 G3VectorQuat operator / (const G3VectorQuat &, double);
-G3VectorQuat operator / (double , const G3VectorQuat &);
+G3VectorQuat operator / (double, const G3VectorQuat &);
 G3VectorQuat operator / (const G3VectorQuat &, const quat &);
 G3VectorQuat operator / (const quat &, const G3VectorQuat &);
 G3VectorQuat operator / (const G3VectorQuat &, const G3VectorQuat &);
@@ -58,5 +88,26 @@ G3VectorQuat &operator *= (G3VectorQuat &, quat);
 
 G3VectorQuat pow(const G3VectorQuat &a, double b);
 G3VectorQuat pow(const G3VectorQuat &a, int b);
+
+G3TimestreamQuat operator ~ (const G3TimestreamQuat &);
+G3TimestreamQuat operator * (const G3TimestreamQuat &, double);
+G3TimestreamQuat operator * (double, const G3TimestreamQuat &);
+G3TimestreamQuat operator / (const G3TimestreamQuat &, double);
+G3TimestreamQuat operator / (double, const G3TimestreamQuat &);
+G3TimestreamQuat operator / (const G3TimestreamQuat &, const quat &);
+G3TimestreamQuat operator / (const quat &, const G3TimestreamQuat &);
+G3TimestreamQuat operator / (const G3TimestreamQuat &, const G3VectorQuat &);
+G3TimestreamQuat &operator /= (G3TimestreamQuat &, double);
+G3TimestreamQuat &operator /= (G3TimestreamQuat &, const quat &);
+G3TimestreamQuat &operator /= (G3TimestreamQuat &, const G3VectorQuat &);
+G3TimestreamQuat operator * (const G3TimestreamQuat &, const G3VectorQuat &);
+G3TimestreamQuat &operator *= (G3TimestreamQuat &, const G3VectorQuat &);
+G3TimestreamQuat operator * (double, const G3TimestreamQuat &);
+G3TimestreamQuat operator * (const G3TimestreamQuat &, quat);
+G3TimestreamQuat operator * (quat, const G3TimestreamQuat &);
+G3TimestreamQuat &operator *= (G3TimestreamQuat &, quat);
+
+G3TimestreamQuat pow(const G3TimestreamQuat &a, double b);
+G3TimestreamQuat pow(const G3TimestreamQuat &a, int b);
 
 #endif
