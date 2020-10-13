@@ -1,6 +1,10 @@
 #include <pybindings.h>
 #include <serialization.h>
 #include <typeinfo>
+#include <sys/types.h>
+#ifdef __FreeBSD__
+#include <sys/endian.h>
+#endif
 
 #include <maps/HealpixSkyMap.h>
 #include <maps/chealpix.h>
@@ -140,18 +144,35 @@ HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool weighted,
 		dense_ = new std::vector<double>(view.shape[0]);
 
 		double *d = &(*dense_)[0];
-		if (strcmp(view.format, "d") == 0) {
+
+		// Consume endian definition
+		const char *format = view.format;
+		if (format[0] == '@' || format[0] == '=')
+			format++;
+#if BYTE_ORDER == LITTLE_ENDIAN
+		else if (format[0] == '<')
+			format++;
+		else if (format[0] == '>' || format[0] == '!')
+			log_fatal("Does not support big-endian numpy arrays");
+#else
+		else if (format[0] == '<')
+			log_fatal("Does not support little-endian numpy arrays");
+		else if (format[0] == '>' || format[0] == '!')
+			format++;
+#endif
+
+		if (strcmp(format, "d") == 0) {
 			memcpy(d, view.buf, view.len);
-		} else if (strcmp(view.format, "f") == 0) {
+		} else if (strcmp(format, "f") == 0) {
 			for (size_t i = 0; i < view.len/sizeof(float); i++)
 				d[i] = ((float *)view.buf)[i];
-		} else if (strcmp(view.format, "i") == 0) {
+		} else if (strcmp(format, "i") == 0) {
 			for (size_t i = 0; i < view.len/sizeof(int); i++)
 				d[i] = ((int *)view.buf)[i];
-		} else if (strcmp(view.format, "I") == 0) {
+		} else if (strcmp(format, "I") == 0) {
 			for (size_t i = 0; i < view.len/sizeof(int); i++)
 				d[i] = ((unsigned int *)view.buf)[i];
-		} else if (strcmp(view.format, "l") == 0) {
+		} else if (strcmp(format, "l") == 0) {
 			for (size_t i = 0; i < view.len/sizeof(long); i++)
 				d[i] = ((unsigned long *)view.buf)[i];
 		} else {

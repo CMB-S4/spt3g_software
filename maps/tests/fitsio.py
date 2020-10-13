@@ -144,14 +144,14 @@ try:
     assert(np.allclose(hm1, hm2['U']))
 
     print('Checking healpy.read_map')
-    hm3 = hp.read_map('test_map.fits')
+    hm3 = hp.read_map('test_map.fits', dtype=float)
     hm3 = maps.HealpixSkyMap(hm3)
     assert(hm1.compatible(hm3))
     assert(np.allclose(hm1, hm3))
 
     print('Checking healpy.write_map')
     os.remove('test_map.fits')
-    hp.write_map('test_map.fits', np.asarray(hm3))
+    hp.write_map('test_map.fits', np.asarray(hm3), dtype=float)
     hm4 = maps.fitsio.load_skymap_fits('test_map.fits')['T']
     assert(hm1.compatible(hm4))
     assert(np.allclose(hm1, hm4))
