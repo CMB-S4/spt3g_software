@@ -266,18 +266,20 @@ MapBinner::BinTimestream(const G3Timestream &det, double weight,
 
 	if (Q) {
 		// And polarization coupling
-		// XXX: does not handle focal-plane rotation
+		// XXX: does not handle focal-plane rotation, since it assumes
+		// polarization coupling is constant for the whole scan.
 		StokesVector pcoupling;
 		set_stokes_coupling(bp.pol_angle, bp.pol_efficiency, pcoupling);
 
 		MuellerMatrix mueller;
 		fill_mueller_matrix_from_stokes_coupling(pcoupling, mueller);
 		mueller *= weight;
+		pcoupling *= weight;
 
 		for (size_t i = 0; i < det.size(); i++) {
-			(*T)[detpointing[i]] += pcoupling.t*weight*det[i];
-			(*Q)[detpointing[i]] += pcoupling.q*weight*det[i];
-			(*U)[detpointing[i]] += pcoupling.u*weight*det[i];
+			(*T)[detpointing[i]] += pcoupling.t*det[i];
+			(*Q)[detpointing[i]] += pcoupling.q*det[i];
+			(*U)[detpointing[i]] += pcoupling.u*det[i];
 			(*W)[detpointing[i]] += mueller;
 		}
 	} else {
