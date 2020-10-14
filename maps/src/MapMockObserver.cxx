@@ -22,10 +22,6 @@ public:
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
 
 private:
-	void BinTimestream(const G3Timestream &det, double weight,
-	    const BolometerProperties &bp, const G3VectorQuat &pointing,
-	    G3SkyMapPtr T, G3SkyMapPtr Q, G3SkyMapPtr U, G3SkyMapWeightsPtr W);
-
 	std::string pointing_;
 	std::string timestreams_;
 	double band_;
