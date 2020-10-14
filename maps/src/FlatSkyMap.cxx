@@ -378,9 +378,10 @@ FlatSkyMap::operator [] (size_t i)
 	return (*this)(i % xpix_, i / xpix_);
 }
 
-#define flatskymap_arithmetic(op, sparsenull) \
+#define flatskymap_arithmetic(op, sparsenull, unitscheck) \
 G3SkyMap &FlatSkyMap::operator op(const G3SkyMap &rhs) {\
 	g3_assert(IsCompatible(rhs)); \
+	unitscheck \
 	try { \
 		const FlatSkyMap& b = dynamic_cast<const FlatSkyMap &>(rhs); \
 		if (dense_) { \
@@ -414,12 +415,15 @@ G3SkyMap &FlatSkyMap::operator op(const G3SkyMap &rhs) {\
 	} \
 }
 
-flatskymap_arithmetic(+=, {})
-flatskymap_arithmetic(-=, {})
-flatskymap_arithmetic(/=, {ConvertToDense(); (*this->dense_) /= 0.0;})
+flatskymap_arithmetic(+=, {}, {g3_assert(units == rhs.units);})
+flatskymap_arithmetic(-=, {}, {g3_assert(units == rhs.units);})
+flatskymap_arithmetic(/=, {ConvertToDense(); (*this->dense_) /= 0.0;},
+    {if (units == G3Timestream::None) units = rhs.units;})
 
 G3SkyMap &FlatSkyMap::operator *=(const G3SkyMap &rhs) {
 	g3_assert(IsCompatible(rhs));
+	if (units == G3Timestream::None)
+		units = rhs.units;
 	try {
 		const FlatSkyMap& b = dynamic_cast<const FlatSkyMap &>(rhs);
 		bool zero = false;

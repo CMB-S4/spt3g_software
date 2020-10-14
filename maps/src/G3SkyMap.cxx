@@ -166,6 +166,7 @@ size_t G3SkyMap::size() const
 G3SkyMap &G3SkyMap::operator+=(const G3SkyMap & rhs)
 {
 	g3_assert(IsCompatible(rhs));
+	g3_assert(units == rhs.units);
 	for (size_t i = 0; i < rhs.size(); i++)
 		(*this)[i] += rhs[i];
 	return *this;
@@ -181,6 +182,7 @@ G3SkyMap &G3SkyMap::operator+=(double rhs)
 G3SkyMap &G3SkyMap::operator-=(const G3SkyMap &rhs)
 {
 	g3_assert(IsCompatible(rhs));
+	g3_assert(units == rhs.units);
 	for (size_t i = 0; i < rhs.size(); i++)
 		(*this)[i] -= rhs[i];
 	return *this;
@@ -196,6 +198,9 @@ G3SkyMap &G3SkyMap::operator-=(double rhs)
 G3SkyMap &G3SkyMap::operator*=(const G3SkyMap &rhs)
 {
 	g3_assert(IsCompatible(rhs));
+	if (units == G3Timestream::None)
+		units = rhs.units;
+
 	for (size_t i = 0; i < rhs.size(); i++)
 		(*this)[i] *= rhs[i];
 	return *this;
@@ -211,6 +216,9 @@ G3SkyMap &G3SkyMap::operator*=(double rhs)
 G3SkyMap &G3SkyMap::operator/=(const G3SkyMap &rhs)
 {
 	g3_assert(IsCompatible(rhs));
+	if (units == G3Timestream::None)
+		units = rhs.units;
+
 	for (size_t i = 0; i < rhs.size(); i++)
 		(*this)[i] /= rhs[i];
 	return *this;
@@ -412,6 +420,7 @@ static void
 pyskymap_ipow(G3SkyMap &a, const G3SkyMap &b)
 {
 	g3_assert(a.IsCompatible(b));
+	g3_assert(b.units == G3Timestream::None);
 	for (size_t i = 0; i < a.size(); i++) {
 		double va = a.at(i);
 		double vb = b.at(i);
@@ -434,6 +443,7 @@ static G3SkyMapPtr \
 pyskymap_##name(const G3SkyMap &a, const G3SkyMap &b) \
 { \
 	g3_assert(a.IsCompatible(b)); \
+	g3_assert(a.units == b.units); \
 	G3SkyMapPtr rv = a.Clone(false); \
 	for (size_t i = 0; i < a.size(); i++) { \
 		if (a.at(i) oper b.at(i)) \

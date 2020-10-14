@@ -538,6 +538,7 @@ HealpixSkyMap::operator [] (size_t i)
 #define healpixskymap_arithmetic(op) \
 G3SkyMap &HealpixSkyMap::operator op(const G3SkyMap &rhs) { \
 	g3_assert(IsCompatible(rhs)); \
+	g3_assert(units == rhs.units); \
 	try { \
 		const HealpixSkyMap& b = dynamic_cast<const HealpixSkyMap &>(rhs); \
 		if (dense_ || ring_sparse_ || indexed_sparse_) { \
@@ -574,6 +575,8 @@ healpixskymap_arithmetic(-=)
 
 G3SkyMap &HealpixSkyMap::operator *=(const G3SkyMap &rhs) {
 	g3_assert(IsCompatible(rhs));
+	if (units == G3Timestream::None)
+		units = rhs.units;
 	try {
 		const HealpixSkyMap& b = dynamic_cast<const HealpixSkyMap &>(rhs);
 		bool zero = false;
@@ -608,6 +611,8 @@ G3SkyMap &HealpixSkyMap::operator *=(const G3SkyMap &rhs) {
 
 G3SkyMap &HealpixSkyMap::operator /=(const G3SkyMap &rhs) {
 	g3_assert(IsCompatible(rhs));
+	if (units == G3Timestream::None)
+		units = rhs.units;
 	try {
 		const HealpixSkyMap& b = dynamic_cast<const HealpixSkyMap &>(rhs);
 		bool zero = false;
