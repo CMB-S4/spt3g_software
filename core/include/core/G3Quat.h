@@ -52,7 +52,7 @@ public:
 	template <class A> void serialize(A &ar, unsigned v);
 
 	std::string Description() const;
-        std::string Summary() const { return Description(); };
+	std::string Summary() const { return Description(); };
 };
 
 namespace cereal {
