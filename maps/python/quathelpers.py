@@ -32,7 +32,7 @@ def quat_to_ang(q):
 
 
 @usefulfunc
-def ang_to_quat(alpha, delt, start=None, stop=None):
+def ang_to_quat(alpha, delta, start=None, stop=None):
     """
     Convert a set of angles (or vector of them) specified as a (longitude,
     latitude) pair to a pointing quaternion (or vector of them). If start
