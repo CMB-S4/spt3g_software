@@ -132,7 +132,6 @@ SingleDetectorMapBinner::Process(G3FramePtr frame,
 
 
 #ifdef OPENMP_FOUND
-	// Clamp num_threads to prevent memory balloon?
 	#pragma omp parallel for
 	for (size_t i = 0; i < dets_.size(); i++) {
 		const std::string &det = dets_[i];
