@@ -129,15 +129,10 @@ SingleDetectorBoresightBinner::Process(G3FramePtr frame,
 
 	// Calculate common pointing
 	g3_assert(timestreams->NSamples() == pointing->size());
-#ifdef NOTYET
-	std::vector<size_t> pixels = template_->QuatsToPixels(*pointing);
-	// This produces nonsense at present.
-#else
-	std::vector<double> alpha, delta;
-	get_detector_pointing(0, 0,
-	    *pointing, template_->coord_ref, alpha, delta);
-	auto pixels = template_->AnglesToPixels(alpha, delta);
-#endif
+	
+	// Conjugate pointing rotation with boresight vector
+	auto pointing_vec = (*pointing)*quat(0,1,0,0)/(*pointing);
+	std::vector<size_t> pixels = template_->QuatsToPixels(pointing_vec);
 
 	for (size_t i = 0; i < pixels.size(); i++)
 		(*map_weights_->TT)[pixels[i]] += 1;
