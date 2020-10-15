@@ -10,9 +10,6 @@
 #include <G3Map.h>
 #include <maps/G3SkyMap.h>
 
-// XXX delete this
-#include <maps/pointing.h>
-
 class SingleDetectorBoresightBinner : public G3Module {
 public:
 	SingleDetectorBoresightBinner(const G3SkyMap &stub_map,
