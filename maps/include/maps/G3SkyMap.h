@@ -3,6 +3,7 @@
 
 #include <G3Frame.h>
 #include <G3Timestream.h>
+#include <G3Quat.h>
 #include <vector>
 #include <map>
 
@@ -99,24 +100,33 @@ public:
 	virtual G3SkyMap &operator/=(double rhs);
 
 	// Pointing information
-	std::vector<int> AnglesToPixels(const std::vector<double> & alphas,
+	std::vector<size_t> AnglesToPixels(const std::vector<double> & alphas,
 	    const std::vector<double> & deltas) const;
-	void PixelsToAngles(const std::vector<int> & pixels,
+	void PixelsToAngles(const std::vector<size_t> & pixels,
 	    std::vector<double> & alphas, std::vector<double> & deltas) const;
+	std::vector<size_t> QuatsToPixels(const G3VectorQuat &quats) const;
+	G3VectorQuat PixelsToQuats(const std::vector<size_t> &pixels) const;
 
 	virtual std::vector<double> PixelToAngle(size_t pixel) const = 0;
 	virtual size_t AngleToPixel(double alpha, double delta) const = 0;
+	quat PixelToQuat(size_t pixel) const;
+	size_t QuatToPixel(quat q) const;
 
 	// Rebinning and interpolation
 	virtual void GetRebinAngles(long pixel, size_t scale,
 	    std::vector<double> & alphas, std::vector<double> & deltas) const = 0;
+	G3VectorQuat GetRebinQuats(long pixel, size_t scale) const;
 	virtual void GetInterpPixelsWeights(double alpha, double delta,
 	    std::vector<long> & pixels, std::vector<double> & weights) const = 0;
+	void GetInterpPixelsWeights(quat q, std::vector<long> & pixels,
+	    std::vector<double> & weights) const;
 	double GetInterpPrecalc(const std::vector<long> &pixels,
 	    const std::vector<double> &weights) const;
 	double GetInterpValue(double alpha, double delta) const;
+	double GetInterpValue(quat q) const;
 	std::vector<double> GetInterpValues(const std::vector<double> &alphas,
 	    const std::vector<double> &deltas) const;
+	std::vector<double> GetInterpValues(const G3VectorQuat & quats) const;
 
 	virtual boost::shared_ptr<G3SkyMap> Rebin(size_t scale, bool norm = true) const = 0;
 
@@ -242,11 +252,23 @@ public:
 		qq *= r; qu *= r; uu *= r;
 		return *this;
 	}
+	MuellerMatrix operator *(const double r) {
+		MuellerMatrix ret; // No copy to initialize to backing
+		ret.tt = tt*r; ret.tq = tq*r; ret.tu = tu*r;
+		ret.qq = qq*r; ret.qu = qu*r; ret.uu = uu*r;
+		return ret;
+	}
 
 	MuellerMatrix &operator /=(const double r) {
 		tt /= r; tq /= r; tu /= r;
 		qq /= r; qu /= r; uu /= r;
 		return *this;
+	}
+	MuellerMatrix operator /(const double r) {
+		MuellerMatrix ret; // No copy to initialize to backing
+		ret.tt = tt/r; ret.tq = tq/r; ret.tu = tu/r;
+		ret.qq = qq/r; ret.qu = qu/r; ret.uu = uu/r;
+		return ret;
 	}
 
 	StokesVector operator *(const StokesVector &r) const {

@@ -5,13 +5,18 @@ add_spt3g_library(maps SHARED
   src/HealpixSkyMap.cxx
   src/FlatSkyProjection.cxx
   src/FlatSkyMap.cxx
+  src/MapBinner.cxx
+  src/MapMockObserver.cxx
+  src/SingleDetectorBoresightBinner.cxx
+  src/SingleDetectorMapBinner.cxx
   src/mapdata.cxx
   src/maputils.cxx
   src/pointing.cxx
   src/python.cxx
 )
 
-target_link_libraries(maps core)
+target_link_libraries(maps core calibration)
+link_openmp(maps)
 
 link_python_dir()
 

@@ -280,7 +280,7 @@ get_fk5_j2000_to_gal_quat()
 
 static void
 create_det_az_el_trans(const G3Timestream &az, const G3Timestream &el,
-    G3VectorQuat &trans_quats)
+    G3VectorQuat &trans_quats) // XXX: switch to G3TimestreamQuat?
 {
 	// Creates the transform that takes (1,0,0) to az, -el 
 	// for why it's -el see the comment at the top of this document
@@ -355,10 +355,10 @@ get_detector_pointing(double x_offset, double y_offset,
 	// For a detector x/y offset and a boresight position specified by
 	// trans_quat with a given coordinate system coord_sys,
 	// computes the individual detector pointing coordinates.
-	//
-	// Assumes alpha and delta have already been allocated.
 
 	quat det_pos = offsets_to_quat(x_offset, y_offset);
+	delta.resize(trans_quat.size());
+	alpha.resize(trans_quat.size());
 
 	if ((!std::isfinite(x_offset)) || (!std::isfinite(y_offset))){
 		log_debug("Found non-finite (inf or nan) offsets");

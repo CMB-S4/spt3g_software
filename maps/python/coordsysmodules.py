@@ -1,5 +1,5 @@
 from spt3g import core
-from spt3g.core import G3VectorQuat
+from spt3g.core import G3TimestreamQuat
 from spt3g.maps.azel import convert_azel_to_radec
 from spt3g.maps import MapCoordReference
 from spt3g.maps import create_det_az_el_trans, create_lazy_det_ra_dec_trans
@@ -67,7 +67,9 @@ def FillCoordTransRotations(
         core.log_debug("Transform already computed, skipping")
         return
 
-    trans = G3VectorQuat()
+    trans = G3TimestreamQuat()
+    trans.start = frame[bs_az_key].start
+    trans.stop = frame[bs_az_key].stop
     if end_coord_sys == MapCoordReference.Local:
         create_det_az_el_trans(frame[bs_az_key], frame[bs_el_key], trans)
     else:
@@ -104,7 +106,9 @@ def EquatorialToGalacticTransRotations(
 
     if frame.type != core.G3FrameType.Scan:
         return
-    gal_trans = G3VectorQuat()
+    gal_trans = G3TimestreamQuat()
+    gal_trans.start = frame[eq_trans_key].start
+    gal_trans.stop = frame[eq_trans_key].stop
     convert_ra_dec_trans_to_gal(frame[eq_trans_key], gal_trans)
     frame[out_key] = gal_trans
 
@@ -125,6 +129,9 @@ def AddLocalTransRotations(
 
     if frame.type != core.G3FrameType.Scan:
         return
-    local_trans = G3VectorQuat()
+    local_trans = G3TimestreamQuat()
+    local_trans.start = frame[az_key].start
+    local_trans.stop = frame[az_key].stop
     create_det_az_el_trans(frame[az_key], frame[el_key], local_trans)
     frame[out_key] = local_trans
+
