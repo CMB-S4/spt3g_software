@@ -670,14 +670,15 @@ skymapweights_pynoninplace(divd, /=, double);
 MuellerMatrix MuellerMatrix::Inv() const
 {
 	MuellerMatrix m;
-	double d = Det();
-	if (tt == 0 || d < 1e-12) {
-		if (d < 1e-12 && tt != 0)
-			log_trace("Singular matrix found when inverting!  Det is %lE\n", d);
+	double c = Cond();
+	if (tt == 0 || c != c || c > 1e12) {
+		if ((c != c || c > 1e12) && tt != 0)
+			log_trace("Singular matrix found when inverting!  Cond is %lE\n", c);
 		m.tt = m.tq = m.tu = m.qq = m.qu = m.uu = 0.0 / 0.0;
 		return m;
 	}
 
+	double d = Det();
 	m.tt = (qq * uu - qu * qu) / d;
 	m.tq = (tu * qu - tq * uu) / d;
 	m.tu = (tq * qu - tu * qq) / d;
@@ -695,7 +696,7 @@ double MuellerMatrix::Cond() const
 	double lmax, lmin;
 
 	double p1 = tq * tq + tu * tu + qu * qu;
-	if (p1 < 1e-12) {
+	if (p1 == 0) {
 		// matrix is empty
 		if ((tt + qq + uu) == 0)
 			return 0.0 / 0.0;
@@ -720,10 +721,13 @@ double MuellerMatrix::Cond() const
 	double p = ttq * ttq + qqq * qqq + uuq * uuq + 2. * p1;
 	p = sqrt(p / 6.0);
 
-	MuellerMatrix B = *this;
+	MuellerMatrix B;
 	B.tt = ttq;
 	B.qq = qqq;
 	B.uu = uuq;
+	B.tq = tq;
+	B.tu = tu;
+	B.qu = qu;
 	B /= p;
 	double r = B.Det() / 2.0;
 
