@@ -695,7 +695,8 @@ double MuellerMatrix::Cond() const
 	// See https://en.wikipedia.org/wiki/Eigenvalue_algorithm#3%C3%973_matrices
 	double lmax, lmin;
 
-	if ((tq + tu + qu) == 0) {
+	double p1 = tq * tq + tu * tu + qu * qu;
+	if (p1 == 0) {
 		// matrix is empty
 		if ((tt + qq + uu) == 0)
 			return 0.0 / 0.0;
@@ -713,7 +714,6 @@ double MuellerMatrix::Cond() const
 		return lmax / lmin;
 	}
 
-	double p1 = tq * tq + tu * tu + qu * qu;
 	double q = (tt + qq + uu) / 3.;
 	double ttq = tt - q;
 	double qqq = qq - q;
@@ -721,10 +721,13 @@ double MuellerMatrix::Cond() const
 	double p = ttq * ttq + qqq * qqq + uuq * uuq + 2. * p1;
 	p = sqrt(p / 6.0);
 
-	MuellerMatrix B = *this;
+	MuellerMatrix B;
 	B.tt = ttq;
 	B.qq = qqq;
 	B.uu = uuq;
+	B.tq = tq;
+	B.tu = tu;
+	B.qu = qu;
 	B /= p;
 	double r = B.Det() / 2.0;
 
