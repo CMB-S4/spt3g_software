@@ -670,14 +670,15 @@ skymapweights_pynoninplace(divd, /=, double);
 MuellerMatrix MuellerMatrix::Inv() const
 {
 	MuellerMatrix m;
-	double d = Det();
-	if (tt == 0 || d < 1e-12) {
-		if (d < 1e-12 && tt != 0)
-			log_trace("Singular matrix found when inverting!  Det is %lE\n", d);
+	double c = Cond();
+	if (tt == 0 || c != c || c > 1e12) {
+		if ((c != c || c > 1e12) && tt != 0)
+			log_trace("Singular matrix found when inverting!  Cond is %lE\n", c);
 		m.tt = m.tq = m.tu = m.qq = m.qu = m.uu = 0.0 / 0.0;
 		return m;
 	}
 
+	double d = Det();
 	m.tt = (qq * uu - qu * qu) / d;
 	m.tq = (tu * qu - tq * uu) / d;
 	m.tu = (tq * qu - tu * qq) / d;
@@ -694,8 +695,7 @@ double MuellerMatrix::Cond() const
 	// See https://en.wikipedia.org/wiki/Eigenvalue_algorithm#3%C3%973_matrices
 	double lmax, lmin;
 
-	double p1 = tq * tq + tu * tu + qu * qu;
-	if (p1 < 1e-12) {
+	if ((tq + tu + qu) == 0) {
 		// matrix is empty
 		if ((tt + qq + uu) == 0)
 			return 0.0 / 0.0;
@@ -713,6 +713,7 @@ double MuellerMatrix::Cond() const
 		return lmax / lmin;
 	}
 
+	double p1 = tq * tq + tu * tu + qu * qu;
 	double q = (tt + qq + uu) / 3.;
 	double ttq = tt - q;
 	double qqq = qq - q;
