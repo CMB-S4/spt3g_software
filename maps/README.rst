@@ -2,7 +2,9 @@
 maps
 ----
 
-The maps project defines map projections, along with G3SkyMap subclasses that provide sky maps in those map projections and tools for format/projection conversions of these data types. 
+The maps project defines map projections, along with G3SkyMap subclasses that provide sky maps in those map projections and tools for format/projection conversions of these data types.
+
+In addition, this library contains three pipeline modules (MapBinner, SingleDetectorMapBinner, and SingleDetectorBoresightBinner) to make binned maps from time-ordered data, as well as a module (MapMockObserver) to mock-observe a provided sky map, generating fake time-ordered-data from it corresponding to some stored instrument pointing itinerary. A few other utility pipeline modules (described below) are provided for some map manipulation tasks.
 
 The key data types defined here are:
 
