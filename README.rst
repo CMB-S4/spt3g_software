@@ -22,7 +22,7 @@ Minimum versions:
 	- GCC >= 4.7 or clang >= 3.3
 	- Boost >= 1.48
 	- cmake >= 3.1
-	- Python >= 2.7
+	- Python >= 2.7 (although pre-Python-3 support is best-effort)
 
 On Ubuntu/Debian, you can install the non-Python dependencies, including the optional ones, by doing:
 
