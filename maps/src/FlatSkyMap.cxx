@@ -808,10 +808,13 @@ FlatSkyMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 	bp::object selfobj(self);
 	FlatSkyMapPtr sm = bp::extract<FlatSkyMapPtr>(selfobj)();
 
-	sm->ConvertToDense();
-
 	view->obj = obj;
-	view->buf = (void*)&(*sm)[0];
+	if (sm->shape()[0] == 0 && sm->shape()[1] == 0) {
+		view->buf = NULL;
+	} else {
+		sm->ConvertToDense();
+		view->buf = (void*)&(*sm)[0];
+	}
 	view->len = sm->size() * sizeof(double);
 	view->readonly = 0;
 	view->itemsize = sizeof(double);
