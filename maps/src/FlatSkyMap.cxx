@@ -14,11 +14,14 @@
 FlatSkyMap::FlatSkyMap(size_t x_len, size_t y_len, double res, bool weighted,
     MapProjection proj, double alpha_center, double delta_center,
     MapCoordReference coord_ref, G3Timestream::TimestreamUnits u,
-    G3SkyMap::MapPolType pol_type, double x_res, double x_center, double y_center,
+    G3SkyMap::MapPolType pol_type, double x_res,
+    double x_center, double y_center,
     bool flat_pol, G3SkyMap::MapPolConv pol_conv) :
       G3SkyMap(coord_ref, weighted, u, pol_type, pol_conv),
-      proj_info(x_len, y_len, res, alpha_center, delta_center, x_res, proj, x_center, y_center),
-      dense_(NULL), sparse_(NULL), xpix_(x_len), ypix_(y_len), flat_pol_(flat_pol)
+      proj_info(x_len, y_len, res, alpha_center, delta_center, x_res, proj,
+        x_center, y_center),
+      dense_(NULL), sparse_(NULL), xpix_(x_len), ypix_(y_len),
+      flat_pol_(flat_pol)
 {
 }
 
@@ -26,7 +29,8 @@ FlatSkyMap::FlatSkyMap(boost::python::object v, double res,
     bool weighted, MapProjection proj,
     double alpha_center, double delta_center,
     MapCoordReference coord_ref, G3Timestream::TimestreamUnits u,
-    G3SkyMap::MapPolType pol_type, double x_res, double x_center, double y_center,
+    G3SkyMap::MapPolType pol_type, double x_res,
+    double x_center, double y_center,
     bool flat_pol, G3SkyMap::MapPolConv pol_conv) :
       G3SkyMap(coord_ref, weighted, u, pol_type, pol_conv),
       dense_(NULL), sparse_(NULL), flat_pol_(flat_pol)
