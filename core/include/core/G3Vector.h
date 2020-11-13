@@ -34,6 +34,9 @@ public:
 		    cereal::base_class<std::vector<Value> >(this));
 	}
 
+	template <class A> void load(A &ar, unsigned v);
+	template <class A> void save(A &ar, unsigned v) const;
+
 	std::string Summary() const
 	{
 		if (this->size() < 5)
@@ -70,12 +73,41 @@ G3_SERIALIZABLE(y, 1);
 
 G3VECTOR_OF(std::complex<double>, G3VectorComplexDouble);
 G3VECTOR_OF(double, G3VectorDouble);
-G3VECTOR_OF(int32_t, G3VectorInt);
 G3VECTOR_OF(uint8_t, G3VectorUnsignedChar);
 G3VECTOR_OF(std::string, G3VectorString);
 G3VECTOR_OF(G3VectorString, G3VectorVectorString);
 G3VECTOR_OF(G3FrameObjectPtr, G3VectorFrameObject);
 G3VECTOR_OF(G3Time, G3VectorTime);
+
+
+/* G3VectorInt needs a separate implementation in order to support v1
+ * (vector<int32_t>) and v2 (vector<int64_t>).  So here we delete the
+ * default ::serialize implementation (which should be ignored anyway
+ * due to the specialize request below) and then declare ::load/save,
+ * to be implemented in G3Vector.cxx.  */
+
+template <>
+template <class A>
+void G3Vector<int64_t>::serialize(A &ar, const unsigned v) = delete;
+
+template <>
+template <class A>
+void G3Vector<int64_t>::load(A &ar, const unsigned v);
+
+template <>
+template <class A>
+void G3Vector<int64_t>::save(A &ar, const unsigned v) const;
+
+
+#define G3VECTOR_SPLIT(x, y, v) \
+typedef G3Vector< x > y; \
+namespace cereal { \
+	template <class A> struct specialize<A, y, cereal::specialization::member_load_save> {}; \
+} \
+G3_POINTERS(y); \
+G3_SERIALIZABLE(y, v);
+
+G3VECTOR_SPLIT(int64_t, G3VectorInt, 2);
 
 #endif
 

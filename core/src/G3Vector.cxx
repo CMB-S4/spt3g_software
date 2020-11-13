@@ -4,7 +4,7 @@
 #include <G3Vector.h>
 #include <complex>
 
-G3_SERIALIZABLE_CODE(G3VectorInt);
+G3_SPLIT_SERIALIZABLE_CODE(G3VectorInt);
 G3_SERIALIZABLE_CODE(G3VectorDouble);
 G3_SERIALIZABLE_CODE(G3VectorComplexDouble);
 G3_SERIALIZABLE_CODE(G3VectorString);
@@ -12,6 +12,100 @@ G3_SERIALIZABLE_CODE(G3VectorVectorString);
 G3_SERIALIZABLE_CODE(G3VectorFrameObject);
 G3_SERIALIZABLE_CODE(G3VectorUnsignedChar);
 G3_SERIALIZABLE_CODE(G3VectorTime);
+
+/* Special load/save for int64_t. */
+
+static
+int bit_count(std::vector<int64_t> const &d) {
+	// Returns the smallest number N such that all ints in the
+	// vector could be safely expressed as intN_t.  Assumes two's
+	// complement integers.  Return value will be between 1 and
+	// 64.
+	uint64_t mask = 0;
+	for (auto c: d) {
+		if (c < 0)
+			mask |= ~c;
+		else
+			mask |= c;
+	}
+	for (int i=1; i<64; i++) {
+		if (mask == 0)
+			return i;
+		mask >>= 1;
+	}
+	return 64;
+}
+
+template <class A, typename FROM_TYPE, typename TO_TYPE>
+void load_as(A &ar, std::vector<TO_TYPE> &dest) {
+	std::vector<FROM_TYPE> temp;
+	ar & cereal::make_nvp("vector", temp);
+	dest.resize(temp.size());
+	std::copy(temp.begin(), temp.end(), dest.begin());
+}
+
+template <class A, typename FROM_TYPE, typename TO_TYPE>
+void save_as(A &ar, const std::vector<FROM_TYPE> &src) {
+	std::vector<TO_TYPE> temp(src.begin(), src.end());
+	ar & cereal::make_nvp("vector", temp);
+}
+
+template <>
+template <class A>
+void G3Vector<int64_t>::load(A &ar, const unsigned v)
+{
+	ar & cereal::make_nvp("G3FrameObject",
+			      cereal::base_class<G3FrameObject>(this));
+	int store_bits = 32;
+	if (v >= 2)
+		ar & cereal::make_nvp("store_bits", store_bits);
+
+	switch(store_bits) {
+	case 64:
+		ar & cereal::make_nvp("vector",
+				      cereal::base_class<std::vector<int64_t> >(this));
+		break;
+	case 32:
+		load_as<A, int32_t, int64_t>(ar, *this);
+		break;
+	case 16:
+		load_as<A, int16_t, int64_t>(ar, *this);
+		break;
+	case 8:
+		load_as<A, int8_t, int64_t>(ar, *this);
+		break;
+	}
+}
+
+template <>
+template <class A>
+void G3Vector<int64_t>::save(A &ar, const unsigned v) const
+{
+	// v == 2
+	ar & cereal::make_nvp("G3FrameObject",
+			      cereal::base_class<G3FrameObject>(this));
+	// Count the interesting bits, and convert to nearest power of 2.
+	int sig_bits = bit_count(*this);
+	int store_bits = 8;
+	while (store_bits < sig_bits)
+		store_bits *= 2;
+	ar & cereal::make_nvp("store_bits", store_bits);
+	switch(store_bits) {
+	case 8:
+		save_as<A, int64_t, int8_t>(ar, *this);
+		break;
+	case 16:
+		save_as<A, int64_t, int16_t>(ar, *this);
+		break;
+	case 32:
+		save_as<A, int64_t, int32_t>(ar, *this);
+		break;
+	default:
+		ar & cereal::make_nvp("vector",
+				      cereal::base_class<std::vector<int64_t> >(this));
+	}		
+}
+
 
 template <>
 G3VectorDoublePtr
@@ -45,7 +139,7 @@ static int
 G3VectorInt_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 {
 	return pyvector_getbuffer<G3VectorInt::value_type>(obj, view, flags,
-	    "i");
+	    "q");
 }
 
 static int
@@ -85,9 +179,9 @@ PYBINDINGS("core") {
 	vcclass->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
 #endif
 
-	boost::python::object vecint = register_g3vector<int32_t>("G3VectorInt",
+	boost::python::object vecint = register_g3vector<int64_t>("G3VectorInt",
 	    "Array of integers. Treat as a serializable version of "
-	    "numpy.array(dtype=int32). Can be efficiently cast to and from "
+	    "numpy.array(dtype=int64). Can be efficiently cast to and from "
 	    "numpy arrays.");
 	// Add buffer protocol interface
 	PyTypeObject *viclass = (PyTypeObject *)vecint.ptr();
