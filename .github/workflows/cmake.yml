@@ -17,10 +17,11 @@ jobs:
     - uses: actions/checkout@v2
   
     - name: Install OS Dependencies
+      shell: bash
       run: |
-        if [ -n `which apt-get` ]; then
+        if [ `echo ${{matrix.os}} | cut -d - -f 1` = "ubuntu" ]; then
           sudo apt-get install libboost-all-dev libflac-dev libnetcdf-dev libfftw3-dev libgsl0-dev python python3 python3-pip
-        elif [ -n `which brew` ]; then
+        elif [ `echo ${{matrix.os}} | cut -d - -f 1` = "macOS" ]; then
           brew boost boost-python flac netcdf fftw gsl python
         else
           echo 'No installed package manager!'
