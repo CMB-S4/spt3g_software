@@ -18,9 +18,9 @@ jobs:
   
     - name: Install OS Dependencies
       run: |
-        if which -s apt-get; then
+        if [ -n `which apt-get` ]; then
           sudo apt-get install libboost-all-dev libflac-dev libnetcdf-dev libfftw3-dev libgsl0-dev python python3 python3-pip
-        elif which -s which brew; then
+        elif [ -n `which brew` ]; then
           brew boost boost-python flac netcdf fftw gsl python
         else
           echo 'No installed package manager!'
