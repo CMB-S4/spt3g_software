@@ -39,12 +39,12 @@ class TestVectorInt(unittest.TestCase):
         for isize, val in bit_sizes:
             f = core.G3Frame()
             f['v'] = core.G3VectorInt([val] * 10)
-            w.Process(f)
+            w(f)
         del w
 
         r = core.G3Reader(test_filename)
         for isize, val in bit_sizes:
-            f = r.Process(None)[0]
+            f = r(None)[0]
             v_in = list(f['v'])
             self.assertTrue(all([_v == val for _v in v_in]),
                              "Failed to save/load value %i" % val)
@@ -58,7 +58,7 @@ class TestVectorInt(unittest.TestCase):
             w = core.G3Writer(test_filename)
             f = core.G3Frame()
             f['v'] = core.G3VectorInt([val] * count)
-            w.Process(f)
+            w(f)
             del w
             on_disk = os.path.getsize(test_filename)
             self.assertTrue(abs(on_disk - count * isize / 8) <= overhead,
