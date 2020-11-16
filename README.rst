@@ -41,7 +41,8 @@ If your system defaults to Python 2, but you wish to use Python 3, please do the
 	1. Install Python 3 *from the system package manager*
 	2. Make sure the python-3 version of the Boost library is installed (on Ubuntu, this is part of the standard boost-python package referenced above)
 	3. When you run cmake below, pass ``-DPYTHON_EXECUTABLE=`which python3```
-
+	
+On any system, this software requires numpy and scipy (hard requirements), plus astropy and healpy (optional).
 
 Setup on RHEL6
 --------------
