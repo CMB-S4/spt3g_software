@@ -10,7 +10,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-18.04, ubuntu-20.04] #, macOS-latest] # macOS disabled because of lameness with Homebrew Boost
+        os: [ubuntu-18.04, ubuntu-20.04, macOS-latest]
     runs-on: ${{ matrix.os}}
 
     steps:
@@ -22,7 +22,7 @@ jobs:
         if [ `echo ${{matrix.os}} | cut -d - -f 1` = "ubuntu" ]; then
           sudo apt-get install libboost-all-dev libflac-dev libnetcdf-dev libfftw3-dev libgsl0-dev python python3 python3-pip
         elif [ `echo ${{matrix.os}} | cut -d - -f 1` = "macOS" ]; then
-          brew install boost boost-python3 flac netcdf fftw gsl python
+          brew install python@3.9 boost boost-python3 flac netcdf fftw gsl
         else
           echo 'No installed package manager!'
           exit 1
@@ -45,7 +45,11 @@ jobs:
       # Note the current convention is to use the -S and -B options here to specify source 
       # and build directories, but this is only available with CMake 3.13 and higher.  
       # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+      run: |
+        if [ `echo ${{matrix.os}} | cut -d - -f 1` = "macOS" ]; then
+          export PATH=/usr/local/opt/python@3.9/bin:$PATH
+        fi
+        cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 
     - name: Build
       working-directory: ${{runner.workspace}}/build
