@@ -28,7 +28,7 @@ if len(sys.argv) > 1:
 # For now, we test files from big-endian (PPC64) and little-endian (amd64)
 # 64-bit systems. Should include some 32-bit ones.
 
-for test in ['test-be.g3', 'test-le.g3']:
+for test in ['test-be.g3', 'test-le.g3', 'test-le-v2.g3']:
 	print(test)
 	testdata = core.G3Reader(os.path.join(testpath, test))(None)[0]
 
