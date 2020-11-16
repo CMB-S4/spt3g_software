@@ -17,10 +17,15 @@ jobs:
     - uses: actions/checkout@v2
   
     - name: Install OS Dependencies
-      uses: mstksg/get-package@v1
-      with:
-        apt-get: libboost-all-dev libflac-dev libnetcdf-dev libfftw3-dev libgsl0-dev python python3 python3-pip
-        brew: boost boost-python flac netcdf fftw gsl python
+      run: |
+        if [ -x `which apt-get` ]; then
+          sudo apt-get install libboost-all-dev libflac-dev libnetcdf-dev libfftw3-dev libgsl0-dev python python3 python3-pip
+        elif [ -x `which brew` ]; then
+          brew boost boost-python flac netcdf fftw gsl python
+        else
+          echo 'No installed package manager!'
+          exit 1
+        fi
             
     - name: Install Python Packages
       run: |
