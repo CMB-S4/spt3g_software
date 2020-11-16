@@ -88,10 +88,6 @@ G3VECTOR_OF(G3Time, G3VectorTime);
 
 template <>
 template <class A>
-void G3Vector<int64_t>::serialize(A &ar, const unsigned v) = delete;
-
-template <>
-template <class A>
 void G3Vector<int64_t>::load(A &ar, const unsigned v);
 
 template <>

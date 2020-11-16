@@ -1,7 +1,7 @@
 About
 -----
 
-This repository contains the public portions of the analysis software developed by the SPT-3G collaboration. It includes the IO libraries, data acquisition code for McGill's DfMux readout boards, and pipeline glue code and defines all the APIs used by the project. For more detail on the intended processing architecture, please see the Quick Start chapter of the `documentation`_.
+This repository contains the public portions of the analysis software developed by the SPT-3G collaboration. It includes the IO libraries, data acquisition code for McGill's DfMux readout boards, pipeline glue code, a binned map-maker, and a sky mock-observer, as well as defining all the APIs used by the project. For more detail on the intended processing architecture, please see the Quick Start chapter of the `documentation`_.
 
 Except where otherwise noted, all files are distributed under the 2-clause BSD license. Acknowledgments and patches are appreciated.
 
@@ -41,7 +41,8 @@ If your system defaults to Python 2, but you wish to use Python 3, please do the
 	1. Install Python 3 *from the system package manager*
 	2. Make sure the python-3 version of the Boost library is installed (on Ubuntu, this is part of the standard boost-python package referenced above)
 	3. When you run cmake below, pass ``-DPYTHON_EXECUTABLE=`which python3```
-
+	
+On any system, this software requires numpy and scipy (hard requirements), plus astropy and healpy (optional).
 
 Setup on RHEL6
 --------------
