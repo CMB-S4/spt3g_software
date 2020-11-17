@@ -18,14 +18,16 @@ def checkinfo(fr):
 	if fr.type != core.G3FrameType.Timepoint:
 		return
 	if 'time' not in fr:
-		print('No time key in frame')
-		sys.exit(1)
+		raise RuntimeError('No time key in frame')
 	if fr['count'] != m:
-		print('Out of order frame')
-		sys.exit(1)
+		raise RuntimeError('Out of order frame')
 	m += 1
 
 if __name__ == '__main__':
+	if sys.version_info[:2] > (3, 7):
+		print('Subprocess option is disabled for python versions > 3.7')
+		raise SystemExit
+
 	pipe = core.G3Pipeline()
 	pipe.Add(core.G3InfiniteSource, type=core.G3FrameType.Timepoint, n=10)
 	pipe.Add(addinfo, subprocess=True)
@@ -33,13 +35,8 @@ if __name__ == '__main__':
 	pipe.Add(checkinfo)
 	pipe.Run()
 
-	if n is not 0:
-		print('Ran in same process!')
-		sys.exit(1)
+	if n != 0:
+		raise RuntimeError('Ran in same process!')
 	n = 10 # Different process, so don't get this back
 	if m != n:
-		print('Wrong number of frames (%d should be %d)' % (m, n))
-		sys.exit(1)
-
-	sys.exit(0)
-
+		raise RuntimeError('Wrong number of frames (%d should be %d)' % (m, n))
