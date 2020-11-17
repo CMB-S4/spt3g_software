@@ -1,4 +1,4 @@
-from spt3g.core import G3Module, G3Pipeline, G3PipelineInfo, G3Frame, G3FrameType, G3Time, G3ModuleConfig, log_fatal, log_error
+from spt3g.core import G3Module, G3Pipeline, G3PipelineInfo, G3Frame, G3FrameType, G3Time, G3ModuleConfig, log_fatal
 try:
     from spt3g.core import multiprocess
     multiproc_avail = True
@@ -189,12 +189,6 @@ def PipelineAddCallable(self, callable, name=None, subprocess=False, **kwargs):
     function. If subprocess is set to True, this module will be
     run in a separate process.
     '''
-
-    if subprocess:
-        import sys
-        if sys.version_info[:2] > (3, 7):
-            log_error("Subprocess option is disabled for python versions > 3.7")
-            subprocess = False
 
     addpipelineinfo = False
     if not hasattr(self, '_pipelineinfo'):

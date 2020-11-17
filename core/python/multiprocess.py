@@ -1,3 +1,7 @@
+import sys
+if sys.version_info[:2] > (3, 7):
+    raise ImportError("Multiprocessing is disabled for python versions > 3.7")
+
 from multiprocessing import Process
 import socket, pickle, errno, struct, time
 
