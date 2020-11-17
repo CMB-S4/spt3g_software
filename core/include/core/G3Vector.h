@@ -72,6 +72,7 @@ G3_POINTERS(y); \
 G3_SERIALIZABLE(y, 1);
 
 G3VECTOR_OF(std::complex<double>, G3VectorComplexDouble);
+G3VECTOR_OF(bool, G3VectorBool);
 G3VECTOR_OF(double, G3VectorDouble);
 G3VECTOR_OF(uint8_t, G3VectorUnsignedChar);
 G3VECTOR_OF(std::string, G3VectorString);

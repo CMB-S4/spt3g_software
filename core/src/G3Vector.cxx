@@ -5,6 +5,7 @@
 #include <complex>
 
 G3_SPLIT_SERIALIZABLE_CODE(G3VectorInt);
+G3_SERIALIZABLE_CODE(G3VectorBool);
 G3_SERIALIZABLE_CODE(G3VectorDouble);
 G3_SERIALIZABLE_CODE(G3VectorComplexDouble);
 G3_SERIALIZABLE_CODE(G3VectorString);
@@ -106,6 +107,9 @@ void G3Vector<int64_t>::save(A &ar, const unsigned v) const
 	}		
 }
 
+// NB: std::vector<bool> is incompatible with numpy in terms of memory layout
+// (stores bits instead of bytes), so no fast path for numpy is provided for
+// G3VectorBool. There are ways to make it work read-only if we need it.
 
 template <>
 G3VectorDoublePtr
@@ -191,6 +195,7 @@ PYBINDINGS("core") {
 	viclass->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
 #endif
 
+	register_g3vector<bool>("G3VectorBool", "List of booleans.");
 	register_g3vector<std::string>("G3VectorString", "List of strings.");
 	register_vector_of<G3VectorString>("VectorG3VectorString");
 	register_g3vector<G3VectorString>("G3VectorVectorString", "List of "

@@ -70,6 +70,7 @@ G3_SERIALIZABLE(name, 1);
 G3MAP_OF(std::string, double, G3MapDouble);
 G3MAP_OF(std::string, G3MapDouble, G3MapMapDouble);
 G3MAP_OF(std::string, std::vector<double>, G3MapVectorDouble);
+G3MAP_OF(std::string, std::vector<bool>, G3MapVectorBool);
 G3MAP_OF(std::string, std::vector<int32_t>, G3MapVectorInt);
 G3MAP_OF(std::string, std::vector<std::string>, G3MapVectorString);
 G3MAP_OF(std::string, G3VectorVectorString, G3MapVectorVectorString);

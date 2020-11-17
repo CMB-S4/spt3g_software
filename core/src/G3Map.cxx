@@ -74,6 +74,7 @@ G3_SERIALIZABLE_CODE(G3MapInt);
 G3_SERIALIZABLE_CODE(G3MapDouble);
 G3_SERIALIZABLE_CODE(G3MapMapDouble);
 G3_SERIALIZABLE_CODE(G3MapString);
+G3_SERIALIZABLE_CODE(G3MapVectorBool);
 G3_SERIALIZABLE_CODE(G3MapVectorInt);
 G3_SERIALIZABLE_CODE(G3MapVectorDouble);
 G3_SERIALIZABLE_CODE(G3MapVectorString);
@@ -94,6 +95,8 @@ PYBINDINGS("core") {
 	register_g3map<G3MapInt>("G3MapInt", "Mapping from strings to ints.");
 	register_g3map<G3MapString>("G3MapString", "Mapping from strings to "
 	    "strings.");
+	register_g3map<G3MapVectorBool>("G3MapVectorBool", "Mapping from "
+	    "strings to arrays of booleans.");
 	register_g3map<G3MapVectorDouble>("G3MapVectorDouble", "Mapping from "
 	    "strings to arrays of floats.");
 	register_g3map<G3MapVectorComplexDouble>("G3MapVectorComplexDouble",
