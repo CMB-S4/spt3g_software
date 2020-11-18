@@ -82,19 +82,9 @@ G3VECTOR_OF(G3Time, G3VectorTime);
 
 
 /* G3VectorInt needs a separate implementation in order to support v1
- * (vector<int32_t>) and v2 (vector<int64_t>).  So here we delete the
- * default ::serialize implementation (which should be ignored anyway
- * due to the specialize request below) and then declare ::load/save,
- * to be implemented in G3Vector.cxx.  */
-
-template <>
-template <class A>
-void G3Vector<int64_t>::load(A &ar, const unsigned v);
-
-template <>
-template <class A>
-void G3Vector<int64_t>::save(A &ar, const unsigned v) const;
-
+ * (vector<int32_t>) and v2 (vector<int64_t>).  So we tell cereal to
+ * ignore the default ::serialize implementation and then implement
+ * ::load/save in G3Vector.cxx. */
 
 #define G3VECTOR_SPLIT(x, y, v) \
 typedef G3Vector< x > y; \
