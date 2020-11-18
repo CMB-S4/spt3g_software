@@ -107,9 +107,12 @@ void G3Vector<int64_t>::save(A &ar, const unsigned v) const
 	}		
 }
 
-// NB: std::vector<bool> is incompatible with numpy in terms of memory layout
-// (stores bits instead of bytes), so no fast path for numpy is provided for
-// G3VectorBool. There are ways to make it work read-only if we need it.
+template <>
+G3VectorBoolPtr
+container_from_object(boost::python::object v)
+{
+	return numpy_container_from_object<G3VectorBool>(v);
+}
 
 template <>
 G3VectorDoublePtr
@@ -131,6 +134,10 @@ container_from_object(boost::python::object v)
 {
 	return complex_numpy_container_from_object<G3VectorComplexDouble>(v);
 }
+
+// NB: std::vector<bool> is incompatible with numpy in terms of memory layout
+// (stores bits instead of bytes), so no fast path for numpy is provided for
+// G3VectorBool. There are ways to make it work read-only if we need it.
 
 static int
 G3VectorDouble_getbuffer(PyObject *obj, Py_buffer *view, int flags)

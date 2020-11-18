@@ -154,6 +154,10 @@ numpy_container_from_object(boost::python::object v)
 			x->resize(view.len/sizeof(size_t));
 			for (size_t i = 0; i < view.len/sizeof(size_t); i++)
 				(*x)[i] = ((size_t *)view.buf)[i];
+		} else if (strcmp(view.format, "?") == 0) { 
+			x->resize(view.len/sizeof(bool));
+			for (size_t i = 0; i < view.len/sizeof(bool); i++)
+				(*x)[i] = ((bool *)view.buf)[i];
 		} else if (strcmp(view.format, "i") == 0) { 
 			x->resize(view.len/sizeof(int));
 			for (size_t i = 0; i < view.len/sizeof(int); i++)
