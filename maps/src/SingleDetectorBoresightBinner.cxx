@@ -87,7 +87,7 @@ SingleDetectorBoresightBinner::Process(G3FramePtr frame,
 	}
 
 	G3VectorQuatConstPtr pointing =
-	    frame->Get<G3VectorQuat>(pointing_);
+	    frame->Get<G3VectorQuat>(pointing_, false);
 	if (!pointing) {
 		log_error("Missing pointing %s", pointing_.c_str());
 		out_queue.push_back(frame);
@@ -95,7 +95,7 @@ SingleDetectorBoresightBinner::Process(G3FramePtr frame,
 	}
 
 	G3TimestreamMapConstPtr timestreams =
-	    frame->Get<G3TimestreamMap>(timestreams_);
+	    frame->Get<G3TimestreamMap>(timestreams_, false);
 	if (!timestreams) {
 		log_error("Missing timestreams %s", timestreams_.c_str());
 		out_queue.push_back(frame);

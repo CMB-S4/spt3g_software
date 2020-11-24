@@ -94,7 +94,7 @@ SingleDetectorMapBinner::Process(G3FramePtr frame,
 		    "can be processed.");
 
 	G3VectorQuatConstPtr pointing =
-	    frame->Get<G3VectorQuat>(pointing_);
+	    frame->Get<G3VectorQuat>(pointing_, false);
 	if (!pointing) {
 		log_error("Missing pointing %s", pointing_.c_str());
 		out_queue.push_back(frame);
@@ -102,7 +102,7 @@ SingleDetectorMapBinner::Process(G3FramePtr frame,
 	}
 
 	G3TimestreamMapConstPtr timestreams =
-	    frame->Get<G3TimestreamMap>(timestreams_);
+	    frame->Get<G3TimestreamMap>(timestreams_, false);
 	if (!timestreams) {
 		log_error("Missing timestreams %s", timestreams_.c_str());
 		out_queue.push_back(frame);
