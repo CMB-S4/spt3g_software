@@ -58,11 +58,22 @@ public:
 	FrameType type;
 	
 	// Add and remove data from the frame. Note that retrieved data is
-	// const. Will return a null pointer if the requested object is not
-	// in the frame. Get<> does RTTI for you.
+	// const. Get<> is like operator [], except that it does a dynamic
+	// cast to a type for you.
+	//
+	// If the data cannot be retrieved:
+	// - operator [] will return a null pointer if the element is not
+	//   present
+	// - Get<> will either log_fatal (default) or return a null pointer if
+	//   the requested object is not in the frame or cannot be cast to the
+	//   given type. Whether it does log_fatal() or returns a NULL pointer
+	//   is set by the value of exception_on_error -- if true, it will
+	//   log_fatal(), printing an informative error and throwing an
+	//   exception.
 	G3FrameObjectConstPtr operator [](const std::string &) const;
+	template<typename T> boost::shared_ptr<const T> Get(
+	    const std::string &, bool exception_on_error = true) const;
 	void Put(const std::string &name, G3FrameObjectConstPtr);
-	template<typename T> boost::shared_ptr<const T> Get(const std::string &) const;
 	void Delete(const std::string &);
 
 	// Check if an object is in the frame. Second version makes sure it
@@ -98,12 +109,13 @@ private:
 G3_POINTERS(G3Frame);
 
 template <typename T>
-boost::shared_ptr<const T> G3Frame::Get(const std::string &name) const
+boost::shared_ptr<const T> G3Frame::Get(const std::string &name,
+  bool exception_on_error) const
 {
 	boost::shared_ptr<const T> ret =
 	    boost::dynamic_pointer_cast<const T>((*this)[name]);
 
-	if (!ret)
+	if (exception_on_error && !ret)
 		log_fatal("Requesting key %s %s", name.c_str(),
 		    Has(name) ? "of the wrong type" : "not in frame");
 
