@@ -741,7 +741,10 @@ double MuellerMatrix::Cond() const
 
 	lmax = q + 2. * p * COS(phi);
 	lmin = q + 2. * p * COS(phi + 120 * G3Units::deg);
-	return lmax / lmin;
+	double c = lmax / lmin;
+	if (c < 0)
+		return 0.0 / 0.0;
+	return c;
 }
 
 StokesVector & StokesVector::operator /=(const MuellerMatrix &r)
