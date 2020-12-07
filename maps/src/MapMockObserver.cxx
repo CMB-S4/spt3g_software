@@ -102,7 +102,7 @@ MapMockObserver::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		    pointing_.c_str());
 
 	G3TimestreamQuatConstPtr pointing =
-	    frame->Get<G3TimestreamQuat>(pointing_);
+	    frame->Get<G3TimestreamQuat>(pointing_, false);
 	if (!pointing) {
 		log_error("Missing pointing %s", pointing_.c_str());
 		out.push_back(frame);
