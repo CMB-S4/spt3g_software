@@ -7,6 +7,7 @@ add_spt3g_library(maps SHARED
   src/FlatSkyMap.cxx
   src/MapBinner.cxx
   src/MapMockObserver.cxx
+  src/MapTODMasker.cxx
   src/SingleDetectorBoresightBinner.cxx
   src/SingleDetectorMapBinner.cxx
   src/mapdata.cxx
