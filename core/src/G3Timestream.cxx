@@ -824,11 +824,16 @@ G3Timestream_getslice(const G3Timestream &a, boost::python::slice slice)
 	if (stop < 0)
 		stop = a.size() + stop;
 
+	if (stop > a.size())
+		stop = a.size();
+	if (step > a.size())
+		step = a.size();
+
 	if (start >= a.size() || start < 0)
 		log_fatal("Start index %d out of range", start);
-	if (stop > a.size() || stop < 0)
+	if (stop < 0)
 		log_fatal("Stop index %d out of range", stop);
-	if (step >= a.size() || step <= 0)
+	if (step <= 0)
 		log_fatal("Step index %d out of range", step);
 	if (start >= stop)
 		log_fatal("Start index %d >= stop index %d", start, stop);
