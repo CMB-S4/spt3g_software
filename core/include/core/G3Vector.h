@@ -1,11 +1,13 @@
 #ifndef _G3_VECTOR_H
 #define _G3_VECTOR_H
 
-#include <G3Frame.h>
-#include <G3TimeStamp.h>
 #include <vector>
 #include <sstream>
 #include <complex>
+
+#include <G3Frame.h>
+#include <G3TimeStamp.h>
+#include <serialization.h>
 
 #include <cereal/types/complex.hpp>
 #include <cereal/types/vector.hpp>
@@ -28,6 +30,8 @@ public:
 
 	template <class A> void serialize(A &ar, const unsigned v)
 	{
+		G3_CHECK_VERSION(v);
+
 		ar & cereal::make_nvp("G3FrameObject",
 		    cereal::base_class<G3FrameObject>(this));
 		ar & cereal::make_nvp("vector",
