@@ -178,7 +178,12 @@ def UnpackACUData(f):
 
     a.state = ACUState(f['antenna0']['acu']['state'].value)
     a.status = f['antenna0']['acu']['acu_status'].value
-    a.error = f['antenna0']['acu']['acu_error'].value
+    try:
+        a.error = f['antenna0']['acu']['acu_error'].value
+    except KeyError:
+        # This register was some time in early 2018.  In order to read
+        # older data, just set the error code to 0.
+        a.error = 0
 
     f['ACUStatus'] = a
 
