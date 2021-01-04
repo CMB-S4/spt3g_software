@@ -350,6 +350,7 @@ public:
 
 	G3SkyMapPtr Det() const;
 	G3SkyMapPtr Cond() const;
+	boost::shared_ptr<G3SkyMapWeights> Inv() const;
 
 	boost::shared_ptr<G3SkyMapWeights> Rebin(size_t scale) const;
 

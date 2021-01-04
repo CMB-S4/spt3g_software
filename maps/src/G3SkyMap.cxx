@@ -789,6 +789,24 @@ G3SkyMapPtr G3SkyMapWeights::Cond() const
 	return C;
 }
 
+G3SkyMapWeightsPtr G3SkyMapWeights::Inv() const
+{
+	G3SkyMapWeightsPtr out = this->Clone(false);
+	out->TT->ConvertToDense();
+	if (IsPolarized()) {
+		out->TQ->ConvertToDense();
+		out->TU->ConvertToDense();
+		out->QQ->ConvertToDense();
+		out->QU->ConvertToDense();
+		out->UU->ConvertToDense();
+	}
+
+	for (size_t i = 0; i < TT->size(); i++)
+		(*out)[i] = this->at(i).Inv();
+
+	return out;
+}
+
 G3SkyMapWeightsPtr G3SkyMapWeights::Rebin(size_t scale) const
 {
 	g3_assert(IsCongruent());
@@ -1036,6 +1054,8 @@ PYBINDINGS("maps") {
 	      "Return the determinant of the Mueller matrix for each pixel")
 	    .def("cond", &G3SkyMapWeights::Cond,
 	      "Return the condition number of the Mueller matrix for each pixel")
+	    .def("inv", &G3SkyMapWeights::Inv,
+	      "Return the inverse of the Mueller matrix for each pixel")
 
 	    .def("clone", &G3SkyMapWeights::Clone, (bp::arg("copy_data")=true),
 	       "Return weights of the same type, populated with a copy of the data "

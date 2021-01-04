@@ -89,6 +89,10 @@ for pol in [True, False]:
         cond = mw.cond()
         assert(np.allclose(cond[15], icond))
 
+        iinv = np.linalg.inv(mat * 5)
+        inv = mw.inv()
+        assert(np.allclose(inv[15], iinv))
+
     if pol:
         assert(np.isnan([mt[16], mq[16], mu[16]]).all())
     else:
