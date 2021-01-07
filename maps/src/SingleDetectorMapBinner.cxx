@@ -111,10 +111,13 @@ SingleDetectorMapBinner::Process(G3FramePtr frame,
 	g3_assert(timestreams->NSamples() == pointing->size());
 
 	// Initialize units and maps on the first scan frame (when we have
-	// no in-progress maps).
-	if (maps_.empty()) {
+	// no in-progress maps) or if there might be new detectors.
+	if (maps_.empty() || maps_.size() != timestreams->size()) {
 		template_->units = timestreams->GetUnits();
 		for (auto i : *timestreams) {
+			if (maps_.find(i.first) != maps_.end())
+				continue;
+
 			maps_[i.first].first = template_->Clone(false);
 			maps_[i.first].second = G3SkyMapWeightsPtr(
 			    new G3SkyMapWeights(template_, false));
@@ -144,7 +147,13 @@ SingleDetectorMapBinner::Process(G3FramePtr frame,
 		G3SkyMapPtr m = i.second.first;
 		G3SkyMapPtr w = i.second.second->TT;
 #endif
-		G3TimestreamConstPtr ts = timestreams->at(det);
+
+		G3TimestreamConstPtr ts;
+		try {
+			ts = timestreams->at(det);
+		} catch (std::out_of_range &e) {
+			continue;
+		}
 	
 		// Get per-detector pointing timestream
         	std::vector<double> alpha, delta;
