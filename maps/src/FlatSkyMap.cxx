@@ -422,15 +422,18 @@ G3SkyMap &FlatSkyMap::operator op(const G3SkyMap &rhs) {\
 	} \
 }
 
-flatskymap_arithmetic(+=, {}, {g3_assert(units == rhs.units);})
-flatskymap_arithmetic(-=, {}, {g3_assert(units == rhs.units);})
+flatskymap_arithmetic(+=, {}, {g3_assert(units == rhs.units); g3_assert(weighted == rhs.weighted);})
+flatskymap_arithmetic(-=, {}, {g3_assert(units == rhs.units); g3_assert(weighted == rhs.weighted);})
 flatskymap_arithmetic(/=, {ConvertToDense(); (*this->dense_) /= 0.0;},
-    {if (units == G3Timestream::None) units = rhs.units;})
+    {if (units == G3Timestream::None) units = rhs.units;
+     if (rhs.weighted and !(weighted)) weighted = true;})
 
 G3SkyMap &FlatSkyMap::operator *=(const G3SkyMap &rhs) {
 	g3_assert(IsCompatible(rhs));
 	if (units == G3Timestream::None)
 		units = rhs.units;
+	if (rhs.weighted and !(weighted))
+		weighted = true;
 	try {
 		const FlatSkyMap& b = dynamic_cast<const FlatSkyMap &>(rhs);
 		bool zero = false;
