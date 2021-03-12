@@ -20,7 +20,7 @@ jobs:
       shell: bash
       run: |
         if [ `echo ${{matrix.os}} | cut -d - -f 1` = "ubuntu" ]; then
-          sudo apt-get install libboost-all-dev libflac-dev libnetcdf-dev libfftw3-dev libgsl0-dev python python3 python3-pip
+          sudo apt-get install libboost-all-dev libflac-dev libnetcdf-dev libfftw3-dev libgsl0-dev python-is-python3 python3 python3-pip
         elif [ `echo ${{matrix.os}} | cut -d - -f 1` = "macOS" ]; then
           brew install python@3.9
           brew link --overwrite python@3.9
