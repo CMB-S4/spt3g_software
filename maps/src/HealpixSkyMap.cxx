@@ -539,6 +539,7 @@ HealpixSkyMap::operator [] (size_t i)
 G3SkyMap &HealpixSkyMap::operator op(const G3SkyMap &rhs) { \
 	g3_assert(IsCompatible(rhs)); \
 	g3_assert(units == rhs.units); \
+	g3_assert(weighted == rhs.weighted); \
 	try { \
 		const HealpixSkyMap& b = dynamic_cast<const HealpixSkyMap &>(rhs); \
 		if (dense_ || ring_sparse_ || indexed_sparse_) { \
@@ -577,6 +578,8 @@ G3SkyMap &HealpixSkyMap::operator *=(const G3SkyMap &rhs) {
 	g3_assert(IsCompatible(rhs));
 	if (units == G3Timestream::None)
 		units = rhs.units;
+	if (rhs.weighted and !(weighted))
+		weighted = true;
 	try {
 		const HealpixSkyMap& b = dynamic_cast<const HealpixSkyMap &>(rhs);
 		bool zero = false;
@@ -613,6 +616,8 @@ G3SkyMap &HealpixSkyMap::operator /=(const G3SkyMap &rhs) {
 	g3_assert(IsCompatible(rhs));
 	if (units == G3Timestream::None)
 		units = rhs.units;
+	if (rhs.weighted and !(weighted))
+		weighted = true;
 	try {
 		const HealpixSkyMap& b = dynamic_cast<const HealpixSkyMap &>(rhs);
 		bool zero = false;
