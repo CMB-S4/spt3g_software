@@ -267,6 +267,36 @@ Modules that need to work on granularilty coarser than a scan (e.g. notch filter
 
 This implements a processing step that works on five scans at a time. From the perspective of a module either before or after this one in the chain, nothing unusual happens: frames appear in order one at a time in both cases. When ``__call__`` returns an empty list, the pipeline goes back to the first module to get a new frame instead of continuing to the next. These accumulate inside the internal queue of ``Buffered`` until there are five scans present. At that point, they are processed as a group and then moved to the output queue. When the pipeline sees five frames in the output queue, it will call the next module five times, with each frame in sequence. Once that is complete, it will then go back to the first module for new frames.
 
+Caching Previous Data
+=====================
+
+The previous example can be adapted to cache data from previous frames when that data is required to operate on current frames.  This is useful for caching e.g. calibration data.
+
+.. code-block:: python
+
+        class Caching(object):
+                def __init__(self, calibrator_key='CalibratorResponse'):
+		    self.calkey = calibrator_key
+		    self.cal = None
+		def __call__(self, frame):
+		    if self.calkey in frame:
+		        self.cal = frame[self.calkey]
+			return
+		    if frame.type == core.G3FrameType.Scan:
+		        # Do something here
+
+There are two convenience methods for caching data and passing it into a module.  This is useful for writing a function that requires (for example) a ``BolometerPropertiesMap``, but otherwise does not require a class.  This is best illustrated with an example
+
+.. code-block:: python
+
+    @core.cache_frame_data(type=core.G3FrameType.Scan, bolo_props='BolometerProperties')
+    def FlagSomeStuff(frame, flag_key='Flags', bolo_props=None):
+        pass
+
+The decorator ``@core.cache_frame_data`` will ensure that the bolometer properties are passed to ``FlagSomeStuff`` in the ``bolo_props`` kwarg.  The (required) ``type`` argument specifies that ``FlagSomeStuff`` only runs on frames of type ``core.G3FrameType.Scan``.  When called with an abritrary ``kwarg='FrameKey'`` pair, ``core.cache_frame_data`` caches the most recent instance of ``'FrameKey'`` in any frame, and passes it to the decorated function under the keyword argument ``kwarg``.  ``core.cache_frame_data`` can cache multiple keys from multiple frames.  For example, if one wanted to cache the calibrator singal to noise ratio (stored as ``'CalibratorResponseSN'``) as well as the bolometer properties, and pass it to a function with the keyword argument `calsn`, one would wrap that function with the decorator ``@core.cache_frame_data(type=core.G3FrameType.Scan, calsn='CalibratorResponseSN', bolo_props='BolometerProperties')``.  This would be useful if one wanted to apply different calibrator SNR thresholds to different bands, for example.
+
+``core.scan_func_cache_data`` is a special case of ``core.cache_frame_data`` where ``type`` is set to ``core.G3FrameType.Scan``.
+
 Pipelines
 =========
 
