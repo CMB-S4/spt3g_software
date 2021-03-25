@@ -202,7 +202,7 @@ if args.whwp:
 
 # Issue a periodic watchdog ping to the SPT pager system
 if args.watchdog:
-    pipe.Add(gcp.GCPWatchdog, calibrator=args.calibrator)
+    pipe.Add(gcp.DAQWatchdog, calibrator=args.calibrator)
 
 if args.verbose:
     pipe.Add(core.Dump)

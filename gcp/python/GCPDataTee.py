@@ -1,49 +1,73 @@
 import struct, socket, errno, numpy, time, threading
 from spt3g import core, dfmux
 
-@core.indexmod
-class GCPWatchdog(object):
+
+class PagerWatchdog(object):
     '''
-    Module that sends a watchdog (ping) message to the GCP pager when it is operational.
+    Module that sends a watchdog (ping) message to the GCP pager when the parent
+    process is running successfully.  Modify the `data_valid` method for
+    particular use cases, and call the `run` method periodically in your
+    application.
     '''
-    def __init__(self, interval=600, host='sptnet.spt', port=50040, timeout=20, sim=False,
-                 calibrator=False):
-        self.host = host
-        self.port = port
+
+    host = 'sptnet.spt'
+    port = 50040
+    timeout = 20
+
+    def __init__(self, name, interval=600, sim=False):
+        self.name = name.lower()
+        self.unit = '{}Watchdog'.format(name.capitalize())
         self.interval = interval
-        self.timeout = timeout
         self.sim = sim
         self.last_ping = None
-        self.last_missing = None
-        self.last_missing_calibrator = None
-        self.calibrator = calibrator
+
         # ping on startup
         self.thread = threading.Thread(target=self.ping)
         self.thread.start()
 
     def ping(self):
-        # send a watchdog command to the pager server port
+        """
+        Send a watchdog ping message to the GCP pager process.  This method is
+        called by the `run` method at regular intervals whenever the
+        `data_valid` method returns True.
+        """
         try:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(self.timeout)
-            sock.connect((self.host, self.port))
-            sock.send('watchdog daq'.encode())
-            resp = sock.recv(4096)
-            if resp:
-                core.log_debug("Sent DAQ watchdog ping, got response {}".format(resp.decode()),
-                               unit='GCPWatchdog')
-            sock.close()
+            if not self.sim:
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.settimeout(self.timeout)
+                sock.connect((self.host, self.port))
+                sock.send('watchdog {}'.format(self.name).encode())
+                resp = sock.recv(4096)
+                if resp:
+                    core.log_debug(
+                        'Sent watchdog ping, got response {}'.format(resp.decode()),
+                        unit=self.unit,
+                    )
+                sock.close()
         except Exception as e:
-            core.log_error("Error sending watchdog ping: {}".format(e), unit='GCPWatchdog')
+            core.log_error('Error sending watchdog ping: {}'.format(e), unit=self.unit)
             # try again in ten seconds
             self.last_ping = time.time() - self.interval + 10
         else:
-            core.log_info('Sent DAQ watchdog ping', unit='GCPWatchdog')
+            core.log_info('Sent watchdog ping', unit=self.unit)
             self.last_ping = time.time()
 
-    def __call__(self, frame):
-        # only ping on Timepoint frames
-        if not self.sim and 'DfMux' not in frame:
+    def data_valid(self, *args, **kwargs):
+        """
+        Returns True if the watchdog should ping, otherwise False.  Arguments
+        are passed to this method from the `run` method.
+        """
+        raise NotImplementedError
+
+    def run(self, *args, **kwargs):
+        """
+        When called, issues a watchdog ping message if the interval time has passed, and
+        the `data_valid` method returns True.  All input arguments are passed to the
+        `data_valid` method for validation.
+        """
+
+        # only ping if ready
+        if not self.data_valid(*args, **kwargs):
             return
 
         # only ping if another ping isn't already running
@@ -59,36 +83,75 @@ class GCPWatchdog(object):
         if self.last_ping and (now - self.last_ping < self.interval):
             return
 
-        # only ping if all the modules are returning data
-        if not self.sim:
-            data = frame['DfMux']
-            nmods_expected = 8 * len(data.keys())
-            nmods = sum([v.nmodules for v in data.values()])
-            if nmods < nmods_expected:
-                core.log_error("Missing {} modules in DAQ data stream".format(nmods_expected - nmods),
-                               unit='GCPWatchdog')
-                self.last_missing = now
-                return
-            else:
-                # only ping if normal data acquisition has been going for a bit
-                if self.last_missing and now - self.last_missing < 10:
-                    return
-
-            # only ping if calibrator is returning data
-            if self.calibrator:
-                if 'CalibratorOn' not in frame:
-                    core.log_error("Missing calibrator signal in DAQ data stream",
-                                   unit='GCPWatchdog')
-                    self.last_missing_calibrator = now
-                    return
-                else:
-                    # only ping if normal data acquisition has been going for a bit
-                    if self.last_missing_calibrator and now - self.last_missing_calibrator < 10:
-                        return
-
-        # spawn thread
+        # ping
         self.thread = threading.Thread(target=self.ping)
         self.thread.start()
+
+
+@core.indexmod
+class DAQWatchdog(PagerWatchdog):
+    """
+    Watchdog that issues a ping to the GCP pager when the DAQ is operational.
+    """
+
+    def __init__(self, calibrator=False, interval=600, sim=False):
+        """
+        Arguments
+        ---------
+        calibrator : bool
+            If True, ensure that the calibrator is also running successfully
+            before sending a ping.
+        """
+        super(DAQWatchdog, self).__init__('DAQ', interval=interval, sim=sim)
+
+        self.last_missing = None
+        self.calibrator = calibrator
+
+    def data_valid(self, frame):
+        """
+        Check the incoming frame for completeness.
+
+         * Ensure that all modules in the listed iceboards are reporting.
+         * If `calibrator` is True, ensure that the calibrator sync signal is in the frame.
+        """
+
+        # always ready in sim mode
+        if self.sim:
+            return True
+
+        # only ping on Timepoint frames
+        if 'DfMux' not in frame:
+            return False
+
+        # only ping if all expected modules are present
+        data = frame['DfMux']
+        nmods_expected = 8 * len(data.keys())
+        nmods = sum([v.nmodules for v in data.values()])
+        if nmods < nmods_expected:
+            core.log_error(
+                "Missing {} modules in DAQ data stream".format(nmods_expected - nmods),
+                unit=self.unit,
+            )
+            self.last_missing = now
+            return False
+
+        # only ping if the calibrator sync signal is present
+        if self.calibrator and 'CalibratorOn' not in frame:
+            core.log_error(
+                "Missing calibrator signal in DAQ data stream",
+                unit=self.unit,
+            )
+            self.last_missing = now
+            return False
+
+        # only ping if normal data acquisition has been going for a bit
+        if self.last_missing and now - self.last_missing < 10:
+            return False
+
+        return True
+
+    def __call__(self, frame):
+        self.run(frame)
 
 
 @core.indexmod
