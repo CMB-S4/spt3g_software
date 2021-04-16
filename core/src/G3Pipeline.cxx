@@ -8,7 +8,8 @@
 #include <iostream>
 #include <mutex>
 
-G3Pipeline::G3Pipeline()
+G3Pipeline::G3Pipeline() :
+  dead_(false)
 {
 	log_trace("Initializing Pipeline");
 }
@@ -219,6 +220,11 @@ G3Pipeline::Run(bool profile, bool graph)
 #ifdef SIGINFO
 	struct sigaction siginfo_catcher, oldsiginfo;
 #endif
+
+	// Pipelines can only be run once
+	if (dead_)
+		log_fatal("Pipeline has already been run and needs to be "
+		    "re-initialized to run again.");
 	
 	// Variables needed for graphing processing chain
 	int graph_frame_id_vals = 0;
@@ -274,6 +280,11 @@ G3Pipeline::Run(bool profile, bool graph)
 		    graph_frame_id_vals, graph_proc_data, 
 		    last_frame);
 	}
+
+	// Mark us dead -- no coming back now
+	dead_ = true;
+	for (auto i = mods.begin(); i != mods.end(); i++)
+		i->mod.reset(); // Free actual module references
 
 	// Restore old handler
 	G3Pipeline::halt_processing = false;

@@ -52,6 +52,7 @@ public:
 private:
 	std::vector<std::pair<std::string, G3ModulePtr> > modules_;
 	std::string graph_info_;
+	bool dead_;
 
 	static void sigint_catcher(int);
 #ifdef SIGINFO
