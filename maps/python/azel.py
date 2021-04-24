@@ -108,7 +108,7 @@ def convert_azel_to_radec(az, el, location=spt, mjd=None):
         assert len(az) == len(el)
         t = astropy.time.Time(mjd, format="mjd")
 
-    check_iers(az.stop)
+    check_iers(t[-1])
 
     # record locations of bad elevation values to mark them later
     badel_inds = np.where(
@@ -180,7 +180,8 @@ def convert_radec_to_azel(ra, dec, location=spt, mjd=None):
             mjd = np.atleast_1d(mjd)
         assert len(ra) == len(dec)
         t = astropy.time.Time(mjd, format="mjd")
-    check_iers(ra.stop)
+
+    check_iers(t[-1])
 
     k = astropy.coordinates.FK5(
         ra=np.asarray(ra) / core.G3Units.deg * astropy.units.deg,
