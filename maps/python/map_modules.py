@@ -460,3 +460,61 @@ def ReplicateMaps(frame, input_map_id, output_map_ids, copy_weights=False):
         frames.append(fr)
 
     return frames
+
+
+@core.indexmod
+class CoaddMaps(object):
+    """
+    Coadd maps and weights.
+
+    Arguments
+    ---------
+    map_ids : list of str
+        List of map Id's to include in the coadd.  If None, any maps
+        in the pipeline are included.
+    output_map_id : str
+        Id to assign to the output frame.
+    ignore_missing_weights : bool
+        If False (default), a warning is issued when the frame contains weighted
+        Stokes maps without a weights map.  Set this option to True when feeding
+        single bolometer map frames with common weights through a pipeline.
+    """
+
+    def __init__(self, map_ids=None, output_map_id=None, ignore_missing_weights=False):
+        self.coadd_frame = core.G3Frame(core.G3FrameType.Map)
+        self.coadd_frame["Id"] = output_map_id
+        if isinstance(map_ids, str):
+            map_ids = [map_ids]
+        self.map_ids = map_ids
+        self.ignore_missing_weights = ignore_missing_weights
+
+    def __call__(self, frame):
+
+        if frame.type == core.G3FrameType.EndProcessing:
+            coadd = self.coadd_frame
+            self.coadd_frame = None
+            return [coadd, frame]
+
+        if "Id" not in frame:
+            return
+
+        if self.map_ids is not None and frame["Id"] not in self.map_ids:
+            return
+
+        ValidateMaps(frame, ignore_missing_weights=ignore_missing_weights)
+        input_weighted = True
+        if not frame["T"].weighted:
+            input_weighted = False
+            ApplyWeights(frame)
+
+        for key in ["T", "Q", "U", "Wpol", "Wunpol"]:
+            if key not in frame:
+                continue
+            if key not in self.coadd_frame:
+                self.coadd_frame[key] = frame[key].clone(False)
+            m = self.coadd_frame.pop(key)
+            m += frame[key]
+            self.coadd_frame[key] = m
+
+        if not input_weighted:
+            RemoveWeights(frame)
