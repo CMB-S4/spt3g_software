@@ -13,6 +13,7 @@ __all__ = [
     "InjectMapStub",
     "InjectMaps",
     "ReplicateMaps",
+    "CoaddMaps",
 ]
 
 
