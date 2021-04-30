@@ -80,7 +80,7 @@ FlatSkyMap::FlatSkyMap(const FlatSkyMap & fm) :
 	if (fm.dense_)
 		dense_ = new DenseMapData(*fm.dense_);
 	else if (fm.sparse_)
-		sparse_ = new SparseMapData(*fm.sparse_);
+		sparse_ = new SparseMapData<double>(*fm.sparse_);
 }
 
 FlatSkyMap::~FlatSkyMap()
@@ -158,7 +158,7 @@ FlatSkyMap::load(A &ar, unsigned v)
 			assert(dense_->ydim() == ypix_);
 			break;
 		case 1:
-			sparse_ = new SparseMapData(0, 0);
+			sparse_ = new SparseMapData<double>(0, 0);
 			ar & make_nvp("sparse", *sparse_);
 			assert(sparse_->xdim() == xpix_);
 			assert(sparse_->ydim() == ypix_);
@@ -282,7 +282,7 @@ FlatSkyMap::const_iterator::operator++()
 		x_ = iter.x;
 		y_ = iter.y;
 	} else if (map_.sparse_) {
-		SparseMapData::const_iterator iter(*map_.sparse_, x_, y_);
+		SparseMapData<double>::const_iterator iter(*map_.sparse_, x_, y_);
 		++iter;
 		x_ = iter.x;
 		y_ = iter.y;
@@ -315,7 +315,7 @@ FlatSkyMap::ConvertToSparse()
 	if (!dense_)
 		return;
 
-	sparse_ = new SparseMapData(*dense_);
+	sparse_ = new SparseMapData<double>(*dense_);
 	delete dense_;
 	dense_ = NULL;
 }
@@ -366,7 +366,7 @@ FlatSkyMap::operator () (size_t x, size_t y)
 	if (dense_)
 		return (*dense_)(x, y);
 	if (!sparse_)
-		sparse_ = new SparseMapData(xpix_, ypix_);
+		sparse_ = new SparseMapData<double>(xpix_, ypix_);
 	return (*sparse_)(x, y);
 }
 
@@ -410,7 +410,7 @@ G3SkyMap &FlatSkyMap::operator op(const G3SkyMap &rhs) {\
 				ConvertToDense(); \
 				(*dense_) op (*b.dense_); \
 			} else if (b.sparse_) { \
-				sparse_ = new SparseMapData(xpix_, ypix_); \
+				sparse_ = new SparseMapData<double>(xpix_, ypix_); \
 				(*sparse_) op (*b.sparse_); \
 			} else { \
 				sparsenull \

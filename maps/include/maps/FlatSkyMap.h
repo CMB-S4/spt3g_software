@@ -11,7 +11,7 @@
 #include <maps/FlatSkyProjection.h>
 
 class DenseMapData;
-class SparseMapData;
+template <typename T> class SparseMapData;
 
 class FlatSkyMap : public G3FrameObject, public G3SkyMap {
 public:
@@ -186,7 +186,7 @@ private:
 	FlatSkyProjection proj_info; // projection parameters and functions
 
 	DenseMapData *dense_;
-	SparseMapData *sparse_;
+	SparseMapData<double> *sparse_;
 	uint64_t xpix_, ypix_;
 	bool flat_pol_;
 

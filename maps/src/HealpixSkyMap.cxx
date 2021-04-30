@@ -124,7 +124,7 @@ HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool weighted,
 		shift_ra = (phi_max - phi_min) > (phi_max_shift - phi_min_shift);
 		info_.initialize(nside, nested, shift_ra);
 
-		ring_sparse_ = new SparseMapData(info_.nring(), info_.nring());
+		ring_sparse_ = new SparseMapData<double>(info_.nring(), info_.nring());
 
 		for (size_t i = 0; i < sz; i++)
 			(*this)[((unsigned long *)indexview.buf)[i]]=
@@ -201,7 +201,7 @@ HealpixSkyMap::HealpixSkyMap(const HealpixSkyMap & fm) :
 	if (fm.dense_)
 		dense_ = new std::vector<double>(*fm.dense_);
 	else if (fm.ring_sparse_)
-		ring_sparse_ = new SparseMapData(*fm.ring_sparse_);
+		ring_sparse_ = new SparseMapData<double>(*fm.ring_sparse_);
 	else if (fm.indexed_sparse_)
 		indexed_sparse_ = new std::unordered_map<uint64_t, double>(
 		    *fm.indexed_sparse_);
@@ -279,7 +279,7 @@ HealpixSkyMap::load(A &ar, unsigned v)
 		ar & make_nvp("data", *dense_);
 		break;
 	case 2:
-		ring_sparse_ = new SparseMapData(1,1);
+		ring_sparse_ = new SparseMapData<double>(1,1);
 		ar & make_nvp("data", *ring_sparse_);
 		break;
 	case 1:
@@ -360,7 +360,7 @@ HealpixSkyMap::const_iterator::operator++()
 		++index_;
 		++it_dense_;
 	} else if (map_.ring_sparse_) {
-		SparseMapData::const_iterator iter(*map_.ring_sparse_, j_, k_);
+		SparseMapData<double>::const_iterator iter(*map_.ring_sparse_, j_, k_);
 		++iter;
 		j_ = iter.x;
 		k_ = iter.y;
@@ -405,7 +405,7 @@ HealpixSkyMap::ConvertToRingSparse()
 	if (ring_sparse_)
 		return;
 
-	ring_sparse_ = new SparseMapData(info_.nring(), info_.nring());
+	ring_sparse_ = new SparseMapData<double>(info_.nring(), info_.nring());
 
 	if (dense_) {
 		auto *old_dense = dense_;
@@ -529,7 +529,7 @@ HealpixSkyMap::operator [] (size_t i)
 		return (*indexed_sparse_)[i];
 
 	if (!ring_sparse_)
-		ring_sparse_ = new SparseMapData(info_.nring(), info_.nring());
+		ring_sparse_ = new SparseMapData<double>(info_.nring(), info_.nring());
 
 	auto ridx = info_.PixelToRing(i);
 	return (*ring_sparse_)(ridx.first, ridx.second);
@@ -970,7 +970,7 @@ void HealpixSkyMap::SetShiftRa(bool shift)
 	HealpixSkyMapInfo info(info_);
 	info.SetShifted(shift);
 
-	SparseMapData *ring_sparse = new SparseMapData(info_.nring(), info_.nring());
+	SparseMapData<double> *ring_sparse = new SparseMapData<double>(info_.nring(), info_.nring());
 	for (auto i : *this) {
 		if (i.second != 0) {
 			auto ridx = info.PixelToRing(i.first);
