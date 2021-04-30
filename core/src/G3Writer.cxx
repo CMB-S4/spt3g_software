@@ -34,6 +34,16 @@ G3Writer::~G3Writer()
 
 void G3Writer::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 {
+        // If in Python context, release the GIL while writing out.
+        // Note we must force serialization of the frames, first,
+        // because in some cases serialization requires calling back
+        // out to Python.
+	PyThreadState *_save = nullptr;
+	if (Py_IsInitialized() && PyGILState_Check()) {
+		frame->GenerateBlobs();
+		_save = PyEval_SaveThread();
+	}
+
 	if (frame->type == G3Frame::EndProcessing)
 		stream_.reset();
 	else if (streams_.size() == 0 ||
@@ -42,6 +52,9 @@ void G3Writer::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		frame->save(stream_);
 
 	out.push_back(frame);
+
+	if (_save != nullptr)
+		PyEval_RestoreThread(_save);
 }
 
 void G3Writer::Flush()
