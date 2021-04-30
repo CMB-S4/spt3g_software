@@ -93,12 +93,33 @@ public:
 	template <typename T> void save(T &os) const;
 	template <typename T> void load(T &is);
 
+	// Routines for handling the stored serialized copies of data.
+	// These are all const because they only manipulate caches and
+	// so change only performance rather than data contents of the frame.
+
+	// Drop all serialized data either for already-decoded objects
+	// (default) or all objects after decoding them (if decode_all is
+	// true). Saves memory at the expense of CPU time if reserialized.
+	void DropBlobs(bool decode_all=false) const;
+
+	// Force immediate serialization of all objects. Will save some
+	// CPU time later during serialization of the frame in exchange for
+	// spending the exact same amount of CPU time right now.
+	void GenerateBlobs(bool drop_objects=false) const;
+
+	// Drop all decoded objects in favor of their serialized copies, where
+	// those serialized copies already exist. Saves memory for frames
+	// about to be written at the expense of CPU time to re-decode them
+	// if they are accessed again later.
+	void DropObjects() const;
+
 private:
 	struct blob_container {
 		G3FrameObjectConstPtr frameobject;
 		boost::shared_ptr<std::vector<char> > blob;
 	};
 	static void blob_decode(struct blob_container &blob);
+	static void blob_encode(struct blob_container &blob);
 	typedef std::unordered_map<std::string, blob_container> G3MapType;
 	friend std::ostream& operator<<(std::ostream& os, const G3Frame &);
 	mutable G3MapType map_;

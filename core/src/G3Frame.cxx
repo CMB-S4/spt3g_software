@@ -250,16 +250,9 @@ void G3Frame::save(T &os) const
 	ar << make_nvp("size", size);
 	ar << make_nvp("type", (uint32_t)type);
 	for (auto i = map_.begin(); i != map_.end(); i++) {
-		if (!i->second.blob) {
-			// If no encoded frameobject, serialize it
-			i->second.blob = boost::make_shared<std::vector<char> >();
-			boost::iostreams::stream<
-			  boost::iostreams::back_insert_device<std::vector<char> > >
-			  item_os(*i->second.blob);
-			cereal::PortableBinaryOutputArchive item_ar(item_os);
-			item_ar << make_nvp("val", i->second.frameobject);
-			item_os.flush();
-		}
+		// If no encoded frameobject, serialize it
+		blob_encode(i->second);
+
 		ar << make_nvp("name", i->first);
 		crc = crc32c(crc, (const uint8_t *)i->first.c_str(),
 		    i->first.size());
@@ -315,6 +308,46 @@ void G3Frame::load(std::vector<char> &data)
 	load(is);
 }
 
+void G3Frame::DropBlobs(bool decode_all) const
+{
+	for (auto i = map_.begin(); i != map_.end(); i++) {
+		if (!i->second.frameobject) {
+			// Decode if asked for and possible, otherwise leave
+			// the blob in place.
+			if (decode_all) {
+				try {
+					blob_decode(i->second);
+				} catch (cereal::Exception &e) {
+					continue;
+				}
+			} else {
+				continue;
+			}
+		}
+
+		i->second.blob.reset();
+	}
+}
+
+void G3Frame::GenerateBlobs(bool drop_objects) const
+{
+	for (auto i = map_.begin(); i != map_.end(); i++) {
+		// If no encoded frameobject, serialize it
+		blob_encode(i->second);
+
+		if (drop_objects)
+			i->second.frameobject.reset();
+	}
+}
+
+void G3Frame::DropObjects() const
+{
+	for (auto i = map_.begin(); i != map_.end(); i++) {
+		if (i->second.blob)
+			i->second.frameobject.reset();
+	}
+}
+
 void G3Frame::blob_decode(struct blob_container &blob)
 {
 	using cereal::make_nvp;
@@ -333,6 +366,23 @@ void G3Frame::blob_decode(struct blob_container &blob)
 	// in CPU is not really worth the huge memory hit.
 	if (blob.blob->size() > 128*1024*1024)
 		blob.blob.reset();
+}
+
+void G3Frame::blob_encode(struct blob_container &blob)
+{
+	using cereal::make_nvp;
+
+	if (blob.blob)
+		return;
+
+	// If no encoded frameobject, serialize it
+	blob.blob = boost::make_shared<std::vector<char> >();
+	boost::iostreams::stream<
+	  boost::iostreams::back_insert_device<std::vector<char> > >
+	  item_os(*blob.blob);
+	cereal::PortableBinaryOutputArchive item_ar(item_os);
+	item_ar << make_nvp("val", blob.frameobject);
+	item_os.flush();
 }
 
 template void G3Frame::load(boost::iostreams::filtering_istream &);
