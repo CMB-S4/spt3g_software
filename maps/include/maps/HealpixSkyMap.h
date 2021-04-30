@@ -10,7 +10,7 @@
 #include <maps/G3SkyMap.h>
 #include <maps/chealpix.h>
 
-class SparseMapData;
+template <typename T> class SparseMapData;
 
 
 class HealpixSkyMap : public G3FrameObject, public G3SkyMap {
@@ -138,7 +138,7 @@ private:
 	size_t npix_;
 	bool nested_;
 	std::vector<double> *dense_;
-	SparseMapData *ring_sparse_;
+	SparseMapData<double> *ring_sparse_;
 	std::unordered_map<uint64_t, double> *indexed_sparse_;
 	map_info *ring_info_;
 	bool shift_ra_;
