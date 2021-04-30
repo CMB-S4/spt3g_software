@@ -564,6 +564,7 @@ pyskymap_##name(const G3SkyMap &a, const G3SkyMap &b) \
 	g3_assert(a.IsCompatible(b)); \
 	g3_assert(a.units == b.units); \
 	G3SkyMapPtr rv = a.Clone(false); \
+	rv->units = G3Timestream::None; \
 	for (size_t i = 0; i < a.size(); i++) { \
 		if (a.at(i) oper b.at(i)) \
 			(*rv)[i] = 1; \
