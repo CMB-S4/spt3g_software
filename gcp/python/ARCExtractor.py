@@ -1,8 +1,9 @@
-import numpy, copy
+import numpy as np
+import copy
 from spt3g import core
 from spt3g.gcp import ACUStatus, ACUState, TrackerStatus, TrackerState, TrackerPointing, CalFile
 
-@core.indexmod
+@core.usefulfunc
 def UnitValue(caldict_entry):
     '''Turn unit name into floating point unit value'''
 
@@ -28,6 +29,38 @@ def UnitValue(caldict_entry):
         uvalue = 1.
 
     return uvalue
+
+
+@core.usefulfunc
+def CalibrateValue(data, caldict_entry):
+    '''Apply gain / offset units from G3 cal file to register'''
+
+    uvalue = UnitValue(caldict_entry)
+    g3type = type(data)
+    # make a copy
+    if np.size(data) == 1:
+        data = data.value
+    data2 = np.array(data, dtype='float64')
+    thisdtype = data2.dtype
+
+    # calibrate units
+    data2 += np.array(caldict_entry['Offset'], dtype=thisdtype)
+    data2 *= np.array(uvalue / caldict_entry['ReciprocalFactor'], dtype=thisdtype)
+    if not data2.shape:
+        data2 = data2.tolist()
+
+    # if a register has units, it can't be an int anymore.  well, actually,
+    # it can't be an int if we're adding floats to it or multiplying it by
+    # floats either, so convert everything that has an entry in the cal file
+    # to float/double.
+    if g3type == core.G3VectorInt:
+        return core.G3VectorDouble(data2)
+    elif g3type == core.G3MapInt:
+        return core.G3MapDouble(data2)
+    elif g3type == core.G3Int:
+        return core.G3Double(data2)
+    else:
+        return g3type(data2)
 
 
 @core.indexmod
@@ -57,101 +90,24 @@ def CalibrateFrame(f, calibration_file=None):
                     rcd = cd[board][rmap][reg]
                 except KeyError:
                     continue
-                rsize = numpy.size(cboard[rmap][reg])
-                if rsize > 1:
-                    rshape = numpy.shape(cboard[rmap][reg])
-                    if len(rshape) > 1:
-                        for i in range(rshape[0]):
-                            try:
-                                rcdi = rcd[i]
-                            except KeyError:
-                                rcdi = rcd
-                            uvalue = UnitValue(rcdi)
-                            datatemp = numpy.asarray(cboard[rmap][reg][i])
-                            datatemp2 = datatemp.copy()
-                            # if a register has units, it can't be an
-                            # int anymore.
-                            # well, actually, it can't be an int if
-                            # we're adding floats to it or multiplying
-                            # it by floats either, so convert
-                            # everything that has an entry in the cal
-                            # file to float/double.
-                            datatemp2 = numpy.asarray(datatemp2,dtype='float64')
-                            thisdtype = datatemp2.dtype
-                            datatemp2 += \
-                                numpy.array(rcdi['Offset'],dtype=thisdtype)
-                            datatemp2 *= numpy.array(uvalue / 
-                                                     rcdi['ReciprocalFactor'],
-                                                     dtype=thisdtype)
-                            if type(cboard[rmap][reg][i]) \
-                                    is core.G3VectorInt:
-                                regitemp = core.G3VectorDouble(datatemp2)
-                            elif type(cboard[rmap][reg][i]) \
-                                    is core.G3MapInt:
-                                regitemp = core.G3MapDouble(datatemp2)
-                            elif type(cboard[rmap][reg][i]) \
-                                    is core.G3Int:
-                                regitemp = core.G3Double(datatemp2)
-                            else:
-                                regitemp = \
-                                    (type(cboard[rmap][reg][i]))(datatemp2)
-                            cboard[rmap][reg][i] = regitemp
-                    else:
+                rsize = np.size(cboard[rmap][reg])
+                rshape = np.shape(cboard[rmap][reg])
+                if rsize > 1 and len(rshape) > 1:
+                    for i in range(rshape[0]):
                         try:
-                            rcdi = rcd[0]
+                            rcdi = rcd[i]
                         except KeyError:
                             rcdi = rcd
-                        uvalue = UnitValue(rcdi)
-                        datatemp = numpy.asarray(cboard[rmap][reg])
-                        datatemp2 = datatemp.copy()
-                        # if a register has units, it can't be an
-                        # int anymore. well, actually (see above)...
-                        datatemp2 = numpy.asarray(datatemp2,dtype='float64')
-                        thisdtype = datatemp2.dtype
-                        datatemp2 += \
-                            numpy.array(rcdi['Offset'],dtype=thisdtype)
-                        datatemp2 *= numpy.array(uvalue / rcdi['ReciprocalFactor'],dtype=thisdtype)
-                        if type(cboard[rmap][reg]) \
-                                is core.G3VectorInt:
-                            regtemp = core.G3VectorDouble(datatemp2)
-                        elif type(cboard[rmap][reg]) \
-                                is core.G3MapInt:
-                            regtemp = core.G3MapDouble(datatemp2)
-                        elif type(cboard[rmap][reg]) \
-                                is core.G3Int:
-                            regtemp = core.G3Double(datatemp2)
-                        else:
-                            regtemp = \
-                                (type(cboard[rmap][reg]))(datatemp2)
-                        cboard[rmap][reg] = regtemp
+                        cboard[rmap][reg][i] = CalibrateValue(cboard[rmap][reg][i], rcdi)
                 else:
                     try:
                         rcdi = rcd[0]
                     except KeyError:
                         rcdi = rcd
-                    uvalue = UnitValue(rcdi)
-                    datatemp = cboard[rmap][reg].value
-                    datatemp2 = datatemp
-                    # if a register has units, it can't be an
-                    # int anymore. well, actually (see above)...
-                    datatemp2 = numpy.float(datatemp2)
-                    datatemp2 = datatemp2 + rcdi['Offset']
-                    datatemp2 *= uvalue / rcdi['ReciprocalFactor']
-                    if type(cboard[rmap][reg]) \
-                            is core.G3VectorInt:
-                        regtemp = core.G3VectorDouble(datatemp2)
-                    elif type(cboard[rmap][reg]) \
-                            is core.G3MapInt:
-                        regtemp = core.G3MapDouble(datatemp2)
-                    elif type(cboard[rmap][reg]) \
-                            is core.G3Int:
-                        regtemp = core.G3Double(datatemp2)
-                    else:
-                        regtemp = \
-                            (type(cboard[rmap][reg]))(datatemp2)
-                    cboard[rmap][reg] = regtemp
+                    cboard[rmap][reg] = CalibrateValue(cboard[rmap][reg], rcdi)
         del f[board]
         f[board] = cboard
+
 
 @core.indexmod
 def UnpackACUData(f):
@@ -160,32 +116,35 @@ def UnpackACUData(f):
     if f.type != core.G3FrameType.GcpSlow:
         return
 
+    board = f['antenna0']['acu']
+
     a = ACUStatus()
     a.time = f['antenna0']['frame']['utc']
-    a.az_pos = f['antenna0']['acu']['az_pos'].value
-    a.el_pos = f['antenna0']['acu']['el_pos'].value
-    a.az_rate = f['antenna0']['acu']['az_rate'].value
-    a.el_rate = f['antenna0']['acu']['el_rate'].value
+    a.az_pos = board['az_pos'].value
+    a.el_pos = board['el_pos'].value
+    a.az_rate = board['az_rate'].value
+    a.el_rate = board['el_rate'].value
 
     # 'new_*' registers not actually filled by GCP; ignore them
 
-    a.px_checksum_error_count = f['antenna0']['acu']['px_checksum_error_count'].value
-    a.px_resync_count = f['antenna0']['acu']['px_resync_count'].value
-    a.px_resync_timeout_count = f['antenna0']['acu']['px_resync_timeout_count'].value
-    a.px_resyncing = f['antenna0']['acu']['px_resyncing'].value
-    a.px_timeout_count = f['antenna0']['acu']['px_timeout_count'].value
-    a.restart_count = f['antenna0']['acu']['restart_count'].value
+    a.px_checksum_error_count = board['px_checksum_error_count'].value
+    a.px_resync_count = board['px_resync_count'].value
+    a.px_resync_timeout_count = board['px_resync_timeout_count'].value
+    a.px_resyncing = board['px_resyncing'].value
+    a.px_timeout_count = board['px_timeout_count'].value
+    a.restart_count = board['restart_count'].value
 
-    a.state = ACUState(f['antenna0']['acu']['state'].value)
-    a.status = f['antenna0']['acu']['acu_status'].value
+    a.state = ACUState(board['state'].value)
+    a.status = board['acu_status'].value
     try:
-        a.error = f['antenna0']['acu']['acu_error'].value
+        a.error = board['acu_error'].value
     except KeyError:
         # This register was some time in early 2018.  In order to read
         # older data, just set the error code to 0.
         a.error = 0
 
     f['ACUStatus'] = a
+
 
 @core.indexmod
 def UnpackTrackerMinimal(f, rewrite_source_from_feature_bits=True):
@@ -221,6 +180,7 @@ def UnpackTrackerMinimal(f, rewrite_source_from_feature_bits=True):
     if 'obs_id' in f['antenna0']['tracker']:
         f['ObservationID'] = f['antenna0']['tracker']['obs_id']
 
+
 @core.indexmod
 def UnpackTrackerData(f, rewrite_source_from_feature_bits=True):
     '''
@@ -238,49 +198,49 @@ def UnpackTrackerData(f, rewrite_source_from_feature_bits=True):
 
     UnpackTrackerMinimal(f, rewrite_source_from_feature_bits)
 
+    board = f['antenna0']['tracker']
+
     t = TrackerStatus()
     # List comprehensions are due to funny business with G3VectorFrameObject
-    t.time = [tm for tm in f['antenna0']['tracker']['utc'][0]]
+    t.time = [tm for tm in board['utc'][0]]
 
     # Measured values
-    t.az_pos = numpy.asarray(f['antenna0']['tracker']['actual'][0])
-    t.el_pos = numpy.asarray(f['antenna0']['tracker']['actual'][1])
+    t.az_pos = np.asarray(board['actual'][0])
+    t.el_pos = np.asarray(board['actual'][1])
     # XXX units for rates seem to be wrong. I think this is in encoder counts
-    t.az_rate = numpy.asarray(f['antenna0']['tracker']['actual_rates'][0],
-                              dtype = float)
-    t.el_rate = numpy.asarray(f['antenna0']['tracker']['actual_rates'][1],
-                              dtype = float)
+    t.az_rate = np.asarray(board['actual_rates'][0], dtype = float)
+    t.el_rate = np.asarray(board['actual_rates'][1], dtype = float)
     
     # Expected values
-    t.az_command = numpy.asarray(f['antenna0']['tracker']['expected'][0])
-    t.el_command = numpy.asarray(f['antenna0']['tracker']['expected'][1])
-    t.az_rate_command = numpy.asarray(f['antenna0']['tracker']['expected_rates'][0], dtype = float)
-    t.el_rate_command = numpy.asarray(f['antenna0']['tracker']['expected_rates'][1], dtype = float)
+    t.az_command = np.asarray(board['expected'][0])
+    t.el_command = np.asarray(board['expected'][1])
+    t.az_rate_command = np.asarray(board['expected_rates'][0], dtype = float)
+    t.el_rate_command = np.asarray(board['expected_rates'][1], dtype = float)
 
     # Status params
-    if isinstance(f['antenna0']['tracker']['state'][0], core.G3String):
+    if isinstance(board['state'][0], core.G3String):
         # If state is all zero (LACKING), for example due to an ACU glitch,
         # the ARC reader may decide that the 8-bit array field is a string.
         # Treat it as one.
-        t.state = [TrackerState(0) for s in f['antenna0']['tracker']['inControl'][0]]
+        t.state = [TrackerState(0) for s in board['inControl'][0]]
     else:
-        t.state = [TrackerState(s) for s in f['antenna0']['tracker']['state'][0]]
-    t.acu_seq = f['antenna0']['tracker']['acu_seq'][0]
-    t.in_control = core.BoolVector(f['antenna0']['tracker']['inControl'][0])
-    t.in_control_int = core.IntVector(f['antenna0']['tracker']['inControl'][0])
-    t.scan_flag = core.BoolVector(f['antenna0']['tracker']['scan_flag'][0])
+        t.state = [TrackerState(s) for s in board['state'][0]]
+    t.acu_seq = board['acu_seq'][0]
+    t.in_control = core.BoolVector(board['inControl'][0])
+    t.in_control_int = core.IntVector(board['inControl'][0])
+    t.scan_flag = core.BoolVector(board['scan_flag'][0])
     
-    t.lst = numpy.asarray(f['antenna0']['tracker']['lst'][0], dtype=float)
+    t.lst = np.asarray(board['lst'][0], dtype=float)
 
-    t.source_acquired = numpy.asarray(f['antenna0']['tracker']['off_source'][0])
-    t.source_acquired_threshold = numpy.asarray(f['antenna0']['tracker']['source_acquired_threshold'])
-    t.tracker_mode = numpy.asarray(f['antenna0']['tracker']['mode'][0])
-    t.tracker_lacking = numpy.asarray(f['antenna0']['tracker']['lacking'][0])
-    t.time_status = numpy.asarray(f['antenna0']['tracker']['time_status'][0])
+    t.source_acquired = np.asarray(board['off_source'][0])
+    t.source_acquired_threshold = np.asarray(board['source_acquired_threshold'])
+    t.tracker_mode = np.asarray(board['mode'][0])
+    t.tracker_lacking = np.asarray(board['lacking'][0])
+    t.time_status = np.asarray(board['time_status'][0])
     try:
-        t.schedule_name = numpy.asarray(f['antenna0']['tracker']['schedule_name'].value)
+        t.schedule_name = np.asarray(board['schedule_name'].value)
     except AttributeError:
-        t.schedule_name = numpy.asarray(''.join([chr(x) for x in f['antenna0']['tracker']['schedule_name']]))
+        t.schedule_name = np.asarray(''.join([chr(x) for x in board['schedule_name']]))
 
     f['TrackerStatus'] = t
 
@@ -296,60 +256,63 @@ def UnpackTrackerPointingData(f):
     if f.type != core.G3FrameType.GcpSlow:
         return
 
+    board = f['antenna0']['tracker']
+
     t = TrackerPointing()
-    t.time = [tm for tm in f['antenna0']['tracker']['utc'][0]]
-    t.scu_temp = numpy.asarray(f['antenna0']['scu']['temp'])
+    t.time = [tm for tm in board['utc'][0]]
+    t.scu_temp = np.asarray(f['antenna0']['scu']['temp'])
     t.features = core.IntVector([f['array']['frame']['features'].value])
 
-    t.encoder_off_x = numpy.asarray([f['antenna0']['tracker']['encoder_off'][0]], dtype=numpy.double)
-    t.encoder_off_y = numpy.asarray([f['antenna0']['tracker']['encoder_off'][1]], dtype=numpy.double)
+    t.encoder_off_x = np.asarray([board['encoder_off'][0]], dtype=np.double)
+    t.encoder_off_y = np.asarray([board['encoder_off'][1]], dtype=np.double)
     
-    t.low_limit_az = numpy.asarray([f['antenna0']['tracker']['az_limits'][0]], dtype=numpy.double)
-    t.high_limit_az = numpy.asarray([f['antenna0']['tracker']['az_limits'][1]], dtype=numpy.double)
-    t.low_limit_el = numpy.asarray([f['antenna0']['tracker']['el_limits'][0]], dtype=numpy.double)
-    t.high_limit_el = numpy.asarray([f['antenna0']['tracker']['el_limits'][1]], dtype=numpy.double)
+    t.low_limit_az = np.asarray([board['az_limits'][0]], dtype=np.double)
+    t.high_limit_az = np.asarray([board['az_limits'][1]], dtype=np.double)
+    t.low_limit_el = np.asarray([board['el_limits'][0]], dtype=np.double)
+    t.high_limit_el = np.asarray([board['el_limits'][1]], dtype=np.double)
 
-    t.tilts_x = numpy.asarray(f['antenna0']['tracker']['tilt_xy_avg'][0], dtype=numpy.double)
-    t.tilts_y = numpy.asarray(f['antenna0']['tracker']['tilt_xy_avg'][1], dtype=numpy.double)
-    t.refraction = numpy.asarray(f['antenna0']['tracker']['refraction'][2], dtype=numpy.double)
+    t.tilts_x = np.asarray(board['tilt_xy_avg'][0], dtype=np.double)
+    t.tilts_y = np.asarray(board['tilt_xy_avg'][1], dtype=np.double)
+    t.refraction = np.asarray(board['refraction'][2], dtype=np.double)
 
-    t.horiz_mount_x = numpy.asarray(f['antenna0']['tracker']['horiz_mount'][0])
-    t.horiz_mount_y = numpy.asarray(f['antenna0']['tracker']['horiz_mount'][1])
-    t.horiz_off_x = numpy.asarray(f['antenna0']['tracker']['horiz_off'][0])
-    t.horiz_off_y = numpy.asarray(f['antenna0']['tracker']['horiz_off'][1])
+    t.horiz_mount_x = np.asarray(board['horiz_mount'][0])
+    t.horiz_mount_y = np.asarray(board['horiz_mount'][1])
+    t.horiz_off_x = np.asarray(board['horiz_off'][0])
+    t.horiz_off_y = np.asarray(board['horiz_off'][1])
 
-    t.scan_off_x = numpy.asarray(f['antenna0']['tracker']['scan_off'][0])
-    t.scan_off_y = numpy.asarray(f['antenna0']['tracker']['scan_off'][1])
-    t.sky_off_x = numpy.asarray(f['antenna0']['tracker']['sky_xy_off'][0])
-    t.sky_off_y = numpy.asarray(f['antenna0']['tracker']['sky_xy_off'][1])
-    t.equat_off_x = numpy.asarray(f['antenna0']['tracker']['equat_off'][0])
-    t.equat_off_y = numpy.asarray(f['antenna0']['tracker']['equat_off'][1])
+    t.scan_off_x = np.asarray(board['scan_off'][0])
+    t.scan_off_y = np.asarray(board['scan_off'][1])
+    t.sky_off_x = np.asarray(board['sky_xy_off'][0])
+    t.sky_off_y = np.asarray(board['sky_xy_off'][1])
+    t.equat_off_x = np.asarray(board['equat_off'][0])
+    t.equat_off_y = np.asarray(board['equat_off'][1])
 
-    t.equat_geoc_ra = numpy.asarray(f['antenna0']['tracker']['equat_geoc'][0])
-    t.equat_geoc_dec = numpy.asarray(f['antenna0']['tracker']['equat_geoc'][1])
-    t.horiz_topo_az = numpy.asarray(f['antenna0']['tracker']['horiz_topo'][0])
-    t.horiz_topo_el = numpy.asarray(f['antenna0']['tracker']['horiz_topo'][1])
+    t.equat_geoc_ra = np.asarray(board['equat_geoc'][0])
+    t.equat_geoc_dec = np.asarray(board['equat_geoc'][1])
+    t.horiz_topo_az = np.asarray(board['horiz_topo'][0])
+    t.horiz_topo_el = np.asarray(board['horiz_topo'][1])
 
-    t.error_az = numpy.asarray(f['antenna0']['tracker']['errors'][0])
-    t.error_el = numpy.asarray(f['antenna0']['tracker']['errors'][1])
+    t.error_az = np.asarray(board['errors'][0])
+    t.error_el = np.asarray(board['errors'][1])
 
-    t.linsens_avg_l1 = numpy.asarray(f['antenna0']['tracker']['linear_sensor_avg'][0])
-    t.linsens_avg_l2 = numpy.asarray(f['antenna0']['tracker']['linear_sensor_avg'][1])
-    t.linsens_avg_r1 = numpy.asarray(f['antenna0']['tracker']['linear_sensor_avg'][2])
-    t.linsens_avg_r2 = numpy.asarray(f['antenna0']['tracker']['linear_sensor_avg'][3])
+    t.linsens_avg_l1 = np.asarray(board['linear_sensor_avg'][0])
+    t.linsens_avg_l2 = np.asarray(board['linear_sensor_avg'][1])
+    t.linsens_avg_r1 = np.asarray(board['linear_sensor_avg'][2])
+    t.linsens_avg_r2 = np.asarray(board['linear_sensor_avg'][3])
     
-    t.telescope_temp = numpy.asarray([f['array']['weather']['airTemperature'].value])
-    t.telescope_pressure = numpy.asarray([f['array']['weather']['pressure'].value])
+    t.telescope_temp = np.asarray([f['array']['weather']['airTemperature'].value])
+    t.telescope_pressure = np.asarray([f['array']['weather']['pressure'].value])
 
     f['TrackerPointing'] = t
 
     p = core.G3MapVectorDouble()
-    p['tilts'] = numpy.asarray(f['antenna0']['tracker']['tilts'], dtype=numpy.double)
-    p['flexure'] = numpy.asarray(f['antenna0']['tracker']['flexure'], dtype=numpy.double)
-    p['fixedCollimation'] = numpy.asarray(f['antenna0']['tracker']['fixedCollimation'], dtype=numpy.double)
-    p['time'] = numpy.asarray(t.time, dtype=numpy.double)
+    p['tilts'] = np.asarray(board['tilts'], dtype=np.double)
+    p['flexure'] = np.asarray(board['flexure'], dtype=np.double)
+    p['fixedCollimation'] = np.asarray(board['fixedCollimation'], dtype=np.double)
+    p['time'] = np.asarray(t.time, dtype=np.double)
 
     f['OnlinePointingModel'] = p
+
 
 @core.indexmod
 def DecryptFeatureBit(f):
@@ -377,6 +340,7 @@ def DecryptFeatureBit(f):
 
     f['GCPFeatureBits'] = flag_array
 
+
 @core.indexmod
 def AddBenchData(f):
     '''
@@ -386,6 +350,15 @@ def AddBenchData(f):
         return
     bench_axes = ['y1', 'y2', 'y3', 'x4', 'x5', 'z6']
 
+    board = f['antenna0']['scu']
+
+    # As of 2017-08-03, SCU time is not trustworthy
+    # time = board['benchSampleTime'][0]
+    # For now, do this bit of evil
+    time = f['antenna0']['tracker']['utc'][0]
+    start = time[0]
+    stop = time[-1]
+
     benchcom = core.G3TimestreamMap()
     benchpos = core.G3TimestreamMap()
     benchzero = core.G3TimestreamMap()
@@ -393,30 +366,23 @@ def AddBenchData(f):
     bencherr = core.G3TimestreamMap()
     bench_info = core.G3TimestreamMap()
     for i, key in enumerate(bench_axes):
-        # As of 2017-08-03, SCU time is not trustworthy
-        # start = f['antenna0']['scu']['benchSampleTime'][0][0]
-        # stop = f['antenna0']['scu']['benchSampleTime'][0][-1]
-        # For now, do this bit of evil
-        start = f['antenna0']['tracker']['utc'][0][0]
-        stop = f['antenna0']['tracker']['utc'][0][-1]
-
-        benchcom[key] = core.G3Timestream(f['antenna0']['scu']['benchExpected'][i])
+        benchcom[key] = core.G3Timestream(board['benchExpected'][i])
         benchcom[key].start = start
         benchcom[key].stop = stop
 
-        benchpos[key] = core.G3Timestream(f['antenna0']['scu']['benchActual'][i])
+        benchpos[key] = core.G3Timestream(board['benchActual'][i])
         benchpos[key].start = start
         benchpos[key].stop = stop
 
-        benchzero[key] = core.G3Timestream(f['antenna0']['scu']['benchZeros'][i])
+        benchzero[key] = core.G3Timestream(board['benchZeros'][i])
         benchzero[key].start = start
         benchzero[key].stop = stop
 
-        benchoff[key] = core.G3Timestream(f['antenna0']['scu']['benchOffsets'][i])
+        benchoff[key] = core.G3Timestream(board['benchOffsets'][i])
         benchoff[key].start = start
         benchoff[key].stop = stop
 
-        bencherr[key] = core.G3Timestream(f['antenna0']['scu']['benchErrors'][i])
+        bencherr[key] = core.G3Timestream(board['benchErrors'][i])
         bencherr[key].start = start
         bencherr[key].stop = stop
 
@@ -425,10 +391,7 @@ def AddBenchData(f):
                   'benchFault', 'timeLocked']
     bench_info = core.G3TimestreamMap()
     for i, key in enumerate(info_items):
-        start = f['antenna0']['tracker']['utc'][0][0]
-        stop = f['antenna0']['tracker']['utc'][0][-1]
-
-        bench_info[key] = core.G3Timestream(f['antenna0']['scu'][key][0])
+        bench_info[key] = core.G3Timestream(board[key][0])
         bench_info[key].start = start
         bench_info[key].stop = stop
 
@@ -438,7 +401,7 @@ def AddBenchData(f):
     f['BenchOffsets'] = benchoff
     f['BenchErrors'] = bencherr
     f['BenchInfo'] = bench_info
-    f['BenchSampleTime'] = f['antenna0']['scu']['benchSampleTime'][0]
+    f['BenchSampleTime'] = board['benchSampleTime'][0]
     
 @core.indexmod
 def UnpackCryoData(f):
@@ -452,72 +415,76 @@ def UnpackCryoData(f):
     if 'cryo' not in f['array']:
         return
 
+    board = f['array']['cryo']
+    temps = board['temperature']
+    heaters = board['heater_dac']
+
     t = core.G3MapDouble()
-    t.time = f['array']['cryo']['utc']
-    t.cryo_is_valid = f['array']['cryo']['cryoIsValid'][0]
+    t['cryo_is_valid'] = board['cryoIsValid'][0]
 
     # Measured values
     # He10
-    t.uc_head = f['array']['cryo']['temperature'][0][0]
-    t.ic_head = f['array']['cryo']['temperature'][0][1]
-    t.he4_head = f['array']['cryo']['temperature'][0][2]
-    t.he4_fb = f['array']['cryo']['temperature'][0][3]
-    t.he4_pump = f['array']['cryo']['temperature'][0][4]
-    t.ic_pump = f['array']['cryo']['temperature'][0][5]
-    t.uc_pump = f['array']['cryo']['temperature'][0][6]
-    t.he4_sw = f['array']['cryo']['temperature'][0][7]
-    t.ic_sw = f['array']['cryo']['temperature'][0][8]
-    t.uc_sw = f['array']['cryo']['temperature'][0][9]
-    t.uc_stage = f['array']['cryo']['temperature'][0][10]
-    t.lc_tower = f['array']['cryo']['temperature'][0][11]
-    t.ic_stage = f['array']['cryo']['temperature'][0][12]
-    t.t4k_head = f['array']['cryo']['temperature'][0][13]
-    t.t4k_squid_strap = f['array']['cryo']['temperature'][0][14]
-    t.t50k_head = f['array']['cryo']['temperature'][0][15]
+    t['uc_head'] = temps[0][0]
+    t['ic_head'] = temps[0][1]
+    t['he4_head'] = temps[0][2]
+    t['he4_fb'] = temps[0][3]
+    t['he4_pump'] = temps[0][4]
+    t['ic_pump'] = temps[0][5]
+    t['uc_pump'] = temps[0][6]
+    t['he4_sw'] = temps[0][7]
+    t['ic_sw'] = temps[0][8]
+    t['uc_sw'] = temps[0][9]
+    t['uc_stage'] = temps[0][10]
+    t['lc_tower'] = temps[0][11]
+    t['ic_stage'] = temps[0][12]
+    t['t4k_head'] = temps[0][13]
+    t['t4k_squid_strap'] = temps[0][14]
+    t['t50k_head'] = temps[0][15]
 
     # Optics
-    t.b1_50k_wbp_near = f['array']['cryo']['temperature'][1][0]
-    t.b2_50k_wbp_far = f['array']['cryo']['temperature'][1][1]
-    t.b3_50k_diving_board = f['array']['cryo']['temperature'][1][2]
-    t.b4_50k_top_bot_ptc = f['array']['cryo']['temperature'][1][3]
-    t.y1_50k_head = f['array']['cryo']['temperature'][1][4]
-    t.y2_50k_window_strap_near = f['array']['cryo']['temperature'][1][5]
-    t.y3_50k_tube_strap_near = f['array']['cryo']['temperature'][1][6]
-    t.y4_50k_tube = f['array']['cryo']['temperature'][1][7]
-    t.g1_4k_head = f['array']['cryo']['temperature'][1][8]
-    t.g2_4k_strap = f['array']['cryo']['temperature'][1][9]
-    t.g3_4k_lens_tab = f['array']['cryo']['temperature'][1][10]
-    t.g4_4k_lens_tab_far = f['array']['cryo']['temperature'][1][11]
-    t.r1_4k_top_top_ptc = f['array']['cryo']['temperature'][1][12]
-    t.r2_50k_midop_bot_ptc = f['array']['cryo']['temperature'][1][13]
-    t.r3_4k_lyot_flange = f['array']['cryo']['temperature'][1][14]
-    t.r4_4k_lyot = f['array']['cryo']['temperature'][1][15]
+    t['b1_50k_wbp_near'] = temps[1][0]
+    t['b2_50k_wbp_far'] = temps[1][1]
+    t['b3_50k_diving_board'] = temps[1][2]
+    t['b4_50k_top_bot_ptc'] = temps[1][3]
+    t['y1_50k_head'] = temps[1][4]
+    t['y2_50k_window_strap_near'] = temps[1][5]
+    t['y3_50k_tube_strap_near'] = temps[1][6]
+    t['y4_50k_tube'] = temps[1][7]
+    t['g1_4k_head'] = temps[1][8]
+    t['g2_4k_strap'] = temps[1][9]
+    t['g3_4k_lens_tab'] = temps[1][10]
+    t['g4_4k_lens_tab_far'] = temps[1][11]
+    t['r1_4k_top_top_ptc'] = temps[1][12]
+    t['r2_50k_midop_bot_ptc'] = temps[1][13]
+    t['r3_4k_lyot_flange'] = temps[1][14]
+    t['r4_4k_lyot'] = temps[1][15]
 
     # Receiver
-    t.t4k_plate_far = f['array']['cryo']['temperature'][2][0]
-    t.t4k_strap_optics = f['array']['cryo']['temperature'][2][1]
-    t.t4k_plate_mid = f['array']['cryo']['temperature'][2][2]
-    t.t4k_plate_top = f['array']['cryo']['temperature'][2][3]
-    t.t4k_plate_ptc = f['array']['cryo']['temperature'][2][4]
-    t.t50k_harness_middle = f['array']['cryo']['temperature'][2][6]
-    t.t50k_strap = f['array']['cryo']['temperature'][2][7]
-    t.squid_wh1_sl1 = f['array']['cryo']['temperature'][2][8]
-    t.squid_wh5_sl1 = f['array']['cryo']['temperature'][2][9]
-    t.squid_wh3_sl7 = f['array']['cryo']['temperature'][2][10]
-    t.cal_filament = f['array']['cryo']['temperature'][2][11]
-    t.cal_ambient1 = f['array']['cryo']['temperature'][2][12]
-    t.cal_ambient2 = f['array']['cryo']['temperature'][2][13]
-    t.cal_ambient3 = f['array']['cryo']['temperature'][2][14]
+    t['t4k_plate_far'] = temps[2][0]
+    t['t4k_strap_optics'] = temps[2][1]
+    t['t4k_plate_mid'] = temps[2][2]
+    t['t4k_plate_top'] = temps[2][3]
+    t['t4k_plate_ptc'] = temps[2][4]
+    t['t50k_harness_middle'] = temps[2][6]
+    t['t50k_strap'] = temps[2][7]
+    t['squid_wh1_sl1'] = temps[2][8]
+    t['squid_wh5_sl1'] = temps[2][9]
+    t['squid_wh3_sl7'] = temps[2][10]
+    t['cal_filament'] = temps[2][11]
+    t['cal_ambient1'] = temps[2][12]
+    t['cal_ambient2'] = temps[2][13]
+    t['cal_ambient3'] = temps[2][14]
 
     # Heaters
-    t.heat_he4_pump = f['array']['cryo']['heater_dac'][0][3]
-    t.heat_ic_pump = f['array']['cryo']['heater_dac'][0][4]
-    t.heat_uc_pump = f['array']['cryo']['heater_dac'][0][5]
-    t.heat_he4_sw = f['array']['cryo']['heater_dac'][0][0]
-    t.heat_ic_sw = f['array']['cryo']['heater_dac'][0][1]
-    t.heat_uc_sw= f['array']['cryo']['heater_dac'][0][2]
+    t['heat_he4_pump'] = heaters[0][3]
+    t['heat_ic_pump'] = heaters[0][4]
+    t['heat_uc_pump'] = heaters[0][5]
+    t['heat_he4_sw'] = heaters[0][0]
+    t['heat_ic_sw'] = heaters[0][1]
+    t['heat_uc_sw'] = heaters[0][2]
 
     f['CryoStatus'] = t
+    f['CryoStatusTime'] = board['utc']
 
 
 @core.indexmod
@@ -531,34 +498,36 @@ def UnpackPTData(f):
     if 'pt415' not in f['array']:
         return
 
+    board = f['array']['pt415']
+
     p = core.G3MapDouble()
 
-    p.time = f['array']['pt415']['utc']
-    p.optics_lowp = f['array']['pt415']['pressure_low'][0]
-    p.min_optics_lowp = f['array']['pt415']['min_pressure_low'][0]
-    p.max_optics_lowp = f['array']['pt415']['max_pressure_low'][0]
-    p.optics_highp = f['array']['pt415']['pressure_high'][0]
-    p.min_optics_highp = f['array']['pt415']['min_pressure_high'][0]
-    p.max_optics_highp = f['array']['pt415']['max_pressure_high'][0]
-    p.optics_tempoil = f['array']['pt415']['temp_oil'][0]
-    p.min_optics_tempoil = f['array']['pt415']['min_temp_oil'][0]
-    p.max_optics_tempoil = f['array']['pt415']['max_temp_oil'][0]
+    p['optics_lowp'] = board['pressure_low'][0]
+    p['min_optics_lowp'] = board['min_pressure_low'][0]
+    p['max_optics_lowp'] = board['max_pressure_low'][0]
+    p['optics_highp'] = board['pressure_high'][0]
+    p['min_optics_highp'] = board['min_pressure_high'][0]
+    p['max_optics_highp'] = board['max_pressure_high'][0]
+    p['optics_tempoil'] = board['temp_oil'][0]
+    p['min_optics_tempoil'] = board['min_temp_oil'][0]
+    p['max_optics_tempoil'] = board['max_temp_oil'][0]
 
-    p.receiver_lowp = f['array']['pt415']['pressure_low'][1]
-    p.min_receiver_lowp = f['array']['pt415']['min_pressure_low'][1]
-    p.max_receiver_lowp = f['array']['pt415']['max_pressure_low'][1]
-    p.receiver_highp = f['array']['pt415']['pressure_high'][1]
-    p.min_receiver_highp = f['array']['pt415']['min_pressure_high'][1]
-    p.max_receiver_highp = f['array']['pt415']['max_pressure_high'][1]
-    p.receiver_tempoil = f['array']['pt415']['temp_oil'][1]
-    p.min_receiver_tempoil = f['array']['pt415']['min_temp_oil'][1]
-    p.max_receiver_tempoil = f['array']['pt415']['max_temp_oil'][1]
+    p['receiver_lowp'] = board['pressure_low'][1]
+    p['min_receiver_lowp'] = board['min_pressure_low'][1]
+    p['max_receiver_lowp'] = board['max_pressure_low'][1]
+    p['receiver_highp'] = board['pressure_high'][1]
+    p['min_receiver_highp'] = board['min_pressure_high'][1]
+    p['max_receiver_highp'] = board['max_pressure_high'][1]
+    p['receiver_tempoil'] = board['temp_oil'][1]
+    p['min_receiver_tempoil'] = board['min_temp_oil'][1]
+    p['max_receiver_tempoil'] = board['max_temp_oil'][1]
 
-    p.optics_is_valid = f['array']['pt415']['deviceIsValid'][0]
-    p.receiver_is_valid = f['array']['pt415']['deviceIsValid'][1]
-
+    p['optics_is_valid'] = board['deviceIsValid'][0]
+    p['receiver_is_valid'] = board['deviceIsValid'][1]
 
     f['PTStatus'] = p
+    f['PTStatusTime'] = board['utc']
+
 
 @core.indexmod
 def UnpackMuxData(f):
@@ -582,10 +551,10 @@ def UnpackMuxData(f):
         if bn != "":
             board_name[str(i)] = bn
             fpga_temp[str(i)] = mux['MB_TEMPERATURE_FPGA_DIE'][i]
-    fpga_temp.time = mux['utc']
-    board_name.time = mux['utc']
     f['MuxFPGATemp'] = fpga_temp
     f['MuxBoardName'] = board_name
+    f['MuxTime'] = mux['utc']
+
 
 @core.indexmod
 def UnpackWeatherData(f):
@@ -598,20 +567,23 @@ def UnpackWeatherData(f):
     if 'weather' not in f['array']:
         return
 
+    board = f['array']['weather']
+
     t = core.G3MapDouble()
-    t.time = f['array']['weather']['utc']
-    t.telescope_temp = f['array']['weather']['airTemperature'].value
-    t.telescope_pressure = f['array']['weather']['pressure'].value
-    t.inside_dsl_temp = f['array']['weather']['internalTemperature'].value
-    t.wind_speed = f['array']['weather']['windSpeed'].value
-    t.wind_direction = f['array']['weather']['windDirection'].value
-    t.battery = f['array']['weather']['battery'].value
-    t.rel_humidity = f['array']['weather']['relativeHumidity'].value
-    t.power = f['array']['weather']['power'].value
-    t.tau = f['array']['tipper']['tau'].value
-    t.tatm = f['array']['tipper']['tatm'].value
+    t['telescope_temp'] = board['airTemperature'].value
+    t['telescope_pressure'] = board['pressure'].value
+    t['inside_dsl_temp'] = board['internalTemperature'].value
+    t['wind_speed'] = board['windSpeed'].value
+    t['wind_direction'] = board['windDirection'].value
+    t['battery'] = board['battery'].value
+    t['rel_humidity'] = board['relativeHumidity'].value
+    t['power'] = board['power'].value
+    t['tau'] = f['array']['tipper']['tau'].value
+    t['tatm'] = f['array']['tipper']['tatm'].value
 
     f['Weather'] = t
+    f['WeatherTime'] = board['utc']
+
 
 @core.pipesegment
 def ARCExtract(pipe):
@@ -626,6 +598,7 @@ def ARCExtract(pipe):
     pipe.Add(UnpackPTData)
     pipe.Add(UnpackMuxData)
     pipe.Add(UnpackWeatherData)
+
 
 @core.pipesegment
 def ARCExtractMinimal(pipe):
