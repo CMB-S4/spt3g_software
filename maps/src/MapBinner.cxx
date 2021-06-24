@@ -48,7 +48,7 @@ EXPORT_G3MODULE("maps", MapBinner,
      std::string, bool>((arg("map_id"), arg("stub_map"), arg("pointing"),
      arg("timestreams"), arg("detector_weights")="",
      arg("bolo_properties_name")="BolometerProperties",
-     arg("store_weight_map")=true)),
+     arg("store_weight_map")=true))),
 "Bins up timestreams into a map with properties (projection, etc.) specified "
 "by the <stub_map> argument. Whether the output map is polarized is determined "
 "by the value of the pol_conv property of <stub_map>: T-only maps are made if "
@@ -59,9 +59,9 @@ EXPORT_G3MODULE("maps", MapBinner,
 "specified by <pointing>. Detector pointing offsets and polarization angles "
 "and efficiencies are obtained from the specified BolometerPropertiesMap, "
 "which can generally be left at its default value. If <store_weight_map> is "
-"set to False (not the default), the output weight map will not be stored,
-though the output maps will *still be weighted*. It should be set to False
-if and only if you know what the weights are a priori (e.g. mock observing).");
+"set to False (not the default), the output weight map will not be stored, "
+"though the output maps will *still be weighted*. It should be set to False "
+"if and only if you know what the weights are a priori (e.g. mock observing).");
 
 MapBinner::MapBinner(std::string output_map_id, const G3SkyMap &stub_map,
     std::string pointing, std::string timestreams, std::string detector_weights,
