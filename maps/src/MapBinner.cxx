@@ -16,7 +16,8 @@ class MapBinner : public G3Module {
 public:
 	MapBinner(std::string output_map_id, const G3SkyMap &stub_map,
 	    std::string pointing, std::string timestreams,
-	    std::string detector_weights, std::string bolo_properties_name);
+	    std::string detector_weights, std::string bolo_properties_name,
+	    bool store_weight_map);
 	virtual ~MapBinner() {}
 
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
@@ -44,9 +45,10 @@ private:
 
 EXPORT_G3MODULE("maps", MapBinner,
     (init<std::string, const G3SkyMap &, std::string, std::string, std::string,
-     std::string>((arg("map_id"), arg("stub_map"), arg("pointing"),
+     std::string, bool>((arg("map_id"), arg("stub_map"), arg("pointing"),
      arg("timestreams"), arg("detector_weights")="",
-     arg("bolo_properties_name")="BolometerProperties"))),
+     arg("bolo_properties_name")="BolometerProperties",
+     arg("store_weight_map")=true)),
 "Bins up timestreams into a map with properties (projection, etc.) specified "
 "by the <stub_map> argument. Whether the output map is polarized is determined "
 "by the value of the pol_conv property of <stub_map>: T-only maps are made if "
@@ -56,19 +58,23 @@ EXPORT_G3MODULE("maps", MapBinner,
 "weighted equally. Boresight pointing is obtained from the quaternion vector "
 "specified by <pointing>. Detector pointing offsets and polarization angles "
 "and efficiencies are obtained from the specified BolometerPropertiesMap, "
-"which can generally be left at its default value.");
+"which can generally be left at its default value. If <store_weight_map> is "
+"set to False (not the default), the output weight map will not be stored,
+though the output maps will *still be weighted*. It should be set to False
+if and only if you know what the weights are a priori (e.g. mock observing).");
 
 MapBinner::MapBinner(std::string output_map_id, const G3SkyMap &stub_map,
     std::string pointing, std::string timestreams, std::string detector_weights,
-    std::string bolo_properties_name) :
+    std::string bolo_properties_name, bool store_weight_map) :
   output_id_(output_map_id), pointing_(pointing), timestreams_(timestreams),
   weights_(detector_weights), boloprops_name_(bolo_properties_name),
   units_set_(false)
 {
 	T_ = stub_map.Clone(false);
 	T_->pol_type = G3SkyMap::T;
-	map_weights_ = G3SkyMapWeightsPtr(new G3SkyMapWeights(T_,
-	    T_->GetPolConv() != G3SkyMap::ConvNone));
+	if (store_weight_map)
+		map_weights_ = G3SkyMapWeightsPtr(new G3SkyMapWeights(T_,
+		    T_->GetPolConv() != G3SkyMap::ConvNone));
 
 	if (T_->GetPolConv() != G3SkyMap::ConvNone) {
 		Q_ = stub_map.Clone(false);
@@ -95,10 +101,10 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 			    boost::dynamic_pointer_cast<G3FrameObject>(Q_));
 			out_frame->Put("U",
 			    boost::dynamic_pointer_cast<G3FrameObject>(U_));
-			out_frame->Put("Wpol", map_weights_);
-		} else {
-			out_frame->Put("Wunpol", map_weights_);
 		}
+
+		if (map_weights_)
+			out_frame->Put((Q_) ? "Wpol" : "Wunpol", map_weights_);
 		out.push_back(out_frame);
 		out.push_back(frame);
 		return;
@@ -171,7 +177,8 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 			scanQ = Q_->Clone(false);
 		if (U_)
 			scanU = U_->Clone(false);
-		scanW = map_weights_->Clone(false);
+		if (map_weights_)
+			scanW = map_weights_->Clone(false);
 
 		#pragma omp for
 		for (size_t i = 0; i < dets.size(); i++) {
@@ -189,7 +196,8 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 				(*Q_) += *scanQ;
 			if (U_)
 				(*U_) += *scanU;
-			(*map_weights_) += *scanW;
+			if (map_weights_)
+				(*map_weights_) += *scanW;
 		}
 	}
 #else
@@ -263,12 +271,14 @@ MapBinner::BinTimestream(const G3Timestream &det, double weight,
 			(*T)[detpointing[i]] += pcoupling.t*det[i];
 			(*Q)[detpointing[i]] += pcoupling.q*det[i];
 			(*U)[detpointing[i]] += pcoupling.u*det[i];
-			(*W)[detpointing[i]] += mueller;
+			if (W)
+				(*W)[detpointing[i]] += mueller;
 		}
 	} else {
 		for (size_t i = 0; i < det.size(); i++) {
 			(*T)[detpointing[i]] += weight*det[i];
-			(*W->TT)[detpointing[i]] += weight;
+			if (W)
+				(*W->TT)[detpointing[i]] += weight;
 		}
 	}
 }
