@@ -486,7 +486,7 @@ HealpixSkyMap::Clone(bool copy_data) const
 		return boost::make_shared<HealpixSkyMap>(*this);
 	else
 		return boost::make_shared<HealpixSkyMap>(nside_, weighted,
-		    nested_, coord_ref, units, pol_type, pol_conv_);
+		    nested_, coord_ref, units, pol_type, shift_ra_, pol_conv_);
 }
 
 double
@@ -988,7 +988,7 @@ G3SkyMapPtr HealpixSkyMap::Rebin(size_t scale, bool norm) const
 		return Clone(true);
 
 	HealpixSkyMapPtr out(new HealpixSkyMap(nside_/scale, weighted,
-	    nested_, coord_ref, units, pol_type, pol_conv_));
+	    nested_, coord_ref, units, pol_type, shift_ra_, pol_conv_));
 
 	if (dense_)
 		out->ConvertToDense();
