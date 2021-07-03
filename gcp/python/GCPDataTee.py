@@ -123,6 +123,8 @@ class DAQWatchdog(PagerWatchdog):
         if 'DfMux' not in frame:
             return False
 
+        now = time.time()
+
         # only ping if all expected modules are present
         data = frame['DfMux']
         nmods_expected = 8 * len(data.keys())
