@@ -96,15 +96,23 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		out_frame->Put("Id", G3StringPtr(new G3String(output_id_)));
 		out_frame->Put("T",
 		    boost::dynamic_pointer_cast<G3FrameObject>(T_));
+		T_ = T_->Clone(false);
+
 		if (Q_) {
 			out_frame->Put("Q",
 			    boost::dynamic_pointer_cast<G3FrameObject>(Q_));
 			out_frame->Put("U",
 			    boost::dynamic_pointer_cast<G3FrameObject>(U_));
+			Q_ = Q_->Clone(false);
+			U_ = U_->Clone(false);
 		}
 
-		if (map_weights_)
+		if (map_weights_) {
 			out_frame->Put((Q_) ? "Wpol" : "Wunpol", map_weights_);
+			map_weights_ = G3SkyMapWeightsPtr(new G3SkyMapWeights(
+			    T_, T_->GetPolConv() != G3SkyMap::ConvNone));
+		}
+
 		out.push_back(out_frame);
 		out.push_back(frame);
 		return;
@@ -263,8 +271,11 @@ MapBinner::BinTimestream(const G3Timestream &det, double weight,
 		set_stokes_coupling(bp.pol_angle, bp.pol_efficiency, pcoupling);
 
 		MuellerMatrix mueller;
-		fill_mueller_matrix_from_stokes_coupling(pcoupling, mueller);
-		mueller *= weight;
+		if (W) {
+			fill_mueller_matrix_from_stokes_coupling(pcoupling, mueller);
+			mueller *= weight;
+		}
+
 		pcoupling *= weight;
 
 		for (size_t i = 0; i < det.size(); i++) {
