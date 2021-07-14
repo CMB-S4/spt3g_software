@@ -232,7 +232,8 @@ G3Pipeline_halt_processing()
     (picokelvin)(pK)(rankine)(R)(snausage) \
     \
     (bar)(b)(millibar)(mb) \
-    (byte)(B)(bit)(kilobyte)(KB)(megabyte)(MB)(gigabyte)(GB)
+    (byte)(B)(bit)(kilobyte)(KB)(megabyte)(MB)(gigabyte)(GB) \
+    (gram)(g)(kilogram)(kg)(milligram)(mg)
 
 #define UNITS_INTERFACE(r,data,T) \
   static double BOOST_PP_CAT(g3units_return_,T)() { return G3Units::T; }
