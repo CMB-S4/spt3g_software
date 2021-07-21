@@ -25,9 +25,9 @@ HealpixSkyMap::HealpixSkyMap(size_t nside, bool weighted, bool nested,
 HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool weighted,
     bool nested, MapCoordReference coord_ref,
     G3Timestream::TimestreamUnits u, G3SkyMap::MapPolType pol_type,
-    G3SkyMap::MapPolConv pol_conv) :
+    bool shift_ra, G3SkyMap::MapPolConv pol_conv) :
       G3SkyMap(coord_ref, weighted, u, pol_type, pol_conv), nested_(nested),
-      dense_(NULL), ring_sparse_(NULL), indexed_sparse_(NULL), shift_ra_(false)
+      dense_(NULL), ring_sparse_(NULL), indexed_sparse_(NULL), shift_ra_(shift_ra)
 {
 	Py_buffer view;
 
@@ -1179,13 +1179,14 @@ PYBINDINGS("maps")
 	       "Instantiate a HealpixSkyMap with given nside"))
 	    .def(bp::init<boost::python::object, bool, bool,
 	       MapCoordReference, G3Timestream::TimestreamUnits,
-	       G3SkyMap::MapPolType, G3SkyMap::MapPolConv>(
+	       G3SkyMap::MapPolType, bool, G3SkyMap::MapPolConv>(
 		  (bp::arg("data"),
 		   bp::arg("weighted") = true,
 		   bp::arg("nested") = false,
 		   bp::arg("coord_ref") = MapCoordReference::Equatorial,
 		   bp::arg("units") = G3Timestream::Tcmb,
 		   bp::arg("pol_type") = G3SkyMap::None,
+		   bp::arg("shift_ra") = false,
 		   bp::arg("pol_conv") = G3SkyMap::ConvNone),
 	       "Instantiate a Healpix map from existing data. If the data are "
 	       "a single numpy array, assumes this is a dense map. Otherwise, "
