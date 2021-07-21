@@ -15,6 +15,15 @@ assert(x.npix_allocated == 1500)
 assert(x[1499] == 1499)
 assert(x[1501] == 0)
 
+# check attributes
+attrs = ["nside", "res", "nested", "shift_ra", "units", "pol_type", "pol_conv", "coord_ref", "weighted"]
+xc = x.clone()
+for attr in attrs:
+    assert getattr(xc, attr) == getattr(x, attr), "Attribute {} mismatched on clone()".format(attr)
+xc = x.clone(False)
+for attr in attrs:
+    assert getattr(xc, attr) == getattr(x, attr), "Attribute {} mismatched on clone(False)".format(attr)
+
 # Test conversion between representations is lossless
 # Along the way, test nonzero_pixels() and rebin() once for each
 # representation.
@@ -51,6 +60,15 @@ assert(x2[0] == v0)
 assert(np.sum(x2) == np.sum(v))
 
 x.shift_ra = True
+
+# check attributes
+xc = x.clone()
+for attr in attrs:
+    assert getattr(xc, attr) == getattr(x, attr), "Attribute {} mismatched on clone()".format(attr)
+xc = x.clone(False)
+for attr in attrs:
+    assert getattr(xc, attr) == getattr(x, attr), "Attribute {} mismatched on clone(False)".format(attr)
+
 x.ringsparse = True # Indexed to ring
 assert(x.nside == 64)
 assert(x.npix_allocated == 1512) # shifted ringsparse is less efficient
@@ -128,7 +146,6 @@ ki = np.asarray(ki)[ii]
 vi = np.asarray(vi)[ii]
 assert((ki == kr).all())
 assert((vi == vr).all())
-
 
 # Conversion to/from flatsky maps
 fm_stub = maps.FlatSkyMap(
