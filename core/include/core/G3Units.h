@@ -146,6 +146,14 @@ namespace G3Units {
         const double MB = megabyte;
         const double gigabyte = 1024*megabyte;
         const double GB = gigabyte;
+
+	/* Mass: base unit is g */
+	const double gram = 1;
+	const double g = gram;
+	const double kilogram = 1000 * gram;
+	const double kg = kilogram;
+	const double milligram = 1e-3 * gram;
+	const double mg = milligram;
 }
 
 #endif
