@@ -123,7 +123,7 @@ def convert_azel_to_radec(az, el, location=spt, mjd=None):
         location=location,
         pressure=0,
     )
-    kt = k.transform_to(astropy.coordinates.FK5)
+    kt = k.transform_to(astropy.coordinates.FK5())
 
     ra = np.asarray(kt.ra / astropy.units.deg) * core.G3Units.deg
     dec = np.asarray(kt.dec / astropy.units.deg) * core.G3Units.deg
@@ -242,7 +242,7 @@ def convert_radec_to_gal(ra, dec):
         ra=np.asarray(ra) / core.G3Units.deg * astropy.units.deg,
         dec=np.asarray(dec) / core.G3Units.deg * astropy.units.deg,
     )
-    kt = k.transform_to(astropy.coordinates.Galactic)
+    kt = k.transform_to(astropy.coordinates.Galactic())
 
     glon = np.asarray(kt.l / astropy.units.deg) * core.G3Units.deg
     glat = np.asarray(kt.b / astropy.units.deg) * core.G3Units.deg
@@ -295,7 +295,7 @@ def convert_gal_to_radec(glon, glat):
         l=np.asarray(glon) / core.G3Units.deg * astropy.units.deg,
         b=np.asarray(glat) / core.G3Units.deg * astropy.units.deg,
     )
-    kt = k.transform_to(astropy.coordinates.FK5)
+    kt = k.transform_to(astropy.coordinates.FK5())
 
     ra = np.asarray(kt.ra / astropy.units.deg) * core.G3Units.deg
     dec = np.asarray(kt.dec / astropy.units.deg) * core.G3Units.deg
