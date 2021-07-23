@@ -179,14 +179,26 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	{
 		G3SkyMapPtr scanT, scanQ, scanU;
 		G3SkyMapWeightsPtr scanW;
- 
-		scanT = T_->Clone(false);
-		if (Q_)
-			scanQ = Q_->Clone(false);
-		if (U_)
-			scanU = U_->Clone(false);
-		if (map_weights_)
-			scanW = map_weights_->Clone(false);
+
+		// root thread writes directly to root map, others write to local clones
+		// should be more efficient (in both memory and time) for any number of threads
+		if (omp_get_thread_num() == 0) {
+			scanT = T_;
+			if (Q_)
+				scanQ = Q_;
+			if (U_)
+				scanU = U_;
+			if (map_weights_)
+				scanW = map_weights_;
+		} else {
+			scanT = T_->Clone(false);
+			if (Q_)
+				scanQ = Q_->Clone(false);
+			if (U_)
+				scanU = U_->Clone(false);
+			if (map_weights_)
+				scanW = map_weights_->Clone(false);
+		}
 
 		#pragma omp for
 		for (size_t i = 0; i < dets.size(); i++) {
@@ -199,13 +211,15 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		#pragma omp critical
 		{
 			// One thread at a time here
-			(*T_) += *scanT;
-			if (Q_)
-				(*Q_) += *scanQ;
-			if (U_)
-				(*U_) += *scanU;
-			if (map_weights_)
-				(*map_weights_) += *scanW;
+			if (omp_get_thread_num() > 0) {
+				(*T_) += *scanT;
+				if (Q_)
+					(*Q_) += *scanQ;
+				if (U_)
+					(*U_) += *scanU;
+				if (map_weights_)
+					(*map_weights_) += *scanW;
+			}
 		}
 	}
 #else
