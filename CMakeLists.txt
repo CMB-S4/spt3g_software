@@ -26,6 +26,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(SPT3G_SOURCE_DIR ${CMAKE_SOURCE_DIR})
 set(SPT3G_BUILD_DIR ${CMAKE_BINARY_DIR})
 
+set(SPT3G_INCLUDE_INSTALL_DIR "include/spt3g")
+
 configure_file(${CMAKE_SOURCE_DIR}/cmake/Spt3gIncludes.cmake.in ${CMAKE_BINARY_DIR}/cmake/Spt3gIncludes.cmake @ONLY)
 include(${CMAKE_BINARY_DIR}/cmake/Spt3gIncludes.cmake)
 
@@ -89,15 +91,13 @@ foreach(d ${cmake_projects})
 endforeach(d ${cmake_projects})
 
 set(SPT3G_LIBRARIES spt3g)
+set(SPT3G_PROGRAMS "")
 list(SORT SUBDIRS)
 foreach(subdir ${SUBDIRS})
 	get_filename_component(pname ${subdir} NAME_WE)
 	message(STATUS "+ ${pname}")
 	set(PROJECT ${pname})
 	add_subdirectory(${CMAKE_SOURCE_DIR}/${pname})
-	if (TARGET ${pname})
-		set(SPT3G_LIBRARIES ${SPT3G_LIBRARIES} ${pname})
-	endif()
 endforeach(subdir ${SUBDIRS})
 
 # export configuration files for use in other projects
@@ -136,3 +136,85 @@ add_custom_target(docs
 	COMMAND mkdir -p ${CMAKE_BINARY_DIR}/docs
 	COMMAND which sphinx-build && sphinx-build -b html ${CMAKE_SOURCE_DIR}/doc ${CMAKE_BINARY_DIR}/docs || echo "Error: sphinx-build not found. Could not generate HTML docs."
 	COMMENT "Generate HTML documentation")
+
+# Set up installation
+
+include(GNUInstallDirs)
+if(APPLE)
+	# See: https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
+	set(CMAKE_MACOSX_RPATH TRUE)
+	set(CMAKE_SKIP_BUILD_RPATH FALSE)
+	set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+	set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+	set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+endif(APPLE)
+
+# Ask python when it keeps modules
+EXECUTE_PROCESS (COMMAND ${Python_EXECUTABLE} -c
+    "from distutils.sysconfig import get_python_lib; print(get_python_lib(plat_specific=True,standard_lib=False))"
+    OUTPUT_VARIABLE PYTHON_MODULE_DIR
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+foreach(lib ${SPT3G_LIBRARIES})
+	INSTALL(TARGETS ${lib} EXPORT ${PROJECT_NAME}Config)
+endforeach(lib ${SPT3G_LIBRARIES})
+
+# The python module
+INSTALL(DIRECTORY ${SPT3G_LIBRARY_DIR} DESTINATION ${PYTHON_MODULE_DIR})
+
+# The exectutables
+foreach(program ${SPT3G_PROGRAMS})
+	# programs are likely to by symlinks, so resolve those before installing
+	if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.19)
+		file(REAL_PATH "${CMAKE_BINARY_DIR}/bin/${program}" true_program)
+	else(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.19)
+		get_filename_component(true_program "${CMAKE_BINARY_DIR}/bin/${program}" REALPATH)
+	endif(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.19)
+	install(FILES "${true_program}" TYPE BIN
+		PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+		RENAME "${program}"
+	)
+endforeach(program ${SPT3G_PROGRAMS})
+
+# The CMake package definitions
+include(CMakePackageConfigHelpers)
+
+set(INCLUDE_INSTALL_DIR include/spt3g )
+set(LIB_INSTALL_DIR lib/ )
+set(CMAKE_INSTALL_DIR share/${PROJECT_NAME}/cmake )
+configure_package_config_file(${CMAKE_SOURCE_DIR}/cmake/Spt3gConfig.cmake.in
+	${CMAKE_BINARY_DIR}/cmake-install/Spt3gConfig.cmake
+	INSTALL_DESTINATION ${CMAKE_INSTALL_DIR}
+	PATH_VARS INCLUDE_INSTALL_DIR LIB_INSTALL_DIR CMAKE_INSTALL_DIR
+)
+
+install(EXPORT ${PROJECT_NAME}Config
+	DESTINATION ${CMAKE_INSTALL_DIR}
+	NAMESPACE spt3g::
+	FILE Spt3gTargets.cmake)
+install(FILES
+	"${CMAKE_BINARY_DIR}/cmake-install/Spt3gConfig.cmake"
+	"${CMAKE_BINARY_DIR}/cmake/Spt3gIncludes.cmake"
+	DESTINATION ${CMAKE_INSTALL_DIR})
+
+# The header files
+foreach(lib ${SPT3G_LIBRARIES})
+	if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${lib}/include/)
+		file(GLOB INCLUDE_ITEMS LIST_DIRECTORIES TRUE
+			RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/${lib}/include/
+			CONFIGURE_DEPENDS
+			"${CMAKE_CURRENT_SOURCE_DIR}/${lib}/include/*")
+		foreach(item ${INCLUDE_ITEMS})
+			install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${lib}/include/${item}
+				DESTINATION ${INCLUDE_INSTALL_DIR}
+			)
+		endforeach(item ${INCLUDE_ITEMS})
+	endif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${lib}/include/)
+endforeach(lib ${SPT3G_LIBRARIES})
+
+# Target for uninstalling
+configure_file(
+	"${CMAKE_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
+	"${CMAKE_BINARY_DIR}/cmake/cmake_uninstall_cmake"
+	IMMEDIATE @ONLY)
+add_custom_target(uninstall "${CMAKE_COMMAND}" -P "${CMAKE_BINARY_DIR}/cmake/cmake_uninstall_cmake")
