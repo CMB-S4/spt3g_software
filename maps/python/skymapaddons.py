@@ -1,6 +1,6 @@
 import numpy
 import warnings
-from spt3g.maps import G3SkyMapWeights, G3SkyMap
+from spt3g.maps import G3SkyMapWeights, G3SkyMap, FlatSkyMap
 
 # This file adds extra functionality to the python interface to G3SkyMap and
 # G3SkyMapWeights. This is done in ways that exploit a large fraction of
@@ -102,6 +102,49 @@ def skymapweights_setitem(self, x, mat):
 
 G3SkyMapWeights.__setitem__ = skymapweights_setitem
 del skymapweights_setitem
+
+# patch handling for flat sky maps
+def skymapweights_extract(self, x0, y0, width, height, fill=0):
+    if not isinstance(self.TT, FlatSkyMap):
+        raise NotImplementedError
+
+    w = self.__class__()
+    for k in self.keys():
+        setattr(w, k, self[k].extract_patch(x0, y0, width, height, fill=fill))
+
+    return w
+
+skymapweights_extract.__doc__ = FlatSkyMap.extract_patch.__doc__
+G3SkyMapWeights.extract_patch = skymapweights_extract
+del skymapweights_extract
+
+def skymapweights_insert(self, weights_patch, ignore_zeros=False):
+    if not isinstance(self.TT, FlatSkyMap):
+        raise NotImplementedError
+
+    assert weights_patch.polarized == self.polarized, \
+        "Input weights patch must be {}polarized".format("" if self.polarized else "un")
+
+    for k in self.keys():
+        self[k].insert_patch(weights_patch[k], ignore_zeros=ignore_zeros)
+
+skymapweights_insert.__doc__ = FlatSkyMap.insert_patch.__doc__
+G3SkyMapWeights.insert_patch = skymapweights_insert
+del skymapweights_insert
+
+def skymapweights_reshape(self, width, height, fill=0):
+    if not isinstance(self.TT, FlatSkyMap):
+        raise NotImplementedError
+
+    w = self.__class__()
+    for k in self.keys():
+        setattr(w, k, self[k].reshape(width, height, fill=fill))
+
+    return w
+
+skymapweights_reshape.__doc__ = FlatSkyMap.reshape.__doc__
+G3SkyMapWeights.reshape = skymapweights_reshape
+del skymapweights_reshape
 
 # Pass through attributes to submaps. This is not ideal because the properties
 # are hidden and not visible by tab completion. A better solution would use
