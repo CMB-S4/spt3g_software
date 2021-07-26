@@ -75,8 +75,10 @@ You can also add C++ executables. Usually, there is not much reason to do this s
 
 	add_executable(newthingexec MyNewThingExecutable.cxx)
 	target_link_libraries(newthingexec core newthing)
+	list(APPEND SPT3G_PROGRAMS newthingexec)
+	set(SPT3G_PROGRAMS ${SPT3G_PROGRAMS} PARENT_SCOPE)
 
-The ``target_link_libraries`` command works as in `Adding a C++ library`_ above. The first command produces an executable named ``newthingexec`` that will be placed in the ``bin`` subdirectory of the build directory.
+The ``target_link_libraries`` command works as in `Adding a C++ library`_ above. The first command produces an executable named ``newthingexec`` that will be placed in the ``bin`` subdirectory of the build directory. The ``list`` and ``set`` commands inform other parts of the build system that this executable will exist, so that it can be included during installation. 
 
 Mixing C++ and Python
 =====================
