@@ -149,11 +149,15 @@ if(APPLE)
 	set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 endif(APPLE)
 
-# Ask python when it keeps modules
-EXECUTE_PROCESS (COMMAND ${Python_EXECUTABLE} -c
-    "from distutils.sysconfig import get_python_lib; print(get_python_lib(plat_specific=True,standard_lib=False))"
-    OUTPUT_VARIABLE PYTHON_MODULE_DIR
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
+# If not set by the user, ask python when it keeps modules
+if(NOT PYTHON_MODULE_DIR)
+	EXECUTE_PROCESS (COMMAND ${Python_EXECUTABLE} -c
+		"from distutils.sysconfig import get_python_lib; print(get_python_lib(plat_specific=True,standard_lib=False))"
+		OUTPUT_VARIABLE PYTHON_MODULE_DIR
+		OUTPUT_STRIP_TRAILING_WHITESPACE
+	)
+endif(NOT PYTHON_MODULE_DIR)
+message("PYTHON_MODULE_DIR is ${PYTHON_MODULE_DIR}")
 
 foreach(lib ${SPT3G_LIBRARIES})
 	INSTALL(TARGETS ${lib} EXPORT ${PROJECT_NAME}Config)
