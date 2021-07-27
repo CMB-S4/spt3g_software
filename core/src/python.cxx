@@ -243,7 +243,7 @@ BOOST_PP_SEQ_FOR_EACH(UNITS_INTERFACE,~,UNITS)
   .add_static_property(BOOST_PP_STRINGIZE(T), &BOOST_PP_CAT(g3units_return_, T))
 struct __XXX_fake_g3units_namespace_XXX {};
 
-#define CONSTANTS (pi)(twopi)(halfpi)(c)(h)(hbar)(k)(kb)(G)(g0)(e)
+#define CONSTANTS (c)(h)(hbar)(k)(kb)(G)(g0)(e)
 
 #define CONSTANTS_INTERFACE(r,data,T) \
   static double BOOST_PP_CAT(g3constants_return_,T)() { return G3Constants::T; }
