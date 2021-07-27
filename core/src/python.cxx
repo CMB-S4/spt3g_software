@@ -11,6 +11,7 @@
 #include <G3Pipeline.h>
 #include <G3Timestream.h>
 #include <G3SimpleLoggers.h>
+#include <G3Constants.h>
 
 namespace bp = boost::python;
 
@@ -242,6 +243,15 @@ BOOST_PP_SEQ_FOR_EACH(UNITS_INTERFACE,~,UNITS)
   .add_static_property(BOOST_PP_STRINGIZE(T), &BOOST_PP_CAT(g3units_return_, T))
 struct __XXX_fake_g3units_namespace_XXX {};
 
+#define CONSTANTS (pi)(twopi)(halfpi)(c)(h)(hbar)(k)(kb)(G)(g0)(e)
+
+#define CONSTANTS_INTERFACE(r,data,T) \
+  static double BOOST_PP_CAT(g3constants_return_,T)() { return G3Constants::T; }
+BOOST_PP_SEQ_FOR_EACH(CONSTANTS_INTERFACE,~,CONSTANTS)
+#define G3_CONSTANTS_DEF(r,data,T) \
+  .add_static_property(BOOST_PP_STRINGIZE(T), &BOOST_PP_CAT(g3constants_return_, T))
+struct __XXX_fake_g3constants_namespace_XXX {};
+
 // Nonsense boilerplate for POD vector numpy bindings
 #define numpy_vector_infrastructure(T, name, conv) \
 template <> \
@@ -366,6 +376,13 @@ BOOST_PYTHON_MODULE(core)
 	    "units arguments to functions. 1 second is 1*G3Units.s.",
 	    bp::no_init)
 	      BOOST_PP_SEQ_FOR_EACH(G3_UNITS_DEF,~,UNITS);
+
+	// Constants values
+	bp::class_<__XXX_fake_g3constants_namespace_XXX, boost::noncopyable>(
+	  "G3Constants",
+	    "Mathematical and physical constants in G3Units.",
+	    bp::no_init)
+	      BOOST_PP_SEQ_FOR_EACH(G3_CONSTANTS_DEF,~,CONSTANTS);
 
 	// Some POD types
 	register_vector_of<bool>("Bool");
