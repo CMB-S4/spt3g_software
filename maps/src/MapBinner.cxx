@@ -163,34 +163,24 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	}
 
 #ifdef OPENMP_FOUND
-	// G3SkyMap is not thread-safe when sparse. Avoid the cost of locks
-	// by making one set of sparse maps per thread per scan (which use
-	// essentially zero memory) and then co-adding them at the end of
-	// the scan.
+	if (omp_get_num_threads() > 1) {
+		// G3SkyMap is not thread-safe when sparse. Avoid the cost of locks
+		// by making one set of sparse maps per thread per scan (which use
+		// essentially zero memory) and then co-adding them at the end of
+		// the scan.
 
-	// Create a list of detectors to satisfy OpenMP's need for scalar
-	// iteration
-	std::vector<std::string> dets;
-	for (auto i : *timestreams)
-		dets.push_back(i.first);
+		// Create a list of detectors to satisfy OpenMP's need for scalar
+		// iteration
+		std::vector<std::string> dets;
+		for (auto i : *timestreams)
+			dets.push_back(i.first);
 
-	// Clamp num_threads to prevent memory balloon?
-	#pragma omp parallel
-	{
-		G3SkyMapPtr scanT, scanQ, scanU;
-		G3SkyMapWeightsPtr scanW;
+		// Clamp num_threads to prevent memory balloon?
+		#pragma omp parallel
+		{
+			G3SkyMapPtr scanT, scanQ, scanU;
+			G3SkyMapWeightsPtr scanW;
 
-		// root thread writes directly to root map, others write to local clones
-		// should be more efficient (in both memory and time) for any number of threads
-		if (omp_get_thread_num() == 0) {
-			scanT = T_;
-			if (Q_)
-				scanQ = Q_;
-			if (U_)
-				scanU = U_;
-			if (map_weights_)
-				scanW = map_weights_;
-		} else {
 			scanT = T_->Clone(false);
 			if (Q_)
 				scanQ = Q_->Clone(false);
@@ -198,20 +188,18 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 				scanU = U_->Clone(false);
 			if (map_weights_)
 				scanW = map_weights_->Clone(false);
-		}
 
-		#pragma omp for
-		for (size_t i = 0; i < dets.size(); i++) {
-			BinTimestream(*timestreams->at(dets[i]),
-			    (weights) ? weights->at(dets[i]) : 1,
-			    boloprops_->at(dets[i]), *pointing,
-			    scanT, scanQ, scanU, scanW);
-		}
+			#pragma omp for
+			for (size_t i = 0; i < dets.size(); i++) {
+				BinTimestream(*timestreams->at(dets[i]),
+				    (weights) ? weights->at(dets[i]) : 1,
+				    boloprops_->at(dets[i]), *pointing,
+				    scanT, scanQ, scanU, scanW);
+			}
 
-		#pragma omp critical
-		{
-			// One thread at a time here
-			if (omp_get_thread_num() > 0) {
+			#pragma omp critical
+			{
+				// One thread at a time here
 				(*T_) += *scanT;
 				if (Q_)
 					(*Q_) += *scanQ;
@@ -221,13 +209,16 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 					(*map_weights_) += *scanW;
 			}
 		}
-	}
-#else
-	for (auto ts : *timestreams) {
-		BinTimestream(*ts.second,
-		    (weights) ? weights->at(ts.first) : 1,
-		    boloprops_->at(ts.first), *pointing,
-		    T_, Q_, U_, map_weights_);
+
+	} else {
+#endif
+		for (auto ts : *timestreams) {
+			BinTimestream(*ts.second,
+			    (weights) ? weights->at(ts.first) : 1,
+			    boloprops_->at(ts.first), *pointing,
+			    T_, Q_, U_, map_weights_);
+		}
+#ifdef OPENMP_FOUND
 	}
 #endif
 
