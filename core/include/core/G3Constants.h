@@ -10,7 +10,7 @@ namespace G3Constants {
 
 	/* Planck constant */
 	const double h = 6.62607015e-34 * G3Units::W * G3Units::s * G3Units::s;
-	const double hbar = h / 2.0 / pi;
+	const double hbar = h / 2.0 / M_PI;
 
 	/* Boltzmann constant */
 	const double k = 1.380649e-23 * G3Units::W * G3Units::s / G3Units::K;
