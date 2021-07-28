@@ -198,16 +198,20 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 
 	G3TimestreamMapConstPtr timestreams =
 	    frame->Get<G3TimestreamMap>(timestreams_, false);
-	G3MapDoubleConstPtr weights = frame->Get<G3MapDouble>(weights_, false);
 	if (!timestreams) {
 		log_error("Missing timestreams %s", timestreams_.c_str());
 		out.push_back(frame);
 		return;
 	}
-	if (!weights) {
-		log_error("Missing weights %s", weights_.c_str());
-		out.push_back(frame);
-		return;
+
+	G3MapDoubleConstPtr weights;
+	if (weights_.size() != 0) {
+		weights = frame->Get<G3MapDouble>(weights_, false);
+		if (!weights) {
+			log_error("Missing weights %s", weights_.c_str());
+			out.push_back(frame);
+			return;
+		}
 	}
 
 	if (!units_set_) {
