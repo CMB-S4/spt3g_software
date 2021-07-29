@@ -4,6 +4,7 @@
 #include <deque>
 #include <unordered_map>
 #include <G3EventBuilder.h>
+#include <G3Units.h>
 
 #include <dfmux/DfMuxCollector.h>
 

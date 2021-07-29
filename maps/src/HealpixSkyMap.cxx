@@ -6,6 +6,7 @@
 #include <sys/endian.h>
 #endif
 
+#include <G3Units.h>
 #include <maps/HealpixSkyMap.h>
 #include <maps/chealpix.h>
 
