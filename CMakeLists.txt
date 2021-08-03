@@ -83,6 +83,19 @@ execute_process(COMMAND mkdir -p ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 execute_process(COMMAND mkdir -p ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 execute_process(COMMAND ln -fsn ${CMAKE_SOURCE_DIR}/cmake/init.py ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/__init__.py)
 
+set(BUILD_PROJECTS "${BUILD_PROJECTS}" CACHE STRING "The subset of available projects to actually build")
+if(NOT "${BUILD_PROJECTS}" STREQUAL "")
+	set(USE_PROJECT_LIST "TRUE" CACHE BOOL "Whether to build only the subset of projects sepcified by BUILD_PROJECTS")
+else(NOT "${BUILD_PROJECTS}" STREQUAL "")
+	set(USE_PROJECT_LIST "FALSE" CACHE BOOL "Whether to build only the subset of projects sepcified by BUILD_PROJECTS")
+endif(NOT "${BUILD_PROJECTS}" STREQUAL "")
+
+list(FIND BUILD_PROJECTS core WILL_BUILD_CORE)
+if(${USE_PROJECT_LIST} AND WILL_BUILD_CORE EQUAL -1)
+	message(STATUS "Automatically adding the core project to the manually specified BUILD_PROJECTS list")
+	list(APPEND BUILD_PROJECTS core)
+endif(${USE_PROJECT_LIST} AND WILL_BUILD_CORE EQUAL -1)
+
 # Find all sub-projects
 file(GLOB cmake_projects RELATIVE ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}/*/CMakeLists.txt)
 foreach(d ${cmake_projects})
@@ -95,6 +108,12 @@ set(SPT3G_PROGRAMS "")
 list(SORT SUBDIRS)
 foreach(subdir ${SUBDIRS})
 	get_filename_component(pname ${subdir} NAME_WE)
+
+	list(FIND BUILD_PROJECTS "${pname}" SHOULD_BUILD_PROJECT)
+	if(${USE_PROJECT_LIST} AND SHOULD_BUILD_PROJECT EQUAL -1)
+		continue() # if we're using the project list but this one isn't in it, skip it
+	endif(${USE_PROJECT_LIST} AND SHOULD_BUILD_PROJECT EQUAL -1)
+
 	message(STATUS "+ ${pname}")
 	set(PROJECT ${pname})
 	add_subdirectory(${CMAKE_SOURCE_DIR}/${pname})
@@ -157,7 +176,7 @@ if(NOT PYTHON_MODULE_DIR)
 		OUTPUT_STRIP_TRAILING_WHITESPACE
 	)
 endif(NOT PYTHON_MODULE_DIR)
-message("PYTHON_MODULE_DIR is ${PYTHON_MODULE_DIR}")
+message("Python modules will be installed to ${PYTHON_MODULE_DIR}")
 
 foreach(lib ${SPT3G_LIBRARIES})
 	INSTALL(TARGETS ${lib} EXPORT ${PROJECT_NAME}Config)
