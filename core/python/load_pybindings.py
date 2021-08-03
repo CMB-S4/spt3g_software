@@ -9,6 +9,8 @@ if platform.system().startswith('freebsd') or platform.system().startswith('Free
 	# http://mail.python.org/pipermail/python-dev/2002-May/024074.html
 	sys.setdlopenflags(0x102)
 
+lib_prefix = "lib"
+
 if platform.system().startswith('Darwin'):
     # OSX compatibility requires .dylib suffix
     lib_suffix = ".dylib"
@@ -16,9 +18,10 @@ else:
     lib_suffix = ".so"
 
 def load_pybindings(name, path):
-	import imp, sys
+	import imp, os, sys
 	mod = sys.modules[name]
-	m = imp.load_dynamic(name, path[0] + lib_suffix)
+	p = os.path.split(path[0])
+	m = imp.load_dynamic(name, p[0] + "/" + lib_prefix + p[1] + lib_suffix)
 	sys.modules[name] = mod # Don't override Python mod with C++
 
 	for (k,v) in m.__dict__.items():
