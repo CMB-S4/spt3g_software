@@ -173,14 +173,31 @@ if(NOT PYTHON_MODULE_DIR)
 		OUTPUT_STRIP_TRAILING_WHITESPACE
 	)
 endif(NOT PYTHON_MODULE_DIR)
-message("Python modules will be installed to ${PYTHON_MODULE_DIR}")
+message(STATUS "Python modules will be installed to ${PYTHON_MODULE_DIR}")
 
 foreach(lib ${SPT3G_LIBRARIES})
 	INSTALL(TARGETS ${lib} EXPORT ${PROJECT_NAME}Config)
 endforeach(lib ${SPT3G_LIBRARIES})
 
 # The python module
-INSTALL(DIRECTORY ${SPT3G_LIBRARY_DIR} DESTINATION ${PYTHON_MODULE_DIR})
+INSTALL(FILES ${CMAKE_SOURCE_DIR}/cmake/init.py DESTINATION ${PYTHON_MODULE_DIR}/spt3g RENAME __init__.py)
+foreach(lib ${SPT3G_LIBRARIES})
+	if("${lib}" STREQUAL "spt3g")
+		continue() # skip phony library
+	endif("${lib}" STREQUAL "spt3g")
+
+	if(EXISTS ${CMAKE_SOURCE_DIR}/${lib}/python)
+		# The INSTALL conmmand does not support the RENAME option in directory mode, which makes this a pain.
+		file(GLOB_RECURSE project_py_files LIST_DIRECTORIES false RELATIVE ${CMAKE_SOURCE_DIR}/${lib}/python ${CMAKE_SOURCE_DIR}/${lib}/python/*)
+		foreach(file ${project_py_files})
+			get_filename_component(subdir "${file}" DIRECTORY)
+			install(FILES "${CMAKE_SOURCE_DIR}/${lib}/python/${file}" DESTINATION ${PYTHON_MODULE_DIR}/spt3g/${lib}/${subdir})
+		endforeach(file ${project_py_files})
+	else(EXISTS ${CMAKE_SOURCE_DIR}/${lib}/python)
+		install(DIRECTORY ${CMAKE_SOURCE_DIR}/${lib} DESTINATION ${PYTHON_MODULE_DIR}/spt3g/)
+	endif(EXISTS ${CMAKE_SOURCE_DIR}/${lib}/python)
+	install(FILES "${CMAKE_BINARY_DIR}/spt3g/lib${lib}${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION ${PYTHON_MODULE_DIR}/spt3g)
+endforeach(lib ${SPT3G_LIBRARIES})
 
 # The exectutables
 foreach(program ${SPT3G_PROGRAMS})
