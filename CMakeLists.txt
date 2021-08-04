@@ -93,6 +93,26 @@ if(${USE_PROJECT_LIST} AND WILL_BUILD_CORE EQUAL -1)
 	list(APPEND BUILD_PROJECTS core)
 endif(${USE_PROJECT_LIST} AND WILL_BUILD_CORE EQUAL -1)
 
+# If not set by the user, ask python when it keeps modules
+if(NOT PYTHON_MODULE_DIR)
+	EXECUTE_PROCESS (COMMAND ${Python_EXECUTABLE} -c
+		"from distutils.sysconfig import get_python_lib; print(get_python_lib(plat_specific=True,standard_lib=False))"
+		OUTPUT_VARIABLE PYTHON_MODULE_DIR
+		OUTPUT_STRIP_TRAILING_WHITESPACE
+	)
+endif(NOT PYTHON_MODULE_DIR)
+message(STATUS "Python modules will be installed to ${PYTHON_MODULE_DIR}")
+
+include(GNUInstallDirs)
+if(APPLE)
+       # See: https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
+	set(CMAKE_MACOSX_RPATH TRUE)
+	set(CMAKE_SKIP_BUILD_RPATH FALSE)
+	set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+	set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${PYTHON_MODULE_DIR}/spt3g")
+	set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+endif(APPLE)
+
 # Find all sub-projects
 file(GLOB cmake_projects RELATIVE ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}/*/CMakeLists.txt)
 foreach(d ${cmake_projects})
@@ -102,6 +122,7 @@ endforeach(d ${cmake_projects})
 
 set(SPT3G_LIBRARIES spt3g)
 set(SPT3G_PROGRAMS "")
+set(SPT3G_PYTHON_DIRS "")
 list(SORT SUBDIRS)
 foreach(subdir ${SUBDIRS})
 	get_filename_component(pname ${subdir} NAME_WE)
@@ -155,50 +176,39 @@ add_custom_target(docs
 
 # Set up installation
 
-include(GNUInstallDirs)
-if(APPLE)
-	# See: https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
-	set(CMAKE_MACOSX_RPATH TRUE)
-	set(CMAKE_SKIP_BUILD_RPATH FALSE)
-	set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-	set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-	set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-endif(APPLE)
-
-# If not set by the user, ask python when it keeps modules
-if(NOT PYTHON_MODULE_DIR)
-	EXECUTE_PROCESS (COMMAND ${Python_EXECUTABLE} -c
-		"from distutils.sysconfig import get_python_lib; print(get_python_lib(plat_specific=True,standard_lib=False))"
-		OUTPUT_VARIABLE PYTHON_MODULE_DIR
-		OUTPUT_STRIP_TRAILING_WHITESPACE
-	)
-endif(NOT PYTHON_MODULE_DIR)
-message(STATUS "Python modules will be installed to ${PYTHON_MODULE_DIR}")
-
 foreach(lib ${SPT3G_LIBRARIES})
 	INSTALL(TARGETS ${lib} EXPORT ${PROJECT_NAME}Config)
 endforeach(lib ${SPT3G_LIBRARIES})
 
 # The python module
+# First, one-off files
 INSTALL(FILES ${CMAKE_SOURCE_DIR}/cmake/init.py DESTINATION ${PYTHON_MODULE_DIR}/spt3g RENAME __init__.py)
 INSTALL(FILES ${CMAKE_BINARY_DIR}/spt3g/version.py DESTINATION ${PYTHON_MODULE_DIR}/spt3g)
+# Libraries
 foreach(lib ${SPT3G_LIBRARIES})
 	if("${lib}" STREQUAL "spt3g")
 		continue() # skip phony library
 	endif("${lib}" STREQUAL "spt3g")
+	install(TARGETS ${lib} DESTINATION ${PYTHON_MODULE_DIR}/spt3g)
+endforeach(lib ${SPT3G_LIBRARIES})
 
-	if(EXISTS ${CMAKE_SOURCE_DIR}/${lib}/python)
+# Python scripts
+foreach(dir ${SPT3G_PYTHON_DIRS})
+	get_filename_component(dir_name "${dir}" NAME)
+	if("${dir_name}" STREQUAL "python")
+		# If the directory name is "python", need to walk up the path to find out what it should be called.
+		get_filename_component(dir_name "${dir}" DIRECTORY)
+		get_filename_component(lib "${dir_name}" NAME)
 		# The INSTALL conmmand does not support the RENAME option in directory mode, which makes this a pain.
-		file(GLOB_RECURSE project_py_files LIST_DIRECTORIES false RELATIVE ${CMAKE_SOURCE_DIR}/${lib}/python ${CMAKE_SOURCE_DIR}/${lib}/python/*)
+		file(GLOB_RECURSE project_py_files LIST_DIRECTORIES false RELATIVE ${dir} ${dir}/*)
 		foreach(file ${project_py_files})
 			get_filename_component(subdir "${file}" DIRECTORY)
-			install(FILES "${CMAKE_SOURCE_DIR}/${lib}/python/${file}" DESTINATION ${PYTHON_MODULE_DIR}/spt3g/${lib}/${subdir})
+			install(FILES "${dir}/${file}" DESTINATION ${PYTHON_MODULE_DIR}/spt3g/${lib}/${subdir})
 		endforeach(file ${project_py_files})
-	else(EXISTS ${CMAKE_SOURCE_DIR}/${lib}/python)
-		install(DIRECTORY ${CMAKE_SOURCE_DIR}/${lib} DESTINATION ${PYTHON_MODULE_DIR}/spt3g/)
-	endif(EXISTS ${CMAKE_SOURCE_DIR}/${lib}/python)
-	install(FILES "${CMAKE_BINARY_DIR}/spt3g/lib${lib}${CMAKE_SHARED_LIBRARY_SUFFIX}" DESTINATION ${PYTHON_MODULE_DIR}/spt3g)
-endforeach(lib ${SPT3G_LIBRARIES})
+	else("${dir_name}" STREQUAL "python")
+		install(DIRECTORY ${dir} DESTINATION ${PYTHON_MODULE_DIR}/spt3g/)
+	endif("${dir_name}" STREQUAL "python")
+endforeach(dir SPT3G_PYTHON_DIRS)
 
 # The exectutables
 foreach(program ${SPT3G_PROGRAMS})
