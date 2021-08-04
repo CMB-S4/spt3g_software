@@ -181,6 +181,7 @@ endforeach(lib ${SPT3G_LIBRARIES})
 
 # The python module
 INSTALL(FILES ${CMAKE_SOURCE_DIR}/cmake/init.py DESTINATION ${PYTHON_MODULE_DIR}/spt3g RENAME __init__.py)
+INSTALL(FILES ${CMAKE_BINARY_DIR}/spt3g/version.py DESTINATION ${PYTHON_MODULE_DIR}/spt3g)
 foreach(lib ${SPT3G_LIBRARIES})
 	if("${lib}" STREQUAL "spt3g")
 		continue() # skip phony library
