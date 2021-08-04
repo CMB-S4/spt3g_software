@@ -60,7 +60,7 @@ struct g3frame_picklesuite : boost::python::pickle_suite
 		std::vector<char> buffer;
 		boost::iostreams::filtering_ostream os(
 		    boost::iostreams::back_inserter(buffer));
-		bp::extract<const G3Frame &>(obj)().save(os);
+		(bp::extract<const G3Frame &>(obj))().save(os);
 		os.flush();
 
 		return boost::python::make_tuple(obj.attr("__dict__"),
@@ -78,7 +78,7 @@ struct g3frame_picklesuite : boost::python::pickle_suite
 
 		std::vector<char> buf((char *)view.buf, (char *)view.buf + view.len);
 		bp::extract<bp::dict>(obj.attr("__dict__"))().update(state[0]);
-		bp::extract<G3Frame &>(obj)().load(buf);
+		(bp::extract<G3Frame &>(obj))().load(buf);
 		PyBuffer_Release(&view);
 	}
 };
