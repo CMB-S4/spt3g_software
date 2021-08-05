@@ -502,7 +502,7 @@ class CoaddMaps(object):
         if self.map_ids is not None and frame["Id"] not in self.map_ids:
             return
 
-        ValidateMaps(frame, ignore_missing_weights=ignore_missing_weights)
+        ValidateMaps(frame, ignore_missing_weights=self.ignore_missing_weights)
         input_weighted = True
         if not frame["T"].weighted:
             input_weighted = False
