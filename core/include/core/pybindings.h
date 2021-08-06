@@ -136,52 +136,85 @@ numpy_container_from_object(boost::python::object v)
 {
 	boost::shared_ptr<T> x(new T);
 	Py_buffer view;
+
+	// Try to get a contiguous buffer first for common data types, since
+	// contiguous-copy is likely to be optimizable to memcpy(). In the
+	// non-contiguous case below, even if the copy is contiguous, the
+	// compiler won't see that.
 	if (PyObject_GetBuffer(v.ptr(), &view,
 	    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) != -1) {
+		bool gaveup = false;
 		if (strcmp(view.format, "d") == 0) {
 			x->resize(view.len/sizeof(double));
 			for (size_t i = 0; i < view.len/sizeof(double); i++)
 				(*x)[i] = ((double *)view.buf)[i];
+		} else {
+			gaveup = true;
+		}
+		PyBuffer_Release(&view);
+		if (!gaveup)
+			return x;
+	} else {
+		PyErr_Clear();
+	}
+
+	if (PyObject_GetBuffer(v.ptr(), &view,
+	    PyBUF_FORMAT | PyBUF_STRIDES) != -1) {
+		if (strcmp(view.format, "d") == 0) {
+			x->resize(view.len/sizeof(double));
+			for (size_t i = 0; i < view.len/sizeof(double); i++)
+				(*x)[i] = *(double *)((char *)view.buf +
+				    i*view.strides[0]);
 		} else if (strcmp(view.format, "f") == 0) {
 			x->resize(view.len/sizeof(float));
 			for (size_t i = 0; i < view.len/sizeof(float); i++)
-				(*x)[i] = ((float *)view.buf)[i];
+				(*x)[i] = *(float *)((char *)view.buf +
+				    i*view.strides[0]);
 		} else if (strcmp(view.format, "n") == 0) {
 			x->resize(view.len/sizeof(ssize_t));
 			for (size_t i = 0; i < view.len/sizeof(ssize_t); i++)
-				(*x)[i] = ((ssize_t *)view.buf)[i];
+				(*x)[i] = *(ssize_t *)((char *)view.buf +
+				    i*view.strides[0]);
 		} else if (strcmp(view.format, "N") == 0) {
 			x->resize(view.len/sizeof(size_t));
 			for (size_t i = 0; i < view.len/sizeof(size_t); i++)
-				(*x)[i] = ((size_t *)view.buf)[i];
+				(*x)[i] = *(size_t *)((char *)view.buf +
+				    i*view.strides[0]);
 		} else if (strcmp(view.format, "?") == 0) { 
 			x->resize(view.len/sizeof(bool));
 			for (size_t i = 0; i < view.len/sizeof(bool); i++)
-				(*x)[i] = ((bool *)view.buf)[i];
+				(*x)[i] = *(bool *)((char *)view.buf +
+				    i*view.strides[0]);
 		} else if (strcmp(view.format, "i") == 0) { 
 			x->resize(view.len/sizeof(int));
 			for (size_t i = 0; i < view.len/sizeof(int); i++)
-				(*x)[i] = ((int *)view.buf)[i];
+				(*x)[i] = *(int *)((char *)view.buf +
+				    i*view.strides[0]);
 		} else if (strcmp(view.format, "I") == 0) { 
 			x->resize(view.len/sizeof(int));
 			for (size_t i = 0; i < view.len/sizeof(int); i++)
-				(*x)[i] = ((unsigned int *)view.buf)[i];
+				(*x)[i] = *(unsigned int *)((char *)view.buf +
+				    i*view.strides[0]);
 		} else if (strcmp(view.format, "l") == 0) {
 			x->resize(view.len/sizeof(long));
 			for (size_t i = 0; i < view.len/sizeof(long); i++)
-				(*x)[i] = ((long *)view.buf)[i];
+				(*x)[i] = *(long *)((char *)view.buf +
+				    i*view.strides[0]);
 		} else if (strcmp(view.format, "L") == 0) {
 			x->resize(view.len/sizeof(long));
 			for (size_t i = 0; i < view.len/sizeof(long); i++)
-				(*x)[i] = ((unsigned long *)view.buf)[i];
+				(*x)[i] = *(unsigned long *)((char *)view.buf +
+				    i*view.strides[0]);
 		} else if (strcmp(view.format, "q") == 0) {
 			x->resize(view.len/sizeof(int64_t));
 			for (size_t i = 0; i < view.len/sizeof(int64_t); i++)
-				(*x)[i] = ((int64_t *)view.buf)[i];
+				(*x)[i] = *(int64_t *)((char *)view.buf +
+				    i*view.strides[0]);
 		} else if (strcmp(view.format, "Q") == 0) {
 			x->resize(view.len/sizeof(uint64_t));
 			for (size_t i = 0; i < view.len/sizeof(uint64_t); i++)
-				(*x)[i] = ((uint64_t *)view.buf)[i];
+				(*x)[i] = *(uint64_t *)((char *)view.buf +
+				    i*view.strides[0]);
 		} else {
 			// We could add more types, but why do that?
 			// Let Python do the work for obscure cases
