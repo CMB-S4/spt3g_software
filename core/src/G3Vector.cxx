@@ -137,6 +137,13 @@ container_from_object(boost::python::object v)
 	return complex_numpy_container_from_object<G3VectorComplexDouble>(v);
 }
 
+template <>
+G3VectorTimePtr
+container_from_object(boost::python::object v)
+{
+        return numpy_container_from_object<G3VectorTime>(v);
+}
+
 // NB: std::vector<bool> is incompatible with numpy in terms of memory layout
 // (stores bits instead of bytes), so no fast path for numpy is provided for
 // G3VectorBool. There are ways to make it work read-only if we need it.

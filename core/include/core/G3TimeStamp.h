@@ -26,6 +26,8 @@ public:
 	bool operator>=(const G3Time & other) const;
 	bool operator!=(const G3Time & other) const;
 	G3Time &operator=(const G3Time & other) { time = other.time; return *this; }
+	G3Time &operator=(G3TimeStamp t) { time = t; return *this; }
+	G3Time &operator=(std::string t) { *this = G3Time(t); return *this; }
 
 	G3Time operator +(G3TimeStamp t) const;
 	G3Time operator -(G3TimeStamp t) const;
