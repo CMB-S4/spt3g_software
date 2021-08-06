@@ -169,9 +169,36 @@ G3VectorComplexDouble_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 	    view, flags, "Zd");
 }
 
+static int
+G3VectorTime_getbuffer(PyObject *obj, Py_buffer *view, int flags)
+{
+	int err;
+	G3Time potemkin[2];
+	static Py_ssize_t strides = (uintptr_t)&potemkin[1] -
+	    (uintptr_t)&potemkin[0];
+
+	err = pyvector_getbuffer<G3VectorTime::value_type>(obj,
+	    view, flags, "q");
+	if (err != 0)
+		return err;
+
+	// pyvector_getbuffer() has set things up so that the elements in
+	// the buffer point to the beginning of each G3Time and item size
+	// is the size of a G3Time. We need this to be offset to the actual
+	// time stamps, maintain the strides, and adjust the item size.
+	// Note that offsetof() doesn't work here until C++17, hence the
+	// silliness with uintptr_t.
+	view->buf = (char *)view->buf + (uintptr_t)&potemkin[0].time -
+	    (uintptr_t)&potemkin[0];
+	view->itemsize = sizeof(G3TimeStamp);
+	view->strides = &strides;
+	return 0;
+};
+
 static PyBufferProcs vecdouble_bufferprocs;
 static PyBufferProcs veccomplexdouble_bufferprocs;
 static PyBufferProcs vecint_bufferprocs;
+static PyBufferProcs vectime_bufferprocs;
 
 PYBINDINGS("core") {
 	boost::python::object vecdouble = register_g3vector<double>(
@@ -221,6 +248,14 @@ PYBINDINGS("core") {
 	    "class unless you are sure you need it.");
 	register_g3vector<uint8_t>("G3VectorUnsignedChar", "List of 8-bit "
 	    "integers");
-	register_g3vector<G3Time>("G3VectorTime", "List of times.");
+	boost::python::object vectime =
+	    register_g3vector<G3Time>("G3VectorTime", "List of times.");
+	// Add buffer protocol interface
+	PyTypeObject *vtclass = (PyTypeObject *)vectime.ptr();
+	vectime_bufferprocs.bf_getbuffer = G3VectorTime_getbuffer,
+	vtclass->tp_as_buffer = &vectime_bufferprocs;
+#if PY_MAJOR_VERSION < 3
+	vtclass->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
+#endif
 }
 
