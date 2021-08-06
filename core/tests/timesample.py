@@ -8,6 +8,31 @@ import copy
 
 SEC = core.G3Units.sec
 
+class TestTimesampleVector(unittest.TestCase):
+    def test_from_list(self):
+        t0 = core.G3Time('2019-01-01T12:30:00')
+        vectime = core.G3VectorTime([t0, t0 + 10*SEC])
+        assert(vectime[0].time == t0.time)
+        assert(vectime[1].time == t0.time + 10*SEC)
+    def test_from_numpy_array(self):
+        t0 = core.G3Time('2019-01-01T12:30:00')
+        timestamps = np.linspace(t0.time, t0.time + 1e7*SEC, 3000)
+        vectime = core.G3VectorTime(timestamps)
+        assert(vectime[0] == t0)
+        assert(vectime[-1] == core.G3Time(timestamps[-1]))
+        assert(len(vectime) == len(timestamps))
+    def test_to_numpy_array(self):
+        t0 = core.G3Time('2019-01-01T12:30:00')
+        timestamps = np.linspace(t0.time, t0.time + 1e7*SEC, 3000, dtype='int64')
+        vectime = core.G3VectorTime(timestamps)
+        assert((np.asarray(vectime) == timestamps).all())
+    def test_reinit_from_numpy_array(self):
+        t0 = core.G3Time('2019-01-01T12:30:00')
+        timestamps = np.linspace(t0.time, t0.time + 1e7*SEC, 3000, dtype='int64')
+        vectime = core.G3VectorTime(timestamps)
+        revectime = core.G3VectorTime(np.asarray(vectime))
+        assert((np.asarray(revectime) == timestamps).all())
+
 
 def get_test_block(length, keys, offset=0, ordered=True):
     type_cycle = [(core.G3VectorDouble, float),
@@ -18,7 +43,7 @@ def get_test_block(length, keys, offset=0, ordered=True):
     times = np.arange(length)
     if not ordered:
         np.random.shuffle(times)
-    m.times = core.G3VectorTime([t0 + t*SEC for t in times])
+    m.times = core.G3VectorTime(t0 + times*SEC)
     for i, k in enumerate(keys):
         y = (np.random.uniform(size=length) * 100).astype(int)
         constructor, cast_func = type_cycle[i % len(type_cycle)]
