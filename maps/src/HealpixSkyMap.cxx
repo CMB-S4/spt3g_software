@@ -109,6 +109,8 @@ HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool weighted,
 		for (size_t i = 0; i < sz; i++) {
 			unsigned long pix = ((unsigned long *)indexview.buf)[i];
 			double ang = PixelToAngle(pix)[0];
+			if (ang < 0)
+				ang += 2 * M_PI * G3Units::rad;
 			ang = fmod(ang, 2 * M_PI * G3Units::rad);
 			if (ang < phi_min)
 				phi_min = ang;
