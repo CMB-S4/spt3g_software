@@ -9,7 +9,7 @@ if platform.system().startswith('freebsd') or platform.system().startswith('Free
 	# http://mail.python.org/pipermail/python-dev/2002-May/024074.html
 	sys.setdlopenflags(0x102)
 
-lib_prefix = "lib"
+lib_prefix = "libspt3g-"
 
 if platform.system().startswith('Darwin'):
     # OSX compatibility requires .dylib suffix

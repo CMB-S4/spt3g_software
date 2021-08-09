@@ -34,6 +34,9 @@ include(${CMAKE_BINARY_DIR}/cmake/Spt3gIncludes.cmake)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${SPT3G_LIBRARY_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${SPT3G_RUNTIME_DIR})
 
+# Sneak in a namespace-like prefix for all libraries
+set(CMAKE_SHARED_LIBRARY_PREFIX "libspt3g-")
+
 # Raise errors on every warning by default
 # (use target-specific options to disable particular warnings)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror")
