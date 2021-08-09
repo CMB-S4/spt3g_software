@@ -209,6 +209,9 @@ foreach(dir ${SPT3G_PYTHON_DIRS})
 		install(DIRECTORY ${dir} DESTINATION ${PYTHON_MODULE_DIR}/spt3g/)
 	endif("${dir_name}" STREQUAL "python")
 endforeach(dir SPT3G_PYTHON_DIRS)
+# Ensure that python scripts are precompiled, in case they will be executed from a read-only perspective
+install(CODE "MESSAGE(STATUS \"Pre-compiling python scripts in ${PYTHON_MODULE_DIR}/spt3g/\")
+EXECUTE_PROCESS(COMMAND ${Python_EXECUTABLE} -O -m compileall -fq ${PYTHON_MODULE_DIR}/spt3g/)")
 
 # The exectutables
 foreach(program ${SPT3G_PROGRAMS})
