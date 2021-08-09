@@ -1,6 +1,7 @@
 #include <pybindings.h>
 #include <serialization.h>
 #include <container_pybindings.h>
+#include <G3Units.h>
 #include <gcp/ACUStatus.h>
 
 template <class A> void ACUStatus::serialize(A &ar, unsigned v)

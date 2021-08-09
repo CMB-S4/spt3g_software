@@ -7,8 +7,6 @@
 #include <cereal/cereal.hpp>
 #include <cereal/types/polymorphic.hpp>
 
-#include <G3Units.h>
-
 #define G3_POINTERS(x) \
 typedef boost::shared_ptr<x> x##Ptr; \
 typedef boost::shared_ptr<const x> x##ConstPtr; \

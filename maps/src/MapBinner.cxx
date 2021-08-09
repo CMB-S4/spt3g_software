@@ -8,6 +8,7 @@
 #include <G3Quat.h>
 #include <G3Data.h>
 #include <G3Map.h>
+#include <G3Units.h>
 #include <maps/G3SkyMap.h>
 #include <maps/pointing.h>
 #include <calibration/BoloProperties.h>

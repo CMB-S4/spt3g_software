@@ -2,6 +2,7 @@
 #include <container_pybindings.h>
 #include <G3Quat.h>
 #include <G3Map.h>
+#include <G3Units.h>
 
 // Quaternion utilities
 
