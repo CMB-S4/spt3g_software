@@ -225,7 +225,7 @@ G3SkyMap &G3SkyMap::operator+=(const G3SkyMap & rhs)
 	g3_assert(weighted == rhs.weighted);
 
 	for (size_t i = 0; i < rhs.size(); i++)
-		(*this)[i] += rhs[i];
+		(*this)[i] += rhs.at(i);
 	return *this;
 }
 
@@ -243,7 +243,7 @@ G3SkyMap &G3SkyMap::operator-=(const G3SkyMap &rhs)
 	g3_assert(weighted == rhs.weighted);
 
 	for (size_t i = 0; i < rhs.size(); i++)
-		(*this)[i] -= rhs[i];
+		(*this)[i] -= rhs.at(i);
 	return *this;
 }
 
@@ -263,7 +263,7 @@ G3SkyMap &G3SkyMap::operator*=(const G3SkyMap &rhs)
 		weighted = true;
 
 	for (size_t i = 0; i < rhs.size(); i++)
-		(*this)[i] *= rhs[i];
+		(*this)[i] *= rhs.at(i);
 	return *this;
 }
 
@@ -283,7 +283,7 @@ G3SkyMap &G3SkyMap::operator/=(const G3SkyMap &rhs)
 		weighted = true;
 
 	for (size_t i = 0; i < rhs.size(); i++)
-		(*this)[i] /= rhs[i];
+		(*this)[i] /= rhs.at(i);
 	return *this;
 }
 
