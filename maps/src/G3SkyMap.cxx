@@ -769,14 +769,6 @@ StokesVector & StokesVector::operator /=(const MuellerMatrix &r)
 	return *this;
 }
 
-StokesVector StokesVector::operator /(const MuellerMatrix &r) const
-{
-	StokesVector v;
-	v += *this;
-	v /= r;
-	return v;
-}
-
 G3SkyMapPtr G3SkyMapWeights::Det() const
 {
 	G3SkyMapPtr D = TT->Clone(false);

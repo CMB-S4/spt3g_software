@@ -203,7 +203,6 @@ public:
 	}
 
 	StokesVector &operator /=(const MuellerMatrix &r);
-	StokesVector operator /(const MuellerMatrix &r) const;
 
 private:
 	double backing[3];
