@@ -106,6 +106,14 @@ G3SkyMapWeights::G3SkyMapWeights(G3SkyMapConstPtr ref, bool polarized) :
     QU(polarized ? ref->Clone(false) : NULL),
     UU(polarized ? ref->Clone(false) : NULL)
 {
+	TT->pol_type = G3SkyMap::None;
+	if (polarized){
+		TQ->pol_type = G3SkyMap::None;
+		TU->pol_type = G3SkyMap::None;
+		QQ->pol_type = G3SkyMap::None;
+		QU->pol_type = G3SkyMap::None;
+		UU->pol_type = G3SkyMap::None;
+	}
 }
 
 G3SkyMapWeights::G3SkyMapWeights(const G3SkyMapWeights &r) :
