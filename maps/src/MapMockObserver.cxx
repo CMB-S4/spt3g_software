@@ -17,7 +17,8 @@ class MapMockObserver : public G3Module {
 public:
 	MapMockObserver(std::string pointing, std::string timestreams,
 	    double band, G3SkyMapConstPtr T, G3SkyMapConstPtr Q,
-	    G3SkyMapConstPtr U, std::string bolo_properties_name);
+	    G3SkyMapConstPtr U, std::string bolo_properties_name,
+	    bool interp);
 	virtual ~MapMockObserver() {}
 
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
@@ -31,27 +32,30 @@ private:
 	std::string boloprops_name_;
 	BolometerPropertiesMapConstPtr boloprops_;
 
+	bool interp_;
+
 	SET_LOGGER("MapMockObserver");
 };
 
 EXPORT_G3MODULE("maps", MapMockObserver,
     (init<std::string, std::string, double,
      G3SkyMapConstPtr, G3SkyMapConstPtr, G3SkyMapConstPtr,
-     std::string>((arg("pointing"), arg("timestreams"), arg("band"),
+     std::string, bool>((arg("pointing"), arg("timestreams"), arg("band"),
      arg("T"), arg("Q")=G3SkyMapConstPtr(), arg("U")=G3SkyMapConstPtr(),
-     arg("bolo_properties_name")="BolometerProperties"))),
+     arg("bolo_properties_name")="BolometerProperties", arg("interp")=false))),
 "Creates a new set of timestreams <timestreams> with the expected mean values "
 "on each of the detectors with band <band> of a nearest-neighbor observation "
 "of the input maps (T and optionally Q and U). Boresight pointing is obtained "
 "from the quaternion vector specified by <pointing>. Detector pointing offsets "
 "and polarization angles and efficiencies are obtained from the specified "
-"BolometerPropertiesMap, which can generally be left at its default value.");
+"BolometerPropertiesMap, which can generally be left at its default value. "
+"Optionally, samples from the input map can be constructed by interpolation.");
 
 MapMockObserver::MapMockObserver(std::string pointing, std::string timestreams,
     double band, G3SkyMapConstPtr T, G3SkyMapConstPtr Q,
-    G3SkyMapConstPtr U, std::string bolo_properties_name) :
+    G3SkyMapConstPtr U, std::string bolo_properties_name, bool interp) :
   pointing_(pointing), timestreams_(timestreams), band_(band),
-  T_(T), Q_(Q), U_(U), boloprops_name_(bolo_properties_name)
+  T_(T), Q_(Q), U_(U), boloprops_name_(bolo_properties_name), interp_(interp)
 {
 	if ((Q_ && !U_) || (U_ && !Q_))
 		log_fatal("If simulating polarized maps, pass both Q and U.");
@@ -144,20 +148,37 @@ MapMockObserver::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		std::vector<double> alpha, delta;
 		get_detector_pointing(bp.x_offset, bp.y_offset, *pointing,
 		    T_->coord_ref, alpha, delta);
-		auto detpointing = T_->AnglesToPixels(alpha, delta);
+		std::vector<size_t> detpointing;
+		if (!interp_)
+			detpointing = T_->AnglesToPixels(alpha, delta);
 
 		if (Q_) {
 			StokesVector pcoupling;
 			set_stokes_coupling(bp.pol_angle, bp.pol_efficiency,
 			    pcoupling);
-			for (size_t i = 0; i < det.size(); i++)
-				det[i] =
-				    (*T_)[detpointing[i]]*pcoupling.t + 
-				    (*Q_)[detpointing[i]]*pcoupling.q +
-				    (*U_)[detpointing[i]]*pcoupling.u;
+			for (size_t i = 0; i < det.size(); i++) {
+				if (interp_) {
+					std::vector<long> pixels;
+					std::vector<double> weights;
+					T_->GetInterpPixelsWeights(alpha[i], delta[i], pixels, weights);
+					det[i] =
+					    T_->GetInterpPrecalc(pixels, weights) * pcoupling.t +
+					    Q_->GetInterpPrecalc(pixels, weights) * pcoupling.q +
+					    U_->GetInterpPrecalc(pixels, weights) * pcoupling.u;
+				} else {
+					det[i] =
+					    (*T_)[detpointing[i]] * pcoupling.t +
+					    (*Q_)[detpointing[i]] * pcoupling.q +
+					    (*U_)[detpointing[i]] * pcoupling.u;
+				}
+			}
 		} else {
-			for (size_t i = 0; i < det.size(); i++)
-				det[i] = (*T_)[detpointing[i]];
+			for (size_t i = 0; i < det.size(); i++) {
+				if (interp_)
+					det[i] = T_->GetInterpValue(alpha[i], delta[i]);
+				else
+					det[i] = (*T_)[detpointing[i]];
+			}
 		}
 	}
 
