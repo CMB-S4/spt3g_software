@@ -117,10 +117,10 @@ def FlattenPol(frame, invert=False):
     if "Q" not in frame or "U" not in frame:
         return
 
-    qmap, umap = frame.pop("Q"), frame.pop("U")
-    if not isinstance(qmap, maps.FlatSkyMap) or not isinstance(umap, maps.FlatSkyMap):
+    if any(not isinstance(frame[k], maps.FlatSkyMap) for k in "QU"):
         return
 
+    qmap, umap = frame.pop("Q"), frame.pop("U")
     maps.flatten_pol(qmap, umap, invert=invert)
 
     frame["Q"] = qmap
@@ -233,6 +233,11 @@ def ValidateMaps(frame, ignore_missing_weights=False):
                     core.log_warn(
                         "Map frame %s: Missing weights" % map_id, unit="ValidateMaps"
                     )
+                if k == "T" and "Q" not in frame and "Wunpol" not in frame:
+                    core.log_warn(
+                        "Map frame %s: Missing unpolarized weights" % map_id,
+                        unit="ValidateMaps",
+                    )
                 if k in "QU" and "Wpol" not in frame:
                     core.log_warn(
                         "Map frame %s: Missing polarized weights" % map_id,
@@ -241,7 +246,9 @@ def ValidateMaps(frame, ignore_missing_weights=False):
         else:
             if frame[k].polarized and ("Q" not in frame or "U" not in frame):
                 core.log_fatal(
-                    "Map frame %s: Missing Q or U maps" % map_id, unit="ValidateMaps"
+                    "Map frame %s: Found unpolarized maps with polarized weights"
+                    % map_id,
+                    unit="ValidateMaps",
                 )
             elif not frame[k].polarized and ("Q" in frame or "U" in frame):
                 core.log_fatal(
@@ -273,7 +280,7 @@ class ExtractMaps(object):
     def __init__(self, map_id=None, copy=False, ignore_missing_weights=False):
         self.map_id = map_id
         self.copy_ = copy
-        self.ignore_missing_weights=ignore_missing_weights
+        self.ignore_missing_weights = ignore_missing_weights
         self.maps = {}
 
     def __call__(self, frame):
@@ -402,9 +409,7 @@ class InjectMaps(object):
         else:
             raise TypeError("maps_in must be a list or dict")
 
-        ValidateMaps(
-            self.map_frame, ignore_missing_weights=ignore_missing_weights
-        )
+        ValidateMaps(self.map_frame, ignore_missing_weights=ignore_missing_weights)
 
     def __call__(self, frame):
         if self.map_frame is None:
