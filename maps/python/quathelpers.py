@@ -78,6 +78,9 @@ def AddTimingToPointingQuats(fr, key, timing_ref='RawBoresightAz'):
     if key not in fr:
         return
 
+    if isinstance(fr[key], G3TimestreamQuat):
+        return
+
     x = fr.pop(key)
     x = G3TimestreamQuat(x)
     x.start = fr[timing_ref].start
