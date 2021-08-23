@@ -18,7 +18,7 @@ public:
 	MapMockObserver(std::string pointing, std::string timestreams,
 	    double band, G3SkyMapConstPtr T, G3SkyMapConstPtr Q,
 	    G3SkyMapConstPtr U, std::string bolo_properties_name,
-	    bool interp);
+	    std::string bolos, bool interp);
 	virtual ~MapMockObserver() {}
 
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
@@ -31,6 +31,7 @@ private:
 
 	std::string boloprops_name_;
 	BolometerPropertiesMapConstPtr boloprops_;
+	std::string bolos_;
 
 	bool interp_;
 
@@ -40,22 +41,25 @@ private:
 EXPORT_G3MODULE("maps", MapMockObserver,
     (init<std::string, std::string, double,
      G3SkyMapConstPtr, G3SkyMapConstPtr, G3SkyMapConstPtr,
-     std::string, bool>((arg("pointing"), arg("timestreams"), arg("band"),
+     std::string, std::string, bool>((arg("pointing"), arg("timestreams"), arg("band"),
      arg("T"), arg("Q")=G3SkyMapConstPtr(), arg("U")=G3SkyMapConstPtr(),
-     arg("bolo_properties_name")="BolometerProperties", arg("interp")=false))),
+     arg("bolo_properties_name")="BolometerProperties", arg("bolos")="",
+     arg("interp")=false))),
 "Creates a new set of timestreams <timestreams> with the expected mean values "
-"on each of the detectors with band <band> of a nearest-neighbor observation "
-"of the input maps (T and optionally Q and U). Boresight pointing is obtained "
-"from the quaternion vector specified by <pointing>. Detector pointing offsets "
-"and polarization angles and efficiencies are obtained from the specified "
-"BolometerPropertiesMap, which can generally be left at its default value. "
-"Optionally, samples from the input map can be constructed by interpolation.");
+"on each of the detectors in list <bolos> or with band <band> of a "
+"nearest-neighbor observation of the input maps (T and optionally Q and U). "
+"Boresight pointing is obtained from the quaternion vector specified by "
+"<pointing>. Detector pointing offsets and polarization angles and "
+"efficiencies are obtained from the specified BolometerPropertiesMap, which "
+"can generally be left at its default value. Optionally, samples from the "
+"input map can be constructed by interpolation.");
 
 MapMockObserver::MapMockObserver(std::string pointing, std::string timestreams,
-    double band, G3SkyMapConstPtr T, G3SkyMapConstPtr Q,
-    G3SkyMapConstPtr U, std::string bolo_properties_name, bool interp) :
+    double band, G3SkyMapConstPtr T, G3SkyMapConstPtr Q, G3SkyMapConstPtr U,
+    std::string bolo_properties_name, std::string bolos, bool interp) :
   pointing_(pointing), timestreams_(timestreams), band_(band),
-  T_(T), Q_(Q), U_(U), boloprops_name_(bolo_properties_name), interp_(interp)
+  T_(T), Q_(Q), U_(U), boloprops_name_(bolo_properties_name),
+  bolos_(bolos), interp_(interp)
 {
 	if ((Q_ && !U_) || (U_ && !Q_))
 		log_fatal("If simulating polarized maps, pass both Q and U.");
@@ -116,12 +120,27 @@ MapMockObserver::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 
 	G3TimestreamMapPtr tsm = G3TimestreamMapPtr(new G3TimestreamMap);
 
-	// Add blank timestreams for all detectors
-	for (auto i : *boloprops_) {
-		if (i.second.band != band_)
-			continue;
-		(*tsm)[i.first] = G3TimestreamPtr(
-		    new G3Timestream(pointing->size()));
+	if (bolos_.size()) {
+		// Add blank timestreams for all listed detectors
+		G3VectorStringConstPtr bolos = frame->Get<G3VectorString>(
+		    bolos_);
+		if (!bolos)
+			log_fatal("Invalid bolometer list %s.", bolos_.c_str());
+		for (auto i : *bolos) {
+			const BolometerProperties &bp = boloprops_->at(i);
+			if (bp.band != band_)
+				continue;
+			(*tsm)[i] = G3TimestreamPtr(
+			    new G3Timestream(pointing->size()));
+		}
+	} else {
+		// Add blank timestreams for all detectors
+		for (auto i : *boloprops_) {
+			if (i.second.band != band_)
+				continue;
+			(*tsm)[i.first] = G3TimestreamPtr(
+			    new G3Timestream(pointing->size()));
+		}
 	}
 
 #ifdef OPENMP_FOUND
