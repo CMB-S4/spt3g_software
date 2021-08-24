@@ -1,14 +1,28 @@
+@PACKAGE_INIT@
+
 set(SPT3G_SOURCE_DIR @CMAKE_SOURCE_DIR@)
 set(SPT3G_BUILD_DIR @CMAKE_BINARY_DIR@)
+set(SPT3G_INCLUDE_INSTALL_DIR @PACKAGE_INCLUDE_INSTALL_DIR@)
 
-set(SPT3G_INCLUDE_DIRS ${SPT3G_SOURCE_DIR}/core/include/core)
-foreach(lib @SPT3G_LIBRARIES@)
-	set(SPT3G_LIBRARIES ${SPT3G_LIBRARIES} spt3g::${lib})
-	set(SPT3G_INCLUDE_DIRS ${SPT3G_SOURCE_DIR}/${lib}/include)
-endforeach(lib @SPT3G_LIBRARIES@)
+if(NOT "@PACKAGE_CMAKE_INSTALL_DIR@" STREQUAL "") # installed
+	set(SPT3G_INCLUDE_DIRS "")
+	foreach(lib @SPT3G_LIBRARIES@)
+		set(SPT3G_LIBRARIES ${SPT3G_LIBRARIES} spt3g::${lib})
+		list(APPEND SPT3G_INCLUDE_DIRS "@PACKAGE_INCLUDE_INSTALL_DIR@/${lib}")
+	endforeach(lib @SPT3G_LIBRARIES@)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SPT3G_BUILD_DIR}/cmake)
-include(Spt3gIncludes)
-include(Spt3gTargets)
+	include("@PACKAGE_CMAKE_INSTALL_DIR@/Spt3gIncludes.cmake")
+	include("@PACKAGE_CMAKE_INSTALL_DIR@/Spt3gTargets.cmake")
+else(NOT "@PACKAGE_CMAKE_INSTALL_DIR@" STREQUAL "") # not installed
+	set(SPT3G_INCLUDE_DIRS ${SPT3G_SOURCE_DIR}/core/include/core)
+	foreach(lib @SPT3G_LIBRARIES@)
+		set(SPT3G_LIBRARIES ${SPT3G_LIBRARIES} spt3g::${lib})
+		list(APPEND SPT3G_INCLUDE_DIRS "${SPT3G_SOURCE_DIR}/${lib}/include")
+	endforeach(lib @SPT3G_LIBRARIES@)
+
+	set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SPT3G_BUILD_DIR}/cmake)
+	include(Spt3gIncludes)
+	include(Spt3gTargets)
+endif(NOT "@PACKAGE_CMAKE_INSTALL_DIR@" STREQUAL "")
 
 set(SPT3G_FOUND true)

@@ -76,6 +76,27 @@ To build the documentation in the build directory type:
 
 This will construct an html version of the documentation.  This builds the documentation in the build/docs folder.  Open build/docs/index.html in your favorite web browser.  You should at least read the quick start portion of the documentation before getting started.
 
+Installation
+------------
+
+For various reasons it may be useful to install the software after building, instead of continuing to use it out of the build directory. Two CMake variables control how the software is installed:
+
+ * ``CMAKE_INSTALL_PREFIX``, which defaults to ``/usr/local`` is used as the root directory for installing all non-python components (header files, cmake export scripts, etc.)
+ * ``PYTHON_MODULE_DIR``, which if not explicitly set defaults to the result of running `distutils.sysconfig.get_python_lib <https://docs.python.org/3/distutils/apiref.html#distutils.sysconfig.get_python_lib>` with the selected python interpreter, is where the python module will be installed.
+
+It is rarely necessary to set ``PYTHON_MODULE_DIR`` if ``python`` has been detected correctly, but setting ``CMAKE_INSTALL_PREFIX`` is frequently useful when installing into a python virtual environment. In such a case, one may want build as follows:
+
+.. code-block:: shell
+
+	cd spt3g_software
+	mkdir build
+	cd build
+	cmake .. -DCMAKE_INSTALL_PREFIX="${VIRTUAL_ENV}"
+	make
+	make install
+
+After this completes, it should be possible when using the virtual environment to ``import spt3g`` in python without needing to make use of ``env-shell.sh``.
+
 Release Version Tracking
 ------------------------
 

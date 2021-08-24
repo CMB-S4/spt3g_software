@@ -19,8 +19,8 @@ Minimum versions:
 	- Python >= 2.7
 
 
-Installing on a Personal System
-===============================
+Installing Dependencies on a Personal System
+============================================
 
 On Ubuntu/Debian, you can install the non-Python dependencies, including the optional ones, by doing:
 
@@ -36,8 +36,8 @@ On RHEL-type systems (SL, CentOS, etc.), do this:
 
 Note that on RHEL/SL versions before 7, you will need a newer compiler than ships with the OS. Please see the clustertools repository for a script in this case.
 
-Installing on the Open Science Grid
-===================================
+Handling Dependencies on the Open Science Grid
+==============================================
 
 On an OSG or other system with OASIS configured, run this before anything else:
 
@@ -47,8 +47,8 @@ On an OSG or other system with OASIS configured, run this before anything else:
 
 This sets up a software environment with all the packages installed by yum, etc. above that you need for the SPT3G software environment, as well as a variety of standard cosmology and astrophysics tasks. You will obtain best results if you place the line above in your ``.bash_profile``. Do *not* put it in ``.bashrc`` and make *sure* that this is the *only* software installation set up in your bash profile. In particular, take care that there are no references to other python installations (Anaconda, etc.).
 
-Installing on NERSC
-===================
+Handling Dependencies on NERSC
+==============================
 
 
 On NERSC, all dependencies can be installed by ensuring the following `modules <https://docs.nersc.gov/environment/#nersc-modules-environment>`_ are loaded with these exact versions (other version combinations may work, but this combination has been tested):
@@ -88,6 +88,29 @@ Once that is complete, you can use the ``env-shell.sh`` script in the build dire
 .. code-block:: sh
 
 	./env-shell.sh
+
+Installation
+============
+
+For various reasons it may be useful to install the software after building, instead of continuing to use it out of the build directory. Two CMake variables control how the software is installed:
+
+ * ``CMAKE_INSTALL_PREFIX``, which defaults to ``/usr/local`` is used as the root directory for installing all non-python components (header files, cmake export scripts, etc.)
+ * ``PYTHON_MODULE_DIR``, which if not explicitly set defaults to the result of running `distutils.sysconfig.get_python_lib <https://docs.python.org/3/distutils/apiref.html#distutils.sysconfig.get_python_lib>` with the selected python interpreter, is where the python module will be installed.
+
+It is rarely necessary to set ``PYTHON_MODULE_DIR`` if ``python`` has been detected correctly, but setting ``CMAKE_INSTALL_PREFIX`` is frequently useful when installing into a python virtual environment. In such a case, one may want build as follows:
+
+.. code-block:: sh
+
+	mkdir build
+	cd build
+	cmake .. -DCMAKE_INSTALL_PREFIX="${VIRTUAL_ENV}"
+	make
+	make install
+
+After this completes, it should be possible when using the virtual environment to ``import spt3g`` in python without needing to make use of ``env-shell.sh`` (and without needing the build directory to continue to exist or otherwise be accessible).
+
+An uninstall target is also provided, so running ``make uninstall`` from the build directory should remove all files created by a previous ``make install``. 
+
 
 Overview
 --------
