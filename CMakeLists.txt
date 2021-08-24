@@ -96,7 +96,7 @@ if(${USE_PROJECT_LIST} AND WILL_BUILD_CORE EQUAL -1)
 	list(APPEND BUILD_PROJECTS core)
 endif(${USE_PROJECT_LIST} AND WILL_BUILD_CORE EQUAL -1)
 
-# If not set by the user, ask python when it keeps modules
+# If not set by the user, ask python where it keeps modules
 if(NOT PYTHON_MODULE_DIR)
 	EXECUTE_PROCESS (COMMAND ${Python_EXECUTABLE} -c
 		"from distutils.sysconfig import get_python_lib; print(get_python_lib(plat_specific=True,standard_lib=False))"
