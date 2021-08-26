@@ -432,6 +432,9 @@ BOOST_PYTHON_MODULE(core)
 	    .value("Calibration",     G3Frame::Calibration)
 	    .value("Wiring",          G3Frame::Wiring)
 	    .value("GcpSlow",         G3Frame::GcpSlow)
+	    .value("Ephemeris",       G3Frame::Ephemeris)
+	    .value("LightCurve",      G3Frame::LightCurve)
+	    .value("Statistics",      G3Frame::Statistics)
 	    .value("none",            G3Frame::None)
 	;
 	enum_none_converter::from_python<G3Frame::FrameType>();

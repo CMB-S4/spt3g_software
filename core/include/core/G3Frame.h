@@ -49,6 +49,9 @@ public:
 		Calibration = 'C',
 		GcpSlow = 'G',
 		PipelineInfo = 'P',
+		Ephemeris = 'E',
+		LightCurve = 'L',
+		Statistics = 'R',
 		EndProcessing = 'Z',
 		None = 'N',
 	};
