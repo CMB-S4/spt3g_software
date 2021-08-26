@@ -207,9 +207,9 @@ MapMockObserver::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 					    U_->GetInterpPrecalc(pixels, weights) * pcoupling.u;
 				} else {
 					det[i] =
-					    (*T_)[detpointing[i]] * pcoupling.t +
-					    (*Q_)[detpointing[i]] * pcoupling.q +
-					    (*U_)[detpointing[i]] * pcoupling.u;
+					    T_->at(detpointing[i]) * pcoupling.t +
+					    Q_->at(detpointing[i]) * pcoupling.q +
+					    U_->at(detpointing[i]) * pcoupling.u;
 				}
 			}
 		} else {
@@ -217,7 +217,7 @@ MapMockObserver::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 				if (interp_)
 					det[i] = T_->GetInterpValue(alpha[i], delta[i]);
 				else
-					det[i] = (*T_)[detpointing[i]];
+					det[i] = T_->at(detpointing[i]);
 			}
 		}
 	}

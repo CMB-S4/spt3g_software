@@ -110,7 +110,7 @@ MapTODMasker::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 
 		det.resize(pointing->size());
 		for (size_t j = 0; j < det.size(); j++)
-			det[j] = !!(*mask_)[detpointing[j]];
+			det[j] = !!(mask_->at(detpointing[j]));
 
 		// Find out if any elements are set, delete entry if not
 		bool is_set = false;
