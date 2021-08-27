@@ -19,6 +19,9 @@ public:
 	std::string Summary() const;
 
 	bool operator ==(const G3ModuleConfig &) const;
+
+private:
+	SET_LOGGER("G3ModuleConfig");
 };
 
 class G3PipelineInfo : public G3FrameObject {
@@ -40,6 +43,9 @@ public:
 
 	std::string Description() const;
 	std::string Summary() const;
+
+private:
+	SET_LOGGER("G3PipelineInfo");
 };
 
 G3_POINTERS(G3PipelineInfo);

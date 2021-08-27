@@ -28,10 +28,22 @@ template <class A> void G3ModuleConfig::save(A &ar, unsigned v) const
 			ar << cereal::make_nvp("frameobject", true);
 			ar << cereal::make_nvp("value", fo);
 		} else {
-			std::string repr = bp::extract<std::string>(
-			    i.second.attr("__repr__")());
-			ar << cereal::make_nvp("frameobject", false);
-			ar << cereal::make_nvp("value", repr);
+			try {
+				PyObject *repr = PyObject_Repr(i.second.ptr());
+				bp::handle<> reprhand(repr);
+				bp::object reprobj(reprhand);
+				std::string reprstr =
+				    bp::extract<std::string>(reprobj);
+
+				ar << cereal::make_nvp("frameobject", false);
+				ar << cereal::make_nvp("value", reprstr);
+			} catch (...) {
+				log_error("Exception thrown while getting "
+				    "repr() of parameter %s of module %s (%s)",
+				    i.first.c_str(), instancename.c_str(),
+				    modname.c_str());
+				throw;
+			}
 		}
 	}
 }
