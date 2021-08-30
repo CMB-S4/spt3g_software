@@ -61,7 +61,7 @@ macro(add_spt3g_library lib_name)
 	list(APPEND SPT3G_LIBRARIES ${lib_name})
  	set(SPT3G_LIBRARIES ${SPT3G_LIBRARIES} PARENT_SCOPE)
 	install(TARGETS ${lib_name} EXPORT ${PROJECT_NAME}Config LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
-	install(TARGETS ${lib} DESTINATION ${PYTHON_MODULE_DIR}/spt3g)
+	install(TARGETS ${lib_name} DESTINATION ${PYTHON_MODULE_DIR}/spt3g)
 endmacro(add_spt3g_library lib_name)
 
 macro(add_spt3g_test test_name)
