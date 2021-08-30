@@ -179,21 +179,13 @@ add_custom_target(docs
 
 # Set up installation
 
-foreach(lib ${SPT3G_LIBRARIES})
-	INSTALL(TARGETS ${lib} EXPORT ${PROJECT_NAME}Config)
-endforeach(lib ${SPT3G_LIBRARIES})
+# Export the phony library target
+INSTALL(TARGETS spt3g EXPORT ${PROJECT_NAME}Config)
 
 # The python module
 # First, one-off files
 INSTALL(FILES ${CMAKE_SOURCE_DIR}/cmake/init.py DESTINATION ${PYTHON_MODULE_DIR}/spt3g RENAME __init__.py)
 INSTALL(FILES ${CMAKE_BINARY_DIR}/spt3g/version.py DESTINATION ${PYTHON_MODULE_DIR}/spt3g)
-# Libraries
-foreach(lib ${SPT3G_LIBRARIES})
-	if("${lib}" STREQUAL "spt3g")
-		continue() # skip phony library
-	endif("${lib}" STREQUAL "spt3g")
-	install(TARGETS ${lib} DESTINATION ${PYTHON_MODULE_DIR}/spt3g)
-endforeach(lib ${SPT3G_LIBRARIES})
 
 # Python scripts
 foreach(dir ${SPT3G_PYTHON_DIRS})
@@ -229,8 +221,8 @@ foreach(program ${SPT3G_PROGRAMS})
 	else(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.19)
 		get_filename_component(true_program "${CMAKE_BINARY_DIR}/bin/${program}" REALPATH)
 	endif(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.19)
-	install(FILES "${true_program}" TYPE BIN
-		PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+	install(PROGRAMS "${true_program}"
+		DESTINATION "${CMAKE_INSTALL_BINDIR}"
 		RENAME "${program}"
 	)
 endforeach(program ${SPT3G_PROGRAMS})
