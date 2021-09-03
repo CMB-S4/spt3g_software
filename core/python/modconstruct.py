@@ -213,7 +213,13 @@ def PipelineAddCallable(self, callable, name=None, subprocess=False, **kwargs):
         modconfig.instancename = name
         modconfig.modname = '%s.%s' % (callable.__module__, callable_name)
         for k,v in kwargs.items():
-            modconfig.config[k] = v
+            tostore = v
+            if hasattr(v, 'npix_allocated') and v.npix_allocated > 0 and \
+              hasattr(v, 'clone'):
+                # Don't store full sky maps as configuration options. It just
+                # a ton of disk space with simulations.
+                tostore = v.clone(False)
+            modconfig.config[k] = tostore
         self._pipelineinfo.pipelineinfo.modules.append(modconfig)
 
     # Deal with the segment case
