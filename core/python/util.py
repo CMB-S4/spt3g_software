@@ -111,7 +111,7 @@ class DeduplicateMetadata(object):
     all frames not in <dataframetypes> to be metadata (by default, everything
     except Timepoint and Scan frames).
     '''
-    def __init__(self, dataframetype=[G3FrameType.Timepoint, G3FrameType.Scan, G3FrameType.PipelineInfo]):
+    def __init__(self, dataframetype=[G3FrameType.Timepoint, G3FrameType.Scan]):
         self.dataframes = dataframetype
         self.metacache = {}
     def __call__(self, f):
