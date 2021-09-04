@@ -120,7 +120,8 @@ class DeduplicateMetadata(object):
             return
 
         # Compare serialized form of frame
-        rawdata = f.__getstate__()[1]
+        from hashlib import md5
+        rawdata = md5(f.__getstate__()[1]).hexdigest()
         if f.type in self.metacache and self.metacache[f.type] == rawdata:
             # Same as the last one, so drop this frame
             return []

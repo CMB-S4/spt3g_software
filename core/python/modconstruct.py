@@ -153,7 +153,7 @@ class _add_pipeline_info(G3Module):
         if self.infoemitted:
             if fr.type == G3FrameType.PipelineInfo and \
               self.originalpi is not None and \
-              self.originalpi == fr.__getstate__()[1]:
+              self.originalpi == list(fr.keys()):
                 # Deduplicate PipelineInfo frames identical to one that we
                 # added to earlier, which avoids false semi-duplicates down
                 # the line when processing multiple files.
@@ -168,7 +168,7 @@ class _add_pipeline_info(G3Module):
 
         self.infoemitted = True
         if fr.type == G3FrameType.PipelineInfo:
-            self.originalpi = fr.__getstate__()[1] # See DeduplicateMetadata()
+            self.originalpi = list(fr.keys())
             fr[str(G3Time.Now())] = self.pipelineinfo
             self.buffer.append(fr)
         else:
