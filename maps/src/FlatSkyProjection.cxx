@@ -249,9 +249,15 @@ void FlatSkyProjection::SetRes(double res, double x_res)
 long
 FlatSkyProjection::XYToPixel(double x, double y) const
 {
-	long ix = (long) (x + 0.5);
-	long iy = (long) (y + 0.5);
-	return (ix < 0 || iy < 0 || ix >= xpix_ || iy >= ypix_) ? -1 : ix + iy * xpix_;
+	// Truncate X/Y coordinates to integer pixels and wrap to 1D.
+	// If the pixel is outside of the projection area, return -1.
+	// The floor() is important to properly truncate negative numbers,
+	// which otherwise pile up at zero from both directions.
+
+	long ix = (long)floor(x + 0.5);
+	long iy = (long)floor(y + 0.5);
+	return (ix < 0 || iy < 0 || ix >= xpix_ || iy >= ypix_) ?
+	    -1 : ix + iy * xpix_;
 }
 
 std::vector<double>
