@@ -8,7 +8,7 @@
 #include <maps/G3SkyMap.h>
 #include <maps/FlatSkyMap.h>
 
-G3SkyMapPtr GetMaskMap(G3SkyMapConstPtr m);
+G3SkyMapPtr GetMaskMap(G3SkyMapConstPtr m, bool ignore_nans=false, bool ignore_infs=false);
 
 void RemoveWeightsT(G3SkyMapPtr T, G3SkyMapWeightsConstPtr W, bool zero_nans = false);
 void RemoveWeights(G3SkyMapPtr T, G3SkyMapPtr Q, G3SkyMapPtr U, G3SkyMapWeightsConstPtr W,
@@ -23,10 +23,11 @@ void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin=1, bool i
 
 void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, double h=0.001, bool invert=false);
 
-std::vector<double> GetMapStats(G3SkyMapConstPtr m, int order=2,
+std::vector<double> GetMapStats(G3SkyMapConstPtr m, G3SkyMapConstPtr mask, int order=2,
     bool ignore_zeros=false, bool ignore_nans=false);
 
-double GetMapMedian(G3SkyMapConstPtr m, bool ignore_zeros=false, bool ignore_nans=false);
+double GetMapMedian(G3SkyMapConstPtr m, G3SkyMapConstPtr mask,
+    bool ignore_zeros=false, bool ignore_nans=false);
 
 FlatSkyMapPtr ConvolveMap(FlatSkyMapConstPtr map, FlatSkyMapConstPtr kernel);
 
