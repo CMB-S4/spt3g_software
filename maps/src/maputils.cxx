@@ -19,15 +19,15 @@
 
 using namespace G3Units;
 
-G3SkyMapPtr GetMaskMap(G3SkyMapConstPtr m, bool ignore_nans, bool ignore_infs)
+G3SkyMapPtr GetMaskMap(G3SkyMapConstPtr m, bool zero_nans, bool zero_infs)
 {
 	G3SkyMapPtr mask = m->Clone(false);
 
 	for (size_t i = 0; i < m->size(); i++) {
 		double v = m->at(i);
-		if (ignore_nans && v != v)
+		if (zero_nans && v != v)
 			continue;
-		if (ignore_infs && !std::isfinite(v))
+		if (zero_infs && !std::isfinite(v))
 			continue;
 		if (v == 0)
 			continue;
@@ -44,7 +44,7 @@ G3SkyMapPtr ApplyMask(G3SkyMapPtr m, G3SkyMapConstPtr mask, bool inverse)
 	for (size_t i = 0; i < m->size(); i++) {
 		if (!!(m->at(i)))
 			continue;
-		if ((!inverse && !mask->at(i)) || (inverse && mask->at(i)))
+		if (!!(mask->at(i)) == inverse)
 			(*m)[i] = 0;
 	}
 
@@ -198,6 +198,13 @@ boost::python::tuple GetRaDecMap(G3SkyMapConstPtr m)
 }
 
 
+static double wrap_ra(double ra)
+{
+	static const double circ = 2 * M_PI * G3Units::rad;
+	return fmod((ra < 0) ? (circ * (1. + ceilf(fabs(ra) / circ)) + ra) : ra, circ);
+}
+
+
 G3SkyMapPtr GetRaDecMask(G3SkyMapConstPtr m, double ra_left, double ra_right,
     double dec_bottom, double dec_top)
 {
@@ -207,16 +214,12 @@ G3SkyMapPtr GetRaDecMask(G3SkyMapConstPtr m, double ra_left, double ra_right,
 	mask->pol_type = G3SkyMap::None;
 	mask->SetPolConv(G3SkyMap::ConvNone);
 
-	if (ra_left < 0)
-		ra_left += 360 * G3Units::deg;
-	if (ra_right < 0)
-		ra_right += 360 * G3Units::deg;
+	ra_left = wrap_ra(ra_left);
+	ra_right = wrap_ra(ra_right);
 
 	for (size_t i = 0; i < m->size(); i++) {
 		std::vector<double> radec = m->PixelToAngle(i);
-		double ra = radec[0];
-		if (ra < 0)
-			ra += 360 * G3Units::deg;
+		double ra = wrap_ra(radec[0]);
 		if (ra_left < ra_right && (ra <= ra_left || ra >= ra_right))
 			continue;
 		if (ra_left >= ra_right && (ra <= ra_left && ra >= ra_right))
@@ -340,7 +343,7 @@ void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool int
 
 // algorithm from https://www.johndcook.com/blog/skewness_kurtosis/
 std::vector<double> GetMapStats(G3SkyMapConstPtr m, G3SkyMapConstPtr mask,
-    int order, bool ignore_zeros, bool ignore_nans)
+    int order, bool ignore_zeros, bool ignore_nans, bool ignore_infs)
 {
 	size_t n = 0;
 	double m1 = 0;
@@ -356,6 +359,8 @@ std::vector<double> GetMapStats(G3SkyMapConstPtr m, G3SkyMapConstPtr mask,
 		if (ignore_zeros && v == 0)
 			continue;
 		if (ignore_nans && v != v)
+			continue;
+		if (ignore_infs && !std::isfinite(v))
 			continue;
 
 		n++;
@@ -388,7 +393,8 @@ std::vector<double> GetMapStats(G3SkyMapConstPtr m, G3SkyMapConstPtr mask,
 
 
 double
-GetMapMedian(G3SkyMapConstPtr m, G3SkyMapConstPtr mask, bool ignore_zeros, bool ignore_nans)
+GetMapMedian(G3SkyMapConstPtr m, G3SkyMapConstPtr mask, bool ignore_zeros, bool ignore_nans,
+    bool ignore_infs)
 {
 
 	std::vector<double> data;
@@ -405,6 +411,8 @@ GetMapMedian(G3SkyMapConstPtr m, G3SkyMapConstPtr mask, bool ignore_zeros, bool 
 		if (ignore_zeros && v == 0)
 			continue;
 		if (ignore_nans && v != v)
+			continue;
+		if (ignore_infs && !std::isfinite(v))
 			continue;
 		data.push_back(v);
 	}
@@ -483,8 +491,9 @@ pyconvolve_map(FlatSkyMapConstPtr map, bp::object val)
 namespace bp = boost::python;
 void maputils_pybindings(void){
 	bp::def("get_mask_map", GetMaskMap,
-		(bp::arg("map_in"), bp::arg("ignore_nans")=false, bp::arg("ignore_infs")=false),
-		"Returns a map that is 1 where the input map is nonzero.");
+		(bp::arg("map_in"), bp::arg("zero_nans")=false, bp::arg("zero_infs")=false),
+		"Returns a map that is 1 where the input map is nonzero, and optionally "
+		"non-nan and/or non-infinite");
 
 	bp::def("apply_mask", ApplyMask,
 		(bp::arg("map"), bp::arg("mask"), bp::arg("inverse")=false),
@@ -540,19 +549,19 @@ void maputils_pybindings(void){
 
 	bp::def("get_map_stats", GetMapStats,
 		(bp::arg("map"), bp::arg("mask")=G3SkyMapConstPtr(), bp::arg("order")=2,
-		 bp::arg("ignore_zeros")=false, bp::arg("ignore_nans")=false),
+		 bp::arg("ignore_zeros")=false, bp::arg("ignore_nans")=false, bp::arg("ignore_infs")=false),
 		"Computes moment statistics of the input map, optionally ignoring "
-		"zero and/or nan values in the map.  If order = 1, only the mean is "
+		"zero, nan and/or inf values in the map.  If order = 1, only the mean is "
 		"returned.  If order = 2, 3 or 4 then the variance, skew and kurtosis "
 		"are also included, respectively.  If a mask is supplied, then only "
 		"the non-zero pixels in the mask are included.");
 
 	bp::def("get_map_median", GetMapMedian,
 		(bp::arg("map"), bp::arg("mask")=G3SkyMapConstPtr(),
-		 bp::arg("ignore_zeros")=false, bp::arg("ignore_nans")=false),
-		"Computes the median of the input map, optionally ignoring zero and/or nan "
+		 bp::arg("ignore_zeros")=false, bp::arg("ignore_nans")=false, bp::arg("ignore_infs")=false),
+		"Computes the median of the input map, optionally ignoring zero, nan and/or inf "
 		"values in the map.  Requires making a copy of the data.  If a mask is "
-		"supplied, then only the non=zero pixels in the mask are included.");
+		"supplied, then only the non-zero pixels in the mask are included.");
 
 	bp::def("convolve_map", pyconvolve_map, (bp::arg("map"), bp::arg("kernel")),
 		"Convolve the input flat sky map with the given map-space kernel. The "
