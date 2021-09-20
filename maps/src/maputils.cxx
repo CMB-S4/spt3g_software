@@ -42,7 +42,7 @@ G3SkyMapPtr ApplyMask(G3SkyMapPtr m, G3SkyMapConstPtr mask, bool inverse)
 	g3_assert(m->IsCompatible(*mask));
 
 	for (size_t i = 0; i < m->size(); i++) {
-		if (!!(m->at(i)))
+		if (!(m->at(i)))
 			continue;
 		if (!!(mask->at(i)) == inverse)
 			(*m)[i] = 0;
