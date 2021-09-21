@@ -37,7 +37,7 @@ G3SkyMapPtr GetMaskMap(G3SkyMapConstPtr m, bool zero_nans, bool zero_infs)
 	return mask;
 }
 
-G3SkyMapPtr ApplyMask(G3SkyMapPtr m, G3SkyMapConstPtr mask, bool inverse)
+void ApplyMask(G3SkyMapPtr m, G3SkyMapConstPtr mask, bool inverse)
 {
 	g3_assert(m->IsCompatible(*mask));
 
@@ -47,8 +47,6 @@ G3SkyMapPtr ApplyMask(G3SkyMapPtr m, G3SkyMapConstPtr mask, bool inverse)
 		if (!!(mask->at(i)) == inverse)
 			(*m)[i] = 0;
 	}
-
-	return m;
 }
 
 void RemoveWeightsT(G3SkyMapPtr T, G3SkyMapWeightsConstPtr W, bool zero_nans)
@@ -432,6 +430,90 @@ GetMapMedian(G3SkyMapConstPtr m, G3SkyMapConstPtr mask, bool ignore_zeros, bool 
 }
 
 
+std::vector<double>
+GetMapMinMax(G3SkyMapConstPtr m, G3SkyMapConstPtr mask, bool ignore_zeros, bool ignore_nans,
+    bool ignore_infs)
+{
+	double min = 0.0 / 0.0;
+	double max = 0.0 / 0.0;
+
+	for (size_t i = 0; i < m->size(); i++) {
+		if (!!mask && !mask->at(i))
+			continue;
+		double v = m->at(i);
+		if (ignore_zeros && v == 0)
+			continue;
+		if (ignore_nans && v != v)
+			continue;
+		if (ignore_infs && !std::isfinite(v))
+			continue;
+		if (v > max || max != max)
+			max = v;
+		if (v < min || min != min)
+			min = v;
+	}
+
+	return {min, max};
+}
+
+
+std::vector<double>
+GetMapHist(G3SkyMapConstPtr m, const std::vector<double> &bin_edges, G3SkyMapConstPtr mask,
+    bool ignore_zeros, bool ignore_nans, bool ignore_infs)
+{
+
+	g3_assert(std::is_sorted(bin_edges.begin(), bin_edges.end()));
+
+	double bin_min = bin_edges[0];
+	double bin_max = bin_edges[bin_edges.size() - 1];
+	size_t nbins = bin_edges.size() - 1;
+	double bin_width = (bin_max - bin_min) / (float) nbins;
+
+	// determine whether bins are equally spaced
+	bool equal_bins = true;
+	for (size_t i = 1; i < bin_edges.size(); i++) {
+		double bw = bin_edges[i] - bin_edges[i - 1];
+		if (std::abs(bw - bin_width) > 1e-8) {
+			equal_bins = false;
+			break;
+		}
+	}
+
+	std::vector<double> hist(nbins);
+
+	for (size_t i = 0; i < m->size(); i++) {
+		if (!!mask && !mask->at(i))
+			continue;
+		double v = m->at(i);
+		if (ignore_zeros && v == 0)
+			continue;
+		if (ignore_nans && v != v)
+			continue;
+		if (ignore_infs && !std::isfinite(v))
+			continue;
+		if ((v < bin_min) || (v > bin_max))
+			continue;
+
+		size_t bin;
+		if (v == bin_max) {
+			// mimic numpy hist behavior, right-most bin edge is closed
+			bin = nbins - 1;
+		} else if (equal_bins) {
+			// fast path for equally spaced bins
+			bin = (size_t)floor((v - bin_min) / bin_width);
+		} else {
+			// log(N) search for bin number
+			auto it = std::upper_bound(bin_edges.begin(), bin_edges.end(), v);
+			bin = it - bin_edges.begin() - 1;
+		}
+
+		hist[bin] += 1;
+	}
+
+	return hist;
+}
+
+
 FlatSkyMapPtr
 ConvolveMap(FlatSkyMapConstPtr map, FlatSkyMapConstPtr kernel)
 {
@@ -562,6 +644,20 @@ void maputils_pybindings(void){
 		"Computes the median of the input map, optionally ignoring zero, nan and/or inf "
 		"values in the map.  Requires making a copy of the data.  If a mask is "
 		"supplied, then only the non-zero pixels in the mask are included.");
+
+	bp::def("get_map_minmax", GetMapMinMax,
+		(bp::arg("map"), bp::arg("mask")=G3SkyMapConstPtr(),
+		 bp::arg("ignore_zeros")=false, bp::arg("ignore_nans")=false, bp::arg("ignore_infs")=false),
+		"Computes the min and max of the input map, optionally ignoring "
+		"zero, nan and/or inf values in the map.  If a mask is supplied, then "
+		"only the non-zero pixels in the mask are included.");
+
+	bp::def("get_map_hist", GetMapHist,
+		(bp::arg("map"), bp::arg("bin_edges"), bp::arg("mask")=G3SkyMapConstPtr(),
+		 bp::arg("ignore_zeros")=false, bp::arg("ignore_nans")=false, bp::arg("ignore_infs")=false),
+		"Computes the histogram of the input map into bins defined by the array of "
+		"bin edges, optionally ignoring zero, nan and/or inf values in the map.  "
+		"If a mask is supplied, then only the non-zero pixels in the mask are included.");
 
 	bp::def("convolve_map", pyconvolve_map, (bp::arg("map"), bp::arg("kernel")),
 		"Convolve the input flat sky map with the given map-space kernel. The "
