@@ -160,6 +160,9 @@ MapMockObserver::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	for (auto i : *boloprops_) {
 		if (i.second.band != band_)
 			continue;
+		// skip channels with missing offsets
+		if (i.second.x_offset != i.second.x_offset)
+			continue;
 		(*tsm)[i.first] = G3TimestreamPtr(
 		    new G3Timestream(pointing->size()));
 	}
