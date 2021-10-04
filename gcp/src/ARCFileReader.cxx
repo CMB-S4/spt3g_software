@@ -795,38 +795,54 @@ void ARCFileReader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	uint8_t *buffer;
 	off_t off;
 
-	while (stream_.peek() == EOF) {
-		if (filename_.size() > 0) {
-			const std::string path = filename_.front();
-			filename_.pop_front();
-			StartFile(path);
-		} else {
-			return;
+	PyThreadState *_save = nullptr;
+	if (Py_IsInitialized() && PyGILState_Check())
+		_save = PyEval_SaveThread();
+
+	try {
+		while (stream_.peek() == EOF) {
+			if (filename_.size() > 0) {
+				const std::string path = filename_.front();
+				filename_.pop_front();
+				StartFile(path);
+			} else {
+				if (_save != nullptr)
+					PyEval_RestoreThread(_save);
+				return;
+			}
 		}
+
+		stream_.read((char *)&size, sizeof(size));
+		size = ntohl(size) - 8;
+		stream_.read((char *)&opcode, sizeof(opcode));
+		opcode = ntohl(opcode);
+		if (opcode != ARC_FRAME_RECORD)
+			log_fatal("Message not an ARC_FRAME_RECORD mid-file");
+		if (fd_ >= 0) {
+			// network source (e.g. GCP) can support changing register selection on the fly
+			int32_t rev;
+			stream_.read((char *)&rev, sizeof(rev));
+			rev = ntohl(rev);
+			if (rev != revision_)
+				log_fatal("Frame regset revision %d does not match expected revision (%d)",
+				    rev, revision_);
+			stream_.read((char *)&size, sizeof(size));
+			size = ntohl(size);
+		}
+		if (size != frame_length_)
+			log_fatal("%zd-byte frame does not match expected length (%zd)",
+			    (size_t)size, (size_t)frame_length_);
+		buffer = new uint8_t[size];
+		stream_.read((char *)buffer, size);
+
+	} catch (...) {
+		if (_save != nullptr)
+			PyEval_RestoreThread(_save);
+		throw;
 	}
 
-	stream_.read((char *)&size, sizeof(size));
-	size = ntohl(size) - 8;
-	stream_.read((char *)&opcode, sizeof(opcode));
-	opcode = ntohl(opcode);
-	if (opcode != ARC_FRAME_RECORD)
-		log_fatal("Message not an ARC_FRAME_RECORD mid-file");
-	if (fd_ >= 0) {
-		// network source (e.g. GCP) can support changing register selection on the fly
-		int32_t rev;
-		stream_.read((char *)&rev, sizeof(rev));
-		rev = ntohl(rev);
-		if (rev != revision_)
-			log_fatal("Frame regset revision %d does not match expected revision (%d)",
-			    rev, revision_);
-		stream_.read((char *)&size, sizeof(size));
-		size = ntohl(size);
-	}
-	if (size != frame_length_)
-		log_fatal("%zd-byte frame does not match expected length (%zd)",
-		    (size_t)size, (size_t)frame_length_);
-	buffer = new uint8_t[size];
-	stream_.read((char *)buffer, size);
+	if (_save != nullptr)
+		PyEval_RestoreThread(_save);
 
 	for (auto temp = array_map_.begin(); temp != array_map_.end(); temp++) {
 		G3MapFrameObjectPtr templ(new G3MapFrameObject);
