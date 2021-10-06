@@ -717,7 +717,9 @@ G3SkyMapPtr FlatSkyMap::Rebin(size_t scale, bool norm) const
 
 	if (dense_)
 		out->ConvertToDense();
-	else if (!sparse_)
+	else if (sparse_)
+		out->ConvertToSparse();
+	else
 		return out;
 
 	for (auto i : *this) {

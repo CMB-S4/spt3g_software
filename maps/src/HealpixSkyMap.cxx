@@ -997,7 +997,9 @@ G3SkyMapPtr HealpixSkyMap::Rebin(size_t scale, bool norm) const
 		out->ConvertToDense();
 	else if (ring_sparse_)
 		out->ConvertToRingSparse();
-	else if (!indexed_sparse_)
+	else if (indexed_sparse_)
+		out->ConvertToIndexedSparse();
+	else
 		return out;
 
 	const size_t scale2 = scale * scale;
