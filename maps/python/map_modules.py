@@ -138,7 +138,7 @@ def MakeMapsPolarized(frame, pol_conv=maps.MapPolConv.IAU):
     This module is only a shim that creates null Q and U maps and populates
     a properly invertible Wpol array from the TT Wunpol weights.
     """
-    if frame.type != core.G3FrameType.Map or "Wunpol" not in frame:
+    if "Wunpol" not in frame:
         return
 
     wgt = frame["Wunpol"].TT
@@ -171,7 +171,7 @@ def MakeMapsUnpolarized(frame):
     """
     Converts individual polarized maps to temperature-only versions of the same map.
     """
-    if frame.type != core.G3FrameType.Map or "Wpol" not in frame:
+    if "Wpol" not in frame:
         return
 
     wgt = frame["Wpol"].TT
