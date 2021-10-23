@@ -124,7 +124,8 @@ def load_skymap_fits(filename, hdu=None, keys=None, memmap=False):
 
             elif map_type == 'healpix':
                 nside = hdr['NSIDE']
-                map_opts.update(nested=(hdr['ORDERING'] == 'nest'))
+                nested = hdr['ORDERING'].strip().lower() in ['nest', 'nested']
+                map_opts.update(nested=nested)
 
             # primary HDU
             if H.data is None:
