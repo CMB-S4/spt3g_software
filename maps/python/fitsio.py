@@ -584,7 +584,7 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
                 if not T.dense:
                     pix1, data = m.nonzero_pixels()
                     pix1 = np.asarray(pix1)
-                    data  = np.asarray(data)
+                    data = np.asarray(data)
                     data = data[np.argsort(pix1)]
                     pix1.sort()
 
@@ -688,7 +688,7 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
 
 
 @core.indexmod
-def SaveMapFrame(frame, map_id, output_file, overwrite=False):
+def SaveMapFrame(frame, map_id, output_file, hdr=None, compress=True, overwrite=False):
     """
     Save the map with Id map_id into output_file.
     """
@@ -696,8 +696,10 @@ def SaveMapFrame(frame, map_id, output_file, overwrite=False):
     if frame.type != core.G3FrameType.Map:
         return
 
-    if frame['Id'] != map_id:
-        return
+    if frame['Id'] != map_id and frame.type == core.G3FrameType.Map:
+        raise ValueError(f"Frame Id {frame['Id']} != to map_id:{map_id}")
+
+    core.log_debug(f"Matched Frame.type:{frame.type} and map_id:{frame['Id']}")
 
     T = frame['T']
     Q = frame.get('Q', None)
@@ -711,4 +713,6 @@ def SaveMapFrame(frame, map_id, output_file, overwrite=False):
         U=U,
         W=W,
         overwrite=overwrite,
+        compress=compress,
+        hdr=hdr,
     )
