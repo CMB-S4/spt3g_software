@@ -14,7 +14,7 @@ __all__ = [
 
 
 @core.usefulfunc
-def load_skymap_fits(filename, hdu=None, keys=None, memmap=False):
+def load_skymap_fits(filename, hdu=None, keys=None, memmap=False, apply_units=False):
     """
     Load a fits file containing a sky map.
 
@@ -28,8 +28,12 @@ def load_skymap_fits(filename, hdu=None, keys=None, memmap=False):
         If supplied, return only these keys in the output dictionary.
         Options are: T, Q, U, W.
     memmap : bool, optional
-      Argument passed to astropy.io.fits.open. If True, the map is not read into
-      memory, but only the required pixels are read when needed. Default: False.
+        Argument passed to astropy.io.fits.open. If True, the map is not read
+        into memory, but only the required pixels are read when needed. Default:
+        False.
+    apply_units : bool, optional
+        If True, and input maps have known units, multiply by the appropriate
+        conversion factor to return maps in G3Units.
 
     Returns
     -------
@@ -54,6 +58,12 @@ def load_skymap_fits(filename, hdu=None, keys=None, memmap=False):
     delta_center = None
     res = None
     xres = None
+
+    unit_dict = {
+        'k_cmb': ('Tcmb', core.G3Units.K),
+        'kcmb': ('Tcmb', core.G3Units.K),
+        'kcmb^2': ('Tcmb', core.G3Units.K ** 2),
+    }
 
     if keys is None:
         keys = ['T', 'Q', 'U', 'W']
@@ -100,9 +110,11 @@ def load_skymap_fits(filename, hdu=None, keys=None, memmap=False):
                                   unit='load_skymap_fits')
                 else:
                     pol_conv = hdr['POLCCONV'].upper()
+            uconv = None
             if 'TUNIT' in hdr:
-                udict = {'k_cmb': 'Tcmb'}
-                units = udict.get(hdr['TUNIT'].lower(), units)
+                u = hdr['TUNIT'].lower()
+                if u in unit_dict:
+                    units, uconv = unit_dict[u]
             else:
                 units = hdr.get('UNITS', units)
             if 'COORDSYS' in hdr:
@@ -145,6 +157,8 @@ def load_skymap_fits(filename, hdu=None, keys=None, memmap=False):
                 data = np.array(H.data, dtype=float)
                 if map_opts.pop('transpose', False):
                     data = np.array(data.T)
+                if uconv is not None:
+                    data *= uconv
 
             # map type must be known if the HDU contains map data
             if map_type not in ['flat', 'healpix']:
@@ -188,10 +202,12 @@ def load_skymap_fits(filename, hdu=None, keys=None, memmap=False):
                     'II': 'TT',
                     'IQ': 'TQ',
                     'IU': 'TU',
-                }
-
-                unit_dict = {
-                    'k_cmb': 'Tcmb',
+                    'II_COV': 'TT',
+                    'IQ_COV': 'TQ',
+                    'IU_COV': 'TU',
+                    'QQ_COV': 'QQ',
+                    'QU_COV': 'QU',
+                    'UU_COV': 'UU',
                 }
 
                 pix = None
@@ -212,7 +228,14 @@ def load_skymap_fits(filename, hdu=None, keys=None, memmap=False):
                         del data
                         continue
 
-                    units = unit_dict.get(hdr.get('TUNIT{:d}'.format(cidx + 1), units), units)
+                    uconv = None
+                    u = 'TUNIT{:d}'.format(cidx + 1)
+                    if u in hdr:
+                        u = hdr[u].lower()
+                        if u in unit_dict:
+                            units, uconv = unit_dict[u.lower()]
+                            if uconv is not None:
+                                data *= uconv
                     overflow = hdr.get('TOFLW{:d}'.format(cidx + 1), overflow)
 
                     weighted = hdr.get(
