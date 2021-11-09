@@ -105,11 +105,15 @@ MapMockObserver::MapMockObserver(std::string pointing, std::string timestreams,
 // to handle boresight rotation.
 static void
 set_stokes_coupling(double pol_ang, double pol_eff,
-    StokesVector &stokes_coupling)
+    StokesVector &stokes_coupling, G3SkyMap::MapPolConv pol_conv)
 {
 	stokes_coupling.t = 1.0;
 	stokes_coupling.q = cos(pol_ang/G3Units::rad *2.)*pol_eff/(2.0-pol_eff);
 	stokes_coupling.u = sin(pol_ang/G3Units::rad *2.)*pol_eff/(2.0-pol_eff);
+	if (pol_conv == G3SkyMap::COSMO)
+		stokes_coupling.u *= -1.0;
+	else if (pol_conv == G3SkyMap::ConvNone)
+		log_fatal("Missing pol_conv");
 
 	if (fabs(stokes_coupling.q) < 1e-12)
 		stokes_coupling.q = 0;
@@ -198,7 +202,7 @@ MapMockObserver::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		if (Q_) {
 			StokesVector pcoupling;
 			set_stokes_coupling(bp.pol_angle, bp.pol_efficiency,
-			    pcoupling);
+			    pcoupling, U_->GetPolConv());
 			for (size_t i = 0; i < det.size(); i++) {
 				if (interp_) {
 					std::vector<long> pixels;
