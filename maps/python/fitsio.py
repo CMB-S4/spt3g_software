@@ -515,10 +515,8 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
         FITS readers (e.g. idlastro).
     hdr  : dict
        If defined, extra keywords to be appened to the FITS header. The dict
-       can contain entries such as:
-       hdr['NEWKEY'] = 'New value'
-         or
-       hdr['NEWKEY'] = ('New value', "Comment for New value")
+       can contain entries such as ``hdr['NEWKEY'] = 'New value'`` or
+       ``hdr['NEWKEY'] = ('New value', "Comment for New value")``.
     """
 
     import astropy.io.fits
