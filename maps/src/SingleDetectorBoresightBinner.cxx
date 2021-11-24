@@ -92,12 +92,14 @@ EXPORT_G3MODULE("maps", SingleDetectorBoresightBinner,
 "\n"
 "Examples\n"
 "--------\n"
-"pipe.Add(\n"
-"    maps.SingleDetectorBoresightBinner,\n"
-"    stub_map=smstub,\n"
-"    timestreams='PolyFilteredTimestreams',\n"
-"    pointing='OffsetRotation',\n"
-")\n"
+".. code-block:: python\n"
+"\n"
+"    pipe.Add(\n"
+"        maps.SingleDetectorBoresightBinner,\n"
+"        stub_map=smstub,\n"
+"        timestreams='PolyFilteredTimestreams',\n"
+"        pointing='OffsetRotation',\n"
+"    )\n"
 );
 
 SingleDetectorBoresightBinner::SingleDetectorBoresightBinner(

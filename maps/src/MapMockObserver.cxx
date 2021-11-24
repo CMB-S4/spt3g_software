@@ -83,13 +83,15 @@ EXPORT_G3MODULE("maps", MapMockObserver,
 "\n"
 "Examples\n"
 "--------\n"
-"pipe.Add(\n"
-"    maps.MapMockObserver,\n"
-"    pointing=\"OfflineRaDecRotation\",\n"
-"    timestreams=\"CalTimestreams150GHz\",\n"
-"    band=150 * core.G3Units.GHz,\n"
-"    T=map_frame[\"T\"],\n"
-")\n"
+".. code-block:: python\n"
+"\n"
+"    pipe.Add(\n"
+"        maps.MapMockObserver,\n"
+"        pointing=\"OfflineRaDecRotation\",\n"
+"        timestreams=\"CalTimestreams150GHz\",\n"
+"        band=150 * core.G3Units.GHz,\n"
+"        T=map_frame[\"T\"],\n"
+"    )\n"
 );
 
 MapMockObserver::MapMockObserver(std::string pointing, std::string timestreams,

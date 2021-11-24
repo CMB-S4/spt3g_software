@@ -117,12 +117,16 @@ EXPORT_G3MODULE("maps", MapBinner,
 "\n"
 "Examples\n"
 "--------\n"
-"pipe.Add(maps.MapBinner,\n"
-"             map_id           = \"150GHz\",\n"
-"             stub_map         = map_params,\n"
-"             timestreams      = \"DeflaggedTimestreams150GHz\",\n"
-"             pointing         = \"OfflineRaDecRotation\",\n"
-"             detector_weights = \"TodWeights\")\n"
+".. code-block:: python\n"
+"\n"
+"    pipe.Add(\n"
+"        maps.MapBinner,\n"
+"        map_id=\"150GHz\",\n"
+"        stub_map=map_params,\n"
+"        timestreams=\"DeflaggedTimestreams150GHz\",\n"
+"        pointing=\"OfflineRaDecRotation\",\n"
+"        detector_weights=\"TodWeights\",\n"
+"    )\n"
 );
 
 
