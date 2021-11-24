@@ -481,7 +481,7 @@ def parse_wcs_header(header):
 
 @core.usefulfunc
 def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
-                     compress=True):
+                     compress=True, hdr=None):
     """
     Save G3 map objects to a fits file.
 
@@ -513,6 +513,12 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
         series of compressed image HDUs, one per map.  Otherwise, store input
         maps in a series of standard ImageHDUs, which are readable with older
         FITS readers (e.g. idlastro).
+    hdr  : dict
+       If defined, extra keywords to be appened to the FITS header. The dict
+       can contain entries such as:
+       hdr['NEWKEY'] = 'New value'
+         or
+       hdr['NEWKEY'] = ('New value', "Comment for New value")
     """
 
     import astropy.io.fits
@@ -586,6 +592,11 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
     header['POLAR'] = pol
     header['UNITS'] = str(T.units)
     header['WEIGHTED'] = T.weighted
+
+    # Append extra metadata in hdr if defined
+    if hdr:
+        for keyword in hdr.keys():
+            header[keyword] = hdr[keyword]
 
     hdulist = astropy.io.fits.HDUList()
     cols = astropy.io.fits.ColDefs([])
