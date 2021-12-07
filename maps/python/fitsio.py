@@ -720,18 +720,13 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
 
 
 @core.indexmod
-def SaveMapFrame(frame, map_id, output_file, hdr=None, compress=True, overwrite=False):
+def SaveMapFrame(frame, output_file, hdr=None, compress=True, overwrite=False):
     """
-    Save the map with Id map_id into output_file.
+    Save a map frame to a FITS file.
     """
 
     if frame.type != core.G3FrameType.Map:
         return
-
-    if frame['Id'] != map_id and frame.type == core.G3FrameType.Map:
-        raise ValueError(f"Frame Id {frame['Id']} != to map_id:{map_id}")
-
-    core.log_debug(f"Matched Frame.type:{frame.type} and map_id:{frame['Id']}")
 
     T = frame['T']
     Q = frame.get('Q', None)
