@@ -149,7 +149,7 @@ bool FlatSkyProjection::IsCompatible(const FlatSkyProjection & other) const
 	}
 	return (check &&
 		(proj_ == other.proj_) &&
-		(fabs(alpha0_ - other.alpha0_) < 1e-8) &&
+		(fabs(delta0_ - other.delta0_) < 1e-8) &&
 		(fmod(fabs(alpha0_ - other.alpha0_), 360 * deg) < 1e-8) &&
 		(fabs(x0_ - other.x0_) < 1e-8) &&
 		(fabs(y0_ - other.y0_) < 1e-8));
