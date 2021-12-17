@@ -38,6 +38,7 @@ endif()
 link_python_dir()
 
 add_spt3g_program(bin/spt3g-dump)
+add_spt3g_program(bin/spt3g-jsonify)
 add_spt3g_program(bin/spt3g-verify)
 add_spt3g_program(bin/spt3g-inspect)
 add_spt3g_program(bin/gen-analysis-doc)

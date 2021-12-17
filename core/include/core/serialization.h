@@ -7,6 +7,9 @@
 #include <boost/iostreams/filtering_stream.hpp>
 
 #include <cereal/archives/portable_binary.hpp>
+#ifdef SPT3G_ENABLE_JSON_OUTPUT
+#include <cereal/archives/json.hpp>
+#endif
 
 #include <cereal/types/polymorphic.hpp>
 #include <cereal/types/string.hpp>
@@ -17,6 +20,22 @@
 #include <pybindings.h>
 #include <G3Logging.h>
 
+#ifdef SPT3G_ENABLE_JSON_OUTPUT
+
+#define G3_SERIALIZABLE_CODE(x) \
+template void x::serialize(cereal::PortableBinaryOutputArchive &, unsigned); \
+template void x::serialize(cereal::JSONOutputArchive &, unsigned); \
+template void x::serialize(cereal::JSONInputArchive &, unsigned); \
+template void x::serialize(cereal::PortableBinaryInputArchive &, unsigned); \
+
+#define G3_SPLIT_SERIALIZABLE_CODE(x) \
+template void x::save(cereal::PortableBinaryOutputArchive &, unsigned) const; \
+template void x::save(cereal::JSONOutputArchive &, unsigned) const; \
+template void x::load(cereal::PortableBinaryInputArchive &, unsigned); \
+template void x::load(cereal::JSONInputArchive &, unsigned); \
+
+#else
+
 #define G3_SERIALIZABLE_CODE(x) \
 template void x::serialize(cereal::PortableBinaryOutputArchive &, unsigned); \
 template void x::serialize(cereal::PortableBinaryInputArchive &, unsigned); \
@@ -24,6 +43,8 @@ template void x::serialize(cereal::PortableBinaryInputArchive &, unsigned); \
 #define G3_SPLIT_SERIALIZABLE_CODE(x) \
 template void x::save(cereal::PortableBinaryOutputArchive &, unsigned) const; \
 template void x::load(cereal::PortableBinaryInputArchive &, unsigned); \
+
+#endif
 
 template <class T>
 struct g3frameobject_picklesuite : boost::python::pickle_suite

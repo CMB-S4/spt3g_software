@@ -272,6 +272,37 @@ void G3Frame::save(T &os) const
 	ar << make_nvp("crc", crc);
 }
 
+template<typename T>
+void G3Frame::saveJSON(T & os) const
+{
+#ifdef SPT3G_ENABLE_JSON_OUTPUT
+  using cereal::make_nvp;
+  uint32_t version(1), size(map_.size());
+
+  cereal::JSONOutputArchive ar(os);
+  ar << make_nvp("version", version);
+	ar << make_nvp("size", size);
+	std::string typestr(1,(char) type);
+	ar << make_nvp("type", typestr);
+	for (auto i = map_.begin(); i != map_.end(); i++) {
+    //make sure it's deserialized so we don't just write a blob
+    blob_decode(i->second);
+		ar << make_nvp("name", i->first);
+		ar << make_nvp("val", i->second.frameobject);
+	}
+#else
+  os << " {error: \"spt3g-software compiled without JSON support\"}";
+#endif
+}
+
+std::string G3Frame::asJSON() const
+{
+  std::stringstream str;
+  saveJSON(str);
+  return str.str();
+}
+
+
 template <typename T>
 void G3Frame::load(T &is)
 {
@@ -401,4 +432,8 @@ template void G3Frame::load(std::istringstream &);
 template void G3Frame::save(boost::iostreams::filtering_ostream &) const;
 template void G3Frame::save(std::ostream &) const;
 template void G3Frame::save(std::ostringstream &) const;
+
+template void G3Frame::saveJSON(std::ostream &) const;
+template void G3Frame::saveJSON(std::ostringstream &) const;
+template void G3Frame::saveJSON(boost::iostreams::filtering_ostream &) const;
 

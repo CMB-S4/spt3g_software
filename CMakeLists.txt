@@ -83,6 +83,15 @@ execute_process(COMMAND mkdir -p ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 execute_process(COMMAND mkdir -p ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 execute_process(COMMAND ln -fsn ${CMAKE_SOURCE_DIR}/cmake/init.py ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/__init__.py)
 
+# build options
+set(ENABLE_JSON_OUTPUT "FALSE" CACHE BOOL "Enable JSON output of frames (adds to compile time and binary size)")
+
+if (${ENABLE_JSON_OUTPUT})
+	# Note, newer cmake suggests using add_compile_definitions, but I think that requires 3.12
+	add_definitions(-DSPT3G_ENABLE_JSON_OUTPUT)
+endif()
+
+
 set(BUILD_PROJECTS "${BUILD_PROJECTS}" CACHE STRING "The subset of available projects to actually build")
 if(NOT "${BUILD_PROJECTS}" STREQUAL "")
 	set(USE_PROJECT_LIST "TRUE" CACHE BOOL "Whether to build only the subset of projects sepcified by BUILD_PROJECTS")
