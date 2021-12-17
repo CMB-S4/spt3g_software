@@ -470,6 +470,7 @@ BOOST_PYTHON_MODULE(core)
 	    .def("generate_blobs", &G3Frame::GenerateBlobs, bp::arg("drop_objects")=false, "Force immediate serialization of all objects. Will save some CPU time later during serialization of the frame in exchange for spending the exact same amount of CPU time right now.")
 	    .def("drop_objects", &G3Frame::DropObjects, "Drop all decoded objects in favor of their serialized copies, where those serialized copies already exist. Saves memory for frames about to be written at the expense of CPU time to re-decode them if they are accessed again later.")
 	    .def_pickle(g3frame_picklesuite())
+      .def("as_json", &G3Frame::asJSON, "JSON representation of frame")
 	;
 	register_vector_of<G3FramePtr>("Frame");
 	register_vector_of<G3FrameObjectPtr>("FrameObject");
