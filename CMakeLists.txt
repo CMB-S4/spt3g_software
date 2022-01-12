@@ -73,7 +73,7 @@ target_link_libraries(spt3g INTERFACE pthread ${Boost_LIBRARIES} ${Python_LIBRAR
 # Work around yet more bugs in GCC 4.4, this time with C++ 11 support
 # Also increase maximum number of arguments in python bindings
 target_compile_definitions(spt3g INTERFACE -DBOOST_NO_CXX11_SMART_PTR=1
-    -DBOOST_PYTHON_MAX_ARITY=20)
+    -DBOOST_PYTHON_MAX_ARITY=20 -DBOOST_BIND_GLOBAL_PLACEHOLDERS)
 
 # Shell script to set environment variables
 configure_file(${CMAKE_SOURCE_DIR}/cmake/env-shell.sh.in ${CMAKE_BINARY_DIR}/env-shell.sh @ONLY)
