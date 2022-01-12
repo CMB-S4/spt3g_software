@@ -69,7 +69,3 @@ if(NOT DEFINED Boost_PYTHON_TYPE)
 endif()
 
 find_package(Boost COMPONENTS system iostreams filesystem ${Boost_PYTHON_TYPE} REQUIRED)
-if(Boost_VERSION EQUAL 104700 OR Boost_VERSION GREATER 104700)
-	set(Boost_GEOMETRY_AVAIL ON)
-	message(STATUS "Boost Geometry Available")
-endif()
