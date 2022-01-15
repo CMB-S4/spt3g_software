@@ -6,6 +6,9 @@ cmake_policy(SET CMP0012 NEW) # Allow use of true in boolean expressions
 if(POLICY CMP0042) # Enable RPATH on OSX
 	cmake_policy(SET CMP0042 NEW)
 endif()
+if(POLICY CMP0057) # Allow IN_LIST operator in if() statements
+	cmake_policy(SET CMP0057 NEW)
+endif()
 
 project(spt3g)
 enable_testing()
