@@ -867,6 +867,8 @@ PYBINDINGS("maps") {
 	    .value("T", G3SkyMap::T)
 	    .value("Q", G3SkyMap::Q)
 	    .value("U", G3SkyMap::U)
+	    .value("E", G3SkyMap::E)
+	    .value("B", G3SkyMap::B)
 	    .value("none", G3SkyMap::None) // "None" is reserved in python
 	;
 	enum_none_converter::from_python<G3SkyMap::MapPolType>();
