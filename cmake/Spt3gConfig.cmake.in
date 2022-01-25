@@ -1,5 +1,9 @@
 @PACKAGE_INIT@
 
+include(CMakeFindDependencyMacro)
+set(Boost_PYTHON_TYPE @Boost_PYTHON_TYPE@)
+find_dependency(Boost COMPONENTS system iostreams filesystem ${Boost_PYTHON_TYPE} REQUIRED)
+
 set(SPT3G_SOURCE_DIR @CMAKE_SOURCE_DIR@)
 set(SPT3G_BUILD_DIR @CMAKE_BINARY_DIR@)
 set(SPT3G_INCLUDE_INSTALL_DIR @PACKAGE_INCLUDE_INSTALL_DIR@)
