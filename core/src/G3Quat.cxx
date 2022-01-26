@@ -499,41 +499,54 @@ template <typename T>
 boost::shared_ptr<T>
 quat_vec_container_from_object(boost::python::object v)
 {
+	// There's a chance this is actually a copy operation, so try that first
+	if (bp::extract<T &>(v).check())
+		return boost::make_shared<T>(bp::extract<T &>(v)());
+
         boost::shared_ptr<T> x(new (T));
 	Py_buffer view;
 	if (PyObject_GetBuffer(v.ptr(), &view,
-	    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) != -1) {
-		if (view.ndim != 2 || view.shape[1] != 4) {
-			boost::python::container_utils::extend_container(*x, v);
-		} else if (strcmp(view.format, "d") == 0) {
-			x->resize(view.shape[0]);
-			memcpy((void *)&(*x)[0], view.buf, view.len);
-		} else if (strcmp(view.format, "f") == 0) {
-			x->resize(view.shape[0]);
-			for (size_t i = 0; i < view.shape[0]; i++)
-				(*x)[i] = quat(
-				    ((float *)view.buf)[4*i + 0],
-				    ((float *)view.buf)[4*i + 1],
-				    ((float *)view.buf)[4*i + 2],
-				    ((float *)view.buf)[4*i + 3]);
-		} else if (strcmp(view.format, "i") == 0) {
-			x->resize(view.shape[0]);
-			for (size_t i = 0; i < view.shape[0]; i++)
-				(*x)[i] = quat(
-				    ((int *)view.buf)[4*i + 0],
-				    ((int *)view.buf)[4*i + 1],
-				    ((int *)view.buf)[4*i + 2],
-				    ((int *)view.buf)[4*i + 3]);
-		} else {
-			// We could add more types, but why do that?
-			// Let Python do the work for obscure cases
-			boost::python::container_utils::extend_container(*x, v);
-		}
-		PyBuffer_Release(&view);
-	} else {
-		PyErr_Clear();
+	    PyBUF_FORMAT | PyBUF_STRIDES) == -1)
+		goto slowpython;
+
+#define QELEM(t, i, j) *((t *)((char *)view.buf + i*view.strides[0] + j*view.strides[1]))
+#define QUATI(t, i) quat(QELEM(t, i, 0), QELEM(t, i, 1), QELEM(t, i, 2), QELEM(t, i, 3))
+
+	x->resize(view.shape[0]);
+	if (view.ndim != 2 || view.shape[1] != 4) {
 		boost::python::container_utils::extend_container(*x, v);
+	} else if (PyBuffer_IsContiguous(&view, 'C') &&
+	    strcmp(view.format, "d") == 0 &&
+	    view.strides[0] == 4*sizeof(double) &&
+	    view.strides[1] == sizeof(double)) {
+		// Packed and simple, use memcpy()
+		memcpy((void *)&(*x)[0], view.buf, view.len);
+	} else if (strcmp(view.format, "d") == 0) {
+		for (size_t i = 0; i < view.shape[0]; i++)
+			(*x)[i] = QUATI(double, i);
+	} else if (strcmp(view.format, "f") == 0) {
+		for (size_t i = 0; i < view.shape[0]; i++)
+			(*x)[i] = QUATI(float, i);
+	} else if (strcmp(view.format, "i") == 0) {
+		for (size_t i = 0; i < view.shape[0]; i++)
+			(*x)[i] = QUATI(int, i);
+	} else if (strcmp(view.format, "l") == 0) {
+		for (size_t i = 0; i < view.shape[0]; i++)
+			(*x)[i] = QUATI(long, i);
+	} else {
+		PyBuffer_Release(&view);
+		goto slowpython;
 	}
+	PyBuffer_Release(&view);
+	return x;
+
+#undef QUATI
+#undef QELEM
+
+slowpython:
+	x->resize(0);
+	PyErr_Clear();
+	boost::python::container_utils::extend_container(*x, v);
 
 	return x;
 }

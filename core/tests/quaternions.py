@@ -53,3 +53,41 @@ assert(np.allclose(core.G3VectorQuat([1./a]), core.G3VectorQuat([(~a) / abs(a)**
 assert((np.asarray(abs(b) - abs(~b)) == 0).all())
 assert(a/b[0] == (a/b)[0])
 assert(b[1]/a == (b/a)[1])
+
+# Test for support of numpy slicing and conversions
+quats = np.array([[1., 2., 3., 4., 5.],   # a
+                  [0., 0., 0., 3., -1.],   # b
+                  [0., 0., 0., 0., 0.],   # c
+                  [18., -23., 5., 0., 0.]])  # d
+
+try:
+	q = core.G3VectorQuat(quats)
+except TypeError:
+	# Wrong shape, should fail
+	pass
+else:
+	raise TypeError('Wrong shape, should not convert')
+
+# Non-trivial strides
+q = core.G3VectorQuat(quats[:,:4])
+assert(q[0] == core.quat(*quats[0,:4]))
+assert(q[1] == core.quat(*quats[1,:4]))
+assert(q[2] == core.quat(*quats[2,:4]))
+assert(q[3] == core.quat(*quats[3,:4]))
+
+# When transposed, has right shape to convert
+q = core.G3VectorQuat(quats.T) # Strides, but simple ones
+assert(q[0] == core.quat(1,0,0,18))
+
+# Trivial case, packed
+q = core.G3VectorQuat(quats.T.copy())
+assert(q[0] == core.quat(1,0,0,18))
+
+# Test conversion of integers
+
+qint = np.asarray(quats[:,:4], dtype='int64')
+q = core.G3VectorQuat(qint)
+assert(q[0] == core.quat(1,2,3,4))
+assert(q[1] == core.quat(0,0,0,3))
+assert(q[3] == core.quat(18, -23, 5, 0))
+
