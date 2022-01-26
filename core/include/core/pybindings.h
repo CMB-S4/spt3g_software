@@ -134,97 +134,109 @@ template <typename T>
 boost::shared_ptr<T>
 numpy_container_from_object(boost::python::object v)
 {
+	// There's a chance this is actually a copy operation, so try that first
+	if (bp::extract<T &>(v).check())
+		return boost::make_shared<T>(bp::extract<T &>(v)());
+
 	boost::shared_ptr<T> x(new T);
+	size_t nelem;
 	Py_buffer view;
+
+	// See if we can get a numpy-ish buffer protocol interface next
+	if (PyObject_GetBuffer(v.ptr(), &view, PyBUF_FORMAT | PyBUF_STRIDES)
+	    == -1)
+		goto slowpython;
+
+	// Only 1D arrays here
+	if (view.ndim != 1)
+		goto bufferwasbad;
+
+	if (view.shape != NULL)
+		nelem = view.shape[0];
+	else
+		nelem = view.len/view.itemsize;
+	x->resize(nelem);
 
 	// Try to get a contiguous buffer first for common data types, since
 	// contiguous-copy is likely to be optimizable to memcpy(). In the
 	// non-contiguous case below, even if the copy is contiguous, the
-	// compiler won't see that.
-	if (PyObject_GetBuffer(v.ptr(), &view,
-	    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) != -1) {
-		bool gaveup = false;
+	// compiler won't see that. Note that Python's "contiguous" doesn't
+	// always mean exactly "contiguous", so we need to check strides too.
+	if (PyBuffer_IsContiguous(&view, 'A')) {
 		if (strcmp(view.format, "d") == 0) {
-			x->resize(view.len/sizeof(double));
-			for (size_t i = 0; i < view.len/sizeof(double); i++)
+			if (view.strides[0] != sizeof(double))
+				goto noncontiguous;
+			for (size_t i = 0; i < nelem; i++)
 				(*x)[i] = ((double *)view.buf)[i];
-		} else {
-			gaveup = true;
+			goto goodbuffer;
 		}
-		PyBuffer_Release(&view);
-		if (!gaveup)
-			return x;
-	} else {
-		PyErr_Clear();
 	}
 
-	if (PyObject_GetBuffer(v.ptr(), &view,
-	    PyBUF_FORMAT | PyBUF_STRIDES) != -1) {
-		if (strcmp(view.format, "d") == 0) {
-			x->resize(view.len/sizeof(double));
-			for (size_t i = 0; i < view.len/sizeof(double); i++)
-				(*x)[i] = *(double *)((char *)view.buf +
-				    i*view.strides[0]);
-		} else if (strcmp(view.format, "f") == 0) {
-			x->resize(view.len/sizeof(float));
-			for (size_t i = 0; i < view.len/sizeof(float); i++)
-				(*x)[i] = *(float *)((char *)view.buf +
-				    i*view.strides[0]);
-		} else if (strcmp(view.format, "n") == 0) {
-			x->resize(view.len/sizeof(ssize_t));
-			for (size_t i = 0; i < view.len/sizeof(ssize_t); i++)
-				(*x)[i] = *(ssize_t *)((char *)view.buf +
-				    i*view.strides[0]);
-		} else if (strcmp(view.format, "N") == 0) {
-			x->resize(view.len/sizeof(size_t));
-			for (size_t i = 0; i < view.len/sizeof(size_t); i++)
-				(*x)[i] = *(size_t *)((char *)view.buf +
-				    i*view.strides[0]);
-		} else if (strcmp(view.format, "?") == 0) { 
-			x->resize(view.len/sizeof(bool));
-			for (size_t i = 0; i < view.len/sizeof(bool); i++)
-				(*x)[i] = *(bool *)((char *)view.buf +
-				    i*view.strides[0]);
-		} else if (strcmp(view.format, "i") == 0) { 
-			x->resize(view.len/sizeof(int));
-			for (size_t i = 0; i < view.len/sizeof(int); i++)
-				(*x)[i] = *(int *)((char *)view.buf +
-				    i*view.strides[0]);
-		} else if (strcmp(view.format, "I") == 0) { 
-			x->resize(view.len/sizeof(int));
-			for (size_t i = 0; i < view.len/sizeof(int); i++)
-				(*x)[i] = *(unsigned int *)((char *)view.buf +
-				    i*view.strides[0]);
-		} else if (strcmp(view.format, "l") == 0) {
-			x->resize(view.len/sizeof(long));
-			for (size_t i = 0; i < view.len/sizeof(long); i++)
-				(*x)[i] = *(long *)((char *)view.buf +
-				    i*view.strides[0]);
-		} else if (strcmp(view.format, "L") == 0) {
-			x->resize(view.len/sizeof(long));
-			for (size_t i = 0; i < view.len/sizeof(long); i++)
-				(*x)[i] = *(unsigned long *)((char *)view.buf +
-				    i*view.strides[0]);
-		} else if (strcmp(view.format, "q") == 0) {
-			x->resize(view.len/sizeof(int64_t));
-			for (size_t i = 0; i < view.len/sizeof(int64_t); i++)
-				(*x)[i] = *(int64_t *)((char *)view.buf +
-				    i*view.strides[0]);
-		} else if (strcmp(view.format, "Q") == 0) {
-			x->resize(view.len/sizeof(uint64_t));
-			for (size_t i = 0; i < view.len/sizeof(uint64_t); i++)
-				(*x)[i] = *(uint64_t *)((char *)view.buf +
-				    i*view.strides[0]);
-		} else {
-			// We could add more types, but why do that?
-			// Let Python do the work for obscure cases
-			boost::python::container_utils::extend_container(*x, v);
-		}
-		PyBuffer_Release(&view);
+noncontiguous:
+	if (strcmp(view.format, "d") == 0) {
+		for (size_t i = 0; i < nelem; i++)
+			(*x)[i] = *(double *)((char *)view.buf +
+			    i*view.strides[0]);
+	} else if (strcmp(view.format, "f") == 0) {
+		for (size_t i = 0; i < nelem; i++)
+			(*x)[i] = *(float *)((char *)view.buf +
+			    i*view.strides[0]);
+	} else if (strcmp(view.format, "n") == 0) {
+		for (size_t i = 0; i < nelem; i++)
+			(*x)[i] = *(ssize_t *)((char *)view.buf +
+			    i*view.strides[0]);
+	} else if (strcmp(view.format, "N") == 0) {
+		for (size_t i = 0; i < nelem; i++)
+			(*x)[i] = *(size_t *)((char *)view.buf +
+			    i*view.strides[0]);
+	} else if (strcmp(view.format, "?") == 0) { 
+		for (size_t i = 0; i < nelem; i++)
+			(*x)[i] = *(bool *)((char *)view.buf +
+			    i*view.strides[0]);
+	} else if (strcmp(view.format, "i") == 0) { 
+		for (size_t i = 0; i < nelem; i++)
+			(*x)[i] = *(int *)((char *)view.buf +
+			    i*view.strides[0]);
+	} else if (strcmp(view.format, "I") == 0) { 
+		for (size_t i = 0; i < nelem; i++)
+			(*x)[i] = *(unsigned int *)((char *)view.buf +
+			    i*view.strides[0]);
+	} else if (strcmp(view.format, "l") == 0) {
+		for (size_t i = 0; i < nelem; i++)
+			(*x)[i] = *(long *)((char *)view.buf +
+			    i*view.strides[0]);
+	} else if (strcmp(view.format, "L") == 0) {
+		for (size_t i = 0; i < nelem; i++)
+			(*x)[i] = *(unsigned long *)((char *)view.buf +
+			    i*view.strides[0]);
+	} else if (strcmp(view.format, "q") == 0) {
+		for (size_t i = 0; i < nelem; i++)
+			(*x)[i] = *(int64_t *)((char *)view.buf +
+			    i*view.strides[0]);
+	} else if (strcmp(view.format, "Q") == 0) {
+		for (size_t i = 0; i < nelem; i++)
+			(*x)[i] = *(uint64_t *)((char *)view.buf +
+			    i*view.strides[0]);
 	} else {
-		PyErr_Clear();
-		boost::python::container_utils::extend_container(*x, v);
+		// We could add more types, but why do that?
+		// Let Python do the work for obscure cases
+		goto bufferwasbad;
 	}
+
+goodbuffer:
+	PyBuffer_Release(&view);
+        return x;
+
+bufferwasbad:
+	PyBuffer_Release(&view);
+
+slowpython:
+	// Failing all of that, try to do element-by-element conversion
+	// using Python iteration. If *that* fails, we just give up and
+	// go home (TypeError will be set inside extend_container()).
+	PyErr_Clear();
+	x->resize(0);
+	boost::python::container_utils::extend_container(*x, v);
         
         return x;
 }
