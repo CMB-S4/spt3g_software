@@ -514,7 +514,8 @@ quat_vec_container_from_object(boost::python::object v)
 
 	x->resize(view.shape[0]);
 	if (view.ndim != 2 || view.shape[1] != 4) {
-		boost::python::container_utils::extend_container(*x, v);
+		PyBuffer_Release(&view);
+		goto slowpython;
 	} else if (PyBuffer_IsContiguous(&view, 'C') &&
 	    strcmp(view.format, "d") == 0 &&
 	    view.strides[0] == 4*sizeof(double) &&
