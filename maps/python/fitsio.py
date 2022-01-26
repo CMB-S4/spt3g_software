@@ -481,7 +481,7 @@ def parse_wcs_header(header):
 
 @core.usefulfunc
 def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
-                     compress=True, hdr=None):
+                     compress='GZIP_2', hdr=None):
     """
     Save G3 map objects to a fits file.
 
@@ -508,11 +508,14 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
         Weights to save with the maps
     overwrite : bool
         If True, any existing file with the same name will be ovewritten.
-    compress : bool
-        If True, and if input maps are FlatSkyMap objects, store these in a
+    compress : str
+        If defined, and if input maps are FlatSkyMap objects, store these in a
         series of compressed image HDUs, one per map.  Otherwise, store input
         maps in a series of standard ImageHDUs, which are readable with older
-        FITS readers (e.g. idlastro).
+        FITS readers (e.g. idlastro). If defined the compression algorithm to
+        be used by the Astropy class astropy.io.fits.CompImageHDU.
+        Can be: 'RICE_1', 'RICE_ONE', 'PLIO_1', 'GZIP_1', 'GZIP_2' or
+        'HCOMPRESS_1'. Only GZIP_1 and GZIP_2 are lossless.
     hdr  : dict
        If defined, extra keywords to be appened to the FITS header. The dict
        can contain entries such as ``hdr['NEWKEY'] = 'New value'`` or
@@ -602,8 +605,8 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
     try:
         for m, name in zip(maps, names):
             if flat:
-                if compress:
-                    hdu = astropy.io.fits.CompImageHDU(np.asarray(m), header=header)
+                if compress is not None:
+                    hdu = astropy.io.fits.CompImageHDU(np.asarray(m), header=header, compression_type=compress)
                 else:
                     hdu = astropy.io.fits.ImageHDU(np.asarray(m), header=header)
                 hdu.header['ISWEIGHT'] = False
