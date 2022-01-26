@@ -32,6 +32,10 @@ class TestTimesampleVector(unittest.TestCase):
         vectime = core.G3VectorTime(timestamps)
         revectime = core.G3VectorTime(np.asarray(vectime))
         assert((np.asarray(revectime) == timestamps).all())
+    def test_copy_constructor(self):
+        t0 = core.G3VectorTime(np.array([100000000, 200000000]))
+        t1 = core.G3VectorTime(t0)
+        assert((np.asarray(t0) == np.asarray(t1)).all())
 
 
 def get_test_block(length, keys, offset=0, ordered=True):

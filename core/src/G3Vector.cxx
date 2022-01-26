@@ -191,6 +191,7 @@ G3VectorTime_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 	view->buf = (char *)view->buf + (uintptr_t)&potemkin[0].time -
 	    (uintptr_t)&potemkin[0];
 	view->itemsize = sizeof(G3TimeStamp);
+	view->len = view->itemsize*view->shape[0];
 	view->strides = &strides;
 	return 0;
 };
