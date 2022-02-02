@@ -244,9 +244,11 @@ void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, G3SkyMapWeightsPtr W, double h
 
 	g3_assert(Q->IsCompatible(*U));
 	g3_assert(Q->IsPolFlat() == U->IsPolFlat());
+	FlatSkyMapPtr flatptr;
 	if (!!W) {
-		g3_assert(W->TQ->IsCompatible(*Q));
-		g3_assert(W->TQ->IsPolFlat() == Q->IsPolFlat());
+		flatptr = boost::dynamic_pointer_cast<FlatSkyMap>(W->TQ);
+		g3_assert(flatptr->IsCompatible(*Q));
+		g3_assert(flatptr->IsPolFlat() == Q->IsPolFlat());
 	}
 
 	if (Q->IsPolFlat() && !invert)
@@ -281,25 +283,30 @@ void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, G3SkyMapWeightsPtr W, double h
 		double cr2 = 1 - 2 * sr * sr;
 		double ws = (w.qq + w.uu) / 2.0;
 		double wd = (w.qq - w.uu) / 2.0;
-		double delta = md * cr2 - w.qu * sr2;
+		double delta = wd * cr2 - w.qu * sr2;
 		double tq = w.tq;
 		double tu = w.tu;
 		w.tq = cr * tq - sr * tu;
 		w.tu = sr * tq + cr * tu;
 		w.qq = ws + delta;
 		w.uu = ws - delta;
-		w.qu = md * sr2 + w.qu * cr2;
+		w.qu = wd * sr2 + w.qu * cr2;
 	}
 
 	Q->SetFlatPol(!invert);
 	U->SetFlatPol(!invert);
 
 	if (!!W) {
-		W->TQ->SetFlatPol(!invert);
-		W->TU->SetFlatPol(!invert);
-		W->QQ->SetFlatPol(!invert);
-		W->QU->SetFlatPol(!invert);
-		W->UU->SetFlatPol(!invert);
+		flatptr = boost::dynamic_pointer_cast<FlatSkyMap>(W->TQ);
+		flatptr->SetFlatPol(!invert);
+		flatptr = boost::dynamic_pointer_cast<FlatSkyMap>(W->TU);
+		flatptr->SetFlatPol(!invert);
+		flatptr = boost::dynamic_pointer_cast<FlatSkyMap>(W->QQ);
+		flatptr->SetFlatPol(!invert);
+		flatptr = boost::dynamic_pointer_cast<FlatSkyMap>(W->QU);
+		flatptr->SetFlatPol(!invert);
+		flatptr = boost::dynamic_pointer_cast<FlatSkyMap>(W->UU);
+		flatptr->SetFlatPol(!invert);
 	}
 }
 
