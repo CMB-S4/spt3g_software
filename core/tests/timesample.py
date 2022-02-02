@@ -8,6 +8,8 @@ import copy
 
 SEC = core.G3Units.sec
 
+
+
 class TestTimesampleVector(unittest.TestCase):
     def test_from_list(self):
         t0 = core.G3Time('2019-01-01T12:30:00')
@@ -38,10 +40,12 @@ class TestTimesampleVector(unittest.TestCase):
         assert((np.asarray(t0) == np.asarray(t1)).all())
 
 
-def get_test_block(length, keys, offset=0, ordered=True):
+def get_test_block(length, keys=['a', 'b', 'c', 'd'],
+                   offset=0, ordered=True):
     type_cycle = [(core.G3VectorDouble, float),
                   (core.G3VectorInt, int),
-                  (core.G3VectorString, str)]
+                  (core.G3VectorString, str),
+                  (core.G3VectorBool, bool)]
     t0 = core.G3Time('2019-01-01T12:30:00') + offset*SEC
     m = core.G3TimesampleMap()
     times = np.arange(length)
@@ -59,26 +63,26 @@ def get_test_block(length, keys, offset=0, ordered=True):
 class TestTimesampleMap(unittest.TestCase):
     def test_00_internal_checks(self):
         # Valid block.
-        m = get_test_block(100, ['x', 'y', 'z'])
+        m = get_test_block(100)
         m.check()
 
     def test_10_safety(self):
-        m0 = get_test_block(100, ['x', 'y', 'z'])
-        m1 = get_test_block(101, ['x', 'y', 'z'])
+        m0 = get_test_block(100)
+        m1 = get_test_block(101)
         # Try to add an incompatible element.
         with self.assertRaises(ValueError):
             m0.times = m1.times
         with self.assertRaises(ValueError):
-            m0['A'] = m1['x']
+            m0['a'] = m1['d']
         # But we should be able to change times in an empty vector.
         m0 = get_test_block(100, [])
-        m1 = get_test_block(101, ['x', 'y', 'z'])
+        m1 = get_test_block(101)
         m0.times = m1.times
-        m0['x'] = m1['x']
+        m0['x'] = m1['a']
 
     def test_20_concat(self):
         # Test concatenation.
-        key_list = ['x', 'y', 'z']
+        key_list = ['w', 'x', 'y', 'z']
         m0 = get_test_block(100, key_list)
         m1 = get_test_block(200, key_list, offset=100)
         m01 = m0.concatenate(m1)
@@ -95,8 +99,8 @@ class TestTimesampleMap(unittest.TestCase):
                 m0.concatenate(fail_vec)
 
     def test_30_serialization(self):
-        m0 = get_test_block(100, ['x', 'y', 'z', 'A'])
-        m1 = get_test_block(200, ['x', 'y', 'z', 'A'], 100)
+        m0 = get_test_block(100)
+        m1 = get_test_block(200, offset=100)
         m2 = m0.concatenate(m1)
         m0.check()
         m1.check()
@@ -108,15 +112,15 @@ class TestTimesampleMap(unittest.TestCase):
         f = core.G3Reader('test.g3').Process(None)[0]
         f['irreg0'].check()
         f['irreg1'].check()
-        f['irreg0'].concatenate(f['irreg1'])['x']
+        f['irreg0'].concatenate(f['irreg1'])['b']
 
     def test_40_sort(self):
-        m0 = get_test_block(100, ['x', 'y', 'z'], ordered=False)
+        m0 = get_test_block(100, ordered=False)
         m1 = copy.deepcopy(m0)
         m0.sort()
         idx = np.argsort(m1.times)
         self.assertTrue((np.asarray(m1.times)[idx] == np.asarray(m0.times)).all())
-        for k in ['x', 'y', 'z']:
+        for k in m0.keys():
             self.assertTrue((np.asarray(m1[k])[idx] == np.asarray(m0[k])).all())
 
 

@@ -40,6 +40,7 @@ ssize_t g3_vect_test_and_size(const G3FrameObjectPtr &vp)
 	ssize_t vsize = -1;
 	if ((vsize = vect_size<G3VectorDouble>(vp)) < 0 &&
 	    (vsize = vect_size<G3VectorInt   >(vp)) < 0 &&
+	    (vsize = vect_size<G3VectorBool  >(vp)) < 0 &&
 	    (vsize = vect_size<G3VectorString>(vp)) < 0)
 		return -1;
 	return vsize;
@@ -168,6 +169,8 @@ G3TimesampleMap G3TimesampleMap::Concatenate(const G3TimesampleMap &other) const
 				item->second, oitem->second)) != nullptr ||
 			(catted = test_and_concat<G3VectorInt>(
 				item->second, oitem->second)) != nullptr ||
+			(catted = test_and_concat<G3VectorBool>(
+				item->second, oitem->second)) != nullptr ||
 			(catted = test_and_concat<G3VectorString>(
 				item->second, oitem->second)) != nullptr
 			) {
@@ -204,6 +207,7 @@ void G3TimesampleMap::Sort()
 		if (
 			!test_and_reorder<G3VectorDouble>(item->second, idx) &&
 			!test_and_reorder<G3VectorInt>(item->second, idx) &&
+			!test_and_reorder<G3VectorBool>(item->second, idx) &&
 			!test_and_reorder<G3VectorString>(item->second, idx)
 			) {
 			std::ostringstream s;
