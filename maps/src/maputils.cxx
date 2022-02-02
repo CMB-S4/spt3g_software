@@ -232,15 +232,22 @@ G3SkyMapPtr GetRaDecMask(G3SkyMapConstPtr m, double ra_left, double ra_right,
 }
 
 
-void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, double h, bool invert)
+void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, G3SkyMapWeightsPtr W, double h, bool invert)
 {
 	if (U->GetPolConv() == G3SkyMap::ConvNone)
 		log_warn("Missing pol_conv attribute for flatten_pol, assuming "
 			 "U.pol_conv is set to IAU. This will raise an error "
 			 "in the future.");
 
+	if (!W)
+		log_warn("Missing weights for flatten_pol");
+
 	g3_assert(Q->IsCompatible(*U));
 	g3_assert(Q->IsPolFlat() == U->IsPolFlat());
+	if (!!W) {
+		g3_assert(W->TQ->IsCompatible(*Q));
+		g3_assert(W->TQ->IsPolFlat() == Q->IsPolFlat());
+	}
 
 	if (Q->IsPolFlat() && !invert)
 		return;
@@ -264,10 +271,36 @@ void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, double h, bool invert)
 
 		(*Q)[i.first] = cr * q - sr * u;
 		(*U)[i.first] = sr * q + cr * u;
+
+		if (!W)
+			continue;
+
+		MuellerMatrix w = (*W)[i.first];
+
+		double sr2 = 2 * sr * cr;
+		double cr2 = 1 - 2 * sr * sr;
+		double ws = (w.qq + w.uu) / 2.0;
+		double wd = (w.qq - w.uu) / 2.0;
+		double delta = md * cr2 - w.qu * sr2;
+		double tq = w.tq;
+		double tu = w.tu;
+		w.tq = cr * tq - sr * tu;
+		w.tu = sr * tq + cr * tu;
+		w.qq = ws + delta;
+		w.uu = ws - delta;
+		w.qu = md * sr2 + w.qu * cr2;
 	}
 
 	Q->SetFlatPol(!invert);
 	U->SetFlatPol(!invert);
+
+	if (!!W) {
+		W->TQ->SetFlatPol(!invert);
+		W->TU->SetFlatPol(!invert);
+		W->QQ->SetFlatPol(!invert);
+		W->QU->SetFlatPol(!invert);
+		W->UU->SetFlatPol(!invert);
+	}
 }
 
 
@@ -608,7 +641,8 @@ void maputils_pybindings(void){
 		"Returns a mask that is nonzero for any pixels within the given ra and dec ranges");
 
 	bp::def("flatten_pol", FlattenPol,
-		(bp::arg("Q"), bp::arg("U"), bp::arg("h")=0.001, bp::arg("invert")=false),
+		(bp::arg("Q"), bp::arg("U"), bp::arg("W")=G3SkyMapWeightsPtr(),
+		 bp::arg("h")=0.001, bp::arg("invert")=false),
 		"For maps defined on the sphere the direction of the polarization angle is "
 		"is defined relative to the direction of North.  When making maps we follow "
 		"this definition.\n\nFor any flat sky estimators, the polarization angle is "
@@ -616,7 +650,8 @@ void maputils_pybindings(void){
 		"direction of north is not the same as the vertical axis.  This function "
 		"applies a rotation to the Q and U values to switch the curved sky Q/U "
 		"definition to the flat sky Q/U definition.\n\nIf for whatever reason you "
-		"want to reverse the process set the invert argument to True.");
+		"want to reverse the process set the invert argument to True. Also applies "
+		"the appropriate rotation to the Q and u elements of the associated weights.");
 
 	bp::def("reproj_map", ReprojMap,
 		(bp::arg("in_map"), bp::arg("out_map"), bp::arg("rebin")=1, bp::arg("interp")=false),
