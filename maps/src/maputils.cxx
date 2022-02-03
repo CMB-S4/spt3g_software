@@ -279,8 +279,8 @@ void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, G3SkyMapWeightsPtr W, double h
 
 		MuellerMatrix w = (*W)[i.first];
 
-		double sr2 = 2 * sr * cr;
-		double cr2 = 1 - 2 * sr * sr;
+		double sr2 = 2.0 * sr * cr;
+		double cr2 = 1.0 - 2.0 * sr * sr;
 		double ws = (w.qq + w.uu) / 2.0;
 		double wd = (w.qq - w.uu) / 2.0;
 		double delta = wd * cr2 - w.qu * sr2;
