@@ -144,7 +144,9 @@ for pol in [True, False]:
         mq2 = mq.copy()
         mu2 = mu.copy()
         mw2 = mw.copy()
+        assert(not mq2.flat_pol)
         flatten_pol(mq2, mu2, mw2)
+        assert(mq2.flat_pol)
         assert(not np.allclose(mq2, mq))
         assert(not np.allclose(mu2, mu))
         assert(not np.allclose(mw2.TQ, mw.TQ))
@@ -154,6 +156,7 @@ for pol in [True, False]:
         assert(not np.allclose(mw2.UU, mw.UU))
 
         flatten_pol(mq2, mu2, mw2, invert=True)
+        assert(not mq2.flat_pol)
         assert(np.allclose(mq2, mq))
         assert(np.allclose(mu2, mu))
         assert(np.allclose(mw2.TQ, mw.TQ))
