@@ -40,7 +40,7 @@ void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin=1, bool i
 
 // Flatten or unflatten Q and U polarization maps using the polarization gradient across the map.
 // The h parameter controls the pixel width over which a gradient is computed.
-void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, double h=0.001, bool invert=false);
+void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, G3SkyMapWeightsPtr W=NULL, double h=0.001, bool invert=false);
 
 // Compute map moments up to fourth order (mean, var, skewness, kurtosis) of the input map,
 // optionally excluding any pixels that are zero in the input mask, or zero/nan/inf in the input map

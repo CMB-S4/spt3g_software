@@ -121,7 +121,13 @@ def FlattenPol(frame, invert=False):
         return
 
     qmap, umap = frame.pop("Q"), frame.pop("U")
-    maps.flatten_pol(qmap, umap, invert=invert)
+
+    if "Wpol" in frame:
+        wmap = frame.pop("Wpol")
+        maps.flatten_pol(qmap, umap, wmap, invert=invert)
+        frame["Wpol"] = wmap
+    else:
+        maps.flatten_pol(qmap, umap, invert=invert)
 
     frame["Q"] = qmap
     frame["U"] = umap

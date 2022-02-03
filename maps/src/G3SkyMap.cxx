@@ -1057,6 +1057,9 @@ PYBINDINGS("maps") {
 	      "True if all components are set, False if only the TT component is set")
 	    .add_property("congruent", &G3SkyMapWeights::IsCongruent,
 	      "True if all components are internally compatible with each other")
+	    .def("compatible", &G3SkyMapWeights::IsCompatible,
+	      "Returns true if the input argument is a map with matching dimensions "
+	      "and boundaries on the sky.")
 	    .def("rebin", &G3SkyMapWeights::Rebin, (bp::arg("scale")),
 	      "Rebin the weights into larger pixels by summing scale-x-scale blocks "
 	      "of pixels together.  Returns a new weights object.  Map dimensions "
