@@ -246,8 +246,8 @@ void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, G3SkyMapWeightsPtr W, double h
 	g3_assert(Q->IsPolFlat() == U->IsPolFlat());
 	FlatSkyMapPtr flatptr;
 	if (!!W) {
+		g3_assert(W->IsCompatible(*Q));
 		flatptr = boost::dynamic_pointer_cast<FlatSkyMap>(W->TQ);
-		g3_assert(flatptr->IsCompatible(*Q));
 		g3_assert(flatptr->IsPolFlat() == Q->IsPolFlat());
 	}
 

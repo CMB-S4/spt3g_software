@@ -317,6 +317,12 @@ public:
 			TT->IsCompatible(*UU));
 	}
 
+	bool IsCompatible(const G3SkyMap & other) const {
+		if (!TT)
+			return false;
+		return TT->IsCompatible(other);
+	}
+
 	MuellerMatrix operator [] (int i) {
 		return (!IsPolarized()) ? MuellerMatrix((*TT)[i]) :
 		    MuellerMatrix((*TT)[i], (*TQ)[i], (*TU)[i], (*QQ)[i],

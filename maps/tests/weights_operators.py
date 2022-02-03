@@ -2,12 +2,12 @@
 
 import numpy as np
 from spt3g import core
-from spt3g.maps import G3SkyMapWeights, FlatSkyMap, MapPolType, MapPolConv
-from spt3g.maps import get_mask_map, remove_weights, apply_weights
+from spt3g.maps import G3SkyMapWeights, FlatSkyMap, MapPolType, MapPolConv, MapProjection
+from spt3g.maps import get_mask_map, remove_weights, remove_weights_t, apply_weights, apply_weights_t, flatten_pol
 
 for pol in [True, False]:
     # allocation
-    m = FlatSkyMap(500, 20, core.G3Units.arcmin, pol_conv=MapPolConv.IAU)
+    m = FlatSkyMap(500, 20, core.G3Units.arcmin, pol_conv=MapPolConv.IAU, proj=MapProjection.Proj5)
     mt = m.clone(False)
     mt.pol_type = MapPolType.T
     if pol:
@@ -39,9 +39,9 @@ for pol in [True, False]:
         mt[15] = vec
         assert(np.allclose(mt[15], vec))
 
-    mat = np.array([[2, 0.1, 0.1],
-                    [0.1, 0.5, 0.05],
-                    [0.1, 0.05, 0.5]]) if pol else 2.
+    mat = np.array([[2, 0.2, 0.1],
+                    [0.2, 0.5, 0.05],
+                    [0.1, 0.05, 0.25]]) if pol else 2.
     mw[15] = mat
     assert(mw.npix_allocated == 1)
     assert(np.allclose(mw[15], mat))
@@ -63,8 +63,9 @@ for pol in [True, False]:
 
     m[15] = 10
     mt *= m
-    mq *= m
-    mu *= m
+    if pol:
+        mq *= m
+        mu *= m
     mw *= m
     assert(np.allclose(mw[15], mat * 5))
     assert(mw.npix_allocated == 1)
@@ -111,6 +112,7 @@ for pol in [True, False]:
     assert(not mt.sparse)
     assert(mt.npix_allocated == mt.size)
 
+    # compactify maps back to sparse
     mt.compact(zero_nans=True)
     assert(mt.npix_allocated == 1)
     assert(np.allclose(mt[15], np.atleast_1d(vec * 10)[0]))
@@ -118,15 +120,44 @@ for pol in [True, False]:
     assert(mask[15] == 1)
     assert(mask.npix_allocated == 1)
 
-    # compactify maps back to sparse
     if pol:
         mq.compact(zero_nans=True)
         mu.compact(zero_nans=True)
 
     # check memory-efficient weights functions
-    remove_weights(mt, mq, mu, mw, zero_nans=True)
+    if pol:
+        remove_weights(mt, mq, mu, mw, zero_nans=True)
+    else:
+        remove_weights_t(mt, mw, zero_nans=True)
     assert(mt.npix_allocated == 1)
 
-    apply_weights(mt, mq, mu, mw)
+    if pol:
+        apply_weights(mt, mq, mu, mw)
+        assert(np.allclose([mt[15], mq[15], mu[15]], vec * 10))
+    else:
+        apply_weights_t(mt, mw)
+        assert(np.allclose(mt[15], vec * 10))
     assert(mt.npix_allocated == 1)
-    assert(mt[15] == np.atleast_1d(vec * 10)[0])
+
+    if pol:
+        # check flatten_pol
+        mq2 = mq.copy()
+        mu2 = mu.copy()
+        mw2 = mw.copy()
+        flatten_pol(mq2, mu2, mw2)
+        assert(not np.allclose(mq2, mq))
+        assert(not np.allclose(mu2, mu))
+        assert(not np.allclose(mw2.TQ, mw.TQ))
+        assert(not np.allclose(mw2.TU, mw.TU))
+        assert(not np.allclose(mw2.QQ, mw.QQ))
+        assert(not np.allclose(mw2.QU, mw.QU))
+        assert(not np.allclose(mw2.UU, mw.UU))
+
+        flatten_pol(mq2, mu2, mw2, invert=True)
+        assert(np.allclose(mq2, mq))
+        assert(np.allclose(mu2, mu))
+        assert(np.allclose(mw2.TQ, mw.TQ))
+        assert(np.allclose(mw2.TU, mw.TU))
+        assert(np.allclose(mw2.QQ, mw.QQ))
+        assert(np.allclose(mw2.QU, mw.QU))
+        assert(np.allclose(mw2.UU, mw.UU))
