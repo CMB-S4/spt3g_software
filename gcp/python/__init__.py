@@ -5,3 +5,4 @@ from .ARCExtractor import UnpackACUData, UnpackTrackerData, DecryptFeatureBit, A
 from .ARCHKExtractor import UnpackSPTpolHKData
 from .GCPDataTee import GCPHousekeepingTee, GCPSignalledHousekeeping, GCPBoloDataTee, PagerWatchdog, DAQWatchdog
 from .InfluxDB import UpdateDB
+from .ARCFile import ARCFile
