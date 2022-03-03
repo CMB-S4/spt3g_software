@@ -61,6 +61,8 @@ def healpix_to_flatsky(
 
     # Construct the output map
     if map_stub is None:
+        if len(kwargs) == 0:
+            raise ValueError("Need to provide either a stub map or map parameters (projection, center, etc.)")
         if isinstance(map_in, maps.HealpixSkyMap):
             kwargs.setdefault("coord_ref", map_in.coord_ref)
             kwargs.setdefault("pol_type", map_in.pol_type)
