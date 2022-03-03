@@ -40,6 +40,26 @@ def Dump(frame, type=None, added_message = None):
 
 
 @indexmod
+class InjectFrame(object):
+    """
+    Inject an arbitrary frame into a pipeline.
+
+    Arguments
+    ---------
+    frame : G3Frame
+        The frame to inject
+    """
+    def __init__(self, frame):
+        self.frame = frame
+    def __call__(self, frame):
+        if self.frame is None:
+            return
+        out = [self.frame, frame]
+        self.frame = None
+        return out
+
+
+@indexmod
 def InjectDebug(frame, type=None, debug_start_func = None):
     '''starts a pdb session when a frame of type shows up.
 
