@@ -18,7 +18,7 @@ public:
 	MapBinner(std::string output_map_id, const G3SkyMap &stub_map,
 	    std::string pointing, std::string timestreams,
 	    std::string detector_weights, std::string bolo_properties_name,
-	    bool store_weight_map);
+	    bool store_weight_map, boost::python::object map_per_scan);
 	virtual ~MapBinner() {}
 
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
@@ -33,6 +33,8 @@ private:
 	std::string timestreams_;
 	std::string weights_;
 	std::string boloprops_name_;
+	int map_per_scan_;
+	boost::python::object map_per_scan_callback_;
 
 	bool units_set_;
 
@@ -46,11 +48,11 @@ private:
 
 EXPORT_G3MODULE("maps", MapBinner,
     (init<std::string, const G3SkyMap &, std::string, std::string, std::string,
-     std::string, bool>((arg("map_id"), arg("stub_map"), arg("pointing"),
-     arg("timestreams"), arg("detector_weights")="",
+     std::string, bool, object>((arg("map_id"), arg("stub_map"),
+     arg("pointing"), arg("timestreams"), arg("detector_weights")="",
      arg("bolo_properties_name")="BolometerProperties",
-     arg("store_weight_map")=true))),
-"MapBinner(map_id, stub_map, pointing, timestreams, detector_weights, bolo_properties_name=\"BolometerProperties\", store_weight_map=True)\n"
+     arg("store_weight_map")=true,arg("map_per_scan")=false))),
+"MapBinner(map_id, stub_map, pointing, timestreams, detector_weights, bolo_properties_name=\"BolometerProperties\", store_weight_map=True, map_per_scan=False)\n"
 "\n"
 "Bins up timestreams into a map with properties (projection, etc.) specified\n"
 "by the stub_map argument. \n\n"
@@ -90,6 +92,14 @@ EXPORT_G3MODULE("maps", MapBinner,
 "    stored, though the output maps will *still be weighted*. It should be \n"
 "    set to False if and only if you know what the weights are a priori \n"
 "    (e.g. mock observing, where they are the same as the data maps).\n"
+"map_per_scan: boolean or callable, optional\n"
+"    Defaults to False. If set to True, will make an output map for every \n"
+"    input Scan frame, which can be useful for fine-grained time-domain \n"
+"    maps. Can also be set to a Python callable for complex situations. In \n"
+"    this case, the callable will be called on each Scan frame and passed \n"
+"    the frame as an argument. If it returns True, the map binner will emit \n"
+"    a map frame with the data since the last emitted map frame but *before* \n"
+"    the current Scan; if False, the binner will continue accumulating data.\n"
 "\n"
 "Emits\n"
 "-----\n"
@@ -132,7 +142,8 @@ EXPORT_G3MODULE("maps", MapBinner,
 
 MapBinner::MapBinner(std::string output_map_id, const G3SkyMap &stub_map,
     std::string pointing, std::string timestreams, std::string detector_weights,
-    std::string bolo_properties_name, bool store_weight_map) :
+    std::string bolo_properties_name, bool store_weight_map,
+    boost::python::object map_per_scan) :
   output_id_(output_map_id), pointing_(pointing), timestreams_(timestreams),
   weights_(detector_weights), boloprops_name_(bolo_properties_name),
   units_set_(false)
@@ -149,6 +160,13 @@ MapBinner::MapBinner(std::string output_map_id, const G3SkyMap &stub_map,
 		U_ = stub_map.Clone(false);
 		U_->pol_type = G3SkyMap::U;
 	}
+
+	if (PyCallable_Check(map_per_scan.ptr())) {
+		map_per_scan_callback_ = map_per_scan;
+		map_per_scan_ = -1;
+	} else {
+		map_per_scan_ = boost::python::extract<bool>(map_per_scan)();
+	}
 }
 
 void
@@ -158,7 +176,17 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		boloprops_ = frame->Get<BolometerPropertiesMap>(
 		    boloprops_name_);
 
-	if (frame->type == G3Frame::EndProcessing) {
+	bool emit_map_now = false;
+	if (frame->type == G3Frame::EndProcessing)
+		emit_map_now = true;
+	else if (frame->type == G3Frame::Scan) {
+		if (map_per_scan_ >= 0)
+			emit_map_now = map_per_scan_;
+		else
+			emit_map_now = map_per_scan_callback_(frame);
+	}
+	
+	if (emit_map_now) {
 		G3FramePtr out_frame(new G3Frame(G3Frame::Map));
 		out_frame->Put("Id", G3StringPtr(new G3String(output_id_)));
 		out_frame->Put("T",
@@ -181,8 +209,6 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		}
 
 		out.push_back(out_frame);
-		out.push_back(frame);
-		return;
 	}
 
 	if (frame->type != G3Frame::Scan) {
