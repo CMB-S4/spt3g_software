@@ -572,7 +572,7 @@ class ReprojectMaps(object):
 
     def __call__(self, frame):
 
-        if frame.type != core.G3FrameType.Map:
+        if isinstance(frame, core.G3Frame) and frame.type != core.G3FrameType.Map:
             return
 
         if "Q" in frame and self.stub.coord_ref != frame["Q"].coord_ref:
