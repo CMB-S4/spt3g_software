@@ -592,7 +592,7 @@ class ReprojectMaps(object):
                 maps.reproj_map(m, mnew, rebin=self.rebin, interp=self.interp)
 
             elif key in ["Wpol", "Wunpol"]:
-                mnew = core.G3SkyMapWeights(self.stub, key == "Wpol")
+                mnew = maps.G3SkyMapWeights(self.stub, key == "Wpol")
                 for wkey in mnew.keys():
                     maps.reproj_map(
                         m[wkey], mnew[wkey], rebin=self.rebin, interp=self.interp
