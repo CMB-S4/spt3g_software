@@ -538,12 +538,12 @@ class ReprojectMaps(object):
     """
     Reproject a map frame into a different projection.  Original data are
     dropped and replaced by reprojected maps in the input frames.  Maps can be
-    rotated between Equatorial and Galactic coordinates, and/or change
-    polarization convention between COSMO and IAU, by setting the appropriate
-    attributes of the input and stub maps.  Attributes not defined in the stub
-    map are assumed to be that of the input map.  NB: currently rotation of
-    polarization coordinates is not done properly when changing coordinate
-    systems.
+    changed between flat sky and healpix pixelizations, rotated between
+    Equatorial and Galactic coordinates, and/or change polarization convention
+    between COSMO and IAU, by setting the appropriate attributes of the input
+    and stub maps.  Attributes not defined in the stub map are assumed to be
+    that of the input map.  NB: coordinate rotation of polarized maps is not
+    currently implemented.
 
     Arguments
     ---------
