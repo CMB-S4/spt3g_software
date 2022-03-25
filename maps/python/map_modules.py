@@ -14,6 +14,7 @@ __all__ = [
     "InjectMaps",
     "ReplicateMaps",
     "CoaddMaps",
+    "ReprojectMaps",
 ]
 
 
@@ -530,3 +531,77 @@ class CoaddMaps(object):
 
         if not input_weighted:
             RemoveWeights(frame)
+
+
+@core.indexmod
+class ReprojectMaps(object):
+    """
+    Reproject a map frame into a different projection.  Original data are
+    dropped and replaced by reprojected maps in the input frames.  Maps can be
+    changed between flat sky and healpix pixelizations, rotated between
+    Equatorial and Galactic coordinates, and/or change polarization convention
+    between COSMO and IAU, by setting the appropriate attributes of the input
+    and stub maps.  Attributes not defined in the stub map are assumed to be
+    that of the input map.  NB: coordinate rotation of polarized maps is not
+    currently implemented.
+
+    Arguments
+    ---------
+    map_stub : G3SkyMap object
+        A stub (empty) sky map object to be used to construct the output maps.
+        Can be a HealpixSkyMap or FlatSkyMap object.  Setting the ``pol_conv``
+        and/or ``coord_ref`` attributes to values that differ from those of the
+        input maps will result in output maps whose polarization convention
+        and/or reference coordinate system have been changed.
+    rebin : int
+        If supplied and >1, subdivide the output pixel by n x n with each
+        sub-pixel taking on the input map values at pixel center (with interp or
+        nearest neighbor). The output pixel takes on the average of the
+        sub-pixel values.  In the case that the input map has higher resolution
+        than the output map (and that the input map is not low-pass filtered to
+        remove information above the Nyquist freq. of the output map pixel),
+        this reduces aliasing compared with direct sampling. But there would
+        still be aliased power from the input map from freq above the ouput map
+        pixel's Nyquist.
+    interp : bool
+        If True, use bilinear interpolation to extract values from the input
+        map.  Otherwise, the nearest-neighbor value is used.
+    """
+
+    def __init__(self, map_stub=None, rebin=1, interp=False):
+        assert map_stub is not None, "map_stub argument required"
+        self.stub = map_stub
+        self.rebin = rebin
+        self.interp = interp
+
+    def __call__(self, frame):
+
+        if isinstance(frame, core.G3Frame) and frame.type != core.G3FrameType.Map:
+            return
+
+        if "Q" in frame and self.stub.coord_ref != frame["Q"].coord_ref:
+            raise RuntimeError(
+                "Coordinate rotation of polarized maps is not implemented"
+            )
+
+        for key in ["T", "Q", "U", "Wpol", "Wunpol"]:
+
+            if key not in frame:
+                continue
+
+            m = frame.pop(key)
+
+            if key in "TQU":
+                mnew = self.stub.clone(False)
+                maps.reproj_map(m, mnew, rebin=self.rebin, interp=self.interp)
+
+            elif key in ["Wpol", "Wunpol"]:
+                mnew = maps.G3SkyMapWeights(self.stub, key == "Wpol")
+                for wkey in mnew.keys():
+                    maps.reproj_map(
+                        m[wkey], mnew[wkey], rebin=self.rebin, interp=self.interp
+                    )
+
+            frame[key] = mnew
+
+        return frame
