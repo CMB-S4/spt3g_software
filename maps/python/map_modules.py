@@ -549,6 +549,10 @@ class ReprojectMaps(object):
     ---------
     map_stub : G3SkyMap object
         A stub (empty) sky map object to be used to construct the output maps.
+        Can be a HealpixSkyMap or FlatSkyMap object.  Setting the ``pol_conv``
+        and/or ``coord_ref`` attributes to values that differ from those of the
+        input maps will result in output maps whose polarization convention
+        and/or reference coordinate system have been changed.
     rebin : int
         If supplied and >1, subdivide the output pixel by n x n with each
         sub-pixel taking on the input map values at pixel center (with interp or
