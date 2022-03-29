@@ -5,3 +5,6 @@ add_spt3g_library(gcp SHARED
 )
 target_link_libraries(gcp core dfmux)
 link_python_dir()
+
+add_spt3g_program(bin/spt3g-arc-dump)
+add_spt3g_program(bin/spt3g-arc-verify)
