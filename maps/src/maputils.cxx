@@ -99,6 +99,8 @@ void RemoveWeights(G3SkyMapPtr T, G3SkyMapPtr Q, G3SkyMapPtr U, G3SkyMapWeightsC
 				empty = (c != c) || (c > 1e12);
 				if (empty && v == 0 && Q->at(pix) == 0 && U->at(pix) == 0)
 					continue;
+				if (!empty)
+					empty |= (m.Det() == 0);
 			}
 
 			// set bad pixels to 0
