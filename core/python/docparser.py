@@ -204,6 +204,14 @@ def get_doc_for_module(module_path, include_link_list = True):
                 if format_doc(obj) is not None:
                     tmp_str = format_doc(obj).strip()
                     out_str = out_str + tmp_str
+                    if format_doc(obj.__init__):
+                        con_str = '\n\n*Constructors:*\n\t%s\n' % format_doc(obj.__init__).replace('\n', '\n\t')
+                        con_str = con_str.replace(' -> None', '``')
+                        con_str = con_str.replace(' -> object', '``')
+                        con_str = con_str.replace('__init__( (object)arg1,', '``{}('.format(obj.__name__))
+                        con_str = con_str.replace('__init__( (object)arg1)', '``{}()'.format(obj.__name__))
+                        con_str = con_str.replace('__init__( (object)arg1 [,', '``{}( ['.format(obj.__name__))
+                        out_str += con_str + '\n'
                     #after we have gotten the documention, find the properties and load their documentation
                     prop_str = ''
                     for p_name, p_obj in obj.__dict__.items():
