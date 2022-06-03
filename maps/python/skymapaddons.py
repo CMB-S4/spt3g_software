@@ -149,7 +149,12 @@ del skymapweights_reshape
 # Pass through attributes to submaps. This is not ideal because the properties
 # are hidden and not visible by tab completion. A better solution would use
 # __getattribute__
-G3SkyMapWeights.__getattr__ = lambda self, x: getattr(self.TT, x)
+def skymapweights_getattr(self, x):
+    if x == "flat_pol" and isinstance(self.TQ, FlatSkyMap):
+        return getattr(self.TQ, x)
+    return getattr(self.TT, x)
+G3SkyMapWeights.__getattr__ = skymapweights_getattr
+del skymapweights_getattr
 oldsetattr = G3SkyMapWeights.__setattr__
 def skymapweights_setattr(self, x, val):
     try:
