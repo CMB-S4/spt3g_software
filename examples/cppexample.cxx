@@ -1,6 +1,8 @@
 #include <core/G3.h>
 #include <core/G3Pipeline.h>
 #include <core/G3Reader.h>
+#include <core/pybindings.h>
+#include <boost/python.hpp>
 
 /*
  * Example of a small C++ program that is the equivalent of the
@@ -26,6 +28,7 @@ main(int argc, const char **argv)
 		std::cerr << "Too few arguments!" << std::endl;
 		return 1;
 	}
+	PyContext::initializePython(); 
 
 	G3Pipeline pipe;
 
@@ -33,7 +36,8 @@ main(int argc, const char **argv)
 	pipe.Add(G3ModulePtr(new Dump));
 
 	pipe.Run();
+
+	PyContext::deinitializePython(); 
 	
 	return 0;
 }
-
