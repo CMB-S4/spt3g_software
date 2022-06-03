@@ -6,6 +6,8 @@
 #include <cereal/types/map.hpp>
 #include <cereal/types/vector.hpp>
 
+
+
 template <class A> void G3ModuleConfig::save(A &ar, unsigned v) const
 {
 	namespace bp = boost::python;
@@ -19,7 +21,7 @@ template <class A> void G3ModuleConfig::save(A &ar, unsigned v) const
 
 	for (auto i : config) {
 		ar << cereal::make_nvp("key", i.first);
-		
+    PyContext ctx; 
 		// Serialize frame objects (e.g. skymaps used as configs)
 		// directly. Serialize random python things through repr().
 		if (bp::extract<G3FrameObject>(i.second).check()) {
@@ -51,8 +53,8 @@ template <class A> void G3ModuleConfig::save(A &ar, unsigned v) const
 template <class A> void G3ModuleConfig::load(A &ar, unsigned v)
 {
 	namespace bp = boost::python;
-	bp::object main = bp::import("__main__");
-	bp::object global = main.attr("__dict__");
+//	bp::object main = bp::import("__main__");
+//	bp::object global = main.attr("__dict__");
 
 	ar & cereal::make_nvp("G3FrameObject",
 	    cereal::base_class<G3FrameObject>(this));
@@ -68,6 +70,7 @@ template <class A> void G3ModuleConfig::load(A &ar, unsigned v)
 		ar >> cereal::make_nvp("key", key);
 		ar >> cereal::make_nvp("frameobject", is_frameobject);
 		
+    PyContext ctx; 
 		// Frame objects (e.g. skymaps used as configs) serialized
 		// directly. Random python things serialized as repr(), so
 		// eval() them.
@@ -80,7 +83,8 @@ template <class A> void G3ModuleConfig::load(A &ar, unsigned v)
 			ar >> cereal::make_nvp("value", repr);
 			bp::object obj;
 			try {
-				obj = bp::eval(bp::str(repr), global, global);
+//				obj = bp::eval(bp::str(repr), bp::None, bp::None);
+				obj = bp::eval(repr.c_str());
 			} catch (const bp::error_already_set& e) {
 				obj = bp::object(repr);
 				PyErr_Clear();
@@ -95,6 +99,7 @@ G3ModuleConfig::Summary() const
 {
 	std::string rv = "pipe.Add(" + modname;
 	for (auto i : config) {
+    PyContext ctx; 
 		std::string repr = bp::extract<std::string>(
 		    i.second.attr("__repr__")());
 		rv += ", " + i.first + "=" + repr;
