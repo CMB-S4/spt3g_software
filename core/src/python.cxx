@@ -596,3 +596,38 @@ BOOST_PYTHON_MODULE(core)
 	G3ModuleRegistrator::CallRegistrarsFor("core");
 }
 
+//PyContext Implementation
+
+static PyThreadState * init_save_ = nullptr; 
+
+int 
+PyContext::initializePython() 
+{
+		if (!Py_IsInitialized())
+		{
+			Py_Initialize(); 
+			// ok, this is going to get removed in Python 3.11, but is necessary for Python <= 3.6
+			// for 3.7-3.8, should be called by Py_Initialize(), for 3.9-3.10, does nothing
+			// be lazy and take advantage of no Python 2.8... 
+#if (PY_MAJOR_VERSION <= 3 && PY_MINOR_VERSION < 8)
+      printf("PyEval_InitThreads()\n"); 
+			PyEval_InitThreads(); // this needs to be in one of the threads that calls this for some unknown reason...
+#endif 
+			//note the thread initialization takes the GIL (lol), so we need to release it. 
+      //to be good citizesn, we save the thread state for finalization
+			init_save_ = PyEval_SaveThread(); 
+		}
+		return 0; 
+}
+
+int
+PyContext::deinitializePython() 
+{
+	if (init_save_) 
+		PyEval_RestoreThread(init_save_); 
+	Py_Finalize(); 
+	return 0; 
+}
+
+std::mutex PyContext::mut_; 
+bool PyContext::enabled_ = false; 

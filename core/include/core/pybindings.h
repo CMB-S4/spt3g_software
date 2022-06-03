@@ -10,6 +10,8 @@
 
 #include <container_conversions.h>
 #include <std_map_indexing_suite.hpp>
+#include <mutex> 
+#include <thread>
 
 template <typename T>
 void
@@ -344,5 +346,93 @@ public:
 	    .def(boost::python::init<const T &>()) \
 	    .def_pickle(g3frameobject_picklesuite<T>())
 
-#endif
 
+/* RAII for a thread-safe Python context 
+ *
+ * This only matters if you're using a multithreaded C++ application
+ * so everything is gated by an on/off switch to optimize the "normal" case. 
+ * So that means you need to call PyContext::enable() at the beginning of your program
+ * for this to do anything. 
+ *
+ * Basically, anywhere we call python code we should have a PyContext. ensureGILState()
+ * is called automatically by the constructor and releaseGILState() by the destructor,
+ * so you only need to call them manually if there's a gap in the same scope 
+ * betwen Python things. 
+ *
+ * For convenience, Python initialization/finalization is also provided as a static
+ * method, as there are some tricks to getting this right across all Python versions.
+ *
+ **/ 
+class PyContext
+{
+	public:
+		// Sets up a Pythoncontext and calls ensureGILState
+		PyContext() 
+			: ensured_(false)
+		{
+			ensureGILState();
+		}
+
+		~PyContext()
+		{
+			releaseGILState();
+		}
+
+		// Make sure we can do python things in a C++ program. Does nothing if enable() hasn't been called before. 
+		// Automatically called by constructor, but you'll have to call it again
+		// if you call releaseGILState 
+		void 
+		ensureGILState()
+		{
+			if(!enabled_)
+				return; 
+
+			if(ensured_)
+				return; 
+
+			mut_.lock();
+			st_ = PyGILState_Ensure();
+			ensured_ = true;
+		}
+
+		// not doing python things, can release state. 
+		void
+		releaseGILState()
+		{
+			if (ensured_)
+			{	
+				PyGILState_Release(st_); 
+				ensured_ = false;
+				mut_.unlock(); 
+			}
+		}
+
+		// ensureGILState and releaseGILState do nothing if not enabled once
+		// (to avoid unnecessarily taking a mutex) 
+		static void 
+		enable()
+		{ 
+			enabled_ = true;
+		}
+
+		// if we are done with threads, we can disable
+    static void
+		disable()
+		{ 
+			enabled_ = false;
+		} 
+
+		// these are helpers for initializing / deinitialing python
+		// from a C++ program. 
+		static int initializePython(); 
+		static int deinitializePython(); 
+
+	private:
+		bool ensured_;
+		PyGILState_STATE st_;
+		static std::mutex mut_;
+		static bool enabled_;
+};
+
+
+#endif
