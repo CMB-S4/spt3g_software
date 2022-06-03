@@ -292,7 +292,7 @@ void G3Frame::saveJSON(T & os) const
 		ar << make_nvp("val", i->second.frameobject);
 	}
 #else
-  os << " {error: \"spt3g-software compiled without JSON support\"}" << std::endl;
+	os << " {error: \"spt3g-software compiled without JSON support\"}" << std::endl;
 #endif
 }
 
@@ -303,7 +303,6 @@ G3Frame::asJSON() const
 	saveJSON(str);
 	return str.str();
 }
-
 
 template <typename T>
 void G3Frame::load(T &is)
