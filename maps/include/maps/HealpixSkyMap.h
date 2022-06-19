@@ -8,7 +8,7 @@
 #include <string>
 
 #include <maps/G3SkyMap.h>
-#include <maps/chealpix.h>
+#include <maps/HealpixSkyMapInfo.h>
 
 class SparseMapData;
 
@@ -71,8 +71,8 @@ public:
 	void NonZeroPixels(std::vector<uint64_t> &indices,
 	    std::vector<double> &data) const; // Iterators better?
 
-	size_t nside() const {return nside_;}
-	bool nested() const {return nested_;}
+	size_t nside() const {return info_.nside();}
+	bool nested() const {return info_.nested();}
 	double res() const;
 
 	size_t AngleToPixel(double alpha, double delta) const override;
@@ -93,7 +93,7 @@ public:
 	bool IsIndexedSparse() const { return (indexed_sparse_ != NULL); }
 	void Compact(bool zero_nans = false) override;
 
-	bool IsRaShifted() const { return shift_ra_; }
+	bool IsRaShifted() const { return info_.shifted(); }
 	void SetShiftRa(bool shift);
 
 	class const_iterator {
@@ -135,14 +135,10 @@ public:
 	const_iterator end() const { return const_iterator(*this, false); };
 
 private:
-	uint32_t nside_;
-	size_t npix_;
-	bool nested_;
+	HealpixSkyMapInfo info_;
 	std::vector<double> *dense_;
 	SparseMapData *ring_sparse_;
 	std::unordered_map<uint64_t, double> *indexed_sparse_;
-	map_info *ring_info_;
-	bool shift_ra_;
 
 	SET_LOGGER("HealpixSkyMap");
 };
@@ -153,7 +149,7 @@ namespace cereal {
 	template <class A> struct specialize<A, HealpixSkyMap, cereal::specialization::member_load_save> {};
 }
 
-G3_SERIALIZABLE(HealpixSkyMap, 2);
+G3_SERIALIZABLE(HealpixSkyMap, 3);
 
 #endif //_MAPS_HEALPIXSKYMAP_H
 

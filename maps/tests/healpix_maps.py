@@ -59,6 +59,25 @@ x2 = x.rebin(2, norm=False)
 assert(x2[0] == v0)
 assert(np.sum(x2) == np.sum(v))
 
+# angles
+pixels = np.arange(x.size, dtype=int)
+alpha, delta = x.pixels_to_angles(pixels)
+alpha, delta = np.asarray(alpha), np.asarray(delta)
+alpha[alpha < 0] += 360 * core.G3Units.deg
+theta, phi = hp.pix2ang(x.nside, pixels)
+
+assert(np.allclose(alpha, phi))
+assert(np.allclose(delta, np.pi / 2 - theta))
+
+pixels2 = x.angles_to_pixels(alpha, delta)
+assert(np.allclose(pixels, pixels2))
+
+# interpolation
+dx = x.res / 2.0
+vx = np.asarray(x.get_interp_values(alpha + dx, delta + dx))
+vh = hp.get_interp_val(np.asarray(x), theta - dx, phi + dx)
+assert(np.allclose(vx, vh))
+
 x.shift_ra = True
 
 # check attributes

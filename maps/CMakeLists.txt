@@ -1,7 +1,7 @@
 add_spt3g_library(maps SHARED
   src/chealpix.c
-  src/get_interp_val.c
   src/G3SkyMap.cxx
+  src/HealpixSkyMapInfo.cxx
   src/HealpixSkyMap.cxx
   src/FlatSkyProjection.cxx
   src/FlatSkyMap.cxx

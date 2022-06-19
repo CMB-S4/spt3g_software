@@ -36,50 +36,6 @@
 extern "C" {
 #endif
 
-
-
-//sasha code
-
-
-/*
-  Structure for storing ring parameters to avoid re-computing every time
-*/
-typedef struct {
-  int init;
-  long idx;
-  long startpix;
-  long ringpix;
-  double theta;
-  int shifted;
-} ring_info;
-
-/*
-  Structure for storing parameters for all rings of a map
-*/
-typedef struct {
-  int nside;
-  long npix;
-  long npface;
-  long ncap;
-  long nring;
-  double fact1;
-  double fact2;
-  int nest;
-  int shift_phi;
-  ring_info *rings;
-} map_info;
-
-
-map_info * init_map_info(size_t nside, int nest, int shift_phi, int populate);
-void free_map_info(map_info *minfo);
-int get_ring_index(map_info *minfo, long pix, long *iring, long *ringpix);
-int get_pixel_index(map_info *minfo, long iring, long ringpix, long *pix);
-int get_interp_weights(map_info *minfo, double theta, double phi,
-                       long pix[4], double weight[4]);
-
-
-
-
 /*! \defgroup chealpix HEALPix C interface
     All angles are in radian, all \a theta values are colatitudes, i.e. counted
     downwards from the North Pole. \a Nside can be any positive number for
