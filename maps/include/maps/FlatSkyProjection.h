@@ -91,6 +91,8 @@ public:
 	std::vector<double> AngleToXY(double alpha, double delta) const;
 	std::vector<double> PixelToAngle(long pixel, bool wrap_alpha=false) const;
 	long AngleToPixel(double alpha, double delta) const;
+	std::vector<double> QuatToXY(quat q, bool local) const;
+	quat XYToQuat(double x, double y, bool local) const;
 
 	std::vector<double> XYToAngleGrad(double x, double y, double h=0.001) const;
 	std::vector<double> PixelToAngleGrad(long pixel, double h=0.001) const;
@@ -100,6 +102,9 @@ public:
 	    bool wrap_alpha=false) const;
 	void GetInterpPixelsWeights(double alpha, double delta,
 	    std::vector<long> & pixels, std::vector<double> & weights) const;
+
+	std::vector<long> QueryDisc(double alpha, double delta, double radius,
+	    bool local) const;
 
 	FlatSkyProjection Rebin(size_t scale, double x_center = 0.0 / 0.0,
 	    double y_center = 0.0 / 0.0) const;

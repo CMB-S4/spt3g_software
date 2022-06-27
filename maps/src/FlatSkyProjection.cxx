@@ -7,6 +7,7 @@
 #include <G3Logging.h>
 #include <G3Units.h>
 
+#include <maps/pointing.h>
 #include <maps/FlatSkyProjection.h>
 
 #define COS cos
@@ -522,6 +523,27 @@ FlatSkyProjection::AngleToXY(double alpha, double delta) const
 }
 
 std::vector<double>
+FlatSkyProjection::QuatToXY(quat q, bool local) const
+{
+	double alpha, delta;
+	quat_to_ang(q, alpha, delta);
+	if (local)
+		delta *= -1;
+
+	return AngleToXY(alpha, delta);
+}
+
+quat
+FlatSkyProjection::XYToQuat(double x, double y, bool local) const
+{
+	std::vector<double> alphadelta = XYToAngle(x, y, false);
+	if (local)
+		alphadelta[1] *= -1;
+
+	return ang_to_quat(alphadelta[0], alphadelta[1]);
+}
+
+std::vector<double>
 FlatSkyProjection::PixelToAngle(long pixel, bool wrap_alpha) const
 {
 	if (pixel < 0 || pixel >= xpix_ * ypix_)
@@ -629,6 +651,68 @@ void FlatSkyProjection::GetInterpPixelsWeights(double alpha, double delta,
 	pixels[1] = x_2 + y_1 * xpix_;  weights[1] = (x - x_1) * (y_2 - y);
 	pixels[2] = x_1 + y_2 * xpix_;  weights[2] = (x_2 - x) * (y - y_1);
 	pixels[3] = x_2 + y_2 * xpix_;  weights[3] = (x - x_1) * (y - y_1);
+}
+
+std::vector<long>
+FlatSkyProjection::QueryDisc(double alpha, double delta, double radius, bool local) const
+{
+	static const size_t npts = 72;
+	alpha /= rad;
+	delta /= rad;
+	double dl = (delta - radius * 2.0 / sqrt(2.0));
+	double d0 = delta;
+	if (local) {
+		dl *= -1;
+		d0 *= -1;
+	}
+	quat p = ang_to_quat(alpha, dl);
+	quat pv = ang_to_quat(alpha, d0);
+	double pva = pv.R_component_2();
+	double pvb = pv.R_component_3();
+	double pvc = pv.R_component_4();
+
+	size_t xmin = xpix_;
+	size_t xmax = 0;
+	size_t ymin = ypix_;
+	size_t ymax = 0;
+
+	double a, d;
+	double phi = 0;
+	double step = 2.0 * M_PI / (double)(npts);
+
+	// select square patch around center
+	for (size_t i = 0; i < npts; i++) {
+		phi = i * step;
+		double c = cos(phi / 2.0);
+		double s = sin(phi / 2.0);
+		quat q = quat(c, pva * s, pvb * s, pvc * s);
+		auto xy = QuatToXY(q * p / q, local);
+		size_t fx = std::floor(xy[0]);
+		size_t cx = std::ceil(xy[0]);
+		size_t fy = std::floor(xy[1]);
+		size_t cy = std::ceil(xy[1]);
+		if (fx < xmin)
+			xmin = fx < 0 ? 0 : fx;
+		if (cx > xmax)
+			xmax = cx > xpix_ ? xpix_ : cx;
+		if (fy < ymin)
+			ymin = fy < 0 ? 0 : fy;
+		if (cy > ymax)
+			ymax = cy > ypix_ ? ypix_ : cy;
+	}
+
+	std::vector<long> pixels;
+	for (size_t x = xmin; x < xmax; x++) {
+		for (size_t y = ymin; y < ymax; y++) {
+			long pixel = y * xpix_ + x;
+			auto ang = PixelToAngle(pixel);
+			if (angular_distance(alpha, delta, ang[0], ang[1]) < radius)
+				pixels.push_back(pixel);
+		}
+	}
+	std::sort(pixels.begin(), pixels.end());
+
+	return pixels;
 }
 
 FlatSkyProjection FlatSkyProjection::Rebin(size_t scale, double x_center, double y_center) const

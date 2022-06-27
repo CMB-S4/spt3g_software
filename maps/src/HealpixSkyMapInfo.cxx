@@ -387,4 +387,90 @@ HealpixSkyMapInfo::GetInterpPixelsWeights(double alpha, double delta,
 	}
 }
 
+std::vector<long>
+HealpixSkyMapInfo::QueryDisc(double alpha, double delta, double radius) const
+{
+	auto pixels = std::vector<long>();
+
+	radius /= G3Units::rad;
+	if (radius >= M_PI) {
+		for (long i = 0; i < npix_; i++)
+			pixels.push_back(i);
+		return pixels;
+	}
+
+	alpha /= G3Units::rad;
+	delta /= G3Units::rad;
+
+	double theta = M_PI_2 - delta;
+	g3_assert(!(theta < 0 || theta > M_PI));
+	double cosrad = cos(radius);
+	double z = cos(theta);
+	double xa = 1.0 / sqrt((1.0 - z) * (1.0 + z));
+	double phi = (alpha < 0) ? (alpha + twopi) : alpha;
+
+	double rlat1 = theta - radius;
+	double zmax = cos(rlat1);
+	size_t irmin = RingAbove(zmax) + 1;
+
+	if ((rlat1 <= 0) && (irmin > 1)) {
+		// north pole in the disk
+		const HealpixRingInfo & ring = rings_[irmin - 1];
+		for (long i = 0; i < ring.pix0 + ring.npix; i++)
+			pixels.push_back(i);
+	}
+
+	double rlat2 = theta + radius;
+	double zmin = cos(rlat2);
+	size_t irmax = RingAbove(zmin);
+
+	for (size_t iring = irmin; iring <= irmax; iring++) {
+		const HealpixRingInfo & ring = rings_[iring];
+
+		double x = (cosrad - ring.z * z) * xa;
+		double ysq = 1 - ring.z * ring.z - x * x;
+		if (ysq <= 0)
+			continue;
+
+		double dphi = atan2(sqrt(ysq), x);
+
+		// highest pixel number in the ring
+		long ipix2 = ring.pix0 + ring.npix - 1;
+
+		long ip_lo = (long)floor((phi - dphi) / ring.dphi - ring.shift) + 1;
+		long ip_hi = (long)floor((phi + dphi) / ring.dphi - ring.shift);
+		if (ip_lo > ip_hi)
+			continue;
+
+		if (ip_hi >= ring.npix) {
+			ip_lo -= ring.npix;
+			ip_hi -= ring.npix;
+		}
+		if (ip_lo < 0) {
+			for (long i = ring.pix0; i < ring.pix0 + ip_hi + 1; i++)
+				pixels.push_back(i);
+			for (long i = ring.pix0 + ip_lo + ring.npix; i < ipix2 + 1; i++)
+				pixels.push_back(i);
+		} else {
+			for (long i = ring.pix0 + ip_lo; i < ring.pix0 + ip_hi + 1; i++)
+				pixels.push_back(i);
+		}
+	}
+
+	if ((rlat2 >= M_PI) && (irmax + 1 < nring_)) {
+		// south pole in the disk
+		const HealpixRingInfo & ring = rings_[irmax + 1];
+		for (long i = ring.pix0; i < npix_; i++)
+			pixels.push_back(i);
+	}
+
+	if (nested_) {
+		for (size_t i = 0; i < pixels.size(); i++)
+			ring2nest(nside_, pixels[i], &pixels[i]);
+		std::sort(pixels.begin(), pixels.end());
+	}
+
+	return pixels;
+}
+
 G3_SPLIT_SERIALIZABLE_CODE(HealpixSkyMapInfo);

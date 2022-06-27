@@ -132,6 +132,11 @@ public:
 
 	virtual boost::shared_ptr<G3SkyMap> Rebin(size_t scale, bool norm = true) const = 0;
 
+	/* Analogue to healpy.query_disc, returns list of pixels within a disc */
+	virtual std::vector<long> QueryDisc(double alpha, double delta, double radius) const {
+		throw std::runtime_error("QueryDisc not implemented");
+	};
+
 	virtual bool IsDense() const {
 		throw std::runtime_error("Checking array density not implemented");
 	}

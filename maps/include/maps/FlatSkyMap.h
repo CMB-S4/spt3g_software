@@ -117,6 +117,8 @@ public:
 	std::vector<double> PixelToAngleWrapRa(size_t pixel) const;
 	std::vector<double> AngleToXY(double alpha, double delta) const;
 	std::vector<double> XYToAngle(double x, double y) const;
+	std::vector<double> QuatToXY(quat q) const;
+	quat XYToQuat(double x, double y) const;
 
 	std::vector<double> PixelToAngleGrad(size_t pixel, double h=0.001) const;
 
@@ -124,6 +126,9 @@ public:
 	    std::vector<double> & alphas, std::vector<double> & deltas) const override;
 	void GetInterpPixelsWeights(double alpha, double delta,
 	    std::vector<long> & pixels, std::vector<double> & weights) const override;
+
+	std::vector<long> QueryDisc(double alpha, double delta,
+	    double radius) const override;
 
 	G3SkyMapPtr Rebin(size_t scale, bool norm = true) const override;
 	G3SkyMapPtr ExtractPatch(size_t x0, size_t y0, size_t width, size_t height,

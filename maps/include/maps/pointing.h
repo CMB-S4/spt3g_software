@@ -30,5 +30,7 @@ quat coord_quat_to_delta_hat(quat q);
 quat get_origin_rotator(double alpha, double delta);
 double get_rot_ang(quat start_q, quat end_q, quat trans);
 
+double angular_distance(double alpha0, double delta0, double alpha1, double delta1);
+
 #endif
 

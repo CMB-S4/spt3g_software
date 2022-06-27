@@ -913,6 +913,12 @@ HealpixSkyMap::GetInterpPixelsWeights(double alpha, double delta,
 	info_.GetInterpPixelsWeights(alpha, delta, pixels, weights);
 }
 
+std::vector<long>
+HealpixSkyMap::QueryDisc(double alpha, double delta, double radius) const
+{
+	return info_.QueryDisc(alpha, delta, radius);
+}
+
 G3SkyMapPtr HealpixSkyMap::Rebin(size_t scale, bool norm) const
 {
 	if (nside() % scale != 0)
