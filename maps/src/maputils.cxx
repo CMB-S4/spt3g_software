@@ -612,6 +612,26 @@ pyconvolve_map(FlatSkyMapConstPtr map, bp::object val)
 }
 
 
+void
+MakePointSourceMask(G3SkyMapPtr map, const std::vector<double> & ra,
+    const std::vector<double> & dec, const std::vector<double> & radius)
+{
+	g3_assert(ra.size() == dec.size());
+	g3_assert(ra.size() == radius.size());
+
+	for (size_t i = 0; i < ra.size(); i++) {
+		auto pixels = map->QueryDisc(ra[i], dec[i], radius[i]);
+		for (auto p: pixels)
+			(*map)[p] = 1;
+	}
+
+	map->weighted = false;
+	map->units = G3Timestream::None;
+	map->pol_type = G3SkyMap::None;
+	map->SetPolConv(G3SkyMap::ConvNone);
+}
+
+
 namespace bp = boost::python;
 void maputils_pybindings(void){
 	bp::def("get_mask_map", GetMaskMap,
@@ -706,4 +726,9 @@ void maputils_pybindings(void){
 	bp::def("convolve_map", pyconvolve_map, (bp::arg("map"), bp::arg("kernel")),
 		"Convolve the input flat sky map with the given map-space kernel. The "
 		"kernel must have odd dimensions and the same resolution as the map.");
+
+	bp::def("make_point_source_mask", MakePointSourceMask,
+		(bp::arg("map"), bp::arg("ra"), bp::arg("dec"), bp::arg("radius")),
+		"Construct a map with pixels within the given radius around each "
+		"point source position set to 1.");
 }

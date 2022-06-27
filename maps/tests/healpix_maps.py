@@ -79,15 +79,27 @@ vh = hp.get_interp_val(np.asarray(x), theta - dx, phi + dx)
 assert(np.allclose(vx, vh))
 
 # Query disc
+avec = []
+dvec = []
+rvec = []
+masked = set()
 alpha = 30 * core.G3Units.deg
 radius = 5 * core.G3Units.deg
 for delta in range(-90, 91, 10):
     delta *= core.G3Units.deg
     theta = 90 * core.G3Units.deg - delta
+    avec.append(alpha)
+    dvec.append(delta)
+    rvec.append(radius)
     pix1 = np.asarray(x.query_disc(alpha, delta, radius), dtype=int)
     v = hp.ang2vec(theta, alpha)
     pix2 = np.asarray(hp.query_disc(x.nside, v, radius), dtype=int)
+    masked |= set(pix2)
     assert not (set(pix1) ^ set(pix2))
+
+mask = x.clone(False)
+maps.make_point_source_mask(mask, np.asarray(avec), np.asarray(dvec), np.asarray(rvec))
+assert not (set(np.where(np.asarray(mask).ravel())[0]) ^ masked)
 
 x.shift_ra = True
 

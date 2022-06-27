@@ -99,8 +99,16 @@ angles = SkyCoord(
 ).ravel()
 radius = 5 * x.res
 
+avec = []
+dvec = []
+rvec = []
+masked = set()
+
 for a in numpy.linspace(numpy.min(alpha), numpy.max(alpha), 20):
     for d in numpy.linspace(numpy.min(delta), numpy.max(delta), 20):
+        avec.append(a)
+        dvec.append(d)
+        rvec.append(radius)
         pix1 = x.query_disc(a, d, radius)
         pix2 = numpy.where(
             angles.separation(
@@ -110,4 +118,9 @@ for a in numpy.linspace(numpy.min(alpha), numpy.max(alpha), 20):
                 )
             ).deg * core.G3Units.deg < radius
         )[0]
+        masked |= set(pix2)
         assert not (set(pix1) ^ set(pix2))
+
+mask = x.clone(False)
+maps.make_point_source_mask(mask, numpy.asarray(avec), numpy.asarray(dvec), numpy.asarray(rvec))
+assert not (set(numpy.where(numpy.asarray(mask).ravel())[0]) ^ masked)
