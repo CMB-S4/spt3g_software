@@ -83,6 +83,9 @@ public:
 	void GetInterpPixelsWeights(double alpha, double delta,
 	    std::vector<long> & pixels, std::vector<double> & weights) const override;
 
+	std::vector<long> QueryDisc(double alpha, double delta,
+	    double radius) const override;
+
 	G3SkyMapPtr Rebin(size_t scale, bool norm = true) const override;
 
 	void ConvertToDense() override;

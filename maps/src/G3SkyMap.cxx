@@ -965,6 +965,11 @@ PYBINDINGS("maps") {
 	       "Compute the sky coordinates, expressed as quaternion rotations "
 	       "from the pole, for each of the given 1-D pixel coordinates.")
 
+	    .def("query_disc", &G3SkyMap::QueryDisc,
+	       (bp::arg("alpha"), bp::arg("delta"), bp::arg("radius")),
+	       "Return a list of pixel indices whose centers are located within "
+	       "a disc of the given radius at the given sky coordinates.")
+
 	    .def("get_interp_values",
 	      (std::vector<double> (G3SkyMap::*)(const std::vector<double> &,
 		const std::vector<double> &) const) &G3SkyMap::GetInterpValues,

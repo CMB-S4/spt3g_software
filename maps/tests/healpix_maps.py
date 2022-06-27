@@ -78,6 +78,17 @@ vx = np.asarray(x.get_interp_values(alpha + dx, delta + dx))
 vh = hp.get_interp_val(np.asarray(x), theta - dx, phi + dx)
 assert(np.allclose(vx, vh))
 
+# Query disc
+alpha = 30 * core.G3Units.deg
+radius = 5 * core.G3Units.deg
+for delta in range(-90, 91, 10):
+    delta *= core.G3Units.deg
+    theta = 90 * core.G3Units.deg - delta
+    pix1 = np.asarray(x.query_disc(alpha, delta, radius), dtype=int)
+    v = hp.ang2vec(theta, alpha)
+    pix2 = np.asarray(hp.query_disc(x.nside, v, radius), dtype=int)
+    assert not (set(pix1) ^ set(pix2))
+
 x.shift_ra = True
 
 # check attributes

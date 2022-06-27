@@ -44,6 +44,9 @@ public:
 	void GetInterpPixelsWeights(double alpha, double delta,
 	    std::vector<long> & pixels, std::vector<double> & weights) const;
 
+	std::vector<long> QueryDisc(double alpha, double delta,
+	    double radius) const;
+
 private:
 	// scheme
 	size_t nside_;

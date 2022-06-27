@@ -489,6 +489,20 @@ get_closest_transform(double ra, double dec,
 	return v;
 }
 
+double
+angular_distance(double alpha0, double delta0, double alpha1, double delta1)
+{
+	alpha0 /= G3Units::rad;
+	delta0 /= G3Units::rad;
+	alpha1 /= G3Units::rad;
+	delta1 /= G3Units::rad;
+
+	double sa = sin((alpha0 - alpha1) / 2.0);
+	double sd = sin((delta0 - delta1) / 2.0);
+	double v = sd * sd + cos(delta0) * cos(delta1) * sa * sa;
+
+	return 2 * asin(sqrt(v)) * G3Units::rad;
+}
 
 PYBINDINGS("maps")
 {
