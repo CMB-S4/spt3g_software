@@ -66,6 +66,10 @@ std::vector<double> GetMapHist(G3SkyMapConstPtr m, const std::vector<double> &bi
 // Convolve the input flat sky map with a filter kernel
 FlatSkyMapPtr ConvolveMap(FlatSkyMapConstPtr map, FlatSkyMapConstPtr kernel);
 
+// Point source masking
+void MakePointSourceMask(G3SkyMapPtr map, const std::vector<double> & ra,
+    const std::vector<double> & dec, const std::vector<double> & radius);
+
 // Python bindings
 void maputils_pybindings(void);
 
