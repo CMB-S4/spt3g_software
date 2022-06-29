@@ -11,7 +11,7 @@ jobs:
     strategy:
       matrix:
         #os: [ubuntu-18.04, ubuntu-20.04, macOS-latest]
-        os: [ubuntu-18.04, macOS-latest]
+        os: [ubuntu-20.04, macOS-latest]
     runs-on: ${{ matrix.os}}
 
     steps:
@@ -21,6 +21,7 @@ jobs:
       shell: bash
       run: |
         if [ `echo ${{matrix.os}} | cut -d - -f 1` = "ubuntu" ]; then
+          sudo apt-get --allow-releaseinfo-change update -y
           [ `echo ${{matrix.os}} | cut -d . -f 1` = "ubuntu-20" ] && sudo apt-get install python-is-python3
           sudo apt-get install libboost-all-dev libflac-dev libnetcdf-dev libfftw3-dev libgsl0-dev python python3 python3-pip python3-setuptools
         elif [ `echo ${{matrix.os}} | cut -d - -f 1` = "macOS" ]; then
