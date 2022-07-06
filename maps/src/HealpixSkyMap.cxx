@@ -244,7 +244,7 @@ HealpixSkyMap::load(A &ar, unsigned v)
 {
 	using namespace cereal;
 	int store;
-	size_t nside;
+	uint32_t nside;
 	bool nested, shifted;
 
 	G3_CHECK_VERSION(v);
