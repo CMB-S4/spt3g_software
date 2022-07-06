@@ -252,7 +252,7 @@ HealpixSkyMap::load(A &ar, unsigned v)
 	ar & make_nvp("G3FrameObject", base_class<G3FrameObject>(this));
 	ar & make_nvp("G3SkyMap", base_class<G3SkyMap>(this));
 
-	if (v < 2) {
+	if (v < 3) {
 		ar & make_nvp("nside", nside);
 		ar & make_nvp("nested", nested);
 	} else {
