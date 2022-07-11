@@ -213,6 +213,7 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 
 		out_frame->Put("StartTime", G3TimePtr(new G3Time(start_)));
 		out_frame->Put("StopTime", G3TimePtr(new G3Time(stop_)));
+		start_.time = stop_.time = 0;
 
 		out.push_back(out_frame);
 	}
