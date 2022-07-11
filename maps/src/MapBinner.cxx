@@ -254,10 +254,10 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	}
 
 	// Update start and stop times for map
-	if (start_.time == 0 || start_ > timestreams->start)
-		start_ = timestreams->start;
-	if (stop_ < timestreams->stop)
-		stop_ = timestreams->stop;
+	if (start_.time == 0 || start_ > timestreams->GetStartTime())
+		start_ = timestreams->GetStartTime();
+	if (stop_ < timestreams->GetStopTime())
+		stop_ = timestreams->GetStopTime();
 
 	if (!units_set_) {
 		T_->units = timestreams->GetUnits();
