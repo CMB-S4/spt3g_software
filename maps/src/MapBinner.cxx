@@ -40,6 +40,7 @@ private:
 
 	G3SkyMapPtr T_, Q_, U_;
 	G3SkyMapWeightsPtr map_weights_;
+	G3Time start_, stop_;
 
 	BolometerPropertiesMapConstPtr boloprops_;
 
@@ -180,10 +181,12 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	if (frame->type == G3Frame::EndProcessing)
 		emit_map_now = true;
 	else if (frame->type == G3Frame::Scan) {
-		if (map_per_scan_ >= 0)
-			emit_map_now = map_per_scan_;
-		else
-			emit_map_now = map_per_scan_callback_(frame);
+		if (start_.time != 0) { // Data exist
+			if (map_per_scan_ >= 0)
+				emit_map_now = map_per_scan_;
+			else
+				emit_map_now = map_per_scan_callback_(frame);
+		}
 	}
 	
 	if (emit_map_now) {
@@ -207,6 +210,9 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 			map_weights_ = G3SkyMapWeightsPtr(new G3SkyMapWeights(
 			    T_, T_->GetPolConv() != G3SkyMap::ConvNone));
 		}
+
+		out_frame->Put("StartTime", G3TimePtr(new G3Time(start_)));
+		out_frame->Put("StopTime", G3TimePtr(new G3Time(stop_)));
 
 		out.push_back(out_frame);
 	}
@@ -245,6 +251,12 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 			return;
 		}
 	}
+
+	// Update start and stop times for map
+	if (start_.time == 0 || start_ > timestreams->start)
+		start_ = timestreams->start;
+	if (stop_ < timestreams->stop)
+		stop_ = timestreams->stop;
 
 	if (!units_set_) {
 		T_->units = timestreams->GetUnits();
