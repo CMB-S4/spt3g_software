@@ -1,7 +1,7 @@
-#ifndef _G3_SKYMAP_H
-#define _G3_SKYMAP_H
+#ifndef _G3_SKYMAPMASK_H
+#define _G3_SKYMAPMASK_H
 
-#include <G3SkyMap.h>
+#include <maps/G3SkyMap.h>
 #include <vector>
 
 #include <boost/python.hpp>
@@ -19,7 +19,7 @@ public:
 	virtual ~G3SkyMapMask() {};
 
 	// Return a (modifiable) pixel value
-	bool &operator [] (size_t i);
+	std::vector<bool>::reference operator [] (size_t i);
 	bool operator [] (size_t i) const { return this->at(i); };
 	bool at(size_t i) const;
 
@@ -38,7 +38,7 @@ public:
 	bool IsDense() const { return true; }
 
 	// The map for projection info
-	G3SkyMapConstPtr Parent() const;
+	G3SkyMapConstPtr Parent() const { return parent_; }
 
 private:
 	G3SkyMapMask() {} // Fake out for serialization
