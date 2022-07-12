@@ -4,7 +4,6 @@
 #include <sys/types.h>
 
 #include <maps/G3SkyMapMask.h>
-#include <maps/FlatSkyProjection.h>
 
 G3SkyMapMask::G3SkyMapMask(const G3SkyMap &parent) : G3FrameObject()
 {
