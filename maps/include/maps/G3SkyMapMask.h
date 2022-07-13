@@ -49,6 +49,9 @@ public:
 	// The map for projection info
 	G3SkyMapConstPtr Parent() const { return parent_; }
 
+	// Return a 1-or-0 sky-map with the contents of the mask (e.g. for plotting)
+	G3SkyMapPtr MakeBinaryMap();
+
 private:
 	G3SkyMapMask() {} // Fake out for serialization
 	template <class A> void serialize(A &ar, const unsigned v);

@@ -123,6 +123,19 @@ G3SkyMapMask::operator ^(const G3SkyMapMask &rhs)
 	return mask;
 }
 
+G3SkyMapPtr
+G3SkyMapMask::MakeBinaryMap()
+{
+	G3SkyMapPtr out = parent_->Clone();
+
+	for (size_t i = 0; i < data_.size(); i++) {
+		if (at(i))
+			(*out)[i] = 1.0;
+	}
+
+	return out;
+}
+
 template <class A>
 void G3SkyMapMask::serialize(A &ar, unsigned v)
 {
@@ -265,6 +278,7 @@ PYBINDINGS("maps")
 	  .def(bp::self | bp::self)
 	  .def(bp::self & bp::self)
 	  .def(bp::self ^ bp::self)
+	  .def("to_map", &G3SkyMapMask::MakeBinaryMap, "Create a skymap with data set to the contents of this mask (1.0 where True, 0.0 where False), which can be useful for plotting.")
 	;
 }
 
