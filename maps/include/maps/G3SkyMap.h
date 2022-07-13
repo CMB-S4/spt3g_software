@@ -151,6 +151,8 @@ public:
 		throw std::runtime_error("Compactification not implemented");
 	}
 
+	virtual boost::shared_ptr<G3SkyMapMask> MakeMask() const;
+
 protected:
 	MapPolConv pol_conv_;
 

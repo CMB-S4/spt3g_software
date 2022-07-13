@@ -1,7 +1,6 @@
 #ifndef _G3_SKYMAPMASK_H
 #define _G3_SKYMAPMASK_H
 
-#include <maps/G3SkyMap.h>
 #include <vector>
 
 #include <boost/python.hpp>
@@ -17,6 +16,8 @@
  * source of data, initializing the mask to True where the input map is
  * non-zero.
  */
+
+class G3SkyMap;
 
 class G3SkyMapMask : public G3FrameObject {
 public:
@@ -46,15 +47,15 @@ public:
 	G3SkyMapMask operator ^(const G3SkyMapMask &rhs) const;
 
 	// Information
-	bool IsCompatible(const G3SkyMap &map) const { return map.IsCompatible(*Parent()); }
-	bool IsCompatible(const G3SkyMapMask &mask) const { return mask.Parent()->IsCompatible(*Parent()); }
+	bool IsCompatible(const G3SkyMap &map) const;
+	bool IsCompatible(const G3SkyMapMask &mask) const;
 	bool IsDense() const { return true; }
 
 	// The map for projection info
-	G3SkyMapConstPtr Parent() const { return parent_; }
+	boost::shared_ptr<const G3SkyMap> Parent() const { return parent_; }
 
 	// Return a 1-or-0 sky-map with the contents of the mask (e.g. for plotting)
-	G3SkyMapPtr MakeBinaryMap() const;
+	boost::shared_ptr<G3SkyMap> MakeBinaryMap() const;
 
 private:
 	G3SkyMapMask() {} // Fake out for serialization
@@ -62,7 +63,7 @@ private:
 	friend class cereal::access;
 
 	std::vector<bool> data_;
-	G3SkyMapConstPtr parent_;
+	boost::shared_ptr<const G3SkyMap> parent_;
 
 	SET_LOGGER("G3SkyMapMask");
 };

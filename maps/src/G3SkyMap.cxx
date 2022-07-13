@@ -227,6 +227,13 @@ size_t G3SkyMap::size() const
 	return s;
 }
 
+G3SkyMapMaskPtr
+G3SkyMap::MakeMask() const
+{
+	G3SkyMapMaskPtr m(new G3SkyMapMask(*this, true));
+	return m;
+}
+
 G3SkyMap &G3SkyMap::operator+=(const G3SkyMap & rhs)
 {
 	g3_assert(IsCompatible(rhs));
@@ -1090,6 +1097,10 @@ PYBINDINGS("maps") {
 	      "empty pixels, and optionally also removing NaN values. A map "
 	      "that is already sparse will be compactified in place in its "
 	      "current representation without additional memory overhead.")
+
+	    .def("to_mask", &G3SkyMap::MakeMask,
+	      "Create a G3SkyMapMask object from the parent map, with pixels "
+	      "set to true where the map is non-zero.")
 
 	    .def(bp::self += bp::self)
 	    .def(bp::self *= bp::self)

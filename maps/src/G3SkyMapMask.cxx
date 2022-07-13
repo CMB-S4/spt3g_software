@@ -4,6 +4,7 @@
 #include <sys/types.h>
 
 #include <maps/G3SkyMapMask.h>
+#include <maps/G3SkyMap.h>
 #include <maps/FlatSkyMap.h>
 
 G3SkyMapMask::G3SkyMapMask(const G3SkyMap &parent, bool use_data)
@@ -19,7 +20,7 @@ G3SkyMapMask::G3SkyMapMask(const G3SkyMap &parent, bool use_data)
 
 G3SkyMapMask::G3SkyMapMask(const G3SkyMapMask &m) : G3FrameObject()
 {
-	parent_ = m.Parent()->Clone(false);
+	parent_ = m.parent_;
 	data_ = std::vector<bool>(m.data_);
 }
 
@@ -163,10 +164,22 @@ G3SkyMapMask::operator ^(const G3SkyMapMask &rhs) const
 	return mask;
 }
 
+bool
+G3SkyMapMask::IsCompatible(const G3SkyMap &map) const
+{
+	return Parent()->IsCompatible(map);
+}
+
+bool
+G3SkyMapMask::IsCompatible(const G3SkyMapMask &mask) const
+{
+	return Parent()->IsCompatible(*mask.Parent());
+}
+
 G3SkyMapPtr
 G3SkyMapMask::MakeBinaryMap() const
 {
-	G3SkyMapPtr out = parent_->Clone();
+	G3SkyMapPtr out = Parent()->Clone();
 
 	for (size_t i = 0; i < data_.size(); i++) {
 		if (at(i))
