@@ -37,8 +37,8 @@ public:
 	G3SkyMapMask operator ^(const G3SkyMapMask &rhs);
 
 	// Information
-	bool IsCompatible(const G3SkyMap &map) { return map.IsCompatible(*Parent()); }
-	bool IsCompatible(const G3SkyMapMask &mask) { return mask.Parent()->IsCompatible(*Parent()); }
+	bool IsCompatible(const G3SkyMap &map) const { return map.IsCompatible(*Parent()); }
+	bool IsCompatible(const G3SkyMapMask &mask) const { return mask.Parent()->IsCompatible(*Parent()); }
 	bool IsDense() const { return true; }
 
 	// The map for projection info
