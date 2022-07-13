@@ -143,11 +143,6 @@ foreach(subdir ${SUBDIRS})
 	add_subdirectory(${CMAKE_SOURCE_DIR}/${pname})
 endforeach(subdir ${SUBDIRS})
 
-if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-	add_executable(cppexample ${CMAKE_SOURCE_DIR}/examples/cppexample.cxx)
-	target_link_libraries(cppexample ${SPT3G_LIBRARIES})
-endif("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-
 # export configuration files for use in other projects
 export(TARGETS ${SPT3G_LIBRARIES} NAMESPACE spt3g:: FILE ${CMAKE_BINARY_DIR}/cmake/Spt3gTargets.cmake)
 configure_file(${CMAKE_SOURCE_DIR}/cmake/Spt3gConfig.cmake.in ${CMAKE_BINARY_DIR}/cmake/Spt3gConfig.cmake @ONLY)
