@@ -36,10 +36,10 @@ public:
 	G3SkyMapMask &operator ^=(const G3SkyMapMask &rhs);
 	G3SkyMapMask &invert(); // Basically ~=
 
-	G3SkyMapMask operator ~();
-	G3SkyMapMask operator |(const G3SkyMapMask &rhs);
-	G3SkyMapMask operator &(const G3SkyMapMask &rhs);
-	G3SkyMapMask operator ^(const G3SkyMapMask &rhs);
+	G3SkyMapMask operator ~() const;
+	G3SkyMapMask operator |(const G3SkyMapMask &rhs) const;
+	G3SkyMapMask operator &(const G3SkyMapMask &rhs) const;
+	G3SkyMapMask operator ^(const G3SkyMapMask &rhs) const;
 
 	// Information
 	bool IsCompatible(const G3SkyMap &map) const { return map.IsCompatible(*Parent()); }
@@ -50,7 +50,7 @@ public:
 	G3SkyMapConstPtr Parent() const { return parent_; }
 
 	// Return a 1-or-0 sky-map with the contents of the mask (e.g. for plotting)
-	G3SkyMapPtr MakeBinaryMap();
+	G3SkyMapPtr MakeBinaryMap() const;
 
 private:
 	G3SkyMapMask() {} // Fake out for serialization

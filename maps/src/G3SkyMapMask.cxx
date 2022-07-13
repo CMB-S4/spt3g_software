@@ -78,7 +78,7 @@ G3SkyMapMask::invert()
 }
 
 G3SkyMapMask
-G3SkyMapMask::operator ~()
+G3SkyMapMask::operator ~() const
 {
 	G3SkyMapMask mask(*Parent());
 	for (size_t i = 0; i < data_.size(); i++)
@@ -88,7 +88,7 @@ G3SkyMapMask::operator ~()
 }
 
 G3SkyMapMask
-G3SkyMapMask::operator |(const G3SkyMapMask &rhs)
+G3SkyMapMask::operator |(const G3SkyMapMask &rhs) const
 {
 	g3_assert(IsCompatible(rhs));
 
@@ -100,7 +100,7 @@ G3SkyMapMask::operator |(const G3SkyMapMask &rhs)
 }
 
 G3SkyMapMask
-G3SkyMapMask::operator &(const G3SkyMapMask &rhs)
+G3SkyMapMask::operator &(const G3SkyMapMask &rhs) const
 {
 	g3_assert(IsCompatible(rhs));
 
@@ -112,7 +112,7 @@ G3SkyMapMask::operator &(const G3SkyMapMask &rhs)
 }
 
 G3SkyMapMask
-G3SkyMapMask::operator ^(const G3SkyMapMask &rhs)
+G3SkyMapMask::operator ^(const G3SkyMapMask &rhs) const
 {
 	g3_assert(IsCompatible(rhs));
 
@@ -124,7 +124,7 @@ G3SkyMapMask::operator ^(const G3SkyMapMask &rhs)
 }
 
 G3SkyMapPtr
-G3SkyMapMask::MakeBinaryMap()
+G3SkyMapMask::MakeBinaryMap() const
 {
 	G3SkyMapPtr out = parent_->Clone();
 
