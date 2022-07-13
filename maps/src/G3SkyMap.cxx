@@ -535,6 +535,13 @@ pyskymap_multm(const G3SkyMap &a, const G3SkyMapMask &b)
 }
 
 static G3SkyMapPtr
+pyskymap_imultm(G3SkyMapPtr a, const G3SkyMapMask &b)
+{
+	(*a) *= b;
+	return a;
+}
+
+static G3SkyMapPtr
 pyskymap_rsubd(const G3SkyMap &a, const double b)
 {
 	G3SkyMapPtr rv = pyskymap_subd(a, b);
@@ -734,7 +741,8 @@ static G3SkyMapWeightsPtr
 pyskymapweights_multma(const G3SkyMapWeights &a, const G3SkyMapMask &b)
 {
 	G3SkyMapWeightsPtr rv(new G3SkyMapWeights());
-	rv->TT = pyskymap_multm(*a.TT, b);
+	if (!!a.TT)
+		rv->TT = pyskymap_multm(*a.TT, b);
 	if (!!a.TQ)
 		rv->TQ = pyskymap_multm(*a.TQ, b);
 	if (!!a.TU)
@@ -747,6 +755,25 @@ pyskymapweights_multma(const G3SkyMapWeights &a, const G3SkyMapMask &b)
 		rv->UU = pyskymap_multm(*a.UU, b);
 
 	return rv;
+}
+
+static G3SkyMapWeightsPtr
+pyskymapweights_imultma(G3SkyMapWeightsPtr a, const G3SkyMapMask &b)
+{
+	if (!!a->TT)
+		(*a->TT) *= b;
+	if (!!a->TQ)
+		(*a->TQ) *= b;
+	if (!!a->TU)
+		(*a->TU) *= b;
+	if (!!a->QQ)
+		(*a->QQ) *= b;
+	if (!!a->QU)
+		(*a->QU) *= b;
+	if (!!a->UU)
+		(*a->UU) *= b;
+
+	return a;
 }
 
 MuellerMatrix MuellerMatrix::Inv() const
@@ -1079,6 +1106,7 @@ PYBINDINGS("maps") {
 	    .def("__sub__", &pyskymap_sub)
 	    .def("__sub__", &pyskymap_subd)
 	    .def("__rsub__", &pyskymap_rsubd)
+	    .def("__imul__", &pyskymap_imultm)
 	    .def("__mul__", &pyskymap_mult)
 	    .def("__mul__", &pyskymap_multm)
 	    .def("__mul__", &pyskymap_multd)
@@ -1159,6 +1187,7 @@ PYBINDINGS("maps") {
 	    .def(bp::self /= double())
 
 	    .def("__add__", &pyskymapweights_add)
+	    .def("__imul__", &pyskymapweights_imultma)
 	    .def("__mul__", &pyskymapweights_multm)
 	    .def("__mul__", &pyskymapweights_multma)
 	    .def("__mul__", &pyskymapweights_multd)
