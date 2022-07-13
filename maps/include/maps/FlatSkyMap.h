@@ -73,6 +73,7 @@ public:
 
 	// *
 	virtual G3SkyMap &operator*=(const G3SkyMap &rhs) override;
+	virtual G3SkyMap &operator*=(const G3SkyMapMask &rhs) override;
 	virtual G3SkyMap &operator*=(double rhs) override;
 
 	// /

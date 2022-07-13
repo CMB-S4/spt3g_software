@@ -9,6 +9,7 @@
 #include <G3Units.h>
 #include <maps/HealpixSkyMap.h>
 #include <maps/chealpix.h>
+#include <maps/G3SkyMapMask.h>
 
 #include "mapdata.h"
 
@@ -610,6 +611,19 @@ G3SkyMap &HealpixSkyMap::operator *=(const G3SkyMap &rhs) {
 	} catch (const std::bad_cast& e) {
 		return G3SkyMap::operator *=(rhs);
 	}
+	return *this;
+}
+
+G3SkyMap &
+HealpixSkyMap::operator *=(const G3SkyMapMask &rhs)
+{
+	g3_assert(rhs.IsCompatible(*this));
+
+	for (auto i : *this) {
+		if (!rhs.at(i.first) && i.second != 0)
+			(*this)[i.first] = 0;
+	}
+
 	return *this;
 }
 

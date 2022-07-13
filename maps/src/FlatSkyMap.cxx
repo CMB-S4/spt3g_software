@@ -8,6 +8,7 @@
 
 #include <maps/FlatSkyMap.h>
 #include <maps/FlatSkyProjection.h>
+#include <maps/G3SkyMapMask.h>
 
 #include "mapdata.h"
 
@@ -468,6 +469,19 @@ G3SkyMap &FlatSkyMap::operator *=(const G3SkyMap &rhs) {
 	} catch (const std::bad_cast& e) {
 		return G3SkyMap::operator *=(rhs);
 	}
+}
+
+G3SkyMap &
+FlatSkyMap::operator *=(const G3SkyMapMask &rhs)
+{
+	g3_assert(rhs.IsCompatible(*this));
+
+	for (auto i : *this) {
+		if (!rhs.at(i.first) && i.second != 0)
+			(*this)[i.first] = 0;
+	}
+
+	return *this;
 }
 
 G3SkyMap &
