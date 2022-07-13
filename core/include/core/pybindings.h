@@ -344,5 +344,10 @@ public:
 	    .def(boost::python::init<const T &>()) \
 	    .def_pickle(g3frameobject_picklesuite<T>())
 
+#define EXPORT_FRAMEOBJECT_NOINITNAMESPACE(T, initf, docstring) \
+	boost::python::class_<T, boost::python::bases<G3FrameObject>, boost::shared_ptr<T> >(#T, docstring, initf) \
+	    .def(boost::python::init<const T &>()) \
+	    .def_pickle(g3frameobject_picklesuite<T>())
+
 #endif
 
