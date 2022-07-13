@@ -16,6 +16,7 @@
 class G3SkyMapMask : public G3FrameObject {
 public:
 	G3SkyMapMask(const G3SkyMap &parent);
+	G3SkyMapMask(const G3SkyMapMask &);
 	virtual ~G3SkyMapMask() {};
 
 	// Return a (modifiable) pixel value
@@ -35,6 +36,9 @@ public:
 	G3SkyMapMask operator &(const G3SkyMapMask &rhs);
 	G3SkyMapMask operator ^(const G3SkyMapMask &rhs);
 
+	// Information
+	bool IsCompatible(const G3SkyMap &map) { return map.IsCompatible(*Parent()); }
+	bool IsCompatible(const G3SkyMapMask &mask) { return mask.Parent()->IsCompatible(*Parent()); }
 	bool IsDense() const { return true; }
 
 	// The map for projection info

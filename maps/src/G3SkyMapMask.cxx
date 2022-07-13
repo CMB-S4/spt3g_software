@@ -11,6 +11,12 @@ G3SkyMapMask::G3SkyMapMask(const G3SkyMap &parent) : G3FrameObject()
 	data_ = std::vector<bool>(parent.size());
 }
 
+G3SkyMapMask::G3SkyMapMask(const G3SkyMapMask &m) : G3FrameObject()
+{
+	parent_ = m.Parent()->Clone(false);
+	data_ = std::vector<bool>(m.data_);
+}
+
 std::vector<bool>::reference
 G3SkyMapMask::operator [] (size_t i)
 {
@@ -21,6 +27,94 @@ bool
 G3SkyMapMask::at (size_t i) const
 {
 	return data_[i];
+}
+
+G3SkyMapMask &
+G3SkyMapMask::operator |=(const G3SkyMapMask &rhs)
+{
+	g3_assert(IsCompatible(rhs));
+
+	for (size_t i = 0; i < data_.size(); i++)
+		(*this)[i] = rhs[i] || (*this)[i];
+
+	return *this;
+}
+
+G3SkyMapMask &
+G3SkyMapMask::operator &=(const G3SkyMapMask &rhs)
+{
+	g3_assert(IsCompatible(rhs));
+
+	for (size_t i = 0; i < data_.size(); i++)
+		(*this)[i] = rhs[i] && (*this)[i];
+
+	return *this;
+}
+
+G3SkyMapMask &
+G3SkyMapMask::operator ^=(const G3SkyMapMask &rhs)
+{
+	g3_assert(IsCompatible(rhs));
+
+	for (size_t i = 0; i < data_.size(); i++)
+		(*this)[i] = rhs[i] ^ (*this)[i];
+
+	return *this;
+}
+
+G3SkyMapMask &
+G3SkyMapMask::invert()
+{
+	for (size_t i = 0; i < data_.size(); i++)
+		(*this)[i] = !(*this)[i];
+
+	return *this;
+}
+
+G3SkyMapMask
+G3SkyMapMask::operator ~()
+{
+	G3SkyMapMask mask(*Parent());
+	for (size_t i = 0; i < data_.size(); i++)
+		mask[i] = !(*this)[i];
+
+	return mask;
+}
+
+G3SkyMapMask
+G3SkyMapMask::operator |(const G3SkyMapMask &rhs)
+{
+	g3_assert(IsCompatible(rhs));
+
+	G3SkyMapMask mask(*Parent());
+	for (size_t i = 0; i < data_.size(); i++)
+		mask[i] = (*this)[i] || rhs[i];
+
+	return mask;
+}
+
+G3SkyMapMask
+G3SkyMapMask::operator &(const G3SkyMapMask &rhs)
+{
+	g3_assert(IsCompatible(rhs));
+
+	G3SkyMapMask mask(*Parent());
+	for (size_t i = 0; i < data_.size(); i++)
+		mask[i] = (*this)[i] && rhs[i];
+
+	return mask;
+}
+
+G3SkyMapMask
+G3SkyMapMask::operator ^(const G3SkyMapMask &rhs)
+{
+	g3_assert(IsCompatible(rhs));
+
+	G3SkyMapMask mask(*Parent());
+	for (size_t i = 0; i < data_.size(); i++)
+		mask[i] = (*this)[i] ^ rhs[i];
+
+	return mask;
 }
 
 template <class A>
@@ -60,6 +154,15 @@ skymapmask_setitem(G3SkyMapMask &m, int i, bool val)
 	m[i] = val;
 }
 
+static G3SkyMapMaskPtr
+skymapmask_pyinvert(G3SkyMapMaskPtr m)
+{
+	// Reference-counting problems returning references to Python,
+	// so use shared pointers.
+	m->invert();
+	return m;
+}
+
 PYBINDINGS("maps")
 {
 	using namespace boost::python;
@@ -72,6 +175,14 @@ PYBINDINGS("maps")
 	    "the map to which this mask corresponds.")
 	  .def("__getitem__", &skymapmask_getitem)
 	  .def("__setitem__", &skymapmask_setitem)
+	  .def("invert", &skymapmask_pyinvert, "Invert all elements in mask")
+	  .def(bp::self |= bp::self)
+	  .def(bp::self &= bp::self)
+	  .def(bp::self ^= bp::self)
+	  .def(~bp::self)
+	  .def(bp::self | bp::self)
+	  .def(bp::self & bp::self)
+	  .def(bp::self ^ bp::self)
 	;
 }
 
