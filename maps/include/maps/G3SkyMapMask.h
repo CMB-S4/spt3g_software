@@ -11,11 +11,16 @@
  * booleans for whether to use (true) or ignore (false) certain pixels.
  * The pixelization is stored externally in the parent map, as is the
  * (potential) translation from 2D to 1D pixel indices.
+ *
+ * By default, initializes to all zeroes. If use_data = True, it will
+ * interpret the input sky map both as projection information and as a
+ * source of data, initializing the mask to True where the input map is
+ * non-zero.
  */
 
 class G3SkyMapMask : public G3FrameObject {
 public:
-	G3SkyMapMask(const G3SkyMap &parent);
+	G3SkyMapMask(const G3SkyMap &parent, bool use_data = false);
 	G3SkyMapMask(const G3SkyMapMask &);
 	virtual ~G3SkyMapMask() {};
 

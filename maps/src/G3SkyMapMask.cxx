@@ -6,10 +6,15 @@
 #include <maps/G3SkyMapMask.h>
 #include <maps/FlatSkyMap.h>
 
-G3SkyMapMask::G3SkyMapMask(const G3SkyMap &parent) : G3FrameObject()
+G3SkyMapMask::G3SkyMapMask(const G3SkyMap &parent, bool use_data)
+  : G3FrameObject()
 {
 	parent_ = parent.Clone(false);
 	data_ = std::vector<bool>(parent.size());
+	if (use_data) {
+		for (size_t i = 0; i < parent.size(); i++)
+			data_[i] = (parent.at(i) != 0);
+	}
 }
 
 G3SkyMapMask::G3SkyMapMask(const G3SkyMapMask &m) : G3FrameObject()
@@ -240,9 +245,11 @@ PYBINDINGS("maps")
 {
 	using namespace boost::python;
 
-	EXPORT_FRAMEOBJECT(G3SkyMapMask, init<const G3SkyMap &>(),
+	EXPORT_FRAMEOBJECT_NOINITNAMESPACE(G3SkyMapMask, (init<const G3SkyMap &, bool>((arg("parent"), arg("use_data")=false))),
 	    "Boolean mask of a sky map. Set pixels to use to true, pixels to "
-	    "ignore to false.")
+	    "ignore to false. If use_data set in contrast, mask initialized to "
+	    "true where input map is non-zero; otherwise, all elements are "
+	    "initialized to zero.")
 	  .def_readonly("parent", &G3SkyMapMask::Parent, "\"Parent\" map which "
 	    "contains no data, but can be used to retrieve the parameters of "
 	    "the map to which this mask corresponds.")
