@@ -7,6 +7,8 @@
 #include <vector>
 #include <map>
 
+#include <maps/G3SkyMapMask.h>
+
 #include <boost/python.hpp>
 
 enum MapCoordReference {
@@ -21,8 +23,6 @@ enum MapCoordReference {
  * rather than this class directly. This class is meant to be a generic
  * interface for the map maker.
  */
-
-class G3SkyMapMask;
 
 class G3SkyMap {
 public:
@@ -103,6 +103,29 @@ public:
 	// /
 	virtual G3SkyMap &operator/=(const G3SkyMap &rhs);
 	virtual G3SkyMap &operator/=(double rhs);
+
+	// Comparison operations
+
+	// <
+	virtual G3SkyMapMask operator<(const G3SkyMap &rhs);
+	virtual G3SkyMapMask operator<=(const G3SkyMap &rhs);
+	virtual G3SkyMapMask operator<(double rhs);
+	virtual G3SkyMapMask operator<=(double rhs);
+
+	// ==
+	virtual G3SkyMapMask operator==(const G3SkyMap &rhs);
+	virtual G3SkyMapMask operator!=(const G3SkyMap &rhs);
+	virtual G3SkyMapMask operator==(double rhs);
+	virtual G3SkyMapMask operator!=(double rhs);
+
+	// <
+	virtual G3SkyMapMask operator>(const G3SkyMap &rhs);
+	virtual G3SkyMapMask operator>=(const G3SkyMap &rhs);
+	virtual G3SkyMapMask operator>(double rhs);
+	virtual G3SkyMapMask operator>=(double rhs);
+
+	virtual bool all() const;
+	virtual bool any() const;
 
 	// Pointing information
 	std::vector<size_t> AnglesToPixels(const std::vector<double> & alphas,

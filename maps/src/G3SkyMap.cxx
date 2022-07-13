@@ -626,15 +626,15 @@ pyskymap_pow(const G3SkyMap &a, const G3SkyMap &b)
 }
 
 #define skymap_comp(name, oper) \
-static G3SkyMapMaskPtr \
-pyskymap_##name(const G3SkyMap &a, const G3SkyMap &b) \
+G3SkyMapMask \
+G3SkyMap::operator oper(const G3SkyMap &rhs) \
 { \
-	g3_assert(a.IsCompatible(b)); \
-	g3_assert(a.units == b.units); \
-	G3SkyMapMaskPtr rv(new G3SkyMapMask(a)); \
-	for (size_t i = 0; i < a.size(); i++) { \
-		if (a.at(i) oper b.at(i)) \
-			(*rv)[i] = true; \
+	g3_assert(IsCompatible(rhs)); \
+	g3_assert(units == rhs.units); \
+	G3SkyMapMask rv(*this); \
+	for (size_t i = 0; i < size(); i++) { \
+		if (at(i) oper rhs.at(i)) \
+			rv[i] = true; \
 	} \
 	return rv; \
 }
@@ -647,13 +647,13 @@ skymap_comp(ge, >=)
 skymap_comp(gt, >)
 
 #define skymap_compd(name, oper) \
-static G3SkyMapMaskPtr \
-pyskymap_##name(const G3SkyMap &a, const double b) \
+G3SkyMapMask \
+G3SkyMap::operator oper(double rhs) \
 { \
-	G3SkyMapMaskPtr rv(new G3SkyMapMask(a)); \
-	for (size_t i = 0; i < a.size(); i++) { \
-		if (a.at(i) oper b) \
-			(*rv)[i] = true; \
+	G3SkyMapMask rv(*this);	\
+	for (size_t i = 0; i < size(); i++) { \
+		if (at(i) oper rhs) \
+			rv[i] = true; \
 	} \
 	return rv; \
 }
@@ -665,20 +665,20 @@ skymap_compd(ned, !=)
 skymap_compd(ged, >=)
 skymap_compd(gtd, >)
 
-static bool
-pyskymap_all(const G3SkyMap &a)
+bool
+G3SkyMap::all() const
 {
-	for (size_t i = 0; i < a.size(); i++)
-		if (a.at(i) == 0)
+	for (size_t i = 0; i < size(); i++)
+		if (at(i) == 0)
 			return false;
 	return true;
 }
 
-static bool
-pyskymap_any(const G3SkyMap &a)
+bool
+G3SkyMap::any() const
 {
-	for (size_t i = 0; i < a.size(); i++)
-		if (a.at(i) != 0)
+	for (size_t i = 0; i < size(); i++)
+		if (at(i) != 0)
 			return true;
 	return false;
 }
@@ -1134,21 +1134,22 @@ PYBINDINGS("maps") {
 	    .def("__pow__", &pyskymap_pow)
 	    .def("__pow__", &pyskymap_powd)
 
-	    .def("__lt__", &pyskymap_lt)
-	    .def("__lt__", &pyskymap_ltd)
-	    .def("__le__", &pyskymap_le)
-	    .def("__le__", &pyskymap_led)
-	    .def("__eq__", &pyskymap_eq)
-	    .def("__eq__", &pyskymap_eqd)
-	    .def("__ne__", &pyskymap_ne)
-	    .def("__ne__", &pyskymap_ned)
-	    .def("__ge__", &pyskymap_ge)
-	    .def("__ge__", &pyskymap_ged)
-	    .def("__gt__", &pyskymap_gt)
-	    .def("__gt__", &pyskymap_gtd)
+	    .def(bp::self < bp::self)
+	    .def(bp::self <= bp::self)
+	    .def(bp::self == bp::self)
+	    .def(bp::self != bp::self)
+	    .def(bp::self >= bp::self)
+	    .def(bp::self > bp::self)
+	    .def(bp::self < double())
+	    .def(bp::self <= double())
+	    .def(bp::self == double())
+	    .def(bp::self != double())
+	    .def(bp::self >= double())
+	    .def(bp::self > double())
+
 	    .def("__bool__", &pyskymap_bool)
-	    .def("any", &pyskymap_any)
-	    .def("all", &pyskymap_all)
+	    .def("any", &G3SkyMap::any)
+	    .def("all", &G3SkyMap::all)
 	;
 
 	EXPORT_FRAMEOBJECT(G3SkyMapWeights, init<>(),
