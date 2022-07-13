@@ -173,6 +173,8 @@ PYBINDINGS("maps")
 	  .def_readonly("parent", &G3SkyMapMask::Parent, "\"Parent\" map which "
 	    "contains no data, but can be used to retrieve the parameters of "
 	    "the map to which this mask corresponds.")
+	  .def<bool (G3SkyMapMask::*)(const G3SkyMapMask &)>("is_compatible", &G3SkyMapMask::IsCompatible, "Returns true if the two masks can be applied to the same map.")
+	  .def<bool (G3SkyMapMask::*)(const G3SkyMap &)>("is_compatible", &G3SkyMapMask::IsCompatible, "Returns true if this mask can be applied to the given map.")
 	  .def("__getitem__", &skymapmask_getitem)
 	  .def("__setitem__", &skymapmask_setitem)
 	  .def("invert", &skymapmask_pyinvert, "Invert all elements in mask")
