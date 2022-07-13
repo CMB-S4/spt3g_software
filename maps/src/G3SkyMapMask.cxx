@@ -4,6 +4,7 @@
 #include <sys/types.h>
 
 #include <maps/G3SkyMapMask.h>
+#include <maps/FlatSkyMap.h>
 
 G3SkyMapMask::G3SkyMapMask(const G3SkyMap &parent) : G3FrameObject()
 {
@@ -129,11 +130,47 @@ void G3SkyMapMask::serialize(A &ar, unsigned v)
 G3_SERIALIZABLE_CODE(G3SkyMapMask);
 
 static bool
-skymapmask_getitem(const G3SkyMapMask &m, int i)
+skymapmask_getitem(const G3SkyMapMask &m, boost::python::object index)
 {
-	if (i < 0)
-		i = m.Parent()->size() + i;
-	if (size_t(i) >= m.Parent()->size()) {
+	using namespace boost::python;
+
+	int i = 0;
+	if (extract<int>(index).check()) {
+		i = extract<int>(index)();
+
+		if (i < 0)
+			i = m.Parent()->size() + i;
+	} else if (extract<tuple>(index).check()) {
+		int x, y;
+
+		tuple t = extract<tuple>(index)();
+		FlatSkyMapConstPtr fsm = boost::dynamic_pointer_cast<const FlatSkyMap>(m.Parent());
+		if (!fsm) {
+			PyErr_SetString(PyExc_TypeError,
+			    "N-D pixels, but underlying map is not a flat sky map");
+			boost::python::throw_error_already_set();
+		}
+
+		x = extract<int>(t[1])();
+		y = extract<int>(t[0])();
+		if (x < 0)
+			x += fsm->shape()[0];
+		if (y < 0)
+			y += fsm->shape()[0];
+		if (size_t(x) >= fsm->shape()[0] ||
+		    size_t(y) >= fsm->shape()[1]) { 
+			PyErr_SetString(PyExc_IndexError, "Index out of range");
+			boost::python::throw_error_already_set();
+		}
+
+		i = y * fsm->shape()[0] + x;
+	} else {
+		PyErr_SetString(PyExc_TypeError,
+		    "Need to pass an integer pixel ID or (optionally) for 2D maps a tuple of coordinates");
+		boost::python::throw_error_already_set();
+	}
+	
+	if (i < 0 || size_t(i) >= m.Parent()->size()) {
 		PyErr_SetString(PyExc_IndexError, "Index out of range");
 		boost::python::throw_error_already_set();
 	}
@@ -142,11 +179,47 @@ skymapmask_getitem(const G3SkyMapMask &m, int i)
 }
 
 static void
-skymapmask_setitem(G3SkyMapMask &m, int i, bool val)
+skymapmask_setitem(G3SkyMapMask &m, boost::python::object index, bool val)
 {
-	if (i < 0)
-		i = m.Parent()->size() + i;
-	if (size_t(i) >= m.Parent()->size()) {
+	using namespace boost::python;
+
+	int i = 0;
+	if (extract<int>(index).check()) {
+		i = extract<int>(index)();
+
+		if (i < 0)
+			i = m.Parent()->size() + i;
+	} else if (extract<tuple>(index).check()) {
+		int x, y;
+
+		tuple t = extract<tuple>(index)();
+		FlatSkyMapConstPtr fsm = boost::dynamic_pointer_cast<const FlatSkyMap>(m.Parent());
+		if (!fsm) {
+			PyErr_SetString(PyExc_TypeError,
+			    "N-D pixels, but underlying map is not a flat sky map");
+			boost::python::throw_error_already_set();
+		}
+
+		x = extract<int>(t[1])();
+		y = extract<int>(t[0])();
+		if (x < 0)
+			x += fsm->shape()[0];
+		if (y < 0)
+			y += fsm->shape()[0];
+		if (size_t(x) >= fsm->shape()[0] ||
+		    size_t(y) >= fsm->shape()[1]) { 
+			PyErr_SetString(PyExc_IndexError, "Index out of range");
+			boost::python::throw_error_already_set();
+		}
+
+		i = y * fsm->shape()[0] + x;
+	} else {
+		PyErr_SetString(PyExc_TypeError,
+		    "Need to pass an integer pixel ID or (optionally) for 2D maps a tuple of coordinates");
+		boost::python::throw_error_already_set();
+	}
+
+	if (i < 0 || size_t(i) >= m.Parent()->size()) {
 		PyErr_SetString(PyExc_IndexError, "Index out of range");
 		boost::python::throw_error_already_set();
 	}
