@@ -22,6 +22,8 @@ enum MapCoordReference {
  * interface for the map maker.
  */
 
+class G3SkyMapMask;
+
 class G3SkyMap {
 public:
 	// Following numerical values are important
@@ -95,6 +97,7 @@ public:
 
 	// *
 	virtual G3SkyMap &operator*=(const G3SkyMap &rhs);
+	virtual G3SkyMap &operator*=(const G3SkyMapMask &rhs);
 	virtual G3SkyMap &operator*=(double rhs);
 
 	// /
@@ -360,6 +363,7 @@ public:
 
 	// Mask
 	G3SkyMapWeights &operator*=(const G3SkyMap &rhs);
+	G3SkyMapWeights &operator*=(const G3SkyMapMask &rhs);
 
 	G3SkyMapPtr Det() const;
 	G3SkyMapPtr Cond() const;

@@ -2,6 +2,7 @@
 #include <serialization.h>
 #include <G3Units.h>
 #include <maps/G3SkyMap.h>
+#include <maps/G3SkyMapMask.h>
 #include <maps/FlatSkyMap.h>
 #include <maps/HealpixSkyMap.h>
 #include <maps/pointing.h>
@@ -275,6 +276,17 @@ G3SkyMap &G3SkyMap::operator*=(const G3SkyMap &rhs)
 	return *this;
 }
 
+G3SkyMap &G3SkyMap::operator*=(const G3SkyMapMask &rhs)
+{
+	g3_assert(rhs.IsCompatible(*this));
+
+	for (size_t i = 0; i < size(); i++) {
+		if (!rhs.at(i) && this->at(i) != 0)
+			(*this)[i] = 0;
+	}
+	return *this;
+}
+
 G3SkyMap &G3SkyMap::operator*=(double rhs)
 {
 	for (size_t i = 0; i < size(); i++)
@@ -511,6 +523,18 @@ skymap_pynoninplace(div, /=, G3SkyMap &)
 skymap_pynoninplace(divd, /=, double)
 
 static G3SkyMapPtr
+pyskymap_multm(const G3SkyMap &a, const G3SkyMapMask &b)
+{
+	G3SkyMapPtr rv = a.Clone(false);
+	for (size_t i = 0; i < a.size(); i++) {
+		if (b.at(i) && a.at(i) != 0)
+			(*rv)[i] = a.at(i);
+	}
+
+	return rv;
+}
+
+static G3SkyMapPtr
 pyskymap_rsubd(const G3SkyMap &a, const double b)
 {
 	G3SkyMapPtr rv = pyskymap_subd(a, b);
@@ -588,17 +612,15 @@ pyskymap_pow(const G3SkyMap &a, const G3SkyMap &b)
 }
 
 #define skymap_comp(name, oper) \
-static G3SkyMapPtr \
+static G3SkyMapMaskPtr \
 pyskymap_##name(const G3SkyMap &a, const G3SkyMap &b) \
 { \
 	g3_assert(a.IsCompatible(b)); \
 	g3_assert(a.units == b.units); \
-	G3SkyMapPtr rv = a.Clone(false); \
-	rv->units = G3Timestream::None; \
-	rv->weighted = false; \
+	G3SkyMapMaskPtr rv(new G3SkyMapMask(a)); \
 	for (size_t i = 0; i < a.size(); i++) { \
 		if (a.at(i) oper b.at(i)) \
-			(*rv)[i] = 1; \
+			(*rv)[i] = true; \
 	} \
 	return rv; \
 }
@@ -611,15 +633,13 @@ skymap_comp(ge, >=)
 skymap_comp(gt, >)
 
 #define skymap_compd(name, oper) \
-static G3SkyMapPtr \
+static G3SkyMapMaskPtr \
 pyskymap_##name(const G3SkyMap &a, const double b) \
 { \
-	G3SkyMapPtr rv = a.Clone(false); \
-	rv->units = G3Timestream::None; \
-	rv->weighted = false; \
+	G3SkyMapMaskPtr rv(new G3SkyMapMask(a)); \
 	for (size_t i = 0; i < a.size(); i++) { \
 		if (a.at(i) oper b) \
-			(*rv)[i] = 1; \
+			(*rv)[i] = true; \
 	} \
 	return rv; \
 }
@@ -692,6 +712,7 @@ G3SkyMapWeights &G3SkyMapWeights::operator op(rhs_type rhs) \
 }
 
 skymapweights_inplace(*=, const G3SkyMap &);
+skymapweights_inplace(*=, const G3SkyMapMask &);
 skymapweights_inplace(*=, double);
 skymapweights_inplace(/=, double);
 
@@ -708,6 +729,25 @@ skymapweights_pynoninplace(add, +=, G3SkyMapWeights &);
 skymapweights_pynoninplace(multm, *=, G3SkyMap &);
 skymapweights_pynoninplace(multd, *=, double);
 skymapweights_pynoninplace(divd, /=, double);
+
+static G3SkyMapWeightsPtr
+pyskymapweights_multma(const G3SkyMapWeights &a, const G3SkyMapMask &b)
+{
+	G3SkyMapWeightsPtr rv(new G3SkyMapWeights());
+	rv->TT = pyskymap_multm(*a.TT, b);
+	if (!!a.TQ)
+		rv->TQ = pyskymap_multm(*a.TQ, b);
+	if (!!a.TU)
+		rv->TU = pyskymap_multm(*a.TU, b);
+	if (!!a.QQ)
+		rv->QQ = pyskymap_multm(*a.QQ, b);
+	if (!!a.QU)
+		rv->QU = pyskymap_multm(*a.QU, b);
+	if (!!a.UU)
+		rv->UU = pyskymap_multm(*a.UU, b);
+
+	return rv;
+}
 
 MuellerMatrix MuellerMatrix::Inv() const
 {
@@ -1040,7 +1080,9 @@ PYBINDINGS("maps") {
 	    .def("__sub__", &pyskymap_subd)
 	    .def("__rsub__", &pyskymap_rsubd)
 	    .def("__mul__", &pyskymap_mult)
+	    .def("__mul__", &pyskymap_multm)
 	    .def("__mul__", &pyskymap_multd)
+	    .def("__rmul__", &pyskymap_multm)
 	    .def("__rmul__", &pyskymap_multd)
 	    .def("__div__", &pyskymap_div)
 	    .def("__div__", &pyskymap_divd)
@@ -1118,7 +1160,10 @@ PYBINDINGS("maps") {
 
 	    .def("__add__", &pyskymapweights_add)
 	    .def("__mul__", &pyskymapweights_multm)
+	    .def("__mul__", &pyskymapweights_multma)
 	    .def("__mul__", &pyskymapweights_multd)
+	    .def("__rmul__", &pyskymapweights_multm)
+	    .def("__rmul__", &pyskymapweights_multma)
 	    .def("__rmul__", &pyskymapweights_multd)
 	    .def("__div__", &pyskymapweights_divd)
 	    .def("__truediv__", &pyskymapweights_divd)
