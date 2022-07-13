@@ -35,6 +35,10 @@ public:
 	G3SkyMapMask &operator &=(const G3SkyMapMask &rhs);
 	G3SkyMapMask &operator ^=(const G3SkyMapMask &rhs);
 	G3SkyMapMask &invert(); // Basically ~=
+	bool all() const;
+	bool any() const;
+	size_t sum() const;
+	std::vector<uint64_t> NonZeroPixels() const;
 
 	G3SkyMapMask operator ~() const;
 	G3SkyMapMask operator |(const G3SkyMapMask &rhs) const;

@@ -41,7 +41,7 @@ G3SkyMapMask::operator |=(const G3SkyMapMask &rhs)
 	g3_assert(IsCompatible(rhs));
 
 	for (size_t i = 0; i < data_.size(); i++)
-		(*this)[i] = rhs[i] || (*this)[i];
+		(*this)[i] = rhs.at(i) || (*this)[i];
 
 	return *this;
 }
@@ -52,7 +52,7 @@ G3SkyMapMask::operator &=(const G3SkyMapMask &rhs)
 	g3_assert(IsCompatible(rhs));
 
 	for (size_t i = 0; i < data_.size(); i++)
-		(*this)[i] = rhs[i] && (*this)[i];
+		(*this)[i] = rhs.at(i) && (*this)[i];
 
 	return *this;
 }
@@ -63,7 +63,7 @@ G3SkyMapMask::operator ^=(const G3SkyMapMask &rhs)
 	g3_assert(IsCompatible(rhs));
 
 	for (size_t i = 0; i < data_.size(); i++)
-		(*this)[i] = rhs[i] ^ (*this)[i];
+		(*this)[i] = rhs.at(i) ^ (*this)[i];
 
 	return *this;
 }
@@ -77,12 +77,52 @@ G3SkyMapMask::invert()
 	return *this;
 }
 
+bool
+G3SkyMapMask::all() const
+{
+	for (size_t i = 0; i < data_.size(); i++)
+		if (at(i) == 0)
+			return false;
+	return true;
+}
+
+bool
+G3SkyMapMask::any() const
+{
+	for (size_t i = 0; i < data_.size(); i++)
+		if (at(i) != 0)
+			return true;
+	return false;
+}
+
+size_t
+G3SkyMapMask::sum() const
+{
+	size_t s = 0;
+	for (size_t i = 0; i < data_.size(); i++)
+		s += at(i);
+	return s;
+}
+
+std::vector<uint64_t>
+G3SkyMapMask::NonZeroPixels() const
+{
+	std::vector<uint64_t> indices;
+
+	for (size_t i = 0; i < data_.size(); i++) {
+		if (at(i))
+			indices.push_back(i);
+	}
+
+	return indices;
+}
+
 G3SkyMapMask
 G3SkyMapMask::operator ~() const
 {
 	G3SkyMapMask mask(*Parent());
 	for (size_t i = 0; i < data_.size(); i++)
-		mask[i] = !(*this)[i];
+		mask[i] = !at(i);
 
 	return mask;
 }
@@ -94,7 +134,7 @@ G3SkyMapMask::operator |(const G3SkyMapMask &rhs) const
 
 	G3SkyMapMask mask(*Parent());
 	for (size_t i = 0; i < data_.size(); i++)
-		mask[i] = (*this)[i] || rhs[i];
+		mask[i] = at(i) || rhs.at(i);
 
 	return mask;
 }
@@ -106,7 +146,7 @@ G3SkyMapMask::operator &(const G3SkyMapMask &rhs) const
 
 	G3SkyMapMask mask(*Parent());
 	for (size_t i = 0; i < data_.size(); i++)
-		mask[i] = (*this)[i] && rhs[i];
+		mask[i] = at(i) && rhs.at(i);
 
 	return mask;
 }
@@ -118,7 +158,7 @@ G3SkyMapMask::operator ^(const G3SkyMapMask &rhs) const
 
 	G3SkyMapMask mask(*Parent());
 	for (size_t i = 0; i < data_.size(); i++)
-		mask[i] = (*this)[i] ^ rhs[i];
+		mask[i] = at(i) ^ rhs.at(i);
 
 	return mask;
 }
@@ -271,6 +311,11 @@ PYBINDINGS("maps")
 	  .def("__getitem__", &skymapmask_getitem)
 	  .def("__setitem__", &skymapmask_setitem)
 	  .def("invert", &skymapmask_pyinvert, "Invert all elements in mask")
+	  .def("all", &G3SkyMapMask::all, "Test whether all elements are non-zero")
+	  .def("any", &G3SkyMapMask::any, "Test whether any elements are non-zero")
+	  .def("sum", &G3SkyMapMask::sum, "Sum of all elements in mask")
+	  .def("nonzero_pixels", &G3SkyMapMask::NonZeroPixels,
+	       "Return a list of indices of non-zero pixels in the mask")
 	  .def(bp::self |= bp::self)
 	  .def(bp::self &= bp::self)
 	  .def(bp::self ^= bp::self)
