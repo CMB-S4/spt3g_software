@@ -3,7 +3,7 @@
 import numpy as np
 from spt3g import core
 from spt3g.maps import G3SkyMapWeights, FlatSkyMap, MapPolType, MapPolConv, MapProjection
-from spt3g.maps import get_mask_map, remove_weights, remove_weights_t, apply_weights, apply_weights_t, flatten_pol
+from spt3g.maps import remove_weights, remove_weights_t, apply_weights, apply_weights_t, flatten_pol
 
 for pol in [True, False]:
     # allocation
@@ -116,9 +116,10 @@ for pol in [True, False]:
     mt.compact(zero_nans=True)
     assert(mt.npix_allocated == 1)
     assert(np.allclose(mt[15], np.atleast_1d(vec * 10)[0]))
-    mask = get_mask_map(mt)
+    mask = mt.to_mask()
     assert(mask[15] == 1)
-    assert(mask.npix_allocated == 1)
+    assert(mask.sum() == 1)
+    assert(mask.to_map().npix_allocated == 1)
 
     if pol:
         mq.compact(zero_nans=True)
