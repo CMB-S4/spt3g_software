@@ -21,7 +21,8 @@ class G3SkyMap;
 
 class G3SkyMapMask : public G3FrameObject {
 public:
-	G3SkyMapMask(const G3SkyMap &parent, bool use_data = false);
+	G3SkyMapMask(const G3SkyMap &parent, bool use_data = false,
+	    bool zero_nans = false, bool zero_infs = false);
 	G3SkyMapMask(const G3SkyMapMask &);
 	virtual ~G3SkyMapMask() {};
 

@@ -7,14 +7,20 @@
 #include <maps/G3SkyMap.h>
 #include <maps/FlatSkyMap.h>
 
-G3SkyMapMask::G3SkyMapMask(const G3SkyMap &parent, bool use_data)
-  : G3FrameObject()
+G3SkyMapMask::G3SkyMapMask(const G3SkyMap &parent, bool use_data,
+  bool zero_nans, bool zero_infs) : G3FrameObject()
 {
 	parent_ = parent.Clone(false);
 	data_ = std::vector<bool>(parent.size());
 	if (use_data) {
-		for (size_t i = 0; i < parent.size(); i++)
-			data_[i] = (parent.at(i) != 0);
+		for (size_t i = 0; i < parent.size(); i++) {
+			double v = parent.at(i);
+			if (zero_nans && v != v)
+				continue;
+			if (zero_infs && !std::isfinite(v))
+				continue;
+			data_[i] = (v != 0);
+		}
 	}
 }
 
@@ -311,11 +317,12 @@ PYBINDINGS("maps")
 {
 	using namespace boost::python;
 
-	EXPORT_FRAMEOBJECT_NOINITNAMESPACE(G3SkyMapMask, (init<const G3SkyMap &, bool>((arg("parent"), arg("use_data")=false))),
+	EXPORT_FRAMEOBJECT_NOINITNAMESPACE(G3SkyMapMask, (init<const G3SkyMap &, bool, bool, bool>((arg("parent"), arg("use_data")=false, arg("zero_nans")=false, arg("zero_infs")=false))),
 	    "Boolean mask of a sky map. Set pixels to use to true, pixels to "
 	    "ignore to false. If use_data set in contrast, mask initialized to "
 	    "true where input map is non-zero; otherwise, all elements are "
-	    "initialized to zero.")
+	    "initialized to zero.  Use zero_nans or zero_infs to exclude nan "
+	    "or inf elements from the mask.")
 	  .def_readonly("parent", &G3SkyMapMask::Parent, "\"Parent\" map which "
 	    "contains no data, but can be used to retrieve the parameters of "
 	    "the map to which this mask corresponds.")

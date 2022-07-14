@@ -228,9 +228,9 @@ size_t G3SkyMap::size() const
 }
 
 G3SkyMapMaskPtr
-G3SkyMap::MakeMask() const
+G3SkyMap::MakeMask(bool zero_nans, bool zero_infs) const
 {
-	G3SkyMapMaskPtr m(new G3SkyMapMask(*this, true));
+	G3SkyMapMaskPtr m(new G3SkyMapMask(*this, true, zero_nans, zero_infs));
 	return m;
 }
 
@@ -1099,8 +1099,10 @@ PYBINDINGS("maps") {
 	      "current representation without additional memory overhead.")
 
 	    .def("to_mask", &G3SkyMap::MakeMask,
+	      (bp::arg("zero_nans")=false, bp::arg("zero_infs")=false),
 	      "Create a G3SkyMapMask object from the parent map, with pixels "
-	      "set to true where the map is non-zero.")
+	      "set to true where the map is non-zero (and optionally non-nan "
+	      "and/or finite).")
 
 	    .def(bp::self += bp::self)
 	    .def(bp::self *= bp::self)
