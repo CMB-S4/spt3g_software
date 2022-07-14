@@ -338,5 +338,6 @@ PYBINDINGS("maps")
 	  .def(bp::self ^ bp::self)
 	  .def("to_map", &G3SkyMapMask::MakeBinaryMap, "Create a skymap with data set to the contents of this mask (1.0 where True, 0.0 where False), which can be useful for plotting.")
 	;
+	register_ponter_conversions<G3SkyMapMask>();
 }
 
