@@ -693,6 +693,19 @@ pyskymap_bool(G3SkyMap &skymap)
 	return false;
 }
 
+void
+G3SkyMap::ApplyMask(const G3SkyMapMask &mask, bool inverse)
+{
+	g3_assert(mask.IsCompatible(*this));
+
+	for (size_t i = 0; i < size(); i++) {
+		if (!at(i))
+			continue;
+		if (mask.at(i) == inverse)
+			(*this)[i] = 0;
+	}
+}
+
 G3SkyMapWeights &
 G3SkyMapWeights::operator+=(const G3SkyMapWeights &rhs)
 {
@@ -1103,6 +1116,11 @@ PYBINDINGS("maps") {
 	      "Create a G3SkyMapMask object from the parent map, with pixels "
 	      "set to true where the map is non-zero (and optionally non-nan "
 	      "and/or finite).")
+
+	    .def("apply_mask", &G3SkyMap::ApplyMask,
+	      (bp::arg("mask"), bp::arg("inverse")=false),
+	      "Apply a mask in-place to the map, optionally inverting which "
+	      "pixels are zeroed.")
 
 	    .def(bp::self += bp::self)
 	    .def(bp::self *= bp::self)

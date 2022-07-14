@@ -127,6 +127,8 @@ public:
 	virtual bool all() const;
 	virtual bool any() const;
 
+	virtual void ApplyMask(const G3SkyMapMask &mask, bool inverse=false);
+
 	// Pointing information
 	std::vector<size_t> AnglesToPixels(const std::vector<double> & alphas,
 	    const std::vector<double> & deltas) const;
