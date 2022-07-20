@@ -36,7 +36,7 @@ void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, G3SkyMapWeightsPtr W=NULL, dou
 
 // Compute map moments up to fourth order (mean, var, skewness, kurtosis) of the input map,
 // optionally excluding any pixels that are zero in the input mask, or zero/nan/inf in the input map
-std::vector<double> GetMapStats(G3SkyMapConstPtr m, G3SkyMapMaskConstPtr mask=NULL, int order=2,
+std::vector<double> GetMapMoments(G3SkyMapConstPtr m, G3SkyMapMaskConstPtr mask=NULL, int order=2,
     bool ignore_zeros=false, bool ignore_nans=false, bool ignore_infs=false);
 
 // Compute the median of the input map, optionally excluding any pixels that are

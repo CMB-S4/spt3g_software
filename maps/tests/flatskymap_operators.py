@@ -2,7 +2,7 @@
 
 import numpy as np
 from spt3g import core
-from spt3g.maps import FlatSkyMap, MapProjection, get_ra_dec_map, get_map_stats, get_map_median
+from spt3g.maps import FlatSkyMap, MapProjection, get_ra_dec_map, get_map_moments, get_map_median
 from scipy.stats import skew, kurtosis
 
 # Sparse extension operators
@@ -253,19 +253,19 @@ for shape in [(20, 500), (21, 501)]:
         # statistics
         m1 = np.asarray(m).ravel()
         stats0 = [np.mean(m1), np.var(m1), skew(m1), kurtosis(m1)]
-        stats1 = get_map_stats(m, order=4)
+        stats1 = get_map_moments(m, order=4)
         assert(np.allclose(stats1, stats0))
         med0 = np.median(m1)
         med1 = get_map_median(m)
         assert(np.allclose(med1, med0))
 
-        stats2 = get_map_stats(mpad, order=4, ignore_zeros=True)
+        stats2 = get_map_moments(mpad, order=4, ignore_zeros=True)
         assert(np.allclose(stats2, stats0))
         med2 = get_map_median(mpad, ignore_zeros=True)
         assert(np.allclose(med2, med0))
 
         np.asarray(mpad)[np.asarray(mpad) == 0] = np.nan
-        stats3 = get_map_stats(mpad, order=4, ignore_nans=True)
+        stats3 = get_map_moments(mpad, order=4, ignore_nans=True)
         assert(np.allclose(stats3, stats0))
         med3 = get_map_median(mpad, ignore_nans=True)
         assert(np.allclose(med3, med0))

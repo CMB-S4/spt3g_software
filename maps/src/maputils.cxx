@@ -348,7 +348,7 @@ void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool int
 }
 
 // algorithm from https://www.johndcook.com/blog/skewness_kurtosis/
-std::vector<double> GetMapStats(G3SkyMapConstPtr m, G3SkyMapMaskConstPtr mask,
+std::vector<double> GetMapMoments(G3SkyMapConstPtr m, G3SkyMapMaskConstPtr mask,
     int order, bool ignore_zeros, bool ignore_nans, bool ignore_infs)
 {
 	size_t n = 0;
@@ -648,7 +648,7 @@ void maputils_pybindings(void){
 		"polarization conventions.  If output attributes are not set, they will be "
 		"copied from the input map.");
 
-	bp::def("get_map_stats", GetMapStats,
+	bp::def("get_map_moments", GetMapMoments,
 		(bp::arg("map"), bp::arg("mask")=G3SkyMapMaskConstPtr(), bp::arg("order")=2,
 		 bp::arg("ignore_zeros")=false, bp::arg("ignore_nans")=false, bp::arg("ignore_infs")=false),
 		"Computes moment statistics of the input map, optionally ignoring "
