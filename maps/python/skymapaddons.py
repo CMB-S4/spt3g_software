@@ -160,12 +160,17 @@ def skymapweights_setattr(self, x, val):
     try:
         oldsetattr(self, x, val)
     except AttributeError:
-        setattr(self.TT, x, val)
-        if self.polarized:
+        if self.TT is not None:
+            setattr(self.TT, x, val)
+        if self.TQ is not None:
             setattr(self.TQ, x, val)
+        if self.TU is not None:
             setattr(self.TU, x, val)
+        if self.QQ is not None:
             setattr(self.QQ, x, val)
+        if self.QU is not None:
             setattr(self.QU, x, val)
+        if self.UU is not None:
             setattr(self.UU, x, val)
 G3SkyMapWeights.__setattr__ = skymapweights_setattr
 del skymapweights_setattr

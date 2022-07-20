@@ -399,6 +399,8 @@ public:
 
 	boost::shared_ptr<G3SkyMapWeights> Rebin(size_t scale) const;
 
+	void ApplyMask(const G3SkyMapMask &mask, bool inverse=false);
+
 	void Compact(bool zero_nans = false);
 
 	boost::shared_ptr<G3SkyMapWeights> Clone(bool copy_data) const {

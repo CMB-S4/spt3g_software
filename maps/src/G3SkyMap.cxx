@@ -706,20 +706,40 @@ G3SkyMap::ApplyMask(const G3SkyMapMask &mask, bool inverse)
 	}
 }
 
+void
+G3SkyMapWeights::ApplyMask(const G3SkyMapMask &mask, bool inverse)
+{
+	if (!!TT)
+		TT->ApplyMask(mask, inverse);
+	if (!!TQ)
+		TQ->ApplyMask(mask, inverse);
+	if (!!TU)
+		TU->ApplyMask(mask, inverse);
+	if (!!QQ)
+		QQ->ApplyMask(mask, inverse);
+	if (!!QU)
+		QU->ApplyMask(mask, inverse);
+	if (!!UU)
+		UU->ApplyMask(mask, inverse);
+}
+
 G3SkyMapWeights &
 G3SkyMapWeights::operator+=(const G3SkyMapWeights &rhs)
 {
 	g3_assert(IsPolarized() == rhs.IsPolarized());
 
-	*TT += *(rhs.TT);
-
-	if (IsPolarized()) {
+	if (!!TT)
+		*TT += *rhs.TT;
+	if (!!TQ)
 		*TQ += *rhs.TQ;
+	if (!!TU)
 		*TU += *rhs.TU;
+	if (!!QQ)
 		*QQ += *rhs.QQ;
+	if (!!QU)
 		*QU += *rhs.QU;
+	if (!!UU)
 		*UU += *rhs.UU;
-	}
 
 	return *this;
 }
@@ -727,14 +747,18 @@ G3SkyMapWeights::operator+=(const G3SkyMapWeights &rhs)
 #define skymapweights_inplace(op, rhs_type) \
 G3SkyMapWeights &G3SkyMapWeights::operator op(rhs_type rhs) \
 { \
-	*TT op rhs; \
-	if (IsPolarized()) { \
+	if (!!TT) \
+		*TT op rhs; \
+	if (!!TQ) \
 		*TQ op rhs; \
+	if (!!TU) \
 		*TU op rhs; \
+	if (!!QQ) \
 		*QQ op rhs; \
+	if (!!QU) \
 		*QU op rhs; \
+	if (!!UU) \
 		*UU op rhs; \
-	} \
 	return *this; \
 }
 
@@ -914,13 +938,16 @@ G3SkyMapWeightsPtr G3SkyMapWeights::Inv() const
 {
 	G3SkyMapWeightsPtr out = this->Clone(false);
 	out->TT->ConvertToDense();
-	if (IsPolarized()) {
+	if (!!TQ)
 		out->TQ->ConvertToDense();
+	if (!!TU)
 		out->TU->ConvertToDense();
+	if (!!QQ)
 		out->QQ->ConvertToDense();
+	if (!!QU)
 		out->QU->ConvertToDense();
+	if (!!UU)
 		out->UU->ConvertToDense();
-	}
 
 	for (size_t i = 0; i < TT->size(); i++)
 		(*out)[i] = this->at(i).Inv();
@@ -933,20 +960,12 @@ G3SkyMapWeightsPtr G3SkyMapWeights::Rebin(size_t scale) const
 	g3_assert(IsCongruent());
 	G3SkyMapWeightsPtr out(new G3SkyMapWeights());
 
-	out->TT = TT->Rebin(scale, false);
-	if (IsPolarized()) {
-		out->TQ = TQ->Rebin(scale, false);
-		out->TU = TU->Rebin(scale, false);
-		out->QQ = QQ->Rebin(scale, false);
-		out->QU = QU->Rebin(scale, false);
-		out->UU = UU->Rebin(scale, false);
-	} else {
-		out->TQ = NULL;
-		out->TU = NULL;
-		out->QQ = NULL;
-		out->QU = NULL;
-		out->UU = NULL;
-	}
+	out->TT = !TT ? NULL : TT->Rebin(scale, false);
+	out->TQ = !TQ ? NULL : TQ->Rebin(scale, false);
+	out->TU = !TU ? NULL : TU->Rebin(scale, false);
+	out->QQ = !QQ ? NULL : QQ->Rebin(scale, false);
+	out->QU = !QU ? NULL : QU->Rebin(scale, false);
+	out->UU = !UU ? NULL : UU->Rebin(scale, false);
 
 	return out;
 }
@@ -955,14 +974,18 @@ void G3SkyMapWeights::Compact(bool zero_nans)
 {
 	g3_assert(IsCongruent());
 
-	TT->Compact(zero_nans);
-	if (IsPolarized()) {
+	if (!!TT)
+		TT->Compact(zero_nans);
+	if (!!TQ)
 		TQ->Compact(zero_nans);
+	if (!!TU)
 		TU->Compact(zero_nans);
+	if (!!QQ)
 		QQ->Compact(zero_nans);
+	if (!!QU)
 		QU->Compact(zero_nans);
+	if (!!UU)
 		UU->Compact(zero_nans);
-	}
 }
 
 PYBINDINGS("maps") {
@@ -1120,7 +1143,8 @@ PYBINDINGS("maps") {
 	    .def("apply_mask", &G3SkyMap::ApplyMask,
 	      (bp::arg("mask"), bp::arg("inverse")=false),
 	      "Apply a mask in-place to the map, optionally inverting which "
-	      "pixels are zeroed.")
+	      "pixels are zeroed.  If inverse = False, this is equivalent to "
+	      "in-place multiplication by the mask.")
 
 	    .def(bp::self += bp::self)
 	    .def(bp::self *= bp::self)
@@ -1207,6 +1231,12 @@ PYBINDINGS("maps") {
 	      "Return the condition number of the Mueller matrix for each pixel")
 	    .def("inv", &G3SkyMapWeights::Inv,
 	      "Return the inverse of the Mueller matrix for each pixel")
+
+	    .def("apply_mask", &G3SkyMapWeights::ApplyMask,
+	      (bp::arg("mask"), bp::arg("inverse")=false),
+	      "Apply a mask in-place to the weights, optionally inverting which "
+	      "pixels are zeroed.  If inverse = False, this is equivalent to "
+	      "in-place multiplication by the mask.")
 
 	    .def("clone", &G3SkyMapWeights::Clone, (bp::arg("copy_data")=true),
 	       "Return weights of the same type, populated with a copy of the data "
