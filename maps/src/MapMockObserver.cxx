@@ -18,7 +18,7 @@ public:
 	MapMockObserver(std::string pointing, std::string timestreams,
 	    double band, G3SkyMapConstPtr T, G3SkyMapConstPtr Q,
 	    G3SkyMapConstPtr U, std::string bolo_properties_name,
-	    bool interp, bool complain_about_zeroes);
+	    bool interp, bool error_on_zero);
 	virtual ~MapMockObserver() {}
 
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
@@ -33,7 +33,7 @@ private:
 	BolometerPropertiesMapConstPtr boloprops_;
 
 	bool interp_;
-	bool complain_about_zeroes_;
+	bool error_on_zero_;
 
 	SET_LOGGER("MapMockObserver");
 };
@@ -44,7 +44,7 @@ EXPORT_G3MODULE("maps", MapMockObserver,
      std::string, bool, bool>((arg("pointing"), arg("timestreams"), arg("band"),
      arg("T"), arg("Q")=G3SkyMapConstPtr(), arg("U")=G3SkyMapConstPtr(),
      arg("bolo_properties_name")="BolometerProperties", arg("interp")=false,
-     arg("complain_about_zeroes")=true))),
+     arg("error_on_zero")=true))),
 "MapMockObserver(pointing, timestreams, band, T, Q=None, U=None, bolo_properties_name=\"BolometerProperties\", interp=False)\n"
 "\n"
 "Creates a new set of timestreams by sampling from an input map.\n\n"
@@ -75,7 +75,7 @@ EXPORT_G3MODULE("maps", MapMockObserver,
 "interp : bool, optional\n"
 "    If True, use bilinear interpolation to sample the input map(s).  If \n"
 "    False (default), use the nearest-neighbor pixel value.\n"
-"complain_about_zeroes : bool, optional\n"
+"error_on_zero : bool, optional\n"
 "    If True (default), complain loudly if the simulation scans across zeroes\n"
 "    in the input map or out of the input map boundaries. If False, allow\n"
 "    this to happen without comment.\n"
@@ -102,10 +102,10 @@ EXPORT_G3MODULE("maps", MapMockObserver,
 
 MapMockObserver::MapMockObserver(std::string pointing, std::string timestreams,
     double band, G3SkyMapConstPtr T, G3SkyMapConstPtr Q, G3SkyMapConstPtr U,
-    std::string bolo_properties_name, bool interp, bool complain_about_zeroes) :
+    std::string bolo_properties_name, bool interp, bool error_on_zero) :
   pointing_(pointing), timestreams_(timestreams), band_(band),
   T_(T), Q_(Q), U_(U), boloprops_name_(bolo_properties_name),
-  interp_(interp), complain_about_zeroes_(complain_about_zeroes)
+  interp_(interp), error_on_zero_(error_on_zero)
 {
 	if ((Q_ && !U_) || (U_ && !Q_))
 		log_fatal("If simulating polarized maps, pass both Q and U.");
@@ -237,15 +237,14 @@ MapMockObserver::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 					det[i] = T_->at(detpointing[i]);
 			}
 		}
-		if (complain_about_zeroes_) {
+		if (error_on_zero_) {
 			for (size_t i = 0; i < det.size(); i++) {
 				if (det[i] == 0) {
-					log_error("Scanning across zero-valued "
+					log_fatal("Scanning across zero-valued "
 					    "pixels in input map. Input map is "
 					    "likely too small. If this is "
 					    "intended, unset parameter "
-					    "complain_about_zeroes.");
-					break;
+					    "error_on_zero.");
 				}
 			}
 		}
