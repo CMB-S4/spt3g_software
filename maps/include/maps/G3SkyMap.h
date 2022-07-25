@@ -136,6 +136,7 @@ public:
 	virtual std::vector<long> QueryDisc(double alpha, double delta, double radius) const {
 		throw std::runtime_error("QueryDisc not implemented");
 	};
+	std::vector<long> QueryAlphaEllipse(double alpha, double delta, double a, double b) const;
 
 	virtual bool IsDense() const {
 		throw std::runtime_error("Checking array density not implemented");

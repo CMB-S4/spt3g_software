@@ -387,6 +387,28 @@ G3SkyMap::GetInterpValues(const G3VectorQuat & quats) const
 	return outvals;
 }
 
+std::vector<long>
+G3SkyMap::QueryAlphaEllipse(double alpha, double delta, double a, double b) const
+{
+	double rmaj = a > b ? a : b;
+	double rmin = a > b ? b : a;
+	double da = ACOS(COS(rmaj) / COS(rmin)) / COS(delta);
+	double ahi = alpha + da;
+	double alo = alpha - da;
+
+	auto disc = QueryDisc(alpha, delta, rmaj);
+
+	std::vector<long> pixels;
+	for (auto i: disc) {
+		auto ang = PixelToAngle(i);
+		double d = angular_distance(ang[0], ang[1], ahi, delta) +
+			angular_distance(ang[0], ang[1], alo, delta);
+		if (d < 2 * rmaj)
+			pixels.push_back(i);
+	}
+
+	return pixels;
+}
 
 static double
 skymap_getitem(const G3SkyMap &skymap, int i)
@@ -969,6 +991,11 @@ PYBINDINGS("maps") {
 	       (bp::arg("alpha"), bp::arg("delta"), bp::arg("radius")),
 	       "Return a list of pixel indices whose centers are located within "
 	       "a disc of the given radius at the given sky coordinates.")
+	    .def("query_alpha_ellipse", &G3SkyMap::QueryAlphaEllipse,
+	       (bp::arg("alpha"), bp::arg("delta"), bp::arg("a"), bp::arg("b")),
+	       "Return a list of pixel indices whose centers are located within an "
+	       "ellipse extended in the alpha direction, at the given alpha and "
+	       "delta sky coordinates, with semimajor and semiminor axes a and b.")
 
 	    .def("get_interp_values",
 	      (std::vector<double> (G3SkyMap::*)(const std::vector<double> &,
