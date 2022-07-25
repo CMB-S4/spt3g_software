@@ -161,8 +161,12 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 		ar & cereal::make_nvp("data", outbuf);
 	} else {
 #endif
-		ar & cereal::make_nvp("data",
-		    cereal::base_class<std::vector<double> >(this));
+		if (buffer_) {
+			ar & cereal::make_nvp("data", *buffer_);
+		} else {
+			std::vector<double> data(this->begin(), this->end());
+			ar & cereal::make_nvp("data", data);
+		}
 #ifdef G3_HAS_FLAC
 	}
 #endif
@@ -188,7 +192,10 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 		std::vector<bool> nanbuf;
 
 		callback.inbuf = &ar;
-		callback.outbuf = this;
+		if (buffer_)
+			delete buffer_;
+		buffer_ = new std::vector<double>();
+		callback.outbuf = buffer_;
 		callback.pos = 0;
 
 		if (units != Counts)
@@ -201,7 +208,7 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 		ar & cereal::make_size_tag(callback.nbytes);
 
 		// Typical compression ratio: N bytes in input = N samples
-		reserve(callback.nbytes);
+		buffer_->reserve(callback.nbytes);
 
 		FLAC__StreamDecoder *decoder = FLAC__stream_decoder_new();
 		FLAC__stream_decoder_init_stream(decoder,
@@ -221,13 +228,15 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 				if (nanbuf[i])
 					(*this)[i] = NAN;
 		}
+		len_ = buffer_->size();
+		data_ = &(*buffer_)[0];
 
 #else
 		log_fatal("Trying to read FLAC-compressed timestreams but built without FLAC support");
 #endif
 	} else {
-		ar & cereal::make_nvp("data",
-		    cereal::base_class<std::vector<double> >(this));
+		buffer_ = new std::vector<double>();
+		ar & cereal::make_nvp("data", *buffer_);
 	}
 }
 
@@ -714,20 +723,22 @@ timestream_from_iterable(boost::python::object v,
 		return G3TimestreamPtr(new G3Timestream(*was_ts_already()));
 
 	// That out of the way, move on to the generic numpy-ish case
-	G3TimestreamPtr x(new G3Timestream);
+	G3TimestreamPtr x;
 	Py_buffer view;
 	if (PyObject_GetBuffer(v.ptr(), &view,
 	    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) != -1) {
 		if (strcmp(view.format, "d") == 0) {
-			x->insert(x->begin(), (double *)view.buf,
-			    (double *)view.buf + view.len/sizeof(double));
+			x = G3TimestreamPtr(new G3Timestream((double *)view.buf,
+			    (double *)view.buf + view.len/sizeof(double)));
 		} else if (strcmp(view.format, "f") == 0) {
-			x->resize(view.len/sizeof(float));
+			x = G3TimestreamPtr(new G3Timestream(
+			    view.len/sizeof(float)));
 			for (size_t i = 0; i < view.len/sizeof(float); i++)
 				(*x)[i] = ((float *)view.buf)[i];
 		} else {
 			// We could add more types, but why do that?
 			// Let Python do the work for obscure cases
+			x = G3TimestreamPtr(new G3Timestream());
 			boost::python::container_utils::extend_container(*x, v);
 		}
 		PyBuffer_Release(&view);

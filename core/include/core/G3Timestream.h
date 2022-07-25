@@ -41,6 +41,7 @@ public:
 	G3Time start, stop;
 
 	// Accessors
+	typedef double value_type;
 	double &operator[](size_t i) noexcept {
 		return data_[i];
 	}
@@ -54,6 +55,12 @@ public:
 		return data_;
 	}
 	double *end() noexcept {
+		return data_ + len_;
+	}
+	const double *begin() const noexcept {
+		return data_;
+	}
+	const double *end() const noexcept {
 		return data_ + len_;
 	}
 
