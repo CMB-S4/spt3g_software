@@ -7,7 +7,7 @@
 #include <vector>
 #include <map>
 
-class G3Timestream : public G3Vector<double> {
+class G3Timestream : public G3FrameObject {
 public:
 	enum TimestreamUnits {
 		None = 0,
@@ -23,23 +23,39 @@ public:
 		FluxDensity = 10,
 	};
 
-	G3Timestream() : G3Vector<double>(), units(None), use_flac_(0) {}
-	G3Timestream(std::vector<double>::size_type s) : G3Vector<double>(s),
-	    units(None), use_flac_(0) {}
-	G3Timestream(std::vector<double>::size_type s,
-	    const double &val) : G3Vector<double>(s, val), units(None),
-	    use_flac_(0) {}
-	G3Timestream(const G3Timestream &r) : G3Vector<double>(r),
-	    units(r.units), start(r.start), stop(r.stop),
-	    use_flac_(r.use_flac_) {}
+	G3Timestream(const G3Timestream &r);
+	G3Timestream(std::vector<double>::size_type s = 0, double val = 0) :
+	    units(None), use_flac_(0), buffer_(new std::vector<double>(s, val)),
+	    data_(&(*buffer_)[0]), len_(buffer_->size()) {}
 	template <typename Iterator> G3Timestream(Iterator l, Iterator r) :
-	    G3Vector<double>(l, r), units(None), use_flac_(0) {}
+	    units(None), use_flac_(0), buffer_(new std::vector<double>(l, r)),
+	    data_(&(*buffer_)[0]), len_(buffer_->size()) {}
+	virtual ~G3Timestream() {
+		if (buffer_) delete buffer_;
+	}
 
 	// FLAC compression levels range from 0-9. 0 means do not use FLAC.
 	void SetFLACCompression(int compression_level);
 
 	TimestreamUnits units;
 	G3Time start, stop;
+
+	// Accessors
+	double &operator[](size_t i) noexcept {
+		return data_[i];
+	}
+	double const & operator[](size_t i) const  noexcept {
+		return data_[i];
+	}
+	size_t size() const noexcept {
+		return len_;
+	}
+	double *begin() noexcept {
+		return data_;
+	}
+	double *end() noexcept {
+		return data_ + len_;
+	}
 
 	double GetSampleRate() const;
 	
@@ -62,10 +78,24 @@ public:
 	G3Timestream &operator *=(double r);
 	G3Timestream operator /(double r) const;
 	G3Timestream &operator /=(double r);
+
+	// Avoid using the following, it works only in very restricted cases
+	void push_back(double value) {
+		if (!buffer_)
+			throw std::bad_alloc();
+		buffer_->push_back(value);
+	}
 private:
 	SET_LOGGER("G3Timestream");
 
+	friend class G3TimestreamMap;
+	//G3Timestream(double *start, size_t size, boost::shared_ptr<DataRef>);
+
 	uint8_t use_flac_;
+
+	std::vector<double> *buffer_;
+	double *data_;
+	size_t len_;
 };
 
 G3_POINTERS(G3Timestream);
