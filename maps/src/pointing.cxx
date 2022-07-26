@@ -156,7 +156,14 @@ get_transform_quat(double as_0, double ds_0, double ae_0, double de_0,
 
 	quat tquat = cross3(asds_0, aede_0);
 	double mag = sqrt(dot3(tquat, tquat));
-	double ang = acos(dot3(asds_0, aede_0)); 
+	double cos_ang = dot3(asds_0, aede_0);
+	double ang;
+	if (cos_ang < -1)
+		ang = PI * G3Units::rad;
+	else if (cos_ang > 1)
+		ang = 0;
+	else
+		ang = acos(cos_ang);
 	tquat *= sin(ang/2.0) / mag;
 	tquat += quat(cos(ang/2.0),0,0,0);
 
@@ -172,7 +179,14 @@ get_transform_quat(double as_0, double ds_0, double ae_0, double de_0,
 	p_asds1 /= sqrt(dot3(p_asds1,p_asds1));
 	p_aede1 /= sqrt(dot3(p_aede1,p_aede1));
 
-	double rot_ang = acos(dot3(p_asds1, p_aede1));
+	double cos_rot_ang = dot3(p_asds1, p_aede1);
+	double rot_ang;
+	if (cos_rot_ang < -1)
+		rot_ang = PI * G3Units::rad;
+	else if (cos_rot_ang > 1)
+		rot_ang = 0;
+	else
+		rot_ang = acos(cos_rot_ang);
 	double sf = (dot3(aede_0, cross3(p_asds1, p_aede1)) < 0) ? -1 : 1;
 	rot_ang *= sf;
 	
