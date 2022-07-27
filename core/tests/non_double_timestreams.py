@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from spt3g import core
 import numpy
 import pickle
