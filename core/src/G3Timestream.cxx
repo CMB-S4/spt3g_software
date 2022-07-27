@@ -15,7 +15,7 @@
 template<typename A>
 struct FlacDecoderCallbackArgs {
 	A *inbuf;
-	std::vector<double> *outbuf;
+	std::vector<int32_t> *outbuf;
 	size_t pos;
 	size_t nbytes;
 };
@@ -196,8 +196,8 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 		callback.inbuf = &ar;
 		if (buffer_)
 			delete buffer_;
-		buffer_ = new std::vector<double>();
-		callback.outbuf = buffer_;
+		buffer_ = NULL;
+		callback.outbuf = new std::vector<int32_t>();
 		callback.pos = 0;
 
 		if (units != Counts)
@@ -210,7 +210,7 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 		ar & cereal::make_size_tag(callback.nbytes);
 
 		// Typical compression ratio: N bytes in input = N samples
-		buffer_->reserve(callback.nbytes);
+		callback.outbuf->reserve(callback.nbytes);
 
 		FLAC__StreamDecoder *decoder = FLAC__stream_decoder_new();
 		FLAC__stream_decoder_init_stream(decoder,
@@ -221,17 +221,30 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 		FLAC__stream_decoder_finish(decoder);
 		FLAC__stream_decoder_delete(decoder);
 
-		len_ = buffer_->size();
-		data_ = &(*buffer_)[0];
+		// Represent data as floats internally. These have the same
+		// significand depth (24 bits) as the max. bit depth of the
+		// reference FLAC encoder we use, so no data are lost, and
+		// allow NaNs, unlike int32_ts, which we try to pull through
+		// the process to signal missing data.
+		float *data = new float[callback.outbuf->size()];
+		root_data_ref_ = boost::shared_ptr<float>(data);
+		data_type_ = TS_FLOAT;
+		len_ = callback.outbuf->size();
+		data_ = data;
+
+		// Convert data format
+		for (size_t i = 0; i < size(); i++)
+			data[i] = (*callback.outbuf)[i];
+		delete callback.outbuf;
 
 		// Apply NaN mask
 		if (nanflag == AllNan) {
 			for (size_t i = 0; i < size(); i++)
-				(*this)[i] = NAN;
+				data[i] = NAN;
 		} else if (nanflag == SomeNan) {
 			for (size_t i = 0; i < size(); i++)
 				if (nanbuf[i])
-					(*this)[i] = NAN;
+					data[i] = NAN;
 		}
 #else
 		log_fatal("Trying to read FLAC-compressed timestreams but built without FLAC support");
