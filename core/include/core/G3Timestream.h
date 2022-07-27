@@ -26,10 +26,10 @@ public:
 	G3Timestream(const G3Timestream &r);
 	G3Timestream(std::vector<double>::size_type s = 0, double val = 0) :
 	    units(None), use_flac_(0), buffer_(new std::vector<double>(s, val)),
-	    data_(&(*buffer_)[0]), len_(buffer_->size()) {}
+	    data_(&(*buffer_)[0]), len_(buffer_->size()), data_type_(TS_DOUBLE) {}
 	template <typename Iterator> G3Timestream(Iterator l, Iterator r) :
 	    units(None), use_flac_(0), buffer_(new std::vector<double>(l, r)),
-	    data_(&(*buffer_)[0]), len_(buffer_->size()) {}
+	    data_(&(*buffer_)[0]), len_(buffer_->size()), data_type_(TS_DOUBLE) {}
 	virtual ~G3Timestream() {
 		if (buffer_) delete buffer_;
 	}
@@ -42,26 +42,60 @@ public:
 
 	// Accessors
 	typedef double value_type;
-	double &operator[](size_t i) noexcept {
-		return data_[i];
+	double &operator[](size_t i) {
+		if (data_type_ != TS_DOUBLE)
+			throw std::runtime_error("Cannot access non-double "
+			    "timestream read/write");
+		return ((double *)data_)[i];
 	}
-	double const & operator[](size_t i) const  noexcept {
-		return data_[i];
+	double operator[](size_t i) const noexcept {
+		switch (data_type_) {
+		case TS_DOUBLE:
+			return ((double *)data_)[i];
+		case TS_FLOAT:
+			return ((float *)data_)[i];
+		case TS_INT32:
+			return ((int32_t *)data_)[i];
+		case TS_INT64:
+			return ((int64_t *)data_)[i];
+		}
+	}
+	double &at(size_t i) {
+		if (i >= len_)
+			throw std::out_of_range("Out of range");
+		return (*this)[i];
+	}
+	double at(size_t i) const {
+		if (i >= len_)
+			throw std::out_of_range("Out of range");
+		return (*this)[i];
 	}
 	size_t size() const noexcept {
 		return len_;
 	}
-	double *begin() noexcept {
-		return data_;
+	double *begin() {
+		if (data_type_ != TS_DOUBLE)
+			throw std::runtime_error("Cannot iterate non-double "
+			    "timestream");
+		return (double *)data_;
 	}
-	double *end() noexcept {
-		return data_ + len_;
+	double *end() {
+		if (data_type_ != TS_DOUBLE)
+			throw std::runtime_error("Cannot iterate non-double "
+			    "timestream");
+		return (double *)data_ + len_;
 	}
-	const double *begin() const noexcept {
-		return data_;
+	const double *begin() const {
+		if (data_type_ != TS_DOUBLE)
+			throw std::runtime_error("Cannot iterate non-double "
+			    "timestream");
+		return (const double *)data_;
 	}
-	const double *end() const noexcept {
-		return data_ + len_;
+	const double *end() const {
+		if (data_type_ != TS_DOUBLE)
+			throw std::runtime_error("Cannot iterate non-double "
+			    "timestream");
+		return (const double *)data_ + len_;
 	}
 
 	double GetSampleRate() const;
@@ -91,6 +125,9 @@ public:
 		if (!buffer_)
 			throw std::bad_alloc();
 		buffer_->push_back(value);
+		// Update pointers and length, which may have changed
+		data_ = &buffer_[0];
+		len_ = buffer_->size();
 	}
 private:
 	SET_LOGGER("G3Timestream");
@@ -101,8 +138,14 @@ private:
 	uint8_t use_flac_;
 
 	std::vector<double> *buffer_;
-	double *data_;
+	void *data_;
 	size_t len_;
+	enum {
+		TS_DOUBLE,
+		TS_FLOAT,
+		TS_INT32,
+		TS_INT64
+	} data_type_;
 };
 
 G3_POINTERS(G3Timestream);

@@ -219,6 +219,9 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 		FLAC__stream_decoder_finish(decoder);
 		FLAC__stream_decoder_delete(decoder);
 
+		len_ = buffer_->size();
+		data_ = &(*buffer_)[0];
+
 		// Apply NaN mask
 		if (nanflag == AllNan) {
 			for (size_t i = 0; i < size(); i++)
@@ -228,9 +231,6 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 				if (nanbuf[i])
 					(*this)[i] = NAN;
 		}
-		len_ = buffer_->size();
-		data_ = &(*buffer_)[0];
-
 #else
 		log_fatal("Trying to read FLAC-compressed timestreams but built without FLAC support");
 #endif
@@ -238,6 +238,21 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 		buffer_ = new std::vector<double>();
 		ar & cereal::make_nvp("data", *buffer_);
 	}
+}
+
+G3Timestream::G3Timestream(const G3Timestream &r) :
+    units(r.units), use_flac_(r.use_flac_), len_(r.len_), data_type_(TS_DOUBLE)
+{
+	// Copy constructor needs to copy data, which always involves
+	// allocating the internal buffer.
+	if (r.buffer_) {
+		buffer_ = new std::vector<double>(*r.buffer_);
+	} else {
+		buffer_ = new std::vector<double>(len_);
+		for (size_t i = 0; i < len_; i++)
+			(*buffer_)[i] = r[i];
+	}
+	data_ = (&(*buffer_)[0]);
 }
 
 double G3Timestream::GetSampleRate() const
