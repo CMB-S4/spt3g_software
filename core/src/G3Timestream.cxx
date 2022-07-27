@@ -164,7 +164,9 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 		if (buffer_) {
 			ar & cereal::make_nvp("data", *buffer_);
 		} else {
-			std::vector<double> data(this->begin(), this->end());
+			std::vector<double> data(size());
+			for (size_t i = 0; i < size(); i++)
+				data[i] = (*this)[i];
 			ar & cereal::make_nvp("data", data);
 		}
 #ifdef G3_HAS_FLAC
@@ -237,6 +239,9 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 	} else {
 		buffer_ = new std::vector<double>();
 		ar & cereal::make_nvp("data", *buffer_);
+
+		len_ = buffer_->size();
+		data_ = &(*buffer_)[0];
 	}
 }
 
@@ -723,11 +728,13 @@ G3TimestreamMap_relbuffer(PyObject *obj, Py_buffer *view)
 
 static PyBufferProcs timestreammap_bufferprocs;
 
-namespace {
+class G3Timestream::G3TimestreamPythonHelpers
+{
+public:
 
 SET_LOGGER("G3Timestream");
 
-G3TimestreamPtr
+static G3TimestreamPtr
 timestream_from_iterable(boost::python::object v,
     G3Timestream::TimestreamUnits units = G3Timestream::None)
 {
@@ -746,10 +753,42 @@ timestream_from_iterable(boost::python::object v,
 			x = G3TimestreamPtr(new G3Timestream((double *)view.buf,
 			    (double *)view.buf + view.len/sizeof(double)));
 		} else if (strcmp(view.format, "f") == 0) {
-			x = G3TimestreamPtr(new G3Timestream(
-			    view.len/sizeof(float)));
-			for (size_t i = 0; i < view.len/sizeof(float); i++)
-				(*x)[i] = ((float *)view.buf)[i];
+			x = G3TimestreamPtr(new G3Timestream());
+			delete x->buffer_; x->buffer_ = NULL;
+			x->data_type_ = G3Timestream::TS_FLOAT;
+			float *data = new float[view.len/sizeof(float)];
+			x->root_data_ref_ = boost::shared_ptr<float>(data);
+			x->data_ = data;
+			x->len_ = view.len/sizeof(float);
+			memcpy(data, view.buf, view.len);
+#ifdef __LP64__
+		} else if (strcmp(view.format, "i") == 0) {
+#else
+		} else if (strcmp(view.format, "i") == 0 || strcmp(view.format, "l") == 0) {
+#endif
+			x = G3TimestreamPtr(new G3Timestream());
+			delete x->buffer_; x->buffer_ = NULL;
+			x->data_type_ = G3Timestream::TS_INT32;
+			int32_t *data = new int32_t[view.len/sizeof(int32_t)];
+			x->root_data_ref_ = boost::shared_ptr<int32_t>(data);
+			x->data_ = data;
+			x->len_ = view.len/sizeof(int32_t);
+			memcpy(data, view.buf, view.len);
+			assert(view.itemsize == sizeof(int32_t));
+#ifdef __LP64__
+		} else if (strcmp(view.format, "q") == 0 || strcmp(view.format, "l") == 0) {
+#else
+		} else if (strcmp(view.format, "q") == 0) {
+#endif
+			x = G3TimestreamPtr(new G3Timestream());
+			delete x->buffer_; x->buffer_ = NULL;
+			x->data_type_ = G3Timestream::TS_INT64;
+			int64_t *data = new int64_t[view.len/sizeof(int64_t)];
+			x->root_data_ref_ = boost::shared_ptr<int64_t>(data);
+			x->data_ = data;
+			x->len_ = view.len/sizeof(int64_t);
+			memcpy(data, view.buf, view.len);
+			assert(view.itemsize == sizeof(int64_t));
 		} else {
 			// We could add more types, but why do that?
 			// Let Python do the work for obscure cases
@@ -781,14 +820,29 @@ G3Timestream_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 	boost::python::object selfobj(self);
 	G3TimestreamPtr ts = boost::python::extract<G3TimestreamPtr>(selfobj)();
 	view->obj = obj;
-	view->buf = (void*)&(*ts)[0];
-	view->len = ts->size() * sizeof(double);
+	view->buf = ts->data_;
 	view->readonly = 0;
-	view->itemsize = sizeof(double);
-	if (flags & PyBUF_FORMAT)
+	switch (ts->data_type_) {
+	case TS_DOUBLE:
 		view->format = (char *)"d";
-	else
+		view->itemsize = sizeof(double);
+		break;
+	case TS_FLOAT:
+		view->format = (char *)"f";
+		view->itemsize = sizeof(float);
+		break;
+	case TS_INT32:
+		view->format = (char *)"i";
+		view->itemsize = sizeof(int32_t);
+		break;
+	case TS_INT64:
+		view->format = (char *)"q";
+		view->itemsize = sizeof(int64_t);
+		break;
+	}
+	if (!(flags & PyBUF_FORMAT))
 		view->format = NULL;
+	view->len = ts->len_ * view->itemsize;
 	view->ndim = 1;
 #if (PY_MAJOR_VERSION == 2 && PY_MINOR_VERSION < 7) || (PY_MAJOR_VERSION >= 3)
 	// Abuse internal pointer in the absence of smalltable. This is safe
@@ -880,7 +934,7 @@ G3Timestream_getslice(const G3Timestream &a, boost::python::slice slice)
 	
 	return out;
 }
-}
+};
 
 static PyBufferProcs timestream_bufferprocs;
 
@@ -896,7 +950,7 @@ PYBINDINGS("core") {
            "buffer: changes to the array affect the timestream and vice versa. "
 	   "Most binary timestream arithmetic operations (+, -) check that the "
 	   "units and start/stop times are congruent.")
-	    .def("__init__", bp::make_constructor(timestream_from_iterable, bp::default_call_policies(), (bp::arg("data"), bp::arg("units") = G3Timestream::TimestreamUnits::None)), "Create a timestream from a numpy array or other numeric python iterable")
+	    .def("__init__", bp::make_constructor(G3Timestream::G3TimestreamPythonHelpers::timestream_from_iterable, bp::default_call_policies(), (bp::arg("data"), bp::arg("units") = G3Timestream::TimestreamUnits::None)), "Create a timestream from a numpy array or other numeric python iterable")
 	    .def("SetFLACCompression", &G3Timestream::SetFLACCompression,
 	      "Pass True to turn on FLAC compression when serialized. "
 	      "FLAC compression only works if the timestream is in units of "
@@ -910,11 +964,11 @@ PYBINDINGS("core") {
 	      "Time of the final sample in the timestream")
 	    .add_property("sample_rate", &G3Timestream::GetSampleRate,
 	      "Computed sample rate of the timestream.")
-	    .add_property("n_samples", &G3Timestream_nsamples,
+	    .add_property("n_samples", &G3Timestream::G3TimestreamPythonHelpers::G3Timestream_nsamples,
 	      "Number of samples in the timestream. Equivalent to len(ts)")
-	    .def("_assert_congruence", G3Timestream_assert_congruence,
+	    .def("_assert_congruence", &G3Timestream::G3TimestreamPythonHelpers::G3Timestream_assert_congruence,
 	      "log_fatal() if units, length, start, or stop times do not match")
-	    .def("_cxxslice", G3Timestream_getslice, "Slice-only __getitem__")
+	    .def("_cxxslice", &G3Timestream::G3TimestreamPythonHelpers::G3Timestream_getslice, "Slice-only __getitem__")
 	    // Operators bound in python through numpy
 	;
 	scitbx::boost_python::container_conversions::from_python_sequence<G3Timestream, scitbx::boost_python::container_conversions::variable_capacity_policy>();
@@ -922,7 +976,7 @@ PYBINDINGS("core") {
 
 	// Add buffer protocol interface
 	PyTypeObject *tsclass = (PyTypeObject *)ts.ptr();
-	timestream_bufferprocs.bf_getbuffer = G3Timestream_getbuffer;
+	timestream_bufferprocs.bf_getbuffer = G3Timestream::G3TimestreamPythonHelpers::G3Timestream_getbuffer;
 	tsclass->tp_as_buffer = &timestream_bufferprocs;
 #if PY_MAJOR_VERSION < 3
 	tsclass->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;

@@ -129,15 +129,19 @@ public:
 		data_ = &buffer_[0];
 		len_ = buffer_->size();
 	}
+	class G3TimestreamPythonHelpers;
+
 private:
 	SET_LOGGER("G3Timestream");
 
 	friend class G3TimestreamMap;
+	friend class G3TimestreamPythonHelpers;
 	//G3Timestream(double *start, size_t size, boost::shared_ptr<DataRef>);
 
 	uint8_t use_flac_;
 
 	std::vector<double> *buffer_;
+	boost::shared_ptr<void> root_data_ref_;
 	void *data_;
 	size_t len_;
 	enum {
