@@ -59,6 +59,7 @@ public:
 		case TS_INT64:
 			return ((int64_t *)data_)[i];
 		}
+		__builtin_unreachable();
 	}
 	double &at(size_t i) {
 		if (i >= len_)
