@@ -161,13 +161,36 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 		ar & cereal::make_nvp("data", outbuf);
 	} else {
 #endif
+		ar & cereal::make_nvp("data_type", data_type_);
 		if (buffer_) {
 			ar & cereal::make_nvp("data", *buffer_);
 		} else {
-			std::vector<double> data(size());
-			for (size_t i = 0; i < size(); i++)
-				data[i] = (*this)[i];
-			ar & cereal::make_nvp("data", data);
+			switch (data_type_) {
+			case TS_DOUBLE: {
+				std::vector<double> data((double *)data_,
+				    (double *)data_ + len_);
+				ar & cereal::make_nvp("data", data);
+				break;
+			}
+			case TS_FLOAT: {
+				std::vector<float> data((float *)data_,
+				    (float *)data_ + len_);
+				ar & cereal::make_nvp("data", data);
+				break;
+			}
+			case TS_INT32: {
+				std::vector<int32_t> data((int32_t *)data_,
+				    (int32_t *)data_ + len_);
+				ar & cereal::make_nvp("data", data);
+				break;
+			}
+			case TS_INT64: {
+				std::vector<int64_t> data((int64_t *)data_,
+				    (int64_t *)data_ + len_);
+				ar & cereal::make_nvp("data", data);
+				break;
+			}
+			}
 		}
 #ifdef G3_HAS_FLAC
 	}
@@ -181,7 +204,7 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 	ar & cereal::make_nvp("G3FrameObject",
 	    cereal::base_class<G3FrameObject>(this));
 	ar & cereal::make_nvp("units", units);
-	if (v > 1) {
+	if (v >= 2) {
 		ar & cereal::make_nvp("start", start);
 		ar & cereal::make_nvp("stop", stop);
 	}
@@ -196,6 +219,7 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 		callback.inbuf = &ar;
 		if (buffer_)
 			delete buffer_;
+		root_data_ref_.reset();
 		buffer_ = NULL;
 		callback.outbuf = new std::vector<int32_t>();
 		callback.pos = 0;
@@ -250,11 +274,52 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 		log_fatal("Trying to read FLAC-compressed timestreams but built without FLAC support");
 #endif
 	} else {
-		buffer_ = new std::vector<double>();
-		ar & cereal::make_nvp("data", *buffer_);
+		if (buffer_)
+			delete buffer_;
+		buffer_ = NULL;
+		root_data_ref_.reset();
 
-		len_ = buffer_->size();
-		data_ = &(*buffer_)[0];
+		if (v >= 3)
+			ar & cereal::make_nvp("data_type", data_type_);
+		else
+			data_type_ = TS_DOUBLE;
+		switch (data_type_) {
+		case TS_DOUBLE:
+			buffer_ = new std::vector<double>();
+			ar & cereal::make_nvp("data", *buffer_);
+			len_ = buffer_->size();
+			data_ = &(*buffer_)[0];
+			break;
+		case TS_FLOAT: {
+			std::vector<float> *data = new std::vector<float>();
+			ar & cereal::make_nvp("data", *data);
+			root_data_ref_ = boost::shared_ptr<std::vector<float> >(
+			    data);
+			len_ = data->size();
+			data_ = &(*data)[0];
+			break;
+			}
+		case TS_INT32: {
+			std::vector<int32_t> *data = new std::vector<int32_t>();
+			ar & cereal::make_nvp("data", *data);
+			root_data_ref_ = boost::shared_ptr<
+			    std::vector<int32_t> >(data);
+			len_ = data->size();
+			data_ = &(*data)[0];
+			break;
+		}
+		case TS_INT64: {
+			std::vector<int64_t> *data = new std::vector<int64_t>();
+			ar & cereal::make_nvp("data", *data);
+			root_data_ref_ = boost::shared_ptr<
+			    std::vector<int64_t> >(data);
+			len_ = data->size();
+			data_ = &(*data)[0];
+			break;
+		}
+		default:
+			log_fatal("Unknown timestream datatype %d", data_type_);
+		}
 	}
 }
 

@@ -37,5 +37,5 @@ for d in [f64, f32, i32, i64, i16]:
 	# Test serialization
 	buf = pickle.dumps(t)
 	t2 = pickle.loads(buf)
-	assert(numpy.asarray(t2).dtype == 'float64') # Always come back as double
+	assert(numpy.asarray(t2).dtype == d.dtype) # Datatype preserved
 	assert((numpy.asarray(t2) == d2).all())

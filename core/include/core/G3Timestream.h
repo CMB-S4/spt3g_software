@@ -181,7 +181,7 @@ namespace cereal {
 	template <class A> struct specialize<A, G3TimestreamMap, cereal::specialization::member_serialize> {};
 }
 
-G3_SERIALIZABLE(G3Timestream, 2);
+G3_SERIALIZABLE(G3Timestream, 3);
 G3_SERIALIZABLE(G3TimestreamMap, 3);
 
 #endif
