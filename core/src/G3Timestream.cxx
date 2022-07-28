@@ -338,6 +338,7 @@ G3Timestream::G3Timestream(const G3Timestream &r) :
 			(*buffer_)[i] = r[i];
 		data_ = (&(*buffer_)[0]);
 	} else {
+		buffer_ = NULL;
 		size_t element = 0;
 		switch (data_type_) {
 		case TS_DOUBLE:
