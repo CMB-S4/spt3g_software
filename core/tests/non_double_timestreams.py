@@ -39,3 +39,9 @@ for d in [f64, f32, i32, i64, i16]:
 	t2 = pickle.loads(buf)
 	assert(numpy.asarray(t2).dtype == d.dtype) # Datatype preserved
 	assert((numpy.asarray(t2) == d2).all())
+
+	# Test copy constructor
+	t2 = core.G3Timestream(t)
+	assert(numpy.asarray(t2).dtype == d.dtype) # Datatype preserved
+	assert((numpy.asarray(t2) == d2).all())
+

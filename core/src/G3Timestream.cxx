@@ -324,18 +324,53 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 }
 
 G3Timestream::G3Timestream(const G3Timestream &r) :
-    units(r.units), use_flac_(r.use_flac_), len_(r.len_), data_type_(TS_DOUBLE)
+    units(r.units), use_flac_(r.use_flac_), len_(r.len_),
+    data_type_(r.data_type_)
 {
 	// Copy constructor needs to copy data, which always involves
 	// allocating the internal buffer.
 	if (r.buffer_) {
 		buffer_ = new std::vector<double>(*r.buffer_);
-	} else {
+		data_ = (&(*buffer_)[0]);
+	} else if (r.data_type_ == TS_DOUBLE) {
 		buffer_ = new std::vector<double>(len_);
 		for (size_t i = 0; i < len_; i++)
 			(*buffer_)[i] = r[i];
+		data_ = (&(*buffer_)[0]);
+	} else {
+		size_t element = 0;
+		switch (data_type_) {
+		case TS_DOUBLE:
+			__builtin_unreachable(); // Handled above
+		case TS_FLOAT: {
+			std::vector<float> *data = new std::vector<float>(len_);
+			root_data_ref_ = boost::shared_ptr<std::vector<float> >(
+			    data);
+			data_ = &(*data)[0];
+			element = 4;
+			break;
+			}
+		case TS_INT32: {
+			std::vector<int32_t> *data =
+			    new std::vector<int32_t>(len_);
+			root_data_ref_ = boost::shared_ptr<
+			    std::vector<int32_t> >(data);
+			data_ = &(*data)[0];
+			element = 4;
+			break;
+		}
+		case TS_INT64: {
+			std::vector<int64_t> *data =
+			    new std::vector<int64_t>(len_);
+			root_data_ref_ = boost::shared_ptr<
+			    std::vector<int64_t> >(data);
+			data_ = &(*data)[0];
+			element = 8;
+			break;
+		}
+		}
+		memcpy(data_, r.data_, element*len_);
 	}
-	data_ = (&(*buffer_)[0]);
 }
 
 double G3Timestream::GetSampleRate() const
@@ -941,6 +976,98 @@ timestream_from_iterable(boost::python::object v,
 	return x;
 }
 
+static G3TimestreamMapPtr
+G3TimestreamMap_from_numpy(std::vector<std::string> keys,
+    boost::python::object data, G3Time start, G3Time stop,
+    G3Timestream::TimestreamUnits units)
+{
+	G3TimestreamMapPtr x(new G3TimestreamMap);
+
+	Py_buffer view;
+	if (PyObject_GetBuffer(data.ptr(), &view,
+	    PyBUF_FORMAT | PyBUF_C_CONTIGUOUS) == -1) {
+		PyErr_Clear();
+		
+		// Maybe it's an indexable iterable? See if processing it
+		// that way throws an exception.
+		for (size_t i = 0; i < keys.size(); i++) {
+			G3TimestreamPtr next =
+			    timestream_from_iterable(data[i], units);
+			next->start = start;
+			next->stop = stop;
+			(*x)[keys[i]] = next;
+		}
+		return x;
+	}
+
+	if (keys.size() != view.shape[0]) {
+		PyBuffer_Release(&view);
+		PyErr_SetString(PyExc_IndexError, "Number of keys does not "
+		    "match number of rows in data structure.");
+		boost::python::throw_error_already_set();
+	}
+
+	if (view.ndim != 2) {
+		PyBuffer_Release(&view);
+		PyErr_SetString(PyExc_ValueError,
+		    "Array must be two-dimensional.");
+		boost::python::throw_error_already_set();
+	}
+
+	G3Timestream templ;
+	templ.units = units;
+	templ.start = start;
+	templ.stop = stop;
+	templ.data_type_;
+	if (strcmp(view.format, "d") == 0) {
+		templ.data_type_ = G3Timestream::TS_DOUBLE;
+	} else if (strcmp(view.format, "f") == 0) {
+		templ.data_type_ = G3Timestream::TS_FLOAT;
+#ifdef __LP64__
+	} else if (strcmp(view.format, "i") == 0) {
+#else
+	} else if (strcmp(view.format, "i") == 0 || strcmp(view.format, "l") == 0) {
+#endif
+		templ.data_type_ = G3Timestream::TS_INT32;
+#ifdef __LP64__
+	} else if (strcmp(view.format, "q") == 0 || strcmp(view.format, "l") == 0) {
+#else
+	} else if (strcmp(view.format, "q") == 0) {
+#endif
+		templ.data_type_ = G3Timestream::TS_INT64;
+	} else {
+		PyBuffer_Release(&view);
+		PyErr_SetString(PyExc_ValueError, "Unsupported data type.");
+		boost::python::throw_error_already_set();
+	}
+
+#if 0
+	uint8_t *buf = (uint8_t *)view.buf;
+	boost::shared_ptr<void> data_ref = // something with the view
+#else
+	uint8_t *buf = new uint8_t[view.len];
+	memcpy(buf, view.buf, view.len);
+	boost::shared_ptr<void> data_ref = boost::shared_ptr<uint8_t>(buf);
+	size_t len = view.shape[1];
+	ptrdiff_t step = view.strides[0];
+	PyBuffer_Release(&view);
+#endif
+
+	for (auto &i : keys) {
+		G3TimestreamPtr next(new G3Timestream(templ));
+		delete next->buffer_;
+		next->buffer_ = NULL;
+		next->len_ = len;
+		next->data_ = buf;
+		next->root_data_ref_ = data_ref;
+		(*x)[i] = next;
+
+		buf += step;
+	}
+
+	return x;
+}
+
 static int
 G3Timestream_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 {
@@ -1120,6 +1247,7 @@ PYBINDINGS("core") {
 
 	bp::object tsm =
 	  EXPORT_FRAMEOBJECT(G3TimestreamMap, init<>(), "Collection of timestreams indexed by logical detector ID")
+	    .def("__init__", bp::make_constructor(G3Timestream::G3TimestreamPythonHelpers::G3TimestreamMap_from_numpy, bp::default_call_policies(), (bp::arg("keys"), bp::arg("data"), bp::arg("start")=G3Time(0), bp::arg("stop")=G3Time(0), bp::arg("units") = G3Timestream::TimestreamUnits::None)), "Create a timestream map from a numpy array or other numeric python iterable. Each row of the 2D input array will correspond to a single timestream, with the key set to the correspondingly-indexed entry of <keys>.")
 	    .def(bp::std_map_indexing_suite<G3TimestreamMap, true>())
 	    .def("CheckAlignment", &G3TimestreamMap::CheckAlignment)
 	    .def("Compactify", &G3TimestreamMap::Compactify,

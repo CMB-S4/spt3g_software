@@ -137,7 +137,6 @@ private:
 
 	friend class G3TimestreamMap;
 	friend class G3TimestreamPythonHelpers;
-	//G3Timestream(double *start, size_t size, boost::shared_ptr<DataRef>);
 
 	uint8_t use_flac_;
 

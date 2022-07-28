@@ -24,6 +24,23 @@ assert(buffer1d.shape == buffer2d.shape)
 assert(buffer2d.shape == (4,600))
 assert((buffer1d == buffer2d).all())
 
+# Try building the TSM directly
+tsm2 = core.G3TimestreamMap(tsm.keys(), buffer1d)
+assert((numpy.asarray(tsm2) == buffer1d).all())
+assert((numpy.asarray(tsm2) == buffer2d).all())
+
+# Try building semi-directly, using a list of numpy arrays
+tsm2 = core.G3TimestreamMap(tsm.keys(), [x for x in buffer1d])
+assert((numpy.asarray(tsm2) == buffer1d).all())
+assert((numpy.asarray(tsm2) == buffer2d).all())
+
+# Round-trip to and from numpy
+tsm2 = core.G3TimestreamMap(tsm.keys(), buffer2d)
+assert((numpy.asarray(tsm2) == buffer1d).all())
+assert((numpy.asarray(tsm2) == buffer2d).all())
+
 # Now try writing to it
 buffer2d[1] = numpy.random.normal(size=600)
 assert((numpy.asarray(tsm['B']) == buffer2d[1]).all())
+
+
