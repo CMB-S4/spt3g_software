@@ -170,6 +170,13 @@ public:
 	size_t NSamples() const;
 	G3Timestream::TimestreamUnits GetUnits() const;
 
+	// Compact underlying data storage into a contiguous 2D block.
+	// This invalidates any references to data inside any member
+	// timestreams (though not the timestream objects themselves)
+	// and requires timestream alignment (throws exception if
+	// CheckAlignment is false).
+	void Compactify();
+
 	template <class A> void serialize(A &ar, unsigned v);
 	std::string Description() const;
 };

@@ -665,10 +665,119 @@ G3Timestream::TimestreamUnits G3TimestreamMap::GetUnits() const
 	return begin()->second->units;
 }
 
+void G3TimestreamMap::Compactify()
+{
+	// Check if already compacted
+	bool is_compact = true;
+	boost::shared_ptr<void> first_root;
+	void *expected_base = NULL;
+	for (auto & i : *this) {
+		// Not compact if any using internal storage
+		if (!i.second->root_data_ref_) {
+			is_compact = false;
+			break;
+		}
+		if (!first_root)
+			first_root = i.second->root_data_ref_;
+		// or if they are using *different* internal storage
+		if (i.second->root_data_ref_ != first_root) {
+			is_compact = false;
+			break;
+		}
+		// or if they are not in order
+		size_t element_size = 0;
+		switch (i.second->data_type_) {
+		case G3Timestream::TS_DOUBLE:
+		case G3Timestream::TS_INT64:
+			element_size = 8;
+			break;
+		case G3Timestream::TS_FLOAT:
+		case G3Timestream::TS_INT32:
+			element_size = 4;
+			break;
+		}
+		if (expected_base != NULL && i.second->data_ != expected_base) {
+			is_compact = false;
+			break;
+		}
+		expected_base = (uint8_t *)i.second->data_ +
+		    element_size*i.second->size();
+	}
+	if (is_compact || size() == 0)
+		return;
+
+	// Check if timestreams aligned; if not, they can't be compacted
+	if (!CheckAlignment())
+		throw std::runtime_error("Cannot compactify a timestream map "
+		    "with non-aligned timestreams.");
+
+	// Check if all timestreams have the same data type
+	for (auto & i : *this) {
+		if (i.second->data_type_ != begin()->second->data_type_)
+			throw std::runtime_error("Cannot compactify a "
+			    "timestream map with mixed data types.");
+	}
+
+	// Now let's do the compactification.
+	boost::shared_ptr<void> root;
+	void *base_ptr;
+	size_t row_bytes;
+	switch (begin()->second->data_type_) {
+	case G3Timestream::TS_DOUBLE: {
+		std::vector<double> *data = new std::vector<double>(size() *
+		    begin()->second->size());
+		root = boost::shared_ptr<std::vector<double> >(data);
+		base_ptr = &(*data)[0];
+		row_bytes = begin()->second->size() * sizeof((*data)[0]);
+		break;
+	}
+	case G3Timestream::TS_FLOAT: {
+		std::vector<float> *data = new std::vector<float>(size() *
+		    begin()->second->size());
+		root = boost::shared_ptr<std::vector<float> >(data);
+		base_ptr = &(*data)[0];
+		row_bytes = begin()->second->size() * sizeof((*data)[0]);
+		break;
+	}
+	case G3Timestream::TS_INT32: {
+		std::vector<int32_t> *data = new std::vector<int32_t>(size() *
+		    begin()->second->size());
+		root = boost::shared_ptr<std::vector<int32_t> >(data);
+		base_ptr = &(*data)[0];
+		row_bytes = begin()->second->size() * sizeof((*data)[0]);
+		break;
+	}
+	case G3Timestream::TS_INT64: {
+		std::vector<int64_t> *data = new std::vector<int64_t>(size() *
+		    begin()->second->size());
+		root = boost::shared_ptr<std::vector<int64_t> >(data);
+		base_ptr = &(*data)[0];
+		row_bytes = begin()->second->size() * sizeof((*data)[0]);
+		break;
+	}
+	}
+
+	for (auto & i : *this) {
+		memcpy(base_ptr, i.second->data_, row_bytes);
+		if (i.second->buffer_)
+			delete i.second->buffer_;
+		i.second->buffer_ = NULL;
+		i.second->root_data_ref_ = root;
+		i.second->data_ = base_ptr;
+		// len unchanged
+
+		base_ptr = (uint8_t *)base_ptr + row_bytes;
+	}
+}
+
 G3_SPLIT_SERIALIZABLE_CODE(G3Timestream);
 G3_SERIALIZABLE_CODE(G3TimestreamMap);
 
-namespace {
+class G3Timestream::G3TimestreamPythonHelpers
+{
+public:
+SET_LOGGER("G3Timestream");
+
 static int
 G3TimestreamMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 {
@@ -697,17 +806,7 @@ G3TimestreamMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 		view->obj = NULL;
 		return -1;
 	}
-#if 0
-	if ((flags & (PyBUF_WRITABLE | PyBUF_ANY_CONTIGUOUS)) ==
-	    (PyBUF_WRITABLE | PyBUF_ANY_CONTIGUOUS)) {
-#else
-	if ((flags & PyBUF_WRITABLE) == PyBUF_WRITABLE) { // See XXX note below
-#endif
-		PyErr_SetString(PyExc_BufferError, "Cannot provide writable "
-		    "contiguous buffer.");
-		view->obj = NULL;
-		return -1;
-	}
+
 	if ((flags & PyBUF_F_CONTIGUOUS) == PyBUF_F_CONTIGUOUS) {
 		PyErr_SetString(PyExc_BufferError, "Cannot provide FORTRAN "
 		    "contiguous buffer.");
@@ -715,76 +814,45 @@ G3TimestreamMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 		return -1;
 	}
 
+	// Get everything into a 2D array
+	ts->Compactify();
+
 	view->obj = obj;
-	view->len = ts->size() * ts->begin()->second->size() * sizeof(double);
 	view->readonly = 0;
-	view->itemsize = sizeof(double);
-	if (flags & PyBUF_FORMAT)
+	switch (ts->begin()->second->data_type_) {
+	case TS_DOUBLE:
 		view->format = (char *)"d";
-	else
+		view->itemsize = sizeof(double);
+		break;
+	case TS_FLOAT:
+		view->format = (char *)"f";
+		view->itemsize = sizeof(float);
+		break;
+	case TS_INT32:
+		view->format = (char *)"i";
+		view->itemsize = sizeof(int32_t);
+		break;
+	case TS_INT64:
+		view->format = (char *)"q";
+		view->itemsize = sizeof(int64_t);
+		break;
+	}
+	if (!(flags & PyBUF_FORMAT))
 		view->format = NULL;
 	view->ndim = 2;
+	view->len = ts->size() * ts->begin()->second->size() * view->itemsize;
 
 	view->shape = new Py_ssize_t[2];
 	view->shape[0] = ts->size();
 	view->shape[1] = ts->begin()->second->size();
 
-	if (false && (flags & PyBUF_INDIRECT) == PyBUF_INDIRECT) {
-		// XXX: code path disabled as a result of a bug in numpy:
-		// it calls PyMemoryView_FromObject, which implicitly
-		// sets PyBUF_INDIRECT, but then has no code to deal
-		// with suboffsets. The code in this branch does work, but
-		// breaks numpy.
-		
-		// Provide an "indirect" buffer in which the buffer
-		// is an array of pointers to buffers. The API is really
-		// weird for this.
-		//
-		// NB: This *must* get used before any changes to the provider!
-		// We do *not* increment reference counts on timestreams, nor
-		// do we even have a way to freeze the buffer locations.
+	view->buf = ts->begin()->second->data_;
+	view->readonly = 0;
 
-		view->strides = new Py_ssize_t[2];
-		view->strides[0] = sizeof(double *);
-		view->strides[1] = sizeof(double);
+	view->strides = new Py_ssize_t[2];
+	view->strides[0] = ts->begin()->second->size()*view->itemsize;
+	view->strides[1] = view->itemsize; 
 
-		view->suboffsets = new Py_ssize_t[2];
-		view->suboffsets[0] = 0;
-		view->suboffsets[1] = -1;
-
-		view->buf = malloc(sizeof(double *)*ts->size());
-
-		int j = 0;
-		for (auto i : (*ts))
-			((double **)(view->buf))[j++] = &(*i.second)[0];
-	} else {
-		// To honor a contiguous buffer request, make a copy of the
-		// data. This violates the spirit of the buffer protocol
-		// slightly, but both simplifies the API and allows a
-		// potential faster memory copy than iterating over the
-		// map in Python would.
-
-		view->buf = malloc(view->len);
-		view->readonly = 1;
-
-		view->strides = new Py_ssize_t[2];
-		view->strides[0] = ts->begin()->second->size()*view->itemsize;
-		view->strides[1] = view->itemsize; 
-
-		int j = 0;
-		for (auto i : (*ts)) {
-			memcpy((int8_t *)view->buf + j*view->strides[0],
-			    &(*i.second)[0], view->strides[0]);
-			j++;
-		}
-
-		view->suboffsets = NULL;
-		view->internal = view->buf;
-	}
-
-	// Try to hold onto our collective hats. This is still very dangerous if
-	// the G3Timestream's underlying vector is resized in the case that the
-	// buffer is not a copy.
 	Py_INCREF(obj);
 
 	return 0;
@@ -799,18 +867,7 @@ G3TimestreamMap_relbuffer(PyObject *obj, Py_buffer *view)
 		delete [] view->shape;
 	if (view->suboffsets != NULL)
 		delete [] view->suboffsets;
-	if (view->buf != NULL)
-		free(view->buf);
 }
-}
-
-static PyBufferProcs timestreammap_bufferprocs;
-
-class G3Timestream::G3TimestreamPythonHelpers
-{
-public:
-
-SET_LOGGER("G3Timestream");
 
 static G3TimestreamPtr
 timestream_from_iterable(boost::python::object v,
@@ -1015,6 +1072,7 @@ G3Timestream_getslice(const G3Timestream &a, boost::python::slice slice)
 };
 
 static PyBufferProcs timestream_bufferprocs;
+static PyBufferProcs timestreammap_bufferprocs;
 
 PYBINDINGS("core") {
 	namespace bp = boost::python;
@@ -1064,6 +1122,10 @@ PYBINDINGS("core") {
 	  EXPORT_FRAMEOBJECT(G3TimestreamMap, init<>(), "Collection of timestreams indexed by logical detector ID")
 	    .def(bp::std_map_indexing_suite<G3TimestreamMap, true>())
 	    .def("CheckAlignment", &G3TimestreamMap::CheckAlignment)
+	    .def("Compactify", &G3TimestreamMap::Compactify,
+	       "If member timestreams are stored non-contiguously, repack all "
+	       "data into a contiguous block. Requires timestreams be aligned "
+	       "and the same data type. Done implicitly by numpy.asarray().")
 	    .add_property("start", &G3TimestreamMap::GetStartTime,
 	      &timestream_map_set_start_time,
 	      "Time of the first sample in the time stream")
@@ -1083,8 +1145,10 @@ PYBINDINGS("core") {
 
 	// Add buffer protocol interface
 	PyTypeObject *tsmclass = (PyTypeObject *)tsm.ptr();
-	timestreammap_bufferprocs.bf_getbuffer = G3TimestreamMap_getbuffer;
-	timestreammap_bufferprocs.bf_releasebuffer = G3TimestreamMap_relbuffer;
+	timestreammap_bufferprocs.bf_getbuffer =
+	    G3Timestream::G3TimestreamPythonHelpers::G3TimestreamMap_getbuffer;
+	timestreammap_bufferprocs.bf_releasebuffer =
+	    G3Timestream::G3TimestreamPythonHelpers::G3TimestreamMap_relbuffer;
 	tsmclass->tp_as_buffer = &timestreammap_bufferprocs;
 #if PY_MAJOR_VERSION < 3
 	tsmclass->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;

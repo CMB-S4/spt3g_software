@@ -24,3 +24,6 @@ assert(buffer1d.shape == buffer2d.shape)
 assert(buffer2d.shape == (4,600))
 assert((buffer1d == buffer2d).all())
 
+# Now try writing to it
+buffer2d[1] = numpy.random.normal(size=600)
+assert((numpy.asarray(tsm['B']) == buffer2d[1]).all())
