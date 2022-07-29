@@ -18,6 +18,10 @@ for d in [f64, f32, i32, i64, i16]:
 		if d.dtype == 'int16': # Meant to fail
 			continue
 		raise
+	else:
+		if d.dtype == 'int16': # Meant to fail
+			raise TypeError('int16 should not work')
+
 
 	assert(len(t) == 20)
 	assert(t[12] == 1.0)
