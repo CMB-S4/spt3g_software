@@ -39,6 +39,28 @@ G3SkyMapMask::Clone(bool copy_data) const
 		return boost::make_shared<G3SkyMapMask>(*Parent());
 }
 
+G3SkyMapMask::const_iterator::const_iterator(const G3SkyMapMask &mask, bool begin) :
+    mask_(mask)
+{
+	index_ = begin ? 0 : mask_.size();
+	set_value();
+}
+
+G3SkyMapMask::const_iterator
+G3SkyMapMask::const_iterator::operator++()
+{
+	++index_;
+	set_value();
+
+	return *this;
+}
+
+size_t
+G3SkyMapMask::size() const
+{
+	return data_.size();
+}
+
 std::vector<bool>::reference
 G3SkyMapMask::operator [] (size_t i)
 {
@@ -48,6 +70,8 @@ G3SkyMapMask::operator [] (size_t i)
 bool
 G3SkyMapMask::at (size_t i) const
 {
+	if (i >= data_.size())
+		return false;
 	return data_[i];
 }
 
@@ -56,8 +80,8 @@ G3SkyMapMask::operator |=(const G3SkyMapMask &rhs)
 {
 	g3_assert(IsCompatible(rhs));
 
-	for (size_t i = 0; i < data_.size(); i++)
-		(*this)[i] = rhs.at(i) || (*this)[i];
+	for (size_t i = 0; i < size(); i++)
+		(*this)[i] = rhs.at(i) || at(i);
 
 	return *this;
 }
@@ -67,8 +91,8 @@ G3SkyMapMask::operator &=(const G3SkyMapMask &rhs)
 {
 	g3_assert(IsCompatible(rhs));
 
-	for (size_t i = 0; i < data_.size(); i++)
-		(*this)[i] = rhs.at(i) && (*this)[i];
+	for (auto i: *this)
+		(*this)[i.first] = rhs.at(i.first) && i.second;
 
 	return *this;
 }
@@ -78,8 +102,8 @@ G3SkyMapMask::operator ^=(const G3SkyMapMask &rhs)
 {
 	g3_assert(IsCompatible(rhs));
 
-	for (size_t i = 0; i < data_.size(); i++)
-		(*this)[i] = rhs.at(i) ^ (*this)[i];
+	for (size_t i = 0; i < size(); i++)
+		(*this)[i] = rhs.at(i) ^ at(i);
 
 	return *this;
 }
@@ -87,8 +111,8 @@ G3SkyMapMask::operator ^=(const G3SkyMapMask &rhs)
 G3SkyMapMask &
 G3SkyMapMask::invert()
 {
-	for (size_t i = 0; i < data_.size(); i++)
-		(*this)[i] = !(*this)[i];
+	for (size_t i = 0; i < size(); i++)
+		(*this)[i] = !at(i);
 
 	return *this;
 }
@@ -96,7 +120,7 @@ G3SkyMapMask::invert()
 bool
 G3SkyMapMask::all() const
 {
-	for (size_t i = 0; i < data_.size(); i++)
+	for (size_t i = 0; i < size(); i++)
 		if (at(i) == 0)
 			return false;
 	return true;
@@ -105,8 +129,8 @@ G3SkyMapMask::all() const
 bool
 G3SkyMapMask::any() const
 {
-	for (size_t i = 0; i < data_.size(); i++)
-		if (at(i) != 0)
+	for (auto i: *this)
+		if (i.second != 0)
 			return true;
 	return false;
 }
@@ -115,8 +139,8 @@ size_t
 G3SkyMapMask::sum() const
 {
 	size_t s = 0;
-	for (size_t i = 0; i < data_.size(); i++)
-		s += at(i);
+	for (auto i: *this)
+		s += i.second;
 	return s;
 }
 
@@ -125,9 +149,9 @@ G3SkyMapMask::NonZeroPixels() const
 {
 	std::vector<uint64_t> indices;
 
-	for (size_t i = 0; i < data_.size(); i++) {
-		if (at(i))
-			indices.push_back(i);
+	for (auto i: *this) {
+		if (i.second)
+			indices.push_back(i.first);
 	}
 
 	return indices;
@@ -137,8 +161,9 @@ G3SkyMapMask
 G3SkyMapMask::operator ~() const
 {
 	G3SkyMapMask mask(*Parent());
-	for (size_t i = 0; i < data_.size(); i++)
-		mask[i] = !at(i);
+	for (size_t i = 0; i < size(); i++)
+		if (!at(i))
+			mask[i] = true;
 
 	return mask;
 }
@@ -149,8 +174,9 @@ G3SkyMapMask::operator |(const G3SkyMapMask &rhs) const
 	g3_assert(IsCompatible(rhs));
 
 	G3SkyMapMask mask(*Parent());
-	for (size_t i = 0; i < data_.size(); i++)
-		mask[i] = at(i) || rhs.at(i);
+	for (size_t i = 0; i < size(); i++)
+		if (at(i) || rhs.at(i))
+			mask[i] = true;
 
 	return mask;
 }
@@ -161,8 +187,9 @@ G3SkyMapMask::operator &(const G3SkyMapMask &rhs) const
 	g3_assert(IsCompatible(rhs));
 
 	G3SkyMapMask mask(*Parent());
-	for (size_t i = 0; i < data_.size(); i++)
-		mask[i] = at(i) && rhs.at(i);
+	for (auto i: *this)
+		if (i.second && rhs.at(i.first))
+			mask[i.first] = true;
 
 	return mask;
 }
@@ -173,8 +200,9 @@ G3SkyMapMask::operator ^(const G3SkyMapMask &rhs) const
 	g3_assert(IsCompatible(rhs));
 
 	G3SkyMapMask mask(*Parent());
-	for (size_t i = 0; i < data_.size(); i++)
-		mask[i] = at(i) ^ rhs.at(i);
+	for (size_t i = 0; i < size(); i++)
+		if (at(i) ^ rhs.at(i))
+			mask[i] = true;
 
 	return mask;
 }
@@ -185,8 +213,9 @@ G3SkyMapMask::operator ==(const G3SkyMapMask &rhs) const
 	g3_assert(IsCompatible(rhs));
 
 	G3SkyMapMask mask(*Parent());
-	for (size_t i = 0; i < data_.size(); i++)
-		mask[i] = at(i) == rhs.at(i);
+	for (size_t i = 0; i < size(); i++)
+		if (at(i) == rhs.at(i))
+			mask[i] = true;
 
 	return mask;
 }
@@ -197,8 +226,9 @@ G3SkyMapMask::operator !=(const G3SkyMapMask &rhs) const
 	g3_assert(IsCompatible(rhs));
 
 	G3SkyMapMask mask(*Parent());
-	for (size_t i = 0; i < data_.size(); i++)
-		mask[i] = at(i) != rhs.at(i);
+	for (size_t i = 0; i < size(); i++)
+		if (at(i) != rhs.at(i))
+			mask[i] = true;
 
 	return mask;
 }
@@ -220,9 +250,9 @@ G3SkyMapMask::MakeBinaryMap() const
 {
 	G3SkyMapPtr out = Parent()->Clone();
 
-	for (size_t i = 0; i < data_.size(); i++) {
-		if (at(i))
-			(*out)[i] = 1.0;
+	for (auto i: *this) {
+		if (i.second)
+			(*out)[i.first] = 1.0;
 	}
 
 	return out;
@@ -249,7 +279,7 @@ skymapmask_getitem(const G3SkyMapMask &m, boost::python::object index)
 		i = extract<int>(index)();
 
 		if (i < 0)
-			i = m.Parent()->size() + i;
+			i = m.size() + i;
 	} else if (extract<tuple>(index).check()) {
 		int x, y;
 
@@ -280,7 +310,7 @@ skymapmask_getitem(const G3SkyMapMask &m, boost::python::object index)
 		boost::python::throw_error_already_set();
 	}
 	
-	if (i < 0 || size_t(i) >= m.Parent()->size()) {
+	if (i < 0 || size_t(i) >= m.size()) {
 		PyErr_SetString(PyExc_IndexError, "Index out of range");
 		boost::python::throw_error_already_set();
 	}
@@ -298,7 +328,7 @@ skymapmask_setitem(G3SkyMapMask &m, boost::python::object index, bool val)
 		i = extract<int>(index)();
 
 		if (i < 0)
-			i = m.Parent()->size() + i;
+			i = m.size() + i;
 	} else if (extract<tuple>(index).check()) {
 		int x, y;
 
@@ -329,7 +359,7 @@ skymapmask_setitem(G3SkyMapMask &m, boost::python::object index, bool val)
 		boost::python::throw_error_already_set();
 	}
 
-	if (i < 0 || size_t(i) >= m.Parent()->size()) {
+	if (i < 0 || size_t(i) >= m.size()) {
 		PyErr_SetString(PyExc_IndexError, "Index out of range");
 		boost::python::throw_error_already_set();
 	}

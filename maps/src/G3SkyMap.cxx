@@ -532,10 +532,11 @@ skymap_pynoninplace(divd, /=, double)
 static G3SkyMapPtr
 pyskymap_multm(const G3SkyMap &a, const G3SkyMapMask &b)
 {
+	g3_assert(b.IsCompatible(a));
 	G3SkyMapPtr rv = a.Clone(false);
-	for (size_t i = 0; i < a.size(); i++) {
-		if (b.at(i) && a.at(i) != 0)
-			(*rv)[i] = a.at(i);
+	for (auto i: b) {
+		if (b.at(i.first) && a.at(i.first) != 0)
+			(*rv)[i.first] = a.at(i.first);
 	}
 
 	return rv;

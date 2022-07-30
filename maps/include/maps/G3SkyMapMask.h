@@ -43,6 +43,7 @@ public:
 	bool all() const;
 	bool any() const;
 	size_t sum() const;
+	size_t size() const;
 	std::vector<uint64_t> NonZeroPixels() const;
 
 	G3SkyMapMask operator ~() const;
@@ -62,6 +63,42 @@ public:
 
 	// Return a 1-or-0 sky-map with the contents of the mask (e.g. for plotting)
 	boost::shared_ptr<G3SkyMap> MakeBinaryMap() const;
+
+	class const_iterator {
+	public:
+		typedef std::pair<uint64_t, bool> value_type;
+		typedef value_type & reference;
+		typedef value_type * pointer;
+
+		const_iterator(const G3SkyMapMask &mask, bool begin);
+
+		bool operator==(const const_iterator & other) const {
+			return index_ == other.index_;
+		};
+
+		bool operator!=(const const_iterator & other) const {
+			return index_ != other.index_;
+		};
+
+		reference operator*() { return value_; };
+		pointer operator->() { return &value_; };
+
+		const_iterator operator++();
+		const_iterator operator++(int) { const_iterator i = *this; ++(*this); return i; }
+
+	private:
+		uint64_t index_;
+		value_type value_;
+		const G3SkyMapMask &mask_;
+
+		void set_value() {
+			value_.first = index_;
+			value_.second = mask_.at(index_);
+		}
+	};
+
+	const_iterator begin() const { return const_iterator(*this, true); };
+	const_iterator end() const { return const_iterator(*this, false); };
 
 private:
 	G3SkyMapMask() {} // Fake out for serialization
