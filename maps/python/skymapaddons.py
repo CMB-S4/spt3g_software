@@ -1,6 +1,6 @@
 import numpy
 import warnings
-from spt3g.maps import G3SkyMapWeights, G3SkyMap, FlatSkyMap
+from spt3g.maps import G3SkyMapWeights, G3SkyMap, FlatSkyMap, G3SkyMapMask
 
 # This file adds extra functionality to the python interface to G3SkyMap and
 # G3SkyMapWeights. This is done in ways that exploit a large fraction of
@@ -152,7 +152,9 @@ del skymapweights_reshape
 def skymapweights_getattr(self, x):
     if x == "flat_pol" and isinstance(self.TQ, FlatSkyMap):
         return getattr(self.TQ, x)
-    return getattr(self.TT, x)
+    if hasattr(self.TT, x):
+        return getattr(self.TT, x)
+    raise AttributeError("'{}' object has no attribute '{}'".format(type(self), x))
 G3SkyMapWeights.__getattr__ = skymapweights_getattr
 del skymapweights_getattr
 oldsetattr = G3SkyMapWeights.__setattr__
@@ -175,6 +177,12 @@ def skymapweights_setattr(self, x, val):
 G3SkyMapWeights.__setattr__ = skymapweights_setattr
 del skymapweights_setattr
 
+def skymapmask_getattr(self, x):
+    if hasattr(self.parent, x):
+        return getattr(self.parent, x)
+    raise AttributeError("'{}' object has no attribute '{}'".format(type(self), x))
+G3SkyMapMask.__getattr__ = skymapmask_getattr
+del skymapmask_getattr
 
 def skymap_clone(self, copy_data=True):
     with warnings.catch_warnings():
