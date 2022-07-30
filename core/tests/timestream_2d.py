@@ -40,6 +40,10 @@ assert((numpy.asarray(tsm2) == buffer1d).all())
 assert((numpy.asarray(tsm2) == buffer2d).all())
 
 # Now try writing to it
+numpy.asarray(tsm2)[1,5] = 16
+assert(numpy.asarray(tsm2)[1,5] == 16)
+
+# And that writes propagate back to the underlying G3Timestream
 buffer2d[1] = numpy.random.normal(size=600)
 assert((numpy.asarray(tsm['B']) == buffer2d[1]).all())
 
