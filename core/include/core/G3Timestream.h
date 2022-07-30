@@ -25,8 +25,10 @@ public:
 
 	G3Timestream(const G3Timestream &r);
 	G3Timestream(std::vector<double>::size_type s = 0, double val = 0) :
-	    units(None), use_flac_(0), buffer_(new std::vector<double>(s, val)),
-	    data_(&(*buffer_)[0]), len_(buffer_->size()), data_type_(TS_DOUBLE) {}
+	    units(None), use_flac_(0),
+	    buffer_((s == 0) ? NULL : new std::vector<double>(s, val)),
+	    data_((s == 0) ? NULL : &(*buffer_)[0]), len_(s),
+	    data_type_(TS_DOUBLE) {}
 	template <typename Iterator> G3Timestream(Iterator l, Iterator r) :
 	    units(None), use_flac_(0), buffer_(new std::vector<double>(l, r)),
 	    data_(&(*buffer_)[0]), len_(buffer_->size()), data_type_(TS_DOUBLE) {}
@@ -123,8 +125,13 @@ public:
 
 	// Avoid using the following, it works only in very restricted cases
 	void push_back(double value) {
-		if (!buffer_)
-			throw std::bad_alloc();
+		if (!buffer_) {
+			// Newly-allocated zero-length timestream?
+			if (!data_ && len_ == 0)
+				buffer_ = new std::vector<double>();
+			else
+				throw std::bad_alloc();
+		}
 		buffer_->push_back(value);
 		// Update pointers and length, which may have changed
 		data_ = &buffer_[0];
