@@ -625,7 +625,7 @@ pyskymap_pow(const G3SkyMap &a, const G3SkyMap &b)
 	return rv;
 }
 
-#define skymap_comp(name, oper) \
+#define skymap_comp(oper) \
 G3SkyMapMask \
 G3SkyMap::operator oper(const G3SkyMap &rhs) \
 { \
@@ -639,14 +639,14 @@ G3SkyMap::operator oper(const G3SkyMap &rhs) \
 	return rv; \
 }
 
-skymap_comp(lt, <)
-skymap_comp(le, <=)
-skymap_comp(eq, ==)
-skymap_comp(ne, !=)
-skymap_comp(ge, >=)
-skymap_comp(gt, >)
+skymap_comp(<)
+skymap_comp(<=)
+skymap_comp(==)
+skymap_comp(!=)
+skymap_comp(>=)
+skymap_comp(>)
 
-#define skymap_compd(name, oper) \
+#define skymap_compd(oper) \
 G3SkyMapMask \
 G3SkyMap::operator oper(double rhs) \
 { \
@@ -658,12 +658,12 @@ G3SkyMap::operator oper(double rhs) \
 	return rv; \
 }
 
-skymap_compd(ltd, <)
-skymap_compd(led, <=)
-skymap_compd(eqd, ==)
-skymap_compd(ned, !=)
-skymap_compd(ged, >=)
-skymap_compd(gtd, >)
+skymap_compd(<)
+skymap_compd(<=)
+skymap_compd(==)
+skymap_compd(!=)
+skymap_compd(>=)
+skymap_compd(>)
 
 bool
 G3SkyMap::all() const
