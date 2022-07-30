@@ -26,6 +26,9 @@ public:
 	G3SkyMapMask(const G3SkyMapMask &);
 	virtual ~G3SkyMapMask() {};
 
+	// Copy
+	boost::shared_ptr<G3SkyMapMask> Clone(bool copy_data = true) const;
+
 	// Return a (modifiable) pixel value
 	std::vector<bool>::reference operator [] (size_t i);
 	bool operator [] (size_t i) const { return this->at(i); };
@@ -46,6 +49,8 @@ public:
 	G3SkyMapMask operator |(const G3SkyMapMask &rhs) const;
 	G3SkyMapMask operator &(const G3SkyMapMask &rhs) const;
 	G3SkyMapMask operator ^(const G3SkyMapMask &rhs) const;
+	G3SkyMapMask operator ==(const G3SkyMapMask &rhs) const;
+	G3SkyMapMask operator !=(const G3SkyMapMask &rhs) const;
 
 	// Information
 	bool IsCompatible(const G3SkyMap &map) const;

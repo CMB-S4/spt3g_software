@@ -30,6 +30,15 @@ G3SkyMapMask::G3SkyMapMask(const G3SkyMapMask &m) : G3FrameObject()
 	data_ = std::vector<bool>(m.data_);
 }
 
+G3SkyMapMaskPtr
+G3SkyMapMask::Clone(bool copy_data) const
+{
+	if (copy_data)
+		return boost::make_shared<G3SkyMapMask>(*this);
+	else
+		return boost::make_shared<G3SkyMapMask>(*Parent());
+}
+
 std::vector<bool>::reference
 G3SkyMapMask::operator [] (size_t i)
 {
@@ -166,6 +175,30 @@ G3SkyMapMask::operator ^(const G3SkyMapMask &rhs) const
 	G3SkyMapMask mask(*Parent());
 	for (size_t i = 0; i < data_.size(); i++)
 		mask[i] = at(i) ^ rhs.at(i);
+
+	return mask;
+}
+
+G3SkyMapMask
+G3SkyMapMask::operator ==(const G3SkyMapMask &rhs) const
+{
+	g3_assert(IsCompatible(rhs));
+
+	G3SkyMapMask mask(*Parent());
+	for (size_t i = 0; i < data_.size(); i++)
+		mask[i] = at(i) == rhs.at(i);
+
+	return mask;
+}
+
+G3SkyMapMask
+G3SkyMapMask::operator !=(const G3SkyMapMask &rhs) const
+{
+	g3_assert(IsCompatible(rhs));
+
+	G3SkyMapMask mask(*Parent());
+	for (size_t i = 0; i < data_.size(); i++)
+		mask[i] = at(i) != rhs.at(i);
 
 	return mask;
 }
@@ -323,6 +356,9 @@ PYBINDINGS("maps")
 	    "true where input map is non-zero; otherwise, all elements are "
 	    "initialized to zero.  Use zero_nans or zero_infs to exclude nan "
 	    "or inf elements from the mask.")
+	  .def("clone", &G3SkyMapMask::Clone, (bp::arg("copy_data")=true),
+	    "Return a mask of the same type, populated with a copy of the data "
+	    "if the argument is true (default), empty otherwise.")
 	  .def_readonly("parent", &G3SkyMapMask::Parent, "\"Parent\" map which "
 	    "contains no data, but can be used to retrieve the parameters of "
 	    "the map to which this mask corresponds.")
@@ -343,6 +379,8 @@ PYBINDINGS("maps")
 	  .def(bp::self | bp::self)
 	  .def(bp::self & bp::self)
 	  .def(bp::self ^ bp::self)
+	  .def(bp::self == bp::self)
+	  .def(bp::self != bp::self)
 	  .def("to_map", &G3SkyMapMask::MakeBinaryMap, "Create a skymap with data set to the contents of this mask (1.0 where True, 0.0 where False), which can be useful for plotting.")
 	;
 	register_pointer_conversions<G3SkyMapMask>();
