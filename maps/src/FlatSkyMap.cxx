@@ -636,6 +636,14 @@ FlatSkyMap::NonZeroPixels(std::vector<uint64_t> &indices,
 	}
 }
 
+void
+FlatSkyMap::ApplyMask(const G3SkyMapMask &mask, bool inverse)
+{
+	for (auto i: *this)
+		if (i.second != 0 && mask.at(i.first) == inverse)
+			(*this)[i.first] = 0;
+}
+
 std::vector<size_t> FlatSkyMap::shape() const {
 	return {xpix_, ypix_};
 }
