@@ -910,6 +910,14 @@ size_t HealpixSkyMap::NpixNonZero() const
 	return sz;
 }
 
+bool HealpixSkyMap::any() const
+{
+	for (auto i: *this)
+		if (i.second != 0)
+			return true;
+	return false;
+}
+
 size_t
 HealpixSkyMap::AngleToPixel(double alpha, double delta) const
 {

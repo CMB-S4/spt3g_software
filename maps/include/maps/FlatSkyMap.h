@@ -94,6 +94,7 @@ public:
 	void NonZeroPixels(std::vector<uint64_t> &indices,
 	    std::vector<double> &data) const;
 	void ApplyMask(const G3SkyMapMask &mask, bool inverse=false) override;
+	bool any() const override;
 
 	void SetProj(MapProjection proj);
 	void SetAlphaCenter(double alpha);

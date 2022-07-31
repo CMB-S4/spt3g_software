@@ -71,8 +71,8 @@ public:
 	bool IsCompatible(const G3SkyMap & other) const override;
 	void NonZeroPixels(std::vector<uint64_t> &indices,
 	    std::vector<double> &data) const; // Iterators better?
-
 	void ApplyMask(const G3SkyMapMask &mask, bool inverse=false) override;
+	bool any() const override;
 
 	size_t nside() const {return info_.nside();}
 	bool nested() const {return info_.nested();}
