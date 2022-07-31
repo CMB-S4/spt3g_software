@@ -6,6 +6,14 @@ from spt3g import core, maps
 shape = (300, 300)
 x = maps.FlatSkyMap(np.random.randn(*shape), core.G3Units.arcmin)
 
+# element-wise assignment
+m = x.to_mask()
+v = m[5, 5]
+m[5, 5] = not v
+assert(m[5, 5] != v)
+m[5, 5] = v
+assert(m[5, 5] == v)
+
 # float comparison
 m1 = x == 0
 m2 = x != 0
