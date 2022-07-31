@@ -389,9 +389,10 @@ PYBINDINGS("maps")
 	  .def("clone", &G3SkyMapMask::Clone, (bp::arg("copy_data")=true),
 	    "Return a mask of the same type, populated with a copy of the data "
 	    "if the argument is true (default), empty otherwise.")
-	  .def_readonly("parent", &G3SkyMapMask::Parent, "\"Parent\" map which "
+	  .add_property("parent", &G3SkyMapMask::Parent, "\"Parent\" map which "
 	    "contains no data, but can be used to retrieve the parameters of "
 	    "the map to which this mask corresponds.")
+	  .add_property("size", &G3SkyMapMask::size, "Number of pixels in mask")
 	  .def<bool (G3SkyMapMask::*)(const G3SkyMapMask &) const>("compatible", &G3SkyMapMask::IsCompatible, "Returns true if the two masks can be applied to the same map.")
 	  .def<bool (G3SkyMapMask::*)(const G3SkyMap &) const>("compatible", &G3SkyMapMask::IsCompatible, "Returns true if this mask can be applied to the given map.")
 	  .def("__getitem__", &skymapmask_getitem)

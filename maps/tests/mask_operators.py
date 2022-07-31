@@ -3,11 +3,15 @@
 import numpy as np
 from spt3g import core, maps
 
-shape = (300, 300)
+shape = (300, 500)
 x = maps.FlatSkyMap(np.random.randn(*shape), core.G3Units.arcmin)
+m = x.to_mask()
+
+# attributes
+assert(m.size == x.size)
+assert(m.shape == x.shape)
 
 # element-wise assignment
-m = x.to_mask()
 v = m[5, 5]
 m[5, 5] = not v
 assert(m[5, 5] != v)
