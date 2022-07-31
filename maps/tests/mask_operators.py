@@ -83,3 +83,6 @@ mpix = m1.nonzero_pixels()
 xpix, _ = x4.nonzero_pixels()
 
 assert(len(set(mpix) ^ set(xpix)) == 0)
+
+m1.apply_mask(m2)
+assert(not m1.any())

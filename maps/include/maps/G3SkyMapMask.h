@@ -53,6 +53,8 @@ public:
 	G3SkyMapMask operator ==(const G3SkyMapMask &rhs) const;
 	G3SkyMapMask operator !=(const G3SkyMapMask &rhs) const;
 
+	void ApplyMask(const G3SkyMapMask &rhs, bool inverse=false);
+
 	// Information
 	bool IsCompatible(const G3SkyMap &map) const;
 	bool IsCompatible(const G3SkyMapMask &mask) const;

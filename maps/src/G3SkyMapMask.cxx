@@ -233,6 +233,16 @@ G3SkyMapMask::operator !=(const G3SkyMapMask &rhs) const
 	return mask;
 }
 
+void
+G3SkyMapMask::ApplyMask(const G3SkyMapMask &rhs, bool inverse)
+{
+	g3_assert(IsCompatible(rhs));
+
+	for (auto i: *this)
+		if (i.second && rhs.at(i.first) == inverse)
+			(*this)[i.first] = false;
+}
+
 bool
 G3SkyMapMask::IsCompatible(const G3SkyMap &map) const
 {
@@ -403,6 +413,11 @@ PYBINDINGS("maps")
 	  .def("sum", &G3SkyMapMask::sum, "Sum of all elements in mask")
 	  .def("nonzero_pixels", &G3SkyMapMask::NonZeroPixels,
 	       "Return a list of indices of non-zero pixels in the mask")
+	  .def("apply_mask", &G3SkyMapMask::ApplyMask,
+	    (bp::arg("mask"), bp::arg("inverse")=false),
+	    "Apply a mask in-place to the mask, optionally inverting which "
+	    "pixels are zeroed.  If inverse = False, this is equivalent to "
+	    "in-place element-wise logical-and with the mask.")
 	  .def(bp::self |= bp::self)
 	  .def(bp::self &= bp::self)
 	  .def(bp::self ^= bp::self)
