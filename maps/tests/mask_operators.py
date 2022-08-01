@@ -18,6 +18,19 @@ assert(m[5, 5] != v)
 m[5, 5] = v
 assert(m[5, 5] == v)
 
+# masked assignment and retrieval
+pospixels = x[x > 0] 
+assert(len(pospixels) == (x > 0).sum())
+assert((np.asarray(pospixels) > 0).all())
+
+x2 = maps.FlatSkyMap(x)
+x2[x2 > 0] = 0
+assert((x2 > 0).sum() == 0)
+nzero = (x2 == 0).sum()
+x2[x2 == 0] = np.abs(np.random.randn((x2 == 0).sum())) + 1
+assert((x2 > 0).sum() == nzero)
+assert((x2 == 0).sum() == 0)
+
 # float comparison
 m1 = x == 0
 m2 = x != 0
