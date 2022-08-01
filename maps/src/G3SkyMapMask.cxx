@@ -10,7 +10,13 @@
 G3SkyMapMask::G3SkyMapMask(const G3SkyMap &parent, bool use_data,
   bool zero_nans, bool zero_infs) : G3FrameObject()
 {
-	parent_ = parent.Clone(false);
+	// masks have no units
+	G3SkyMapPtr tmp = parent.Clone(false);
+	tmp->units = G3Timestream::None;
+	tmp->pol_type = G3SkyMap::None;
+	tmp->SetPolConv(G3SkyMap::ConvNone);
+	tmp->weighted = false;
+	parent_ = tmp;
 	data_ = std::vector<bool>(parent.size());
 	if (use_data) {
 		for (size_t i = 0; i < parent.size(); i++) {
