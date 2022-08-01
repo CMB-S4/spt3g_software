@@ -1060,10 +1060,8 @@ G3TimestreamMap_from_numpy(std::vector<std::string> keys,
 	ptrdiff_t step = v->v.strides[0];
 	if (copy_data) {
 		buf = new uint8_t[v->v.len];
-		memcpy(buf, v->v.buf, v->v.len);
 		data_ref = boost::shared_ptr<uint8_t>(buf);
-		len = v->v.shape[1];
-		step = v->v.strides[0];
+		memcpy(buf, v->v.buf, v->v.len);
 		v.reset(); // Release Python Buffer view
 	} else {
 		buf = (uint8_t *)v->v.buf;
