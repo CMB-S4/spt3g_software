@@ -386,6 +386,14 @@ skymapmask_pyinvert(G3SkyMapMaskPtr m)
 	return m;
 }
 
+// This function handles some implicit pointer conversions that boost won't
+// do because G3SkyMap is an abstract type. Just do it by hand.
+static G3SkyMapPtr
+skymapmask_pyparent(G3SkyMapMaskPtr m)
+{
+	return boost::const_pointer_cast<G3SkyMap>(m->Parent());
+}
+
 PYBINDINGS("maps")
 {
 	using namespace boost::python;
@@ -399,7 +407,7 @@ PYBINDINGS("maps")
 	  .def("clone", &G3SkyMapMask::Clone, (bp::arg("copy_data")=true),
 	    "Return a mask of the same type, populated with a copy of the data "
 	    "if the argument is true (default), empty otherwise.")
-	  .add_property("parent", &G3SkyMapMask::Parent, "\"Parent\" map which "
+	  .add_property("parent", &skymapmask_pyparent, "\"Parent\" map which "
 	    "contains no data, but can be used to retrieve the parameters of "
 	    "the map to which this mask corresponds.")
 	  .add_property("size", &G3SkyMapMask::size, "Number of pixels in mask")
