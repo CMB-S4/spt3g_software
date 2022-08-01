@@ -47,4 +47,17 @@ assert(numpy.asarray(tsm2)[1,5] == 16)
 buffer2d[1] = numpy.random.normal(size=600)
 assert((numpy.asarray(tsm['B']) == buffer2d[1]).all())
 
+# Test initialization from numpy and data copying/sharing
+buffer1d[2,6] = -3.0
+
+# By default (copy_data = True), changes should not propagate from the array used to initialize
+# to the timestreams
+tsm2 = core.G3TimestreamMap(tsm.keys(), buffer1d)
+buffer1d[2,6] = 14.0
+assert(numpy.asarray(tsm2)[2,6] != 14.0)
+
+# But we should be able to set things up so that they do
+tsm2 = core.G3TimestreamMap(tsm.keys(), buffer1d, copy_data = False)
+buffer1d[2,6] = 16.0
+assert(numpy.asarray(tsm2)[2,6] == 16.0)
 
