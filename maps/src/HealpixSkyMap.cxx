@@ -1202,8 +1202,6 @@ PYBINDINGS("maps")
 #endif
 
 	implicitly_convertible<HealpixSkyMapPtr, G3SkyMapPtr>();
-	implicitly_convertible<HealpixSkyMapConstPtr, G3SkyMapConstPtr>();
 	implicitly_convertible<HealpixSkyMapPtr, G3SkyMapConstPtr>();
-	implicitly_convertible<HealpixSkyMapConstPtr, G3SkyMapConstPtr>();
 }
 

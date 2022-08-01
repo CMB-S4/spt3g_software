@@ -1196,6 +1196,7 @@ PYBINDINGS("maps") {
 	    .def("any", &G3SkyMap::any)
 	    .def("all", &G3SkyMap::all)
 	;
+	boost::python::implicitly_convertible<G3SkyMapPtr, G3SkyMapConstPtr>();
 
 	EXPORT_FRAMEOBJECT(G3SkyMapWeights, init<>(),
 	    "Polarized (Mueller matrix) or unpolarized (scalar) map pixel weights.")

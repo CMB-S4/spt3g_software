@@ -1253,8 +1253,6 @@ PYBINDINGS("maps")
 #endif
 
 	implicitly_convertible<FlatSkyMapPtr, G3SkyMapPtr>();
-	implicitly_convertible<FlatSkyMapConstPtr, G3SkyMapConstPtr>();
 	implicitly_convertible<FlatSkyMapPtr, G3SkyMapConstPtr>();
-	implicitly_convertible<FlatSkyMapConstPtr, G3SkyMapConstPtr>();
 }
 
