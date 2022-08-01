@@ -3,7 +3,7 @@
 import sys, inspect
 from spt3g import core
 
-py_module_lst = ['spt3g.'+ m for m in ['core', 'todfilter', 'mapmaker']]
+py_module_lst = ['spt3g.'+ m for m in ['core', 'dfmux', 'gcp', 'maps']]
 
 
 out_str = ''
