@@ -1069,6 +1069,34 @@ HealpixSkyMap_nonzeropixels(const HealpixSkyMap &m)
 	return boost::python::make_tuple(i, d);
 }
 
+static double
+skymap_getitem(const G3SkyMap &skymap, int i)
+{
+
+	if (i < 0)
+		i = skymap.size() + i;
+	if (size_t(i) >= skymap.size()) {
+		PyErr_SetString(PyExc_IndexError, "Index out of range");
+		bp::throw_error_already_set();
+	}
+
+	return skymap.at(i);
+}
+
+static void
+skymap_setitem(G3SkyMap &skymap, int i, double val)
+{
+
+	if (i < 0)
+		i = skymap.size() + i;
+	if (size_t(i) >= skymap.size()) {
+		PyErr_SetString(PyExc_IndexError, "Index out of range");
+		bp::throw_error_already_set();
+	}
+
+	skymap[i] = val;
+}
+
 static std::vector<double>
 HealpixSkyMap_getitem_masked(const HealpixSkyMap &skymap, const G3SkyMapMask &m)
 {
@@ -1226,6 +1254,8 @@ PYBINDINGS("maps")
 		"holes or very small filling factors. "
 		"If set to True, converts the map to this representation." )
 
+	    .def("__getitem__", &skymap_getitem)
+	    .def("__setitem__", &skymap_setitem)
 	    .def("__getitem__", HealpixSkyMap_getitem_masked)
 	    .def("__setitem__", HealpixSkyMap_setitem_masked)
 
