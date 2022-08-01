@@ -1069,6 +1069,45 @@ HealpixSkyMap_nonzeropixels(const HealpixSkyMap &m)
 	return boost::python::make_tuple(i, d);
 }
 
+static std::vector<double>
+HealpixSkyMap_getitem_masked(const HealpixSkyMap &skymap, const G3SkyMapMask &m)
+{
+	g3_assert(m.IsCompatible(skymap));
+	std::vector<double> out;
+
+	for (auto i : skymap) {
+		if (m.at(i.first))
+			out.push_back(i.second);
+	}
+
+	return out;
+}
+
+static void
+HealpixSkyMap_setitem_masked(HealpixSkyMap &skymap, const G3SkyMapMask &m,
+    bp::object val)
+{
+	g3_assert(m.IsCompatible(skymap));
+
+	if (bp::extract<double>(val).check()) {
+		double dval = bp::extract<double>(val)();
+		for (auto i : skymap) {
+			if (m.at(i.first))
+				skymap[i.first] = dval;
+		}
+	} else {
+		// XXX: the iterable case probably be optimized for numpy arrays
+		// XXX: check for size congruence first?
+		size_t j = 0;
+		for (auto i : skymap) {
+			if (m.at(i.first)) {
+				skymap[i.first] = bp::extract<double>(val[j])();
+				j++;
+			}
+		}
+	}
+}
+
 static int
 HealpixSkyMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 {
@@ -1186,6 +1225,9 @@ PYBINDINGS("maps")
 		"and values. More efficient than ring-sparse for maps with "
 		"holes or very small filling factors. "
 		"If set to True, converts the map to this representation." )
+
+	    .def("__getitem__", HealpixSkyMap_getitem_masked)
+	    .def("__setitem__", HealpixSkyMap_setitem_masked)
 
 	    .def("nonzero_pixels", &HealpixSkyMap_nonzeropixels,
 		"Returns a list of the indices of the non-zero pixels in the "

@@ -3,99 +3,110 @@
 import numpy as np
 from spt3g import core, maps
 
-shape = (300, 500)
-x = maps.FlatSkyMap(np.random.randn(*shape), core.G3Units.arcmin)
-m = x.to_mask()
+maplist = [
+    maps.FlatSkyMap(np.random.randn(300, 500), core.G3Units.arcmin),
+    maps.HealpixSkyMap(np.random.randn(12 * 256 * 256)),
+]
 
-# attributes
-assert(m.size == x.size)
-assert(m.shape == x.shape)
+for x in maplist:
+    m = x.to_mask()
 
-# element-wise assignment
-v = m[5, 5]
-m[5, 5] = not v
-assert(m[5, 5] != v)
-m[5, 5] = v
-assert(m[5, 5] == v)
+    # attributes
+    assert(m.size == x.size)
+    assert(m.shape == x.shape)
 
-# masked assignment and retrieval
-pospixels = x[x > 0] 
-assert(len(pospixels) == (x > 0).sum())
-assert((np.asarray(pospixels) > 0).all())
+    # element-wise assignment
+    if isinstance(x, maps.FlatSkyMap):
+        v = m[5, 5]
+        m[5, 5] = not v
+        assert(m[5, 5] != v)
+        m[5, 5] = v
+        assert(m[5, 5] == v)
+    else:
+        v = m[5]
+        m[5] = not v
+        assert(m[5] != v)
+        m[5] = v
+        assert(m[5] == v)
 
-x2 = maps.FlatSkyMap(x)
-x2[x2 > 0] = 0
-assert((x2 > 0).sum() == 0)
-nzero = (x2 == 0).sum()
-x2[x2 == 0] = np.abs(np.random.randn((x2 == 0).sum())) + 1
-assert((x2 > 0).sum() == nzero)
-assert((x2 == 0).sum() == 0)
+    # masked assignment and retrieval
+    pospixels = x[x > 0]
+    assert(len(pospixels) == (x > 0).sum())
+    assert((np.asarray(pospixels) > 0).all())
 
-# float comparison
-m1 = x == 0
-m2 = x != 0
-assert(m1.sum() + m2.sum() == x.size)
+    x2 = x.__class__(x)
+    x2[x2 > 0] = 0
+    assert((x2 > 0).sum() == 0)
+    nzero = (x2 == 0).sum()
+    x2[x2 == 0] = np.abs(np.random.randn((x2 == 0).sum())) + 1
+    assert((x2 > 0).sum() == nzero)
+    assert((x2 == 0).sum() == 0)
 
-m1 = x <= 0
-m2 = x > 0
-assert(m1.sum() + m2.sum() == x.size)
+    # float comparison
+    m1 = x == 0
+    m2 = x != 0
+    assert(m1.sum() + m2.sum() == x.size)
 
-m1 = x < 0
-m2 = x >= 0
-assert(m1.sum() + m2.sum() == x.size)
+    m1 = x <= 0
+    m2 = x > 0
+    assert(m1.sum() + m2.sum() == x.size)
 
-# map comparison
-y = 2 * x.clone()
+    m1 = x < 0
+    m2 = x >= 0
+    assert(m1.sum() + m2.sum() == x.size)
 
-m1 = y == x
-m2 = y != x
-assert(m1.sum() + m2.sum() == x.size)
+    # map comparison
+    y = 2 * x.clone()
 
-m1 = y <= x
-m2 = y > x
-assert(m1.sum() + m2.sum() == x.size)
+    m1 = y == x
+    m2 = y != x
+    assert(m1.sum() + m2.sum() == x.size)
 
-m1 = y < x
-m2 = y >= x
-assert(m1.sum() + m2.sum() == x.size)
+    m1 = y <= x
+    m2 = y > x
+    assert(m1.sum() + m2.sum() == x.size)
 
-# logic operators
-assert((m1 == ~m2).all())
-assert(not (m1 & m2).any())
-assert((m1 | m2).all())
-assert((m1 ^ m2).all())
+    m1 = y < x
+    m2 = y >= x
+    assert(m1.sum() + m2.sum() == x.size)
 
-m3 = m1.clone()
-m3 |= m2
-assert(m3.all())
-m3 = m1.clone()
-m3 &= m2
-assert(not m3.any())
-m3 = m1.clone()
-m3 ^= m2
-assert(m3.all())
-m3 = m1.clone()
-m3.invert()
-assert((m3 == m2).all())
+    # logic operators
+    assert((m1 == ~m2).all())
+    assert(not (m1 & m2).any())
+    assert((m1 | m2).all())
+    assert((m1 ^ m2).all())
 
-# convert to mask
-x2 = x.clone()
-x2 *= m1
-assert((x2.to_mask() == m1).all())
-assert(((x * m1).to_mask() == m1).all())
+    m3 = m1.clone()
+    m3 |= m2
+    assert(m3.all())
+    m3 = m1.clone()
+    m3 &= m2
+    assert(not m3.any())
+    m3 = m1.clone()
+    m3 ^= m2
+    assert(m3.all())
+    m3 = m1.clone()
+    m3.invert()
+    assert((m3 == m2).all())
 
-x3 = x.clone()
-x3.apply_mask(m1, inverse=True)
-assert((x3.to_mask() == m2).all())
+    # convert to mask
+    x2 = x.clone()
+    x2 *= m1
+    assert((x2.to_mask() == m1).all())
+    assert(((x * m1).to_mask() == m1).all())
 
-x4 = m1.to_map()
-assert(np.sum(x4) == m1.sum())
-assert((x4.to_mask() == m1).all())
+    x3 = x.clone()
+    x3.apply_mask(m1, inverse=True)
+    assert((x3.to_mask() == m2).all())
 
-mpix = m1.nonzero_pixels()
-xpix, _ = x4.nonzero_pixels()
+    x4 = m1.to_map()
+    assert(np.sum(x4) == m1.sum())
+    assert((x4.to_mask() == m1).all())
 
-assert(len(set(mpix) ^ set(xpix)) == 0)
+    mpix = m1.nonzero_pixels()
+    xpix, _ = x4.nonzero_pixels()
 
-m1.apply_mask(m2)
-assert(not m1.any())
+    assert(len(set(mpix) ^ set(xpix)) == 0)
+
+    m1.apply_mask(m2)
+    assert(not m1.any())
