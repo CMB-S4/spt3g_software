@@ -1067,7 +1067,7 @@ G3TimestreamMap_from_numpy(std::vector<std::string> keys,
 		v.reset(); // Release Python Buffer view
 	} else {
 		buf = (uint8_t *)v->v.buf;
-		boost::shared_ptr<void> data_ref = v; // Keep view around
+		data_ref = v; // Keep view around
 	}
 
 	for (auto &i : keys) {
