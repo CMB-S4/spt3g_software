@@ -10,7 +10,7 @@ G3Reader::G3Reader(std::string filename, int n_frames_to_read,
     n_frames_read_(0), timeout_(timeout)
 {
 	boost::filesystem::path fpath(filename);
-	if (filename.find("://") == -1 &&
+	if (filename.find("://") == std::string::npos &&
 	   (!boost::filesystem::exists(fpath) ||
 	    !boost::filesystem::is_regular_file(fpath)))
 		log_fatal("Could not find file %s", filename.c_str());
@@ -27,7 +27,7 @@ G3Reader::G3Reader(std::vector<std::string> filename, int n_frames_to_read,
 
 	for (auto i = filename.begin(); i != filename.end(); i++){
 		boost::filesystem::path fpath(*i);
-		if (i->find("://") == -1 &&
+		if (i->find("://") == std::string::npos &&
 		   (!boost::filesystem::exists(fpath) ||
 		    !boost::filesystem::is_regular_file(fpath)))
 			log_fatal("Could not find file %s", i->c_str());
@@ -108,6 +108,14 @@ void G3Reader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	n_frames_read_++;
 }
 
+int G3Reader::Seek(int offset) {
+	return boost::iostreams::seek(stream_, offset, std::ios_base::beg);
+}
+
+int G3Reader::Tell() {
+	return boost::iostreams::seek(stream_, 0, std::ios_base::cur);
+}
+
 PYBINDINGS("core") {
 	using namespace boost::python;
 
@@ -118,14 +126,18 @@ PYBINDINGS("core") {
 	      "or an iterable of files to be read in sequence. If "
 	      "n_frames_to_read is greater than zero, will stop after "
 	      "n_frames_to_read frames rather than at the end of the file[s]. "
-              "The timeout parameter can used to enable socket timeout for tcp "
-              "streams, resulting in EOF behavior on expiry; unfortunately this "
-              "cannot be used for polling, you have to close the connection.",
-              init<std::string, int, float>((arg("filename"),
-                arg("n_frames_to_read")=0,arg("timeout")=-1.)))
-                .def(init<std::vector<std::string>, int, float>((arg("filename"), 
-                  arg("n_frames_to_read")=0, arg("timeout")=-1.)))
-		.def_readonly("__g3module__", true)
+	      "The timeout parameter can used to enable socket timeout for tcp "
+	      "streams, resulting in EOF behavior on expiry; unfortunately this "
+	      "cannot be used for polling, you have to close the connection. "
+	      "Use the `tell` and `seek` methods to record the position of and "
+	      "seek to the beginning of a particular frame in the file.",
+	init<std::string, int, float>((arg("filename"),
+	    arg("n_frames_to_read")=0,arg("timeout")=-1.)))
+	.def(init<std::vector<std::string>, int, float>((arg("filename"),
+	    arg("n_frames_to_read")=0, arg("timeout")=-1.)))
+	.def("tell", &G3Reader::Tell)
+	.def("seek", &G3Reader::Seek)
+	.def_readonly("__g3module__", true)
 	;
 }
 
