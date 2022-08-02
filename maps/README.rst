@@ -67,7 +67,7 @@ Masks are returned when using comparison operators with map objects, e.g.  ``map
 
 Mask objects can be ``clone``'ed the same way as maps.  A map can be converted to a boolean mask using ``G3SkyMap.to_mask()``, which returns a mask which is ``True`` wherever the map is non-zero (optionally excluding nan or inf pixels).  A mask can be converted back to a map object using ``G3SkyMapMask.to_map()``, which returns a sparse, unit-less, unweighted, unpolarized map object of the same type as ``G3SkyMapMask.parent``, containing double ``1.0`` wherever the mask is ``True``.
 
-Masks can also be applied to maps or masks using the appropriate ``.apply_mask`` method, with optional inversion.  A list of non-zero pixels can be returned using ``.nonzero_pixels()`` (note that this returns a single vector of pixel positions), and mask contents can be checked using ``.all()``, ``.any()`` and ``.sum()``.  Mask contents can be inverted in-place using ``.invert()``.
+Masks can also be applied to maps or masks using the appropriate ``.apply_mask`` method, with optional inversion; alternatively maps can also be directly multiplied by a compatible mask object.  A list of non-zero pixels can be returned using ``.nonzero_pixels()`` (note that this returns a single vector of pixel positions), and mask contents can be checked using ``.all()``, ``.any()`` and ``.sum()``.  Mask contents can be inverted in-place using ``.invert()``.
 
 Mask objects cannot be accessed using ``numpy`` slicing, or converted directly to arrays, because ``numpy`` does not represent boolean values as single bits.  To be able to use ``numpy`` tools with masks, you need to first convert the mask to a dense map using ``.to_map()``.  All associated methods of the parent map are accessible as attributes of the mask object in python, e.g. ``mask.angles_to_pixels()`` works as one would expect.
 
@@ -75,6 +75,8 @@ Mask Memory Usage
 -----------------
 
 The current implementation of masks is to use a dense ``std::vector<bool>`` as the data storage backend, which uses 64x less memory than a dense map (``std::vector<double>``) of the same dimensions.  This implementation is sufficient for ``FlatSkyMap`` objects, since these are typically O(50\%) full populated in their sparse state; however, the memory savings for ``HealpixSkyMap`` objects is not as significant when observing sufficiently small patches of sky.  Future work would enable a similar sparse storage backend for masks.
+
+In general, when working with high-resolution maps of any sort, it is important to think carefully about doing the sorts of operations that can balloon memory usage, e.g. taking care to preserve the sparsity of maps by avoiding numpy operations if possible, or using in-place operations to avoid unintentionally creating extra maps or masks in memory.
 
 Map Interpolation
 =================
