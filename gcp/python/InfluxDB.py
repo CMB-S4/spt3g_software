@@ -30,6 +30,8 @@ def build_field_list(fr):
         'tracker_lacking': ['TrackerStatus', 'tracker_lacking', None],
         'time_status': ['TrackerStatus', 'time_status', None],
         'schedule': ['TrackerStatus', 'schedule_name', None],
+        'raw_encoder_1': ['antenna0', 'tracker', 'raw_encoder', 0, None]
+        'raw_encoder_2': ['antenna0', 'tracker', 'raw_encoder', 1, None]
 
         # tracker pointing
         'features': ['TrackerPointing', 'features', 1],
@@ -291,7 +293,15 @@ def WriteDB(fr, client, fields=None):
     dict_list = []
     for f in fields:
         field_dat = all_fields[f]
-        if len(field_dat) == 4:
+        if len(field_dat) == 5:
+            # raw register
+            tmp, brd, attr, ind, unit = field_dat
+            try:
+                dat = fr[tmp][brd][attr][ind]
+                time = [tm for tm in fr[tmp][brd]['utc'][0]]
+            except:
+                continue
+        elif len(field_dat) == 4:
             stat, attr, ind, unit = field_dat
             try:
                 dat = getattr(fr[stat], attr)[ind]
