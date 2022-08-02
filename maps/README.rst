@@ -58,6 +58,24 @@ By default, both Healpix and flat-sky maps are initialized in sparse mode. This 
 
 Beyond paying attention to implicit conversions to dense storage and the performance impact of sparse storage (which is small), users of this code do not need to worry about the storage mode--all interfaces are identical in all modes.
 
+Masking
+=======
+
+Maps containing only boolean data for each pixel are stored as ``G3SkyMapMask`` objects.  Such mask objects have a ``.parent`` attribute which is a shallow clone of the map object with which they are associated (to check for shape compatibility).
+
+Masks are returned when using comparison operators with map objects, e.g.  ``map1 > 5`` or ``map1 == map2``.  The supported comparison operators are: ``>, >=, ==, !=, <=, <``.  Masks can also be combined together using logical operators, e.g. ``mask3 = mask1 & mask2`` or ``mask1 ^= mask2``.  The supported comparison operators are: ``&, &=, |, |=, ^, ^=``.  Masks can also be checked for equality to other masks using ``==`` and ``!=`` operators.
+
+Mask objects can be ``clone``'ed the same way as maps.  A map can be converted to a boolean mask using ``G3SkyMap.to_mask()``, which returns a mask which is ``True`` wherever the map is non-zero (optionally excluding nan or inf pixels).  A mask can be converted back to a map object using ``G3SkyMapMask.to_map()``, which returns a sparse, unit-less, unweighted, unpolarized map object of the same type as ``G3SkyMapMask.parent``, containing double ``1.0`` wherever the mask is ``True``.
+
+Masks can also be applied to maps or masks using the appropriate ``.apply_mask`` method, with optional inversion.  A list of non-zero pixels can be returned using ``.nonzero_pixels()`` (note that this returns a single vector of pixel positions), and mask contents can be checked using ``.all()``, ``.any()`` and ``.sum()``.  Mask contents can be inverted in-place using ``.invert()``.
+
+Mask objects cannot be accessed using ``numpy`` slicing, or converted directly to arrays, because ``numpy`` does not represent boolean values as single bits.  To be able to use ``numpy`` tools with masks, you need to first convert the mask to a dense map using ``.to_map()``.  All associated methods of the parent map are accessible as attributes of the mask object in python, e.g. ``mask.angles_to_pixels()`` works as one would expect.
+
+Mask Memory Usage
+-----------------
+
+The current implementation of masks is to use a dense ``std::vector<bool>`` as the data storage backend, which uses 64x less memory than a dense map (``std::vector<double>``) of the same dimensions.  This implementation is sufficient for ``FlatSkyMap`` objects, since these are typically O(50\%) full populated in their sparse state; however, the memory savings for ``HealpixSkyMap`` objects is not as significant when observing sufficiently small patches of sky.  Future work would enable a similar sparse storage backend for masks.
+
 Map Interpolation
 =================
 
