@@ -15,6 +15,8 @@ public:
                  float timeout = -1.);
 
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
+	off_t Seek(off_t offset);
+	off_t Tell();
 
 private:
 	void StartFile(std::string path);
