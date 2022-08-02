@@ -108,11 +108,11 @@ void G3Reader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	n_frames_read_++;
 }
 
-int G3Reader::Seek(int offset) {
+off_t G3Reader::Seek(off_t offset) {
 	return boost::iostreams::seek(stream_, offset, std::ios_base::beg);
 }
 
-int G3Reader::Tell() {
+off_t G3Reader::Tell() {
 	return boost::iostreams::seek(stream_, 0, std::ios_base::cur);
 }
 
