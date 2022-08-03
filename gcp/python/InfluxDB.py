@@ -30,8 +30,8 @@ def build_field_list(fr):
         'tracker_lacking': ['TrackerStatus', 'tracker_lacking', None],
         'time_status': ['TrackerStatus', 'time_status', None],
         'schedule': ['TrackerStatus', 'schedule_name', None],
-        'raw_encoder_1': ['antenna0', 'tracker', 'raw_encoder', 0, None]
-        'raw_encoder_2': ['antenna0', 'tracker', 'raw_encoder', 1, None]
+        'raw_encoder_1': ['antenna0', 'tracker', 'raw_encoder', 0, None],
+        'raw_encoder_2': ['antenna0', 'tracker', 'raw_encoder', 1, None],
 
         # tracker pointing
         'features': ['TrackerPointing', 'features', 1],
