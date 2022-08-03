@@ -28,13 +28,13 @@ On Ubuntu/Debian, you can install the non-Python dependencies, including the opt
 
 .. code-block:: shell
 
-	apt-get install cmake libboost-all-dev libflac-dev libnetcdf-dev libfftw3-dev libgsl0-dev
+	apt-get install cmake libboost-all-dev libflac-dev libnetcdf-dev
 
 On RHEL-type systems (SL, CentOS, etc.), do this:
 
 .. code-block:: shell
 
-	yum install cmake netcdf-devel boost-devel flac-devel fftw-devel gsl-devel
+	yum install cmake netcdf-devel boost-devel flac-devel
 	
 If your system defaults to Python 2, but you wish to use Python 3, please do the following:
 
@@ -51,7 +51,7 @@ Note that on any RHEL6 system, you will need a newer compiler than ships with th
 
 .. code-block:: shell
 
-	eval `/cvmfs/spt.opensciencegrid.org/py3-v2/setup.sh`
+	eval `/cvmfs/spt.opensciencegrid.org/py3-v4/setup.sh`
 
 
 How to Build
