@@ -1,18 +1,19 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
     <title>Build System &#8212; SPT3G Software  documentation</title>
-    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/nature.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Style Guide" href="styleguide.html" />
@@ -30,7 +31,8 @@
         <li class="right" >
           <a href="autodoc.html" title="Auto-documentation"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Build System</a></li> 
       </ul>
     </div>  
 
@@ -39,10 +41,10 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="build-system">
-<h1>Build System<a class="headerlink" href="#build-system" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="cmake-overview">
-<h2>CMake Overview<a class="headerlink" href="#cmake-overview" title="Permalink to this headline">¶</a></h2>
+  <section id="build-system">
+<h1>Build System<a class="headerlink" href="#build-system" title="Permalink to this heading">¶</a></h1>
+<section id="cmake-overview">
+<h2>CMake Overview<a class="headerlink" href="#cmake-overview" title="Permalink to this heading">¶</a></h2>
 <p>We use cmake as a build system, which provides a number of nice features for finding dependencies and managing the build process. cmake generates Makefiles (or XCode projects) from files called <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code> in each directory. cmake in general is designed to perform so-called “out-of-tree” builds, which keep the source directories unmodified by object files. The process for doing this is something like this:</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>mkdir build
 git clone https://github.com/CMB-S4/spt3g_software src
@@ -53,25 +55,27 @@ make
 </div>
 <p>A number of variables can be set on the command line when cmake is run that control the build. The syntax for these options is <code class="docutils literal notranslate"><span class="pre">cmake</span> <span class="pre">-DVARIABLE=value</span> <span class="pre">srcdir</span></code>.</p>
 <blockquote>
-<div><dl class="docutils">
-<dt>CMAKE_BUILD_TYPE</dt>
-<dd>This can be set to either <code class="docutils literal notranslate"><span class="pre">Release</span></code> or <code class="docutils literal notranslate"><span class="pre">Debug</span></code>. Setting it to <code class="docutils literal notranslate"><span class="pre">Release</span></code> will cause the compiler to optimize the code more, making it substantially faster at the expense of increased build times and removal of some debugging information.</dd>
+<div><dl class="simple">
+<dt>CMAKE_BUILD_TYPE</dt><dd><p>This can be set to either <code class="docutils literal notranslate"><span class="pre">Release</span></code> or <code class="docutils literal notranslate"><span class="pre">Debug</span></code>. Setting it to <code class="docutils literal notranslate"><span class="pre">Release</span></code> will cause the compiler to optimize the code more, making it substantially faster at the expense of increased build times and removal of some debugging information.</p>
+</dd>
+<dt>BUILD_PROJECTS</dt><dd><p>This variable can be set to a semicolon-separated list of projects to build, to allow building only a subset of the projects which are present. For example, specifying <code class="docutils literal notranslate"><span class="pre">-DBUILD_PROJECTS='gcp;dfmux'</span></code> will result in the <code class="docutils literal notranslate"><span class="pre">core</span></code>, <code class="docutils literal notranslate"><span class="pre">gcp</span></code>, and <code class="docutils literal notranslate"><span class="pre">dfmux</span></code> projects being built. The <code class="docutils literal notranslate"><span class="pre">core</span></code> project must always be built, so if this variable is set to a list which does not contain it, it will be added. Other project dependencies are not automatically detected, so use this feature only if you are certain that you understand exactly which projects you need. Note that the list will usually need to be quoted to avoid the shell interpreting the first semicolon as the end of the command.</p>
+</dd>
 </dl>
 </div></blockquote>
-</div>
-<div class="section" id="adding-a-project">
-<h2>Adding a Project<a class="headerlink" href="#adding-a-project" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="adding-a-project">
+<h2>Adding a Project<a class="headerlink" href="#adding-a-project" title="Permalink to this heading">¶</a></h2>
 <p>To add another project to the repository (corresponding to a python module, e.g. <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">spt3g</span> <span class="pre">import</span> <span class="pre">newthing</span></code>), make a new directory at the root of the repository. This directory must contain a file called CMakeLists.txt.</p>
-<div class="section" id="adding-python-code">
-<h3>Adding Python code<a class="headerlink" href="#adding-python-code" title="Permalink to this headline">¶</a></h3>
+<section id="adding-python-code">
+<h3>Adding Python code<a class="headerlink" href="#adding-python-code" title="Permalink to this heading">¶</a></h3>
 <p>To include Python code, include a line like the following in your CMakeLists.txt:</p>
 <div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">execute_process</span><span class="p">(</span><span class="s">COMMAND</span> <span class="s">ln</span> <span class="s">-fsn</span> <span class="o">${</span><span class="nv">CMAKE_CURRENT_SOURCE_DIR</span><span class="o">}</span><span class="s">/python</span> <span class="o">${</span><span class="nv">CMAKE_LIBRARY_OUTPUT_DIRECTORY</span><span class="o">}</span><span class="s">/newthing</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Here, <code class="docutils literal notranslate"><span class="pre">newthing</span></code> is the name of your project (which <strong>must</strong> match the directory name) and <code class="docutils literal notranslate"><span class="pre">python</span></code> is the name of the directory inside your project containing the Python source code. If your project contains only Python code, this need not be a subdirectory and you can remove the “/python”.</p>
-</div>
-<div class="section" id="adding-a-c-library">
-<h3>Adding a C++ library<a class="headerlink" href="#adding-a-c-library" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="adding-a-c-library">
+<h3>Adding a C++ library<a class="headerlink" href="#adding-a-c-library" title="Permalink to this heading">¶</a></h3>
 <p>To add a C++ component to your project, add some lines like the following:</p>
 <div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">add_library</span><span class="p">(</span><span class="s">newthing</span> <span class="s">SHARED</span>
         <span class="s">src/MyNewThing.cxx</span> <span class="s">src/python.cxx</span>
@@ -94,36 +98,40 @@ make
 </pre></div>
 </div>
 <p>This is sufficient for most uses (with “newthing” replaced by the name of the project).</p>
-</div>
-<div class="section" id="adding-a-c-executable">
-<h3>Adding a C++ executable<a class="headerlink" href="#adding-a-c-executable" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="adding-a-c-executable">
+<h3>Adding a C++ executable<a class="headerlink" href="#adding-a-c-executable" title="Permalink to this heading">¶</a></h3>
 <p>You can also add C++ executables. Usually, there is not much reason to do this since everything is designed to be interacted with by Python. A few projects contain small standalone executables nonetheless, typically as test programs.</p>
 <div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">add_executable</span><span class="p">(</span><span class="s">newthingexec</span> <span class="s">MyNewThingExecutable.cxx</span><span class="p">)</span>
 <span class="nb">target_link_libraries</span><span class="p">(</span><span class="s">newthingexec</span> <span class="s">core</span> <span class="s">newthing</span><span class="p">)</span>
+<span class="nb">list</span><span class="p">(</span><span class="s">APPEND</span> <span class="s">SPT3G_PROGRAMS</span> <span class="s">newthingexec</span><span class="p">)</span>
+<span class="nb">set</span><span class="p">(</span><span class="s">SPT3G_PROGRAMS</span> <span class="o">${</span><span class="nv">SPT3G_PROGRAMS</span><span class="o">}</span> <span class="s">PARENT_SCOPE</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The <code class="docutils literal notranslate"><span class="pre">target_link_libraries</span></code> command works as in <a class="reference internal" href="#adding-a-c-library">Adding a C++ library</a> above. The first command produces an executable named <code class="docutils literal notranslate"><span class="pre">newthingexec</span></code> that will be placed in the <code class="docutils literal notranslate"><span class="pre">bin</span></code> subdirectory of the build directory.</p>
-</div>
-</div>
-<div class="section" id="mixing-c-and-python">
-<h2>Mixing C++ and Python<a class="headerlink" href="#mixing-c-and-python" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">target_link_libraries</span></code> command works as in <a class="reference internal" href="#adding-a-c-library">Adding a C++ library</a> above. The first command produces an executable named <code class="docutils literal notranslate"><span class="pre">newthingexec</span></code> that will be placed in the <code class="docutils literal notranslate"><span class="pre">bin</span></code> subdirectory of the build directory. The <code class="docutils literal notranslate"><span class="pre">list</span></code> and <code class="docutils literal notranslate"><span class="pre">set</span></code> commands inform other parts of the build system that this executable will exist, so that it can be included during installation.</p>
+</section>
+</section>
+<section id="mixing-c-and-python">
+<h2>Mixing C++ and Python<a class="headerlink" href="#mixing-c-and-python" title="Permalink to this heading">¶</a></h2>
 <p>If your project has both a C++ and a Python component, place the following into your <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">spt3g.core.load_pybindings</span> <span class="kn">import</span> <span class="n">load_pybindings</span>
 <span class="n">load_pybindings</span><span class="p">(</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">__path__</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>This (with no modifications) will merge the C++ and Python parts of the module into a single Python namespace.</p>
-</div>
-</div>
+</section>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table of Contents</a></h3>
-  <ul>
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
 <li><a class="reference internal" href="#">Build System</a><ul>
 <li><a class="reference internal" href="#cmake-overview">CMake Overview</a></li>
 <li><a class="reference internal" href="#adding-a-project">Adding a Project</a><ul>
@@ -137,12 +145,17 @@ make
 </li>
 </ul>
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="autodoc.html"
-                        title="previous chapter">Auto-documentation</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="styleguide.html"
-                        title="next chapter">Style Guide</a></p>
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="autodoc.html"
+                          title="previous chapter">Auto-documentation</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="styleguide.html"
+                          title="next chapter">Style Guide</a></p>
+  </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -151,17 +164,15 @@ make
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -178,12 +189,13 @@ make
         <li class="right" >
           <a href="autodoc.html" title="Auto-documentation"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Build System</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.2.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.1.1.
     </div>
   </body>
 </html>

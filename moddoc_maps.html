@@ -1,18 +1,19 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
     <title>maps &#8212; SPT3G Software  documentation</title>
-    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/nature.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="mpi" href="moddoc_mpi.html" />
@@ -30,7 +31,8 @@
         <li class="right" >
           <a href="moddoc_gcp.html" title="gcp"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">maps</a></li> 
       </ul>
     </div>  
 
@@ -39,867 +41,106 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="maps">
-<h1>maps<a class="headerlink" href="#maps" title="Permalink to this headline">¶</a></h1>
+  <section id="maps">
+<h1>maps<a class="headerlink" href="#maps" title="Permalink to this heading">¶</a></h1>
 <p>The maps project defines map projections, along with G3SkyMap subclasses that provide sky maps in those map projections and tools for format/projection conversions of these data types.</p>
+<p>In addition, this library contains three pipeline modules (MapBinner, SingleDetectorMapBinner, and SingleDetectorBoresightBinner) to make binned maps from time-ordered data, as well as a module (MapMockObserver) to mock-observe a provided sky map, generating fake time-ordered-data from it corresponding to some stored instrument pointing itinerary. A few other utility pipeline modules (described below) are provided for some map manipulation tasks.</p>
 <p>The key data types defined here are:</p>
-<dl class="docutils">
-<dt>HealpixSkyMap</dt>
-<dd>Implements Healpix over all or a fraction of the sky, either in nested or ring mode. The underlying sky map data are represented in one of three ways: as a dense 1-D array (full sky), as a locally-dense region surrounded by zeroes (ring mode only), or as a list of non-zero pixels and their values. The second two modes efficiently represent partial-sky maps.</dd>
-<dt>FlatSkyMap</dt>
-<dd>Implements a flat-sky map (similar to a 2D numpy array) in any of the supported projections. The stored map is either a dense 2D array, or a locally dense region (a set of neighboring columns containing non-zero values, each of which contains a single contiguous block of non-zero values).</dd>
+<dl class="simple">
+<dt>HealpixSkyMap</dt><dd><p>Implements Healpix over all or a fraction of the sky, either in nested or ring mode. The underlying sky map data are represented in one of three ways: as a dense 1-D array (full sky), as a locally-dense region surrounded by zeroes (ring mode only), or as a list of non-zero pixels and their values. The second two modes efficiently represent partial-sky maps.</p>
+</dd>
+<dt>FlatSkyMap</dt><dd><p>Implements a flat-sky map (similar to a 2D numpy array) in any of the supported projections. The stored map is either a dense 2D array, or a locally dense region (a set of neighboring columns containing non-zero values, each of which contains a single contiguous block of non-zero values).</p>
+</dd>
 </dl>
-<div class="section" id="map-attributes">
-<h2>Map Attributes<a class="headerlink" href="#map-attributes" title="Permalink to this headline">¶</a></h2>
+<section id="map-attributes">
+<h2>Map Attributes<a class="headerlink" href="#map-attributes" title="Permalink to this heading">¶</a></h2>
 <p>The following attributes are common to all G3SkyMap subclasses:</p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">coord_ref</span></code></dt>
-<dd>The coordinate system on the sky to which each map pixel is referenced, stored as an instance of the <code class="docutils literal notranslate"><span class="pre">MapCoordReference</span></code> enum.  Currently supported coordinate systems are <code class="docutils literal notranslate"><span class="pre">Equatorial</span></code> (FK5 J2000), <code class="docutils literal notranslate"><span class="pre">Galactic</span></code> and <code class="docutils literal notranslate"><span class="pre">Local</span></code> (telescope azimuth and elevation).</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">pol_type</span></code></dt>
-<dd>The Stokes polarization of the map object, which is an instance of the <code class="docutils literal notranslate"><span class="pre">MapPolType</span></code> enum, and can have the value <code class="docutils literal notranslate"><span class="pre">T</span></code>, <code class="docutils literal notranslate"><span class="pre">Q</span></code>, <code class="docutils literal notranslate"><span class="pre">U</span></code> or None.</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">pol_conv</span></code></dt>
-<dd>The polarization convention used to encode the Q and U Stokes orientations relative to the coordinate axes.  This attribute is an instance of the <code class="docutils literal notranslate"><span class="pre">MapPolConv</span></code> enum, which can have the value <code class="docutils literal notranslate"><span class="pre">IAU</span></code>, <code class="docutils literal notranslate"><span class="pre">COSMO</span></code> or None.  Both IAU and COSMO polarization conventions are supported in polarization-aware functions (e.g. <code class="docutils literal notranslate"><span class="pre">FlattenPol</span></code>), but most default to using the IAU convention.  Warnings will be raised when a polarized map is used without a polarization convention set.  Changing the polarization convention between IAU and COSMO on a <code class="docutils literal notranslate"><span class="pre">U</span></code> map results in flipping the sign of all pixels in the map.</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">units</span></code></dt>
-<dd>The units system in which the map is computed, stored as an instance of the <code class="docutils literal notranslate"><span class="pre">G3TimestreamUnits</span></code> enum, typically <code class="docutils literal notranslate"><span class="pre">Tcmb</span></code>.</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">weighted</span></code></dt>
-<dd>A boolean attribute indicating whether the data in the map have been normalized by the inverse of the appropriate Mueller matrix (<code class="docutils literal notranslate"><span class="pre">weighted=False</span></code>) or not (<code class="docutils literal notranslate"><span class="pre">weighted=True</span></code>).  See more information on map weights below.</dd>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">coord_ref</span></code></dt><dd><p>The coordinate system on the sky to which each map pixel is referenced, stored as an instance of the <code class="docutils literal notranslate"><span class="pre">MapCoordReference</span></code> enum.  Currently supported coordinate systems are <code class="docutils literal notranslate"><span class="pre">Equatorial</span></code> (FK5 J2000), <code class="docutils literal notranslate"><span class="pre">Galactic</span></code> and <code class="docutils literal notranslate"><span class="pre">Local</span></code> (telescope azimuth and elevation).</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">pol_type</span></code></dt><dd><p>The Stokes polarization of the map object, which is an instance of the <code class="docutils literal notranslate"><span class="pre">MapPolType</span></code> enum, and can have the value <code class="docutils literal notranslate"><span class="pre">T</span></code>, <code class="docutils literal notranslate"><span class="pre">Q</span></code>, <code class="docutils literal notranslate"><span class="pre">U</span></code> or None.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">pol_conv</span></code></dt><dd><p>The polarization convention used to encode the Q and U Stokes orientations relative to the coordinate axes.  This attribute is an instance of the <code class="docutils literal notranslate"><span class="pre">MapPolConv</span></code> enum, which can have the value <code class="docutils literal notranslate"><span class="pre">IAU</span></code>, <code class="docutils literal notranslate"><span class="pre">COSMO</span></code> or None.  Both IAU and COSMO polarization conventions are supported in polarization-aware functions (e.g. <code class="docutils literal notranslate"><span class="pre">FlattenPol</span></code>), but most default to using the IAU convention.  Warnings will be raised when a polarized map is used without a polarization convention set.  Changing the polarization convention between IAU and COSMO on a <code class="docutils literal notranslate"><span class="pre">U</span></code> map results in flipping the sign of all pixels in the map.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">units</span></code></dt><dd><p>The units system in which the map is computed, stored as an instance of the <code class="docutils literal notranslate"><span class="pre">G3TimestreamUnits</span></code> enum, typically <code class="docutils literal notranslate"><span class="pre">Tcmb</span></code>.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">weighted</span></code></dt><dd><p>A boolean attribute indicating whether the data in the map have been normalized by the inverse of the appropriate Mueller matrix (<code class="docutils literal notranslate"><span class="pre">weighted=False</span></code>) or not (<code class="docutils literal notranslate"><span class="pre">weighted=True</span></code>).  See more information on map weights below.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="file-format-conversions">
-<h2>File Format Conversions<a class="headerlink" href="#file-format-conversions" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="file-format-conversions">
+<h2>File Format Conversions<a class="headerlink" href="#file-format-conversions" title="Permalink to this heading">¶</a></h2>
 <p>We support writing maps into FITS files that can be read with other tools (such as DS9), using the <code class="docutils literal notranslate"><span class="pre">fitsio.save_skymap_fits</span></code> function.  FITS files with compatible headers can be read in using the <code class="docutils literal notranslate"><span class="pre">fitsio.load_skymap_fits</span></code> function.</p>
 <p>T, Q, U and corresponding G3SkyMapWeights objects are written to a single file as a sequence of HDUs.  FlatSkyMap objects are stored in dense format (see below) to CompImageHDU objects if compression is enabled, and otherwise stored in dense format to standard ImageHDU objects.  The latter can be loaded using “old style” fits readers, such as the <code class="docutils literal notranslate"><span class="pre">idlastro</span></code> fits utilities.</p>
 <p>HealpixSkyMap objects are stored in a sequence of BinTableHDU objects, a format that is compatible with the <code class="docutils literal notranslate"><span class="pre">healpy.read_map</span></code> function.  Dense maps (see below) are stored using implicit indexing, and sparse maps are stored using explicit indexing with an additional pixel index column.</p>
-</div>
-<div class="section" id="indexing">
-<h2>Indexing<a class="headerlink" href="#indexing" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="indexing">
+<h2>Indexing<a class="headerlink" href="#indexing" title="Permalink to this heading">¶</a></h2>
 <p>Values in maps can be set and retrieved using the standard python (or C++) <code class="docutils literal notranslate"><span class="pre">[]</span></code> operator. Both flat and Healpix maps support a 1-D indexing convention. For flat-sky maps, this 1-D index follows C ordering; for Healpix maps, this is the normal 1-D Healpix pixel number. Flat-sky maps also accept 2-D indices, which have ordering following normal language conventions for 2-D indices ((y, x) in Python, (x, y) in C++).</p>
 <p>Note that sky maps <em>do not</em> support numpy-style slicing operations, except for 2-D indexing of flat-sky maps (see below), which makes a copy of the underlying map data.  To perform operations with other numpy arrays, use <code class="docutils literal notranslate"><span class="pre">numpy.asarray</span></code>, which will convert the map to its dense representation (see below) and provides read-write access the map’s internal buffer, which requires no meaningful CPU time or memory.</p>
-</div>
-<div class="section" id="sparsity">
-<h2>Sparsity<a class="headerlink" href="#sparsity" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="sparsity">
+<h2>Sparsity<a class="headerlink" href="#sparsity" title="Permalink to this heading">¶</a></h2>
 <p>By default, both Healpix and flat-sky maps are initialized in sparse mode. This imposes a slight performance penalty but will result in the map storing only non-zero portions (with caveats, see details above), substantially reducing RAM usage. Some map operations, in particular casting to numpy arrays, will result in the implicit conversion of the map to dense storage, which can result in sudden increases in RAM usage. The current sparsity mode can be examined or changed with the <code class="docutils literal notranslate"><span class="pre">sparse</span></code> property (flat sky maps) or the <code class="docutils literal notranslate"><span class="pre">dense</span></code>, <code class="docutils literal notranslate"><span class="pre">ringsparse</span></code>, or <code class="docutils literal notranslate"><span class="pre">indexedsparse</span></code> properties (Healpix maps). Serialization to <code class="docutils literal notranslate"><span class="pre">.g3</span></code> files will maintain the current sparsity scheme, as do arithmetic operators where possible. Serialization to <code class="docutils literal notranslate"><span class="pre">.fits</span></code> files implicitly converts flat sky maps to dense mode, but preserves the sparsity of Healpix maps.  The current number of stored pixels can be obtained using the <code class="docutils literal notranslate"><span class="pre">npix_allocated</span></code> property, and the number of non-zero pixels can be obtained using the <code class="docutils literal notranslate"><span class="pre">npix_nonzero</span></code> property.  Dense maps can be efficiently compactified in memory using the <code class="docutils literal notranslate"><span class="pre">G3SkyMap.compact</span></code> method, or the <code class="docutils literal notranslate"><span class="pre">CompactMaps</span></code> pipeline module.</p>
 <p>Beyond paying attention to implicit conversions to dense storage and the performance impact of sparse storage (which is small), users of this code do not need to worry about the storage mode–all interfaces are identical in all modes.</p>
-</div>
-<div class="section" id="map-interpolation">
-<h2>Map Interpolation<a class="headerlink" href="#map-interpolation" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="map-interpolation">
+<h2>Map Interpolation<a class="headerlink" href="#map-interpolation" title="Permalink to this heading">¶</a></h2>
 <p>Several interpolation and rebinning utilities are provided.  The method <code class="docutils literal notranslate"><span class="pre">G3SkyMap.get_interp_values</span></code> can be used for extracting map values at arbitrary sky positions.  The method <code class="docutils literal notranslate"><span class="pre">G3SkyMap.rebin</span></code> can be used to downgrade the map resolution in a way that preserves the total power within each map pixel.</p>
 <p>The functions <code class="docutils literal notranslate"><span class="pre">healpix_to_flatsky</span></code> and <code class="docutils literal notranslate"><span class="pre">flatsky_to_healpix</span></code> functions are provided to reproject maps between flat sky and curved sky systems, with options to use interpolation or rebinning to improve the accuracy of the reprojection.</p>
 <p>The more general <code class="docutils literal notranslate"><span class="pre">reproj_map</span></code> function can also be used to convert between flat sky projections.</p>
-</div>
-<div class="section" id="map-weights">
-<h2>Map Weights<a class="headerlink" href="#map-weights" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="map-weights">
+<h2>Map Weights<a class="headerlink" href="#map-weights" title="Permalink to this heading">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">G3SkyMapWeights</span></code> class combines the six unique components of the Mueller weight matrix into one object.  The individual matrix terms can be accessed using the attributes <code class="docutils literal notranslate"><span class="pre">G3SkyMapWeights.TT</span></code>, etc, or as keyed elements (e.g. <code class="docutils literal notranslate"><span class="pre">weights['TT']</span></code>).  The full matrix for an individual map pixel can be accessed using the standard <code class="docutils literal notranslate"><span class="pre">[]</span></code> operator.  In python, this returns a symmetric 3x3 numpy array that is a copy of the values in the underlying maps, and in C++ this returns a MuellerMatrix object, with scalar attributes <code class="docutils literal notranslate"><span class="pre">MuellerMatrix.tt</span></code>, etc that are writable references to elements of the underlying map objects.  The <code class="docutils literal notranslate"><span class="pre">G3SkyMapWeights.polarized</span></code> attribute determines whether the weight structure contains polarization information.  For unpolarized weights, only the <code class="docutils literal notranslate"><span class="pre">TT</span></code> element is set, and the <code class="docutils literal notranslate"><span class="pre">[]</span></code> operator returns a scalar value in python, and a MuellerMatrix with just the TT element set in C++.</p>
 <p>In C++ there is also a StokesVector object that is analogous to the MuellerMatrix object.  It has scalar attributes StokesVector.t etc, that are writable references to elements of map objects.  Matrix operations on the StokesVector and MuellerMatrix objects are well defined.</p>
 <p>Weights are removed from or applied to a set of Stokes T/Q/U maps simultaneously, using the <code class="docutils literal notranslate"><span class="pre">remove_weights</span></code> or <code class="docutils literal notranslate"><span class="pre">apply_weights</span></code> functions, or their corresponding pipeline modules.</p>
-</div>
-<div class="section" id="map-frames-and-pipelines">
-<h2>Map Frames and Pipelines<a class="headerlink" href="#map-frames-and-pipelines" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="map-frames-and-pipelines">
+<h2>Map Frames and Pipelines<a class="headerlink" href="#map-frames-and-pipelines" title="Permalink to this heading">¶</a></h2>
 <p>Maps and associated weights are generally stored in memory and on disk in <code class="docutils literal notranslate"><span class="pre">G3Frames</span></code> of type <code class="docutils literal notranslate"><span class="pre">G3FrameType.Map</span></code>, with keys <code class="docutils literal notranslate"><span class="pre">'T',</span> <span class="pre">'Q',</span> <span class="pre">'U',</span> <span class="pre">'Wpol'</span></code> defined for polarized maps, and <code class="docutils literal notranslate"><span class="pre">'T',</span> <span class="pre">'Wunpol'</span></code> defined for unpolarized maps.  Map frames can be checked for validity using the <code class="docutils literal notranslate"><span class="pre">ValidateFrames</span></code> pipeline module, which raises errors or warnings for missing keys or inconsistent attributes.</p>
 <p>Map frames can be manipulated in a pipeline using some memory-efficient pipeline modules.  Weights can be applied or removed from their corresponding Stokes maps using the <code class="docutils literal notranslate"><span class="pre">ApplyWeights</span></code> or <code class="docutils literal notranslate"><span class="pre">RemoveWeights</span></code> pipeline modules.  Maps can be converted to polarized or unpolarized versions using the <code class="docutils literal notranslate"><span class="pre">MakeMapPolarized</span></code> and <code class="docutils literal notranslate"><span class="pre">MakeMapUnpolarized</span></code> modules.  They can also be compactified to their most sparse representation using the <code class="docutils literal notranslate"><span class="pre">CompactMaps</span></code> module.</p>
 <p>Existing maps can be injected into a pipeline using the <code class="docutils literal notranslate"><span class="pre">InjectMaps</span></code> module, and map stubs can be injected using <code class="docutils literal notranslate"><span class="pre">InjectMapStub</span></code> or <code class="docutils literal notranslate"><span class="pre">ReplicateMaps</span></code>.  Maps can also be extracted from a pipeline using the <code class="docutils literal notranslate"><span class="pre">ExtractMaps</span></code> module.</p>
-</div>
-<div class="section" id="flat-sky-map-projections">
-<h2>Flat Sky Map Projections<a class="headerlink" href="#flat-sky-map-projections" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="flat-sky-map-projections">
+<h2>Flat Sky Map Projections<a class="headerlink" href="#flat-sky-map-projections" title="Permalink to this heading">¶</a></h2>
 <p>For flat-sky maps, we support the following map projections:</p>
-<dl class="docutils">
-<dt>ProjSansonFlamsteed</dt>
-<dd>Sanson-Flamsteed (also called the sinusoidal projection). It has equal-area pixels, defined by multiplying azimuth distances by cos(latitude). Mercator-esque in that lines of constant latitude are transformed to lines of constant y. Distances are not preserved. Also known as “proj 0”.</dd>
-<dt>ProjPlateCarree</dt>
-<dd>The Plate-Carree projection just plots latitude and longitude on a grid: latitude lines are at constant y and equally spaced, while longitude lines are at constant x and equally spaced. Pixels are not equal-area. Also known as “proj 1”.  A variant of this projection, called ProjBICEP (or “proj 9”), adjusts the resolution along x to scale with the cosine of the latitude of the center of the map.</dd>
-<dt>ProjOrthographic</dt>
-<dd>The projection of the sphere onto a plane – the sky looks like a circle. Can only show one hemisphere. Lines drawn on the map do not correspond to latitude or longitude. Pixels are not equal-area. Also known as “proj 2”.</dd>
-<dt>ProjStereographic</dt>
-<dd>Another projection of the sphere onto a plane that makes it look like a circle. Differs from an orthographic projection in that it lets you see both hemispheres. Popularized in the form of the UN logo. Lines drawn on the map do not correspond to latitude or longitude. Pixels are not equal-area. Also known as “proj 4”.</dd>
-<dt>ProjLambertAzimuthalEqualArea</dt>
-<dd>Yet another mapping of the sphere to a circle, but this one has equal-area pixels. Largely distance-preserving, which makes it particularly useful for power-spectrum analyses. Also known as “proj 5”.</dd>
-<dt>ProjGnomonic</dt>
-<dd>Another projection of the sphere onto a circle. This one has the property that straight lines correspond to geodesics. Does not have equal-area pixels. Can show less than half a sphere. Also known as a “tangent projection” or “proj 6”.</dd>
-<dt>ProjCylindricalEqualArea</dt>
-<dd>The Lambert cylindrical equal-area projection (CEA) maps the sphere to a rectangle. Has equal-area pixels. Lines of constant x correspond to constant longitude; lines of constant y are constant latitude. Latitudes get closer together (by sin(latitude)) at the poles. Also known as “proj 7”.</dd>
+<dl class="simple">
+<dt>ProjSansonFlamsteed</dt><dd><p>Sanson-Flamsteed (also called the sinusoidal projection). It has equal-area pixels, defined by multiplying azimuth distances by cos(latitude). Mercator-esque in that lines of constant latitude are transformed to lines of constant y. Distances are not preserved. Also known as “proj 0”.</p>
+</dd>
+<dt>ProjPlateCarree</dt><dd><p>The Plate-Carree projection just plots latitude and longitude on a grid: latitude lines are at constant y and equally spaced, while longitude lines are at constant x and equally spaced. Pixels are not equal-area. Also known as “proj 1”.  A variant of this projection, called ProjBICEP (or “proj 9”), adjusts the resolution along x to scale with the cosine of the latitude of the center of the map.</p>
+</dd>
+<dt>ProjOrthographic</dt><dd><p>The projection of the sphere onto a plane – the sky looks like a circle. Can only show one hemisphere. Lines drawn on the map do not correspond to latitude or longitude. Pixels are not equal-area. Also known as “proj 2”.</p>
+</dd>
+<dt>ProjStereographic</dt><dd><p>Another projection of the sphere onto a plane that makes it look like a circle. Differs from an orthographic projection in that it lets you see both hemispheres. Popularized in the form of the UN logo. Lines drawn on the map do not correspond to latitude or longitude. Pixels are not equal-area. Also known as “proj 4”.</p>
+</dd>
+<dt>ProjLambertAzimuthalEqualArea</dt><dd><p>Yet another mapping of the sphere to a circle, but this one has equal-area pixels. Largely distance-preserving, which makes it particularly useful for power-spectrum analyses. Also known as “proj 5”.</p>
+</dd>
+<dt>ProjGnomonic</dt><dd><p>Another projection of the sphere onto a circle. This one has the property that straight lines correspond to geodesics. Does not have equal-area pixels. Can show less than half a sphere. Also known as a “tangent projection” or “proj 6”.</p>
+</dd>
+<dt>ProjCylindricalEqualArea</dt><dd><p>The Lambert cylindrical equal-area projection (CEA) maps the sphere to a rectangle. Has equal-area pixels. Lines of constant x correspond to constant longitude; lines of constant y are constant latitude. Latitudes get closer together (by sin(latitude)) at the poles. Also known as “proj 7”.</p>
+</dd>
 </dl>
-</div>
-<div class="section" id="flat-sky-map-manipulation">
-<h2>Flat Sky Map Manipulation<a class="headerlink" href="#flat-sky-map-manipulation" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="flat-sky-map-manipulation">
+<h2>Flat Sky Map Manipulation<a class="headerlink" href="#flat-sky-map-manipulation" title="Permalink to this heading">¶</a></h2>
 <p>Flat sky maps have additional functions defined for efficient manipulation in memory.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">FlattenPol</span></code> pipeline module flattens the Q and U stokes parameters to align with the pixel coordinate grid, which is necessary for computing power spectra in the flat sky approximation.</p>
 <p>Small patches can be extracted from and inserted into larger flat sky maps using the <code class="docutils literal notranslate"><span class="pre">FlatSkyMap.extract_patch</span></code> and <code class="docutils literal notranslate"><span class="pre">FlatSkyMap.insert_patch</span></code> methods, respectively.  Also, maps can be padded and cropped using the <code class="docutils literal notranslate"><span class="pre">FlatSkyMap.reshape</span></code> method, which keeps the patch centered in the output map.  All of these preserve the map pixelization and correspondence to angle on the sky.</p>
 <p>As an equivalent and more Pythonic alternative, you can also extract portions of the map using numpy-style slicing operations (e.g. <code class="docutils literal notranslate"><span class="pre">map[45:130,114:182]</span></code>), which will produce a map with the same contents as the numpy operation but without converting it to a dense map and with all the coordinate information set appropriately (and is equivalent to <code class="docutils literal notranslate"><span class="pre">extract_patch()</span></code>). This also works with setting, but the coordinates have to match the sub-subcoordinates (as you would have gotten them from getting a slice or <code class="docutils literal notranslate"><span class="pre">extract_patch()</span></code>).  Note that this slicing creates a copy of the underlying data, so in-place operations (e.g. <code class="docutils literal notranslate"><span class="pre">map[45:130,114:182]</span> <span class="pre">+=</span> <span class="pre">5</span></code>) will work, but are not necessarily memory efficient.</p>
-</div>
-<div class="section" id="frame-objects-in-spt3g-maps">
-<h2>Frame Objects in spt3g.maps<a class="headerlink" href="#frame-objects-in-spt3g-maps" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><a class="reference internal" href="#spt3g-maps-flatskymap">spt3g.maps.FlatSkyMap</a></li>
-<li><a class="reference internal" href="#spt3g-maps-g3skymap">spt3g.maps.G3SkyMap</a></li>
-<li><a class="reference internal" href="#spt3g-maps-g3skymapweights">spt3g.maps.G3SkyMapWeights</a></li>
-<li><a class="reference internal" href="#spt3g-maps-healpixskymap">spt3g.maps.HealpixSkyMap</a></li>
-</ul>
-<div class="section" id="spt3g-maps-flatskymap">
-<span id="id1"></span><h3>spt3g.maps.FlatSkyMap<a class="headerlink" href="#spt3g-maps-flatskymap" title="Permalink to this headline">¶</a></h3>
-<p>FlatSkyMap is a G3SkyMap with the extra meta information about the particular flat sky projection included.  In practice it behaves (mostly) like a 2d numpy array.  The pixels are normally indexed with an 1d pixel index.  If you find that you need numpy functionality from a FlatSkyMap, e.g. for slicing across the two dimensions, you can access a numpy representation of the map using <cite>np.asarray(m)</cite>. This does not copy the data, so any changes to the resulting array will affect the data stored in the map.  Alternatively, you can use 2d slice indexing directly on the map to access a copy of the data with the coordinate representation intact.  The latter method is most efficient for extracting small patches from sparse maps.</p>
-<p><em>Members:</em></p>
-<ul class="simple">
-<li><strong>proj</strong>: Map projection (one of maps.MapProjection)</li>
-<li><strong>alpha_center</strong>: Horizontal axis center position</li>
-<li><strong>delta_center</strong>: Vertical axis center position</li>
-<li><strong>x_center</strong>: Horizontal axis center pixel position</li>
-<li><strong>y_center</strong>: Vertical axis center pixel position</li>
-<li><strong>res</strong>: Map resolution in angular units for maps with square pixels</li>
-<li><strong>x_res</strong>: Resolution in X direction for maps with rectangular pixels</li>
-<li><strong>y_res</strong>: Resolution in Y direction for maps with rectangular pixels</li>
-<li><strong>sparse</strong>: True if the map is stored with column and row zero-suppression, False if every pixel is stored. Map sparsity can be changed by setting this to True (or False).</li>
-<li><strong>flat_pol</strong>: True if this map has been flattened using flatten_pol.</li>
-<li><strong>wcs</strong>: astropy.wcs.WCS instance containing projection information</li>
-</ul>
-<p><em>Methods:</em></p>
-<p id="spt3g-maps-flatskymap-pixel-to-angle"><strong>spt3g.maps.FlatSkyMap.pixel_to_angle</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">pixel_to_angle(</span> <span class="pre">(FlatSkyMap)arg1,</span> <span class="pre">(int)pixel)</span> <span class="pre">-&gt;</span> <span class="pre">DoubleVector</span> <span class="pre">:</span></code></dt>
-<dd>Compute the sky coordinates of the given 1D pixel</dd>
-<dt><code class="docutils literal notranslate"><span class="pre">pixel_to_angle(</span> <span class="pre">(FlatSkyMap)arg1,</span> <span class="pre">(int)x,</span> <span class="pre">(int)y)</span> <span class="pre">-&gt;</span> <span class="pre">DoubleVector</span> <span class="pre">:</span></code></dt>
-<dd>Compute the sky coordinates of the given 2D pixel (also see xy_to_angle()).</dd>
-</dl>
-<p id="spt3g-maps-flatskymap-xy-to-angle"><strong>spt3g.maps.FlatSkyMap.xy_to_angle</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">xy_to_angle(</span> <span class="pre">(FlatSkyMap)arg1,</span> <span class="pre">(float)x,</span> <span class="pre">(float)y)</span> <span class="pre">-&gt;</span> <span class="pre">DoubleVector</span> <span class="pre">:</span></code></dt>
-<dd>Compute the sky coordinates of the input flat 2D coordinates</dd>
-</dl>
-<p id="spt3g-maps-flatskymap-angle-to-xy"><strong>spt3g.maps.FlatSkyMap.angle_to_xy</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">angle_to_xy(</span> <span class="pre">(FlatSkyMap)arg1,</span> <span class="pre">(float)alpha,</span> <span class="pre">(float)delta)</span> <span class="pre">-&gt;</span> <span class="pre">DoubleVector</span> <span class="pre">:</span></code></dt>
-<dd>Compute the flat 2D coordinates of the input sky coordinates</dd>
-</dl>
-<p id="spt3g-maps-flatskymap-nonzero-pixels"><strong>spt3g.maps.FlatSkyMap.nonzero_pixels</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">nonzero_pixels(</span> <span class="pre">(FlatSkyMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">tuple</span> <span class="pre">:</span></code></dt>
-<dd>Returns a list of the indices of the non-zero pixels in the map and a list of the values of those non-zero pixels.</dd>
-</dl>
-<p id="spt3g-maps-flatskymap-extract-patch"><strong>spt3g.maps.FlatSkyMap.extract_patch</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">extract_patch(</span> <span class="pre">(FlatSkyMap)arg1,</span> <span class="pre">(int)x0,</span> <span class="pre">(int)y0,</span> <span class="pre">(int)width,</span> <span class="pre">(int)height</span> <span class="pre">[,</span> <span class="pre">(float)fill=0])</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMap</span> <span class="pre">:</span></code></dt>
-<dd>Returns a map of shape (width, height) containing a rectangular patch of the parent map.  Pixel (width // 2, height // 2) of the output map corresponds to pixel (x0, y0) in the parent map, and the angular location of each pixel on the sky is maintained.  Surrounding empty pixels can be optionally filled.</dd>
-</dl>
-<p id="spt3g-maps-flatskymap-insert-patch"><strong>spt3g.maps.FlatSkyMap.insert_patch</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">insert_patch(</span> <span class="pre">(FlatSkyMap)arg1,</span> <span class="pre">(FlatSkyMap)patch</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_zeros=False])</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt>
-<dd>Inserts a patch (e.g. as extracted using extract_patch) into the parent map.  The coordinate system and angular center of the patch must match that of the parent map.  If ignore_zeros is True, zero-valued pixels in the patch are not inserted.  This is useful for preserving the sparsity of the parent map.</dd>
-</dl>
-<p id="spt3g-maps-flatskymap-reshape"><strong>spt3g.maps.FlatSkyMap.reshape</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">reshape(</span> <span class="pre">(FlatSkyMap)arg1,</span> <span class="pre">(int)width,</span> <span class="pre">(int)height</span> <span class="pre">[,</span> <span class="pre">(float)fill=0])</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMap</span> <span class="pre">:</span></code></dt>
-<dd>Returns a map of shape (width, height) containing the parent map centered within it.  The angular location of each pixel on the sky is maintained.  Surrounding empty pixels can be optionally filled.</dd>
-</dl>
-</div>
-<div class="section" id="spt3g-maps-g3skymap">
-<span id="id2"></span><h3>spt3g.maps.G3SkyMap<a class="headerlink" href="#spt3g-maps-g3skymap" title="Permalink to this headline">¶</a></h3>
-<p>Base class for 1- and 2-D skymaps of various projections. Usually you want a subclass of this (e.g. FlatSkyMap) rather than using it directly.</p>
-<p><em>Members:</em></p>
-<ul class="simple">
-<li><strong>coord_ref</strong>: Coordinate system (maps.MapCoordReference) of the map (e.g. Galactic, Equatorial, etc.)</li>
-<li><strong>pol_type</strong>: Polarization type (maps.MapPolType) of the map (e.g. maps.MapPolType.Q).</li>
-<li><strong>pol_conv</strong>: Polarization convention (maps.MapPolConv) of the map (e.g. maps.MapPolConv.IAU or maps.MapPolConv.COSMO). Switching between IAU and COSMO conventions for a U map multiplies the U map by -1.</li>
-<li><strong>units</strong>: Unit class (core.G3TimestreamUnits) of the map (e.g. core.G3TimestreamUnits.Tcmb). Within each unit class, further conversions, for example from K to uK, should use core.G3Units.</li>
-<li><strong>weighted</strong>: True if map is multiplied by weights</li>
-<li><strong>size</strong>: Number of pixels in map</li>
-<li><strong>shape</strong>: Shape of map</li>
-<li><strong>npix_allocated</strong>: Number of pixels in map currently stored in memory</li>
-<li><strong>npix_nonzero</strong>: Number of nonzero pixels in map currently stored in memory</li>
-<li><strong>overflow</strong>: Combined value of data processed by the map maker but outside of the map area</li>
-</ul>
-<p><em>Methods:</em></p>
-<p id="spt3g-maps-g3skymap-copy"><strong>spt3g.maps.G3SkyMap.copy</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">copy(</span> <span class="pre">(G3SkyMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMap</span> <span class="pre">:</span></code></dt>
-<dd>Return a copy of the map object</dd>
-</dl>
-<p id="spt3g-maps-g3skymap-clone"><strong>spt3g.maps.G3SkyMap.Clone</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">Clone(</span> <span class="pre">(G3SkyMap)arg1</span> <span class="pre">[,</span> <span class="pre">(bool)copy_data=True])</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMap</span> <span class="pre">:</span></code></dt>
-<dd>Return a map of the same type, populated with a copy of the data if the argument is true (default), empty otherwise.</dd>
-</dl>
-<p id="spt3g-maps-g3skymap-iscompatible"><strong>spt3g.maps.G3SkyMap.IsCompatible</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">IsCompatible(</span> <span class="pre">(G3SkyMap)arg1,</span> <span class="pre">(G3SkyMap)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span> <span class="pre">:</span></code></dt>
-<dd>Returns true if the input argument is a map with matching dimensions and boundaries on the sky.</dd>
-</dl>
-<p id="spt3g-maps-g3skymap-angles-to-pixels"><strong>spt3g.maps.G3SkyMap.angles_to_pixels</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">angles_to_pixels(</span> <span class="pre">(G3SkyMap)arg1,</span> <span class="pre">(DoubleVector)alphas,</span> <span class="pre">(DoubleVector)deltas)</span> <span class="pre">-&gt;</span> <span class="pre">IntVector</span> <span class="pre">:</span></code></dt>
-<dd>Compute the 1D pixel location for each of the sky coordinates</dd>
-</dl>
-<p id="spt3g-maps-g3skymap-pixels-to-angles"><strong>spt3g.maps.G3SkyMap.pixels_to_angles</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">pixels_to_angles(</span> <span class="pre">(G3SkyMap)arg1,</span> <span class="pre">(IntVector)pixels)</span> <span class="pre">-&gt;</span> <span class="pre">tuple</span> <span class="pre">:</span></code></dt>
-<dd>Compute the sky coordinates of each of the given 1D pixels</dd>
-</dl>
-<p id="spt3g-maps-g3skymap-pixel-to-angle"><strong>spt3g.maps.G3SkyMap.pixel_to_angle</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">pixel_to_angle(</span> <span class="pre">(G3SkyMap)arg1,</span> <span class="pre">(int)pixel)</span> <span class="pre">-&gt;</span> <span class="pre">DoubleVector</span> <span class="pre">:</span></code></dt>
-<dd>Compute the sky coordinates of the given 1D pixel</dd>
-</dl>
-<p id="spt3g-maps-g3skymap-angle-to-pixel"><strong>spt3g.maps.G3SkyMap.angle_to_pixel</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">angle_to_pixel(</span> <span class="pre">(G3SkyMap)arg1,</span> <span class="pre">(float)alpha,</span> <span class="pre">(float)delta)</span> <span class="pre">-&gt;</span> <span class="pre">int</span> <span class="pre">:</span></code></dt>
-<dd>Compute the 1D pixel location of the given sky coordinates.</dd>
-</dl>
-<p id="spt3g-maps-g3skymap-get-interp-values"><strong>spt3g.maps.G3SkyMap.get_interp_values</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">get_interp_values(</span> <span class="pre">(G3SkyMap)arg1,</span> <span class="pre">(DoubleVector)alphas,</span> <span class="pre">(DoubleVector)deltas)</span> <span class="pre">-&gt;</span> <span class="pre">DoubleVector</span> <span class="pre">:</span></code></dt>
-<dd>Return the values at each of the input coordinate locations. Computes each value using bilinear interpolation over the map pixels.</dd>
-</dl>
-<p id="spt3g-maps-g3skymap-rebin"><strong>spt3g.maps.G3SkyMap.rebin</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">rebin(</span> <span class="pre">(G3SkyMap)arg1,</span> <span class="pre">(int)scale</span> <span class="pre">[,</span> <span class="pre">(bool)norm=True])</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMap</span> <span class="pre">:</span></code></dt>
-<dd>Rebin the map into larger pixels by summing (if norm is false) or averaging (if norm is true) scale-x-scale blocks of pixels together.  Returns a new map object.  Map dimensions must be a multiple of the rebinning scale.</dd>
-</dl>
-<p id="spt3g-maps-g3skymap-compact"><strong>spt3g.maps.G3SkyMap.compact</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">compact(</span> <span class="pre">(G3SkyMap)arg1</span> <span class="pre">[,</span> <span class="pre">(bool)zero_nans=False])</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt>
-<dd>Convert the map to its default sparse representation, removing empty pixels, and optionally also removing NaN values. A map that is already sparse will be compactified in place in its current representation without additional memory overhead.</dd>
-</dl>
-<p id="spt3g-maps-g3skymap-any"><strong>spt3g.maps.G3SkyMap.any</strong></p>
-<p><code class="docutils literal notranslate"><span class="pre">any(</span> <span class="pre">(G3SkyMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span></code></p>
-<p id="spt3g-maps-g3skymap-all"><strong>spt3g.maps.G3SkyMap.all</strong></p>
-<p><code class="docutils literal notranslate"><span class="pre">all(</span> <span class="pre">(G3SkyMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span></code></p>
-</div>
-<div class="section" id="spt3g-maps-g3skymapweights">
-<span id="id3"></span><h3>spt3g.maps.G3SkyMapWeights<a class="headerlink" href="#spt3g-maps-g3skymapweights" title="Permalink to this headline">¶</a></h3>
-<p>Polarized (Mueller matrix) or unpolarized (scalar) map pixel weights.</p>
-<p><em>Members:</em></p>
-<ul class="simple">
-<li><strong>TT</strong>: Mueller matrix component map</li>
-<li><strong>TQ</strong>: Mueller matrix component map</li>
-<li><strong>TU</strong>: Mueller matrix component map</li>
-<li><strong>QQ</strong>: Mueller matrix component map</li>
-<li><strong>QU</strong>: Mueller matrix component map</li>
-<li><strong>UU</strong>: Mueller matrix component map</li>
-<li><strong>size</strong>: Number of pixels in weights</li>
-<li><strong>shape</strong>: Shape of weights</li>
-<li><strong>polarized</strong>: True if all components are set, False if only the TT component is set</li>
-<li><strong>congruent</strong>: True if all components are internally compatible with each other</li>
-</ul>
-<p><em>Methods:</em></p>
-<p id="spt3g-maps-g3skymapweights-copy"><strong>spt3g.maps.G3SkyMapWeights.copy</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">copy(</span> <span class="pre">(G3SkyMapWeights)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMapWeights</span> <span class="pre">:</span></code></dt>
-<dd>Return a copy of the weights object</dd>
-</dl>
-<p id="spt3g-maps-g3skymapweights-rebin"><strong>spt3g.maps.G3SkyMapWeights.rebin</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">rebin(</span> <span class="pre">(G3SkyMapWeights)arg1,</span> <span class="pre">(int)scale)</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMapWeights</span> <span class="pre">:</span></code></dt>
-<dd>Rebin the weights into larger pixels by summing scale-x-scale blocks of pixels together.  Returns a new weights object.  Map dimensions must be a multiple of the  rebinning scale.</dd>
-</dl>
-<p id="spt3g-maps-g3skymapweights-compact"><strong>spt3g.maps.G3SkyMapWeights.compact</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">compact(</span> <span class="pre">(G3SkyMapWeights)arg1</span> <span class="pre">[,</span> <span class="pre">(bool)zero_nans=False])</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt>
-<dd>Convert the map to its default sparse representation, excluding empty pixels, and optionally converting NaN values to zeroes.</dd>
-</dl>
-<p id="spt3g-maps-g3skymapweights-det"><strong>spt3g.maps.G3SkyMapWeights.det</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">det(</span> <span class="pre">(G3SkyMapWeights)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMap</span> <span class="pre">:</span></code></dt>
-<dd>Return the determinant of the Mueller matrix for each pixel</dd>
-</dl>
-<p id="spt3g-maps-g3skymapweights-cond"><strong>spt3g.maps.G3SkyMapWeights.cond</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">cond(</span> <span class="pre">(G3SkyMapWeights)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMap</span> <span class="pre">:</span></code></dt>
-<dd>Return the condition number of the Mueller matrix for each pixel</dd>
-</dl>
-<p id="spt3g-maps-g3skymapweights-clone"><strong>spt3g.maps.G3SkyMapWeights.Clone</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">Clone(</span> <span class="pre">(G3SkyMapWeights)arg1</span> <span class="pre">[,</span> <span class="pre">(bool)copy_data=True])</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMapWeights</span> <span class="pre">:</span></code></dt>
-<dd>Return weights of the same type, populated with a copy of the data if the argument is true (default), empty otherwise.</dd>
-</dl>
-</div>
-<div class="section" id="spt3g-maps-healpixskymap">
-<span id="id4"></span><h3>spt3g.maps.HealpixSkyMap<a class="headerlink" href="#spt3g-maps-healpixskymap" title="Permalink to this headline">¶</a></h3>
-<p>HealpixSkyMap is a G3SkyMap with the extra meta information about the particular Healpix pixelization used.  In practice it behaves (mostly) like a 1d numpy array.  If you find that you need numpy functionality from a HealpixSkyMap, e.g. for slicing across the array, you can access a numpy representation of the map using <cite>np.asarray(m)</cite>. This does not copy the data, so any changes to the resulting array will affect the data stored in the map.</p>
-<p><em>Members:</em></p>
-<ul class="simple">
-<li><strong>nside</strong>: Healpix resolution parameter</li>
-<li><strong>res</strong>: Map resolution in angular units</li>
-<li><strong>nested</strong>: True if pixel ordering is nested, False if ring-ordered</li>
-<li><strong>shift_ra</strong>: True if the ringsparse representation of the map is stored with the rings centered at ra = 0 deg, rather than ra = 180 deg.</li>
-<li><strong>dense</strong>: True if the map is stored with all elements, False otherwise. If set to True, converts the map to a dense representation.</li>
-<li><strong>ringsparse</strong>: True if the map is stored as a dense 2D region using ring ordering (analogous to FlatSkyMap’s sparse mode). Ring-sparsity is efficient for dense blocks on a ring-ordered map (e.g. a continuous sky region), but is inefficient otherwise (e.g. nested pixel ordering or discontinous coverage). If set to True, converts the map to this representation.</li>
-<li><strong>indexedsparse</strong>: True if the map is stored as a list of non-zero pixels and values. More efficient than ring-sparse for maps with holes or very small filling factors. If set to True, converts the map to this representation.</li>
-</ul>
-<p><em>Methods:</em></p>
-<p id="spt3g-maps-healpixskymap-nonzero-pixels"><strong>spt3g.maps.HealpixSkyMap.nonzero_pixels</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">nonzero_pixels(</span> <span class="pre">(HealpixSkyMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">tuple</span> <span class="pre">:</span></code></dt>
-<dd>Returns a list of the indices of the non-zero pixels in the map and a list of the values of those non-zero pixels.</dd>
-</dl>
-</div>
-</div>
-<div class="section" id="modules-in-spt3g-maps">
-<h2>Modules in spt3g.maps<a class="headerlink" href="#modules-in-spt3g-maps" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><a class="reference internal" href="#spt3g-maps-azel-equatorialtogalacticpointing">spt3g.maps.azel.EquatorialToGalacticPointing</a></li>
-<li><a class="reference internal" href="#spt3g-maps-azel-localtoastronomicalpointing">spt3g.maps.azel.LocalToAstronomicalPointing</a></li>
-<li><a class="reference internal" href="#spt3g-maps-coordsysmodules-addlocaltransrotations">spt3g.maps.coordsysmodules.AddLocalTransRotations</a></li>
-<li><a class="reference internal" href="#spt3g-maps-coordsysmodules-equatorialtogalactictransrotations">spt3g.maps.coordsysmodules.EquatorialToGalacticTransRotations</a></li>
-<li><a class="reference internal" href="#spt3g-maps-coordsysmodules-fillcoordtransrotations">spt3g.maps.coordsysmodules.FillCoordTransRotations</a></li>
-<li><a class="reference internal" href="#spt3g-maps-fitsio-savemapframe">spt3g.maps.fitsio.SaveMapFrame</a></li>
-<li><a class="reference internal" href="#spt3g-maps-map-modules-applyweights">spt3g.maps.map_modules.ApplyWeights</a></li>
-<li><a class="reference internal" href="#spt3g-maps-map-modules-compactmaps">spt3g.maps.map_modules.CompactMaps</a></li>
-<li><a class="reference internal" href="#spt3g-maps-map-modules-extractmaps">spt3g.maps.map_modules.ExtractMaps</a></li>
-<li><a class="reference internal" href="#spt3g-maps-map-modules-flattenpol">spt3g.maps.map_modules.FlattenPol</a></li>
-<li><a class="reference internal" href="#spt3g-maps-map-modules-injectmapstub">spt3g.maps.map_modules.InjectMapStub</a></li>
-<li><a class="reference internal" href="#spt3g-maps-map-modules-injectmaps">spt3g.maps.map_modules.InjectMaps</a></li>
-<li><a class="reference internal" href="#spt3g-maps-map-modules-makemapspolarized">spt3g.maps.map_modules.MakeMapsPolarized</a></li>
-<li><a class="reference internal" href="#spt3g-maps-map-modules-makemapsunpolarized">spt3g.maps.map_modules.MakeMapsUnpolarized</a></li>
-<li><a class="reference internal" href="#spt3g-maps-map-modules-removeweights">spt3g.maps.map_modules.RemoveWeights</a></li>
-<li><a class="reference internal" href="#spt3g-maps-map-modules-replicatemaps">spt3g.maps.map_modules.ReplicateMaps</a></li>
-<li><a class="reference internal" href="#spt3g-maps-map-modules-validatemaps">spt3g.maps.map_modules.ValidateMaps</a></li>
-</ul>
-<p id="spt3g-maps-azel-equatorialtogalacticpointing"><strong>spt3g.maps.azel.EquatorialToGalacticPointing</strong></p>
-<p>Converts a set of timestreams in Scan frames representing RA and Declination
-pointing of the telescope into Galactic longitude and latitude timestreams,
-stored in the frame under their respective names.</p>
-<dl class="docutils">
-<dt><em>Definition:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">EquatorialToGalacticPointing(frame,</span> <span class="pre">ra_timestream='BoresightRa',</span> <span class="pre">dec_timestream='BoresightDec',</span> <span class="pre">glon_timestream='BoresightGalLon',</span> <span class="pre">glat_timestream='BoresightGalLat')</span></code></dd>
-</dl>
-<p id="spt3g-maps-azel-localtoastronomicalpointing"><strong>spt3g.maps.azel.LocalToAstronomicalPointing</strong></p>
-<p>Converts a set of timestreams in Scan frames representing Az and El pointing
-of the telescope into RA and Declination timestreams, stored in the frame
-under their respective names.</p>
-<dl class="docutils">
-<dt><em>Definition:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">LocalToAstronomicalPointing(frame,</span> <span class="pre">az_timestream='BoresightAz',</span> <span class="pre">el_timestream='BoresightEl',</span> <span class="pre">ra_timestream='BoresightRa',</span> <span class="pre">dec_timestream='BoresightDec',</span> <span class="pre">Telescope=&lt;EarthLocation</span> <span class="pre">(710.21505704,</span> <span class="pre">-701.59071905,</span> <span class="pre">-6359587.23641261)</span> <span class="pre">m&gt;)</span></code></dd>
-</dl>
-<p id="spt3g-maps-coordsysmodules-addlocaltransrotations"><strong>spt3g.maps.coordsysmodules.AddLocalTransRotations</strong></p>
-<p>Creates the transform for boresight pointing for az el based maps.  This is
-equivalent to FillCoordTransRotations with end_coord_sys in Local
-coordinates.</p>
-<p>Right now it’s using the coordinate system where delta = -el because of
-implementation details.  All of the maps generated with this will be upside
-down in el.</p>
-<dl class="docutils">
-<dt><em>Definition:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">AddLocalTransRotations(frame,</span> <span class="pre">az_key='RawBoresightAz',</span> <span class="pre">el_key='RawBoresightEl',</span> <span class="pre">out_key='RawAzElRotation')</span></code></dd>
-</dl>
-<p id="spt3g-maps-coordsysmodules-equatorialtogalactictransrotations"><strong>spt3g.maps.coordsysmodules.EquatorialToGalacticTransRotations</strong></p>
-<p>Takes a quaternion vector specifying the rotation to FK5 (Equatorial)
-boresight and converts it into a rotation to Galactic J2000 boresight
-coordinates.</p>
-<p>Use this to convert the output of FillCoordTransRotations to Galactic
-coordinates.</p>
-<dl class="docutils">
-<dt><em>Definition:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">EquatorialToGalacticTransRotations(frame,</span> <span class="pre">eq_trans_key='OnlineRaDecRotation',</span> <span class="pre">out_key='OnlineGalacticRotation')</span></code></dd>
-</dl>
-<p id="spt3g-maps-coordsysmodules-fillcoordtransrotations"><strong>spt3g.maps.coordsysmodules.FillCoordTransRotations</strong></p>
-<p>Calculates the rotation quaternions that take the point (1,0,0) (so az=el=0)
-in local coordinates to the coordinates specified by end_coord_sys and
-stores them in transform_store_key.  This encodes the boresight pointing and
-any rotations about this boresight pointing due to coordinate system
-changes, az/el bearing tilt, etc.</p>
-<dl class="docutils">
-<dt><em>Arguments:</em></dt>
-<dd><dl class="first last docutils">
-<dt>transform_store_key <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
-<dd>The key where the output transformation quaternion will be stored.
-If already present in the frame, this calculation will be skipped.</dd>
-<dt>end_coord_sys <span class="classifier-delimiter">:</span> <span class="classifier">MapCoordReference</span></dt>
-<dd>If Local, the transformation is computed using the negative of the
-detector delta angle.  Otherwise the detector angle is not inverted.</dd>
-<dt>do_bad_transform <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd>If end_coord_sys is not Local and this argument is True, the offset
-keys are ignored and the coordinate transformation does not take
-into account rotation about the boresight.</dd>
-<dt>bs_az_key, bs_el_key <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
-<dd>Boresight coordinates in the local coordinate system.  If end_coord_sys
-is Local, only these two keys are required.</dd>
-<dt>bs_ra_key, bs_dec_key <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
-<dd>Boresight coordinates in the output coordinate system.  If
-do_bad_transform is True, only these two keys and the previous two keys
-are required.</dd>
-<dt>offset_az_key, offset_el_key, offset_ra_key, offset_dec_key <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
-<dd>Local and output coordinates computed at a small offset from boresight.
-These keys are required if do_bad_transform is False, and will be used
-to account for any rotation about boresight in the coordinate
-transformation.</dd>
-</dl>
-</dd>
-<dt><em>Definition:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">FillCoordTransRotations(frame,</span> <span class="pre">transform_store_key='OnlineRaDecRotation',</span> <span class="pre">end_coord_sys=spt3g.maps.MapCoordReference.Equatorial,</span> <span class="pre">do_bad_transform=False,</span> <span class="pre">bs_az_key='RawBoresightAz',</span> <span class="pre">bs_el_key='RawBoresightEl',</span> <span class="pre">bs_ra_key='OnlineBoresightRa',</span> <span class="pre">bs_dec_key='OnlineBoresightDec',</span> <span class="pre">offset_az_key='OffsetBoresightAz',</span> <span class="pre">offset_el_key='OffsetBoresightEl',</span> <span class="pre">offset_ra_key='OnlineOffsetRa',</span> <span class="pre">offset_dec_key='OnlineOffsetDec')</span></code></dd>
-</dl>
-<p id="spt3g-maps-fitsio-savemapframe"><strong>spt3g.maps.fitsio.SaveMapFrame</strong></p>
-<p>Save the map with Id map_id into output_file.</p>
-<dl class="docutils">
-<dt><em>Definition:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">SaveMapFrame(frame,</span> <span class="pre">map_id,</span> <span class="pre">output_file,</span> <span class="pre">overwrite=False)</span></code></dd>
-</dl>
-<p id="spt3g-maps-map-modules-applyweights"><strong>spt3g.maps.map_modules.ApplyWeights</strong></p>
-<p>Apply weights to the input maps.  The operation is performed in place to
-minimize memory use.</p>
-<dl class="docutils">
-<dt><em>Definition:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">ApplyWeights(frame)</span></code></dd>
-</dl>
-<p id="spt3g-maps-map-modules-compactmaps"><strong>spt3g.maps.map_modules.CompactMaps</strong></p>
-<p>Compact all maps in a frame to their default sparse representation.
-Optionally remove NaN values as well.  Removing NaN values will reduce
-memory use, but will remove the distinction in unweighted (or
-weight-removed) maps between unobserved regions and regions with zero
-temperature.</p>
-<dl class="docutils">
-<dt><em>Definition:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">CompactMaps(frame,</span> <span class="pre">zero_nans=False)</span></code></dd>
-</dl>
-<p id="spt3g-maps-map-modules-extractmaps"><strong>spt3g.maps.map_modules.ExtractMaps</strong></p>
-<p>Cache maps that come through the pipeline. Initialize an instance of this
-module before adding to a pipeline..  Any maps that pass through the pipe
-are stored in the .maps attribute of the object after the pipeline is run.</p>
-<dl class="docutils">
-<dt><em>Arguments:</em></dt>
-<dd><dl class="first last docutils">
-<dt>map_id <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
-<dd>If supplied, select only map frames that match this ID.</dd>
-<dt>copy <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd>If True, make a copy of the map on extraction.</dd>
-<dt>ignore_missing_weights <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd>If False (default), a warning is issued when the frame contains weighted
-Stokes maps without a weights map.  Set this option to True when feeding
-single bolometer map frames with common weights through a pipeline.</dd>
-</dl>
-</dd>
-<dt><em>Constructor:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">ExtractMaps(self,</span> <span class="pre">map_id=None,</span> <span class="pre">copy=False,</span> <span class="pre">ignore_missing_weights=False)</span></code></dd>
-</dl>
-<p id="spt3g-maps-map-modules-flattenpol"><strong>spt3g.maps.map_modules.FlattenPol</strong></p>
-<p>For maps defined on the sphere the direction of the polarization angle is
-is defined relative to the direction of North.  When making maps we follow
-this definition.</p>
-<p>For any flat sky estimators, the polarization angle is defined relative to
-the vertical axis.  For some map projections the direction of north is not
-the same as the vertical axis.  This function applies a rotation to the Q
-and U values to switch the curved sky Q/U definition to the flat sky Q/U
-definition.</p>
-<p>If for whatever reason you want to reverse the process set the invert
-argument to True.</p>
-<dl class="docutils">
-<dt><em>Definition:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">FlattenPol(frame,</span> <span class="pre">invert=False)</span></code></dd>
-</dl>
-<p id="spt3g-maps-map-modules-injectmapstub"><strong>spt3g.maps.map_modules.InjectMapStub</strong></p>
-<p>Inject a new map frame from a map stub.</p>
-<dl class="docutils">
-<dt><em>Arguments:</em></dt>
-<dd><dl class="first last docutils">
-<dt>map_id <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
-<dd>Id to assign to the new map frame</dd>
-<dt>map_stub <span class="classifier-delimiter">:</span> <span class="classifier">G3SkyMap instance</span></dt>
-<dd>Map stub from which to Clone the Stokes maps and weights.</dd>
-<dt>polarized <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd>If True, add Q and U maps to stub frame, and ensure that weights are
-polarized.  Otherwise, only a T map is created.</dd>
-<dt>weighted <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd>If True, add weights to the stub frame.</dd>
-<dt>pol_conv <span class="classifier-delimiter">:</span> <span class="classifier">MapPolConv instance</span></dt>
-<dd>Polarization convention to use.</dd>
-</dl>
-</dd>
-<dt><em>Constructor:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">InjectMapStub(self,</span> <span class="pre">map_id,</span> <span class="pre">map_stub,</span> <span class="pre">polarized=True,</span> <span class="pre">weighted=True,</span> <span class="pre">pol_conv=spt3g.maps.MapPolConv.IAU)</span></code></dd>
-</dl>
-<p id="spt3g-maps-map-modules-injectmaps"><strong>spt3g.maps.map_modules.InjectMaps</strong></p>
-<p>Inject a set of maps into a new map frame.</p>
-<dl class="docutils">
-<dt><em>Arguments:</em></dt>
-<dd><dl class="first last docutils">
-<dt>map_id <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
-<dd>Id to assign to the new map frame</dd>
-<dt>maps_in <span class="classifier-delimiter">:</span> <span class="classifier">list or dict</span></dt>
-<dd>Maps to add to the frame.  If a list, contains Stokes maps with valid
-pol_type and weights.  If a dict, contains Stokes and weights maps keyed
-by the standard map frame names.</dd>
-</dl>
-</dd>
-<dt><em>Constructor:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">InjectMaps(self,</span> <span class="pre">map_id,</span> <span class="pre">maps_in)</span></code></dd>
-</dl>
-<p id="spt3g-maps-map-modules-makemapspolarized"><strong>spt3g.maps.map_modules.MakeMapsPolarized</strong></p>
-<p>Converts individual unpolarized maps to polarized versions of the same map,
-with the given polarization convention</p>
-<p>This module is only a shim that creates null Q and U maps and populates
-a properly invertible Wpol array from the TT Wunpol weights.</p>
-<dl class="docutils">
-<dt><em>Definition:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">MakeMapsPolarized(frame,</span> <span class="pre">pol_conv=spt3g.maps.MapPolConv.IAU)</span></code></dd>
-</dl>
-<p id="spt3g-maps-map-modules-makemapsunpolarized"><strong>spt3g.maps.map_modules.MakeMapsUnpolarized</strong></p>
-<p>Converts individual polarized maps to temperature-only versions of the same map.</p>
-<dl class="docutils">
-<dt><em>Definition:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">MakeMapsUnpolarized(frame)</span></code></dd>
-</dl>
-<p id="spt3g-maps-map-modules-removeweights"><strong>spt3g.maps.map_modules.RemoveWeights</strong></p>
-<p>Remove weights from input maps.  If zero_nans is <cite>True</cite>, empty pixels are
-skipped and pixels with zero weight are set to 0 instead of NaN.  Operation
-is performed in place to minimize memory use.</p>
-<dl class="docutils">
-<dt><em>Definition:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">RemoveWeights(frame,</span> <span class="pre">zero_nans=False)</span></code></dd>
-</dl>
-<p id="spt3g-maps-map-modules-replicatemaps"><strong>spt3g.maps.map_modules.ReplicateMaps</strong></p>
-<p>Clone the input map frame with Id input_map_id into new stub frames, one for
-each Id listed in output_map_ids.</p>
-<dl class="docutils">
-<dt><em>Arguments:</em></dt>
-<dd><dl class="first last docutils">
-<dt>input_map_id <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
-<dd>ID of the map frame to replicate.  The input frame is discarded after
-replication.</dd>
-<dt>output_map_ids <span class="classifier-delimiter">:</span> <span class="classifier">list of strings</span></dt>
-<dd>List of IDs to assign to replicated map frames.</dd>
-<dt>copy_weights <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd>If False, only the first output frame in the list includes a weights key
-(Wpol or Wunpol).  If True, all output frames include a weights key.</dd>
-</dl>
-</dd>
-<dt><em>Definition:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">ReplicateMaps(frame,</span> <span class="pre">input_map_id,</span> <span class="pre">output_map_ids,</span> <span class="pre">copy_weights=False)</span></code></dd>
-</dl>
-<p id="spt3g-maps-map-modules-validatemaps"><strong>spt3g.maps.map_modules.ValidateMaps</strong></p>
-<p>Validate that the input map frame has all the necessary keys.</p>
-<p>If ignore_missing_weights is False (default), a warning is issued when the
-frame contains weighted Stokes maps without a weights map.  Set this option
-to True when feeding single bolometer map frames with common weights through
-a pipeline.</p>
-<dl class="docutils">
-<dt><em>Definition:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">ValidateMaps(frame,</span> <span class="pre">ignore_missing_weights=False)</span></code></dd>
-</dl>
-</div>
-<div class="section" id="functions-in-spt3g-maps">
-<h2>Functions in spt3g.maps<a class="headerlink" href="#functions-in-spt3g-maps" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><a class="reference internal" href="#spt3g-maps-apply-weights">spt3g.maps.apply_weights</a></li>
-<li><a class="reference internal" href="#spt3g-maps-apply-weights-t">spt3g.maps.apply_weights_t</a></li>
-<li><a class="reference internal" href="#spt3g-maps-azel-convert-azel-to-radec">spt3g.maps.azel.convert_azel_to_radec</a></li>
-<li><a class="reference internal" href="#spt3g-maps-azel-convert-gal-to-radec">spt3g.maps.azel.convert_gal_to_radec</a></li>
-<li><a class="reference internal" href="#spt3g-maps-azel-convert-radec-to-azel">spt3g.maps.azel.convert_radec_to_azel</a></li>
-<li><a class="reference internal" href="#spt3g-maps-azel-convert-radec-to-gal">spt3g.maps.azel.convert_radec_to_gal</a></li>
-<li><a class="reference internal" href="#spt3g-maps-convert-ra-dec-trans-to-gal">spt3g.maps.convert_ra_dec_trans_to_gal</a></li>
-<li><a class="reference internal" href="#spt3g-maps-create-det-az-el-trans">spt3g.maps.create_det_az_el_trans</a></li>
-<li><a class="reference internal" href="#spt3g-maps-create-det-ra-dec-trans">spt3g.maps.create_det_ra_dec_trans</a></li>
-<li><a class="reference internal" href="#spt3g-maps-create-lazy-det-ra-dec-trans">spt3g.maps.create_lazy_det_ra_dec_trans</a></li>
-<li><a class="reference internal" href="#spt3g-maps-fitsio-load-skymap-fits">spt3g.maps.fitsio.load_skymap_fits</a></li>
-<li><a class="reference internal" href="#spt3g-maps-fitsio-save-skymap-fits">spt3g.maps.fitsio.save_skymap_fits</a></li>
-<li><a class="reference internal" href="#spt3g-maps-flatten-pol">spt3g.maps.flatten_pol</a></li>
-<li><a class="reference internal" href="#spt3g-maps-get-map-median">spt3g.maps.get_map_median</a></li>
-<li><a class="reference internal" href="#spt3g-maps-get-map-stats">spt3g.maps.get_map_stats</a></li>
-<li><a class="reference internal" href="#spt3g-maps-get-mask-map">spt3g.maps.get_mask_map</a></li>
-<li><a class="reference internal" href="#spt3g-maps-get-ra-dec-map">spt3g.maps.get_ra_dec_map</a></li>
-<li><a class="reference internal" href="#spt3g-maps-maputils-flatsky-to-healpix">spt3g.maps.maputils.flatsky_to_healpix</a></li>
-<li><a class="reference internal" href="#spt3g-maps-maputils-healpix-to-flatsky">spt3g.maps.maputils.healpix_to_flatsky</a></li>
-<li><a class="reference internal" href="#spt3g-maps-quathelpers-ang-to-quat">spt3g.maps.quathelpers.ang_to_quat</a></li>
-<li><a class="reference internal" href="#spt3g-maps-quathelpers-quat-to-ang">spt3g.maps.quathelpers.quat_to_ang</a></li>
-<li><a class="reference internal" href="#spt3g-maps-remove-weights">spt3g.maps.remove_weights</a></li>
-<li><a class="reference internal" href="#spt3g-maps-remove-weights-t">spt3g.maps.remove_weights_t</a></li>
-<li><a class="reference internal" href="#spt3g-maps-reproj-map">spt3g.maps.reproj_map</a></li>
-</ul>
-<p id="spt3g-maps-apply-weights"><strong>spt3g.maps.apply_weights</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">apply_weights(</span> <span class="pre">(G3SkyMap)T,</span> <span class="pre">(G3SkyMap)Q,</span> <span class="pre">(G3SkyMap)U,</span> <span class="pre">(G3SkyMapWeights)W)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt>
-<dd>Apply weights to polarized maps.</dd>
-</dl>
-<p id="spt3g-maps-apply-weights-t"><strong>spt3g.maps.apply_weights_t</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">apply_weights_t(</span> <span class="pre">(G3SkyMap)T,</span> <span class="pre">(G3SkyMapWeights)W)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt>
-<dd>Apply weights to unpolarized maps.</dd>
-</dl>
-<p id="spt3g-maps-azel-convert-azel-to-radec"><strong>spt3g.maps.azel.convert_azel_to_radec</strong></p>
-<p>Convert timestreams of local azimuth and elevation to right ascension and
-declination.</p>
-<dl class="docutils">
-<dt><em>Arguments:</em></dt>
-<dd><dl class="first last docutils">
-<dt>az, el <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray or G3Timestream</span></dt>
-<dd>Array of local coordinates. If inputs are G3Timestream objects,
-G3Timestreams are also returned.</dd>
-<dt>location <span class="classifier-delimiter">:</span> <span class="classifier">astropy.coordinates.EarthLocation instance</span></dt>
-<dd>The telescope location on Earth.</dd>
-<dt>mjd <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray</span></dt>
-<dd>An array of times for each az/el sample.  If input az and el
-are not G3Timestreams, this argument is required.</dd>
-</dl>
-</dd>
-<dt><em>Returns:</em></dt>
-<dd>ra, dec : np.ndarray or G3Timestream</dd>
-<dt><em>Definition:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">convert_azel_to_radec(az,</span> <span class="pre">el,</span> <span class="pre">location=&lt;EarthLocation</span> <span class="pre">(710.21505704,</span> <span class="pre">-701.59071905,</span> <span class="pre">-6359587.23641261)</span> <span class="pre">m&gt;,</span> <span class="pre">mjd=None)</span></code></dd>
-</dl>
-<p id="spt3g-maps-azel-convert-gal-to-radec"><strong>spt3g.maps.azel.convert_gal_to_radec</strong></p>
-<p>Convert timestreams of Galactic longitude and latitude to right ascension
-and declination.</p>
-<dl class="docutils">
-<dt><em>Arguments:</em></dt>
-<dd><dl class="first last docutils">
-<dt>glon, glat <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray or G3Timestream</span></dt>
-<dd>Array of Galactic sky coordinates. If inputs are G3Timestream
-objects, G3Timestreams are also returned.</dd>
-</dl>
-</dd>
-<dt><em>Returns:</em></dt>
-<dd>ra, dec : np.ndarray or G3Timestream</dd>
-<dt><em>Definition:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">convert_gal_to_radec(glon,</span> <span class="pre">glat)</span></code></dd>
-</dl>
-<p id="spt3g-maps-azel-convert-radec-to-azel"><strong>spt3g.maps.azel.convert_radec_to_azel</strong></p>
-<p>Convert timestreams of right ascension and declination to local
-azimuth and elevation.</p>
-<dl class="docutils">
-<dt><em>Arguments:</em></dt>
-<dd><dl class="first last docutils">
-<dt>ra, dec <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray or G3Timestream</span></dt>
-<dd>Array of Equatorial sky coordinates. If inputs are G3Timestream
-objects, G3Timestreams are also returned.</dd>
-<dt>location <span class="classifier-delimiter">:</span> <span class="classifier">astropy.coordinates.EarthLocation instance</span></dt>
-<dd>The telescope location on Earth.</dd>
-<dt>mjd <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray</span></dt>
-<dd>An array of times for each ra/dec sample.  If input ra and dec
-are not G3Timestreams, this argument is required.</dd>
-</dl>
-</dd>
-<dt><em>Returns:</em></dt>
-<dd>az, el : np.ndarray or G3Timestream</dd>
-<dt><em>Definition:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">convert_radec_to_azel(ra,</span> <span class="pre">dec,</span> <span class="pre">location=&lt;EarthLocation</span> <span class="pre">(710.21505704,</span> <span class="pre">-701.59071905,</span> <span class="pre">-6359587.23641261)</span> <span class="pre">m&gt;,</span> <span class="pre">mjd=None)</span></code></dd>
-</dl>
-<p id="spt3g-maps-azel-convert-radec-to-gal"><strong>spt3g.maps.azel.convert_radec_to_gal</strong></p>
-<p>Convert timestreams of right ascension and declination to Galactic
-longitude and latitude.</p>
-<dl class="docutils">
-<dt><em>Arguments:</em></dt>
-<dd><dl class="first last docutils">
-<dt>ra, dec <span class="classifier-delimiter">:</span> <span class="classifier">np.ndarray or G3Timestream</span></dt>
-<dd>Array of Equatorial sky coordinates. If inputs are G3Timestream
-objects, G3Timestreams are also returned.</dd>
-</dl>
-</dd>
-<dt><em>Returns:</em></dt>
-<dd>glon, glat : np.ndarray or G3Timestream</dd>
-<dt><em>Definition:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">convert_radec_to_gal(ra,</span> <span class="pre">dec)</span></code></dd>
-</dl>
-<p id="spt3g-maps-convert-ra-dec-trans-to-gal"><strong>spt3g.maps.convert_ra_dec_trans_to_gal</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">convert_ra_dec_trans_to_gal(</span> <span class="pre">(G3VectorQuat)arg1,</span> <span class="pre">(G3VectorQuat)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt>
-<dd>Rotate a vector of quaternions from Equatorial to Galactic coordinates</dd>
-</dl>
-<p id="spt3g-maps-create-det-az-el-trans"><strong>spt3g.maps.create_det_az_el_trans</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">create_det_az_el_trans(</span> <span class="pre">(G3Timestream)arg1,</span> <span class="pre">(G3Timestream)arg2,</span> <span class="pre">(G3VectorQuat)arg3)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt>
-<dd>Construct a quaternion vector from timestreams of detector azimuth and elevation. Equivalent to <code class="docutils literal notranslate"><span class="pre">R_z(az)</span> <span class="pre">*</span> <span class="pre">R_y(-el)</span></code>.</dd>
-</dl>
-<p id="spt3g-maps-create-det-ra-dec-trans"><strong>spt3g.maps.create_det_ra_dec_trans</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">create_det_ra_dec_trans(</span> <span class="pre">(G3Timestream)arg1,</span> <span class="pre">(G3Timestream)arg2,</span> <span class="pre">(G3Timestream)arg3,</span> <span class="pre">(G3Timestream)arg4,</span> <span class="pre">(G3Timestream)arg5,</span> <span class="pre">(G3Timestream)arg6,</span> <span class="pre">(G3Timestream)arg7,</span> <span class="pre">(G3Timestream)arg8,</span> <span class="pre">(G3VectorQuat)arg9)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt>
-<dd>Construct a quaternion vector from timestreams of detector coordinates.  Computes the transformation from local (az_0, el_0) coordinates to celestial (ra_0, dec_0), accounting for rotation about the boresight by including the second set of points.</dd>
-</dl>
-<p id="spt3g-maps-create-lazy-det-ra-dec-trans"><strong>spt3g.maps.create_lazy_det_ra_dec_trans</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">create_lazy_det_ra_dec_trans(</span> <span class="pre">(G3Timestream)arg1,</span> <span class="pre">(G3Timestream)arg2,</span> <span class="pre">(G3VectorQuat)arg3)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt>
-<dd>Construct a quaternion vector from timestreams of detector RA and declination.  Equivalent to <code class="docutils literal notranslate"><span class="pre">R_z(ra)</span> <span class="pre">*</span> <span class="pre">R_y(dec)</span></code></dd>
-</dl>
-<p id="spt3g-maps-fitsio-load-skymap-fits"><strong>spt3g.maps.fitsio.load_skymap_fits</strong></p>
-<p>Load a fits file containing a sky map.</p>
-<dl class="docutils">
-<dt><em>Arguments:</em></dt>
-<dd><dl class="first last docutils">
-<dt>filename <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd>Path to fits file</dd>
-<dt>hdu <span class="classifier-delimiter">:</span> <span class="classifier">int, optional</span></dt>
-<dd>If supplied, the data are extract from the given HDU index.</dd>
-<dt>keys <span class="classifier-delimiter">:</span> <span class="classifier">list of strings, optional</span></dt>
-<dd>If supplied, return only these keys in the output dictionary.
-Options are: T, Q, U, W.</dd>
-<dt>memmap <span class="classifier-delimiter">:</span> <span class="classifier">bool, optional</span></dt>
-<dd>Argument passed to astropy.io.fits.open. If True, the map is not read into
-memory, but only the required pixels are read when needed. Default: False.</dd>
-</dl>
-</dd>
-<dt><em>Returns:</em></dt>
-<dd>a dictionary of maps keyed with e.g. ‘T’, ‘Q’, ‘U’ and ‘W’.</dd>
-<dt><em>Definition:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">load_skymap_fits(filename,</span> <span class="pre">hdu=None,</span> <span class="pre">keys=None,</span> <span class="pre">memmap=False)</span></code></dd>
-</dl>
-<p id="spt3g-maps-fitsio-save-skymap-fits"><strong>spt3g.maps.fitsio.save_skymap_fits</strong></p>
-<p>Save G3 map objects to a fits file.</p>
-<p><cite>FlatSkyMap</cite> objects are stored in a series of (optionally compressed)
-<cite>ImageHDU</cite> entries, in which each HDU contains the projection information in
-its header in standard WCS format, along with the image data for a single
-map (one of the Stokes maps or a weight map component).</p>
-<p><cite>HealpixSkyMap</cite> objects are stored in a <cite>BinTableHDU</cite> extension, which
-contains the necessary header information for compatiblity with healpix map
-readers (e.g. <cite>healpix.read_map</cite>), and a single table with one column per
-Stokes map or weight map component.  Sparse maps are stored as cut-sky
-pixel-indexed tables, while dense maps are stored with implicit indexing
-over all pixels.  The former produces output that is equivalent to using
-<cite>healpy.write_map</cite> with the <cite>partial=True</cite> option.</p>
-<dl class="docutils">
-<dt><em>Arguments:</em></dt>
-<dd><dl class="first last docutils">
-<dt>filename <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd>Path to output file.  Must not exist, unless overwrite is True.</dd>
-<dt>T[, Q, U] <span class="classifier-delimiter">:</span> <span class="classifier">FlatSkyMap or HealpixSkyMap</span></dt>
-<dd>Maps to save</dd>
-<dt>W <span class="classifier-delimiter">:</span> <span class="classifier">G3SkyMapWeights</span></dt>
-<dd>Weights to save with the maps</dd>
-<dt>overwrite <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd>If True, any existing file with the same name will be ovewritten.</dd>
-<dt>compress <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd>If True, and if input maps are FlatSkyMap objects, store these in a
-series of compressed image HDUs, one per map.  Otherwise, store input
-maps in a series of standard ImageHDUs, which are readable with older
-FITS readers (e.g. idlastro).</dd>
-</dl>
-</dd>
-<dt><em>Definition:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">save_skymap_fits(filename,</span> <span class="pre">T,</span> <span class="pre">Q=None,</span> <span class="pre">U=None,</span> <span class="pre">W=None,</span> <span class="pre">overwrite=False,</span> <span class="pre">compress=True)</span></code></dd>
-</dl>
-<p id="spt3g-maps-flatten-pol"><strong>spt3g.maps.flatten_pol</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">flatten_pol(</span> <span class="pre">(FlatSkyMap)Q,</span> <span class="pre">(FlatSkyMap)U</span> <span class="pre">[,</span> <span class="pre">(float)h=0.001</span> <span class="pre">[,</span> <span class="pre">(bool)invert=False]])</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt>
-<dd><p class="first">For maps defined on the sphere the direction of the polarization angle is is defined relative to the direction of North.  When making maps we follow this definition.</p>
-<p>For any flat sky estimators, the polarization angle is defined relative to the vertical axis.  For some map projections the direction of north is not the same as the vertical axis.  This function applies a rotation to the Q and U values to switch the curved sky Q/U definition to the flat sky Q/U definition.</p>
-<p class="last">If for whatever reason you want to reverse the process set the invert argument to True.</p>
-</dd>
-</dl>
-<p id="spt3g-maps-get-map-median"><strong>spt3g.maps.get_map_median</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">get_map_median(</span> <span class="pre">(object)map</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_zeros=False</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_nans=False]])</span> <span class="pre">-&gt;</span> <span class="pre">float</span> <span class="pre">:</span></code></dt>
-<dd>Computes the median of the input map, optionally ignoring zero and/or nan values in the map.  Requires making a copy of the data.</dd>
-</dl>
-<p id="spt3g-maps-get-map-stats"><strong>spt3g.maps.get_map_stats</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">get_map_stats(</span> <span class="pre">(object)map</span> <span class="pre">[,</span> <span class="pre">(int)order=2</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_zeros=False</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_nans=False]]])</span> <span class="pre">-&gt;</span> <span class="pre">DoubleVector</span> <span class="pre">:</span></code></dt>
-<dd>Computes moment statistics of the input map, optionally ignoring zero and/or nan values in the map.  If order = 1, only the mean is returned.  If order = 2, 3 or 4 then the variance, skew and kurtosis are also included, respectively.</dd>
-</dl>
-<p id="spt3g-maps-get-mask-map"><strong>spt3g.maps.get_mask_map</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">get_mask_map(</span> <span class="pre">(object)map_in)</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMap</span> <span class="pre">:</span></code></dt>
-<dd>Returns a map that is 1 where the input map is nonzero.</dd>
-</dl>
-<p id="spt3g-maps-get-ra-dec-map"><strong>spt3g.maps.get_ra_dec_map</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">get_ra_dec_map(</span> <span class="pre">(object)map_in)</span> <span class="pre">-&gt;</span> <span class="pre">tuple</span> <span class="pre">:</span></code></dt>
-<dd>Returns maps of the ra and dec angles for each pixel in the input map</dd>
-</dl>
-<p id="spt3g-maps-maputils-flatsky-to-healpix"><strong>spt3g.maps.maputils.flatsky_to_healpix</strong></p>
-<p>Re-pixelize a map to Healpix from one of the flat projections.</p>
-<dl class="docutils">
-<dt><em>Parameters:</em></dt>
-<dd><dl class="first docutils">
-<dt>map_in: FlatSkyMap</dt>
-<dd>The input map you want to reproject</dd>
-<dt>map_stub[None]: HealpixSkyMap</dt>
-<dd>Stub output map object to be used to construct the output map.  If not
-supplied, one will be constructed using the remaining keyword arguments.</dd>
-<dt>rebin[1]: int</dt>
-<dd>If supplied and &gt;1, account for sub-pixel structure by integrating
-over a sub-grid on each pixel of the given dimension.  This avoids
-aliasing of power at angular scales beyond the map resolution.</dd>
-<dt>interp[false]: bool</dt>
-<dd>If True, use bilinear interpolation to extract values from the input
-map.  Otherwise, the nearest-neighbor value is used.</dd>
-<dt>fullsky[false]: bool</dt>
-<dd>If True a full-sky numpy array representation of the map is returned.
-Otherwise, a HealpixSkyMap instance is returned, containing only the
-pixels that overlap with the input map.</dd>
-</dl>
-<p class="last">All additional keyword arguments are passed to HealpixSkyMap to construct
-the output map object.  Required if <cite>map_stub</cite> is not supplied,
-otherwise ignored.</p>
-</dd>
-<dt><em>Returns:</em></dt>
-<dd><dl class="first last docutils">
-<dt>output_map: numpy array or HealpixSkyMap</dt>
-<dd>The array containing the healpix map
-If <cite>fullsky</cite> is True, this is a numpy array, otherwise a
-HealpixSkyMap instance.</dd>
-</dl>
-</dd>
-<dt><em>Definition:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">flatsky_to_healpix(map_in,</span> <span class="pre">map_stub=None,</span> <span class="pre">rebin=1,</span> <span class="pre">interp=False,</span> <span class="pre">fullsky=False,</span> <span class="pre">**kwargs)</span></code></dd>
-</dl>
-<p id="spt3g-maps-maputils-healpix-to-flatsky"><strong>spt3g.maps.maputils.healpix_to_flatsky</strong></p>
-<p>Re-pixelize a map from Healpix to one of the flat sky projections.</p>
-<dl class="docutils">
-<dt><em>Parameters:</em></dt>
-<dd><dl class="first docutils">
-<dt>map_in: numpy array or HealpixSkyMap</dt>
-<dd>The array containing the input healpix map to reproject.</dd>
-<dt>nest[False]: bool</dt>
-<dd>Ordering of the healpix map, if the input is a numpy array.  Ring
-ordering is assumed by default.</dd>
-<dt>map_stub[None]: FlatSkyMap</dt>
-<dd>Stub output map object to be used to construct the output map.  If not
-supplied, one will be constructed using the remaining keyword arguments.</dd>
-<dt>rebin[1]: int</dt>
-<dd>If supplied and &gt;1, account for sub-pixel structure by integrating
-over a sub-grid on each pixel of the given dimension.  This avoids
-aliasing of power at angular scales beyond the map resolution.</dd>
-<dt>interp[false]: bool</dt>
-<dd>If True, use bilinear interpolation to extract values from the input
-map.  Otherwise, the nearest-neighbor value is used.</dd>
-</dl>
-<p class="last">All additional keyword arguments are passed to FlatSkyMap to construct
-the output map object.  Required if <cite>map_stub</cite> is not supplied,
-otherwise ignored.</p>
-</dd>
-<dt><em>Returns:</em></dt>
-<dd><dl class="first last docutils">
-<dt>output_map: FlatSkyMap</dt>
-<dd>The reprojected map</dd>
-</dl>
-</dd>
-<dt><em>Definition:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">healpix_to_flatsky(map_in,</span> <span class="pre">nest=False,</span> <span class="pre">map_stub=None,</span> <span class="pre">rebin=1,</span> <span class="pre">interp=False,</span> <span class="pre">**kwargs)</span></code></dd>
-</dl>
-<p id="spt3g-maps-quathelpers-ang-to-quat"><strong>spt3g.maps.quathelpers.ang_to_quat</strong></p>
-<p>Convert a set of angles (or vector of them) specified as a (longitude,
-latitude) pair to a pointing quaternion (or vector of them).</p>
-<dl class="docutils">
-<dt><em>Definition:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">ang_to_quat(alpha,</span> <span class="pre">delta)</span></code></dd>
-</dl>
-<p id="spt3g-maps-quathelpers-quat-to-ang"><strong>spt3g.maps.quathelpers.quat_to_ang</strong></p>
-<p>Convert a pointing quaternion (or vector of them) to a set of angles (or
-vector of them) specified as a (longitude, latitude) pair.</p>
-<dl class="docutils">
-<dt><em>Definition:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">quat_to_ang(q)</span></code></dd>
-</dl>
-<p id="spt3g-maps-remove-weights"><strong>spt3g.maps.remove_weights</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">remove_weights(</span> <span class="pre">(G3SkyMap)T,</span> <span class="pre">(G3SkyMap)Q,</span> <span class="pre">(G3SkyMap)U,</span> <span class="pre">(G3SkyMapWeights)W</span> <span class="pre">[,</span> <span class="pre">(bool)zero_nans=False])</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt>
-<dd>Remove weights from polarized maps.  If zero_nans is true, empty pixels are skipped, and pixels with zero weight are set to 0 instead of nan.</dd>
-</dl>
-<p id="spt3g-maps-remove-weights-t"><strong>spt3g.maps.remove_weights_t</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">remove_weights_t(</span> <span class="pre">(G3SkyMap)T,</span> <span class="pre">(G3SkyMapWeights)W</span> <span class="pre">[,</span> <span class="pre">(bool)zero_nans=False])</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt>
-<dd>Remove weights from unpolarized maps.  If zero_nans is true, empty pixels are skipped, and pixels with zero weight are set to 0 instead of nan.</dd>
-</dl>
-<p id="spt3g-maps-reproj-map"><strong>spt3g.maps.reproj_map</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">reproj_map(</span> <span class="pre">(object)in_map,</span> <span class="pre">(G3SkyMap)out_map</span> <span class="pre">[,</span> <span class="pre">(int)rebin=1</span> <span class="pre">[,</span> <span class="pre">(bool)interp=False]])</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt>
-<dd>Takes the data in in_map and reprojects it onto out_map.  out_map can have a different projection, size, resolution, etc.  Optionally account for sub-pixel structure by setting rebin &gt; 1 and/or enable bilinear interpolation of values from the input map by setting interp=True. Use the maps’ coord_ref attributes to rotate between Equatorial and Galactic coordinate systems.</dd>
-</dl>
-</div>
-</div>
+</section>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table of Contents</a></h3>
-  <ul>
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
 <li><a class="reference internal" href="#">maps</a><ul>
 <li><a class="reference internal" href="#map-attributes">Map Attributes</a></li>
 <li><a class="reference internal" href="#file-format-conversions">File Format Conversions</a></li>
@@ -910,25 +151,21 @@ vector of them) specified as a (longitude, latitude) pair.</p>
 <li><a class="reference internal" href="#map-frames-and-pipelines">Map Frames and Pipelines</a></li>
 <li><a class="reference internal" href="#flat-sky-map-projections">Flat Sky Map Projections</a></li>
 <li><a class="reference internal" href="#flat-sky-map-manipulation">Flat Sky Map Manipulation</a></li>
-<li><a class="reference internal" href="#frame-objects-in-spt3g-maps">Frame Objects in spt3g.maps</a><ul>
-<li><a class="reference internal" href="#spt3g-maps-flatskymap">spt3g.maps.FlatSkyMap</a></li>
-<li><a class="reference internal" href="#spt3g-maps-g3skymap">spt3g.maps.G3SkyMap</a></li>
-<li><a class="reference internal" href="#spt3g-maps-g3skymapweights">spt3g.maps.G3SkyMapWeights</a></li>
-<li><a class="reference internal" href="#spt3g-maps-healpixskymap">spt3g.maps.HealpixSkyMap</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#modules-in-spt3g-maps">Modules in spt3g.maps</a></li>
-<li><a class="reference internal" href="#functions-in-spt3g-maps">Functions in spt3g.maps</a></li>
 </ul>
 </li>
 </ul>
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="moddoc_gcp.html"
-                        title="previous chapter">gcp</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="moddoc_mpi.html"
-                        title="next chapter">mpi</a></p>
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="moddoc_gcp.html"
+                          title="previous chapter">gcp</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="moddoc_mpi.html"
+                          title="next chapter">mpi</a></p>
+  </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -937,17 +174,15 @@ vector of them) specified as a (longitude, latitude) pair.</p>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -964,12 +199,13 @@ vector of them) specified as a (longitude, latitude) pair.</p>
         <li class="right" >
           <a href="moddoc_gcp.html" title="gcp"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">maps</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.2.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.1.1.
     </div>
   </body>
 </html>

@@ -1,18 +1,19 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
     <title>calibration &#8212; SPT3G Software  documentation</title>
-    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/nature.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="core" href="moddoc_core.html" />
@@ -30,7 +31,8 @@
         <li class="right" >
           <a href="commonissues.html" title="Common Problems"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">calibration</a></li> 
       </ul>
     </div>  
 
@@ -39,413 +41,32 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="calibration">
-<h1>calibration<a class="headerlink" href="#calibration" title="Permalink to this headline">¶</a></h1>
+  <section id="calibration">
+<h1>calibration<a class="headerlink" href="#calibration" title="Permalink to this heading">¶</a></h1>
 <p>The calibration project contains data classes and analysis code for storing the following things:</p>
-<dl class="docutils">
-<dt><em>Physical properties of the bolometers</em></dt>
-<dd>This includes the relative pointing offsets of the detectors on the focal plane, their polarization angles and efficiences, their bands, and the fabrication name (physical name) of the detector to which the channel corresponds. It does <em>not</em> include tuning-dependent parameters like time constants or responsivity. This information is stored in a <code class="docutils literal notranslate"><span class="pre">BolometerPropertiesMap</span></code>, indexed by logical bolometer ID, in the Calibration frame. The standard name for this object is “BolometerProperties” and it is created from a composite of other calibration information.</dd>
-</dl>
-<div class="section" id="frame-objects-in-spt3g-calibration">
-<h2>Frame Objects in spt3g.calibration<a class="headerlink" href="#frame-objects-in-spt3g-calibration" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><a class="reference internal" href="#spt3g-calibration-bolometerproperties">spt3g.calibration.BolometerProperties</a></li>
-<li><a class="reference internal" href="#spt3g-calibration-bolometerpropertiesmap">spt3g.calibration.BolometerPropertiesMap</a></li>
-<li><a class="reference internal" href="#spt3g-calibration-pointingproperties">spt3g.calibration.PointingProperties</a></li>
-<li><a class="reference internal" href="#spt3g-calibration-pointingpropertiesmap">spt3g.calibration.PointingPropertiesMap</a></li>
-</ul>
-<div class="section" id="spt3g-calibration-bolometerproperties">
-<span id="id1"></span><h3>spt3g.calibration.BolometerProperties<a class="headerlink" href="#spt3g-calibration-bolometerproperties" title="Permalink to this headline">¶</a></h3>
-<p>Physical bolometer properties, such as detector angular offsets. Does not include tuning-dependent properties of the detectors.</p>
-<p><em>Members:</em></p>
-<ul class="simple">
-<li><strong>physical_name</strong>: Physical name of the detector (e.g. some polarization at some particular pixel on the wafer)</li>
-<li><strong>x_offset</strong>: Horizontal pointing offset relative to boresight in angular units.</li>
-<li><strong>y_offset</strong>: Vertical pointing offset relative to boresight in angular units.</li>
-<li><strong>band</strong>: Center of detector observing band in frequency units</li>
-<li><strong>pol_angle</strong>: Polarization angle in angular units</li>
-<li><strong>pol_efficiency</strong>: Polarization efficiency (0-1)</li>
-<li><strong>coupling</strong>: Optical coupling type</li>
-<li><strong>wafer_id</strong>: Name of the name this detector is on</li>
-<li><strong>pixel_id</strong>: Name of the pixel of which this detector is a part</li>
-<li><strong>pixel_type</strong>: Name of the pixel type of which this detector is a part</li>
-</ul>
-</div>
-<div class="section" id="spt3g-calibration-bolometerpropertiesmap">
-<span id="id2"></span><h3>spt3g.calibration.BolometerPropertiesMap<a class="headerlink" href="#spt3g-calibration-bolometerpropertiesmap" title="Permalink to this headline">¶</a></h3>
-<p>Container for bolometer properties for focal plane, mapping logical bolometer IDs to their physical properties.</p>
-<p><em>Methods:</em></p>
-<p id="spt3g-calibration-bolometerpropertiesmap-keys"><strong>spt3g.calibration.BolometerPropertiesMap.keys</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">keys(</span> <span class="pre">(BolometerPropertiesMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt>
-<dd>D.keys() -&gt; list of D’s keys</dd>
-</dl>
-<p id="spt3g-calibration-bolometerpropertiesmap-has-key"><strong>spt3g.calibration.BolometerPropertiesMap.has_key</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">has_key(</span> <span class="pre">(BolometerPropertiesMap)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span> <span class="pre">:</span></code></dt>
-<dd>D.has_key(k) -&gt; True if D has a key k, else False</dd>
-</dl>
-<p id="spt3g-calibration-bolometerpropertiesmap-values"><strong>spt3g.calibration.BolometerPropertiesMap.values</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">values(</span> <span class="pre">(BolometerPropertiesMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt>
-<dd>D.values() -&gt; list of D’s values</dd>
-</dl>
-<p id="spt3g-calibration-bolometerpropertiesmap-items"><strong>spt3g.calibration.BolometerPropertiesMap.items</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">items(</span> <span class="pre">(BolometerPropertiesMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt>
-<dd>D.items() -&gt; list of D’s (key, value) pairs, as 2-tuples</dd>
-</dl>
-<p id="spt3g-calibration-bolometerpropertiesmap-clear"><strong>spt3g.calibration.BolometerPropertiesMap.clear</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">clear(</span> <span class="pre">(BolometerPropertiesMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt>
-<dd>D.clear() -&gt; None.  Remove all items from D.</dd>
-</dl>
-<p id="spt3g-calibration-bolometerpropertiesmap-copy"><strong>spt3g.calibration.BolometerPropertiesMap.copy</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">copy(</span> <span class="pre">(BolometerPropertiesMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">BolometerPropertiesMap</span> <span class="pre">:</span></code></dt>
-<dd>D.copy() -&gt; a shallow copy of D</dd>
-</dl>
-<p id="spt3g-calibration-bolometerpropertiesmap-get"><strong>spt3g.calibration.BolometerPropertiesMap.get</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">get(</span> <span class="pre">(BolometerPropertiesMap)arg1,</span> <span class="pre">(str)arg2</span> <span class="pre">[,</span> <span class="pre">(object)default_val])</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
-<dd>D.get(k[,d]) -&gt; D[k] if k in D, else d.  d defaults to None.</dd>
-</dl>
-<p id="spt3g-calibration-bolometerpropertiesmap-pop"><strong>spt3g.calibration.BolometerPropertiesMap.pop</strong></p>
-<p><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(BolometerPropertiesMap)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">object</span></code></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(BolometerPropertiesMap)arg1,</span> <span class="pre">(str)arg2,</span> <span class="pre">(object)arg3)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
-<dd>D.pop(k[,d]) -&gt; v, remove specified key and return the corresponding value
-If key is not found, d is returned if given, otherwise KeyError is raised</dd>
-</dl>
-<p id="spt3g-calibration-bolometerpropertiesmap-popitem"><strong>spt3g.calibration.BolometerPropertiesMap.popitem</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">popitem(</span> <span class="pre">(BolometerPropertiesMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
-<dd>D.popitem() -&gt; (k, v), remove and return some (key, value) pair as a
-2-tuple; but raise KeyError if D is empty</dd>
-</dl>
-<p id="spt3g-calibration-bolometerpropertiesmap-update"><strong>spt3g.calibration.BolometerPropertiesMap.update</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">update(</span> <span class="pre">(object)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt>
-<dd>D.update(E) -&gt; None.  Update D from E: for k in E: D[k] = E[k]</dd>
-</dl>
-<p id="spt3g-calibration-bolometerpropertiesmap-iteritems"><strong>spt3g.calibration.BolometerPropertiesMap.iteritems</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">iteritems(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
-<dd>D.iteritems() -&gt; an iterator over the (key, value) items of D</dd>
-</dl>
-<p id="spt3g-calibration-bolometerpropertiesmap-iterkeys"><strong>spt3g.calibration.BolometerPropertiesMap.iterkeys</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">iterkeys(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
-<dd>D.iterkeys() -&gt; an iterator over the keys of D</dd>
-</dl>
-<p id="spt3g-calibration-bolometerpropertiesmap-itervalues"><strong>spt3g.calibration.BolometerPropertiesMap.itervalues</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">itervalues(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
-<dd>D.itervalues() -&gt; an iterator over the values of D</dd>
-</dl>
-</div>
-<div class="section" id="spt3g-calibration-pointingproperties">
-<span id="id3"></span><h3>spt3g.calibration.PointingProperties<a class="headerlink" href="#spt3g-calibration-pointingproperties" title="Permalink to this headline">¶</a></h3>
-<p>Pointing model parameters to be used for offline pointing corrections.</p>
-<p><em>Members:</em></p>
-<ul class="simple">
-<li><strong>tiltLat</strong>: Azimuth lateral tilt parameter.</li>
-<li><strong>tiltHA</strong>: Azimuth hour angle tilt parameter.</li>
-<li><strong>tiltMag</strong>: Magnitude of azimuth tilt.</li>
-<li><strong>tiltAngle</strong>: Orientation of azimuth tilt.</li>
-</ul>
-</div>
-<div class="section" id="spt3g-calibration-pointingpropertiesmap">
-<span id="id4"></span><h3>spt3g.calibration.PointingPropertiesMap<a class="headerlink" href="#spt3g-calibration-pointingpropertiesmap" title="Permalink to this headline">¶</a></h3>
-<p>Container for pointing model parameters for offline pointing.</p>
-<p><em>Methods:</em></p>
-<p id="spt3g-calibration-pointingpropertiesmap-keys"><strong>spt3g.calibration.PointingPropertiesMap.keys</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">keys(</span> <span class="pre">(PointingPropertiesMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt>
-<dd>D.keys() -&gt; list of D’s keys</dd>
-</dl>
-<p id="spt3g-calibration-pointingpropertiesmap-has-key"><strong>spt3g.calibration.PointingPropertiesMap.has_key</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">has_key(</span> <span class="pre">(PointingPropertiesMap)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span> <span class="pre">:</span></code></dt>
-<dd>D.has_key(k) -&gt; True if D has a key k, else False</dd>
-</dl>
-<p id="spt3g-calibration-pointingpropertiesmap-values"><strong>spt3g.calibration.PointingPropertiesMap.values</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">values(</span> <span class="pre">(PointingPropertiesMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt>
-<dd>D.values() -&gt; list of D’s values</dd>
-</dl>
-<p id="spt3g-calibration-pointingpropertiesmap-items"><strong>spt3g.calibration.PointingPropertiesMap.items</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">items(</span> <span class="pre">(PointingPropertiesMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt>
-<dd>D.items() -&gt; list of D’s (key, value) pairs, as 2-tuples</dd>
-</dl>
-<p id="spt3g-calibration-pointingpropertiesmap-clear"><strong>spt3g.calibration.PointingPropertiesMap.clear</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">clear(</span> <span class="pre">(PointingPropertiesMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt>
-<dd>D.clear() -&gt; None.  Remove all items from D.</dd>
-</dl>
-<p id="spt3g-calibration-pointingpropertiesmap-copy"><strong>spt3g.calibration.PointingPropertiesMap.copy</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">copy(</span> <span class="pre">(PointingPropertiesMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">PointingPropertiesMap</span> <span class="pre">:</span></code></dt>
-<dd>D.copy() -&gt; a shallow copy of D</dd>
-</dl>
-<p id="spt3g-calibration-pointingpropertiesmap-get"><strong>spt3g.calibration.PointingPropertiesMap.get</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">get(</span> <span class="pre">(PointingPropertiesMap)arg1,</span> <span class="pre">(str)arg2</span> <span class="pre">[,</span> <span class="pre">(object)default_val])</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
-<dd>D.get(k[,d]) -&gt; D[k] if k in D, else d.  d defaults to None.</dd>
-</dl>
-<p id="spt3g-calibration-pointingpropertiesmap-pop"><strong>spt3g.calibration.PointingPropertiesMap.pop</strong></p>
-<p><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(PointingPropertiesMap)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">object</span></code></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(PointingPropertiesMap)arg1,</span> <span class="pre">(str)arg2,</span> <span class="pre">(object)arg3)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
-<dd>D.pop(k[,d]) -&gt; v, remove specified key and return the corresponding value
-If key is not found, d is returned if given, otherwise KeyError is raised</dd>
-</dl>
-<p id="spt3g-calibration-pointingpropertiesmap-popitem"><strong>spt3g.calibration.PointingPropertiesMap.popitem</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">popitem(</span> <span class="pre">(PointingPropertiesMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
-<dd>D.popitem() -&gt; (k, v), remove and return some (key, value) pair as a
-2-tuple; but raise KeyError if D is empty</dd>
-</dl>
-<p id="spt3g-calibration-pointingpropertiesmap-update"><strong>spt3g.calibration.PointingPropertiesMap.update</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">update(</span> <span class="pre">(object)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt>
-<dd>D.update(E) -&gt; None.  Update D from E: for k in E: D[k] = E[k]</dd>
-</dl>
-<p id="spt3g-calibration-pointingpropertiesmap-iteritems"><strong>spt3g.calibration.PointingPropertiesMap.iteritems</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">iteritems(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
-<dd>D.iteritems() -&gt; an iterator over the (key, value) items of D</dd>
-</dl>
-<p id="spt3g-calibration-pointingpropertiesmap-iterkeys"><strong>spt3g.calibration.PointingPropertiesMap.iterkeys</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">iterkeys(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
-<dd>D.iterkeys() -&gt; an iterator over the keys of D</dd>
-</dl>
-<p id="spt3g-calibration-pointingpropertiesmap-itervalues"><strong>spt3g.calibration.PointingPropertiesMap.itervalues</strong></p>
-<dl class="docutils">
-<dt><code class="docutils literal notranslate"><span class="pre">itervalues(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt>
-<dd>D.itervalues() -&gt; an iterator over the values of D</dd>
-</dl>
-</div>
-</div>
-<div class="section" id="modules-in-spt3g-calibration">
-<h2>Modules in spt3g.calibration<a class="headerlink" href="#modules-in-spt3g-calibration" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><a class="reference internal" href="#spt3g-calibration-bolopropertiesutils-splitbyband">spt3g.calibration.bolopropertiesutils.SplitByBand</a></li>
-<li><a class="reference internal" href="#spt3g-calibration-bolopropertiesutils-splitbypixeltype">spt3g.calibration.bolopropertiesutils.SplitByPixelType</a></li>
-<li><a class="reference internal" href="#spt3g-calibration-bolopropertiesutils-splitbyproperty">spt3g.calibration.bolopropertiesutils.SplitByProperty</a></li>
-<li><a class="reference internal" href="#spt3g-calibration-bolopropertiesutils-splitbywafer">spt3g.calibration.bolopropertiesutils.SplitByWafer</a></li>
-<li><a class="reference internal" href="#spt3g-calibration-bolopropertiesutils-splittimestreamsbyband">spt3g.calibration.bolopropertiesutils.SplitTimestreamsByBand</a></li>
-<li><a class="reference internal" href="#spt3g-calibration-build-cal-frames-buildbolopropertiesmap">spt3g.calibration.build_cal_frames.BuildBoloPropertiesMap</a></li>
-<li><a class="reference internal" href="#spt3g-calibration-build-cal-frames-buildpointingproperties">spt3g.calibration.build_cal_frames.BuildPointingProperties</a></li>
-<li><a class="reference internal" href="#spt3g-calibration-build-cal-frames-explodebolometerproperties">spt3g.calibration.build_cal_frames.ExplodeBolometerProperties</a></li>
-<li><a class="reference internal" href="#spt3g-calibration-build-cal-frames-mergecalibrationframes">spt3g.calibration.build_cal_frames.MergeCalibrationFrames</a></li>
-</ul>
-<p id="spt3g-calibration-bolopropertiesutils-splitbyband"><strong>spt3g.calibration.bolopropertiesutils.SplitByBand</strong></p>
-<p>Take an input G3FrameObject-derivative Map keyed by bolometer name and
-split it into several based on the bands of the detectors as given by
-the BolometerProperties key.
-Return the same type of maps as the one it was handed, e.g.
-G3TimestreamMap, G3MapInt, etc.</p>
-<dl class="docutils">
-<dt><em>Constructor:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">SplitByBand(self,</span> <span class="pre">input='CalTimestreams',</span> <span class="pre">output_root=None,</span> <span class="pre">bands=None,</span> <span class="pre">bpm='BolometerProperties')</span></code></dd>
-<dt><em>Constructor:</em></dt>
-<dd>Split the input map given by input into several output
-maps named output_root + band + GHz (e.g. CalTimestreams150GHz with
-the default options). If bands is not None, use only the bands in the
-list (possibly writing empty timestream maps to the frame). Otherwise,
-creates maps for every band that exists in the input. Setting bpm
-to a non-default value causes this to get its band mapping from an
-alternative data source.</dd>
-</dl>
-<p id="spt3g-calibration-bolopropertiesutils-splitbypixeltype"><strong>spt3g.calibration.bolopropertiesutils.SplitByPixelType</strong></p>
-<p>Take an input G3FrameObject-derivative Map keyed by bolometer name and
-split it into several based on the pixel types of the detectors as given by
-the BolometerProperties key.
-Return the same type of maps as the one it was handed, e.g.
-G3TimestreamMap, G3MapInt, etc.</p>
-<dl class="docutils">
-<dt><em>Constructor:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">SplitByPixelType(self,</span> <span class="pre">input='CalTimestreams',</span> <span class="pre">output_root=None,</span> <span class="pre">types=None,</span> <span class="pre">bpm='BolometerProperties')</span></code></dd>
-<dt><em>Constructor:</em></dt>
-<dd>Split the input map given by input into several output
-maps named output_root + wafer (e.g. CalTimestreamsW172 with
-the default options). If wafers is not None, use only the wafers in the
-list (possibly writing empty timestream maps to the frame). Otherwise,
-creates maps for every wafer that exists in the input. Setting bpm
-to a non-default value causes this to get its wafer mapping from an
-alternative data source.</dd>
-</dl>
-<p id="spt3g-calibration-bolopropertiesutils-splitbyproperty"><strong>spt3g.calibration.bolopropertiesutils.SplitByProperty</strong></p>
-<p>Take an input G3FrameObject-derivative Map keyed by bolometer name and
-split it into several based on the property of the detectors as given by
-the BolometerProperties key.
-Return the same type of maps as the one it was handed, e.g.
-G3TimestreamMap, G3MapInt, etc.</p>
-<dl class="docutils">
-<dt><em>Constructor:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">SplitByProperty(self,</span> <span class="pre">input='CalTimestreams',</span> <span class="pre">property=None,</span> <span class="pre">property_list=None,</span> <span class="pre">output_root=None,</span> <span class="pre">bpm='BolometerProperties')</span></code></dd>
-<dt><em>Constructor:</em></dt>
-<dd><p class="first">Split the input map given by input into several output
-maps named output_root + key (e.g. CalTimestreams + str(property)) with
-the default options).</p>
-<dl class="last docutils">
-<dt><em>Arguments:</em></dt>
-<dd><dl class="first last docutils">
-<dt>input <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd>Key name of the input map to split.</dd>
-<dt>property <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd>Attribute name to extract from the BolometerProperties object.
-Required.</dd>
-<dt>property_list <span class="classifier-delimiter">:</span> <span class="classifier">list of properties</span></dt>
-<dd>Properties to include in the output keys.  Entries that are not strings
-will be converted to strings using the <cite>SplitByProperty.converter</cite> method.
-If property_list is not None, use only the names in the
-list (possibly writing empty timestream maps to the frame). Otherwise,
-creates maps for every that exists in the input.</dd>
-<dt>output_root <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd>Prefix for the output keys.
-If None (default), use <cite>input</cite> as the output root.</dd>
-<dt>bpm <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd>The key name of the BolometerPropertiesMap from which to extract
-the requested <cite>property</cite> for splitting the input map.</dd>
-</dl>
+<dl class="simple">
+<dt><em>Physical properties of the bolometers</em></dt><dd><p>This includes the relative pointing offsets of the detectors on the focal plane, their polarization angles and efficiences, their bands, and the fabrication name (physical name) of the detector to which the channel corresponds. It does <em>not</em> include tuning-dependent parameters like time constants or responsivity. This information is stored in a <code class="docutils literal notranslate"><span class="pre">BolometerPropertiesMap</span></code>, indexed by logical bolometer ID, in the Calibration frame. The standard name for this object is “BolometerProperties” and it is created from a composite of other calibration information.</p>
 </dd>
 </dl>
-</dd>
-</dl>
-<p id="spt3g-calibration-bolopropertiesutils-splitbywafer"><strong>spt3g.calibration.bolopropertiesutils.SplitByWafer</strong></p>
-<p>Take an input G3FrameObject-derivative Map keyed by bolometer name and
-split it into several based on the wafers of the detectors as given by
-the BolometerProperties key.
-Return the same type of maps as the one it was handed, e.g.
-G3TimestreamMap, G3MapInt, etc.</p>
-<dl class="docutils">
-<dt><em>Constructor:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">SplitByWafer(self,</span> <span class="pre">input='CalTimestreams',</span> <span class="pre">output_root=None,</span> <span class="pre">wafers=None,</span> <span class="pre">bpm='BolometerProperties')</span></code></dd>
-<dt><em>Constructor:</em></dt>
-<dd>Split the input map given by input into several output
-maps named output_root + wafer (e.g. CalTimestreamsW172 with
-the default options). If wafers is not None, use only the wafers in the
-list (possibly writing empty timestream maps to the frame). Otherwise,
-creates maps for every wafer that exists in the input. Setting bpm
-to a non-default value causes this to get its wafer mapping from an
-alternative data source.</dd>
-</dl>
-<p id="spt3g-calibration-bolopropertiesutils-splittimestreamsbyband"><strong>spt3g.calibration.bolopropertiesutils.SplitTimestreamsByBand</strong></p>
-<p>Take an input G3FrameObject-derivative Map keyed by bolometer name and
-split it into several based on the bands of the detectors as given by
-the BolometerProperties key.
-Return the same type of maps as the one it was handed, e.g.
-G3TimestreamMap, G3MapInt, etc.</p>
-<dl class="docutils">
-<dt><em>Constructor:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">SplitTimestreamsByBand(self,</span> <span class="pre">input='CalTimestreams',</span> <span class="pre">output_root=None,</span> <span class="pre">bands=None,</span> <span class="pre">bpm='BolometerProperties')</span></code></dd>
-<dt><em>Constructor:</em></dt>
-<dd>Split the input map given by input into several output
-maps named output_root + band + GHz (e.g. CalTimestreams150GHz with
-the default options). If bands is not None, use only the bands in the
-list (possibly writing empty timestream maps to the frame). Otherwise,
-creates maps for every band that exists in the input. Setting bpm
-to a non-default value causes this to get its band mapping from an
-alternative data source.</dd>
-</dl>
-<p id="spt3g-calibration-build-cal-frames-buildbolopropertiesmap"><strong>spt3g.calibration.build_cal_frames.BuildBoloPropertiesMap</strong></p>
-<p>Build bolometer properties map from raw calibration sub-frames emitted
-by other processing scripts. Input data are maps of bolo ID to floats
-or, in the case of names, strings. If multiple instance of each data
-class appear, the final bolometer properties map will be the median
-of the input values.</p>
-<p>Expects to be passed frames from:
-- RCW38 Relative Pointing Offset Calibration (Keys: ‘PointingOffsetX’, ‘PointingOffsetY’)
-- CenA Angle Calibration (Keys: ‘PolarizationAngle’, ‘PolarizationEfficiency’)
-- Band Calibration (Key: ‘BoloBands’)
-- Physical Name Data (Key: ‘PhysicalBoloIDs’)</p>
-<dl class="docutils">
-<dt><em>Constructor:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">BuildBoloPropertiesMap(self,</span> <span class="pre">drop_original_frames=True,</span> <span class="pre">fiducial_detectors=[],</span> <span class="pre">bpm_name='NominalBolometerProperties',</span> <span class="pre">use_bpm_pointing=False)</span></code></dd>
-<dt><em>Constructor:</em></dt>
-<dd><p class="first">If drop_original_frames is True, will drop all input Calibration frames.</p>
-<p>If fiducial_detectors is set, will use the average of the position[s] of
-whatever detector[s] are specified to center each set of relative offsets
-encountered (NB: this recentering is done in a Cartesian way). If it is
-<em>not</em> specified, five detectors near the middle of the focal plane present
-in every observation given will be chosen automatically and printed to the
-console.</p>
-<p>bpm_name is the name of the key containing the input BolometerPropertiesMap
-that will be merged into the output map.</p>
-<p class="last">If use_bpm_pointing is True, then the pointing information is extracted
-from the input BolometerPropertiesMap.  If False, pointing information
-must be supplied in an additional input frame.</p>
-</dd>
-</dl>
-<p id="spt3g-calibration-build-cal-frames-buildpointingproperties"><strong>spt3g.calibration.build_cal_frames.BuildPointingProperties</strong></p>
-<p>Build pointing properties from raw calibration sub-frames emitted
-by other processing scripts. Input data are floats, including
-tilt information, and eventually other pointing model values.</p>
-<p>Expects to be passed frames from:
-- Az tilt fit parameters (Keys: ‘tiltAngle’, ‘tiltHA’, ‘tiltLat’, ‘tiltMag’)</p>
-<dl class="docutils">
-<dt><em>Constructor:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">BuildPointingProperties(self,</span> <span class="pre">drop_original_frames=True)</span></code></dd>
-<dt><em>Constructor:</em></dt>
-<dd>If drop_original_frames is True, will drop all input Calibration frames.</dd>
-</dl>
-<p id="spt3g-calibration-build-cal-frames-explodebolometerproperties"><strong>spt3g.calibration.build_cal_frames.ExplodeBolometerProperties</strong></p>
-<p>Take a bolometer properties map (usually the nominal one) and convert it
-into its constituent keys as though they came from real calibration. This
-is the inverse of BuildBoloPropertiesMap and mostly is useful when combining
-hardware map information with real calibration.</p>
-<dl class="docutils">
-<dt><em>Definition:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">ExplodeBolometerProperties(frame,</span> <span class="pre">bpmname='NominalBolometerProperties')</span></code></dd>
-</dl>
-<p id="spt3g-calibration-build-cal-frames-mergecalibrationframes"><strong>spt3g.calibration.build_cal_frames.MergeCalibrationFrames</strong></p>
-<p>Merge the keys from a sequence of calibration frames. Will throw an
-exception if a key recurs in more than one calibration frame. The merged
-calibration frame will be emitted before the first non-calibration frame
-that follows a calibration frame or at the end of processing, whichever
-comes first. Other non-calibration frames will be ignored.</p>
-<dl class="docutils">
-<dt><em>Constructor:</em></dt>
-<dd><code class="docutils literal notranslate"><span class="pre">MergeCalibrationFrames(self,</span> <span class="pre">KeysToIgnore=['PointingOffsetX',</span> <span class="pre">'PointingOffsetY'])</span></code></dd>
-<dt><em>Constructor:</em></dt>
-<dd>Ignores keys in the KeysToIgnore list during merging. By default, set
-to values written by the flux/pointing calibration that are stored to
-the BolometerPropertiesMap.</dd>
-</dl>
-</div>
-</div>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">calibration</a><ul>
-<li><a class="reference internal" href="#frame-objects-in-spt3g-calibration">Frame Objects in spt3g.calibration</a><ul>
-<li><a class="reference internal" href="#spt3g-calibration-bolometerproperties">spt3g.calibration.BolometerProperties</a></li>
-<li><a class="reference internal" href="#spt3g-calibration-bolometerpropertiesmap">spt3g.calibration.BolometerPropertiesMap</a></li>
-<li><a class="reference internal" href="#spt3g-calibration-pointingproperties">spt3g.calibration.PointingProperties</a></li>
-<li><a class="reference internal" href="#spt3g-calibration-pointingpropertiesmap">spt3g.calibration.PointingPropertiesMap</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#modules-in-spt3g-calibration">Modules in spt3g.calibration</a></li>
-</ul>
-</li>
-</ul>
-
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="commonissues.html"
-                        title="previous chapter">Common Problems</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="moddoc_core.html"
-                        title="next chapter">core</a></p>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="commonissues.html"
+                          title="previous chapter">Common Problems</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="moddoc_core.html"
+                          title="next chapter">core</a></p>
+  </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -454,17 +75,15 @@ the BolometerPropertiesMap.</dd>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -481,12 +100,13 @@ the BolometerPropertiesMap.</dd>
         <li class="right" >
           <a href="commonissues.html" title="Common Problems"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">calibration</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.2.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.1.1.
     </div>
   </body>
 </html>

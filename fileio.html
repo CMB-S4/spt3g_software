@@ -1,18 +1,19 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
     <title>File IO &#8212; SPT3G Software  documentation</title>
-    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/nature.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Units" href="units.html" />
@@ -30,7 +31,8 @@
         <li class="right" >
           <a href="logging.html" title="Logging"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">File IO</a></li> 
       </ul>
     </div>  
 
@@ -39,12 +41,12 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="file-io">
-<h1>File IO<a class="headerlink" href="#file-io" title="Permalink to this headline">¶</a></h1>
+  <section id="file-io">
+<h1>File IO<a class="headerlink" href="#file-io" title="Permalink to this heading">¶</a></h1>
 <p>This framework has a native file format using the Cereal serialization library that can store all frames and maintain an exact copy of the data flowing through a pipeline. Since modules communicate with each other only through frames, interposing a serialized step in a pipeline allows it to be resumed from disk at any point. The file format is streaming (i.e. there are no headers) and has strong data integrity protections, including a CRC32-C checksum on each stored frame. The format is also architecture and endian safe.</p>
 <p>Use of these files is through four main classes: <a class="reference internal" href="#g3reader">G3Reader</a>, <a class="reference internal" href="#g3writer">G3Writer</a>, <a class="reference internal" href="#g3multifilewriter">G3MultiFileWriter</a>, and <a class="reference internal" href="#g3file">G3File</a>.</p>
-<div class="section" id="g3reader">
-<h2>G3Reader<a class="headerlink" href="#g3reader" title="Permalink to this headline">¶</a></h2>
+<section id="g3reader">
+<h2>G3Reader<a class="headerlink" href="#g3reader" title="Permalink to this heading">¶</a></h2>
 <p>The G3Reader class reads a file from disk and inserts it into a pipeline when placed as the pipeline’s first module. Once the file, or files, have been read completely, it will terminate the pipeline.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3Pipeline</span><span class="p">()</span>
 <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">G3Reader</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;/path/to/file.g3&#39;</span><span class="p">)</span>
@@ -68,9 +70,9 @@
 </pre></div>
 </div>
 <p>In addition to reading files, G3Reader can be used to receive streaming data over the network; this is described in the <a class="reference internal" href="networkstreaming.html"><span class="doc">Network Streaming</span></a> section of the manual.</p>
-</div>
-<div class="section" id="g3writer">
-<h2>G3Writer<a class="headerlink" href="#g3writer" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="g3writer">
+<h2>G3Writer<a class="headerlink" href="#g3writer" title="Permalink to this heading">¶</a></h2>
 <p>G3Writer is the output counterpart of G3Reader. All frames it receives as input get written to disk, as well as copied to the module’s copied without changes. An example follows:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3Pipeline</span><span class="p">()</span>
 <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">dosomethings</span><span class="p">)</span>
@@ -80,9 +82,9 @@
 </div>
 <p>All frames emitted by <code class="docutils literal notranslate"><span class="pre">dosomethings</span></code> will be written to <code class="docutils literal notranslate"><span class="pre">/path/to/file.g3</span></code>. If this file is read in a different scipt using G3Reader, modules following the G3Reader will operate exactly as though they followed <code class="docutils literal notranslate"><span class="pre">dosomethings</span></code>.</p>
 <p>Like G3Reader, G3Writer supports gzip and will write compressed output if its output file name ends in <code class="docutils literal notranslate"><span class="pre">.gz</span></code>.</p>
-</div>
-<div class="section" id="g3multifilewriter">
-<h2>G3MultiFileWriter<a class="headerlink" href="#g3multifilewriter" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="g3multifilewriter">
+<h2>G3MultiFileWriter<a class="headerlink" href="#g3multifilewriter" title="Permalink to this heading">¶</a></h2>
 <p>G3MultiFileWriter is like G3Writer but, instead of writing to only one file, it splits its output over multiple files. This is useful, for example, when doing data acquisition or TOD streams to prevent having a single TB output file. In order to make these files independently readable, the most recent instances of any metadata frames (i.e. any frame of type other than Timepoint or Scan) will be prepended to every output file in the order in which they were originally seen.</p>
 <p>The constructor of G3MultiFileWriter takes three arguments: a base file name, a file size limit, and, optionally, a file division algorithm. A typical invocation looks like the following and fills a directory with files of at most 1 GB:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3Pipeline</span><span class="p">()</span>
@@ -112,62 +114,63 @@
 <span class="n">pipe</span><span class="o">.</span><span class="n">Run</span><span class="p">()</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="g3file">
-<h2>G3File<a class="headerlink" href="#g3file" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="g3file">
+<h2>G3File<a class="headerlink" href="#g3file" title="Permalink to this heading">¶</a></h2>
 <p>Unlike G3Reader and G3Writer, G3File is not a pipeline module. Instead, it is a python iterable that can be used to read frames interactively:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">frame</span> <span class="ow">in</span> <span class="n">core</span><span class="o">.</span><span class="n">G3File</span><span class="p">(</span><span class="s1">&#39;/path/to/file.g3&#39;</span><span class="p">):</span>
         <span class="k">print</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>It supports the same arguments as G3Reader.</p>
-</div>
-<div class="section" id="file-format">
-<h2>File Format<a class="headerlink" href="#file-format" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="file-format">
+<h2>File Format<a class="headerlink" href="#file-format" title="Permalink to this heading">¶</a></h2>
 <p>The file format used by these tools is a concatenation of serialized G3Frames. Each frame is serialized by the Cereal library using its portable binary archive mechanism in a simple endian- and word-length-neutral binary format. Each class is serialized using code in the class definition with fields stored sequentially on disk. The serialized form of each class is also versioned to allow later versions of the software to read earlier versions of the serialized classes.</p>
-<div class="section" id="frame-structure-on-disk">
-<h3>Frame Structure on Disk<a class="headerlink" href="#frame-structure-on-disk" title="Permalink to this headline">¶</a></h3>
+<section id="frame-structure-on-disk">
+<h3>Frame Structure on Disk<a class="headerlink" href="#frame-structure-on-disk" title="Permalink to this heading">¶</a></h3>
 <p>G3Frames are stored on disk with the following layout:</p>
 <ol class="arabic simple">
-<li>A 32-bit version code (currently set to 1) to describe the frame version</li>
-<li>A 32-bit count of the number of objects stored in the frame.</li>
-<li>The 32-bit type code.</li>
-<li><dl class="first docutils">
-<dt>A list of frame objects stored as:</dt>
-<dd><ol class="first last upperalpha">
-<li>A string with the object key</li>
-<li>The blob for the frame object</li>
+<li><p>A 32-bit version code (currently set to 1) to describe the frame version</p></li>
+<li><p>A 32-bit count of the number of objects stored in the frame.</p></li>
+<li><p>The 32-bit type code.</p></li>
+<li><dl class="simple">
+<dt>A list of frame objects stored as:</dt><dd><ol class="upperalpha simple">
+<li><p>A string with the object key</p></li>
+<li><p>The blob for the frame object</p></li>
 </ol>
 </dd>
 </dl>
 </li>
-<li>A CRC32-C checksum</li>
+<li><p>A CRC32-C checksum</p></li>
 </ol>
-</div>
-<div class="section" id="blobs">
-<h3>Blobs<a class="headerlink" href="#blobs" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="blobs">
+<h3>Blobs<a class="headerlink" href="#blobs" title="Permalink to this heading">¶</a></h3>
 <p>Frame objects are stored in the frame through the intermediate structure of a blob. A blob is a portable binary archive of the frame object, serialized by a pointer to the base class, written to a binary buffer.</p>
 <p>When a frame is read from disk, the blobs are read and stored in memory but not immediately deserialized. Instead, deserialization happens only lazily when the object is accessed. This optimizes file IO performance for data in which only a subset of keys are regularly being used and allows files to be read in which some keys are classes in unloaded libraries.</p>
 <p>When a frame object is accessed (e.g. with []), the blob is deserialized. The original blob may, however, be retained in memory as well. As frame objects are only returned via const pointers, they are immutable for the life of the frame and so the original blob can be written back to disk later without expending CPU time to reserialize the class. Blobs are not retained for very large objects (&gt; 128 MB) to lower memory consumption.</p>
-</div>
-<div class="section" id="miscellany">
-<h3>Miscellany<a class="headerlink" href="#miscellany" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="miscellany">
+<h3>Miscellany<a class="headerlink" href="#miscellany" title="Permalink to this heading">¶</a></h3>
 <p>Due to the streaming file format, the frames in one file can be appended to the frames in another file simply by using <code class="docutils literal notranslate"><span class="pre">cat</span></code> on the command line:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cat file1.g3 file2.g3 &gt; file-combined.g3
 </pre></div>
 </div>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table of Contents</a></h3>
-  <ul>
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
 <li><a class="reference internal" href="#">File IO</a><ul>
 <li><a class="reference internal" href="#g3reader">G3Reader</a></li>
 <li><a class="reference internal" href="#g3writer">G3Writer</a></li>
@@ -183,12 +186,17 @@
 </li>
 </ul>
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="logging.html"
-                        title="previous chapter">Logging</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="units.html"
-                        title="next chapter">Units</a></p>
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="logging.html"
+                          title="previous chapter">Logging</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="units.html"
+                          title="next chapter">Units</a></p>
+  </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -197,17 +205,15 @@
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -224,12 +230,13 @@
         <li class="right" >
           <a href="logging.html" title="Logging"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">File IO</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.2.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.1.1.
     </div>
   </body>
 </html>

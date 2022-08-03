@@ -18,6 +18,12 @@ In C++, functions exported as ``bp::def()`` will automatically be documented.
 Additionally, any modules exported with the ``EXPORT_G3MODULE`` macro will
 automatically be documented as well.
 
+Documentation needs to be valid RST_.  Improperly formatted RST may result in 
+really weird html.  To be 100% sure that you are not generating RST warnings, 
+you can run ``make docs`` in your build directory and check the output.
+
+.. _RST: http://docutils.sourceforge.net/rst.html
+
 Viewing the docs
 ----------------
 

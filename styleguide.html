@@ -1,18 +1,19 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
     <title>Style Guide &#8212; SPT3G Software  documentation</title>
-    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/nature.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Network Streaming" href="networkstreaming.html" />
@@ -30,7 +31,8 @@
         <li class="right" >
           <a href="buildsystem.html" title="Build System"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Style Guide</a></li> 
       </ul>
     </div>  
 
@@ -39,13 +41,13 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="style-guide">
-<h1>Style Guide<a class="headerlink" href="#style-guide" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="version-control-hygiene">
-<h2>Version Control Hygiene<a class="headerlink" href="#version-control-hygiene" title="Permalink to this headline">¶</a></h2>
+  <section id="style-guide">
+<h1>Style Guide<a class="headerlink" href="#style-guide" title="Permalink to this heading">¶</a></h1>
+<section id="version-control-hygiene">
+<h2>Version Control Hygiene<a class="headerlink" href="#version-control-hygiene" title="Permalink to this heading">¶</a></h2>
 <p>You can use two mechanisms to access the repository: git and SVN. The following is a brief overview of how to use these in a way that your collaborators will appreciate.</p>
-<div class="section" id="git">
-<h3>Git<a class="headerlink" href="#git" title="Permalink to this headline">¶</a></h3>
+<section id="git">
+<h3>Git<a class="headerlink" href="#git" title="Permalink to this heading">¶</a></h3>
 <p>To initially check out the repository:</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git clone https://user@github.com/CMB-S4/spt3g_software.git
 </pre></div>
@@ -60,9 +62,9 @@ git commit files_to_commit
 git push
 </pre></div>
 </div>
-</div>
-<div class="section" id="svn">
-<h3>SVN<a class="headerlink" href="#svn" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="svn">
+<h3>SVN<a class="headerlink" href="#svn" title="Permalink to this heading">¶</a></h3>
 <p>To initially check out the repository:</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>svn co https://user@github.com/CMB-S4/spt3g_software/trunk spt3g_software
 </pre></div>
@@ -76,29 +78,29 @@ git push
 svn ci files_to_commit
 </pre></div>
 </div>
-</div>
-</div>
-<div class="section" id="coding-style">
-<h2>Coding Style<a class="headerlink" href="#coding-style" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="coding-style">
+<h2>Coding Style<a class="headerlink" href="#coding-style" title="Permalink to this heading">¶</a></h2>
 <p>We have style guidelines for both Python and C code. These are intended to keep code readable and avoid jarring transitions before code written by different people. These are summarized below. In general, the guiding principle is to make new code look like existing code. If you run into a file that obviously violates these style guidelines, please (a) hit the author with a stick and (b) do <em>not</em> change the style yourself. When adding to files that conform to some consistent, but different, style, prefer the style of the existing code to these guidelines unless you are replacing more than 50% of the file.</p>
-<div class="section" id="python-style-guide">
-<h3>Python Style Guide<a class="headerlink" href="#python-style-guide" title="Permalink to this headline">¶</a></h3>
+<section id="python-style-guide">
+<h3>Python Style Guide<a class="headerlink" href="#python-style-guide" title="Permalink to this heading">¶</a></h3>
 <p>For python we will be following <a class="reference external" href="https://www.python.org/dev/peps/pep-0008/">PEP8</a> (the style guide for the python standard library).
 PEP8 is a fairly significant document, so I will summarize the important points.
 Nonetheless, it is a generally good idea to read at least the section on <a class="reference external" href="https://www.python.org/dev/peps/pep-0008/#a-foolish-consistency-is-the-hobgoblin-of-little-minds">readability</a>.
 These are what we consider the most important points of PEP8:</p>
 <ul class="simple">
-<li>Function and variables names should be lower case, with words separated by underscores,
-when it improves readability.</li>
-<li>Class names should use CapitalizedWords.</li>
-<li>Constants should be in ALL_CAPS.</li>
-<li>Non-public class methods and instance variables should begin with a single underscore
-(this is baked into the way python implements classes).</li>
-<li>Lines should be short.  The standard convention is 79 characters.  We’re not going to be anal
+<li><p>Function and variables names should be lower case, with words separated by underscores,
+when it improves readability.</p></li>
+<li><p>Class names should use CapitalizedWords.</p></li>
+<li><p>Constants should be in ALL_CAPS.</p></li>
+<li><p>Non-public class methods and instance variables should begin with a single underscore
+(this is baked into the way python implements classes).</p></li>
+<li><p>Lines should be short.  The standard convention is 79 characters.  We’re not going to be anal
 about this, but long lines should not be significantly longer than that, as they are hard to read.
-For reference, most terminals open at 80 characters wide.</li>
-<li>Indentation should be done with 4 spaces.  At least one person is going to continue to violate
-this rule, so we should generally</li>
+For reference, most terminals open at 80 characters wide.</p></li>
+<li><p>Indentation should be done with 4 spaces.  At least one person is going to continue to violate
+this rule, so we should generally</p></li>
 </ul>
 <p>For example:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">CONSTANT_VALUE</span> <span class="o">=</span> <span class="mi">10</span>
@@ -115,21 +117,21 @@ this rule, so we should generally</li>
         <span class="n">do_things</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="c-style-guide">
-<h3>C++ Style Guide<a class="headerlink" href="#c-style-guide" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="c-style-guide">
+<h3>C++ Style Guide<a class="headerlink" href="#c-style-guide" title="Permalink to this heading">¶</a></h3>
 <p>C and C++ code in the tree is supposed to follow the <a class="reference external" href="https://www.freebsd.org/cgi/man.cgi?query=style&amp;sektion=9">KNF</a> conventions. On Mac OS X systems, you have a local copy of this guide installed in a man page named <code class="docutils literal notranslate"><span class="pre">style</span></code>. Like PEP8, the document is long, so a brief summary follows. The general rules are similar to PEP8 in most cases.</p>
 <ul class="simple">
-<li>Variable and global function names should be lower case, with words separated by underscores when it improves readability.</li>
-<li>Class names and class member function should use CapitalizedWords.</li>
-<li>Constants should be in ALL_CAPS, as should all macros created with <code class="docutils literal notranslate"><span class="pre">#define</span></code>.</li>
-<li>Non-public class variables should end with a single underscore.</li>
-<li>Indentation for control flow marking (e.g. inside an <code class="docutils literal notranslate"><span class="pre">if</span></code>) should be done with hard tabs. Indentation for alignment should be done with spaces following the number of hard tabs indicated for control flow. This allows control flow indentation to be uniform no matter what the setting for tab width is on people’s editors.</li>
-<li>Lines should be short.  The standard convention is 79 characters.  We’re not going to be anal
+<li><p>Variable and global function names should be lower case, with words separated by underscores when it improves readability.</p></li>
+<li><p>Class names and class member function should use CapitalizedWords.</p></li>
+<li><p>Constants should be in ALL_CAPS, as should all macros created with <code class="docutils literal notranslate"><span class="pre">#define</span></code>.</p></li>
+<li><p>Non-public class variables should end with a single underscore.</p></li>
+<li><p>Indentation for control flow marking (e.g. inside an <code class="docutils literal notranslate"><span class="pre">if</span></code>) should be done with hard tabs. Indentation for alignment should be done with spaces following the number of hard tabs indicated for control flow. This allows control flow indentation to be uniform no matter what the setting for tab width is on people’s editors.</p></li>
+<li><p>Lines should be short.  The standard convention is 79 characters.  We’re not going to be anal
 about this, but long lines should not be significantly longer than that, as they are hard to read.
-For reference, most terminals open at 80 characters wide. If you need to continue a line, it should be indented four spaces deeper than the beginning of the line. For line widths, tabs are considered to represent 8 spaces.</li>
-<li>For functions, the opening brace (<code class="docutils literal notranslate"><span class="pre">{</span></code>) should be on the line <em>following</em> the function definition. For classes, conditionals, and loops, it should be on the <em>same</em> line.</li>
-<li>Where functions are not used outside of a single C++ file, they should be marked <code class="docutils literal notranslate"><span class="pre">static</span></code>.</li>
+For reference, most terminals open at 80 characters wide. If you need to continue a line, it should be indented four spaces deeper than the beginning of the line. For line widths, tabs are considered to represent 8 spaces.</p></li>
+<li><p>For functions, the opening brace (<code class="docutils literal notranslate"><span class="pre">{</span></code>) should be on the line <em>following</em> the function definition. For classes, conditionals, and loops, it should be on the <em>same</em> line.</p></li>
+<li><p>Where functions are not used outside of a single C++ file, they should be marked <code class="docutils literal notranslate"><span class="pre">static</span></code>.</p></li>
 </ul>
 <p>Conforming code looks like this:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">const</span> <span class="kt">int</span> <span class="n">CONSTANT_VALUE</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
@@ -161,18 +163,20 @@ For reference, most terminals open at 80 characters wide. If you need to continu
 <span class="p">}</span>
 </pre></div>
 </div>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table of Contents</a></h3>
-  <ul>
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
 <li><a class="reference internal" href="#">Style Guide</a><ul>
 <li><a class="reference internal" href="#version-control-hygiene">Version Control Hygiene</a><ul>
 <li><a class="reference internal" href="#git">Git</a></li>
@@ -188,12 +192,17 @@ For reference, most terminals open at 80 characters wide. If you need to continu
 </li>
 </ul>
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="buildsystem.html"
-                        title="previous chapter">Build System</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="networkstreaming.html"
-                        title="next chapter">Network Streaming</a></p>
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="buildsystem.html"
+                          title="previous chapter">Build System</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="networkstreaming.html"
+                          title="next chapter">Network Streaming</a></p>
+  </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -202,17 +211,15 @@ For reference, most terminals open at 80 characters wide. If you need to continu
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -229,12 +236,13 @@ For reference, most terminals open at 80 characters wide. If you need to continu
         <li class="right" >
           <a href="buildsystem.html" title="Build System"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Style Guide</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.2.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.1.1.
     </div>
   </body>
 </html>

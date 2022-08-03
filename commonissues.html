@@ -1,18 +1,19 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
     <title>Common Problems &#8212; SPT3G Software  documentation</title>
-    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/nature.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="calibration" href="moddoc_calibration.html" />
@@ -30,7 +31,8 @@
         <li class="right" >
           <a href="networkstreaming.html" title="Network Streaming"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Common Problems</a></li> 
       </ul>
     </div>  
 
@@ -39,45 +41,47 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="common-problems">
-<h1>Common Problems<a class="headerlink" href="#common-problems" title="Permalink to this headline">¶</a></h1>
+  <section id="common-problems">
+<h1>Common Problems<a class="headerlink" href="#common-problems" title="Permalink to this heading">¶</a></h1>
 <p>This contains a list of common problems that people have run into and solutions to them. If you run into others, and an FAQ entry here is a more appropriate place than text in the main part of the manual, please feel to add them to this page.</p>
-<div class="section" id="setting-values-of-a-flatskymap">
-<h2>Setting Values of a FlatSkyMap<a class="headerlink" href="#setting-values-of-a-flatskymap" title="Permalink to this headline">¶</a></h2>
+<section id="setting-values-of-a-flatskymap">
+<h2>Setting Values of a FlatSkyMap<a class="headerlink" href="#setting-values-of-a-flatskymap" title="Permalink to this heading">¶</a></h2>
 <p>Because the implementations of <code class="docutils literal notranslate"><span class="pre">__setitem__</span></code> and <code class="docutils literal notranslate"><span class="pre">__getitem__</span></code> in G3SkyMap have to handle both 1D and 2D semantics), the FlatSkyMap class has different slicing semantics than a numpy array. To slice it as though it were a numpy array, you can cast it to one:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">your_flat_sky_map</span><span class="p">)[:]</span> <span class="o">=</span> <span class="n">the_numpy_array_you_are_assigning</span>
 </pre></div>
 </div>
 <p>Because sky maps, like timestreams, implement the Python buffer protocol, there is no performance or memory penalty for these kinds of operations.</p>
-</div>
-<div class="section" id="error-message-decryption">
-<h2>Error Message Decryption<a class="headerlink" href="#error-message-decryption" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="argument-errors">
-<h3>Argument Errors<a class="headerlink" href="#argument-errors" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="error-message-decryption">
+<h2>Error Message Decryption<a class="headerlink" href="#error-message-decryption" title="Permalink to this heading">¶</a></h2>
+<section id="argument-errors">
+<h3>Argument Errors<a class="headerlink" href="#argument-errors" title="Permalink to this heading">¶</a></h3>
 <p>If you are adding a module to a pipeline in python, and if the module is written in C++, when you misspell a keyword argument, you may get an unhelpful message like the following:</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Boost.Python.ArgumentError: Python argument types in
         FilterEventsOnSameSquid.__init__(FilterEventsOnSameSquid) did not match C++ signature:
 </pre></div>
 </div>
 <p>The unhelpfulness of this message arises because Python and C++ have different semantics for overloaded functions, preventing Boost from succesfully disambiguating a misspelled or otherwise wrong argument from an attempt to execute a different function entirely. If you see errors like the above, check your arguements for typos in keywords, number of positional arguments, and types.</p>
-</div>
-</div>
-<div class="section" id="misbehaving-compilers">
-<h2>Misbehaving Compilers<a class="headerlink" href="#misbehaving-compilers" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="misbehaving-compilers">
+<h2>Misbehaving Compilers<a class="headerlink" href="#misbehaving-compilers" title="Permalink to this heading">¶</a></h2>
 <ol class="arabic simple">
-<li>Clang 3.6.0 has some bugs with the std::unordered_map implementation that our code encounters.</li>
+<li><p>Clang 3.6.0 has some bugs with the std::unordered_map implementation that our code encounters.</p></li>
 </ol>
-</div>
-</div>
+</section>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table of Contents</a></h3>
-  <ul>
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
 <li><a class="reference internal" href="#">Common Problems</a><ul>
 <li><a class="reference internal" href="#setting-values-of-a-flatskymap">Setting Values of a FlatSkyMap</a></li>
 <li><a class="reference internal" href="#error-message-decryption">Error Message Decryption</a><ul>
@@ -89,12 +93,17 @@
 </li>
 </ul>
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="networkstreaming.html"
-                        title="previous chapter">Network Streaming</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="moddoc_calibration.html"
-                        title="next chapter">calibration</a></p>
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="networkstreaming.html"
+                          title="previous chapter">Network Streaming</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="moddoc_calibration.html"
+                          title="next chapter">calibration</a></p>
+  </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -103,17 +112,15 @@
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -130,12 +137,13 @@
         <li class="right" >
           <a href="networkstreaming.html" title="Network Streaming"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Common Problems</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.2.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.1.1.
     </div>
   </body>
 </html>

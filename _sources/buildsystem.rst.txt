@@ -19,6 +19,9 @@ A number of variables can be set on the command line when cmake is run that cont
   CMAKE_BUILD_TYPE
     This can be set to either ``Release`` or ``Debug``. Setting it to ``Release`` will cause the compiler to optimize the code more, making it substantially faster at the expense of increased build times and removal of some debugging information.
 
+  BUILD_PROJECTS
+    This variable can be set to a semicolon-separated list of projects to build, to allow building only a subset of the projects which are present. For example, specifying ``-DBUILD_PROJECTS='gcp;dfmux'`` will result in the ``core``, ``gcp``, and ``dfmux`` projects being built. The ``core`` project must always be built, so if this variable is set to a list which does not contain it, it will be added. Other project dependencies are not automatically detected, so use this feature only if you are certain that you understand exactly which projects you need. Note that the list will usually need to be quoted to avoid the shell interpreting the first semicolon as the end of the command.
+
 Adding a Project
 ================
 
@@ -75,8 +78,10 @@ You can also add C++ executables. Usually, there is not much reason to do this s
 
 	add_executable(newthingexec MyNewThingExecutable.cxx)
 	target_link_libraries(newthingexec core newthing)
+	list(APPEND SPT3G_PROGRAMS newthingexec)
+	set(SPT3G_PROGRAMS ${SPT3G_PROGRAMS} PARENT_SCOPE)
 
-The ``target_link_libraries`` command works as in `Adding a C++ library`_ above. The first command produces an executable named ``newthingexec`` that will be placed in the ``bin`` subdirectory of the build directory.
+The ``target_link_libraries`` command works as in `Adding a C++ library`_ above. The first command produces an executable named ``newthingexec`` that will be placed in the ``bin`` subdirectory of the build directory. The ``list`` and ``set`` commands inform other parts of the build system that this executable will exist, so that it can be included during installation. 
 
 Mixing C++ and Python
 =====================

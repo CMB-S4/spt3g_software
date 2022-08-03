@@ -1,18 +1,19 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
     <title>mpi &#8212; SPT3G Software  documentation</title>
-    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/nature.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="prev" title="maps" href="moddoc_maps.html" /> 
@@ -26,7 +27,8 @@
         <li class="right" >
           <a href="moddoc_maps.html" title="maps"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mpi</a></li> 
       </ul>
     </div>  
 
@@ -35,37 +37,37 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="mpi">
-<h1>mpi<a class="headerlink" href="#mpi" title="Permalink to this headline">¶</a></h1>
+  <section id="mpi">
+<h1>mpi<a class="headerlink" href="#mpi" title="Permalink to this heading">¶</a></h1>
 <p>mpi contains several modules build to interface with HPC systems using the installed MPI library (through mpi4py). This comes in two pieces: parallelization of frame processing and accumulation.</p>
-<div class="section" id="frame-io-parallelization">
-<h2>Frame IO Parallelization<a class="headerlink" href="#frame-io-parallelization" title="Permalink to this headline">¶</a></h2>
+<section id="frame-io-parallelization">
+<h2>Frame IO Parallelization<a class="headerlink" href="#frame-io-parallelization" title="Permalink to this heading">¶</a></h2>
 <p>The MPIFileIO sub-module contains a few modules that will add frame-level parallelism to a G3Pipeline by reading files within an observation in parallel and (optionally, with MPIIODistributor or MPIFrameParallelizer) distributes the data frame-by-frame across any number of processes with an M:N IO:CPU node distribution.</p>
 <p>This processing will make sure all metadata frames are seen by all processes in the same order with respect to both each other and all data frames and are thus strongly ordered across all processes. Data frames (scans, typically) are ordered on a node, but are not ordered between nodes and thus should be considered weakly ordered. For a frame sequence MN12345PQ67, where letters denote metadata frames (calibration, etc.) and numbers data frames, a possible ordering seen by the pipelines on two processing nodes would be MN134PQ7 and MN25PQ6, respectively. A consequence of these ordering rules is that you <em>must not use any modules that depend on frame ordering and continuity</em>. Examples of such would be modules that buffer multiple scans together to get longer-time-period data; by their nature, these only work for observation-level parallelism, rather than frame-level or file-level.</p>
 <p>Parallelization in this sense can be achieved by replacement of G3Reader in a normal G3Pipeline with MPIIODistributor.</p>
-</div>
-<div class="section" id="frame-accumulation">
-<h2>Frame Accumulation<a class="headerlink" href="#frame-accumulation" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="frame-accumulation">
+<h2>Frame Accumulation<a class="headerlink" href="#frame-accumulation" title="Permalink to this heading">¶</a></h2>
 <p>At the end of a sequence of parallel pipelines, you in general want to join the data from all the processes in the communicator back together again. Typical cases are stitching processed scans back together again, for example to feed to a maximum-likelihood map-maker or some other algorithm that needs very large quantities of distributed data, or doing a parallel reduction, for example by coadding map frames produced by N parallel map-makers.</p>
 <p>The first of these cases (restitching an observation processed on many parallel processes) is more complicated than the second, so this library provides a helper module (MPIAccumulator) that does it for you, placing the result in a member variable inspected after the pipelines end.</p>
 <p>The second case is easier, but potentially common enough that a module should be added in future.</p>
-</div>
-<div class="section" id="interface-to-toast">
-<h2>Interface to TOAST<a class="headerlink" href="#interface-to-toast" title="Permalink to this headline">¶</a></h2>
-<p>There is an experimental module (TOASTFiller) that uses MPIAccumulator to fill frame contents after processing in many parallel pipelines into a TOAST TOD object in order to use TOAST’s set of parallel timestream algorithms and map-making. Basic functionality is present, but it should be considered in-development at present.
-Could not import module spt3g.mpi:
-No module named ‘mpi4py’</p>
-</div>
-</div>
+</section>
+<section id="interface-to-toast">
+<h2>Interface to TOAST<a class="headerlink" href="#interface-to-toast" title="Permalink to this heading">¶</a></h2>
+<p>There is an experimental module (TOASTFiller) that uses MPIAccumulator to fill frame contents after processing in many parallel pipelines into a TOAST TOD object in order to use TOAST’s set of parallel timestream algorithms and map-making. Basic functionality is present, but it should be considered in-development at present.</p>
+</section>
+</section>
 
 
+            <div class="clearer"></div>
           </div>
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table of Contents</a></h3>
-  <ul>
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
 <li><a class="reference internal" href="#">mpi</a><ul>
 <li><a class="reference internal" href="#frame-io-parallelization">Frame IO Parallelization</a></li>
 <li><a class="reference internal" href="#frame-accumulation">Frame Accumulation</a></li>
@@ -74,9 +76,12 @@ No module named ‘mpi4py’</p>
 </li>
 </ul>
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="moddoc_maps.html"
-                        title="previous chapter">maps</a></p>
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="moddoc_maps.html"
+                          title="previous chapter">maps</a></p>
+  </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -85,17 +90,15 @@ No module named ‘mpi4py’</p>
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -109,12 +112,13 @@ No module named ‘mpi4py’</p>
         <li class="right" >
           <a href="moddoc_maps.html" title="maps"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">mpi</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.2.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.1.1.
     </div>
   </body>
 </html>

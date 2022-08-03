@@ -93,6 +93,21 @@ The examples above return ``None`` and so implicitly pass their input frame to t
 
   Something with truth value (e.g. ``True`` or ``False``)
     A return value of ``True`` will cause the input frame to be passed to the next module and is equivalent to returning ``None``. Returning ``False`` will cause the input frame to be dropped and is equivalent to returning ``[]``. This can be used to implement cuts by returning the value of a conditional expression.
+    
+(Im)mutability of frame objects
+_______________________________
+
+Objects stored in a G3Frame are *immutable* -- once added to a frame, they should not be modified. If you want to change the contents of a frame object, delete it from the frame, modify a copy, and add the copy to be frame. (In C++, the compiler will prevent in-place modifications since ``G3Frame::Get()`` returns a const pointer, but Python doesn't have a concept of ``const`` so you just have to pay attention to the rules yourself and don't get the compiler's help). Copying the most common objects (e.g. G3TimestreamMaps) is designed to be particularly lightweight to facilitate this. 
+
+The immutability allows three particularly useful features of the software:
+
+ * Any pipeline module can cache an object (e.g. calibration data) by reference, without using excess memory. If later modules had the ability to modify frame objects, this could change the past in some sense by changing previous pipeline stages' view of the data after it was cached.
+ * Serialization and deserialization of frame objects happens when frames are read from or written to disk and every time they pass through an MPI communicator or between members of a multiprocess group. To amortize this cost, G3Frame saves the original serialized copy of small (< 128 MB) frame objects when deserialized and restores that copy to disk/MPI/etc. when the frame is saved again rather than pointlessly reserializing the unchanged object. If an object read from disk/MPI is modified in place and the frame is re-serialized, it will save the *original version* of the object, leading to a great deal of puzzling down the line.
+ * The provenance of any object in the frame can be tracked at a high level since the only time things can change is when they are added to or deleted from a frame. This makes tracing where data came from in the pipeline *vastly* easier.
+ 
+**CAUTION**: An astute reader will notice that there are a few patterns that, while illegal in the strictest sense of the rules (they change frame-objects in place and a C++ compiler would reject them), will not create causality paradoxes (e.g. changing an object that a function has just added to a frame). Please proceed with great caution when writing such code.
+
+For software connoisseurs: this is similar to, and exists for largely the same reasons as, the "single-static-assignment" architecture popular in modern compilers.
 
 The first module
 ________________
@@ -251,6 +266,36 @@ Modules that need to work on granularilty coarser than a scan (e.g. notch filter
 			return returnval
 
 This implements a processing step that works on five scans at a time. From the perspective of a module either before or after this one in the chain, nothing unusual happens: frames appear in order one at a time in both cases. When ``__call__`` returns an empty list, the pipeline goes back to the first module to get a new frame instead of continuing to the next. These accumulate inside the internal queue of ``Buffered`` until there are five scans present. At that point, they are processed as a group and then moved to the output queue. When the pipeline sees five frames in the output queue, it will call the next module five times, with each frame in sequence. Once that is complete, it will then go back to the first module for new frames.
+
+Caching Previous Data
+=====================
+
+The previous example can be adapted to cache data from previous frames when that data is required to operate on current frames.  This is useful for caching e.g. calibration data.
+
+.. code-block:: python
+
+        class Caching(object):
+                def __init__(self, calibrator_key='CalibratorResponse'):
+		    self.calkey = calibrator_key
+		    self.cal = None
+		def __call__(self, frame):
+		    if self.calkey in frame:
+		        self.cal = frame[self.calkey]
+			return
+		    if frame.type == core.G3FrameType.Scan:
+		        # Do something here
+
+There are two convenience methods for caching data and passing it into a module.  This is useful for writing a function that requires (for example) a ``BolometerPropertiesMap``, but otherwise does not require a class.  This is best illustrated with an example
+
+.. code-block:: python
+
+    @core.cache_frame_data(type=core.G3FrameType.Scan, bolo_props='BolometerProperties')
+    def FlagSomeStuff(frame, flag_key='Flags', bolo_props=None):
+        pass
+
+The decorator ``@core.cache_frame_data`` will ensure that the bolometer properties are passed to ``FlagSomeStuff`` in the ``bolo_props`` kwarg.  The (required) ``type`` argument specifies that ``FlagSomeStuff`` only runs on frames of type ``core.G3FrameType.Scan``.  When called with an abritrary ``kwarg='FrameKey'`` pair, ``core.cache_frame_data`` caches the most recent instance of ``'FrameKey'`` in any frame, and passes it to the decorated function under the keyword argument ``kwarg``.  ``core.cache_frame_data`` can cache multiple keys from multiple frames.  For example, if one wanted to cache the calibrator singal to noise ratio (stored as ``'CalibratorResponseSN'``) as well as the bolometer properties, and pass it to a function with the keyword argument `calsn`, one would wrap that function with the decorator ``@core.cache_frame_data(type=core.G3FrameType.Scan, calsn='CalibratorResponseSN', bolo_props='BolometerProperties')``.  This would be useful if one wanted to apply different calibrator SNR thresholds to different bands, for example.
+
+``core.scan_func_cache_data`` is a special case of ``core.cache_frame_data`` where ``type`` is set to ``core.G3FrameType.Scan``.
 
 Pipelines
 =========
