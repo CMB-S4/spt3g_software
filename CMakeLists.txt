@@ -175,7 +175,7 @@ add_custom_target(tarball
 
 # Add target to generate documentation
 add_custom_target(docs
-	COMMAND cmake -P ${CMAKE_SOURCE_DIR}/cmake/gen_per_module_docs.cmake ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}
+	COMMAND cmake -P ${CMAKE_SOURCE_DIR}/cmake/gen_per_module_docs.cmake ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} ${Python_EXECUTABLE}
 	COMMAND mkdir -p ${CMAKE_BINARY_DIR}/docs
 	COMMAND which sphinx-build && sphinx-build -b html ${CMAKE_SOURCE_DIR}/doc ${CMAKE_BINARY_DIR}/docs || echo "Error: sphinx-build not found. Could not generate HTML docs."
 	COMMENT "Generate HTML documentation")

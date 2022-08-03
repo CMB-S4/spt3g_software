@@ -23,11 +23,11 @@ jobs:
         if [ `echo ${{matrix.os}} | cut -d - -f 1` = "ubuntu" ]; then
           sudo apt-get --allow-releaseinfo-change update -y
           [ `echo ${{matrix.os}} | cut -d . -f 1` = "ubuntu-20" ] && sudo apt-get install python-is-python3
-          sudo apt-get install libboost-all-dev libflac-dev libnetcdf-dev libfftw3-dev libgsl0-dev python python3 python3-pip python3-setuptools
+          sudo apt-get install libboost-all-dev libflac-dev libnetcdf-dev python python3 python3-pip python3-setuptools
         elif [ `echo ${{matrix.os}} | cut -d - -f 1` = "macOS" ]; then
           brew install python@3.9
           brew link --overwrite python@3.9
-          brew install boost boost-python3 flac netcdf fftw gsl
+          brew install boost boost-python3 flac netcdf
         else
           echo 'No installed package manager!'
           exit 1
@@ -35,7 +35,7 @@ jobs:
             
     - name: Install Python Packages
       run: |
-        pip3 install numpy scipy matplotlib astropy healpy
+        pip3 install numpy scipy matplotlib astropy healpy sphinx
       
     - name: Create Build Environment
       # Some projects don't allow in-source building, so create a separate build directory
@@ -64,3 +64,30 @@ jobs:
       # Execute tests defined by the CMake configuration.  
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: ./env-shell.sh ctest -C $BUILD_TYPE --output-on-failure
+
+    - name: Docs
+      if: github.ref_name == 'master' && matrix.os == 'ubuntu-20.04'
+      working-directory: ${{runner.workspace}}/build
+      shell: bash
+      # Build docs
+      run: ./env-shell.sh cmake --build . --config $BUILD_TYPE --target docs
+
+    - name: Checkout gh_pages
+      if: github.ref_name == 'master' && matrix.os == 'ubuntu-20.04'
+      uses: actions/checkout@v3
+      with:
+        ref: gh-pages
+        path: gh-pages
+
+    - name: Commit docs
+      if: github.ref_name == 'master' && matrix.os == 'ubuntu-20.04'
+      shell: bash
+      run: |
+        cp -r ${{runner.workspace}}/build/docs/* gh-pages/
+        cd gh-pages
+        touch .nojekyll
+        git config --local user.name github-actions
+        git config --local user.email github-actions@github.com
+        git add .
+        git commit -m "Update documentation" -a || true
+        git push
