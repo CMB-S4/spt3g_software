@@ -138,7 +138,7 @@ def _concatenate_timestreams(cls, ts_lst, ts_rounding_error=0.6, ts_interp_thres
 G3Timestream.concatenate = classmethod(_concatenate_timestreams)
 
 
-def _concatenate_timestream_maps(cls, ts_map_lst, ts_rounding_error=0.6, ts_interp_threshold=0):
+def _concatenate_timestream_maps(cls, ts_map_lst, ts_rounding_error=0.6, ts_interp_threshold=0, skip_missing=False):
     """
     Concatenate G3TimestreamMap objects together.
 
@@ -155,18 +155,29 @@ def _concatenate_timestream_maps(cls, ts_map_lst, ts_rounding_error=0.6, ts_inte
     ts_interp_threshold : float
         allowed timestream separation below which gaps between timestreams are
         interpolated to be made continuous
+    skip_missing : bool
+        If True, include only the channels that are present in all of the
+        input G3TimestreamMap object.  Otherwise, raises an error if any
+        map does not have the same keys.
 
     Returns
     -------
     tsm : G3TimestreamMap instance
         The concatenation of the input list of G3TimestreamMap objects
     """
-
+    keys = ts_map_lst[0].keys()
+    skeys = set(keys)
     for tsm in ts_map_lst[1:]:
-        if set(tsm.keys()) != set(ts_map_lst[0].keys()):
+        if skip_missing:
+            skeys &= set(tsm.keys())
+            continue
+        if set(tsm.keys()) != skeys:
             log_fatal("Timestream maps do not have the same keys")
+    if skip_missing:
+        # preserve key order
+        keys = [k for k in keys if k in skeys]
     out_tsm = cls()
-    for k in ts_map_lst[0].keys():
+    for k in keys:
         ts_lst = [tsm[k] for tsm in ts_map_lst]
         out_tsm[k] = G3Timestream.concatenate(ts_lst, ts_rounding_error, ts_interp_threshold)
     return out_tsm
