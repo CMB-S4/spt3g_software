@@ -66,21 +66,21 @@ jobs:
       run: ./env-shell.sh ctest -C $BUILD_TYPE --output-on-failure
 
     - name: Docs
-      if: github.ref_name == 'master' && matrix.os == 'ubuntu-20.04'
+      if: github.ref_name == 'master' && startsWith(matrix.os, 'ubuntu')
       working-directory: ${{runner.workspace}}/build
       shell: bash
       # Build docs
       run: ./env-shell.sh cmake --build . --config $BUILD_TYPE --target docs
 
     - name: Checkout gh_pages
-      if: github.ref_name == 'master' && matrix.os == 'ubuntu-20.04'
+      if: github.ref_name == 'master' && startsWith(matrix.os, 'ubuntu')
       uses: actions/checkout@v3
       with:
         ref: gh-pages
         path: gh-pages
 
     - name: Commit docs
-      if: github.ref_name == 'master' && matrix.os == 'ubuntu-20.04'
+      if: github.ref_name == 'master' && startsWith(matrix.os, 'ubuntu')
       shell: bash
       run: |
         cp -r ${{runner.workspace}}/build/docs/* gh-pages/
