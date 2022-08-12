@@ -60,7 +60,7 @@ def CalibrateValue(data, caldict_entry):
     # make a copy
     if np.size(data) == 1:
         data = data.value
-    data2 = np.array(data, dtype='float64')
+    data2 = np.asarray(data, dtype='float64')
 
     # calibrate units
     offset, recip = caldict_entry['Offset'], caldict_entry['ReciprocalFactor']
