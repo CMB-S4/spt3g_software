@@ -89,12 +89,17 @@ class CalibrateFrame:
 
         for board in frame.keys():
             cboard = frame.pop(board)
+            if board not in self.cal:
+                continue
+            bcal = self.cal[board]
             for rmap, crmap in cboard.items():
+                if rmap not in cd:
+                    continue
+                rcal = bcal[rmap]
                 for reg, creg in crmap.items():
-                    try:
-                        rcd = self.cal[board][rmap][reg]
-                    except KeyError:
+                    if reg not in self.cal[board][rmap]:
                         continue
+                    rcd = rcal[reg]
                     rsize = np.size(creg)
                     rshape = np.shape(creg)
                     if rsize > 1 and len(rshape) > 1:
@@ -103,13 +108,13 @@ class CalibrateFrame:
                                 rcdi = rcd[i]
                             except KeyError:
                                 rcdi = rcd
-                            cboard[rmap][reg][i] = CalibrateValue(creg[i], rcdi)
+                            creg[i] = CalibrateValue(creg[i], rcdi)
                     else:
                         try:
                             rcdi = rcd[0]
                         except KeyError:
                             rcdi = rcd
-                        cboard[rmap][reg] = CalibrateValue(creg, rcdi)
+                        crmap[reg] = CalibrateValue(creg, rcdi)
             frame[board] = cboard
 
         frame['Calibrated'] = True
