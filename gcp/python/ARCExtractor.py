@@ -93,7 +93,7 @@ class CalibrateFrame:
                 continue
             bcal = self.cal[board]
             for rmap, crmap in cboard.items():
-                if rmap not in cd:
+                if rmap not in bcal:
                     continue
                 rcal = bcal[rmap]
                 for reg, creg in crmap.items():
