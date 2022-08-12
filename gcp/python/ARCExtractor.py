@@ -41,7 +41,22 @@ def CalibrateValue(data, caldict_entry):
     '''Apply gain / offset units from G3 cal file to register'''
 
     uvalue = UnitValue(caldict_entry)
-    g3type = type(data)
+
+    # if a register has units, it can't be an int anymore.  well, actually,
+    # it can't be an int if we're adding floats to it or multiplying it by
+    # floats either, so convert everything that has an entry in the cal file
+    # to float/double.
+    if 'OutputType' not in caldict_entry:
+        g3type = type(data)
+        if g3type == core.G3VectorInt:
+            g3type = core.G3VectorDouble
+        elif g3type == core.G3MapInt:
+            g3type = core.G3MapDouble
+        elif g3type == core.G3Int:
+            g3type = core.G3Double
+        caldict_entry['OutputType'] = g3type
+    g3type = caldict_entry['OutputType']
+
     # make a copy
     if np.size(data) == 1:
         data = data.value
@@ -56,18 +71,7 @@ def CalibrateValue(data, caldict_entry):
     if not data2.shape:
         data2 = data2.tolist()
 
-    # if a register has units, it can't be an int anymore.  well, actually,
-    # it can't be an int if we're adding floats to it or multiplying it by
-    # floats either, so convert everything that has an entry in the cal file
-    # to float/double.
-    if g3type == core.G3VectorInt:
-        return core.G3VectorDouble(data2)
-    elif g3type == core.G3MapInt:
-        return core.G3MapDouble(data2)
-    elif g3type == core.G3Int:
-        return core.G3Double(data2)
-    else:
-        return g3type(data2)
+    return g3type(data2)
 
 
 @core.indexmod
