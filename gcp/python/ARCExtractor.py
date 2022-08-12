@@ -97,7 +97,7 @@ class CalibrateFrame:
                     continue
                 rcal = bcal[rmap]
                 for reg, creg in crmap.items():
-                    if reg not in self.cal[board][rmap]:
+                    if reg not in rcal:
                         continue
                     rcd = rcal[reg]
                     rsize = np.size(creg)
