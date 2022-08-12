@@ -583,6 +583,7 @@ def UnpackWeatherData(f):
 
     f['Weather'] = t
     f['WeatherTime'] = board['utc']
+    f['TipperTime'] = f['array']['tipper']['utc']
 
 
 @core.pipesegment
