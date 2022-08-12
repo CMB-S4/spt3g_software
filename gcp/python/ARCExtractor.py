@@ -7,6 +7,9 @@ from spt3g.gcp import ACUStatus, ACUState, TrackerStatus, TrackerState, TrackerP
 def UnitValue(caldict_entry):
     '''Turn unit name into floating point unit value'''
 
+    if 'UnitValue' in caldict_entry:
+        return caldict_entry['UnitValue']
+
     try: 
         uname = caldict_entry['UnitName']
         if uname and uname != 'None':
@@ -28,6 +31,8 @@ def UnitValue(caldict_entry):
     except KeyError:
         uvalue = 1.
 
+    caldict_entry['UnitValue'] = uvalue
+
     return uvalue
 
 
@@ -44,8 +49,10 @@ def CalibrateValue(data, caldict_entry):
     thisdtype = data2.dtype
 
     # calibrate units
-    data2 += np.array(caldict_entry['Offset'], dtype=thisdtype)
-    data2 *= np.array(uvalue / caldict_entry['ReciprocalFactor'], dtype=thisdtype)
+    offset, recip = caldict_entry['Offset'], caldict_entry['ReciprocalFactor']
+    if offset != 0:
+        data2 += np.array(offset, dtype=thisdtype)
+    data2 *= np.array(uvalue / recip, dtype=thisdtype)
     if not data2.shape:
         data2 = data2.tolist()
 
@@ -64,49 +71,44 @@ def CalibrateValue(data, caldict_entry):
 
 
 @core.indexmod
-def CalibrateFrame(f, calibration_file=None):
+class CalibrateFrame:
     '''Apply gain / offset / units from G3 cal file'''
-    
-    if f.type != core.G3FrameType.GcpSlow:
-        return
 
-    try:
-        if f['Calibrated'] == True:
-            print('Already calibrated!\n')
+    def __init__(self, calibration_file=None):
+        cf = CalFile.CalFileReader()
+        self.cal = cf.readCalFile(calibration_file)
+
+    def __call__(self, frame):
+
+        if frame.type != core.G3FrameType.GcpSlow or 'Calibrated' in frame:
             return
-    except KeyError:
-        f['Calibrated'] = True
 
-    cf = CalFile.CalFileReader()
-    cd = cf.readCalFile(calibration_file)
-
-    for board in f.keys():
-        if board == 'Calibrated':
-            continue
-        cboard = copy.deepcopy(f[board])
-        for rmap in cboard.keys():
-            for reg in cboard[rmap].keys():
-                try: 
-                    rcd = cd[board][rmap][reg]
-                except KeyError:
-                    continue
-                rsize = np.size(cboard[rmap][reg])
-                rshape = np.shape(cboard[rmap][reg])
-                if rsize > 1 and len(rshape) > 1:
-                    for i in range(rshape[0]):
+        for board in frame.keys():
+            cboard = frame.pop(board)
+            for rmap, crmap in cboard.items():
+                for reg, creg in crmap.items():
+                    try:
+                        rcd = self.cal[board][rmap][reg]
+                    except KeyError:
+                        continue
+                    rsize = np.size(creg)
+                    rshape = np.shape(creg)
+                    if rsize > 1 and len(rshape) > 1:
+                        for i in range(rshape[0]):
+                            try:
+                                rcdi = rcd[i]
+                            except KeyError:
+                                rcdi = rcd
+                            cboard[rmap][reg][i] = CalibrateValue(creg[i], rcdi)
+                    else:
                         try:
-                            rcdi = rcd[i]
+                            rcdi = rcd[0]
                         except KeyError:
                             rcdi = rcd
-                        cboard[rmap][reg][i] = CalibrateValue(cboard[rmap][reg][i], rcdi)
-                else:
-                    try:
-                        rcdi = rcd[0]
-                    except KeyError:
-                        rcdi = rcd
-                    cboard[rmap][reg] = CalibrateValue(cboard[rmap][reg], rcdi)
-        del f[board]
-        f[board] = cboard
+                        cboard[rmap][reg] = CalibrateValue(creg, rcdi)
+            frame[board] = cboard
+
+        frame['Calibrated'] = True
 
 
 @core.indexmod
