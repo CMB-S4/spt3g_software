@@ -309,9 +309,8 @@ Add the optical bench positions to the frame.
 
 Apply gain / offset / units from G3 cal file
 
-
-*Definition:*
-        ``CalibrateFrame(f, calibration_file=None)``
+*Constructor:*
+	``CalibrateFrame(self, calibration_file=None)``
 
 
 
