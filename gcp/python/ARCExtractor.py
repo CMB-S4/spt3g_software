@@ -61,13 +61,12 @@ def CalibrateValue(data, caldict_entry):
     if np.size(data) == 1:
         data = data.value
     data2 = np.array(data, dtype='float64')
-    thisdtype = data2.dtype
 
     # calibrate units
     offset, recip = caldict_entry['Offset'], caldict_entry['ReciprocalFactor']
     if offset != 0:
-        data2 += np.array(offset, dtype=thisdtype)
-    data2 *= np.array(uvalue / recip, dtype=thisdtype)
+        data2 += float(offset)
+    data2 *= float(uvalue / recip)
     if not data2.shape:
         data2 = data2.tolist()
 
