@@ -30,6 +30,17 @@ G3Timestream.__len__ = lambda x: numpy.asarray(x).__len__()
 G3Timestream.shape = timestream_shape
 G3Timestream.ndim = timestream_ndim
 
+def timestreamastype(a, dtype):
+    '''
+    Convert timestream to a different data type. See numpy.array.astype()
+    '''
+    out = G3Timestream(numpy.asarray(a).astype(dtype))
+    out.units = a.units
+    out.start = a.start
+    out.stop = a.stop
+    return out
+G3Timestream.astype = timestreamastype
+
 # Provide all the numpy binary arithmetic operators, first non-in-place, then
 # in-place, with slightly different semantics
 def numpybinarywrap(a, b, op):
