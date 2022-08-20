@@ -1957,6 +1957,9 @@ Collection of timestreams indexed by logical detector ID
 	
 	``G3TimestreamMap( (G3TimestreamMap)arg2)``
 	
+	``G3TimestreamMap( (StringVector)keys, (object)data [, (G3Time)start=<spt3g.core.G3Time object at 0x7f12aab6ae40> [, (G3Time)stop=<spt3g.core.G3Time object at 0x7f12aab6aeb0> [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None [, (bool)copy_data=True]]]])`` :
+	    Create a timestream map from a numpy array or other numeric python iterable. Each row of the 2D input array will correspond to a single timestream, with the key set to the correspondingly-indexed entry of <keys>. If <copy_data> is True (default), the data will be copied into the output data structure. If False, the timestream map will provide a view into the given numpy array.
+	
 	``G3TimestreamMap( (list)arg2)`` :
 	    Initialize with keys and values from a Python dictionary: {'key':'value'}
 	
@@ -2084,6 +2087,13 @@ Collection of timestreams indexed by logical detector ID
 **spt3g.core.G3TimestreamMap.CheckAlignment**
 
 ``CheckAlignment( (G3TimestreamMap)arg1) -> bool``
+
+.. _spt3g.core.G3TimestreamMap.Compactify:
+
+**spt3g.core.G3TimestreamMap.Compactify**
+
+``Compactify( (G3TimestreamMap)arg1) -> None :``
+    If member timestreams are stored non-contiguously, repack all data into a contiguous block. Requires timestreams be aligned and the same data type. Done implicitly by numpy.asarray().
 
 
 
