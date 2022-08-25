@@ -1,6 +1,6 @@
 import numpy
-from spt3g.core import G3Timestream, DoubleVector, G3VectorDouble, G3TimestreamMap, G3Time, usefulfunc
-from spt3g.core import G3Units, log_fatal, log_warn
+from spt3g.core import G3Timestream, DoubleVector, G3VectorDouble, G3TimestreamMap, G3VectorTime, G3Time, IntVector, G3VectorInt
+from spt3g.core import G3Units, log_fatal, log_warn, usefulfunc
 
 __all__ = ['concatenate_timestreams']
 
@@ -44,58 +44,72 @@ G3Timestream.astype = timestreamastype
 # Provide all the numpy binary arithmetic operators, first non-in-place, then
 # in-place, with slightly different semantics
 def numpybinarywrap(a, b, op):
-    if isinstance(b, G3Timestream):
+    is_tsa = isinstance(a, G3Timestream)
+    is_tsb = isinstance(b, G3Timestream)
+    if is_tsa and is_tsb:
         a._assert_congruence(b)
-    out = G3Timestream(op(numpy.asarray(a), numpy.asarray(b)))
-    out.units = a.units
-    out.start = a.start
-    out.stop = a.stop
+    v = op(numpy.asarray(a), numpy.asarray(b))
+    if is_tsa:
+        out = a.__class__(v)
+        out.units = a.units
+        out.start = a.start
+        out.stop = a.stop
+    elif is_tsb:
+        out = b.__class__(v)
+        out.units = b.units
+        out.start = b.start
+        out.stop = b.stop
+    else:
+        out = a.__class__(v)
     return out
 
 for x in ['__add__', '__and__', '__div__', '__divmod__', '__floordiv__', 
-          '__mul__', '__neg__', '__or__', '__pow__', '__sub__', '__radd__',
+          '__mul__', '__or__', '__pow__', '__sub__', '__radd__',
           '__rdiv__', '__rdivmod__', '__rmod__', '__rmul__', '__rpow__',
           '__rsub__', '__rtruediv__', '__truediv__']:
-    if x in numpy.ndarray.__dict__:
-        setattr(G3Timestream, x, 
+    if x not in numpy.ndarray.__dict__:
+        continue
+    for cls in [G3Timestream, G3VectorDouble, DoubleVector]:
+        setattr(cls, x,
                 lambda a, b, op=numpy.ndarray.__dict__[x]: numpybinarywrap(a, b, op))
 
+# unary operators
+for x in ['__neg__', '__pos__', '__invert__', '__abs__', '__bool__']:
+    if x not in numpy.ndarray.__dict__:
+        continue
+    for cls in [G3Timestream, G3VectorDouble, DoubleVector, G3VectorInt, IntVector]:
+        setattr(cls, x,
+                lambda a, op=numpy.ndarray.__dict__[x]: a.__class__(op(numpy.asarray(a))))
+
 def numpyinplacebinarywrap(a, b, op):
-    if isinstance(b, G3Timestream):
+    if isinstance(a, G3Timestream) and isinstance(b, G3Timestream):
         a._assert_congruence(b)
     op(numpy.asarray(a), numpy.asarray(b))
     return a
 
 for x in ['__iadd__', '__iand__', '__idiv__', '__ifloordiv__', '__imod__', 
           '__imul__', '__ior__', '__ipow__', '__isub__', '__itruediv__']:
-    if x in numpy.ndarray.__dict__:
-        setattr(G3Timestream, x, 
+    if x not in numpy.ndarray.__dict__:
+        continue
+    for cls in [G3Timestream, G3VectorDouble, DoubleVector, G3VectorInt, IntVector]:
+        setattr(cls, x,
                 lambda a, b, op=numpy.ndarray.__dict__[x]: numpyinplacebinarywrap(a, b, op))
 
 # Bind some useful nativish binary operators
 for x in ['__eq__', '__ge__', '__gt__', '__le__', '__lt__', '__neq__']:
-    if x in numpy.ndarray.__dict__:
-        setattr(G3Timestream, x, 
-                lambda a, b, op=x: numpy.ndarray.__dict__[op](numpy.asarray(a), numpy.asarray(b)))
-G3Timestream.mean = lambda a, *args, **kwargs: numpy.ndarray.mean(numpy.asarray(a), *args, **kwargs)
-G3Timestream.min = lambda a, *args, **kwargs: numpy.ndarray.min(numpy.asarray(a), *args, **kwargs)
-G3Timestream.max = lambda a, *args, **kwargs: numpy.ndarray.max(numpy.asarray(a), *args, **kwargs)
+    if x not in numpy.ndarray.__dict__:
+        continue
+    for cls in [G3Timestream, G3VectorDouble, DoubleVector, G3VectorInt, IntVector]:
+        setattr(cls, x,
+                lambda a, b, op=numpy.ndarray.__dict__[x]: op(numpy.asarray(a), numpy.asarray(b)))
 
-# Bind a few useful function to double vectors (more or less timestreams) so
-# that unit conversions are easy.
-DoubleVector.__sub__ = lambda self, val: DoubleVector(numpy.asarray(self)-val)
-DoubleVector.__add__ = lambda self, val: DoubleVector(numpy.asarray(self)+val)
-DoubleVector.__mul__ = lambda self, val: DoubleVector(numpy.asarray(self)*val)
-DoubleVector.__div__ = lambda self, val: DoubleVector(numpy.asarray(self)/val)
-DoubleVector.__truediv__ = DoubleVector.__div__
-
-# Prevent G3VectorDoubles from turning into DoubleVector on mult. C++ has no
-# idea what to do with them.
-G3VectorDouble.__add__ = lambda self, val: G3VectorDouble(numpy.asarray(self)+val)
-G3VectorDouble.__sub__ = lambda self, val: G3VectorDouble(numpy.asarray(self)-val)
-G3VectorDouble.__mul__ = lambda self, val: G3VectorDouble(numpy.asarray(self)*val)
-G3VectorDouble.__div__ = lambda self, val: G3VectorDouble(numpy.asarray(self)/val)
-G3VectorDouble.__truediv__ = G3VectorDouble.__div__
+# Bind some useful methods
+for x in ["sum", "mean", "any", "all", "min", "max", "argmin", "argmax", "var", "std"]:
+    if x not in numpy.ndarray.__dict__:
+        continue
+    for cls in [G3Timestream, G3VectorDouble, DoubleVector, G3VectorInt, IntVector]:
+        setattr(cls, x,
+                lambda a, *args, op=numpy.ndarray.__dict__[x], **kwargs: op(numpy.asarray(a), *args, **kwargs))
 
 #add concatenation routines to g3timestream objects
 def _concatenate_timestreams(cls, ts_lst, ts_rounding_error=0.6, ts_interp_threshold=0):
@@ -225,6 +239,7 @@ def concatenate_timestreams(ts_lst, ts_rounding_error=0.6, ts_interp_threshold=0
     return ts_lst[0].concatenate(ts_lst, ts_rounding_error, ts_interp_threshold)
 
 
+@property
 def timestream_elapsed(self):
     '''
     Compute elapsed time array for samples.
@@ -236,14 +251,31 @@ def timestream_elapsed(self):
 G3Timestream.elapsed = timestream_elapsed
 G3TimestreamMap.elapsed = timestream_elapsed
 
-
+@property
 def timestream_t(self):
     '''
     Compute time vector for samples.
     '''
-    times = self.elapsed() + self.start.time
-    return [G3Time(t) for t in times]
+    times = self.elapsed + self.start.time
+    return G3VectorTime(times)
 
 G3Timestream.times = timestream_t
 G3TimestreamMap.times = timestream_t
 
+@property
+def tsm_names(self):
+    '''
+    Get timestream map channel names.
+    '''
+    return list(self.keys())
+
+G3TimestreamMap.names = tsm_names
+
+@property
+def tsm_data(self):
+    '''
+    Return a numpy array view into the underlying 2D array of the timestream map
+    '''
+    return np.asarray(self)
+
+G3TimestreamMap.data = tsm_data
