@@ -46,40 +46,32 @@ G3Timestream.astype = timestreamastype
 def numpybinarywrap(a, b, op):
     is_tsa = isinstance(a, G3Timestream)
     is_tsb = isinstance(b, G3Timestream)
-    if is_tsa and is_tsb:
-        a._assert_congruence(b)
-    v = op(numpy.asarray(a), numpy.asarray(b))
     if is_tsa:
-        out = a.__class__(v)
+        if is_tsb:
+            a._assert_congruence(b)
+        cls = a.__class__
+    elif is_tsb:
+        cls = b.__class__
+    else:
+        cls = a.__class__
+    if isinstance(a, (IntVector, G3VectorInt)):
+        if isinstance(b, float):
+            cls = G3VectorDouble if isinstance(a, G3VectorInt) else DoubleVector
+        elif not isinstance(b, (IntVector, G3VectorInt)):
+            # let b's operators handle it
+            return NotImplemented
+        if "truediv" in op.__name__:
+            cls = G3VectorDouble if isinstance(a, G3VectorInt) else DoubleVector
+    out = cls(op(numpy.asarray(a), numpy.asarray(b)))
+    if is_tsa:
         out.units = a.units
         out.start = a.start
         out.stop = a.stop
     elif is_tsb:
-        out = b.__class__(v)
         out.units = b.units
         out.start = b.start
         out.stop = b.stop
-    else:
-        out = a.__class__(v)
     return out
-
-for x in ['__add__', '__and__', '__div__', '__divmod__', '__floordiv__', 
-          '__mul__', '__or__', '__pow__', '__sub__', '__radd__',
-          '__rdiv__', '__rdivmod__', '__rmod__', '__rmul__', '__rpow__',
-          '__rsub__', '__rtruediv__', '__truediv__']:
-    if x not in numpy.ndarray.__dict__:
-        continue
-    for cls in [G3Timestream, G3VectorDouble, DoubleVector]:
-        setattr(cls, x,
-                lambda a, b, op=numpy.ndarray.__dict__[x]: numpybinarywrap(a, b, op))
-
-# unary operators
-for x in ['__neg__', '__pos__', '__invert__', '__abs__', '__bool__']:
-    if x not in numpy.ndarray.__dict__:
-        continue
-    for cls in [G3Timestream, G3VectorDouble, DoubleVector, G3VectorInt, IntVector]:
-        setattr(cls, x,
-                lambda a, op=numpy.ndarray.__dict__[x]: a.__class__(op(numpy.asarray(a))))
 
 def numpyinplacebinarywrap(a, b, op):
     if isinstance(a, G3Timestream) and isinstance(b, G3Timestream):
@@ -87,19 +79,37 @@ def numpyinplacebinarywrap(a, b, op):
     op(numpy.asarray(a), numpy.asarray(b))
     return a
 
-for x in ['__iadd__', '__iand__', '__idiv__', '__ifloordiv__', '__imod__', 
-          '__imul__', '__ior__', '__ipow__', '__isub__', '__itruediv__']:
+all_cls = [G3Timestream, G3VectorDouble, DoubleVector, G3VectorInt, IntVector]
+
+for attr in ['add', 'sub', 'mul', 'div', 'truediv', 'floordiv', 'mod', 'pow',
+             'and', 'or', 'xor', 'lshift', 'rshift']:
+    for cls in all_cls:
+        x = '__{}__'.format(attr)
+        if x in numpy.ndarray.__dict__:
+            setattr(cls, x,
+                    lambda a, b, op=numpy.ndarray.__dict__[x]: numpybinarywrap(a, b, op))
+        x = '__r{}__'.format(attr)
+        if x in numpy.ndarray.__dict__:
+            setattr(cls, x,
+                    lambda a, b, op=numpy.ndarray.__dict__[x]: numpybinarywrap(a, b, op))
+        x = '__i{}__'.format(attr)
+        if x in numpy.ndarray.__dict__:
+            setattr(cls, x,
+                    lambda a, b, op=numpy.ndarray.__dict__[x]: numpyinplacebinarywrap(a, b, op))
+
+# unary operators
+for x in ['__neg__', '__pos__', '__invert__', '__abs__', '__bool__']:
     if x not in numpy.ndarray.__dict__:
         continue
-    for cls in [G3Timestream, G3VectorDouble, DoubleVector, G3VectorInt, IntVector]:
+    for cls in all_cls:
         setattr(cls, x,
-                lambda a, b, op=numpy.ndarray.__dict__[x]: numpyinplacebinarywrap(a, b, op))
+                lambda a, op=numpy.ndarray.__dict__[x]: a.__class__(op(numpy.asarray(a))))
 
 # Bind some useful nativish binary operators
 for x in ['__eq__', '__ge__', '__gt__', '__le__', '__lt__', '__neq__']:
     if x not in numpy.ndarray.__dict__:
         continue
-    for cls in [G3Timestream, G3VectorDouble, DoubleVector, G3VectorInt, IntVector]:
+    for cls in all_cls:
         setattr(cls, x,
                 lambda a, b, op=numpy.ndarray.__dict__[x]: op(numpy.asarray(a), numpy.asarray(b)))
 
@@ -107,7 +117,7 @@ for x in ['__eq__', '__ge__', '__gt__', '__le__', '__lt__', '__neq__']:
 for x in ["sum", "mean", "any", "all", "min", "max", "argmin", "argmax", "var", "std"]:
     if x not in numpy.ndarray.__dict__:
         continue
-    for cls in [G3Timestream, G3VectorDouble, DoubleVector, G3VectorInt, IntVector]:
+    for cls in all_cls:
         setattr(cls, x,
                 lambda a, *args, op=numpy.ndarray.__dict__[x], **kwargs: op(numpy.asarray(a), *args, **kwargs))
 
