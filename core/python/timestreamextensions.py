@@ -57,8 +57,11 @@ def numpybinarywrap(a, b, op):
     if isinstance(a, (IntVector, G3VectorInt)):
         if isinstance(b, float):
             cls = G3VectorDouble if isinstance(a, G3VectorInt) else DoubleVector
+        elif isinstance(b, int):
+            pass
         elif not isinstance(b, (IntVector, G3VectorInt)):
             # let b's operators handle it
+            # NB: if b is a numpy scalar, this operation will return a numpy array!
             return NotImplemented
         if "truediv" in op.__name__:
             cls = G3VectorDouble if isinstance(a, G3VectorInt) else DoubleVector

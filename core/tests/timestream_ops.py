@@ -2,12 +2,15 @@ import numpy as np
 from spt3g.core import G3Timestream, G3VectorDouble, DoubleVector, G3VectorInt, IntVector
 
 s = 5.0  # python float
+si = 5  # python integer
 v = np.abs(np.random.randn(10))  # numpy array
-vi = np.random.randint(0, 10, 10)
+vi = np.random.randint(1, 10, 10)
 f = v[0]  # numpy float
+fi = vi[0]  # numpy integer
 
-for a in [s, f, v, G3Timestream(v), G3VectorDouble(v), DoubleVector(v), G3VectorInt(vi), IntVector(vi)]:
-    for b in [s, f, v, G3Timestream(v), G3VectorDouble(v), DoubleVector(v)]:
+for a in [s, f, v, si, fi, vi, G3Timestream(v), G3VectorDouble(v), DoubleVector(v), G3VectorInt(vi), IntVector(vi)]:
+    for b in [s, f, v, si, fi, vi, G3Timestream(v), G3VectorDouble(v), DoubleVector(v)]:
+        print(type(a), type(b))
         # binary operators
         v1 = a if np.isscalar(a) or isinstance(a, np.ndarray) else vi if isinstance(a, (G3VectorInt, IntVector)) else v
         v2 = b if np.isscalar(b) or isinstance(b, np.ndarray) else vi if isinstance(b, (G3VectorInt, IntVector)) else v
