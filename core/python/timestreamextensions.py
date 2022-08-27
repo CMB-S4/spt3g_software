@@ -1,5 +1,5 @@
 import numpy
-from spt3g.core import G3Timestream, DoubleVector, G3VectorDouble, G3TimestreamMap, G3VectorTime, G3Time, IntVector, G3VectorInt
+from spt3g.core import G3Timestream, DoubleVector, G3VectorDouble, G3TimestreamMap, G3VectorTime, G3Time, IntVector, G3VectorInt, G3VectorComplexDouble, ComplexDoubleVector
 from spt3g.core import G3Units, log_fatal, log_warn, usefulfunc
 
 __all__ = ['concatenate_timestreams']
@@ -82,7 +82,7 @@ def numpyinplacebinarywrap(a, b, op):
     op(numpy.asarray(a), numpy.asarray(b))
     return a
 
-all_cls = [G3Timestream, G3VectorDouble, DoubleVector, G3VectorInt, IntVector]
+all_cls = [G3Timestream, G3VectorDouble, DoubleVector, G3VectorInt, IntVector, G3VectorComplexDouble, ComplexDoubleVector]
 
 for attr in ['add', 'sub', 'mul', 'div', 'truediv', 'floordiv', 'mod', 'pow',
              'and', 'or', 'xor', 'lshift', 'rshift']:
