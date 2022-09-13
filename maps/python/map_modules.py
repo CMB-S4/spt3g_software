@@ -230,11 +230,19 @@ def ValidateMaps(frame, ignore_missing_weights=False):
                 unit="ValidateMaps",
             )
         if k in "TQU":
-            if k == "U" and frame[k].pol_conv is maps.MapPolConv.none:
-                core.log_warn(
-                    "Map frame %s: U map polarization convention not set" % map_id,
-                    unit="ValidateMaps",
-                )
+            if k == "U":
+                if isinstance(frame[k], maps.FlatSkyMap) and (
+                    frame[k].flat_pol != frame["Q"].flat_pol
+                ):
+                    core.log_fatal(
+                        "Map frame %s: Q and U maps have different flat_pol" % map_id,
+                        unit="ValidateMaps",
+                    )
+                if frame[k].pol_conv is maps.MapPolConv.none:
+                    core.log_warn(
+                        "Map frame %s: U map polarization convention not set" % map_id,
+                        unit="ValidateMaps",
+                    )
             if frame[k].weighted and not ignore_missing_weights:
                 if "Wpol" not in frame and "Wunpol" not in frame:
                     core.log_warn(
@@ -261,6 +269,15 @@ def ValidateMaps(frame, ignore_missing_weights=False):
                 core.log_fatal(
                     "Map frame %s: Found polarized maps with unpolarized weights"
                     % map_id,
+                    unit="ValidateMaps",
+                )
+            if (
+                frame[k].polarized
+                and isinstance(frame[k].QQ, maps.FlatSkyMap)
+                and frame[k].flat_pol != frame["Q"].flat_pol
+            ):
+                core.log_fatal(
+                    "Map frame %s: %s and U maps have different flat_pol" % (map_id, k),
                     unit="ValidateMaps",
                 )
 
