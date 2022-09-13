@@ -50,11 +50,13 @@ def numpybinarywrap(a, b, op):
         if is_tsb:
             a._assert_congruence(b)
         cls = a.__class__
-    elif is_tsb:
+    elif is_tsb and not isinstance(a, (G3VectorComplexDouble, ComplexDoubleVector)):
         cls = b.__class__
     else:
         cls = a.__class__
-    if isinstance(a, (IntVector, G3VectorInt)):
+    if not isinstance(a, (G3VectorComplexDouble, ComplexDoubleVector)) and numpy.iscomplex(b).any():
+        cls = G3VectorComplexDouble if isinstance(a, (G3VectorDouble, G3VectorInt, G3Timestream)) else ComplexDoubleVector
+    elif isinstance(a, (IntVector, G3VectorInt)):
         if isinstance(b, float):
             cls = G3VectorDouble if isinstance(a, G3VectorInt) else DoubleVector
         elif isinstance(b, int):
