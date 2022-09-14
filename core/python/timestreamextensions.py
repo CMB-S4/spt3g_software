@@ -1,5 +1,6 @@
 import numpy
-from spt3g.core import G3Timestream, DoubleVector, G3VectorDouble, G3TimestreamMap, G3VectorTime, G3Time, IntVector, G3VectorInt, G3VectorComplexDouble, ComplexDoubleVector
+from spt3g.core import G3Timestream, DoubleVector, G3VectorDouble, G3TimestreamMap, G3VectorTime, G3Time, IntVector, G3VectorInt, \
+    G3VectorComplexDouble, ComplexDoubleVector, BoolVector, G3VectorBool
 from spt3g.core import G3Units, log_fatal, log_warn, usefulfunc
 
 __all__ = ['concatenate_timestreams']
@@ -41,42 +42,42 @@ def timestreamastype(a, dtype):
     return out
 G3Timestream.astype = timestreamastype
 
+# XXX consider replacing all of this with the numpy __array_ufunc__ machinery
+
 # Provide all the numpy binary arithmetic operators, first non-in-place, then
 # in-place, with slightly different semantics
 def numpybinarywrap(a, b, op):
+    is_g3 = 'G3' in a.__class__.__name__ or 'G3' in b.__class__.__name__
     is_tsa = isinstance(a, G3Timestream)
     is_tsb = isinstance(b, G3Timestream)
+    is_cxa = isinstance(a, (G3VectorComplexDouble, ComplexDoubleVector))
+    is_cxb = isinstance(b, (G3VectorComplexDouble, ComplexDoubleVector))
+    cls = a.__class__
     if is_tsa:
         if is_tsb:
             a._assert_congruence(b)
-        cls = a.__class__
-    elif is_tsb and not isinstance(a, (G3VectorComplexDouble, ComplexDoubleVector)):
-        cls = b.__class__
-    else:
-        cls = a.__class__
-    if not isinstance(a, (G3VectorComplexDouble, ComplexDoubleVector)) and numpy.iscomplex(b).any():
-        cls = G3VectorComplexDouble if isinstance(a, (G3VectorDouble, G3VectorInt, G3Timestream)) else ComplexDoubleVector
-    elif isinstance(a, (IntVector, G3VectorInt)):
-        if isinstance(b, float):
-            cls = G3VectorDouble if isinstance(a, G3VectorInt) else DoubleVector
-        elif isinstance(b, int):
-            pass
-        elif not isinstance(b, (IntVector, G3VectorInt)):
-            # let b's operators handle it
-            # NB: if b is a numpy scalar, this operation will return a numpy array!
+        elif is_cxb:
             return NotImplemented
-        if "truediv" in op.__name__:
-            cls = G3VectorDouble if isinstance(a, G3VectorInt) else DoubleVector
-    out = cls(op(numpy.asarray(a), numpy.asarray(b)))
-    if is_tsa:
+    elif is_cxa:
+        pass
+    elif is_tsb or is_cxb:
+        return NotImplemented
+    out = op(numpy.asarray(a), numpy.asarray(b))
+    if out.dtype.kind == 'c':
+        return G3VectorComplexDouble(out) if is_g3 else ComplexDoubleVector(out)
+    elif is_tsa:
+        out = G3Timestream(out)
         out.units = a.units
         out.start = a.start
         out.stop = a.stop
-    elif is_tsb:
-        out.units = b.units
-        out.start = b.start
-        out.stop = b.stop
-    return out
+        return out
+    elif out.dtype.kind == 'f':
+        return G3VectorDouble(out) if is_g3 else DoubleVector(out)
+    elif out.dtype.kind in 'iu':
+        return G3VectorInt(out) if is_g3 else IntVector(out)
+    elif out.dtype.kind == 'b':
+        return G3VectorBool(out) if is_g3 else BoolVector(G3VectorBool(out))
+    return NotImplemented
 
 def numpyinplacebinarywrap(a, b, op):
     if isinstance(a, G3Timestream) and isinstance(b, G3Timestream):
@@ -84,7 +85,8 @@ def numpyinplacebinarywrap(a, b, op):
     op(numpy.asarray(a), numpy.asarray(b))
     return a
 
-all_cls = [G3Timestream, G3VectorDouble, DoubleVector, G3VectorInt, IntVector, G3VectorComplexDouble, ComplexDoubleVector]
+all_cls = [G3Timestream, G3VectorDouble, DoubleVector, G3VectorInt, IntVector,
+           G3VectorComplexDouble, ComplexDoubleVector, G3VectorBool, BoolVector]
 
 for attr in ['add', 'sub', 'mul', 'div', 'truediv', 'floordiv', 'mod', 'pow',
              'and', 'or', 'xor', 'lshift', 'rshift']:
@@ -291,6 +293,6 @@ def tsm_data(self):
     '''
     Return a numpy array view into the underlying 2D array of the timestream map
     '''
-    return np.asarray(self)
+    return numpy.asarray(self)
 
 G3TimestreamMap.data = tsm_data

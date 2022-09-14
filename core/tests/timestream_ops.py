@@ -7,6 +7,8 @@ from spt3g.core import (
     IntVector,
     G3VectorComplexDouble,
     ComplexDoubleVector,
+    G3VectorBool,
+    BoolVector,
 )
 
 s = 5.0  # python float
@@ -18,8 +20,11 @@ vc = v + 1j * v  # numpy complex array
 f = v[0]  # numpy float
 fi = vi[0]  # numpy integer
 fc = vc[0]  # numpy complex float
+sb = True
+vb = v.astype(bool)
+fb = vb[0]
 
-for a in [
+all_arr = [
     s,
     f,
     v,
@@ -29,87 +34,107 @@ for a in [
     sc,
     fc,
     vc,
+    sb,
+    fb,
+    vb,
     G3Timestream(v),
+    G3Timestream(vi),
     G3VectorDouble(v),
     DoubleVector(v),
     G3VectorInt(vi),
     IntVector(vi),
     G3VectorComplexDouble(vc),
     ComplexDoubleVector(vc),
-]:
-    for b in [
-        s,
-        f,
-        v,
-        si,
-        fi,
-        vi,
-        sc,
-        fc,
-        vc,
-        G3Timestream(v),
-        G3VectorDouble(v),
-        DoubleVector(v),
-        G3VectorInt(vi),
-        IntVector(vi),
-        G3VectorComplexDouble(vc),
-        ComplexDoubleVector(vc),
-    ]:
-        print(type(a), type(b))
-        # binary operators
-        if np.isscalar(a) or isinstance(a, np.ndarray):
-            v1 = a
-        elif isinstance(a, (G3VectorInt, IntVector)):
-            v1 = vi
-        elif isinstance(a, (G3VectorComplexDouble, ComplexDoubleVector)):
-            v1 = vc
-        else:
-            v1 = v
-        if np.isscalar(b) or isinstance(b, np.ndarray):
-            v2 = b
-        elif isinstance(b, (G3VectorInt, IntVector)):
-            v2 = vi
-        elif isinstance(b, (G3VectorComplexDouble, ComplexDoubleVector)):
-            v2 = vc
-        else:
-            v2 = v
-        assert np.array_equal(a + b, v1 + v2)
-        assert np.array_equal(a - b, v1 - v2)
-        assert np.array_equal(a * b, v1 * v2)
-        assert np.array_equal(a / b, v1 / v2)
-        if not np.iscomplex(b).any() and not np.iscomplex(a).any():
-            assert np.array_equal(a // b, v1 // v2)
-            assert np.array_equal(a % b, v1 % v2)
-        assert np.array_equal(a ** b, v1 ** v2)
+    G3VectorBool(vb),
+    BoolVector(G3VectorBool(vb)),
+]
 
-        if np.isscalar(a) or isinstance(a, (np.ndarray, G3VectorInt, IntVector)):
+def check(a1, a2, strict=False):
+    assert np.array_equal(a1, a2)
+    assert np.asarray(a1).dtype.kind == np.asarray(a2).dtype.kind
+
+def copy(v):
+    if isinstance(v, np.ndarray):
+        return v.copy()
+    return v.__class__(v)
+
+for a in all_arr:
+    for b in all_arr:
+        n = "/".join([a.__class__.__name__, b.__class__.__name__])
+        if not ("Vector" in n or "Timestream" in n):
             continue
 
-        if np.iscomplex(b).any():
+        print(type(a), type(b), type(a + b))
+        v1 = a if np.isscalar(a) else np.asarray(a)
+        v2 = b if np.isscalar(b) else np.asarray(b)
+        k1 = np.asarray(a).dtype.kind
+        k2 = np.asarray(b).dtype.kind
+
+        # binary operators
+        if not (k1 == 'b' and k2 == 'b'):
+            check(a + b, v1 + v2)
+            check(a - b, v1 - v2)
+            check(a * b, v1 * v2)
+            check(a / b, v1 / v2)
+            if k1 != 'c' and k2 != 'c':
+                check(a // b, v1 // v2)
+                check(a % b, v1 % v2)
+            check(a ** b, v1 ** v2)
+
+        if k1 in 'iub' and k2 in 'iub':
+            check(a | b, v1 | v2)
+            check(a & b, v1 & v2)
+            check(a ^ b, v1 ^ v2)
+            check(a << 1, v1 << 1)
+            check(a >> 1, v1 >> 1)
+
+        if np.isscalar(a) or k1 == 'b':
+            continue
+
+        korder = list('buifc')
+        if korder.index(np.asarray(a).dtype.kind) < korder.index(np.asarray(b).dtype.kind):
             continue
 
         # in-place binary operators
-        c = a.__class__(a)
+        c = copy(a)
         c += b
+        check(c, a + b)
         assert isinstance(c, a.__class__)
-        assert np.array_equal(c, a + b)
 
-        c = a.__class__(a)
+        c = copy(a)
         c -= b
+        check(c, a - b)
         assert isinstance(c, a.__class__)
-        assert np.array_equal(c, a - b)
 
-        c = a.__class__(a)
+        c = copy(a)
         c *= b
+        check(c, a * b)
         assert isinstance(c, a.__class__)
-        assert np.array_equal(c, a * b)
 
-        c = a.__class__(a)
+        if k1 in 'iub':
+            c = copy(a)
+            c |= b
+            check(c, a | b)
+            assert isinstance(c, a.__class__)
+
+            c = copy(a)
+            c &= b
+            check(c, a & b)
+            assert isinstance(c, a.__class__)
+
+            c = copy(a)
+            c ^= b
+            check(c, a ^ b)
+            assert isinstance(c, a.__class__)
+
+            continue
+
+        c = copy(a)
         c /= b
+        check(c, a / b)
         assert isinstance(c, a.__class__)
-        assert np.array_equal(c, a / b)
 
-    if isinstance(a, np.ndarray) or np.isscalar(a):
+    if np.isscalar(a) or isinstance(a, np.ndarray):
         continue
 
     for attr in [
@@ -124,4 +149,4 @@ for a in [
         "var",
         "std",
     ]:
-        assert getattr(a, attr)() == getattr(np, attr)(a)
+        assert getattr(a, attr)() == getattr(np, attr)(v1)
