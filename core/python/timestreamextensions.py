@@ -63,20 +63,21 @@ def numpybinarywrap(a, b, op):
     elif is_tsb or is_cxb:
         return NotImplemented
     out = op(numpy.asarray(a), numpy.asarray(b))
-    if out.dtype.kind == 'c':
+    k = out.dtype.kind
+    if k == 'c':
         return G3VectorComplexDouble(out) if is_g3 else ComplexDoubleVector(out)
+    elif k == 'b':
+        return G3VectorBool(out) if is_g3 else BoolVector(G3VectorBool(out))
     elif is_tsa:
         out = G3Timestream(out)
         out.units = a.units
         out.start = a.start
         out.stop = a.stop
         return out
-    elif out.dtype.kind == 'f':
+    elif k == 'f':
         return G3VectorDouble(out) if is_g3 else DoubleVector(out)
-    elif out.dtype.kind in 'iu':
-        return G3VectorInt(out) if is_g3 else IntVector(out)
-    elif out.dtype.kind == 'b':
-        return G3VectorBool(out) if is_g3 else BoolVector(G3VectorBool(out))
+    elif k in 'iu':
+        return G3VectorInt(out.astype(int)) if is_g3 else IntVector(out.astype(int))
     return NotImplemented
 
 def numpyinplacebinarywrap(a, b, op):
@@ -113,12 +114,12 @@ for x in ['__neg__', '__pos__', '__invert__', '__abs__', '__bool__']:
                 lambda a, op=numpy.ndarray.__dict__[x]: a.__class__(op(numpy.asarray(a))))
 
 # Bind some useful nativish binary operators
-for x in ['__eq__', '__ge__', '__gt__', '__le__', '__lt__', '__neq__']:
+for x in ['__eq__', '__ge__', '__gt__', '__le__', '__lt__', '__ne__']:
     if x not in numpy.ndarray.__dict__:
         continue
     for cls in all_cls:
         setattr(cls, x,
-                lambda a, b, op=numpy.ndarray.__dict__[x]: op(numpy.asarray(a), numpy.asarray(b)))
+                lambda a, b, op=numpy.ndarray.__dict__[x]: numpybinarywrap(a, b, op))
 
 # Bind some useful methods
 for x in ["sum", "mean", "any", "all", "min", "max", "argmin", "argmax", "var", "std"]:
