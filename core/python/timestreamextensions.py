@@ -1,7 +1,7 @@
 import numpy
 from spt3g.core import G3Timestream, DoubleVector, G3VectorDouble, G3TimestreamMap, G3VectorTime, G3Time, IntVector, G3VectorInt, \
     G3VectorComplexDouble, ComplexDoubleVector, BoolVector, G3VectorBool
-from spt3g.core import G3Units, log_fatal, log_warn, usefulfunc
+from spt3g.core import G3Units, log_fatal, log_warn, usefulfunc, G3FrameObject
 
 __all__ = ['concatenate_timestreams']
 
@@ -47,7 +47,7 @@ G3Timestream.astype = timestreamastype
 # Provide all the numpy binary arithmetic operators, first non-in-place, then
 # in-place, with slightly different semantics
 def numpybinarywrap(a, b, op):
-    is_g3 = 'G3' in a.__class__.__name__ or 'G3' in b.__class__.__name__
+    is_g3 = isinstance(a, G3FrameObject) or isinstance(b, G3FrameObject)
     is_tsa = isinstance(a, G3Timestream)
     is_tsb = isinstance(b, G3Timestream)
     is_cxa = isinstance(a, (G3VectorComplexDouble, ComplexDoubleVector))
