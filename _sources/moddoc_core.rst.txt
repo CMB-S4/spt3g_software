@@ -1933,6 +1933,10 @@ Detector timestream. Includes a units field and start and stop times. Can otherw
 
 * **ndim**: No Doc (Shame!)
 
+* **elapsed**: Compute elapsed time array for samples.
+
+* **times**: Compute time vector for samples.
+
 
 *Methods:*
 
@@ -1957,7 +1961,7 @@ Collection of timestreams indexed by logical detector ID
 	
 	``G3TimestreamMap( (G3TimestreamMap)arg2)``
 	
-	``G3TimestreamMap( (StringVector)keys, (object)data [, (G3Time)start=<spt3g.core.G3Time object at 0x7f4896399e40> [, (G3Time)stop=<spt3g.core.G3Time object at 0x7f4896399eb0> [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None [, (bool)copy_data=True]]]])`` :
+	``G3TimestreamMap( (StringVector)keys, (object)data [, (G3Time)start=<spt3g.core.G3Time object at 0x7f7928f75e40> [, (G3Time)stop=<spt3g.core.G3Time object at 0x7f7928f75eb0> [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None [, (bool)copy_data=True]]]])`` :
 	    Create a timestream map from a numpy array or other numeric python iterable. Each row of the 2D input array will correspond to a single timestream, with the key set to the correspondingly-indexed entry of <keys>. If <copy_data> is True (default), the data will be copied into the output data structure. If False, the timestream map will provide a view into the given numpy array.
 	
 	``G3TimestreamMap( (list)arg2)`` :
@@ -1983,6 +1987,14 @@ Collection of timestreams indexed by logical detector ID
 * **n_samples**: Number of samples in the timestream. Equivalent to the length of one of the timestreams.
 
 * **units**: Units of the data in the timestream, stored as one of the members of core.G3TimestreamUnits.
+
+* **elapsed**: Compute elapsed time array for samples.
+
+* **times**: Compute time vector for samples.
+
+* **names**: Get timestream map channel names.
+
+* **data**: Return a numpy array view into the underlying 2D array of the timestream map
 
 
 *Methods:*

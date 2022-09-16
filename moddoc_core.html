@@ -1352,6 +1352,8 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <li><p><strong>n_samples</strong>: Number of samples in the timestream. Equivalent to len(ts)</p></li>
 <li><p><strong>shape</strong>: No Doc (Shame!)</p></li>
 <li><p><strong>ndim</strong>: No Doc (Shame!)</p></li>
+<li><p><strong>elapsed</strong>: Compute elapsed time array for samples.</p></li>
+<li><p><strong>times</strong>: Compute time vector for samples.</p></li>
 </ul>
 <p><em>Methods:</em></p>
 <p id="spt3g-core-g3timestream-setflaccompression"><strong>spt3g.core.G3Timestream.SetFLACCompression</strong></p>
@@ -1367,7 +1369,7 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3TimestreamMap()</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">G3TimestreamMap(</span> <span class="pre">(G3TimestreamMap)arg2)</span></code></p>
 <dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">G3TimestreamMap(</span> <span class="pre">(StringVector)keys,</span> <span class="pre">(object)data</span> <span class="pre">[,</span> <span class="pre">(G3Time)start=&lt;spt3g.core.G3Time</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7f4896399e40&gt;</span> <span class="pre">[,</span> <span class="pre">(G3Time)stop=&lt;spt3g.core.G3Time</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7f4896399eb0&gt;</span> <span class="pre">[,</span> <span class="pre">(G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None</span> <span class="pre">[,</span> <span class="pre">(bool)copy_data=True]]]])</span></code> :</dt><dd><p>Create a timestream map from a numpy array or other numeric python iterable. Each row of the 2D input array will correspond to a single timestream, with the key set to the correspondingly-indexed entry of &lt;keys&gt;. If &lt;copy_data&gt; is True (default), the data will be copied into the output data structure. If False, the timestream map will provide a view into the given numpy array.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">G3TimestreamMap(</span> <span class="pre">(StringVector)keys,</span> <span class="pre">(object)data</span> <span class="pre">[,</span> <span class="pre">(G3Time)start=&lt;spt3g.core.G3Time</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7f7928f75e40&gt;</span> <span class="pre">[,</span> <span class="pre">(G3Time)stop=&lt;spt3g.core.G3Time</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7f7928f75eb0&gt;</span> <span class="pre">[,</span> <span class="pre">(G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None</span> <span class="pre">[,</span> <span class="pre">(bool)copy_data=True]]]])</span></code> :</dt><dd><p>Create a timestream map from a numpy array or other numeric python iterable. Each row of the 2D input array will correspond to a single timestream, with the key set to the correspondingly-indexed entry of &lt;keys&gt;. If &lt;copy_data&gt; is True (default), the data will be copied into the output data structure. If False, the timestream map will provide a view into the given numpy array.</p>
 </dd>
 <dt><code class="docutils literal notranslate"><span class="pre">G3TimestreamMap(</span> <span class="pre">(list)arg2)</span></code> :</dt><dd><p>Initialize with keys and values from a Python dictionary: {‘key’:’value’}</p>
 </dd>
@@ -1384,6 +1386,10 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <li><p><strong>sample_rate</strong>: Computed sample rate of the timestream.</p></li>
 <li><p><strong>n_samples</strong>: Number of samples in the timestream. Equivalent to the length of one of the timestreams.</p></li>
 <li><p><strong>units</strong>: Units of the data in the timestream, stored as one of the members of core.G3TimestreamUnits.</p></li>
+<li><p><strong>elapsed</strong>: Compute elapsed time array for samples.</p></li>
+<li><p><strong>times</strong>: Compute time vector for samples.</p></li>
+<li><p><strong>names</strong>: Get timestream map channel names.</p></li>
+<li><p><strong>data</strong>: Return a numpy array view into the underlying 2D array of the timestream map</p></li>
 </ul>
 <p><em>Methods:</em></p>
 <p id="spt3g-core-g3timestreammap-keys"><strong>spt3g.core.G3TimestreamMap.keys</strong></p>
