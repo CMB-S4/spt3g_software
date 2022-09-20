@@ -5,7 +5,7 @@ from spt3g import core, maps
 
 maplist = [
     maps.FlatSkyMap(np.random.randn(300, 500), core.G3Units.arcmin),
-    maps.HealpixSkyMap(np.random.randn(12 * 256 * 256)),
+    maps.HealpixSkyMap(np.random.randn(12 * 128 * 128)),
 ]
 
 for x in maplist:
@@ -41,6 +41,17 @@ for x in maplist:
     x2[x2 == 0] = np.abs(np.random.randn((x2 == 0).sum())) + 1
     assert((x2 > 0).sum() == nzero)
     assert((x2 == 0).sum() == 0)
+
+    # init and clone
+    mx = maps.G3SkyMapMask(x, True)
+    assert((mx == m).all())
+    mn = maps.G3SkyMapMask(x, False)
+    assert(mn.sum() == 0)
+    a = np.asarray(x).ravel()
+    ma = m.array_clone(a)
+    assert((m == ma).all())
+    mp = m.array_clone(a > 0)
+    assert(((x > 0) == mp).all())
 
     # float comparison
     m1 = x == 0

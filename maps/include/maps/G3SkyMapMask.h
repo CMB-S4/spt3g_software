@@ -23,11 +23,15 @@ class G3SkyMapMask : public G3FrameObject {
 public:
 	G3SkyMapMask(const G3SkyMap &parent, bool use_data = false,
 	    bool zero_nans = false, bool zero_infs = false);
+	G3SkyMapMask(const G3SkyMap &parent, boost::python::object v,
+	    bool zero_nans = false, bool zero_infs = false);
 	G3SkyMapMask(const G3SkyMapMask &);
 	virtual ~G3SkyMapMask() {};
 
 	// Copy
 	boost::shared_ptr<G3SkyMapMask> Clone(bool copy_data = true) const;
+	boost::shared_ptr<G3SkyMapMask> ArrayClone(boost::python::object v,
+	    bool zero_nans = false, bool zero_infs = false) const;
 
 	// Return a (modifiable) pixel value
 	std::vector<bool>::reference operator [] (size_t i);
@@ -109,6 +113,10 @@ private:
 
 	std::vector<bool> data_;
 	boost::shared_ptr<const G3SkyMap> parent_;
+
+	// Populate
+	void FillFromMap(const G3SkyMap &m, bool zero_nans = false, bool zero_infs = false);
+	void FillFromArray(boost::python::object v, bool zero_nans = false, bool zero_infs = false);
 
 	SET_LOGGER("G3SkyMapMask");
 };
