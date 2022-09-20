@@ -93,7 +93,7 @@ namespace G3Units {
 	const double Jy = jansky;
 	const double millijansky = 1e-3 * jansky;
 	const double mJy = millijansky;
-	const double megajansky = 1e3 * jansky;
+	const double megajansky = 1e6 * jansky;
 	const double MJy = megajansky;
 
 	/* Voltage: base unit is volts */
