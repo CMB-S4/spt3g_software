@@ -67,22 +67,26 @@ G3SkyMapMask::FillFromMap(const G3SkyMap &m, bool zero_nans, bool zero_infs)
 
 	for (size_t i = 0; i < m.size(); i++) {
 		double v = m.at(i);
-		if (zero_nans && v != v)
+		if (v == 0)
 			continue;
-		if (zero_infs && !std::isfinite(v))
+		if (zero_nans && std::isnan(v))
 			continue;
-		data_[i] = (v != 0);
+		if (zero_infs && std::isinf(v))
+			continue;
+		data_[i] = true;
 	}
 }
 
 #define FILL_BUFFER(type) \
 	for (size_t i = 0; i < view.len / sizeof(type); i++) { \
 		double v = ((type *)view.buf)[i]; \
-		if (zero_nans && v != v) \
+		if (v == 0) \
 			continue; \
-		if (zero_infs && !std::isfinite(v)) \
+		if (zero_nans && std::isnan(v)) \
 			continue; \
-		data_[i] = (v != 0); \
+		if (zero_infs && std::isinf(v)) \
+			continue; \
+		data_[i] = true; \
 	}
 
 void
