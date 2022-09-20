@@ -223,6 +223,9 @@ G3Pipeline_halt_processing()
     (watt)(W)(milliwatt)(mW)(microwatt)(uW)(nanowatt)(nW)(picowatt)(pW) \
     (attowatt)(aW)(horsepower)(hp) \
     \
+    (sr)(steradian)(steradians)(deg2)(sqdeg)(squaredegree)(squaredegrees) \
+    (arcmin2)(sqarcmin)(squarearcmin) \
+    \
     (jansky)(Jy)(millijansky)(mJy)(megajansky)(MJy) \
     \
     (volt)(V)(millivolt)(mV)(microvolt)(uV) \
