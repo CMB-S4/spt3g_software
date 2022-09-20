@@ -96,6 +96,18 @@ namespace G3Units {
 	const double megajansky = 1e6 * jansky;
 	const double MJy = megajansky;
 
+	/* Solid angle: base unit is rad ** 2 */
+	const double sr = rad * rad;
+	const double steradian = sr;
+	const double steradians = sr;
+	const double deg2 = deg * deg;
+	const double sqdeg = deg2;
+	const double squaredegree = deg2;
+	const double squaredegrees = deg2;
+	const double arcmin2 = arcmin * arcmin;
+	const double sqarcmin = arcmin2;
+	const double squarearcmin = arcmin2;
+
 	/* Voltage: base unit is volts */
 	const double volt = 1;
 	const double V = volt;
