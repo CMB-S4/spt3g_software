@@ -124,8 +124,31 @@ public:
 	virtual G3SkyMapMask operator>(double rhs);
 	virtual G3SkyMapMask operator>=(double rhs);
 
-	virtual bool all() const;
-	virtual bool any() const;
+	virtual bool all(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual bool any(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double sum(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double mean(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double median(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double var(size_t ddof, G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double std(size_t ddof, G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double min(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double max(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual size_t argmin(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual size_t argmax(G3SkyMapMaskConstPtr where=NULL) const;
+
+	virtual double nansum(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double nanmean(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double nanmedian(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double nanvar(size_t ddof, G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double nanstd(size_t ddof, G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double nanmin(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double nanmax(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual size_t nanargmin(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual size_t nanargmax(G3SkyMapMaskConstPtr where=NULL) const;
+
+	virtual G3SkyMapMask isinf(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual G3SkyMapMask isnan(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual G3SkyMapMask isfinite(G3SkyMapMaskConstPtr where=NULL) const;
 
 	virtual void ApplyMask(const G3SkyMapMask &mask, bool inverse=false);
 
@@ -176,7 +199,7 @@ public:
 		throw std::runtime_error("Compactification not implemented");
 	}
 
-	virtual boost::shared_ptr<G3SkyMapMask> MakeMask(bool zero_nans = false,
+	virtual G3SkyMapMaskPtr MakeMask(bool zero_nans = false,
 	    bool zero_infs = false) const;
 
 protected:

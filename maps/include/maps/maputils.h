@@ -39,16 +39,6 @@ void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, G3SkyMapWeightsPtr W=NULL, dou
 std::vector<double> GetMapMoments(G3SkyMapConstPtr m, G3SkyMapMaskConstPtr mask=NULL, int order=2,
     bool ignore_zeros=false, bool ignore_nans=false, bool ignore_infs=false);
 
-// Compute the median of the input map, optionally excluding any pixels that are
-// zero in the input mask, or zero/nan/inf in the input map
-double GetMapMedian(G3SkyMapConstPtr m, G3SkyMapMaskConstPtr mask=NULL,
-    bool ignore_zeros=false, bool ignore_nans=false, bool ignore_infs=false);
-
-// Compute the min and max of the values in the input map, optionally excluding
-// any pixels that are zero in the input mask, or zero/nan/inf in the input map
-std::vector<double> GetMapMinMax(G3SkyMapConstPtr m, G3SkyMapMaskConstPtr mask=NULL,
-    bool ignore_zeros=false, bool ignore_nans=false, bool ignore_infs=false);
-
 // Compute the histogram of the input map pixels, grouping the values into bins
 // defined by the array of bin edges, and optionally excluding any pixels that are
 // zero in the input mask, or zero/nan/inf in the input map

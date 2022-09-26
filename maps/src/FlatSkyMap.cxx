@@ -664,14 +664,6 @@ size_t FlatSkyMap::NpixNonZero() const {
 	return 0;
 }
 
-bool FlatSkyMap::any() const
-{
-	for (auto i: *this)
-		if (i.second != 0)
-			return true;
-	return false;
-}
-
 #define GETSET(name, cname, type)              \
 	type FlatSkyMap::name() const          \
 	{                                      \

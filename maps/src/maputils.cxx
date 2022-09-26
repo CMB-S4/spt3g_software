@@ -398,73 +398,6 @@ std::vector<double> GetMapMoments(G3SkyMapConstPtr m, G3SkyMapMaskConstPtr mask,
 }
 
 
-double
-GetMapMedian(G3SkyMapConstPtr m, G3SkyMapMaskConstPtr mask, bool ignore_zeros, bool ignore_nans,
-    bool ignore_infs)
-{
-
-	std::vector<double> data;
-	size_t npix = mask ? mask->sum() : (ignore_zeros ? m->NpixAllocated() : m->size());
-	if (npix == 0)
-		return 0;
-
-	data.reserve(npix);
-
-	for (size_t i = 0; i < m->size(); i++) {
-		if (!!mask && !mask->at(i))
-			continue;
-		double v = m->at(i);
-		if (ignore_zeros && v == 0)
-			continue;
-		if (ignore_nans && v != v)
-			continue;
-		if (ignore_infs && !std::isfinite(v))
-			continue;
-		data.push_back(v);
-	}
-
-	npix = data.size();
-	size_t n = npix / 2;
-	std::nth_element(data.begin(), data.begin() + n, data.end());
-
-	// odd-length array
-	if (npix % 2)
-		return data[n];
-
-	// even-length array
-	double median = data[n];
-	std::nth_element(data.begin(), data.begin() + n - 1, data.end());
-	return (median + data[n - 1]) / 2.;
-}
-
-
-std::vector<double>
-GetMapMinMax(G3SkyMapConstPtr m, G3SkyMapMaskConstPtr mask, bool ignore_zeros, bool ignore_nans,
-    bool ignore_infs)
-{
-	double min = 0.0 / 0.0;
-	double max = 0.0 / 0.0;
-
-	for (size_t i = 0; i < m->size(); i++) {
-		if (!!mask && !mask->at(i))
-			continue;
-		double v = m->at(i);
-		if (ignore_zeros && v == 0)
-			continue;
-		if (ignore_nans && v != v)
-			continue;
-		if (ignore_infs && !std::isfinite(v))
-			continue;
-		if (v > max || max != max)
-			max = v;
-		if (v < min || min != min)
-			min = v;
-	}
-
-	return {min, max};
-}
-
-
 std::vector<double>
 GetMapHist(G3SkyMapConstPtr m, const std::vector<double> &bin_edges, G3SkyMapMaskConstPtr mask,
     bool ignore_zeros, bool ignore_nans, bool ignore_infs)
@@ -656,20 +589,6 @@ void maputils_pybindings(void){
 		"returned.  If order = 2, 3 or 4 then the variance, skew and kurtosis "
 		"are also included, respectively.  If a mask is supplied, then only "
 		"the non-zero pixels in the mask are included.");
-
-	bp::def("get_map_median", GetMapMedian,
-		(bp::arg("map"), bp::arg("mask")=G3SkyMapMaskConstPtr(),
-		 bp::arg("ignore_zeros")=false, bp::arg("ignore_nans")=false, bp::arg("ignore_infs")=false),
-		"Computes the median of the input map, optionally ignoring zero, nan and/or inf "
-		"values in the map.  Requires making a copy of the data.  If a mask is "
-		"supplied, then only the non-zero pixels in the mask are included.");
-
-	bp::def("get_map_minmax", GetMapMinMax,
-		(bp::arg("map"), bp::arg("mask")=G3SkyMapMaskConstPtr(),
-		 bp::arg("ignore_zeros")=false, bp::arg("ignore_nans")=false, bp::arg("ignore_infs")=false),
-		"Computes the min and max of the input map, optionally ignoring "
-		"zero, nan and/or inf values in the map.  If a mask is supplied, then "
-		"only the non-zero pixels in the mask are included.");
 
 	bp::def("get_map_hist", GetMapHist,
 		(bp::arg("map"), bp::arg("bin_edges"), bp::arg("mask")=G3SkyMapMaskConstPtr(),

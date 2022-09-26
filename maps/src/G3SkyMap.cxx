@@ -6,6 +6,7 @@
 #include <maps/FlatSkyMap.h>
 #include <maps/HealpixSkyMap.h>
 #include <maps/pointing.h>
+#include <cmath>
 
 namespace bp=boost::python;
 
@@ -667,21 +668,343 @@ skymap_compd(>=)
 skymap_compd(>)
 
 bool
-G3SkyMap::all() const
+G3SkyMap::all(G3SkyMapMaskConstPtr where) const
 {
-	for (size_t i = 0; i < size(); i++)
-		if (at(i) == 0)
-			return false;
+	if (!where) {
+		for (size_t i = 0; i < size(); i++) {
+			if (at(i) == 0)
+				return false;
+		}
+	} else {
+		g3_assert(where->IsCompatible(*this));
+
+		for (size_t i = 0; i < size(); i++) {
+			if (!where->at(i))
+				continue;
+			if (at(i) == 0)
+				return false;
+		}
+	}
+
 	return true;
 }
 
 bool
-G3SkyMap::any() const
+G3SkyMap::any(G3SkyMapMaskConstPtr where) const
 {
-	for (size_t i = 0; i < size(); i++)
-		if (at(i) != 0)
-			return true;
+	if (!where) {
+		for (size_t i = 0; i < size(); i++) {
+			if (at(i) != 0)
+				return true;
+		}
+	} else {
+		g3_assert(where->IsCompatible(*this));
+
+		for (size_t i = 0; i < size(); i++) {
+			if (!where->at(i))
+				continue;
+			if (at(i) != 0)
+				return true;
+		}
+	}
+
 	return false;
+}
+
+double
+G3SkyMap::sum(G3SkyMapMaskConstPtr where) const
+{
+	double s = 0;
+
+	if (!where) {
+		for (size_t i = 0; i < size(); i++) {
+			s += at(i);
+		}
+	} else {
+		g3_assert(where->IsCompatible(*this));
+
+		for (size_t i = 0; i < size(); i++) {
+			if (!where->at(i))
+				continue;
+			s += at(i);
+		}
+	}
+
+	return s;
+}
+
+double
+G3SkyMap::mean(G3SkyMapMaskConstPtr where) const
+{
+	double m = 0;
+	size_t n = 0;
+
+	if (!where) {
+		n = size();
+		for (size_t i = 0; i < n; i++) {
+			m += at(i);
+		}
+	} else {
+		g3_assert(where->IsCompatible(*this));
+
+		for (size_t i = 0; i < size(); i++) {
+			if (!where->at(i))
+				continue;
+			m += at(i);
+			n++;
+		}
+	}
+
+	return m / n;
+}
+
+double
+G3SkyMap::var(size_t ddof, G3SkyMapMaskConstPtr where) const
+{
+	double m1 = 0;
+	double m2 = 0;
+	double a, b;
+	size_t n = 0;
+
+	if (!where) {
+		n = size();
+		for (size_t i = 0; i < n; i++) {
+			a = at(i);
+			m1 += a;
+			m2 += a * a;
+		}
+	} else {
+		g3_assert(where->IsCompatible(*this));
+
+		for (size_t i = 0; i < size(); i++) {
+			if (!where->at(i))
+				continue;
+			n++;
+			a = at(i);
+			m1 += a;
+			m2 += a * a;
+		}
+	}
+
+	return (m2 - m1 * m1 / (double)n) / (double)(n - ddof);
+}
+
+double
+G3SkyMap::std(size_t ddof, G3SkyMapMaskConstPtr where) const
+{
+	return sqrt(var(ddof, where));
+}
+
+double
+G3SkyMap::min(G3SkyMapMaskConstPtr where) const
+{
+	double m = std::numeric_limits<double>::infinity();
+	double v;
+
+	if (!where) {
+		for (size_t i = 0; i < size(); i++) {
+			v = at(i);
+			if (v < m)
+				m = v;
+		}
+	} else {
+		g3_assert(where->IsCompatible(*this));
+
+		for (size_t i = 0; i < size(); i++) {
+			if (!where->at(i))
+				continue;
+			v = at(i);
+			if (v < m)
+				m = v;
+		}
+	}
+
+	return m;
+}
+
+size_t
+G3SkyMap::argmin(G3SkyMapMaskConstPtr where) const
+{
+	double m = std::numeric_limits<double>::infinity();
+	double v;
+	size_t j = 0;
+
+	if (!where) {
+		for (size_t i = 0; i < size(); i++) {
+			v = at(i);
+			if (v < m) {
+				m = v;
+				j = i;
+			}
+		}
+	} else {
+		g3_assert(where->IsCompatible(*this));
+
+		for (size_t i = 0; i < size(); i++) {
+			if (!where->at(i))
+				continue;
+			v = at(i);
+			if (v < m) {
+				m = v;
+				j = i;
+			}
+		}
+	}
+
+	return j;
+}
+
+double
+G3SkyMap::max(G3SkyMapMaskConstPtr where) const
+{
+	double m = -1 * std::numeric_limits<double>::infinity();
+	double v;
+
+	if (!where) {
+		for (size_t i = 0; i < size(); i++) {
+			v = at(i);
+			if (v > m)
+				m = v;
+		}
+	} else {
+		g3_assert(where->IsCompatible(*this));
+
+		for (size_t i = 0; i < size(); i++) {
+			if (!where->at(i))
+				continue;
+			v = at(i);
+			if (v > m)
+				m = v;
+		}
+	}
+
+	return m;
+}
+
+size_t
+G3SkyMap::argmax(G3SkyMapMaskConstPtr where) const
+{
+	double m = -1 * std::numeric_limits<double>::infinity();
+	double v;
+	size_t j = 0;
+
+	if (!where) {
+		for (size_t i = 0; i < size(); i++) {
+			v = at(i);
+			if (v > m) {
+				m = v;
+				j = i;
+			}
+		}
+	} else {
+		g3_assert(where->IsCompatible(*this));
+
+		for (size_t i = 0; i < size(); i++) {
+			if (!where->at(i))
+				continue;
+			v = at(i);
+			if (v > m) {
+				m = v;
+				j = i;
+			}
+		}
+	}
+
+	return j;
+}
+
+double
+G3SkyMap::median(G3SkyMapMaskConstPtr where) const
+{
+	std::vector<double> data;
+	size_t npix = where ? where->sum() : size();
+	if (npix == 0)
+		return 0;
+
+	if (!where) {
+		for (size_t i = 0; i < size(); i++) {
+			data.push_back(at(i));
+		}
+	} else {
+		g3_assert(where->IsCompatible(*this));
+
+		for (size_t i = 0; i < size(); i++) {
+			if (!where->at(i))
+				continue;
+			data.push_back(at(i));
+		}
+	}
+
+	npix = data.size();
+	size_t n = npix / 2;
+
+	std::nth_element(data.begin(), data.begin() + n, data.end());
+
+	// odd-length array
+	if (npix % 2)
+		return data[n];
+
+	// even-length array
+	double m = data[n];
+	std::nth_element(data.begin(), data.begin() + n - 1, data.end());
+	return (m + data[n - 1]) / 2.;
+}
+
+#define skymap_test(oper) \
+G3SkyMapMask \
+G3SkyMap::oper(G3SkyMapMaskConstPtr where) const \
+{ \
+	G3SkyMapMask mask(*this); \
+	if (!where) { \
+		for (size_t i = 0; i < size(); i++) { \
+			if (std::oper(at(i))) \
+				mask[i] = true; \
+		} \
+	} else { \
+		g3_assert(where->IsCompatible(*this)); \
+		for (size_t i = 0; i < size(); i++) { \
+			if (!where->at(i)) \
+				continue; \
+			if (std::oper(at(i))) \
+				mask[i] = true; \
+		} \
+	} \
+	return mask; \
+}
+
+skymap_test(isinf);
+skymap_test(isnan);
+skymap_test(isfinite);
+
+#define skymap_nanoper(oper, type) \
+type \
+G3SkyMap::nan##oper(G3SkyMapMaskConstPtr where) const \
+{ \
+	G3SkyMapMask mask = isnan(where); \
+	mask.invert(); \
+	return oper(boost::make_shared<G3SkyMapMask>(mask)); \
+}
+
+skymap_nanoper(sum, double);
+skymap_nanoper(mean, double);
+skymap_nanoper(median, double);
+skymap_nanoper(min, double);
+skymap_nanoper(max, double);
+skymap_nanoper(argmin, size_t);
+skymap_nanoper(argmax, size_t);
+
+double
+G3SkyMap::nanvar(size_t ddof, G3SkyMapMaskConstPtr where) const
+{
+	G3SkyMapMask mask = isnan(where);
+	mask.invert();
+	return var(ddof, boost::make_shared<G3SkyMapMask>(mask));
+}
+
+double
+G3SkyMap::nanstd(size_t ddof, G3SkyMapMaskConstPtr where) const
+{
+	return sqrt(nanvar(ddof, where));
 }
 
 static bool
@@ -692,6 +1015,12 @@ pyskymap_bool(G3SkyMap &skymap)
 	bp::throw_error_already_set();
 
 	return false;
+}
+
+static std::vector<uint64_t>
+pyskymap_nonzero(G3SkyMap &skymap)
+{
+	return skymap.MakeMask()->NonZeroPixels();
 }
 
 void
@@ -1057,6 +1386,7 @@ PYBINDINGS("maps") {
 	    .def("compatible", &G3SkyMap::IsCompatible,
 	      "Returns true if the input argument is a map with matching dimensions "
 	      "and boundaries on the sky.")
+	    .def("nonzero", &pyskymap_nonzero, "Return indices of non-zero pixels in the map")
 
 	    .def("angles_to_pixels", &G3SkyMap::AnglesToPixels,
 	      (bp::arg("alphas"), bp::arg("deltas")),
@@ -1193,8 +1523,35 @@ PYBINDINGS("maps") {
 	    .def(bp::self > double())
 
 	    .def("__bool__", &pyskymap_bool)
-	    .def("any", &G3SkyMap::any)
-	    .def("all", &G3SkyMap::all)
+	    .def("_cany", &G3SkyMap::any, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("_call", &G3SkyMap::all, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("_csum", &G3SkyMap::sum, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("_cmean", &G3SkyMap::mean, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("median", &G3SkyMap::median, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("_cvar", &G3SkyMap::var, (bp::arg("ddof")=0,
+	        bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("_cstd", &G3SkyMap::std, (bp::arg("ddof")=0,
+	        bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("_cmin", &G3SkyMap::min, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("_cmax", &G3SkyMap::max, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("_cargmin", &G3SkyMap::argmin, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("_cargmax", &G3SkyMap::argmax, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+
+	    .def("nansum", &G3SkyMap::nansum, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("nanmean", &G3SkyMap::nanmean, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("nanmedian", &G3SkyMap::nanmedian, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("nanvar", &G3SkyMap::nanvar, (bp::arg("ddof")=0,
+	        bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("nanstd", &G3SkyMap::nanstd, (bp::arg("ddof")=0,
+	        bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("nanmin", &G3SkyMap::nanmin, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("nanmax", &G3SkyMap::nanmax, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("nanargmin", &G3SkyMap::nanargmin, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("nanargmax", &G3SkyMap::nanargmax, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+
+	    .def("isinf", &G3SkyMap::isinf, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("isnan", &G3SkyMap::isnan, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("isfinite", &G3SkyMap::isfinite, (bp::arg("where")=G3SkyMapMaskConstPtr()))
 	;
 	boost::python::implicitly_convertible<G3SkyMapPtr, G3SkyMapConstPtr>();
 

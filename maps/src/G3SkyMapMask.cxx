@@ -520,6 +520,16 @@ skymapmask_pyparent(G3SkyMapMaskPtr m)
 	return boost::const_pointer_cast<G3SkyMap>(m->Parent());
 }
 
+static bool
+skymapmask_pybool(G3SkyMapMaskPtr m)
+{
+	PyErr_SetString(PyExc_ValueError,
+	    "ValueError: The truth value of a G3SkyMapMask is ambiguous. Use m.any() or m.all()");
+	bp::throw_error_already_set();
+
+	return false;
+}
+
 PYBINDINGS("maps")
 {
 	using namespace boost::python;
@@ -556,11 +566,12 @@ PYBINDINGS("maps")
 	  .def<bool (G3SkyMapMask::*)(const G3SkyMap &) const>("compatible", &G3SkyMapMask::IsCompatible, "Returns true if this mask can be applied to the given map.")
 	  .def("__getitem__", &skymapmask_getitem)
 	  .def("__setitem__", &skymapmask_setitem)
+	  .def("__bool__", &skymapmask_pybool)
 	  .def("invert", &skymapmask_pyinvert, "Invert all elements in mask")
-	  .def("all", &G3SkyMapMask::all, "Test whether all elements are non-zero")
-	  .def("any", &G3SkyMapMask::any, "Test whether any elements are non-zero")
-	  .def("sum", &G3SkyMapMask::sum, "Sum of all elements in mask")
-	  .def("nonzero_pixels", &G3SkyMapMask::NonZeroPixels,
+	  .def("_call", &G3SkyMapMask::all, "Test whether all elements are non-zero")
+	  .def("_cany", &G3SkyMapMask::any, "Test whether any elements are non-zero")
+	  .def("_csum", &G3SkyMapMask::sum, "Sum of all elements in mask")
+	  .def("nonzero", &G3SkyMapMask::NonZeroPixels,
 	       "Return a list of indices of non-zero pixels in the mask")
 	  .def("apply_mask", &G3SkyMapMask::ApplyMask,
 	    (bp::arg("mask"), bp::arg("inverse")=false),

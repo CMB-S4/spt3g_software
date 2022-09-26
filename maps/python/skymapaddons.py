@@ -29,6 +29,31 @@ def numpycompat(a, b, op):
 for x in ['__and__', '__divmod__', '__floordiv__', '__iand__', '__ifloordiv__', '__imod__', '__ior__', '__mod__', '__or__', '__rdivmod__', '__rmod__', '__rpow__']:
     setattr(G3SkyMap, x, lambda a, b, op=x: numpycompat(a, b, op))
 
+for op in ["all", "any", "sum", "mean", "var", "std", "min", "max", "argmin", "argmax"]:
+    def ufunc_wrapper(op):
+        def ufunc(a, *args, **kwargs):
+            bound_args = {}
+            bound = getattr(a, "_c" + op)
+            if op in ["std", "var", "nanstd", "nanvar"]:
+                if "ddof" in kwargs:
+                    bound_args["ddof"] = kwargs.pop("ddof")
+            if "where" in kwargs:
+                where = kwargs.pop("where")
+                if isinstance(where, numpy.ndarray):
+                    where = G3SkyMapMask(a, where)
+                bound_args["where"] = where
+            for k in ["axis", "out", "dtype"]:
+                if k in kwargs and kwargs[k] is None:
+                    kwargs.pop(k)
+            if len(args) or len(kwargs):
+                raise TypeError("ufunc {} does not support complex arguments".format(op))
+            return bound(**bound_args)
+        ufunc.__doc__ = getattr(numpy.ndarray, op).__doc__
+        return ufunc
+    setattr(G3SkyMap, op, ufunc_wrapper(op))
+    if op in ["all", "any", "sum"]:
+        setattr(G3SkyMapMask, op, ufunc_wrapper(op))
+
 # Make weight maps so that you can index them and get the full 3x3 weight matrix
 
 def skymapweights_keys(self):

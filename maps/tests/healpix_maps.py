@@ -98,7 +98,7 @@ for delta in range(-90, 91, 10):
     assert not (set(pix1) ^ set(pix2))
 
 mask = maps.make_point_source_mask(x, np.asarray(avec), np.asarray(dvec), np.asarray(rvec))
-assert not (set(mask.nonzero_pixels()) ^ masked)
+assert not (set(mask.nonzero()) ^ masked)
 
 x.shift_ra = True
 
