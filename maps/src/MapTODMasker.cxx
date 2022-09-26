@@ -81,6 +81,8 @@ MapTODMasker::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		return;
 	}
 
+	G3SkyMapConstPtr skymap = mask_->Parent();
+
 	G3TimestreamMapConstPtr tsm =
 	    frame->Get<G3TimestreamMap>(timestreams_);
 	G3MapVectorBoolPtr output(new G3MapVectorBool);
@@ -105,8 +107,8 @@ MapTODMasker::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		// Get per-detector pointing timestream
 		std::vector<double> alpha, delta;
 		get_detector_pointing(bp.x_offset, bp.y_offset, *pointing,
-		    mask_->Parent()->coord_ref, alpha, delta);
-		auto detpointing = mask_->Parent()->AnglesToPixels(alpha, delta);
+		    skymap->coord_ref, alpha, delta);
+		auto detpointing = skymap->AnglesToPixels(alpha, delta);
 
 		det.resize(pointing->size());
 		for (size_t j = 0; j < det.size(); j++)
