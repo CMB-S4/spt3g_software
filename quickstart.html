@@ -14,6 +14,7 @@
     <script src="_static/underscore.js"></script>
     <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Modules" href="modules.html" />
@@ -100,10 +101,10 @@
 <section id="handling-dependencies-on-the-open-science-grid">
 <h3><a class="toc-backref" href="#id5" role="doc-backlink">Handling Dependencies on the Open Science Grid</a><a class="headerlink" href="#handling-dependencies-on-the-open-science-grid" title="Permalink to this heading">¶</a></h3>
 <p>On an OSG or other system with OASIS configured, run this before anything else:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nb">eval</span> <span class="sb">`</span>/cvmfs/spt.opensciencegrid.org/py3-v2/setup.sh<span class="sb">`</span>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span><span class="nb">eval</span> <span class="sb">`</span>/cvmfs/spt.opensciencegrid.org/py3-v4/setup.sh<span class="sb">`</span>
 </pre></div>
 </div>
-<p>This sets up a software environment with all the packages installed by yum, etc. above that you need for the SPT3G software environment, as well as a variety of standard cosmology and astrophysics tasks. You will obtain best results if you place the line above in your <code class="docutils literal notranslate"><span class="pre">.bash_profile</span></code>. Do <em>not</em> put it in <code class="docutils literal notranslate"><span class="pre">.bashrc</span></code> and make <em>sure</em> that this is the <em>only</em> software installation set up in your bash profile. In particular, take care that there are no references to other python installations (Anaconda, etc.).</p>
+<p>This sets up a software environment  with all the packages installed by yum, etc. above that you need for the SPT3G software environment, as well as a variety of standard cosmology and astrophysics tasks. As of late 2022, <cite>py3-v4</cite> is the most recent version of this <a class="reference external" href="https://github.com/SouthPoleTelescope/clustertools">clustertools</a> package; double check that you are using the correct version before you continue. You will obtain best results if you place the line above in your <code class="docutils literal notranslate"><span class="pre">.bash_profile</span></code>. Do <em>not</em> put it in <code class="docutils literal notranslate"><span class="pre">.bashrc</span></code> and make <em>sure</em> that this is the <em>only</em> software installation set up in your bash profile. In particular, take care that there are no references to other python installations (Anaconda, etc.).</p>
 </section>
 <section id="handling-dependencies-on-nersc">
 <h3><a class="toc-backref" href="#id6" role="doc-backlink">Handling Dependencies on NERSC</a><a class="headerlink" href="#handling-dependencies-on-nersc" title="Permalink to this heading">¶</a></h3>
@@ -183,12 +184,12 @@ Frame (Scan) [
 <h3><a class="toc-backref" href="#id11" role="doc-backlink">Modules</a><a class="headerlink" href="#id1" title="Permalink to this heading">¶</a></h3>
 <p>A module is a python callable that does data processing. Modules are passed a frame and can inspect and modify it at will before the frame is passed along to the next module. An example of a module is doing poly filtering on a timestream. As an example of a very simple module:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">simplemod</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
-    <span class="k">print</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>This prints the contents of the frame and does not modify it. As a more complex example, this would print the time at which a DfMux sample was recorded:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">printmuxtime</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
-    <span class="k">print</span><span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="s1">&#39;EventHeader&#39;</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="s1">&#39;EventHeader&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>Modifying the frame also works like a dictionary. The following adds the number 5 to every frame:</p>
@@ -364,7 +365,7 @@ Frame (Scan) [
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.1.1.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.2.1.
     </div>
   </body>
 </html>

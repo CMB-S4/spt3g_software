@@ -14,6 +14,7 @@
     <script src="_static/underscore.js"></script>
     <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Network Streaming" href="networkstreaming.html" />
@@ -134,33 +135,33 @@ For reference, most terminals open at 80 characters wide. If you need to continu
 <li><p>Where functions are not used outside of a single C++ file, they should be marked <code class="docutils literal notranslate"><span class="pre">static</span></code>.</p></li>
 </ul>
 <p>Conforming code looks like this:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">const</span> <span class="kt">int</span> <span class="n">CONSTANT_VALUE</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">CONSTANT_VALUE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w"></span>
 
-<span class="kt">void</span>
-<span class="nf">function_name</span><span class="p">(</span><span class="kt">int</span> <span class="n">variable_name</span><span class="p">,</span> <span class="kt">double</span> <span class="n">other</span><span class="p">)</span>
-<span class="p">{</span>
-        <span class="n">do_some_things</span><span class="p">(</span><span class="n">variable_name</span><span class="p">);</span>
-<span class="p">}</span>
+<span class="kt">void</span><span class="w"></span>
+<span class="nf">function_name</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">variable_name</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">other</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">do_some_things</span><span class="p">(</span><span class="n">variable_name</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 
-<span class="k">class</span> <span class="nc">MyClass</span> <span class="o">:</span> <span class="k">public</span> <span class="n">Parent</span> <span class="p">{</span>
-<span class="k">public</span><span class="o">:</span>
-        <span class="n">MyClass</span><span class="p">(</span><span class="kt">int</span> <span class="n">input</span><span class="p">,</span> <span class="kt">int</span> <span class="n">other_input</span><span class="p">);</span>
-        <span class="kt">void</span> <span class="nf">ClassMethod</span><span class="p">(</span><span class="kt">int</span> <span class="n">input</span><span class="p">);</span>
-<span class="k">private</span><span class="o">:</span>
-        <span class="kt">int</span> <span class="n">instance_variable_</span><span class="p">;</span>
-<span class="p">};</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MyClass</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Parent</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">        </span><span class="n">MyClass</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">input</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">other_input</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="kt">void</span><span class="w"> </span><span class="nf">ClassMethod</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">input</span><span class="p">);</span><span class="w"></span>
+<span class="k">private</span><span class="o">:</span><span class="w"></span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">instance_variable_</span><span class="p">;</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
 
-<span class="n">MyClass</span><span class="o">::</span><span class="n">MyClass</span><span class="p">(</span><span class="kt">int</span> <span class="n">input</span><span class="p">,</span> <span class="kt">int</span> <span class="n">other_input</span><span class="p">)</span> <span class="o">:</span> <span class="n">Parent</span><span class="p">(</span><span class="n">input</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span>
-    <span class="s">&quot;long line&quot;</span><span class="p">)</span>
-<span class="p">{</span>
-        <span class="n">instance_variable_</span> <span class="o">=</span> <span class="n">input</span> <span class="o">+</span> <span class="n">other_input</span><span class="p">;</span>
-<span class="p">}</span>
+<span class="n">MyClass</span><span class="o">::</span><span class="n">MyClass</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">input</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">other_input</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">Parent</span><span class="p">(</span><span class="n">input</span><span class="p">,</span><span class="w"> </span><span class="mi">15</span><span class="p">,</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="s">&quot;long line&quot;</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">instance_variable_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">input</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">other_input</span><span class="p">;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 
-<span class="kt">void</span>
-<span class="n">MyClass</span><span class="o">::</span><span class="n">ClassMethod</span><span class="p">(</span><span class="kt">int</span> <span class="n">input</span><span class="p">)</span>
-<span class="p">{</span>
-        <span class="n">do_things</span><span class="p">();</span>
-<span class="p">}</span>
+<span class="kt">void</span><span class="w"></span>
+<span class="n">MyClass</span><span class="o">::</span><span class="n">ClassMethod</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">input</span><span class="p">)</span><span class="w"></span>
+<span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">do_things</span><span class="p">();</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
@@ -242,7 +243,7 @@ For reference, most terminals open at 80 characters wide. If you need to continu
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.1.1.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.2.1.
     </div>
   </body>
 </html>

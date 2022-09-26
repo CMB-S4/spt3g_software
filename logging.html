@@ -14,6 +14,7 @@
     <script src="_static/underscore.js"></script>
     <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="File IO" href="fileio.html" />
@@ -88,31 +89,31 @@
 <section id="using-logging-from-c">
 <h2>Using Logging from C++<a class="headerlink" href="#using-logging-from-c" title="Permalink to this heading">¶</a></h2>
 <p>The C++ interface to logging mirrors the Python one. For a C++ version of the FireWarden above, we can do the following:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">log_error</span><span class="p">(</span><span class="s">&quot;Everything is on fire&quot;</span><span class="p">);</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">log_error</span><span class="p">(</span><span class="s">&quot;Everything is on fire&quot;</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 <p>In C++, the log functions know how to do <code class="docutils literal notranslate"><span class="pre">printf()</span></code> formatting. For example:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">log_error</span><span class="p">(</span><span class="s">&quot;%d things are on fire&quot;</span><span class="p">,</span> <span class="mi">15</span><span class="p">);</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">log_error</span><span class="p">(</span><span class="s">&quot;%d things are on fire&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">15</span><span class="p">);</span><span class="w"></span>
 </pre></div>
 </div>
 <p>Log units in C++ are set for a particular scope rather than in the call to the log function. This is done using the <code class="docutils literal notranslate"><span class="pre">SET_LOGGER()</span></code> macro. For example:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">WardFire</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
-        <span class="n">SET_LOGGER</span><span class="p">(</span><span class="s">&quot;FireWarden&quot;</span><span class="p">);</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">WardFire</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">SET_LOGGER</span><span class="p">(</span><span class="s">&quot;FireWarden&quot;</span><span class="p">);</span><span class="w"></span>
 
-        <span class="n">log_error</span><span class="p">(</span><span class="s">&quot;%d things are on fire&quot;</span><span class="p">,</span> <span class="mi">15</span><span class="p">);</span>
-<span class="p">}</span>
+<span class="w">        </span><span class="n">log_error</span><span class="p">(</span><span class="s">&quot;%d things are on fire&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">15</span><span class="p">);</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </pre></div>
 </div>
 <p>A common idiom for this is to put <code class="docutils literal notranslate"><span class="pre">SET_LOGGER()</span></code> into the class definition so that it applies to all log messages emitted by class member functions. As an example:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">FireWarden</span> <span class="o">:</span> <span class="k">public</span> <span class="n">G3Module</span> <span class="p">{</span>
-<span class="k">public</span><span class="o">:</span>
-        <span class="kt">void</span> <span class="n">Process</span><span class="p">(</span><span class="n">G3FramePtr</span> <span class="n">frame</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">deque</span><span class="o">&lt;</span><span class="n">G3FramePtr</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">out</span><span class="p">)</span> <span class="p">{</span>
-                <span class="n">log_error</span><span class="p">(</span><span class="s">&quot;%d things are on fire&quot;</span><span class="p">,</span> <span class="n">frame</span><span class="o">-&gt;</span><span class="n">Get</span><span class="o">&lt;</span><span class="n">G3Int</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;ThingsOnFire&quot;</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">value</span><span class="p">);</span>
-                <span class="n">out</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">frame</span><span class="p">);</span>
-        <span class="p">}</span>
-<span class="k">private</span><span class="o">:</span>
-        <span class="n">SET_LOGGER</span><span class="p">(</span><span class="s">&quot;FireWarden&quot;</span><span class="p">);</span>
-<span class="p">};</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">FireWarden</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">G3Module</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="k">public</span><span class="o">:</span><span class="w"></span>
+<span class="w">        </span><span class="kt">void</span><span class="w"> </span><span class="n">Process</span><span class="p">(</span><span class="n">G3FramePtr</span><span class="w"> </span><span class="n">frame</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">deque</span><span class="o">&lt;</span><span class="n">G3FramePtr</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&amp;</span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="n">log_error</span><span class="p">(</span><span class="s">&quot;%d things are on fire&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">frame</span><span class="o">-&gt;</span><span class="n">Get</span><span class="o">&lt;</span><span class="n">G3Int</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;ThingsOnFire&quot;</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">value</span><span class="p">);</span><span class="w"></span>
+<span class="w">                </span><span class="n">out</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">frame</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="k">private</span><span class="o">:</span><span class="w"></span>
+<span class="w">        </span><span class="n">SET_LOGGER</span><span class="p">(</span><span class="s">&quot;FireWarden&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="p">};</span><span class="w"></span>
 </pre></div>
 </div>
 </section>
@@ -186,7 +187,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.1.1.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.2.1.
     </div>
   </body>
 </html>
