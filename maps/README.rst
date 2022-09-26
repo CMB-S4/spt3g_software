@@ -81,9 +81,9 @@ In general, when working with high-resolution maps of any sort, it is important 
 Statistics
 ==========
 
-Most ``numpy.ufunc``-like methods are defined for map objects, such as ``all, any, sum, mean, median, var, std, min, max, argmin, argmax``.  All methods take an optional ``where`` argument, which can be a compatible ``G3SkyMapMask`` object, or size-compatible 1-D ``numpy`` array that can be converted into one.  In addition, these methods are called under the hood when using the numpy equivalent functions (``numpy.all``, etc), in order to preserve the sparsity of the input map.  Methods that ignore ``NaN`` values are also defined (``nansum``, etc), which behave much like the standard methods, except that calling ``numpy.nansum()`` and friends on a map object does *not* preserve sparsity.
+Most ``numpy.ufunc``-like methods are defined for map objects, namely ``.all(), .any(), .sum(), .mean(), .median(), .var(), .std(), .min(), .max(), .argmin(), .argmax()``.  All methods take an optional ``where`` argument, which can be a compatible ``G3SkyMapMask`` object, or size-compatible 1-D ``numpy`` array that can be converted into one.  In addition, these methods are called under the hood when using the numpy equivalent functions (``numpy.all()``, etc), in order to preserve the sparsity of the input map.  Methods that ignore ``NaN`` values are also defined (``.nansum()``, etc), which behave much like the standard methods, except that calling ``numpy.nansum()`` and friends on a map object does *not* preserve sparsity.
 
-Map values can be tested using ``isnan, isinf, isfinite`` methods as well; these return ``G3SkyMapMask`` objects.
+Map values can be tested using ``.isnan(), .isinf(), .isfinite()`` methods as well; these return ``G3SkyMapMask`` objects.
 
 Map Interpolation
 =================
