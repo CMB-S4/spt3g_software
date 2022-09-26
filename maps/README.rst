@@ -56,7 +56,7 @@ Sparsity
 
 By default, both Healpix and flat-sky maps are initialized in sparse mode. This imposes a slight performance penalty but will result in the map storing only non-zero portions (with caveats, see details above), substantially reducing RAM usage. Some map operations, in particular casting to numpy arrays, will result in the implicit conversion of the map to dense storage, which can result in sudden increases in RAM usage. The current sparsity mode can be examined or changed with the ``sparse`` property (flat sky maps) or the ``dense``, ``ringsparse``, or ``indexedsparse`` properties (Healpix maps). Serialization to ``.g3`` files will maintain the current sparsity scheme, as do arithmetic operators where possible. Serialization to ``.fits`` files implicitly converts flat sky maps to dense mode, but preserves the sparsity of Healpix maps.  The current number of stored pixels can be obtained using the ``npix_allocated`` property, and the number of non-zero pixels can be obtained using the ``npix_nonzero`` property.  Dense maps can be efficiently compactified in memory using the ``G3SkyMap.compact`` method, or the ``CompactMaps`` pipeline module.
 
-Beyond paying attention to implicit conversions to dense storage and the performance impact of sparse storage (which is small), users of this code do not need to worry about the storage mode--all interfaces are identical in all modes.
+Beyond paying attention to implicit conversions to dense storage and the performance impact of sparse storage (which is small, at least for FlatSkyMap objects), users of this code do not need to worry about the storage mode--all interfaces are identical in all modes.
 
 Masking
 =======
@@ -67,7 +67,7 @@ Masks are returned when using comparison operators with map objects, e.g.  ``map
 
 Mask objects can be ``clone``'ed the same way as maps.  A map can be converted to a boolean mask using ``G3SkyMap.to_mask()``, which returns a mask which is ``True`` wherever the map is non-zero (optionally excluding nan or inf pixels).  A mask can be converted back to a map object using ``G3SkyMapMask.to_map()``, which returns a sparse, unit-less, unweighted, unpolarized map object of the same type as ``G3SkyMapMask.parent``, containing double ``1.0`` wherever the mask is ``True``.
 
-Masks can also be applied to maps or masks using the appropriate ``.apply_mask`` method, with optional inversion; alternatively maps can also be directly multiplied by a compatible mask object.  A list of non-zero pixels can be returned using ``.nonzero_pixels()`` (note that this returns a single vector of pixel positions), and mask contents can be checked using ``.all()``, ``.any()`` and ``.sum()``.  Mask contents can be inverted in-place using ``.invert()``.
+Masks can also be applied to maps or masks using the appropriate ``.apply_mask`` method, with optional inversion; alternatively maps can also be directly multiplied by a compatible mask object.  A list of non-zero pixels can be returned using ``.nonzero()`` (note that this returns a single vector of pixel positions), and mask contents can be checked using ``.all()``, ``.any()`` and ``.sum()``.  Mask contents can be inverted in-place using ``.invert()``.
 
 Mask objects cannot be accessed using ``numpy`` slicing, or converted directly to arrays, because ``numpy`` does not represent boolean values as single bits.  To be able to use ``numpy`` tools with masks, you need to first convert the mask to a dense map using ``.to_map()``.  All associated methods of the parent map are accessible as attributes of the mask object in python, e.g. ``mask.angles_to_pixels()`` works as one would expect.
 
@@ -77,6 +77,13 @@ Mask Memory Usage
 The current implementation of masks is to use a dense ``std::vector<bool>`` as the data storage backend, which uses 64x less memory than a dense map (``std::vector<double>``) of the same dimensions.  This implementation is sufficient for ``FlatSkyMap`` objects, since these are typically O(50\%) full populated in their sparse state; however, the memory savings for ``HealpixSkyMap`` objects is not as significant when observing sufficiently small patches of sky.  Future work would enable a similar sparse storage backend for masks.
 
 In general, when working with high-resolution maps of any sort, it is important to think carefully about doing the sorts of operations that can balloon memory usage, e.g. taking care to preserve the sparsity of maps by avoiding numpy operations if possible, or using in-place operations to avoid unintentionally creating extra maps or masks in memory.
+
+Statistics
+==========
+
+Most ``numpy.ufunc``-like methods are defined for map objects, such as ``all, any, sum, mean, median, var, std, min, max, argmin, argmax``.  All methods take an optional ``where`` argument, which can be a compatible ``G3SkyMapMask`` object, or size-compatible 1-D ``numpy`` array that can be converted into one.  In addition, these methods are called under the hood when using the numpy equivalent functions (``numpy.all``, etc), in order to preserve the sparsity of the input map.  Methods that ignore ``NaN`` values are also defined (``nansum``, etc), which behave much like the standard methods, except that calling ``numpy.nansum()`` and friends on a map object does *not* preserve sparsity.
+
+Map values can be tested using ``isnan, isinf, isfinite`` methods as well; these return ``G3SkyMapMask`` objects.
 
 Map Interpolation
 =================
