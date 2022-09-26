@@ -43,9 +43,9 @@ On an OSG or other system with OASIS configured, run this before anything else:
 
 .. code-block:: sh
 
-	eval `/cvmfs/spt.opensciencegrid.org/py3-v2/setup.sh`
+	eval `/cvmfs/spt.opensciencegrid.org/py3-v4/setup.sh`
 
-This sets up a software environment with all the packages installed by yum, etc. above that you need for the SPT3G software environment, as well as a variety of standard cosmology and astrophysics tasks. You will obtain best results if you place the line above in your ``.bash_profile``. Do *not* put it in ``.bashrc`` and make *sure* that this is the *only* software installation set up in your bash profile. In particular, take care that there are no references to other python installations (Anaconda, etc.).
+This sets up a software environment  with all the packages installed by yum, etc. above that you need for the SPT3G software environment, as well as a variety of standard cosmology and astrophysics tasks. As of late 2022, `py3-v4` is the most recent version of this `clustertools <https://github.com/SouthPoleTelescope/clustertools>`_ package; double check that you are using the correct version before you continue. You will obtain best results if you place the line above in your ``.bash_profile``. Do *not* put it in ``.bashrc`` and make *sure* that this is the *only* software installation set up in your bash profile. In particular, take care that there are no references to other python installations (Anaconda, etc.).
 
 Handling Dependencies on NERSC
 ==============================
