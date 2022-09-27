@@ -324,8 +324,8 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 }
 
 G3Timestream::G3Timestream(const G3Timestream &r) :
-    units(r.units), use_flac_(r.use_flac_), len_(r.len_),
-    data_type_(r.data_type_)
+    units(r.units), start(r.start), stop(r.stop), use_flac_(r.use_flac_),
+    len_(r.len_), data_type_(r.data_type_)
 {
 	// Copy constructor needs to copy data, which always involves
 	// allocating the internal buffer.
