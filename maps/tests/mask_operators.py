@@ -145,7 +145,13 @@ for x in maplist:
             kwargs = {"where": w} if w is not None else {}
             if attr in ["std", "var"]:
                 kwargs["ddof"] = 1
-            v1 = getattr(np, attr)(x, **kwargs)
+            try:
+                v1 = getattr(np, attr)(x, **kwargs)
+            except TypeError as e:
+                # ignore errors with older numpy versions
+                if w is not None and "unexpected keyword argument 'where'" in str(e):
+                    continue
+                raise
             v2 = getattr(x, attr)(**kwargs)
             if w is not None:
                 kwargs["where"] = np.asarray(w.to_map(), dtype=bool)
