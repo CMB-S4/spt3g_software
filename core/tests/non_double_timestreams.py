@@ -23,6 +23,7 @@ for d in [f64, f32, i32, i64, i16]:
 			raise TypeError('int16 should not work')
 
 
+	assert(t.dtype == d.dtype)
 	assert(len(t) == 20)
 	assert(t[12] == 1.0)
 	t[12] = 5
@@ -41,11 +42,23 @@ for d in [f64, f32, i32, i64, i16]:
 	# Test serialization
 	buf = pickle.dumps(t)
 	t2 = pickle.loads(buf)
-	assert(numpy.asarray(t2).dtype == d.dtype) # Datatype preserved
+	assert(t2.dtype == d.dtype) # Datatype preserved
 	assert((numpy.asarray(t2) == d2).all())
 
 	# Test copy constructor
 	t2 = core.G3Timestream(t)
-	assert(numpy.asarray(t2).dtype == d.dtype) # Datatype preserved
+	assert(t2.dtype == d.dtype) # Datatype preserved
 	assert((numpy.asarray(t2) == d2).all())
 
+	# Test map
+	m = core.G3TimestreamMap(['a', 'b', 'c'], numpy.asarray([d, d, d]))
+	assert(m.dtype == d.dtype)
+
+	buf = pickle.dumps(m)
+	m2 = pickle.loads(buf)
+	assert(m2.dtype == d.dtype) # Datatype preserved
+	assert((numpy.asarray(m2) == numpy.asarray(m)).all())
+
+	m2 = core.G3TimestreamMap(m)
+	assert(m2.dtype == d.dtype) # Datatype preserved
+	assert((numpy.asarray(m2) == numpy.asarray(m)).all())
