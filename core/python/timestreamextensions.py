@@ -25,22 +25,39 @@ def timestream_shape(ts):
 def timestream_ndim(ts):
     return len(numpy.asarray(ts).shape)
 
+@property
+def timestream_dtype(ts):
+    return numpy.asarray(ts).dtype
+
 G3Timestream.__getitem__ = G3Timestream_getitem
 G3Timestream.__setitem__ = lambda x, y, z: numpy.asarray(x).__setitem__(y, z)
 G3Timestream.__len__ = lambda x: numpy.asarray(x).__len__()
 G3Timestream.shape = timestream_shape
 G3Timestream.ndim = timestream_ndim
+G3Timestream.dtype = timestream_dtype
+G3TimestreamMap.dtype = timestream_dtype
 
 def timestreamastype(a, dtype):
     '''
     Convert timestream to a different data type. See numpy.array.astype()
     '''
+    if a.dtype == numpy.dtype(dtype):
+        return a
     out = G3Timestream(numpy.asarray(a).astype(dtype))
     out.units = a.units
     out.start = a.start
     out.stop = a.stop
     return out
 G3Timestream.astype = timestreamastype
+
+def timestreammapastype(a, dtype):
+    '''
+    Convert timestream map to a different data type.  See numpy.array.astype()
+    '''
+    if a.dtype == numpy.dtype(dtype):
+        return a
+    return G3TimestreamMap(a.keys(), numpy.asarray(a).astype(dtype), a.start, a.stop, a.units, False)
+G3TimestreamMap.astype = timestreammapastype
 
 # XXX consider replacing all of this with the numpy __array_ufunc__ machinery
 

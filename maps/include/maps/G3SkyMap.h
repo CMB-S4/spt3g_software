@@ -48,6 +48,8 @@ public:
 	virtual ~G3SkyMap() {};
 
 	// Reimplement the following in subclasses
+	virtual void FillFromArray(boost::python::object v) = 0;
+	boost::shared_ptr<G3SkyMap> ArrayClone(boost::python::object v) const;
 	virtual boost::shared_ptr<G3SkyMap> Clone(bool copy_data = true) const = 0;
 
 	MapCoordReference coord_ref;

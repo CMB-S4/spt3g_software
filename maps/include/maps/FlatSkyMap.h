@@ -82,8 +82,7 @@ public:
 
 	template <class A> void load(A &ar, unsigned v);
 	template <class A> void save(A &ar, unsigned v) const;
-	void FillFromArray(boost::python::object v);
-	G3SkyMapPtr ArrayClone(boost::python::object v);
+	virtual void FillFromArray(boost::python::object v) override;
 	virtual G3SkyMapPtr Clone(bool copy_data = true) const override;
 	std::string Description() const override;
 

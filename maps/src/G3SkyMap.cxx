@@ -101,6 +101,16 @@ G3SkyMap::G3SkyMap(MapCoordReference coords, bool weighted,
 			 "Set the pol_conv attribute to IAU or COSMO.");
 }
 
+G3SkyMapPtr
+G3SkyMap::ArrayClone(boost::python::object val) const
+{
+
+	G3SkyMapPtr skymap = Clone(false);
+	skymap->FillFromArray(val);
+	return skymap;
+}
+
+
 G3SkyMapWeights::G3SkyMapWeights(G3SkyMapConstPtr ref, bool polarized) :
     TT(ref->Clone(false)), TQ(polarized ? ref->Clone(false) : NULL),
     TU(polarized ? ref->Clone(false) : NULL),
@@ -1383,6 +1393,10 @@ PYBINDINGS("maps") {
 	      (bp::arg("copy_data")=true),
 	       "Return a map of the same type, populated with a copy of the data "
 	       "if the argument is true (default), empty otherwise.")
+	    .def("array_clone", &G3SkyMap::ArrayClone,
+	      (bp::arg("array")),
+	       "Return a map of the same type, populated with a copy of the input "
+	       "numpy array")
 	    .def("compatible", &G3SkyMap::IsCompatible,
 	      "Returns true if the input argument is a map with matching dimensions "
 	      "and boundaries on the sky.")
