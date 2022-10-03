@@ -297,6 +297,13 @@ Base class for 1- and 2-D skymaps of various projections. Usually you want a sub
 ``clone( (G3SkyMap)arg1 [, (bool)copy_data=True]) -> G3SkyMap :``
     Return a map of the same type, populated with a copy of the data if the argument is true (default), empty otherwise.
 
+.. _spt3g.maps.G3SkyMap.array_clone:
+
+**spt3g.maps.G3SkyMap.array_clone**
+
+``array_clone( (G3SkyMap)arg1, (object)array) -> G3SkyMap :``
+    Return a map of the same type, populated with a copy of the input numpy array
+
 .. _spt3g.maps.G3SkyMap.compatible:
 
 **spt3g.maps.G3SkyMap.compatible**
