@@ -642,6 +642,8 @@ FlatSkyMap::NonZeroPixels(std::vector<uint64_t> &indices,
 void
 FlatSkyMap::ApplyMask(const G3SkyMapMask &mask, bool inverse)
 {
+	g3_assert(mask.IsCompatible(*this));
+
 	for (auto i: *this)
 		if (i.second != 0 && mask.at(i.first) == inverse)
 			(*this)[i.first] = 0;
