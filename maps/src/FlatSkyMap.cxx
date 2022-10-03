@@ -42,6 +42,7 @@ FlatSkyMap::FlatSkyMap(boost::python::object v, double res,
 			ypix_ = view.shape[0];
 			xpix_ = view.shape[1];
 		} else {
+			PyBuffer_Release(&view);
 			log_fatal("Only 2-D maps supported");
 		}
 		PyBuffer_Release(&view);
@@ -194,10 +195,13 @@ FlatSkyMap::FillFromArray(boost::python::object v)
 		if (view.ndim == 2) {
 			size_t ypix = view.shape[0];
 			size_t xpix = view.shape[1];
-			if (xpix != xpix_ || ypix != ypix_)
+			if (xpix != xpix_ || ypix != ypix_) {
+				PyBuffer_Release(&view);
 				log_fatal("Got array of shape (%zu, %zu), expected (%zu, %zu)",
 				    ypix, xpix, (size_t) ypix_, (size_t) xpix_);
+			}
 		} else {
+			PyBuffer_Release(&view);
 			log_fatal("Only 2-D maps supported");
 		}
 		ConvertToDense();
@@ -211,11 +215,15 @@ FlatSkyMap::FillFromArray(boost::python::object v)
 #if BYTE_ORDER == LITTLE_ENDIAN
 		else if (format[0] == '<')
 			format++;
-		else if (format[0] == '>' || format[0] == '!')
+		else if (format[0] == '>' || format[0] == '!') {
+			PyBuffer_Release(&view);
 			log_fatal("Does not support big-endian numpy arrays");
+		}
 #else
-		else if (format[0] == '<')
+		else if (format[0] == '<') {
+			PyBuffer_Release(&view);
 			log_fatal("Does not support little-endian numpy arrays");
+		}
 		else if (format[0] == '>' || format[0] == '!')
 			format++;
 #endif
@@ -233,8 +241,12 @@ FlatSkyMap::FillFromArray(boost::python::object v)
 				d[i] = ((unsigned int *)view.buf)[i];
 		} else if (strcmp(format, "l") == 0) {
 			for (size_t i = 0; i < view.len/sizeof(long); i++)
+				d[i] = ((long *)view.buf)[i];
+		} else if (strcmp(format, "L") == 0) {
+			for (size_t i = 0; i < view.len/sizeof(long); i++)
 				d[i] = ((unsigned long *)view.buf)[i];
 		} else {
+			PyBuffer_Release(&view);
 			log_fatal("Unknown type code %s", view.format);
 		}
 		PyBuffer_Release(&view);
@@ -243,15 +255,6 @@ FlatSkyMap::FillFromArray(boost::python::object v)
 	}
 
 	throw bp::error_already_set();
-}
-
-G3SkyMapPtr
-FlatSkyMap::ArrayClone(boost::python::object val)
-{
-
-	FlatSkyMapPtr skymap = boost::dynamic_pointer_cast<FlatSkyMap>(Clone(false));
-	skymap->FillFromArray(val);
-	return skymap;
 }
 
 FlatSkyMap::const_iterator::const_iterator(const FlatSkyMap &map, bool begin) :

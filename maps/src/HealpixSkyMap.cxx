@@ -64,123 +64,26 @@ HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool weighted,
 			throw bp::error_already_set();
 		}
 
-		if (PyObject_GetBuffer(PyTuple_GetItem(v.ptr(), 0), &indexview,
-		    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) == -1)
-			throw bp::error_already_set();
-
-		if (PyObject_GetBuffer(PyTuple_GetItem(v.ptr(), 1), &dataview,
-		    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) == -1) {
-			PyBuffer_Release(&indexview);
-			throw bp::error_already_set();
-		}
-
-		if (indexview.ndim != 1 || dataview.ndim != 1) {
-			PyBuffer_Release(&indexview);
-			PyBuffer_Release(&dataview);
-			log_fatal("Only 1-D maps supported");
-		}
-
-		if (indexview.len/indexview.itemsize !=
-		    dataview.len/dataview.itemsize) {
-			PyBuffer_Release(&indexview);
-			PyBuffer_Release(&dataview);
-			log_fatal("Index and data must have matching shapes.");
-		}
-
-		if (strcmp(indexview.format, "l") != 0 &&
-		    strcmp(indexview.format, "L") != 0) {
-			PyBuffer_Release(&indexview);
-			PyBuffer_Release(&dataview);
-			log_fatal("Indices must be (long) integers.");
-		}
-
-		if (strcmp(dataview.format, "d") != 0) {
-			PyBuffer_Release(&indexview);
-			PyBuffer_Release(&dataview);
-			log_fatal("Data must be double-precision (float64).");
-		}
-
-		size_t sz = indexview.len / indexview.itemsize;
-		double phi_min = 2 * M_PI;
-		double phi_max = 0;
-		double phi_min_shift = 2 * M_PI;
-		double phi_max_shift = 0;
-		for (size_t i = 0; i < sz; i++) {
-			unsigned long pix = ((unsigned long *)indexview.buf)[i];
-			double ang = PixelToAngle(pix)[0];
-			if (ang < 0)
-				ang += 2 * M_PI * G3Units::rad;
-			ang = fmod(ang, 2 * M_PI * G3Units::rad);
-			if (ang < phi_min)
-				phi_min = ang;
-			if (ang > phi_max)
-				phi_max = ang;
-			ang = fmod(ang + M_PI * G3Units::rad, 2 * M_PI * G3Units::rad);
-			if (ang < phi_min_shift)
-				phi_min_shift = ang;
-			if (ang > phi_max_shift)
-				phi_max_shift = ang;
-		}
-		shift_ra = (phi_max - phi_min) > (phi_max_shift - phi_min_shift);
 		info_.initialize(nside, nested, shift_ra);
 
-		ring_sparse_ = new SparseMapData(info_.nring(), info_.nring());
+		FillFromArray(v);
 
-		for (size_t i = 0; i < sz; i++)
-			(*this)[((unsigned long *)indexview.buf)[i]]=
-			    ((double *)dataview.buf)[i];
-		PyBuffer_Release(&indexview);
-		PyBuffer_Release(&dataview);
 		return;
 	}
 
 	if (PyObject_GetBuffer(v.ptr(), &view,
 	    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) != -1) {
 		// Fall back to just 1-D
-		if (view.ndim != 1)
+		if (view.ndim != 1) {
+			PyBuffer_Release(&view);
 			log_fatal("Only 1-D maps supported");
-
-		nside = npix2nside(view.shape[0]);
-		dense_ = new std::vector<double>(view.shape[0]);
-
-		double *d = &(*dense_)[0];
-
-		// Consume endian definition
-		const char *format = view.format;
-		if (format[0] == '@' || format[0] == '=')
-			format++;
-#if BYTE_ORDER == LITTLE_ENDIAN
-		else if (format[0] == '<')
-			format++;
-		else if (format[0] == '>' || format[0] == '!')
-			log_fatal("Does not support big-endian numpy arrays");
-#else
-		else if (format[0] == '<')
-			log_fatal("Does not support little-endian numpy arrays");
-		else if (format[0] == '>' || format[0] == '!')
-			format++;
-#endif
-
-		if (strcmp(format, "d") == 0) {
-			memcpy(d, view.buf, view.len);
-		} else if (strcmp(format, "f") == 0) {
-			for (size_t i = 0; i < view.len/sizeof(float); i++)
-				d[i] = ((float *)view.buf)[i];
-		} else if (strcmp(format, "i") == 0) {
-			for (size_t i = 0; i < view.len/sizeof(int); i++)
-				d[i] = ((int *)view.buf)[i];
-		} else if (strcmp(format, "I") == 0) {
-			for (size_t i = 0; i < view.len/sizeof(int); i++)
-				d[i] = ((unsigned int *)view.buf)[i];
-		} else if (strcmp(format, "l") == 0) {
-			for (size_t i = 0; i < view.len/sizeof(long); i++)
-				d[i] = ((unsigned long *)view.buf)[i];
-		} else {
-			log_fatal("Unknown type code %s", view.format);
 		}
 		PyBuffer_Release(&view);
 
+		nside = npix2nside(view.shape[0]);
 		info_.initialize(nside, nested, shift_ra);
+
+		FillFromArray(v);
 
 		return;
 	}
@@ -482,6 +385,188 @@ void HealpixSkyMap::Compact(bool zero_nans)
 	} else if (ring_sparse_) {
 		ring_sparse_->compact();
 	}
+}
+
+void
+HealpixSkyMap::FillFromArray(boost::python::object v)
+{
+	if (PyTuple_Check(v.ptr())) {
+		// One option is that we got passed a tuple of numpy
+		// arrays: first indices, next data, next (optionally) nside.
+		Py_buffer indexview, dataview;
+
+		if (PyTuple_Size(v.ptr()) == 3) {
+			size_t nside;
+
+#if PY_MAJOR_VERSION < 3
+			if (PyInt_Check(PyTuple_GetItem(v.ptr(), 2))) {
+				nside = PyInt_AsSsize_t(PyTuple_GetItem(v.ptr(), 2));
+			} else
+#endif
+			if (PyLong_Check(PyTuple_GetItem(v.ptr(), 2))) {
+#if PY_MAJOR_VERSION < 3
+				nside = PyLong_AsUnsignedLong(PyTuple_GetItem(v.ptr(), 2));
+#else
+				nside = PyLong_AsSize_t(PyTuple_GetItem(v.ptr(), 2));
+#endif
+			} else {
+				PyErr_SetString(PyExc_TypeError,
+				    "Third tuple element for sparse maps needs to be "
+				    "nside");
+				throw bp::error_already_set();
+			}
+
+			if (nside != info_.nside())
+				log_fatal("Got nside %zu, expected %zu", nside, info_.nside());
+		} else if (PyTuple_Size(v.ptr()) != 2) {
+			PyErr_SetString(PyExc_TypeError,
+			    "Tuple argument for sparse maps should have two or "
+			    "three elements");
+			throw bp::error_already_set();
+		}
+
+		if (PyObject_GetBuffer(PyTuple_GetItem(v.ptr(), 0), &indexview,
+		    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) == -1)
+			throw bp::error_already_set();
+
+		if (PyObject_GetBuffer(PyTuple_GetItem(v.ptr(), 1), &dataview,
+		    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) == -1) {
+			PyBuffer_Release(&indexview);
+			throw bp::error_already_set();
+		}
+
+		if (indexview.ndim != 1 || dataview.ndim != 1) {
+			PyBuffer_Release(&indexview);
+			PyBuffer_Release(&dataview);
+			log_fatal("Only 1-D maps supported");
+		}
+
+		if (indexview.len/indexview.itemsize !=
+		    dataview.len/dataview.itemsize) {
+			PyBuffer_Release(&indexview);
+			PyBuffer_Release(&dataview);
+			log_fatal("Index and data must have matching shapes.");
+		}
+
+		if (strcmp(indexview.format, "l") != 0 &&
+		    strcmp(indexview.format, "L") != 0) {
+			PyBuffer_Release(&indexview);
+			PyBuffer_Release(&dataview);
+			log_fatal("Indices must be (long) integers.");
+		}
+
+		if (strcmp(dataview.format, "d") != 0) {
+			PyBuffer_Release(&indexview);
+			PyBuffer_Release(&dataview);
+			log_fatal("Data must be double-precision (float64).");
+		}
+
+		size_t sz = indexview.len / indexview.itemsize;
+		double phi_min = 2 * M_PI;
+		double phi_max = 0;
+		double phi_min_shift = 2 * M_PI;
+		double phi_max_shift = 0;
+		for (size_t i = 0; i < sz; i++) {
+			unsigned long pix = ((unsigned long *)indexview.buf)[i];
+			if (pix < 0 || pix >= info_.npix()) {
+				PyBuffer_Release(&indexview);
+				PyBuffer_Release(&dataview);
+				log_fatal("Index %zu out of range", pix);
+			}
+			double ang = PixelToAngle(pix)[0];
+			if (ang < 0)
+				ang += 2 * M_PI * G3Units::rad;
+			ang = fmod(ang, 2 * M_PI * G3Units::rad);
+			if (ang < phi_min)
+				phi_min = ang;
+			if (ang > phi_max)
+				phi_max = ang;
+			ang = fmod(ang + M_PI * G3Units::rad, 2 * M_PI * G3Units::rad);
+			if (ang < phi_min_shift)
+				phi_min_shift = ang;
+			if (ang > phi_max_shift)
+				phi_max_shift = ang;
+		}
+		bool shift_ra = (phi_max - phi_min) > (phi_max_shift - phi_min_shift);
+
+		SetShiftRa(shift_ra);
+		ConvertToRingSparse();
+
+		for (size_t i = 0; i < sz; i++)
+			(*this)[((unsigned long *)indexview.buf)[i]]=
+			    ((double *)dataview.buf)[i];
+		PyBuffer_Release(&indexview);
+		PyBuffer_Release(&dataview);
+
+		return;
+	}
+
+	Py_buffer view;
+	if (PyObject_GetBuffer(v.ptr(), &view,
+	    PyBUF_FORMAT | PyBUF_C_CONTIGUOUS) != -1) {
+		// Fall back to just 1-D
+		if (view.ndim != 1) {
+			PyBuffer_Release(&view);
+			log_fatal("Only 1-D maps supported");
+		}
+
+		size_t npix = view.shape[0];
+		if (npix != info_.npix()) {
+			PyBuffer_Release(&view);
+			log_fatal("Got array of shape (%zu,), expected (%zu,)", npix, info_.npix());
+		}
+
+		ConvertToDense();
+
+		double *d = &(*dense_)[0];
+
+		// Consume endian definition
+		const char *format = view.format;
+		if (format[0] == '@' || format[0] == '=')
+			format++;
+#if BYTE_ORDER == LITTLE_ENDIAN
+		else if (format[0] == '<')
+			format++;
+		else if (format[0] == '>' || format[0] == '!') {
+			PyBuffer_Release(&view);
+			log_fatal("Does not support big-endian numpy arrays");
+		}
+#else
+		else if (format[0] == '<') {
+			PyBuffer_Release(&view);
+			log_fatal("Does not support little-endian numpy arrays");
+		}
+		else if (format[0] == '>' || format[0] == '!')
+			format++;
+#endif
+
+		if (strcmp(format, "d") == 0) {
+			memcpy(d, view.buf, view.len);
+		} else if (strcmp(format, "f") == 0) {
+			for (size_t i = 0; i < view.len/sizeof(float); i++)
+				d[i] = ((float *)view.buf)[i];
+		} else if (strcmp(format, "i") == 0) {
+			for (size_t i = 0; i < view.len/sizeof(int); i++)
+				d[i] = ((int *)view.buf)[i];
+		} else if (strcmp(format, "I") == 0) {
+			for (size_t i = 0; i < view.len/sizeof(int); i++)
+				d[i] = ((unsigned int *)view.buf)[i];
+		} else if (strcmp(format, "l") == 0) {
+			for (size_t i = 0; i < view.len/sizeof(long); i++)
+				d[i] = ((long *)view.buf)[i];
+		} else if (strcmp(format, "L") == 0) {
+			for (size_t i = 0; i < view.len/sizeof(long); i++)
+				d[i] = ((unsigned long *)view.buf)[i];
+		} else {
+			PyBuffer_Release(&view);
+			log_fatal("Unknown type code %s", view.format);
+		}
+		PyBuffer_Release(&view);
+
+		return;
+	}
+
+	throw bp::error_already_set();
 }
 
 G3SkyMapPtr
@@ -1085,6 +1170,30 @@ HealpixSkyMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 static PyBufferProcs healpixskymap_bufferprocs;
 
 
+static void
+HealpixSkyMap_setitem_1d(G3SkyMap &skymap, size_t i, double val)
+{
+
+	if (i < 0)
+		i = skymap.size() + i;
+	if (size_t(i) >= skymap.size()) {
+		PyErr_SetString(PyExc_IndexError, "Index out of range");
+		bp::throw_error_already_set();
+	}
+
+	skymap[i] = val;
+}
+
+static void
+HealpixSkyMap_setslice_1d(G3SkyMap &skymap, bp::slice coords, bp::object val)
+{
+	if (coords.start().ptr() != Py_None || coords.stop().ptr() != Py_None)
+		log_fatal("1D slicing not supported");
+
+	skymap.FillFromArray(val);
+}
+
+
 G3_SPLIT_SERIALIZABLE_CODE(HealpixSkyMap);
 
 PYBINDINGS("maps")
@@ -1160,6 +1269,9 @@ PYBINDINGS("maps")
 	    .def("nonzero_pixels", &HealpixSkyMap_nonzeropixels,
 		"Returns a list of the indices of the non-zero pixels in the "
 		"map and a list of the values of those non-zero pixels.")
+
+	    .def("__setitem__", HealpixSkyMap_setitem_1d)
+	    .def("__setitem__", HealpixSkyMap_setslice_1d)
 	;
 	register_pointer_conversions<HealpixSkyMap>();
 
