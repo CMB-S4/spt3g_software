@@ -88,11 +88,13 @@ Map values can be tested using ``.isnan(), .isinf(), .isfinite()`` methods as we
 Map Interpolation
 =================
 
-Several interpolation and rebinning utilities are provided.  The method ``G3SkyMap.get_interp_values`` can be used for extracting map values at arbitrary sky positions.  The method ``G3SkyMap.rebin`` can be used to downgrade the map resolution in a way that preserves the total power within each map pixel.
+Several interpolation and rebinning utilities are provided.  The method ``G3SkyMap.get_interp_values`` can be used for extracting map values at arbitrary sky positions using bilinear interpolation.  The method ``G3SkyMap.rebin`` can be used to downgrade the map resolution in a way that preserves the total power within each map pixel.
 
 The functions ``healpix_to_flatsky`` and ``flatsky_to_healpix`` functions are provided to reproject maps between flat sky and curved sky systems, with options to use interpolation or rebinning to improve the accuracy of the reprojection.
 
 The more general ``reproj_map`` function can also be used to convert between flat sky projections.
+
+*Note:* The interpolation routine for healpix maps produces results that differ from those of the equivalent ``healpy.get_interp_val`` routine.  The interpolation routine implemented here is area-preserving in the computation of bilinear weights, whereas the ``healpy`` routine is not.
 
 Map Weights
 ===========

@@ -76,7 +76,7 @@ assert(np.allclose(pixels, pixels2))
 dx = x.res / 2.0
 vx = np.asarray(x.get_interp_values(alpha + dx, delta + dx))
 vh = hp.get_interp_val(np.asarray(x), theta - dx, phi + dx)
-assert(np.allclose(vx, vh))
+assert(not np.allclose(vx, vh))
 
 # Query disc
 avec = []
