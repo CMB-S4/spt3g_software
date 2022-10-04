@@ -8,6 +8,7 @@
 
 #include <maps/FlatSkyMap.h>
 #include <maps/FlatSkyProjection.h>
+#include <maps/G3SkyMapMask.h>
 
 #include "mapdata.h"
 
@@ -81,7 +82,7 @@ FlatSkyMap::FlatSkyMap(const FlatSkyMap & fm) :
 	if (fm.dense_)
 		dense_ = new DenseMapData(*fm.dense_);
 	else if (fm.sparse_)
-		sparse_ = new SparseMapData(*fm.sparse_);
+		sparse_ = new SparseMapData<double>(*fm.sparse_);
 }
 
 FlatSkyMap::~FlatSkyMap()
@@ -159,7 +160,7 @@ FlatSkyMap::load(A &ar, unsigned v)
 			assert(dense_->ydim() == ypix_);
 			break;
 		case 1:
-			sparse_ = new SparseMapData(0, 0);
+			sparse_ = new SparseMapData<double>(0, 0);
 			ar & make_nvp("sparse", *sparse_);
 			assert(sparse_->xdim() == xpix_);
 			assert(sparse_->ydim() == ypix_);
@@ -285,7 +286,7 @@ FlatSkyMap::const_iterator::operator++()
 		x_ = iter.x;
 		y_ = iter.y;
 	} else if (map_.sparse_) {
-		SparseMapData::const_iterator iter(*map_.sparse_, x_, y_);
+		SparseMapData<double>::const_iterator iter(*map_.sparse_, x_, y_);
 		++iter;
 		x_ = iter.x;
 		y_ = iter.y;
@@ -318,7 +319,7 @@ FlatSkyMap::ConvertToSparse()
 	if (!dense_)
 		return;
 
-	sparse_ = new SparseMapData(*dense_);
+	sparse_ = new SparseMapData<double>(*dense_);
 	delete dense_;
 	dense_ = NULL;
 }
@@ -369,7 +370,7 @@ FlatSkyMap::operator () (size_t x, size_t y)
 	if (dense_)
 		return (*dense_)(x, y);
 	if (!sparse_)
-		sparse_ = new SparseMapData(xpix_, ypix_);
+		sparse_ = new SparseMapData<double>(xpix_, ypix_);
 	return (*sparse_)(x, y);
 }
 
@@ -413,7 +414,7 @@ G3SkyMap &FlatSkyMap::operator op(const G3SkyMap &rhs) {\
 				ConvertToDense(); \
 				(*dense_) op (*b.dense_); \
 			} else if (b.sparse_) { \
-				sparse_ = new SparseMapData(xpix_, ypix_); \
+				sparse_ = new SparseMapData<double>(xpix_, ypix_); \
 				(*sparse_) op (*b.sparse_); \
 			} else { \
 				sparsenull \
@@ -471,6 +472,19 @@ G3SkyMap &FlatSkyMap::operator *=(const G3SkyMap &rhs) {
 	} catch (const std::bad_cast& e) {
 		return G3SkyMap::operator *=(rhs);
 	}
+}
+
+G3SkyMap &
+FlatSkyMap::operator *=(const G3SkyMapMask &rhs)
+{
+	g3_assert(rhs.IsCompatible(*this));
+
+	for (auto i : *this) {
+		if (!rhs.at(i.first) && i.second != 0)
+			(*this)[i.first] = 0;
+	}
+
+	return *this;
 }
 
 G3SkyMap &
@@ -623,6 +637,16 @@ FlatSkyMap::NonZeroPixels(std::vector<uint64_t> &indices,
 			data.push_back(i.second);
 		}
 	}
+}
+
+void
+FlatSkyMap::ApplyMask(const G3SkyMapMask &mask, bool inverse)
+{
+	g3_assert(mask.IsCompatible(*this));
+
+	for (auto i: *this)
+		if (i.second != 0 && mask.at(i.first) == inverse)
+			(*this)[i.first] = 0;
 }
 
 std::vector<size_t> FlatSkyMap::shape() const {
@@ -1017,6 +1041,45 @@ flatskymap_setitem_1d(G3SkyMap &skymap, size_t i, double val)
 	skymap[i] = val;
 }
 
+static std::vector<double>
+flatskymap_getitem_masked(const FlatSkyMap &skymap, const G3SkyMapMask &m)
+{
+	g3_assert(m.IsCompatible(skymap));
+	std::vector<double> out;
+
+	for (auto i : skymap) {
+		if (m.at(i.first))
+			out.push_back(i.second);
+	}
+
+	return out;
+}
+
+static void
+flatskymap_setitem_masked(FlatSkyMap &skymap, const G3SkyMapMask &m,
+    bp::object val)
+{
+	g3_assert(m.IsCompatible(skymap));
+
+	if (bp::extract<double>(val).check()) {
+		double dval = bp::extract<double>(val)();
+		for (auto i : skymap) {
+			if (m.at(i.first))
+				skymap[i.first] = dval;
+		}
+	} else {
+		// XXX: the iterable case probably be optimized for numpy arrays
+		// XXX: check for size congruence first?
+		size_t j = 0;
+		for (auto i : skymap) {
+			if (m.at(i.first)) {
+				skymap[i.first] = bp::extract<double>(val[j])();
+				j++;
+			}
+		}
+	}
+}
+
 static bool
 flatskymap_pysparsity_get(const FlatSkyMap &fsm)
 {
@@ -1214,6 +1277,8 @@ PYBINDINGS("maps")
 	    .def("__getitem__", flatskymap_getitem_2d)
 	    .def("__setitem__", flatskymap_setitem_2d)
 	    .def("__setitem__", flatskymap_setslice_1d)
+	    .def("__getitem__", flatskymap_getitem_masked)
+	    .def("__setitem__", flatskymap_setitem_masked)
 	;
 	register_pointer_conversions<FlatSkyMap>();
 
@@ -1226,8 +1291,6 @@ PYBINDINGS("maps")
 #endif
 
 	implicitly_convertible<FlatSkyMapPtr, G3SkyMapPtr>();
-	implicitly_convertible<FlatSkyMapConstPtr, G3SkyMapConstPtr>();
 	implicitly_convertible<FlatSkyMapPtr, G3SkyMapConstPtr>();
-	implicitly_convertible<FlatSkyMapConstPtr, G3SkyMapConstPtr>();
 }
 

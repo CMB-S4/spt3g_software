@@ -10,7 +10,7 @@
 #include <maps/G3SkyMap.h>
 #include <maps/HealpixSkyMapInfo.h>
 
-class SparseMapData;
+template <typename T> class SparseMapData;
 
 
 class HealpixSkyMap : public G3FrameObject, public G3SkyMap {
@@ -53,6 +53,7 @@ public:
 
 	// *
 	virtual G3SkyMap &operator*=(const G3SkyMap &rhs) override;
+	virtual G3SkyMap &operator*=(const G3SkyMapMask &rhs) override;
 	virtual G3SkyMap &operator*=(double rhs) override;
 
 	// /
@@ -71,6 +72,7 @@ public:
 	bool IsCompatible(const G3SkyMap & other) const override;
 	void NonZeroPixels(std::vector<uint64_t> &indices,
 	    std::vector<double> &data) const; // Iterators better?
+	void ApplyMask(const G3SkyMapMask &mask, bool inverse=false) override;
 
 	size_t nside() const {return info_.nside();}
 	bool nested() const {return info_.nested();}
@@ -141,7 +143,7 @@ public:
 private:
 	HealpixSkyMapInfo info_;
 	std::vector<double> *dense_;
-	SparseMapData *ring_sparse_;
+	SparseMapData<double> *ring_sparse_;
 	std::unordered_map<uint64_t, double> *indexed_sparse_;
 
 	SET_LOGGER("HealpixSkyMap");

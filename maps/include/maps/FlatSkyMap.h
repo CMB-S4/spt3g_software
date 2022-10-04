@@ -11,7 +11,7 @@
 #include <maps/FlatSkyProjection.h>
 
 class DenseMapData;
-class SparseMapData;
+template <typename T> class SparseMapData;
 
 class FlatSkyMap : public G3FrameObject, public G3SkyMap {
 public:
@@ -73,6 +73,7 @@ public:
 
 	// *
 	virtual G3SkyMap &operator*=(const G3SkyMap &rhs) override;
+	virtual G3SkyMap &operator*=(const G3SkyMapMask &rhs) override;
 	virtual G3SkyMap &operator*=(double rhs) override;
 
 	// /
@@ -91,6 +92,7 @@ public:
 	bool IsCompatible(const G3SkyMap & other) const override;
 	void NonZeroPixels(std::vector<uint64_t> &indices,
 	    std::vector<double> &data) const;
+	void ApplyMask(const G3SkyMapMask &mask, bool inverse=false) override;
 
 	void SetProj(MapProjection proj);
 	void SetAlphaCenter(double alpha);
@@ -185,7 +187,7 @@ private:
 	FlatSkyProjection proj_info; // projection parameters and functions
 
 	DenseMapData *dense_;
-	SparseMapData *sparse_;
+	SparseMapData<double> *sparse_;
 	uint64_t xpix_, ypix_;
 	bool flat_pol_;
 

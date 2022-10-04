@@ -2,7 +2,7 @@
 
 import numpy as np
 from spt3g import core
-from spt3g.maps import FlatSkyMap, MapProjection, get_ra_dec_map, get_map_stats, get_map_median
+from spt3g.maps import FlatSkyMap, MapProjection, get_ra_dec_map, get_map_moments
 from scipy.stats import skew, kurtosis
 
 # Sparse extension operators
@@ -81,7 +81,8 @@ assert(n.npix_allocated == 1)
 m *= 2 # Get numbers bigger
 assert((m == n).all())
 assert((m > 0).any())
-assert((m > 0).npix_allocated == 1)
+assert((m > 0).sum() == 1)
+assert((m > 0).to_map().npix_allocated == 1)
 
 m1 = m
 m2 = m.copy()
@@ -252,22 +253,28 @@ for shape in [(20, 500), (21, 501)]:
         # statistics
         m1 = np.asarray(m).ravel()
         stats0 = [np.mean(m1), np.var(m1), skew(m1), kurtosis(m1)]
-        stats1 = get_map_stats(m, order=4)
+        stats1 = get_map_moments(m, order=4)
         assert(np.allclose(stats1, stats0))
-        med0 = np.median(m1)
-        med1 = get_map_median(m)
+        med0 = np.median(np.asarray(m1))
+        med1 = np.median(m)
         assert(np.allclose(med1, med0))
 
-        stats2 = get_map_stats(mpad, order=4, ignore_zeros=True)
+        stats2 = get_map_moments(mpad, order=4, ignore_zeros=True)
         assert(np.allclose(stats2, stats0))
-        med2 = get_map_median(mpad, ignore_zeros=True)
+        med2 = mpad.median(where=mpad.to_mask())
         assert(np.allclose(med2, med0))
 
-        np.asarray(mpad)[np.asarray(mpad) == 0] = np.nan
-        stats3 = get_map_stats(mpad, order=4, ignore_nans=True)
+        mpad[mpad == 0] = np.nan
+        stats3 = get_map_moments(mpad, order=4, ignore_nans=True)
         assert(np.allclose(stats3, stats0))
-        med3 = get_map_median(mpad, ignore_nans=True)
+        med3 = mpad.median(where=~mpad.isnan())
         assert(np.allclose(med3, med0))
+
+        mask = mpad.to_mask(zero_nans=True)
+        stats4 = get_map_moments(mpad, mask=mask, order=4)
+        assert(np.allclose(stats4, stats0))
+        med4 = mpad.median(where=mask)
+        assert(np.allclose(med4, med0))
 
 # convolution
 from scipy.signal import convolve2d

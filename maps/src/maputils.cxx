@@ -19,36 +19,6 @@
 
 using namespace G3Units;
 
-G3SkyMapPtr GetMaskMap(G3SkyMapConstPtr m, bool zero_nans, bool zero_infs)
-{
-	G3SkyMapPtr mask = m->Clone(false);
-
-	for (size_t i = 0; i < m->size(); i++) {
-		double v = m->at(i);
-		if (zero_nans && v != v)
-			continue;
-		if (zero_infs && !std::isfinite(v))
-			continue;
-		if (v == 0)
-			continue;
-		(*mask)[i] = 1.0;
-	}
-
-	return mask;
-}
-
-void ApplyMask(G3SkyMapPtr m, G3SkyMapConstPtr mask, bool inverse)
-{
-	g3_assert(m->IsCompatible(*mask));
-
-	for (size_t i = 0; i < m->size(); i++) {
-		if (!(m->at(i)))
-			continue;
-		if (!!(mask->at(i)) == inverse)
-			(*m)[i] = 0;
-	}
-}
-
 void RemoveWeightsT(G3SkyMapPtr T, G3SkyMapWeightsConstPtr W, bool zero_nans)
 {
 	RemoveWeights(T, NULL, NULL, W, zero_nans);
@@ -205,14 +175,10 @@ static double wrap_ra(double ra)
 }
 
 
-G3SkyMapPtr GetRaDecMask(G3SkyMapConstPtr m, double ra_left, double ra_right,
+G3SkyMapMaskPtr GetRaDecMask(G3SkyMapConstPtr m, double ra_left, double ra_right,
     double dec_bottom, double dec_top)
 {
-	G3SkyMapPtr mask = m->Clone(false);
-	mask->weighted = false;
-	mask->units = G3Timestream::None;
-	mask->pol_type = G3SkyMap::None;
-	mask->SetPolConv(G3SkyMap::ConvNone);
+	G3SkyMapMaskPtr mask(new G3SkyMapMask(*m));
 
 	ra_left = wrap_ra(ra_left);
 	ra_right = wrap_ra(ra_right);
@@ -227,7 +193,7 @@ G3SkyMapPtr GetRaDecMask(G3SkyMapConstPtr m, double ra_left, double ra_right,
 		double dec = radec[1];
 		if (dec <= dec_bottom || dec >= dec_top)
 			continue;
-		(*mask)[i] = 1.0;
+		(*mask)[i] = true;
 	}
 
 	return mask;
@@ -382,7 +348,7 @@ void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool int
 }
 
 // algorithm from https://www.johndcook.com/blog/skewness_kurtosis/
-std::vector<double> GetMapStats(G3SkyMapConstPtr m, G3SkyMapConstPtr mask,
+std::vector<double> GetMapMoments(G3SkyMapConstPtr m, G3SkyMapMaskConstPtr mask,
     int order, bool ignore_zeros, bool ignore_nans, bool ignore_infs)
 {
 	size_t n = 0;
@@ -432,75 +398,8 @@ std::vector<double> GetMapStats(G3SkyMapConstPtr m, G3SkyMapConstPtr mask,
 }
 
 
-double
-GetMapMedian(G3SkyMapConstPtr m, G3SkyMapConstPtr mask, bool ignore_zeros, bool ignore_nans,
-    bool ignore_infs)
-{
-
-	std::vector<double> data;
-	size_t npix = mask ? mask->NpixNonZero() : (ignore_zeros ? m->NpixAllocated() : m->size());
-	if (npix == 0)
-		return 0;
-
-	data.reserve(npix);
-
-	for (size_t i = 0; i < m->size(); i++) {
-		if (!!mask && !mask->at(i))
-			continue;
-		double v = m->at(i);
-		if (ignore_zeros && v == 0)
-			continue;
-		if (ignore_nans && v != v)
-			continue;
-		if (ignore_infs && !std::isfinite(v))
-			continue;
-		data.push_back(v);
-	}
-
-	npix = data.size();
-	size_t n = npix / 2;
-	std::nth_element(data.begin(), data.begin() + n, data.end());
-
-	// odd-length array
-	if (npix % 2)
-		return data[n];
-
-	// even-length array
-	double median = data[n];
-	std::nth_element(data.begin(), data.begin() + n - 1, data.end());
-	return (median + data[n - 1]) / 2.;
-}
-
-
 std::vector<double>
-GetMapMinMax(G3SkyMapConstPtr m, G3SkyMapConstPtr mask, bool ignore_zeros, bool ignore_nans,
-    bool ignore_infs)
-{
-	double min = 0.0 / 0.0;
-	double max = 0.0 / 0.0;
-
-	for (size_t i = 0; i < m->size(); i++) {
-		if (!!mask && !mask->at(i))
-			continue;
-		double v = m->at(i);
-		if (ignore_zeros && v == 0)
-			continue;
-		if (ignore_nans && v != v)
-			continue;
-		if (ignore_infs && !std::isfinite(v))
-			continue;
-		if (v > max || max != max)
-			max = v;
-		if (v < min || min != min)
-			min = v;
-	}
-
-	return {min, max};
-}
-
-
-std::vector<double>
-GetMapHist(G3SkyMapConstPtr m, const std::vector<double> &bin_edges, G3SkyMapConstPtr mask,
+GetMapHist(G3SkyMapConstPtr m, const std::vector<double> &bin_edges, G3SkyMapMaskConstPtr mask,
     bool ignore_zeros, bool ignore_nans, bool ignore_infs)
 {
 
@@ -612,37 +511,26 @@ pyconvolve_map(FlatSkyMapConstPtr map, bp::object val)
 }
 
 
-void
-MakePointSourceMask(G3SkyMapPtr map, const std::vector<double> & ra,
+G3SkyMapMaskPtr
+MakePointSourceMask(G3SkyMapConstPtr map, const std::vector<double> & ra,
     const std::vector<double> & dec, const std::vector<double> & radius)
 {
+	G3SkyMapMaskPtr mask(new G3SkyMapMask(*map));
 	g3_assert(ra.size() == dec.size());
 	g3_assert(ra.size() == radius.size());
 
 	for (size_t i = 0; i < ra.size(); i++) {
 		auto pixels = map->QueryDisc(ra[i], dec[i], radius[i]);
 		for (auto p: pixels)
-			(*map)[p] = 1;
+			(*mask)[p] = true;
 	}
 
-	map->weighted = false;
-	map->units = G3Timestream::None;
-	map->pol_type = G3SkyMap::None;
-	map->SetPolConv(G3SkyMap::ConvNone);
+	return mask;
 }
 
 
 namespace bp = boost::python;
 void maputils_pybindings(void){
-	bp::def("get_mask_map", GetMaskMap,
-		(bp::arg("map_in"), bp::arg("zero_nans")=false, bp::arg("zero_infs")=false),
-		"Returns a map that is 1 where the input map is nonzero, and optionally "
-		"non-nan and/or non-infinite");
-
-	bp::def("apply_mask", ApplyMask,
-		(bp::arg("map"), bp::arg("mask"), bp::arg("inverse")=false),
-		"Apply a boolean mask to the input map in place, optionally inverting the mask values");
-
 	bp::def("remove_weights_t", RemoveWeightsT,
 		(bp::arg("T"), bp::arg("W"), bp::arg("zero_nans")=false),
 		"Remove weights from unpolarized maps.	If zero_nans is true, empty pixels "
@@ -693,8 +581,8 @@ void maputils_pybindings(void){
 		"polarization conventions.  If output attributes are not set, they will be "
 		"copied from the input map.");
 
-	bp::def("get_map_stats", GetMapStats,
-		(bp::arg("map"), bp::arg("mask")=G3SkyMapConstPtr(), bp::arg("order")=2,
+	bp::def("get_map_moments", GetMapMoments,
+		(bp::arg("map"), bp::arg("mask")=G3SkyMapMaskConstPtr(), bp::arg("order")=2,
 		 bp::arg("ignore_zeros")=false, bp::arg("ignore_nans")=false, bp::arg("ignore_infs")=false),
 		"Computes moment statistics of the input map, optionally ignoring "
 		"zero, nan and/or inf values in the map.  If order = 1, only the mean is "
@@ -702,22 +590,8 @@ void maputils_pybindings(void){
 		"are also included, respectively.  If a mask is supplied, then only "
 		"the non-zero pixels in the mask are included.");
 
-	bp::def("get_map_median", GetMapMedian,
-		(bp::arg("map"), bp::arg("mask")=G3SkyMapConstPtr(),
-		 bp::arg("ignore_zeros")=false, bp::arg("ignore_nans")=false, bp::arg("ignore_infs")=false),
-		"Computes the median of the input map, optionally ignoring zero, nan and/or inf "
-		"values in the map.  Requires making a copy of the data.  If a mask is "
-		"supplied, then only the non-zero pixels in the mask are included.");
-
-	bp::def("get_map_minmax", GetMapMinMax,
-		(bp::arg("map"), bp::arg("mask")=G3SkyMapConstPtr(),
-		 bp::arg("ignore_zeros")=false, bp::arg("ignore_nans")=false, bp::arg("ignore_infs")=false),
-		"Computes the min and max of the input map, optionally ignoring "
-		"zero, nan and/or inf values in the map.  If a mask is supplied, then "
-		"only the non-zero pixels in the mask are included.");
-
 	bp::def("get_map_hist", GetMapHist,
-		(bp::arg("map"), bp::arg("bin_edges"), bp::arg("mask")=G3SkyMapConstPtr(),
+		(bp::arg("map"), bp::arg("bin_edges"), bp::arg("mask")=G3SkyMapMaskConstPtr(),
 		 bp::arg("ignore_zeros")=false, bp::arg("ignore_nans")=false, bp::arg("ignore_infs")=false),
 		"Computes the histogram of the input map into bins defined by the array of "
 		"bin edges, optionally ignoring zero, nan and/or inf values in the map.  "
@@ -729,6 +603,6 @@ void maputils_pybindings(void){
 
 	bp::def("make_point_source_mask", MakePointSourceMask,
 		(bp::arg("map"), bp::arg("ra"), bp::arg("dec"), bp::arg("radius")),
-		"Construct a map with pixels within the given radius around each "
-		"point source position set to 1.");
+		"Construct a mask from the input stub map with pixels within the given "
+		"radius around each point source position set to 1.");
 }

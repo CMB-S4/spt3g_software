@@ -121,6 +121,5 @@ for a in numpy.linspace(numpy.min(alpha), numpy.max(alpha), 20):
         masked |= set(pix2)
         assert not (set(pix1) ^ set(pix2))
 
-mask = x.clone(False)
-maps.make_point_source_mask(mask, numpy.asarray(avec), numpy.asarray(dvec), numpy.asarray(rvec))
-assert not (set(numpy.where(numpy.asarray(mask).ravel())[0]) ^ masked)
+mask = maps.make_point_source_mask(x, numpy.asarray(avec), numpy.asarray(dvec), numpy.asarray(rvec))
+assert not (set(mask.nonzero()) ^ masked)

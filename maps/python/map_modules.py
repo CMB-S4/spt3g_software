@@ -158,7 +158,7 @@ def MakeMapsPolarized(frame, pol_conv=maps.MapPolConv.IAU):
     umap.pol_type = maps.MapPolType.U
     umap.pol_conv = pol_conv
     frame["U"] = umap
-    mask = maps.get_mask_map(wgt)
+    mask = wgt.to_mask().to_map()
 
     wgt_out = maps.G3SkyMapWeights(frame["T"], polarized=True)
     wgt_out.TT = wgt

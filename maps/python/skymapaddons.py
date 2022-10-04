@@ -1,6 +1,6 @@
 import numpy
 import warnings
-from spt3g.maps import G3SkyMapWeights, G3SkyMap, FlatSkyMap
+from spt3g.maps import G3SkyMapWeights, G3SkyMap, FlatSkyMap, G3SkyMapMask
 
 # This file adds extra functionality to the python interface to G3SkyMap and
 # G3SkyMapWeights. This is done in ways that exploit a large fraction of
@@ -28,6 +28,31 @@ def numpycompat(a, b, op):
 
 for x in ['__and__', '__divmod__', '__floordiv__', '__iand__', '__ifloordiv__', '__imod__', '__ior__', '__mod__', '__or__', '__rdivmod__', '__rmod__', '__rpow__']:
     setattr(G3SkyMap, x, lambda a, b, op=x: numpycompat(a, b, op))
+
+for op in ["all", "any", "sum", "mean", "var", "std", "min", "max", "argmin", "argmax"]:
+    def ufunc_wrapper(op):
+        def ufunc(a, *args, **kwargs):
+            bound_args = {}
+            bound = getattr(a, "_c" + op)
+            if op in ["std", "var", "nanstd", "nanvar"]:
+                if "ddof" in kwargs:
+                    bound_args["ddof"] = kwargs.pop("ddof")
+            if "where" in kwargs:
+                where = kwargs.pop("where")
+                if isinstance(where, numpy.ndarray):
+                    where = G3SkyMapMask(a, where)
+                bound_args["where"] = where
+            for k in ["axis", "out", "dtype"]:
+                if k in kwargs and kwargs[k] is None:
+                    kwargs.pop(k)
+            if len(args) or len(kwargs):
+                raise TypeError("ufunc {} does not support complex arguments".format(op))
+            return bound(**bound_args)
+        ufunc.__doc__ = getattr(numpy.ndarray, op).__doc__
+        return ufunc
+    setattr(G3SkyMap, op, ufunc_wrapper(op))
+    if op in ["all", "any", "sum"]:
+        setattr(G3SkyMapMask, op, ufunc_wrapper(op))
 
 # Make weight maps so that you can index them and get the full 3x3 weight matrix
 
@@ -152,7 +177,9 @@ del skymapweights_reshape
 def skymapweights_getattr(self, x):
     if x == "flat_pol" and isinstance(self.TQ, FlatSkyMap):
         return getattr(self.TQ, x)
-    return getattr(self.TT, x)
+    if hasattr(self.TT, x):
+        return getattr(self.TT, x)
+    raise AttributeError("'{}' object has no attribute '{}'".format(type(self), x))
 G3SkyMapWeights.__getattr__ = skymapweights_getattr
 del skymapweights_getattr
 oldsetattr = G3SkyMapWeights.__setattr__
@@ -160,16 +187,27 @@ def skymapweights_setattr(self, x, val):
     try:
         oldsetattr(self, x, val)
     except AttributeError:
-        setattr(self.TT, x, val)
-        if self.polarized:
+        if self.TT is not None:
+            setattr(self.TT, x, val)
+        if self.TQ is not None:
             setattr(self.TQ, x, val)
+        if self.TU is not None:
             setattr(self.TU, x, val)
+        if self.QQ is not None:
             setattr(self.QQ, x, val)
+        if self.QU is not None:
             setattr(self.QU, x, val)
+        if self.UU is not None:
             setattr(self.UU, x, val)
 G3SkyMapWeights.__setattr__ = skymapweights_setattr
 del skymapweights_setattr
 
+def skymapmask_getattr(self, x):
+    if hasattr(self.parent, x):
+        return getattr(self.parent, x)
+    raise AttributeError("'{}' object has no attribute '{}'".format(type(self), x))
+G3SkyMapMask.__getattr__ = skymapmask_getattr
+del skymapmask_getattr
 
 def skymap_clone(self, copy_data=True):
     with warnings.catch_warnings():

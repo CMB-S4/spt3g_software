@@ -7,6 +7,8 @@
 #include <vector>
 #include <map>
 
+#include <maps/G3SkyMapMask.h>
+
 #include <boost/python.hpp>
 
 enum MapCoordReference {
@@ -97,11 +99,60 @@ public:
 
 	// *
 	virtual G3SkyMap &operator*=(const G3SkyMap &rhs);
+	virtual G3SkyMap &operator*=(const G3SkyMapMask &rhs);
 	virtual G3SkyMap &operator*=(double rhs);
 
 	// /
 	virtual G3SkyMap &operator/=(const G3SkyMap &rhs);
 	virtual G3SkyMap &operator/=(double rhs);
+
+	// Comparison operations
+
+	// <
+	virtual G3SkyMapMask operator<(const G3SkyMap &rhs);
+	virtual G3SkyMapMask operator<=(const G3SkyMap &rhs);
+	virtual G3SkyMapMask operator<(double rhs);
+	virtual G3SkyMapMask operator<=(double rhs);
+
+	// ==
+	virtual G3SkyMapMask operator==(const G3SkyMap &rhs);
+	virtual G3SkyMapMask operator!=(const G3SkyMap &rhs);
+	virtual G3SkyMapMask operator==(double rhs);
+	virtual G3SkyMapMask operator!=(double rhs);
+
+	// <
+	virtual G3SkyMapMask operator>(const G3SkyMap &rhs);
+	virtual G3SkyMapMask operator>=(const G3SkyMap &rhs);
+	virtual G3SkyMapMask operator>(double rhs);
+	virtual G3SkyMapMask operator>=(double rhs);
+
+	virtual bool all(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual bool any(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double sum(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double mean(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double median(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double var(size_t ddof, G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double std(size_t ddof, G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double min(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double max(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual size_t argmin(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual size_t argmax(G3SkyMapMaskConstPtr where=NULL) const;
+
+	virtual double nansum(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double nanmean(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double nanmedian(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double nanvar(size_t ddof, G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double nanstd(size_t ddof, G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double nanmin(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double nanmax(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual size_t nanargmin(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual size_t nanargmax(G3SkyMapMaskConstPtr where=NULL) const;
+
+	virtual G3SkyMapMask isinf(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual G3SkyMapMask isnan(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual G3SkyMapMask isfinite(G3SkyMapMaskConstPtr where=NULL) const;
+
+	virtual void ApplyMask(const G3SkyMapMask &mask, bool inverse=false);
 
 	// Pointing information
 	std::vector<size_t> AnglesToPixels(const std::vector<double> & alphas,
@@ -149,6 +200,9 @@ public:
 	virtual void Compact(bool zero_nans = false) {
 		throw std::runtime_error("Compactification not implemented");
 	}
+
+	virtual G3SkyMapMaskPtr MakeMask(bool zero_nans = false,
+	    bool zero_infs = false) const;
 
 protected:
 	MapPolConv pol_conv_;
@@ -362,12 +416,15 @@ public:
 
 	// Mask
 	G3SkyMapWeights &operator*=(const G3SkyMap &rhs);
+	G3SkyMapWeights &operator*=(const G3SkyMapMask &rhs);
 
 	G3SkyMapPtr Det() const;
 	G3SkyMapPtr Cond() const;
 	boost::shared_ptr<G3SkyMapWeights> Inv() const;
 
 	boost::shared_ptr<G3SkyMapWeights> Rebin(size_t scale) const;
+
+	void ApplyMask(const G3SkyMapMask &mask, bool inverse=false);
 
 	void Compact(bool zero_nans = false);
 
