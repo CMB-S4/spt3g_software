@@ -1354,8 +1354,9 @@ reduces aliasing compared with direct sampling. But there would still be
 aliased power from the input map from freq above the ouput map pixel’s
 Nyquist.</p>
 </dd>
-<dt>interp[false]: bool</dt><dd><p>If True, use bilinear interpolation to extract values from the input
-map.  Otherwise, the nearest-neighbor value is used.</p>
+<dt>interp[false]: bool</dt><dd><p>If True, use bilinear interpolation to extract values from the 4 closest
+pixel centers of the healpix map. Otherwise, the nearest-neighbor value
+is used.</p>
 </dd>
 </dl>
 <p>All additional keyword arguments are passed to FlatSkyMap to construct the
