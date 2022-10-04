@@ -38,8 +38,9 @@ def healpix_to_flatsky(
         Nyquist. 
 
     interp[false]: bool
-        If True, use bilinear interpolation to extract values from the input
-        map.  Otherwise, the nearest-neighbor value is used.
+        If True, use bilinear interpolation to extract values from the 4 closest
+        pixel centers of the healpix map. Otherwise, the nearest-neighbor value 
+        is used.
 
     All additional keyword arguments are passed to FlatSkyMap to construct the
     output map object.  Required if `map_stub` is not supplied, otherwise
