@@ -83,7 +83,25 @@
 <section id="sparsity">
 <h2>Sparsity<a class="headerlink" href="#sparsity" title="Permalink to this heading">¶</a></h2>
 <p>By default, both Healpix and flat-sky maps are initialized in sparse mode. This imposes a slight performance penalty but will result in the map storing only non-zero portions (with caveats, see details above), substantially reducing RAM usage. Some map operations, in particular casting to numpy arrays, will result in the implicit conversion of the map to dense storage, which can result in sudden increases in RAM usage. The current sparsity mode can be examined or changed with the <code class="docutils literal notranslate"><span class="pre">sparse</span></code> property (flat sky maps) or the <code class="docutils literal notranslate"><span class="pre">dense</span></code>, <code class="docutils literal notranslate"><span class="pre">ringsparse</span></code>, or <code class="docutils literal notranslate"><span class="pre">indexedsparse</span></code> properties (Healpix maps). Serialization to <code class="docutils literal notranslate"><span class="pre">.g3</span></code> files will maintain the current sparsity scheme, as do arithmetic operators where possible. Serialization to <code class="docutils literal notranslate"><span class="pre">.fits</span></code> files implicitly converts flat sky maps to dense mode, but preserves the sparsity of Healpix maps.  The current number of stored pixels can be obtained using the <code class="docutils literal notranslate"><span class="pre">npix_allocated</span></code> property, and the number of non-zero pixels can be obtained using the <code class="docutils literal notranslate"><span class="pre">npix_nonzero</span></code> property.  Dense maps can be efficiently compactified in memory using the <code class="docutils literal notranslate"><span class="pre">G3SkyMap.compact</span></code> method, or the <code class="docutils literal notranslate"><span class="pre">CompactMaps</span></code> pipeline module.</p>
-<p>Beyond paying attention to implicit conversions to dense storage and the performance impact of sparse storage (which is small), users of this code do not need to worry about the storage mode–all interfaces are identical in all modes.</p>
+<p>Beyond paying attention to implicit conversions to dense storage and the performance impact of sparse storage (which is small, at least for FlatSkyMap objects), users of this code do not need to worry about the storage mode–all interfaces are identical in all modes.</p>
+</section>
+<section id="masking">
+<h2>Masking<a class="headerlink" href="#masking" title="Permalink to this heading">¶</a></h2>
+<p>Maps containing only boolean data for each pixel are stored as <code class="docutils literal notranslate"><span class="pre">G3SkyMapMask</span></code> objects.  Such mask objects have a <code class="docutils literal notranslate"><span class="pre">.parent</span></code> attribute which is a shallow clone of the map object with which they are associated (to check for shape compatibility).</p>
+<p>Masks are returned when using comparison operators with map objects, e.g.  <code class="docutils literal notranslate"><span class="pre">map1</span> <span class="pre">&gt;</span> <span class="pre">5</span></code> or <code class="docutils literal notranslate"><span class="pre">map1</span> <span class="pre">==</span> <span class="pre">map2</span></code>.  The supported comparison operators are: <code class="docutils literal notranslate"><span class="pre">&gt;,</span> <span class="pre">&gt;=,</span> <span class="pre">==,</span> <span class="pre">!=,</span> <span class="pre">&lt;=,</span> <span class="pre">&lt;</span></code>.  Masks can also be combined together using logical operators, e.g. <code class="docutils literal notranslate"><span class="pre">mask3</span> <span class="pre">=</span> <span class="pre">mask1</span> <span class="pre">&amp;</span> <span class="pre">mask2</span></code> or <code class="docutils literal notranslate"><span class="pre">mask1</span> <span class="pre">^=</span> <span class="pre">mask2</span></code>.  The supported comparison operators are: <code class="docutils literal notranslate"><span class="pre">&amp;,</span> <span class="pre">&amp;=,</span> <span class="pre">|,</span> <span class="pre">|=,</span> <span class="pre">^,</span> <span class="pre">^=</span></code>.  Masks can also be checked for equality to other masks using <code class="docutils literal notranslate"><span class="pre">==</span></code> and <code class="docutils literal notranslate"><span class="pre">!=</span></code> operators.</p>
+<p>Mask objects can be <code class="docutils literal notranslate"><span class="pre">clone</span></code>’ed the same way as maps.  A map can be converted to a boolean mask using <code class="docutils literal notranslate"><span class="pre">G3SkyMap.to_mask()</span></code>, which returns a mask which is <code class="docutils literal notranslate"><span class="pre">True</span></code> wherever the map is non-zero (optionally excluding nan or inf pixels).  A mask can be converted back to a map object using <code class="docutils literal notranslate"><span class="pre">G3SkyMapMask.to_map()</span></code>, which returns a sparse, unit-less, unweighted, unpolarized map object of the same type as <code class="docutils literal notranslate"><span class="pre">G3SkyMapMask.parent</span></code>, containing double <code class="docutils literal notranslate"><span class="pre">1.0</span></code> wherever the mask is <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+<p>Masks can also be applied to maps or masks using the appropriate <code class="docutils literal notranslate"><span class="pre">.apply_mask</span></code> method, with optional inversion; alternatively maps can also be directly multiplied by a compatible mask object.  A list of non-zero pixels can be returned using <code class="docutils literal notranslate"><span class="pre">.nonzero()</span></code> (note that this returns a single vector of pixel positions), and mask contents can be checked using <code class="docutils literal notranslate"><span class="pre">.all()</span></code>, <code class="docutils literal notranslate"><span class="pre">.any()</span></code> and <code class="docutils literal notranslate"><span class="pre">.sum()</span></code>.  Mask contents can be inverted in-place using <code class="docutils literal notranslate"><span class="pre">.invert()</span></code>.</p>
+<p>Mask objects cannot be accessed using <code class="docutils literal notranslate"><span class="pre">numpy</span></code> slicing, or converted directly to arrays, because <code class="docutils literal notranslate"><span class="pre">numpy</span></code> does not represent boolean values as single bits.  To be able to use <code class="docutils literal notranslate"><span class="pre">numpy</span></code> tools with masks, you need to first convert the mask to a dense map using <code class="docutils literal notranslate"><span class="pre">.to_map()</span></code>.  All associated methods of the parent map are accessible as attributes of the mask object in python, e.g. <code class="docutils literal notranslate"><span class="pre">mask.angles_to_pixels()</span></code> works as one would expect.</p>
+<section id="mask-memory-usage">
+<h3>Mask Memory Usage<a class="headerlink" href="#mask-memory-usage" title="Permalink to this heading">¶</a></h3>
+<p>The current implementation of masks is to use a dense <code class="docutils literal notranslate"><span class="pre">std::vector&lt;bool&gt;</span></code> as the data storage backend, which uses 64x less memory than a dense map (<code class="docutils literal notranslate"><span class="pre">std::vector&lt;double&gt;</span></code>) of the same dimensions.  This implementation is sufficient for <code class="docutils literal notranslate"><span class="pre">FlatSkyMap</span></code> objects, since these are typically O(50%) full populated in their sparse state; however, the memory savings for <code class="docutils literal notranslate"><span class="pre">HealpixSkyMap</span></code> objects is not as significant when observing sufficiently small patches of sky.  Future work would enable a similar sparse storage backend for masks.</p>
+<p>In general, when working with high-resolution maps of any sort, it is important to think carefully about doing the sorts of operations that can balloon memory usage, e.g. taking care to preserve the sparsity of maps by avoiding numpy operations if possible, or using in-place operations to avoid unintentionally creating extra maps or masks in memory.</p>
+</section>
+</section>
+<section id="statistics">
+<h2>Statistics<a class="headerlink" href="#statistics" title="Permalink to this heading">¶</a></h2>
+<p>Most <code class="docutils literal notranslate"><span class="pre">numpy.ufunc</span></code>-like methods are defined for map objects, namely <code class="docutils literal notranslate"><span class="pre">.all(),</span> <span class="pre">.any(),</span> <span class="pre">.sum(),</span> <span class="pre">.mean(),</span> <span class="pre">.median(),</span> <span class="pre">.var(),</span> <span class="pre">.std(),</span> <span class="pre">.min(),</span> <span class="pre">.max(),</span> <span class="pre">.argmin(),</span> <span class="pre">.argmax()</span></code>.  All methods take an optional <code class="docutils literal notranslate"><span class="pre">where</span></code> argument, which can be a compatible <code class="docutils literal notranslate"><span class="pre">G3SkyMapMask</span></code> object, or size-compatible 1-D <code class="docutils literal notranslate"><span class="pre">numpy</span></code> array that can be converted into one.  In addition, these methods are called under the hood when using the numpy equivalent functions (<code class="docutils literal notranslate"><span class="pre">numpy.all()</span></code>, etc), in order to preserve the sparsity of the input map.  Methods that ignore <code class="docutils literal notranslate"><span class="pre">NaN</span></code> values are also defined (<code class="docutils literal notranslate"><span class="pre">.nansum()</span></code>, etc), which behave much like the standard methods, except that calling <code class="docutils literal notranslate"><span class="pre">numpy.nansum()</span></code> and friends on a map object does <em>not</em> preserve sparsity.</p>
+<p>Map values can be tested using <code class="docutils literal notranslate"><span class="pre">.isnan(),</span> <span class="pre">.isinf(),</span> <span class="pre">.isfinite()</span></code> methods as well; these return <code class="docutils literal notranslate"><span class="pre">G3SkyMapMask</span></code> objects.</p>
 </section>
 <section id="map-interpolation">
 <h2>Map Interpolation<a class="headerlink" href="#map-interpolation" title="Permalink to this heading">¶</a></h2>
@@ -135,12 +153,11 @@
 <ul class="simple">
 <li><p><a class="reference internal" href="#spt3g-maps-flatskymap">spt3g.maps.FlatSkyMap</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-g3skymap">spt3g.maps.G3SkyMap</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-maps-g3skymapmask">spt3g.maps.G3SkyMapMask</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-g3skymapweights">spt3g.maps.G3SkyMapWeights</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-healpixskymap">spt3g.maps.HealpixSkyMap</a></p></li>
 </ul>
-<section id="spt3g-maps-flatskymap">
-<span id="id1"></span><h3>spt3g.maps.FlatSkyMap<a class="headerlink" href="#spt3g-maps-flatskymap" title="Permalink to this heading">¶</a></h3>
-<p>FlatSkyMap is a G3SkyMap with the extra meta information about the particular flat sky projection included.  In practice it behaves (mostly) like a 2d numpy array.  The pixels are normally indexed with an 1d pixel index.  If you find that you need numpy functionality from a FlatSkyMap, e.g. for slicing across the two dimensions, you can access a numpy representation of the map using <cite>np.asarray(m)</cite>. This does not copy the data, so any changes to the resulting array will affect the data stored in the map.  Alternatively, you can use 2d slice indexing directly on the map to access a copy of the data with the coordinate representation intact.  The latter method is most efficient for extracting small patches from sparse maps.</p>
+<p id="spt3g-maps-flatskymap">FlatSkyMap is a G3SkyMap with the extra meta information about the particular flat sky projection included.  In practice it behaves (mostly) like a 2d numpy array.  The pixels are normally indexed with an 1d pixel index.  If you find that you need numpy functionality from a FlatSkyMap, e.g. for slicing across the two dimensions, you can access a numpy representation of the map using <cite>np.asarray(m)</cite>. This does not copy the data, so any changes to the resulting array will affect the data stored in the map.  Alternatively, you can use 2d slice indexing directly on the map to access a copy of the data with the coordinate representation intact.  The latter method is most efficient for extracting small patches from sparse maps.</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">FlatSkyMap(</span> <span class="pre">(FlatSkyMap)arg2)</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">FlatSkyMap(</span> <span class="pre">(int)x_len,</span> <span class="pre">(int)y_len,</span> <span class="pre">(float)res</span> <span class="pre">[,</span> <span class="pre">(bool)weighted=True</span> <span class="pre">[,</span> <span class="pre">(MapProjection)proj=spt3g.maps.MapProjection.ProjNone</span> <span class="pre">[,</span> <span class="pre">(float)alpha_center=0</span> <span class="pre">[,</span> <span class="pre">(float)delta_center=0</span> <span class="pre">[,</span> <span class="pre">(MapCoordReference)coord_ref=spt3g.maps.MapCoordReference.Equatorial</span> <span class="pre">[,</span> <span class="pre">(G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.Tcmb</span> <span class="pre">[,</span> <span class="pre">(MapPolType)pol_type=spt3g.maps.MapPolType.none</span> <span class="pre">[,</span> <span class="pre">(float)x_res=nan</span> <span class="pre">[,</span> <span class="pre">(float)x_center=nan</span> <span class="pre">[,</span> <span class="pre">(float)y_center=nan</span> <span class="pre">[,</span> <span class="pre">(bool)flat_pol=False</span> <span class="pre">[,</span> <span class="pre">(MapPolConv)pol_conv=spt3g.maps.MapPolConv.none]]]]]]]]]]]])</span></code></p>
@@ -209,10 +226,7 @@
 <dt><code class="docutils literal notranslate"><span class="pre">reshape(</span> <span class="pre">(FlatSkyMap)arg1,</span> <span class="pre">(int)width,</span> <span class="pre">(int)height</span> <span class="pre">[,</span> <span class="pre">(float)fill=0])</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMap</span> <span class="pre">:</span></code></dt><dd><p>Returns a map of shape (width, height) containing the parent map centered within it.  The angular location of each pixel on the sky is maintained.  Surrounding empty pixels can be optionally filled.</p>
 </dd>
 </dl>
-</section>
-<section id="spt3g-maps-g3skymap">
-<span id="id2"></span><h3>spt3g.maps.G3SkyMap<a class="headerlink" href="#spt3g-maps-g3skymap" title="Permalink to this heading">¶</a></h3>
-<p>Base class for 1- and 2-D skymaps of various projections. Usually you want a subclass of this (e.g. FlatSkyMap) rather than using it directly.</p>
+<p id="spt3g-maps-g3skymap">Base class for 1- and 2-D skymaps of various projections. Usually you want a subclass of this (e.g. FlatSkyMap) rather than using it directly.</p>
 <dl class="simple">
 <dt><em>Constructors:</em></dt><dd><p>Raises an exception
 This class cannot be instantiated from Python</p>
@@ -250,6 +264,11 @@ This class cannot be instantiated from Python</p>
 <p id="spt3g-maps-g3skymap-compatible"><strong>spt3g.maps.G3SkyMap.compatible</strong></p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">compatible(</span> <span class="pre">(G3SkyMap)arg1,</span> <span class="pre">(G3SkyMap)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span> <span class="pre">:</span></code></dt><dd><p>Returns true if the input argument is a map with matching dimensions and boundaries on the sky.</p>
+</dd>
+</dl>
+<p id="spt3g-maps-g3skymap-nonzero"><strong>spt3g.maps.G3SkyMap.nonzero</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">nonzero(</span> <span class="pre">(G3SkyMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">UInt64Vector</span> <span class="pre">:</span></code></dt><dd><p>Return indices of non-zero pixels in the map</p>
 </dd>
 </dl>
 <p id="spt3g-maps-g3skymap-angles-to-pixels"><strong>spt3g.maps.G3SkyMap.angles_to_pixels</strong></p>
@@ -327,14 +346,97 @@ This class cannot be instantiated from Python</p>
 <dt><code class="docutils literal notranslate"><span class="pre">compact(</span> <span class="pre">(G3SkyMap)arg1</span> <span class="pre">[,</span> <span class="pre">(bool)zero_nans=False])</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>Convert the map to its default sparse representation, removing empty pixels, and optionally also removing NaN values. A map that is already sparse will be compactified in place in its current representation without additional memory overhead.</p>
 </dd>
 </dl>
-<p id="spt3g-maps-g3skymap-any"><strong>spt3g.maps.G3SkyMap.any</strong></p>
-<p><code class="docutils literal notranslate"><span class="pre">any(</span> <span class="pre">(G3SkyMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span></code></p>
-<p id="spt3g-maps-g3skymap-all"><strong>spt3g.maps.G3SkyMap.all</strong></p>
-<p><code class="docutils literal notranslate"><span class="pre">all(</span> <span class="pre">(G3SkyMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span></code></p>
-</section>
-<section id="spt3g-maps-g3skymapweights">
-<span id="id3"></span><h3>spt3g.maps.G3SkyMapWeights<a class="headerlink" href="#spt3g-maps-g3skymapweights" title="Permalink to this heading">¶</a></h3>
-<p>Polarized (Mueller matrix) or unpolarized (scalar) map pixel weights.</p>
+<p id="spt3g-maps-g3skymap-to-mask"><strong>spt3g.maps.G3SkyMap.to_mask</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">to_mask(</span> <span class="pre">(G3SkyMap)arg1</span> <span class="pre">[,</span> <span class="pre">(bool)zero_nans=False</span> <span class="pre">[,</span> <span class="pre">(bool)zero_infs=False]])</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMapMask</span> <span class="pre">:</span></code></dt><dd><p>Create a G3SkyMapMask object from the parent map, with pixels set to true where the map is non-zero (and optionally non-nan and/or finite).</p>
+</dd>
+</dl>
+<p id="spt3g-maps-g3skymap-apply-mask"><strong>spt3g.maps.G3SkyMap.apply_mask</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">apply_mask(</span> <span class="pre">(G3SkyMap)arg1,</span> <span class="pre">(G3SkyMapMask)mask</span> <span class="pre">[,</span> <span class="pre">(bool)inverse=False])</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>Apply a mask in-place to the map, optionally inverting which pixels are zeroed.  If inverse = False, this is equivalent to in-place multiplication by the mask.</p>
+</dd>
+</dl>
+<p id="spt3g-maps-g3skymap-median"><strong>spt3g.maps.G3SkyMap.median</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">median(</span> <span class="pre">(G3SkyMap)arg1</span> <span class="pre">[,</span> <span class="pre">(G3SkyMapMask)where=None])</span> <span class="pre">-&gt;</span> <span class="pre">float</span></code></p>
+<p id="spt3g-maps-g3skymap-nansum"><strong>spt3g.maps.G3SkyMap.nansum</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">nansum(</span> <span class="pre">(G3SkyMap)arg1</span> <span class="pre">[,</span> <span class="pre">(G3SkyMapMask)where=None])</span> <span class="pre">-&gt;</span> <span class="pre">float</span></code></p>
+<p id="spt3g-maps-g3skymap-nanmean"><strong>spt3g.maps.G3SkyMap.nanmean</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">nanmean(</span> <span class="pre">(G3SkyMap)arg1</span> <span class="pre">[,</span> <span class="pre">(G3SkyMapMask)where=None])</span> <span class="pre">-&gt;</span> <span class="pre">float</span></code></p>
+<p id="spt3g-maps-g3skymap-nanmedian"><strong>spt3g.maps.G3SkyMap.nanmedian</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">nanmedian(</span> <span class="pre">(G3SkyMap)arg1</span> <span class="pre">[,</span> <span class="pre">(G3SkyMapMask)where=None])</span> <span class="pre">-&gt;</span> <span class="pre">float</span></code></p>
+<p id="spt3g-maps-g3skymap-nanvar"><strong>spt3g.maps.G3SkyMap.nanvar</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">nanvar(</span> <span class="pre">(G3SkyMap)arg1</span> <span class="pre">[,</span> <span class="pre">(int)ddof=0</span> <span class="pre">[,</span> <span class="pre">(G3SkyMapMask)where=None]])</span> <span class="pre">-&gt;</span> <span class="pre">float</span></code></p>
+<p id="spt3g-maps-g3skymap-nanstd"><strong>spt3g.maps.G3SkyMap.nanstd</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">nanstd(</span> <span class="pre">(G3SkyMap)arg1</span> <span class="pre">[,</span> <span class="pre">(int)ddof=0</span> <span class="pre">[,</span> <span class="pre">(G3SkyMapMask)where=None]])</span> <span class="pre">-&gt;</span> <span class="pre">float</span></code></p>
+<p id="spt3g-maps-g3skymap-nanmin"><strong>spt3g.maps.G3SkyMap.nanmin</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">nanmin(</span> <span class="pre">(G3SkyMap)arg1</span> <span class="pre">[,</span> <span class="pre">(G3SkyMapMask)where=None])</span> <span class="pre">-&gt;</span> <span class="pre">float</span></code></p>
+<p id="spt3g-maps-g3skymap-nanmax"><strong>spt3g.maps.G3SkyMap.nanmax</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">nanmax(</span> <span class="pre">(G3SkyMap)arg1</span> <span class="pre">[,</span> <span class="pre">(G3SkyMapMask)where=None])</span> <span class="pre">-&gt;</span> <span class="pre">float</span></code></p>
+<p id="spt3g-maps-g3skymap-nanargmin"><strong>spt3g.maps.G3SkyMap.nanargmin</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">nanargmin(</span> <span class="pre">(G3SkyMap)arg1</span> <span class="pre">[,</span> <span class="pre">(G3SkyMapMask)where=None])</span> <span class="pre">-&gt;</span> <span class="pre">int</span></code></p>
+<p id="spt3g-maps-g3skymap-nanargmax"><strong>spt3g.maps.G3SkyMap.nanargmax</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">nanargmax(</span> <span class="pre">(G3SkyMap)arg1</span> <span class="pre">[,</span> <span class="pre">(G3SkyMapMask)where=None])</span> <span class="pre">-&gt;</span> <span class="pre">int</span></code></p>
+<p id="spt3g-maps-g3skymap-isinf"><strong>spt3g.maps.G3SkyMap.isinf</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">isinf(</span> <span class="pre">(G3SkyMap)arg1</span> <span class="pre">[,</span> <span class="pre">(G3SkyMapMask)where=None])</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMapMask</span></code></p>
+<p id="spt3g-maps-g3skymap-isnan"><strong>spt3g.maps.G3SkyMap.isnan</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">isnan(</span> <span class="pre">(G3SkyMap)arg1</span> <span class="pre">[,</span> <span class="pre">(G3SkyMapMask)where=None])</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMapMask</span></code></p>
+<p id="spt3g-maps-g3skymap-isfinite"><strong>spt3g.maps.G3SkyMap.isfinite</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">isfinite(</span> <span class="pre">(G3SkyMap)arg1</span> <span class="pre">[,</span> <span class="pre">(G3SkyMapMask)where=None])</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMapMask</span></code></p>
+<p id="spt3g-maps-g3skymapmask">Boolean mask of a sky map. Set pixels to use to true, pixels to ignore to false. If use_data set in contrast, mask initialized to true where input map is non-zero; otherwise, all elements are initialized to zero.  Use zero_nans or zero_infs to exclude nan or inf elements from the mask.</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3SkyMapMask(</span> <span class="pre">(G3SkyMapMask)arg2)</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">G3SkyMapMask(</span> <span class="pre">(G3SkyMap)parent</span> <span class="pre">[,</span> <span class="pre">(bool)use_data=False</span> <span class="pre">[,</span> <span class="pre">(bool)zero_nans=False</span> <span class="pre">[,</span> <span class="pre">(bool)zero_infs=False]]])</span></code> :</dt><dd><p>Instantiate a G3SkyMapMask from a parent G3SkyMap</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">G3SkyMapMask(</span> <span class="pre">(G3SkyMap)parent,</span> <span class="pre">(object)data</span> <span class="pre">[,</span> <span class="pre">(bool)zero_nans=False</span> <span class="pre">[,</span> <span class="pre">(bool)zero_infs=False]])</span></code> :</dt><dd><p>Instantiate a G3SkyMapMask from a 1D numpy array</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p><em>Members:</em></p>
+<ul class="simple">
+<li><p><strong>parent</strong>: “Parent” map which contains no data, but can be used to retrieve the parameters of the map to which this mask corresponds.</p></li>
+<li><p><strong>size</strong>: Number of pixels in mask</p></li>
+</ul>
+<p><em>Methods:</em></p>
+<p id="spt3g-maps-g3skymapmask-clone"><strong>spt3g.maps.G3SkyMapMask.clone</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">clone(</span> <span class="pre">(G3SkyMapMask)arg1</span> <span class="pre">[,</span> <span class="pre">(bool)copy_data=True])</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMapMask</span> <span class="pre">:</span></code></dt><dd><p>Return a mask of the same type, populated with a copy of the data if the argument is true (default), empty otherwise.</p>
+</dd>
+</dl>
+<p id="spt3g-maps-g3skymapmask-array-clone"><strong>spt3g.maps.G3SkyMapMask.array_clone</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">array_clone(</span> <span class="pre">(G3SkyMapMask)arg1,</span> <span class="pre">(object)data</span> <span class="pre">[,</span> <span class="pre">(bool)zero_nans=False</span> <span class="pre">[,</span> <span class="pre">(bool)zero_infs=False]])</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMapMask</span> <span class="pre">:</span></code></dt><dd><p>Return a mask of the same type, populated from the input numpy array</p>
+</dd>
+</dl>
+<p id="spt3g-maps-g3skymapmask-compatible"><strong>spt3g.maps.G3SkyMapMask.compatible</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">compatible(</span> <span class="pre">(G3SkyMapMask)arg1,</span> <span class="pre">(G3SkyMapMask)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span> <span class="pre">:</span></code></dt><dd><p>Returns true if the two masks can be applied to the same map.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">compatible(</span> <span class="pre">(G3SkyMapMask)arg1,</span> <span class="pre">(G3SkyMap)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span> <span class="pre">:</span></code></dt><dd><p>Returns true if this mask can be applied to the given map.</p>
+</dd>
+</dl>
+<p id="spt3g-maps-g3skymapmask-invert"><strong>spt3g.maps.G3SkyMapMask.invert</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">invert(</span> <span class="pre">(G3SkyMapMask)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMapMask</span> <span class="pre">:</span></code></dt><dd><p>Invert all elements in mask</p>
+</dd>
+</dl>
+<p id="spt3g-maps-g3skymapmask-nonzero"><strong>spt3g.maps.G3SkyMapMask.nonzero</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">nonzero(</span> <span class="pre">(G3SkyMapMask)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">UInt64Vector</span> <span class="pre">:</span></code></dt><dd><p>Return a list of indices of non-zero pixels in the mask</p>
+</dd>
+</dl>
+<p id="spt3g-maps-g3skymapmask-apply-mask"><strong>spt3g.maps.G3SkyMapMask.apply_mask</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">apply_mask(</span> <span class="pre">(G3SkyMapMask)arg1,</span> <span class="pre">(G3SkyMapMask)mask</span> <span class="pre">[,</span> <span class="pre">(bool)inverse=False])</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>Apply a mask in-place to the mask, optionally inverting which pixels are zeroed.  If inverse = False, this is equivalent to in-place element-wise logical-and with the mask.</p>
+</dd>
+</dl>
+<p id="spt3g-maps-g3skymapmask-to-map"><strong>spt3g.maps.G3SkyMapMask.to_map</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">to_map(</span> <span class="pre">(G3SkyMapMask)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMap</span> <span class="pre">:</span></code></dt><dd><p>Create a skymap with data set to the contents of this mask (1.0 where True, 0.0 where False), which can be useful for plotting.</p>
+</dd>
+</dl>
+<p id="spt3g-maps-g3skymapweights">Polarized (Mueller matrix) or unpolarized (scalar) map pixel weights.</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3SkyMapWeights()</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">G3SkyMapWeights(</span> <span class="pre">(G3SkyMapWeights)arg2)</span></code></p>
@@ -390,15 +492,17 @@ This class cannot be instantiated from Python</p>
 <dt><code class="docutils literal notranslate"><span class="pre">inv(</span> <span class="pre">(G3SkyMapWeights)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMapWeights</span> <span class="pre">:</span></code></dt><dd><p>Return the inverse of the Mueller matrix for each pixel</p>
 </dd>
 </dl>
+<p id="spt3g-maps-g3skymapweights-apply-mask"><strong>spt3g.maps.G3SkyMapWeights.apply_mask</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">apply_mask(</span> <span class="pre">(G3SkyMapWeights)arg1,</span> <span class="pre">(G3SkyMapMask)mask</span> <span class="pre">[,</span> <span class="pre">(bool)inverse=False])</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>Apply a mask in-place to the weights, optionally inverting which pixels are zeroed.  If inverse = False, this is equivalent to in-place multiplication by the mask.</p>
+</dd>
+</dl>
 <p id="spt3g-maps-g3skymapweights-clone"><strong>spt3g.maps.G3SkyMapWeights.clone</strong></p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">clone(</span> <span class="pre">(G3SkyMapWeights)arg1</span> <span class="pre">[,</span> <span class="pre">(bool)copy_data=True])</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMapWeights</span> <span class="pre">:</span></code></dt><dd><p>Return weights of the same type, populated with a copy of the data if the argument is true (default), empty otherwise.</p>
 </dd>
 </dl>
-</section>
-<section id="spt3g-maps-healpixskymap">
-<span id="id4"></span><h3>spt3g.maps.HealpixSkyMap<a class="headerlink" href="#spt3g-maps-healpixskymap" title="Permalink to this heading">¶</a></h3>
-<p>HealpixSkyMap is a G3SkyMap with the extra meta information about the particular Healpix pixelization used.  In practice it behaves (mostly) like a 1d numpy array.  If you find that you need numpy functionality from a HealpixSkyMap, e.g. for slicing across the array, you can access a numpy representation of the map using <cite>np.asarray(m)</cite>. This does not copy the data, so any changes to the resulting array will affect the data stored in the map.</p>
+<p id="spt3g-maps-healpixskymap">HealpixSkyMap is a G3SkyMap with the extra meta information about the particular Healpix pixelization used.  In practice it behaves (mostly) like a 1d numpy array.  If you find that you need numpy functionality from a HealpixSkyMap, e.g. for slicing across the array, you can access a numpy representation of the map using <cite>np.asarray(m)</cite>. This does not copy the data, so any changes to the resulting array will affect the data stored in the map.</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">HealpixSkyMap(</span> <span class="pre">(HealpixSkyMap)arg2)</span></code></p>
 <dl class="simple">
@@ -426,7 +530,6 @@ This class cannot be instantiated from Python</p>
 <dt><code class="docutils literal notranslate"><span class="pre">nonzero_pixels(</span> <span class="pre">(HealpixSkyMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">tuple</span> <span class="pre">:</span></code></dt><dd><p>Returns a list of the indices of the non-zero pixels in the map and a list of the values of those non-zero pixels.</p>
 </dd>
 </dl>
-</section>
 </section>
 <section id="modules-in-spt3g-maps">
 <h2>Modules in spt3g.maps<a class="headerlink" href="#modules-in-spt3g-maps" title="Permalink to this heading">¶</a></h2>
@@ -947,7 +1050,6 @@ one.</p>
 <section id="functions-in-spt3g-maps">
 <h2>Functions in spt3g.maps<a class="headerlink" href="#functions-in-spt3g-maps" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
-<li><p><a class="reference internal" href="#spt3g-maps-apply-mask">spt3g.maps.apply_mask</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-apply-weights">spt3g.maps.apply_weights</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-apply-weights-t">spt3g.maps.apply_weights_t</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-azel-convert-azel-to-radec">spt3g.maps.azel.convert_azel_to_radec</a></p></li>
@@ -963,10 +1065,7 @@ one.</p>
 <li><p><a class="reference internal" href="#spt3g-maps-fitsio-save-skymap-fits">spt3g.maps.fitsio.save_skymap_fits</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-flatten-pol">spt3g.maps.flatten_pol</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-get-map-hist">spt3g.maps.get_map_hist</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-maps-get-map-median">spt3g.maps.get_map_median</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-maps-get-map-minmax">spt3g.maps.get_map_minmax</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-maps-get-map-stats">spt3g.maps.get_map_stats</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-maps-get-mask-map">spt3g.maps.get_mask_map</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-maps-get-map-moments">spt3g.maps.get_map_moments</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-get-origin-rotator">spt3g.maps.get_origin_rotator</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-get-ra-dec-map">spt3g.maps.get_ra_dec_map</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-get-ra-dec-mask">spt3g.maps.get_ra_dec_mask</a></p></li>
@@ -980,11 +1079,6 @@ one.</p>
 <li><p><a class="reference internal" href="#spt3g-maps-remove-weights-t">spt3g.maps.remove_weights_t</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-reproj-map">spt3g.maps.reproj_map</a></p></li>
 </ul>
-<p id="spt3g-maps-apply-mask"><strong>spt3g.maps.apply_mask</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">apply_mask(</span> <span class="pre">(G3SkyMap)map,</span> <span class="pre">(object)mask</span> <span class="pre">[,</span> <span class="pre">(bool)inverse=False])</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>Apply a boolean mask to the input map in place, optionally inverting the mask values</p>
-</dd>
-</dl>
 <p id="spt3g-maps-apply-weights"><strong>spt3g.maps.apply_weights</strong></p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">apply_weights(</span> <span class="pre">(G3SkyMap)T,</span> <span class="pre">(G3SkyMap)Q,</span> <span class="pre">(G3SkyMap)U,</span> <span class="pre">(G3SkyMapWeights)W)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>Apply weights to polarized maps.</p>
@@ -1164,27 +1258,12 @@ can contain entries such as <code class="docutils literal notranslate"><span cla
 </dl>
 <p id="spt3g-maps-get-map-hist"><strong>spt3g.maps.get_map_hist</strong></p>
 <dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">get_map_hist(</span> <span class="pre">(object)map,</span> <span class="pre">(DoubleVector)bin_edges</span> <span class="pre">[,</span> <span class="pre">(object)mask=None</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_zeros=False</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_nans=False</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_infs=False]]]])</span> <span class="pre">-&gt;</span> <span class="pre">DoubleVector</span> <span class="pre">:</span></code></dt><dd><p>Computes the histogram of the input map into bins defined by the array of bin edges, optionally ignoring zero, nan and/or inf values in the map.  If a mask is supplied, then only the non-zero pixels in the mask are included.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">get_map_hist(</span> <span class="pre">(object)map,</span> <span class="pre">(DoubleVector)bin_edges</span> <span class="pre">[,</span> <span class="pre">(G3SkyMapMask)mask=None</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_zeros=False</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_nans=False</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_infs=False]]]])</span> <span class="pre">-&gt;</span> <span class="pre">DoubleVector</span> <span class="pre">:</span></code></dt><dd><p>Computes the histogram of the input map into bins defined by the array of bin edges, optionally ignoring zero, nan and/or inf values in the map.  If a mask is supplied, then only the non-zero pixels in the mask are included.</p>
 </dd>
 </dl>
-<p id="spt3g-maps-get-map-median"><strong>spt3g.maps.get_map_median</strong></p>
+<p id="spt3g-maps-get-map-moments"><strong>spt3g.maps.get_map_moments</strong></p>
 <dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">get_map_median(</span> <span class="pre">(object)map</span> <span class="pre">[,</span> <span class="pre">(object)mask=None</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_zeros=False</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_nans=False</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_infs=False]]]])</span> <span class="pre">-&gt;</span> <span class="pre">float</span> <span class="pre">:</span></code></dt><dd><p>Computes the median of the input map, optionally ignoring zero, nan and/or inf values in the map.  Requires making a copy of the data.  If a mask is supplied, then only the non-zero pixels in the mask are included.</p>
-</dd>
-</dl>
-<p id="spt3g-maps-get-map-minmax"><strong>spt3g.maps.get_map_minmax</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">get_map_minmax(</span> <span class="pre">(object)map</span> <span class="pre">[,</span> <span class="pre">(object)mask=None</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_zeros=False</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_nans=False</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_infs=False]]]])</span> <span class="pre">-&gt;</span> <span class="pre">DoubleVector</span> <span class="pre">:</span></code></dt><dd><p>Computes the min and max of the input map, optionally ignoring zero, nan and/or inf values in the map.  If a mask is supplied, then only the non-zero pixels in the mask are included.</p>
-</dd>
-</dl>
-<p id="spt3g-maps-get-map-stats"><strong>spt3g.maps.get_map_stats</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">get_map_stats(</span> <span class="pre">(object)map</span> <span class="pre">[,</span> <span class="pre">(object)mask=None</span> <span class="pre">[,</span> <span class="pre">(int)order=2</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_zeros=False</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_nans=False</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_infs=False]]]]])</span> <span class="pre">-&gt;</span> <span class="pre">DoubleVector</span> <span class="pre">:</span></code></dt><dd><p>Computes moment statistics of the input map, optionally ignoring zero, nan and/or inf values in the map.  If order = 1, only the mean is returned.  If order = 2, 3 or 4 then the variance, skew and kurtosis are also included, respectively.  If a mask is supplied, then only the non-zero pixels in the mask are included.</p>
-</dd>
-</dl>
-<p id="spt3g-maps-get-mask-map"><strong>spt3g.maps.get_mask_map</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">get_mask_map(</span> <span class="pre">(object)map_in</span> <span class="pre">[,</span> <span class="pre">(bool)zero_nans=False</span> <span class="pre">[,</span> <span class="pre">(bool)zero_infs=False]])</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMap</span> <span class="pre">:</span></code></dt><dd><p>Returns a map that is 1 where the input map is nonzero, and optionally non-nan and/or non-infinite</p>
+<dt><code class="docutils literal notranslate"><span class="pre">get_map_moments(</span> <span class="pre">(object)map</span> <span class="pre">[,</span> <span class="pre">(G3SkyMapMask)mask=None</span> <span class="pre">[,</span> <span class="pre">(int)order=2</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_zeros=False</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_nans=False</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_infs=False]]]]])</span> <span class="pre">-&gt;</span> <span class="pre">DoubleVector</span> <span class="pre">:</span></code></dt><dd><p>Computes moment statistics of the input map, optionally ignoring zero, nan and/or inf values in the map.  If order = 1, only the mean is returned.  If order = 2, 3 or 4 then the variance, skew and kurtosis are also included, respectively.  If a mask is supplied, then only the non-zero pixels in the mask are included.</p>
 </dd>
 </dl>
 <p id="spt3g-maps-get-origin-rotator"><strong>spt3g.maps.get_origin_rotator</strong></p>
@@ -1199,12 +1278,12 @@ can contain entries such as <code class="docutils literal notranslate"><span cla
 </dl>
 <p id="spt3g-maps-get-ra-dec-mask"><strong>spt3g.maps.get_ra_dec_mask</strong></p>
 <dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">get_ra_dec_mask(</span> <span class="pre">(object)map_in,</span> <span class="pre">(float)ra_left,</span> <span class="pre">(float)ra_right,</span> <span class="pre">(float)dec_bottom,</span> <span class="pre">(float)dec_top)</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMap</span> <span class="pre">:</span></code></dt><dd><p>Returns a mask that is nonzero for any pixels within the given ra and dec ranges</p>
+<dt><code class="docutils literal notranslate"><span class="pre">get_ra_dec_mask(</span> <span class="pre">(object)map_in,</span> <span class="pre">(float)ra_left,</span> <span class="pre">(float)ra_right,</span> <span class="pre">(float)dec_bottom,</span> <span class="pre">(float)dec_top)</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMapMask</span> <span class="pre">:</span></code></dt><dd><p>Returns a mask that is nonzero for any pixels within the given ra and dec ranges</p>
 </dd>
 </dl>
 <p id="spt3g-maps-make-point-source-mask"><strong>spt3g.maps.make_point_source_mask</strong></p>
 <dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">make_point_source_mask(</span> <span class="pre">(G3SkyMap)map,</span> <span class="pre">(DoubleVector)ra,</span> <span class="pre">(DoubleVector)dec,</span> <span class="pre">(DoubleVector)radius)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>Construct a map with pixels within the given radius around each point source position set to 1.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">make_point_source_mask(</span> <span class="pre">(object)map,</span> <span class="pre">(DoubleVector)ra,</span> <span class="pre">(DoubleVector)dec,</span> <span class="pre">(DoubleVector)radius)</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMapMask</span> <span class="pre">:</span></code></dt><dd><p>Construct a mask from the input stub map with pixels within the given radius around each point source position set to 1.</p>
 </dd>
 </dl>
 <p id="spt3g-maps-maputils-flatsky-to-healpix"><strong>spt3g.maps.maputils.flatsky_to_healpix</strong></p>
@@ -1352,18 +1431,17 @@ vector of them) specified as a (longitude, latitude) pair.</p>
 <li><a class="reference internal" href="#file-format-conversions">File Format Conversions</a></li>
 <li><a class="reference internal" href="#indexing">Indexing</a></li>
 <li><a class="reference internal" href="#sparsity">Sparsity</a></li>
+<li><a class="reference internal" href="#masking">Masking</a><ul>
+<li><a class="reference internal" href="#mask-memory-usage">Mask Memory Usage</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#statistics">Statistics</a></li>
 <li><a class="reference internal" href="#map-interpolation">Map Interpolation</a></li>
 <li><a class="reference internal" href="#map-weights">Map Weights</a></li>
 <li><a class="reference internal" href="#map-frames-and-pipelines">Map Frames and Pipelines</a></li>
 <li><a class="reference internal" href="#flat-sky-map-projections">Flat Sky Map Projections</a></li>
 <li><a class="reference internal" href="#flat-sky-map-manipulation">Flat Sky Map Manipulation</a></li>
-<li><a class="reference internal" href="#frame-objects-in-spt3g-maps">Frame Objects in spt3g.maps</a><ul>
-<li><a class="reference internal" href="#spt3g-maps-flatskymap">spt3g.maps.FlatSkyMap</a></li>
-<li><a class="reference internal" href="#spt3g-maps-g3skymap">spt3g.maps.G3SkyMap</a></li>
-<li><a class="reference internal" href="#spt3g-maps-g3skymapweights">spt3g.maps.G3SkyMapWeights</a></li>
-<li><a class="reference internal" href="#spt3g-maps-healpixskymap">spt3g.maps.HealpixSkyMap</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#frame-objects-in-spt3g-maps">Frame Objects in spt3g.maps</a></li>
 <li><a class="reference internal" href="#modules-in-spt3g-maps">Modules in spt3g.maps</a></li>
 <li><a class="reference internal" href="#functions-in-spt3g-maps">Functions in spt3g.maps</a></li>
 </ul>

@@ -56,7 +56,34 @@ Sparsity
 
 By default, both Healpix and flat-sky maps are initialized in sparse mode. This imposes a slight performance penalty but will result in the map storing only non-zero portions (with caveats, see details above), substantially reducing RAM usage. Some map operations, in particular casting to numpy arrays, will result in the implicit conversion of the map to dense storage, which can result in sudden increases in RAM usage. The current sparsity mode can be examined or changed with the ``sparse`` property (flat sky maps) or the ``dense``, ``ringsparse``, or ``indexedsparse`` properties (Healpix maps). Serialization to ``.g3`` files will maintain the current sparsity scheme, as do arithmetic operators where possible. Serialization to ``.fits`` files implicitly converts flat sky maps to dense mode, but preserves the sparsity of Healpix maps.  The current number of stored pixels can be obtained using the ``npix_allocated`` property, and the number of non-zero pixels can be obtained using the ``npix_nonzero`` property.  Dense maps can be efficiently compactified in memory using the ``G3SkyMap.compact`` method, or the ``CompactMaps`` pipeline module.
 
-Beyond paying attention to implicit conversions to dense storage and the performance impact of sparse storage (which is small), users of this code do not need to worry about the storage mode--all interfaces are identical in all modes.
+Beyond paying attention to implicit conversions to dense storage and the performance impact of sparse storage (which is small, at least for FlatSkyMap objects), users of this code do not need to worry about the storage mode--all interfaces are identical in all modes.
+
+Masking
+=======
+
+Maps containing only boolean data for each pixel are stored as ``G3SkyMapMask`` objects.  Such mask objects have a ``.parent`` attribute which is a shallow clone of the map object with which they are associated (to check for shape compatibility).
+
+Masks are returned when using comparison operators with map objects, e.g.  ``map1 > 5`` or ``map1 == map2``.  The supported comparison operators are: ``>, >=, ==, !=, <=, <``.  Masks can also be combined together using logical operators, e.g. ``mask3 = mask1 & mask2`` or ``mask1 ^= mask2``.  The supported comparison operators are: ``&, &=, |, |=, ^, ^=``.  Masks can also be checked for equality to other masks using ``==`` and ``!=`` operators.
+
+Mask objects can be ``clone``'ed the same way as maps.  A map can be converted to a boolean mask using ``G3SkyMap.to_mask()``, which returns a mask which is ``True`` wherever the map is non-zero (optionally excluding nan or inf pixels).  A mask can be converted back to a map object using ``G3SkyMapMask.to_map()``, which returns a sparse, unit-less, unweighted, unpolarized map object of the same type as ``G3SkyMapMask.parent``, containing double ``1.0`` wherever the mask is ``True``.
+
+Masks can also be applied to maps or masks using the appropriate ``.apply_mask`` method, with optional inversion; alternatively maps can also be directly multiplied by a compatible mask object.  A list of non-zero pixels can be returned using ``.nonzero()`` (note that this returns a single vector of pixel positions), and mask contents can be checked using ``.all()``, ``.any()`` and ``.sum()``.  Mask contents can be inverted in-place using ``.invert()``.
+
+Mask objects cannot be accessed using ``numpy`` slicing, or converted directly to arrays, because ``numpy`` does not represent boolean values as single bits.  To be able to use ``numpy`` tools with masks, you need to first convert the mask to a dense map using ``.to_map()``.  All associated methods of the parent map are accessible as attributes of the mask object in python, e.g. ``mask.angles_to_pixels()`` works as one would expect.
+
+Mask Memory Usage
+-----------------
+
+The current implementation of masks is to use a dense ``std::vector<bool>`` as the data storage backend, which uses 64x less memory than a dense map (``std::vector<double>``) of the same dimensions.  This implementation is sufficient for ``FlatSkyMap`` objects, since these are typically O(50\%) full populated in their sparse state; however, the memory savings for ``HealpixSkyMap`` objects is not as significant when observing sufficiently small patches of sky.  Future work would enable a similar sparse storage backend for masks.
+
+In general, when working with high-resolution maps of any sort, it is important to think carefully about doing the sorts of operations that can balloon memory usage, e.g. taking care to preserve the sparsity of maps by avoiding numpy operations if possible, or using in-place operations to avoid unintentionally creating extra maps or masks in memory.
+
+Statistics
+==========
+
+Most ``numpy.ufunc``-like methods are defined for map objects, namely ``.all(), .any(), .sum(), .mean(), .median(), .var(), .std(), .min(), .max(), .argmin(), .argmax()``.  All methods take an optional ``where`` argument, which can be a compatible ``G3SkyMapMask`` object, or size-compatible 1-D ``numpy`` array that can be converted into one.  In addition, these methods are called under the hood when using the numpy equivalent functions (``numpy.all()``, etc), in order to preserve the sparsity of the input map.  Methods that ignore ``NaN`` values are also defined (``.nansum()``, etc), which behave much like the standard methods, except that calling ``numpy.nansum()`` and friends on a map object does *not* preserve sparsity.
+
+Map values can be tested using ``.isnan(), .isinf(), .isfinite()`` methods as well; these return ``G3SkyMapMask`` objects.
 
 Map Interpolation
 =================
@@ -127,6 +154,8 @@ Frame Objects in spt3g.maps
 * spt3g.maps.FlatSkyMap_
 
 * spt3g.maps.G3SkyMap_
+
+* spt3g.maps.G3SkyMapMask_
 
 * spt3g.maps.G3SkyMapWeights_
 
@@ -311,6 +340,13 @@ Base class for 1- and 2-D skymaps of various projections. Usually you want a sub
 ``compatible( (G3SkyMap)arg1, (G3SkyMap)arg2) -> bool :``
     Returns true if the input argument is a map with matching dimensions and boundaries on the sky.
 
+.. _spt3g.maps.G3SkyMap.nonzero:
+
+**spt3g.maps.G3SkyMap.nonzero**
+
+``nonzero( (G3SkyMap)arg1) -> UInt64Vector :``
+    Return indices of non-zero pixels in the map
+
 .. _spt3g.maps.G3SkyMap.angles_to_pixels:
 
 **spt3g.maps.G3SkyMap.angles_to_pixels**
@@ -417,17 +453,178 @@ Base class for 1- and 2-D skymaps of various projections. Usually you want a sub
 ``compact( (G3SkyMap)arg1 [, (bool)zero_nans=False]) -> None :``
     Convert the map to its default sparse representation, removing empty pixels, and optionally also removing NaN values. A map that is already sparse will be compactified in place in its current representation without additional memory overhead.
 
-.. _spt3g.maps.G3SkyMap.any:
+.. _spt3g.maps.G3SkyMap.to_mask:
 
-**spt3g.maps.G3SkyMap.any**
+**spt3g.maps.G3SkyMap.to_mask**
 
-``any( (G3SkyMap)arg1) -> bool``
+``to_mask( (G3SkyMap)arg1 [, (bool)zero_nans=False [, (bool)zero_infs=False]]) -> G3SkyMapMask :``
+    Create a G3SkyMapMask object from the parent map, with pixels set to true where the map is non-zero (and optionally non-nan and/or finite).
 
-.. _spt3g.maps.G3SkyMap.all:
+.. _spt3g.maps.G3SkyMap.apply_mask:
 
-**spt3g.maps.G3SkyMap.all**
+**spt3g.maps.G3SkyMap.apply_mask**
 
-``all( (G3SkyMap)arg1) -> bool``
+``apply_mask( (G3SkyMap)arg1, (G3SkyMapMask)mask [, (bool)inverse=False]) -> None :``
+    Apply a mask in-place to the map, optionally inverting which pixels are zeroed.  If inverse = False, this is equivalent to in-place multiplication by the mask.
+
+.. _spt3g.maps.G3SkyMap.median:
+
+**spt3g.maps.G3SkyMap.median**
+
+``median( (G3SkyMap)arg1 [, (G3SkyMapMask)where=None]) -> float``
+
+.. _spt3g.maps.G3SkyMap.nansum:
+
+**spt3g.maps.G3SkyMap.nansum**
+
+``nansum( (G3SkyMap)arg1 [, (G3SkyMapMask)where=None]) -> float``
+
+.. _spt3g.maps.G3SkyMap.nanmean:
+
+**spt3g.maps.G3SkyMap.nanmean**
+
+``nanmean( (G3SkyMap)arg1 [, (G3SkyMapMask)where=None]) -> float``
+
+.. _spt3g.maps.G3SkyMap.nanmedian:
+
+**spt3g.maps.G3SkyMap.nanmedian**
+
+``nanmedian( (G3SkyMap)arg1 [, (G3SkyMapMask)where=None]) -> float``
+
+.. _spt3g.maps.G3SkyMap.nanvar:
+
+**spt3g.maps.G3SkyMap.nanvar**
+
+``nanvar( (G3SkyMap)arg1 [, (int)ddof=0 [, (G3SkyMapMask)where=None]]) -> float``
+
+.. _spt3g.maps.G3SkyMap.nanstd:
+
+**spt3g.maps.G3SkyMap.nanstd**
+
+``nanstd( (G3SkyMap)arg1 [, (int)ddof=0 [, (G3SkyMapMask)where=None]]) -> float``
+
+.. _spt3g.maps.G3SkyMap.nanmin:
+
+**spt3g.maps.G3SkyMap.nanmin**
+
+``nanmin( (G3SkyMap)arg1 [, (G3SkyMapMask)where=None]) -> float``
+
+.. _spt3g.maps.G3SkyMap.nanmax:
+
+**spt3g.maps.G3SkyMap.nanmax**
+
+``nanmax( (G3SkyMap)arg1 [, (G3SkyMapMask)where=None]) -> float``
+
+.. _spt3g.maps.G3SkyMap.nanargmin:
+
+**spt3g.maps.G3SkyMap.nanargmin**
+
+``nanargmin( (G3SkyMap)arg1 [, (G3SkyMapMask)where=None]) -> int``
+
+.. _spt3g.maps.G3SkyMap.nanargmax:
+
+**spt3g.maps.G3SkyMap.nanargmax**
+
+``nanargmax( (G3SkyMap)arg1 [, (G3SkyMapMask)where=None]) -> int``
+
+.. _spt3g.maps.G3SkyMap.isinf:
+
+**spt3g.maps.G3SkyMap.isinf**
+
+``isinf( (G3SkyMap)arg1 [, (G3SkyMapMask)where=None]) -> G3SkyMapMask``
+
+.. _spt3g.maps.G3SkyMap.isnan:
+
+**spt3g.maps.G3SkyMap.isnan**
+
+``isnan( (G3SkyMap)arg1 [, (G3SkyMapMask)where=None]) -> G3SkyMapMask``
+
+.. _spt3g.maps.G3SkyMap.isfinite:
+
+**spt3g.maps.G3SkyMap.isfinite**
+
+``isfinite( (G3SkyMap)arg1 [, (G3SkyMapMask)where=None]) -> G3SkyMapMask``
+
+
+
+.. _spt3g.maps.G3SkyMapMask:
+
+spt3g.maps.G3SkyMapMask
+_______________________
+
+Boolean mask of a sky map. Set pixels to use to true, pixels to ignore to false. If use_data set in contrast, mask initialized to true where input map is non-zero; otherwise, all elements are initialized to zero.  Use zero_nans or zero_infs to exclude nan or inf elements from the mask.
+
+*Constructors:*
+	``G3SkyMapMask( (G3SkyMapMask)arg2)``
+	
+	``G3SkyMapMask( (G3SkyMap)parent [, (bool)use_data=False [, (bool)zero_nans=False [, (bool)zero_infs=False]]])`` :
+	    Instantiate a G3SkyMapMask from a parent G3SkyMap
+	
+	``G3SkyMapMask( (G3SkyMap)parent, (object)data [, (bool)zero_nans=False [, (bool)zero_infs=False]])`` :
+	    Instantiate a G3SkyMapMask from a 1D numpy array
+
+
+
+*Members:*
+
+* **parent**: "Parent" map which contains no data, but can be used to retrieve the parameters of the map to which this mask corresponds.
+
+* **size**: Number of pixels in mask
+
+
+*Methods:*
+
+.. _spt3g.maps.G3SkyMapMask.clone:
+
+**spt3g.maps.G3SkyMapMask.clone**
+
+``clone( (G3SkyMapMask)arg1 [, (bool)copy_data=True]) -> G3SkyMapMask :``
+    Return a mask of the same type, populated with a copy of the data if the argument is true (default), empty otherwise.
+
+.. _spt3g.maps.G3SkyMapMask.array_clone:
+
+**spt3g.maps.G3SkyMapMask.array_clone**
+
+``array_clone( (G3SkyMapMask)arg1, (object)data [, (bool)zero_nans=False [, (bool)zero_infs=False]]) -> G3SkyMapMask :``
+    Return a mask of the same type, populated from the input numpy array
+
+.. _spt3g.maps.G3SkyMapMask.compatible:
+
+**spt3g.maps.G3SkyMapMask.compatible**
+
+``compatible( (G3SkyMapMask)arg1, (G3SkyMapMask)arg2) -> bool :``
+    Returns true if the two masks can be applied to the same map.
+
+``compatible( (G3SkyMapMask)arg1, (G3SkyMap)arg2) -> bool :``
+    Returns true if this mask can be applied to the given map.
+
+.. _spt3g.maps.G3SkyMapMask.invert:
+
+**spt3g.maps.G3SkyMapMask.invert**
+
+``invert( (G3SkyMapMask)arg1) -> G3SkyMapMask :``
+    Invert all elements in mask
+
+.. _spt3g.maps.G3SkyMapMask.nonzero:
+
+**spt3g.maps.G3SkyMapMask.nonzero**
+
+``nonzero( (G3SkyMapMask)arg1) -> UInt64Vector :``
+    Return a list of indices of non-zero pixels in the mask
+
+.. _spt3g.maps.G3SkyMapMask.apply_mask:
+
+**spt3g.maps.G3SkyMapMask.apply_mask**
+
+``apply_mask( (G3SkyMapMask)arg1, (G3SkyMapMask)mask [, (bool)inverse=False]) -> None :``
+    Apply a mask in-place to the mask, optionally inverting which pixels are zeroed.  If inverse = False, this is equivalent to in-place element-wise logical-and with the mask.
+
+.. _spt3g.maps.G3SkyMapMask.to_map:
+
+**spt3g.maps.G3SkyMapMask.to_map**
+
+``to_map( (G3SkyMapMask)arg1) -> G3SkyMap :``
+    Create a skymap with data set to the contents of this mask (1.0 where True, 0.0 where False), which can be useful for plotting.
 
 
 
@@ -520,6 +717,13 @@ Polarized (Mueller matrix) or unpolarized (scalar) map pixel weights.
 
 ``inv( (G3SkyMapWeights)arg1) -> G3SkyMapWeights :``
     Return the inverse of the Mueller matrix for each pixel
+
+.. _spt3g.maps.G3SkyMapWeights.apply_mask:
+
+**spt3g.maps.G3SkyMapWeights.apply_mask**
+
+``apply_mask( (G3SkyMapWeights)arg1, (G3SkyMapMask)mask [, (bool)inverse=False]) -> None :``
+    Apply a mask in-place to the weights, optionally inverting which pixels are zeroed.  If inverse = False, this is equivalent to in-place multiplication by the mask.
 
 .. _spt3g.maps.G3SkyMapWeights.clone:
 
@@ -1279,8 +1483,6 @@ one.
 
 Functions in spt3g.maps
 =======================
-* spt3g.maps.apply_mask_
-
 * spt3g.maps.apply_weights_
 
 * spt3g.maps.apply_weights_t_
@@ -1311,13 +1513,7 @@ Functions in spt3g.maps
 
 * spt3g.maps.get_map_hist_
 
-* spt3g.maps.get_map_median_
-
-* spt3g.maps.get_map_minmax_
-
-* spt3g.maps.get_map_stats_
-
-* spt3g.maps.get_mask_map_
+* spt3g.maps.get_map_moments_
 
 * spt3g.maps.get_origin_rotator_
 
@@ -1342,14 +1538,6 @@ Functions in spt3g.maps
 * spt3g.maps.remove_weights_t_
 
 * spt3g.maps.reproj_map_
-
-
-.. _spt3g.maps.apply_mask:
-
-**spt3g.maps.apply_mask**
-
-``apply_mask( (G3SkyMap)map, (object)mask [, (bool)inverse=False]) -> None :``
-    Apply a boolean mask to the input map in place, optionally inverting the mask values
 
 
 .. _spt3g.maps.apply_weights:
@@ -1596,40 +1784,16 @@ over all pixels.  The former produces output that is equivalent to using
 
 **spt3g.maps.get_map_hist**
 
-``get_map_hist( (object)map, (DoubleVector)bin_edges [, (object)mask=None [, (bool)ignore_zeros=False [, (bool)ignore_nans=False [, (bool)ignore_infs=False]]]]) -> DoubleVector :``
+``get_map_hist( (object)map, (DoubleVector)bin_edges [, (G3SkyMapMask)mask=None [, (bool)ignore_zeros=False [, (bool)ignore_nans=False [, (bool)ignore_infs=False]]]]) -> DoubleVector :``
     Computes the histogram of the input map into bins defined by the array of bin edges, optionally ignoring zero, nan and/or inf values in the map.  If a mask is supplied, then only the non-zero pixels in the mask are included.
 
 
-.. _spt3g.maps.get_map_median:
+.. _spt3g.maps.get_map_moments:
 
-**spt3g.maps.get_map_median**
+**spt3g.maps.get_map_moments**
 
-``get_map_median( (object)map [, (object)mask=None [, (bool)ignore_zeros=False [, (bool)ignore_nans=False [, (bool)ignore_infs=False]]]]) -> float :``
-    Computes the median of the input map, optionally ignoring zero, nan and/or inf values in the map.  Requires making a copy of the data.  If a mask is supplied, then only the non-zero pixels in the mask are included.
-
-
-.. _spt3g.maps.get_map_minmax:
-
-**spt3g.maps.get_map_minmax**
-
-``get_map_minmax( (object)map [, (object)mask=None [, (bool)ignore_zeros=False [, (bool)ignore_nans=False [, (bool)ignore_infs=False]]]]) -> DoubleVector :``
-    Computes the min and max of the input map, optionally ignoring zero, nan and/or inf values in the map.  If a mask is supplied, then only the non-zero pixels in the mask are included.
-
-
-.. _spt3g.maps.get_map_stats:
-
-**spt3g.maps.get_map_stats**
-
-``get_map_stats( (object)map [, (object)mask=None [, (int)order=2 [, (bool)ignore_zeros=False [, (bool)ignore_nans=False [, (bool)ignore_infs=False]]]]]) -> DoubleVector :``
+``get_map_moments( (object)map [, (G3SkyMapMask)mask=None [, (int)order=2 [, (bool)ignore_zeros=False [, (bool)ignore_nans=False [, (bool)ignore_infs=False]]]]]) -> DoubleVector :``
     Computes moment statistics of the input map, optionally ignoring zero, nan and/or inf values in the map.  If order = 1, only the mean is returned.  If order = 2, 3 or 4 then the variance, skew and kurtosis are also included, respectively.  If a mask is supplied, then only the non-zero pixels in the mask are included.
-
-
-.. _spt3g.maps.get_mask_map:
-
-**spt3g.maps.get_mask_map**
-
-``get_mask_map( (object)map_in [, (bool)zero_nans=False [, (bool)zero_infs=False]]) -> G3SkyMap :``
-    Returns a map that is 1 where the input map is nonzero, and optionally non-nan and/or non-infinite
 
 
 .. _spt3g.maps.get_origin_rotator:
@@ -1652,7 +1816,7 @@ over all pixels.  The former produces output that is equivalent to using
 
 **spt3g.maps.get_ra_dec_mask**
 
-``get_ra_dec_mask( (object)map_in, (float)ra_left, (float)ra_right, (float)dec_bottom, (float)dec_top) -> G3SkyMap :``
+``get_ra_dec_mask( (object)map_in, (float)ra_left, (float)ra_right, (float)dec_bottom, (float)dec_top) -> G3SkyMapMask :``
     Returns a mask that is nonzero for any pixels within the given ra and dec ranges
 
 
@@ -1660,8 +1824,8 @@ over all pixels.  The former produces output that is equivalent to using
 
 **spt3g.maps.make_point_source_mask**
 
-``make_point_source_mask( (G3SkyMap)map, (DoubleVector)ra, (DoubleVector)dec, (DoubleVector)radius) -> None :``
-    Construct a map with pixels within the given radius around each point source position set to 1.
+``make_point_source_mask( (object)map, (DoubleVector)ra, (DoubleVector)dec, (DoubleVector)radius) -> G3SkyMapMask :``
+    Construct a mask from the input stub map with pixels within the given radius around each point source position set to 1.
 
 
 .. _spt3g.maps.maputils.flatsky_to_healpix:
