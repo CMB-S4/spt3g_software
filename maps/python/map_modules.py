@@ -47,6 +47,7 @@ def RemoveWeights(frame, zero_nans=False):
 
     if not frame["T"].weighted:
         return frame
+    ValidateMaps(frame)
 
     tmap = frame.pop("T")
 
@@ -78,6 +79,7 @@ def ApplyWeights(frame):
 
     if frame["T"].weighted:
         return frame
+    ValidateMaps(frame)
 
     tmap = frame.pop("T")
 
@@ -121,6 +123,7 @@ def FlattenPol(frame, invert=False):
     if any(not isinstance(frame[k], maps.FlatSkyMap) for k in "QU"):
         return
 
+    ValidateMaps(frame)
     qmap, umap = frame.pop("Q"), frame.pop("U")
 
     if "Wpol" in frame:
