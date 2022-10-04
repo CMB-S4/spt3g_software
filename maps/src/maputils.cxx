@@ -207,9 +207,6 @@ void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, G3SkyMapWeightsPtr W, double h
 			 "U.pol_conv is set to IAU. This will raise an error "
 			 "in the future.");
 
-	if (!W)
-		log_warn("Missing weights for flatten_pol");
-
 	g3_assert(Q->IsCompatible(*U));
 	g3_assert(Q->IsPolFlat() == U->IsPolFlat());
 	FlatSkyMapPtr flatptr;
