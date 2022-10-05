@@ -350,7 +350,7 @@ HealpixSkyMapInfo::GetInterpPixelsWeights(double alpha, double delta,
 	}
 
 	if (ir1 == 0) {
-		double wz = z / z2;
+		double wz = (z - 1.0) / (z2 - 1.0);
 		weights[2] *= wz;
 		weights[3] *= wz;
 		double fac = (1 - wz) * 0.25;
@@ -361,7 +361,7 @@ HealpixSkyMapInfo::GetInterpPixelsWeights(double alpha, double delta,
 		pixels[0] = (pixels[2] + 2) & 3;
 		pixels[1] = (pixels[3] + 2) & 3;
 	} else if (ir2 == nring_) {
-		double wz = (z - z1) / (M_PI - z1);
+		double wz = (z - z1) / (-1.0 - z1);
 		weights[0] *= 1 - wz;
 		weights[1] *= 1 - wz;
 		double fac = wz * 0.25;
