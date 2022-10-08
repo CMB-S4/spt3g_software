@@ -105,9 +105,10 @@
 </section>
 <section id="map-interpolation">
 <h2>Map Interpolation<a class="headerlink" href="#map-interpolation" title="Permalink to this heading">¶</a></h2>
-<p>Several interpolation and rebinning utilities are provided.  The method <code class="docutils literal notranslate"><span class="pre">G3SkyMap.get_interp_values</span></code> can be used for extracting map values at arbitrary sky positions.  The method <code class="docutils literal notranslate"><span class="pre">G3SkyMap.rebin</span></code> can be used to downgrade the map resolution in a way that preserves the total power within each map pixel.</p>
+<p>Several interpolation and rebinning utilities are provided.  The method <code class="docutils literal notranslate"><span class="pre">G3SkyMap.get_interp_values</span></code> can be used for extracting map values at arbitrary sky positions using bilinear interpolation.  The method <code class="docutils literal notranslate"><span class="pre">G3SkyMap.rebin</span></code> can be used to downgrade the map resolution in a way that preserves the total power within each map pixel.</p>
 <p>The functions <code class="docutils literal notranslate"><span class="pre">healpix_to_flatsky</span></code> and <code class="docutils literal notranslate"><span class="pre">flatsky_to_healpix</span></code> functions are provided to reproject maps between flat sky and curved sky systems, with options to use interpolation or rebinning to improve the accuracy of the reprojection.</p>
 <p>The more general <code class="docutils literal notranslate"><span class="pre">reproj_map</span></code> function can also be used to convert between flat sky projections.</p>
+<p><em>Note:</em> The interpolation routine for healpix maps produces results that differ from those of the equivalent <code class="docutils literal notranslate"><span class="pre">healpy.get_interp_val</span></code> routine.  The interpolation routine implemented here is area-preserving in the computation of bilinear weights, whereas the <code class="docutils literal notranslate"><span class="pre">healpy</span></code> routine is not.</p>
 </section>
 <section id="map-weights">
 <h2>Map Weights<a class="headerlink" href="#map-weights" title="Permalink to this heading">¶</a></h2>
