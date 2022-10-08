@@ -313,11 +313,11 @@ HealpixSkyMapInfo::GetInterpPixelsWeights(double alpha, double delta,
 	size_t ir1 = RingAbove(z);
 	size_t ir2 = ir1 + 1;
 
-	double theta1, theta2;
+	double z1, z2;
 
 	if (ir1 > 0) {
 		const HealpixRingInfo & ring = rings_[ir1];
-		theta1 = ring.theta;
+		z1 = ring.z;
 		double tmp = phi / ring.dphi - ring.shift;
 		long i1 = (tmp < 0) ? tmp - 1 : tmp;
 		double w1 = (phi - (i1 + ring.shift) * ring.dphi) / ring.dphi;
@@ -334,7 +334,7 @@ HealpixSkyMapInfo::GetInterpPixelsWeights(double alpha, double delta,
 
 	if (ir2 < nring_) {
 		const HealpixRingInfo & ring = rings_[ir2];
-		theta2 = ring.theta;
+		z2 = ring.z;
 		double tmp = phi / ring.dphi - ring.shift;
 		long i1 = (tmp < 0) ? tmp - 1 : tmp;
 		double w1 = (phi - (i1 + ring.shift) * ring.dphi) / ring.dphi;
@@ -350,10 +350,10 @@ HealpixSkyMapInfo::GetInterpPixelsWeights(double alpha, double delta,
 	}
 
 	if (ir1 == 0) {
-		double wtheta = theta / theta2;
-		weights[2] *= wtheta;
-		weights[3] *= wtheta;
-		double fac = (1 - wtheta) * 0.25;
+		double wz = (z - 1.0) / (z2 - 1.0);
+		weights[2] *= wz;
+		weights[3] *= wz;
+		double fac = (1 - wz) * 0.25;
 		weights[0] = fac;
 		weights[1] = fac;
 		weights[2] += fac;
@@ -361,10 +361,10 @@ HealpixSkyMapInfo::GetInterpPixelsWeights(double alpha, double delta,
 		pixels[0] = (pixels[2] + 2) & 3;
 		pixels[1] = (pixels[3] + 2) & 3;
 	} else if (ir2 == nring_) {
-		double wtheta = (theta - theta1) / (M_PI - theta1);
-		weights[0] *= 1 - wtheta;
-		weights[1] *= 1 - wtheta;
-		double fac = wtheta * 0.25;
+		double wz = (z - z1) / (-1.0 - z1);
+		weights[0] *= 1 - wz;
+		weights[1] *= 1 - wz;
+		double fac = wz * 0.25;
 		weights[0] += fac;
 		weights[1] += fac;
 		weights[2] = fac;
@@ -372,11 +372,11 @@ HealpixSkyMapInfo::GetInterpPixelsWeights(double alpha, double delta,
 		pixels[2] = ((pixels[0] + 2) & 3) + npix_ - 4;
 		pixels[3] = ((pixels[1] + 2) & 3) + npix_ - 4;
 	} else {
-		double wtheta = (theta - theta1) / (theta2 - theta1);
-		weights[0] *= 1 - wtheta;
-		weights[1] *= 1 - wtheta;
-		weights[2] *= wtheta;
-		weights[3] *= wtheta;
+		double wz = (z - z1) / (z2 - z1);
+		weights[0] *= 1 - wz;
+		weights[1] *= 1 - wz;
+		weights[2] *= wz;
+		weights[3] *= wz;
 	}
 
 	if (nested_) {
