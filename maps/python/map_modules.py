@@ -223,6 +223,8 @@ def ValidateMaps(frame, ignore_missing_weights=False):
             unit="ValidateMaps",
         )
 
+    check_weights = False
+
     stub = frame["T"].clone(False)
     for k in ["T", "Q", "U", "Wpol", "Wunpol"]:
         if k not in frame:
@@ -248,19 +250,22 @@ def ValidateMaps(frame, ignore_missing_weights=False):
                     )
             if frame[k].weighted and not ignore_missing_weights:
                 if "Wpol" not in frame and "Wunpol" not in frame:
-                    core.log_warn(
-                        "Map frame %s: Missing weights" % map_id, unit="ValidateMaps"
-                    )
-                if k == "T" and "Q" not in frame and "Wunpol" not in frame:
-                    core.log_warn(
-                        "Map frame %s: Missing unpolarized weights" % map_id,
-                        unit="ValidateMaps",
-                    )
-                if k in "QU" and "Wpol" not in frame:
-                    core.log_warn(
-                        "Map frame %s: Missing polarized weights" % map_id,
-                        unit="ValidateMaps",
-                    )
+                    if not check_weights:
+                        core.log_warn(
+                            "Map frame %s: Missing weights" % map_id, unit="ValidateMaps"
+                        )
+                        check_weights = True
+                else:
+                    if k == "T" and "Q" not in frame and "Wunpol" not in frame:
+                        core.log_warn(
+                            "Map frame %s: Missing unpolarized weights" % map_id,
+                            unit="ValidateMaps",
+                        )
+                    elif k == "Q" and "Wpol" not in frame:
+                        core.log_warn(
+                            "Map frame %s: Missing polarized weights" % map_id,
+                            unit="ValidateMaps",
+                        )
         else:
             if frame[k].polarized and ("Q" not in frame or "U" not in frame):
                 core.log_fatal(
