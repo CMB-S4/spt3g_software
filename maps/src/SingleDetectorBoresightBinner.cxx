@@ -199,7 +199,12 @@ SingleDetectorBoresightBinner::Process(G3FramePtr frame,
 		const std::string &det = i.first;
 		G3SkyMapPtr m = i.second;
 #endif
-		G3TimestreamConstPtr ts = timestreams->at(det);
+		G3TimestreamConstPtr ts;
+		try {
+			ts = timestreams->at(det);
+		} catch (std::out_of_range &e) {
+			continue;
+		}
 	
 		g3_assert(ts->size() == pixels.size());
 		for (size_t j = 0; j < ts->size(); j++) {
