@@ -105,7 +105,8 @@ G3SkyMapMask::FillFromArray(boost::python::object v, bool zero_nans, bool zero_i
 		size_t npix = view.shape[0];
 		if (npix != size()) {
 			PyBuffer_Release(&view);
-			log_fatal("Got array of shape (%zu,), expected (%zu,)", npix, size());
+			log_fatal("Got array of shape (%zu,), expected (%zu,)",
+			    npix, size());
 		}
 
 		const char *format = view.format;
