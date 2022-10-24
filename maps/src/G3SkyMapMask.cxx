@@ -1,6 +1,7 @@
 #include <pybindings.h>
 #include <serialization.h>
 #include <typeinfo>
+#include <algorithm>
 #include <sys/types.h>
 
 #include <maps/G3SkyMapMask.h>
@@ -531,6 +532,21 @@ skymapmask_pybool(G3SkyMapMaskPtr m)
 	return false;
 }
 
+static boost::python::dict
+G3SkyMapMask_array_interface(const G3SkyMapMask &self)
+{
+	namespace bp = boost::python;
+
+	bp::dict out;
+	out["typestr"] = "f8";
+	out["data"] = bp::object(self.MakeBinaryMap());
+	auto shape = self.Parent()->shape();
+	std::reverse(shape.begin(), shape.end());
+	out["shape"] = bp::tuple(shape);
+
+	return out;
+}
+
 PYBINDINGS("maps")
 {
 	using namespace boost::python;
@@ -588,6 +604,7 @@ PYBINDINGS("maps")
 	  .def(bp::self ^ bp::self)
 	  .def(bp::self == bp::self)
 	  .def(bp::self != bp::self)
+	  .add_property("__array_interface__", G3SkyMapMask_array_interface)
 	  .def("to_map", &G3SkyMapMask::MakeBinaryMap, "Create a skymap with data set to the contents of this mask (1.0 where True, 0.0 where False), which can be useful for plotting.")
 	;
 	register_pointer_conversions<G3SkyMapMask>();

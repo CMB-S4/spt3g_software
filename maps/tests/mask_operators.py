@@ -130,6 +130,10 @@ for x in maplist:
     m1.apply_mask(m2)
     assert(not m1.any())
 
+    # Direct array conversion
+    assert(np.asarray(m2).shape == np.asarray(m2.to_map()).shape)
+    assert((np.asarray(m2) == np.asarray(m2.to_map())).all())
+
     # ufuncs
     print("ufuncs")
     if isinstance(x, maps.FlatSkyMap):
