@@ -70,6 +70,11 @@ set(Boost_NO_BOOST_CMAKE ON)
 # Find all the Boost and Python libraries
 include(Spt3gBoostPython)
 
+# Upgrade C++ standard to C++14 for Boost >= 1.80, which requires it
+if(Boost_VERSION VERSION_GREATER 1.79)
+	set(CMAKE_CXX_STANDARD 14)
+endif()
+
 target_include_directories(spt3g INTERFACE ${Boost_INCLUDE_DIR} ${Python_INCLUDE_DIRS})
 target_link_libraries(spt3g INTERFACE pthread ${Boost_LIBRARIES} ${Python_LIBRARIES})
 
