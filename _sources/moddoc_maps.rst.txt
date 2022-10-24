@@ -573,6 +573,8 @@ Boolean mask of a sky map. Set pixels to use to true, pixels to ignore to false.
 
 * **size**: Number of pixels in mask
 
+* **__array_interface__**: No Doc (Shame!)
+
 
 *Methods:*
 
