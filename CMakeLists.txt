@@ -277,3 +277,7 @@ configure_file(
 	"${CMAKE_BINARY_DIR}/cmake/cmake_uninstall_cmake"
 	IMMEDIATE @ONLY)
 add_custom_target(uninstall "${CMAKE_COMMAND}" -P "${CMAKE_BINARY_DIR}/cmake/cmake_uninstall_cmake")
+
+if(NOT Python_FOUND)
+	message(FATAL_ERROR "Unable to find Python; build cannot proceed")
+endif(NOT Python_FOUND)
