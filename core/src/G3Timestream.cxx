@@ -926,7 +926,7 @@ timestream_from_iterable(boost::python::object v,
 			delete x->buffer_; x->buffer_ = NULL;
 			x->data_type_ = G3Timestream::TS_FLOAT;
 			float *data = new float[view.len/sizeof(float)];
-			x->root_data_ref_ = boost::shared_ptr<float>(data);
+			x->root_data_ref_ = boost::shared_ptr<float []>(data);
 			x->data_ = data;
 			x->len_ = view.len/sizeof(float);
 			memcpy(data, view.buf, view.len);
