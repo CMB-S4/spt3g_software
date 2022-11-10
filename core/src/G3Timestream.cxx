@@ -251,7 +251,7 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 		// allow NaNs, unlike int32_ts, which we try to pull through
 		// the process to signal missing data.
 		float *data = new float[callback.outbuf->size()];
-		root_data_ref_ = boost::shared_ptr<float>(data);
+		root_data_ref_ = boost::shared_ptr<float[]>(data);
 		data_type_ = TS_FLOAT;
 		len_ = callback.outbuf->size();
 		data_ = data;
@@ -926,7 +926,7 @@ timestream_from_iterable(boost::python::object v,
 			delete x->buffer_; x->buffer_ = NULL;
 			x->data_type_ = G3Timestream::TS_FLOAT;
 			float *data = new float[view.len/sizeof(float)];
-			x->root_data_ref_ = boost::shared_ptr<float []>(data);
+			x->root_data_ref_ = boost::shared_ptr<float[]>(data);
 			x->data_ = data;
 			x->len_ = view.len/sizeof(float);
 			memcpy(data, view.buf, view.len);
@@ -939,7 +939,7 @@ timestream_from_iterable(boost::python::object v,
 			delete x->buffer_; x->buffer_ = NULL;
 			x->data_type_ = G3Timestream::TS_INT32;
 			int32_t *data = new int32_t[view.len/sizeof(int32_t)];
-			x->root_data_ref_ = boost::shared_ptr<int32_t>(data);
+			x->root_data_ref_ = boost::shared_ptr<int32_t[]>(data);
 			x->data_ = data;
 			x->len_ = view.len/sizeof(int32_t);
 			memcpy(data, view.buf, view.len);
@@ -953,7 +953,7 @@ timestream_from_iterable(boost::python::object v,
 			delete x->buffer_; x->buffer_ = NULL;
 			x->data_type_ = G3Timestream::TS_INT64;
 			int64_t *data = new int64_t[view.len/sizeof(int64_t)];
-			x->root_data_ref_ = boost::shared_ptr<int64_t>(data);
+			x->root_data_ref_ = boost::shared_ptr<int64_t[]>(data);
 			x->data_ = data;
 			x->len_ = view.len/sizeof(int64_t);
 			memcpy(data, view.buf, view.len);
