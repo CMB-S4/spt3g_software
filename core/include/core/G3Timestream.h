@@ -123,20 +123,6 @@ public:
 	G3Timestream operator /(double r) const;
 	G3Timestream &operator /=(double r);
 
-	// Avoid using the following, it works only in very restricted cases
-	void push_back(double value) {
-		if (!buffer_) {
-			// Newly-allocated zero-length timestream?
-			if (!data_ && len_ == 0)
-				buffer_ = new std::vector<double>();
-			else
-				throw std::bad_alloc();
-		}
-		buffer_->push_back(value);
-		// Update pointers and length, which may have changed
-		data_ = &buffer_[0];
-		len_ = buffer_->size();
-	}
 	class G3TimestreamPythonHelpers;
 
 private:

@@ -917,7 +917,7 @@ timestream_from_iterable(boost::python::object v,
 	G3TimestreamPtr x;
 	Py_buffer view;
 	if (PyObject_GetBuffer(v.ptr(), &view,
-	    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) != -1) {
+	    PyBUF_FORMAT | PyBUF_CONTIG_RO) != -1) {
 		if (strcmp(view.format, "d") == 0) {
 			x = G3TimestreamPtr(new G3Timestream((double *)view.buf,
 			    (double *)view.buf + view.len/sizeof(double)));
@@ -961,13 +961,16 @@ timestream_from_iterable(boost::python::object v,
 		} else {
 			// We could add more types, but why do that?
 			// Let Python do the work for obscure cases
-			x = G3TimestreamPtr(new G3Timestream());
-			boost::python::container_utils::extend_container(*x, v);
+			std::vector<double> data;
+			boost::python::container_utils::extend_container(data, v);
+			x = G3TimestreamPtr(new G3Timestream(data.begin(), data.end()));
 		}
 		PyBuffer_Release(&view);
 	} else {
 		PyErr_Clear();
-		boost::python::container_utils::extend_container(*x, v);
+		std::vector<double> data;
+		boost::python::container_utils::extend_container(data, v);
+		x = G3TimestreamPtr(new G3Timestream(data.begin(), data.end()));
 	}
 
 	x->units = units;
@@ -1247,7 +1250,6 @@ PYBINDINGS("core") {
 	    .def("_cxxslice", &G3Timestream::G3TimestreamPythonHelpers::G3Timestream_getslice, "Slice-only __getitem__")
 	    // Operators bound in python through numpy
 	;
-	scitbx::boost_python::container_conversions::from_python_sequence<G3Timestream, scitbx::boost_python::container_conversions::variable_capacity_policy>();
 	register_pointer_conversions<G3Timestream>();
 
 	// Add buffer protocol interface
