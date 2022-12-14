@@ -362,7 +362,7 @@ public:
 	// Instantiate weight maps based on the metadata of a reference map
 	G3SkyMapWeights(G3SkyMapConstPtr ref_map, bool polarized = true);
 
-	G3SkyMapWeights(const G3SkyMapWeights &r);
+	G3SkyMapWeights(const G3SkyMapWeights &r, bool copy_data = true);
 	G3SkyMapPtr TT, TQ, TU, QQ, QU, UU;
 
 	bool IsPolarized() const {
@@ -430,9 +430,9 @@ public:
 
 	boost::shared_ptr<G3SkyMapWeights> Clone(bool copy_data) const {
 		if (copy_data)
-			return boost::make_shared<G3SkyMapWeights>(*this);
+			return boost::make_shared<G3SkyMapWeights>(*this, true);
 		else
-			return boost::make_shared<G3SkyMapWeights>(this->TT, this->IsPolarized());
+			return boost::make_shared<G3SkyMapWeights>(*this, false);
 	}
 private:
 	template <class A> void serialize(A &ar, const unsigned v);

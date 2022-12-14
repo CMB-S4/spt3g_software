@@ -128,12 +128,12 @@ G3SkyMapWeights::G3SkyMapWeights(G3SkyMapConstPtr ref, bool polarized) :
 	}
 }
 
-G3SkyMapWeights::G3SkyMapWeights(const G3SkyMapWeights &r) :
-    TT(r.TT->Clone(true)), TQ(!r.TQ ? NULL : r.TQ->Clone(true)),
-    TU(!r.TU ? NULL : r.TU->Clone(true)),
-    QQ(!r.QQ ? NULL : r.QQ->Clone(true)),
-    QU(!r.QU ? NULL : r.QU->Clone(true)),
-    UU(!r.UU ? NULL : r.UU->Clone(true))
+G3SkyMapWeights::G3SkyMapWeights(const G3SkyMapWeights &r, bool copy_data) :
+    TT(r.TT->Clone(copy_data)), TQ(!r.TQ ? NULL : r.TQ->Clone(copy_data)),
+    TU(!r.TU ? NULL : r.TU->Clone(copy_data)),
+    QQ(!r.QQ ? NULL : r.QQ->Clone(copy_data)),
+    QU(!r.QU ? NULL : r.QU->Clone(copy_data)),
+    UU(!r.UU ? NULL : r.UU->Clone(copy_data))
 {
 }
 
