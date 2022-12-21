@@ -657,10 +657,10 @@ G3Time G3TimestreamMap::GetStartTime() const
 	return begin()->second->start;
 }
 
-static void timestream_map_set_start_time(G3TimestreamMap &map, G3Time start)
+void G3TimestreamMap::SetStartTime(G3Time start)
 {
-	for (auto i = map.begin(); i != map.end(); i++)
-		i->second->start = start;
+	for (auto& ts : *this)
+		ts.second->start = start;
 }
 
 G3Time G3TimestreamMap::GetStopTime() const
@@ -671,10 +671,10 @@ G3Time G3TimestreamMap::GetStopTime() const
 	return begin()->second->stop;
 }
 
-static void timestream_map_set_stop_time(G3TimestreamMap &map, G3Time stop)
+void G3TimestreamMap::SetStopTime(G3Time stop)
 {
-	for (auto i = map.begin(); i != map.end(); i++)
-		i->second->stop = stop;
+	for (auto& ts : *this)
+		ts.second->stop = stop;
 }
 
 double G3TimestreamMap::GetSampleRate() const
@@ -699,6 +699,12 @@ G3Timestream::TimestreamUnits G3TimestreamMap::GetUnits() const
 		return G3Timestream::None;
 
 	return begin()->second->units;
+}
+
+void G3TimestreamMap::SetUnits(G3Timestream::TimestreamUnits units)
+{
+	for (auto& ts : *this)
+		ts.second->units = units;
 }
 
 void G3TimestreamMap::Compactify()
@@ -1270,10 +1276,10 @@ PYBINDINGS("core") {
 	       "data into a contiguous block. Requires timestreams be aligned "
 	       "and the same data type. Done implicitly by numpy.asarray().")
 	    .add_property("start", &G3TimestreamMap::GetStartTime,
-	      &timestream_map_set_start_time,
+	      &G3TimestreamMap::SetStartTime,
 	      "Time of the first sample in the time stream")
 	    .add_property("stop", &G3TimestreamMap::GetStopTime,
-	      &timestream_map_set_stop_time,
+	      &G3TimestreamMap::SetStopTime,
 	      "Time of the final sample in the time stream")
 	    .add_property("sample_rate", &G3TimestreamMap::GetSampleRate,
 	      "Computed sample rate of the timestream.")

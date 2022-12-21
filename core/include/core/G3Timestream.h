@@ -143,13 +143,42 @@ private:
 		TS_INT32,
 		TS_INT64
 	} data_type_;
+	
+	template<typename T>
+	struct TimeStreamTypeResolver{
+		static_assert(sizeof(T)!=sizeof(T), "Unsupported datatype for G3Timestream");
+	};
 };
 
 G3_POINTERS(G3Timestream);
 
+template<>
+struct G3Timestream::TimeStreamTypeResolver<double>{
+	constexpr static auto type_tag=G3Timestream::TS_DOUBLE;
+};
+
+template<>
+struct G3Timestream::TimeStreamTypeResolver<float>{
+	constexpr static auto type_tag=G3Timestream::TS_FLOAT;
+};
+
+template<>
+struct G3Timestream::TimeStreamTypeResolver<int32_t>{
+	constexpr static auto type_tag=G3Timestream::TS_INT32;
+};
+
+template<>
+struct G3Timestream::TimeStreamTypeResolver<int64_t>{
+	constexpr static auto type_tag=G3Timestream::TS_INT64;
+};
+
 class G3TimestreamMap : public G3FrameObject,
     public std::map<std::string, G3TimestreamPtr> {
 public:
+	G3TimestreamMap(){}
+	G3TimestreamMap(const G3TimestreamMap& other):std::map<std::string, G3TimestreamPtr>(other){}
+	G3TimestreamMap(G3TimestreamMap&& other):std::map<std::string, G3TimestreamPtr>(std::move(other)){}
+
 	// Return true if all timestreams start and end at the same time and
 	// contain the same number of samples.
 	bool CheckAlignment() const;
@@ -157,10 +186,15 @@ public:
 	// Return statistics for contained timestreams. Results undefined if
 	// CheckAlignment is false.
 	G3Time GetStartTime() const;
+	void SetStartTime(G3Time start);
 	G3Time GetStopTime() const;
+	void SetStopTime(G3Time stop);
 	double GetSampleRate() const;
 	size_t NSamples() const;
 	G3Timestream::TimestreamUnits GetUnits() const;
+	void SetUnits(G3Timestream::TimestreamUnits units);
+	/// FLAC compression levels range from 0-9. 0 means do not use FLAC.
+	void SetFLACCompression(int compression_level);
 
 	// Compact underlying data storage into a contiguous 2D block.
 	// This invalidates any references to data inside any member
@@ -168,6 +202,48 @@ public:
 	// and requires timestream alignment (throws exception if
 	// CheckAlignment is false).
 	void Compactify();
+	
+	/// Construct a map whose underlying data storage is a contiguous 2D block.
+	/// \param keys the timestream keys for which the map should be constructed
+	/// \param start the start time which will be shared by all time streams
+	/// \param stop the stop time which will be shared by all time streams
+	/// \param n_samples the number of samples each timestream will have
+	/// \pre keys must be in sorted order
+	template<typename SampleType>
+	static G3TimestreamMap MakeCompact(const std::vector<std::string>& keys, G3Time start, G3Time stop, std::size_t n_samples){
+		boost::shared_ptr<SampleType[]> data(new SampleType[n_samples*keys.size()]);
+		return MakeCompact(keys, start, stop, n_samples, data);
+	}
+
+	/// Construct a map using an existing contiguous 2D block of data as the underlying storage.
+	/// Within the data block, the samples for each timestream must be laid out in the same order as
+	/// the (sorted) keys, without gaps.
+	/// \param keys the timestream keys for which the map should be constructed
+	/// \param start the start time which will be shared by all time streams
+	/// \param stop the stop time which will be shared by all time streams
+	/// \param n_samples the number of samples each timestream will have
+	/// \param data existing data into which the new timestreams should be views
+	/// \pre keys must be in sorted order
+	template<typename SampleType>
+	static G3TimestreamMap MakeCompact(const std::vector<std::string>& keys, G3Time start, G3Time stop, std::size_t n_samples, boost::shared_ptr<SampleType[]> data){
+		if(!std::is_sorted(keys.begin(), keys.end()))
+			throw std::runtime_error("G3TimestreamMap::MakeCompact: keys must be sorted");
+		const auto data_type=G3Timestream::TimeStreamTypeResolver<SampleType>::type_tag;
+		G3TimestreamMap map;
+		std::size_t offset=0;
+		for(const auto& key : keys){
+			auto ts=boost::make_shared<G3Timestream>(0);
+			ts->start=start;
+			ts->stop=stop;
+			ts->root_data_ref_=data;
+			ts->data_=data.get()+offset;
+			ts->data_type_=data_type;
+			ts->len_=n_samples;
+			map.emplace(key, std::move(ts));
+			offset+=n_samples;
+		}
+		return map;
+	}
 
 	template <class A> void serialize(A &ar, unsigned v);
 	std::string Description() const;
