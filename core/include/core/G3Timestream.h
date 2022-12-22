@@ -102,6 +102,7 @@ public:
 	}
 
 	double GetSampleRate() const;
+	uint8_t GetCompressionLevel() const{ return use_flac_; }
 	
 	template <class A> void load(A &ar, unsigned v);
 	template <class A> void save(A &ar, unsigned v) const;

@@ -707,6 +707,12 @@ void G3TimestreamMap::SetUnits(G3Timestream::TimestreamUnits units)
 		ts.second->units = units;
 }
 
+void G3TimestreamMap::SetFLACCompression(int compression_level)
+{
+	for (auto& ts : *this)
+		ts.second->use_flac_ = compression_level;
+}
+
 void G3TimestreamMap::Compactify()
 {
 	// Check if already compacted
