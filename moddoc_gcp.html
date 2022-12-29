@@ -164,6 +164,7 @@
 <li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-unpacktrackerminimal">spt3g.gcp.ARCExtractor.UnpackTrackerMinimal</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-unpacktrackerpointingdata">spt3g.gcp.ARCExtractor.UnpackTrackerPointingData</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-unpackweatherdata">spt3g.gcp.ARCExtractor.UnpackWeatherData</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-updatelinearsensordeltas">spt3g.gcp.ARCExtractor.UpdateLinearSensorDeltas</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-arcfilereader">spt3g.gcp.ARCFileReader</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-archkextractor-unpacksptpolhkdata">spt3g.gcp.ARCHKExtractor.UnpackSPTpolHKData</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-calfile-calfilereader">spt3g.gcp.CalFile.CalFileReader</a></p></li>
@@ -181,6 +182,7 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">CalibrateFrame</span><span class="p">)</span>
 <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UnpackACUData</span><span class="p">)</span>
 <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UnpackTrackerPointingData</span><span class="p">)</span>
+<span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UpdateLinearSensorDeltas</span><span class="p">)</span>
 <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">DecryptFeatureBit</span><span class="p">)</span>
 <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UnpackTrackerData</span><span class="p">)</span>
 <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">AddBenchData</span><span class="p">)</span>
@@ -284,6 +286,11 @@ gcp/control/conf/spt/cal.</p>
 in frame</p>
 <dl class="simple">
 <dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">UnpackWeatherData(f)</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-gcp-arcextractor-updatelinearsensordeltas"><strong>spt3g.gcp.ARCExtractor.UpdateLinearSensorDeltas</strong></p>
+<dl class="simple">
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">UpdateLinearSensorDeltas(f)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-gcp-arcfilereader"><strong>spt3g.gcp.ARCFileReader</strong></p>

@@ -214,6 +214,8 @@ Modules in spt3g.gcp
 
 * spt3g.gcp.ARCExtractor.UnpackWeatherData_
 
+* spt3g.gcp.ARCExtractor.UpdateLinearSensorDeltas_
+
 * spt3g.gcp.ARCFileReader_
 
 * spt3g.gcp.ARCHKExtractor.UnpackSPTpolHKData_
@@ -249,6 +251,7 @@ Extract GCP registers into native objects
     pipe.Add(spt3g.gcp.ARCExtractor.CalibrateFrame)
     pipe.Add(spt3g.gcp.ARCExtractor.UnpackACUData)
     pipe.Add(spt3g.gcp.ARCExtractor.UnpackTrackerPointingData)
+    pipe.Add(spt3g.gcp.ARCExtractor.UpdateLinearSensorDeltas)
     pipe.Add(spt3g.gcp.ARCExtractor.DecryptFeatureBit)
     pipe.Add(spt3g.gcp.ARCExtractor.UnpackTrackerData)
     pipe.Add(spt3g.gcp.ARCExtractor.AddBenchData)
@@ -443,6 +446,18 @@ in frame
 
 *Definition:*
         ``UnpackWeatherData(f)``
+
+
+
+
+.. _spt3g.gcp.ARCExtractor.UpdateLinearSensorDeltas:
+
+**spt3g.gcp.ARCExtractor.UpdateLinearSensorDeltas**
+
+
+
+*Definition:*
+        ``UpdateLinearSensorDeltas(f)``
 
 
 
