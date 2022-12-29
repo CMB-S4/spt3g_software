@@ -30,8 +30,16 @@ def build_field_list(fr):
         'tracker_lacking': ['TrackerStatus', 'tracker_lacking', None],
         'time_status': ['TrackerStatus', 'time_status', None],
         'schedule': ['TrackerStatus', 'schedule_name', None],
-        'raw_encoder_1': ['antenna0', 'tracker', 'raw_encoder', 0, None],
-        'raw_encoder_2': ['antenna0', 'tracker', 'raw_encoder', 1, None],
+        'raw_encoder_1': ['antenna0', 'tracker', 'raw_encoder', 0, U.deg],
+        'raw_encoder_2': ['antenna0', 'tracker', 'raw_encoder', 1, U.deg],
+        'drive_currents_el1': ['array', 'dc', 'currents', 0, U.volt],
+        'drive_currents_el2': ['array', 'dc', 'currents', 1, U.volt],
+        'drive_currents_el3': ['array', 'dc', 'currents', 2, U.volt],
+        'drive_currents_el4': ['array', 'dc', 'currents', 3, U.volt],
+        'drive_currents_az1': ['array', 'dc', 'currents', 4, U.volt],
+        'drive_currents_az2': ['array', 'dc', 'currents', 5, U.volt],
+        'drive_currents_az3': ['array', 'dc', 'currents', 6, U.volt],
+        'drive_currents_az4': ['array', 'dc', 'currents', 7, U.volt],
 
         # tracker pointing
         'features': ['TrackerPointing', 'features', 1],
@@ -64,6 +72,9 @@ def build_field_list(fr):
         'linsens_avg_l2': ['TrackerPointing', 'linsens_avg_l2', U.mm],
         'linsens_avg_r1': ['TrackerPointing', 'linsens_avg_r1', U.mm],
         'linsens_avg_r2': ['TrackerPointing', 'linsens_avg_r2', U.mm],
+        'linsens_daz': ['LinearSensorDeltas', 'delta_az', U.deg],
+        'linsens_del': ['LinearSensorDeltas', 'delta_el', U.deg],
+        'linsens_det': ['LinearSensorDeltas', 'delta_et', U.deg],
 
         # Weather
         'telescope_temp': ['Weather', 'telescope_temp', 'C'],
@@ -169,6 +180,10 @@ def build_field_list(fr):
         'flexure_cos': ['OnlinePointingModel', 'flexure', 1, U.deg],
         'fixed_collimation_x': ['OnlinePointingModel', 'fixedCollimation', 0, U.deg],
         'fixed_collimation_y': ['OnlinePointingModel', 'fixedCollimation', 1, U.deg],
+        'linsens_coeff_az': ['OnlinePointingModel', 'linsensCoeffs', 0, None],
+        'linsens_coeff_el': ['OnlinePointingModel', 'linsensCoeffs', 1, None],
+        'linsens_coeff_et': ['OnlinePointingModel', 'linsensCoeffs', 2, None],
+        'linsens_enabled': ['OnlinePointingModel', 'linsensEnabled', 0, None],
 
         # Other
         'obs_id': ['ObservationID', None],
@@ -295,10 +310,17 @@ def WriteDB(fr, client, fields=None):
         field_dat = all_fields[f]
         if len(field_dat) == 5:
             # raw register
+            stat = 'TrackerStatus'
             tmp, brd, attr, ind, unit = field_dat
             try:
                 dat = fr[tmp][brd][attr][ind]
-                time = [tm for tm in fr[tmp][brd]['utc'][0]]
+            except:
+                continue
+            try:
+                if 'utc' in fr[tmp][brd].keys():
+                    time = [tm for tm in fr[tmp][brd]['utc'][0]]
+                else:
+                    time = [tm for tm in fr['antenna0']['tracker']['utc'][0]][:len(dat)]
             except:
                 continue
         elif len(field_dat) == 4:
@@ -410,6 +432,14 @@ def WriteDB(fr, client, fields=None):
         if 'Mux' in stat:
             stat = 'muxHousekeeping'
             tag2 = 'ib'+f.split('ib')[-1]
+
+        if 'linsens_coeff' in f:
+            tag2 = 'linsens_coeff'
+
+        if 'drive_currents_az' in f:
+            tag2 = 'drive_currents_az'
+        if 'drive_currents_el' in f:
+            tag2 = 'drive_currents_el'
 
         dict_list += make_lines(
             measurement=stat,

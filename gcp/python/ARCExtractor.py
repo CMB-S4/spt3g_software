@@ -320,8 +320,39 @@ def UnpackTrackerPointingData(f):
     p['flexure'] = np.asarray(board['flexure'], dtype=np.double)
     p['fixedCollimation'] = np.asarray(board['fixedCollimation'], dtype=np.double)
     p['time'] = np.asarray(t.time, dtype=np.double)
+    p['linsensCoeffs'] = np.asarray(board['linear_sensor_coeff'], dtype=np.double)
+    p['linsensEnabled'] = np.asarray(board['linear_sensor_enabled'][0], dtype=np.double)
 
     f['OnlinePointingModel'] = p
+
+
+@core.indexmod
+def UpdateLinearSensorDeltas(f):
+
+    if 'TrackerPointing' not in f:
+        return
+
+    if 'LinearSensorDeltas' in f:
+        return
+
+    # Yoke dimensions in mm.
+    Rs = 1652.0 * core.G3Units.mm
+    Rh = 3556.0 * core.G3Units.mm
+    Ry = 6782.0 * core.G3Units.mm
+
+    l1 = f["TrackerPointing"].linsens_avg_l1
+    l2 = f["TrackerPointing"].linsens_avg_l2
+    r1 = f["TrackerPointing"].linsens_avg_r1
+    r2 = f["TrackerPointing"].linsens_avg_r2
+
+    # Calculate corrections in radians.
+    p = core.G3MapVectorDouble()
+    p['time'] = np.asarray(f['TrackerPointing'].time, dtype=np.double)
+    p["delta_az"] = (Rh / (Ry * Rs)) * (l1 - l2 - r1 + r2) * core.G3Units.rad
+    p["delta_el"] = (1. / (2. * Rs)) * (l2 - l1 + r2 - r1) * core.G3Units.rad
+    p["delta_et"] = (1. / (2. * Ry)) * (l1 + l2 - r1 - r2) * core.G3Units.rad
+
+    f['LinearSensorDeltas'] = p
 
 
 @core.indexmod
@@ -602,6 +633,7 @@ def ARCExtract(pipe):
     pipe.Add(CalibrateFrame)
     pipe.Add(UnpackACUData)
     pipe.Add(UnpackTrackerPointingData)
+    pipe.Add(UpdateLinearSensorDeltas)
     pipe.Add(DecryptFeatureBit)
     pipe.Add(UnpackTrackerData)
     pipe.Add(AddBenchData)
