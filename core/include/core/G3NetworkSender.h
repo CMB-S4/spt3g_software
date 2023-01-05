@@ -7,6 +7,8 @@
 #include <mutex>
 #include <condition_variable>
 
+#include <core/G3Module.h>
+
 class G3NetworkSender : public G3Module {
 public:
 	G3NetworkSender(std::string hostname, int port, int max_queue_size);
