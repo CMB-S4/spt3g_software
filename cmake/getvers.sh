@@ -126,7 +126,7 @@ else
 	echo revision=\"UNKNOWN VCS\"
 	echo gitrevision=\"UNKNOWN\"
 	echo versionname=\"UNKNOWN\"
-	if [ "$(cat VERSION)" == "\$Version\$" ]; then
+	if [ "$(cat VERSION)" = '$Version$' ]; then
 		echo localdiffs=True
 		echo fullversion=\"UNKNOWN\"
 	else

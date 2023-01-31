@@ -24,7 +24,11 @@ g3_istream_from_path(boost::iostreams::filtering_istream &stream,
 	if (boost::algorithm::ends_with(path, ".gz"))
 		stream.push(boost::iostreams::gzip_decompressor());
 	if (boost::algorithm::ends_with(path, ".bz2"))
+#ifdef Boost_BZIP2_FOUND
 		stream.push(boost::iostreams::bzip2_decompressor());
+#else
+		log_fatal("Boost not compiled with bzip2 support.");
+#endif
 
 	int fd = -1;
 
