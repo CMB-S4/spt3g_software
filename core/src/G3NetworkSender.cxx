@@ -1,5 +1,4 @@
 #include <pybindings.h>
-#include <G3Module.h>
 #include <G3NetworkSender.h>
 
 #include <boost/iostreams/stream.hpp>
@@ -7,17 +6,15 @@
 #include <boost/iostreams/device/back_inserter.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 
-#include <deque>
-#include <vector>
-#include <thread>
-#include <mutex>
-#include <condition_variable>
+#include <chrono>
 
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
 #include <fcntl.h>
+
+#include <core/SetThreadName.h>
 
 /*
  * This class provides a unicast or broadcast distribution for frames via TCP
@@ -41,8 +38,8 @@
 
 
 EXPORT_G3MODULE_AND("core", G3NetworkSender,
-    (init<std::string, int, int>((arg("hostname"), arg("port"),
-      arg("max_queue_size")=0))),
+    (init<std::string, int, int, int>((arg("hostname"), arg("port"),
+      arg("max_queue_size")=0, arg("n_serializers")=0))),
     "Writes frames to a network socket. If hostname is set to '*', will listen "
     "on the given port, on all interfaces, instead of connecting to the given "
     "port on a remote host. In listen mode, metadata frames (Calibration, "
@@ -55,11 +52,20 @@ EXPORT_G3MODULE_AND("core", G3NetworkSender,
     .def("Close", &G3NetworkSender::Close));
 
 
-G3NetworkSender::G3NetworkSender(std::string hostname, int port, int max_queue)
+G3NetworkSender::G3NetworkSender(std::string hostname, int port, int max_queue,
+                                 int n_serializers)
+:max_queue_size_(max_queue),listening_(hostname=="*"),
+ n_serializers_(n_serializers),n_serial_drops_(0),n_send_drops_(0)
 {
-	max_queue_size_ = max_queue;
+	serialization_queue.max_size = max_queue_size_;
 
-	if (strcmp(hostname.c_str(), "*") == 0) {
+	for (int i=0; i<n_serializers; i++) {
+		auto t = boost::make_shared<serializer_thread_data>(serialization_queue);
+		t->thread = std::thread(SerializeLoop, t);
+		serializer_threads_.push_back(t);
+	}
+
+	if (listening_) {
 		// Listen for incoming connections
 
 		struct sockaddr_in6 sin;
@@ -92,8 +98,6 @@ G3NetworkSender::G3NetworkSender(std::string hostname, int port, int max_queue)
 		if (listen(fd_, 10) < 0)
 			log_fatal("Could not listen on port %d (%s)",
 			    port, strerror(errno));
-
-		listening_ = true;
 	} else {
 		// Connect to a listening host elsewhere
 
@@ -136,51 +140,102 @@ G3NetworkSender::G3NetworkSender(std::string hostname, int port, int max_queue)
 		if (info != NULL)
 			freeaddrinfo(info);
 
-		listening_ = false;
 		StartThread(fd_);
 	}
 }
 
 G3NetworkSender::~G3NetworkSender()
 {
+	StopAllThreads();
 
-	for (auto i = threads_.begin(); i != threads_.end(); i++) {
-		(*i)->queue_lock.lock();
-		(*i)->die = true;
-		(*i)->queue_sem.notify_one();
-		(*i)->queue_lock.unlock();
+	if (fd_ != -1) {
+		close(fd_);
+		fd_ = -1;
+	}
+}
 
-		(*i)->thread.join();
+void G3NetworkSender::SerializeFrame(serialization_task& task)
+{
+	try{
+		netbuf_type buf(new std::vector<char>);
+		boost::iostreams::filtering_ostream os(
+			boost::iostreams::back_inserter(*buf));
+		task.input->save(os);
+		os.flush();
+		task.output.set_value(buf);
+	}
+	catch (...) {
+		task.output.set_exception(std::current_exception());
 	}
 }
 
 void
-G3NetworkSender::SendLoop(boost::shared_ptr<struct thread_data> t)
+G3NetworkSender::SerializeLoop(boost::shared_ptr<serializer_thread_data> t)
 {
-	// Iteratively pop frames out of the queue and send them
-	// on their merry way.
+	setThreadName("G3NetSnd Srlize");
+	std::unique_lock<std::mutex> lock(t->queue.lock);
+	while(true) {
+		if (t->queue.empty() && !t->queue.die)
+			t->queue.sem.wait(lock);
 
-	std::unique_lock<std::mutex> lock(t->queue_lock);
-	int err;
+		if (t->queue.empty()) {
+			if (t->queue.die)
+				break;
+			//else, spurious wake-up
+			continue;
+		}
 
-	while (true) {
-		if (t->queue.empty() && !t->die)
-			t->queue_sem.wait(lock);
-
-		if (t->queue.empty() && t->die)
-			break;
-
-		netbuf_type buf = t->queue.front();
+		serialization_task task = std::move(t->queue.front());
 		t->queue.pop_front();
 		lock.unlock();
 
-		err = write(t->fd, buf->data(), buf->size());
+		SerializeFrame(task);
+
+		lock.lock();
+	}
+}
+
+void
+G3NetworkSender::SendLoop(boost::shared_ptr<network_thread_data> t)
+{
+	setThreadName("G3NetSnd Send");
+	// Iteratively pop frames out of the queue and send them
+	// on their merry way.
+
+	std::unique_lock<std::mutex> lock(t->queue.lock);
+	while (true) {
+		if (t->queue.empty() && !t->queue.die)
+			t->queue.sem.wait(lock);
+
+		if (t->queue.empty()) {
+			if (t->queue.die)
+				break;
+			//else, spurious wake-up
+			continue;
+		}
+
+		std::shared_future<netbuf_type> f = t->queue.front();
+		t->queue.pop_front();
+		lock.unlock();
+
+		netbuf_type buf;
+		try {
+			buf = f.get();
+		}
+		catch (...) {
+			// The future might emit an exception.
+			// If so, we absorb it and carry on as best we can.
+			lock.lock();
+			continue;
+		}
+
+		int err = write(t->fd, buf->data(), buf->size());
 
 		lock.lock();
 
 		// If the remote end has hung up, bail
 		if (err == -1) {
-			t->die = true;
+			t->queue.die = true;
 			break;
 		}
 	}
@@ -189,35 +244,49 @@ G3NetworkSender::SendLoop(boost::shared_ptr<struct thread_data> t)
 void
 G3NetworkSender::StartThread(int fd)
 {
-	boost::shared_ptr<thread_data> t(new thread_data);
+	auto t = boost::make_shared<network_thread_data>();
 
 	// Initialize the outbound queue with the metadata frames
 	for (auto i = metadata_.begin(); i != metadata_.end(); i++)
-		t->queue.push_back(i->second);
+		t->queue.queue.push_back(i->second);
 
 	t->fd = fd;
-	t->die = false;
+	t->queue.max_size = max_queue_size_;
 	t->thread = std::thread(SendLoop, t);
 
-	threads_.push_back(t);
+	network_threads_.push_back(t);
+}
+
+void
+G3NetworkSender::StopAllThreads()
+{
+	serialization_queue.stop();
+	for (auto& t : serializer_threads_)
+		t->thread.join();
+	serializer_threads_.clear();
+
+	for (auto& t : network_threads_) {
+		t->queue.stop();
+		t->thread.join();
+	}
+	network_threads_.clear();
 }
 
 void
 G3NetworkSender::ReapDeadThreads(void)
 {
 	// Wait for all threads marked for death to complete
-restart:
-	for (auto i = threads_.begin(); i != threads_.end(); i++) {
-		(*i)->queue_lock.lock();
-		if ((*i)->die) {
-			(*i)->queue_lock.unlock();
-			(*i)->thread.join();
-			threads_.erase(i);
-			goto restart;
-		}
-
-		(*i)->queue_lock.unlock();
-	}
+	auto it=std::remove_if(network_threads_.begin(), network_threads_.end(),
+		[](boost::shared_ptr<network_thread_data>& t)->bool{
+			std::unique_lock<std::mutex> lock(t->queue.lock);
+			if(t->queue.die){
+				lock.unlock();
+				t->thread.join();
+				return true;
+			}
+			return false;
+		});
+	network_threads_.erase(it, network_threads_.end());
 }
 
 
@@ -238,78 +307,83 @@ G3NetworkSender::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 
 	if (frame->type == G3Frame::EndProcessing) {
 		// Reap all threads on EndProcessing.
-		for (auto i = threads_.begin(); i != threads_.end(); i++) {
-			(*i)->queue_lock.lock();
-			(*i)->die = true;
-			(*i)->queue_sem.notify_one();
-			(*i)->queue_lock.unlock();
+		StopAllThreads();
+
+		// Wait until all frames are prcoessed
+		while (!outstanding_frames.empty()) {
+			outstanding_frames.front().output.wait();
+			out.push_back(outstanding_frames.front().frame);
+			outstanding_frames.pop_front();
 		}
-		ReapDeadThreads();
+
+		out.push_back(frame);
+		return;
 	} else {
 		// Send other frames normally
-		netbuf_type buf(new std::vector<char>);
-		{
-			boost::iostreams::filtering_ostream os(
-			    boost::iostreams::back_inserter(*buf));
-			frame->save(os);
-			os.flush();
+
+		// Arrange getting the frame serialized
+		bool non_meta = (frame->type == G3Frame::Scan ||
+		                 frame->type == G3Frame::Timepoint);
+		serialization_task s_task;
+		s_task.input = frame;
+		buffer_future s_future = s_task.output.get_future().share();
+		bool will_serialize=true;
+		if (n_serializers_) {
+			will_serialize = serialization_queue.insert(std::move(s_task),
+			                                            non_meta);
 		}
+		else
+			SerializeFrame(s_task); // do directly on the main thread
 
 		// Clean up after any threads that have stopped on their own
 		ReapDeadThreads();
 
-		for (auto i = threads_.begin(); i != threads_.end(); i++) {
-			(*i)->queue_lock.lock();
-
-			// Check if we need to drop some packets.
-			if (max_queue_size_ > 0 &&
-			   (*i)->queue.size() > max_queue_size_ &&
-			    (frame->type == G3Frame::Scan ||
-			     frame->type == G3Frame::Timepoint)) {
-				(*i)->queue_lock.unlock();
-				continue;
+		// Each network thread gets its own copy of the future
+		if (will_serialize) {
+			for (auto& t : network_threads_) {
+				if (not t->queue.insert(buffer_future(s_future), non_meta))
+					n_send_drops_++;
 			}
-
-			// Otherwise, send away
-			(*i)->queue.push_back(buf);
-			(*i)->queue_lock.unlock();
-
-			(*i)->queue_sem.notify_one();
+			outstanding_frames.push_back(output_rcord{frame,
+			                                          buffer_future(s_future)});
 		}
+		else
+			n_serial_drops_++;
 
 		// If this is a metadata frame (not scan or timepoint),
 		// stick it in the queue.
-		if (frame->type != G3Frame::Scan &&
-		    frame->type != G3Frame::Timepoint) {
+		if (!non_meta) {
 			auto i = metadata_.begin();
 			while (i != metadata_.end()) {
 				if (i->first == frame->type) {
-					i->second = buf;
+					i->second = s_future;
 					break;
 				}
 				i++;
 			}
 
 			if (i == metadata_.end())
-				metadata_.push_back(std::pair<
-				    G3Frame::FrameType, netbuf_type>(
-				    frame->type, buf));
+				metadata_.push_back(std::make_pair(frame->type, s_future));
 		}
 	}
-	out.push_back(frame);
+
+	// Output any frames which have been processed
+	while (!outstanding_frames.empty() &&
+	       outstanding_frames.front().output.wait_for(std::chrono::seconds(0))
+	       == std::future_status::ready) {
+		out.push_back(outstanding_frames.front().frame);
+		outstanding_frames.pop_front();
+	}
 }
 
 void
 G3NetworkSender::Close()
 {
+	// Ask all threads to please die now.
+	StopAllThreads();
+
 	if (listening_) {
-                close(fd_);
-                fd_ = -1;
+		close(fd_);
+		fd_ = -1;
 	}
-
-        // Ask all threads to please die now.
-	for (auto i = threads_.begin(); i != threads_.end(); i++)
-                (*i)->die = 1;
-
-        ReapDeadThreads();
 }
