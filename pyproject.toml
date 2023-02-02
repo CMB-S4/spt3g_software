@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "spt3g"
-version = "0.1.0"
-description = ""
+version = "$Version$"
+description = "SPT3G Analysis and DAQ Software"
 authors = ["SPT Collaboration"]
 
 [tool.poetry.dependencies]
