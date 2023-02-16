@@ -59,12 +59,6 @@ G3NetworkSender::G3NetworkSender(std::string hostname, int port, int max_queue,
 {
 	serialization_queue.max_size = max_queue_size_;
 
-	for (int i=0; i<n_serializers; i++) {
-		auto t = boost::make_shared<serializer_thread_data>(serialization_queue);
-		t->thread = std::thread(SerializeLoop, t);
-		serializer_threads_.push_back(t);
-	}
-
 	if (listening_) {
 		// Listen for incoming connections
 
@@ -141,6 +135,22 @@ G3NetworkSender::G3NetworkSender(std::string hostname, int port, int max_queue,
 			freeaddrinfo(info);
 
 		StartThread(fd_);
+	}
+
+	try {
+		serializer_threads_.reserve(n_serializers);
+		for (int i=0; i<n_serializers; i++) {
+			auto t = boost::make_shared<serializer_thread_data>(serialization_queue);
+			t->thread = std::thread(SerializeLoop, t);
+			serializer_threads_.push_back(t);
+		}
+	}
+	catch(...){
+		//We can't rely on the destructor to do this, because if construction
+		//fails, the destructor is never invoked.
+		StopAllThreads();
+		close(fd_);
+		throw;
 	}
 }
 
