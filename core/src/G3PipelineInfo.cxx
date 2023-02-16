@@ -17,6 +17,12 @@ template <class A> void G3ModuleConfig::save(A &ar, unsigned v) const
 
 	ar << cereal::make_nvp("size", config.size());
 
+	struct gil_holder{
+		PyGILState_STATE gs;
+		gil_holder():gs(PyGILState_Ensure()){}
+		~gil_holder(){ PyGILState_Release(gs); }
+	} gh;
+
 	for (auto i : config) {
 		ar << cereal::make_nvp("key", i.first);
 		
