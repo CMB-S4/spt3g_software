@@ -10,9 +10,6 @@
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/nature.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -50,33 +47,33 @@
 <section id="git">
 <h3>Git<a class="headerlink" href="#git" title="Permalink to this heading">¶</a></h3>
 <p>To initially check out the repository:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git clone https://user@github.com/CMB-S4/spt3g_software.git
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://user@github.com/CMB-S4/spt3g_software.git
 </pre></div>
 </div>
 <p>To update your checkout (the –rebase is important, especially if you have local changes):</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git pull --rebase
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>pull<span class="w"> </span>--rebase
 </pre></div>
 </div>
 <p>To send your changes back:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git diff files_to_commit &lt;- Examine this
-git commit files_to_commit
-git push
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>diff<span class="w"> </span>files_to_commit<span class="w"> </span>&lt;-<span class="w"> </span>Examine<span class="w"> </span>this
+git<span class="w"> </span>commit<span class="w"> </span>files_to_commit
+git<span class="w"> </span>push
 </pre></div>
 </div>
 </section>
 <section id="svn">
 <h3>SVN<a class="headerlink" href="#svn" title="Permalink to this heading">¶</a></h3>
 <p>To initially check out the repository:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>svn co https://user@github.com/CMB-S4/spt3g_software/trunk spt3g_software
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>svn<span class="w"> </span>co<span class="w"> </span>https://user@github.com/CMB-S4/spt3g_software/trunk<span class="w"> </span>spt3g_software
 </pre></div>
 </div>
 <p>To update your checkout:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>svn up
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>svn<span class="w"> </span>up
 </pre></div>
 </div>
 <p>To send your changes back:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>svn diff files_to_commit &lt;- Examine this
-svn ci files_to_commit
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>svn<span class="w"> </span>diff<span class="w"> </span>files_to_commit<span class="w"> </span>&lt;-<span class="w"> </span>Examine<span class="w"> </span>this
+svn<span class="w"> </span>ci<span class="w"> </span>files_to_commit
 </pre></div>
 </div>
 </section>
@@ -118,6 +115,50 @@ this rule, so we should generally</p></li>
         <span class="n">do_things</span>
 </pre></div>
 </div>
+<p>For classes, modules, and functions individuals are HIGHLY encouraged to use the standard SPT3G docstring format.
+This includes individually defining each argument and output of a function along with their default values and types.
+Below is an example of a well written docstring using the <a class="reference external" href="https://numpydoc.readthedocs.io/en/latest/format.html">numpy</a> docstring format.
+Please adhere to this format for all spt3g_software code.</p>
+<p>Docsting example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">get_fft_scale_fac</span><span class="p">(</span><span class="n">res</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                      <span class="n">apod_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a scale factor to convert a 2d fft of a map into</span>
+<span class="sd">    sqrt(C_l) normalized units by scaling it by the sky area.</span>
+<span class="sd">    In particular it returns:</span>
+<span class="sd">      np.mean(apod_mask**2)**0.5 * (n1 * n2)**0.5 / reso_rad</span>
+
+<span class="sd">    For forward transforms: fft2(mp)  / scale_fac</span>
+<span class="sd">    For inverse transforms: ifft2(mp) * scale_fac</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">    res : float, default=None</span>
+<span class="sd">        Resolution of the map in G3Units.</span>
+<span class="sd">        Must be specified if parent is None.</span>
+<span class="sd">    n1 : int, default=None</span>
+<span class="sd">        Number of map pixels in x direction.</span>
+<span class="sd">        Must be specified if parent is None.</span>
+<span class="sd">    n2 : int, default=None</span>
+<span class="sd">        Number of map pixels in y direction.</span>
+<span class="sd">        Must be specified if parent is None.</span>
+<span class="sd">    apod_mask : FlatSkyMap or ndarray, default=None</span>
+<span class="sd">        An apodization mask.</span>
+<span class="sd">    parent : FlatSkyMap, default=None</span>
+<span class="sd">        Parent Map object containing resolution and shape info.</span>
+<span class="sd">        Must be specified if res, n1, and n2 are None.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        FFT normalization factor</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    -------</span>
+<span class="sd">    ft_to_map</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</pre></div>
+</div>
 </section>
 <section id="c-style-guide">
 <h3>C++ Style Guide<a class="headerlink" href="#c-style-guide" title="Permalink to this heading">¶</a></h3>
@@ -135,33 +176,33 @@ For reference, most terminals open at 80 characters wide. If you need to continu
 <li><p>Where functions are not used outside of a single C++ file, they should be marked <code class="docutils literal notranslate"><span class="pre">static</span></code>.</p></li>
 </ul>
 <p>Conforming code looks like this:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">CONSTANT_VALUE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">CONSTANT_VALUE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">;</span>
 
-<span class="kt">void</span><span class="w"></span>
-<span class="nf">function_name</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">variable_name</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">other</span><span class="p">)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="n">do_some_things</span><span class="p">(</span><span class="n">variable_name</span><span class="p">);</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="kt">void</span>
+<span class="nf">function_name</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">variable_name</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">other</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">        </span><span class="n">do_some_things</span><span class="p">(</span><span class="n">variable_name</span><span class="p">);</span>
+<span class="p">}</span>
 
-<span class="k">class</span><span class="w"> </span><span class="nc">MyClass</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Parent</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="k">public</span><span class="o">:</span><span class="w"></span>
-<span class="w">        </span><span class="n">MyClass</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">input</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">other_input</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="kt">void</span><span class="w"> </span><span class="nf">ClassMethod</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">input</span><span class="p">);</span><span class="w"></span>
-<span class="k">private</span><span class="o">:</span><span class="w"></span>
-<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">instance_variable_</span><span class="p">;</span><span class="w"></span>
-<span class="p">};</span><span class="w"></span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MyClass</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">Parent</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">        </span><span class="n">MyClass</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">input</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">other_input</span><span class="p">);</span>
+<span class="w">        </span><span class="kt">void</span><span class="w"> </span><span class="nf">ClassMethod</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">input</span><span class="p">);</span>
+<span class="k">private</span><span class="o">:</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">instance_variable_</span><span class="p">;</span>
+<span class="p">};</span>
 
-<span class="n">MyClass</span><span class="o">::</span><span class="n">MyClass</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">input</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">other_input</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">Parent</span><span class="p">(</span><span class="n">input</span><span class="p">,</span><span class="w"> </span><span class="mi">15</span><span class="p">,</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="s">&quot;long line&quot;</span><span class="p">)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="n">instance_variable_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">input</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">other_input</span><span class="p">;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="n">MyClass</span><span class="o">::</span><span class="n">MyClass</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">input</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">other_input</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">Parent</span><span class="p">(</span><span class="n">input</span><span class="p">,</span><span class="w"> </span><span class="mi">15</span><span class="p">,</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span>
+<span class="w">    </span><span class="s">&quot;long line&quot;</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">        </span><span class="n">instance_variable_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">input</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">other_input</span><span class="p">;</span>
+<span class="p">}</span>
 
-<span class="kt">void</span><span class="w"></span>
-<span class="n">MyClass</span><span class="o">::</span><span class="n">ClassMethod</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">input</span><span class="p">)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="n">do_things</span><span class="p">();</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="kt">void</span>
+<span class="n">MyClass</span><span class="o">::</span><span class="n">ClassMethod</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">input</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">        </span><span class="n">do_things</span><span class="p">();</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 </section>
@@ -243,7 +284,7 @@ For reference, most terminals open at 80 characters wide. If you need to continu
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
     </div>
   </body>
 </html>

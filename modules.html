@@ -10,9 +10,6 @@
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/nature.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -202,7 +199,7 @@
 <p>For example:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
 <span class="k">def</span> <span class="nf">printframe</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Print frame to console&#39;&#39;&#39;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;Print frame to console&#39;&#39;&#39;</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -218,41 +215,41 @@ Print frame to console</p>
 <h2><a class="toc-backref" href="#id9" role="doc-backlink">Writing a module in C++</a><a class="headerlink" href="#writing-a-module-in-c" title="Permalink to this heading">¶</a></h2>
 <p>The process of writing a processing module in C++ is similar to the Python one. C++ modules use a slightly different interface than Python; in particular, they behave like the callable object interface where all methods return lists.</p>
 <p>A C++ module must inherit from the <code class="docutils literal notranslate"><span class="pre">G3Module</span></code> class. Data processing happens through the <code class="docutils literal notranslate"><span class="pre">Process</span></code> method, which takes two arguments: an input frame and an output queue. Output frames are pushed onto the queue; the semantics of this output queue are identical to those for Python processing modules returning lists.</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;G3Frame.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;G3Module.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;G3Data.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;pybindings.h&gt;</span><span class="cp"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;G3Frame.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;G3Module.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;G3Data.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;pybindings.h&gt;</span>
 
-<span class="k">class</span><span class="w"> </span><span class="nc">Five</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">G3Module</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="k">public</span><span class="o">:</span><span class="w"></span>
-<span class="w">        </span><span class="kt">void</span><span class="w"> </span><span class="n">Process</span><span class="p">(</span><span class="n">G3FramePtr</span><span class="w"> </span><span class="n">frame</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">deque</span><span class="o">&lt;</span><span class="n">G3FramePtr</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&amp;</span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">                </span><span class="n">frame</span><span class="o">-&gt;</span><span class="n">Put</span><span class="p">(</span><span class="s">&quot;Five&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">G3IntPtr</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">G3Int</span><span class="p">(</span><span class="mi">5</span><span class="p">)));</span><span class="w"></span>
-<span class="w">                </span><span class="n">out</span><span class="p">.</span><span class="n">push_pack</span><span class="p">(</span><span class="n">frame</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="p">};</span><span class="w"></span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Five</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">G3Module</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">        </span><span class="kt">void</span><span class="w"> </span><span class="n">Process</span><span class="p">(</span><span class="n">G3FramePtr</span><span class="w"> </span><span class="n">frame</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">deque</span><span class="o">&lt;</span><span class="n">G3FramePtr</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&amp;</span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">frame</span><span class="o">-&gt;</span><span class="n">Put</span><span class="p">(</span><span class="s">&quot;Five&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">G3IntPtr</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">G3Int</span><span class="p">(</span><span class="mi">5</span><span class="p">)));</span>
+<span class="w">                </span><span class="n">out</span><span class="p">.</span><span class="n">push_pack</span><span class="p">(</span><span class="n">frame</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="p">};</span>
 
-<span class="n">EXPORT_G3MODULE</span><span class="p">(</span><span class="s">&quot;exampleproject&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">Five</span><span class="p">,</span><span class="w"> </span><span class="n">init</span><span class="o">&lt;&gt;</span><span class="p">(),</span><span class="w"> </span><span class="s">&quot;Adds five&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="n">EXPORT_G3MODULE</span><span class="p">(</span><span class="s">&quot;exampleproject&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">Five</span><span class="p">,</span><span class="w"> </span><span class="n">init</span><span class="o">&lt;&gt;</span><span class="p">(),</span><span class="w"> </span><span class="s">&quot;Adds five&quot;</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>This example creates a module called <code class="docutils literal notranslate"><span class="pre">Five</span></code> that, like the earlier Python example, adds a key named <code class="docutils literal notranslate"><span class="pre">Five</span></code> to every frame. It is a part of the library “exampleproject” and will be accessible from Python as <code class="docutils literal notranslate"><span class="pre">exampleproject.Five</span></code>.</p>
 <p>Interaction with Python occurs through the <code class="docutils literal notranslate"><span class="pre">EXPORT_G3MODULE()</span></code> macro. The first two arguments are the library name and class to export. The third gives the arguments to the constructor (none, in this case). The fourth is the docstring visible for the class in Python. An example configurable version of the class follows:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;G3Frame.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;G3Module.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;G3Data.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;string&gt;</span><span class="cp"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;G3Frame.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;G3Module.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;G3Data.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;string&gt;</span>
 
-<span class="k">class</span><span class="w"> </span><span class="nc">Five</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">G3Module</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="k">public</span><span class="o">:</span><span class="w"></span>
-<span class="w">        </span><span class="n">Five</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Five&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">output_</span><span class="p">(</span><span class="n">output</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span><span class="w"></span>
-<span class="w">        </span><span class="kt">void</span><span class="w"> </span><span class="n">Process</span><span class="p">(</span><span class="n">G3FramePtr</span><span class="w"> </span><span class="n">frame</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">deque</span><span class="o">&lt;</span><span class="n">G3FramePtr</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&amp;</span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">                </span><span class="n">frame</span><span class="o">-&gt;</span><span class="n">Put</span><span class="p">(</span><span class="n">output_</span><span class="p">,</span><span class="w"> </span><span class="n">G3IntPtr</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">G3Int</span><span class="p">(</span><span class="mi">5</span><span class="p">)));</span><span class="w"></span>
-<span class="w">                </span><span class="n">out</span><span class="p">.</span><span class="n">push_pack</span><span class="p">(</span><span class="n">frame</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="k">private</span><span class="o">:</span><span class="w"></span>
-<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">output_</span><span class="p">;</span><span class="w"></span>
-<span class="p">};</span><span class="w"></span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Five</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="k">public</span><span class="w"> </span><span class="n">G3Module</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">        </span><span class="n">Five</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;Five&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">output_</span><span class="p">(</span><span class="n">output</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">        </span><span class="kt">void</span><span class="w"> </span><span class="n">Process</span><span class="p">(</span><span class="n">G3FramePtr</span><span class="w"> </span><span class="n">frame</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">deque</span><span class="o">&lt;</span><span class="n">G3FramePtr</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&amp;</span><span class="n">out</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">frame</span><span class="o">-&gt;</span><span class="n">Put</span><span class="p">(</span><span class="n">output_</span><span class="p">,</span><span class="w"> </span><span class="n">G3IntPtr</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">G3Int</span><span class="p">(</span><span class="mi">5</span><span class="p">)));</span>
+<span class="w">                </span><span class="n">out</span><span class="p">.</span><span class="n">push_pack</span><span class="p">(</span><span class="n">frame</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="k">private</span><span class="o">:</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">output_</span><span class="p">;</span>
+<span class="p">};</span>
 
-<span class="n">EXPORT_G3MODULE</span><span class="p">(</span><span class="s">&quot;exampleproject&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">Five</span><span class="p">,</span><span class="w"> </span><span class="n">init</span><span class="o">&lt;</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="p">(</span><span class="n">args</span><span class="p">(</span><span class="s">&quot;output&quot;</span><span class="p">)),</span><span class="w"> </span><span class="s">&quot;Adds five&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="n">EXPORT_G3MODULE</span><span class="p">(</span><span class="s">&quot;exampleproject&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">Five</span><span class="p">,</span><span class="w"> </span><span class="n">init</span><span class="o">&lt;</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="p">(</span><span class="n">args</span><span class="p">(</span><span class="s">&quot;output&quot;</span><span class="p">)),</span><span class="w"> </span><span class="s">&quot;Adds five&quot;</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>Here, the <code class="docutils literal notranslate"><span class="pre">init&lt;&gt;</span></code> arguments are modified to reflect that the configuration parameter is a string, that it is optional (leaving out the <code class="docutils literal notranslate"><span class="pre">optional&lt;&gt;</span></code> will make it mandatory), and that it maps to a Python keyword argument named “output”. If your constructor takes multiple arguments, enclose the entire init section in parentheses to avoid preprocessor errors.</p>
@@ -263,7 +260,7 @@ Print frame to console</p>
 <p>A pipeline segment is defined by a Python function that is marked by the <code class="docutils literal notranslate"><span class="pre">&#64;core.pipesegment</span></code> decorator and takes a pipeline as its first argument. For example:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@core</span><span class="o">.</span><span class="n">pipesegment</span>
 <span class="k">def</span> <span class="nf">standardfiltering</span><span class="p">(</span><span class="n">pipe</span><span class="p">,</span> <span class="nb">input</span><span class="o">=</span><span class="s1">&#39;CalTimestreams&#39;</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s1">&#39;OutTimestreams&#39;</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        This is the standard timestream filtering used for 2016 data</span>
 <span class="sd">        &#39;&#39;&#39;</span>
 
@@ -448,7 +445,7 @@ Print frame to console</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
     </div>
   </body>
 </html>

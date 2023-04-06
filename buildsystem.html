@@ -10,9 +10,6 @@
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/nature.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -47,10 +44,10 @@
 <section id="cmake-overview">
 <h2>CMake Overview<a class="headerlink" href="#cmake-overview" title="Permalink to this heading">¶</a></h2>
 <p>We use cmake as a build system, which provides a number of nice features for finding dependencies and managing the build process. cmake generates Makefiles (or XCode projects) from files called <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code> in each directory. cmake in general is designed to perform so-called “out-of-tree” builds, which keep the source directories unmodified by object files. The process for doing this is something like this:</p>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>mkdir build
-git clone https://github.com/CMB-S4/spt3g_software src
-<span class="nb">cd</span> build
-cmake ../src
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>build
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/CMB-S4/spt3g_software<span class="w"> </span>src
+<span class="nb">cd</span><span class="w"> </span>build
+cmake<span class="w"> </span>../src
 make
 </pre></div>
 </div>
@@ -86,16 +83,16 @@ make
 </div>
 <p>This builds a library called <code class="docutils literal notranslate"><span class="pre">newthing.so</span></code> from the two given source files and links it to the spt3g core library and the Boost and Python libraries (which are mandatory). Typically C++ source files are in a directory called <code class="docutils literal notranslate"><span class="pre">src</span></code>. Header files that you want visible from other projects must be placed in a directory called <code class="docutils literal notranslate"><span class="pre">include/newthing</span></code>.</p>
 <p>Every C++ library must contain a file declaring the library to Python. This file is usually named <code class="docutils literal notranslate"><span class="pre">python.cxx</span></code> and has contents like the following:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;G3Frame.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;pybindings.h&gt;</span><span class="cp"></span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;boost/python.hpp&gt;</span><span class="cp"></span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;G3Frame.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;pybindings.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;boost/python.hpp&gt;</span>
 
-<span class="n">BOOST_PYTHON_MODULE</span><span class="p">(</span><span class="n">newthing</span><span class="p">)</span><span class="w"></span>
-<span class="p">{</span><span class="w"></span>
+<span class="n">BOOST_PYTHON_MODULE</span><span class="p">(</span><span class="n">newthing</span><span class="p">)</span>
+<span class="p">{</span>
 <span class="w">        </span><span class="n">boost</span><span class="o">::</span><span class="n">python</span><span class="o">::</span><span class="k">import</span><span class="p">(</span><span class="s">&quot;spt3g.core&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// Import core python bindings</span>
 
-<span class="w">        </span><span class="n">G3ModuleRegistrator</span><span class="o">::</span><span class="n">CallRegistrarsFor</span><span class="p">(</span><span class="s">&quot;newthing&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="n">G3ModuleRegistrator</span><span class="o">::</span><span class="n">CallRegistrarsFor</span><span class="p">(</span><span class="s">&quot;newthing&quot;</span><span class="p">);</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 <p>This is sufficient for most uses (with “newthing” replaced by the name of the project).</p>
@@ -196,7 +193,7 @@ make
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
     </div>
   </body>
 </html>
