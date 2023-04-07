@@ -696,6 +696,16 @@ std::vector<double> FlatSkyMap::XYToAngle(double x, double y) const {
 	return proj_info.XYToAngle(x, y, false);
 }
 
+size_t
+FlatSkyMap::XYToPixel(double x, double y) const {
+	return proj_info.XYToPixel(x, y);
+}
+
+std::vector<double>
+FlatSkyMap::PixelToXY(size_t pixel) const {
+	return proj_info.PixelToXY(pixel);
+}
+
 std::vector<double>
 FlatSkyMap::QuatToXY(quat q) const
 {
@@ -1138,6 +1148,33 @@ flatskymap_xy_to_angles(const FlatSkyMap & skymap, const std::vector<double> &x,
 	return boost::python::make_tuple(alpha, delta);
 }
 
+static boost::python::tuple
+flatskymap_pixels_to_xy(const FlatSkyMap & skymap, const std::vector<size_t> &pixel)
+{
+	std::vector<double> x(pixel.size()), y(pixel.size());
+	for (size_t i = 0; i < pixel.size(); i++) {
+		auto xy = skymap.PixelToXY(pixel[i]);
+		x[i] = xy[0];
+		y[i] = xy[1];
+	}
+
+	return boost::python::make_tuple(x, y);
+}
+
+static std::vector<size_t>
+flatskymap_xy_to_pixels(const FlatSkyMap & skymap, const std::vector<double> &x,
+    const std::vector<double> &y)
+{
+	g3_assert(x.size() == y.size());
+
+	std::vector<size_t> pixel(x.size());
+	for (size_t i = 0; i < x.size(); i++) {
+		pixel[i] = skymap.XYToPixel(x[i], y[i]);
+	}
+
+	return pixel;
+}
+
 
 G3_SPLIT_SERIALIZABLE_CODE(FlatSkyMap);
 
@@ -1236,6 +1273,19 @@ PYBINDINGS("maps")
 	    .def("angle_to_xy", flatskymap_angles_to_xy,
 	      (bp::arg("alpha"), bp::arg("delta")),
 	       "Compute the flat 2D coordinates of the input sky coordinates (vectorized)")
+
+	    .def("xy_to_pixel", &FlatSkyMap::XYToPixel,
+	      (bp::arg("x"), bp::arg("y")),
+	       "Compute the pixel index of the input flat 2D coordinates")
+	    .def("xy_to_pixel", flatskymap_xy_to_pixels,
+	      (bp::arg("x"), bp::arg("y")),
+	       "Compute the pixel indices of the input flat 2D coordinates (vectorized)")
+	    .def("pixel_to_xy", &FlatSkyMap::PixelToXY,
+	      (bp::arg("pixel")),
+	       "Compute the flat 2D coordinates of the input pixel index")
+	    .def("pixel_to_xy", flatskymap_pixels_to_xy,
+	      (bp::arg("pixel")),
+	       "Compute the flat 2D coordinates of the input pixel indices (vectorized)")
 
 	    .add_property("sparse", flatskymap_pysparsity_get, flatskymap_pysparsity_set,
 	       "True if the map is stored with column and row zero-suppression, False if "
