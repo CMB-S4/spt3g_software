@@ -204,6 +204,20 @@
 <dt><code class="docutils literal notranslate"><span class="pre">angle_to_xy(</span> <span class="pre">(FlatSkyMap)arg1,</span> <span class="pre">(DoubleVector)alpha,</span> <span class="pre">(DoubleVector)delta)</span> <span class="pre">-&gt;</span> <span class="pre">tuple</span> <span class="pre">:</span></code></dt><dd><p>Compute the flat 2D coordinates of the input sky coordinates (vectorized)</p>
 </dd>
 </dl>
+<p id="spt3g-maps-flatskymap-xy-to-pixel"><strong>spt3g.maps.FlatSkyMap.xy_to_pixel</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">xy_to_pixel(</span> <span class="pre">(FlatSkyMap)arg1,</span> <span class="pre">(float)x,</span> <span class="pre">(float)y)</span> <span class="pre">-&gt;</span> <span class="pre">int</span> <span class="pre">:</span></code></dt><dd><p>Compute the pixel index of the input flat 2D coordinates</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">xy_to_pixel(</span> <span class="pre">(FlatSkyMap)arg1,</span> <span class="pre">(DoubleVector)x,</span> <span class="pre">(DoubleVector)y)</span> <span class="pre">-&gt;</span> <span class="pre">UInt64Vector</span> <span class="pre">:</span></code></dt><dd><p>Compute the pixel indices of the input flat 2D coordinates (vectorized)</p>
+</dd>
+</dl>
+<p id="spt3g-maps-flatskymap-pixel-to-xy"><strong>spt3g.maps.FlatSkyMap.pixel_to_xy</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">pixel_to_xy(</span> <span class="pre">(FlatSkyMap)arg1,</span> <span class="pre">(int)pixel)</span> <span class="pre">-&gt;</span> <span class="pre">DoubleVector</span> <span class="pre">:</span></code></dt><dd><p>Compute the flat 2D coordinates of the input pixel index</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">pixel_to_xy(</span> <span class="pre">(FlatSkyMap)arg1,</span> <span class="pre">(UInt64Vector)pixel)</span> <span class="pre">-&gt;</span> <span class="pre">tuple</span> <span class="pre">:</span></code></dt><dd><p>Compute the flat 2D coordinates of the input pixel indices (vectorized)</p>
+</dd>
+</dl>
 <p id="spt3g-maps-flatskymap-nonzero-pixels"><strong>spt3g.maps.FlatSkyMap.nonzero_pixels</strong></p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">nonzero_pixels(</span> <span class="pre">(FlatSkyMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">tuple</span> <span class="pre">:</span></code></dt><dd><p>Returns a list of the indices of the non-zero pixels in the map and a list of the values of those non-zero pixels.</p>

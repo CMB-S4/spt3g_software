@@ -246,6 +246,26 @@ FlatSkyMap is a G3SkyMap with the extra meta information about the particular fl
 ``angle_to_xy( (FlatSkyMap)arg1, (DoubleVector)alpha, (DoubleVector)delta) -> tuple :``
     Compute the flat 2D coordinates of the input sky coordinates (vectorized)
 
+.. _spt3g.maps.FlatSkyMap.xy_to_pixel:
+
+**spt3g.maps.FlatSkyMap.xy_to_pixel**
+
+``xy_to_pixel( (FlatSkyMap)arg1, (float)x, (float)y) -> int :``
+    Compute the pixel index of the input flat 2D coordinates
+
+``xy_to_pixel( (FlatSkyMap)arg1, (DoubleVector)x, (DoubleVector)y) -> UInt64Vector :``
+    Compute the pixel indices of the input flat 2D coordinates (vectorized)
+
+.. _spt3g.maps.FlatSkyMap.pixel_to_xy:
+
+**spt3g.maps.FlatSkyMap.pixel_to_xy**
+
+``pixel_to_xy( (FlatSkyMap)arg1, (int)pixel) -> DoubleVector :``
+    Compute the flat 2D coordinates of the input pixel index
+
+``pixel_to_xy( (FlatSkyMap)arg1, (UInt64Vector)pixel) -> tuple :``
+    Compute the flat 2D coordinates of the input pixel indices (vectorized)
+
 .. _spt3g.maps.FlatSkyMap.nonzero_pixels:
 
 **spt3g.maps.FlatSkyMap.nonzero_pixels**
