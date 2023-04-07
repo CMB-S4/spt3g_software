@@ -1,13 +1,12 @@
-import sys
-if sys.version_info[:2] > (3, 7):
-    raise ImportError("Multiprocessing is disabled for python versions > 3.7")
-
-from multiprocessing import Process
+from multiprocessing import get_context
 import socket, pickle, errno, struct, time
 
 from spt3g.core import G3FrameType, G3Frame
 
-class Subproc(Process):
+# Require fork to avoid pickling errors
+ctx = get_context("fork")
+
+class Subproc(ctx.Process):
     '''
     Run a module in a subprocess, using python multiprocessing to proxy
     frames to it. If more than maxqueuelen frames are queued on the
@@ -18,7 +17,7 @@ class Subproc(Process):
         Set up a multiprocessing shim for the pipeline module <target>
         under the process name <name> (can be None).
         '''
-        Process.__init__(self, name=name)
+        ctx.Process.__init__(self, name=name)
         self.targetmod = target
 
         self.queue = socket.socketpair()
