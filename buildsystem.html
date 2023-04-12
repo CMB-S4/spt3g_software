@@ -108,6 +108,81 @@ make
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">target_link_libraries</span></code> command works as in <a class="reference internal" href="#adding-a-c-library">Adding a C++ library</a> above. The first command produces an executable named <code class="docutils literal notranslate"><span class="pre">newthingexec</span></code> that will be placed in the <code class="docutils literal notranslate"><span class="pre">bin</span></code> subdirectory of the build directory. The <code class="docutils literal notranslate"><span class="pre">list</span></code> and <code class="docutils literal notranslate"><span class="pre">set</span></code> commands inform other parts of the build system that this executable will exist, so that it can be included during installation.</p>
 </section>
+<section id="adding-tests">
+<h3>Adding tests<a class="headerlink" href="#adding-tests" title="Permalink to this heading">¶</a></h3>
+<p>Tests can be written in either Python or C++. Some tests must be written in one language  in order to test interfaces specific to it; otherwise, most tests are currently written in python.</p>
+<p>The simplest way to run the full set of tests is by executing <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">test</span></code>. This does not allow for much flexibility, however, so in cases where more control is desirable, one should run tests using the <code class="docutils literal notranslate"><span class="pre">ctest</span></code> driver tool directly. Commonly useful options are <code class="docutils literal notranslate"><span class="pre">ctest</span> <span class="pre">--output-on-failure</span></code> which will show a test’s output when it fails, which is frequently useful for understanding what the failure was in order to fix it, and <code class="docutils literal notranslate"><span class="pre">ctest</span> <span class="pre">-R</span> <span class="pre">&lt;regex&gt;</span></code> which will run any tests any part of whose name is matches the given regular expression, which is handy for running just a particular test to debug it, without having to wait while the entire test suite runs each time.</p>
+<section id="python-tests">
+<h4>Python Tests<a class="headerlink" href="#python-tests" title="Permalink to this heading">¶</a></h4>
+<p>Python tests should be placed in a <code class="docutils literal notranslate"><span class="pre">tests</span></code> subdirectory of the project. Each test must then also be declared in the project’s <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code>, so that <code class="docutils literal notranslate"><span class="pre">cmake</span></code> will know to include it in the list of tests to be run by <code class="docutils literal notranslate"><span class="pre">ctest</span></code> or the <code class="docutils literal notranslate"><span class="pre">test</span></code> build target. This is done by using the <code class="docutils literal notranslate"><span class="pre">add_spt3g_test</span></code> macro:</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">add_spt3g_test</span><span class="p">(</span><span class="s">test_foo</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>will add a test which is implemented in <code class="docutils literal notranslate"><span class="pre">tests/test_foo.py</span></code>.</p>
+<p>The contents of a Python test script can be anything; the script is simply run, and if its exit value is 0, it is considered to have passed. Any non-zero exit status will be taken to indicate a failure. The simplest mechanism to do tests is to just write code with <code class="docutils literal notranslate"><span class="pre">assert</span></code> statements which check that properties of interest hold.</p>
+</section>
+<section id="c-tests">
+<h4>C++ Tests<a class="headerlink" href="#c-tests" title="Permalink to this heading">¶</a></h4>
+<p>C++ tests consist of one or more implementation files which declare tests, organized into test groups. The implementation files for a test are linked together into a test executable.</p>
+<p>Like Python tests, C++ tests must be declared in the project’s CMake script, which is done using the <code class="docutils literal notranslate"><span class="pre">add_spt3g_test_program</span></code> command:</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">add_spt3g_test_program</span><span class="p">(</span><span class="s">test</span>
+<span class="w">                       </span><span class="s">SOURCE_FILES</span>
+<span class="w">                         </span><span class="o">${</span><span class="nv">PROJECT_SOURCE_DIR</span><span class="o">}</span><span class="s">/my_test.cpp</span>
+<span class="w">                       </span><span class="s">USE_PROJECTS</span><span class="w"> </span><span class="s">core</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The first argument is the name of the test executable, which will be prefixed with the project name. Several implementation files may be listed after <code class="docutils literal notranslate"><span class="pre">SOURCE_FILES</span></code>, and the arguments after <code class="docutils literal notranslate"><span class="pre">USE_PROJECTS</span></code> indicate which projects the executable depends on, so suitable compiler options will be generated to give access to those projects’ header paths and to link against their libraries.
+Arbitrary labels can also be associated with a test by passing them after the <code class="docutils literal notranslate"><span class="pre">TEST_LABELS</span></code> argument.</p>
+<p>Typically, each implementation file defines one test group, but multiple implementation files may redeclare and contribute to the same test group. It is also possible to place multiple test groups in one translation unit by isolating each in its own namespace. Each test implementation file should include the <code class="docutils literal notranslate"><span class="pre">G3Test.h</span></code> header to have access to the test infrastructure definitions.</p>
+<p>A test group is declared using the <code class="docutils literal notranslate"><span class="pre">TEST_GROUP</span></code> macro:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">TEST_GROUP</span><span class="p">(</span><span class="n">MyTests</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Individual tests are then defined using the <code class="docutils literal notranslate"><span class="pre">TEST</span></code> macro, followed by a function body which does the work of the test:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">TEST</span><span class="p">(</span><span class="n">Test1</span><span class="p">){</span>
+<span class="w">        </span><span class="n">Num</span><span class="o">::</span><span class="n">InitializeNumbers</span><span class="p">();</span>
+<span class="w">        </span><span class="k">auto</span><span class="w"> </span><span class="n">n5</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Num</span><span class="o">::</span><span class="n">Get</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span>
+<span class="w">        </span><span class="k">auto</span><span class="w"> </span><span class="n">n7</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Num</span><span class="o">::</span><span class="n">Get</span><span class="p">(</span><span class="mi">7</span><span class="p">);</span>
+<span class="w">        </span><span class="n">ENSURE</span><span class="p">(</span><span class="n">n5</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">n7</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;5 should be less than 7&quot;</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The argument to the <code class="docutils literal notranslate"><span class="pre">TEST</span></code> macro is the name of the test, which will then have a fully qualified name derived from its test group: <code class="docutils literal notranslate"><span class="pre">MyTests::Test1</span></code>.</p>
+<p>Since multiple C++ tests can run in the same executable, it is poor form to use <code class="docutils literal notranslate"><span class="pre">assert</span></code>, <code class="docutils literal notranslate"><span class="pre">exit</span></code>, or some other mechanism which can stop the whole process before other tests can run. Tests indicate failure by throwing an exception, but for convenience and readability, particularly of failure messages, a set of macros are provided. The simpest is <code class="docutils literal notranslate"><span class="pre">ENSURE</span></code>, which takes a predicate to be tested, and optionally a message to be shown if the predicate evaluates to false. An example is shown above, and if that test fails, the output produced would look similar to the following:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>MyTests::Test1: /some/path/my_test.cpp:50: n5 &lt; n7: 5 should be less than 7
+FAIL
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">FAIL</span></code> macro can be used when a test has reached a point in its control flow which indicates failure without any further condition needing to be checked. This is particularly useful for ensuring that exceptions are or aren’t thrown in correct places:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">TEST</span><span class="p">(</span><span class="n">Exceptions</span><span class="p">){</span>
+<span class="w">        </span><span class="k">try</span><span class="p">{</span>
+<span class="w">                </span><span class="n">some_func</span><span class="p">();</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">catch</span><span class="p">(...){</span>
+<span class="w">                </span><span class="n">FAIL</span><span class="p">(</span><span class="s">&quot;some_func must not throw exceptions&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="k">try</span><span class="p">{</span>
+<span class="w">                </span><span class="n">other_func</span><span class="p">(</span><span class="n">bad_val</span><span class="p">);</span>
+<span class="w">                </span><span class="n">FAIL</span><span class="p">(</span><span class="s">&quot;other_func must throw an exception when passed bad_val&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="k">catch</span><span class="p">(...){}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>There is also the <code class="docutils literal notranslate"><span class="pre">ENSURE_EQUAL</span></code> macro, which specifically checks to expressions for equality, and produces a detailed error message if they are not:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">TEST</span><span class="p">(</span><span class="n">Equality</span><span class="p">){</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="o">=</span><span class="mi">5</span><span class="p">;</span>
+<span class="w">        </span><span class="n">ENSURE_EQUAL</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="s">&quot;a and b should be the same&quot;</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>which outputs:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>MyTests::Equality: my_test.cpp:19: ENSURE_EQUAL(a, b): 4 != 5: a and b should be the same
+</pre></div>
+</div>
+</section>
+</section>
 </section>
 <section id="mixing-c-and-python">
 <h2>Mixing C++ and Python<a class="headerlink" href="#mixing-c-and-python" title="Permalink to this heading">¶</a></h2>
@@ -136,6 +211,11 @@ make
 <li><a class="reference internal" href="#adding-python-code">Adding Python code</a></li>
 <li><a class="reference internal" href="#adding-a-c-library">Adding a C++ library</a></li>
 <li><a class="reference internal" href="#adding-a-c-executable">Adding a C++ executable</a></li>
+<li><a class="reference internal" href="#adding-tests">Adding tests</a><ul>
+<li><a class="reference internal" href="#python-tests">Python Tests</a></li>
+<li><a class="reference internal" href="#c-tests">C++ Tests</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li><a class="reference internal" href="#mixing-c-and-python">Mixing C++ and Python</a></li>
