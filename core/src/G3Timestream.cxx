@@ -999,7 +999,7 @@ struct PyBufferOwner {
 static G3TimestreamMapPtr
 G3TimestreamMap_from_numpy(std::vector<std::string> keys,
     boost::python::object data, G3Time start, G3Time stop,
-    G3Timestream::TimestreamUnits units, bool copy_data)
+    G3Timestream::TimestreamUnits units, int compression_level, bool copy_data)
 {
 	G3TimestreamMapPtr x(new G3TimestreamMap);
 
@@ -1045,6 +1045,7 @@ G3TimestreamMap_from_numpy(std::vector<std::string> keys,
 	templ.units = units;
 	templ.start = start;
 	templ.stop = stop;
+	templ.SetFLACCompression(compression_level);
 	templ.data_type_;
 	if (strcmp(v->v.format, "d") == 0) {
 		templ.data_type_ = G3Timestream::TS_DOUBLE;
@@ -1257,6 +1258,9 @@ PYBINDINGS("core") {
 	      "Computed sample rate of the timestream.")
 	    .add_property("n_samples", &G3Timestream::G3TimestreamPythonHelpers::G3Timestream_nsamples,
 	      "Number of samples in the timestream. Equivalent to len(ts)")
+	    .add_property("compression_level", &G3Timestream::GetCompressionLevel,
+	      &G3Timestream::SetFLACCompression, "Level of FLAC compression used for this timestream. "
+	      "This can only be non-zero if the timestream is in units of counts.")
 	    .def("_assert_congruence", &G3Timestream::G3TimestreamPythonHelpers::G3Timestream_assert_congruence,
 	      "log_fatal() if units, length, start, or stop times do not match")
 	    .def("_cxxslice", &G3Timestream::G3TimestreamPythonHelpers::G3Timestream_getslice, "Slice-only __getitem__")
@@ -1274,7 +1278,16 @@ PYBINDINGS("core") {
 
 	bp::object tsm =
 	  EXPORT_FRAMEOBJECT(G3TimestreamMap, init<>(), "Collection of timestreams indexed by logical detector ID")
-	    .def("__init__", bp::make_constructor(G3Timestream::G3TimestreamPythonHelpers::G3TimestreamMap_from_numpy, bp::default_call_policies(), (bp::arg("keys"), bp::arg("data"), bp::arg("start")=G3Time(0), bp::arg("stop")=G3Time(0), bp::arg("units") = G3Timestream::TimestreamUnits::None, bp::arg("copy_data") = true)), "Create a timestream map from a numpy array or other numeric python iterable. Each row of the 2D input array will correspond to a single timestream, with the key set to the correspondingly-indexed entry of <keys>. If <copy_data> is True (default), the data will be copied into the output data structure. If False, the timestream map will provide a view into the given numpy array.")
+	    .def("__init__", bp::make_constructor(G3Timestream::G3TimestreamPythonHelpers::G3TimestreamMap_from_numpy, 
+	         bp::default_call_policies(),
+	         (bp::arg("keys"), bp::arg("data"), bp::arg("start")=G3Time(0),
+	          bp::arg("stop")=G3Time(0), bp::arg("units") = G3Timestream::TimestreamUnits::None,
+	          bp::arg("compression_level") = 0, bp::arg("copy_data") = true)),
+	         "Create a timestream map from a numpy array or other numeric python iterable. "
+	         "Each row of the 2D input array will correspond to a single timestream, with "
+	         "the key set to the correspondingly-indexed entry of <keys>. If <copy_data> "
+	         "is True (default), the data will be copied into the output data structure. "
+	         "If False, the timestream map will provide a view into the given numpy array.")
 	    .def(bp::std_map_indexing_suite<G3TimestreamMap, true>())
 	    .def("CheckAlignment", &G3TimestreamMap::CheckAlignment)
 	    .def("Compactify", &G3TimestreamMap::Compactify,

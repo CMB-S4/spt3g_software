@@ -11,7 +11,7 @@ void testMakeCompact(){
 	std::vector<std::string> keys={"a","b","c","d"};
 	G3Time t1(0), t2(3);
 	const std::size_t nSamples=4;
-	G3TimestreamMap tsm=G3TimestreamMap::MakeCompact<SampleType>(keys, t1, t2, nSamples);
+	G3TimestreamMap tsm=G3TimestreamMap::MakeCompact<SampleType>(keys, nSamples, t1, t2);
 	
 	ENSURE_EQUAL(tsm.size(),keys.size(), "MakeCompact should produce the correct number of timestreams");
 	ENSURE_EQUAL(tsm.GetStartTime(),t1, "MakeCompact should produce a map with the given start time");
@@ -24,6 +24,26 @@ TEST(MakeCompactDouble){ testMakeCompact<double>(); }
 TEST(MakeCompactFloat){ testMakeCompact<float>(); }
 TEST(MakeCompactInt32){ testMakeCompact<int32_t>(); }
 TEST(MakeCompactInt64){ testMakeCompact<int64_t>(); }
+
+TEST(MakeCompactUnits){
+	std::vector<std::string> keys={"a","b","c","d"};
+	G3Time t1(0), t2(3);
+	const std::size_t nSamples=4;
+	G3TimestreamMap tsm=G3TimestreamMap::MakeCompact<double>(keys, nSamples, t1, t2, G3Timestream::Voltage);
+	
+	for(const auto& item : tsm)
+		ENSURE_EQUAL(item.second->units, G3Timestream::Voltage, "All timestreams' units should be set");
+}
+
+TEST(MakeCompactCompressed){
+	std::vector<std::string> keys={"a","b","c","d"};
+	G3Time t1(0), t2(3);
+	const std::size_t nSamples=4;
+	G3TimestreamMap tsm=G3TimestreamMap::MakeCompact<int32_t>(keys, nSamples, t1, t2, G3Timestream::Counts, 6);
+	
+	for(const auto& item : tsm)
+		ENSURE_EQUAL(item.second->GetCompressionLevel(), 6, "All timestreams should be set to use compression");
+}
 
 template<typename SampleType>
 void testMakeCompactExisting(){
@@ -38,7 +58,7 @@ void testMakeCompactExisting(){
 		}
 	}
 	
-	G3TimestreamMap tsm=G3TimestreamMap::MakeCompact<SampleType>(keys, t1, t2, nSamples, data);
+	G3TimestreamMap tsm=G3TimestreamMap::MakeCompact<SampleType>(keys, nSamples, data, t1, t2);
 	
 	ENSURE_EQUAL(tsm.size(),keys.size(), "MakeCompact should produce the correct number of timestreams");
 	ENSURE_EQUAL(tsm.GetStartTime(),t1, "MakeCompact should produce a map with the given start time");
@@ -69,7 +89,7 @@ TEST(SetStartTime){
 	std::vector<std::string> keys={"a","b","c","d"};
 	G3Time t1(0), t2(3), t3(47);
 	const std::size_t nSamples=4;
-	G3TimestreamMap tsm=G3TimestreamMap::MakeCompact<double>(keys, t1, t2, nSamples);
+	G3TimestreamMap tsm=G3TimestreamMap::MakeCompact<double>(keys, nSamples, t1, t2);
 	
 	ENSURE_EQUAL(tsm.GetStartTime(),t1, "MakeCompact should produce a map with the given start time");
 	tsm.SetStartTime(t3);
@@ -81,7 +101,7 @@ TEST(SetStopTime){
 	std::vector<std::string> keys={"a","b","c","d"};
 	G3Time t1(0), t2(3), t3(47);
 	const std::size_t nSamples=4;
-	G3TimestreamMap tsm=G3TimestreamMap::MakeCompact<double>(keys, t1, t2, nSamples);
+	G3TimestreamMap tsm=G3TimestreamMap::MakeCompact<double>(keys, nSamples, t1, t2);
 	
 	ENSURE_EQUAL(tsm.GetStopTime(),t2, "MakeCompact should produce a map with the given stop time");
 	tsm.SetStopTime(t3);
@@ -93,7 +113,7 @@ TEST(SetUnits){
 	std::vector<std::string> keys={"a","b","c","d"};
 	G3Time t1(0), t2(3);
 	const std::size_t nSamples=4;
-	G3TimestreamMap tsm=G3TimestreamMap::MakeCompact<double>(keys, t1, t2, nSamples);
+	G3TimestreamMap tsm=G3TimestreamMap::MakeCompact<double>(keys, nSamples, t1, t2);
 	
 	tsm.SetUnits(G3Timestream::Voltage);
 	for(const auto& key : keys){
@@ -105,7 +125,7 @@ TEST(SetCompression){
 	std::vector<std::string> keys={"a","b","c","d"};
 	G3Time t1(0), t2(3);
 	const std::size_t nSamples=4;
-	G3TimestreamMap tsm=G3TimestreamMap::MakeCompact<double>(keys, t1, t2, nSamples);
+	G3TimestreamMap tsm=G3TimestreamMap::MakeCompact<double>(keys, nSamples, t1, t2);
 	
 	unsigned int compressionLevel=5;
 	tsm.SetFLACCompression(5);

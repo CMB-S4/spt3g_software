@@ -211,9 +211,12 @@ public:
 	/// \param n_samples the number of samples each timestream will have
 	/// \pre keys must be in sorted order
 	template<typename SampleType>
-	static G3TimestreamMap MakeCompact(const std::vector<std::string>& keys, G3Time start, G3Time stop, std::size_t n_samples){
+	static G3TimestreamMap MakeCompact(const std::vector<std::string>& keys, std::size_t n_samples,
+	                                   G3Time start, G3Time stop,
+	                                   G3Timestream::TimestreamUnits units=G3Timestream::None,
+	                                   int compression_level=0){
 		boost::shared_ptr<SampleType[]> data(new SampleType[n_samples*keys.size()]);
-		return MakeCompact(keys, start, stop, n_samples, data);
+		return MakeCompact(keys, n_samples, data, start, stop, units, compression_level);
 	}
 
 	/// Construct a map using an existing contiguous 2D block of data as the underlying storage.
@@ -226,7 +229,11 @@ public:
 	/// \param data existing data into which the new timestreams should be views
 	/// \pre keys must be in sorted order
 	template<typename SampleType>
-	static G3TimestreamMap MakeCompact(const std::vector<std::string>& keys, G3Time start, G3Time stop, std::size_t n_samples, boost::shared_ptr<SampleType[]> data){
+	static G3TimestreamMap MakeCompact(const std::vector<std::string>& keys, std::size_t n_samples,
+	                                   boost::shared_ptr<SampleType[]> data,
+	                                   G3Time start, G3Time stop,
+	                                   G3Timestream::TimestreamUnits units=G3Timestream::None,
+	                                   int compression_level=0){
 		if(!std::is_sorted(keys.begin(), keys.end()))
 			throw std::runtime_error("G3TimestreamMap::MakeCompact: keys must be sorted");
 		const auto data_type=G3Timestream::TimeStreamTypeResolver<SampleType>::type_tag;
@@ -236,6 +243,8 @@ public:
 			auto ts=boost::make_shared<G3Timestream>(0);
 			ts->start=start;
 			ts->stop=stop;
+			ts->units=units;
+			ts->use_flac_=compression_level;
 			ts->root_data_ref_=data;
 			ts->data_=data.get()+offset;
 			ts->data_type_=data_type;
