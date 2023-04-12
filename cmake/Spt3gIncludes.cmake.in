@@ -45,7 +45,7 @@ macro(add_spt3g_program prog_name)
 		get_filename_component(prog_out ${prog_in} NAME)
 	endif()
 	list(APPEND SPT3G_PROGRAMS ${prog_out})
- 	set(SPT3G_PROGRAMS ${SPT3G_PROGRAMS} PARENT_SCOPE)
+	set(SPT3G_PROGRAMS ${SPT3G_PROGRAMS} PARENT_SCOPE)
 	set(prog_out ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${prog_out})
 	execute_process(COMMAND ln -fsn ${prog_in} ${prog_out})
 endmacro(add_spt3g_program prog_name)
@@ -55,11 +55,11 @@ macro(add_spt3g_library lib_name)
 	target_compile_features(${lib_name} PUBLIC cxx_std_11)
 	if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/include)
 		target_include_directories(${lib_name} PUBLIC
- 			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
- 			$<INSTALL_INTERFACE:${SPT3G_INCLUDE_INSTALL_DIR}/${lib_name}>)
+			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+			$<INSTALL_INTERFACE:${SPT3G_INCLUDE_INSTALL_DIR}/${lib_name}>)
 	endif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/include)
 	list(APPEND SPT3G_LIBRARIES ${lib_name})
- 	set(SPT3G_LIBRARIES ${SPT3G_LIBRARIES} PARENT_SCOPE)
+	set(SPT3G_LIBRARIES ${SPT3G_LIBRARIES} PARENT_SCOPE)
 	install(TARGETS ${lib_name} EXPORT ${PROJECT_NAME}Config LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 	install(TARGETS ${lib_name} DESTINATION ${PYTHON_MODULE_DIR}/spt3g)
 endmacro(add_spt3g_library lib_name)
@@ -76,6 +76,16 @@ macro(add_spt3g_test test_name)
 endmacro(add_spt3g_test test_name)
 
 macro(add_spt3g_test_program test_name)
+	if(PROJECT_NAME STREQUAL "spt3g") # internal use by this code
+		set(TEST_NAME_PREFIX ${PROJECT})
+		set(TEST_PROJECT_PREFIX "")
+		set(IS_INTERNAL_TEST TRUE)
+	else() # external use by down-stream code
+		set(TEST_NAME_PREFIX ${PROJECT_NAME})
+		set(TEST_PROJECT_PREFIX "spt3g::")
+		set(IS_INTERNAL_TEST FALSE)
+	endif()
+	
 	cmake_parse_arguments("ADD_TEST_PROGRAM"
 	                      "" # options
 	                      "" # one value keywords
@@ -83,30 +93,47 @@ macro(add_spt3g_test_program test_name)
 	                      ${ARGN}
 	                      )
 	
-	add_test(NAME ${PROJECT}/${test_name}
-	         WORKING_DIRECTORY ${SPT3G_BUILD_DIR}
-	         COMMAND ${PROJECT}-${test_name}
+	add_test(NAME ${TEST_NAME_PREFIX}/${test_name}
+	         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+	         COMMAND ${TEST_NAME_PREFIX}-${test_name}
 	         )
 	
 	if(ADD_TEST_PROGRAM_TEST_LABELS)
-		set_tests_properties(${PROJECT}/${test_name} PROPERTIES LABELS ${ADD_TEST_PROGRAM_TEST_LABELS})
-    endif(ADD_TEST_PROGRAM_TEST_LABELS)
-    
-	add_executable(${PROJECT}-${test_name}
-	               ${CMAKE_SOURCE_DIR}/cmake/Spt3gTestMain.cxx
-                   ${ADD_TEST_PROGRAM_SOURCE_FILES}
-                   )
-	target_include_directories(${PROJECT}-${test_name} PRIVATE ${CMAKE_SOURCE_DIR}/cmake)
+		set_tests_properties(${TEST_NAME_PREFIX}/${test_name} PROPERTIES LABELS ${ADD_TEST_PROGRAM_TEST_LABELS})
+	endif(ADD_TEST_PROGRAM_TEST_LABELS)
+	
+	if(NOT EXISTS ${PROJECT_BINARY_DIR}/Spt3gTestMain.cxx)
+		file(WRITE ${PROJECT_BINARY_DIR}/Spt3gTestMain.cxx "#include <G3Test.h>\nG3TEST_MAIN_IMPL\n")
+	endif(NOT EXISTS ${PROJECT_BINARY_DIR}/Spt3gTestMain.cxx)
+	
+	add_executable(${TEST_NAME_PREFIX}-${test_name}
+	               ${PROJECT_BINARY_DIR}/Spt3gTestMain.cxx
+	               ${ADD_TEST_PROGRAM_SOURCE_FILES}
+	               )
+	target_include_directories(${TEST_NAME_PREFIX}-${test_name} PRIVATE ${CMAKE_SOURCE_DIR}/cmake)
 	
 	foreach(USED_PROJECT ${ADD_TEST_PROGRAM_USE_PROJECTS})
-		if(NOT IS_DIRECTORY ${CMAKE_SOURCE_DIR}/${USED_PROJECT})
-			message(FATAL_ERROR "Attempt to use nonexistent project '${USED_PROJECT}'")
-		endif(NOT IS_DIRECTORY ${CMAKE_SOURCE_DIR}/${USED_PROJECT})
-		if(NOT EXISTS ${CMAKE_SOURCE_DIR}/${USED_PROJECT}/CMakeLists.txt)
-			message(FATAL_ERROR "Attempt to use project '${USED_PROJECT}'. There is a directory but no CMakeLists.txt. . . is this a valid project?")
-		endif(NOT EXISTS ${CMAKE_SOURCE_DIR}/${USED_PROJECT}/CMakeLists.txt)
+		if(IS_INTERNAL_TEST)
+			if(NOT IS_DIRECTORY ${CMAKE_SOURCE_DIR}/${USED_PROJECT})
+				message(FATAL_ERROR "Attempt to use nonexistent project '${USED_PROJECT}'")
+			endif(NOT IS_DIRECTORY ${CMAKE_SOURCE_DIR}/${USED_PROJECT})
+			if(NOT EXISTS ${CMAKE_SOURCE_DIR}/${USED_PROJECT}/CMakeLists.txt)
+				message(FATAL_ERROR "Attempt to use project '${USED_PROJECT}'. There is a directory but no CMakeLists.txt. . . is this a valid project?")
+			endif(NOT EXISTS ${CMAKE_SOURCE_DIR}/${USED_PROJECT}/CMakeLists.txt)
 		
-		target_include_directories(${PROJECT}-${test_name} PRIVATE  ${CMAKE_SOURCE_DIR}/${USED_PROJECT}/include)
-		target_link_libraries(${PROJECT}-${test_name} ${USED_PROJECT})
+			target_include_directories(${TEST_NAME_PREFIX}-${test_name} PRIVATE ${CMAKE_SOURCE_DIR}/${USED_PROJECT}/include)
+		else(IS_INTERNAL_TEST)
+			list(FIND SPT3G_LIBRARIES "${TEST_PROJECT_PREFIX}${USED_PROJECT}" PROJECT_INDEX)
+			if(PROJECT_INDEX EQUAL -1)
+				message(FATAL_ERROR "Attempt to use nonexistent project '${USED_PROJECT}'")
+			endif(PROJECT_INDEX EQUAL -1)
+			
+			target_include_directories(${TEST_NAME_PREFIX}-${test_name} PRIVATE "${SPT3G_INCLUDE_INSTALL_DIR}/${USED_PROJECT}")
+		endif(IS_INTERNAL_TEST)
+		
+		target_link_libraries(${TEST_NAME_PREFIX}-${test_name} ${TEST_PROJECT_PREFIX}${USED_PROJECT})
 	endforeach(USED_PROJECT ${ADD_TEST_PROGRAM_USE_PROJECTS})
+	if(NOT IS_INTERNAL_TEST)
+		target_include_directories(dependent PRIVATE ${SPT3G_INCLUDE_DIRS})
+	endif()
 endmacro(add_spt3g_test_program test_name)

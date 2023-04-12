@@ -271,6 +271,9 @@ foreach(lib ${SPT3G_LIBRARIES})
 	endif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${lib}/include/)
 endforeach(lib ${SPT3G_LIBRARIES})
 
+# cmake doesn't generally have headers, but we want to provide the test header
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake/G3Test.h DESTINATION ${INCLUDE_INSTALL_DIR})
+
 # Target for uninstalling
 configure_file(
 	"${CMAKE_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
