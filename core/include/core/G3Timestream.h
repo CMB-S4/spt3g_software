@@ -180,6 +180,9 @@ public:
 	G3TimestreamMap(const G3TimestreamMap& other):std::map<std::string, G3TimestreamPtr>(other){}
 	G3TimestreamMap(G3TimestreamMap&& other):std::map<std::string, G3TimestreamPtr>(std::move(other)){}
 
+	G3TimestreamMap& operator=(const G3TimestreamMap&)=default;
+	G3TimestreamMap& operator=(G3TimestreamMap&&)=default;
+
 	// Return true if all timestreams start and end at the same time and
 	// contain the same number of samples.
 	bool CheckAlignment() const;

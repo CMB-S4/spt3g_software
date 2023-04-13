@@ -1,10 +1,28 @@
 #include <G3Test.h>
 
+#include <type_traits>
+
 #include <core/G3Timestream.h>
 
 #include <boost/make_shared.hpp>
 
 TEST_GROUP(G3TimestreamMap)
+
+//These things can be checked purely at compile time
+static_assert(std::is_default_constructible<G3TimestreamMap>::value,
+              "G3TimestreamMap must be default constructible");
+
+static_assert(std::is_copy_constructible<G3TimestreamMap>::value,
+              "G3TimestreamMap must be copy constructible");
+
+static_assert(std::is_move_constructible<G3TimestreamMap>::value,
+              "G3TimestreamMap must be move constructible");
+
+static_assert(std::is_copy_assignable<G3TimestreamMap>::value,
+              "G3TimestreamMap must be copy assignable");
+
+static_assert(std::is_move_assignable<G3TimestreamMap>::value,
+              "G3TimestreamMap must be move assignable");
 
 template<typename SampleType>
 void testMakeCompact(){
