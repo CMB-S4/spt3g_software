@@ -50,7 +50,7 @@ all_arr = [
 ]
 
 def check(a1, a2, cls=None):
-    assert np.array_equal(a1, a2)
+    np.testing.assert_array_equal(np.asarray(a1), np.asarray(a2), verbose=True)
     assert np.asarray(a1).dtype.kind == np.asarray(a2).dtype.kind
     if cls is not None:
         assert isinstance(a1, cls)
