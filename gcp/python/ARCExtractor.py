@@ -321,8 +321,9 @@ def UnpackTrackerPointingData(f):
     p['fixedCollimation'] = np.asarray(board['fixedCollimation'], dtype=np.double)
     p['time'] = np.asarray(t.time, dtype=np.double)
     if 'linear_sensor_enabled' in board.keys():
-        p['linsensCoeffs'] = np.asarray(board['linear_sensor_coeff'], dtype=np.double)
         p['linsensEnabled'] = np.asarray(board['linear_sensor_enabled'][0], dtype=np.double)
+        if 'linear_sensor_coeff' in board.keys():
+            p['linsensCoeffs'] = np.asarray(board['linear_sensor_coeff'], dtype=np.double)
     else:
         p['linsensEnabled'] = np.zeros_like(p['time'], dtype=np.double)
 
