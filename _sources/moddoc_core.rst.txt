@@ -1965,7 +1965,7 @@ Collection of timestreams indexed by logical detector ID
 	
 	``G3TimestreamMap( (G3TimestreamMap)arg2)``
 	
-	``G3TimestreamMap( (StringVector)keys, (object)data [, (G3Time)start=<spt3g.core.G3Time object at 0x7fc9e77e5eb0> [, (G3Time)stop=<spt3g.core.G3Time object at 0x7fc9e77e5f20> [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None [, (int)compression_level=0 [, (bool)copy_data=True]]]]])`` :
+	``G3TimestreamMap( (StringVector)keys, (object)data [, (G3Time)start=<spt3g.core.G3Time object at 0x7f7060c31eb0> [, (G3Time)stop=<spt3g.core.G3Time object at 0x7f7060c31f20> [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None [, (int)compression_level=0 [, (bool)copy_data=True]]]]])`` :
 	    Create a timestream map from a numpy array or other numeric python iterable. Each row of the 2D input array will correspond to a single timestream, with the key set to the correspondingly-indexed entry of <keys>. If <copy_data> is True (default), the data will be copied into the output data structure. If False, the timestream map will provide a view into the given numpy array.
 	
 	``G3TimestreamMap( (list)arg2)`` :
@@ -2517,7 +2517,7 @@ More complex behavior can be obtained with the optional divide_on argument. This
 
 **spt3g.core.G3NetworkSender**
 
-Writes frames to a network socket. If hostname is set to '*', will listen on the given port, on all interfaces, instead of connecting to the given port on a remote host. In listen mode, metadata frames (Calibration, Wiring, etc. -- everything but Scan and Timepoint) will be accumulated and the most recent of each will be sent to new clients on connect. Scan and Timepoint frames will be broadcasted live to all connected clients. If max_queue_size is set to a non-zero value, Scan and Timepoint frames may be dropped if more than max_queue_size frames are queued for transmission.
+Writes frames to a network socket. If hostname is set to '*', will listen on the given port, on all interfaces, instead of connecting to the given port on a remote host. In listen mode, metadata frames (Calibration, Wiring, etc. -- everything but Scan and Timepoint) will be accumulated and the most recent of each will be sent to new clients on connect. Scan and Timepoint frames will be broadcast live to all connected clients. If max_queue_size is set to a non-zero value, Scan and Timepoint frames may be dropped if more than max_queue_size frames are queued for transmission. If n_serializers is set to a non-zero value, the task of serializing frames to be sent will be distributed across that many background threads, which is useful when high throughput of large frames is required, but is otherwise typically not necessary.
 
 
 
