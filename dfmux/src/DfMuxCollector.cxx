@@ -14,7 +14,6 @@
 
 #ifdef __FreeBSD__
 #include <sys/endian.h>
-#include <pthread_np.h>
 #endif
 
 #ifdef __APPLE__
@@ -38,6 +37,7 @@
 
 #include <dfmux/DfMuxCollector.h>
 
+#include <core/SetThreadName.h>
 
 struct RawTimestamp {
 	/* SIGNED types are used here to permit negative numbers during
@@ -236,13 +236,6 @@ int DfMuxCollector::Start()
 	stop_listening_ = false;
 	listen_thread_ = std::thread(Listen, this);
 
-#ifdef __linux__
-	pthread_setname_np(listen_thread_.native_handle(), "dfmux listen");
-#endif
-#ifdef __FreeBSD__
-	pthread_set_name_np(listen_thread_.native_handle(), "dfmux listen");
-#endif
-
 	return (0);
 }
 
@@ -256,6 +249,8 @@ int DfMuxCollector::Stop()
 
 void DfMuxCollector::Listen(DfMuxCollector *collector)
 {
+	setThreadName("dfmux listen");
+
 	struct sockaddr_in addr;
 	socklen_t addrlen = sizeof(addr);
 	struct DfmuxPacket buf;
