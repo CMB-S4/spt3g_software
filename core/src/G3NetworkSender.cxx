@@ -22,18 +22,23 @@
  * the class definition) provides detail on how to use it and operational
  * semantics.
  *
- * Frames are serialized to buffers as part of the main processing thread
- * and are then distributed to one or more communication threads, each of which
- * serves one network client. Data are communicated to the communication threads
- * as buffers rather than frames to accomplish the following things:
+ * Frames are serialized to buffers either as part of the main processing
+ * thread or on dedicated background threads, and then distributed to one or
+ * more communication threads, each of which serves one network client. This
+ * module will not output each frame until it has been completely serialized in
+ * order to accomplish the following things:
  *
- * 1) Avoids paradoxes from later modification of frames by other modules.
+ * 1) Avoid paradoxes from later modification of frames by other modules.
  *    Frames, unlike frame objects, are mutable.
- * 2) Avoids worrying about races during serialization.
- * 3) Centralizes the serialization CPU load in the event that many clients
- *    are listening.
- * 4) Works around any potential need to acquire the GIL when destroying shared
- *    pointers that may have come from Python
+ * 2) Avoid worrying about races during serialization.
+ *
+ * Separating serialization from communication is also useful because it avoids
+ * repeated serialization when serving frames to many clients.
+ *
+ * Using multiple serialization threads can be advantageous when frames are
+ * large and high throughput is required. Otherwise, the default is to use no
+ * dedicated threads for this purpose, and to simply serialize on the main
+ * thread, which is sufficient in most cases.
  */
 
 
@@ -45,10 +50,13 @@ EXPORT_G3MODULE_AND("core", G3NetworkSender,
     "port on a remote host. In listen mode, metadata frames (Calibration, "
     "Wiring, etc. -- everything but Scan and Timepoint) will be accumulated "
     "and the most recent of each will be sent to new clients on connect. Scan "
-    "and Timepoint frames will be broadcasted live to all connected clients. "
+    "and Timepoint frames will be broadcast live to all connected clients. "
     "If max_queue_size is set to a non-zero value, Scan and Timepoint frames "
     "may be dropped if more than max_queue_size frames are queued for "
-    "transmission.",
+    "transmission. If n_serializers is set to a non-zero value, the task of "
+    "serializing frames to be sent will be distributed across that many "
+    "background threads, which is useful when high throughput of large frames "
+    "is required, but is otherwise typically not necessary.",
     .def("Close", &G3NetworkSender::Close));
 
 
@@ -319,7 +327,7 @@ G3NetworkSender::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		// Reap all threads on EndProcessing.
 		StopAllThreads();
 
-		// Wait until all frames are prcoessed
+		// Wait until all frames are processed
 		while (!outstanding_frames.empty()) {
 			outstanding_frames.front().output.wait();
 			out.push_back(outstanding_frames.front().frame);
