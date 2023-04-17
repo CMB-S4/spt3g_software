@@ -93,6 +93,13 @@ static void flac_decoder_error_cb(const FLAC__StreamDecoder *decoder,
 		log_fatal("FLAC decoding error (%d)", status);
 	}
 }
+
+extern "C"{
+	// Provide our own declaration of this function.
+	// This libFLAC interface is private but stable, and this use is officially sanctioned:
+	// https://github.com/xiph/flac/commit/3baaf23faa05eca1cfc34737d95131ad0b628d4c
+	FLAC__bool FLAC__stream_encoder_set_do_md5(FLAC__StreamEncoder *encoder, FLAC__bool value);
+}
 #endif
 
 template <class A> void G3Timestream::save(A &ar, unsigned v) const
@@ -152,6 +159,7 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 		// XXX: should assert if high-order 8 bits are not clear
 		FLAC__stream_encoder_set_bits_per_sample(encoder, 24);
 		FLAC__stream_encoder_set_compression_level(encoder, use_flac_);
+		FLAC__stream_encoder_set_do_md5(encoder, false);
 		FLAC__stream_encoder_init_stream(encoder,
 		    flac_encoder_write_cb, NULL, NULL, NULL, (void*)(&outbuf));
 		FLAC__stream_encoder_process (encoder, chanmap, inbuf.size());
@@ -237,6 +245,7 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 		callback.outbuf->reserve(callback.nbytes);
 
 		FLAC__StreamDecoder *decoder = FLAC__stream_decoder_new();
+		FLAC__stream_decoder_set_md5_checking(decoder, false);
 		FLAC__stream_decoder_init_stream(decoder,
 		    flac_decoder_read_cb<A>, NULL, NULL, NULL, NULL,
 		    flac_decoder_write_cb<A>, NULL, flac_decoder_error_cb,
