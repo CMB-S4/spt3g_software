@@ -137,11 +137,13 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 		// rare case that only some samples are valid, store a
 		// validity mask.
 		std::vector<bool> nanbuf(size(), false);
-		for (size_t i = 0; i < size(); i++) {
-			if (!std::isfinite((*this)[i])) {
-				nans++;
-				nanbuf[i] = true;
-				inbuf[i] = 0;
+		if(data_type_==TS_DOUBLE || data_type_==TS_FLOAT){
+			for (size_t i = 0; i < size(); i++) {
+				if (!std::isfinite((*this)[i])) {
+					nans++;
+					nanbuf[i] = true;
+					inbuf[i] = 0;
+				}
 			}
 		}
 		nanflag = SomeNan;
