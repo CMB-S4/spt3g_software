@@ -124,9 +124,30 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 
 		// Copy to 24-bit integers
 		inbuf.resize(size());
-		for (size_t i = 0; i < size(); i++)
-			inbuf[i] = ((int32_t((*this)[i]) & 0x00ffffff) << 8)
-			    >> 8;
+		switch (data_type_) {
+			case TS_DOUBLE:
+				for (size_t i = 0; i < size(); i++)
+					inbuf[i] = ((int32_t(((double *)data_)[i]) & 0x00ffffff) << 8) >> 8;
+				break;
+			case TS_FLOAT:
+				for (size_t i = 0; i < size(); i++)
+					inbuf[i] = ((int32_t(((float *)data_)[i]) & 0x00ffffff) << 8) >> 8;
+				break;
+			case TS_INT32:
+				{
+					// Using this rather raw form for the loop can enable automatic
+					// unrolling and vectorization.
+					int32_t* in_ptr=(int32_t *)data_;
+					int32_t* out_ptr=&inbuf[0];
+					for(int32_t* end=in_ptr+size(); in_ptr!=end; in_ptr++,out_ptr++)
+						*out_ptr = ((*in_ptr & 0x00ffffff) << 8) >> 8;
+				}
+				break;
+			case TS_INT64:
+				for (size_t i = 0; i < size(); i++)
+					inbuf[i] = ((int32_t(((int64_t *)data_)[i]) & 0x00ffffff) << 8) >> 8;
+				break;
+		}
 		chanmap[0] = &inbuf[0];
 
 		// Mark bad samples using an out-of-band signal. Since we
