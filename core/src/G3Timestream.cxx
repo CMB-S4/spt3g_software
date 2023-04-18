@@ -93,6 +93,13 @@ static void flac_decoder_error_cb(const FLAC__StreamDecoder *decoder,
 		log_fatal("FLAC decoding error (%d)", status);
 	}
 }
+
+extern "C"{
+	// Provide our own declaration of this function.
+	// This libFLAC interface is private but stable, and this use is officially sanctioned:
+	// https://github.com/xiph/flac/commit/3baaf23faa05eca1cfc34737d95131ad0b628d4c
+	FLAC__bool FLAC__stream_encoder_set_do_md5(FLAC__StreamEncoder *encoder, FLAC__bool value);
+}
 #endif
 
 template <class A> void G3Timestream::save(A &ar, unsigned v) const
@@ -117,9 +124,30 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 
 		// Copy to 24-bit integers
 		inbuf.resize(size());
-		for (size_t i = 0; i < size(); i++)
-			inbuf[i] = ((int32_t((*this)[i]) & 0x00ffffff) << 8)
-			    >> 8;
+		switch (data_type_) {
+			case TS_DOUBLE:
+				for (size_t i = 0; i < size(); i++)
+					inbuf[i] = ((int32_t(((double *)data_)[i]) & 0x00ffffff) << 8) >> 8;
+				break;
+			case TS_FLOAT:
+				for (size_t i = 0; i < size(); i++)
+					inbuf[i] = ((int32_t(((float *)data_)[i]) & 0x00ffffff) << 8) >> 8;
+				break;
+			case TS_INT32:
+				{
+					// Using this rather raw form for the loop can enable automatic
+					// unrolling and vectorization.
+					int32_t* in_ptr=(int32_t *)data_;
+					int32_t* out_ptr=&inbuf[0];
+					for(int32_t* end=in_ptr+size(); in_ptr!=end; in_ptr++,out_ptr++)
+						*out_ptr = ((*in_ptr & 0x00ffffff) << 8) >> 8;
+				}
+				break;
+			case TS_INT64:
+				for (size_t i = 0; i < size(); i++)
+					inbuf[i] = ((int32_t(((int64_t *)data_)[i]) & 0x00ffffff) << 8) >> 8;
+				break;
+		}
 		chanmap[0] = &inbuf[0];
 
 		// Mark bad samples using an out-of-band signal. Since we
@@ -130,11 +158,13 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 		// rare case that only some samples are valid, store a
 		// validity mask.
 		std::vector<bool> nanbuf(size(), false);
-		for (size_t i = 0; i < size(); i++) {
-			if (!std::isfinite((*this)[i])) {
-				nans++;
-				nanbuf[i] = true;
-				inbuf[i] = 0;
+		if(data_type_==TS_DOUBLE || data_type_==TS_FLOAT){
+			for (size_t i = 0; i < size(); i++) {
+				if (!std::isfinite((*this)[i])) {
+					nans++;
+					nanbuf[i] = true;
+					inbuf[i] = 0;
+				}
 			}
 		}
 		nanflag = SomeNan;
@@ -152,6 +182,7 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 		// XXX: should assert if high-order 8 bits are not clear
 		FLAC__stream_encoder_set_bits_per_sample(encoder, 24);
 		FLAC__stream_encoder_set_compression_level(encoder, use_flac_);
+		FLAC__stream_encoder_set_do_md5(encoder, false);
 		FLAC__stream_encoder_init_stream(encoder,
 		    flac_encoder_write_cb, NULL, NULL, NULL, (void*)(&outbuf));
 		FLAC__stream_encoder_process (encoder, chanmap, inbuf.size());
@@ -237,6 +268,7 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 		callback.outbuf->reserve(callback.nbytes);
 
 		FLAC__StreamDecoder *decoder = FLAC__stream_decoder_new();
+		FLAC__stream_decoder_set_md5_checking(decoder, false);
 		FLAC__stream_decoder_init_stream(decoder,
 		    flac_decoder_read_cb<A>, NULL, NULL, NULL, NULL,
 		    flac_decoder_write_cb<A>, NULL, flac_decoder_error_cb,
