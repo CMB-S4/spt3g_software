@@ -12,7 +12,7 @@ def get_function_signature(f, replacement_kwargs = None):
      the ones in replacement_kwargs
     
     '''
-    args = inspect.getargspec(f)
+    args = inspect.getfullargspec(f)
     name = f.__name__
     #ereh sdrawkcab si gnihtyreve
     if not args.args is None:
