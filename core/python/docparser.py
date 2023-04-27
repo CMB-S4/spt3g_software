@@ -48,7 +48,7 @@ def get_doc_for_module(module_path, include_link_list = True):
 
     def format_object(modname, x):
         name = '%s.%s' % (modname, x)
-        return '\n.. _%s:\n\n%s\n%s\n' % (name, name, '_' * len(name))
+        return '\n.. _%s:\n\n%s\n%s\n' % (name, name, '-' * len(name))
     def format_name(modname, x):
         return '\n.. _%s.%s:\n\n**%s.%s**\n' % (modname, x, modname, x)
     def format_arguments(s0,s1):
