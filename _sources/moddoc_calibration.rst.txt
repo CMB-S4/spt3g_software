@@ -21,7 +21,7 @@ Frame Objects in spt3g.calibration
 .. _spt3g.calibration.BolometerProperties:
 
 spt3g.calibration.BolometerProperties
-_____________________________________
+-------------------------------------
 
 Physical bolometer properties, such as detector angular offsets. Does not include tuning-dependent properties of the detectors.
 
@@ -59,7 +59,7 @@ Physical bolometer properties, such as detector angular offsets. Does not includ
 .. _spt3g.calibration.BolometerPropertiesMap:
 
 spt3g.calibration.BolometerPropertiesMap
-________________________________________
+----------------------------------------
 
 Container for bolometer properties for focal plane, mapping logical bolometer IDs to their physical properties.
 
@@ -182,7 +182,7 @@ Container for bolometer properties for focal plane, mapping logical bolometer ID
 .. _spt3g.calibration.PointingProperties:
 
 spt3g.calibration.PointingProperties
-____________________________________
+------------------------------------
 
 Pointing model parameters to be used for offline pointing corrections.
 
@@ -208,7 +208,7 @@ Pointing model parameters to be used for offline pointing corrections.
 .. _spt3g.calibration.PointingPropertiesMap:
 
 spt3g.calibration.PointingPropertiesMap
-_______________________________________
+---------------------------------------
 
 Container for pointing model parameters for offline pointing.
 

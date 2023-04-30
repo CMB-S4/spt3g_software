@@ -18,7 +18,7 @@ Frame Objects in spt3g.gcp
 .. _spt3g.gcp.ACUStatus:
 
 spt3g.gcp.ACUStatus
-___________________
+-------------------
 
 ACU Status information, as reported by the ACU
 
@@ -62,7 +62,7 @@ ACU Status information, as reported by the ACU
 .. _spt3g.gcp.ACUStatusVector:
 
 spt3g.gcp.ACUStatusVector
-_________________________
+-------------------------
 
 Array of ACUStatus objects, usually time-ordered
 
@@ -92,7 +92,7 @@ Array of ACUStatus objects, usually time-ordered
 .. _spt3g.gcp.TrackerPointing:
 
 spt3g.gcp.TrackerPointing
-_________________________
+-------------------------
 
 GCP Tracker Pointing
 
@@ -146,7 +146,7 @@ GCP Tracker Pointing
 .. _spt3g.gcp.TrackerStatus:
 
 spt3g.gcp.TrackerStatus
-_______________________
+-----------------------
 
 GCP Tracker Status
 

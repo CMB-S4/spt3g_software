@@ -30,7 +30,7 @@ Frame Objects in spt3g.dfmux
 .. _spt3g.dfmux.DfMuxBoardSamples:
 
 spt3g.dfmux.DfMuxBoardSamples
-_____________________________
+-----------------------------
 
 Container structure for samples from modules on one board, mapping 0-indexed module IDs to a dfmux.DfMuxSample.
 
@@ -163,7 +163,7 @@ Container structure for samples from modules on one board, mapping 0-indexed mod
 .. _spt3g.dfmux.DfMuxChannelMapping:
 
 spt3g.dfmux.DfMuxChannelMapping
-_______________________________
+-------------------------------
 
 Bolometer wiring information. Module and channel IDs are stored zero-indexed, but be aware that they often printed one-indexed for compatibility with pydfmux.
 
@@ -193,7 +193,7 @@ Bolometer wiring information. Module and channel IDs are stored zero-indexed, bu
 .. _spt3g.dfmux.DfMuxHousekeepingMap:
 
 spt3g.dfmux.DfMuxHousekeepingMap
-________________________________
+--------------------------------
 
 Container structure for housekeeping data from all DfMux boards, indexed by board serial number.
 
@@ -316,7 +316,7 @@ Container structure for housekeeping data from all DfMux boards, indexed by boar
 .. _spt3g.dfmux.DfMuxMetaSample:
 
 spt3g.dfmux.DfMuxMetaSample
-___________________________
+---------------------------
 
 Container structure for coincident samples from all boards. Individual board data, stored in dfmux.DfMuxBoardSamples classes, is contained indexed by board serial number.
 
@@ -437,7 +437,7 @@ Container structure for coincident samples from all boards. Individual board dat
 .. _spt3g.dfmux.DfMuxSample:
 
 spt3g.dfmux.DfMuxSample
-_______________________
+-----------------------
 
 Samples from all channels on one readout module, stored with I and Q interleaved, such that the first element is channel 1 I, followed by channel 1 Q, followed by channel 2 I, etc.
 
@@ -455,7 +455,7 @@ Samples from all channels on one readout module, stored with I and Q interleaved
 .. _spt3g.dfmux.DfMuxWiringMap:
 
 spt3g.dfmux.DfMuxWiringMap
-__________________________
+--------------------------
 
 Mapping from logical detector ID string (same as used in timestreams) to wiring information (the board, module, and channel to which a given detector is connected)
 
@@ -578,7 +578,7 @@ Mapping from logical detector ID string (same as used in timestreams) to wiring 
 .. _spt3g.dfmux.HkBoardInfo:
 
 spt3g.dfmux.HkBoardInfo
-_______________________
+-----------------------
 
 Mux board status. Includes both configuration and sensor readings for board generic quantities and a list of quantities for the mezzanines.
 
@@ -614,7 +614,7 @@ Mux board status. Includes both configuration and sensor readings for board gene
 .. _spt3g.dfmux.HkChannelInfo:
 
 spt3g.dfmux.HkChannelInfo
-_________________________
+-------------------------
 
 Mux channel status (configuration and sensors). Usually a part of an HkModuleInfo.
 
@@ -662,7 +662,7 @@ Mux channel status (configuration and sensors). Usually a part of an HkModuleInf
 .. _spt3g.dfmux.HkMezzanineInfo:
 
 spt3g.dfmux.HkMezzanineInfo
-___________________________
+---------------------------
 
 Mux mezzanine status
 
@@ -704,7 +704,7 @@ Mux mezzanine status
 .. _spt3g.dfmux.HkModuleInfo:
 
 spt3g.dfmux.HkModuleInfo
-________________________
+------------------------
 
 Mux module status
 

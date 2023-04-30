@@ -167,7 +167,7 @@ Frame Objects in spt3g.maps
 .. _spt3g.maps.FlatSkyMap:
 
 spt3g.maps.FlatSkyMap
-_____________________
+---------------------
 
 FlatSkyMap is a G3SkyMap with the extra meta information about the particular flat sky projection included.  In practice it behaves (mostly) like a 2d numpy array.  The pixels are normally indexed with an 1d pixel index.  If you find that you need numpy functionality from a FlatSkyMap, e.g. for slicing across the two dimensions, you can access a numpy representation of the map using `np.asarray(m)`. This does not copy the data, so any changes to the resulting array will affect the data stored in the map.  Alternatively, you can use 2d slice indexing directly on the map to access a copy of the data with the coordinate representation intact.  The latter method is most efficient for extracting small patches from sparse maps.
 
@@ -299,7 +299,7 @@ FlatSkyMap is a G3SkyMap with the extra meta information about the particular fl
 .. _spt3g.maps.G3SkyMap:
 
 spt3g.maps.G3SkyMap
-___________________
+-------------------
 
 Base class for 1- and 2-D skymaps of various projections. Usually you want a subclass of this (e.g. FlatSkyMap) rather than using it directly.
 
@@ -572,7 +572,7 @@ Base class for 1- and 2-D skymaps of various projections. Usually you want a sub
 .. _spt3g.maps.G3SkyMapMask:
 
 spt3g.maps.G3SkyMapMask
-_______________________
+-----------------------
 
 Boolean mask of a sky map. Set pixels to use to true, pixels to ignore to false. If use_data set in contrast, mask initialized to true where input map is non-zero; otherwise, all elements are initialized to zero.  Use zero_nans or zero_infs to exclude nan or inf elements from the mask.
 
@@ -655,7 +655,7 @@ Boolean mask of a sky map. Set pixels to use to true, pixels to ignore to false.
 .. _spt3g.maps.G3SkyMapWeights:
 
 spt3g.maps.G3SkyMapWeights
-__________________________
+--------------------------
 
 Polarized (Mueller matrix) or unpolarized (scalar) map pixel weights.
 
@@ -761,7 +761,7 @@ Polarized (Mueller matrix) or unpolarized (scalar) map pixel weights.
 .. _spt3g.maps.HealpixSkyMap:
 
 spt3g.maps.HealpixSkyMap
-________________________
+------------------------
 
 HealpixSkyMap is a G3SkyMap with the extra meta information about the particular Healpix pixelization used.  In practice it behaves (mostly) like a 1d numpy array.  If you find that you need numpy functionality from a HealpixSkyMap, e.g. for slicing across the array, you can access a numpy representation of the map using `np.asarray(m)`. This does not copy the data, so any changes to the resulting array will affect the data stored in the map.
 

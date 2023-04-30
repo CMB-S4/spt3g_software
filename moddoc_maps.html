@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 
 <html lang="en">
@@ -155,7 +154,9 @@
 <li><p><a class="reference internal" href="#spt3g-maps-g3skymapweights">spt3g.maps.G3SkyMapWeights</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-healpixskymap">spt3g.maps.HealpixSkyMap</a></p></li>
 </ul>
-<p id="spt3g-maps-flatskymap">FlatSkyMap is a G3SkyMap with the extra meta information about the particular flat sky projection included.  In practice it behaves (mostly) like a 2d numpy array.  The pixels are normally indexed with an 1d pixel index.  If you find that you need numpy functionality from a FlatSkyMap, e.g. for slicing across the two dimensions, you can access a numpy representation of the map using <cite>np.asarray(m)</cite>. This does not copy the data, so any changes to the resulting array will affect the data stored in the map.  Alternatively, you can use 2d slice indexing directly on the map to access a copy of the data with the coordinate representation intact.  The latter method is most efficient for extracting small patches from sparse maps.</p>
+<section id="spt3g-maps-flatskymap">
+<span id="id1"></span><h3>spt3g.maps.FlatSkyMap<a class="headerlink" href="#spt3g-maps-flatskymap" title="Permalink to this heading">¶</a></h3>
+<p>FlatSkyMap is a G3SkyMap with the extra meta information about the particular flat sky projection included.  In practice it behaves (mostly) like a 2d numpy array.  The pixels are normally indexed with an 1d pixel index.  If you find that you need numpy functionality from a FlatSkyMap, e.g. for slicing across the two dimensions, you can access a numpy representation of the map using <cite>np.asarray(m)</cite>. This does not copy the data, so any changes to the resulting array will affect the data stored in the map.  Alternatively, you can use 2d slice indexing directly on the map to access a copy of the data with the coordinate representation intact.  The latter method is most efficient for extracting small patches from sparse maps.</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">FlatSkyMap(</span> <span class="pre">(FlatSkyMap)arg2)</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">FlatSkyMap(</span> <span class="pre">(int)x_len,</span> <span class="pre">(int)y_len,</span> <span class="pre">(float)res</span> <span class="pre">[,</span> <span class="pre">(bool)weighted=True</span> <span class="pre">[,</span> <span class="pre">(MapProjection)proj=spt3g.maps.MapProjection.ProjNone</span> <span class="pre">[,</span> <span class="pre">(float)alpha_center=0</span> <span class="pre">[,</span> <span class="pre">(float)delta_center=0</span> <span class="pre">[,</span> <span class="pre">(MapCoordReference)coord_ref=spt3g.maps.MapCoordReference.Equatorial</span> <span class="pre">[,</span> <span class="pre">(G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.Tcmb</span> <span class="pre">[,</span> <span class="pre">(MapPolType)pol_type=spt3g.maps.MapPolType.none</span> <span class="pre">[,</span> <span class="pre">(float)x_res=nan</span> <span class="pre">[,</span> <span class="pre">(float)x_center=nan</span> <span class="pre">[,</span> <span class="pre">(float)y_center=nan</span> <span class="pre">[,</span> <span class="pre">(bool)flat_pol=False</span> <span class="pre">[,</span> <span class="pre">(MapPolConv)pol_conv=spt3g.maps.MapPolConv.none]]]]]]]]]]]])</span></code></p>
@@ -238,7 +239,10 @@
 <dt><code class="docutils literal notranslate"><span class="pre">reshape(</span> <span class="pre">(FlatSkyMap)arg1,</span> <span class="pre">(int)width,</span> <span class="pre">(int)height</span> <span class="pre">[,</span> <span class="pre">(float)fill=0])</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMap</span> <span class="pre">:</span></code></dt><dd><p>Returns a map of shape (width, height) containing the parent map centered within it.  The angular location of each pixel on the sky is maintained.  Surrounding empty pixels can be optionally filled.</p>
 </dd>
 </dl>
-<p id="spt3g-maps-g3skymap">Base class for 1- and 2-D skymaps of various projections. Usually you want a subclass of this (e.g. FlatSkyMap) rather than using it directly.</p>
+</section>
+<section id="spt3g-maps-g3skymap">
+<span id="id2"></span><h3>spt3g.maps.G3SkyMap<a class="headerlink" href="#spt3g-maps-g3skymap" title="Permalink to this heading">¶</a></h3>
+<p>Base class for 1- and 2-D skymaps of various projections. Usually you want a subclass of this (e.g. FlatSkyMap) rather than using it directly.</p>
 <dl class="simple">
 <dt><em>Constructors:</em></dt><dd><p>Raises an exception
 This class cannot be instantiated from Python</p>
@@ -394,7 +398,10 @@ This class cannot be instantiated from Python</p>
 <p><code class="docutils literal notranslate"><span class="pre">isnan(</span> <span class="pre">(G3SkyMap)arg1</span> <span class="pre">[,</span> <span class="pre">(G3SkyMapMask)where=None])</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMapMask</span></code></p>
 <p id="spt3g-maps-g3skymap-isfinite"><strong>spt3g.maps.G3SkyMap.isfinite</strong></p>
 <p><code class="docutils literal notranslate"><span class="pre">isfinite(</span> <span class="pre">(G3SkyMap)arg1</span> <span class="pre">[,</span> <span class="pre">(G3SkyMapMask)where=None])</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMapMask</span></code></p>
-<p id="spt3g-maps-g3skymapmask">Boolean mask of a sky map. Set pixels to use to true, pixels to ignore to false. If use_data set in contrast, mask initialized to true where input map is non-zero; otherwise, all elements are initialized to zero.  Use zero_nans or zero_infs to exclude nan or inf elements from the mask.</p>
+</section>
+<section id="spt3g-maps-g3skymapmask">
+<span id="id3"></span><h3>spt3g.maps.G3SkyMapMask<a class="headerlink" href="#spt3g-maps-g3skymapmask" title="Permalink to this heading">¶</a></h3>
+<p>Boolean mask of a sky map. Set pixels to use to true, pixels to ignore to false. If use_data set in contrast, mask initialized to true where input map is non-zero; otherwise, all elements are initialized to zero.  Use zero_nans or zero_infs to exclude nan or inf elements from the mask.</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3SkyMapMask(</span> <span class="pre">(G3SkyMapMask)arg2)</span></code></p>
 <dl class="simple">
@@ -449,7 +456,10 @@ This class cannot be instantiated from Python</p>
 <dt><code class="docutils literal notranslate"><span class="pre">to_map(</span> <span class="pre">(G3SkyMapMask)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMap</span> <span class="pre">:</span></code></dt><dd><p>Create a skymap with data set to the contents of this mask (1.0 where True, 0.0 where False), which can be useful for plotting.</p>
 </dd>
 </dl>
-<p id="spt3g-maps-g3skymapweights">Polarized (Mueller matrix) or unpolarized (scalar) map pixel weights.</p>
+</section>
+<section id="spt3g-maps-g3skymapweights">
+<span id="id4"></span><h3>spt3g.maps.G3SkyMapWeights<a class="headerlink" href="#spt3g-maps-g3skymapweights" title="Permalink to this heading">¶</a></h3>
+<p>Polarized (Mueller matrix) or unpolarized (scalar) map pixel weights.</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3SkyMapWeights()</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">G3SkyMapWeights(</span> <span class="pre">(G3SkyMapWeights)arg2)</span></code></p>
@@ -515,7 +525,10 @@ This class cannot be instantiated from Python</p>
 <dt><code class="docutils literal notranslate"><span class="pre">clone(</span> <span class="pre">(G3SkyMapWeights)arg1</span> <span class="pre">[,</span> <span class="pre">(bool)copy_data=True])</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMapWeights</span> <span class="pre">:</span></code></dt><dd><p>Return weights of the same type, populated with a copy of the data if the argument is true (default), empty otherwise.</p>
 </dd>
 </dl>
-<p id="spt3g-maps-healpixskymap">HealpixSkyMap is a G3SkyMap with the extra meta information about the particular Healpix pixelization used.  In practice it behaves (mostly) like a 1d numpy array.  If you find that you need numpy functionality from a HealpixSkyMap, e.g. for slicing across the array, you can access a numpy representation of the map using <cite>np.asarray(m)</cite>. This does not copy the data, so any changes to the resulting array will affect the data stored in the map.</p>
+</section>
+<section id="spt3g-maps-healpixskymap">
+<span id="id5"></span><h3>spt3g.maps.HealpixSkyMap<a class="headerlink" href="#spt3g-maps-healpixskymap" title="Permalink to this heading">¶</a></h3>
+<p>HealpixSkyMap is a G3SkyMap with the extra meta information about the particular Healpix pixelization used.  In practice it behaves (mostly) like a 1d numpy array.  If you find that you need numpy functionality from a HealpixSkyMap, e.g. for slicing across the array, you can access a numpy representation of the map using <cite>np.asarray(m)</cite>. This does not copy the data, so any changes to the resulting array will affect the data stored in the map.</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">HealpixSkyMap(</span> <span class="pre">(HealpixSkyMap)arg2)</span></code></p>
 <dl class="simple">
@@ -543,6 +556,7 @@ This class cannot be instantiated from Python</p>
 <dt><code class="docutils literal notranslate"><span class="pre">nonzero_pixels(</span> <span class="pre">(HealpixSkyMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">tuple</span> <span class="pre">:</span></code></dt><dd><p>Returns a list of the indices of the non-zero pixels in the map and a list of the values of those non-zero pixels.</p>
 </dd>
 </dl>
+</section>
 </section>
 <section id="modules-in-spt3g-maps">
 <h2>Modules in spt3g.maps<a class="headerlink" href="#modules-in-spt3g-maps" title="Permalink to this heading">¶</a></h2>
@@ -1455,7 +1469,14 @@ vector of them) specified as a (longitude, latitude) pair.</p>
 <li><a class="reference internal" href="#map-frames-and-pipelines">Map Frames and Pipelines</a></li>
 <li><a class="reference internal" href="#flat-sky-map-projections">Flat Sky Map Projections</a></li>
 <li><a class="reference internal" href="#flat-sky-map-manipulation">Flat Sky Map Manipulation</a></li>
-<li><a class="reference internal" href="#frame-objects-in-spt3g-maps">Frame Objects in spt3g.maps</a></li>
+<li><a class="reference internal" href="#frame-objects-in-spt3g-maps">Frame Objects in spt3g.maps</a><ul>
+<li><a class="reference internal" href="#spt3g-maps-flatskymap">spt3g.maps.FlatSkyMap</a></li>
+<li><a class="reference internal" href="#spt3g-maps-g3skymap">spt3g.maps.G3SkyMap</a></li>
+<li><a class="reference internal" href="#spt3g-maps-g3skymapmask">spt3g.maps.G3SkyMapMask</a></li>
+<li><a class="reference internal" href="#spt3g-maps-g3skymapweights">spt3g.maps.G3SkyMapWeights</a></li>
+<li><a class="reference internal" href="#spt3g-maps-healpixskymap">spt3g.maps.HealpixSkyMap</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#modules-in-spt3g-maps">Modules in spt3g.maps</a></li>
 <li><a class="reference internal" href="#functions-in-spt3g-maps">Functions in spt3g.maps</a></li>
 </ul>
@@ -1512,7 +1533,7 @@ vector of them) specified as a (longitude, latitude) pair.</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright .
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.1.3.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.0.0.
     </div>
   </body>
 </html>

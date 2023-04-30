@@ -78,7 +78,7 @@ Frame Objects in spt3g.core
 .. _spt3g.core.G3Bool:
 
 spt3g.core.G3Bool
-_________________
+-----------------
 
 Serializable boolean type
 
@@ -93,7 +93,7 @@ Serializable boolean type
 .. _spt3g.core.G3Double:
 
 spt3g.core.G3Double
-___________________
+-------------------
 
 Serializable double
 
@@ -108,7 +108,7 @@ Serializable double
 .. _spt3g.core.G3FrameObject:
 
 spt3g.core.G3FrameObject
-________________________
+------------------------
 
 Base class for objects that can be added to a frame. All such must inherit from G3FrameObject in C++. Pickle hooks are overridden to use the fast internal serialization
 
@@ -138,7 +138,7 @@ Base class for objects that can be added to a frame. All such must inherit from 
 .. _spt3g.core.G3Int:
 
 spt3g.core.G3Int
-________________
+----------------
 
 Serializable integer type
 
@@ -153,7 +153,7 @@ Serializable integer type
 .. _spt3g.core.G3MapDouble:
 
 spt3g.core.G3MapDouble
-______________________
+----------------------
 
 Mapping from strings to floats
 
@@ -276,7 +276,7 @@ Mapping from strings to floats
 .. _spt3g.core.G3MapFrameObject:
 
 spt3g.core.G3MapFrameObject
-___________________________
+---------------------------
 
 Mapping strings to generic frame objects. Can lead to a variety of paradoxes; please avoid general use of this class.
 
@@ -399,7 +399,7 @@ Mapping strings to generic frame objects. Can lead to a variety of paradoxes; pl
 .. _spt3g.core.G3MapInt:
 
 spt3g.core.G3MapInt
-___________________
+-------------------
 
 Mapping from strings to ints.
 
@@ -522,7 +522,7 @@ Mapping from strings to ints.
 .. _spt3g.core.G3MapMapDouble:
 
 spt3g.core.G3MapMapDouble
-_________________________
+-------------------------
 
 Mapping from strings to maps of strings to floats. For example, m['Det1']['Det2'] = 5.3
 
@@ -645,7 +645,7 @@ Mapping from strings to maps of strings to floats. For example, m['Det1']['Det2'
 .. _spt3g.core.G3MapString:
 
 spt3g.core.G3MapString
-______________________
+----------------------
 
 Mapping from strings to strings.
 
@@ -768,7 +768,7 @@ Mapping from strings to strings.
 .. _spt3g.core.G3MapVectorBool:
 
 spt3g.core.G3MapVectorBool
-__________________________
+--------------------------
 
 Mapping from strings to arrays of booleans.
 
@@ -891,7 +891,7 @@ Mapping from strings to arrays of booleans.
 .. _spt3g.core.G3MapVectorComplexDouble:
 
 spt3g.core.G3MapVectorComplexDouble
-___________________________________
+-----------------------------------
 
 Mapping from strings to arrays of complex numbers.
 
@@ -1014,7 +1014,7 @@ Mapping from strings to arrays of complex numbers.
 .. _spt3g.core.G3MapVectorDouble:
 
 spt3g.core.G3MapVectorDouble
-____________________________
+----------------------------
 
 Mapping from strings to arrays of floats.
 
@@ -1137,7 +1137,7 @@ Mapping from strings to arrays of floats.
 .. _spt3g.core.G3MapVectorInt:
 
 spt3g.core.G3MapVectorInt
-_________________________
+-------------------------
 
 Mapping from strings to arrays of integers.
 
@@ -1260,7 +1260,7 @@ Mapping from strings to arrays of integers.
 .. _spt3g.core.G3MapVectorString:
 
 spt3g.core.G3MapVectorString
-____________________________
+----------------------------
 
 Mapping from strings to lists of strings.
 
@@ -1383,7 +1383,7 @@ Mapping from strings to lists of strings.
 .. _spt3g.core.G3MapVectorTime:
 
 spt3g.core.G3MapVectorTime
-__________________________
+--------------------------
 
 Mapping from strings to lists of G3 time objects.
 
@@ -1506,7 +1506,7 @@ Mapping from strings to lists of G3 time objects.
 .. _spt3g.core.G3MapVectorVectorString:
 
 spt3g.core.G3MapVectorVectorString
-__________________________________
+----------------------------------
 
 Mapping from strings to lists of lists of strings.
 
@@ -1629,7 +1629,7 @@ Mapping from strings to lists of lists of strings.
 .. _spt3g.core.G3ModuleConfig:
 
 spt3g.core.G3ModuleConfig
-_________________________
+-------------------------
 
 Stored configuration of a pipeline module or segment
 
@@ -1653,7 +1653,7 @@ Stored configuration of a pipeline module or segment
 .. _spt3g.core.G3PipelineInfo:
 
 spt3g.core.G3PipelineInfo
-_________________________
+-------------------------
 
 Stored configuration of a pipeline, including software version information
 
@@ -1691,7 +1691,7 @@ Stored configuration of a pipeline, including software version information
 .. _spt3g.core.G3String:
 
 spt3g.core.G3String
-___________________
+-------------------
 
 Serializable string
 
@@ -1706,7 +1706,7 @@ Serializable string
 .. _spt3g.core.G3Time:
 
 spt3g.core.G3Time
-_________________
+-----------------
 
 UTC Time
 
@@ -1754,7 +1754,7 @@ UTC Time
 .. _spt3g.core.G3TimesampleMap:
 
 spt3g.core.G3TimesampleMap
-__________________________
+--------------------------
 
 Mapping from string to vectors of data, with an associated vector of timestamps.  This object is for storing multiple co-sampled vectors with a single set of (irregular) timestamps.
 
@@ -1903,7 +1903,7 @@ Mapping from string to vectors of data, with an associated vector of timestamps.
 .. _spt3g.core.G3Timestream:
 
 spt3g.core.G3Timestream
-_______________________
+-----------------------
 
 Detector timestream. Includes a units field and start and stop times. Can otherwise be treated as a numpy array with a float64 dtype. Conversions to and from such arrays (e.g. with numpy.asarray) are fast. Note that a numpy array constructed from a timestream will share a memory buffer: changes to the array affect the timestream and vice versa. Most binary timestream arithmetic operations (+, -) check that the units and start/stop times are congruent.
 
@@ -1956,7 +1956,7 @@ Detector timestream. Includes a units field and start and stop times. Can otherw
 .. _spt3g.core.G3TimestreamMap:
 
 spt3g.core.G3TimestreamMap
-__________________________
+--------------------------
 
 Collection of timestreams indexed by logical detector ID
 
@@ -1965,7 +1965,7 @@ Collection of timestreams indexed by logical detector ID
 	
 	``G3TimestreamMap( (G3TimestreamMap)arg2)``
 	
-	``G3TimestreamMap( (StringVector)keys, (object)data [, (G3Time)start=<spt3g.core.G3Time object at 0x7f0e06016eb0> [, (G3Time)stop=<spt3g.core.G3Time object at 0x7f0e06016f20> [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None [, (int)compression_level=0 [, (bool)copy_data=True]]]]])`` :
+	``G3TimestreamMap( (StringVector)keys, (object)data [, (G3Time)start=<spt3g.core.G3Time object at 0x7f6498c2feb0> [, (G3Time)stop=<spt3g.core.G3Time object at 0x7f6498c2ff20> [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None [, (int)compression_level=0 [, (bool)copy_data=True]]]]])`` :
 	    Create a timestream map from a numpy array or other numeric python iterable. Each row of the 2D input array will correspond to a single timestream, with the key set to the correspondingly-indexed entry of <keys>. If <copy_data> is True (default), the data will be copied into the output data structure. If False, the timestream map will provide a view into the given numpy array.
 	
 	``G3TimestreamMap( (list)arg2)`` :
@@ -2118,7 +2118,7 @@ Collection of timestreams indexed by logical detector ID
 .. _spt3g.core.G3TimestreamQuat:
 
 spt3g.core.G3TimestreamQuat
-___________________________
+---------------------------
 
 Timestream of quaternions. Identical to a G3VectorQuat except for the addition of start and stop times.
 
@@ -2146,7 +2146,7 @@ Timestream of quaternions. Identical to a G3VectorQuat except for the addition o
 .. _spt3g.core.G3VectorBool:
 
 spt3g.core.G3VectorBool
-_______________________
+-----------------------
 
 List of booleans.
 
@@ -2176,7 +2176,7 @@ List of booleans.
 .. _spt3g.core.G3VectorComplexDouble:
 
 spt3g.core.G3VectorComplexDouble
-________________________________
+--------------------------------
 
 Array of complex floats. Treat as a serializable version of numpy.array(dtype=complex128). Can be efficiently cast to and from numpy arrays.
 
@@ -2206,7 +2206,7 @@ Array of complex floats. Treat as a serializable version of numpy.array(dtype=co
 .. _spt3g.core.G3VectorDouble:
 
 spt3g.core.G3VectorDouble
-_________________________
+-------------------------
 
 Array of floats. Treat as a serializable version of numpy.array(dtype=float64). Can be efficiently cast to and from numpy arrays.
 
@@ -2236,7 +2236,7 @@ Array of floats. Treat as a serializable version of numpy.array(dtype=float64). 
 .. _spt3g.core.G3VectorFrameObject:
 
 spt3g.core.G3VectorFrameObject
-______________________________
+------------------------------
 
 List of generic frame objects. Can lead to paradoxes; avoid use of this class unless you are sure you need it.
 
@@ -2266,7 +2266,7 @@ List of generic frame objects. Can lead to paradoxes; avoid use of this class un
 .. _spt3g.core.G3VectorInt:
 
 spt3g.core.G3VectorInt
-______________________
+----------------------
 
 Array of integers. Treat as a serializable version of numpy.array(dtype=int64). Can be efficiently cast to and from numpy arrays.
 
@@ -2296,7 +2296,7 @@ Array of integers. Treat as a serializable version of numpy.array(dtype=int64). 
 .. _spt3g.core.G3VectorQuat:
 
 spt3g.core.G3VectorQuat
-_______________________
+-----------------------
 
 List of quaternions. Convertible to a 4xN numpy array. Arithmetic operations on this object are fast and provide results given proper quaternion math rather than element-by-element numpy-ish results.
 
@@ -2326,7 +2326,7 @@ List of quaternions. Convertible to a 4xN numpy array. Arithmetic operations on 
 .. _spt3g.core.G3VectorString:
 
 spt3g.core.G3VectorString
-_________________________
+-------------------------
 
 List of strings.
 
@@ -2356,7 +2356,7 @@ List of strings.
 .. _spt3g.core.G3VectorTime:
 
 spt3g.core.G3VectorTime
-_______________________
+-----------------------
 
 List of times.
 
@@ -2386,7 +2386,7 @@ List of times.
 .. _spt3g.core.G3VectorUnsignedChar:
 
 spt3g.core.G3VectorUnsignedChar
-_______________________________
+-------------------------------
 
 List of 8-bit integers
 
@@ -2416,7 +2416,7 @@ List of 8-bit integers
 .. _spt3g.core.G3VectorVectorString:
 
 spt3g.core.G3VectorVectorString
-_______________________________
+-------------------------------
 
 List of lists of strings.
 
