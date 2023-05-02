@@ -26,5 +26,6 @@ Interface to TOAST
 ==================
 
 There is an experimental module (TOASTFiller) that uses MPIAccumulator to fill frame contents after processing in many parallel pipelines into a TOAST TOD object in order to use TOAST's set of parallel timestream algorithms and map-making. Basic functionality is present, but it should be considered in-development at present.
+
 Could not import module spt3g.mpi:
 No module named 'mpi4py'
