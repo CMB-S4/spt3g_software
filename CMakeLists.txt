@@ -161,6 +161,10 @@ add_custom_target(fasttest COMMAND ctest -LE SLOWTEST COMMENT "Running fast test
 configure_file(${CMAKE_SOURCE_DIR}/cmake/test_env.py.in ${CMAKE_BINARY_DIR}/test_env.py @ONLY)
 configure_file(${CMAKE_SOURCE_DIR}/cmake/CTestCustom.cmake.in ${CMAKE_BINARY_DIR}/CTestCustom.cmake @ONLY)
 
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.17)
+	list(APPEND CMAKE_CTEST_ARGUMENTS "--output-on-failure")
+endif(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.17)
+
 # Target for version string
 add_custom_target(version ALL
 	COMMAND sh ${CMAKE_SOURCE_DIR}/cmake/getvers.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}/spt3g/version.py
