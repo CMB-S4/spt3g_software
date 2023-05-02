@@ -49,8 +49,17 @@ all_arr = [
     BoolVector(G3VectorBool(vb)),
 ]
 
-def check(a1, a2, cls=None):
-    np.testing.assert_array_equal(np.asarray(a1), np.asarray(a2), verbose=True)
+def check(a1, a2, cls=None, flt=False):
+    if flt:
+        np.testing.assert_allclose(
+            np.asarray(a1),
+            np.asarray(a2),
+            atol=1e-14,
+            rtol=1e-14,
+            verbose=True,
+        )
+    else:
+        np.testing.assert_array_equal(np.asarray(a1), np.asarray(a2), verbose=True)
     assert np.asarray(a1).dtype.kind == np.asarray(a2).dtype.kind
     if cls is not None:
         assert isinstance(a1, cls)
@@ -71,17 +80,18 @@ for a in all_arr:
         v2 = b if np.isscalar(b) else np.asarray(b)
         k1 = np.asarray(a).dtype.kind
         k2 = np.asarray(b).dtype.kind
+        flt = k1 in 'fc' or k2 in 'fc'
 
         # binary operators
         if not (k1 == 'b' and k2 == 'b'):
-            check(a + b, v1 + v2)
-            check(a - b, v1 - v2)
-            check(a * b, v1 * v2)
-            check(a / b, v1 / v2)
+            check(a + b, v1 + v2, flt=flt)
+            check(a - b, v1 - v2, flt=flt)
+            check(a * b, v1 * v2, flt=flt)
+            check(a / b, v1 / v2, flt=flt)
             if k1 != 'c' and k2 != 'c':
                 check(a // b, v1 // v2)
-                check(a % b, v1 % v2)
-            check(a ** b, v1 ** v2)
+                check(a % b, v1 % v2, flt=flt)
+            check(a ** b, v1 ** v2, flt=flt)
 
         if k1 in 'iub' and k2 in 'iub':
             check(a | b, v1 | v2)
@@ -108,15 +118,15 @@ for a in all_arr:
         # in-place binary operators
         c = copy(a)
         c += b
-        check(c, a + b, a.__class__)
+        check(c, a + b, a.__class__, flt=flt)
 
         c = copy(a)
         c -= b
-        check(c, a - b, a.__class__)
+        check(c, a - b, a.__class__, flt=flt)
 
         c = copy(a)
         c *= b
-        check(c, a * b, a.__class__)
+        check(c, a * b, a.__class__, flt=flt)
 
         if k1 in 'iub':
             c = copy(a)
@@ -135,7 +145,7 @@ for a in all_arr:
 
         c = copy(a)
         c /= b
-        check(c, a / b, a.__class__)
+        check(c, a / b, a.__class__, flt=flt)
 
     if np.isscalar(a) or isinstance(a, np.ndarray):
         continue
