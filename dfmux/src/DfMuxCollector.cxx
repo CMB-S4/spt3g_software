@@ -326,7 +326,8 @@ int DfMuxCollector::BookPacket(struct DfmuxPacket *packet, struct in_addr src)
 	}
 
 	modseq = &sequence_[board_id];
-	mod_id = (le16toh(packet->version) == 4) ? le32toh(packet->channels_per_module) :
+	mod_id = (le16toh(packet->version) == 4) ?
+	  (le32toh(packet->module) * 8 + le32toh(packet->channels_per_module)) :
 	  le32toh(packet->module);
 	seq = modseq->find(mod_id);
 	if (seq != modseq->end()) {
