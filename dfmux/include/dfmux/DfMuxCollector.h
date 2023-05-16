@@ -16,7 +16,9 @@ class DfMuxSamplePacket : public G3FrameObject {
 public:
 	int32_t board;		/* Board serial number */
 	int32_t module;		/* Module number (0-7) */
+	int32_t block;          /* Sub-module block number (0-7) */
 	int32_t nmodules;	/* Total number of modules on board (8) */
+	int32_t nblocks;        /* Total number of blocks per module (8) */
 	DfMuxSamplePtr sample;	/* Pointer to the DfMuxSample */
 };
 

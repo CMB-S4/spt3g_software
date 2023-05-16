@@ -55,8 +55,8 @@ struct DfmuxPacket {
 
 	uint16_t serial; /* zero for V2, filled for V3 */
 
-	uint8_t num_modules;
-	uint8_t channels_per_module; /* this means something else for v4 [hidfmux] firmware */
+	uint8_t num_modules; /* correct for V4 */
+	uint8_t channels_per_module; /* sub-module block in V4 */
 	uint8_t fir_stage;
 	uint8_t module; /* linear; 0-7. don't like it much. */
 
@@ -313,8 +313,9 @@ int DfMuxCollector::BookPacket(struct DfmuxPacket *packet, struct in_addr src)
 		    == board_list_.end()) {
 			struct in_addr i;
 			i.s_addr = listenaddr_;
-			log_debug("Received V3 data for board %d not "
+			log_debug("Received V%d data for board %d not "
 			    "enumerated on listener for interface %s",
+			    le16toh(packet->version),
 			    board_id, inet_ntoa(i));
 			return (-1);
 		}
@@ -359,13 +360,16 @@ int DfMuxCollector::BookPacket(struct DfmuxPacket *packet, struct in_addr src)
 
 	DfMuxSamplePacketPtr outpacket(new DfMuxSamplePacket);
 	outpacket->board = board_id;
-	outpacket->module = (le16toh(packet->version) == 4) ?
-	  le32toh(packet->channels_per_module) : le32toh(packet->module);
+	outpacket->module = le32toh(packet->module);
+	outpacket->block = (le16toh(packet->version) == 4) ?
+	  le32toh(packet->channels_per_module) : 0;
 	outpacket->sample = sample;
 
 	// Work around bug in IceBoard firmware. You always get 8 modules'
 	// worth of packets, no matter what packet->num_modules says.
-	outpacket->nmodules = 8;
+	// (firmware V3 and below)
+	outpacket->nmodules = (le16toh(packet->version) == 4) ? le32toh(packet->num_modules) : 8;
+	outpacket->nblocks = (le16toh(packet->version) == 4) ? 8 : 1;
 
 	builder_->AsyncDatum(timecode, outpacket);
 

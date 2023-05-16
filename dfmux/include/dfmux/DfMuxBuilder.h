@@ -15,13 +15,14 @@
  */
 struct DfMuxBoardSamples : public G3FrameObject, public std::map<int32_t, DfMuxSamplePtr> {
 	size_t nmodules; // Total number of modules expected from this board
+	size_t nblocks; // Total number of sub-module blocks expected from this board
 	
-	bool Complete() const { return (size() == nmodules); };
+	bool Complete() const { return (size() == nmodules * nblocks); };
 	template <class A> void serialize(A &ar, unsigned v);
 };
 
 G3_POINTERS(DfMuxBoardSamples);
-G3_SERIALIZABLE(DfMuxBoardSamples, 1);
+G3_SERIALIZABLE(DfMuxBoardSamples, 2);
 
 /*
  * DfMuxMetaSample: collection of DfMuxBoardSamples, indexed by board serial
