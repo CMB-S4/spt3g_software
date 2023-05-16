@@ -62,7 +62,7 @@ struct DfmuxPacket {
 
 	uint32_t seq; /* incrementing sequence number */
 
-	int32_t s[256]; /* >= largest number of channels we expect */
+	int32_t s[1024]; /* >= largest number of channels we expect */
 	struct RawTimestamp ts;
 } __attribute__((packed));
 
