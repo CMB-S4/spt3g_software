@@ -256,6 +256,7 @@ void DfMuxCollector::Listen(DfMuxCollector *collector)
 	struct DfmuxPacket buf;
 	ssize_t len;
 	size_t target_size;
+	int nchan;
 
 	size_t base_size = sizeof(buf) - sizeof(buf.s);
 	
@@ -264,12 +265,12 @@ void DfMuxCollector::Listen(DfMuxCollector *collector)
 	while (!collector->stop_listening_) {
 		len = recvfrom(collector->fd_, &buf, sizeof(buf), 0,
 		    (struct sockaddr *)&addr, &addrlen);
-		target_size = base_size +
-		    buf.channels_per_module*sizeof(buf.s[0])*2;
+		nchan = (le16toh(buf.version) == 4) ? 1024 : buf.channels_per_module;
+		target_size = base_size + nchan*sizeof(buf.s[0])*2;
 		if (len != target_size) {
 			log_error("Badly-sized packet with %d channels from %s "
 			    "(%zd bytes should be %zd)",
-			    buf.channels_per_module, inet_ntoa(addr.sin_addr),
+			    nchan, inet_ntoa(addr.sin_addr),
 			    len, target_size);
 			continue;
 		}
@@ -304,7 +305,7 @@ int DfMuxCollector::BookPacket(struct DfmuxPacket *packet, struct in_addr src)
 			return (-1);
 		}
 		board_id = id_it->second;
-	} else if (le16toh(packet->version) == 3) {
+	} else if (le16toh(packet->version) == 3 || le16toh(packet->version) == 4) {
 		board_id = le16toh(packet->serial);
 		if (board_list_.size() > 0 &&
 		    std::find(board_list_.begin(), board_list_.end(), board_id)
@@ -345,8 +346,8 @@ int DfMuxCollector::BookPacket(struct DfmuxPacket *packet, struct in_addr src)
 	// to (before or after). Shift them all 1 second forward.
 	timecode += clock_rate_;
 
-	DfMuxSamplePtr sample(new DfMuxSample(timecode,
-	    le32toh(packet->channels_per_module)*2));
+	int nchan = (le16toh(packet->version) == 4) ? 1024 : le32toh(packet->channels_per_module);
+	DfMuxSamplePtr sample(new DfMuxSample(timecode, nchan*2));
 
 	// NB: Bottom 8 bits are zero. Divide by 256 rather than >> 8 to
 	// guarantee sign preservation.
