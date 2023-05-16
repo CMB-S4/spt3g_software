@@ -56,7 +56,7 @@ struct DfmuxPacket {
 	uint16_t serial; /* zero for V2, filled for V3 */
 
 	uint8_t num_modules;
-	uint8_t channels_per_module;
+	uint8_t channels_per_module; /* this means something else for v4 [hidfmux] firmware */
 	uint8_t fir_stage;
 	uint8_t module; /* linear; 0-7. don't like it much. */
 
@@ -361,7 +361,8 @@ int DfMuxCollector::BookPacket(struct DfmuxPacket *packet, struct in_addr src)
 
 	// Work around bug in IceBoard firmware. You always get 8 modules'
 	// worth of packets, no matter what packet->num_modules says.
-	outpacket->nmodules = 8;
+	// version 4 firmware expects only one module (hidfmux)
+	outpacket->nmodules = (le16toh(packet->version) == 4) ? 1 : 8;
 
 	builder_->AsyncDatum(timecode, outpacket);
 
