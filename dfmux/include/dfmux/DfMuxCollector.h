@@ -53,8 +53,8 @@ public:
 	int Stop();	// Stop listening thread
 
 	// Configure iceboard clock rate
-	void SetClockRate(uint64_t rate) { clock_rate_ = rate; };
-	uint64_t GetClockRate() { return clock_rate_; };
+	void SetClockRate(double rate);
+	double GetClockRate() { return clock_rate_; };
 
 private:
 	int SetupUDPSocket(const char *listenaddr);
@@ -73,7 +73,8 @@ private:
 	std::vector<int32_t> board_list_;
 	int fd_;
 	in_addr_t listenaddr_;
-	uint64_t clock_rate_;
+	double clock_rate_;
+	double clock_scale_;
 
 	SET_LOGGER("DfMuxCollector");
 };

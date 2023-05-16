@@ -38,6 +38,7 @@
 #include <dfmux/DfMuxCollector.h>
 
 #include <core/SetThreadName.h>
+#include <core/G3Units.h>
 
 struct RawTimestamp {
 	/* SIGNED types are used here to permit negative numbers during
@@ -68,7 +69,7 @@ struct DfmuxPacket {
 
 // Convert time stamp to a code in IRIG-B ticks (10 ns intervals)
 static int64_t
-RawTimestampToTimeCode(RawTimestamp stamp, uint64_t clock_rate)
+RawTimestampToTimeCode(RawTimestamp stamp, double clock_scale)
 {
 	static __thread int64_t last_code = -1;
 	static __thread RawTimestamp last_stamp;
@@ -96,6 +97,10 @@ RawTimestampToTimeCode(RawTimestamp stamp, uint64_t clock_rate)
 				stamp.y = last_stamp.y;
 		}
 	}
+
+	// fix the subsecond counter if the iceboard is using
+	// an internal clock with a rate other than 100 MHz
+	stamp.ss = htole32(le32toh(stamp.ss) * clock_scale);
 	
 	tm.tm_year = le32toh(stamp.y) + 100 /* tm_year starts in 1900 */;
 	tm.tm_yday = le32toh(stamp.d);
@@ -113,7 +118,7 @@ RawTimestampToTimeCode(RawTimestamp stamp, uint64_t clock_rate)
 	} else {
 		tm.tm_mon = 0;       // Fake out timegm with the 274th of Jan.
 		tm.tm_mday = tm.tm_yday; // since it ignores tm_yday otherwise
-		last_code = clock_rate * int64_t(timegm(&tm));
+		last_code = 100000000LL * int64_t(timegm(&tm));
 		last_code += (uint64_t)le32toh(stamp.ss);
 	}
 
@@ -124,29 +129,39 @@ RawTimestampToTimeCode(RawTimestamp stamp, uint64_t clock_rate)
 
 DfMuxCollector::DfMuxCollector(G3EventBuilderPtr builder,
     std::vector<std::string> hosts) :
-    builder_(builder), success_(false), stop_listening_(false), clock_rate_(100000000LL)
+     builder_(builder), success_(false), stop_listening_(false)
 {
 
+	SetClockRate(100 * G3Units::MHz);
 	success_ = (SetupSCTPSocket(hosts) != 0);
 }
 
 DfMuxCollector::DfMuxCollector(const char *listenaddr,
    G3EventBuilderPtr builder, std::vector<int32_t> board_list) :
     builder_(builder), success_(false), stop_listening_(false),
-    board_list_(board_list), clock_rate_(100000000LL)
+    board_list_(board_list)
 {
+	SetClockRate(100 * G3Units::MHz);
 	success_ = (SetupUDPSocket(listenaddr) != 0);
 }
 
 DfMuxCollector::DfMuxCollector(const char *listenaddr,
     G3EventBuilderPtr builder, std::map<in_addr_t, int32_t> board_serial_map) :
      builder_(builder), success_(false), stop_listening_(false),
-     board_serials_(board_serial_map), clock_rate_(100000000LL)
+     board_serials_(board_serial_map)
 {
 	for (auto i : board_serials_)
 		board_list_.push_back(i.second);
 
+	SetClockRate(100 * G3Units::MHz);
 	success_ = (SetupUDPSocket(listenaddr) != 0);
+}
+
+void DfMuxCollector::SetClockRate(double rate)
+{
+
+  clock_rate_ = rate;
+  clock_scale_ = 100 * G3Units::MHz / clock_rate_;
 }
 
 int DfMuxCollector::SetupUDPSocket(const char *listenaddr)
@@ -344,12 +359,12 @@ int DfMuxCollector::BookPacket(struct DfmuxPacket *packet, struct in_addr src)
 	}
 
 	// Decode packet
-	timecode = RawTimestampToTimeCode(packet->ts, clock_rate_);
+	timecode = RawTimestampToTimeCode(packet->ts, clock_scale_);
 
 	// All times reported by the readout are exactly one second behind,
 	// likely due to a misparsing of which IRIG code the time marker refers
 	// to (before or after). Shift them all 1 second forward.
-	timecode += clock_rate_;
+	timecode += 100000000LL;
 
 	int nchan = (le16toh(packet->version) == 4) ? 128 : le32toh(packet->channels_per_module);
 	DfMuxSamplePtr sample(new DfMuxSample(timecode, nchan*2));
@@ -431,7 +446,7 @@ PYBINDINGS("dfmux")
 	    .def("Start", &DfMuxCollector::Start)
 	    .def("Stop", &DfMuxCollector::Stop)
 	    .add_property("clock_rate", &DfMuxCollector::GetClockRate, &DfMuxCollector::SetClockRate,
-	      "Set the clock rate for the iceboard subseconds timer, e.g. for hidfmux")
+	      "Set the clock rate for the iceboard subseconds counter, e.g. for hidfmux.  Values should be in G3Units of frequency (e.g. 125*core.G3Units.MHz)")
 	;
 }
 
