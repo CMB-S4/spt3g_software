@@ -160,8 +160,8 @@ DfMuxCollector::DfMuxCollector(const char *listenaddr,
 void DfMuxCollector::SetClockRate(double rate)
 {
 
-  clock_rate_ = rate;
-  clock_scale_ = 100 * G3Units::MHz / clock_rate_;
+	clock_rate_ = rate;
+	clock_scale_ = 100 * G3Units::MHz / clock_rate_;
 }
 
 int DfMuxCollector::SetupUDPSocket(const char *listenaddr)
