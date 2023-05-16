@@ -68,7 +68,7 @@ struct DfmuxPacket {
 
 // Convert time stamp to a code in IRIG-B ticks (10 ns intervals)
 static int64_t
-RawTimestampToTimeCode(RawTimestamp stamp)
+RawTimestampToTimeCode(RawTimestamp stamp, uint64_t clock_rate)
 {
 	static __thread int64_t last_code = -1;
 	static __thread RawTimestamp last_stamp;
@@ -113,7 +113,7 @@ RawTimestampToTimeCode(RawTimestamp stamp)
 	} else {
 		tm.tm_mon = 0;       // Fake out timegm with the 274th of Jan.
 		tm.tm_mday = tm.tm_yday; // since it ignores tm_yday otherwise
-		last_code = 100000000LL * int64_t(timegm(&tm));
+		last_code = clock_rate * int64_t(timegm(&tm));
 		last_code += (uint64_t)le32toh(stamp.ss);
 	}
 
@@ -124,7 +124,7 @@ RawTimestampToTimeCode(RawTimestamp stamp)
 
 DfMuxCollector::DfMuxCollector(G3EventBuilderPtr builder,
     std::vector<std::string> hosts) :
-     builder_(builder), success_(false), stop_listening_(false)
+    builder_(builder), success_(false), stop_listening_(false), clock_rate_(100000000LL)
 {
 
 	success_ = (SetupSCTPSocket(hosts) != 0);
@@ -133,7 +133,7 @@ DfMuxCollector::DfMuxCollector(G3EventBuilderPtr builder,
 DfMuxCollector::DfMuxCollector(const char *listenaddr,
    G3EventBuilderPtr builder, std::vector<int32_t> board_list) :
     builder_(builder), success_(false), stop_listening_(false),
-    board_list_(board_list)
+    board_list_(board_list), clock_rate_(100000000LL)
 {
 	success_ = (SetupUDPSocket(listenaddr) != 0);
 }
@@ -141,7 +141,7 @@ DfMuxCollector::DfMuxCollector(const char *listenaddr,
 DfMuxCollector::DfMuxCollector(const char *listenaddr,
     G3EventBuilderPtr builder, std::map<in_addr_t, int32_t> board_serial_map) :
      builder_(builder), success_(false), stop_listening_(false),
-     board_serials_(board_serial_map)
+     board_serials_(board_serial_map), clock_rate_(100000000LL)
 {
 	for (auto i : board_serials_)
 		board_list_.push_back(i.second);
@@ -338,12 +338,12 @@ int DfMuxCollector::BookPacket(struct DfmuxPacket *packet, struct in_addr src)
 	}
 
 	// Decode packet
-	timecode = RawTimestampToTimeCode(packet->ts);
+	timecode = RawTimestampToTimeCode(packet->ts, clock_rate_);
 
 	// All times reported by the readout are exactly one second behind,
 	// likely due to a misparsing of which IRIG code the time marker refers
 	// to (before or after). Shift them all 1 second forward.
-	timecode += 100000000LL;
+	timecode += clock_rate_;
 
 	DfMuxSamplePtr sample(new DfMuxSample(timecode,
 	    le32toh(packet->channels_per_module)*2));
@@ -420,6 +420,8 @@ PYBINDINGS("dfmux")
 	    .def("__init__", bp::make_constructor(make_dfmux_collector_v2_from_dict, bp::default_call_policies(), (bp::arg("interface"), bp::arg("builder"), bp::arg("board_serial_map"))), "Crate a DfMuxCollector that can parse V2 (64x) data. Pass a mapping from board IP address (strings or integers) to serial numbers as the last argument")
 	    .def("Start", &DfMuxCollector::Start)
 	    .def("Stop", &DfMuxCollector::Stop)
+	    .add_property("clock_rate", &DfMuxCollector::GetClockRate, &DfMuxCollector::SetClockRate,
+	      "Set the clock rate for the iceboard subseconds timer, e.g. for hidfmux")
 	;
 }
 
