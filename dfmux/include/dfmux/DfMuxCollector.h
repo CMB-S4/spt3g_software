@@ -19,6 +19,7 @@ public:
 	int32_t block;          /* Sub-module block number (0-7) */
 	int32_t nmodules;	/* Total number of modules on board (8) */
 	int32_t nblocks;        /* Total number of blocks per module (8) */
+	int32_t nchannels;      /* Total number of channels per block (128) */
 	DfMuxSamplePtr sample;	/* Pointer to the DfMuxSample */
 };
 

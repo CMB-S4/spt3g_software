@@ -294,6 +294,7 @@ int LegacyDfMuxCollector::BookPacket(struct DfmuxPacket *packet,
 		outpacket->block = 0;
 		outpacket->nmodules = 4;
 		outpacket->nblocks = 1;
+		outpacket->nchannels = 16;
 
 		builder_->AsyncDatum(timecode, outpacket);
 	}

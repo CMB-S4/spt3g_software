@@ -325,6 +325,7 @@ GCPMuxDataDecoder::Process(G3FramePtr frame, std::deque<G3FramePtr> &out_queue)
 		for (auto j = metasample->begin(); j != metasample->end(); j++) {
 			j->second.nmodules = j->second.size();
 			j->second.nblocks = 1;
+			j->second.nchannels = max_channel_count_;
 		}
 
 		// Process boardValid: delete boards that are invalid. This

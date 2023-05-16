@@ -16,6 +16,7 @@
 struct DfMuxBoardSamples : public G3FrameObject, public std::map<int32_t, DfMuxSamplePtr> {
 	size_t nmodules; // Total number of modules expected from this board
 	size_t nblocks; // Total number of sub-module blocks expected from this board
+	size_t nchannels; // Total number of channels per block expected from this board
 	
 	bool Complete() const { return (size() == nmodules * nblocks); };
 	template <class A> void serialize(A &ar, unsigned v);

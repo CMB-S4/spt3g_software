@@ -386,6 +386,7 @@ int DfMuxCollector::BookPacket(struct DfmuxPacket *packet, struct in_addr src)
 	// (firmware V3 and below)
 	outpacket->nmodules = (le16toh(packet->version) == 4) ? le32toh(packet->num_modules) : 8;
 	outpacket->nblocks = (le16toh(packet->version) == 4) ? 8 : 1;
+	outpacket->nchannels = nchan;
 
 	builder_->AsyncDatum(timecode, outpacket);
 

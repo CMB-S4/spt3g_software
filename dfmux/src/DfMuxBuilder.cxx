@@ -20,10 +20,13 @@ template <class A> void DfMuxBoardSamples::serialize(A &ar, const unsigned v)
 	ar & make_nvp("samples", base_class<std::map<int, DfMuxSamplePtr> >(this));
 	ar & make_nvp("nmodules", nmodules);
 
-	if (v > 1)
+	if (v > 1) {
 		ar & make_nvp("nblocks", nblocks);
-	else
+		ar & make_nvp("nchannels", nchannels);
+	} else {
 		nblocks = 1;
+		nchannels = 128;
+	}
 }
 
 G3_SERIALIZABLE_CODE(DfMuxBoardSamples);
@@ -135,6 +138,7 @@ void DfMuxBuilder::ProcessNewData()
 	(*sample->sample)[pkt->board][idx] = pkt->sample;
 	(*sample->sample)[pkt->board].nmodules = pkt->nmodules;
 	(*sample->sample)[pkt->board].nblocks = pkt->nblocks;
+	(*sample->sample)[pkt->board].nchannels = pkt->nchannels;
 	
 	while (oqueue_.size() > 0 && oqueue_.front().sample->size() ==
 	    nboards_) {
@@ -216,6 +220,8 @@ PYBINDINGS("dfmux")
 	      "Number of modules expected to report from this board")
 	    .def_readwrite("nblocks", &DfMuxBoardSamples::nblocks,
 	      "Number of sub-module blocks expected to report from this board")
+	    .def_readwrite("nchannels", &DfMuxBoardSamples::nchannels,
+	      "Number of channels per block expected to report from this board")
 	    .def("Complete", &DfMuxBoardSamples::Complete,
 	      "True if this structure contains data from all expected modules and blocks")
 	    .def_pickle(g3frameobject_picklesuite<DfMuxBoardSamples>())
