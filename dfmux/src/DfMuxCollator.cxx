@@ -143,7 +143,6 @@ void DfMuxCollator::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 
 			int mod_idx, chan_idx;
 			// slight hackery for indexing timepoint frames with modules split into blocks (e.g. with hidfmux)
-			// hard-coded number of channels per block
 			if (board->second.nblocks != 1) {
 				mod_idx = chan->mapping->module * board->second.nblocks + (int)(chan->mapping->channel / board->second.nchannels);
 				chan_idx = chan->mapping->channel % board->second.nchannels;
