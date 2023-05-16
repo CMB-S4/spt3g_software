@@ -359,13 +359,13 @@ int DfMuxCollector::BookPacket(struct DfmuxPacket *packet, struct in_addr src)
 
 	DfMuxSamplePacketPtr outpacket(new DfMuxSamplePacket);
 	outpacket->board = board_id;
-	outpacket->module = le32toh(packet->module);
+	outpacket->module = (le16toh(packet->version) == 4) ?
+	  le32toh(packet->channels_per_module) : le32toh(packet->module);
 	outpacket->sample = sample;
 
 	// Work around bug in IceBoard firmware. You always get 8 modules'
 	// worth of packets, no matter what packet->num_modules says.
-	// version 4 firmware expects only one module (hidfmux)
-	outpacket->nmodules = (le16toh(packet->version) == 4) ? 1 : 8;
+	outpacket->nmodules = 8;
 
 	builder_->AsyncDatum(timecode, outpacket);
 
