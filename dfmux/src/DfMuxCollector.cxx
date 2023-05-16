@@ -62,7 +62,7 @@ struct DfmuxPacket {
 
 	uint32_t seq; /* incrementing sequence number */
 
-	int32_t s[1024]; /* >= largest number of channels we expect */
+	int32_t s[256]; /* >= largest number of channels we expect */
 	struct RawTimestamp ts;
 } __attribute__((packed));
 
@@ -265,7 +265,7 @@ void DfMuxCollector::Listen(DfMuxCollector *collector)
 	while (!collector->stop_listening_) {
 		len = recvfrom(collector->fd_, &buf, sizeof(buf), 0,
 		    (struct sockaddr *)&addr, &addrlen);
-		nchan = (le16toh(buf.version) == 4) ? 1024 : buf.channels_per_module;
+		nchan = (le16toh(buf.version) == 4) ? 128 : buf.channels_per_module;
 		target_size = base_size + nchan*sizeof(buf.s[0])*2;
 		if (len != target_size) {
 			log_error("Badly-sized packet with %d channels from %s "
@@ -289,6 +289,7 @@ int DfMuxCollector::BookPacket(struct DfmuxPacket *packet, struct in_addr src)
 	std::map<int32_t, int32_t>::iterator seq;
 	int64_t timecode;
 	int board_id;
+	int mod_id;
 
 	if (le32toh(packet->magic) != FAST_MAGIC) {
 		log_error("Corrupted packet from %s begins with %#x "
@@ -324,18 +325,20 @@ int DfMuxCollector::BookPacket(struct DfmuxPacket *packet, struct in_addr src)
 	}
 
 	modseq = &sequence_[board_id];
-	seq = modseq->find(le32toh(packet->module));
+	mod_id = (le16toh(packet->version) == 4) ? le32toh(packet->channels_per_module) :
+	  le32toh(packet->module);
+	seq = modseq->find(mod_id);
 	if (seq != modseq->end()) {
 		seq->second++;
 		if ((uint32_t)seq->second != le32toh(packet->seq)) {
 			log_warn("Out-of-order packet from %d/%d (%d "
-			    "instead of %d)", board_id, le32toh(packet->module),
+			    "instead of %d)", board_id, mod_id,
 			    le32toh(packet->seq), seq->second);
 			seq->second = le32toh(packet->seq);
 		}
 	} else {
 		// New board we haven't seen before
-		(*modseq)[le32toh(packet->module)] = le32toh(packet->seq); 
+		(*modseq)[mod_id] = le32toh(packet->seq);
 	}
 
 	// Decode packet
@@ -346,7 +349,7 @@ int DfMuxCollector::BookPacket(struct DfmuxPacket *packet, struct in_addr src)
 	// to (before or after). Shift them all 1 second forward.
 	timecode += clock_rate_;
 
-	int nchan = (le16toh(packet->version) == 4) ? 1024 : le32toh(packet->channels_per_module);
+	int nchan = (le16toh(packet->version) == 4) ? 128 : le32toh(packet->channels_per_module);
 	DfMuxSamplePtr sample(new DfMuxSample(timecode, nchan*2));
 
 	// NB: Bottom 8 bits are zero. Divide by 256 rather than >> 8 to
