@@ -23,6 +23,7 @@ public:
 	double y_offset; /* and el */
 
 	double band;		/* Standard frequency units */
+	double center_frequency;
 	double pol_angle;	/* Standard angular units */
 	double pol_efficiency;	/* 0-1 */
 
@@ -44,7 +45,7 @@ public:
 };
 
 G3_POINTERS(BolometerProperties);
-G3_SERIALIZABLE(BolometerProperties, 6);
+G3_SERIALIZABLE(BolometerProperties, 7);
 
 G3MAP_OF(std::string, BolometerProperties, BolometerPropertiesMap);
 
