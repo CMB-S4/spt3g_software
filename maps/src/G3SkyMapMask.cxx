@@ -397,15 +397,56 @@ G3SkyMapMask::MakeBinaryMap() const
 }
 
 template <class A>
-void G3SkyMapMask::serialize(A &ar, unsigned v)
+void G3SkyMapMask::load(A &ar, unsigned v)
 {
 	using namespace cereal;
 	ar & make_nvp("G3FrameObject", base_class<G3FrameObject>(this));
 	ar & make_nvp("parent", parent_);
-	ar & make_nvp("data", data_);
+	if (v < 2) {
+		ar & make_nvp("data", data_);
+	} else {
+		std::vector<uint8_t> packed;
+		size_t nbits;
+		ar & make_nvp("data", packed);
+		data_.resize(packed.size()*8);
+		for (ssize_t i = 0; i < packed.size(); i++)
+			for (int j = 0; j < 8; j++)
+				data_[i*8 + j] = (packed[i] >> j) & 1;
+		ar & make_nvp("nbits", nbits); // In case not a multiple of 8
+		data_.resize(nbits);
+	}
 }
 
-G3_SERIALIZABLE_CODE(G3SkyMapMask);
+template <class A>
+void G3SkyMapMask::save(A &ar, unsigned v) const
+{
+	using namespace cereal;
+	ar & make_nvp("G3FrameObject", base_class<G3FrameObject>(this));
+	ar & make_nvp("parent", parent_);
+
+	std::vector<uint8_t> packed(data_.size() / 8);
+
+	// Pack data in all bits up to a multiple of 8, then the remainder
+	// Two pieces so the compiler can unroll the inner loop in the first
+	// part
+	for (ssize_t i = 0; i < packed.size() - 1; i++) {
+		packed[i] = 0;
+		for (int j = 0; j < 8; j++)
+			packed[i] |= !!data_[i*8 + j] << j;
+	}
+	if (packed.size() > 0) {
+		const ssize_t i = packed.size() - 1;
+		packed[i] = 0;
+		for (int j = 0; j < data_.size() - i*8; j++)
+			packed[i] |= !!data_[i*8 + j] << j;
+	}
+
+	ar & make_nvp("data", packed);
+	ar & make_nvp("nbits", data_.size());
+}
+		
+
+G3_SPLIT_SERIALIZABLE_CODE(G3SkyMapMask);
 
 static bool
 skymapmask_getitem(const G3SkyMapMask &m, boost::python::object index)

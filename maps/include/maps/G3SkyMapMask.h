@@ -108,7 +108,8 @@ public:
 
 private:
 	G3SkyMapMask() {} // Fake out for serialization
-	template <class A> void serialize(A &ar, const unsigned v);
+	template <class A> void load(A &ar, const unsigned v);
+	template <class A> void save(A &ar, const unsigned v) const;
 	friend class cereal::access;
 
 	std::vector<bool> data_;
@@ -121,8 +122,12 @@ private:
 	SET_LOGGER("G3SkyMapMask");
 };
 
+namespace cereal {
+  template <class A> struct specialize<A, G3SkyMapMask, cereal::specialization::member_load_save> {};
+}
+
 G3_POINTERS(G3SkyMapMask);
-G3_SERIALIZABLE(G3SkyMapMask, 1);
+G3_SERIALIZABLE(G3SkyMapMask, 2);
 
 #endif
 
