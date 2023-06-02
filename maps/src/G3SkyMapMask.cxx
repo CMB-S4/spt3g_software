@@ -424,17 +424,17 @@ void G3SkyMapMask::save(A &ar, unsigned v) const
 	ar & make_nvp("G3FrameObject", base_class<G3FrameObject>(this));
 	ar & make_nvp("parent", parent_);
 
-	std::vector<uint8_t> packed(data_.size() / 8);
-
+	std::vector<uint8_t> packed((data_.size() / 8) +
+	    ((data_.size() % 8) ? 1 : 0));
 	// Pack data in all bits up to a multiple of 8, then the remainder
 	// Two pieces so the compiler can unroll the inner loop in the first
 	// part
-	for (ssize_t i = 0; i < packed.size() - 1; i++) {
+	for (ssize_t i = 0; i < data_.size() / 8; i++) {
 		packed[i] = 0;
 		for (int j = 0; j < 8; j++)
 			packed[i] |= !!data_[i*8 + j] << j;
 	}
-	if (packed.size() > 0) {
+	if (data_.size() % 8) {
 		const ssize_t i = packed.size() - 1;
 		packed[i] = 0;
 		for (int j = 0; j < data_.size() - i*8; j++)
