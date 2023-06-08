@@ -447,7 +447,7 @@ PYBINDINGS("dfmux")
 	    .def("Start", &DfMuxCollector::Start)
 	    .def("Stop", &DfMuxCollector::Stop)
 	    .add_property("clock_rate", &DfMuxCollector::GetClockRate, &DfMuxCollector::SetClockRate,
-	      "Set the clock rate for the iceboard subseconds counter, e.g. for hidfmux.  Values should be in G3Units of frequency (e.g. 100*core.G3Units.MHz)")
+	      "Set the clock rate for the iceboard subseconds counter, e.g. for hidfmux.  Values should be in G3Units of frequency.  Defaults to 100*core.G3Units.MHz.")
 	;
 }
 
