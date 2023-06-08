@@ -71,9 +71,11 @@ struct DfmuxPacket {
 static int64_t
 RawTimestampToTimeCode(RawTimestamp stamp, double clock_scale)
 {
-	static __thread int64_t last_code = -1;
+	static __thread double last_code = -1;
 	static __thread RawTimestamp last_stamp;
+	static __thread double last_ss;
 	struct tm tm;
+	double ss;
 
 	// Some IRIG generators don't fill in year, which is annoying. This
 	// algorithm works unless time goes backwards, the computer clock's year
@@ -100,7 +102,7 @@ RawTimestampToTimeCode(RawTimestamp stamp, double clock_scale)
 
 	// fix the subsecond counter if the iceboard is using
 	// an internal clock with a rate other than 100 MHz
-	stamp.ss = htole32(le32toh(stamp.ss) * clock_scale);
+	ss = le32toh(stamp.ss) * clock_scale;
 	
 	tm.tm_year = le32toh(stamp.y) + 100 /* tm_year starts in 1900 */;
 	tm.tm_yday = le32toh(stamp.d);
@@ -113,16 +115,16 @@ RawTimestampToTimeCode(RawTimestamp stamp, double clock_scale)
 	    stamp.m == last_stamp.m && stamp.s == last_stamp.s) {
 		// If all fields but sub-second agree, just apply the change
 		// in the subsecond field as an offset
-		last_code = (last_code - le32toh(last_stamp.ss)) +
-		    le32toh(stamp.ss);
+		last_code = (last_code - last_ss) + ss;
 	} else {
 		tm.tm_mon = 0;       // Fake out timegm with the 274th of Jan.
 		tm.tm_mday = tm.tm_yday; // since it ignores tm_yday otherwise
 		last_code = 100000000LL * int64_t(timegm(&tm));
-		last_code += (uint64_t)le32toh(stamp.ss);
+		last_code += ss;
 	}
 
 	last_stamp = stamp;
+	last_ss = ss;
 	
 	return last_code;
 }
