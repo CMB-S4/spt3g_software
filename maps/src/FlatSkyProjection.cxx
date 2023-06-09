@@ -671,10 +671,10 @@ FlatSkyProjection::QueryDisc(double alpha, double delta, double radius, bool loc
 	double pvb = pv.R_component_3();
 	double pvc = pv.R_component_4();
 
-	ssize_t xmin = xpix_;
-	ssize_t xmax = 0;
-	ssize_t ymin = ypix_;
-	ssize_t ymax = 0;
+	long xmin = xpix_;
+	long xmax = 0;
+	long ymin = ypix_;
+	long ymax = 0;
 
 	double a, d;
 	double phi = 0;
@@ -687,10 +687,10 @@ FlatSkyProjection::QueryDisc(double alpha, double delta, double radius, bool loc
 		double s = sin(phi / 2.0);
 		quat q = quat(c, pva * s, pvb * s, pvc * s);
 		auto xy = QuatToXY(q * p / q, local);
-		ssize_t fx = std::floor(xy[0]);
-		ssize_t cx = std::ceil(xy[0]);
-		ssize_t fy = std::floor(xy[1]);
-		ssize_t cy = std::ceil(xy[1]);
+		long fx = std::floor(xy[0]);
+		long cx = std::ceil(xy[0]);
+		long fy = std::floor(xy[1]);
+		long cy = std::ceil(xy[1]);
 		if (fx < xmin)
 			xmin = fx < 0 ? 0 : fx;
 		if (cx > xmax)
