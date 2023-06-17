@@ -725,6 +725,14 @@ FlatSkyProjection FlatSkyProjection::Rebin(size_t scale, double x_center, double
 	fp.xpix_ /= scale;
 	fp.ypix_ /= scale;
 	fp.SetRes(y_res_ * scale, x_res_ * scale);
+
+	// Use correct center for extracted patch
+	if (x_center != x_center && xc_ != (xpix_ / 2.0 - 0.5))
+		x_center = (xc_ - xpix_ / 2) / scale + fp.xpix_ / 2;
+
+	if (y_center != y_center && yc_ != (ypix_ / 2.0 - 0.5))
+		y_center = (yc_ - ypix_ / 2) / scale + fp.ypix_ / 2;
+
 	fp.SetXYCenter(x_center, y_center);
 
 	return fp;
