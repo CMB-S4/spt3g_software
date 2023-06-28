@@ -564,6 +564,7 @@ This class cannot be instantiated from Python</p>
 <li><p><a class="reference internal" href="#spt3g-maps-mapbinner">spt3g.maps.MapBinner</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-mapmockobserver">spt3g.maps.MapMockObserver</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-maptodmasker">spt3g.maps.MapTODMasker</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-maps-maptodpointing">spt3g.maps.MapTODPointing</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-singledetectorboresightbinner">spt3g.maps.SingleDetectorBoresightBinner</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-singledetectormapbinner">spt3g.maps.SingleDetectorMapBinner</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-azel-equatorialtogalacticpointing">spt3g.maps.azel.EquatorialToGalacticPointing</a></p></li>
@@ -726,6 +727,65 @@ this to happen without comment.</p>
 </dl>
 <p id="spt3g-maps-maptodmasker"><strong>spt3g.maps.MapTODMasker</strong></p>
 <p>Creates a filter mask &lt;tod_mask&gt; to indicate to later TOD filtering that a detector has passed over a “bad” part of the sky. This is used, for example, to avoid fitting a polynomial to a timestream while the detector is looking at a bright point source. All timestream values for the detectors in &lt;timestreams&gt; are set to be ignored (true in the output &lt;tod_mask&gt;) if they point at pixels of the input &lt;mask&gt; map containing a non-zero value. Boresight pointing is obtained from the quaternion vector specified by &lt;pointing&gt;. Detector pointing offsets and polarization angles and efficiencies are obtained from the specified BolometerPropertiesMap, which can generally be left at its default value.</p>
+<p id="spt3g-maps-maptodpointing"><strong>spt3g.maps.MapTODPointing</strong></p>
+<p>MapTODPointing(pointing, timestreams, stub_map, tod_pointing, bolo_properties_name=”BolometerProperties”)</p>
+<p>Compute pixel pointing for timestreams for a map with properties (projection, etc.) specified
+by the stub_map argument.</p>
+<p>The outputs of this module are identical to internally-calculated quantities in the map maker
+and can be used for debugging map-making or studying individual-detector pixel coverage.
+The outputs are not consumed by any stage of the map-making pipeline.</p>
+<dl>
+<dt><em>Parameters:</em></dt><dd><dl class="simple">
+<dt>pointing<span class="classifier">string (frame object G3VectorQuat or G3TimestreamQuat)</span></dt><dd><p>Name of a frame object containing the boresight pointing quaternion
+timestream. Must have the same number of elements as the data in
+<cite>timestreams</cite> and be present in every Scan frame.</p>
+</dd>
+<dt>timestreams<span class="classifier">string (frame object G3TimestreamMap)</span></dt><dd><p>Name of a frame object that contains the detector timestreams for
+the channels for which to compute pointing timestreams.</p>
+</dd>
+<dt>stub_map<span class="classifier">G3SkyMap</span></dt><dd><p>Template of the map for which to compute pixel pointing.</p>
+</dd>
+<dt>tod_pointing<span class="classifier">string</span></dt><dd><p>The key to which the pixel pointing G3MapVectorInt object is
+stored in the output Scan frames from this module.</p>
+</dd>
+<dt>bolo_properties_name<span class="classifier">string, optional (frame object BolometerPropertiesMap)</span></dt><dd><p>Name of a bolometer properties map containing detector pointing offsets
+from boresight. These are usually named “BolometerProperties”, the
+default, and this parameter only need be set if you wish to use
+alternative values.</p>
+</dd>
+</dl>
+</dd>
+<dt><em>Emits:</em></dt><dd><p>Adds a new key to every Scan frame containing the output pointing data:</p>
+<p>Frame (Scan) [
+…
+“OnlineRaDecRotation” (spt3g.core.G3TimestreamQuat) =&gt; 15716 quaternions at 152.6 Hz
+“RawTimestreams_I” (spt3g.core.G3TimestreamMap) =&gt; Timestreams from 14112 detectors
+“TodPointing” (spt3g.core.G3MapVectorInt) =&gt; 14112 elements
+…
+]</p>
+</dd>
+<dt><em>See Also:</em></dt><dd><dl class="simple">
+<dt>MapTODMasker :</dt><dd><p>Projection of sky masks to detector timestreams.</p>
+</dd>
+<dt>MapBinner, SingleDetectorMapBinner, SingleDetectorBoresightBinner :</dt><dd><p>Map binners for making coadded and single-detector maps.</p>
+</dd>
+<dt>MapMockObserver :</dt><dd><p>The inverse of MapBinner. Produces timestreams from an input map.</p>
+</dd>
+<dt>FlatSkyMap, HealpixSkyMap :</dt><dd><p>Possible map types.</p>
+</dd>
+</dl>
+</dd>
+<dt><em>Examples:</em></dt><dd><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span>
+    <span class="n">maps</span><span class="o">.</span><span class="n">MapTODPointing</span><span class="p">,</span>
+    <span class="n">pointing</span><span class="o">=</span><span class="s2">&quot;OnlineRaDecRotation&quot;</span><span class="p">,</span>
+    <span class="n">timestreams</span><span class="o">=</span><span class="s2">&quot;RawTimestreams_I&quot;</span><span class="p">,</span>
+    <span class="n">stub_map</span><span class="o">=</span><span class="n">map_params</span><span class="p">,</span>
+    <span class="n">tod_pointing</span><span class="o">=</span><span class="s2">&quot;TodPointing&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
 <p id="spt3g-maps-singledetectorboresightbinner"><strong>spt3g.maps.SingleDetectorBoresightBinner</strong></p>
 <p>SingleDetectorBoresightBinner(stub_map, pointing, timestreams)</p>
 <p>Makes simple binned maps of the sky, in boresight coordinates, for every
