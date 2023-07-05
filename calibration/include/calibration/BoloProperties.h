@@ -13,7 +13,8 @@ class BolometerProperties : public G3FrameObject
 {
 public:
 	BolometerProperties() : x_offset(NAN), y_offset(NAN), band(NAN),
-	    pol_angle(NAN), pol_efficiency(NAN), coupling(Unknown) {}
+	    center_frequency(NAN), bandwidth(NAN), pol_angle(NAN),
+	    pol_efficiency(NAN), coupling(Unknown) {}
 	std::string Description() const;
 
 	std::string physical_name; /* e.g. D4.A2.3.Y */
@@ -24,6 +25,7 @@ public:
 
 	double band;		/* Standard frequency units */
 	double center_frequency;
+	double bandwidth;
 	double pol_angle;	/* Standard angular units */
 	double pol_efficiency;	/* 0-1 */
 
