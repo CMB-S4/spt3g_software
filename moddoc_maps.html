@@ -924,9 +924,32 @@ transformation.</p>
 </dd>
 </dl>
 <p id="spt3g-maps-fitsio-savemapframe"><strong>spt3g.maps.fitsio.SaveMapFrame</strong></p>
-<p>Save a map frame to a FITS file.</p>
+<p>Save a map frame to a FITS file.  See <code class="docutils literal notranslate"><span class="pre">save_skymap_fits</span></code> for details.  The
+map frame should contain T maps and (optionally) unpolarized weights, or T/Q/U
+maps and (optionally) polarized weights to store in the output file.</p>
 <dl class="simple">
-<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">SaveMapFrame(frame,</span> <span class="pre">output_file,</span> <span class="pre">hdr=None,</span> <span class="pre">compress=True,</span> <span class="pre">overwrite=False)</span></code></p>
+<dt><em>Arguments:</em></dt><dd><dl class="simple">
+<dt>output_file<span class="classifier">str or callable</span></dt><dd><p>Fits filename to which the map will be written.  Maybe a callable
+function that takes a frame object as its sole input argument and
+returns a string filename.</p>
+</dd>
+<dt>hdr<span class="classifier">dict</span></dt><dd><p>If defined, extra keywords to be appened to the FITS header. The dict
+can contain entries such as <code class="docutils literal notranslate"><span class="pre">hdr['NEWKEY']</span> <span class="pre">=</span> <span class="pre">'New</span> <span class="pre">value'</span></code> or
+<code class="docutils literal notranslate"><span class="pre">hdr['NEWKEY']</span> <span class="pre">=</span> <span class="pre">('New</span> <span class="pre">value',</span> <span class="pre">&quot;Comment</span> <span class="pre">for</span> <span class="pre">New</span> <span class="pre">value&quot;)</span></code>.</p>
+</dd>
+<dt>compress<span class="classifier">str or bool</span></dt><dd><p>If defined, and if input maps are FlatSkyMap objects, store these in a
+series of compressed image HDUs, one per map.  Otherwise, store input
+maps in a series of standard ImageHDUs, which are readable with older
+FITS readers (e.g. idlastro). If defined, the compression algorithm to
+be used by the Astropy class astropy.io.fits.CompImageHDU.
+Can be: ‘RICE_1’, ‘RICE_ONE’, ‘PLIO_1’, ‘GZIP_1’, ‘GZIP_2’ or
+‘HCOMPRESS_1’. Only GZIP_1 and GZIP_2 are lossless.</p>
+</dd>
+<dt>overwrite<span class="classifier">bool</span></dt><dd><p>If True, any existing file with the same name will be ovewritten.</p>
+</dd>
+</dl>
+</dd>
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">SaveMapFrame(frame,</span> <span class="pre">output_file=None,</span> <span class="pre">hdr=None,</span> <span class="pre">compress='GZIP_2',</span> <span class="pre">overwrite=False)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-maps-map-modules-applyweights"><strong>spt3g.maps.map_modules.ApplyWeights</strong></p>
@@ -1319,10 +1342,10 @@ over all pixels.  The former produces output that is equivalent to using
 </dd>
 <dt>overwrite<span class="classifier">bool</span></dt><dd><p>If True, any existing file with the same name will be ovewritten.</p>
 </dd>
-<dt>compress<span class="classifier">str</span></dt><dd><p>If defined, and if input maps are FlatSkyMap objects, store these in a
+<dt>compress<span class="classifier">str or bool</span></dt><dd><p>If defined, and if input maps are FlatSkyMap objects, store these in a
 series of compressed image HDUs, one per map.  Otherwise, store input
 maps in a series of standard ImageHDUs, which are readable with older
-FITS readers (e.g. idlastro). If defined the compression algorithm to
+FITS readers (e.g. idlastro). If defined, the compression algorithm to
 be used by the Astropy class astropy.io.fits.CompImageHDU.
 Can be: ‘RICE_1’, ‘RICE_ONE’, ‘PLIO_1’, ‘GZIP_1’, ‘GZIP_2’ or
 ‘HCOMPRESS_1’. Only GZIP_1 and GZIP_2 are lossless.</p>
