@@ -723,9 +723,32 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
 
 
 @core.indexmod
-def SaveMapFrame(frame, output_file, hdr=None, compress=True, overwrite=False):
+def SaveMapFrame(frame, output_file=None, hdr=None, compress='GZIP_2', overwrite=False):
     """
-    Save a map frame to a FITS file.
+    Save a map frame to a FITS file.  See ``save_skymap_fits`` for details.  The
+    map frame should contain T maps and (optionally) unpolarized weights, or T/Q/U
+    maps and (optionally) polarized weights to store in the output file.
+
+    Arguments
+    ---------
+    output_file : str or callable
+        Fits filename to which the map will be written.  Maybe a callable
+        function that takes a frame object as its sole input argument and
+        returns a string filename.
+    hdr  : dict
+       If defined, extra keywords to be appened to the FITS header. The dict
+       can contain entries such as ``hdr['NEWKEY'] = 'New value'`` or
+       ``hdr['NEWKEY'] = ('New value', "Comment for New value")``.
+    compress : str or bool
+        If defined, and if input maps are FlatSkyMap objects, store these in a
+        series of compressed image HDUs, one per map.  Otherwise, store input
+        maps in a series of standard ImageHDUs, which are readable with older
+        FITS readers (e.g. idlastro). If defined, the compression algorithm to
+        be used by the Astropy class astropy.io.fits.CompImageHDU.
+        Can be: 'RICE_1', 'RICE_ONE', 'PLIO_1', 'GZIP_1', 'GZIP_2' or
+        'HCOMPRESS_1'. Only GZIP_1 and GZIP_2 are lossless.
+    overwrite : bool
+        If True, any existing file with the same name will be ovewritten.
     """
 
     if frame.type != core.G3FrameType.Map:
@@ -735,6 +758,9 @@ def SaveMapFrame(frame, output_file, hdr=None, compress=True, overwrite=False):
     Q = frame.get('Q', None)
     U = frame.get('U', None)
     W = frame.get('Wpol', frame.get('Wunpol', None))
+
+    if callable(output_file):
+        output_file = output_file(frame)
 
     save_skymap_fits(
         output_file,
