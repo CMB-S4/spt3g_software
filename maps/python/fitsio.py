@@ -508,11 +508,11 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
         Weights to save with the maps
     overwrite : bool
         If True, any existing file with the same name will be ovewritten.
-    compress : str
+    compress : str or bool
         If defined, and if input maps are FlatSkyMap objects, store these in a
         series of compressed image HDUs, one per map.  Otherwise, store input
         maps in a series of standard ImageHDUs, which are readable with older
-        FITS readers (e.g. idlastro). If defined the compression algorithm to
+        FITS readers (e.g. idlastro). If defined, the compression algorithm to
         be used by the Astropy class astropy.io.fits.CompImageHDU.
         Can be: 'RICE_1', 'RICE_ONE', 'PLIO_1', 'GZIP_1', 'GZIP_2' or
         'HCOMPRESS_1'. Only GZIP_1 and GZIP_2 are lossless.
@@ -528,6 +528,12 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
         flat = isinstance(T, FlatSkyMap)
     else:
         raise TypeError("Input map must be a FlatSkyMap or HealpixSkyMap instance")
+
+    ctype = None
+    if compress == True:
+        ctype = 'GZIP_2'
+    elif isinstance(compress, str):
+        ctype = compress
 
     if Q is not None:
         assert(U is not None)
@@ -605,8 +611,8 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
     try:
         for m, name in zip(maps, names):
             if flat:
-                if compress is not None:
-                    hdu = astropy.io.fits.CompImageHDU(np.asarray(m), header=header, compression_type=compress)
+                if compress:
+                    hdu = astropy.io.fits.CompImageHDU(np.asarray(m), header=header, compression_type=ctype)
                 else:
                     hdu = astropy.io.fits.ImageHDU(np.asarray(m), header=header)
                 hdu.header['ISWEIGHT'] = False
@@ -666,7 +672,7 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
 
                 if flat:
                     if compress:
-                        hdu = astropy.io.fits.CompImageHDU(np.asarray(m), header=header)
+                        hdu = astropy.io.fits.CompImageHDU(np.asarray(m), header=header, compression_type=ctype)
                     else:
                         hdu = astropy.io.fits.ImageHDU(np.asarray(m), header=header)
                     hdu.header['ISWEIGHT'] = True
