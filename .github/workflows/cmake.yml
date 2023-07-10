@@ -86,8 +86,8 @@ jobs:
         cp -r ${{runner.workspace}}/build/docs/* gh-pages/
         cd gh-pages
         touch .nojekyll
-        git config --local user.name github-actions
-        git config --local user.email github-actions@github.com
+        git config --local user.name github-actions[bot]
+        git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
         git add .
         git commit -m "Update documentation" -a || true
         git push
