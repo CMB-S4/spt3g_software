@@ -41,7 +41,11 @@ Physical bolometer properties, such as detector angular offsets. Does not includ
 
 * **y_offset**: Vertical pointing offset relative to boresight in angular units.
 
-* **band**: Center of detector observing band in frequency units
+* **band**: Nominal center of detector observing band in frequency units
+
+* **center_frequency**: Measured center of detector observing band in frequency units
+
+* **bandwidth**: Measured bandwidth of detector observing band in frequency units
 
 * **pol_angle**: Polarization angle in angular units
 
@@ -49,7 +53,7 @@ Physical bolometer properties, such as detector angular offsets. Does not includ
 
 * **coupling**: Optical coupling type
 
-* **wafer_id**: Name of the name this detector is on
+* **wafer_id**: Name of the wafer this detector is on
 
 * **pixel_id**: Name of the pixel of which this detector is a part
 

@@ -6,11 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>calibration &#8212; SPT3G Software  documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/nature.css" />
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=362ab14a" />
+    <link rel="stylesheet" type="text/css" href="_static/nature.css?v=8fc2db88" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=b3ba4146"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=4825356b"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="core" href="moddoc_core.html" />
@@ -66,11 +66,13 @@
 <li><p><strong>physical_name</strong>: Physical name of the detector (e.g. some polarization at some particular pixel on the wafer)</p></li>
 <li><p><strong>x_offset</strong>: Horizontal pointing offset relative to boresight in angular units.</p></li>
 <li><p><strong>y_offset</strong>: Vertical pointing offset relative to boresight in angular units.</p></li>
-<li><p><strong>band</strong>: Center of detector observing band in frequency units</p></li>
+<li><p><strong>band</strong>: Nominal center of detector observing band in frequency units</p></li>
+<li><p><strong>center_frequency</strong>: Measured center of detector observing band in frequency units</p></li>
+<li><p><strong>bandwidth</strong>: Measured bandwidth of detector observing band in frequency units</p></li>
 <li><p><strong>pol_angle</strong>: Polarization angle in angular units</p></li>
 <li><p><strong>pol_efficiency</strong>: Polarization efficiency (0-1)</p></li>
 <li><p><strong>coupling</strong>: Optical coupling type</p></li>
-<li><p><strong>wafer_id</strong>: Name of the name this detector is on</p></li>
+<li><p><strong>wafer_id</strong>: Name of the wafer this detector is on</p></li>
 <li><p><strong>pixel_id</strong>: Name of the pixel of which this detector is a part</p></li>
 <li><p><strong>pixel_type</strong>: Name of the pixel type of which this detector is a part</p></li>
 </ul>
@@ -521,8 +523,8 @@ the BolometerPropertiesMap.</p>
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright .
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.0.1.
+    &#169; Copyright .
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.1.
     </div>
   </body>
 </html>

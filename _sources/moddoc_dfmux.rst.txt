@@ -33,7 +33,7 @@ Frame Objects in spt3g.dfmux
 spt3g.dfmux.DfMuxBoardSamples
 -----------------------------
 
-Container structure for samples from modules on one board, mapping 0-indexed module IDs to a dfmux.DfMuxSample.
+Container structure for samples from modules on one board, mapping 0-indexed module and block IDs to a dfmux.DfMuxSample.
 
 *Constructors:*
 	``DfMuxBoardSamples()``
@@ -53,6 +53,10 @@ Container structure for samples from modules on one board, mapping 0-indexed mod
 *Members:*
 
 * **nmodules**: Number of modules expected to report from this board
+
+* **nblocks**: Number of sub-module blocks expected to report from this board
+
+* **nchannels**: Number of channels per block expected to report from this board
 
 
 *Methods:*
@@ -157,7 +161,7 @@ Container structure for samples from modules on one board, mapping 0-indexed mod
 **spt3g.dfmux.DfMuxBoardSamples.Complete**
 
 ``Complete( (DfMuxBoardSamples)arg1) -> bool :``
-    True if this structure contains data from all expected modules
+    True if this structure contains data from all expected modules and blocks
 
 
 
