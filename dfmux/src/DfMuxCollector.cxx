@@ -38,6 +38,7 @@
 #include <dfmux/DfMuxCollector.h>
 
 #include <core/SetThreadName.h>
+#include <core/G3Units.h>
 
 struct RawTimestamp {
 	/* SIGNED types are used here to permit negative numbers during
@@ -55,8 +56,8 @@ struct DfmuxPacket {
 
 	uint16_t serial; /* zero for V2, filled for V3 */
 
-	uint8_t num_modules;
-	uint8_t channels_per_module;
+	uint8_t num_modules; /* correct for V4 */
+	uint8_t channels_per_module; /* sub-module block in V4 */
 	uint8_t fir_stage;
 	uint8_t module; /* linear; 0-7. don't like it much. */
 
@@ -68,11 +69,13 @@ struct DfmuxPacket {
 
 // Convert time stamp to a code in IRIG-B ticks (10 ns intervals)
 static int64_t
-RawTimestampToTimeCode(RawTimestamp stamp)
+RawTimestampToTimeCode(RawTimestamp stamp, double clock_scale)
 {
-	static __thread int64_t last_code = -1;
+	static __thread double last_code = -1;
 	static __thread RawTimestamp last_stamp;
+	static __thread double last_ss;
 	struct tm tm;
+	double ss;
 
 	// Some IRIG generators don't fill in year, which is annoying. This
 	// algorithm works unless time goes backwards, the computer clock's year
@@ -96,6 +99,10 @@ RawTimestampToTimeCode(RawTimestamp stamp)
 				stamp.y = last_stamp.y;
 		}
 	}
+
+	// fix the subsecond counter if the iceboard is using
+	// an internal clock with a rate other than 100 MHz
+	ss = le32toh(stamp.ss) * clock_scale;
 	
 	tm.tm_year = le32toh(stamp.y) + 100 /* tm_year starts in 1900 */;
 	tm.tm_yday = le32toh(stamp.d);
@@ -108,16 +115,16 @@ RawTimestampToTimeCode(RawTimestamp stamp)
 	    stamp.m == last_stamp.m && stamp.s == last_stamp.s) {
 		// If all fields but sub-second agree, just apply the change
 		// in the subsecond field as an offset
-		last_code = (last_code - le32toh(last_stamp.ss)) +
-		    le32toh(stamp.ss);
+		last_code = (last_code - last_ss) + ss;
 	} else {
 		tm.tm_mon = 0;       // Fake out timegm with the 274th of Jan.
 		tm.tm_mday = tm.tm_yday; // since it ignores tm_yday otherwise
 		last_code = 100000000LL * int64_t(timegm(&tm));
-		last_code += (uint64_t)le32toh(stamp.ss);
+		last_code += ss;
 	}
 
 	last_stamp = stamp;
+	last_ss = ss;
 	
 	return last_code;
 }
@@ -127,6 +134,7 @@ DfMuxCollector::DfMuxCollector(G3EventBuilderPtr builder,
      builder_(builder), success_(false), stop_listening_(false)
 {
 
+	SetClockRate(100 * G3Units::MHz);
 	success_ = (SetupSCTPSocket(hosts) != 0);
 }
 
@@ -135,6 +143,7 @@ DfMuxCollector::DfMuxCollector(const char *listenaddr,
     builder_(builder), success_(false), stop_listening_(false),
     board_list_(board_list)
 {
+	SetClockRate(100 * G3Units::MHz);
 	success_ = (SetupUDPSocket(listenaddr) != 0);
 }
 
@@ -146,7 +155,15 @@ DfMuxCollector::DfMuxCollector(const char *listenaddr,
 	for (auto i : board_serials_)
 		board_list_.push_back(i.second);
 
+	SetClockRate(100 * G3Units::MHz);
 	success_ = (SetupUDPSocket(listenaddr) != 0);
+}
+
+void DfMuxCollector::SetClockRate(double rate)
+{
+
+	clock_rate_ = rate;
+	clock_scale_ = 100 * G3Units::MHz / clock_rate_;
 }
 
 int DfMuxCollector::SetupUDPSocket(const char *listenaddr)
@@ -256,6 +273,7 @@ void DfMuxCollector::Listen(DfMuxCollector *collector)
 	struct DfmuxPacket buf;
 	ssize_t len;
 	size_t target_size;
+	int nchan;
 
 	size_t base_size = sizeof(buf) - sizeof(buf.s);
 	
@@ -264,12 +282,12 @@ void DfMuxCollector::Listen(DfMuxCollector *collector)
 	while (!collector->stop_listening_) {
 		len = recvfrom(collector->fd_, &buf, sizeof(buf), 0,
 		    (struct sockaddr *)&addr, &addrlen);
-		target_size = base_size +
-		    buf.channels_per_module*sizeof(buf.s[0])*2;
+		nchan = (le16toh(buf.version) == 4) ? 128 : buf.channels_per_module;
+		target_size = base_size + nchan*sizeof(buf.s[0])*2;
 		if (len != target_size) {
 			log_error("Badly-sized packet with %d channels from %s "
 			    "(%zd bytes should be %zd)",
-			    buf.channels_per_module, inet_ntoa(addr.sin_addr),
+			    nchan, inet_ntoa(addr.sin_addr),
 			    len, target_size);
 			continue;
 		}
@@ -288,6 +306,7 @@ int DfMuxCollector::BookPacket(struct DfmuxPacket *packet, struct in_addr src)
 	std::map<int32_t, int32_t>::iterator seq;
 	int64_t timecode;
 	int board_id;
+	int mod_id;
 
 	if (le32toh(packet->magic) != FAST_MAGIC) {
 		log_error("Corrupted packet from %s begins with %#x "
@@ -304,15 +323,16 @@ int DfMuxCollector::BookPacket(struct DfmuxPacket *packet, struct in_addr src)
 			return (-1);
 		}
 		board_id = id_it->second;
-	} else if (le16toh(packet->version) == 3) {
+	} else if (le16toh(packet->version) == 3 || le16toh(packet->version) == 4) {
 		board_id = le16toh(packet->serial);
 		if (board_list_.size() > 0 &&
 		    std::find(board_list_.begin(), board_list_.end(), board_id)
 		    == board_list_.end()) {
 			struct in_addr i;
 			i.s_addr = listenaddr_;
-			log_debug("Received V3 data for board %d not "
+			log_debug("Received V%d data for board %d not "
 			    "enumerated on listener for interface %s",
+			    le16toh(packet->version),
 			    board_id, inet_ntoa(i));
 			return (-1);
 		}
@@ -323,30 +343,33 @@ int DfMuxCollector::BookPacket(struct DfmuxPacket *packet, struct in_addr src)
 	}
 
 	modseq = &sequence_[board_id];
-	seq = modseq->find(le32toh(packet->module));
+	mod_id = (le16toh(packet->version) == 4) ?
+	  (le32toh(packet->module) * 8 + le32toh(packet->channels_per_module)) :
+	  le32toh(packet->module);
+	seq = modseq->find(mod_id);
 	if (seq != modseq->end()) {
 		seq->second++;
 		if ((uint32_t)seq->second != le32toh(packet->seq)) {
 			log_warn("Out-of-order packet from %d/%d (%d "
-			    "instead of %d)", board_id, le32toh(packet->module),
+			    "instead of %d)", board_id, mod_id,
 			    le32toh(packet->seq), seq->second);
 			seq->second = le32toh(packet->seq);
 		}
 	} else {
 		// New board we haven't seen before
-		(*modseq)[le32toh(packet->module)] = le32toh(packet->seq); 
+		(*modseq)[mod_id] = le32toh(packet->seq);
 	}
 
 	// Decode packet
-	timecode = RawTimestampToTimeCode(packet->ts);
+	timecode = RawTimestampToTimeCode(packet->ts, clock_scale_);
 
 	// All times reported by the readout are exactly one second behind,
 	// likely due to a misparsing of which IRIG code the time marker refers
 	// to (before or after). Shift them all 1 second forward.
 	timecode += 100000000LL;
 
-	DfMuxSamplePtr sample(new DfMuxSample(timecode,
-	    le32toh(packet->channels_per_module)*2));
+	int nchan = (le16toh(packet->version) == 4) ? 128 : le32toh(packet->channels_per_module);
+	DfMuxSamplePtr sample(new DfMuxSample(timecode, nchan*2));
 
 	// NB: Bottom 8 bits are zero. Divide by 256 rather than >> 8 to
 	// guarantee sign preservation.
@@ -356,11 +379,16 @@ int DfMuxCollector::BookPacket(struct DfmuxPacket *packet, struct in_addr src)
 	DfMuxSamplePacketPtr outpacket(new DfMuxSamplePacket);
 	outpacket->board = board_id;
 	outpacket->module = le32toh(packet->module);
+	outpacket->block = (le16toh(packet->version) == 4) ?
+	  le32toh(packet->channels_per_module) : 0;
 	outpacket->sample = sample;
 
 	// Work around bug in IceBoard firmware. You always get 8 modules'
 	// worth of packets, no matter what packet->num_modules says.
-	outpacket->nmodules = 8;
+	// (firmware V3 and below)
+	outpacket->nmodules = (le16toh(packet->version) == 4) ? le32toh(packet->num_modules) : 8;
+	outpacket->nblocks = (le16toh(packet->version) == 4) ? 8 : 1;
+	outpacket->nchannels = nchan;
 
 	builder_->AsyncDatum(timecode, outpacket);
 
@@ -420,6 +448,8 @@ PYBINDINGS("dfmux")
 	    .def("__init__", bp::make_constructor(make_dfmux_collector_v2_from_dict, bp::default_call_policies(), (bp::arg("interface"), bp::arg("builder"), bp::arg("board_serial_map"))), "Crate a DfMuxCollector that can parse V2 (64x) data. Pass a mapping from board IP address (strings or integers) to serial numbers as the last argument")
 	    .def("Start", &DfMuxCollector::Start)
 	    .def("Stop", &DfMuxCollector::Stop)
+	    .add_property("clock_rate", &DfMuxCollector::GetClockRate, &DfMuxCollector::SetClockRate,
+	      "Set the clock rate for the iceboard subseconds counter, e.g. for hidfmux.  Values should be in G3Units of frequency.  Defaults to 100*core.G3Units.MHz.")
 	;
 }
 

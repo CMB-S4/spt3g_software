@@ -19,6 +19,14 @@ template <class A> void DfMuxBoardSamples::serialize(A &ar, const unsigned v)
 	ar & make_nvp("G3FrameObject", base_class<G3FrameObject>(this));
 	ar & make_nvp("samples", base_class<std::map<int, DfMuxSamplePtr> >(this));
 	ar & make_nvp("nmodules", nmodules);
+
+	if (v > 1) {
+		ar & make_nvp("nblocks", nblocks);
+		ar & make_nvp("nchannels", nchannels);
+	} else {
+		nblocks = 1;
+		nchannels = 128;
+	}
 }
 
 G3_SERIALIZABLE_CODE(DfMuxBoardSamples);
@@ -124,10 +132,13 @@ void DfMuxBuilder::ProcessNewData()
 	}
 
 	// Add to meta sample
-	g3_assert((*sample->sample)[pkt->board].find(pkt->module) ==
+	int idx = pkt->module * pkt->nblocks + pkt->block;
+	g3_assert((*sample->sample)[pkt->board].find(idx) ==
 	    (*sample->sample)[pkt->board].end());
-	(*sample->sample)[pkt->board][pkt->module] = pkt->sample;
+	(*sample->sample)[pkt->board][idx] = pkt->sample;
 	(*sample->sample)[pkt->board].nmodules = pkt->nmodules;
+	(*sample->sample)[pkt->board].nblocks = pkt->nblocks;
+	(*sample->sample)[pkt->board].nchannels = pkt->nchannels;
 	
 	while (oqueue_.size() > 0 && oqueue_.front().sample->size() ==
 	    nboards_) {
@@ -203,12 +214,16 @@ PYBINDINGS("dfmux")
 	class_<DfMuxBoardSamples, bases<G3FrameObject>,
 	  DfMuxBoardSamplesPtr>("DfMuxBoardSamples",
 	  "Container structure for samples from modules on one board, mapping "
-	  "0-indexed module IDs to a dfmux.DfMuxSample.")
+	  "0-indexed module and block IDs to a dfmux.DfMuxSample.")
 	    .def(std_map_indexing_suite<DfMuxBoardSamples, true>())
 	    .def_readwrite("nmodules", &DfMuxBoardSamples::nmodules,
 	      "Number of modules expected to report from this board")
+	    .def_readwrite("nblocks", &DfMuxBoardSamples::nblocks,
+	      "Number of sub-module blocks expected to report from this board")
+	    .def_readwrite("nchannels", &DfMuxBoardSamples::nchannels,
+	      "Number of channels per block expected to report from this board")
 	    .def("Complete", &DfMuxBoardSamples::Complete,
-	      "True if this structure contains data from all expected modules")
+	      "True if this structure contains data from all expected modules and blocks")
 	    .def_pickle(g3frameobject_picklesuite<DfMuxBoardSamples>())
 	;
 	register_pointer_conversions<DfMuxBoardSamples>();
