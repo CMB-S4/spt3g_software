@@ -1,0 +1,54 @@
+#!/usr/bin/env python
+
+import argparse as ap
+import os, glob
+from spt3g import core, maps
+
+P = ap.ArgumentParser(
+    description="Coadd map frames from input files into a single output map frame"
+)
+P.add_argument("inputs", nargs="+", help="Input g3 files.  May be glob-able strings")
+P.add_argument("-o", "--output", default="map_coadd.g3", help="Output g3 file")
+P.add_argument(
+    "-m",
+    "--map-ids",
+    nargs="+",
+    help="Id's of map frames to include in the coadd.  If not set, all map frames are included.",
+)
+P.add_argument("-i", "--output-map-id", help="Id for output coadd map frame")
+
+args = P.parse_args()
+
+args.inputs = sum([glob.glob(x) for x in args.inputs], [])
+args.inputs = [x for x in args.inputs if os.path.splitext(x)[-1].startswith(".g3")]
+
+pipe = core.G3Pipeline()
+
+pipe.Add(core.G3Reader, filename=args.inputs)
+
+# drop metadata frames
+pipe.Add(lambda fr: fr.type == core.G3FrameType.Map)
+
+# build coadded map with consistently handled weights
+pipe.Add(maps.ApplyWeights)
+pipe.Add(
+    maps.CoaddMaps,
+    map_ids=args.map_ids,
+    output_map_id=args.output_map_id,
+)
+pipe.Add(lambda fr: "Id" not in fr or fr["Id"] == args.output_map_id)
+
+
+# record input parameters
+def RecordInputs(fr):
+    if fr.type != core.G3FrameType.Map:
+        return
+    fr["InputFiles"] = core.G3VectorString(args.inputs)
+    fr["InputMapIds"] = core.G3VectorString(args.map_ids)
+
+
+pipe.Add(RecordInputs)
+
+pipe.Add(core.G3Writer, filename=args.output)
+
+pipe.Run()

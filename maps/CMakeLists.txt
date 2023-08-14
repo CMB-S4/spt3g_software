@@ -23,6 +23,8 @@ link_openmp(maps)
 
 link_python_dir()
 
+add_spt3g_program(bin/spt3g-coadd-maps)
+
 add_spt3g_test(quatangtest)
 add_spt3g_test(transtest SLOWTEST)
 add_spt3g_test(flatsky_maps)
