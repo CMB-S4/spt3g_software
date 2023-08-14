@@ -516,22 +516,25 @@ class CoaddMaps(object):
         If False (default), a warning is issued when the frame contains weighted
         Stokes maps without a weights map.  Set this option to True when feeding
         single bolometer map frames with common weights through a pipeline.
+    ensure_weighted_maps : bool
+        If True (default), ensure that maps have had weights applied before
+        coadding.  Otherwise, blindly coadds all input maps.
     """
 
-    def __init__(self, map_ids=None, output_map_id=None, ignore_missing_weights=False):
+    def __init__(self, map_ids=None, output_map_id=None, ignore_missing_weights=False, ensure_weighted_maps=True):
         self.coadd_frame = core.G3Frame(core.G3FrameType.Map)
-        self.coadd_frame["Id"] = output_map_id
+        if output_map_id is not None:
+            self.coadd_frame["Id"] = output_map_id
         if isinstance(map_ids, str):
             map_ids = [map_ids]
         self.map_ids = map_ids
         self.ignore_missing_weights = ignore_missing_weights
+        self.ensure_weighted_maps = ensure_weighted_maps
 
     def __call__(self, frame):
 
         if frame.type == core.G3FrameType.EndProcessing:
-            coadd = self.coadd_frame
-            self.coadd_frame = None
-            return [coadd, frame]
+            return [self.coadd_frame, frame]
 
         if "Id" not in frame:
             return
@@ -541,7 +544,7 @@ class CoaddMaps(object):
 
         ValidateMaps(frame, ignore_missing_weights=self.ignore_missing_weights)
         input_weighted = True
-        if not frame["T"].weighted:
+        if not self.ensure_weighted_maps and not frame["T"].weighted:
             input_weighted = False
             ApplyWeights(frame)
 
