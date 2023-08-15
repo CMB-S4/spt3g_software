@@ -4,7 +4,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
-#ifdef Boost_BZIP2_FOUND
+#ifdef BZIP2_FOUND
 #include <boost/iostreams/filter/bzip2.hpp>
 #endif
 #include <boost/iostreams/device/file.hpp>
@@ -26,7 +26,7 @@ g3_istream_from_path(boost::iostreams::filtering_istream &stream,
 	if (boost::algorithm::ends_with(path, ".gz"))
 		stream.push(boost::iostreams::gzip_decompressor());
 	if (boost::algorithm::ends_with(path, ".bz2")) {
-#ifdef Boost_BZIP2_FOUND
+#ifdef BZIP2_FOUND
 		stream.push(boost::iostreams::bzip2_decompressor());
 #else
 		log_fatal("Boost not compiled with bzip2 support.");

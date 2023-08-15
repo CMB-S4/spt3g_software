@@ -65,10 +65,4 @@ if(NOT DEFINED Boost_PYTHON_TYPE)
 	endif()
 endif()
 
-# look for boost
-if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.19")
-	find_package(Boost REQUIRED COMPONENTS system iostreams filesystem ${Boost_PYTHON_TYPE} OPTIONAL_COMPONENTS bzip2)
-else(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.19")
-	find_package(Boost COMPONENTS system iostreams filesystem ${Boost_PYTHON_TYPE} REQUIRED)
-	set(Boost_BZIP2_FOUND FALSE)
-endif(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.19")
+find_package(Boost COMPONENTS system iostreams filesystem ${Boost_PYTHON_TYPE} REQUIRED)

@@ -35,8 +35,9 @@ if(FLAC_FOUND)
 	target_link_libraries(core ${FLAC_LIBRARIES})
 endif()
 
-if(Boost_BZIP2_FOUND)
-	target_compile_definitions(core PRIVATE -DBoost_BZIP2_FOUND)
+find_package(BZip2)
+if(BZIP2_FOUND)
+	target_compile_definitions(core PRIVATE -DBZIP2_FOUND)
 endif()
 
 link_python_dir()

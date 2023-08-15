@@ -27,7 +27,7 @@ jobs:
         elif [ `echo ${{matrix.os}} | cut -d - -f 1` = "macOS" ]; then
           brew install python@3.10
           brew link --overwrite python@3.10
-          brew install boost boost-python3 flac netcdf
+          brew install bzip2 boost boost-python3 flac netcdf
         else
           echo 'No installed package manager!'
           exit 1
