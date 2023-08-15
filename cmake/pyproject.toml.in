@@ -5,7 +5,7 @@ description = "SPT3G Analysis and DAQ Software"
 authors = ["SPT Collaboration"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.7"
 numpy = "^1.15"
 astropy = "^5"
 scipy = "^1.4.1"
