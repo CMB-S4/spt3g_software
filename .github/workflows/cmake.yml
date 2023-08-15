@@ -15,7 +15,7 @@ jobs:
     runs-on: ${{ matrix.os}}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
   
     - name: Install OS Dependencies
       shell: bash
@@ -23,11 +23,11 @@ jobs:
         if [ `echo ${{matrix.os}} | cut -d - -f 1` = "ubuntu" ]; then
           sudo apt-get --allow-releaseinfo-change update -y
           [ `echo ${{matrix.os}} | cut -d . -f 1` = "ubuntu-20" ] && sudo apt-get install python-is-python3
-          sudo apt-get install libboost-all-dev libflac-dev libnetcdf-dev python python3 python3-pip python3-setuptools
+          sudo apt-get install libbz2-dev libboost-all-dev libflac-dev libnetcdf-dev python python3 python3-pip python3-setuptools
         elif [ `echo ${{matrix.os}} | cut -d - -f 1` = "macOS" ]; then
           brew install python@3.10
           brew link --overwrite python@3.10
-          brew install boost boost-python3 flac netcdf
+          brew install bzip2 boost boost-python3 flac netcdf
         else
           echo 'No installed package manager!'
           exit 1
@@ -86,8 +86,8 @@ jobs:
         cp -r ${{runner.workspace}}/build/docs/* gh-pages/
         cd gh-pages
         touch .nojekyll
-        git config --local user.name github-actions
-        git config --local user.email github-actions@github.com
+        git config --local user.name github-actions[bot]
+        git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
         git add .
         git commit -m "Update documentation" -a || true
         git push

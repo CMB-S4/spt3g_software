@@ -40,6 +40,10 @@ template <class A> void BolometerProperties::serialize(A &ar, unsigned v)
 		ar & make_nvp("pixel_type", pixel_type);
 	}
 
+	if (v > 6) {
+		ar & make_nvp("center_frequency", center_frequency);
+		ar & make_nvp("bandwidth", bandwidth);
+	}
 }
 
 std::string BolometerProperties::Description() const
@@ -63,7 +67,11 @@ PYBINDINGS("calibration") {
 	    .def_readwrite("y_offset", &BolometerProperties::y_offset,
 	       "Vertical pointing offset relative to boresight in angular units.")
 	    .def_readwrite("band", &BolometerProperties::band,
-	       "Center of detector observing band in frequency units")
+	       "Nominal center of detector observing band in frequency units")
+	    .def_readwrite("center_frequency", &BolometerProperties::center_frequency,
+	       "Measured center of detector observing band in frequency units")
+	    .def_readwrite("bandwidth", &BolometerProperties::bandwidth,
+	       "Measured bandwidth of detector observing band in frequency units")
 	    .def_readwrite("pol_angle", &BolometerProperties::pol_angle,
 	       "Polarization angle in angular units")
 	    .def_readwrite("pol_efficiency", &BolometerProperties::pol_efficiency,
@@ -72,7 +80,7 @@ PYBINDINGS("calibration") {
 	       "Optical coupling type")
 
 	    .def_readwrite("wafer_id", &BolometerProperties::wafer_id,
-	       "Name of the name this detector is on")
+	       "Name of the wafer this detector is on")
 	    .def_readwrite("pixel_id", &BolometerProperties::pixel_id,
 	       "Name of the pixel of which this detector is a part")
 	    .def_readwrite("pixel_type", &BolometerProperties::pixel_type,

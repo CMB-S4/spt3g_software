@@ -35,6 +35,17 @@ if(FLAC_FOUND)
 	target_link_libraries(core ${FLAC_LIBRARIES})
 endif()
 
+# Link against BZIP2 library
+if(NOT DEFINED WITH_BZIP2)
+	set(WITH_BZIP2 TRUE CACHE BOOL "Enable bzip2 file compression")
+endif()
+if(WITH_BZIP2)
+	find_package(BZip2)
+endif()
+if(BZIP2_FOUND)
+	target_compile_definitions(core PRIVATE -DBZIP2_FOUND)
+endif()
+
 link_python_dir()
 
 add_spt3g_program(bin/spt3g-dump)
@@ -59,6 +70,9 @@ add_spt3g_test(fileio)
 add_spt3g_test(multifileio)
 add_spt3g_test(splitfileio)
 add_spt3g_test(compressedfileio)
+if(BZIP2_FOUND)
+	add_spt3g_test(bz2fileio)
+endif()
 add_spt3g_test(portability)
 add_spt3g_test(vecint)
 add_spt3g_test(ts_bufferprotocol)
@@ -79,3 +93,9 @@ add_spt3g_test(cached_frame)
 add_spt3g_test(pipelineinfo)
 add_spt3g_test(quaternions)
 add_spt3g_test(timesample)
+
+add_spt3g_test_program(test
+                       SOURCE_FILES
+                         ${CMAKE_CURRENT_SOURCE_DIR}/tests/G3TimestreamTest.cxx
+                         ${CMAKE_CURRENT_SOURCE_DIR}/tests/G3TimestreamMapTest.cxx
+                       USE_PROJECTS core)

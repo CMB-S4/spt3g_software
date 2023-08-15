@@ -9,6 +9,7 @@ add_spt3g_library(maps SHARED
   src/MapBinner.cxx
   src/MapMockObserver.cxx
   src/MapTODMasker.cxx
+  src/MapTODPointing.cxx
   src/SingleDetectorBoresightBinner.cxx
   src/SingleDetectorMapBinner.cxx
   src/mapdata.cxx
@@ -32,3 +33,4 @@ add_spt3g_test(mask_operators)
 add_spt3g_test(healpix_maps)
 add_spt3g_test(fitsio)
 add_spt3g_test(map_modules)
+add_spt3g_test(mask_serialization_test)

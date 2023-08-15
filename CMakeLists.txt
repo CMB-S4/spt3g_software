@@ -161,6 +161,10 @@ add_custom_target(fasttest COMMAND ctest -LE SLOWTEST COMMENT "Running fast test
 configure_file(${CMAKE_SOURCE_DIR}/cmake/test_env.py.in ${CMAKE_BINARY_DIR}/test_env.py @ONLY)
 configure_file(${CMAKE_SOURCE_DIR}/cmake/CTestCustom.cmake.in ${CMAKE_BINARY_DIR}/CTestCustom.cmake @ONLY)
 
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.17)
+	list(APPEND CMAKE_CTEST_ARGUMENTS "--output-on-failure")
+endif(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.17)
+
 # Target for version string
 add_custom_target(version ALL
 	COMMAND sh ${CMAKE_SOURCE_DIR}/cmake/getvers.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}
@@ -270,6 +274,9 @@ foreach(lib ${SPT3G_LIBRARIES})
 		endforeach(item ${INCLUDE_ITEMS})
 	endif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${lib}/include/)
 endforeach(lib ${SPT3G_LIBRARIES})
+
+# cmake doesn't generally have headers, but we want to provide the test header
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake/G3Test.h DESTINATION ${INCLUDE_INSTALL_DIR})
 
 # Target for uninstalling
 configure_file(

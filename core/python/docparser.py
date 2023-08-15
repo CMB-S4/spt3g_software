@@ -48,13 +48,13 @@ def get_doc_for_module(module_path, include_link_list = True):
 
     def format_object(modname, x):
         name = '%s.%s' % (modname, x)
-        return '\n.. _%s:\n\n%s\n%s\n' % (name, name, '_' * len(name))
+        return '\n.. _%s:\n\n%s\n%s\n' % (name, name, '-' * len(name))
     def format_name(modname, x):
         return '\n.. _%s.%s:\n\n**%s.%s**\n' % (modname, x, modname, x)
-    def format_arguments(s0,s1):
-        # remove object hashes
-        s1 = re.sub('<(.*) at (.*)>', '<\\1>', s1)
-        argdef = '%s%s'%(s0,s1)
+    def format_signature(obj):
+        return re.sub('<(.*) at (.*)>', '<\\1>', str(inspect.signature(obj)))
+    def format_definition(name, obj):
+        argdef = '%s%s' % (name, format_signature(obj))
         return '\n\n*Definition:*\n        ``%s``\n' % argdef.strip()
     def add_str(s0, s1):
         return s0 + s1 + '\n'
@@ -99,10 +99,10 @@ def get_doc_for_module(module_path, include_link_list = True):
                     # in py3, all functions have an __init__, so check if we are dealing with a function first
                     # this logic should be backward-compatible with py2
                     if inspect.isfunction(obj):
-                        out_str = add_str(out_str, format_arguments(x, inspect.formatargspec(*inspect.getargspec(obj))))
+                        out_str = add_str(out_str, format_definition(x, obj))
                     else:
                         out_str = add_str(out_str, '\n*Constructor:*\n\t``%s%s``\n' %
-                                          ((x, inspect.formatargspec(*inspect.getargspec(obj.__init__))) ) )
+                                          ((x, format_signature(obj.__init__)) ) )
                         if format_doc(obj.__init__):
                             con_str = '\n*Constructor:*\n\t%s\n' % format_doc(obj.__init__).replace('\n', '\n\t')
                             con_str = con_str.replace(' -> None', ' -> None``')
@@ -122,7 +122,7 @@ def get_doc_for_module(module_path, include_link_list = True):
                         out_str = add_str(out_str, baredoc)
                 else:
                     out_str = add_str(out_str, '\nNo documentation\n')
-                out_str = add_str(out_str, format_arguments(x, inspect.formatargspec(*inspect.getargspec(obj))))
+                out_str = add_str(out_str, format_definition(x, obj))
                 mod_dict[itemname] = out_str
             elif hasattr(obj, '__dict__'):
                 mod_dict.update(iterate_through_mod(obj, itemname))
@@ -166,7 +166,7 @@ def get_doc_for_module(module_path, include_link_list = True):
                     if subclasstest:
                         out_str = out_str 
                 try:
-                    out_str = add_str(out_str, format_arguments(x, inspect.formatargspec(*inspect.getargspec(obj))))
+                    out_str = add_str(out_str, format_definition(x, obj))
                 except:
                     pass
                 out_str = add_str(out_str, '')

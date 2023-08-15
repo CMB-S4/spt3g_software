@@ -93,6 +93,13 @@ static void flac_decoder_error_cb(const FLAC__StreamDecoder *decoder,
 		log_fatal("FLAC decoding error (%d)", status);
 	}
 }
+
+extern "C"{
+	// Provide our own declaration of this function.
+	// This libFLAC interface is private but stable, and this use is officially sanctioned:
+	// https://github.com/xiph/flac/commit/3baaf23faa05eca1cfc34737d95131ad0b628d4c
+	FLAC__bool FLAC__stream_encoder_set_do_md5(FLAC__StreamEncoder *encoder, FLAC__bool value);
+}
 #endif
 
 template <class A> void G3Timestream::save(A &ar, unsigned v) const
@@ -117,9 +124,30 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 
 		// Copy to 24-bit integers
 		inbuf.resize(size());
-		for (size_t i = 0; i < size(); i++)
-			inbuf[i] = ((int32_t((*this)[i]) & 0x00ffffff) << 8)
-			    >> 8;
+		switch (data_type_) {
+			case TS_DOUBLE:
+				for (size_t i = 0; i < size(); i++)
+					inbuf[i] = ((int32_t(((double *)data_)[i]) & 0x00ffffff) << 8) >> 8;
+				break;
+			case TS_FLOAT:
+				for (size_t i = 0; i < size(); i++)
+					inbuf[i] = ((int32_t(((float *)data_)[i]) & 0x00ffffff) << 8) >> 8;
+				break;
+			case TS_INT32:
+				{
+					// Using this rather raw form for the loop can enable automatic
+					// unrolling and vectorization.
+					int32_t* in_ptr=(int32_t *)data_;
+					int32_t* out_ptr=&inbuf[0];
+					for(int32_t* end=in_ptr+size(); in_ptr!=end; in_ptr++,out_ptr++)
+						*out_ptr = ((*in_ptr & 0x00ffffff) << 8) >> 8;
+				}
+				break;
+			case TS_INT64:
+				for (size_t i = 0; i < size(); i++)
+					inbuf[i] = ((int32_t(((int64_t *)data_)[i]) & 0x00ffffff) << 8) >> 8;
+				break;
+		}
 		chanmap[0] = &inbuf[0];
 
 		// Mark bad samples using an out-of-band signal. Since we
@@ -130,11 +158,13 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 		// rare case that only some samples are valid, store a
 		// validity mask.
 		std::vector<bool> nanbuf(size(), false);
-		for (size_t i = 0; i < size(); i++) {
-			if (!std::isfinite((*this)[i])) {
-				nans++;
-				nanbuf[i] = true;
-				inbuf[i] = 0;
+		if(data_type_==TS_DOUBLE || data_type_==TS_FLOAT){
+			for (size_t i = 0; i < size(); i++) {
+				if (!std::isfinite((*this)[i])) {
+					nans++;
+					nanbuf[i] = true;
+					inbuf[i] = 0;
+				}
 			}
 		}
 		nanflag = SomeNan;
@@ -152,6 +182,7 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 		// XXX: should assert if high-order 8 bits are not clear
 		FLAC__stream_encoder_set_bits_per_sample(encoder, 24);
 		FLAC__stream_encoder_set_compression_level(encoder, use_flac_);
+		FLAC__stream_encoder_set_do_md5(encoder, false);
 		FLAC__stream_encoder_init_stream(encoder,
 		    flac_encoder_write_cb, NULL, NULL, NULL, (void*)(&outbuf));
 		FLAC__stream_encoder_process (encoder, chanmap, inbuf.size());
@@ -237,6 +268,7 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 		callback.outbuf->reserve(callback.nbytes);
 
 		FLAC__StreamDecoder *decoder = FLAC__stream_decoder_new();
+		FLAC__stream_decoder_set_md5_checking(decoder, false);
 		FLAC__stream_decoder_init_stream(decoder,
 		    flac_decoder_read_cb<A>, NULL, NULL, NULL, NULL,
 		    flac_decoder_write_cb<A>, NULL, flac_decoder_error_cb,
@@ -657,10 +689,10 @@ G3Time G3TimestreamMap::GetStartTime() const
 	return begin()->second->start;
 }
 
-static void timestream_map_set_start_time(G3TimestreamMap &map, G3Time start)
+void G3TimestreamMap::SetStartTime(G3Time start)
 {
-	for (auto i = map.begin(); i != map.end(); i++)
-		i->second->start = start;
+	for (auto& ts : *this)
+		ts.second->start = start;
 }
 
 G3Time G3TimestreamMap::GetStopTime() const
@@ -671,10 +703,10 @@ G3Time G3TimestreamMap::GetStopTime() const
 	return begin()->second->stop;
 }
 
-static void timestream_map_set_stop_time(G3TimestreamMap &map, G3Time stop)
+void G3TimestreamMap::SetStopTime(G3Time stop)
 {
-	for (auto i = map.begin(); i != map.end(); i++)
-		i->second->stop = stop;
+	for (auto& ts : *this)
+		ts.second->stop = stop;
 }
 
 double G3TimestreamMap::GetSampleRate() const
@@ -699,6 +731,18 @@ G3Timestream::TimestreamUnits G3TimestreamMap::GetUnits() const
 		return G3Timestream::None;
 
 	return begin()->second->units;
+}
+
+void G3TimestreamMap::SetUnits(G3Timestream::TimestreamUnits units)
+{
+	for (auto& ts : *this)
+		ts.second->units = units;
+}
+
+void G3TimestreamMap::SetFLACCompression(int compression_level)
+{
+	for (auto& ts : *this)
+		ts.second->use_flac_ = compression_level;
 }
 
 void G3TimestreamMap::Compactify()
@@ -987,7 +1031,7 @@ struct PyBufferOwner {
 static G3TimestreamMapPtr
 G3TimestreamMap_from_numpy(std::vector<std::string> keys,
     boost::python::object data, G3Time start, G3Time stop,
-    G3Timestream::TimestreamUnits units, bool copy_data)
+    G3Timestream::TimestreamUnits units, int compression_level, bool copy_data)
 {
 	G3TimestreamMapPtr x(new G3TimestreamMap);
 
@@ -1033,6 +1077,7 @@ G3TimestreamMap_from_numpy(std::vector<std::string> keys,
 	templ.units = units;
 	templ.start = start;
 	templ.stop = stop;
+	templ.SetFLACCompression(compression_level);
 	templ.data_type_;
 	if (strcmp(v->v.format, "d") == 0) {
 		templ.data_type_ = G3Timestream::TS_DOUBLE;
@@ -1245,6 +1290,9 @@ PYBINDINGS("core") {
 	      "Computed sample rate of the timestream.")
 	    .add_property("n_samples", &G3Timestream::G3TimestreamPythonHelpers::G3Timestream_nsamples,
 	      "Number of samples in the timestream. Equivalent to len(ts)")
+	    .add_property("compression_level", &G3Timestream::GetCompressionLevel,
+	      &G3Timestream::SetFLACCompression, "Level of FLAC compression used for this timestream. "
+	      "This can only be non-zero if the timestream is in units of counts.")
 	    .def("_assert_congruence", &G3Timestream::G3TimestreamPythonHelpers::G3Timestream_assert_congruence,
 	      "log_fatal() if units, length, start, or stop times do not match")
 	    .def("_cxxslice", &G3Timestream::G3TimestreamPythonHelpers::G3Timestream_getslice, "Slice-only __getitem__")
@@ -1262,7 +1310,16 @@ PYBINDINGS("core") {
 
 	bp::object tsm =
 	  EXPORT_FRAMEOBJECT(G3TimestreamMap, init<>(), "Collection of timestreams indexed by logical detector ID")
-	    .def("__init__", bp::make_constructor(G3Timestream::G3TimestreamPythonHelpers::G3TimestreamMap_from_numpy, bp::default_call_policies(), (bp::arg("keys"), bp::arg("data"), bp::arg("start")=G3Time(0), bp::arg("stop")=G3Time(0), bp::arg("units") = G3Timestream::TimestreamUnits::None, bp::arg("copy_data") = true)), "Create a timestream map from a numpy array or other numeric python iterable. Each row of the 2D input array will correspond to a single timestream, with the key set to the correspondingly-indexed entry of <keys>. If <copy_data> is True (default), the data will be copied into the output data structure. If False, the timestream map will provide a view into the given numpy array.")
+	    .def("__init__", bp::make_constructor(G3Timestream::G3TimestreamPythonHelpers::G3TimestreamMap_from_numpy, 
+	         bp::default_call_policies(),
+	         (bp::arg("keys"), bp::arg("data"), bp::arg("start")=G3Time(0),
+	          bp::arg("stop")=G3Time(0), bp::arg("units") = G3Timestream::TimestreamUnits::None,
+	          bp::arg("compression_level") = 0, bp::arg("copy_data") = true)),
+	         "Create a timestream map from a numpy array or other numeric python iterable. "
+	         "Each row of the 2D input array will correspond to a single timestream, with "
+	         "the key set to the correspondingly-indexed entry of <keys>. If <copy_data> "
+	         "is True (default), the data will be copied into the output data structure. "
+	         "If False, the timestream map will provide a view into the given numpy array.")
 	    .def(bp::std_map_indexing_suite<G3TimestreamMap, true>())
 	    .def("CheckAlignment", &G3TimestreamMap::CheckAlignment)
 	    .def("Compactify", &G3TimestreamMap::Compactify,
@@ -1270,10 +1327,10 @@ PYBINDINGS("core") {
 	       "data into a contiguous block. Requires timestreams be aligned "
 	       "and the same data type. Done implicitly by numpy.asarray().")
 	    .add_property("start", &G3TimestreamMap::GetStartTime,
-	      &timestream_map_set_start_time,
+	      &G3TimestreamMap::SetStartTime,
 	      "Time of the first sample in the time stream")
 	    .add_property("stop", &G3TimestreamMap::GetStopTime,
-	      &timestream_map_set_stop_time,
+	      &G3TimestreamMap::SetStopTime,
 	      "Time of the final sample in the time stream")
 	    .add_property("sample_rate", &G3TimestreamMap::GetSampleRate,
 	      "Computed sample rate of the timestream.")

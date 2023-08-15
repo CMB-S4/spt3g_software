@@ -671,10 +671,10 @@ FlatSkyProjection::QueryDisc(double alpha, double delta, double radius, bool loc
 	double pvb = pv.R_component_3();
 	double pvc = pv.R_component_4();
 
-	size_t xmin = xpix_;
-	size_t xmax = 0;
-	size_t ymin = ypix_;
-	size_t ymax = 0;
+	long xmin = xpix_;
+	long xmax = 0;
+	long ymin = ypix_;
+	long ymax = 0;
 
 	double a, d;
 	double phi = 0;
@@ -687,10 +687,10 @@ FlatSkyProjection::QueryDisc(double alpha, double delta, double radius, bool loc
 		double s = sin(phi / 2.0);
 		quat q = quat(c, pva * s, pvb * s, pvc * s);
 		auto xy = QuatToXY(q * p / q, local);
-		size_t fx = std::floor(xy[0]);
-		size_t cx = std::ceil(xy[0]);
-		size_t fy = std::floor(xy[1]);
-		size_t cy = std::ceil(xy[1]);
+		long fx = std::floor(xy[0]);
+		long cx = std::ceil(xy[0]);
+		long fy = std::floor(xy[1]);
+		long cy = std::ceil(xy[1]);
 		if (fx < xmin)
 			xmin = fx < 0 ? 0 : fx;
 		if (cx > xmax)
@@ -725,6 +725,14 @@ FlatSkyProjection FlatSkyProjection::Rebin(size_t scale, double x_center, double
 	fp.xpix_ /= scale;
 	fp.ypix_ /= scale;
 	fp.SetRes(y_res_ * scale, x_res_ * scale);
+
+	// Use correct center for extracted patch
+	if (x_center != x_center && xc_ != (xpix_ / 2.0 - 0.5))
+		x_center = (xc_ - xpix_ / 2) / scale + fp.xpix_ / 2;
+
+	if (y_center != y_center && yc_ != (ypix_ / 2.0 - 0.5))
+		y_center = (yc_ - ypix_ / 2) / scale + fp.ypix_ / 2;
+
 	fp.SetXYCenter(x_center, y_center);
 
 	return fp;
