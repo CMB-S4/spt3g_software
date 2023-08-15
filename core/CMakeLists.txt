@@ -35,6 +35,10 @@ if(FLAC_FOUND)
 	target_link_libraries(core ${FLAC_LIBRARIES})
 endif()
 
+if(Boost_BZIP2_FOUND)
+	target_compile_definitions(core PRIVATE -DBoost_BZIP2_FOUND)
+endif()
+
 link_python_dir()
 
 add_spt3g_program(bin/spt3g-dump)
