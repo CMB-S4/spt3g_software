@@ -45,7 +45,7 @@ else()
 endif()
 
 # suppress configuration warnings in newer cmake / boost versions
-if (NOT DEFINED CMAKE_FIND_PACKAGE_PREFER_CONFIG)
+if(NOT DEFINED CMAKE_FIND_PACKAGE_PREFER_CONFIG)
 	set(CMAKE_FIND_PACKAGE_PREFER_CONFIG TRUE)
 endif()
 
