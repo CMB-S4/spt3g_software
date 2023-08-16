@@ -83,11 +83,13 @@ Passing ``-jN`` to ``make``, where N is the number of cores you wish to use duri
 
 By default, this will use the system's standard Python installation (whatever you get if you just run ``python``). If you want a different python, you can specify that python through passing the argument ``-DPYTHON_EXECUTABLE=`` to cmake. For example, to use Python 3 if Python 3 is not the default, replace the cmake command above with ``cmake -DPYTHON_EXECUTABLE=`which python3```. Note that, if you do this, make *sure* that a Boost library built for the version of Python you are using exists -- generally, installing everything from the system package manager will ensure this.
 
-Once that is complete, you can use the ``env-shell.sh`` script in the build directory to set up the appropriate environment variables (PYTHONPATH, etc.):
+Once that is complete, you can either use the ``env-shell.sh`` script in the build directory to set up the appropriate environment variables (PYTHONPATH, etc.):
 
 .. code-block:: sh
 
 	./env-shell.sh
+
+or you can ``pip install -e /path/to/spt3g_software/build`` (needs pip>=22) or ``poetry add -e /path/to/spt3g_software/build`` to partially install spt3g_software and all of its Python dependencies in "editable mode" into whatever Python environment you'd like. In either case 1) the ``build`` directory should be kept around, since the installation will read directly from this folder, and 2) the version of Python in the environment you are using should be the same as the one used to build spt3g_software.  Note that this method does not install the headers and compiled binaries for use by downstream projects; the installation instructions below provide a more complete method for this.
 
 Installation
 ============
