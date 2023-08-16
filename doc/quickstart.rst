@@ -89,7 +89,7 @@ Once that is complete, you can either use the ``env-shell.sh`` script in the bui
 
 	./env-shell.sh
 
-or you can ``pip install -e /path/to/spt3g_software/build`` (needs pip>=22) or ``poetry add -e /path/to/spt3g_software/build`` to install spt3g_software and all of its Python dependencies in "editable mode" into whatever Python environment you'd like. In either case 1) the ``build`` directory should be kept around, since the installation will read directly from this folder, and 2) the version of Python in the environment you are using should be the same as the one used to build spt3g_software.
+or you can ``pip install -e /path/to/spt3g_software/build`` (needs pip>=22) or ``poetry add -e /path/to/spt3g_software/build`` to partially install spt3g_software and all of its Python dependencies in "editable mode" into whatever Python environment you'd like. In either case 1) the ``build`` directory should be kept around, since the installation will read directly from this folder, and 2) the version of Python in the environment you are using should be the same as the one used to build spt3g_software.  Note that this method does not install the headers and compiled binaries for use by downstream projects; the installation instructions below provide a more complete method for this.
 
 Installation
 ============
