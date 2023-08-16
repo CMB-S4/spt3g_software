@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "spt3g"
+version = "$Version$"
+description = "SPT3G Analysis and DAQ Software"
+authors = ["SPT Collaboration"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+numpy = "^1.15"
+astropy = "^5"
+scipy = "^1.4.1"
+pandas = "^1"
+healpy = "^1.13"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
