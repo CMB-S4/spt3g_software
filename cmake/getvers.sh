@@ -129,7 +129,7 @@ elif [ -d .git ]; then
 		echo localdiffs=False
 	fi
 	echo versionname=\"$(git tag -l --points-at HEAD 2>/dev/null)\"
-	echo fullversion=\"$(git describe --always --tags --dirty 2>/dev/null)\"
+	echo fullversion=\"$fullversion_pep440\"
 else
 	echo upstream_url=\"UNKNOWN VCS\"
 	echo upstream_branch=\"UNKNOWN VCS\"
