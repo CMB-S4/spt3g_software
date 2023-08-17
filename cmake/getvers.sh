@@ -6,9 +6,10 @@ set -e
 cd $1
 
 # PEP440-compliant version number for pyproject.toml
-if [ -d .git ]; then
-	# replaces first - with .dev and second - with +, so e.g. 0.3-154-gd36baf4a becomes 0.3.dev154+gd36baf4a
-	fullversion_pep440=$(echo $(git describe --always --tags 2>/dev/null) | sed 's/-/.dev/' | sed 's/-/+/')
+if [ -e .git ]; then
+	# removes starting characters, so e.g. autoprocessing-0.3-154-gd36baf4a becomes just 0.3-154-gd36baf4a
+	# then replaces first - with .dev and second - with +, so e.g. 0.3-154-gd36baf4a becomes 0.3.dev154+gd36baf4a
+	fullversion_pep440=$(echo $(git describe --always --tags 2>/dev/null) | sed 's/^[^0-9]*//' | sed 's/-/.dev/' | sed 's/-/+/')
 fi
 fullversion_pep440="${fullversion_pep440:-0.1.0+unknown}" # fallback for SVN or error above
 sed "s/\\\$Version\\\$/$fullversion_pep440/" $1/cmake/pyproject.toml.in > $2/pyproject.toml
@@ -108,7 +109,7 @@ if [ -d .svn ]; then
 			echo fullversion=\"$(echo $revision)\"
 		fi
 	fi
-elif [ -d .git ]; then
+elif [ -e .git ]; then
 	if (git rev-parse --abbrev-ref --symbolic-full-name @{u}>/dev/null 2>/dev/null); then
 		remote_branch=$(git rev-parse --abbrev-ref --symbolic-full-name @{u})
 		if (git remote get-url 1>&2 2>/dev/null); then
