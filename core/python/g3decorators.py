@@ -89,7 +89,7 @@ Cached Values
 
             def __call__(self, frame):
                 for vname, stored_key in self.argument_map.items():
-                    if stored_key in frame:
+                    if stored_key and stored_key in frame:
                         self.kwargs[vname] = frame[stored_key]
                 if self_outer.type is None or frame.type == self_outer.type:
                     return f(frame, *(self.args), **(self.kwargs))
