@@ -521,7 +521,13 @@ class CoaddMaps(object):
         coadding.  Otherwise, blindly coadds all input maps.
     """
 
-    def __init__(self, map_ids=None, output_map_id=None, ignore_missing_weights=False, ensure_weighted_maps=True):
+    def __init__(
+        self,
+        map_ids=None,
+        output_map_id=None,
+        ignore_missing_weights=False,
+        ensure_weighted_maps=True,
+    ):
         self.coadd_frame = core.G3Frame(core.G3FrameType.Map)
         if output_map_id is not None:
             self.coadd_frame["Id"] = output_map_id
