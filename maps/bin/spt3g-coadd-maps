@@ -1,104 +1,40 @@
 #!/usr/bin/env python
 
-from spt3g import core, maps
+import argparse as ap
+import os, glob
+from spt3g import maps
 
+P = ap.ArgumentParser(
+    description="Coadd map frames from input files into a single output map frame"
+)
+P.add_argument(
+    "input_files", nargs="+", help="Input g3 files.  May be glob-able strings"
+)
+P.add_argument("-o", "--output-file", default="map_coadd.g3", help="Output g3 file")
+P.add_argument(
+    "-m",
+    "--map-ids",
+    nargs="+",
+    help="Id's of map frames to include in the coadd.  If not set, all map frames are included.",
+)
+P.add_argument(
+    "-c",
+    "--collate",
+    action="store_true",
+    help="Coadd each input map Id into a separate output map frame.  In this case, the "
+    "output map Id is treated as a prefix, with the input map Id appended to the string.",
+)
+P.add_argument("-i", "--output-map-id", help="Id for output coadd map frame")
+P.add_argument(
+    "-w",
+    "--weighted",
+    action="store_true",
+    help="Ensure that weights are applied before coadding.",
+)
 
-# record input parameters
-def RecordInputs(fr, coadd_id=None, map_ids=None, inputs=None):
-    if fr.type != core.G3FrameType.Map:
-        return
-    if coadd_id and "Id" in fr and fr["Id"] != coadd_id:
-        return
-    fr["InputFiles"] = core.G3VectorString(inputs)
-    fr["InputMapIds"] = core.G3VectorString(map_ids)
+args = P.parse_args()
 
+args.input_files = sum([glob.glob(x) for x in args.input_files], [])
+args.input_files = [x for x in args.input_files if os.path.splitext(x)[-1].startswith(".g3")]
 
-def coadd_maps(
-    inputs,
-    output="map_coadd.g3",
-    map_ids=None,
-    collate=False,
-    output_map_id=None,
-    weighted=False,
-):
-    pipe = core.G3Pipeline()
-    pipe.Add(core.G3Reader, filename=inputs)
-
-    # drop metadata frames
-    pipe.Add(lambda fr: fr.type == core.G3FrameType.Map)
-
-    # build coadded map with consistently handled weights
-    if weighted:
-        pipe.Add(maps.ApplyWeights)
-
-    if collate:
-        # coadd each map_id into a separate output frame
-        for mid in map_ids:
-            cid = output_map_id + mid if output_map_id else None
-            pipe.Add(
-                maps.CoaddMaps,
-                map_ids=[mid],
-                output_map_id=cid,
-                ensure_weighted_maps=False,
-            )
-            pipe.Add(RecordInputs, coadd_id=cid, map_ids=[mid], inputs=inputs)
-        pipe.Add(lambda fr: "Id" not in fr or fr["Id"].startswith(output_map_id))
-
-    else:
-        # coadd all map_id's into one output frame
-        pipe.Add(
-            maps.CoaddMaps,
-            map_ids=map_ids,
-            output_map_id=output_map_id,
-            ensure_weighted_maps=False,
-        )
-        pipe.Add(lambda fr: "Id" not in fr or fr["Id"] == output_map_id)
-        pipe.Add(
-            RecordInputs,
-            coadd_id=output_map_id,
-            map_ids=map_ids,
-            inputs=inputs,
-        )
-
-    pipe.Add(core.G3Writer, filename=output)
-    pipe.Run()
-
-
-if __name__ == "__main__":
-    import argparse as ap
-    import os, glob
-
-    P = ap.ArgumentParser(
-        description="Coadd map frames from input files into a single output map frame"
-    )
-    P.add_argument(
-        "inputs", nargs="+", help="Input g3 files.  May be glob-able strings"
-    )
-    P.add_argument("-o", "--output", default="map_coadd.g3", help="Output g3 file")
-    P.add_argument(
-        "-m",
-        "--map-ids",
-        nargs="+",
-        help="Id's of map frames to include in the coadd.  If not set, all map frames are included.",
-    )
-    P.add_argument(
-        "-c",
-        "--collate",
-        action="store_true",
-        help="Coadd each input map Id into a separate output map frame.  In this case, the "
-        "output map Id is treated as a prefix, with the input map Id appended to the string.",
-    )
-    P.add_argument("-i", "--output-map-id", help="Id for output coadd map frame")
-    P.add_argument(
-        "-w",
-        "--weighted",
-        action="store_true",
-        help="Ensure that weights are applied before coadding.",
-    )
-
-    args = P.parse_args()
-
-    args.inputs = sum([glob.glob(x) for x in args.inputs], [])
-    args.inputs = [x for x in args.inputs if os.path.splitext(x)[-1].startswith(".g3")]
-
-    coadd_maps(**vars(args))
+maps.coadd_map_files(**vars(args))

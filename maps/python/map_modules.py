@@ -15,6 +15,7 @@ __all__ = [
     "ReplicateMaps",
     "CoaddMaps",
     "ReprojectMaps",
+    "coadd_map_files",
 ]
 
 
@@ -565,6 +566,97 @@ class CoaddMaps(object):
 
         if not input_weighted:
             RemoveWeights(frame)
+
+
+@core.usefulfunc
+def coadd_map_files(
+    input_files,
+    output_file="map_coadd.g3",
+    map_ids=None,
+    collate=False,
+    output_map_id="Coadd",
+    weighted=False,
+):
+    """
+    Coadd map files, optionally collating map Id's into separate frames.
+
+    Arguments
+    ---------
+    input_files : list of str
+        List of input files to feed through the pipeline.
+    output_file : str
+        Output G3 filename.
+    map_ids : list of str
+        A list of map Id's to include in the coadd(s).
+    collate : bool
+        If True, coadd individual map Id's into separate map frames.
+        Otherwise, all map frames are coadded into one output frame.
+    output_map_id : str
+        Id to use for the output map frame.  If ``collate`` is True,
+        this is the prefix applied to each output frame, with the
+        input map Id appended to it.
+    weighted : bool
+        If True, ensure that weights have been applied before coadding.
+        Otherwise, the input maps are coadded as they are.
+
+    Returns
+    -------
+    maps : G3Frame or dict of G3Frames
+        If ``collate`` is True, returns a dictionary of map frames
+        keyed by Id.  Otherwise, returns a single map frame.
+    """
+
+    pipe = core.G3Pipeline()
+    pipe.Add(core.G3Reader, filename=input_files)
+
+    # drop metadata frames
+    pipe.Add(lambda fr: fr.type == core.G3FrameType.Map)
+
+    # build coadded map with consistently handled weights
+    if weighted:
+        pipe.Add(ApplyWeights)
+
+    if collate:
+        # coadd each map_id into a separate output frame
+        coadders = dict()
+        for mid in map_ids:
+            cid = output_map_id + mid
+            coadder = CoaddMaps(
+                map_ids=[mid],
+                output_map_id=cid,
+                ensure_weighted_maps=False,
+            )
+            coadder.coadd_frame["InputFiles"] = core.G3VectorString(input_files)
+            coadder.coadd_frame["InputMapIds"] = core.G3VectorString([mid])
+            coadders[cid] = coadder
+            pipe.Add(coadder)
+            pipe.Add(RecordInputs, coadd_id=cid, map_ids=[mid], input_files=input_files)
+
+    else:
+        # coadd all map_id's into one output frame
+        coadder = CoaddMaps(
+            map_ids=map_ids,
+            output_map_id=output_map_id,
+            ensure_weighted_maps=False,
+        )
+        coadder.coadd_frame["InputFiles"] = core.G3VectorString(input_files)
+        coadder.coadd_frame["InputMapIds"] = core.G3VectorString(map_ids)
+        pipe.Add(coadder)
+        pipe.Add(
+            RecordInputs,
+            coadd_id=output_map_id,
+            map_ids=map_ids,
+            input_files=input_files,
+        )
+
+    pipe.Add(lambda fr: "Id" not in fr or fr["Id"].startswith(output_map_id))
+
+    pipe.Add(core.G3Writer, filename=output)
+    pipe.Run()
+
+    if collate:
+        return {k: v.coadd_frame for k, v in coadders.items()}
+    return coadder.coadd_frame
 
 
 @core.indexmod
