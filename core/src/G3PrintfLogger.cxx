@@ -4,7 +4,7 @@
 #include <unistd.h>
 
 G3PrintfLogger::G3PrintfLogger(G3LogLevel level)
-    : G3Logger(level), TrimFileNames(true), Timestamps(false)
+    : G3Logger(level), TrimFileNames(true), Timestamps(true)
 {
 	tty_ = isatty(STDERR_FILENO);
 }

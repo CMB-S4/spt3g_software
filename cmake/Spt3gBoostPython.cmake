@@ -45,7 +45,9 @@ else()
 endif()
 
 # suppress configuration warnings in newer cmake / boost versions
-set(CMAKE_FIND_PACKAGE_PREFER_CONFIG TRUE)
+if(NOT DEFINED CMAKE_FIND_PACKAGE_PREFER_CONFIG)
+	set(CMAKE_FIND_PACKAGE_PREFER_CONFIG TRUE)
+endif()
 
 if(NOT DEFINED Boost_PYTHON_TYPE)
 	set(Boost_PYTHON_TYPE python)

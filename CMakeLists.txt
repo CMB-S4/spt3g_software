@@ -167,9 +167,9 @@ endif(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.17)
 
 # Target for version string
 add_custom_target(version ALL
-	COMMAND sh ${CMAKE_SOURCE_DIR}/cmake/getvers.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}/spt3g/version.py
-	COMMAND cmake -P ${CMAKE_SOURCE_DIR}/cmake/Spt3gVersion.cmake ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}
-	BYPRODUCTS ${CMAKE_BINARY_DIR}/spt3g/version.py ${CMAKE_BINARY_DIR}/cmake/Spt3gConfigVersion.cmake
+	COMMAND sh ${CMAKE_SOURCE_DIR}/cmake/getvers.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}
+	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_SOURCE_DIR}/cmake/Spt3gVersion.cmake ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}
+	BYPRODUCTS ${CMAKE_BINARY_DIR}/spt3g/version.py ${CMAKE_BINARY_DIR}/pyproject.toml ${CMAKE_BINARY_DIR}/cmake/Spt3gConfigVersion.cmake
 	COMMENT "Regenerating VCS version information"
 )
 
@@ -184,7 +184,7 @@ add_custom_target(tarball
 
 # Add target to generate documentation
 add_custom_target(docs
-	COMMAND cmake -P ${CMAKE_SOURCE_DIR}/cmake/gen_per_module_docs.cmake ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} ${Python_EXECUTABLE}
+	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_SOURCE_DIR}/cmake/gen_per_module_docs.cmake ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} ${Python_EXECUTABLE}
 	COMMAND mkdir -p ${CMAKE_BINARY_DIR}/docs
 	COMMAND which sphinx-build && sphinx-build -b html ${CMAKE_SOURCE_DIR}/doc ${CMAKE_BINARY_DIR}/docs || echo "Error: sphinx-build not found. Could not generate HTML docs."
 	COMMENT "Generate HTML documentation")
