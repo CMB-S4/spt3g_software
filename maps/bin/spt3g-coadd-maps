@@ -16,6 +16,12 @@ P.add_argument(
     help="Id's of map frames to include in the coadd.  If not set, all map frames are included.",
 )
 P.add_argument("-i", "--output-map-id", help="Id for output coadd map frame")
+P.add_argument(
+    "-w",
+    "--weighted",
+    action="store_true",
+    help="Ensure that weights are applied before coadding.",
+)
 
 args = P.parse_args()
 
@@ -30,11 +36,13 @@ pipe.Add(core.G3Reader, filename=args.inputs)
 pipe.Add(lambda fr: fr.type == core.G3FrameType.Map)
 
 # build coadded map with consistently handled weights
-pipe.Add(maps.ApplyWeights)
+if args.weighted:
+    pipe.Add(maps.ApplyWeights)
 pipe.Add(
     maps.CoaddMaps,
     map_ids=args.map_ids,
     output_map_id=args.output_map_id,
+    ensure_weighted_maps=False,
 )
 pipe.Add(lambda fr: "Id" not in fr or fr["Id"] == args.output_map_id)
 
