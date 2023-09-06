@@ -532,13 +532,13 @@ class CoaddMaps(object):
         appended.
     collate : bool
         If True, coadd unique map Id's into separate output map frames.
+    weighted : bool
+        If True (default), ensure that maps have had weights applied before
+        coadding.  Otherwise, coadd maps without checking the weights.
     ignore_missing_weights : bool
         If False (default), a warning is issued when the frame contains weighted
         Stokes maps without a weights map.  Set this option to True when feeding
         single bolometer map frames with common weights through a pipeline.
-    weighted : bool
-        If True (default), ensure that maps have had weights applied before
-        coadding.  Otherwise, coadd maps without checking the weights.
     drop_input_frames : bool
         If True, drop input map frames from the pipeline.
     """
@@ -624,8 +624,8 @@ def coadd_map_files(
     input_files,
     output_file=None,
     map_ids=None,
-    collate=False,
     output_map_id="Coadd",
+    collate=False,
     weighted=True,
 ):
     """
@@ -640,13 +640,13 @@ def coadd_map_files(
         returned without saving to disk.
     map_ids : list of str
         A list of map Id's to include in the coadd(s).
-    collate : bool
-        If True, coadd individual map Id's into separate map frames.
-        Otherwise, all map frames are coadded into one output frame.
     output_map_id : str
         Id to use for the output map frame.  If ``collate`` is True,
         this is the prefix applied to each output frame, with the
         input map Id appended to it.
+    collate : bool
+        If True, coadd individual map Id's into separate map frames.
+        Otherwise, all map frames are coadded into one output frame.
     weighted : bool
         If True, ensure that weights have been applied before coadding.
         Otherwise, the input maps are coadded as they are.
