@@ -575,7 +575,7 @@ def coadd_map_files(
     map_ids=None,
     collate=False,
     output_map_id="Coadd",
-    weighted=False,
+    weighted=True,
 ):
     """
     Coadd map files, optionally collating map Id's into separate frames.

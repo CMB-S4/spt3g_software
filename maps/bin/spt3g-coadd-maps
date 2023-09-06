@@ -26,10 +26,10 @@ P.add_argument(
 )
 P.add_argument("-i", "--output-map-id", help="Id for output coadd map frame")
 P.add_argument(
-    "-w",
-    "--weighted",
-    action="store_true",
-    help="Ensure that weights are applied before coadding.",
+    "--no-check-weighted",
+    dest="weighted",
+    action="store_false",
+    help="Do not check that weights are applied before coadding.",
 )
 
 args = P.parse_args()
