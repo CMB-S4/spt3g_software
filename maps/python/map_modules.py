@@ -606,6 +606,19 @@ class CoaddMaps(object):
             map_ids += [map_id]
         cfr["InputMapIds"] = core.G3VectorString(map_ids)
 
+        if "InputFiles" in cfr:
+            input_files = list(cfr.pop("InputFiles"))
+        else:
+            input_files = []
+        if "InputFiles" in frame:
+            # allow for recursive coadds
+            input_files += list(frame["InputFiles"])
+        elif getattr(frame, "filename", None):
+            if frame.filename not in input_files:
+                input_files += [frame.filename]
+        if len(input_files):
+            cfr["InputFiles"] = core.G3VectorString(input_files)
+
         for key in ["T", "Q", "U", "Wpol", "Wunpol"]:
             if key not in frame:
                 continue
@@ -673,13 +686,6 @@ def coadd_map_files(
         drop_input_frames=True,
     )
     pipe.Add(coadder)
-
-    def RecordInputFiles(frame):
-        if frame.type != core.G3FrameType.Map:
-            return
-        frame["InputFiles"] = core.G3VectorString(input_files)
-
-    pipe.Add(RecordInputFiles)
 
     if output_file:
         pipe.Add(core.G3Writer, filename=output_file)
