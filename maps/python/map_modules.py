@@ -571,7 +571,7 @@ class CoaddMaps(object):
 @core.usefulfunc
 def coadd_map_files(
     input_files,
-    output_file="map_coadd.g3",
+    output_file=None,
     map_ids=None,
     collate=False,
     output_map_id="Coadd",
@@ -585,7 +585,8 @@ def coadd_map_files(
     input_files : list of str
         List of input files to feed through the pipeline.
     output_file : str
-        Output G3 filename.
+        Output G3 filename.  If not supplied, the output frames are
+        returned without saving to disk.
     map_ids : list of str
         A list of map Id's to include in the coadd(s).
     collate : bool
@@ -651,7 +652,8 @@ def coadd_map_files(
 
     pipe.Add(lambda fr: "Id" not in fr or fr["Id"].startswith(output_map_id))
 
-    pipe.Add(core.G3Writer, filename=output)
+    if output_file:
+        pipe.Add(core.G3Writer, filename=output_file)
     pipe.Run()
 
     if collate:
