@@ -104,6 +104,7 @@ void G3Reader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	if (_save != nullptr)
 		PyEval_RestoreThread(_save);
 
+	frame->filename = cur_file_;
 	out.push_back(frame);
 	n_frames_read_++;
 }

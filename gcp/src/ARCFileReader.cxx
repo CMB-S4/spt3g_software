@@ -859,6 +859,7 @@ void ARCFileReader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		outframe->Put(temp->first, templ);
 	}
 
+	outframe->filename = cur_file_;
 	out.push_back(outframe);
 
 	delete [] buffer;
