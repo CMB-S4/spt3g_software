@@ -42,6 +42,7 @@ def checkinfo(fr):
         return
     assert 'time' in fr, 'No time key in frame'
     assert fr['count'] == n, 'Out of order frame'
+    assert fr.filename == 'test.g3', 'Wrong filename'
     n += 1
 pipe.Add(checkinfo)
 pipe.Run()
