@@ -541,6 +541,11 @@ class CoaddMaps(object):
         single bolometer map frames with common weights through a pipeline.
     drop_input_frames : bool
         If True, drop input map frames from the pipeline.
+    map_id_function : callable
+        If supplied, use this callable to extract a map_id from the input map
+        frames.  Otherwise, use ``frame["Id"]``.  The function should take a
+        single frame object as an argument and return a string value to match
+        against ``map_ids``, or ``None`` if a valid Id cannot be constructed.
     """
 
     def __init__(
@@ -551,6 +556,7 @@ class CoaddMaps(object):
         weighted=True,
         ignore_missing_weights=False,
         drop_input_frames=False,
+        map_id_function=None,
     ):
         if isinstance(map_ids, str):
             map_ids = [map_ids]
@@ -567,6 +573,9 @@ class CoaddMaps(object):
         self.weighted = weighted
         self.ignore_missing_weights = ignore_missing_weights
         self.drop_input_frames = drop_input_frames
+        if not map_id_function:
+            map_id_function = lambda fr: fr.get("Id", None)
+        self.get_map_id = map_id_function
 
     def __call__(self, frame):
 
@@ -575,10 +584,13 @@ class CoaddMaps(object):
                 return list(self.coadd_frames.values()) + [frame]
             return [self.coadd_frame, frame]
 
-        if "Id" not in frame:
+        if frame.type != core.G3FrameType.Map:
             return
 
-        map_id = frame["Id"]
+        map_id = self.get_map_id(frame)
+        if not map_id:
+            return
+
         if self.map_ids is not None and map_id not in self.map_ids:
             return
 
