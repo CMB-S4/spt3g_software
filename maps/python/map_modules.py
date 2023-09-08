@@ -561,8 +561,6 @@ class CoaddMaps(object):
         if isinstance(map_ids, str):
             map_ids = [map_ids]
         self.map_ids = map_ids
-        if map_ids and len(map_ids) == 1:
-            collate = False
         self.collate = collate
         if self.collate:
             self.coadd_frames = dict()
