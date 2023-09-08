@@ -82,9 +82,9 @@ enum {
 class ARCFileReader : public G3Module {
 public:
 	ARCFileReader(const std::string &path,
-	    Experiment experiment=Experiment::SPT);
+	    Experiment experiment=Experiment::SPT, bool track_filename=false);
 	ARCFileReader(const std::vector<std::string> & filename,
-	    Experiment experiment=Experiment::SPT);
+	    Experiment experiment=Experiment::SPT, bool track_filename=false);
 	virtual ~ARCFileReader() {}
 
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
@@ -124,12 +124,15 @@ private:
 	Experiment experiment;
 	G3TimePtr GCPToTime(uint8_t *buffer, off_t offset);
 
+	bool track_filename_;
+
 	SET_LOGGER("ARCFileReader");
 };
 
 
 ARCFileReader::ARCFileReader(const std::string &path,
-    Experiment experiment) : experiment(experiment)
+    Experiment experiment, bool track_filename) :
+    experiment(experiment), track_filename_(track_filename)
 {
 	if (experiment == Experiment::SPT || experiment == Experiment::BK) {
 		ms_jiffie_base_ = G3Units::ms;
@@ -149,7 +152,8 @@ ARCFileReader::ARCFileReader(const std::string &path,
 
 
 ARCFileReader::ARCFileReader(const std::vector<std::string> &filename,
-    Experiment experiment) : experiment(experiment)
+    Experiment experiment, bool track_filename) :
+    experiment(experiment), track_filename_(track_filename)
 {
 	if (experiment == Experiment::SPT || experiment == Experiment::BK) {
 		ms_jiffie_base_ = G3Units::ms;
@@ -859,7 +863,8 @@ void ARCFileReader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		outframe->Put(temp->first, templ);
 	}
 
-	outframe->filename = cur_file_;
+	if (track_filename_)
+		outframe->_filename = cur_file_;
 	out.push_back(outframe);
 
 	delete [] buffer;

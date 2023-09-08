@@ -459,7 +459,7 @@ BOOST_PYTHON_MODULE(core)
 	    .def("__init__", bp::make_constructor(g3frame_char_constructor, bp::default_call_policies(), bp::args("adhoctypecode")), "Create a frame with an ad-hoc (non-standard) type code. Use sparingly and with care.")
 	    .def_readwrite("type", &G3Frame::type, "Type code for frame. "
 	      "See general G3Frame docstring.")
-	    .def_readonly("filename", &G3Frame::filename, "Source filename for frame, "
+	    .def_readonly("_filename", &G3Frame::_filename, "Source filename for frame, "
 	      "if read in using G3Reader. This attribute is fragile, use at your own risk.")
 	    .def("__setitem__", &g3frame_python_put)
 	    .def("__getitem__", &g3frame_python_get)

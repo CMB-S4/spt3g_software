@@ -61,7 +61,7 @@ public:
 	FrameType type;
 	
 	// Source filename (if output from G3Reader)
-	std::string filename;
+	std::string _filename;
 
 	// Add and remove data from the frame. Note that retrieved data is
 	// const. Get<> is like operator [], except that it does a dynamic

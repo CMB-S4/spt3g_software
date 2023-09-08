@@ -8,7 +8,7 @@ Frames have fast serialization to and from disk (see the G3Reader and G3Writer m
 
 Each frame has a type defined under the ``core.G3FrameType`` namespace. These are meant to indicate different types of data (calibration vs. scan data, for example) and, in general, many types of frames will be interleaved in the same data stream. A good general rule for whether data should be in a different frame type is to consider the rates at which the data change: data that change at the same speed (e.g. bolometer data and pointing) should share a frame, while data that change at different speeds (e.g. calibration constants and bolometer data) should be separated.
 
-Each frame also has a ``filename`` attribute, which is set when frames are read in using the ``core.G3Reader`` pipeline module. This attribute is not serialized with the frame, so will be an empty string when used with pickling or multiprocessing.
+Each frame also has a ``._filename`` attribute, which is set when frames are read in using the ``core.G3Reader`` pipeline module. This attribute is not serialized with the frame, so will be an empty string when used with pickling or multiprocessing.  This attribute is fragile and should not be relied upon for production code.
 
 A brief description of the intention of each frame type follows along with a table containing a representative minimal set of data likely to be contained by a frame of a given type. The list is neither exhaustive nor truly minimal: other data can and will be present and some of the data listed here may have been removed or renamed. Neither is this an exhaustive list of frame types: any single character code can be [ab]used as a frame type for special purpose tools.
 
