@@ -133,7 +133,9 @@ PYBINDINGS("core") {
 	      "streams, resulting in EOF behavior on expiry; unfortunately this "
 	      "cannot be used for polling, you have to close the connection. "
 	      "Use the `tell` and `seek` methods to record the position of and "
-	      "seek to the beginning of a particular frame in the file.",
+	      "seek to the beginning of a particular frame in the file.  Set "
+	      "track_filename to True to record the filename for each frame in "
+	      "the ._filename attribute (fragile).",
 	init<std::string, int, float, bool>((arg("filename"),
 	    arg("n_frames_to_read")=0,arg("timeout")=-1.,arg("track_filename")=false)))
 	.def(init<std::vector<std::string>, int, float, bool>((arg("filename"),

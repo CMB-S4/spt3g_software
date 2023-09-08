@@ -876,13 +876,14 @@ PYBINDINGS("gcp") {
 	// Instead of EXPORT_G3MODULE since there are two constructors
 	class_<ARCFileReader, bases<G3Module>, boost::shared_ptr<ARCFileReader>,
 	    boost::noncopyable>("ARCFileReader",
-	    "Read GCP archive file (or files if you pass an iterable of paths)."
-	    " For non-SPT ARC file formats, please set Experiment to the "
-	    " appropriate value.",
-		init<std::string, optional<Experiment> >(
-		        args("filename", "experiment")))
-		.def(init<std::vector<std::string>, optional<Experiment> >(
-		        args("filename", "experiment")))
+	    "Read GCP archive file (or files if you pass an iterable of paths). "
+	    "For non-SPT ARC file formats, please set Experiment to the "
+	    "appropriate value.  Set track_filename to True to record the "
+	    "filename for each frame in the ._filename attribute (fragile).",
+		init<std::string, Experiment, bool>((arg("filename"),
+			arg("experiment")=Experiment::SPT, arg("track_filename")=false)))
+		.def(init<std::vector<std::string>, Experiment, bool>((arg("filename"),
+			arg("experiment")=Experiment::SPT, arg("track_filename")=false)))
 		.def_readonly("__g3module__", true)
 	;
 }
