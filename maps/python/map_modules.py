@@ -510,6 +510,16 @@ class CoaddMaps(object):
     treated as a callable for input map frames, and the ``coadd_frame`` or
     ``coadd_frames`` attribute contains the running coadd(s).
 
+    The output coadd frames contain two additional keys: ``'InputMapIds'`` and
+    ``'InputFiles'``, which are both lists of unique map Id's and filenames that
+    are associated with the frames that contribute to each coadd.  When one
+    coadd is added to another, these keys are updated recursively, so that the
+    resulting coadd includes the Id's and filenames that contributed to both
+    itself and the other coadd.  The list of filenames can be populated by
+    combining this module with a G3Reader whose ``track_filename`` option is set
+    to True; however, this feature is fragile and may not work as expected with
+    complex pipelines.
+
     Attributes
     ----------
     coadd_frame : G3Frame
