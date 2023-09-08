@@ -728,7 +728,6 @@ G3SkyMap &HealpixSkyMap::operator /=(const G3SkyMap &rhs) {
 			} else
 				zero = true;
 		} else if (ring_sparse_) {
-			long i = 0;
 			if (b.dense_ || b.ring_sparse_ || b.indexed_sparse_) {
 				for (size_t i = 0; i < size(); i++) {
 					double valb = b.at(i);
@@ -1009,7 +1008,7 @@ HealpixSkyMap::PixelToAngle(size_t pixel) const
 	return info_.PixelToAngle(pixel);
 }
 
-void HealpixSkyMap::GetRebinAngles(long pixel, size_t scale,
+void HealpixSkyMap::GetRebinAngles(size_t pixel, size_t scale,
     std::vector<double> & alphas, std::vector<double> & deltas) const
 {
 	info_.GetRebinAngles(pixel, scale, alphas, deltas);
@@ -1017,12 +1016,12 @@ void HealpixSkyMap::GetRebinAngles(long pixel, size_t scale,
 
 void
 HealpixSkyMap::GetInterpPixelsWeights(double alpha, double delta,
-    std::vector<long> & pixels, std::vector<double> & weights) const
+    std::vector<size_t> & pixels, std::vector<double> & weights) const
 {
 	info_.GetInterpPixelsWeights(alpha, delta, pixels, weights);
 }
 
-std::vector<long>
+std::vector<ssize_t>
 HealpixSkyMap::QueryDisc(double alpha, double delta, double radius) const
 {
 	return info_.QueryDisc(alpha, delta, radius);
@@ -1054,12 +1053,12 @@ G3SkyMapPtr HealpixSkyMap::Rebin(size_t scale, bool norm) const
 	for (auto i : *this) {
 		if (i.second == 0)
 			continue;
-		long ip = i.first;
+		size_t ip = i.first;
 		if (!nested())
-			ring2nest(nside(), ip, &ip);
+			ring2nest64(nside(), ip, &ip);
 		ip /= scale2;
 		if (!nested())
-			nest2ring(out->nside(), ip, &ip);
+			nest2ring64(out->nside(), ip, &ip);
 		(*out)[ip] += i.second / sqscal;
 	}
 

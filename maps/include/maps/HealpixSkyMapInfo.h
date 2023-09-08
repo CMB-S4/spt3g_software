@@ -33,18 +33,18 @@ public:
 	double res() const;
 
 	std::pair<size_t, size_t> PixelToRing(size_t pix) const;
-	size_t RingToPixel(size_t iring, size_t ringpix) const;
+	ssize_t RingToPixel(size_t iring, size_t ringpix) const;
 
 	std::vector<double> PixelToAngle(size_t pixel) const;
-	size_t AngleToPixel(double alpha, double delta) const;
+	ssize_t AngleToPixel(double alpha, double delta) const;
 
-	void GetRebinAngles(long pixel, size_t scale,
+	void GetRebinAngles(size_t pixel, size_t scale,
 	    std::vector<double> & alphas, std::vector<double> & deltas) const;
 
 	void GetInterpPixelsWeights(double alpha, double delta,
-	    std::vector<long> & pixels, std::vector<double> & weights) const;
+	    std::vector<size_t> & pixels, std::vector<double> & weights) const;
 
-	std::vector<long> QueryDisc(double alpha, double delta,
+	std::vector<ssize_t> QueryDisc(double alpha, double delta,
 	    double radius) const;
 
 private:
