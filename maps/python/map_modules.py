@@ -684,7 +684,7 @@ def coadd_map_files(
     """
 
     pipe = core.G3Pipeline()
-    pipe.Add(core.G3Reader, filename=input_files)
+    pipe.Add(core.G3Reader, filename=input_files, track_filename=True)
 
     # drop metadata frames
     pipe.Add(lambda fr: fr.type == core.G3FrameType.Map)
