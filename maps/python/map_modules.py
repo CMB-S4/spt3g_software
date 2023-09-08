@@ -625,9 +625,9 @@ class CoaddMaps(object):
         if "InputFiles" in frame:
             # allow for recursive coadds
             input_files += list(frame["InputFiles"])
-        elif getattr(frame, "filename", None):
-            if frame.filename not in input_files:
-                input_files += [frame.filename]
+        elif getattr(frame, "_filename", None):
+            if frame._filename not in input_files:
+                input_files += [frame._filename]
         if len(input_files):
             cfr["InputFiles"] = core.G3VectorString(input_files)
 
