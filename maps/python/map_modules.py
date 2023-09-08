@@ -612,9 +612,11 @@ class CoaddMaps(object):
         if "InputMapIds" in frame:
             # allow for recursive coadds
             map_ids += list(frame["InputMapIds"])
-        elif map_id not in map_ids:
-            map_ids += [map_id]
-        cfr["InputMapIds"] = core.G3VectorString(map_ids)
+        elif frame.get("Id", None):
+            if frame["Id"] not in map_ids:
+                map_ids += [frame["Id"]]
+        if len(map_ids):
+            cfr["InputMapIds"] = core.G3VectorString(map_ids)
 
         if "InputFiles" in cfr:
             input_files = list(cfr.pop("InputFiles"))
