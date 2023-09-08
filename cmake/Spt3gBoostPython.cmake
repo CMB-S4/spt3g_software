@@ -1,4 +1,5 @@
 # Locate Python
+
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.12)
 	find_package(Python COMPONENTS Interpreter Development)
 else()
@@ -15,9 +16,9 @@ endif()
 execute_process(COMMAND ${Python_EXECUTABLE} -c "import numpy"
 	RESULT_VARIABLE NUMPY_FOUND ERROR_QUIET)
 if(NUMPY_FOUND EQUAL 0)
-	set(Python_NumPy_FOUND TRUE CACHE BOOL "Numpy found successfully")
+	set(Python_NumPy_FOUND TRUE CACHE BOOL "Numpy found successfully" FORCE)
 else(NUMPY_FOUND EQUAL 0)
-	set(Python_NumPy_FOUND FALSE CACHE BOOL "Numpy found successfully")
+	set(Python_NumPy_FOUND FALSE CACHE BOOL "Numpy found successfully" FORCE)
 endif(NUMPY_FOUND EQUAL 0)
 
 if(Python_NumPy_FOUND)
