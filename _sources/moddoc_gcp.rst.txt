@@ -467,7 +467,7 @@ in frame
 
 **spt3g.gcp.ARCFileReader**
 
-Read GCP archive file (or files if you pass an iterable of paths). For non-SPT ARC file formats, please set Experiment to the  appropriate value.
+Read GCP archive file (or files if you pass an iterable of paths). For non-SPT ARC file formats, please set Experiment to the appropriate value.  Set track_filename to True to record the filename for each frame in the ._filename attribute (fragile).
 
 
 

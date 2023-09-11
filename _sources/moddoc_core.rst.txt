@@ -1966,7 +1966,7 @@ Collection of timestreams indexed by logical detector ID
 	
 	``G3TimestreamMap( (G3TimestreamMap)arg2)``
 	
-	``G3TimestreamMap( (StringVector)keys, (object)data [, (G3Time)start=<spt3g.core.G3Time object at 0x7feef7736eb0> [, (G3Time)stop=<spt3g.core.G3Time object at 0x7feef7736f20> [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None [, (int)compression_level=0 [, (bool)copy_data=True]]]]])`` :
+	``G3TimestreamMap( (StringVector)keys, (object)data [, (G3Time)start=<spt3g.core.G3Time object at 0x7f11f76e0eb0> [, (G3Time)stop=<spt3g.core.G3Time object at 0x7f11f76e0f20> [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None [, (int)compression_level=0 [, (bool)copy_data=True]]]]])`` :
 	    Create a timestream map from a numpy array or other numeric python iterable. Each row of the 2D input array will correspond to a single timestream, with the key set to the correspondingly-indexed entry of <keys>. If <copy_data> is True (default), the data will be copied into the output data structure. If False, the timestream map will provide a view into the given numpy array.
 	
 	``G3TimestreamMap( (list)arg2)`` :
@@ -2526,7 +2526,7 @@ Writes frames to a network socket. If hostname is set to '*', will listen on the
 
 **spt3g.core.G3Reader**
 
-Read frames from disk. Takes either the path to a file to read or an iterable of files to be read in sequence. If n_frames_to_read is greater than zero, will stop after n_frames_to_read frames rather than at the end of the file[s]. The timeout parameter can used to enable socket timeout for tcp streams, resulting in EOF behavior on expiry; unfortunately this cannot be used for polling, you have to close the connection. Use the `tell` and `seek` methods to record the position of and seek to the beginning of a particular frame in the file.
+Read frames from disk. Takes either the path to a file to read or an iterable of files to be read in sequence. If n_frames_to_read is greater than zero, will stop after n_frames_to_read frames rather than at the end of the file[s]. The timeout parameter can used to enable socket timeout for tcp streams, resulting in EOF behavior on expiry; unfortunately this cannot be used for polling, you have to close the connection. Use the `tell` and `seek` methods to record the position of and seek to the beginning of a particular frame in the file.  Set track_filename to True to record the filename for each frame in the ._filename attribute (fragile).
 
 
 
