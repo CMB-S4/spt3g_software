@@ -33,7 +33,7 @@ assert n == 10, 'Wrong number of frames written (%d should be %d)' % (n, 10)
 # And back from disk
 print('Reading')
 pipe = core.G3Pipeline()
-pipe.Add(core.G3Reader, filename='test.g3')
+pipe.Add(core.G3Reader, filename='test.g3', track_filename=True)
 pipe.Add(core.Dump)
 n = 0
 def checkinfo(fr):
@@ -42,6 +42,7 @@ def checkinfo(fr):
         return
     assert 'time' in fr, 'No time key in frame'
     assert fr['count'] == n, 'Out of order frame'
+    assert fr._filename == 'test.g3', 'Wrong filename'
     n += 1
 pipe.Add(checkinfo)
 pipe.Run()
