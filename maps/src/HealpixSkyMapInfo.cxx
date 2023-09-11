@@ -6,7 +6,7 @@
 #include <G3Units.h>
 
 #include <maps/HealpixSkyMapInfo.h>
-#include <maps/chealpix.h>
+#include "chealpix.h"
 
 static const double twothird = 2.0 / 3.0;
 static const double twopi = 2 * M_PI;

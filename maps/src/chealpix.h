@@ -106,9 +106,8 @@ void pix2vec_ring(long nside, long ipix, double *vec);
 /* operations on Nside values up to 2^29 */
 
 /*! 64bit integer type
-    \note We are not using \c int64_t, since this type is not part of the C++
-    standard, and we want the header to be usable from C++. */
-typedef long long hpint64;
+    \note We use int64_t here because it is now part of the C++ standard. */
+typedef int64_t hpint64;
 
 /*! Sets \a *ipix to the pixel number in NEST scheme at resolution \a nside,
     which contains the position \a theta, \a phi. */

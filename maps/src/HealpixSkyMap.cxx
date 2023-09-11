@@ -8,7 +8,7 @@
 
 #include <G3Units.h>
 #include <maps/HealpixSkyMap.h>
-#include <maps/chealpix.h>
+#include "chealpix.h"
 #include <maps/G3SkyMapMask.h>
 
 #include "mapdata.h"
