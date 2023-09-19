@@ -137,11 +137,11 @@ G3SkyMapWeights::G3SkyMapWeights(const G3SkyMapWeights &r, bool copy_data) :
 {
 }
 
-std::vector<size_t>
+std::vector<ssize_t>
 G3SkyMap::AnglesToPixels(const std::vector<double> & alphas,
     const std::vector<double> & deltas) const
 {
-	std::vector<size_t> pixels(alphas.size());
+	std::vector<ssize_t> pixels(alphas.size());
 
 	for (size_t i = 0; i < alphas.size(); i++) {
 		pixels[i] = AngleToPixel(alphas[i], deltas[i]);
@@ -169,7 +169,7 @@ G3SkyMap::PixelsToAngles(const std::vector<size_t> & pixels,
 	}
 }
 
-size_t
+ssize_t
 G3SkyMap::QuatToPixel(quat q) const
 {
 	double alpha, delta;
@@ -190,10 +190,10 @@ G3SkyMap::PixelToQuat(size_t pixel) const
 	return ang_to_quat(alphadelta[0], alphadelta[1]);
 }
 
-std::vector<size_t>
+std::vector<ssize_t>
 G3SkyMap::QuatsToPixels(const G3VectorQuat &quats) const
 {
-	std::vector<size_t> pixels(quats.size());
+	std::vector<ssize_t> pixels(quats.size());
 	for (size_t i = 0; i < quats.size(); i++)
 		pixels[i] = QuatToPixel(quats[i]);
 
@@ -334,7 +334,7 @@ G3SkyMap &G3SkyMap::operator/=(double rhs)
 
 
 void
-G3SkyMap::GetInterpPixelsWeights(quat q, std::vector<long> & pixels,
+G3SkyMap::GetInterpPixelsWeights(quat q, std::vector<ssize_t> & pixels,
     std::vector<double> & weights) const
 {
 	double alpha, delta;
@@ -346,7 +346,7 @@ G3SkyMap::GetInterpPixelsWeights(quat q, std::vector<long> & pixels,
 }
 
 G3VectorQuat
-G3SkyMap::GetRebinQuats(long pixel, size_t scale) const
+G3SkyMap::GetRebinQuats(size_t pixel, size_t scale) const
 {
 	std::vector<double> alphas, deltas;
 
@@ -363,7 +363,7 @@ G3SkyMap::GetRebinQuats(long pixel, size_t scale) const
 }
 
 double
-G3SkyMap::GetInterpPrecalc(const std::vector<long> & pix,
+G3SkyMap::GetInterpPrecalc(const std::vector<ssize_t> & pix,
     const std::vector<double> & weight) const
 {
 	double outval = 0;
@@ -376,7 +376,7 @@ G3SkyMap::GetInterpPrecalc(const std::vector<long> & pix,
 double
 G3SkyMap::GetInterpValue(double alpha, double delta) const
 {
-	std::vector<long> pix;
+	std::vector<ssize_t> pix;
 	std::vector<double> weight;
 	GetInterpPixelsWeights(alpha, delta, pix, weight);
 	return GetInterpPrecalc(pix, weight);
@@ -417,7 +417,7 @@ G3SkyMap::GetInterpValues(const G3VectorQuat & quats) const
 	return outvals;
 }
 
-std::vector<long>
+std::vector<ssize_t>
 G3SkyMap::QueryAlphaEllipse(double alpha, double delta, double a, double b) const
 {
 	double rmaj = a > b ? a : b;
@@ -428,7 +428,7 @@ G3SkyMap::QueryAlphaEllipse(double alpha, double delta, double a, double b) cons
 
 	auto disc = QueryDisc(alpha, delta, rmaj);
 
-	std::vector<long> pixels;
+	std::vector<ssize_t> pixels;
 	for (auto i: disc) {
 		auto ang = PixelToAngle(i);
 		double d = angular_distance(ang[0], ang[1], ahi, delta) +
@@ -441,7 +441,7 @@ G3SkyMap::QueryAlphaEllipse(double alpha, double delta, double a, double b) cons
 }
 
 static double
-skymap_getitem(const G3SkyMap &skymap, int i)
+skymap_getitem(const G3SkyMap &skymap, ssize_t i)
 {
 
 	if (i < 0)
@@ -455,7 +455,7 @@ skymap_getitem(const G3SkyMap &skymap, int i)
 }
 
 static void
-skymap_setitem(G3SkyMap &skymap, int i, double val)
+skymap_setitem(G3SkyMap &skymap, ssize_t i, double val)
 {
 
 	if (i < 0)

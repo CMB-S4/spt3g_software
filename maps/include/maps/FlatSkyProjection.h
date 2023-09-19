@@ -85,25 +85,25 @@ public:
 	double yres() const { return y_res_; };
 	double res() const { return y_res_; };
 
-	long XYToPixel(double x, double y) const;
-	std::vector<double> PixelToXY(long pixel) const;
+	ssize_t XYToPixel(double x, double y) const;
+	std::vector<double> PixelToXY(size_t pixel) const;
 	std::vector<double> XYToAngle(double x, double y, bool wrap_alpha=false) const;
 	std::vector<double> AngleToXY(double alpha, double delta) const;
-	std::vector<double> PixelToAngle(long pixel, bool wrap_alpha=false) const;
-	long AngleToPixel(double alpha, double delta) const;
+	std::vector<double> PixelToAngle(size_t pixel, bool wrap_alpha=false) const;
+	ssize_t AngleToPixel(double alpha, double delta) const;
 	std::vector<double> QuatToXY(quat q, bool local) const;
 	quat XYToQuat(double x, double y, bool local) const;
 
 	std::vector<double> XYToAngleGrad(double x, double y, double h=0.001) const;
-	std::vector<double> PixelToAngleGrad(long pixel, double h=0.001) const;
+	std::vector<double> PixelToAngleGrad(size_t pixel, double h=0.001) const;
 
-	void GetRebinAngles(long pixel, size_t scale,
+	void GetRebinAngles(size_t pixel, size_t scale,
 	    std::vector<double> & alphas, std::vector<double> & deltas,
 	    bool wrap_alpha=false) const;
 	void GetInterpPixelsWeights(double alpha, double delta,
-	    std::vector<long> & pixels, std::vector<double> & weights) const;
+	    std::vector<ssize_t> & pixels, std::vector<double> & weights) const;
 
-	std::vector<long> QueryDisc(double alpha, double delta, double radius,
+	std::vector<ssize_t> QueryDisc(double alpha, double delta, double radius,
 	    bool local) const;
 
 	FlatSkyProjection Rebin(size_t scale, double x_center = 0.0 / 0.0,

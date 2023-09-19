@@ -147,33 +147,30 @@ HealpixSkyMapInfo::SetShifted(bool shifted)
 	shifted_ = shifted;
 }
 
-std::pair<size_t, size_t>
-HealpixSkyMapInfo::PixelToRing(size_t pixel) const
+std::pair<ssize_t, ssize_t>
+HealpixSkyMapInfo::PixelToRing(ssize_t pixel) const
 {
-	static const std::pair<size_t, size_t> bad = {(size_t) -1, (size_t)-1};
+	static const std::pair<ssize_t, ssize_t> bad = {(ssize_t) -1, (ssize_t)-1};
 
 	if (pixel < 0 || pixel >= npix_)
 		return bad;
 
-	if (nested_) {
-		int64_t pix = pixel;
-		nest2ring64(nside_, pix, &pix);
-		pixel = pix;
-	}
+	if (nested_)
+		nest2ring64(nside_, pixel, &pixel);
 
-	size_t iring;
+	ssize_t iring;
 	if (pixel < ncap_) /* North Polar cap */
-		iring = (size_t)(0.5 * (1 + sqrt(1.5 + 2 * pixel)));
+		iring = (ssize_t)(0.5 * (1 + sqrt(1.5 + 2 * pixel)));
 	else if (pixel < (npix_ - ncap_)) /* Equatorial region */
-		iring = (size_t)((pixel - ncap_) / nring_ + nside_);
+		iring = (ssize_t)((pixel - ncap_) / nring_ + nside_);
 	else /* South Polar cap */
-		iring = nring_ - (size_t)(0.5 * (1 + sqrt(2 * (npix_ - pixel) - 0.5)));
+		iring = nring_ - (ssize_t)(0.5 * (1 + sqrt(2 * (npix_ - pixel) - 0.5)));
 	if (iring < 0 || iring >= nring_)
 		return bad;
 
 	const HealpixRingInfo & ring = rings_[iring];
 
-	size_t ringpix = pixel - ring.pix0;
+	ssize_t ringpix = pixel - ring.pix0;
 	if (ringpix < 0 || ringpix >= ring.npix)
 		return bad;
 
@@ -184,7 +181,7 @@ HealpixSkyMapInfo::PixelToRing(size_t pixel) const
 }
 
 ssize_t
-HealpixSkyMapInfo::RingToPixel(size_t iring, size_t ringpix) const
+HealpixSkyMapInfo::RingToPixel(ssize_t iring, ssize_t ringpix) const
 {
 	if (iring < 0 || iring >= nring_)
 		return -1;
@@ -256,7 +253,7 @@ HealpixSkyMapInfo::PixelToAngle(size_t pixel) const
 }
 
 void
-HealpixSkyMapInfo::GetRebinAngles(size_t pixel, size_t scale,
+HealpixSkyMapInfo::GetRebinAngles(ssize_t pixel, size_t scale,
     std::vector<double> & alphas, std::vector<double> & deltas) const
 {
 	if (nside_ % scale != 0)
@@ -284,24 +281,24 @@ HealpixSkyMapInfo::GetRebinAngles(size_t pixel, size_t scale,
 	}
 }
 
-size_t
+ssize_t
 HealpixSkyMapInfo::RingAbove(double z) const
 {
 	double za = fabs(z);
 	if (za <= twothird)
 		return nside_ * (2 - 1.5 * z);
-	size_t iring = nside_ * sqrt(3 * (1 - za));
+	ssize_t iring = nside_ * sqrt(3 * (1 - za));
 	return (z > 0) ? iring : (nring_ - iring - 1);
 }
 
 void
 HealpixSkyMapInfo::GetInterpPixelsWeights(double alpha, double delta,
-    std::vector<size_t> & pixels, std::vector<double> & weights) const
+    std::vector<ssize_t> & pixels, std::vector<double> & weights) const
 {
 	alpha /= G3Units::rad;
 	delta /= G3Units::rad;
 
-	pixels = std::vector<size_t>(4, -1);
+	pixels = std::vector<ssize_t>(4, -1);
 	weights = std::vector<double>(4, 0);
 
 	double theta = M_PI_2 - delta;
@@ -310,8 +307,8 @@ HealpixSkyMapInfo::GetInterpPixelsWeights(double alpha, double delta,
 
 	double phi = (alpha < 0) ? (alpha + twopi) : alpha;
 
-	size_t ir1 = RingAbove(z);
-	size_t ir2 = ir1 + 1;
+	ssize_t ir1 = RingAbove(z);
+	ssize_t ir2 = ir1 + 1;
 
 	double z1, z2;
 
@@ -319,11 +316,11 @@ HealpixSkyMapInfo::GetInterpPixelsWeights(double alpha, double delta,
 		const HealpixRingInfo & ring = rings_[ir1];
 		z1 = ring.z;
 		double tmp = phi / ring.dphi - ring.shift;
-		int64_t i1 = (tmp < 0) ? tmp - 1 : tmp;
+		ssize_t i1 = (tmp < 0) ? tmp - 1 : tmp;
 		double w1 = (phi - (i1 + ring.shift) * ring.dphi) / ring.dphi;
 		if (i1 < 0)
 			i1 += ring.npix;
-		int64_t i2 = i1 + 1;
+		ssize_t i2 = i1 + 1;
 		if (i2 >= ring.npix)
 			i2 -= ring.npix;
 		pixels[0] = ring.pix0 + i1;
@@ -336,11 +333,11 @@ HealpixSkyMapInfo::GetInterpPixelsWeights(double alpha, double delta,
 		const HealpixRingInfo & ring = rings_[ir2];
 		z2 = ring.z;
 		double tmp = phi / ring.dphi - ring.shift;
-		int64_t i1 = (tmp < 0) ? tmp - 1 : tmp;
+		ssize_t i1 = (tmp < 0) ? tmp - 1 : tmp;
 		double w1 = (phi - (i1 + ring.shift) * ring.dphi) / ring.dphi;
 		if (i1 < 0)
 			i1 += ring.npix;
-		int64_t i2 = i1 + 1;
+		ssize_t i2 = i1 + 1;
 		if (i2 >= ring.npix)
 			i2 -= ring.npix;
 		pixels[2] = ring.pix0 + i1;
@@ -394,7 +391,7 @@ HealpixSkyMapInfo::QueryDisc(double alpha, double delta, double radius) const
 
 	radius /= G3Units::rad;
 	if (radius >= M_PI) {
-		for (size_t i = 0; i < npix_; i++)
+		for (ssize_t i = 0; i < npix_; i++)
 			pixels.push_back(i);
 		return pixels;
 	}
@@ -411,18 +408,18 @@ HealpixSkyMapInfo::QueryDisc(double alpha, double delta, double radius) const
 
 	double rlat1 = theta - radius;
 	double zmax = cos(rlat1);
-	size_t irmin = RingAbove(zmax) + 1;
+	ssize_t irmin = RingAbove(zmax) + 1;
 
 	if ((rlat1 <= 0) && (irmin > 1)) {
 		// north pole in the disk
 		const HealpixRingInfo & ring = rings_[irmin - 1];
-		for (size_t i = 0; i < ring.pix0 + ring.npix; i++)
+		for (ssize_t i = 0; i < ring.pix0 + ring.npix; i++)
 			pixels.push_back(i);
 	}
 
 	double rlat2 = theta + radius;
 	double zmin = cos(rlat2);
-	size_t irmax = RingAbove(zmin);
+	ssize_t irmax = RingAbove(zmin);
 
 	for (size_t iring = irmin; iring <= irmax; iring++) {
 		const HealpixRingInfo & ring = rings_[iring];
@@ -435,10 +432,10 @@ HealpixSkyMapInfo::QueryDisc(double alpha, double delta, double radius) const
 		double dphi = atan2(sqrt(ysq), x);
 
 		// highest pixel number in the ring
-		size_t ipix2 = ring.pix0 + ring.npix - 1;
+		ssize_t ipix2 = ring.pix0 + ring.npix - 1;
 
-		int64_t ip_lo = (size_t)floor((phi - dphi) / ring.dphi - ring.shift) + 1;
-		int64_t ip_hi = (size_t)floor((phi + dphi) / ring.dphi - ring.shift);
+		ssize_t ip_lo = (ssize_t)floor((phi - dphi) / ring.dphi - ring.shift) + 1;
+		ssize_t ip_hi = (ssize_t)floor((phi + dphi) / ring.dphi - ring.shift);
 		if (ip_lo > ip_hi)
 			continue;
 
@@ -447,12 +444,12 @@ HealpixSkyMapInfo::QueryDisc(double alpha, double delta, double radius) const
 			ip_hi -= ring.npix;
 		}
 		if (ip_lo < 0) {
-			for (size_t i = ring.pix0; i < ring.pix0 + ip_hi + 1; i++)
+			for (ssize_t i = ring.pix0; i < ring.pix0 + ip_hi + 1; i++)
 				pixels.push_back(i);
-			for (size_t i = ring.pix0 + ip_lo + ring.npix; i < ipix2 + 1; i++)
+			for (ssize_t i = ring.pix0 + ip_lo + ring.npix; i < ipix2 + 1; i++)
 				pixels.push_back(i);
 		} else {
-			for (size_t i = ring.pix0 + ip_lo; i < ring.pix0 + ip_hi + 1; i++)
+			for (ssize_t i = ring.pix0 + ip_lo; i < ring.pix0 + ip_hi + 1; i++)
 				pixels.push_back(i);
 		}
 	}
@@ -460,7 +457,7 @@ HealpixSkyMapInfo::QueryDisc(double alpha, double delta, double radius) const
 	if ((rlat2 >= M_PI) && (irmax + 1 < nring_)) {
 		// south pole in the disk
 		const HealpixRingInfo & ring = rings_[irmax + 1];
-		for (size_t i = ring.pix0; i < npix_; i++)
+		for (ssize_t i = ring.pix0; i < npix_; i++)
 			pixels.push_back(i);
 	}
 

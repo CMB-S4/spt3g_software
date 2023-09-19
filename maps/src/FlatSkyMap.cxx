@@ -696,7 +696,7 @@ std::vector<double> FlatSkyMap::XYToAngle(double x, double y) const {
 	return proj_info.XYToAngle(x, y, false);
 }
 
-size_t
+ssize_t
 FlatSkyMap::XYToPixel(double x, double y) const {
 	return proj_info.XYToPixel(x, y);
 }
@@ -718,7 +718,7 @@ FlatSkyMap::XYToQuat(double x, double y) const
 	return proj_info.XYToQuat(x, y, coord_ref == Local);
 }
 
-size_t FlatSkyMap::AngleToPixel(double alpha, double delta) const {
+ssize_t FlatSkyMap::AngleToPixel(double alpha, double delta) const {
 	return proj_info.AngleToPixel(alpha, delta);
 }
 
@@ -738,19 +738,19 @@ std::vector<double> FlatSkyMap::PixelToAngleGrad(size_t pixel, double h) const {
 	return proj_info.PixelToAngleGrad(pixel, h);
 }
 
-void FlatSkyMap::GetRebinAngles(long pixel, size_t scale,
+void FlatSkyMap::GetRebinAngles(size_t pixel, size_t scale,
     std::vector<double> & alphas, std::vector<double> & deltas) const
 {
 	proj_info.GetRebinAngles(pixel, scale, alphas, deltas, false);
 }
 
 void FlatSkyMap::GetInterpPixelsWeights(double alpha, double delta,
-    std::vector<long> & pixels, std::vector<double> & weights) const
+    std::vector<ssize_t> & pixels, std::vector<double> & weights) const
 {
 	proj_info.GetInterpPixelsWeights(alpha, delta, pixels, weights);
 }
 
-std::vector<long>
+std::vector<ssize_t>
 FlatSkyMap::QueryDisc(double alpha, double delta, double radius) const
 {
 	return proj_info.QueryDisc(alpha, delta, radius, coord_ref == Local);
@@ -1161,13 +1161,13 @@ flatskymap_pixels_to_xy(const FlatSkyMap & skymap, const std::vector<size_t> &pi
 	return boost::python::make_tuple(x, y);
 }
 
-static std::vector<size_t>
+static std::vector<ssize_t>
 flatskymap_xy_to_pixels(const FlatSkyMap & skymap, const std::vector<double> &x,
     const std::vector<double> &y)
 {
 	g3_assert(x.size() == y.size());
 
-	std::vector<size_t> pixel(x.size());
+	std::vector<ssize_t> pixel(x.size());
 	for (size_t i = 0; i < x.size(); i++) {
 		pixel[i] = skymap.XYToPixel(x[i], y[i]);
 	}

@@ -284,7 +284,7 @@ HealpixSkyMap::ConvertToDense()
 	dense_ = new std::vector<double>(size(), 0);
 
 	if (ring_sparse_) {
-		long idx;
+		ssize_t idx;
 		for (auto i = ring_sparse_->begin(); i != ring_sparse_->end();
 		    i++) {
 			idx = info_.RingToPixel(i.x, i.y);
@@ -341,7 +341,7 @@ HealpixSkyMap::ConvertToIndexedSparse()
 	indexed_sparse_ = new std::unordered_map<uint64_t, double>;
 
 	if (ring_sparse_) {
-		long idx;
+		ssize_t idx;
 		for (auto i = ring_sparse_->begin(); i != ring_sparse_->end();
 		    i++) {
 			if ((*i) == 0)
@@ -996,7 +996,7 @@ size_t HealpixSkyMap::NpixNonZero() const
 	return sz;
 }
 
-size_t
+ssize_t
 HealpixSkyMap::AngleToPixel(double alpha, double delta) const
 {
 	return info_.AngleToPixel(alpha, delta);
@@ -1016,7 +1016,7 @@ void HealpixSkyMap::GetRebinAngles(size_t pixel, size_t scale,
 
 void
 HealpixSkyMap::GetInterpPixelsWeights(double alpha, double delta,
-    std::vector<size_t> & pixels, std::vector<double> & weights) const
+    std::vector<ssize_t> & pixels, std::vector<double> & weights) const
 {
 	info_.GetInterpPixelsWeights(alpha, delta, pixels, weights);
 }
@@ -1053,7 +1053,7 @@ G3SkyMapPtr HealpixSkyMap::Rebin(size_t scale, bool norm) const
 	for (auto i : *this) {
 		if (i.second == 0)
 			continue;
-		size_t ip = i.first;
+		ssize_t ip = i.first;
 		if (!nested())
 			ring2nest64(nside(), ip, &ip);
 		ip /= scale2;
@@ -1148,7 +1148,7 @@ HealpixSkyMap_nonzeropixels(const HealpixSkyMap &m)
 }
 
 static double
-skymap_getitem(const G3SkyMap &skymap, int i)
+skymap_getitem(const G3SkyMap &skymap, ssize_t i)
 {
 
 	if (i < 0)
@@ -1162,7 +1162,7 @@ skymap_getitem(const G3SkyMap &skymap, int i)
 }
 
 static void
-skymap_setitem(G3SkyMap &skymap, int i, double val)
+skymap_setitem(G3SkyMap &skymap, ssize_t i, double val)
 {
 
 	if (i < 0)
@@ -1261,7 +1261,7 @@ static PyBufferProcs healpixskymap_bufferprocs;
 
 
 static void
-HealpixSkyMap_setitem_1d(G3SkyMap &skymap, size_t i, double val)
+HealpixSkyMap_setitem_1d(G3SkyMap &skymap, ssize_t i, double val)
 {
 
 	if (i < 0)

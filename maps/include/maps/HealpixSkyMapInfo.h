@@ -32,17 +32,17 @@ public:
 	bool shifted() const { return shifted_; }
 	double res() const;
 
-	std::pair<size_t, size_t> PixelToRing(size_t pix) const;
-	ssize_t RingToPixel(size_t iring, size_t ringpix) const;
+	std::pair<ssize_t, ssize_t> PixelToRing(ssize_t pix) const;
+	ssize_t RingToPixel(ssize_t iring, ssize_t ringpix) const;
 
 	std::vector<double> PixelToAngle(size_t pixel) const;
 	ssize_t AngleToPixel(double alpha, double delta) const;
 
-	void GetRebinAngles(size_t pixel, size_t scale,
+	void GetRebinAngles(ssize_t pixel, size_t scale,
 	    std::vector<double> & alphas, std::vector<double> & deltas) const;
 
 	void GetInterpPixelsWeights(double alpha, double delta,
-	    std::vector<size_t> & pixels, std::vector<double> & weights) const;
+	    std::vector<ssize_t> & pixels, std::vector<double> & weights) const;
 
 	std::vector<ssize_t> QueryDisc(double alpha, double delta,
 	    double radius) const;
@@ -68,7 +68,7 @@ private:
 
 	std::vector<HealpixRingInfo> rings_;
 
-	size_t RingAbove(double z) const;
+	ssize_t RingAbove(double z) const;
 
 	SET_LOGGER("HealpixSkyMapInfo");
 };

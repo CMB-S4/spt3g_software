@@ -205,7 +205,7 @@ MapMockObserver::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		std::vector<double> alpha, delta;
 		get_detector_pointing(bp.x_offset, bp.y_offset, *pointing,
 		    T_->coord_ref, alpha, delta);
-		std::vector<size_t> detpointing;
+		std::vector<ssize_t> detpointing;
 		if (!interp_)
 			detpointing = T_->AnglesToPixels(alpha, delta);
 
@@ -215,7 +215,7 @@ MapMockObserver::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 			    pcoupling, U_->GetPolConv());
 			for (size_t i = 0; i < det.size(); i++) {
 				if (interp_) {
-					std::vector<long> pixels;
+					std::vector<ssize_t> pixels;
 					std::vector<double> weights;
 					T_->GetInterpPixelsWeights(alpha[i], delta[i], pixels, weights);
 					det[i] =
