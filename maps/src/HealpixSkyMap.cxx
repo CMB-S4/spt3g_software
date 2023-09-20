@@ -8,7 +8,6 @@
 
 #include <G3Units.h>
 #include <maps/HealpixSkyMap.h>
-#include "chealpix.h"
 #include <maps/G3SkyMapMask.h>
 
 #include "mapdata.h"
@@ -79,10 +78,10 @@ HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool weighted,
 			PyBuffer_Release(&view);
 			log_fatal("Only 1-D maps supported");
 		}
+		ssize_t npix = view.shape[0];
 		PyBuffer_Release(&view);
 
-		nside = npix2nside(view.shape[0]);
-		info_.initialize(nside, nested, shift_ra);
+		info_.initialize(npix, nested, shift_ra, true);
 
 		FillFromArray(v);
 

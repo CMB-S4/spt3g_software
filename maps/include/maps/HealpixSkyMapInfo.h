@@ -14,7 +14,8 @@ public:
 	HealpixSkyMapInfo();
 	HealpixSkyMapInfo(const HealpixSkyMapInfo& info);
 
-	void initialize(size_t nside, bool nested=false, bool shifted=false);
+	void initialize(size_t nside_or_npix, bool nested=false,
+	    bool shifted=false, bool is_npix=false);
 
 	template <class A> void load(A &ar, unsigned v);
 	template <class A> void save(A &ar, unsigned v) const;
@@ -22,6 +23,7 @@ public:
 	std::string Description() const override;
 
 	void SetNSide(size_t nside);
+	void SetNPix(size_t npix);
 	void SetNested(bool nested);
 	void SetShifted(bool shifted);
 

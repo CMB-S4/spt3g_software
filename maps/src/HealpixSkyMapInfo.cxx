@@ -27,9 +27,13 @@ HealpixSkyMapInfo::HealpixSkyMapInfo(const HealpixSkyMapInfo & other)
 }
 
 void
-HealpixSkyMapInfo::initialize(size_t nside, bool nested, bool shifted)
+HealpixSkyMapInfo::initialize(size_t nside_or_npix, bool nested, bool shifted,
+   bool is_npix)
 {
-	SetNSide(nside);
+	if (is_npix)
+		SetNPix(nside_or_npix);
+	else
+		SetNSide(nside_or_npix);
 	SetNested(nested);
 	SetShifted(shifted);
 }
@@ -84,6 +88,16 @@ double
 HealpixSkyMapInfo::res() const
 {
 	return sqrt(4.0 * M_PI / npix_) * G3Units::rad;
+}
+
+void
+HealpixSkyMapInfo::SetNPix(size_t npix)
+{
+	ssize_t nside = npix2nside64(npix);
+	if (nside < 0)
+		log_fatal("Invalid npix %zu", npix);
+
+	SetNSide(nside);
 }
 
 void
