@@ -106,7 +106,7 @@ void pix2vec_ring(long nside, long ipix, double *vec);
 /* operations on Nside values up to 2^29 */
 
 /*! 64bit integer type
-    \note We use int64_t here because it is now part of the C++ standard. */
+    \note We use ssize_t here since this is properly defined on all platforms. */
 typedef ssize_t hpint64;
 
 /*! Sets \a *ipix to the pixel number in NEST scheme at resolution \a nside,
