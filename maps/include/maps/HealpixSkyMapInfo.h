@@ -32,13 +32,13 @@ public:
 	bool shifted() const { return shifted_; }
 	double res() const;
 
-	std::pair<ssize_t, ssize_t> PixelToRing(ssize_t pix) const;
-	ssize_t RingToPixel(ssize_t iring, ssize_t ringpix) const;
+	std::pair<size_t, size_t> PixelToRing(size_t pix) const;
+	size_t RingToPixel(size_t iring, size_t ringpix) const;
 
 	std::vector<double> PixelToAngle(size_t pixel) const;
 	ssize_t AngleToPixel(double alpha, double delta) const;
 
-	void GetRebinAngles(ssize_t pixel, size_t scale,
+	void GetRebinAngles(size_t pixel, size_t scale,
 	    std::vector<double> & alphas, std::vector<double> & deltas) const;
 
 	void GetInterpPixelsWeights(double alpha, double delta,

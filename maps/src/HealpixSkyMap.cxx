@@ -284,7 +284,7 @@ HealpixSkyMap::ConvertToDense()
 	dense_ = new std::vector<double>(size(), 0);
 
 	if (ring_sparse_) {
-		ssize_t idx;
+		size_t idx;
 		for (auto i = ring_sparse_->begin(); i != ring_sparse_->end();
 		    i++) {
 			idx = info_.RingToPixel(i.x, i.y);
@@ -341,7 +341,7 @@ HealpixSkyMap::ConvertToIndexedSparse()
 	indexed_sparse_ = new std::unordered_map<uint64_t, double>;
 
 	if (ring_sparse_) {
-		ssize_t idx;
+		size_t idx;
 		for (auto i = ring_sparse_->begin(); i != ring_sparse_->end();
 		    i++) {
 			if ((*i) == 0)

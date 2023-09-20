@@ -147,31 +147,34 @@ HealpixSkyMapInfo::SetShifted(bool shifted)
 	shifted_ = shifted;
 }
 
-std::pair<ssize_t, ssize_t>
-HealpixSkyMapInfo::PixelToRing(ssize_t pixel) const
+std::pair<size_t, size_t>
+HealpixSkyMapInfo::PixelToRing(size_t pixel) const
 {
-	static const std::pair<ssize_t, ssize_t> bad = {(ssize_t) -1, (ssize_t)-1};
+	static const std::pair<size_t, size_t> bad = {(size_t) -1, (size_t)-1};
 
-	if (pixel < 0 || pixel >= npix_)
+	if (pixel >= npix_)
 		return bad;
 
-	if (nested_)
-		nest2ring64(nside_, pixel, &pixel);
+	if (nested_) {
+		ssize_t pix = pixel;
+		nest2ring64(nside_, pix, &pix);
+		pixel = pix;
+	}
 
-	ssize_t iring;
+	size_t iring;
 	if (pixel < ncap_) /* North Polar cap */
-		iring = (ssize_t)(0.5 * (1 + sqrt(1.5 + 2 * pixel)));
+		iring = (size_t)(0.5 * (1 + sqrt(1.5 + 2 * pixel)));
 	else if (pixel < (npix_ - ncap_)) /* Equatorial region */
-		iring = (ssize_t)((pixel - ncap_) / nring_ + nside_);
+		iring = (size_t)((pixel - ncap_) / nring_ + nside_);
 	else /* South Polar cap */
-		iring = nring_ - (ssize_t)(0.5 * (1 + sqrt(2 * (npix_ - pixel) - 0.5)));
-	if (iring < 0 || iring >= nring_)
+		iring = nring_ - (size_t)(0.5 * (1 + sqrt(2 * (npix_ - pixel) - 0.5)));
+	if (iring >= nring_)
 		return bad;
 
 	const HealpixRingInfo & ring = rings_[iring];
 
 	ssize_t ringpix = pixel - ring.pix0;
-	if (ringpix < 0 || ringpix >= ring.npix)
+	if (ringpix >= ring.npix)
 		return bad;
 
 	if (shifted_)
@@ -180,24 +183,27 @@ HealpixSkyMapInfo::PixelToRing(ssize_t pixel) const
 	return {iring, ringpix};
 }
 
-ssize_t
-HealpixSkyMapInfo::RingToPixel(ssize_t iring, ssize_t ringpix) const
+size_t
+HealpixSkyMapInfo::RingToPixel(size_t iring, size_t ringpix) const
 {
-	if (iring < 0 || iring >= nring_)
+	if (iring >= nring_)
 		return -1;
 	const HealpixRingInfo & ring = rings_[iring];
 
 	if (shifted_)
 		ringpix = (ringpix + ring.npix / 2) % ring.npix;
-	if (ringpix < 0 || ringpix >= ring.npix)
+	if (ringpix >= ring.npix)
 		return -1;
 
-	ssize_t pixel = ring.pix0 + ringpix;
-	if (pixel < 0 || pixel >= npix_)
+	size_t pixel = ring.pix0 + ringpix;
+	if (pixel >= npix_)
 		return -1;
 
-	if (nested_)
-		ring2nest64(nside_, pixel, &pixel);
+	if (nested_) {
+		ssize_t pix = pixel;
+		ring2nest64(nside_, pix, &pix);
+		pixel = pix;
+	}
 
 	return pixel;
 }
@@ -253,14 +259,17 @@ HealpixSkyMapInfo::PixelToAngle(size_t pixel) const
 }
 
 void
-HealpixSkyMapInfo::GetRebinAngles(ssize_t pixel, size_t scale,
+HealpixSkyMapInfo::GetRebinAngles(size_t pixel, size_t scale,
     std::vector<double> & alphas, std::vector<double> & deltas) const
 {
 	if (nside_ % scale != 0)
 		log_fatal("Nside must be a multiple of rebinning scale");
 
-	if (!nested_)
-		ring2nest64(nside_, pixel, &pixel);
+	if (!nested_) {
+		ssize_t pix = pixel;
+		ring2nest64(nside_, pix, &pix);
+		pixel = pix;
+	}
 
 	alphas = std::vector<double>(scale * scale);
 	deltas = std::vector<double>(scale * scale);
