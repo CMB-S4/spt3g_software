@@ -738,6 +738,13 @@ FlatSkyProjection FlatSkyProjection::Rebin(size_t scale, double x_center, double
 	return fp;
 }
 
+size_t FlatSkyProjection::RebinPixel(size_t pixel, size_t scale) const
+{
+	size_t x = (pixel % xpix_) / scale;
+	size_t y = ((size_t)(pixel / xpix_)) / scale;
+	return x + y * (xpix_ / scale);
+}
+
 FlatSkyProjection FlatSkyProjection::OverlayPatch(double x0, double y0,
     size_t width, size_t height) const
 {

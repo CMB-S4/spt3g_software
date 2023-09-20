@@ -780,9 +780,7 @@ G3SkyMapPtr FlatSkyMap::Rebin(size_t scale, bool norm) const
 	for (auto i : *this) {
 		if (i.second == 0)
 			continue;
-		size_t x = (i.first % xpix_) / scale;
-		size_t y = ((size_t)(i.first / xpix_)) / scale;
-		size_t ip = x + y * out->xpix_;
+		size_t ip = proj_info.RebinPixel(i.first, scale);
 		(*out)[ip] += i.second / sqscal;
 	}
 
