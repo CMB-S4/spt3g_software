@@ -112,13 +112,13 @@ public:
 	double yres() const;
 	double res() const;
 
-	ssize_t AngleToPixel(double alpha, double delta) const override;
+	size_t AngleToPixel(double alpha, double delta) const override;
 	std::vector<double> PixelToAngle(size_t pixel) const override;
 	std::vector<double> PixelToAngle(size_t x_pix, size_t y_pix) const;
 	std::vector<double> PixelToAngleWrapRa(size_t pixel) const;
 	std::vector<double> AngleToXY(double alpha, double delta) const;
 	std::vector<double> XYToAngle(double x, double y) const;
-	ssize_t XYToPixel(double x, double y) const;
+	size_t XYToPixel(double x, double y) const;
 	std::vector<double> PixelToXY(size_t pixel) const;
 	std::vector<double> QuatToXY(quat q) const;
 	quat XYToQuat(double x, double y) const;

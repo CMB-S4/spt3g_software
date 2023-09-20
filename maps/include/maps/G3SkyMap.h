@@ -155,17 +155,17 @@ public:
 	virtual void ApplyMask(const G3SkyMapMask &mask, bool inverse=false);
 
 	// Pointing information
-	std::vector<ssize_t> AnglesToPixels(const std::vector<double> & alphas,
+	std::vector<size_t> AnglesToPixels(const std::vector<double> & alphas,
 	    const std::vector<double> & deltas) const;
 	void PixelsToAngles(const std::vector<size_t> & pixels,
 	    std::vector<double> & alphas, std::vector<double> & deltas) const;
-	std::vector<ssize_t> QuatsToPixels(const G3VectorQuat &quats) const;
+	std::vector<size_t> QuatsToPixels(const G3VectorQuat &quats) const;
 	G3VectorQuat PixelsToQuats(const std::vector<size_t> &pixels) const;
 
 	virtual std::vector<double> PixelToAngle(size_t pixel) const = 0;
-	virtual ssize_t AngleToPixel(double alpha, double delta) const = 0;
+	virtual size_t AngleToPixel(double alpha, double delta) const = 0;
 	quat PixelToQuat(size_t pixel) const;
-	ssize_t QuatToPixel(quat q) const;
+	size_t QuatToPixel(quat q) const;
 
 	// Rebinning and interpolation
 	virtual void GetRebinAngles(size_t pixel, size_t scale,

@@ -85,12 +85,12 @@ public:
 	double yres() const { return y_res_; };
 	double res() const { return y_res_; };
 
-	ssize_t XYToPixel(double x, double y) const;
+	size_t XYToPixel(double x, double y) const;
 	std::vector<double> PixelToXY(size_t pixel) const;
 	std::vector<double> XYToAngle(double x, double y, bool wrap_alpha=false) const;
 	std::vector<double> AngleToXY(double alpha, double delta) const;
 	std::vector<double> PixelToAngle(size_t pixel, bool wrap_alpha=false) const;
-	ssize_t AngleToPixel(double alpha, double delta) const;
+	size_t AngleToPixel(double alpha, double delta) const;
 	std::vector<double> QuatToXY(quat q, bool local) const;
 	quat XYToQuat(double x, double y, bool local) const;
 

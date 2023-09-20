@@ -247,7 +247,7 @@ void FlatSkyProjection::SetRes(double res, double x_res)
 	SetXRes(x_res);
 }
 
-ssize_t
+size_t
 FlatSkyProjection::XYToPixel(double x, double y) const
 {
 	// Truncate X/Y coordinates to integer pixels and wrap to 1D.
@@ -552,7 +552,7 @@ FlatSkyProjection::PixelToAngle(size_t pixel, bool wrap_alpha) const
 	return XYToAngle(xy[0], xy[1], wrap_alpha);
 }
 
-ssize_t
+size_t
 FlatSkyProjection::AngleToPixel(double alpha, double delta) const
 {
 	std::vector<double> xy = AngleToXY(alpha, delta);

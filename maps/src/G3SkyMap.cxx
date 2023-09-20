@@ -137,11 +137,11 @@ G3SkyMapWeights::G3SkyMapWeights(const G3SkyMapWeights &r, bool copy_data) :
 {
 }
 
-std::vector<ssize_t>
+std::vector<size_t>
 G3SkyMap::AnglesToPixels(const std::vector<double> & alphas,
     const std::vector<double> & deltas) const
 {
-	std::vector<ssize_t> pixels(alphas.size());
+	std::vector<size_t> pixels(alphas.size());
 
 	for (size_t i = 0; i < alphas.size(); i++) {
 		pixels[i] = AngleToPixel(alphas[i], deltas[i]);
@@ -169,7 +169,7 @@ G3SkyMap::PixelsToAngles(const std::vector<size_t> & pixels,
 	}
 }
 
-ssize_t
+size_t
 G3SkyMap::QuatToPixel(quat q) const
 {
 	double alpha, delta;
@@ -190,10 +190,10 @@ G3SkyMap::PixelToQuat(size_t pixel) const
 	return ang_to_quat(alphadelta[0], alphadelta[1]);
 }
 
-std::vector<ssize_t>
+std::vector<size_t>
 G3SkyMap::QuatsToPixels(const G3VectorQuat &quats) const
 {
-	std::vector<ssize_t> pixels(quats.size());
+	std::vector<size_t> pixels(quats.size());
 	for (size_t i = 0; i < quats.size(); i++)
 		pixels[i] = QuatToPixel(quats[i]);
 

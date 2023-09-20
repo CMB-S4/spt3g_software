@@ -696,7 +696,7 @@ std::vector<double> FlatSkyMap::XYToAngle(double x, double y) const {
 	return proj_info.XYToAngle(x, y, false);
 }
 
-ssize_t
+size_t
 FlatSkyMap::XYToPixel(double x, double y) const {
 	return proj_info.XYToPixel(x, y);
 }
@@ -718,7 +718,7 @@ FlatSkyMap::XYToQuat(double x, double y) const
 	return proj_info.XYToQuat(x, y, coord_ref == Local);
 }
 
-ssize_t FlatSkyMap::AngleToPixel(double alpha, double delta) const {
+size_t FlatSkyMap::AngleToPixel(double alpha, double delta) const {
 	return proj_info.AngleToPixel(alpha, delta);
 }
 
@@ -1161,13 +1161,13 @@ flatskymap_pixels_to_xy(const FlatSkyMap & skymap, const std::vector<size_t> &pi
 	return boost::python::make_tuple(x, y);
 }
 
-static std::vector<ssize_t>
+static std::vector<size_t>
 flatskymap_xy_to_pixels(const FlatSkyMap & skymap, const std::vector<double> &x,
     const std::vector<double> &y)
 {
 	g3_assert(x.size() == y.size());
 
-	std::vector<ssize_t> pixel(x.size());
+	std::vector<size_t> pixel(x.size());
 	for (size_t i = 0; i < x.size(); i++) {
 		pixel[i] = skymap.XYToPixel(x[i], y[i]);
 	}

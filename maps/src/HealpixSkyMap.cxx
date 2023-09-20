@@ -996,7 +996,7 @@ size_t HealpixSkyMap::NpixNonZero() const
 	return sz;
 }
 
-ssize_t
+size_t
 HealpixSkyMap::AngleToPixel(double alpha, double delta) const
 {
 	return info_.AngleToPixel(alpha, delta);

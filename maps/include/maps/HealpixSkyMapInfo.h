@@ -36,7 +36,7 @@ public:
 	size_t RingToPixel(size_t iring, size_t ringpix) const;
 
 	std::vector<double> PixelToAngle(size_t pixel) const;
-	ssize_t AngleToPixel(double alpha, double delta) const;
+	size_t AngleToPixel(double alpha, double delta) const;
 
 	void GetRebinAngles(size_t pixel, size_t scale,
 	    std::vector<double> & alphas, std::vector<double> & deltas) const;
@@ -68,7 +68,7 @@ private:
 
 	std::vector<HealpixRingInfo> rings_;
 
-	ssize_t RingAbove(double z) const;
+	size_t RingAbove(double z) const;
 
 	SET_LOGGER("HealpixSkyMapInfo");
 };

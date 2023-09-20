@@ -78,7 +78,7 @@ public:
 	bool nested() const {return info_.nested();}
 	double res() const;
 
-	ssize_t AngleToPixel(double alpha, double delta) const override;
+	size_t AngleToPixel(double alpha, double delta) const override;
 	std::vector<double> PixelToAngle(size_t pixel) const override;
 
 	void GetRebinAngles(size_t pixel, size_t scale,
