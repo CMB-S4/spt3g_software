@@ -1047,18 +1047,12 @@ G3SkyMapPtr HealpixSkyMap::Rebin(size_t scale, bool norm) const
 	else
 		return out;
 
-	const size_t scale2 = scale * scale;
-	const double sqscal = norm ? scale2 : 1.0;
+	const double sqscal = norm ? scale * scale : 1.0;
 
 	for (auto i : *this) {
 		if (i.second == 0)
 			continue;
-		ssize_t ip = i.first;
-		if (!nested())
-			ring2nest64(nside(), ip, &ip);
-		ip /= scale2;
-		if (!nested())
-			nest2ring64(out->nside(), ip, &ip);
+		size_t ip = info_.RebinPixel(i.first, scale);
 		(*out)[ip] += i.second / sqscal;
 	}
 

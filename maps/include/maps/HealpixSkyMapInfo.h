@@ -38,6 +38,8 @@ public:
 	std::vector<double> PixelToAngle(size_t pixel) const;
 	size_t AngleToPixel(double alpha, double delta) const;
 
+	size_t RebinPixel(size_t pixel, size_t scale) const;
+
 	void GetRebinAngles(size_t pixel, size_t scale,
 	    std::vector<double> & alphas, std::vector<double> & deltas) const;
 

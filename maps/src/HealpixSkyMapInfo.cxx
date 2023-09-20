@@ -258,6 +258,20 @@ HealpixSkyMapInfo::PixelToAngle(size_t pixel) const
 	return {alpha, delta};
 }
 
+size_t
+HealpixSkyMapInfo::RebinPixel(size_t pixel, size_t scale) const
+{
+	ssize_t pix = pixel;
+
+	if (!nested_)
+		ring2nest64(nside_, pix, &pix);
+	pix /= scale * scale;
+	if (!nested_)
+		nest2ring64(nside_ / scale, pix, &pix);
+
+	return pix;
+}
+
 void
 HealpixSkyMapInfo::GetRebinAngles(size_t pixel, size_t scale,
     std::vector<double> & alphas, std::vector<double> & deltas) const
