@@ -629,19 +629,19 @@ FlatSkyProjection::PixelToAngleGrad(size_t pixel, double h) const
 }
 
 void FlatSkyProjection::GetInterpPixelsWeights(double alpha, double delta,
-    std::vector<ssize_t> & pixels, std::vector<double> & weights) const
+    std::vector<size_t> & pixels, std::vector<double> & weights) const
 {
 	std::vector<double> xy = AngleToXY(alpha, delta);
 	double x = xy[0];
 	double y = xy[1];
 
-	pixels = std::vector<ssize_t>(4, -1);
+	pixels = std::vector<size_t>(4, (size_t) -1);
 	weights = std::vector<double>(4, 0);
 
-	int x_1 = (int)floorf(x);
-	int x_2 = x_1 + 1;
-	int y_1 = (int)floorf(y);
-	int y_2 = y_1 + 1;
+	ssize_t x_1 = (ssize_t)floorf(x);
+	ssize_t x_2 = x_1 + 1;
+	ssize_t y_1 = (ssize_t)floorf(y);
+	ssize_t y_2 = y_1 + 1;
 	if (x_1 < 0 || y_1 < 0 || x_2 >= xpix_ || y_2 >= ypix_){
 		log_debug("Point lies outside of pixel grid\n");
 		return;
@@ -653,7 +653,7 @@ void FlatSkyProjection::GetInterpPixelsWeights(double alpha, double delta,
 	pixels[3] = x_2 + y_2 * xpix_;  weights[3] = (x - x_1) * (y - y_1);
 }
 
-std::vector<ssize_t>
+std::vector<size_t>
 FlatSkyProjection::QueryDisc(double alpha, double delta, double radius, bool local) const
 {
 	static const size_t npts = 72;
@@ -701,10 +701,10 @@ FlatSkyProjection::QueryDisc(double alpha, double delta, double radius, bool loc
 			ymax = cy > ypix_ ? ypix_ : cy;
 	}
 
-	std::vector<ssize_t> pixels;
+	std::vector<size_t> pixels;
 	for (size_t x = xmin; x < xmax; x++) {
 		for (size_t y = ymin; y < ymax; y++) {
-			ssize_t pixel = y * xpix_ + x;
+			size_t pixel = y * xpix_ + x;
 			auto ang = PixelToAngle(pixel);
 			if (angular_distance(alpha, delta, ang[0], ang[1]) < radius)
 				pixels.push_back(pixel);

@@ -46,9 +46,9 @@ public:
 	    std::vector<double> & alphas, std::vector<double> & deltas) const;
 
 	void GetInterpPixelsWeights(double alpha, double delta,
-	    std::vector<ssize_t> & pixels, std::vector<double> & weights) const;
+	    std::vector<size_t> & pixels, std::vector<double> & weights) const;
 
-	std::vector<ssize_t> QueryDisc(double alpha, double delta,
+	std::vector<size_t> QueryDisc(double alpha, double delta,
 	    double radius) const;
 
 private:

@@ -215,7 +215,7 @@ MapMockObserver::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 			    pcoupling, U_->GetPolConv());
 			for (size_t i = 0; i < det.size(); i++) {
 				if (interp_) {
-					std::vector<ssize_t> pixels;
+					std::vector<size_t> pixels;
 					std::vector<double> weights;
 					T_->GetInterpPixelsWeights(alpha[i], delta[i], pixels, weights);
 					det[i] =

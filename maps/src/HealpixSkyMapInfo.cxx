@@ -330,12 +330,12 @@ HealpixSkyMapInfo::RingAbove(double z) const
 
 void
 HealpixSkyMapInfo::GetInterpPixelsWeights(double alpha, double delta,
-    std::vector<ssize_t> & pixels, std::vector<double> & weights) const
+    std::vector<size_t> & pixels, std::vector<double> & weights) const
 {
 	alpha /= G3Units::rad;
 	delta /= G3Units::rad;
 
-	pixels = std::vector<ssize_t>(4, -1);
+	pixels = std::vector<size_t>(4, (size_t) -1);
 	weights = std::vector<double>(4, 0);
 
 	double theta = M_PI_2 - delta;
@@ -414,17 +414,18 @@ HealpixSkyMapInfo::GetInterpPixelsWeights(double alpha, double delta,
 	}
 
 	if (nested_) {
-		ring2nest64(nside_, pixels[0], &pixels[0]);
-		ring2nest64(nside_, pixels[1], &pixels[1]);
-		ring2nest64(nside_, pixels[2], &pixels[2]);
-		ring2nest64(nside_, pixels[3], &pixels[3]);
+		for (size_t i = 0; i < pixels.size(); i++) {
+			ssize_t pix = pixels[i];
+			ring2nest64(nside_, pix, &pix);
+			pixels[i] = pix;
+		}
 	}
 }
 
-std::vector<ssize_t>
+std::vector<size_t>
 HealpixSkyMapInfo::QueryDisc(double alpha, double delta, double radius) const
 {
-	auto pixels = std::vector<ssize_t>();
+	auto pixels = std::vector<size_t>();
 
 	radius /= G3Units::rad;
 	if (radius >= M_PI) {
@@ -499,8 +500,11 @@ HealpixSkyMapInfo::QueryDisc(double alpha, double delta, double radius) const
 	}
 
 	if (nested_) {
-		for (size_t i = 0; i < pixels.size(); i++)
-			ring2nest64(nside_, pixels[i], &pixels[i]);
+		for (size_t i = 0; i < pixels.size(); i++) {
+			ssize_t pix = pixels[i];
+			ring2nest64(nside_, pix, &pix);
+			pixels[i] = pix;
+		}
 		std::sort(pixels.begin(), pixels.end());
 	}
 

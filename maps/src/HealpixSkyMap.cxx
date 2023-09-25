@@ -1015,12 +1015,12 @@ void HealpixSkyMap::GetRebinAngles(size_t pixel, size_t scale,
 
 void
 HealpixSkyMap::GetInterpPixelsWeights(double alpha, double delta,
-    std::vector<ssize_t> & pixels, std::vector<double> & weights) const
+    std::vector<size_t> & pixels, std::vector<double> & weights) const
 {
 	info_.GetInterpPixelsWeights(alpha, delta, pixels, weights);
 }
 
-std::vector<ssize_t>
+std::vector<size_t>
 HealpixSkyMap::QueryDisc(double alpha, double delta, double radius) const
 {
 	return info_.QueryDisc(alpha, delta, radius);

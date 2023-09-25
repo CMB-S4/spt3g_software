@@ -103,9 +103,9 @@ public:
 	    std::vector<double> & alphas, std::vector<double> & deltas,
 	    bool wrap_alpha=false) const;
 	void GetInterpPixelsWeights(double alpha, double delta,
-	    std::vector<ssize_t> & pixels, std::vector<double> & weights) const;
+	    std::vector<size_t> & pixels, std::vector<double> & weights) const;
 
-	std::vector<ssize_t> QueryDisc(double alpha, double delta, double radius,
+	std::vector<size_t> QueryDisc(double alpha, double delta, double radius,
 	    bool local) const;
 
 	FlatSkyProjection Rebin(size_t scale, double x_center = 0.0 / 0.0,
