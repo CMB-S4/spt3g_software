@@ -45,7 +45,10 @@ for m in maplist:
         copy_weights=True,
     )
 
-    mex2 = maps.ExtractMaps()
+    coadder = maps.CoaddMaps()
+    pipe.Add(coadder)
+
+    mex2 = maps.ExtractMaps(copy=True)
     pipe.Add(mex2)
 
     pipe.Add(maps.MakeMapsUnpolarized)
@@ -58,6 +61,9 @@ for m in maplist:
     tmap.weighted = False
     pipe.Add(maps.InjectMaps, map_id="test_map", maps_in=[tmap])
 
+    mex4 = maps.ExtractMaps()
+    pipe.Add(mex4)
+
     pipe.Run()
 
     # check that mex0 and mex1 are nearly (but not exactly) identical
@@ -67,6 +73,23 @@ for m in maplist:
     # check that replication dropped the test map
     assert "test_map" not in mex2.maps
     assert "test_map" not in mex3.maps
+
+    # check that injection added a new test map
+    assert "test_map" in mex4.maps
+    assert (mex4.maps["test_map"]["T"] == tmap).all()
+
+    # check that coadd is correct
+    assert "Coadd" in mex2.maps
+    assert list(coadder.coadd_frame["InputMapIds"]) == ["test_map1", "test_map2"]
+    assert (
+        mex2.maps["Coadd"]["T"] ==
+        mex2.maps["test_map1"]["T"] + mex2.maps["test_map2"]["T"]
+    ).all()
+    assert "Coadd" in mex3.maps
+    assert (
+        mex3.maps["Coadd"]["T"] ==
+        mex3.maps["test_map1"]["T"] + mex3.maps["test_map2"]["T"]
+    ).all()
 
     # check that replicated maps are properly populated
     for map_id in ["test_map1", "test_map2"]:
