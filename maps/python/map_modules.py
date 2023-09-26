@@ -27,7 +27,7 @@ def CompactMaps(frame, zero_nans=False):
     weight-removed) maps between unobserved regions and regions with zero
     temperature.
     """
-    for s in ["T", "Q", "U", "Wunpol", "Wpol"]:
+    for s in ["T", "Q", "U", "Wunpol", "Wpol", "H"]:
         if s in frame:
             m = frame.pop(s)
             m.compact(zero_nans=zero_nans)
@@ -214,6 +214,8 @@ def ValidateMaps(frame, ignore_missing_weights=False):
     map_id = frame.get("Id", None)
 
     if "T" not in frame:
+        if "H" in frame:
+            return
         core.log_fatal("Map frame %s: Missing T map" % map_id, unit="ValidateMaps")
     if ("Q" in frame and not "U" in frame) or ("U" in frame and not "Q" in frame):
         core.log_fatal("Map frame %s: Missing Q or U map" % map_id, unit="ValidateMaps")
@@ -226,7 +228,7 @@ def ValidateMaps(frame, ignore_missing_weights=False):
     check_weights = False
 
     stub = frame["T"].clone(False)
-    for k in ["T", "Q", "U", "Wpol", "Wunpol"]:
+    for k in ["T", "Q", "U", "Wpol", "Wunpol", "H"]:
         if k not in frame:
             continue
         if not frame[k].compatible(stub):
@@ -325,7 +327,7 @@ class ExtractMaps(object):
 
         mid = frame["Id"]
         mdict = {}
-        for k in ["T", "Q", "U", "Wpol", "Wunpol"]:
+        for k in ["T", "Q", "U", "Wpol", "Wunpol", "H"]:
             if k not in frame:
                 continue
             mdict[k] = frame[k] if not self.copy_ else frame[k].copy()
@@ -434,7 +436,7 @@ class InjectMaps(object):
 
         elif isinstance(maps_in, dict):
             for k, m in maps_in.items():
-                if k not in ["T", "Q", "U", "Wpol", "Wunpol"]:
+                if k not in ["T", "Q", "U", "Wpol", "Wunpol", "H"]:
                     continue
                 self.map_frame[k] = m
 
@@ -485,7 +487,7 @@ def ReplicateMaps(frame, input_map_id, output_map_ids, copy_weights=False):
         fr = core.G3Frame(core.G3FrameType.Map)
         fr["Id"] = oid
         if copy_weights or first:
-            map_keys = ["T", "Q", "U", "Wpol", "Wunpol"]
+            map_keys = ["T", "Q", "U", "Wpol", "Wunpol", "H"]
             first = False
         else:
             map_keys = ["T", "Q", "U"]
@@ -545,7 +547,7 @@ class CoaddMaps(object):
             input_weighted = False
             ApplyWeights(frame)
 
-        for key in ["T", "Q", "U", "Wpol", "Wunpol"]:
+        for key in ["T", "Q", "U", "Wpol", "Wunpol", "H"]:
             if key not in frame:
                 continue
             if key not in self.coadd_frame:
@@ -609,14 +611,14 @@ class ReprojectMaps(object):
                 "Coordinate rotation of polarized maps is not implemented"
             )
 
-        for key in ["T", "Q", "U", "Wpol", "Wunpol"]:
+        for key in ["T", "Q", "U", "Wpol", "Wunpol", "H"]:
 
             if key not in frame:
                 continue
 
             m = frame.pop(key)
 
-            if key in "TQU":
+            if key in "TQUH":
                 mnew = self.stub.clone(False)
                 maps.reproj_map(m, mnew, rebin=self.rebin, interp=self.interp)
 
