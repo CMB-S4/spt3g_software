@@ -738,19 +738,19 @@ std::vector<double> FlatSkyMap::PixelToAngleGrad(size_t pixel, double h) const {
 	return proj_info.PixelToAngleGrad(pixel, h);
 }
 
-void FlatSkyMap::GetRebinAngles(long pixel, size_t scale,
+void FlatSkyMap::GetRebinAngles(size_t pixel, size_t scale,
     std::vector<double> & alphas, std::vector<double> & deltas) const
 {
 	proj_info.GetRebinAngles(pixel, scale, alphas, deltas, false);
 }
 
 void FlatSkyMap::GetInterpPixelsWeights(double alpha, double delta,
-    std::vector<long> & pixels, std::vector<double> & weights) const
+    std::vector<size_t> & pixels, std::vector<double> & weights) const
 {
 	proj_info.GetInterpPixelsWeights(alpha, delta, pixels, weights);
 }
 
-std::vector<long>
+std::vector<size_t>
 FlatSkyMap::QueryDisc(double alpha, double delta, double radius) const
 {
 	return proj_info.QueryDisc(alpha, delta, radius, coord_ref == Local);
@@ -780,9 +780,7 @@ G3SkyMapPtr FlatSkyMap::Rebin(size_t scale, bool norm) const
 	for (auto i : *this) {
 		if (i.second == 0)
 			continue;
-		size_t x = (i.first % xpix_) / scale;
-		size_t y = ((size_t)(i.first / xpix_)) / scale;
-		size_t ip = x + y * out->xpix_;
+		size_t ip = proj_info.RebinPixel(i.first, scale);
 		(*out)[ip] += i.second / sqscal;
 	}
 

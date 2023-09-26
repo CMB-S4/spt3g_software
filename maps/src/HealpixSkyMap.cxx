@@ -8,7 +8,6 @@
 
 #include <G3Units.h>
 #include <maps/HealpixSkyMap.h>
-#include <maps/chealpix.h>
 #include <maps/G3SkyMapMask.h>
 
 #include "mapdata.h"
@@ -79,10 +78,10 @@ HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool weighted,
 			PyBuffer_Release(&view);
 			log_fatal("Only 1-D maps supported");
 		}
+		ssize_t npix = view.shape[0];
 		PyBuffer_Release(&view);
 
-		nside = npix2nside(view.shape[0]);
-		info_.initialize(nside, nested, shift_ra);
+		info_.initialize(npix, nested, shift_ra, true);
 
 		FillFromArray(v);
 
@@ -284,7 +283,7 @@ HealpixSkyMap::ConvertToDense()
 	dense_ = new std::vector<double>(size(), 0);
 
 	if (ring_sparse_) {
-		long idx;
+		size_t idx;
 		for (auto i = ring_sparse_->begin(); i != ring_sparse_->end();
 		    i++) {
 			idx = info_.RingToPixel(i.x, i.y);
@@ -341,7 +340,7 @@ HealpixSkyMap::ConvertToIndexedSparse()
 	indexed_sparse_ = new std::unordered_map<uint64_t, double>;
 
 	if (ring_sparse_) {
-		long idx;
+		size_t idx;
 		for (auto i = ring_sparse_->begin(); i != ring_sparse_->end();
 		    i++) {
 			if ((*i) == 0)
@@ -728,7 +727,6 @@ G3SkyMap &HealpixSkyMap::operator /=(const G3SkyMap &rhs) {
 			} else
 				zero = true;
 		} else if (ring_sparse_) {
-			long i = 0;
 			if (b.dense_ || b.ring_sparse_ || b.indexed_sparse_) {
 				for (size_t i = 0; i < size(); i++) {
 					double valb = b.at(i);
@@ -1009,7 +1007,7 @@ HealpixSkyMap::PixelToAngle(size_t pixel) const
 	return info_.PixelToAngle(pixel);
 }
 
-void HealpixSkyMap::GetRebinAngles(long pixel, size_t scale,
+void HealpixSkyMap::GetRebinAngles(size_t pixel, size_t scale,
     std::vector<double> & alphas, std::vector<double> & deltas) const
 {
 	info_.GetRebinAngles(pixel, scale, alphas, deltas);
@@ -1017,12 +1015,12 @@ void HealpixSkyMap::GetRebinAngles(long pixel, size_t scale,
 
 void
 HealpixSkyMap::GetInterpPixelsWeights(double alpha, double delta,
-    std::vector<long> & pixels, std::vector<double> & weights) const
+    std::vector<size_t> & pixels, std::vector<double> & weights) const
 {
 	info_.GetInterpPixelsWeights(alpha, delta, pixels, weights);
 }
 
-std::vector<long>
+std::vector<size_t>
 HealpixSkyMap::QueryDisc(double alpha, double delta, double radius) const
 {
 	return info_.QueryDisc(alpha, delta, radius);
@@ -1048,18 +1046,12 @@ G3SkyMapPtr HealpixSkyMap::Rebin(size_t scale, bool norm) const
 	else
 		return out;
 
-	const size_t scale2 = scale * scale;
-	const double sqscal = norm ? scale2 : 1.0;
+	const double sqscal = norm ? scale * scale : 1.0;
 
 	for (auto i : *this) {
 		if (i.second == 0)
 			continue;
-		long ip = i.first;
-		if (!nested())
-			ring2nest(nside(), ip, &ip);
-		ip /= scale2;
-		if (!nested())
-			nest2ring(out->nside(), ip, &ip);
+		size_t ip = info_.RebinPixel(i.first, scale);
 		(*out)[ip] += i.second / sqscal;
 	}
 
@@ -1149,7 +1141,7 @@ HealpixSkyMap_nonzeropixels(const HealpixSkyMap &m)
 }
 
 static double
-skymap_getitem(const G3SkyMap &skymap, int i)
+skymap_getitem(const G3SkyMap &skymap, ssize_t i)
 {
 
 	if (i < 0)
@@ -1163,7 +1155,7 @@ skymap_getitem(const G3SkyMap &skymap, int i)
 }
 
 static void
-skymap_setitem(G3SkyMap &skymap, int i, double val)
+skymap_setitem(G3SkyMap &skymap, ssize_t i, double val)
 {
 
 	if (i < 0)
@@ -1262,7 +1254,7 @@ static PyBufferProcs healpixskymap_bufferprocs;
 
 
 static void
-HealpixSkyMap_setitem_1d(G3SkyMap &skymap, size_t i, double val)
+HealpixSkyMap_setitem_1d(G3SkyMap &skymap, ssize_t i, double val)
 {
 
 	if (i < 0)

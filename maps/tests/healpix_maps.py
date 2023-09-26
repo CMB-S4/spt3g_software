@@ -221,3 +221,9 @@ maps.reproj_map(x, xeq)
 lon, lat = maps.azel.convert_radec_to_gal(alpha, delta)
 pix = xeq.angles_to_pixels(lon, lat)
 assert(np.allclose(np.asarray(pix), np.asarray(xeq)))
+
+# high-res
+hx = maps.HealpixSkyMap(16384)
+pix1 = hx.angle_to_pixel(0, -45 * core.G3Units.deg)
+pix2 = hp.ang2pix(16384, 3 * np.pi / 4, 0)
+assert(pix1 == pix2)
