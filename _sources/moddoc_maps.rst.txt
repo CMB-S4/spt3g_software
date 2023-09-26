@@ -1388,21 +1388,59 @@ minimize memory use.
 
 **spt3g.maps.map_modules.CoaddMaps**
 
-Coadd maps and weights.
+Coadd maps and weights, optionally collating by map Id.  This class can be
+used as an argument to ``pipe.Add()`` as a standard pipeline module, or
+instantiated as a standalone instance.  In the latter case, the object is
+treated as a callable for input map frames, and the ``coadd_frame`` or
+``coadd_frames`` attribute contains the running coadd(s).
 
+The output coadd frames contain two additional keys: ``'InputMapIds'`` and
+``'InputFiles'``, which are both lists of unique map Id's and filenames that
+are associated with the frames that contribute to each coadd.  When one
+coadd is added to another, these keys are updated recursively, so that the
+resulting coadd includes the Id's and filenames that contributed to both
+itself and the other coadd.  The list of filenames can be populated by
+combining this module with a G3Reader whose ``track_filename`` option is set
+to True; however, this feature is fragile and may not work as expected with
+complex pipelines.
+
+*Attributes:*
+	coadd_frame : G3Frame
+	    Output coadd map frame, also injected into the pipeline on
+	    EndProcessing.  This attribute is only populated if the ``collate``
+	    option is set to False.
+	coadd_frames : dict of G3Frames
+	    Output coadd map frames, keyed by input map Id.  Each frame is also
+	    injected into the pipeline on EndProcessing.  This attribute is only
+	    populated if the ``collate`` option is set to True.
+	
 *Arguments:*
 	map_ids : list of str
-	    List of map Id's to include in the coadd.  If None, any maps
+	    List of map Id's to include in the coadd(s).  If None, any maps
 	    in the pipeline are included.
 	output_map_id : str
-	    Id to assign to the output frame.
+	    Id to assign to the output frame.  If ``collate`` is True, this argument
+	    is required and treated as a prefix to which each input map Id is
+	    appended.
+	collate : bool
+	    If True, coadd unique map Id's into separate output map frames.
+	weighted : bool
+	    If True (default), ensure that maps have had weights applied before
+	    coadding.  Otherwise, coadd maps without checking the weights.
 	ignore_missing_weights : bool
 	    If False (default), a warning is issued when the frame contains weighted
 	    Stokes maps without a weights map.  Set this option to True when feeding
 	    single bolometer map frames with common weights through a pipeline.
+	drop_input_frames : bool
+	    If True, drop input map frames from the pipeline.
+	map_id_function : callable
+	    If supplied, use this callable to extract a map_id from the input map
+	    frames.  Otherwise, use ``frame["Id"]``.  The function should take a
+	    single frame object as an argument and return a string value to match
+	    against ``map_ids``, or ``None`` if a valid Id cannot be constructed.
 
 *Constructor:*
-	``CoaddMaps(self, map_ids=None, output_map_id=None, ignore_missing_weights=False)``
+	``CoaddMaps(self, map_ids=None, output_map_id='Coadd', collate=False, weighted=True, ignore_missing_weights=False, drop_input_frames=False, map_id_function=None)``
 
 
 
@@ -1705,6 +1743,8 @@ Functions in spt3g.maps
 * spt3g.maps.get_ra_dec_mask_
 
 * spt3g.maps.make_point_source_mask_
+
+* spt3g.maps.map_modules.coadd_map_files_
 
 * spt3g.maps.maputils.flatsky_to_healpix_
 
@@ -2009,6 +2049,42 @@ over all pixels.  The former produces output that is equivalent to using
 
 ``make_point_source_mask( (object)map, (DoubleVector)ra, (DoubleVector)dec, (DoubleVector)radius) -> G3SkyMapMask :``
     Construct a mask from the input stub map with pixels within the given radius around each point source position set to 1.
+
+
+.. _spt3g.maps.map_modules.coadd_map_files:
+
+**spt3g.maps.map_modules.coadd_map_files**
+
+Coadd map files, optionally collating map Id's into separate frames.
+
+*Arguments:*
+	input_files : list of str
+	    List of input files to feed through the pipeline.
+	output_file : str
+	    Output G3 filename.  If not supplied, the output frames are
+	    returned without saving to disk.
+	map_ids : list of str
+	    A list of map Id's to include in the coadd(s).
+	output_map_id : str
+	    Id to use for the output map frame.  If ``collate`` is True,
+	    this is the prefix applied to each output frame, with the
+	    input map Id appended to it.
+	collate : bool
+	    If True, coadd individual map Id's into separate map frames.
+	    Otherwise, all map frames are coadded into one output frame.
+	weighted : bool
+	    If True, ensure that weights have been applied before coadding.
+	    Otherwise, the input maps are coadded as they are.
+	
+*Returns:*
+	maps : G3Frame or dict of G3Frames
+	    If ``collate`` is True, returns a dictionary of map frames
+	    keyed by Id.  Otherwise, returns a single map frame.
+
+*Definition:*
+        ``coadd_map_files(input_files, output_file=None, map_ids=None, output_map_id='Coadd', collate=False, weighted=True)``
+
+
 
 
 .. _spt3g.maps.maputils.flatsky_to_healpix:

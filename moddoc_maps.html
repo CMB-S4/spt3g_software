@@ -1021,21 +1021,59 @@ minimize memory use.</p>
 </dd>
 </dl>
 <p id="spt3g-maps-map-modules-coaddmaps"><strong>spt3g.maps.map_modules.CoaddMaps</strong></p>
-<p>Coadd maps and weights.</p>
+<p>Coadd maps and weights, optionally collating by map Id.  This class can be
+used as an argument to <code class="docutils literal notranslate"><span class="pre">pipe.Add()</span></code> as a standard pipeline module, or
+instantiated as a standalone instance.  In the latter case, the object is
+treated as a callable for input map frames, and the <code class="docutils literal notranslate"><span class="pre">coadd_frame</span></code> or
+<code class="docutils literal notranslate"><span class="pre">coadd_frames</span></code> attribute contains the running coadd(s).</p>
+<p>The output coadd frames contain two additional keys: <code class="docutils literal notranslate"><span class="pre">'InputMapIds'</span></code> and
+<code class="docutils literal notranslate"><span class="pre">'InputFiles'</span></code>, which are both lists of unique map Id’s and filenames that
+are associated with the frames that contribute to each coadd.  When one
+coadd is added to another, these keys are updated recursively, so that the
+resulting coadd includes the Id’s and filenames that contributed to both
+itself and the other coadd.  The list of filenames can be populated by
+combining this module with a G3Reader whose <code class="docutils literal notranslate"><span class="pre">track_filename</span></code> option is set
+to True; however, this feature is fragile and may not work as expected with
+complex pipelines.</p>
 <dl class="simple">
+<dt><em>Attributes:</em></dt><dd><dl class="simple">
+<dt>coadd_frame<span class="classifier">G3Frame</span></dt><dd><p>Output coadd map frame, also injected into the pipeline on
+EndProcessing.  This attribute is only populated if the <code class="docutils literal notranslate"><span class="pre">collate</span></code>
+option is set to False.</p>
+</dd>
+<dt>coadd_frames<span class="classifier">dict of G3Frames</span></dt><dd><p>Output coadd map frames, keyed by input map Id.  Each frame is also
+injected into the pipeline on EndProcessing.  This attribute is only
+populated if the <code class="docutils literal notranslate"><span class="pre">collate</span></code> option is set to True.</p>
+</dd>
+</dl>
+</dd>
 <dt><em>Arguments:</em></dt><dd><dl class="simple">
-<dt>map_ids<span class="classifier">list of str</span></dt><dd><p>List of map Id’s to include in the coadd.  If None, any maps
+<dt>map_ids<span class="classifier">list of str</span></dt><dd><p>List of map Id’s to include in the coadd(s).  If None, any maps
 in the pipeline are included.</p>
 </dd>
-<dt>output_map_id<span class="classifier">str</span></dt><dd><p>Id to assign to the output frame.</p>
+<dt>output_map_id<span class="classifier">str</span></dt><dd><p>Id to assign to the output frame.  If <code class="docutils literal notranslate"><span class="pre">collate</span></code> is True, this argument
+is required and treated as a prefix to which each input map Id is
+appended.</p>
+</dd>
+<dt>collate<span class="classifier">bool</span></dt><dd><p>If True, coadd unique map Id’s into separate output map frames.</p>
+</dd>
+<dt>weighted<span class="classifier">bool</span></dt><dd><p>If True (default), ensure that maps have had weights applied before
+coadding.  Otherwise, coadd maps without checking the weights.</p>
 </dd>
 <dt>ignore_missing_weights<span class="classifier">bool</span></dt><dd><p>If False (default), a warning is issued when the frame contains weighted
 Stokes maps without a weights map.  Set this option to True when feeding
 single bolometer map frames with common weights through a pipeline.</p>
 </dd>
+<dt>drop_input_frames<span class="classifier">bool</span></dt><dd><p>If True, drop input map frames from the pipeline.</p>
+</dd>
+<dt>map_id_function<span class="classifier">callable</span></dt><dd><p>If supplied, use this callable to extract a map_id from the input map
+frames.  Otherwise, use <code class="docutils literal notranslate"><span class="pre">frame[&quot;Id&quot;]</span></code>.  The function should take a
+single frame object as an argument and return a string value to match
+against <code class="docutils literal notranslate"><span class="pre">map_ids</span></code>, or <code class="docutils literal notranslate"><span class="pre">None</span></code> if a valid Id cannot be constructed.</p>
+</dd>
 </dl>
 </dd>
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">CoaddMaps(self,</span> <span class="pre">map_ids=None,</span> <span class="pre">output_map_id=None,</span> <span class="pre">ignore_missing_weights=False)</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">CoaddMaps(self,</span> <span class="pre">map_ids=None,</span> <span class="pre">output_map_id='Coadd',</span> <span class="pre">collate=False,</span> <span class="pre">weighted=True,</span> <span class="pre">ignore_missing_weights=False,</span> <span class="pre">drop_input_frames=False,</span> <span class="pre">map_id_function=None)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-maps-map-modules-compactmaps"><strong>spt3g.maps.map_modules.CompactMaps</strong></p>
@@ -1241,6 +1279,7 @@ one.</p>
 <li><p><a class="reference internal" href="#spt3g-maps-get-ra-dec-map">spt3g.maps.get_ra_dec_map</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-get-ra-dec-mask">spt3g.maps.get_ra_dec_mask</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-make-point-source-mask">spt3g.maps.make_point_source_mask</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-maps-map-modules-coadd-map-files">spt3g.maps.map_modules.coadd_map_files</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-maputils-flatsky-to-healpix">spt3g.maps.maputils.flatsky_to_healpix</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-maputils-healpix-to-flatsky">spt3g.maps.maputils.healpix_to_flatsky</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-offsets-to-quat">spt3g.maps.offsets_to_quat</a></p></li>
@@ -1455,6 +1494,38 @@ can contain entries such as <code class="docutils literal notranslate"><span cla
 <p id="spt3g-maps-make-point-source-mask"><strong>spt3g.maps.make_point_source_mask</strong></p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">make_point_source_mask(</span> <span class="pre">(object)map,</span> <span class="pre">(DoubleVector)ra,</span> <span class="pre">(DoubleVector)dec,</span> <span class="pre">(DoubleVector)radius)</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMapMask</span> <span class="pre">:</span></code></dt><dd><p>Construct a mask from the input stub map with pixels within the given radius around each point source position set to 1.</p>
+</dd>
+</dl>
+<p id="spt3g-maps-map-modules-coadd-map-files"><strong>spt3g.maps.map_modules.coadd_map_files</strong></p>
+<p>Coadd map files, optionally collating map Id’s into separate frames.</p>
+<dl class="simple">
+<dt><em>Arguments:</em></dt><dd><dl class="simple">
+<dt>input_files<span class="classifier">list of str</span></dt><dd><p>List of input files to feed through the pipeline.</p>
+</dd>
+<dt>output_file<span class="classifier">str</span></dt><dd><p>Output G3 filename.  If not supplied, the output frames are
+returned without saving to disk.</p>
+</dd>
+<dt>map_ids<span class="classifier">list of str</span></dt><dd><p>A list of map Id’s to include in the coadd(s).</p>
+</dd>
+<dt>output_map_id<span class="classifier">str</span></dt><dd><p>Id to use for the output map frame.  If <code class="docutils literal notranslate"><span class="pre">collate</span></code> is True,
+this is the prefix applied to each output frame, with the
+input map Id appended to it.</p>
+</dd>
+<dt>collate<span class="classifier">bool</span></dt><dd><p>If True, coadd individual map Id’s into separate map frames.
+Otherwise, all map frames are coadded into one output frame.</p>
+</dd>
+<dt>weighted<span class="classifier">bool</span></dt><dd><p>If True, ensure that weights have been applied before coadding.
+Otherwise, the input maps are coadded as they are.</p>
+</dd>
+</dl>
+</dd>
+<dt><em>Returns:</em></dt><dd><dl class="simple">
+<dt>maps<span class="classifier">G3Frame or dict of G3Frames</span></dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">collate</span></code> is True, returns a dictionary of map frames
+keyed by Id.  Otherwise, returns a single map frame.</p>
+</dd>
+</dl>
+</dd>
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">coadd_map_files(input_files,</span> <span class="pre">output_file=None,</span> <span class="pre">map_ids=None,</span> <span class="pre">output_map_id='Coadd',</span> <span class="pre">collate=False,</span> <span class="pre">weighted=True)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-maps-maputils-flatsky-to-healpix"><strong>spt3g.maps.maputils.flatsky_to_healpix</strong></p>
