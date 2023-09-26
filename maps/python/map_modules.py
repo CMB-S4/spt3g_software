@@ -15,6 +15,7 @@ __all__ = [
     "ReplicateMaps",
     "CoaddMaps",
     "ReprojectMaps",
+    "coadd_map_files",
 ]
 
 
@@ -505,59 +506,218 @@ def ReplicateMaps(frame, input_map_id, output_map_ids, copy_weights=False):
 @core.indexmod
 class CoaddMaps(object):
     """
-    Coadd maps and weights.
+    Coadd maps and weights, optionally collating by map Id.  This class can be
+    used as an argument to ``pipe.Add()`` as a standard pipeline module, or
+    instantiated as a standalone instance.  In the latter case, the object is
+    treated as a callable for input map frames, and the ``coadd_frame`` or
+    ``coadd_frames`` attribute contains the running coadd(s).
+
+    The output coadd frames contain two additional keys: ``'InputMapIds'`` and
+    ``'InputFiles'``, which are both lists of unique map Id's and filenames that
+    are associated with the frames that contribute to each coadd.  When one
+    coadd is added to another, these keys are updated recursively, so that the
+    resulting coadd includes the Id's and filenames that contributed to both
+    itself and the other coadd.  The list of filenames can be populated by
+    combining this module with a G3Reader whose ``track_filename`` option is set
+    to True; however, this feature is fragile and may not work as expected with
+    complex pipelines.
+
+    Attributes
+    ----------
+    coadd_frame : G3Frame
+        Output coadd map frame, also injected into the pipeline on
+        EndProcessing.  This attribute is only populated if the ``collate``
+        option is set to False.
+    coadd_frames : dict of G3Frames
+        Output coadd map frames, keyed by input map Id.  Each frame is also
+        injected into the pipeline on EndProcessing.  This attribute is only
+        populated if the ``collate`` option is set to True.
 
     Arguments
     ---------
     map_ids : list of str
-        List of map Id's to include in the coadd.  If None, any maps
+        List of map Id's to include in the coadd(s).  If None, any maps
         in the pipeline are included.
     output_map_id : str
-        Id to assign to the output frame.
+        Id to assign to the output frame.  If ``collate`` is True, this argument
+        is required and treated as a prefix to which each input map Id is
+        appended.
+    collate : bool
+        If True, coadd unique map Id's into separate output map frames.
+    weighted : bool
+        If True (default), ensure that maps have had weights applied before
+        coadding.  Otherwise, coadd maps without checking the weights.
     ignore_missing_weights : bool
         If False (default), a warning is issued when the frame contains weighted
         Stokes maps without a weights map.  Set this option to True when feeding
         single bolometer map frames with common weights through a pipeline.
+    drop_input_frames : bool
+        If True, drop input map frames from the pipeline.
+    map_id_function : callable
+        If supplied, use this callable to extract a map_id from the input map
+        frames.  Otherwise, use ``frame["Id"]``.  The function should take a
+        single frame object as an argument and return a string value to match
+        against ``map_ids``, or ``None`` if a valid Id cannot be constructed.
     """
 
-    def __init__(self, map_ids=None, output_map_id=None, ignore_missing_weights=False):
-        self.coadd_frame = core.G3Frame(core.G3FrameType.Map)
-        self.coadd_frame["Id"] = output_map_id
+    def __init__(
+        self,
+        map_ids=None,
+        output_map_id="Coadd",
+        collate=False,
+        weighted=True,
+        ignore_missing_weights=False,
+        drop_input_frames=False,
+        map_id_function=None,
+    ):
         if isinstance(map_ids, str):
             map_ids = [map_ids]
         self.map_ids = map_ids
+        self.collate = collate
+        if self.collate:
+            self.coadd_frames = dict()
+            self.output_map_id = output_map_id
+        else:
+            self.coadd_frame = core.G3Frame(core.G3FrameType.Map)
+            self.coadd_frame["Id"] = output_map_id
+        self.weighted = weighted
         self.ignore_missing_weights = ignore_missing_weights
+        self.drop_input_frames = drop_input_frames
+        if not map_id_function:
+            map_id_function = lambda fr: fr.get("Id", None)
+        self.get_map_id = map_id_function
 
     def __call__(self, frame):
 
         if frame.type == core.G3FrameType.EndProcessing:
-            coadd = self.coadd_frame
-            self.coadd_frame = None
-            return [coadd, frame]
+            if self.collate:
+                return list(self.coadd_frames.values()) + [frame]
+            return [self.coadd_frame, frame]
 
-        if "Id" not in frame:
+        if frame.type != core.G3FrameType.Map:
             return
 
-        if self.map_ids is not None and frame["Id"] not in self.map_ids:
+        map_id = self.get_map_id(frame)
+        if not map_id:
+            return
+
+        if self.map_ids is not None and map_id not in self.map_ids:
             return
 
         ValidateMaps(frame, ignore_missing_weights=self.ignore_missing_weights)
-        input_weighted = True
-        if not frame["T"].weighted:
-            input_weighted = False
+        if self.weighted:
             ApplyWeights(frame)
+
+        if self.collate:
+            if map_id not in self.coadd_frames:
+                fr = core.G3Frame(core.G3FrameType.Map)
+                fr["Id"] = self.output_map_id + map_id
+                self.coadd_frames[map_id] = fr
+            cfr = self.coadd_frames[map_id]
+        else:
+            cfr = self.coadd_frame
+
+        if "InputMapIds" in cfr:
+            map_ids = list(cfr.pop("InputMapIds"))
+        else:
+            map_ids = []
+        if "InputMapIds" in frame:
+            # allow for recursive coadds
+            map_ids += list(frame["InputMapIds"])
+        elif frame.get("Id", None):
+            if frame["Id"] not in map_ids:
+                map_ids += [frame["Id"]]
+        if len(map_ids):
+            cfr["InputMapIds"] = core.G3VectorString(map_ids)
+
+        if "InputFiles" in cfr:
+            input_files = list(cfr.pop("InputFiles"))
+        else:
+            input_files = []
+        if "InputFiles" in frame:
+            # allow for recursive coadds
+            input_files += list(frame["InputFiles"])
+        elif getattr(frame, "_filename", None):
+            if frame._filename not in input_files:
+                input_files += [frame._filename]
+        if len(input_files):
+            cfr["InputFiles"] = core.G3VectorString(input_files)
 
         for key in ["T", "Q", "U", "Wpol", "Wunpol", "H"]:
             if key not in frame:
                 continue
-            if key not in self.coadd_frame:
-                self.coadd_frame[key] = frame[key].clone(False)
-            m = self.coadd_frame.pop(key)
+            if key not in cfr:
+                cfr[key] = frame[key].clone(False)
+            m = cfr.pop(key)
             m += frame[key]
-            self.coadd_frame[key] = m
+            cfr[key] = m
 
-        if not input_weighted:
-            RemoveWeights(frame)
+        if self.drop_input_frames:
+            return False
+
+
+@core.usefulfunc
+def coadd_map_files(
+    input_files,
+    output_file=None,
+    map_ids=None,
+    output_map_id="Coadd",
+    collate=False,
+    weighted=True,
+):
+    """
+    Coadd map files, optionally collating map Id's into separate frames.
+
+    Arguments
+    ---------
+    input_files : list of str
+        List of input files to feed through the pipeline.
+    output_file : str
+        Output G3 filename.  If not supplied, the output frames are
+        returned without saving to disk.
+    map_ids : list of str
+        A list of map Id's to include in the coadd(s).
+    output_map_id : str
+        Id to use for the output map frame.  If ``collate`` is True,
+        this is the prefix applied to each output frame, with the
+        input map Id appended to it.
+    collate : bool
+        If True, coadd individual map Id's into separate map frames.
+        Otherwise, all map frames are coadded into one output frame.
+    weighted : bool
+        If True, ensure that weights have been applied before coadding.
+        Otherwise, the input maps are coadded as they are.
+
+    Returns
+    -------
+    maps : G3Frame or dict of G3Frames
+        If ``collate`` is True, returns a dictionary of map frames
+        keyed by Id.  Otherwise, returns a single map frame.
+    """
+
+    pipe = core.G3Pipeline()
+    pipe.Add(core.G3Reader, filename=input_files, track_filename=True)
+
+    # drop metadata frames
+    pipe.Add(lambda fr: fr.type == core.G3FrameType.Map)
+
+    # build coadds
+    coadder = CoaddMaps(
+        map_ids=map_ids,
+        output_map_id=output_map_id,
+        collate=collate,
+        weighted=weighted,
+        drop_input_frames=True,
+    )
+    pipe.Add(coadder)
+
+    if output_file:
+        pipe.Add(core.G3Writer, filename=output_file)
+    pipe.Run()
+
+    if collate:
+        return coadder.coadd_frames
+    return coadder.coadd_frame
 
 
 @core.indexmod
