@@ -808,6 +808,8 @@ HealpixSkyMap is a G3SkyMap with the extra meta information about the particular
 
 Modules in spt3g.maps
 =====================
+* spt3g.maps.HitsBinner_
+
 * spt3g.maps.MapBinner_
 
 * spt3g.maps.MapMockObserver_
@@ -859,6 +861,72 @@ Modules in spt3g.maps
 * spt3g.maps.map_modules.ValidateMaps_
 
 * spt3g.maps.quathelpers.AddTimingToPointingQuats_
+
+
+.. _spt3g.maps.HitsBinner:
+
+**spt3g.maps.HitsBinner**
+
+HitsBinner(map_id, stub_map, pointing, timestreams, bolo_properties_name="BolometerProperties", map_per_scan=False)
+
+Bins up pointing for a set of channels into a hits map with properties (projection, etc.) 
+specified by the stub_map argument. 
+
+*Parameters:*
+	map_id : string
+	    Will be set as the "Id" element of the output frame from this module.
+	stub_map : G3SkyMap
+	    Template of the map in which to accumulate timestream data. All 
+	    parameters of the output map (projection, boundaries, pixel size, etc.) 
+	    are copied from this map, which is not modified.
+	pointing : string (frame object G3TimestreamQuat)
+	    Name of a frame object containing the boresight pointing quaternion 
+	    timestream. Must be present in every Scan frame.
+	timestreams : string (frame object G3TimestreamMap)
+	    Name of a frame object containing the timestreams to be binned into the 
+	    output map. Must exist in every Scan frame that is to be binned. 
+	    This key is used only to determine the subset of channels to bin into 
+	    the hits map.
+	bolo_properties_name : string, optional (frame object BolometerPropertiesMap)
+	    Name of a bolometer properties map containing detector pointing offsets
+	    from boresight. These are usually named "BolometerProperties", the 
+	    default, and this parameter only need be set if you wish to use 
+	    alternative values.
+	map_per_scan: boolean or callable, optional
+	    Defaults to False. If set to True, will make an output map for every 
+	    input Scan frame, which can be useful for fine-grained time-domain 
+	    maps. Can also be set to a Python callable for complex situations. In 
+	    this case, the callable will be called on each Scan frame and passed 
+	    the frame as an argument. If it returns True, the map binner will emit 
+	    a map frame with the data since the last emitted map frame but *before* 
+	    the current Scan; if False, the binner will continue accumulating data.
+	
+*Emits:*
+	Emits a frame of type Map at the end of processing containing the output 
+	map:
+	
+	Frame (Map) [
+	"Id" (spt3g.core.G3String) => "ra0hdec-57.5-150GHz"
+	"H" (spt3g.maps.FlatSkyMap) => 2700 x 1500 (45 x 25 deg) ZEA centered at (1350, 749.5) = (0, -57.5 deg) in equatorial coordinates  (Tcmb)
+	]
+	
+*See Also:*
+	MapBinner, SingleDetectorMapBinner, SingleDetectorBoresightBinner :
+	    Alternative map binners.
+	FlatSkyMap, HealpixSkyMap :
+	    Possible output types.
+	
+*Examples:*
+	.. code-block:: python
+	
+	    pipe.Add(
+	        maps.HitsBinner,
+	        map_id="150GHz",
+	        stub_map=map_params,
+	        timestreams="DeflaggedTimestreams150GHz",
+	        pointing="OfflineRaDecRotation",
+	    )
+
 
 
 .. _spt3g.maps.MapBinner:

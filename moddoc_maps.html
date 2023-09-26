@@ -561,6 +561,7 @@ This class cannot be instantiated from Python</p>
 <section id="modules-in-spt3g-maps">
 <h2>Modules in spt3g.maps<a class="headerlink" href="#modules-in-spt3g-maps" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
+<li><p><a class="reference internal" href="#spt3g-maps-hitsbinner">spt3g.maps.HitsBinner</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-mapbinner">spt3g.maps.MapBinner</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-mapmockobserver">spt3g.maps.MapMockObserver</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-maptodmasker">spt3g.maps.MapTODMasker</a></p></li>
@@ -588,6 +589,66 @@ This class cannot be instantiated from Python</p>
 <li><p><a class="reference internal" href="#spt3g-maps-map-modules-validatemaps">spt3g.maps.map_modules.ValidateMaps</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-quathelpers-addtimingtopointingquats">spt3g.maps.quathelpers.AddTimingToPointingQuats</a></p></li>
 </ul>
+<p id="spt3g-maps-hitsbinner"><strong>spt3g.maps.HitsBinner</strong></p>
+<p>HitsBinner(map_id, stub_map, pointing, timestreams, bolo_properties_name=”BolometerProperties”, map_per_scan=False)</p>
+<p>Bins up pointing for a set of channels into a hits map with properties (projection, etc.)
+specified by the stub_map argument.</p>
+<dl>
+<dt><em>Parameters:</em></dt><dd><dl class="simple">
+<dt>map_id<span class="classifier">string</span></dt><dd><p>Will be set as the “Id” element of the output frame from this module.</p>
+</dd>
+<dt>stub_map<span class="classifier">G3SkyMap</span></dt><dd><p>Template of the map in which to accumulate timestream data. All
+parameters of the output map (projection, boundaries, pixel size, etc.)
+are copied from this map, which is not modified.</p>
+</dd>
+<dt>pointing<span class="classifier">string (frame object G3TimestreamQuat)</span></dt><dd><p>Name of a frame object containing the boresight pointing quaternion
+timestream. Must be present in every Scan frame.</p>
+</dd>
+<dt>timestreams<span class="classifier">string (frame object G3TimestreamMap)</span></dt><dd><p>Name of a frame object containing the timestreams to be binned into the
+output map. Must exist in every Scan frame that is to be binned.
+This key is used only to determine the subset of channels to bin into
+the hits map.</p>
+</dd>
+<dt>bolo_properties_name<span class="classifier">string, optional (frame object BolometerPropertiesMap)</span></dt><dd><p>Name of a bolometer properties map containing detector pointing offsets
+from boresight. These are usually named “BolometerProperties”, the
+default, and this parameter only need be set if you wish to use
+alternative values.</p>
+</dd>
+<dt>map_per_scan: boolean or callable, optional</dt><dd><p>Defaults to False. If set to True, will make an output map for every
+input Scan frame, which can be useful for fine-grained time-domain
+maps. Can also be set to a Python callable for complex situations. In
+this case, the callable will be called on each Scan frame and passed
+the frame as an argument. If it returns True, the map binner will emit
+a map frame with the data since the last emitted map frame but <em>before</em>
+the current Scan; if False, the binner will continue accumulating data.</p>
+</dd>
+</dl>
+</dd>
+<dt><em>Emits:</em></dt><dd><p>Emits a frame of type Map at the end of processing containing the output
+map:</p>
+<p>Frame (Map) [
+“Id” (spt3g.core.G3String) =&gt; “ra0hdec-57.5-150GHz”
+“H” (spt3g.maps.FlatSkyMap) =&gt; 2700 x 1500 (45 x 25 deg) ZEA centered at (1350, 749.5) = (0, -57.5 deg) in equatorial coordinates  (Tcmb)
+]</p>
+</dd>
+<dt><em>See Also:</em></dt><dd><dl class="simple">
+<dt>MapBinner, SingleDetectorMapBinner, SingleDetectorBoresightBinner :</dt><dd><p>Alternative map binners.</p>
+</dd>
+<dt>FlatSkyMap, HealpixSkyMap :</dt><dd><p>Possible output types.</p>
+</dd>
+</dl>
+</dd>
+<dt><em>Examples:</em></dt><dd><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span>
+    <span class="n">maps</span><span class="o">.</span><span class="n">HitsBinner</span><span class="p">,</span>
+    <span class="n">map_id</span><span class="o">=</span><span class="s2">&quot;150GHz&quot;</span><span class="p">,</span>
+    <span class="n">stub_map</span><span class="o">=</span><span class="n">map_params</span><span class="p">,</span>
+    <span class="n">timestreams</span><span class="o">=</span><span class="s2">&quot;DeflaggedTimestreams150GHz&quot;</span><span class="p">,</span>
+    <span class="n">pointing</span><span class="o">=</span><span class="s2">&quot;OfflineRaDecRotation&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
 <p id="spt3g-maps-mapbinner"><strong>spt3g.maps.MapBinner</strong></p>
 <p>MapBinner(map_id, stub_map, pointing, timestreams, detector_weights, bolo_properties_name=”BolometerProperties”, store_weight_map=True, map_per_scan=False)</p>
 <p>Bins up timestreams into a map with properties (projection, etc.) specified
