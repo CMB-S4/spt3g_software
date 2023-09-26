@@ -119,6 +119,7 @@ HitsBinner::HitsBinner(std::string output_map_id, const G3SkyMap &stub_map,
 	H_->pol_type = G3SkyMap::None;
 	H_->SetPolConv(G3SkyMap::ConvNone);
 	H_->units = G3Timestream::None;
+	H_->weighted = false;
 
 	if (PyCallable_Check(map_per_scan.ptr())) {
 		map_per_scan_callback_ = map_per_scan;
