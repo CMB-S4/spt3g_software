@@ -82,9 +82,9 @@ enum {
 class ARCFileReader : public G3Module {
 public:
 	ARCFileReader(const std::string &path,
-	    Experiment experiment=Experiment::SPT);
+	    Experiment experiment=Experiment::SPT, bool track_filename=false);
 	ARCFileReader(const std::vector<std::string> & filename,
-	    Experiment experiment=Experiment::SPT);
+	    Experiment experiment=Experiment::SPT, bool track_filename=false);
 	virtual ~ARCFileReader() {}
 
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
@@ -124,12 +124,15 @@ private:
 	Experiment experiment;
 	G3TimePtr GCPToTime(uint8_t *buffer, off_t offset);
 
+	bool track_filename_;
+
 	SET_LOGGER("ARCFileReader");
 };
 
 
 ARCFileReader::ARCFileReader(const std::string &path,
-    Experiment experiment) : experiment(experiment)
+    Experiment experiment, bool track_filename) :
+    experiment(experiment), track_filename_(track_filename)
 {
 	if (experiment == Experiment::SPT || experiment == Experiment::BK) {
 		ms_jiffie_base_ = G3Units::ms;
@@ -149,7 +152,8 @@ ARCFileReader::ARCFileReader(const std::string &path,
 
 
 ARCFileReader::ARCFileReader(const std::vector<std::string> &filename,
-    Experiment experiment) : experiment(experiment)
+    Experiment experiment, bool track_filename) :
+    experiment(experiment), track_filename_(track_filename)
 {
 	if (experiment == Experiment::SPT || experiment == Experiment::BK) {
 		ms_jiffie_base_ = G3Units::ms;
@@ -859,6 +863,8 @@ void ARCFileReader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		outframe->Put(temp->first, templ);
 	}
 
+	if (track_filename_)
+		outframe->_filename = cur_file_;
 	out.push_back(outframe);
 
 	delete [] buffer;
@@ -870,13 +876,14 @@ PYBINDINGS("gcp") {
 	// Instead of EXPORT_G3MODULE since there are two constructors
 	class_<ARCFileReader, bases<G3Module>, boost::shared_ptr<ARCFileReader>,
 	    boost::noncopyable>("ARCFileReader",
-	    "Read GCP archive file (or files if you pass an iterable of paths)."
-	    " For non-SPT ARC file formats, please set Experiment to the "
-	    " appropriate value.",
-		init<std::string, optional<Experiment> >(
-		        args("filename", "experiment")))
-		.def(init<std::vector<std::string>, optional<Experiment> >(
-		        args("filename", "experiment")))
+	    "Read GCP archive file (or files if you pass an iterable of paths). "
+	    "For non-SPT ARC file formats, please set Experiment to the "
+	    "appropriate value.  Set track_filename to True to record the "
+	    "filename for each frame in the ._filename attribute (fragile).",
+		init<std::string, Experiment, bool>((arg("filename"),
+			arg("experiment")=Experiment::SPT, arg("track_filename")=false)))
+		.def(init<std::vector<std::string>, Experiment, bool>((arg("filename"),
+			arg("experiment")=Experiment::SPT, arg("track_filename")=false)))
 		.def_readonly("__g3module__", true)
 	;
 }

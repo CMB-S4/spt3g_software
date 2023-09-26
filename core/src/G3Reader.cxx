@@ -5,9 +5,9 @@
 #include <boost/filesystem.hpp>
 
 G3Reader::G3Reader(std::string filename, int n_frames_to_read,
-    float timeout) :
+    float timeout, bool track_filename) :
     prefix_file_(false), n_frames_to_read_(n_frames_to_read),
-    n_frames_read_(0), timeout_(timeout)
+    n_frames_read_(0), timeout_(timeout), track_filename_(track_filename)
 {
 	boost::filesystem::path fpath(filename);
 	if (filename.find("://") == std::string::npos &&
@@ -18,9 +18,9 @@ G3Reader::G3Reader(std::string filename, int n_frames_to_read,
 }
 
 G3Reader::G3Reader(std::vector<std::string> filename, int n_frames_to_read,
-    float timeout) :
+    float timeout, bool track_filename) :
     prefix_file_(false), n_frames_to_read_(n_frames_to_read),
-    n_frames_read_(0), timeout_(timeout)
+    n_frames_read_(0), timeout_(timeout), track_filename_(track_filename)
 {
 	if (filename.size() == 0)
 		log_fatal("Empty file list provided to G3Reader");
@@ -104,7 +104,10 @@ void G3Reader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	if (_save != nullptr)
 		PyEval_RestoreThread(_save);
 
+	if (track_filename_)
+		frame->_filename = cur_file_;
 	out.push_back(frame);
+
 	n_frames_read_++;
 }
 
@@ -130,11 +133,13 @@ PYBINDINGS("core") {
 	      "streams, resulting in EOF behavior on expiry; unfortunately this "
 	      "cannot be used for polling, you have to close the connection. "
 	      "Use the `tell` and `seek` methods to record the position of and "
-	      "seek to the beginning of a particular frame in the file.",
-	init<std::string, int, float>((arg("filename"),
-	    arg("n_frames_to_read")=0,arg("timeout")=-1.)))
-	.def(init<std::vector<std::string>, int, float>((arg("filename"),
-	    arg("n_frames_to_read")=0, arg("timeout")=-1.)))
+	      "seek to the beginning of a particular frame in the file.  Set "
+	      "track_filename to True to record the filename for each frame in "
+	      "the ._filename attribute (fragile).",
+	init<std::string, int, float, bool>((arg("filename"),
+	    arg("n_frames_to_read")=0,arg("timeout")=-1.,arg("track_filename")=false)))
+	.def(init<std::vector<std::string>, int, float, bool>((arg("filename"),
+	    arg("n_frames_to_read")=0, arg("timeout")=-1.,arg("track_filename")=false)))
 	.def("tell", &G3Reader::Tell)
 	.def("seek", &G3Reader::Seek)
 	.def_readonly("__g3module__", true)
