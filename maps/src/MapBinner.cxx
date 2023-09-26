@@ -18,8 +18,7 @@ public:
 	MapBinner(std::string output_map_id, const G3SkyMap &stub_map,
 	    std::string pointing, std::string timestreams,
 	    std::string detector_weights, std::string bolo_properties_name,
-	    bool store_stokes_map, bool store_weight_map,
-	    boost::python::object map_per_scan);
+	    bool store_weight_map, boost::python::object map_per_scan);
 	virtual ~MapBinner() {}
 
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
@@ -37,10 +36,9 @@ private:
 	int map_per_scan_;
 	boost::python::object map_per_scan_callback_;
 
-	bool pol_;
 	bool units_set_;
 
-	G3SkyMapPtr stub_, T_, Q_, U_;
+	G3SkyMapPtr T_, Q_, U_;
 	G3SkyMapWeightsPtr map_weights_;
 	G3Time start_, stop_;
 
@@ -51,11 +49,10 @@ private:
 
 EXPORT_G3MODULE("maps", MapBinner,
     (init<std::string, const G3SkyMap &, std::string, std::string, std::string,
-     std::string, bool, bool, object>((arg("map_id"), arg("stub_map"),
+     std::string, bool, object>((arg("map_id"), arg("stub_map"),
      arg("pointing"), arg("timestreams"), arg("detector_weights")="",
      arg("bolo_properties_name")="BolometerProperties",
-     arg("store_stokes_map")=true,arg("store_weight_map")=true,
-     arg("map_per_scan")=false))),
+     arg("store_weight_map")=true,arg("map_per_scan")=false))),
 "MapBinner(map_id, stub_map, pointing, timestreams, detector_weights, bolo_properties_name=\"BolometerProperties\", store_weight_map=True, map_per_scan=False)\n"
 "\n"
 "Bins up timestreams into a map with properties (projection, etc.) specified\n"
@@ -91,9 +88,6 @@ EXPORT_G3MODULE("maps", MapBinner,
 "    from boresight. These are usually named \"BolometerProperties\", the \n"
 "    default, and this parameter only need be set if you wish to use \n"
 "    alternative values.\n"
-"store_stokes_map : boolean, optional\n"
-"    Defaults to True. If set to False, the output Stokes T/Q/U map(s) \n"
-"    will not be stored, and only the weights map will be stored.\n"
 "store_weight_map : boolean, optional\n"
 "    Defaults to True. If set to False, the output weight map will not be \n"
 "    stored, though the output maps will *still be weighted*. It should be \n"
@@ -149,27 +143,22 @@ EXPORT_G3MODULE("maps", MapBinner,
 
 MapBinner::MapBinner(std::string output_map_id, const G3SkyMap &stub_map,
     std::string pointing, std::string timestreams, std::string detector_weights,
-    std::string bolo_properties_name, bool store_stokes_map,
-    bool store_weight_map, boost::python::object map_per_scan) :
+    std::string bolo_properties_name, bool store_weight_map,
+    boost::python::object map_per_scan) :
   output_id_(output_map_id), pointing_(pointing), timestreams_(timestreams),
   weights_(detector_weights), boloprops_name_(bolo_properties_name),
   units_set_(false)
 {
-	stub_ = stub_map.Clone(false);
-	pol_ = stub_->GetPolConv() != G3SkyMap::ConvNone;
-
-	if (store_stokes_map) {
-		T_ = stub_->Clone(false);
-		T_->pol_type = G3SkyMap::T;
-	}
-
+	T_ = stub_map.Clone(false);
+	T_->pol_type = G3SkyMap::T;
 	if (store_weight_map)
-		map_weights_ = G3SkyMapWeightsPtr(new G3SkyMapWeights(stub_, pol_));
+		map_weights_ = G3SkyMapWeightsPtr(new G3SkyMapWeights(T_,
+		    T_->GetPolConv() != G3SkyMap::ConvNone));
 
-	if (store_stokes_map && pol_) {
-		Q_ = stub_->Clone(false);
+	if (T_->GetPolConv() != G3SkyMap::ConvNone) {
+		Q_ = stub_map.Clone(false);
 		Q_->pol_type = G3SkyMap::Q;
-		U_ = stub_->Clone(false);
+		U_ = stub_map.Clone(false);
 		U_->pol_type = G3SkyMap::U;
 	}
 
@@ -203,12 +192,9 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	if (emit_map_now) {
 		G3FramePtr out_frame(new G3Frame(G3Frame::Map));
 		out_frame->Put("Id", G3StringPtr(new G3String(output_id_)));
-
-		if (T_) {
-			out_frame->Put("T",
-			    boost::dynamic_pointer_cast<G3FrameObject>(T_));
-			T_ = T_->Clone(false);
-		}
+		out_frame->Put("T",
+		    boost::dynamic_pointer_cast<G3FrameObject>(T_));
+		T_ = T_->Clone(false);
 
 		if (Q_) {
 			out_frame->Put("Q",
@@ -220,8 +206,9 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		}
 
 		if (map_weights_) {
-			out_frame->Put(pol_ ? "Wpol" : "Wunpol", map_weights_);
-			map_weights_ = map_weights_->Clone(false);
+			out_frame->Put((Q_) ? "Wpol" : "Wunpol", map_weights_);
+			map_weights_ = G3SkyMapWeightsPtr(new G3SkyMapWeights(
+			    T_, T_->GetPolConv() != G3SkyMap::ConvNone));
 		}
 
 		out_frame->Put("StartTime", G3TimePtr(new G3Time(start_)));
@@ -273,16 +260,14 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		stop_ = timestreams->GetStopTime();
 
 	if (!units_set_) {
-		stub_->units = timestreams->GetUnits();
-		if (T_)
-			T_->units = timestreams->GetUnits();
+		T_->units = timestreams->GetUnits();
 		if (Q_)
 			Q_->units = timestreams->GetUnits();
 		if (U_)
 			U_->units = timestreams->GetUnits();
 		units_set_ = true;
 	} else {
-		if (stub_->units != timestreams->GetUnits())
+		if (T_->units != timestreams->GetUnits())
 			log_fatal("Timestreams have units that do not match "
 			    "earlier timestreams in the pipeline.");
 	}
@@ -306,8 +291,7 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 			G3SkyMapPtr scanT, scanQ, scanU;
 			G3SkyMapWeightsPtr scanW;
 
-			if (T_)
-				scanT = T_->Clone(false);
+			scanT = T_->Clone(false);
 			if (Q_)
 				scanQ = Q_->Clone(false);
 			if (U_)
@@ -326,8 +310,7 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 			#pragma omp critical
 			{
 				// One thread at a time here
-				if (T_)
-					(*T_) += *scanT;
+				(*T_) += *scanT;
 				if (Q_)
 					(*Q_) += *scanQ;
 				if (U_)
@@ -390,12 +373,12 @@ MapBinner::BinTimestream(const G3Timestream &det, double weight,
 	// Get per-detector pointing timestream
 
 	std::vector<double> alpha, delta;
-	get_detector_pointing(bp.x_offset, bp.y_offset, pointing, stub_->coord_ref,
+	get_detector_pointing(bp.x_offset, bp.y_offset, pointing, T->coord_ref,
 	    alpha, delta);
 
-	auto detpointing = stub_->AnglesToPixels(alpha, delta);
+	auto detpointing = T->AnglesToPixels(alpha, delta);
 
-	if (pol_) {
+	if (Q) {
 		// And polarization coupling
 		// XXX: does not handle focal-plane rotation, since it assumes
 		// polarization coupling is constant for the whole scan.
@@ -411,19 +394,15 @@ MapBinner::BinTimestream(const G3Timestream &det, double weight,
 		pcoupling *= weight;
 
 		for (size_t i = 0; i < det.size(); i++) {
-			if (T)
-				(*T)[detpointing[i]] += pcoupling.t*det[i];
-			if (Q)
-				(*Q)[detpointing[i]] += pcoupling.q*det[i];
-			if (U)
-				(*U)[detpointing[i]] += pcoupling.u*det[i];
+			(*T)[detpointing[i]] += pcoupling.t*det[i];
+			(*Q)[detpointing[i]] += pcoupling.q*det[i];
+			(*U)[detpointing[i]] += pcoupling.u*det[i];
 			if (W)
 				(*W)[detpointing[i]] += mueller;
 		}
 	} else {
 		for (size_t i = 0; i < det.size(); i++) {
-			if (T)
-				(*T)[detpointing[i]] += weight*det[i];
+			(*T)[detpointing[i]] += weight*det[i];
 			if (W)
 				(*W->TT)[detpointing[i]] += weight;
 		}
