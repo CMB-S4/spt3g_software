@@ -14,7 +14,8 @@ public:
 	HealpixSkyMapInfo();
 	HealpixSkyMapInfo(const HealpixSkyMapInfo& info);
 
-	void initialize(size_t nside, bool nested=false, bool shifted=false);
+	void initialize(size_t nside_or_npix, bool nested=false,
+	    bool shifted=false, bool is_npix=false);
 
 	template <class A> void load(A &ar, unsigned v);
 	template <class A> void save(A &ar, unsigned v) const;
@@ -22,6 +23,7 @@ public:
 	std::string Description() const override;
 
 	void SetNSide(size_t nside);
+	void SetNPix(size_t npix);
 	void SetNested(bool nested);
 	void SetShifted(bool shifted);
 
@@ -38,13 +40,15 @@ public:
 	std::vector<double> PixelToAngle(size_t pixel) const;
 	size_t AngleToPixel(double alpha, double delta) const;
 
-	void GetRebinAngles(long pixel, size_t scale,
+	size_t RebinPixel(size_t pixel, size_t scale) const;
+
+	void GetRebinAngles(size_t pixel, size_t scale,
 	    std::vector<double> & alphas, std::vector<double> & deltas) const;
 
 	void GetInterpPixelsWeights(double alpha, double delta,
-	    std::vector<long> & pixels, std::vector<double> & weights) const;
+	    std::vector<size_t> & pixels, std::vector<double> & weights) const;
 
-	std::vector<long> QueryDisc(double alpha, double delta,
+	std::vector<size_t> QueryDisc(double alpha, double delta,
 	    double radius) const;
 
 private:

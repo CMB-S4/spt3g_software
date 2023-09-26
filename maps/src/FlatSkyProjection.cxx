@@ -247,7 +247,7 @@ void FlatSkyProjection::SetRes(double res, double x_res)
 	SetXRes(x_res);
 }
 
-long
+size_t
 FlatSkyProjection::XYToPixel(double x, double y) const
 {
 	// Truncate X/Y coordinates to integer pixels and wrap to 1D.
@@ -255,20 +255,20 @@ FlatSkyProjection::XYToPixel(double x, double y) const
 	// The floor() is important to properly truncate negative numbers,
 	// which otherwise pile up at zero from both directions.
 
-	long ix = (long)floor(x + 0.5);
-	long iy = (long)floor(y + 0.5);
+	ssize_t ix = (ssize_t)floor(x + 0.5);
+	ssize_t iy = (ssize_t)floor(y + 0.5);
 	return (ix < 0 || iy < 0 || ix >= xpix_ || iy >= ypix_) ?
 	    -1 : ix + iy * xpix_;
 }
 
 std::vector<double>
-FlatSkyProjection::PixelToXY(long pixel) const
+FlatSkyProjection::PixelToXY(size_t pixel) const
 {
 	std::vector<double> out(2, -1);
 
 	if (pixel >= 0 && pixel < xpix_ * ypix_) {
-		out[0] = (int)(pixel % xpix_);
-		out[1] = (int)(pixel / xpix_);
+		out[0] = (ssize_t)(pixel % xpix_);
+		out[1] = (ssize_t)(pixel / xpix_);
 	}
 
 	return out;
@@ -544,7 +544,7 @@ FlatSkyProjection::XYToQuat(double x, double y, bool local) const
 }
 
 std::vector<double>
-FlatSkyProjection::PixelToAngle(long pixel, bool wrap_alpha) const
+FlatSkyProjection::PixelToAngle(size_t pixel, bool wrap_alpha) const
 {
 	if (pixel < 0 || pixel >= xpix_ * ypix_)
 		return {0., 0.};
@@ -552,14 +552,14 @@ FlatSkyProjection::PixelToAngle(long pixel, bool wrap_alpha) const
 	return XYToAngle(xy[0], xy[1], wrap_alpha);
 }
 
-long
+size_t
 FlatSkyProjection::AngleToPixel(double alpha, double delta) const
 {
 	std::vector<double> xy = AngleToXY(alpha, delta);
 	return XYToPixel(xy[0], xy[1]);
 }
 
-void FlatSkyProjection::GetRebinAngles(long pixel, size_t scale,
+void FlatSkyProjection::GetRebinAngles(size_t pixel, size_t scale,
     std::vector<double> & alphas, std::vector<double> & deltas,
     bool wrap_alpha) const
 {
@@ -620,7 +620,7 @@ FlatSkyProjection::XYToAngleGrad(double x, double y, double h) const
 }
 
 std::vector<double>
-FlatSkyProjection::PixelToAngleGrad(long pixel, double h) const
+FlatSkyProjection::PixelToAngleGrad(size_t pixel, double h) const
 {
 	if (pixel < 0 || pixel >= xpix_ * ypix_)
 		return {0., 0., 0., 0.};
@@ -629,19 +629,19 @@ FlatSkyProjection::PixelToAngleGrad(long pixel, double h) const
 }
 
 void FlatSkyProjection::GetInterpPixelsWeights(double alpha, double delta,
-    std::vector<long> & pixels, std::vector<double> & weights) const
+    std::vector<size_t> & pixels, std::vector<double> & weights) const
 {
 	std::vector<double> xy = AngleToXY(alpha, delta);
 	double x = xy[0];
 	double y = xy[1];
 
-	pixels = std::vector<long>(4, -1);
+	pixels = std::vector<size_t>(4, (size_t) -1);
 	weights = std::vector<double>(4, 0);
 
-	int x_1 = (int)floorf(x);
-	int x_2 = x_1 + 1;
-	int y_1 = (int)floorf(y);
-	int y_2 = y_1 + 1;
+	ssize_t x_1 = (ssize_t)floorf(x);
+	ssize_t x_2 = x_1 + 1;
+	ssize_t y_1 = (ssize_t)floorf(y);
+	ssize_t y_2 = y_1 + 1;
 	if (x_1 < 0 || y_1 < 0 || x_2 >= xpix_ || y_2 >= ypix_){
 		log_debug("Point lies outside of pixel grid\n");
 		return;
@@ -653,7 +653,7 @@ void FlatSkyProjection::GetInterpPixelsWeights(double alpha, double delta,
 	pixels[3] = x_2 + y_2 * xpix_;  weights[3] = (x - x_1) * (y - y_1);
 }
 
-std::vector<long>
+std::vector<size_t>
 FlatSkyProjection::QueryDisc(double alpha, double delta, double radius, bool local) const
 {
 	static const size_t npts = 72;
@@ -671,10 +671,10 @@ FlatSkyProjection::QueryDisc(double alpha, double delta, double radius, bool loc
 	double pvb = pv.R_component_3();
 	double pvc = pv.R_component_4();
 
-	long xmin = xpix_;
-	long xmax = 0;
-	long ymin = ypix_;
-	long ymax = 0;
+	ssize_t xmin = xpix_;
+	ssize_t xmax = 0;
+	ssize_t ymin = ypix_;
+	ssize_t ymax = 0;
 
 	double a, d;
 	double phi = 0;
@@ -687,10 +687,10 @@ FlatSkyProjection::QueryDisc(double alpha, double delta, double radius, bool loc
 		double s = sin(phi / 2.0);
 		quat q = quat(c, pva * s, pvb * s, pvc * s);
 		auto xy = QuatToXY(q * p / q, local);
-		long fx = std::floor(xy[0]);
-		long cx = std::ceil(xy[0]);
-		long fy = std::floor(xy[1]);
-		long cy = std::ceil(xy[1]);
+		ssize_t fx = std::floor(xy[0]);
+		ssize_t cx = std::ceil(xy[0]);
+		ssize_t fy = std::floor(xy[1]);
+		ssize_t cy = std::ceil(xy[1]);
 		if (fx < xmin)
 			xmin = fx < 0 ? 0 : fx;
 		if (cx > xmax)
@@ -701,10 +701,10 @@ FlatSkyProjection::QueryDisc(double alpha, double delta, double radius, bool loc
 			ymax = cy > ypix_ ? ypix_ : cy;
 	}
 
-	std::vector<long> pixels;
+	std::vector<size_t> pixels;
 	for (size_t x = xmin; x < xmax; x++) {
 		for (size_t y = ymin; y < ymax; y++) {
-			long pixel = y * xpix_ + x;
+			size_t pixel = y * xpix_ + x;
 			auto ang = PixelToAngle(pixel);
 			if (angular_distance(alpha, delta, ang[0], ang[1]) < radius)
 				pixels.push_back(pixel);
@@ -736,6 +736,13 @@ FlatSkyProjection FlatSkyProjection::Rebin(size_t scale, double x_center, double
 	fp.SetXYCenter(x_center, y_center);
 
 	return fp;
+}
+
+size_t FlatSkyProjection::RebinPixel(size_t pixel, size_t scale) const
+{
+	size_t x = (pixel % xpix_) / scale;
+	size_t y = ((size_t)(pixel / xpix_)) / scale;
+	return x + y * (xpix_ / scale);
 }
 
 FlatSkyProjection FlatSkyProjection::OverlayPatch(double x0, double y0,

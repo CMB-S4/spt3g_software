@@ -81,12 +81,12 @@ public:
 	size_t AngleToPixel(double alpha, double delta) const override;
 	std::vector<double> PixelToAngle(size_t pixel) const override;
 
-	void GetRebinAngles(long pixel, size_t scale,
+	void GetRebinAngles(size_t pixel, size_t scale,
 	    std::vector<double> & alphas, std::vector<double> & deltas) const override;
 	void GetInterpPixelsWeights(double alpha, double delta,
-	    std::vector<long> & pixels, std::vector<double> & weights) const override;
+	    std::vector<size_t> & pixels, std::vector<double> & weights) const override;
 
-	std::vector<long> QueryDisc(double alpha, double delta,
+	std::vector<size_t> QueryDisc(double alpha, double delta,
 	    double radius) const override;
 
 	G3SkyMapPtr Rebin(size_t scale, bool norm = true) const override;

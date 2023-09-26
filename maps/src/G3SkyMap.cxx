@@ -334,7 +334,7 @@ G3SkyMap &G3SkyMap::operator/=(double rhs)
 
 
 void
-G3SkyMap::GetInterpPixelsWeights(quat q, std::vector<long> & pixels,
+G3SkyMap::GetInterpPixelsWeights(quat q, std::vector<size_t> & pixels,
     std::vector<double> & weights) const
 {
 	double alpha, delta;
@@ -346,7 +346,7 @@ G3SkyMap::GetInterpPixelsWeights(quat q, std::vector<long> & pixels,
 }
 
 G3VectorQuat
-G3SkyMap::GetRebinQuats(long pixel, size_t scale) const
+G3SkyMap::GetRebinQuats(size_t pixel, size_t scale) const
 {
 	std::vector<double> alphas, deltas;
 
@@ -363,7 +363,7 @@ G3SkyMap::GetRebinQuats(long pixel, size_t scale) const
 }
 
 double
-G3SkyMap::GetInterpPrecalc(const std::vector<long> & pix,
+G3SkyMap::GetInterpPrecalc(const std::vector<size_t> & pix,
     const std::vector<double> & weight) const
 {
 	double outval = 0;
@@ -376,7 +376,7 @@ G3SkyMap::GetInterpPrecalc(const std::vector<long> & pix,
 double
 G3SkyMap::GetInterpValue(double alpha, double delta) const
 {
-	std::vector<long> pix;
+	std::vector<size_t> pix;
 	std::vector<double> weight;
 	GetInterpPixelsWeights(alpha, delta, pix, weight);
 	return GetInterpPrecalc(pix, weight);
@@ -417,7 +417,7 @@ G3SkyMap::GetInterpValues(const G3VectorQuat & quats) const
 	return outvals;
 }
 
-std::vector<long>
+std::vector<size_t>
 G3SkyMap::QueryAlphaEllipse(double alpha, double delta, double a, double b) const
 {
 	double rmaj = a > b ? a : b;
@@ -428,7 +428,7 @@ G3SkyMap::QueryAlphaEllipse(double alpha, double delta, double a, double b) cons
 
 	auto disc = QueryDisc(alpha, delta, rmaj);
 
-	std::vector<long> pixels;
+	std::vector<size_t> pixels;
 	for (auto i: disc) {
 		auto ang = PixelToAngle(i);
 		double d = angular_distance(ang[0], ang[1], ahi, delta) +
@@ -441,7 +441,7 @@ G3SkyMap::QueryAlphaEllipse(double alpha, double delta, double a, double b) cons
 }
 
 static double
-skymap_getitem(const G3SkyMap &skymap, int i)
+skymap_getitem(const G3SkyMap &skymap, ssize_t i)
 {
 
 	if (i < 0)
@@ -455,7 +455,7 @@ skymap_getitem(const G3SkyMap &skymap, int i)
 }
 
 static void
-skymap_setitem(G3SkyMap &skymap, int i, double val)
+skymap_setitem(G3SkyMap &skymap, ssize_t i, double val)
 {
 
 	if (i < 0)

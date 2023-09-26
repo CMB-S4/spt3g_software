@@ -168,14 +168,14 @@ public:
 	size_t QuatToPixel(quat q) const;
 
 	// Rebinning and interpolation
-	virtual void GetRebinAngles(long pixel, size_t scale,
+	virtual void GetRebinAngles(size_t pixel, size_t scale,
 	    std::vector<double> & alphas, std::vector<double> & deltas) const = 0;
-	G3VectorQuat GetRebinQuats(long pixel, size_t scale) const;
+	G3VectorQuat GetRebinQuats(size_t pixel, size_t scale) const;
 	virtual void GetInterpPixelsWeights(double alpha, double delta,
-	    std::vector<long> & pixels, std::vector<double> & weights) const = 0;
-	void GetInterpPixelsWeights(quat q, std::vector<long> & pixels,
+	    std::vector<size_t> & pixels, std::vector<double> & weights) const = 0;
+	void GetInterpPixelsWeights(quat q, std::vector<size_t> & pixels,
 	    std::vector<double> & weights) const;
-	double GetInterpPrecalc(const std::vector<long> &pixels,
+	double GetInterpPrecalc(const std::vector<size_t> &pixels,
 	    const std::vector<double> &weights) const;
 	double GetInterpValue(double alpha, double delta) const;
 	double GetInterpValue(quat q) const;
@@ -186,10 +186,10 @@ public:
 	virtual boost::shared_ptr<G3SkyMap> Rebin(size_t scale, bool norm = true) const = 0;
 
 	/* Analogue to healpy.query_disc, returns list of pixels within a disc */
-	virtual std::vector<long> QueryDisc(double alpha, double delta, double radius) const {
+	virtual std::vector<size_t> QueryDisc(double alpha, double delta, double radius) const {
 		throw std::runtime_error("QueryDisc not implemented");
 	};
-	std::vector<long> QueryAlphaEllipse(double alpha, double delta, double a, double b) const;
+	std::vector<size_t> QueryAlphaEllipse(double alpha, double delta, double a, double b) const;
 
 	virtual bool IsDense() const {
 		throw std::runtime_error("Checking array density not implemented");
