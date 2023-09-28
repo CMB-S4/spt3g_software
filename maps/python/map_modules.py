@@ -623,7 +623,7 @@ class CoaddMaps(object):
             map_ids = []
         if "InputMapIds" in frame:
             # allow for recursive coadds
-            map_ids += list(frame["InputMapIds"])
+            map_ids += [i for i in frame["InputMapIds"] if i not in mapids]
         elif frame.get("Id", None):
             if frame["Id"] not in map_ids:
                 map_ids += [frame["Id"]]
@@ -636,7 +636,9 @@ class CoaddMaps(object):
             input_files = []
         if "InputFiles" in frame:
             # allow for recursive coadds
-            input_files += list(frame["InputFiles"])
+            input_files += [
+                f for f in frame["InputFiles"] if f not in input_files
+            ]
         elif getattr(frame, "_filename", None):
             if frame._filename not in input_files:
                 input_files += [frame._filename]
