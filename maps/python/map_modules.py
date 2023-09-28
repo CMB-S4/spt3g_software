@@ -623,7 +623,7 @@ class CoaddMaps(object):
             map_ids = []
         if "InputMapIds" in frame:
             # allow for recursive coadds
-            map_ids += [i for i in frame["InputMapIds"] if i not in mapids]
+            map_ids += [i for i in frame["InputMapIds"] if i not in map_ids]
         elif frame.get("Id", None):
             if frame["Id"] not in map_ids:
                 map_ids += [frame["Id"]]
