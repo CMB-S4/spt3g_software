@@ -307,37 +307,36 @@ void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool int
 		out_map->SetPolConv(in_map->GetPolConv());
 	}
 
-	for (size_t i = 0; i < out_map->size(); i++) {
-		double val = 0;
-		if (rebin > 1) {
-			std::vector<double> ra, dec;
-			out_map->GetRebinAngles(i, rebin, ra, dec);
-			for (size_t j = 0; j < ra.size(); j++) {
-				if (rotate) {
-					quat q = ang_to_quat(ra[j], dec[j]);
-					q = q_rot * q / q_rot;
-					quat_to_ang(q, ra[j], dec[j]);
-				}
-				if (interp)
-					val += in_map->GetInterpValue(ra[j], dec[j]);
-				else
-					val += in_map->at(in_map->AngleToPixel(ra[j], dec[j]));
-			}
-			val /= ra.size();
-		} else {
-			std::vector<double> radec = out_map->PixelToAngle(i);
-			if (rotate) {
-				quat q = ang_to_quat(radec[0], radec[1]);
-				q = q_rot * q / q_rot;
-				quat_to_ang(q, radec[0], radec[1]);
-			}
+	if (rebin > 1) {
+		for (size_t i = 0; i < out_map->size(); i++) {
+			double val = 0;
+			auto quats = out_map->GetRebinQuats(i, rebin);
+			if (rotate)
+				quats = q_rot * quats / q_rot;
 			if (interp)
-				val = in_map->GetInterpValue(radec[0], radec[1]);
+				for (size_t j = 0; j < quats.size(); j++)
+					val += in_map->GetInterpValue(quats[j]);
 			else
-				val = in_map->at(in_map->AngleToPixel(radec[0], radec[1]));
+				for (size_t j = 0; j < quats.size(); j++)
+					val += in_map->at(in_map->QuatToPixel(quats[j]));
+			if (val != 0) {
+				val /= quats.size();
+				(*out_map)[i] = s * val;
+			}
 		}
-		if (val != 0)
-			(*out_map)[i] = s * val;
+	} else {
+		for (size_t i = 0; i < out_map->size(); i++) {
+			double val = 0;
+			quat q = out_map->PixelToQuat(i);
+			if (rotate)
+				q = q_rot * q / q_rot;
+			if (interp)
+				val = in_map->GetInterpValue(q);
+			else
+				val = in_map->at(in_map->QuatToPixel(q));
+			if (val != 0)
+				(*out_map)[i] = s * val;
+		}
 	}
 
 	out_map->weighted = in_map->weighted;
