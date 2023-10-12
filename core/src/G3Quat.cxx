@@ -606,7 +606,7 @@ PYBINDINGS("core")
 	     .def("dot3", dot3, "Dot product of last three entries")
 	     .def("cross3", cross3, "Cross product of last three entries")
 	;
-	register_vector_of<quat>("QuatVector");
+	register_vector_of<quat>("Quat");
 	object vq =
 	    register_g3vector<quat>("G3VectorQuat",
 	     "List of quaternions. Convertible to a 4xN numpy array. "
