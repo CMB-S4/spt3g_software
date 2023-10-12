@@ -23,6 +23,8 @@ Frame Objects in spt3g.core
 
 * spt3g.core.G3MapMapDouble_
 
+* spt3g.core.G3MapQuat_
+
 * spt3g.core.G3MapString_
 
 * spt3g.core.G3MapVectorBool_
@@ -32,6 +34,8 @@ Frame Objects in spt3g.core
 * spt3g.core.G3MapVectorDouble_
 
 * spt3g.core.G3MapVectorInt_
+
+* spt3g.core.G3MapVectorQuat_
 
 * spt3g.core.G3MapVectorString_
 
@@ -637,6 +641,129 @@ Mapping from strings to maps of strings to floats. For example, m['Det1']['Det2'
 .. _spt3g.core.G3MapMapDouble.itervalues:
 
 **spt3g.core.G3MapMapDouble.itervalues**
+
+``itervalues( (object)arg1) -> object :``
+    D.itervalues() -> an iterator over the values of D
+
+
+
+.. _spt3g.core.G3MapQuat:
+
+spt3g.core.G3MapQuat
+--------------------
+
+Mapping from strings to quaternions.
+
+*Constructors:*
+	``G3MapQuat()``
+	
+	``G3MapQuat( (G3MapQuat)arg2)``
+	
+	``G3MapQuat( (list)arg2)`` :
+	    Initialize with keys and values from a Python dictionary: {'key':'value'}
+	
+	
+	``G3MapQuat( (dict)arg2)`` :
+	    Initialize with keys and values as tuples in a Python list: [('key','value')]
+	
+	
+	``G3MapQuat()``
+
+
+
+*Methods:*
+
+.. _spt3g.core.G3MapQuat.keys:
+
+**spt3g.core.G3MapQuat.keys**
+
+``keys( (G3MapQuat)arg1) -> list :``
+    D.keys() -> list of D's keys
+
+.. _spt3g.core.G3MapQuat.has_key:
+
+**spt3g.core.G3MapQuat.has_key**
+
+``has_key( (G3MapQuat)arg1, (str)arg2) -> bool :``
+    D.has_key(k) -> True if D has a key k, else False
+
+.. _spt3g.core.G3MapQuat.values:
+
+**spt3g.core.G3MapQuat.values**
+
+``values( (G3MapQuat)arg1) -> list :``
+    D.values() -> list of D's values
+
+.. _spt3g.core.G3MapQuat.items:
+
+**spt3g.core.G3MapQuat.items**
+
+``items( (G3MapQuat)arg1) -> list :``
+    D.items() -> list of D's (key, value) pairs, as 2-tuples
+
+.. _spt3g.core.G3MapQuat.clear:
+
+**spt3g.core.G3MapQuat.clear**
+
+``clear( (G3MapQuat)arg1) -> None :``
+    D.clear() -> None.  Remove all items from D.
+
+.. _spt3g.core.G3MapQuat.copy:
+
+**spt3g.core.G3MapQuat.copy**
+
+``copy( (G3MapQuat)arg1) -> G3MapQuat :``
+    D.copy() -> a shallow copy of D
+
+.. _spt3g.core.G3MapQuat.get:
+
+**spt3g.core.G3MapQuat.get**
+
+``get( (G3MapQuat)arg1, (str)arg2 [, (object)default_val]) -> object :``
+    D.get(k[,d]) -> D[k] if k in D, else d.  d defaults to None.
+
+.. _spt3g.core.G3MapQuat.pop:
+
+**spt3g.core.G3MapQuat.pop**
+
+``pop( (G3MapQuat)arg1, (str)arg2) -> object``
+
+``pop( (G3MapQuat)arg1, (str)arg2, (object)arg3) -> object :``
+    D.pop(k[,d]) -> v, remove specified key and return the corresponding value
+    If key is not found, d is returned if given, otherwise KeyError is raised
+
+.. _spt3g.core.G3MapQuat.popitem:
+
+**spt3g.core.G3MapQuat.popitem**
+
+``popitem( (G3MapQuat)arg1) -> object :``
+    D.popitem() -> (k, v), remove and return some (key, value) pair as a
+    2-tuple; but raise KeyError if D is empty
+
+.. _spt3g.core.G3MapQuat.update:
+
+**spt3g.core.G3MapQuat.update**
+
+``update( (object)arg1, (object)arg2) -> None :``
+    D.update(E) -> None.  Update D from E: for k in E: D[k] = E[k]
+
+.. _spt3g.core.G3MapQuat.iteritems:
+
+**spt3g.core.G3MapQuat.iteritems**
+
+``iteritems( (object)arg1) -> object :``
+    D.iteritems() -> an iterator over the (key, value) items of D
+
+.. _spt3g.core.G3MapQuat.iterkeys:
+
+**spt3g.core.G3MapQuat.iterkeys**
+
+``iterkeys( (object)arg1) -> object :``
+    D.iterkeys() -> an iterator over the keys of D
+
+.. _spt3g.core.G3MapQuat.itervalues:
+
+**spt3g.core.G3MapQuat.itervalues**
 
 ``itervalues( (object)arg1) -> object :``
     D.itervalues() -> an iterator over the values of D
@@ -1252,6 +1379,129 @@ Mapping from strings to arrays of integers.
 .. _spt3g.core.G3MapVectorInt.itervalues:
 
 **spt3g.core.G3MapVectorInt.itervalues**
+
+``itervalues( (object)arg1) -> object :``
+    D.itervalues() -> an iterator over the values of D
+
+
+
+.. _spt3g.core.G3MapVectorQuat:
+
+spt3g.core.G3MapVectorQuat
+--------------------------
+
+Mapping from strings to lists of quaternions.
+
+*Constructors:*
+	``G3MapVectorQuat()``
+	
+	``G3MapVectorQuat( (G3MapVectorQuat)arg2)``
+	
+	``G3MapVectorQuat( (list)arg2)`` :
+	    Initialize with keys and values from a Python dictionary: {'key':'value'}
+	
+	
+	``G3MapVectorQuat( (dict)arg2)`` :
+	    Initialize with keys and values as tuples in a Python list: [('key','value')]
+	
+	
+	``G3MapVectorQuat()``
+
+
+
+*Methods:*
+
+.. _spt3g.core.G3MapVectorQuat.keys:
+
+**spt3g.core.G3MapVectorQuat.keys**
+
+``keys( (G3MapVectorQuat)arg1) -> list :``
+    D.keys() -> list of D's keys
+
+.. _spt3g.core.G3MapVectorQuat.has_key:
+
+**spt3g.core.G3MapVectorQuat.has_key**
+
+``has_key( (G3MapVectorQuat)arg1, (str)arg2) -> bool :``
+    D.has_key(k) -> True if D has a key k, else False
+
+.. _spt3g.core.G3MapVectorQuat.values:
+
+**spt3g.core.G3MapVectorQuat.values**
+
+``values( (G3MapVectorQuat)arg1) -> list :``
+    D.values() -> list of D's values
+
+.. _spt3g.core.G3MapVectorQuat.items:
+
+**spt3g.core.G3MapVectorQuat.items**
+
+``items( (G3MapVectorQuat)arg1) -> list :``
+    D.items() -> list of D's (key, value) pairs, as 2-tuples
+
+.. _spt3g.core.G3MapVectorQuat.clear:
+
+**spt3g.core.G3MapVectorQuat.clear**
+
+``clear( (G3MapVectorQuat)arg1) -> None :``
+    D.clear() -> None.  Remove all items from D.
+
+.. _spt3g.core.G3MapVectorQuat.copy:
+
+**spt3g.core.G3MapVectorQuat.copy**
+
+``copy( (G3MapVectorQuat)arg1) -> G3MapVectorQuat :``
+    D.copy() -> a shallow copy of D
+
+.. _spt3g.core.G3MapVectorQuat.get:
+
+**spt3g.core.G3MapVectorQuat.get**
+
+``get( (G3MapVectorQuat)arg1, (str)arg2 [, (object)default_val]) -> object :``
+    D.get(k[,d]) -> D[k] if k in D, else d.  d defaults to None.
+
+.. _spt3g.core.G3MapVectorQuat.pop:
+
+**spt3g.core.G3MapVectorQuat.pop**
+
+``pop( (G3MapVectorQuat)arg1, (str)arg2) -> object``
+
+``pop( (G3MapVectorQuat)arg1, (str)arg2, (object)arg3) -> object :``
+    D.pop(k[,d]) -> v, remove specified key and return the corresponding value
+    If key is not found, d is returned if given, otherwise KeyError is raised
+
+.. _spt3g.core.G3MapVectorQuat.popitem:
+
+**spt3g.core.G3MapVectorQuat.popitem**
+
+``popitem( (G3MapVectorQuat)arg1) -> object :``
+    D.popitem() -> (k, v), remove and return some (key, value) pair as a
+    2-tuple; but raise KeyError if D is empty
+
+.. _spt3g.core.G3MapVectorQuat.update:
+
+**spt3g.core.G3MapVectorQuat.update**
+
+``update( (object)arg1, (object)arg2) -> None :``
+    D.update(E) -> None.  Update D from E: for k in E: D[k] = E[k]
+
+.. _spt3g.core.G3MapVectorQuat.iteritems:
+
+**spt3g.core.G3MapVectorQuat.iteritems**
+
+``iteritems( (object)arg1) -> object :``
+    D.iteritems() -> an iterator over the (key, value) items of D
+
+.. _spt3g.core.G3MapVectorQuat.iterkeys:
+
+**spt3g.core.G3MapVectorQuat.iterkeys**
+
+``iterkeys( (object)arg1) -> object :``
+    D.iterkeys() -> an iterator over the keys of D
+
+.. _spt3g.core.G3MapVectorQuat.itervalues:
+
+**spt3g.core.G3MapVectorQuat.itervalues**
 
 ``itervalues( (object)arg1) -> object :``
     D.itervalues() -> an iterator over the values of D
@@ -1966,7 +2216,7 @@ Collection of timestreams indexed by logical detector ID
 	
 	``G3TimestreamMap( (G3TimestreamMap)arg2)``
 	
-	``G3TimestreamMap( (StringVector)keys, (object)data [, (G3Time)start=<spt3g.core.G3Time object at 0x7f6fcbb85eb0> [, (G3Time)stop=<spt3g.core.G3Time object at 0x7f6fcbb85f20> [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None [, (int)compression_level=0 [, (bool)copy_data=True]]]]])`` :
+	``G3TimestreamMap( (StringVector)keys, (object)data [, (G3Time)start=<spt3g.core.G3Time object at 0x7f625e0e36d0> [, (G3Time)stop=<spt3g.core.G3Time object at 0x7f625e0e3740> [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None [, (int)compression_level=0 [, (bool)copy_data=True]]]]])`` :
 	    Create a timestream map from a numpy array or other numeric python iterable. Each row of the 2D input array will correspond to a single timestream, with the key set to the correspondingly-indexed entry of <keys>. If <copy_data> is True (default), the data will be copied into the output data structure. If False, the timestream map will provide a view into the given numpy array.
 	
 	``G3TimestreamMap( (list)arg2)`` :

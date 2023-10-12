@@ -52,11 +52,13 @@
 <li><p><a class="reference internal" href="#spt3g-core-g3mapframeobject">spt3g.core.G3MapFrameObject</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-core-g3mapint">spt3g.core.G3MapInt</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-core-g3mapmapdouble">spt3g.core.G3MapMapDouble</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3mapquat">spt3g.core.G3MapQuat</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-core-g3mapstring">spt3g.core.G3MapString</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-core-g3mapvectorbool">spt3g.core.G3MapVectorBool</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-core-g3mapvectorcomplexdouble">spt3g.core.G3MapVectorComplexDouble</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-core-g3mapvectordouble">spt3g.core.G3MapVectorDouble</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-core-g3mapvectorint">spt3g.core.G3MapVectorInt</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3mapvectorquat">spt3g.core.G3MapVectorQuat</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-core-g3mapvectorstring">spt3g.core.G3MapVectorString</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-core-g3mapvectortime">spt3g.core.G3MapVectorTime</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-core-g3mapvectorvectorstring">spt3g.core.G3MapVectorVectorString</a></p></li>
@@ -465,8 +467,93 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 </dd>
 </dl>
 </section>
+<section id="spt3g-core-g3mapquat">
+<span id="id9"></span><h3>spt3g.core.G3MapQuat<a class="headerlink" href="#spt3g-core-g3mapquat" title="Permalink to this heading">¶</a></h3>
+<p>Mapping from strings to quaternions.</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3MapQuat()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3MapQuat(</span> <span class="pre">(G3MapQuat)arg2)</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">G3MapQuat(</span> <span class="pre">(list)arg2)</span></code> :</dt><dd><p>Initialize with keys and values from a Python dictionary: {‘key’:’value’}</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">G3MapQuat(</span> <span class="pre">(dict)arg2)</span></code> :</dt><dd><p>Initialize with keys and values as tuples in a Python list: [(‘key’,’value’)]</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">G3MapQuat()</span></code></p>
+</dd>
+</dl>
+<p><em>Methods:</em></p>
+<p id="spt3g-core-g3mapquat-keys"><strong>spt3g.core.G3MapQuat.keys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">keys(</span> <span class="pre">(G3MapQuat)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.keys() -&gt; list of D’s keys</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapquat-has-key"><strong>spt3g.core.G3MapQuat.has_key</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">has_key(</span> <span class="pre">(G3MapQuat)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span> <span class="pre">:</span></code></dt><dd><p>D.has_key(k) -&gt; True if D has a key k, else False</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapquat-values"><strong>spt3g.core.G3MapQuat.values</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">values(</span> <span class="pre">(G3MapQuat)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.values() -&gt; list of D’s values</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapquat-items"><strong>spt3g.core.G3MapQuat.items</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">items(</span> <span class="pre">(G3MapQuat)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.items() -&gt; list of D’s (key, value) pairs, as 2-tuples</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapquat-clear"><strong>spt3g.core.G3MapQuat.clear</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">clear(</span> <span class="pre">(G3MapQuat)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.clear() -&gt; None.  Remove all items from D.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapquat-copy"><strong>spt3g.core.G3MapQuat.copy</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">copy(</span> <span class="pre">(G3MapQuat)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">G3MapQuat</span> <span class="pre">:</span></code></dt><dd><p>D.copy() -&gt; a shallow copy of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapquat-get"><strong>spt3g.core.G3MapQuat.get</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">get(</span> <span class="pre">(G3MapQuat)arg1,</span> <span class="pre">(str)arg2</span> <span class="pre">[,</span> <span class="pre">(object)default_val])</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.get(k[,d]) -&gt; D[k] if k in D, else d.  d defaults to None.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapquat-pop"><strong>spt3g.core.G3MapQuat.pop</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3MapQuat)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">object</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3MapQuat)arg1,</span> <span class="pre">(str)arg2,</span> <span class="pre">(object)arg3)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.pop(k[,d]) -&gt; v, remove specified key and return the corresponding value
+If key is not found, d is returned if given, otherwise KeyError is raised</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapquat-popitem"><strong>spt3g.core.G3MapQuat.popitem</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">popitem(</span> <span class="pre">(G3MapQuat)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.popitem() -&gt; (k, v), remove and return some (key, value) pair as a
+2-tuple; but raise KeyError if D is empty</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapquat-update"><strong>spt3g.core.G3MapQuat.update</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">update(</span> <span class="pre">(object)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.update(E) -&gt; None.  Update D from E: for k in E: D[k] = E[k]</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapquat-iteritems"><strong>spt3g.core.G3MapQuat.iteritems</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iteritems(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iteritems() -&gt; an iterator over the (key, value) items of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapquat-iterkeys"><strong>spt3g.core.G3MapQuat.iterkeys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iterkeys(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iterkeys() -&gt; an iterator over the keys of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapquat-itervalues"><strong>spt3g.core.G3MapQuat.itervalues</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">itervalues(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.itervalues() -&gt; an iterator over the values of D</p>
+</dd>
+</dl>
+</section>
 <section id="spt3g-core-g3mapstring">
-<span id="id9"></span><h3>spt3g.core.G3MapString<a class="headerlink" href="#spt3g-core-g3mapstring" title="Permalink to this heading">¶</a></h3>
+<span id="id10"></span><h3>spt3g.core.G3MapString<a class="headerlink" href="#spt3g-core-g3mapstring" title="Permalink to this heading">¶</a></h3>
 <p>Mapping from strings to strings.</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3MapString()</span></code></p>
@@ -551,7 +638,7 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 </dl>
 </section>
 <section id="spt3g-core-g3mapvectorbool">
-<span id="id10"></span><h3>spt3g.core.G3MapVectorBool<a class="headerlink" href="#spt3g-core-g3mapvectorbool" title="Permalink to this heading">¶</a></h3>
+<span id="id11"></span><h3>spt3g.core.G3MapVectorBool<a class="headerlink" href="#spt3g-core-g3mapvectorbool" title="Permalink to this heading">¶</a></h3>
 <p>Mapping from strings to arrays of booleans.</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3MapVectorBool()</span></code></p>
@@ -636,7 +723,7 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 </dl>
 </section>
 <section id="spt3g-core-g3mapvectorcomplexdouble">
-<span id="id11"></span><h3>spt3g.core.G3MapVectorComplexDouble<a class="headerlink" href="#spt3g-core-g3mapvectorcomplexdouble" title="Permalink to this heading">¶</a></h3>
+<span id="id12"></span><h3>spt3g.core.G3MapVectorComplexDouble<a class="headerlink" href="#spt3g-core-g3mapvectorcomplexdouble" title="Permalink to this heading">¶</a></h3>
 <p>Mapping from strings to arrays of complex numbers.</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3MapVectorComplexDouble()</span></code></p>
@@ -721,7 +808,7 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 </dl>
 </section>
 <section id="spt3g-core-g3mapvectordouble">
-<span id="id12"></span><h3>spt3g.core.G3MapVectorDouble<a class="headerlink" href="#spt3g-core-g3mapvectordouble" title="Permalink to this heading">¶</a></h3>
+<span id="id13"></span><h3>spt3g.core.G3MapVectorDouble<a class="headerlink" href="#spt3g-core-g3mapvectordouble" title="Permalink to this heading">¶</a></h3>
 <p>Mapping from strings to arrays of floats.</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3MapVectorDouble()</span></code></p>
@@ -806,7 +893,7 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 </dl>
 </section>
 <section id="spt3g-core-g3mapvectorint">
-<span id="id13"></span><h3>spt3g.core.G3MapVectorInt<a class="headerlink" href="#spt3g-core-g3mapvectorint" title="Permalink to this heading">¶</a></h3>
+<span id="id14"></span><h3>spt3g.core.G3MapVectorInt<a class="headerlink" href="#spt3g-core-g3mapvectorint" title="Permalink to this heading">¶</a></h3>
 <p>Mapping from strings to arrays of integers.</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3MapVectorInt()</span></code></p>
@@ -890,8 +977,93 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 </dd>
 </dl>
 </section>
+<section id="spt3g-core-g3mapvectorquat">
+<span id="id15"></span><h3>spt3g.core.G3MapVectorQuat<a class="headerlink" href="#spt3g-core-g3mapvectorquat" title="Permalink to this heading">¶</a></h3>
+<p>Mapping from strings to lists of quaternions.</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3MapVectorQuat()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3MapVectorQuat(</span> <span class="pre">(G3MapVectorQuat)arg2)</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">G3MapVectorQuat(</span> <span class="pre">(list)arg2)</span></code> :</dt><dd><p>Initialize with keys and values from a Python dictionary: {‘key’:’value’}</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">G3MapVectorQuat(</span> <span class="pre">(dict)arg2)</span></code> :</dt><dd><p>Initialize with keys and values as tuples in a Python list: [(‘key’,’value’)]</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">G3MapVectorQuat()</span></code></p>
+</dd>
+</dl>
+<p><em>Methods:</em></p>
+<p id="spt3g-core-g3mapvectorquat-keys"><strong>spt3g.core.G3MapVectorQuat.keys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">keys(</span> <span class="pre">(G3MapVectorQuat)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.keys() -&gt; list of D’s keys</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorquat-has-key"><strong>spt3g.core.G3MapVectorQuat.has_key</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">has_key(</span> <span class="pre">(G3MapVectorQuat)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span> <span class="pre">:</span></code></dt><dd><p>D.has_key(k) -&gt; True if D has a key k, else False</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorquat-values"><strong>spt3g.core.G3MapVectorQuat.values</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">values(</span> <span class="pre">(G3MapVectorQuat)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.values() -&gt; list of D’s values</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorquat-items"><strong>spt3g.core.G3MapVectorQuat.items</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">items(</span> <span class="pre">(G3MapVectorQuat)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.items() -&gt; list of D’s (key, value) pairs, as 2-tuples</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorquat-clear"><strong>spt3g.core.G3MapVectorQuat.clear</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">clear(</span> <span class="pre">(G3MapVectorQuat)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.clear() -&gt; None.  Remove all items from D.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorquat-copy"><strong>spt3g.core.G3MapVectorQuat.copy</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">copy(</span> <span class="pre">(G3MapVectorQuat)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">G3MapVectorQuat</span> <span class="pre">:</span></code></dt><dd><p>D.copy() -&gt; a shallow copy of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorquat-get"><strong>spt3g.core.G3MapVectorQuat.get</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">get(</span> <span class="pre">(G3MapVectorQuat)arg1,</span> <span class="pre">(str)arg2</span> <span class="pre">[,</span> <span class="pre">(object)default_val])</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.get(k[,d]) -&gt; D[k] if k in D, else d.  d defaults to None.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorquat-pop"><strong>spt3g.core.G3MapVectorQuat.pop</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3MapVectorQuat)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">object</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3MapVectorQuat)arg1,</span> <span class="pre">(str)arg2,</span> <span class="pre">(object)arg3)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.pop(k[,d]) -&gt; v, remove specified key and return the corresponding value
+If key is not found, d is returned if given, otherwise KeyError is raised</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorquat-popitem"><strong>spt3g.core.G3MapVectorQuat.popitem</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">popitem(</span> <span class="pre">(G3MapVectorQuat)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.popitem() -&gt; (k, v), remove and return some (key, value) pair as a
+2-tuple; but raise KeyError if D is empty</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorquat-update"><strong>spt3g.core.G3MapVectorQuat.update</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">update(</span> <span class="pre">(object)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.update(E) -&gt; None.  Update D from E: for k in E: D[k] = E[k]</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorquat-iteritems"><strong>spt3g.core.G3MapVectorQuat.iteritems</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iteritems(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iteritems() -&gt; an iterator over the (key, value) items of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorquat-iterkeys"><strong>spt3g.core.G3MapVectorQuat.iterkeys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iterkeys(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iterkeys() -&gt; an iterator over the keys of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorquat-itervalues"><strong>spt3g.core.G3MapVectorQuat.itervalues</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">itervalues(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.itervalues() -&gt; an iterator over the values of D</p>
+</dd>
+</dl>
+</section>
 <section id="spt3g-core-g3mapvectorstring">
-<span id="id14"></span><h3>spt3g.core.G3MapVectorString<a class="headerlink" href="#spt3g-core-g3mapvectorstring" title="Permalink to this heading">¶</a></h3>
+<span id="id16"></span><h3>spt3g.core.G3MapVectorString<a class="headerlink" href="#spt3g-core-g3mapvectorstring" title="Permalink to this heading">¶</a></h3>
 <p>Mapping from strings to lists of strings.</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3MapVectorString()</span></code></p>
@@ -976,7 +1148,7 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 </dl>
 </section>
 <section id="spt3g-core-g3mapvectortime">
-<span id="id15"></span><h3>spt3g.core.G3MapVectorTime<a class="headerlink" href="#spt3g-core-g3mapvectortime" title="Permalink to this heading">¶</a></h3>
+<span id="id17"></span><h3>spt3g.core.G3MapVectorTime<a class="headerlink" href="#spt3g-core-g3mapvectortime" title="Permalink to this heading">¶</a></h3>
 <p>Mapping from strings to lists of G3 time objects.</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3MapVectorTime()</span></code></p>
@@ -1061,7 +1233,7 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 </dl>
 </section>
 <section id="spt3g-core-g3mapvectorvectorstring">
-<span id="id16"></span><h3>spt3g.core.G3MapVectorVectorString<a class="headerlink" href="#spt3g-core-g3mapvectorvectorstring" title="Permalink to this heading">¶</a></h3>
+<span id="id18"></span><h3>spt3g.core.G3MapVectorVectorString<a class="headerlink" href="#spt3g-core-g3mapvectorvectorstring" title="Permalink to this heading">¶</a></h3>
 <p>Mapping from strings to lists of lists of strings.</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3MapVectorVectorString()</span></code></p>
@@ -1146,7 +1318,7 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 </dl>
 </section>
 <section id="spt3g-core-g3moduleconfig">
-<span id="id17"></span><h3>spt3g.core.G3ModuleConfig<a class="headerlink" href="#spt3g-core-g3moduleconfig" title="Permalink to this heading">¶</a></h3>
+<span id="id19"></span><h3>spt3g.core.G3ModuleConfig<a class="headerlink" href="#spt3g-core-g3moduleconfig" title="Permalink to this heading">¶</a></h3>
 <p>Stored configuration of a pipeline module or segment</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3ModuleConfig()</span></code></p>
@@ -1161,7 +1333,7 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 </ul>
 </section>
 <section id="spt3g-core-g3pipelineinfo">
-<span id="id18"></span><h3>spt3g.core.G3PipelineInfo<a class="headerlink" href="#spt3g-core-g3pipelineinfo" title="Permalink to this heading">¶</a></h3>
+<span id="id20"></span><h3>spt3g.core.G3PipelineInfo<a class="headerlink" href="#spt3g-core-g3pipelineinfo" title="Permalink to this heading">¶</a></h3>
 <p>Stored configuration of a pipeline, including software version information</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3PipelineInfo()</span></code></p>
@@ -1183,7 +1355,7 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 </ul>
 </section>
 <section id="spt3g-core-g3string">
-<span id="id19"></span><h3>spt3g.core.G3String<a class="headerlink" href="#spt3g-core-g3string" title="Permalink to this heading">¶</a></h3>
+<span id="id21"></span><h3>spt3g.core.G3String<a class="headerlink" href="#spt3g-core-g3string" title="Permalink to this heading">¶</a></h3>
 <p>Serializable string</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3String(</span> <span class="pre">(str)arg2)</span></code></p>
@@ -1192,7 +1364,7 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 </dl>
 </section>
 <section id="spt3g-core-g3time">
-<span id="id20"></span><h3>spt3g.core.G3Time<a class="headerlink" href="#spt3g-core-g3time" title="Permalink to this heading">¶</a></h3>
+<span id="id22"></span><h3>spt3g.core.G3Time<a class="headerlink" href="#spt3g-core-g3time" title="Permalink to this heading">¶</a></h3>
 <p>UTC Time</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3Time()</span></code></p>
@@ -1225,7 +1397,7 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 </dl>
 </section>
 <section id="spt3g-core-g3timesamplemap">
-<span id="id21"></span><h3>spt3g.core.G3TimesampleMap<a class="headerlink" href="#spt3g-core-g3timesamplemap" title="Permalink to this heading">¶</a></h3>
+<span id="id23"></span><h3>spt3g.core.G3TimesampleMap<a class="headerlink" href="#spt3g-core-g3timesamplemap" title="Permalink to this heading">¶</a></h3>
 <p>Mapping from string to vectors of data, with an associated vector of timestamps.  This object is for storing multiple co-sampled vectors with a single set of (irregular) timestamps.</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3TimesampleMap()</span></code></p>
@@ -1329,7 +1501,7 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 </dl>
 </section>
 <section id="spt3g-core-g3timestream">
-<span id="id22"></span><h3>spt3g.core.G3Timestream<a class="headerlink" href="#spt3g-core-g3timestream" title="Permalink to this heading">¶</a></h3>
+<span id="id24"></span><h3>spt3g.core.G3Timestream<a class="headerlink" href="#spt3g-core-g3timestream" title="Permalink to this heading">¶</a></h3>
 <p>Detector timestream. Includes a units field and start and stop times. Can otherwise be treated as a numpy array with a float64 dtype. Conversions to and from such arrays (e.g. with numpy.asarray) are fast. Note that a numpy array constructed from a timestream will share a memory buffer: changes to the array affect the timestream and vice versa. Most binary timestream arithmetic operations (+, -) check that the units and start/stop times are congruent.</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3Timestream()</span></code></p>
@@ -1362,13 +1534,13 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 </dl>
 </section>
 <section id="spt3g-core-g3timestreammap">
-<span id="id23"></span><h3>spt3g.core.G3TimestreamMap<a class="headerlink" href="#spt3g-core-g3timestreammap" title="Permalink to this heading">¶</a></h3>
+<span id="id25"></span><h3>spt3g.core.G3TimestreamMap<a class="headerlink" href="#spt3g-core-g3timestreammap" title="Permalink to this heading">¶</a></h3>
 <p>Collection of timestreams indexed by logical detector ID</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3TimestreamMap()</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">G3TimestreamMap(</span> <span class="pre">(G3TimestreamMap)arg2)</span></code></p>
 <dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">G3TimestreamMap(</span> <span class="pre">(StringVector)keys,</span> <span class="pre">(object)data</span> <span class="pre">[,</span> <span class="pre">(G3Time)start=&lt;spt3g.core.G3Time</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7f6fcbb85eb0&gt;</span> <span class="pre">[,</span> <span class="pre">(G3Time)stop=&lt;spt3g.core.G3Time</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7f6fcbb85f20&gt;</span> <span class="pre">[,</span> <span class="pre">(G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None</span> <span class="pre">[,</span> <span class="pre">(int)compression_level=0</span> <span class="pre">[,</span> <span class="pre">(bool)copy_data=True]]]]])</span></code> :</dt><dd><p>Create a timestream map from a numpy array or other numeric python iterable. Each row of the 2D input array will correspond to a single timestream, with the key set to the correspondingly-indexed entry of &lt;keys&gt;. If &lt;copy_data&gt; is True (default), the data will be copied into the output data structure. If False, the timestream map will provide a view into the given numpy array.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">G3TimestreamMap(</span> <span class="pre">(StringVector)keys,</span> <span class="pre">(object)data</span> <span class="pre">[,</span> <span class="pre">(G3Time)start=&lt;spt3g.core.G3Time</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7f625e0e36d0&gt;</span> <span class="pre">[,</span> <span class="pre">(G3Time)stop=&lt;spt3g.core.G3Time</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7f625e0e3740&gt;</span> <span class="pre">[,</span> <span class="pre">(G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None</span> <span class="pre">[,</span> <span class="pre">(int)compression_level=0</span> <span class="pre">[,</span> <span class="pre">(bool)copy_data=True]]]]])</span></code> :</dt><dd><p>Create a timestream map from a numpy array or other numeric python iterable. Each row of the 2D input array will correspond to a single timestream, with the key set to the correspondingly-indexed entry of &lt;keys&gt;. If &lt;copy_data&gt; is True (default), the data will be copied into the output data structure. If False, the timestream map will provide a view into the given numpy array.</p>
 </dd>
 <dt><code class="docutils literal notranslate"><span class="pre">G3TimestreamMap(</span> <span class="pre">(list)arg2)</span></code> :</dt><dd><p>Initialize with keys and values from a Python dictionary: {‘key’:’value’}</p>
 </dd>
@@ -1469,7 +1641,7 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 </dl>
 </section>
 <section id="spt3g-core-g3timestreamquat">
-<span id="id24"></span><h3>spt3g.core.G3TimestreamQuat<a class="headerlink" href="#spt3g-core-g3timestreamquat" title="Permalink to this heading">¶</a></h3>
+<span id="id26"></span><h3>spt3g.core.G3TimestreamQuat<a class="headerlink" href="#spt3g-core-g3timestreamquat" title="Permalink to this heading">¶</a></h3>
 <p>Timestream of quaternions. Identical to a G3VectorQuat except for the addition of start and stop times.</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3TimestreamQuat()</span></code></p>
@@ -1486,7 +1658,7 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 </ul>
 </section>
 <section id="spt3g-core-g3vectorbool">
-<span id="id25"></span><h3>spt3g.core.G3VectorBool<a class="headerlink" href="#spt3g-core-g3vectorbool" title="Permalink to this heading">¶</a></h3>
+<span id="id27"></span><h3>spt3g.core.G3VectorBool<a class="headerlink" href="#spt3g-core-g3vectorbool" title="Permalink to this heading">¶</a></h3>
 <p>List of booleans.</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3VectorBool()</span></code></p>
@@ -1500,7 +1672,7 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <p><code class="docutils literal notranslate"><span class="pre">extend(</span> <span class="pre">(G3VectorBool)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
 </section>
 <section id="spt3g-core-g3vectorcomplexdouble">
-<span id="id26"></span><h3>spt3g.core.G3VectorComplexDouble<a class="headerlink" href="#spt3g-core-g3vectorcomplexdouble" title="Permalink to this heading">¶</a></h3>
+<span id="id28"></span><h3>spt3g.core.G3VectorComplexDouble<a class="headerlink" href="#spt3g-core-g3vectorcomplexdouble" title="Permalink to this heading">¶</a></h3>
 <p>Array of complex floats. Treat as a serializable version of numpy.array(dtype=complex128). Can be efficiently cast to and from numpy arrays.</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3VectorComplexDouble()</span></code></p>
@@ -1514,7 +1686,7 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <p><code class="docutils literal notranslate"><span class="pre">extend(</span> <span class="pre">(G3VectorComplexDouble)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
 </section>
 <section id="spt3g-core-g3vectordouble">
-<span id="id27"></span><h3>spt3g.core.G3VectorDouble<a class="headerlink" href="#spt3g-core-g3vectordouble" title="Permalink to this heading">¶</a></h3>
+<span id="id29"></span><h3>spt3g.core.G3VectorDouble<a class="headerlink" href="#spt3g-core-g3vectordouble" title="Permalink to this heading">¶</a></h3>
 <p>Array of floats. Treat as a serializable version of numpy.array(dtype=float64). Can be efficiently cast to and from numpy arrays.</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3VectorDouble()</span></code></p>
@@ -1528,7 +1700,7 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <p><code class="docutils literal notranslate"><span class="pre">extend(</span> <span class="pre">(G3VectorDouble)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
 </section>
 <section id="spt3g-core-g3vectorframeobject">
-<span id="id28"></span><h3>spt3g.core.G3VectorFrameObject<a class="headerlink" href="#spt3g-core-g3vectorframeobject" title="Permalink to this heading">¶</a></h3>
+<span id="id30"></span><h3>spt3g.core.G3VectorFrameObject<a class="headerlink" href="#spt3g-core-g3vectorframeobject" title="Permalink to this heading">¶</a></h3>
 <p>List of generic frame objects. Can lead to paradoxes; avoid use of this class unless you are sure you need it.</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3VectorFrameObject()</span></code></p>
@@ -1542,7 +1714,7 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <p><code class="docutils literal notranslate"><span class="pre">extend(</span> <span class="pre">(G3VectorFrameObject)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
 </section>
 <section id="spt3g-core-g3vectorint">
-<span id="id29"></span><h3>spt3g.core.G3VectorInt<a class="headerlink" href="#spt3g-core-g3vectorint" title="Permalink to this heading">¶</a></h3>
+<span id="id31"></span><h3>spt3g.core.G3VectorInt<a class="headerlink" href="#spt3g-core-g3vectorint" title="Permalink to this heading">¶</a></h3>
 <p>Array of integers. Treat as a serializable version of numpy.array(dtype=int64). Can be efficiently cast to and from numpy arrays.</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3VectorInt()</span></code></p>
@@ -1556,7 +1728,7 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <p><code class="docutils literal notranslate"><span class="pre">extend(</span> <span class="pre">(G3VectorInt)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
 </section>
 <section id="spt3g-core-g3vectorquat">
-<span id="id30"></span><h3>spt3g.core.G3VectorQuat<a class="headerlink" href="#spt3g-core-g3vectorquat" title="Permalink to this heading">¶</a></h3>
+<span id="id32"></span><h3>spt3g.core.G3VectorQuat<a class="headerlink" href="#spt3g-core-g3vectorquat" title="Permalink to this heading">¶</a></h3>
 <p>List of quaternions. Convertible to a 4xN numpy array. Arithmetic operations on this object are fast and provide results given proper quaternion math rather than element-by-element numpy-ish results.</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3VectorQuat()</span></code></p>
@@ -1570,7 +1742,7 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <p><code class="docutils literal notranslate"><span class="pre">extend(</span> <span class="pre">(G3VectorQuat)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
 </section>
 <section id="spt3g-core-g3vectorstring">
-<span id="id31"></span><h3>spt3g.core.G3VectorString<a class="headerlink" href="#spt3g-core-g3vectorstring" title="Permalink to this heading">¶</a></h3>
+<span id="id33"></span><h3>spt3g.core.G3VectorString<a class="headerlink" href="#spt3g-core-g3vectorstring" title="Permalink to this heading">¶</a></h3>
 <p>List of strings.</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3VectorString()</span></code></p>
@@ -1584,7 +1756,7 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <p><code class="docutils literal notranslate"><span class="pre">extend(</span> <span class="pre">(G3VectorString)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
 </section>
 <section id="spt3g-core-g3vectortime">
-<span id="id32"></span><h3>spt3g.core.G3VectorTime<a class="headerlink" href="#spt3g-core-g3vectortime" title="Permalink to this heading">¶</a></h3>
+<span id="id34"></span><h3>spt3g.core.G3VectorTime<a class="headerlink" href="#spt3g-core-g3vectortime" title="Permalink to this heading">¶</a></h3>
 <p>List of times.</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3VectorTime()</span></code></p>
@@ -1598,7 +1770,7 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <p><code class="docutils literal notranslate"><span class="pre">extend(</span> <span class="pre">(G3VectorTime)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
 </section>
 <section id="spt3g-core-g3vectorunsignedchar">
-<span id="id33"></span><h3>spt3g.core.G3VectorUnsignedChar<a class="headerlink" href="#spt3g-core-g3vectorunsignedchar" title="Permalink to this heading">¶</a></h3>
+<span id="id35"></span><h3>spt3g.core.G3VectorUnsignedChar<a class="headerlink" href="#spt3g-core-g3vectorunsignedchar" title="Permalink to this heading">¶</a></h3>
 <p>List of 8-bit integers</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3VectorUnsignedChar()</span></code></p>
@@ -1612,7 +1784,7 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <p><code class="docutils literal notranslate"><span class="pre">extend(</span> <span class="pre">(G3VectorUnsignedChar)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
 </section>
 <section id="spt3g-core-g3vectorvectorstring">
-<span id="id34"></span><h3>spt3g.core.G3VectorVectorString<a class="headerlink" href="#spt3g-core-g3vectorvectorstring" title="Permalink to this heading">¶</a></h3>
+<span id="id36"></span><h3>spt3g.core.G3VectorVectorString<a class="headerlink" href="#spt3g-core-g3vectorvectorstring" title="Permalink to this heading">¶</a></h3>
 <p>List of lists of strings.</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3VectorVectorString()</span></code></p>
@@ -1801,11 +1973,13 @@ interpolated to be made continuous</p>
 <li><a class="reference internal" href="#spt3g-core-g3mapframeobject">spt3g.core.G3MapFrameObject</a></li>
 <li><a class="reference internal" href="#spt3g-core-g3mapint">spt3g.core.G3MapInt</a></li>
 <li><a class="reference internal" href="#spt3g-core-g3mapmapdouble">spt3g.core.G3MapMapDouble</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3mapquat">spt3g.core.G3MapQuat</a></li>
 <li><a class="reference internal" href="#spt3g-core-g3mapstring">spt3g.core.G3MapString</a></li>
 <li><a class="reference internal" href="#spt3g-core-g3mapvectorbool">spt3g.core.G3MapVectorBool</a></li>
 <li><a class="reference internal" href="#spt3g-core-g3mapvectorcomplexdouble">spt3g.core.G3MapVectorComplexDouble</a></li>
 <li><a class="reference internal" href="#spt3g-core-g3mapvectordouble">spt3g.core.G3MapVectorDouble</a></li>
 <li><a class="reference internal" href="#spt3g-core-g3mapvectorint">spt3g.core.G3MapVectorInt</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3mapvectorquat">spt3g.core.G3MapVectorQuat</a></li>
 <li><a class="reference internal" href="#spt3g-core-g3mapvectorstring">spt3g.core.G3MapVectorString</a></li>
 <li><a class="reference internal" href="#spt3g-core-g3mapvectortime">spt3g.core.G3MapVectorTime</a></li>
 <li><a class="reference internal" href="#spt3g-core-g3mapvectorvectorstring">spt3g.core.G3MapVectorVectorString</a></li>
