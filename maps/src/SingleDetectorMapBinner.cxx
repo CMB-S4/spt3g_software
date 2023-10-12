@@ -160,10 +160,9 @@ SingleDetectorMapBinner::Process(G3FramePtr frame,
 		if (bp == boloprops_->end())
 			log_fatal("Missing bolometer properties for %s",
 			    det.c_str());
-		auto detquats = get_detector_pointing_quats(
+		auto pixels = get_detector_pointing_pixels(
 		    bp->second.x_offset, bp->second.y_offset,
-		    *pointing, m->coord_ref);
-		auto pixels = m->QuatsToPixels(detquats);
+		    *pointing, m);
 
 		g3_assert(ts->size() == pixels.size());
 		for (size_t j = 0; j < ts->size(); j++) {

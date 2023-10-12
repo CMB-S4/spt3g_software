@@ -156,10 +156,8 @@ MapTODPointing::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		const BolometerProperties &bp = boloprops_->at(dets[i]);
 
 		// Get per-detector pointing timestream
-		auto detquats = get_detector_pointing_quats(bp.x_offset, bp.y_offset,
-		    *pointing, stub_->coord_ref);
-
-		auto detpointing = stub_->QuatsToPixels(detquats);
+		auto detpointing = get_detector_pointing_pixels(bp.x_offset, bp.y_offset,
+		    *pointing, stub_);
 
 		for (size_t j = 0; j < sz; j++)
 			det[j] = detpointing[j];

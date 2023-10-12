@@ -11,6 +11,10 @@ G3VectorQuat
 get_detector_pointing_quats(double x_offset, double y_offset,
     const G3VectorQuat & trans_quat, MapCoordReference coord_sys);
 
+std::vector<size_t>
+get_detector_pointing_pixels(double x_offset, double y_offset,
+    const G3VectorQuat & trans_quat, G3SkyMapConstPtr skymap);
+
 void get_detector_pointing( 
 	double x_offset, double y_offset,
 	const G3VectorQuat & trans_quat,
