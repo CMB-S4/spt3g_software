@@ -105,10 +105,9 @@ MapTODMasker::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		const BolometerProperties &bp = boloprops_->at(dets[i]);
 
 		// Get per-detector pointing timestream
-		std::vector<double> alpha, delta;
-		get_detector_pointing(bp.x_offset, bp.y_offset, *pointing,
-		    skymap->coord_ref, alpha, delta);
-		auto detpointing = skymap->AnglesToPixels(alpha, delta);
+		auto detquats = get_detector_pointing_quats(bp.x_offset, bp.y_offset,
+		    *pointing, skymap->coord_ref);
+		auto detpointing = skymap->QuatsToPixels(detquats);
 
 		det.resize(pointing->size());
 		for (size_t j = 0; j < det.size(); j++)

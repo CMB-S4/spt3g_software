@@ -256,11 +256,10 @@ HitsBinner::BinHits(const BolometerProperties &bp, const G3VectorQuat &pointing,
 {
 	// Get per-detector pointing timestream
 
-	std::vector<double> alpha, delta;
-	get_detector_pointing(bp.x_offset, bp.y_offset, pointing, H->coord_ref,
-	    alpha, delta);
+	auto detquats = get_detector_pointing_quats(bp.x_offset, bp.y_offset,
+	    pointing, H->coord_ref);
 
-	auto detpointing = H->AnglesToPixels(alpha, delta);
+	auto detpointing = H->QuatsToPixels(detquats);
 
 	for (size_t i = 0; i < detpointing.size(); i++) {
 		(*H)[detpointing[i]] += 1.0;

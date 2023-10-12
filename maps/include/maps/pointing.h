@@ -7,6 +7,10 @@
 
 // XXX: Define what the following functions do!
 
+G3VectorQuat
+get_detector_pointing_quats(double x_offset, double y_offset,
+    const G3VectorQuat & trans_quat, MapCoordReference coord_sys);
+
 void get_detector_pointing( 
 	double x_offset, double y_offset,
 	const G3VectorQuat & trans_quat,

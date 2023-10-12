@@ -202,12 +202,11 @@ MapMockObserver::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		det.stop = pointing->stop;
 
 		// Get per-detector pointing timestream
-		std::vector<double> alpha, delta;
-		get_detector_pointing(bp.x_offset, bp.y_offset, *pointing,
-		    T_->coord_ref, alpha, delta);
+		auto detquats = get_detector_pointing_quats(bp.x_offset, bp.y_offset,
+		    *pointing, T_->coord_ref);
 		std::vector<size_t> detpointing;
 		if (!interp_)
-			detpointing = T_->AnglesToPixels(alpha, delta);
+			detpointing = T_->QuatsToPixels(detquats);
 
 		if (Q_) {
 			StokesVector pcoupling;
@@ -217,7 +216,7 @@ MapMockObserver::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 				if (interp_) {
 					std::vector<size_t> pixels;
 					std::vector<double> weights;
-					T_->GetInterpPixelsWeights(alpha[i], delta[i], pixels, weights);
+					T_->GetInterpPixelsWeights(detquats[i], pixels, weights);
 					det[i] =
 					    T_->GetInterpPrecalc(pixels, weights) * pcoupling.t +
 					    Q_->GetInterpPrecalc(pixels, weights) * pcoupling.q +
@@ -232,7 +231,7 @@ MapMockObserver::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		} else {
 			for (size_t i = 0; i < det.size(); i++) {
 				if (interp_)
-					det[i] = T_->GetInterpValue(alpha[i], delta[i]);
+					det[i] = T_->GetInterpValue(detquats[i]);
 				else
 					det[i] = T_->at(detpointing[i]);
 			}

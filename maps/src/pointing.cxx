@@ -361,6 +361,28 @@ convert_ra_dec_trans_to_gal(const G3VectorQuat &radec_trans,
 		gal_trans[i] = gt*radec_trans[i];
 }
 
+G3VectorQuat
+get_detector_pointing_quats(double x_offset, double y_offset,
+    const G3VectorQuat &trans_quat, MapCoordReference coord_sys)
+{
+	quat q_off = offsets_to_quat(x_offset, y_offset);
+	size_t nsamp = trans_quat.size();
+	G3VectorQuat det_quats(nsamp, quat(0, 1, 0, 0));
+
+	for (size_t i = 0; i < nsamp; i++)
+		det_quats[i] = trans_quat[i] * q_off * ~trans_quat[i];
+
+	if (coord_sys == Local) {
+		for (size_t i = 0; i < nsamp; i++) {
+			const quat &q = det_quats[i];
+			det_quats[i] = quat(q.R_component_1(), q.R_component_2(),
+			    q.R_component_3(), -q.R_component_4());
+		}
+	}
+
+	return det_quats;
+}
+
 void
 get_detector_pointing(double x_offset, double y_offset,
     const G3VectorQuat &trans_quat, MapCoordReference coord_sys,
