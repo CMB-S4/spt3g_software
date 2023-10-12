@@ -6,6 +6,7 @@
 
 #include <G3Frame.h>
 #include <G3Logging.h>
+#include <G3Quat.h>
 
 class HealpixSkyMapInfo : public G3FrameObject {
 public:
@@ -39,17 +40,17 @@ public:
 
 	std::vector<double> PixelToAngle(size_t pixel) const;
 	size_t AngleToPixel(double alpha, double delta) const;
+	quat PixelToQuat(size_t pixel) const;
+	size_t QuatToPixel(quat q) const;
 
 	size_t RebinPixel(size_t pixel, size_t scale) const;
 
-	void GetRebinAngles(size_t pixel, size_t scale,
-	    std::vector<double> & alphas, std::vector<double> & deltas) const;
+	G3VectorQuat GetRebinQuats(size_t pixel, size_t scale) const;
 
-	void GetInterpPixelsWeights(double alpha, double delta,
-	    std::vector<size_t> & pixels, std::vector<double> & weights) const;
+	void GetInterpPixelsWeights(quat q, std::vector<size_t> & pixels,
+	    std::vector<double> & weights) const;
 
-	std::vector<size_t> QueryDisc(double alpha, double delta,
-	    double radius) const;
+	std::vector<size_t> QueryDisc(quat q, double radius) const;
 
 private:
 	// scheme

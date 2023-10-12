@@ -162,19 +162,19 @@ public:
 	std::vector<size_t> QuatsToPixels(const G3VectorQuat &quats) const;
 	G3VectorQuat PixelsToQuats(const std::vector<size_t> &pixels) const;
 
-	virtual std::vector<double> PixelToAngle(size_t pixel) const = 0;
-	virtual size_t AngleToPixel(double alpha, double delta) const = 0;
-	quat PixelToQuat(size_t pixel) const;
-	size_t QuatToPixel(quat q) const;
+	virtual std::vector<double> PixelToAngle(size_t pixel) const;
+	virtual size_t AngleToPixel(double alpha, double delta) const;
+	virtual quat PixelToQuat(size_t pixel) const = 0;
+	virtual size_t QuatToPixel(quat q) const = 0;
 
 	// Rebinning and interpolation
 	virtual void GetRebinAngles(size_t pixel, size_t scale,
-	    std::vector<double> & alphas, std::vector<double> & deltas) const = 0;
-	G3VectorQuat GetRebinQuats(size_t pixel, size_t scale) const;
+	    std::vector<double> & alphas, std::vector<double> & deltas) const;
+	virtual G3VectorQuat GetRebinQuats(size_t pixel, size_t scale) const = 0;
 	virtual void GetInterpPixelsWeights(double alpha, double delta,
-	    std::vector<size_t> & pixels, std::vector<double> & weights) const = 0;
-	void GetInterpPixelsWeights(quat q, std::vector<size_t> & pixels,
-	    std::vector<double> & weights) const;
+	    std::vector<size_t> & pixels, std::vector<double> & weights) const;
+	virtual void GetInterpPixelsWeights(quat q, std::vector<size_t> & pixels,
+	    std::vector<double> & weights) const = 0;
 	double GetInterpPrecalc(const std::vector<size_t> &pixels,
 	    const std::vector<double> &weights) const;
 	double GetInterpValue(double alpha, double delta) const;
@@ -186,10 +186,10 @@ public:
 	virtual boost::shared_ptr<G3SkyMap> Rebin(size_t scale, bool norm = true) const = 0;
 
 	/* Analogue to healpy.query_disc, returns list of pixels within a disc */
-	virtual std::vector<size_t> QueryDisc(double alpha, double delta, double radius) const {
-		throw std::runtime_error("QueryDisc not implemented");
-	};
+	std::vector<size_t> QueryDisc(double alpha, double delta, double radius) const;
+	virtual std::vector<size_t> QueryDisc(quat q, double radius) const = 0;
 	std::vector<size_t> QueryAlphaEllipse(double alpha, double delta, double a, double b) const;
+	std::vector<size_t> QueryAlphaEllipse(quat q, double a, double b) const;
 
 	virtual bool IsDense() const {
 		throw std::runtime_error("Checking array density not implemented");

@@ -170,24 +170,21 @@ G3SkyMap::PixelsToAngles(const std::vector<size_t> & pixels,
 }
 
 size_t
-G3SkyMap::QuatToPixel(quat q) const
+G3SkyMap::AngleToPixel(double alpha, double delta) const
 {
-	double alpha, delta;
-	quat_to_ang(q, alpha, delta);
-	if (coord_ref == Local)
-		delta *= -1;
+	quat q = ang_to_quat(alpha, delta);
 
-	return AngleToPixel(alpha, delta);
+	return QuatToPixel(q);
 }
 
-quat
-G3SkyMap::PixelToQuat(size_t pixel) const
+std::vector<double>
+G3SkyMap::PixelToAngle(size_t pixel) const
 {
-	std::vector<double> alphadelta = PixelToAngle(pixel);
-	if (coord_ref == Local)
-		alphadelta[1] *= -1;
+	quat q = PixelToQuat(pixel);
+	double alpha, delta;
+	quat_to_ang(q, alpha, delta);
 
-	return ang_to_quat(alphadelta[0], alphadelta[1]);
+	return {alpha, delta};
 }
 
 std::vector<size_t>
@@ -334,32 +331,27 @@ G3SkyMap &G3SkyMap::operator/=(double rhs)
 
 
 void
-G3SkyMap::GetInterpPixelsWeights(quat q, std::vector<size_t> & pixels,
-    std::vector<double> & weights) const
+G3SkyMap::GetInterpPixelsWeights(double alpha, double delta,
+    std::vector<size_t> & pixels, std::vector<double> & weights) const
 {
-	double alpha, delta;
-	quat_to_ang(q, alpha, delta);
-	if (coord_ref == Local)
-		delta *= -1;
-
-	GetInterpPixelsWeights(alpha, delta, pixels, weights);
+	quat q = ang_to_quat(alpha, delta);
+	GetInterpPixelsWeights(q, pixels, weights);
 }
 
-G3VectorQuat
-G3SkyMap::GetRebinQuats(size_t pixel, size_t scale) const
+void
+G3SkyMap::GetRebinAngles(size_t pixel, size_t scale,
+    std::vector<double> &alphas, std::vector<double> &deltas) const
 {
-	std::vector<double> alphas, deltas;
+	auto quats = GetRebinQuats(pixel, scale);
+	alphas = std::vector<double>(quats.size());
+	deltas = std::vector<double>(quats.size());
 
-	GetRebinAngles(pixel, scale, alphas, deltas);
-
-	G3VectorQuat q(alphas.size());
-	for (size_t i = 0; i < alphas.size(); i++) {
-		if (coord_ref == Local)
-			deltas[i] *= -1;
-		q[i] = ang_to_quat(alphas[i], deltas[i]);
+	for (size_t i = 0; i < quats.size(); i++) {
+		double alpha, delta;
+		quat_to_ang(quats[i], alpha, delta);
+		alphas[i] = alpha;
+		deltas[i] = delta;
 	}
-
-	return q;
 }
 
 double
@@ -376,10 +368,8 @@ G3SkyMap::GetInterpPrecalc(const std::vector<size_t> & pix,
 double
 G3SkyMap::GetInterpValue(double alpha, double delta) const
 {
-	std::vector<size_t> pix;
-	std::vector<double> weight;
-	GetInterpPixelsWeights(alpha, delta, pix, weight);
-	return GetInterpPrecalc(pix, weight);
+	quat q = ang_to_quat(alpha, delta);
+	return GetInterpValue(q);
 }
 
 std::vector<double>
@@ -398,12 +388,10 @@ G3SkyMap::GetInterpValues(const std::vector<double> & alphas,
 double
 G3SkyMap::GetInterpValue(quat q) const
 {
-	double alpha, delta;
-	quat_to_ang(q, alpha, delta);
-	if (coord_ref == Local)
-		delta *= -1;
-
-	return GetInterpValue(alpha, delta);
+	std::vector<size_t> pix;
+	std::vector<double> weight;
+	GetInterpPixelsWeights(q, pix, weight);
+	return GetInterpPrecalc(pix, weight);
 }
 
 std::vector<double>
@@ -418,21 +406,38 @@ G3SkyMap::GetInterpValues(const G3VectorQuat & quats) const
 }
 
 std::vector<size_t>
-G3SkyMap::QueryAlphaEllipse(double alpha, double delta, double a, double b) const
+G3SkyMap::QueryDisc(double alpha, double delta, double radius) const
+{
+	quat q = ang_to_quat(alpha, delta);
+	return QueryDisc(q, radius);
+}
+
+std::vector<size_t>
+G3SkyMap::QueryAlphaEllipse(double alpha ,double delta, double a, double b) const
+{
+	quat q = ang_to_quat(alpha, delta);
+	return QueryAlphaEllipse(q, a, b);
+}
+
+std::vector<size_t>
+G3SkyMap::QueryAlphaEllipse(quat q, double a, double b) const
 {
 	double rmaj = a > b ? a : b;
 	double rmin = a > b ? b : a;
-	double da = ACOS(COS(rmaj) / COS(rmin)) / COS(delta);
-	double ahi = alpha + da;
-	double alo = alpha - da;
+	double sd = q.R_component_4();
+	double cd = sqrt((1 - sd) * (1 + sd));
+	double da = ACOS(COS(rmaj) / COS(rmin)) / cd;
 
-	auto disc = QueryDisc(alpha, delta, rmaj);
+	quat qda = get_origin_rotator(da, 0);
+	quat ql = qda * q * ~qda;
+	quat qr = ~qda * q * qda;
+
+	auto disc = QueryDisc(q, rmaj);
 
 	std::vector<size_t> pixels;
 	for (auto i: disc) {
-		auto ang = PixelToAngle(i);
-		double d = angular_distance(ang[0], ang[1], ahi, delta) +
-			angular_distance(ang[0], ang[1], alo, delta);
+		quat qp = PixelToQuat(i);
+		double d = ACOS(dot3(qp, ql)) + ACOS(dot3(qp, qr));
 		if (d < 2 * rmaj)
 			pixels.push_back(i);
 	}
@@ -1442,12 +1447,32 @@ PYBINDINGS("maps") {
 	       "Compute the sky coordinates, expressed as quaternion rotations "
 	       "from the pole, for each of the given 1-D pixel coordinates.")
 
-	    .def("query_disc", &G3SkyMap::QueryDisc,
+	    .def("query_disc",
+	      (std::vector<size_t> (G3SkyMap::*)(double, double, double) const)
+		&G3SkyMap::QueryDisc,
 	       (bp::arg("alpha"), bp::arg("delta"), bp::arg("radius")),
 	       "Return a list of pixel indices whose centers are located within "
 	       "a disc of the given radius at the given sky coordinates.")
-	    .def("query_alpha_ellipse", &G3SkyMap::QueryAlphaEllipse,
+
+	    .def("query_disc",
+	      (std::vector<size_t> (G3SkyMap::*)(quat, double) const)
+		&G3SkyMap::QueryDisc,
+	       (bp::arg("quat"), bp::arg("radius")),
+	       "Return a list of pixel indices whose centers are located within "
+	       "a disc of the given radius at the given sky coordinates.")
+
+	    .def("query_alpha_ellipse",
+	      (std::vector<size_t> (G3SkyMap::*)(double, double, double, double) const)
+		&G3SkyMap::QueryAlphaEllipse,
 	       (bp::arg("alpha"), bp::arg("delta"), bp::arg("a"), bp::arg("b")),
+	       "Return a list of pixel indices whose centers are located within an "
+	       "ellipse extended in the alpha direction, at the given alpha and "
+	       "delta sky coordinates, with semimajor and semiminor axes a and b.")
+
+	    .def("query_alpha_ellipse",
+	      (std::vector<size_t> (G3SkyMap::*)(quat, double, double) const)
+		&G3SkyMap::QueryAlphaEllipse,
+	       (bp::arg("quat"), bp::arg("a"), bp::arg("b")),
 	       "Return a list of pixel indices whose centers are located within an "
 	       "ellipse extended in the alpha direction, at the given alpha and "
 	       "delta sky coordinates, with semimajor and semiminor axes a and b.")

@@ -232,15 +232,28 @@ HealpixSkyMapInfo::AngleToPixel(double alpha, double delta) const
 	if (theta < 0 || theta > M_PI)
 		return -1;
 
-	alpha /= G3Units::rad;
-	while (alpha < 0)
-		alpha += twopi;
-
 	ssize_t outpix;
 	if (nested_)
 		ang2pix_nest64(nside_, theta, alpha, &outpix);
 	else
 		ang2pix_ring64(nside_, theta, alpha, &outpix);
+
+	if (outpix < 0 || outpix >= npix_)
+		return -1;
+
+	return outpix;
+}
+
+size_t
+HealpixSkyMapInfo::QuatToPixel(quat q) const
+{
+	std::vector<double> v = {q.R_component_2(), q.R_component_3(), q.R_component_4()};
+	ssize_t outpix;
+
+	if (nested_)
+		vec2pix_nest64(nside_, &v[0], &outpix);
+	else
+		vec2pix_ring64(nside_, &v[0], &outpix);
 
 	if (outpix < 0 || outpix >= npix_)
 		return -1;
@@ -260,7 +273,7 @@ HealpixSkyMapInfo::PixelToAngle(size_t pixel) const
 	else
 		pix2ang_ring64(nside_, pixel, &delta, &alpha);
 
-	while(alpha > M_PI)
+	if (alpha > M_PI)
 		alpha -= twopi;
 
 	if (delta < 0 || delta > 180 * G3Units::deg)
@@ -270,6 +283,21 @@ HealpixSkyMapInfo::PixelToAngle(size_t pixel) const
 	delta = 90 * G3Units::deg - delta * G3Units::rad;
 
 	return {alpha, delta};
+}
+
+quat
+HealpixSkyMapInfo::PixelToQuat(size_t pixel) const
+{
+	if (pixel < 0 || pixel >= npix_)
+		return quat(0, 1, 0, 0);
+
+	std::vector<double> v(3);
+	if (nested_)
+		pix2vec_nest64(nside_, pixel, &v[0]);
+	else
+		pix2vec_ring64(nside_, pixel, &v[0]);
+
+	return quat(0, v[0], v[1], v[2]);
 }
 
 size_t
@@ -286,12 +314,18 @@ HealpixSkyMapInfo::RebinPixel(size_t pixel, size_t scale) const
 	return pix;
 }
 
-void
-HealpixSkyMapInfo::GetRebinAngles(size_t pixel, size_t scale,
-    std::vector<double> & alphas, std::vector<double> & deltas) const
+G3VectorQuat
+HealpixSkyMapInfo::GetRebinQuats(size_t pixel, size_t scale) const
 {
 	if (nside_ % scale != 0)
 		log_fatal("Nside must be a multiple of rebinning scale");
+
+	G3VectorQuat quats(scale * scale, quat(0, 1, 0, 0));
+
+	if (pixel >= npix_) {
+		quats.resize(0);
+		return quats;
+	}
 
 	if (!nested_) {
 		ssize_t pix = pixel;
@@ -299,23 +333,16 @@ HealpixSkyMapInfo::GetRebinAngles(size_t pixel, size_t scale,
 		pixel = pix;
 	}
 
-	alphas = std::vector<double>(scale * scale);
-	deltas = std::vector<double>(scale * scale);
-
 	size_t nside_rebin = nside_ * scale;
 	size_t pixmin = pixel * scale * scale;
+	std::vector<double> v(3);
 
 	for (size_t i = 0; i < (scale * scale); i++) {
-		size_t p = pixmin + i;
-		double theta, phi;
-		pix2ang_nest64(nside_rebin, p, &theta, &phi);
-
-		while (phi > M_PI)
-			phi -= twopi;
-
-		alphas[i] = phi * G3Units::rad;
-		deltas[i] = 90 * G3Units::deg - theta * G3Units::rad;
+		pix2vec_nest64(nside_rebin, pixmin + i, &v[0]);
+		quats[i] = quat(0, v[0], v[1], v[2]);
 	}
+
+	return quats;
 }
 
 size_t
@@ -329,20 +356,16 @@ HealpixSkyMapInfo::RingAbove(double z) const
 }
 
 void
-HealpixSkyMapInfo::GetInterpPixelsWeights(double alpha, double delta,
-    std::vector<size_t> & pixels, std::vector<double> & weights) const
+HealpixSkyMapInfo::GetInterpPixelsWeights(quat q, std::vector<size_t> & pixels,
+    std::vector<double> & weights) const
 {
-	alpha /= G3Units::rad;
-	delta /= G3Units::rad;
-
 	pixels = std::vector<size_t>(4, (size_t) -1);
 	weights = std::vector<double>(4, 0);
 
-	double theta = M_PI_2 - delta;
-	g3_assert(!(theta < 0 || theta > M_PI));
-	double z = cos(theta);
-
-	double phi = (alpha < 0) ? (alpha + twopi) : alpha;
+	double z = q.R_component_4() / sqrt(dot3(q, q));
+	double phi = atan2(q.R_component_3(), q.R_component_2());
+	if (phi < 0)
+		phi += twopi;
 
 	size_t ir1 = RingAbove(z);
 	size_t ir2 = ir1 + 1;
@@ -423,40 +446,44 @@ HealpixSkyMapInfo::GetInterpPixelsWeights(double alpha, double delta,
 }
 
 std::vector<size_t>
-HealpixSkyMapInfo::QueryDisc(double alpha, double delta, double radius) const
+HealpixSkyMapInfo::QueryDisc(quat q, double radius) const
 {
-	auto pixels = std::vector<size_t>();
+	double r = radius / G3Units::rad;
+	size_t n = (r < 1) ? ((size_t) (r * r * npix_)) : npix_;
+	auto pixels = std::vector<size_t>(n);
+	n = 0;
 
 	radius /= G3Units::rad;
 	if (radius >= M_PI) {
 		for (ssize_t i = 0; i < npix_; i++)
-			pixels.push_back(i);
+			pixels[n++] = i;
+		pixels.resize(n);
 		return pixels;
 	}
 
-	alpha /= G3Units::rad;
-	delta /= G3Units::rad;
-
-	double theta = M_PI_2 - delta;
-	g3_assert(!(theta < 0 || theta > M_PI));
 	double cosrad = cos(radius);
-	double z = cos(theta);
-	double xa = 1.0 / sqrt((1.0 - z) * (1.0 + z));
-	double phi = (alpha < 0) ? (alpha + twopi) : alpha;
+	double sinrad = sin(radius);
+	double z = q.R_component_4() / sqrt(dot3(q, q));
+	double theta = acos(z);
+	double s = sqrt((1 - z) * (1 + z));
+	double xa = 1.0 / s;
+	double phi = atan2(q.R_component_3(), q.R_component_2());
+	if (phi < 0)
+		phi += twopi;
 
 	double rlat1 = theta - radius;
-	double zmax = cos(rlat1);
+	double zmax = z * cosrad + s * sinrad;
 	size_t irmin = RingAbove(zmax) + 1;
 
 	if ((rlat1 <= 0) && (irmin > 1)) {
 		// north pole in the disk
 		const HealpixRingInfo & ring = rings_[irmin - 1];
 		for (ssize_t i = 0; i < ring.pix0 + ring.npix; i++)
-			pixels.push_back(i);
+			pixels[n++] = i;
 	}
 
 	double rlat2 = theta + radius;
-	double zmin = cos(rlat2);
+	double zmin = z * cosrad - s * sinrad;
 	size_t irmax = RingAbove(zmin);
 
 	for (size_t iring = irmin; iring <= irmax; iring++) {
@@ -483,12 +510,12 @@ HealpixSkyMapInfo::QueryDisc(double alpha, double delta, double radius) const
 		}
 		if (ip_lo < 0) {
 			for (ssize_t i = ring.pix0; i < ring.pix0 + ip_hi + 1; i++)
-				pixels.push_back(i);
+				pixels[n++] = i;
 			for (ssize_t i = ring.pix0 + ip_lo + ring.npix; i < ipix2 + 1; i++)
-				pixels.push_back(i);
+				pixels[n++] = i;
 		} else {
 			for (ssize_t i = ring.pix0 + ip_lo; i < ring.pix0 + ip_hi + 1; i++)
-				pixels.push_back(i);
+				pixels[n++] = i;
 		}
 	}
 
@@ -496,8 +523,9 @@ HealpixSkyMapInfo::QueryDisc(double alpha, double delta, double radius) const
 		// south pole in the disk
 		const HealpixRingInfo & ring = rings_[irmax + 1];
 		for (ssize_t i = ring.pix0; i < npix_; i++)
-			pixels.push_back(i);
+			pixels[n++] = i;
 	}
+	pixels.resize(n);
 
 	if (nested_) {
 		for (size_t i = 0; i < pixels.size(); i++) {
