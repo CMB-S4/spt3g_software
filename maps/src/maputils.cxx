@@ -286,7 +286,7 @@ void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool int
 		rotate = true;
 		q_rot = get_fk5_j2000_to_gal_quat();
 		if (in_map->coord_ref == MapCoordReference::Equatorial)
-			q_rot = 1. / q_rot;
+			q_rot = ~q_rot;
 	} else if (in_map->coord_ref != out_map->coord_ref) {
 		log_fatal("Cannot convert input coord_ref %d to output coord_ref %d",
 		    in_map->coord_ref, out_map->coord_ref);
@@ -312,7 +312,7 @@ void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool int
 			double val = 0;
 			auto quats = out_map->GetRebinQuats(i, rebin);
 			if (rotate)
-				quats = q_rot * quats / q_rot;
+				quats = q_rot * quats * ~q_rot;
 			if (interp)
 				for (size_t j = 0; j < quats.size(); j++)
 					val += in_map->GetInterpValue(quats[j]);
@@ -329,7 +329,7 @@ void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool int
 			double val = 0;
 			quat q = out_map->PixelToQuat(i);
 			if (rotate)
-				q = q_rot * q / q_rot;
+				q = q_rot * q * ~q_rot;
 			if (interp)
 				val = in_map->GetInterpValue(q);
 			else

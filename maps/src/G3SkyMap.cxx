@@ -426,18 +426,23 @@ G3SkyMap::QueryAlphaEllipse(quat q, double a, double b) const
 	double rmin = a > b ? b : a;
 	double sd = q.R_component_4();
 	double cd = sqrt((1 - sd) * (1 + sd));
+
+	// focus distance from center
 	double da = ACOS(COS(rmaj) / COS(rmin)) / cd;
 
+	// focus locations
 	quat qda = get_origin_rotator(da, 0);
 	quat ql = qda * q * ~qda;
 	quat qr = ~qda * q * qda;
 
+	// narrow search to pixels within the major disc
 	auto disc = QueryDisc(q, rmaj);
 
+	// narrow further to locus of points within ellipse
 	std::vector<size_t> pixels;
 	for (auto i: disc) {
 		quat qp = PixelToQuat(i);
-		double d = ACOS(dot3(qp, ql)) + ACOS(dot3(qp, qr));
+		double d = quat_ang_sep(qp, ql) + quat_ang_sep(qp, qr);
 		if (d < 2 * rmaj)
 			pixels.push_back(i);
 	}

@@ -1,9 +1,8 @@
 from spt3g import core
 from spt3g.core import G3TimestreamQuat
-from spt3g.maps.azel import convert_azel_to_radec
 from spt3g.maps import MapCoordReference
-from spt3g.maps import create_det_az_el_trans, create_lazy_det_ra_dec_trans
-from spt3g.maps import create_det_ra_dec_trans, convert_ra_dec_trans_to_gal
+from spt3g.maps import get_origin_rotator_timestream, get_boresight_rotator_timestream
+from spt3g.maps import get_fk5_j2000_to_gal_quat
 
 
 __all__ = [
@@ -68,16 +67,18 @@ def FillCoordTransRotations(
         return
 
     trans = G3TimestreamQuat()
-    trans.start = frame[bs_az_key].start
-    trans.stop = frame[bs_az_key].stop
     if end_coord_sys == MapCoordReference.Local:
-        create_det_az_el_trans(frame[bs_az_key], frame[bs_el_key], trans)
+        trans = get_origin_rotator_timestream(
+            frame[bs_az_key], frame[bs_el_key], end_coord_sys
+        )
     else:
         if do_bad_transform:
             core.log_debug("You are doing the old calculation for pointing")
-            create_lazy_det_ra_dec_trans(frame[bs_ra_key], frame[bs_dec_key], trans)
+            trans = get_origin_rotator_timestream(
+                frame[bs_ra_key], frame[bs_dec_key], end_coord_sys
+            )
         else:
-            create_det_ra_dec_trans(
+            trans = get_boresight_rotator_timestream(
                 frame[bs_az_key],
                 frame[bs_el_key],
                 frame[bs_ra_key],
@@ -86,7 +87,6 @@ def FillCoordTransRotations(
                 frame[offset_el_key],
                 frame[offset_ra_key],
                 frame[offset_dec_key],
-                trans,
             )
     frame[transform_store_key] = trans
 
@@ -106,10 +106,7 @@ def EquatorialToGalacticTransRotations(
 
     if frame.type != core.G3FrameType.Scan:
         return
-    gal_trans = G3TimestreamQuat()
-    gal_trans.start = frame[eq_trans_key].start
-    gal_trans.stop = frame[eq_trans_key].stop
-    convert_ra_dec_trans_to_gal(frame[eq_trans_key], gal_trans)
+    gal_trans = get_fk5_j2000_to_gal_quat() * frame[eq_trans_key]
     frame[out_key] = gal_trans
 
 
@@ -129,9 +126,8 @@ def AddLocalTransRotations(
 
     if frame.type != core.G3FrameType.Scan:
         return
-    local_trans = G3TimestreamQuat()
-    local_trans.start = frame[az_key].start
-    local_trans.stop = frame[az_key].stop
-    create_det_az_el_trans(frame[az_key], frame[el_key], local_trans)
+    local_trans = get_origin_rotator_timestream(
+        frame[az_key], frame[el_key], MapCoordReference.Local
+    )
     frame[out_key] = local_trans
 
