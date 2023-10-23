@@ -196,8 +196,8 @@ void FlatSkyProjection::SetDeltaCenter(double delta)
 	if (fabs(delta) > 90 * deg)
 		log_fatal("Delta center out of range");
 	delta0_ = delta;
-	cosdelta0_ = COS(delta0_ / rad);
 	sindelta0_ = SIN(delta0_ / rad);
+	cosdelta0_ = COS(delta0_ / rad);
 	q0_ = get_origin_rotator(alpha0_, delta0_);
 }
 
@@ -307,10 +307,9 @@ FlatSkyProjection::XYToAngle(double x, double y) const
 		break;
 	}
 
-	double dalpha = alpha - alpha0_;
-
 	static const double circ = 360 * deg;
 	static const double halfcirc = 180 * deg;
+	double dalpha = alpha - alpha0_;
 
 	if (dalpha > halfcirc)
 		alpha -= circ;
@@ -387,6 +386,7 @@ FlatSkyProjection::QuatToXY(quat q) const
 
 	// Rotate to projection center
 	quat qr = ~q0_ * q * q0_;
+	double cc = qr.R_component_2();
 	double k;
 
 	switch(proj_) {
@@ -395,20 +395,19 @@ FlatSkyProjection::QuatToXY(quat q) const
 		break;
 	}
 	case Proj3: {
-		double c = ASIN(qr.R_component_2());
-		k = (90 * deg - rad * c) / COS(c);
+		k = rad * acos(cc) / sqrt((1. - cc) * (1. + cc));
 		break;
 	}
 	case Proj4: {
-		k = rad * (2. / (1. + qr.R_component_2()));
+		k = rad * (2. / (1. + cc));
 		break;
 	}
 	case Proj5: {
-		k = rad * sqrt(2. / (1. + qr.R_component_2()));
+		k = rad * sqrt(2. / (1. + cc));
 		break;
 	}
 	case Proj6: {
-		k = rad / qr.R_component_2();
+		k = rad / cc;
 		break;
 	}
 	default:
@@ -442,7 +441,7 @@ FlatSkyProjection::XYToQuat(double x, double y) const
 	if (rho < 1e-8) {
 		q = quat(0, 1, 0, 0);
 	} else if (proj_ == Proj2) {
-		double cc = sqrt(1 - rho * rho);
+		double cc = sqrt((1. - rho) * (1. + rho));
 		q = quat(0, cc, x, -y);
 	} else {
 		double c;
