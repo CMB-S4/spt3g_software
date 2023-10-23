@@ -76,5 +76,9 @@ antenna0.tracker.tilts                          0.0000  3.600000e+06  degrees
 antenna0.tracker.ut1utc                         0.0000  1.000000e+03  sec
 array.dc.currents[0-7]                      -1000.0000  1.000000e+02  volt
 array.weather.airTemperature                  273.1500  1.000000e+00  K
+array.weather.battery                           0.0000  1.000000e+00  mV
+array.weather.internalTemperature             273.1500  1.000000e+00  K
+array.weather.pressure                          0.0000  1.000000e+00  millibar
 array.weather.relativeHumidity                  0.0000  1.000000e-02  
 array.weather.windDirection                   -80.0000  1.000000e+00  deg
+array.weather.windSpeed                         0.0000  1.000000e+00  m/s

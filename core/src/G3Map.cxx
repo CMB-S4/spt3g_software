@@ -74,6 +74,7 @@ G3_SERIALIZABLE_CODE(G3MapInt);
 G3_SERIALIZABLE_CODE(G3MapDouble);
 G3_SERIALIZABLE_CODE(G3MapMapDouble);
 G3_SERIALIZABLE_CODE(G3MapString);
+G3_SERIALIZABLE_CODE(G3MapQuat);
 G3_SERIALIZABLE_CODE(G3MapVectorBool);
 G3_SERIALIZABLE_CODE(G3MapVectorInt);
 G3_SERIALIZABLE_CODE(G3MapVectorDouble);
@@ -81,6 +82,7 @@ G3_SERIALIZABLE_CODE(G3MapVectorString);
 G3_SERIALIZABLE_CODE(G3MapVectorVectorString);
 G3_SERIALIZABLE_CODE(G3MapVectorComplexDouble);
 G3_SERIALIZABLE_CODE(G3MapVectorTime);
+G3_SERIALIZABLE_CODE(G3MapVectorQuat);
 
 G3_SPLIT_SERIALIZABLE_CODE(G3MapFrameObject);
 
@@ -95,6 +97,8 @@ PYBINDINGS("core") {
 	register_g3map<G3MapInt>("G3MapInt", "Mapping from strings to ints.");
 	register_g3map<G3MapString>("G3MapString", "Mapping from strings to "
 	    "strings.");
+	register_g3map<G3MapQuat>("G3MapQuat", "Mapping from strings to "
+	    "quaternions.");
 	register_g3map<G3MapVectorBool>("G3MapVectorBool", "Mapping from "
 	    "strings to arrays of booleans.");
 	register_g3map<G3MapVectorDouble>("G3MapVectorDouble", "Mapping from "
@@ -109,6 +113,8 @@ PYBINDINGS("core") {
 	    "Mapping from strings to lists of lists of strings.");
 	register_g3map<G3MapVectorTime>("G3MapVectorTime", "Mapping from "
 	    "strings to lists of G3 time objects.");
+	register_g3map<G3MapVectorQuat>("G3MapVectorQuat", "Mapping from "
+	    "strings to lists of quaternions.");
 
 	// Special handling to get the object proxying right
 	register_g3map<G3MapFrameObject, true>("G3MapFrameObject", "Mapping "
