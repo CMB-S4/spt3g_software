@@ -169,5 +169,5 @@ Conversion between coordinate systems is done by constructing rotation quaternio
 Detector Pointing
 -----------------
 
-Detector pointing timestreams are constructed by first using the ``offsets_to_quat`` function to construct the detector offset quaternion in boresight coordinates, then rotating that pointing quaternion onto the sky by applying a rotation quaternion constructed from the boresight pointing timestreams.  This is done internally for each detector in each of the mapmaking pipeline modules (``MapBinner``, ``MapMockObserver``, etc), which all require an input ``BolometerPropertiesMap`` object with offsets for each detector, and pre-computed timestreams of rotation quaternions associated with each input ``Scan`` frame.
+Detector pointing timestreams are constructed by first using the ``offsets_to_quat`` function to construct the detector offset quaternion in boresight coordinates, then rotating that pointing quaternion onto the sky by applying a rotation quaternion constructed from the boresight pointing timestreams.  This is done internally for each detector in each of the mapmaking pipeline modules (``MapBinner``, ``MapMockObserver``, etc), which all require an input ``BolometerPropertiesMap`` object with offsets for each detector, and pre-computed timestreams of boresight rotation quaternions associated with each input ``Scan`` frame.
 
