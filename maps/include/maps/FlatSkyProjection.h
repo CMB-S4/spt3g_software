@@ -127,8 +127,8 @@ private:
 
 	// derived values
 	bool cyl_;
-	double cosdelta0_;
 	double sindelta0_;
+	double cosdelta0_;
 	quat q0_;
 
 	SET_LOGGER("FlatSkyProjection");
