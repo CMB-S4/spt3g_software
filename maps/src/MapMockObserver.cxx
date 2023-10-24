@@ -34,6 +34,7 @@ private:
 
 	bool interp_;
 	bool error_on_zero_;
+	int pol_sign_;
 
 	SET_LOGGER("MapMockObserver");
 };
@@ -109,26 +110,12 @@ MapMockObserver::MapMockObserver(std::string pointing, std::string timestreams,
 {
 	if ((Q_ && !U_) || (U_ && !Q_))
 		log_fatal("If simulating polarized maps, pass both Q and U.");
-}
 
-// Following utility function copied from old map-maker and needs re-tooling
-// to handle boresight rotation.
-static void
-set_stokes_coupling(double pol_ang, double pol_eff,
-    StokesVector &stokes_coupling, G3SkyMap::MapPolConv pol_conv)
-{
-	stokes_coupling.t = 1.0;
-	stokes_coupling.q = cos(pol_ang/G3Units::rad *2.)*pol_eff/(2.0-pol_eff);
-	stokes_coupling.u = sin(pol_ang/G3Units::rad *2.)*pol_eff/(2.0-pol_eff);
-	if (pol_conv == G3SkyMap::COSMO)
-		stokes_coupling.u *= -1.0;
-	else if (pol_conv == G3SkyMap::ConvNone)
-		log_fatal("Missing pol_conv");
-
-	if (fabs(stokes_coupling.q) < 1e-12)
-		stokes_coupling.q = 0;
-	if (fabs(stokes_coupling.u) < 1e-12)
-		stokes_coupling.u = 0;
+	if (U_) {
+		if (U_->GetPolConv() == G3SkyMap::ConvNone)
+			log_fatal("Missing pol_conv");
+		pol_sign_ = (U_->GetPolConv() == G3SkyMap::COSMO) ? -1 : 1;
+	}
 }
 
 void
@@ -210,9 +197,8 @@ MapMockObserver::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 			detpointing = T_->AnglesToPixels(alpha, delta);
 
 		if (Q_) {
-			StokesVector pcoupling;
-			set_stokes_coupling(bp.pol_angle, bp.pol_efficiency,
-			    pcoupling, U_->GetPolConv());
+			// needs re-tooling to handle boresight rotation.
+			StokesVector pcoupling(bp.pol_angle * pol_sign_, bp.pol_efficiency);
 			for (size_t i = 0; i < det.size(); i++) {
 				if (interp_) {
 					std::vector<size_t> pixels;

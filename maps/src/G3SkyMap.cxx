@@ -1240,6 +1240,22 @@ double MuellerMatrix::Cond() const
 	return c;
 }
 
+StokesVector::StokesVector(double pol_ang, double pol_eff) :
+    t(backing[0]), q(backing[1]), u(backing[2])
+{
+	double phi = pol_ang / G3Units::rad * 2.0;
+	double gamma = pol_eff / (2.0 - pol_eff);
+
+	t = 1.0;
+	q = cos(phi) * gamma;
+	u = sin(phi) * gamma;
+
+	if (fabs(q) < 1e-12)
+		q = 0.0;
+	if (fabs(u) < 1e-12)
+		u = 0.0;
+}
+
 StokesVector & StokesVector::operator /=(const MuellerMatrix &r)
 {
 	MuellerMatrix ir = r.Inv();

@@ -241,6 +241,9 @@ public:
 	// you initialize one of these statically and then use it in arithmetic.
 	StokesVector() : t(backing[0]), q(backing[1]), u(backing[2]) {}
 
+	// Constructor for polarization coupling
+	StokesVector(double pol_ang, double pol_eff);
+
 	double &t, &q, &u;
 
 	StokesVector &operator +=(const StokesVector &r) {
@@ -292,7 +295,18 @@ public:
 	MuellerMatrix() : tt(backing[0]), tq(backing[1]),
 	    tu(backing[2]), qq(backing[3]), qu(backing[4]), uu(backing[5]) {}
 
+	// Constructor from Stokes vector
+	MuellerMatrix(const StokesVector &r) : tt(backing[0]), tq(backing[1]),
+	    tu(backing[2]), qq(backing[3]), qu(backing[4]), uu(backing[5]) {
+		from_vector(r);
+	}
+
 	double &tt, &tq, &tu, &qq, &qu, &uu;
+
+	void from_vector(const StokesVector &r) {
+		tt = r.t * r.t; tq = r.t * r.q; tu = r.t * r.u;
+		qq = r.q * r.q; qu = r.q * r.u; uu = r.u * r.u;
+	}
 
 	MuellerMatrix &operator +=(const MuellerMatrix &r) {
 		tt += r.tt; tq += r.tq; tu += r.tu;
