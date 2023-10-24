@@ -284,7 +284,7 @@ the BolometerProperties key.
 Return the same type of maps as the one it was handed, e.g.
 G3TimestreamMap, G3MapInt, etc.</p>
 <dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">SplitByBand(self,</span> <span class="pre">input='CalTimestreams',</span> <span class="pre">output_root=None,</span> <span class="pre">bands=None,</span> <span class="pre">bpm='BolometerProperties')</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">SplitByBand(self,</span> <span class="pre">input='CalTimestreams',</span> <span class="pre">output_root=None,</span> <span class="pre">bands=None,</span> <span class="pre">bpm='BolometerProperties',</span> <span class="pre">drop_empty=False)</span></code></p>
 </dd>
 <dt><em>Constructor:</em></dt><dd><p>Split the input map given by input into several output
 maps named output_root + band + GHz (e.g. CalTimestreams150GHz with
@@ -302,7 +302,7 @@ the BolometerProperties key.
 Return the same type of maps as the one it was handed, e.g.
 G3TimestreamMap, G3MapInt, etc.</p>
 <dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">SplitByPixelType(self,</span> <span class="pre">input='CalTimestreams',</span> <span class="pre">output_root=None,</span> <span class="pre">types=None,</span> <span class="pre">bpm='BolometerProperties')</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">SplitByPixelType(self,</span> <span class="pre">input='CalTimestreams',</span> <span class="pre">output_root=None,</span> <span class="pre">types=None,</span> <span class="pre">bpm='BolometerProperties',</span> <span class="pre">drop_empty=False)</span></code></p>
 </dd>
 <dt><em>Constructor:</em></dt><dd><p>Split the input map given by input into several output
 maps named output_root + wafer (e.g. CalTimestreamsW172 with
@@ -320,7 +320,7 @@ the BolometerProperties key.
 Return the same type of maps as the one it was handed, e.g.
 G3TimestreamMap, G3MapInt, etc.</p>
 <dl>
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">SplitByProperty(self,</span> <span class="pre">input='CalTimestreams',</span> <span class="pre">property=None,</span> <span class="pre">property_list=None,</span> <span class="pre">output_root=None,</span> <span class="pre">bpm='BolometerProperties')</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">SplitByProperty(self,</span> <span class="pre">input='CalTimestreams',</span> <span class="pre">property=None,</span> <span class="pre">property_list=None,</span> <span class="pre">output_root=None,</span> <span class="pre">bpm='BolometerProperties',</span> <span class="pre">drop_empty=False)</span></code></p>
 </dd>
 <dt><em>Constructor:</em></dt><dd><p>Split the input map given by input into several output
 maps named output_root + key (e.g. CalTimestreams + str(property)) with
@@ -344,6 +344,8 @@ If None (default), use <cite>input</cite> as the output root.</p>
 <dt>bpm<span class="classifier">str</span></dt><dd><p>The key name of the BolometerPropertiesMap from which to extract
 the requested <cite>property</cite> for splitting the input map.</p>
 </dd>
+<dt>drop_empty<span class="classifier">bool</span></dt><dd><p>If True, drop output maps that don’t contain any bolometers.</p>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -356,7 +358,7 @@ the BolometerProperties key.
 Return the same type of maps as the one it was handed, e.g.
 G3TimestreamMap, G3MapInt, etc.</p>
 <dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">SplitByWafer(self,</span> <span class="pre">input='CalTimestreams',</span> <span class="pre">output_root=None,</span> <span class="pre">wafers=None,</span> <span class="pre">bpm='BolometerProperties')</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">SplitByWafer(self,</span> <span class="pre">input='CalTimestreams',</span> <span class="pre">output_root=None,</span> <span class="pre">wafers=None,</span> <span class="pre">bpm='BolometerProperties',</span> <span class="pre">drop_empty=False)</span></code></p>
 </dd>
 <dt><em>Constructor:</em></dt><dd><p>Split the input map given by input into several output
 maps named output_root + wafer (e.g. CalTimestreamsW172 with
@@ -374,7 +376,7 @@ the BolometerProperties key.
 Return the same type of maps as the one it was handed, e.g.
 G3TimestreamMap, G3MapInt, etc.</p>
 <dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">SplitTimestreamsByBand(self,</span> <span class="pre">input='CalTimestreams',</span> <span class="pre">output_root=None,</span> <span class="pre">bands=None,</span> <span class="pre">bpm='BolometerProperties')</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">SplitTimestreamsByBand(self,</span> <span class="pre">input='CalTimestreams',</span> <span class="pre">output_root=None,</span> <span class="pre">bands=None,</span> <span class="pre">bpm='BolometerProperties',</span> <span class="pre">drop_empty=False)</span></code></p>
 </dd>
 <dt><em>Constructor:</em></dt><dd><p>Split the input map given by input into several output
 maps named output_root + band + GHz (e.g. CalTimestreams150GHz with

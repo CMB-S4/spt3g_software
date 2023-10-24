@@ -364,7 +364,7 @@ Return the same type of maps as the one it was handed, e.g.
 G3TimestreamMap, G3MapInt, etc.
 
 *Constructor:*
-	``SplitByBand(self, input='CalTimestreams', output_root=None, bands=None, bpm='BolometerProperties')``
+	``SplitByBand(self, input='CalTimestreams', output_root=None, bands=None, bpm='BolometerProperties', drop_empty=False)``
 
 
 *Constructor:*
@@ -390,7 +390,7 @@ Return the same type of maps as the one it was handed, e.g.
 G3TimestreamMap, G3MapInt, etc.
 
 *Constructor:*
-	``SplitByPixelType(self, input='CalTimestreams', output_root=None, types=None, bpm='BolometerProperties')``
+	``SplitByPixelType(self, input='CalTimestreams', output_root=None, types=None, bpm='BolometerProperties', drop_empty=False)``
 
 
 *Constructor:*
@@ -416,7 +416,7 @@ Return the same type of maps as the one it was handed, e.g.
 G3TimestreamMap, G3MapInt, etc.
 
 *Constructor:*
-	``SplitByProperty(self, input='CalTimestreams', property=None, property_list=None, output_root=None, bpm='BolometerProperties')``
+	``SplitByProperty(self, input='CalTimestreams', property=None, property_list=None, output_root=None, bpm='BolometerProperties', drop_empty=False)``
 
 
 *Constructor:*
@@ -442,6 +442,8 @@ G3TimestreamMap, G3MapInt, etc.
 		bpm : str
 		    The key name of the BolometerPropertiesMap from which to extract
 		    the requested `property` for splitting the input map.
+		drop_empty : bool
+		    If True, drop output maps that don't contain any bolometers.
 
 
 
@@ -457,7 +459,7 @@ Return the same type of maps as the one it was handed, e.g.
 G3TimestreamMap, G3MapInt, etc.
 
 *Constructor:*
-	``SplitByWafer(self, input='CalTimestreams', output_root=None, wafers=None, bpm='BolometerProperties')``
+	``SplitByWafer(self, input='CalTimestreams', output_root=None, wafers=None, bpm='BolometerProperties', drop_empty=False)``
 
 
 *Constructor:*
@@ -483,7 +485,7 @@ Return the same type of maps as the one it was handed, e.g.
 G3TimestreamMap, G3MapInt, etc.
 
 *Constructor:*
-	``SplitTimestreamsByBand(self, input='CalTimestreams', output_root=None, bands=None, bpm='BolometerProperties')``
+	``SplitTimestreamsByBand(self, input='CalTimestreams', output_root=None, bands=None, bpm='BolometerProperties', drop_empty=False)``
 
 
 *Constructor:*
