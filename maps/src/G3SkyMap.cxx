@@ -1160,10 +1160,10 @@ pyskymapweights_imultma(G3SkyMapWeightsPtr a, const G3SkyMapMask &b)
 	return a;
 }
 
-MuellerMatrix MuellerMatrix::Inv() const
+MuellerMatrix MuellerMatrix::inv() const
 {
 	MuellerMatrix m;
-	double c = Cond();
+	double c = cond();
 	if (tt == 0 || c != c || c > 1e12) {
 		if ((c != c || c > 1e12) && tt != 0)
 			log_trace("Singular matrix found when inverting!  Cond is %lE\n", c);
@@ -1171,7 +1171,7 @@ MuellerMatrix MuellerMatrix::Inv() const
 		return m;
 	}
 
-	double d = Det();
+	double d = det();
 	m.tt = (qq * uu - qu * qu) / d;
 	m.tq = (tu * qu - tq * uu) / d;
 	m.tu = (tq * qu - tu * qq) / d;
@@ -1182,7 +1182,7 @@ MuellerMatrix MuellerMatrix::Inv() const
 	return m;
 }
 
-double MuellerMatrix::Cond() const
+double MuellerMatrix::cond() const
 {
 	// Compute eigenvalues of a symmetrix 3x3 matrix
 	// See https://en.wikipedia.org/wiki/Eigenvalue_algorithm#3%C3%973_matrices
@@ -1222,7 +1222,7 @@ double MuellerMatrix::Cond() const
 	B.tu = tu;
 	B.qu = qu;
 	B /= p;
-	double r = B.Det() / 2.0;
+	double r = B.det() / 2.0;
 
 	double phi;
 	if (r <= -1)
@@ -1256,9 +1256,45 @@ StokesVector::StokesVector(double pol_ang, double pol_eff) :
 		u = 0.0;
 }
 
+void StokesVector::rotate_pol(double pol_ang)
+{
+	double phi = pol_ang * 2.0 / G3Units::rad;
+	double c = cos(phi);
+	double s = sin(phi);
+
+	double qr = q * c - u * s;
+	double ur = q * s + u * c;
+
+	q = qr;
+	u = ur;
+}
+
+void MuellerMatrix::rotate_pol(double pol_ang)
+{
+	double phi = pol_ang * 2.0 / G3Units::rad;
+	double c = cos(phi);
+	double s = sin(phi);
+	double cc = c * c;
+	double ss = s * s;
+	double cs = c * s;
+	double xx = 2.0 * qu * cs;
+
+	double tqr = tq * c - tu * s;
+	double tur = tq * s + tu * c;
+	double qqr = qq * cc - xx + uu * ss;
+	double qur = (qq - uu) * cs + qu * (cc - ss);
+	double uur = qq * ss + xx + uu * cc;
+
+	tq = tqr;
+	tu = tur;
+	qq = qqr;
+	qu = qur;
+	uu = uur;
+}
+
 StokesVector & StokesVector::operator /=(const MuellerMatrix &r)
 {
-	MuellerMatrix ir = r.Inv();
+	MuellerMatrix ir = r.inv();
 	if (ir.tt != ir.tt)
 		t = q = u = 0.0 / 0.0;
 	else
@@ -1271,7 +1307,7 @@ G3SkyMapPtr G3SkyMapWeights::Det() const
 	G3SkyMapPtr D = TT->Clone(false);
 
 	for (size_t i = 0; i < TT->size(); i++) {
-		double det = this->at(i).Det();
+		double det = this->at(i).det();
 		if (det != 0)
 			(*D)[i] = det;
 	}
@@ -1285,7 +1321,7 @@ G3SkyMapPtr G3SkyMapWeights::Cond() const
 	C->ConvertToDense();
 
 	for (size_t i = 0; i < TT->size(); i++)
-		(*C)[i] = this->at(i).Cond();
+		(*C)[i] = this->at(i).cond();
 
 	return C;
 }
@@ -1306,7 +1342,7 @@ G3SkyMapWeightsPtr G3SkyMapWeights::Inv() const
 		out->UU->ConvertToDense();
 
 	for (size_t i = 0; i < TT->size(); i++)
-		(*out)[i] = this->at(i).Inv();
+		(*out)[i] = this->at(i).inv();
 
 	return out;
 }

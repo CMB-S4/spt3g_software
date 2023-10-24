@@ -271,6 +271,8 @@ public:
 
 	StokesVector &operator /=(const MuellerMatrix &r);
 
+	void rotate_pol(double pol_ang);
+
 private:
 	double backing[3];
 };
@@ -356,14 +358,16 @@ public:
 		return s;
 	}
 
-	double Det() const {
+	double det() const {
 		return (tt * (qq * uu - qu * qu) -
 			tq * (tq * uu - qu * tu) +
 			tu * (tq * qu - qq * tu));
 	}
 
-	MuellerMatrix Inv() const;
-	double Cond() const;
+	MuellerMatrix inv() const;
+	double cond() const;
+
+	void rotate_pol(double pol_ang);
 
 private:
 	double backing[6];
