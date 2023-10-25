@@ -8,7 +8,8 @@
 #include <G3Logging.h>
 #include <G3Units.h>
 
-#include <maps/maputils.h>
+#include <maps/G3SkyMap.h>
+#include <maps/FlatSkyMap.h>
 #include <maps/pointing.h>
 
 #include <iostream>
@@ -18,11 +19,6 @@
 #define ATAN2 atan2
 
 using namespace G3Units;
-
-void RemoveWeightsT(G3SkyMapPtr T, G3SkyMapWeightsConstPtr W, bool zero_nans)
-{
-	RemoveWeights(T, NULL, NULL, W, zero_nans);
-}
 
 void RemoveWeights(G3SkyMapPtr T, G3SkyMapPtr Q, G3SkyMapPtr U, G3SkyMapWeightsConstPtr W,
     bool zero_nans)
@@ -100,9 +96,9 @@ void RemoveWeights(G3SkyMapPtr T, G3SkyMapPtr Q, G3SkyMapPtr U, G3SkyMapWeightsC
 	}
 }
 
-void ApplyWeightsT(G3SkyMapPtr T, G3SkyMapWeightsConstPtr W)
+void RemoveWeightsT(G3SkyMapPtr T, G3SkyMapWeightsConstPtr W, bool zero_nans)
 {
-	ApplyWeights(T, NULL, NULL, W);
+	RemoveWeights(T, NULL, NULL, W, zero_nans);
 }
 
 void ApplyWeights(G3SkyMapPtr T, G3SkyMapPtr Q, G3SkyMapPtr U, G3SkyMapWeightsConstPtr W)
@@ -137,6 +133,11 @@ void ApplyWeights(G3SkyMapPtr T, G3SkyMapPtr Q, G3SkyMapPtr U, G3SkyMapWeightsCo
 		Q->weighted = true;
 		U->weighted = true;
 	}
+}
+
+void ApplyWeightsT(G3SkyMapPtr T, G3SkyMapWeightsConstPtr W)
+{
+	ApplyWeights(T, NULL, NULL, W);
 }
 
 boost::python::tuple GetRaDecMap(G3SkyMapConstPtr m)
@@ -525,8 +526,9 @@ MakePointSourceMask(G3SkyMapConstPtr map, const std::vector<double> & ra,
 }
 
 
-namespace bp = boost::python;
-void maputils_pybindings(void){
+PYBINDINGS("maps")
+{
+	namespace bp = boost::python;
 	bp::def("remove_weights_t", RemoveWeightsT,
 		(bp::arg("T"), bp::arg("W"), bp::arg("zero_nans")=false),
 		"Remove weights from unpolarized maps.	If zero_nans is true, empty pixels "

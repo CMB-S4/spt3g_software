@@ -15,7 +15,7 @@ class SplitByProperty(object):
     G3TimestreamMap, G3MapInt, etc.
     '''
     def __init__(self, input='CalTimestreams', property=None, property_list=None,
-                 output_root=None, bpm='BolometerProperties'):
+                 output_root=None, bpm='BolometerProperties', drop_empty=False):
         '''
         Split the input map given by input into several output
         maps named output_root + key (e.g. CalTimestreams + str(property)) with
@@ -40,6 +40,8 @@ class SplitByProperty(object):
         bpm : str
             The key name of the BolometerPropertiesMap from which to extract
             the requested `property` for splitting the input map.
+        drop_empty : bool
+            If True, drop output maps that don't contain any bolometers.
         '''
         if property is None:
             core.log_fatal("Property is a required argument")
@@ -54,6 +56,7 @@ class SplitByProperty(object):
             self.props = None
         self.bpmkey = bpm
         self.bpm = None
+        self.drop_empty = drop_empty
 
     @staticmethod
     def converter(prop):
@@ -94,8 +97,10 @@ class SplitByProperty(object):
                     continue
             out[prop][b] = inmap[b]
 
-        for prop in out.keys():
-            frame['%s%s' % (self.output_root, prop)] = out[prop]
+        for prop, outmap in out.items():
+            if not len(outmap.keys()) and self.drop_empty:
+                continue
+            frame['%s%s' % (self.output_root, prop)] = outmap
 
 
 @core.indexmod
@@ -108,7 +113,7 @@ class SplitByBand(SplitByProperty):
     G3TimestreamMap, G3MapInt, etc.
     '''
     def __init__(self, input='CalTimestreams', output_root=None,
-                 bands=None, bpm='BolometerProperties'):
+                 bands=None, bpm='BolometerProperties', drop_empty=False):
         '''
         Split the input map given by input into several output
         maps named output_root + band + GHz (e.g. CalTimestreams150GHz with
@@ -120,7 +125,7 @@ class SplitByBand(SplitByProperty):
         '''
         super(SplitByBand, self).__init__(
             input=input, output_root=output_root, property_list=bands,
-            bpm=bpm, property='band')
+            bpm=bpm, property='band', drop_empty=drop_empty)
 
     @staticmethod
     def converter(band):
@@ -137,10 +142,10 @@ class SplitByBand(SplitByProperty):
 class SplitTimestreamsByBand(SplitByBand):
 
     def __init__(self, input='CalTimestreams', output_root=None,
-                 bands=None, bpm='BolometerProperties'):
+                 bands=None, bpm='BolometerProperties', drop_empty=False):
         core.log_warn("SplitTimestreamsByBand is deprecated, use SplitByBand instead")
         super(SplitTimestreamsByBand, self).__init__(
-            input=input, output_root=output_root, bands=bands, bpm=bpm)
+            input=input, output_root=output_root, bands=bands, bpm=bpm, drop_empty=drop_empty)
 
 
 @core.indexmod
@@ -153,7 +158,7 @@ class SplitByWafer(SplitByProperty):
     G3TimestreamMap, G3MapInt, etc.
     '''
     def __init__(self, input='CalTimestreams', output_root=None,
-                 wafers=None, bpm='BolometerProperties'):
+                 wafers=None, bpm='BolometerProperties', drop_empty=False):
         '''
         Split the input map given by input into several output
         maps named output_root + wafer (e.g. CalTimestreamsW172 with
@@ -165,7 +170,7 @@ class SplitByWafer(SplitByProperty):
         '''
         super(SplitByWafer, self).__init__(
             input=input, output_root=output_root, property_list=wafers,
-            bpm=bpm, property='wafer_id')
+            bpm=bpm, property='wafer_id', drop_empty=drop_empty)
 
     @staticmethod
     def converter(wafer):
@@ -184,7 +189,7 @@ class SplitByPixelType(SplitByProperty):
     G3TimestreamMap, G3MapInt, etc.
     '''
     def __init__(self, input='CalTimestreams', output_root=None,
-                 types=None, bpm='BolometerProperties'):
+                 types=None, bpm='BolometerProperties', drop_empty=False):
         '''
         Split the input map given by input into several output
         maps named output_root + wafer (e.g. CalTimestreamsW172 with
@@ -196,7 +201,7 @@ class SplitByPixelType(SplitByProperty):
         '''
         super(SplitByPixelType, self).__init__(
             input=input, output_root=output_root, property_list=types,
-            bpm=bpm, property='pixel_type')
+            bpm=bpm, property='pixel_type', drop_empty=drop_empty)
 
     @staticmethod
     def converter(pixel_type):
