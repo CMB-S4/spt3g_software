@@ -567,42 +567,45 @@ FlatSkyMap::Description() const
 	default:
 		os << "unknown";
 	}
-	os << " coordinates ";
+	os << " coordinates (";
 
 	switch (units) {
 	case G3Timestream::Counts:
-		os << " (Counts)";
+		os << "Counts";
 		break;
 	case G3Timestream::Current:
-		os << " (Current)";
+		os << "Current";
 		break;
 	case G3Timestream::Power:
-		os << " (Power)";
+		os << "Power";
 		break;
 	case G3Timestream::Resistance:
-		os << " (Resistance)";
+		os << "Resistance";
 		break;
 	case G3Timestream::Tcmb:
-		os << " (Tcmb)";
+		os << "Tcmb";
 		break;
 	case G3Timestream::Angle:
-		os << " (Angle)";
+		os << "Angle";
 		break;
 	case G3Timestream::Distance:
-		os << " (Distance)";
+		os << "Distance";
 		break;
 	case G3Timestream::Voltage:
-		os << " (Voltage)";
+		os << "Voltage";
 		break;
 	case G3Timestream::Pressure:
-		os << " (Pressure)";
+		os << "Pressure";
 		break;
 	case G3Timestream::FluxDensity:
-		os << " (FluxDensity)";
+		os << "FluxDensity";
 		break;
 	default:
 		break;
 	}
+
+	os << ", " << (weighted ? "" : "not ") << "weighted";
+	os << ", " << (flat_pol_ ? "" : "not ") << "flattened)";
 
 	return os.str();
 }
