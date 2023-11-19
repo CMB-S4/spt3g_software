@@ -157,6 +157,7 @@ def MakeMapsPolarized(frame, pol_conv=maps.MapPolConv.IAU):
 
     qmap = frame["T"].clone(False)
     qmap.pol_type = maps.MapPolType.Q
+    qmap.pol_conv = pol_conv
     frame["Q"] = qmap
     umap = frame["T"].clone(False)
     umap.pol_type = maps.MapPolType.U
@@ -164,13 +165,17 @@ def MakeMapsPolarized(frame, pol_conv=maps.MapPolConv.IAU):
     frame["U"] = umap
     mask = wgt.to_mask().to_map()
 
-    wgt_out = maps.G3SkyMapWeights(frame["T"], polarized=True)
+    wgt_out = maps.G3SkyMapWeights()
     wgt_out.TT = wgt
     wgt_out.TQ = wgt.clone(False)
     wgt_out.TU = wgt.clone(False)
     wgt_out.QQ = mask
     wgt_out.QU = wgt.clone(False)
     wgt_out.UU = mask.clone(True)
+
+    for k in wgt_out.keys():
+        wgt_out[k].pol_type = getattr(maps.MapPolType, k)
+        wgt_out[k].pol_conv = pol_conv
 
     frame["Wpol"] = wgt_out
 
@@ -185,15 +190,18 @@ def MakeMapsUnpolarized(frame):
     if "Wpol" not in frame:
         return
 
-    wgt = frame["Wpol"].TT
-    del frame["Wpol"]
+    tmap = frame.pop("T")
+    tmap.pol_conv = maps.MapPolConv.none
+    frame["T"] = tmap
+
+    wgt = frame.pop("Wpol").TT
+    wgt.pol_conv = maps.MapPolConv.none
+    wgt_out = maps.G3SkyMapWeights()
+    wgt_out.TT = wgt
+    frame["Wunpol"] = wgt_out
+
     del frame["Q"]
     del frame["U"]
-
-    wgt_out = maps.G3SkyMapWeights(frame["T"], polarized=False)
-    wgt_out.TT = wgt
-
-    frame["Wunpol"] = wgt_out
 
     return frame
 
@@ -354,30 +362,19 @@ class InjectMapStub(object):
     map_id : string
         Id to assign to the new map frame
     map_stub : G3SkyMap instance
-        Map stub from which to clone the Stokes maps and weights.
-    polarized : bool
-        If True, add Q and U maps to stub frame, and ensure that weights are
-        polarized.  Otherwise, only a T map is created.
-    weighted : bool
-        If True, add weights to the stub frame.
-    pol_conv : MapPolConv instance
-        Polarization convention to use.
+        Map stub from which to clone the Stokes maps and weights.  If the
+        `weighted` attribute of the stub is True, the output frame will include
+        weights.  If the `pol_conv` attribute of the stub is not None, the
+        output frame will include Q and U maps (and polarized weights).
     """
 
-    def __init__(
-        self,
-        map_id,
-        map_stub,
-        polarized=True,
-        weighted=True,
-        pol_conv=maps.MapPolConv.IAU,
-    ):
+    def __init__(self, map_id, map_stub):
         self.map_frame = core.G3Frame(core.G3FrameType.Map)
         self.map_frame["Id"] = map_id
 
         map_stub = map_stub.clone(False)
-        map_stub.weighted = weighted
-        map_stub.pol_conv = pol_conv
+        weighted = map_stub.weighted
+        polarized = map_stub.polarized
 
         T = map_stub.clone(False)
         T.pol_type = maps.MapPolType.T
@@ -390,7 +387,7 @@ class InjectMapStub(object):
             U.pol_type = maps.MapPolType.U
             self.map_frame["U"] = U
         if weighted:
-            W = maps.G3SkyMapWeights(map_stub, polarized)
+            W = maps.G3SkyMapWeights(map_stub)
             self.map_frame["Wpol" if polarized else "Wunpol"] = W
 
     def __call__(self, frame):
@@ -773,6 +770,9 @@ class ReprojectMaps(object):
                 "Coordinate rotation of polarized maps is not implemented"
             )
 
+        if "Q" in frame and not self.stub.polarized:
+            self.stub.pol_conv = frame["Q"].pol_conv
+
         for key in ["T", "Q", "U", "Wpol", "Wunpol", "H"]:
 
             if key not in frame:
@@ -785,7 +785,7 @@ class ReprojectMaps(object):
                 maps.reproj_map(m, mnew, rebin=self.rebin, interp=self.interp)
 
             elif key in ["Wpol", "Wunpol"]:
-                mnew = maps.G3SkyMapWeights(self.stub, key == "Wpol")
+                mnew = maps.G3SkyMapWeights(self.stub)
                 for wkey in mnew.keys():
                     maps.reproj_map(
                         m[wkey], mnew[wkey], rebin=self.rebin, interp=self.interp

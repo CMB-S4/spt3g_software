@@ -7,7 +7,8 @@ from spt3g.maps import remove_weights, remove_weights_t, apply_weights, apply_we
 
 for pol in [True, False]:
     # allocation
-    m = FlatSkyMap(500, 20, core.G3Units.arcmin, pol_conv=MapPolConv.IAU, proj=MapProjection.Proj5)
+    pol_conv = MapPolConv.IAU if pol else MapPolConv.none
+    m = FlatSkyMap(500, 20, core.G3Units.arcmin, pol_conv=pol_conv, proj=MapProjection.Proj5)
     mt = m.clone(False)
     mt.pol_type = MapPolType.T
     if pol:
@@ -15,7 +16,7 @@ for pol in [True, False]:
         mq.pol_type = MapPolType.Q
         mu = m.clone(False)
         mu.pol_type = MapPolType.U
-    mw = G3SkyMapWeights(m, polarized=pol)
+    mw = G3SkyMapWeights(m)
     assert(mw.size == m.size)
     assert(mw.shape == m.shape)
     assert(mw.npix_allocated == 0)

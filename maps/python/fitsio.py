@@ -167,12 +167,11 @@ def load_skymap_fits(filename, hdu=None, keys=None, memmap=False, apply_units=Fa
             if map_type == 'flat' and hdr.get('ISWEIGHT', None):
                 # flat map weights
                 assert('T' in output)
-                if pol is None:
-                    pol = True if ('Q' in output and 'U' in output) else False
-                weight_map = output.setdefault(
-                    'W', G3SkyMapWeights(output['T'], polarized=pol)
-                )
-                fm = FlatSkyMap(data, **map_opts)
+                if 'W' not in output:
+                    output['W'] = G3SkyMapWeights()
+                weight_map = output['W']
+                pol_type = getattr(MapPolType, hdr['WTYPE'], None)
+                fm = FlatSkyMap(data, pol_type=pol_type, **map_opts)
                 fm.overflow = overflow
                 setattr(weight_map, hdr['WTYPE'], fm)
                 del data
@@ -242,24 +241,18 @@ def load_skymap_fits(filename, hdu=None, keys=None, memmap=False, apply_units=Fa
                         'TISWGT{:d}'.format(cidx + 1),
                         col in ['TT', 'TQ', 'TU', 'QQ', 'QU', 'UU'],
                     )
+                    pol_type = getattr(MapPolType, col, None)
+                    mdata = (pix, data, nside) if pix is not None else data
+
                     if weighted:
                         assert('T' in output)
-                        if pol is None:
-                            pol = True if ('Q' in output and 'U' in output) else False
-                        weight_map = output.setdefault(
-                            'W', G3SkyMapWeights(output['T'], polarized=pol)
-                        )
-
-                        mdata = (pix, data, nside) if pix is not None else data
-                        hm = HealpixSkyMap(mdata, **map_opts)
+                        if 'W' not in output:
+                            output['W'] = G3SkyMapWeights()
+                        weight_map = output['W']
+                        hm = HealpixSkyMap(mdata, pol_type=pol_type, **map_opts)
                         hm.overflow = overflow
-
                         setattr(weight_map, col, hm)
-
                     else:
-                        pol_type = getattr(MapPolType, col, None)
-                        mdata = (pix, data, nside) if pix is not None else data
-
                         hm = HealpixSkyMap(mdata, pol_type=pol_type, **map_opts)
                         output[col] = hm
 

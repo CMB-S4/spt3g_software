@@ -33,7 +33,18 @@ public:
 		U = 2,
 		E = 3,
 		B = 4,
-		None = 7
+		None = 7,
+		TT = 8,
+		TQ = 9,
+		TU = 10,
+		QQ = 11,
+		QU = 12,
+		UU = 13,
+		TE = 14,
+		TB = 15,
+		EE = 16,
+		EB = 17,
+		BB = 18,
 	};
 
 	enum MapPolConv {
@@ -77,6 +88,8 @@ public:
 
 	MapPolConv GetPolConv() const { return pol_conv_; };
 	void SetPolConv(MapPolConv pol_conv);
+
+	bool IsPolarized() const { return pol_conv_ != ConvNone; }
 
 	virtual bool IsCompatible(const G3SkyMap & other) const {
 		if (shape().size() != other.shape().size())
@@ -378,7 +391,7 @@ public:
 	G3SkyMapWeights() {}
 
 	// Instantiate weight maps based on the metadata of a reference map
-	G3SkyMapWeights(G3SkyMapConstPtr ref_map, bool polarized = true);
+	G3SkyMapWeights(G3SkyMapConstPtr ref_map);
 
 	G3SkyMapWeights(const G3SkyMapWeights &r, bool copy_data = true);
 	G3SkyMapPtr TT, TQ, TU, QQ, QU, UU;

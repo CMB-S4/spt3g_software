@@ -11,7 +11,7 @@ for m in maplist:
     pipe = core.G3Pipeline()
 
     pipe.Add(core.G3InfiniteSource, type=core.G3FrameType.Observation, n=1)
-    pipe.Add(maps.InjectMapStub, map_id="test_map", map_stub=m, polarized=False, weighted=True)
+    pipe.Add(maps.InjectMapStub, map_id="test_map", map_stub=m)
 
     def RandomMap(frame):
         if frame.type != core.G3FrameType.Map:
