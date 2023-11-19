@@ -605,7 +605,10 @@ FlatSkyMap::Description() const
 	}
 
 	os << ", " << (weighted ? "" : "not ") << "weighted";
-	os << ", " << (flat_pol_ ? "" : "not ") << "flattened)";
+	if (pol_type == G3SkyMap::Q || pol_type == G3SkyMap::U)
+		os << ", " << (flat_pol_ ? "" : "not ") << "flattened)";
+	else
+		os << ")";
 
 	return os.str();
 }
