@@ -323,7 +323,9 @@ def UnpackTrackerPointingData(f):
         p[k] = np.asarray(board[k], dtype=np.double)
         kadj = k + "Adjust"
         if kadj in board.keys():
-            pc[k] = np.asarray(board[kadj], dtype=np.double)
+            v = np.asarray(board[kadj], dtype=np.double)
+            if np.any(v):
+                pc[k] = v
 
     p['time'] = np.asarray(t.time, dtype=np.double)
     if 'linear_sensor_enabled' in board.keys():
