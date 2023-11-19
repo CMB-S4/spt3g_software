@@ -316,15 +316,14 @@ def UnpackTrackerPointingData(f):
     f['TrackerPointing'] = t
 
     p = core.G3MapVectorDouble()
+    pc = core.G3MapVectorDouble()
 
     # core model parameters
     for k in ["tilts", "flexure", "fixedCollimation"]:
         p[k] = np.asarray(board[k], dtype=np.double)
         kadj = k + "Adjust"
         if kadj in board.keys():
-            p[kadj] = np.asarray(board[kadj], dtype=np.double)
-        else:
-            p[kadj] = np.zeros_like(p[k])
+            pc[k] = np.asarray(board[kadj], dtype=np.double)
 
     p['time'] = np.asarray(t.time, dtype=np.double)
     if 'linear_sensor_enabled' in board.keys():
@@ -335,6 +334,8 @@ def UnpackTrackerPointingData(f):
         p['linsensEnabled'] = np.zeros_like(p['time'], dtype=np.double)
 
     f['OnlinePointingModel'] = p
+    if len(pc.keys()):
+        f['OnlinePointingModelCorrection'] = pc
 
 
 @core.indexmod
