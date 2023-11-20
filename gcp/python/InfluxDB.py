@@ -78,11 +78,11 @@ def build_field_list(fr):
 
         # Weather
         'telescope_temp': ['Weather', 'telescope_temp', 'C'],
-        'inside_dsl_temp': ['Weather', 'inside_dsl_temp', None],
-        'telescope_pressure': ['Weather', 'telescope_pressure', None],
-        'wind_speed': ['Weather', 'wind_speed', None],
+        'inside_dsl_temp': ['Weather', 'inside_dsl_temp', 'C'],
+        'telescope_pressure': ['Weather', 'telescope_pressure', U.mb],
+        'wind_speed': ['Weather', 'wind_speed', U.m / U.s],
         'wind_direction': ['Weather', 'wind_direction', U.deg],
-        'battery': ['Weather', 'battery', None],
+        'battery': ['Weather', 'battery', U.mV],
         'rel_humidity': ['Weather', 'rel_humidity', None],
         'power': ['Weather', 'power', None],
         'tau': ['Weather', 'tau', None],
