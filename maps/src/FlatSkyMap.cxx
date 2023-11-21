@@ -567,6 +567,16 @@ FlatSkyMap::Description() const
 	default:
 		os << "unknown";
 	}
+	switch (pol_conv_) {
+	case IAU:
+		os << " IAU";
+		break;
+	case COSMO:
+		os << " COSMO";
+		break;
+	default:
+		break;
+	}
 	os << " coordinates (";
 
 	switch (units) {
