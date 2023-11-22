@@ -212,7 +212,7 @@ def UnpackTrackerData(f, rewrite_source_from_feature_bits=True):
 
     t = TrackerStatus()
     # List comprehensions are due to funny business with G3VectorFrameObject
-    t.time = [tm for tm in board['utc'][0]]
+    t.time = board['utc'][0]
 
     # Measured values
     t.az_pos = np.asarray(board['actual'][0])
@@ -269,7 +269,7 @@ def UnpackTrackerPointingData(f):
     board = f['antenna0']['tracker']
 
     t = TrackerPointing()
-    t.time = [tm for tm in board['utc'][0]]
+    t.time = board['utc'][0]
     t.scu_temp = np.asarray(f['antenna0']['scu']['temp'])
     t.features = core.IntVector([f['array']['frame']['features'].value])
 

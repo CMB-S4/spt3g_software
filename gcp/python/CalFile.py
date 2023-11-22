@@ -32,8 +32,8 @@ class CalFileReader(object):
                     fline = list(filter(None,line.split(' '))) #list() for py3
                     name = fline[0]
                     linedict = {}
-                    linedict['Offset'] = np.float(fline[1])
-                    linedict['ReciprocalFactor'] = np.float(fline[2])
+                    linedict['Offset'] = float(fline[1])
+                    linedict['ReciprocalFactor'] = float(fline[2])
                     try:
                         linedict['UnitName'] = fline[3]
                     except:
@@ -81,7 +81,7 @@ class CalFileReader(object):
                     if indices == '0':
                         cal_dict[regmaps[j]][regblocks[j]][realreg] = {}
                     cal_dict[regmaps[j]][regblocks[j]][realreg]\
-                        [np.int(indices)] = cal_dict_orig[names[j]]
+                        [int(indices)] = cal_dict_orig[names[j]]
             else:
                 cal_dict[regmaps[j]][regblocks[j]][reg] = \
                     cal_dict_orig[names[j]]
@@ -132,12 +132,12 @@ def create_g3_cal_file(path, read_from_gcp=True, extra_dict=None,
                     fline = list(filter(None,(info_and_comment[0]).split('\t')))
                 name = (fline[0]).replace('*','0')
                 try:
-                    linedict['Offset'] = np.float(fline[1])
+                    linedict['Offset'] = float(fline[1])
                     if '/' in fline[2]:
                         gainfacs = (fline[2]).split('/')
-                        gainfac = np.float(gainfacs[1])/np.float(gainfacs[0])
+                        gainfac = float(gainfacs[1])/float(gainfacs[0])
                     else:
-                        gainfac = 1./np.float(fline[2])
+                        gainfac = 1./float(fline[2])
                     linedict['ReciprocalFactor'] = gainfac
                     linedict['UnitName'] = ''
                 # try to figure out units. currently cal file 

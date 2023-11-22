@@ -318,9 +318,9 @@ def WriteDB(fr, client, fields=None):
                 continue
             try:
                 if 'utc' in fr[tmp][brd].keys():
-                    time = [tm for tm in fr[tmp][brd]['utc'][0]]
+                    time = fr[tmp][brd]['utc'][0]
                 else:
-                    time = [tm for tm in fr['antenna0']['tracker']['utc'][0]][:len(dat)]
+                    time = fr['antenna0']['tracker']['utc'][0][:len(dat)]
             except:
                 continue
         elif len(field_dat) == 4:
@@ -365,13 +365,13 @@ def WriteDB(fr, client, fields=None):
             try:
                 time = getattr(fr[stat], 'time')
             except AttributeError as err:
-                time = [tm for tm in fr['antenna0']['tracker']['utc'][0]]
+                time = fr['antenna0']['tracker']['utc'][0]
 
         # InfluxDB wants time in nanoseconds since the UNIX epoch in UTC
         try:
-            time = [x.time/U.nanosecond for x in np.atleast_1d(time)]
+            time = np.atleast_1d(time) / U.nanosecond
         except AttributeError:
-            time = [core.G3Time(t0).time/U.nanosecond for t0 in np.atleast_1d(time)]
+            time = np.asarray(core.G3VectorTime(np.atleast_1d(time))) / U.nanosecond
         if dat is None:
             core.log_warn('{} dat is None'.format(f), unit='InfluxDB')
             continue
