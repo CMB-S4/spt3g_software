@@ -180,6 +180,13 @@ def build_field_list(fr):
         'flexure_cos': ['OnlinePointingModel', 'flexure', 1, U.deg],
         'fixed_collimation_x': ['OnlinePointingModel', 'fixedCollimation', 0, U.deg],
         'fixed_collimation_y': ['OnlinePointingModel', 'fixedCollimation', 1, U.deg],
+        'tilts_hr_angle_adjust': ['OnlinePointingModelCorrection', 'tilts', 0, U.deg],
+        'tilts_lat_adjust': ['OnlinePointingModelCorrection', 'tilts', 1, U.deg],
+        'tilts_el_adjust': ['OnlinePointingModelCorrection', 'tilts', 2, U.deg],
+        'flexure_sin_adjust': ['OnlinePointingModelCorrection', 'flexure', 0, U.deg],
+        'flexure_cos_adjust': ['OnlinePointingModelCorrection', 'flexure', 1, U.deg],
+        'fixed_collimation_x_adjust': ['OnlinePointingModelCorrection', 'fixedCollimation', 0, U.deg],
+        'fixed_collimation_y_adjust': ['OnlinePointingModelCorrection', 'fixedCollimation', 1, U.deg],
         'linsens_coeff_az': ['OnlinePointingModel', 'linsensCoeffs', 0, None],
         'linsens_coeff_el': ['OnlinePointingModel', 'linsensCoeffs', 1, None],
         'linsens_coeff_et': ['OnlinePointingModel', 'linsensCoeffs', 2, None],
@@ -325,12 +332,19 @@ def WriteDB(fr, client, fields=None):
                 continue
         elif len(field_dat) == 4:
             stat, attr, ind, unit = field_dat
+            if stat not in fr:
+                # OnlinePointingModelCorrection
+                continue
             try:
                 dat = getattr(fr[stat], attr)[ind]
                 time = getattr(fr[stat], 'time')
             except AttributeError:
                 # OnlinePointingModel
-                dat = fr[stat][attr][ind]
+                try:
+                    dat = fr[stat][attr][ind]
+                except KeyError:
+                    # OnlinePointingModelCorrection
+                    continue
                 time = fr[stat]['time']
         elif len(field_dat) == 3:
             stat, attr, unit = field_dat
