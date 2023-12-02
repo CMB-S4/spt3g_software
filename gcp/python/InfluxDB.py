@@ -382,10 +382,16 @@ def WriteDB(fr, client, fields=None):
                 time = fr['antenna0']['tracker']['utc'][0]
 
         # InfluxDB wants time in nanoseconds since the UNIX epoch in UTC
-        try:
-            time = np.atleast_1d(time) / U.nanosecond
-        except AttributeError:
-            time = np.asarray(core.G3VectorTime(np.atleast_1d(time))) / U.nanosecond
+        if isinstance(time, core.G3Time):
+            time = np.asarray([time.time / U.nanosecond])
+        elif isinstance(time, core.G3VectorTime):
+            time = np.asarray(time) / U.nanosecond
+        else:
+            try:
+                time = np.asarray(core.G3VectorTime(np.atleast_1d(time))) / U.nanosecond
+            except Exception as e:
+                core.log_error("Error converting time: {}".format(str(e)), unit="InfluxDB")
+                continue
         if dat is None:
             core.log_warn('{} dat is None'.format(f), unit='InfluxDB')
             continue
