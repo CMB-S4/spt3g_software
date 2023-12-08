@@ -29,7 +29,7 @@ o_ra_0, o_dec_0 = maps.azel.convert_azel_to_radec(o_az_0, o_el_0)
 import astropy.coordinates
 from astropy import units as u
 c = astropy.coordinates.FK5(ra=np.asarray(o_ra_0)*u.rad, dec=np.asarray(o_dec_0)*u.rad)
-g = c.transform_to(astropy.coordinates.Galactic)
+g = c.transform_to(astropy.coordinates.Galactic())
 l_test = g.l.radian
 b_test = g.b.radian
 
