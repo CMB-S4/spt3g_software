@@ -18,13 +18,13 @@ else:
     lib_suffix = ".so"
 
 def load_pybindings(name, path):
-	import imp, os, sys
+	import os
 	mod = sys.modules[name]
 	p = os.path.split(path[0])
-	m = imp.load_dynamic(name, p[0] + "/" + lib_prefix + p[1] + lib_suffix)
+	from spt3g import dload
+	m = dload.load_dynamic(name, p[1], p[0] + "/" + lib_prefix + p[1] + lib_suffix)
 	sys.modules[name] = mod # Don't override Python mod with C++
 
 	for (k,v) in m.__dict__.items():
 		if not k.startswith("_"):
 			mod.__dict__[k] = v
-

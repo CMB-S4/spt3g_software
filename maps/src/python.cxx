@@ -2,7 +2,7 @@
 
 namespace bp = boost::python;
 
-BOOST_PYTHON_MODULE(maps)
+SPT3G_PYTHON_MODULE(maps)
 {
 	bp::import("spt3g.core");
 	bp::docstring_options docopts(true, true, false);
