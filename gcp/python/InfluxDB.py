@@ -78,11 +78,11 @@ def build_field_list(fr):
 
         # Weather
         'telescope_temp': ['Weather', 'telescope_temp', 'C'],
-        'inside_dsl_temp': ['Weather', 'inside_dsl_temp', None],
-        'telescope_pressure': ['Weather', 'telescope_pressure', None],
-        'wind_speed': ['Weather', 'wind_speed', None],
+        'inside_dsl_temp': ['Weather', 'inside_dsl_temp', 'C'],
+        'telescope_pressure': ['Weather', 'telescope_pressure', U.mb],
+        'wind_speed': ['Weather', 'wind_speed', U.m / U.s],
         'wind_direction': ['Weather', 'wind_direction', U.deg],
-        'battery': ['Weather', 'battery', None],
+        'battery': ['Weather', 'battery', U.mV],
         'rel_humidity': ['Weather', 'rel_humidity', None],
         'power': ['Weather', 'power', None],
         'tau': ['Weather', 'tau', None],
@@ -180,6 +180,13 @@ def build_field_list(fr):
         'flexure_cos': ['OnlinePointingModel', 'flexure', 1, U.deg],
         'fixed_collimation_x': ['OnlinePointingModel', 'fixedCollimation', 0, U.deg],
         'fixed_collimation_y': ['OnlinePointingModel', 'fixedCollimation', 1, U.deg],
+        'tilts_hr_angle_adjust': ['OnlinePointingModelCorrection', 'tilts', 0, U.deg],
+        'tilts_lat_adjust': ['OnlinePointingModelCorrection', 'tilts', 1, U.deg],
+        'tilts_el_adjust': ['OnlinePointingModelCorrection', 'tilts', 2, U.deg],
+        'flexure_sin_adjust': ['OnlinePointingModelCorrection', 'flexure', 0, U.deg],
+        'flexure_cos_adjust': ['OnlinePointingModelCorrection', 'flexure', 1, U.deg],
+        'fixed_collimation_x_adjust': ['OnlinePointingModelCorrection', 'fixedCollimation', 0, U.deg],
+        'fixed_collimation_y_adjust': ['OnlinePointingModelCorrection', 'fixedCollimation', 1, U.deg],
         'linsens_coeff_az': ['OnlinePointingModel', 'linsensCoeffs', 0, None],
         'linsens_coeff_el': ['OnlinePointingModel', 'linsensCoeffs', 1, None],
         'linsens_coeff_et': ['OnlinePointingModel', 'linsensCoeffs', 2, None],
@@ -318,19 +325,26 @@ def WriteDB(fr, client, fields=None):
                 continue
             try:
                 if 'utc' in fr[tmp][brd].keys():
-                    time = [tm for tm in fr[tmp][brd]['utc'][0]]
+                    time = fr[tmp][brd]['utc'][0]
                 else:
-                    time = [tm for tm in fr['antenna0']['tracker']['utc'][0]][:len(dat)]
+                    time = fr['antenna0']['tracker']['utc'][0][:len(dat)]
             except:
                 continue
         elif len(field_dat) == 4:
             stat, attr, ind, unit = field_dat
+            if stat not in fr:
+                # OnlinePointingModelCorrection
+                continue
             try:
                 dat = getattr(fr[stat], attr)[ind]
                 time = getattr(fr[stat], 'time')
             except AttributeError:
                 # OnlinePointingModel
-                dat = fr[stat][attr][ind]
+                try:
+                    dat = fr[stat][attr][ind]
+                except KeyError:
+                    # OnlinePointingModelCorrection
+                    continue
                 time = fr[stat]['time']
         elif len(field_dat) == 3:
             stat, attr, unit = field_dat
@@ -365,13 +379,19 @@ def WriteDB(fr, client, fields=None):
             try:
                 time = getattr(fr[stat], 'time')
             except AttributeError as err:
-                time = [tm for tm in fr['antenna0']['tracker']['utc'][0]]
+                time = fr['antenna0']['tracker']['utc'][0]
 
         # InfluxDB wants time in nanoseconds since the UNIX epoch in UTC
-        try:
-            time = [x.time/U.nanosecond for x in np.atleast_1d(time)]
-        except AttributeError:
-            time = [core.G3Time(t0).time/U.nanosecond for t0 in np.atleast_1d(time)]
+        if isinstance(time, core.G3Time):
+            time = np.asarray([time.time / U.nanosecond])
+        elif isinstance(time, core.G3VectorTime):
+            time = np.asarray(time) / U.nanosecond
+        else:
+            try:
+                time = np.asarray(core.G3VectorTime(np.atleast_1d(time))) / U.nanosecond
+            except Exception as e:
+                core.log_error("Error converting time: {}".format(str(e)), unit="InfluxDB")
+                continue
         if dat is None:
             core.log_warn('{} dat is None'.format(f), unit='InfluxDB')
             continue

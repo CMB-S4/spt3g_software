@@ -869,42 +869,54 @@ HealpixSkyMap::Description() const
 	default:
 		os << "unknown";
 	}
-	os << " coordinates ";
-
-	switch (units) {
-	case G3Timestream::Counts:
-		os << " (Counts)";
+	switch (pol_conv_) {
+	case IAU:
+		os << " IAU";
 		break;
-	case G3Timestream::Current:
-		os << " (Current)";
-		break;
-	case G3Timestream::Power:
-		os << " (Power)";
-		break;
-	case G3Timestream::Resistance:
-		os << " (Resistance)";
-		break;
-	case G3Timestream::Tcmb:
-		os << " (Tcmb)";
-		break;
-	case G3Timestream::Angle:
-		os << " (Angle)";
-		break;
-	case G3Timestream::Distance:
-		os << " (Distance)";
-		break;
-	case G3Timestream::Voltage:
-		os << " (Voltage)";
-		break;
-	case G3Timestream::Pressure:
-		os << " (Pressure)";
-		break;
-	case G3Timestream::FluxDensity:
-		os << " (FluxDensity)";
+	case COSMO:
+		os << " COSMO";
 		break;
 	default:
 		break;
 	}
+	os << " coordinates (";
+
+	switch (units) {
+	case G3Timestream::Counts:
+		os << "Counts";
+		break;
+	case G3Timestream::Current:
+		os << "Current";
+		break;
+	case G3Timestream::Power:
+		os << "Power";
+		break;
+	case G3Timestream::Resistance:
+		os << "Resistance";
+		break;
+	case G3Timestream::Tcmb:
+		os << "Tcmb";
+		break;
+	case G3Timestream::Angle:
+		os << "Angle";
+		break;
+	case G3Timestream::Distance:
+		os << "Distance";
+		break;
+	case G3Timestream::Voltage:
+		os << "Voltage";
+		break;
+	case G3Timestream::Pressure:
+		os << "Pressure";
+		break;
+	case G3Timestream::FluxDensity:
+		os << "FluxDensity";
+		break;
+	default:
+		break;
+	}
+
+	os << ", " << (weighted ? "" : "not ") << "weighted)";
 
 	return os.str();
 }

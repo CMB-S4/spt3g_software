@@ -670,9 +670,9 @@ G3FrameObjectPtr ARCFileReader::GCPToFrameObject(uint8_t *buffer,
 	if (block.dim[depth] > 0 && !(depth == 0 && block.dim[depth] == 1)) {
 		switch (block.flags & REG_TYPEMASK) {
 		case REG_UTC: {
-			G3VectorFrameObjectPtr root(new G3VectorFrameObject);
+			G3VectorTimePtr root(new G3VectorTime);
 			for (int i = 0; i < block.dim[depth]; i++) {
-				root->push_back(GCPToTime(buffer, base_offset));
+				root->push_back(*GCPToTime(buffer, base_offset));
 				base_offset += block.width;
 			}
 			return root; }
