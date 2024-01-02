@@ -34,70 +34,31 @@ l_test = g.l.radian
 b_test = g.b.radian
 
 
-def wrap_ring(a):
-    np.asarray(a)[np.where(a > np.pi)] -= 2*np.pi
-def sloppy_eq(f,g, eps = 1e-5):
-    return np.abs(f-g) < eps
+def sloppy_eq(f, g, eps=1e-5):
+    np.testing.assert_allclose(f, g, rtol=0, atol=eps)
 
+def apply_trans(alpha, delta, trans):
+    q_off = maps.ang_to_quat(alpha, delta)
+    ra, dec = maps.quat_to_ang(trans * q_off / trans)
+    if ra < 0:
+        ra += 2 * np.pi
+    return ra, dec
 
 for i in range(n_samps):
-    t_ra_0, t_dec_0 = maps.test_trans_( az_0[i], el_0[i], ra_0[i], dec_0[i], 
-                                            az_1[i], el_1[i], ra_1[i], dec_1[i],
-                                            az_0[i], el_0[i])
-    if t_ra_0 <0:
-        t_ra_0 += 2*np.pi
-    if not sloppy_eq(t_ra_0, ra_0[i]):
-        print(t_ra_0, ra_0[i])
-        print(az_0[i], el_0[i], ra_0[i], dec_0[i],
-              az_1[i], el_1[i], ra_1[i], dec_1[i],
-              az_0[i], el_0[i])
-        assert(0)
-    if not sloppy_eq(t_dec_0, dec_0[i]):
-        print(t_dec_0, dec_0[i])
-        print(az_0[i], el_0[i], ra_0[i], dec_0[i],
-              az_1[i], el_1[i], ra_1[i], dec_1[i],
-              az_0[i], el_0[i])
-        assert(0)        
+    q_trans = maps.get_transform_quat(
+        az_0[i], -el_0[i], ra_0[i], dec_0[i],
+        az_1[i], -el_1[i], ra_1[i], dec_1[i]
+    );
 
-    t_ra_1, t_dec_1 = maps.test_trans_( az_0[i], el_0[i], ra_0[i], dec_0[i], 
-                                                   az_1[i], el_1[i], ra_1[i], dec_1[i],
-                                                   az_1[i], el_1[i])
-    if t_ra_1 <0:
-        t_ra_1 += 2*np.pi
+    t_ra_0, t_dec_0 = apply_trans(az_0[i], -el_0[i], q_trans)
+    sloppy_eq([t_ra_0, t_dec_0], [ra_0[i], dec_0[i]])
 
-    if not sloppy_eq(t_ra_1, ra_1[i]):
-        print(t_ra_1, ra_1[i])
-        print(az_0[i], el_0[i], ra_0[i], dec_0[i],
-              az_1[i], el_1[i], ra_1[i], dec_1[i])
-        assert(0)
-    if not sloppy_eq(t_dec_1, dec_1[i]):
-        print(t_dec_1, dec_1[i])
-        print(az_0[i], el_0[i], ra_0[i], dec_0[i],
-              az_1[i], el_1[i], ra_1[i], dec_1[i])
-        assert(0)        
+    t_ra_1, t_dec_1 = apply_trans(az_1[i], -el_1[i], q_trans)
+    sloppy_eq([t_ra_1, t_dec_1], [ra_1[i], dec_1[i]])
 
-    t_ra_o, t_dec_o = maps.test_trans_( az_0[i], el_0[i], ra_0[i], dec_0[i], 
-                                           az_1[i], el_1[i], ra_1[i], dec_1[i],
-                                           o_az_0[i], o_el_0[i])
-    if t_ra_o <0:
-        t_ra_o += 2*np.pi
-    if not sloppy_eq(t_ra_o, o_ra_0[i]):
-        print(t_ra_o, o_ra_0[i])
-        assert(0)
-    if not sloppy_eq(t_dec_o, o_dec_0[i]):
-        print(t_dec_o, o_dec_0[i])
-        assert(0)        
+    t_ra_o, t_dec_o = apply_trans(o_az_0[i], -o_el_0[i], q_trans)
+    sloppy_eq([t_ra_o, t_dec_o], [o_ra_0[i], o_dec_0[i]])
 
-
-        
-    t_l_o, t_b_o = maps.test_gal_trans_( az_0[i], el_0[i], ra_0[i], dec_0[i], 
-                                            az_1[i], el_1[i], ra_1[i], dec_1[i],
-                                            o_az_0[i], o_el_0[i])
-
-    if t_l_o < 0:
-        t_l_o += 2*np.pi
-    if not sloppy_eq(t_l_o, l_test[i]):
-        assert(0)
-    if not sloppy_eq(t_b_o, b_test[i]):
-        assert(0)
-
+    q_trans_gal = maps.get_fk5_j2000_to_gal_quat() * q_trans
+    t_l_o, t_b_o = apply_trans(o_az_0[i], -o_el_0[i], q_trans_gal)
+    sloppy_eq([t_l_o, t_b_o], [l_test[i], b_test[i]])

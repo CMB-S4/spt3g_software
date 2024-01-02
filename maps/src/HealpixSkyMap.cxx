@@ -1019,23 +1019,35 @@ HealpixSkyMap::PixelToAngle(size_t pixel) const
 	return info_.PixelToAngle(pixel);
 }
 
-void HealpixSkyMap::GetRebinAngles(size_t pixel, size_t scale,
-    std::vector<double> & alphas, std::vector<double> & deltas) const
+size_t
+HealpixSkyMap::QuatToPixel(quat q) const
 {
-	info_.GetRebinAngles(pixel, scale, alphas, deltas);
+	return info_.QuatToPixel(q);
+}
+
+quat
+HealpixSkyMap::PixelToQuat(size_t pixel) const
+{
+	return info_.PixelToQuat(pixel);
+}
+
+G3VectorQuat
+HealpixSkyMap::GetRebinQuats(size_t pixel, size_t scale) const
+{
+	return info_.GetRebinQuats(pixel, scale);
 }
 
 void
-HealpixSkyMap::GetInterpPixelsWeights(double alpha, double delta,
-    std::vector<size_t> & pixels, std::vector<double> & weights) const
+HealpixSkyMap::GetInterpPixelsWeights(quat q, std::vector<size_t> & pixels,
+    std::vector<double> & weights) const
 {
-	info_.GetInterpPixelsWeights(alpha, delta, pixels, weights);
+	info_.GetInterpPixelsWeights(q, pixels, weights);
 }
 
 std::vector<size_t>
-HealpixSkyMap::QueryDisc(double alpha, double delta, double radius) const
+HealpixSkyMap::QueryDisc(quat q, double radius) const
 {
-	return info_.QueryDisc(alpha, delta, radius);
+	return info_.QueryDisc(q, radius);
 }
 
 G3SkyMapPtr HealpixSkyMap::Rebin(size_t scale, bool norm) const

@@ -709,7 +709,7 @@ std::vector<double> FlatSkyMap::AngleToXY(double alpha, double delta) const {
 }
 
 std::vector<double> FlatSkyMap::XYToAngle(double x, double y) const {
-	return proj_info.XYToAngle(x, y, false);
+	return proj_info.XYToAngle(x, y);
 }
 
 size_t
@@ -725,13 +725,25 @@ FlatSkyMap::PixelToXY(size_t pixel) const {
 std::vector<double>
 FlatSkyMap::QuatToXY(quat q) const
 {
-	return proj_info.QuatToXY(q, coord_ref == Local);
+	return proj_info.QuatToXY(q);
+}
+
+size_t
+FlatSkyMap::QuatToPixel(quat q) const
+{
+	return proj_info.QuatToPixel(q);
 }
 
 quat
 FlatSkyMap::XYToQuat(double x, double y) const
 {
-	return proj_info.XYToQuat(x, y, coord_ref == Local);
+	return proj_info.XYToQuat(x, y);
+}
+
+quat
+FlatSkyMap::PixelToQuat(size_t pixel) const
+{
+	return proj_info.PixelToQuat(pixel);
 }
 
 size_t FlatSkyMap::AngleToPixel(double alpha, double delta) const {
@@ -739,37 +751,34 @@ size_t FlatSkyMap::AngleToPixel(double alpha, double delta) const {
 }
 
 std::vector<double> FlatSkyMap::PixelToAngle(size_t pixel) const {
-	return proj_info.PixelToAngle(pixel, false);
+	return proj_info.PixelToAngle(pixel);
 }
 
 std::vector<double> FlatSkyMap::PixelToAngle(size_t x, size_t y) const {
-	return proj_info.PixelToAngle(y*xpix_ + x, false);
-}
-
-std::vector<double> FlatSkyMap::PixelToAngleWrapRa(size_t pixel) const {
-	return proj_info.PixelToAngle(pixel, true);
+	return proj_info.PixelToAngle(y*xpix_ + x);
 }
 
 std::vector<double> FlatSkyMap::PixelToAngleGrad(size_t pixel, double h) const {
 	return proj_info.PixelToAngleGrad(pixel, h);
 }
 
-void FlatSkyMap::GetRebinAngles(size_t pixel, size_t scale,
-    std::vector<double> & alphas, std::vector<double> & deltas) const
+G3VectorQuat
+FlatSkyMap::GetRebinQuats(size_t pixel, size_t scale) const
 {
-	proj_info.GetRebinAngles(pixel, scale, alphas, deltas, false);
+	return proj_info.GetRebinQuats(pixel, scale);
 }
 
-void FlatSkyMap::GetInterpPixelsWeights(double alpha, double delta,
-    std::vector<size_t> & pixels, std::vector<double> & weights) const
+void
+FlatSkyMap::GetInterpPixelsWeights(quat q, std::vector<size_t> & pixels,
+    std::vector<double> & weights) const
 {
-	proj_info.GetInterpPixelsWeights(alpha, delta, pixels, weights);
+	proj_info.GetInterpPixelsWeights(q, pixels, weights);
 }
 
 std::vector<size_t>
-FlatSkyMap::QueryDisc(double alpha, double delta, double radius) const
+FlatSkyMap::QueryDisc(quat q, double radius) const
 {
-	return proj_info.QueryDisc(alpha, delta, radius, coord_ref == Local);
+	return proj_info.QueryDisc(q, radius);
 }
 
 G3SkyMapPtr FlatSkyMap::Rebin(size_t scale, bool norm) const

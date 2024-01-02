@@ -255,12 +255,8 @@ HitsBinner::BinHits(const BolometerProperties &bp, const G3VectorQuat &pointing,
     // Do shared pointers add too much overhead here? Probably not...
 {
 	// Get per-detector pointing timestream
-
-	std::vector<double> alpha, delta;
-	get_detector_pointing(bp.x_offset, bp.y_offset, pointing, H->coord_ref,
-	    alpha, delta);
-
-	auto detpointing = H->AnglesToPixels(alpha, delta);
+	auto detpointing = get_detector_pointing_pixels(bp.x_offset, bp.y_offset,
+	    pointing, H);
 
 	for (size_t i = 0; i < detpointing.size(); i++) {
 		(*H)[detpointing[i]] += 1.0;

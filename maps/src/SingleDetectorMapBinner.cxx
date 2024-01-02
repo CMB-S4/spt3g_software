@@ -156,14 +156,13 @@ SingleDetectorMapBinner::Process(G3FramePtr frame,
 		}
 	
 		// Get per-detector pointing timestream
-        	std::vector<double> alpha, delta;
 		auto bp = boloprops_->find(det);
 		if (bp == boloprops_->end())
 			log_fatal("Missing bolometer properties for %s",
 			    det.c_str());
-		get_detector_pointing(bp->second.x_offset, bp->second.y_offset,
-		    *pointing, m->coord_ref, alpha, delta);
-		auto pixels = m->AnglesToPixels(alpha, delta);
+		auto pixels = get_detector_pointing_pixels(
+		    bp->second.x_offset, bp->second.y_offset,
+		    *pointing, m);
 
 		g3_assert(ts->size() == pixels.size());
 		for (size_t j = 0; j < ts->size(); j++) {

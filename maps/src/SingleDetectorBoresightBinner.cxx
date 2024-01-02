@@ -9,6 +9,7 @@
 #include <G3Data.h>
 #include <G3Map.h>
 #include <maps/G3SkyMap.h>
+#include <maps/pointing.h>
 
 class SingleDetectorBoresightBinner : public G3Module {
 public:
@@ -183,8 +184,7 @@ SingleDetectorBoresightBinner::Process(G3FramePtr frame,
 	g3_assert(timestreams->NSamples() == pointing->size());
 	
 	// Conjugate pointing rotation with boresight vector
-	auto pointing_vec = (*pointing)*quat(0,1,0,0)/(*pointing);
-	auto pixels = template_->QuatsToPixels(pointing_vec);
+	auto pixels = get_detector_pointing_pixels(0, 0, *pointing, template_);
 
 	for (size_t i = 0; i < pixels.size(); i++)
 		(*map_weights_->TT)[pixels[i]] += 1;

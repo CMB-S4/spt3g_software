@@ -151,3 +151,23 @@ Small patches can be extracted from and inserted into larger flat sky maps using
 
 As an equivalent and more Pythonic alternative, you can also extract portions of the map using numpy-style slicing operations (e.g. ``map[45:130,114:182]``), which will produce a map with the same contents as the numpy operation but without converting it to a dense map and with all the coordinate information set appropriately (and is equivalent to ``extract_patch()``). This also works with setting, but the coordinates have to match the sub-subcoordinates (as you would have gotten them from getting a slice or ``extract_patch()``).  Note that this slicing creates a copy of the underlying data, so in-place operations (e.g. ``map[45:130,114:182] += 5``) will work, but are not necessarily memory efficient.
 
+Map Pointing
+============
+
+This package also provides functions and pipeline modules for creating and manipulating the quaternions necessary for mapmaking.  In general, there are two forms of quaternions that are used throughout the code: pointing quaternions and rotation quaternions.
+
+Pointing Quaternions
+--------------------
+
+Pointing quaternions encode the two-dimensional sky coordinate angles in their vector component.  These quaternions can be created using the ``ang_to_quat`` function, and their sky coordinates extracted using the ``quat_to_ang`` function.  The various methods of the ``G3SkyMap`` classes return or accept pointing quaternions.  Note that local (horizon) coordinates have a different parity than sky coordinates (equatorial, galactic); the ``z`` vector coordinate encodes ``-sin(elevation)`` in local coordinates, but ``+sin(dec)`` in sky coordinates.
+
+Rotation Quaternions
+--------------------
+
+Conversion between coordinate systems is done by constructing rotation quaternions.  A pointing quaternion ``q_p`` can be rotated to a new coordinate system by the rotation quaternion ``q_r`` by using quaternion multiplication: ``q_p_rot = q_r * q_p / q_r``.  For example, the module ``FillCoordTransRotations`` can be used to construct rotation quaternions for rotating detector offset coordinates into local or on-sky coordinate systems.  Rotation quaternions can be rotated into Galactic coordinates using the ``EquatorialToGalacticTransRotations`` module.
+
+Detector Pointing
+-----------------
+
+Detector pointing timestreams are constructed by first using the ``offsets_to_quat`` function to construct the detector offset quaternion in boresight coordinates, then rotating that pointing quaternion onto the sky by applying a rotation quaternion constructed from the boresight pointing timestreams.  This is done internally for each detector in each of the mapmaking pipeline modules (``MapBinner``, ``MapMockObserver``, etc), which all require an input ``BolometerPropertiesMap`` object with offsets for each detector, and pre-computed timestreams of boresight rotation quaternions associated with each input ``Scan`` frame.
+

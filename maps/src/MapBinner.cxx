@@ -343,11 +343,8 @@ MapBinner::BinTimestream(const G3Timestream &det, double weight,
 {
 	// Get per-detector pointing timestream
 
-	std::vector<double> alpha, delta;
-	get_detector_pointing(bp.x_offset, bp.y_offset, pointing, T->coord_ref,
-	    alpha, delta);
-
-	auto detpointing = T->AnglesToPixels(alpha, delta);
+	auto detpointing = get_detector_pointing_pixels(bp.x_offset, bp.y_offset,
+	    pointing, T);
 
 	if (Q) {
 		// And polarization coupling

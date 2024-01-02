@@ -152,15 +152,12 @@ MapTODPointing::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	#pragma omp parallel for
 #endif
 	for (size_t i = 0; i < dets.size(); i++) {
-		std::vector<int> &det = output->at(dets[i]);
+		auto &det = output->at(dets[i]);
 		const BolometerProperties &bp = boloprops_->at(dets[i]);
 
 		// Get per-detector pointing timestream
-		std::vector<double> alpha, delta;
-		get_detector_pointing(bp.x_offset, bp.y_offset, *pointing,
-		    stub_->coord_ref, alpha, delta);
-
-		auto detpointing = stub_->AnglesToPixels(alpha, delta);
+		auto detpointing = get_detector_pointing_pixels(bp.x_offset, bp.y_offset,
+		    *pointing, stub_);
 
 		for (size_t j = 0; j < sz; j++)
 			det[j] = detpointing[j];

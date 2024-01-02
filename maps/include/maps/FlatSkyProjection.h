@@ -77,36 +77,35 @@ public:
 	size_t xdim() const { return xpix_; };
 	size_t ydim() const { return ypix_; };
 	MapProjection proj() const { return proj_; };
-	double alpha_center() const { return alphac_; };
-	double delta_center() const { return deltac_; };
-	double x_center() const { return xc_; };
-	double y_center() const { return yc_; };
+	double alpha_center() const { return alpha0_; };
+	double delta_center() const { return delta0_; };
+	double x_center() const { return x0_; };
+	double y_center() const { return y0_; };
 	double xres() const { return x_res_; };
 	double yres() const { return y_res_; };
 	double res() const { return y_res_; };
 
 	size_t XYToPixel(double x, double y) const;
 	std::vector<double> PixelToXY(size_t pixel) const;
-	std::vector<double> XYToAngle(double x, double y, bool wrap_alpha=false) const;
+	std::vector<double> XYToAngle(double x, double y) const;
 	std::vector<double> AngleToXY(double alpha, double delta) const;
-	std::vector<double> PixelToAngle(size_t pixel, bool wrap_alpha=false) const;
+	std::vector<double> PixelToAngle(size_t pixel) const;
 	size_t AngleToPixel(double alpha, double delta) const;
-	std::vector<double> QuatToXY(quat q, bool local) const;
-	quat XYToQuat(double x, double y, bool local) const;
+	std::vector<double> QuatToXY(quat q) const;
+	quat XYToQuat(double x, double y) const;
+	size_t QuatToPixel(quat q) const;
+	quat PixelToQuat(size_t pixel) const;
 
 	std::vector<double> XYToAngleGrad(double x, double y, double h=0.001) const;
 	std::vector<double> PixelToAngleGrad(size_t pixel, double h=0.001) const;
 
 	size_t RebinPixel(size_t pixel, size_t scale) const;
 
-	void GetRebinAngles(size_t pixel, size_t scale,
-	    std::vector<double> & alphas, std::vector<double> & deltas,
-	    bool wrap_alpha=false) const;
-	void GetInterpPixelsWeights(double alpha, double delta,
-	    std::vector<size_t> & pixels, std::vector<double> & weights) const;
+	G3VectorQuat GetRebinQuats(size_t pixel, size_t scale) const;
+	void GetInterpPixelsWeights(quat q, std::vector<size_t> & pixels,
+	    std::vector<double> & weights) const;
 
-	std::vector<size_t> QueryDisc(double alpha, double delta, double radius,
-	    bool local) const;
+	std::vector<size_t> QueryDisc(quat q, double radius) const;
 
 	FlatSkyProjection Rebin(size_t scale, double x_center = 0.0 / 0.0,
 	    double y_center = 0.0 / 0.0) const;
@@ -119,27 +118,18 @@ private:
 	size_t xpix_;
 	size_t ypix_;
 	MapProjection proj_;
-	double alphac_;
-	double deltac_;
-	double xc_;
-	double yc_;
-	double x_res_;
-	double y_res_;
-
-	// projection reference points
-	// differ from center points for cylindrical projections
 	double alpha0_;
 	double delta0_;
 	double x0_;
 	double y0_;
+	double x_res_;
+	double y_res_;
 
 	// derived values
+	bool cyl_;
 	double sindelta0_;
 	double cosdelta0_;
-	std::vector<double> pv_;
-	std::vector<double> pc_;
-
-	bool init_;
+	quat q0_;
 
 	SET_LOGGER("FlatSkyProjection");
 };
