@@ -145,6 +145,22 @@
 <p>Small patches can be extracted from and inserted into larger flat sky maps using the <code class="docutils literal notranslate"><span class="pre">FlatSkyMap.extract_patch</span></code> and <code class="docutils literal notranslate"><span class="pre">FlatSkyMap.insert_patch</span></code> methods, respectively.  Also, maps can be padded and cropped using the <code class="docutils literal notranslate"><span class="pre">FlatSkyMap.reshape</span></code> method, which keeps the patch centered in the output map.  All of these preserve the map pixelization and correspondence to angle on the sky.</p>
 <p>As an equivalent and more Pythonic alternative, you can also extract portions of the map using numpy-style slicing operations (e.g. <code class="docutils literal notranslate"><span class="pre">map[45:130,114:182]</span></code>), which will produce a map with the same contents as the numpy operation but without converting it to a dense map and with all the coordinate information set appropriately (and is equivalent to <code class="docutils literal notranslate"><span class="pre">extract_patch()</span></code>). This also works with setting, but the coordinates have to match the sub-subcoordinates (as you would have gotten them from getting a slice or <code class="docutils literal notranslate"><span class="pre">extract_patch()</span></code>).  Note that this slicing creates a copy of the underlying data, so in-place operations (e.g. <code class="docutils literal notranslate"><span class="pre">map[45:130,114:182]</span> <span class="pre">+=</span> <span class="pre">5</span></code>) will work, but are not necessarily memory efficient.</p>
 </section>
+<section id="map-pointing">
+<h2>Map Pointing<a class="headerlink" href="#map-pointing" title="Permalink to this heading">¶</a></h2>
+<p>This package also provides functions and pipeline modules for creating and manipulating the quaternions necessary for mapmaking.  In general, there are two forms of quaternions that are used throughout the code: pointing quaternions and rotation quaternions.</p>
+<section id="pointing-quaternions">
+<h3>Pointing Quaternions<a class="headerlink" href="#pointing-quaternions" title="Permalink to this heading">¶</a></h3>
+<p>Pointing quaternions encode the two-dimensional sky coordinate angles in their vector component.  These quaternions can be created using the <code class="docutils literal notranslate"><span class="pre">ang_to_quat</span></code> function, and their sky coordinates extracted using the <code class="docutils literal notranslate"><span class="pre">quat_to_ang</span></code> function.  The various methods of the <code class="docutils literal notranslate"><span class="pre">G3SkyMap</span></code> classes return or accept pointing quaternions.  Note that local (horizon) coordinates have a different parity than sky coordinates (equatorial, galactic); the <code class="docutils literal notranslate"><span class="pre">z</span></code> vector coordinate encodes <code class="docutils literal notranslate"><span class="pre">-sin(elevation)</span></code> in local coordinates, but <code class="docutils literal notranslate"><span class="pre">+sin(dec)</span></code> in sky coordinates.</p>
+</section>
+<section id="rotation-quaternions">
+<h3>Rotation Quaternions<a class="headerlink" href="#rotation-quaternions" title="Permalink to this heading">¶</a></h3>
+<p>Conversion between coordinate systems is done by constructing rotation quaternions.  A pointing quaternion <code class="docutils literal notranslate"><span class="pre">q_p</span></code> can be rotated to a new coordinate system by the rotation quaternion <code class="docutils literal notranslate"><span class="pre">q_r</span></code> by using quaternion multiplication: <code class="docutils literal notranslate"><span class="pre">q_p_rot</span> <span class="pre">=</span> <span class="pre">q_r</span> <span class="pre">*</span> <span class="pre">q_p</span> <span class="pre">/</span> <span class="pre">q_r</span></code>.  For example, the module <code class="docutils literal notranslate"><span class="pre">FillCoordTransRotations</span></code> can be used to construct rotation quaternions for rotating detector offset coordinates into local or on-sky coordinate systems.  Rotation quaternions can be rotated into Galactic coordinates using the <code class="docutils literal notranslate"><span class="pre">EquatorialToGalacticTransRotations</span></code> module.</p>
+</section>
+<section id="detector-pointing">
+<h3>Detector Pointing<a class="headerlink" href="#detector-pointing" title="Permalink to this heading">¶</a></h3>
+<p>Detector pointing timestreams are constructed by first using the <code class="docutils literal notranslate"><span class="pre">offsets_to_quat</span></code> function to construct the detector offset quaternion in boresight coordinates, then rotating that pointing quaternion onto the sky by applying a rotation quaternion constructed from the boresight pointing timestreams.  This is done internally for each detector in each of the mapmaking pipeline modules (<code class="docutils literal notranslate"><span class="pre">MapBinner</span></code>, <code class="docutils literal notranslate"><span class="pre">MapMockObserver</span></code>, etc), which all require an input <code class="docutils literal notranslate"><span class="pre">BolometerPropertiesMap</span></code> object with offsets for each detector, and pre-computed timestreams of boresight rotation quaternions associated with each input <code class="docutils literal notranslate"><span class="pre">Scan</span></code> frame.</p>
+</section>
+</section>
 <section id="frame-objects-in-spt3g-maps">
 <h2>Frame Objects in spt3g.maps<a class="headerlink" href="#frame-objects-in-spt3g-maps" title="Permalink to this heading">¶</a></h2>
 <ul class="simple">
@@ -339,10 +355,14 @@ This class cannot be instantiated from Python</p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">query_disc(</span> <span class="pre">(G3SkyMap)arg1,</span> <span class="pre">(float)alpha,</span> <span class="pre">(float)delta,</span> <span class="pre">(float)radius)</span> <span class="pre">-&gt;</span> <span class="pre">UInt64Vector</span> <span class="pre">:</span></code></dt><dd><p>Return a list of pixel indices whose centers are located within a disc of the given radius at the given sky coordinates.</p>
 </dd>
+<dt><code class="docutils literal notranslate"><span class="pre">query_disc(</span> <span class="pre">(G3SkyMap)arg1,</span> <span class="pre">(quat)quat,</span> <span class="pre">(float)radius)</span> <span class="pre">-&gt;</span> <span class="pre">UInt64Vector</span> <span class="pre">:</span></code></dt><dd><p>Return a list of pixel indices whose centers are located within a disc of the given radius at the given sky coordinates.</p>
+</dd>
 </dl>
 <p id="spt3g-maps-g3skymap-query-alpha-ellipse"><strong>spt3g.maps.G3SkyMap.query_alpha_ellipse</strong></p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">query_alpha_ellipse(</span> <span class="pre">(G3SkyMap)arg1,</span> <span class="pre">(float)alpha,</span> <span class="pre">(float)delta,</span> <span class="pre">(float)a,</span> <span class="pre">(float)b)</span> <span class="pre">-&gt;</span> <span class="pre">UInt64Vector</span> <span class="pre">:</span></code></dt><dd><p>Return a list of pixel indices whose centers are located within an ellipse extended in the alpha direction, at the given alpha and delta sky coordinates, with semimajor and semiminor axes a and b.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">query_alpha_ellipse(</span> <span class="pre">(G3SkyMap)arg1,</span> <span class="pre">(quat)quat,</span> <span class="pre">(float)a,</span> <span class="pre">(float)b)</span> <span class="pre">-&gt;</span> <span class="pre">UInt64Vector</span> <span class="pre">:</span></code></dt><dd><p>Return a list of pixel indices whose centers are located within an ellipse extended in the alpha direction, at the given alpha and delta sky coordinates, with semimajor and semiminor axes a and b.</p>
 </dd>
 </dl>
 <p id="spt3g-maps-g3skymap-get-interp-values"><strong>spt3g.maps.G3SkyMap.get_interp_values</strong></p>
@@ -1265,19 +1285,20 @@ one.</p>
 <li><p><a class="reference internal" href="#spt3g-maps-azel-convert-gal-to-radec">spt3g.maps.azel.convert_gal_to_radec</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-azel-convert-radec-to-azel">spt3g.maps.azel.convert_radec_to_azel</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-azel-convert-radec-to-gal">spt3g.maps.azel.convert_radec_to_gal</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-maps-convert-ra-dec-trans-to-gal">spt3g.maps.convert_ra_dec_trans_to_gal</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-convolve-map">spt3g.maps.convolve_map</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-maps-create-det-az-el-trans">spt3g.maps.create_det_az_el_trans</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-maps-create-det-ra-dec-trans">spt3g.maps.create_det_ra_dec_trans</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-maps-create-lazy-det-ra-dec-trans">spt3g.maps.create_lazy_det_ra_dec_trans</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-fitsio-load-skymap-fits">spt3g.maps.fitsio.load_skymap_fits</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-fitsio-save-skymap-fits">spt3g.maps.fitsio.save_skymap_fits</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-flatten-pol">spt3g.maps.flatten_pol</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-maps-get-boresight-rotator-timestream">spt3g.maps.get_boresight_rotator_timestream</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-maps-get-fk5-j2000-to-gal-quat">spt3g.maps.get_fk5_j2000_to_gal_quat</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-get-map-hist">spt3g.maps.get_map_hist</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-get-map-moments">spt3g.maps.get_map_moments</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-get-origin-rotator">spt3g.maps.get_origin_rotator</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-maps-get-origin-rotator-timestream">spt3g.maps.get_origin_rotator_timestream</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-get-ra-dec-map">spt3g.maps.get_ra_dec_map</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-get-ra-dec-mask">spt3g.maps.get_ra_dec_mask</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-maps-get-rot-ang">spt3g.maps.get_rot_ang</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-maps-get-transform-quat">spt3g.maps.get_transform_quat</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-make-point-source-mask">spt3g.maps.make_point_source_mask</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-map-modules-coadd-map-files">spt3g.maps.map_modules.coadd_map_files</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-maputils-flatsky-to-healpix">spt3g.maps.maputils.flatsky_to_healpix</a></p></li>
@@ -1369,29 +1390,9 @@ objects, G3Timestreams are also returned.</p>
 <dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">convert_radec_to_gal(ra,</span> <span class="pre">dec)</span></code></p>
 </dd>
 </dl>
-<p id="spt3g-maps-convert-ra-dec-trans-to-gal"><strong>spt3g.maps.convert_ra_dec_trans_to_gal</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">convert_ra_dec_trans_to_gal(</span> <span class="pre">(G3VectorQuat)arg1,</span> <span class="pre">(G3VectorQuat)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>Rotate a vector of quaternions from Equatorial to Galactic coordinates</p>
-</dd>
-</dl>
 <p id="spt3g-maps-convolve-map"><strong>spt3g.maps.convolve_map</strong></p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">convolve_map(</span> <span class="pre">(FlatSkyMap)map,</span> <span class="pre">(object)kernel)</span> <span class="pre">-&gt;</span> <span class="pre">FlatSkyMap</span> <span class="pre">:</span></code></dt><dd><p>Convolve the input flat sky map with the given map-space kernel. The kernel must have odd dimensions and the same resolution as the map.</p>
-</dd>
-</dl>
-<p id="spt3g-maps-create-det-az-el-trans"><strong>spt3g.maps.create_det_az_el_trans</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">create_det_az_el_trans(</span> <span class="pre">(G3Timestream)arg1,</span> <span class="pre">(G3Timestream)arg2,</span> <span class="pre">(G3VectorQuat)arg3)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>Construct a quaternion vector from timestreams of detector azimuth and elevation. Equivalent to <code class="docutils literal notranslate"><span class="pre">R_z(az)</span> <span class="pre">*</span> <span class="pre">R_y(-el)</span></code>.</p>
-</dd>
-</dl>
-<p id="spt3g-maps-create-det-ra-dec-trans"><strong>spt3g.maps.create_det_ra_dec_trans</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">create_det_ra_dec_trans(</span> <span class="pre">(G3Timestream)arg1,</span> <span class="pre">(G3Timestream)arg2,</span> <span class="pre">(G3Timestream)arg3,</span> <span class="pre">(G3Timestream)arg4,</span> <span class="pre">(G3Timestream)arg5,</span> <span class="pre">(G3Timestream)arg6,</span> <span class="pre">(G3Timestream)arg7,</span> <span class="pre">(G3Timestream)arg8,</span> <span class="pre">(G3VectorQuat)arg9)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>Construct a quaternion vector from timestreams of detector coordinates.  Computes the transformation from local (az_0, el_0) coordinates to celestial (ra_0, dec_0), accounting for rotation about the boresight by including the second set of points.</p>
-</dd>
-</dl>
-<p id="spt3g-maps-create-lazy-det-ra-dec-trans"><strong>spt3g.maps.create_lazy_det_ra_dec_trans</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">create_lazy_det_ra_dec_trans(</span> <span class="pre">(G3Timestream)arg1,</span> <span class="pre">(G3Timestream)arg2,</span> <span class="pre">(G3VectorQuat)arg3)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>Construct a quaternion vector from timestreams of detector RA and declination.  Equivalent to <code class="docutils literal notranslate"><span class="pre">R_z(ra)</span> <span class="pre">*</span> <span class="pre">R_y(dec)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-maps-fitsio-load-skymap-fits"><strong>spt3g.maps.fitsio.load_skymap_fits</strong></p>
@@ -1466,6 +1467,16 @@ can contain entries such as <code class="docutils literal notranslate"><span cla
 <p>If for whatever reason you want to reverse the process set the invert argument to True. Also applies the appropriate rotation to the Q and u elements of the associated weights.</p>
 </dd>
 </dl>
+<p id="spt3g-maps-get-boresight-rotator-timestream"><strong>spt3g.maps.get_boresight_rotator_timestream</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">get_boresight_rotator_timestream(</span> <span class="pre">(G3Timestream)arg1,</span> <span class="pre">(G3Timestream)arg2,</span> <span class="pre">(G3Timestream)arg3,</span> <span class="pre">(G3Timestream)arg4,</span> <span class="pre">(G3Timestream)arg5,</span> <span class="pre">(G3Timestream)arg6,</span> <span class="pre">(G3Timestream)arg7,</span> <span class="pre">(G3Timestream)arg8)</span> <span class="pre">-&gt;</span> <span class="pre">G3TimestreamQuat</span> <span class="pre">:</span></code></dt><dd><p>Construct a transform quaternion timestream from timestreams of local and equatorial boresight pointing coordinates.  Computes the transform from local (az_0, el_0) coordinates to equatorial (ra_0, dec_0), accounting for rotation about the boresight by including the second set of points.</p>
+</dd>
+</dl>
+<p id="spt3g-maps-get-fk5-j2000-to-gal-quat"><strong>spt3g.maps.get_fk5_j2000_to_gal_quat</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">get_fk5_j2000_to_gal_quat()</span> <span class="pre">-&gt;</span> <span class="pre">quat</span> <span class="pre">:</span></code></dt><dd><p>Return the rotation quaternion to rotate from equatorial to galactic coordinates.</p>
+</dd>
+</dl>
 <p id="spt3g-maps-get-map-hist"><strong>spt3g.maps.get_map_hist</strong></p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">get_map_hist(</span> <span class="pre">(object)map,</span> <span class="pre">(DoubleVector)bin_edges</span> <span class="pre">[,</span> <span class="pre">(G3SkyMapMask)mask=None</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_zeros=False</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_nans=False</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_infs=False]]]])</span> <span class="pre">-&gt;</span> <span class="pre">DoubleVector</span> <span class="pre">:</span></code></dt><dd><p>Computes the histogram of the input map into bins defined by the array of bin edges, optionally ignoring zero, nan and/or inf values in the map.  If a mask is supplied, then only the non-zero pixels in the mask are included.</p>
@@ -1481,6 +1492,11 @@ can contain entries such as <code class="docutils literal notranslate"><span cla
 <dt><code class="docutils literal notranslate"><span class="pre">get_origin_rotator(</span> <span class="pre">(float)alpha,</span> <span class="pre">(float)delta)</span> <span class="pre">-&gt;</span> <span class="pre">quat</span> <span class="pre">:</span></code></dt><dd><p>Compute the transformation quaternion that would rotate the vector (1, 0, 0) to point in the given direction.</p>
 </dd>
 </dl>
+<p id="spt3g-maps-get-origin-rotator-timestream"><strong>spt3g.maps.get_origin_rotator_timestream</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">get_origin_rotator_timestream(</span> <span class="pre">(G3Timestream)alpha,</span> <span class="pre">(G3Timestream)delta,</span> <span class="pre">(MapCoordReference)coord_sys)</span> <span class="pre">-&gt;</span> <span class="pre">G3TimestreamQuat</span> <span class="pre">:</span></code></dt><dd><p>Construct a transform quaternion timestream from timestreams of sky coordinates. Equivalent to <code class="docutils literal notranslate"><span class="pre">R_z(alpha)</span> <span class="pre">*</span> <span class="pre">R_y(delta)</span></code>.</p>
+</dd>
+</dl>
 <p id="spt3g-maps-get-ra-dec-map"><strong>spt3g.maps.get_ra_dec_map</strong></p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">get_ra_dec_map(</span> <span class="pre">(object)map_in)</span> <span class="pre">-&gt;</span> <span class="pre">tuple</span> <span class="pre">:</span></code></dt><dd><p>Returns maps of the ra and dec angles for each pixel in the input map</p>
@@ -1489,6 +1505,16 @@ can contain entries such as <code class="docutils literal notranslate"><span cla
 <p id="spt3g-maps-get-ra-dec-mask"><strong>spt3g.maps.get_ra_dec_mask</strong></p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">get_ra_dec_mask(</span> <span class="pre">(object)map_in,</span> <span class="pre">(float)ra_left,</span> <span class="pre">(float)ra_right,</span> <span class="pre">(float)dec_bottom,</span> <span class="pre">(float)dec_top)</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMapMask</span> <span class="pre">:</span></code></dt><dd><p>Returns a mask that is nonzero for any pixels within the given ra and dec ranges</p>
+</dd>
+</dl>
+<p id="spt3g-maps-get-rot-ang"><strong>spt3g.maps.get_rot_ang</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">get_rot_ang(</span> <span class="pre">(quat)start_q,</span> <span class="pre">(quat)trans)</span> <span class="pre">-&gt;</span> <span class="pre">float</span> <span class="pre">:</span></code></dt><dd><p>Computes the boresight rotation of the vector start_q when rotated by trans.</p>
+</dd>
+</dl>
+<p id="spt3g-maps-get-transform-quat"><strong>spt3g.maps.get_transform_quat</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">get_transform_quat(</span> <span class="pre">(float)arg1,</span> <span class="pre">(float)arg2,</span> <span class="pre">(float)arg3,</span> <span class="pre">(float)arg4,</span> <span class="pre">(float)arg5,</span> <span class="pre">(float)arg6,</span> <span class="pre">(float)arg7,</span> <span class="pre">(float)arg8)</span> <span class="pre">-&gt;</span> <span class="pre">quat</span> <span class="pre">:</span></code></dt><dd><p>Computes a rotation that will take (as_0,ds_0) to (ae_0, de_0) and (as_1, ds_1) to (ae_1, de_1)</p>
 </dd>
 </dl>
 <p id="spt3g-maps-make-point-source-mask"><strong>spt3g.maps.make_point_source_mask</strong></p>
@@ -1684,6 +1710,12 @@ vector of them) specified as a (longitude, latitude) pair.</p>
 <li><a class="reference internal" href="#map-frames-and-pipelines">Map Frames and Pipelines</a></li>
 <li><a class="reference internal" href="#flat-sky-map-projections">Flat Sky Map Projections</a></li>
 <li><a class="reference internal" href="#flat-sky-map-manipulation">Flat Sky Map Manipulation</a></li>
+<li><a class="reference internal" href="#map-pointing">Map Pointing</a><ul>
+<li><a class="reference internal" href="#pointing-quaternions">Pointing Quaternions</a></li>
+<li><a class="reference internal" href="#rotation-quaternions">Rotation Quaternions</a></li>
+<li><a class="reference internal" href="#detector-pointing">Detector Pointing</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#frame-objects-in-spt3g-maps">Frame Objects in spt3g.maps</a><ul>
 <li><a class="reference internal" href="#spt3g-maps-flatskymap">spt3g.maps.FlatSkyMap</a></li>
 <li><a class="reference internal" href="#spt3g-maps-g3skymap">spt3g.maps.G3SkyMap</a></li>

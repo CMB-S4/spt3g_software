@@ -151,6 +151,26 @@ Small patches can be extracted from and inserted into larger flat sky maps using
 
 As an equivalent and more Pythonic alternative, you can also extract portions of the map using numpy-style slicing operations (e.g. ``map[45:130,114:182]``), which will produce a map with the same contents as the numpy operation but without converting it to a dense map and with all the coordinate information set appropriately (and is equivalent to ``extract_patch()``). This also works with setting, but the coordinates have to match the sub-subcoordinates (as you would have gotten them from getting a slice or ``extract_patch()``).  Note that this slicing creates a copy of the underlying data, so in-place operations (e.g. ``map[45:130,114:182] += 5``) will work, but are not necessarily memory efficient.
 
+Map Pointing
+============
+
+This package also provides functions and pipeline modules for creating and manipulating the quaternions necessary for mapmaking.  In general, there are two forms of quaternions that are used throughout the code: pointing quaternions and rotation quaternions.
+
+Pointing Quaternions
+--------------------
+
+Pointing quaternions encode the two-dimensional sky coordinate angles in their vector component.  These quaternions can be created using the ``ang_to_quat`` function, and their sky coordinates extracted using the ``quat_to_ang`` function.  The various methods of the ``G3SkyMap`` classes return or accept pointing quaternions.  Note that local (horizon) coordinates have a different parity than sky coordinates (equatorial, galactic); the ``z`` vector coordinate encodes ``-sin(elevation)`` in local coordinates, but ``+sin(dec)`` in sky coordinates.
+
+Rotation Quaternions
+--------------------
+
+Conversion between coordinate systems is done by constructing rotation quaternions.  A pointing quaternion ``q_p`` can be rotated to a new coordinate system by the rotation quaternion ``q_r`` by using quaternion multiplication: ``q_p_rot = q_r * q_p / q_r``.  For example, the module ``FillCoordTransRotations`` can be used to construct rotation quaternions for rotating detector offset coordinates into local or on-sky coordinate systems.  Rotation quaternions can be rotated into Galactic coordinates using the ``EquatorialToGalacticTransRotations`` module.
+
+Detector Pointing
+-----------------
+
+Detector pointing timestreams are constructed by first using the ``offsets_to_quat`` function to construct the detector offset quaternion in boresight coordinates, then rotating that pointing quaternion onto the sky by applying a rotation quaternion constructed from the boresight pointing timestreams.  This is done internally for each detector in each of the mapmaking pipeline modules (``MapBinner``, ``MapMockObserver``, etc), which all require an input ``BolometerPropertiesMap`` object with offsets for each detector, and pre-computed timestreams of boresight rotation quaternions associated with each input ``Scan`` frame.
+
 
 Frame Objects in spt3g.maps
 ===========================
@@ -445,11 +465,17 @@ Base class for 1- and 2-D skymaps of various projections. Usually you want a sub
 ``query_disc( (G3SkyMap)arg1, (float)alpha, (float)delta, (float)radius) -> UInt64Vector :``
     Return a list of pixel indices whose centers are located within a disc of the given radius at the given sky coordinates.
 
+``query_disc( (G3SkyMap)arg1, (quat)quat, (float)radius) -> UInt64Vector :``
+    Return a list of pixel indices whose centers are located within a disc of the given radius at the given sky coordinates.
+
 .. _spt3g.maps.G3SkyMap.query_alpha_ellipse:
 
 **spt3g.maps.G3SkyMap.query_alpha_ellipse**
 
 ``query_alpha_ellipse( (G3SkyMap)arg1, (float)alpha, (float)delta, (float)a, (float)b) -> UInt64Vector :``
+    Return a list of pixel indices whose centers are located within an ellipse extended in the alpha direction, at the given alpha and delta sky coordinates, with semimajor and semiminor axes a and b.
+
+``query_alpha_ellipse( (G3SkyMap)arg1, (quat)quat, (float)a, (float)b) -> UInt64Vector :``
     Return a list of pixel indices whose centers are located within an ellipse extended in the alpha direction, at the given alpha and delta sky coordinates, with semimajor and semiminor axes a and b.
 
 .. _spt3g.maps.G3SkyMap.get_interp_values:
@@ -1716,15 +1742,7 @@ Functions in spt3g.maps
 
 * spt3g.maps.azel.convert_radec_to_gal_
 
-* spt3g.maps.convert_ra_dec_trans_to_gal_
-
 * spt3g.maps.convolve_map_
-
-* spt3g.maps.create_det_az_el_trans_
-
-* spt3g.maps.create_det_ra_dec_trans_
-
-* spt3g.maps.create_lazy_det_ra_dec_trans_
 
 * spt3g.maps.fitsio.load_skymap_fits_
 
@@ -1732,15 +1750,25 @@ Functions in spt3g.maps
 
 * spt3g.maps.flatten_pol_
 
+* spt3g.maps.get_boresight_rotator_timestream_
+
+* spt3g.maps.get_fk5_j2000_to_gal_quat_
+
 * spt3g.maps.get_map_hist_
 
 * spt3g.maps.get_map_moments_
 
 * spt3g.maps.get_origin_rotator_
 
+* spt3g.maps.get_origin_rotator_timestream_
+
 * spt3g.maps.get_ra_dec_map_
 
 * spt3g.maps.get_ra_dec_mask_
+
+* spt3g.maps.get_rot_ang_
+
+* spt3g.maps.get_transform_quat_
 
 * spt3g.maps.make_point_source_mask_
 
@@ -1873,44 +1901,12 @@ longitude and latitude.
 
 
 
-.. _spt3g.maps.convert_ra_dec_trans_to_gal:
-
-**spt3g.maps.convert_ra_dec_trans_to_gal**
-
-``convert_ra_dec_trans_to_gal( (G3VectorQuat)arg1, (G3VectorQuat)arg2) -> None :``
-    Rotate a vector of quaternions from Equatorial to Galactic coordinates
-
-
 .. _spt3g.maps.convolve_map:
 
 **spt3g.maps.convolve_map**
 
 ``convolve_map( (FlatSkyMap)map, (object)kernel) -> FlatSkyMap :``
     Convolve the input flat sky map with the given map-space kernel. The kernel must have odd dimensions and the same resolution as the map.
-
-
-.. _spt3g.maps.create_det_az_el_trans:
-
-**spt3g.maps.create_det_az_el_trans**
-
-``create_det_az_el_trans( (G3Timestream)arg1, (G3Timestream)arg2, (G3VectorQuat)arg3) -> None :``
-    Construct a quaternion vector from timestreams of detector azimuth and elevation. Equivalent to ``R_z(az) * R_y(-el)``.
-
-
-.. _spt3g.maps.create_det_ra_dec_trans:
-
-**spt3g.maps.create_det_ra_dec_trans**
-
-``create_det_ra_dec_trans( (G3Timestream)arg1, (G3Timestream)arg2, (G3Timestream)arg3, (G3Timestream)arg4, (G3Timestream)arg5, (G3Timestream)arg6, (G3Timestream)arg7, (G3Timestream)arg8, (G3VectorQuat)arg9) -> None :``
-    Construct a quaternion vector from timestreams of detector coordinates.  Computes the transformation from local (az_0, el_0) coordinates to celestial (ra_0, dec_0), accounting for rotation about the boresight by including the second set of points.
-
-
-.. _spt3g.maps.create_lazy_det_ra_dec_trans:
-
-**spt3g.maps.create_lazy_det_ra_dec_trans**
-
-``create_lazy_det_ra_dec_trans( (G3Timestream)arg1, (G3Timestream)arg2, (G3VectorQuat)arg3) -> None :``
-    Construct a quaternion vector from timestreams of detector RA and declination.  Equivalent to ``R_z(ra) * R_y(dec)``
 
 
 .. _spt3g.maps.fitsio.load_skymap_fits:
@@ -2003,6 +1999,22 @@ over all pixels.  The former produces output that is equivalent to using
     If for whatever reason you want to reverse the process set the invert argument to True. Also applies the appropriate rotation to the Q and u elements of the associated weights.
 
 
+.. _spt3g.maps.get_boresight_rotator_timestream:
+
+**spt3g.maps.get_boresight_rotator_timestream**
+
+``get_boresight_rotator_timestream( (G3Timestream)arg1, (G3Timestream)arg2, (G3Timestream)arg3, (G3Timestream)arg4, (G3Timestream)arg5, (G3Timestream)arg6, (G3Timestream)arg7, (G3Timestream)arg8) -> G3TimestreamQuat :``
+    Construct a transform quaternion timestream from timestreams of local and equatorial boresight pointing coordinates.  Computes the transform from local (az_0, el_0) coordinates to equatorial (ra_0, dec_0), accounting for rotation about the boresight by including the second set of points.
+
+
+.. _spt3g.maps.get_fk5_j2000_to_gal_quat:
+
+**spt3g.maps.get_fk5_j2000_to_gal_quat**
+
+``get_fk5_j2000_to_gal_quat() -> quat :``
+    Return the rotation quaternion to rotate from equatorial to galactic coordinates.
+
+
 .. _spt3g.maps.get_map_hist:
 
 **spt3g.maps.get_map_hist**
@@ -2027,6 +2039,14 @@ over all pixels.  The former produces output that is equivalent to using
     Compute the transformation quaternion that would rotate the vector (1, 0, 0) to point in the given direction.
 
 
+.. _spt3g.maps.get_origin_rotator_timestream:
+
+**spt3g.maps.get_origin_rotator_timestream**
+
+``get_origin_rotator_timestream( (G3Timestream)alpha, (G3Timestream)delta, (MapCoordReference)coord_sys) -> G3TimestreamQuat :``
+    Construct a transform quaternion timestream from timestreams of sky coordinates. Equivalent to ``R_z(alpha) * R_y(delta)``.
+
+
 .. _spt3g.maps.get_ra_dec_map:
 
 **spt3g.maps.get_ra_dec_map**
@@ -2041,6 +2061,22 @@ over all pixels.  The former produces output that is equivalent to using
 
 ``get_ra_dec_mask( (object)map_in, (float)ra_left, (float)ra_right, (float)dec_bottom, (float)dec_top) -> G3SkyMapMask :``
     Returns a mask that is nonzero for any pixels within the given ra and dec ranges
+
+
+.. _spt3g.maps.get_rot_ang:
+
+**spt3g.maps.get_rot_ang**
+
+``get_rot_ang( (quat)start_q, (quat)trans) -> float :``
+    Computes the boresight rotation of the vector start_q when rotated by trans.
+
+
+.. _spt3g.maps.get_transform_quat:
+
+**spt3g.maps.get_transform_quat**
+
+``get_transform_quat( (float)arg1, (float)arg2, (float)arg3, (float)arg4, (float)arg5, (float)arg6, (float)arg7, (float)arg8) -> quat :``
+    Computes a rotation that will take (as_0,ds_0) to (ae_0, de_0) and (as_1, ds_1) to (ae_1, de_1)
 
 
 .. _spt3g.maps.make_point_source_mask:
