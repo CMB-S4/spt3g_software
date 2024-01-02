@@ -335,35 +335,6 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	out.push_back(frame);
 }
 
-// Following two utility functions copied from the old map-maker and need to
-// be re-tooled -- either moved into the constructors of the relevant objects
-// and/or improved to handle things like boresight rotation.
-static void
-fill_mueller_matrix_from_stokes_coupling(
-    const StokesVector &stokes_coupling, MuellerMatrix &pcm)
-{
-	pcm.tt = stokes_coupling.t * stokes_coupling.t;
-	pcm.tq = stokes_coupling.t * stokes_coupling.q;
-	pcm.tu = stokes_coupling.t * stokes_coupling.u;
-	pcm.qq = stokes_coupling.q * stokes_coupling.q;
-	pcm.qu = stokes_coupling.q * stokes_coupling.u;
-	pcm.uu = stokes_coupling.u * stokes_coupling.u;
-}
-
-static void
-set_stokes_coupling(double pol_ang, double pol_eff,
-    StokesVector &stokes_coupling)
-{
-	stokes_coupling.t = 1.0;
-	stokes_coupling.q = cos(pol_ang/G3Units::rad *2.)*pol_eff/(2.0-pol_eff);
-	stokes_coupling.u = sin(pol_ang/G3Units::rad *2.)*pol_eff/(2.0-pol_eff);
-
-	if (fabs(stokes_coupling.q) < 1e-12)
-		stokes_coupling.q = 0;
-	if (fabs(stokes_coupling.u) < 1e-12)
-		stokes_coupling.u = 0;
-}
-
 void
 MapBinner::BinTimestream(const G3Timestream &det, double weight,
     const BolometerProperties &bp, const G3VectorQuat &pointing,
@@ -382,12 +353,11 @@ MapBinner::BinTimestream(const G3Timestream &det, double weight,
 		// And polarization coupling
 		// XXX: does not handle focal-plane rotation, since it assumes
 		// polarization coupling is constant for the whole scan.
-		StokesVector pcoupling;
-		set_stokes_coupling(bp.pol_angle, bp.pol_efficiency, pcoupling);
+		StokesVector pcoupling(bp.pol_angle, bp.pol_efficiency);
 
 		MuellerMatrix mueller;
 		if (W) {
-			fill_mueller_matrix_from_stokes_coupling(pcoupling, mueller);
+			mueller.from_vector(pcoupling);
 			mueller *= weight;
 		}
 
