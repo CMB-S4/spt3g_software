@@ -1094,6 +1094,27 @@ G3SkyMapWeights::operator+=(const G3SkyMapWeights &rhs)
 	return *this;
 }
 
+G3SkyMapWeights &
+G3SkyMapWeights::operator-=(const G3SkyMapWeights &rhs)
+{
+	g3_assert(IsPolarized() == rhs.IsPolarized());
+
+	if (!!TT)
+		*TT -= *rhs.TT;
+	if (!!TQ)
+		*TQ -= *rhs.TQ;
+	if (!!TU)
+		*TU -= *rhs.TU;
+	if (!!QQ)
+		*QQ -= *rhs.QQ;
+	if (!!QU)
+		*QU -= *rhs.QU;
+	if (!!UU)
+		*UU -= *rhs.UU;
+
+	return *this;
+}
+
 #define skymapweights_inplace(op, rhs_type) \
 G3SkyMapWeights &G3SkyMapWeights::operator op(rhs_type rhs) \
 { \
@@ -1127,6 +1148,7 @@ pyskymapweights_##name(const G3SkyMapWeights &a, const rhs_type b) \
 }
 
 skymapweights_pynoninplace(add, +=, G3SkyMapWeights &);
+skymapweights_pynoninplace(sub, -=, G3SkyMapWeights &);
 skymapweights_pynoninplace(multm, *=, G3SkyMap &);
 skymapweights_pynoninplace(multd, *=, double);
 skymapweights_pynoninplace(divd, /=, double);
@@ -1698,12 +1720,14 @@ PYBINDINGS("maps") {
 	       "if the argument is true (default), empty otherwise.")
 
 	    .def(bp::self += bp::self)
+	    .def(bp::self -= bp::self)
 	    .def(bp::self *= FlatSkyMap())
 	    .def(bp::self *= HealpixSkyMap())
 	    .def(bp::self *= double())
 	    .def(bp::self /= double())
 
 	    .def("__add__", &pyskymapweights_add)
+	    .def("__sub__", &pyskymapweights_sub)
 	    .def("__imul__", &pyskymapweights_imultma)
 	    .def("__mul__", &pyskymapweights_multm)
 	    .def("__mul__", &pyskymapweights_multma)

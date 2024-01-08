@@ -427,6 +427,7 @@ public:
 
 	// Coadd
 	G3SkyMapWeights &operator+=(const G3SkyMapWeights &rhs);
+	G3SkyMapWeights &operator-=(const G3SkyMapWeights &rhs);
 
 	// Scale
 	G3SkyMapWeights &operator*=(double rhs);
