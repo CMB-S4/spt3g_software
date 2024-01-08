@@ -47,7 +47,11 @@ for pol in [True, False]:
     assert(np.allclose(mw[15], mat))
 
     # operators
-    mw += mw
+    mw += 2 * mw
+    assert(np.allclose(mw[15], mat * 3))
+    assert(mw.npix_allocated == 1)
+
+    mw -= mw / 3
     assert(np.allclose(mw[15], mat * 2))
     assert(mw.npix_allocated == 1)
 
