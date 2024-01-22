@@ -98,6 +98,8 @@ def ApplyWeights(frame):
         frame["Q"] = qmap
         frame["U"] = umap
 
+    
+
     return frame
 
 
@@ -125,7 +127,7 @@ def FlattenPol(frame, invert=False):
         return
 
     ValidateMaps(frame)
-    qmap, umap = frame.pop("Q"), frame.pop("U")
+    tmap, qmap, umap = frame.pop("T"), frame.pop("Q"), frame.pop("U")
 
     if "Wpol" in frame:
         wmap = frame.pop("Wpol")
@@ -134,6 +136,9 @@ def FlattenPol(frame, invert=False):
     else:
         maps.flatten_pol(qmap, umap, invert=invert)
 
+    tmap.flat_pol = not invert
+    
+    frame["T"] = tmap
     frame["Q"] = qmap
     frame["U"] = umap
 
