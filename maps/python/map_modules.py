@@ -96,9 +96,7 @@ def ApplyWeights(frame):
     frame["T"] = tmap
     if "Wpol" in frame:
         frame["Q"] = qmap
-        frame["U"] = umap
-
-    
+        frame["U"] = umap    
 
     return frame
 
