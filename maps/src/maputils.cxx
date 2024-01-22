@@ -263,6 +263,8 @@ void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, G3SkyMapWeightsPtr W, double h
 	U->SetFlatPol(!invert);
 
 	if (!!W) {
+		flatptr = boost::dynamic_pointer_cast<FlatSkyMap>(W->TT);
+		flatptr->SetFlatPol(!invert);
 		flatptr = boost::dynamic_pointer_cast<FlatSkyMap>(W->TQ);
 		flatptr->SetFlatPol(!invert);
 		flatptr = boost::dynamic_pointer_cast<FlatSkyMap>(W->TU);
