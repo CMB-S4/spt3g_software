@@ -159,11 +159,11 @@ boost::python::tuple GetRaDecMap(G3SkyMapConstPtr m)
 	ra->weighted = false;
 	ra->units = G3Timestream::Angle;
 	ra->pol_type = G3SkyMap::None;
-	ra->SetPolConv(G3SkyMap::ConvNone);
+	ra->pol_conv = G3SkyMap::ConvNone;
 	dec->weighted = false;
 	dec->units = G3Timestream::Angle;
 	dec->pol_type = G3SkyMap::None;
-	dec->SetPolConv(G3SkyMap::ConvNone);
+	dec->pol_conv = G3SkyMap::ConvNone;
 
 	return boost::python::make_tuple(ra, dec);
 }
@@ -203,7 +203,7 @@ G3SkyMapMaskPtr GetRaDecMask(G3SkyMapConstPtr m, double ra_left, double ra_right
 
 void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, G3SkyMapWeightsPtr W, double h, bool invert)
 {
-	if (U->GetPolConv() == G3SkyMap::ConvNone)
+	if (!(U->IsPolarized()))
 		log_warn("Missing pol_conv attribute for flatten_pol, assuming "
 			 "U.pol_conv is set to IAU. This will raise an error "
 			 "in the future.");
@@ -232,7 +232,7 @@ void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, G3SkyMapWeightsPtr W, double h
 		double rot = ATAN2(-grad[0], grad[1]) + ATAN2(-grad[3], -grad[2]);
 		if (invert)
 			rot *= -1.0;
-		if (U->GetPolConv() == G3SkyMap::COSMO)
+		if (U->pol_conv == G3SkyMap::COSMO)
 			rot *= -1.0;
 		double cr = COS(rot);
 		double sr = SIN(rot);
@@ -303,11 +303,11 @@ void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool int
 	}
 
 	double s = 1.;
-	if (out_map->GetPolConv() != G3SkyMap::ConvNone && in_map->GetPolConv() != G3SkyMap::ConvNone) {
-		if (out_map->pol_type == G3SkyMap::U && out_map->GetPolConv() != in_map->GetPolConv())
+	if (out_map->IsPolarized() && in_map->IsPolarized()) {
+		if (out_map->pol_type == G3SkyMap::U && out_map->pol_conv != in_map->pol_conv)
 			s = -1.;
-	} else if (out_map->GetPolConv() == G3SkyMap::ConvNone) {
-		out_map->SetPolConv(in_map->GetPolConv());
+	} else if (!(out_map->IsPolarized())) {
+		out_map->pol_conv = in_map->pol_conv;
 	}
 
 	if (rebin > 1) {

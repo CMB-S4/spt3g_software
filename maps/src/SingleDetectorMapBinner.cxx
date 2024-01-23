@@ -57,7 +57,7 @@ SingleDetectorMapBinner::SingleDetectorMapBinner(
 {
 	template_ = stub_map.Clone(false);
 	template_->pol_type = G3SkyMap::T;
-	template_->SetPolConv(G3SkyMap::ConvNone);
+	template_->pol_conv = G3SkyMap::ConvNone;
 }
 
 void

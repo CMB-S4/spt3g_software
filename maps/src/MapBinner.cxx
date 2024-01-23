@@ -154,7 +154,7 @@ MapBinner::MapBinner(std::string output_map_id, const G3SkyMap &stub_map,
 	if (store_weight_map)
 		map_weights_ = G3SkyMapWeightsPtr(new G3SkyMapWeights(T_));
 
-	if (T_->GetPolConv() != G3SkyMap::ConvNone) {
+	if (T_->IsPolarized()) {
 		Q_ = stub_map.Clone(false);
 		Q_->pol_type = G3SkyMap::Q;
 		U_ = stub_map.Clone(false);
