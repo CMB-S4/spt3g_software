@@ -80,7 +80,7 @@ void G3Reader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	if (Py_IsInitialized())
 		_save = PyEval_SaveThread();
 
-	if (stream_.peek() == EOF) {
+	while (stream_.peek() == EOF) {
 		if (filename_.size() > 0) {
 			StartFile(filename_.front());
 			filename_.pop_front();
