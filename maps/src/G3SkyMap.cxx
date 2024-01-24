@@ -94,14 +94,14 @@ G3_SERIALIZABLE_CODE(G3SkyMapWeights);
 static bool
 isumap(const G3SkyMap &m)
 {
-  if (m.pol_type == G3SkyMap::U)
-    return true;
-  if (m.pol_type == G3SkyMap::TU)
-    return true;
-  if (m.pol_type == G3SkyMap::QU)
-    return true;
+	if (m.pol_type == G3SkyMap::U)
+		return true;
+	if (m.pol_type == G3SkyMap::TU)
+		return true;
+	if (m.pol_type == G3SkyMap::QU)
+		return true;
 
-  return false;
+	return false;
 }
 
 
