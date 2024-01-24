@@ -26,6 +26,7 @@ private:
 	boost::iostreams::filtering_istream stream_;
 	int n_frames_to_read_;
 	int n_frames_read_;
+	int n_frames_cur_;
 	float timeout_;
 	bool track_filename_;
 
