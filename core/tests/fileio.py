@@ -49,6 +49,17 @@ pipe.Run()
 
 assert n == 10, 'Wrong number of frames read (%d should be %d)' % (n, 10)
 
+# Skip empty files
+wr = core.G3Writer("empty.g3")
+del wr
+n = 0
+pipe = core.G3Pipeline()
+pipe.Add(core.G3Reader, filename=["empty.g3", "test.g3", "empty.g3"], track_filename=True)
+pipe.Add(checkinfo)
+pipe.Run()
+
+assert n == 10, 'Wrong number of frames read (%d should be %d)' % (n, 10)
+
 # Indexing
 class CachingReader:
     def __init__(self, filename='test.g3'):
