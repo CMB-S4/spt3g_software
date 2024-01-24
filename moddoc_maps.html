@@ -1024,13 +1024,19 @@ maps in a series of standard ImageHDUs, which are readable with older
 FITS readers (e.g. idlastro). If defined, the compression algorithm to
 be used by the Astropy class astropy.io.fits.CompImageHDU.
 Can be: ‘RICE_1’, ‘RICE_ONE’, ‘PLIO_1’, ‘GZIP_1’, ‘GZIP_2’ or
-‘HCOMPRESS_1’. Only GZIP_1 and GZIP_2 are lossless.</p>
+‘HCOMPRESS_1’. Only GZIP_1 and GZIP_2 are lossless, although only
+for integer data.</p>
+</dd>
+<dt>quantize_level<span class="classifier">float</span></dt><dd><p>Floating point quantization level for compression.  Higher values result
+in more accurate floating point representation, but worse compression
+ratio.  See the astropy FITS image documention for details:
+<a class="reference external" href="https://docs.astropy.org/en/stable/io/fits/api/images.html">https://docs.astropy.org/en/stable/io/fits/api/images.html</a></p>
 </dd>
 <dt>overwrite<span class="classifier">bool</span></dt><dd><p>If True, any existing file with the same name will be ovewritten.</p>
 </dd>
 </dl>
 </dd>
-<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">SaveMapFrame(frame,</span> <span class="pre">output_file=None,</span> <span class="pre">hdr=None,</span> <span class="pre">compress='GZIP_2',</span> <span class="pre">overwrite=False)</span></code></p>
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">SaveMapFrame(frame,</span> <span class="pre">output_file=None,</span> <span class="pre">hdr=None,</span> <span class="pre">compress=False,</span> <span class="pre">quantize_level=16.0,</span> <span class="pre">overwrite=False)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-maps-map-modules-applyweights"><strong>spt3g.maps.map_modules.ApplyWeights</strong></p>
@@ -1449,7 +1455,13 @@ maps in a series of standard ImageHDUs, which are readable with older
 FITS readers (e.g. idlastro). If defined, the compression algorithm to
 be used by the Astropy class astropy.io.fits.CompImageHDU.
 Can be: ‘RICE_1’, ‘RICE_ONE’, ‘PLIO_1’, ‘GZIP_1’, ‘GZIP_2’ or
-‘HCOMPRESS_1’. Only GZIP_1 and GZIP_2 are lossless.</p>
+‘HCOMPRESS_1’. Only GZIP_1 and GZIP_2 are lossless, although only
+for integer data.</p>
+</dd>
+<dt>quantize_level<span class="classifier">float</span></dt><dd><p>Floating point quantization level for compression.  Higher values result
+in more accurate floating point representation, but worse compression
+ratio.  See the astropy FITS image documention for details:
+<a class="reference external" href="https://docs.astropy.org/en/stable/io/fits/api/images.html">https://docs.astropy.org/en/stable/io/fits/api/images.html</a></p>
 </dd>
 <dt>hdr<span class="classifier">dict</span></dt><dd><p>If defined, extra keywords to be appened to the FITS header. The dict
 can contain entries such as <code class="docutils literal notranslate"><span class="pre">hdr['NEWKEY']</span> <span class="pre">=</span> <span class="pre">'New</span> <span class="pre">value'</span></code> or
@@ -1457,7 +1469,7 @@ can contain entries such as <code class="docutils literal notranslate"><span cla
 </dd>
 </dl>
 </dd>
-<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">save_skymap_fits(filename,</span> <span class="pre">T,</span> <span class="pre">Q=None,</span> <span class="pre">U=None,</span> <span class="pre">W=None,</span> <span class="pre">overwrite=False,</span> <span class="pre">compress='GZIP_2',</span> <span class="pre">hdr=None)</span></code></p>
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">save_skymap_fits(filename,</span> <span class="pre">T,</span> <span class="pre">Q=None,</span> <span class="pre">U=None,</span> <span class="pre">W=None,</span> <span class="pre">overwrite=False,</span> <span class="pre">compress=False,</span> <span class="pre">quantize_level=16.0,</span> <span class="pre">hdr=None)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-maps-flatten-pol"><strong>spt3g.maps.flatten_pol</strong></p>

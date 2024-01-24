@@ -1385,13 +1385,19 @@ maps and (optionally) polarized weights to store in the output file.
 	    FITS readers (e.g. idlastro). If defined, the compression algorithm to
 	    be used by the Astropy class astropy.io.fits.CompImageHDU.
 	    Can be: 'RICE_1', 'RICE_ONE', 'PLIO_1', 'GZIP_1', 'GZIP_2' or
-	    'HCOMPRESS_1'. Only GZIP_1 and GZIP_2 are lossless.
+	    'HCOMPRESS_1'. Only GZIP_1 and GZIP_2 are lossless, although only
+	    for integer data.
+	quantize_level : float
+	    Floating point quantization level for compression.  Higher values result
+	    in more accurate floating point representation, but worse compression
+	    ratio.  See the astropy FITS image documention for details:
+	    https://docs.astropy.org/en/stable/io/fits/api/images.html
 	overwrite : bool
 	    If True, any existing file with the same name will be ovewritten.
 
 
 *Definition:*
-        ``SaveMapFrame(frame, output_file=None, hdr=None, compress='GZIP_2', overwrite=False)``
+        ``SaveMapFrame(frame, output_file=None, hdr=None, compress=False, quantize_level=16.0, overwrite=False)``
 
 
 
@@ -1975,14 +1981,20 @@ over all pixels.  The former produces output that is equivalent to using
 	    FITS readers (e.g. idlastro). If defined, the compression algorithm to
 	    be used by the Astropy class astropy.io.fits.CompImageHDU.
 	    Can be: 'RICE_1', 'RICE_ONE', 'PLIO_1', 'GZIP_1', 'GZIP_2' or
-	    'HCOMPRESS_1'. Only GZIP_1 and GZIP_2 are lossless.
+	    'HCOMPRESS_1'. Only GZIP_1 and GZIP_2 are lossless, although only
+	    for integer data.
+	quantize_level : float
+	    Floating point quantization level for compression.  Higher values result
+	    in more accurate floating point representation, but worse compression
+	    ratio.  See the astropy FITS image documention for details:
+	    https://docs.astropy.org/en/stable/io/fits/api/images.html
 	hdr  : dict
 	   If defined, extra keywords to be appened to the FITS header. The dict
 	   can contain entries such as ``hdr['NEWKEY'] = 'New value'`` or
 	   ``hdr['NEWKEY'] = ('New value', "Comment for New value")``.
 
 *Definition:*
-        ``save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False, compress='GZIP_2', hdr=None)``
+        ``save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False, compress=False, quantize_level=16.0, hdr=None)``
 
 
 
