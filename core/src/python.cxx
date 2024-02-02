@@ -368,7 +368,7 @@ numpy_container_from_object(boost::python::object v)
 numpy_vector_infrastructure(std::complex<double>, cxdouble, "Zd");
 numpy_vector_infrastructure(std::complex<float>, cxfloat, "Zf");
 
-BOOST_PYTHON_MODULE(core)
+SPT3G_PYTHON_MODULE(core)
 {
 	bp::docstring_options docopts(true, true, false);
 
