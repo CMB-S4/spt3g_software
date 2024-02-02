@@ -60,7 +60,7 @@ Every C++ library must contain a file declaring the library to Python. This file
 	#include <pybindings.h>
 	#include <boost/python.hpp>
 
-	BOOST_PYTHON_MODULE(newthing)
+	SPT3G_PYTHON_MODULE(newthing)
 	{
 		boost::python::import("spt3g.core"); // Import core python bindings
 
