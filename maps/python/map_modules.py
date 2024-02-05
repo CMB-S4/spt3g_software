@@ -669,6 +669,7 @@ def coadd_map_files(
     output_map_id="Coadd",
     collate=False,
     weighted=True,
+    map_id_function=None,
 ):
     """
     Coadd map files, optionally collating map Id's into separate frames.
@@ -692,6 +693,11 @@ def coadd_map_files(
     weighted : bool
         If True, ensure that weights have been applied before coadding.
         Otherwise, the input maps are coadded as they are.
+    map_id_function : callable
+        If supplied, use this callable to extract a map_id from the input map
+        frames.  Otherwise, use ``frame["Id"]``.  The function should take a
+        single frame object as an argument and return a string value to match
+        against ``map_ids``, or ``None`` if a valid Id cannot be constructed.
 
     Returns
     -------
@@ -713,6 +719,7 @@ def coadd_map_files(
         collate=collate,
         weighted=weighted,
         drop_input_frames=True,
+        map_id_function=map_id_function,
     )
     pipe.Add(coadder)
 
