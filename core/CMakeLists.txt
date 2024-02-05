@@ -5,7 +5,6 @@ add_library(dload SHARED src/dload.c)
 set_target_properties(dload PROPERTIES PREFIX "")
 set_target_properties(dload PROPERTIES SUFFIX ".so")
 install(TARGETS dload DESTINATION ${PYTHON_MODULE_DIR}/spt3g)
-MESSAGE("Setting dload target_include_directories to ${Python_INCLUDE_DIRS}")
 target_include_directories(dload PRIVATE ${Python_INCLUDE_DIRS})
 target_link_libraries(dload PUBLIC ${Python_LIBRARIES})
 
