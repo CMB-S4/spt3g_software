@@ -27,6 +27,9 @@ public:
 		    cereal::base_class<std::map<Key, Value> >(this));
 	}
 
+	template <class A> void load(A &ar, unsigned v);
+	template <class A> void save(A &ar, unsigned v) const;
+
 	std::string Summary() const
 	{
 		if (this->size() < 5)
@@ -72,15 +75,24 @@ G3MAP_OF(std::string, double, G3MapDouble);
 G3MAP_OF(std::string, G3MapDouble, G3MapMapDouble);
 G3MAP_OF(std::string, std::vector<double>, G3MapVectorDouble);
 G3MAP_OF(std::string, std::vector<bool>, G3MapVectorBool);
-G3MAP_OF(std::string, std::vector<int32_t>, G3MapVectorInt);
 G3MAP_OF(std::string, std::vector<std::string>, G3MapVectorString);
 G3MAP_OF(std::string, G3VectorVectorString, G3MapVectorVectorString);
 G3MAP_OF(std::string, std::vector<std::complex<double> >, G3MapVectorComplexDouble);
 G3MAP_OF(std::string, G3VectorTime, G3MapVectorTime);
-G3MAP_OF(std::string, int32_t, G3MapInt);
 G3MAP_OF(std::string, std::string, G3MapString);
 G3MAP_OF(std::string, quat, G3MapQuat);
 G3MAP_OF(std::string, G3VectorQuat, G3MapVectorQuat);
+
+#define G3MAP_SPLIT(key, value, name, version) \
+typedef G3Map< key, value > name; \
+namespace cereal { \
+	template <class A> struct specialize<A, name, cereal::specialization::member_load_save> {}; \
+} \
+G3_POINTERS(name); \
+G3_SERIALIZABLE(name, version);
+
+G3MAP_SPLIT(std::string, std::vector<int64_t>, G3MapVectorInt, 2);
+G3MAP_SPLIT(std::string, int64_t, G3MapInt, 2);
 
 namespace cereal {
         template <class A> struct specialize<A, G3MapFrameObject, cereal::specialization::member_load_save> {};
@@ -88,4 +100,3 @@ namespace cereal {
 G3_POINTERS(G3MapFrameObject);
 G3_SERIALIZABLE(G3MapFrameObject, 1);
 #endif
-
