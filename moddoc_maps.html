@@ -1555,6 +1555,11 @@ Otherwise, all map frames are coadded into one output frame.</p>
 <dt>weighted<span class="classifier">bool</span></dt><dd><p>If True, ensure that weights have been applied before coadding.
 Otherwise, the input maps are coadded as they are.</p>
 </dd>
+<dt>map_id_function<span class="classifier">callable</span></dt><dd><p>If supplied, use this callable to extract a map_id from the input map
+frames.  Otherwise, use <code class="docutils literal notranslate"><span class="pre">frame[&quot;Id&quot;]</span></code>.  The function should take a
+single frame object as an argument and return a string value to match
+against <code class="docutils literal notranslate"><span class="pre">map_ids</span></code>, or <code class="docutils literal notranslate"><span class="pre">None</span></code> if a valid Id cannot be constructed.</p>
+</dd>
 </dl>
 </dd>
 <dt><em>Returns:</em></dt><dd><dl class="simple">
@@ -1563,7 +1568,7 @@ keyed by Id.  Otherwise, returns a single map frame.</p>
 </dd>
 </dl>
 </dd>
-<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">coadd_map_files(input_files,</span> <span class="pre">output_file=None,</span> <span class="pre">map_ids=None,</span> <span class="pre">output_map_id='Coadd',</span> <span class="pre">collate=False,</span> <span class="pre">weighted=True)</span></code></p>
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">coadd_map_files(input_files,</span> <span class="pre">output_file=None,</span> <span class="pre">map_ids=None,</span> <span class="pre">output_map_id='Coadd',</span> <span class="pre">collate=False,</span> <span class="pre">weighted=True,</span> <span class="pre">map_id_function=None)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-maps-maputils-flatsky-to-healpix"><strong>spt3g.maps.maputils.flatsky_to_healpix</strong></p>

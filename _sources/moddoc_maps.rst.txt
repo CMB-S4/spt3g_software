@@ -2123,6 +2123,11 @@ Coadd map files, optionally collating map Id's into separate frames.
 	weighted : bool
 	    If True, ensure that weights have been applied before coadding.
 	    Otherwise, the input maps are coadded as they are.
+	map_id_function : callable
+	    If supplied, use this callable to extract a map_id from the input map
+	    frames.  Otherwise, use ``frame["Id"]``.  The function should take a
+	    single frame object as an argument and return a string value to match
+	    against ``map_ids``, or ``None`` if a valid Id cannot be constructed.
 	
 *Returns:*
 	maps : G3Frame or dict of G3Frames
@@ -2130,7 +2135,7 @@ Coadd map files, optionally collating map Id's into separate frames.
 	    keyed by Id.  Otherwise, returns a single map frame.
 
 *Definition:*
-        ``coadd_map_files(input_files, output_file=None, map_ids=None, output_map_id='Coadd', collate=False, weighted=True)``
+        ``coadd_map_files(input_files, output_file=None, map_ids=None, output_map_id='Coadd', collate=False, weighted=True, map_id_function=None)``
 
 
 
