@@ -204,6 +204,7 @@ def MakeMapsPolarized(frame, pol_conv=maps.MapPolConv.IAU):
         return
 
     wgt = frame["Wunpol"].TT
+    wgt.pol_conv = pol_conv
     del frame["Wunpol"]
 
     qmap = frame["T"].clone(False)
@@ -215,8 +216,6 @@ def MakeMapsPolarized(frame, pol_conv=maps.MapPolConv.IAU):
     umap.pol_conv = pol_conv
     frame["U"] = umap
     mask = wgt.to_mask().to_map()
-    mask.units = qmap.units
-    mask.weighted = qmap.weighted
 
     wgt_out = maps.G3SkyMapWeights()
     wgt_out.TT = wgt
@@ -228,7 +227,6 @@ def MakeMapsPolarized(frame, pol_conv=maps.MapPolConv.IAU):
 
     for k in wgt_out.keys():
         wgt_out[k].pol_type = getattr(maps.MapPolType, k)
-        wgt_out[k].pol_conv = pol_conv
 
     frame["Wpol"] = wgt_out
 
