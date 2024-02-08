@@ -100,3 +100,4 @@ namespace cereal {
 G3_POINTERS(G3MapFrameObject);
 G3_SERIALIZABLE(G3MapFrameObject, 1);
 #endif
+
