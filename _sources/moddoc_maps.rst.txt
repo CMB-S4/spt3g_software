@@ -1470,9 +1470,13 @@ complex pipelines.
 	    frames.  Otherwise, use ``frame["Id"]``.  The function should take a
 	    single frame object as an argument and return a string value to match
 	    against ``map_ids``, or ``None`` if a valid Id cannot be constructed.
+	record_obs_id : bool
+	    If True, include source name and observation ID info in the output coadd
+	    frame ``InputMapIds`` key, along with the map ID for each input frame.
+	    If False, only the map frame ID is included.
 
 *Constructor:*
-	``CoaddMaps(self, map_ids=None, output_map_id='Coadd', collate=False, weighted=True, ignore_missing_weights=False, drop_input_frames=False, map_id_function=None)``
+	``CoaddMaps(self, map_ids=None, output_map_id='Coadd', collate=False, weighted=True, ignore_missing_weights=False, drop_input_frames=False, map_id_function=None, record_obs_id=False)``
 
 
 
@@ -2128,6 +2132,10 @@ Coadd map files, optionally collating map Id's into separate frames.
 	    frames.  Otherwise, use ``frame["Id"]``.  The function should take a
 	    single frame object as an argument and return a string value to match
 	    against ``map_ids``, or ``None`` if a valid Id cannot be constructed.
+	record_obs_id : bool
+	    If True, include source name and observation ID info in the output coadd
+	    frame ``InputMapIds`` key, along with the map ID for each input frame.
+	    If False, only the map frame ID is included.
 	
 *Returns:*
 	maps : G3Frame or dict of G3Frames
@@ -2135,7 +2143,7 @@ Coadd map files, optionally collating map Id's into separate frames.
 	    keyed by Id.  Otherwise, returns a single map frame.
 
 *Definition:*
-        ``coadd_map_files(input_files, output_file=None, map_ids=None, output_map_id='Coadd', collate=False, weighted=True, map_id_function=None)``
+        ``coadd_map_files(input_files, output_file=None, map_ids=None, output_map_id='Coadd', collate=False, weighted=True, map_id_function=None, record_obs_id=False)``
 
 
 

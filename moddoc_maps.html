@@ -1097,9 +1097,13 @@ frames.  Otherwise, use <code class="docutils literal notranslate"><span class="
 single frame object as an argument and return a string value to match
 against <code class="docutils literal notranslate"><span class="pre">map_ids</span></code>, or <code class="docutils literal notranslate"><span class="pre">None</span></code> if a valid Id cannot be constructed.</p>
 </dd>
+<dt>record_obs_id<span class="classifier">bool</span></dt><dd><p>If True, include source name and observation ID info in the output coadd
+frame <code class="docutils literal notranslate"><span class="pre">InputMapIds</span></code> key, along with the map ID for each input frame.
+If False, only the map frame ID is included.</p>
+</dd>
 </dl>
 </dd>
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">CoaddMaps(self,</span> <span class="pre">map_ids=None,</span> <span class="pre">output_map_id='Coadd',</span> <span class="pre">collate=False,</span> <span class="pre">weighted=True,</span> <span class="pre">ignore_missing_weights=False,</span> <span class="pre">drop_input_frames=False,</span> <span class="pre">map_id_function=None)</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">CoaddMaps(self,</span> <span class="pre">map_ids=None,</span> <span class="pre">output_map_id='Coadd',</span> <span class="pre">collate=False,</span> <span class="pre">weighted=True,</span> <span class="pre">ignore_missing_weights=False,</span> <span class="pre">drop_input_frames=False,</span> <span class="pre">map_id_function=None,</span> <span class="pre">record_obs_id=False)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-maps-map-modules-compactmaps"><strong>spt3g.maps.map_modules.CompactMaps</strong></p>
@@ -1560,6 +1564,10 @@ frames.  Otherwise, use <code class="docutils literal notranslate"><span class="
 single frame object as an argument and return a string value to match
 against <code class="docutils literal notranslate"><span class="pre">map_ids</span></code>, or <code class="docutils literal notranslate"><span class="pre">None</span></code> if a valid Id cannot be constructed.</p>
 </dd>
+<dt>record_obs_id<span class="classifier">bool</span></dt><dd><p>If True, include source name and observation ID info in the output coadd
+frame <code class="docutils literal notranslate"><span class="pre">InputMapIds</span></code> key, along with the map ID for each input frame.
+If False, only the map frame ID is included.</p>
+</dd>
 </dl>
 </dd>
 <dt><em>Returns:</em></dt><dd><dl class="simple">
@@ -1568,7 +1576,7 @@ keyed by Id.  Otherwise, returns a single map frame.</p>
 </dd>
 </dl>
 </dd>
-<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">coadd_map_files(input_files,</span> <span class="pre">output_file=None,</span> <span class="pre">map_ids=None,</span> <span class="pre">output_map_id='Coadd',</span> <span class="pre">collate=False,</span> <span class="pre">weighted=True,</span> <span class="pre">map_id_function=None)</span></code></p>
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">coadd_map_files(input_files,</span> <span class="pre">output_file=None,</span> <span class="pre">map_ids=None,</span> <span class="pre">output_map_id='Coadd',</span> <span class="pre">collate=False,</span> <span class="pre">weighted=True,</span> <span class="pre">map_id_function=None,</span> <span class="pre">record_obs_id=False)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-maps-maputils-flatsky-to-healpix"><strong>spt3g.maps.maputils.flatsky_to_healpix</strong></p>
