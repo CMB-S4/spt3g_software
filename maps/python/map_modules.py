@@ -561,6 +561,10 @@ class CoaddMaps(object):
         frames.  Otherwise, use ``frame["Id"]``.  The function should take a
         single frame object as an argument and return a string value to match
         against ``map_ids``, or ``None`` if a valid Id cannot be constructed.
+    record_obs_id : bool
+        If True, include source name and observation ID info in the output coadd
+        frame ``InputMapIds`` key, along with the map ID for each input frame.
+        If False, only the map frame ID is included.
     """
 
     def __init__(
@@ -572,6 +576,7 @@ class CoaddMaps(object):
         ignore_missing_weights=False,
         drop_input_frames=False,
         map_id_function=None,
+        record_obs_id=False,
     ):
         if isinstance(map_ids, str):
             map_ids = [map_ids]
@@ -589,6 +594,7 @@ class CoaddMaps(object):
         if not map_id_function:
             map_id_function = lambda fr: fr.get("Id", None)
         self.get_map_id = map_id_function
+        self.obs_id = None if record_obs_id else False
 
     def __call__(self, frame):
 
@@ -596,6 +602,11 @@ class CoaddMaps(object):
             if self.collate:
                 return list(self.coadd_frames.values()) + [frame]
             return [self.coadd_frame, frame]
+
+        if self.obs_id is not False and "SourceName" in frame:
+            self.obs_id = "{}/{}".format(
+                frame["SourceName"], frame["ObservationID"]
+            )
 
         if frame.type != core.G3FrameType.Map:
             return
@@ -628,8 +639,11 @@ class CoaddMaps(object):
             # allow for recursive coadds
             map_ids += [i for i in frame["InputMapIds"] if i not in map_ids]
         elif frame.get("Id", None):
-            if frame["Id"] not in map_ids:
-                map_ids += [frame["Id"]]
+            mid = frame["Id"]
+            if self.obs_id:
+                mid = "{}/{}".format(self.obs_id, mid)
+            if mid not in map_ids:
+                map_ids += [mid]
         if len(map_ids):
             cfr["InputMapIds"] = core.G3VectorString(map_ids)
 
@@ -670,6 +684,7 @@ def coadd_map_files(
     collate=False,
     weighted=True,
     map_id_function=None,
+    record_obs_id=False,
 ):
     """
     Coadd map files, optionally collating map Id's into separate frames.
@@ -698,6 +713,10 @@ def coadd_map_files(
         frames.  Otherwise, use ``frame["Id"]``.  The function should take a
         single frame object as an argument and return a string value to match
         against ``map_ids``, or ``None`` if a valid Id cannot be constructed.
+    record_obs_id : bool
+        If True, include source name and observation ID info in the output coadd
+        frame ``InputMapIds`` key, along with the map ID for each input frame.
+        If False, only the map frame ID is included.
 
     Returns
     -------
@@ -720,6 +739,7 @@ def coadd_map_files(
         weighted=weighted,
         drop_input_frames=True,
         map_id_function=map_id_function,
+        record_obs_id=record_obs_id,
     )
     pipe.Add(coadder)
 
