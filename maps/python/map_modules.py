@@ -536,11 +536,21 @@ class CoaddMaps(object):
         injected into the pipeline on EndProcessing.  This attribute is only
         populated if the ``collate`` option is set to True.
 
+    Methods
+    -------
+    get_map_id :
+        Takes a map frame as an argument and returns an identifier string for
+        the coadd to which it should be added, or None if the map should be
+        ignored.  This method can be modified by subclassing the CoaddMaps
+        module.
+
     Arguments
     ---------
     map_ids : list of str
-        List of map Id's to include in the coadd(s).  If None, any maps
-        in the pipeline are included.
+        List of map Id's to include in the coadd(s).  If None, any maps in the
+        pipeline are included.  Otherwise, the output of the ``get_map_ids``
+        method is compared with this list, and the input frame is discarded if
+        no match is found.
     output_map_id : str
         Id to assign to the output frame.  If ``collate`` is True, this argument
         is required and treated as a prefix to which each input map Id is
@@ -555,12 +565,8 @@ class CoaddMaps(object):
         Stokes maps without a weights map.  Set this option to True when feeding
         single bolometer map frames with common weights through a pipeline.
     drop_input_frames : bool
-        If True, drop input map frames from the pipeline.
-    map_id_function : callable
-        If supplied, use this callable to extract a map_id from the input map
-        frames.  Otherwise, use ``frame["Id"]``.  The function should take a
-        single frame object as an argument and return a string value to match
-        against ``map_ids``, or ``None`` if a valid Id cannot be constructed.
+        If True, drop input map frames from the pipeline that are included in
+        any coadds.
     record_obs_id : bool
         If True, include source name and observation ID info in the output coadd
         frame ``InputMapIds`` key, along with the map ID for each input frame.
@@ -575,7 +581,6 @@ class CoaddMaps(object):
         weighted=True,
         ignore_missing_weights=False,
         drop_input_frames=False,
-        map_id_function=None,
         record_obs_id=False,
     ):
         if isinstance(map_ids, str):
@@ -591,10 +596,28 @@ class CoaddMaps(object):
         self.weighted = weighted
         self.ignore_missing_weights = ignore_missing_weights
         self.drop_input_frames = drop_input_frames
-        if not map_id_function:
-            map_id_function = lambda fr: fr.get("Id", None)
-        self.get_map_id = map_id_function
         self.obs_id = None if record_obs_id else False
+
+    def get_map_id(self, frame):
+        """
+        Return Id associated with the input frame
+
+        By default, this returns the "Id" entry in the frame, None if not found.
+        Subclass the CoaddMaps structure to override the default behavior.
+
+        Arguments
+        ---------
+        frame : core.G3Frame instance of type G3FrameType.Map
+            Candidate map frame to include in a coadd.
+
+        Returns
+        -------
+        map_id : str, None or False
+            A string if the frame is to be included in a coadd, None if the
+            frame is to be passed on to downstream pipeline modules, or False if
+            the frame is to be dropped from the pipeline altogether.
+        """
+        return frame.get("Id", None)
 
     def __call__(self, frame):
 
@@ -612,8 +635,8 @@ class CoaddMaps(object):
             return
 
         map_id = self.get_map_id(frame)
-        if not map_id:
-            return
+        if map_id is None or map_id is False:
+            return map_id
 
         if self.map_ids is not None and map_id not in self.map_ids:
             return
@@ -679,11 +702,11 @@ class CoaddMaps(object):
 def coadd_map_files(
     input_files,
     output_file=None,
+    coadder=None,
     map_ids=None,
     output_map_id="Coadd",
     collate=False,
     weighted=True,
-    map_id_function=None,
     record_obs_id=False,
 ):
     """
@@ -696,6 +719,9 @@ def coadd_map_files(
     output_file : str
         Output G3 filename.  If not supplied, the output frames are
         returned without saving to disk.
+    coadder : CoaddMaps instance
+        If set, use this instantiated module in the coadding pipeline.
+        In this case, all other keyword arguments below are ignored.
     map_ids : list of str
         A list of map Id's to include in the coadd(s).
     output_map_id : str
@@ -708,11 +734,6 @@ def coadd_map_files(
     weighted : bool
         If True, ensure that weights have been applied before coadding.
         Otherwise, the input maps are coadded as they are.
-    map_id_function : callable
-        If supplied, use this callable to extract a map_id from the input map
-        frames.  Otherwise, use ``frame["Id"]``.  The function should take a
-        single frame object as an argument and return a string value to match
-        against ``map_ids``, or ``None`` if a valid Id cannot be constructed.
     record_obs_id : bool
         If True, include source name and observation ID info in the output coadd
         frame ``InputMapIds`` key, along with the map ID for each input frame.
@@ -728,26 +749,26 @@ def coadd_map_files(
     pipe = core.G3Pipeline()
     pipe.Add(core.G3Reader, filename=input_files, track_filename=True)
 
+    # build coadds
+    if coadder is None:
+        coadder = CoaddMaps(
+            map_ids=map_ids,
+            output_map_id=output_map_id,
+            collate=collate,
+            weighted=weighted,
+            drop_input_frames=True,
+            record_obs_id=record_obs_id,
+        )
+    pipe.Add(coadder)
+
     # drop metadata frames
     pipe.Add(lambda fr: fr.type == core.G3FrameType.Map)
-
-    # build coadds
-    coadder = CoaddMaps(
-        map_ids=map_ids,
-        output_map_id=output_map_id,
-        collate=collate,
-        weighted=weighted,
-        drop_input_frames=True,
-        map_id_function=map_id_function,
-        record_obs_id=record_obs_id,
-    )
-    pipe.Add(coadder)
 
     if output_file:
         pipe.Add(core.G3Writer, filename=output_file)
     pipe.Run()
 
-    if collate:
+    if hasattr(coadder, 'coadd_frames'):
         return coadder.coadd_frames
     return coadder.coadd_frame
 
