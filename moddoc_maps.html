@@ -1073,9 +1073,19 @@ populated if the <code class="docutils literal notranslate"><span class="pre">co
 </dd>
 </dl>
 </dd>
+<dt><em>Methods:</em></dt><dd><dl class="simple">
+<dt>get_map_id :</dt><dd><p>Takes a map frame as an argument and returns an identifier string for
+the coadd to which it should be added, or None if the map should be
+ignored.  This method can be modified by subclassing the CoaddMaps
+module.</p>
+</dd>
+</dl>
+</dd>
 <dt><em>Arguments:</em></dt><dd><dl class="simple">
-<dt>map_ids<span class="classifier">list of str</span></dt><dd><p>List of map Id’s to include in the coadd(s).  If None, any maps
-in the pipeline are included.</p>
+<dt>map_ids<span class="classifier">list of str</span></dt><dd><p>List of map Id’s to include in the coadd(s).  If None, any maps in the
+pipeline are included.  Otherwise, the output of the <code class="docutils literal notranslate"><span class="pre">get_map_ids</span></code>
+method is compared with this list, and the input frame is discarded if
+no match is found.</p>
 </dd>
 <dt>output_map_id<span class="classifier">str</span></dt><dd><p>Id to assign to the output frame.  If <code class="docutils literal notranslate"><span class="pre">collate</span></code> is True, this argument
 is required and treated as a prefix to which each input map Id is
@@ -1090,12 +1100,8 @@ coadding.  Otherwise, coadd maps without checking the weights.</p>
 Stokes maps without a weights map.  Set this option to True when feeding
 single bolometer map frames with common weights through a pipeline.</p>
 </dd>
-<dt>drop_input_frames<span class="classifier">bool</span></dt><dd><p>If True, drop input map frames from the pipeline.</p>
-</dd>
-<dt>map_id_function<span class="classifier">callable</span></dt><dd><p>If supplied, use this callable to extract a map_id from the input map
-frames.  Otherwise, use <code class="docutils literal notranslate"><span class="pre">frame[&quot;Id&quot;]</span></code>.  The function should take a
-single frame object as an argument and return a string value to match
-against <code class="docutils literal notranslate"><span class="pre">map_ids</span></code>, or <code class="docutils literal notranslate"><span class="pre">None</span></code> if a valid Id cannot be constructed.</p>
+<dt>drop_input_frames<span class="classifier">bool</span></dt><dd><p>If True, drop input map frames from the pipeline that are included in
+any coadds.</p>
 </dd>
 <dt>record_obs_id<span class="classifier">bool</span></dt><dd><p>If True, include source name and observation ID info in the output coadd
 frame <code class="docutils literal notranslate"><span class="pre">InputMapIds</span></code> key, along with the map ID for each input frame.
@@ -1103,7 +1109,7 @@ If False, only the map frame ID is included.</p>
 </dd>
 </dl>
 </dd>
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">CoaddMaps(self,</span> <span class="pre">map_ids=None,</span> <span class="pre">output_map_id='Coadd',</span> <span class="pre">collate=False,</span> <span class="pre">weighted=True,</span> <span class="pre">ignore_missing_weights=False,</span> <span class="pre">drop_input_frames=False,</span> <span class="pre">map_id_function=None,</span> <span class="pre">record_obs_id=False)</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">CoaddMaps(self,</span> <span class="pre">map_ids=None,</span> <span class="pre">output_map_id='Coadd',</span> <span class="pre">collate=False,</span> <span class="pre">weighted=True,</span> <span class="pre">ignore_missing_weights=False,</span> <span class="pre">drop_input_frames=False,</span> <span class="pre">record_obs_id=False)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-maps-map-modules-compactmaps"><strong>spt3g.maps.map_modules.CompactMaps</strong></p>
@@ -1547,6 +1553,9 @@ can contain entries such as <code class="docutils literal notranslate"><span cla
 <dt>output_file<span class="classifier">str</span></dt><dd><p>Output G3 filename.  If not supplied, the output frames are
 returned without saving to disk.</p>
 </dd>
+<dt>coadder<span class="classifier">CoaddMaps instance</span></dt><dd><p>If set, use this instantiated module in the coadding pipeline.
+In this case, all other keyword arguments below are ignored.</p>
+</dd>
 <dt>map_ids<span class="classifier">list of str</span></dt><dd><p>A list of map Id’s to include in the coadd(s).</p>
 </dd>
 <dt>output_map_id<span class="classifier">str</span></dt><dd><p>Id to use for the output map frame.  If <code class="docutils literal notranslate"><span class="pre">collate</span></code> is True,
@@ -1558,11 +1567,6 @@ Otherwise, all map frames are coadded into one output frame.</p>
 </dd>
 <dt>weighted<span class="classifier">bool</span></dt><dd><p>If True, ensure that weights have been applied before coadding.
 Otherwise, the input maps are coadded as they are.</p>
-</dd>
-<dt>map_id_function<span class="classifier">callable</span></dt><dd><p>If supplied, use this callable to extract a map_id from the input map
-frames.  Otherwise, use <code class="docutils literal notranslate"><span class="pre">frame[&quot;Id&quot;]</span></code>.  The function should take a
-single frame object as an argument and return a string value to match
-against <code class="docutils literal notranslate"><span class="pre">map_ids</span></code>, or <code class="docutils literal notranslate"><span class="pre">None</span></code> if a valid Id cannot be constructed.</p>
 </dd>
 <dt>record_obs_id<span class="classifier">bool</span></dt><dd><p>If True, include source name and observation ID info in the output coadd
 frame <code class="docutils literal notranslate"><span class="pre">InputMapIds</span></code> key, along with the map ID for each input frame.
@@ -1576,7 +1580,7 @@ keyed by Id.  Otherwise, returns a single map frame.</p>
 </dd>
 </dl>
 </dd>
-<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">coadd_map_files(input_files,</span> <span class="pre">output_file=None,</span> <span class="pre">map_ids=None,</span> <span class="pre">output_map_id='Coadd',</span> <span class="pre">collate=False,</span> <span class="pre">weighted=True,</span> <span class="pre">map_id_function=None,</span> <span class="pre">record_obs_id=False)</span></code></p>
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">coadd_map_files(input_files,</span> <span class="pre">output_file=None,</span> <span class="pre">coadder=None,</span> <span class="pre">map_ids=None,</span> <span class="pre">output_map_id='Coadd',</span> <span class="pre">collate=False,</span> <span class="pre">weighted=True,</span> <span class="pre">record_obs_id=False)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-maps-maputils-flatsky-to-healpix"><strong>spt3g.maps.maputils.flatsky_to_healpix</strong></p>
