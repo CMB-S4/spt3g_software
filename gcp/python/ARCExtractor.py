@@ -176,7 +176,7 @@ def UnpackTrackerMinimal(f, rewrite_source_from_feature_bits=True):
     if rewrite_source_from_feature_bits and 'GCPFeatureBits' in f:
         if 'elnod' in f['GCPFeatureBits']:
             source = 'elnod'
-        if 'calibrator' in f['GCPFeatureBits']:
+        if 'calibrator' in f['GCPFeatureBits'] and 'source_scan' not in f['GCPFeatureBits']:
             source = 'calibrator'
         if 'noise' in f['GCPFeatureBits']:
             source = 'noise'
