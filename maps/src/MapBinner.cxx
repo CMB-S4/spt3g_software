@@ -190,6 +190,10 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	}
 	
 	if (emit_map_now) {
+		if (start_.time == 0)
+			log_error("No valid scan frames found for map %s",
+			    output_id_.c_str());
+
 		G3FramePtr out_frame(new G3Frame(G3Frame::Map));
 		out_frame->Put("Id", G3StringPtr(new G3String(output_id_)));
 		out_frame->Put("T",
@@ -219,6 +223,12 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	}
 
 	if (frame->type != G3Frame::Scan) {
+		out.push_back(frame);
+		return;
+	}
+
+	if (!frame->Has(timestreams_)) {
+		log_info("Missing timestreams %s", timestreams_.c_str());
 		out.push_back(frame);
 		return;
 	}
