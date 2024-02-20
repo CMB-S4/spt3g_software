@@ -6,7 +6,7 @@ set -e
 cd $1
 
 # PEP440-compliant version number for pyproject.toml
-if [ -d .git ]; then
+if [ -e .git ]; then
 	# replaces first - with .dev and second - with +, so e.g. 0.3-154-gd36baf4a becomes 0.3.dev154+gd36baf4a
 	fullversion_pep440=$(echo $(git describe --always --tags 2>/dev/null) | sed 's/-/.dev/' | sed 's/-/+/')
 fi
@@ -108,7 +108,7 @@ if [ -d .svn ]; then
 			echo fullversion=\"$(echo $revision)\"
 		fi
 	fi
-elif [ -d .git ]; then
+elif [ -e .git ]; then
 	if (git rev-parse --abbrev-ref --symbolic-full-name @{u}>/dev/null 2>/dev/null); then
 		remote_branch=$(git rev-parse --abbrev-ref --symbolic-full-name @{u})
 		if (git remote get-url 1>&2 2>/dev/null); then
