@@ -355,6 +355,11 @@ class MergeCalibrationFrames(object):
                     self.outframe[k] = frame[k]
             return []
 
+        # Allow extra calibration frames to follow proper calframe files
+        # (which likely have PipelineInfo frames in them)
+        if frame.type == core.G3FrameType.PipelineInfo:
+            return
+
         # Ignore random wiring frames etc.
         if self.outframe is None or len(self.outframe.keys()) == 0:
             return
