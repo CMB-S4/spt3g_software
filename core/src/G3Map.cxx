@@ -14,7 +14,7 @@ void G3Map<std::string, int64_t>::load(A &ar, const unsigned v)
 	G3_CHECK_VERSION(v);
 
 	ar & cereal::make_nvp("G3FrameObject",
-			      cereal::base_class<G3FrameObject>(this));
+	    cereal::base_class<G3FrameObject>(this));
 	int store_bits = 32;
 	if (v >= 2)
 		ar & cereal::make_nvp("store_bits", store_bits);
@@ -22,7 +22,7 @@ void G3Map<std::string, int64_t>::load(A &ar, const unsigned v)
 	switch(store_bits) {
 	case 64:
 		ar & cereal::make_nvp("map",
-				      cereal::base_class<std::map<std::string, int64_t> >(this));
+		    cereal::base_class<std::map<std::string, int64_t> >(this));
 		break;
 	case 32:
 		load_as<A, int32_t>(ar, *this);
@@ -42,7 +42,7 @@ void G3Map<std::string, int64_t>::save(A &ar, const unsigned v) const
 {
 	// v == 2
 	ar & cereal::make_nvp("G3FrameObject",
-			      cereal::base_class<G3FrameObject>(this));
+	    cereal::base_class<G3FrameObject>(this));
 	// Count the interesting bits, and convert to nearest power of 2.
 	int sig_bits = bit_count(*this);
 	int store_bits = 8;
@@ -61,7 +61,7 @@ void G3Map<std::string, int64_t>::save(A &ar, const unsigned v) const
 		break;
 	default:
 		ar & cereal::make_nvp("map",
-				      cereal::base_class<std::map<std::string, int64_t> >(this));
+		    cereal::base_class<std::map<std::string, int64_t> >(this));
 	}
 }
 
@@ -72,7 +72,7 @@ void G3Map<std::string, std::vector<int64_t> >::load(A &ar, const unsigned v)
 	G3_CHECK_VERSION(v);
 
 	ar & cereal::make_nvp("G3FrameObject",
-			      cereal::base_class<G3FrameObject>(this));
+	    cereal::base_class<G3FrameObject>(this));
 
 	if (v == 1) {
 		std::map<std::string, std::vector<int32_t> > temp;
@@ -119,7 +119,7 @@ void G3Map<std::string, std::vector<int64_t> >::save(A &ar, const unsigned v) co
 {
 	// v == 2
 	ar & cereal::make_nvp("G3FrameObject",
-			      cereal::base_class<G3FrameObject>(this));
+	    cereal::base_class<G3FrameObject>(this));
 
 	uint32_t len = size();
 	ar & cereal::make_nvp("len", len);
