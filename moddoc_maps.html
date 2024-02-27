@@ -57,7 +57,7 @@
 </dd>
 <dt><code class="docutils literal notranslate"><span class="pre">pol_type</span></code></dt><dd><p>The Stokes polarization of the map object, which is an instance of the <code class="docutils literal notranslate"><span class="pre">MapPolType</span></code> enum, and can have the value <code class="docutils literal notranslate"><span class="pre">T</span></code>, <code class="docutils literal notranslate"><span class="pre">Q</span></code>, <code class="docutils literal notranslate"><span class="pre">U</span></code> or None.</p>
 </dd>
-<dt><code class="docutils literal notranslate"><span class="pre">pol_conv</span></code></dt><dd><p>The polarization convention used to encode the Q and U Stokes orientations relative to the coordinate axes.  This attribute is an instance of the <code class="docutils literal notranslate"><span class="pre">MapPolConv</span></code> enum, which can have the value <code class="docutils literal notranslate"><span class="pre">IAU</span></code>, <code class="docutils literal notranslate"><span class="pre">COSMO</span></code> or None.  Both IAU and COSMO polarization conventions are supported in polarization-aware functions (e.g. <code class="docutils literal notranslate"><span class="pre">FlattenPol</span></code>), but most default to using the IAU convention.  Warnings will be raised when a polarized map is used without a polarization convention set.  Changing the polarization convention between IAU and COSMO on a <code class="docutils literal notranslate"><span class="pre">U</span></code> map results in flipping the sign of all pixels in the map.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">pol_conv</span></code></dt><dd><p>The polarization convention used to encode the Q and U Stokes orientations relative to the coordinate axes.  This attribute is an instance of the <code class="docutils literal notranslate"><span class="pre">MapPolConv</span></code> enum, which can have the value <code class="docutils literal notranslate"><span class="pre">IAU</span></code>, <code class="docutils literal notranslate"><span class="pre">COSMO</span></code> or None.  Both IAU and COSMO polarization conventions are supported in polarization-aware functions (e.g. <code class="docutils literal notranslate"><span class="pre">FlattenPol</span></code>), but most default to using the IAU convention.  Warnings will be raised when a polarized map is used without a polarization convention set.  Use the <code class="docutils literal notranslate"><span class="pre">SetPolConv</span></code> pipeline module to change the polarization convention between IAU and COSMO for an entire map frame.  This will result in flipping the sign of all pixels in the <code class="docutils literal notranslate"><span class="pre">U</span></code> map as well as the <code class="docutils literal notranslate"><span class="pre">TU</span></code> and <code class="docutils literal notranslate"><span class="pre">QU</span></code> weights.</p>
 </dd>
 <dt><code class="docutils literal notranslate"><span class="pre">units</span></code></dt><dd><p>The units system in which the map is computed, stored as an instance of the <code class="docutils literal notranslate"><span class="pre">G3TimestreamUnits</span></code> enum, typically <code class="docutils literal notranslate"><span class="pre">Tcmb</span></code>.</p>
 </dd>
@@ -268,7 +268,8 @@ This class cannot be instantiated from Python</p>
 <ul class="simple">
 <li><p><strong>coord_ref</strong>: Coordinate system (maps.MapCoordReference) of the map (e.g. Galactic, Equatorial, etc.)</p></li>
 <li><p><strong>pol_type</strong>: Polarization type (maps.MapPolType) of the map (e.g. maps.MapPolType.Q).</p></li>
-<li><p><strong>pol_conv</strong>: Polarization convention (maps.MapPolConv) of the map (e.g. maps.MapPolConv.IAU or maps.MapPolConv.COSMO). Switching between IAU and COSMO conventions for a U map multiplies the U map by -1.</p></li>
+<li><p><strong>pol_conv</strong>: Polarization convention (maps.MapPolConv) of the map (e.g. maps.MapPolConv.IAU or maps.MapPolConv.COSMO).</p></li>
+<li><p><strong>polarized</strong>: True if the pol_conv property is set to IAU or COSMO, False otherwise.</p></li>
 <li><p><strong>units</strong>: Unit class (core.G3TimestreamUnits) of the map (e.g. core.G3TimestreamUnits.Tcmb). Within each unit class, further conversions, for example from K to uK, should use core.G3Units.</p></li>
 <li><p><strong>weighted</strong>: True if map is multiplied by weights</p></li>
 <li><p><strong>size</strong>: Number of pixels in map</p></li>
@@ -479,11 +480,11 @@ This class cannot be instantiated from Python</p>
 </section>
 <section id="spt3g-maps-g3skymapweights">
 <span id="id4"></span><h3>spt3g.maps.G3SkyMapWeights<a class="headerlink" href="#spt3g-maps-g3skymapweights" title="Permalink to this heading">¶</a></h3>
-<p>Polarized (Mueller matrix) or unpolarized (scalar) map pixel weights.</p>
+<p>Polarized (Mueller matrix) or unpolarized (scalar) map pixel weights.Weights are polarized if the pol_conv attribute of the reference map is set.</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3SkyMapWeights()</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">G3SkyMapWeights(</span> <span class="pre">(G3SkyMapWeights)arg2)</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">G3SkyMapWeights(</span> <span class="pre">(object)skymap</span> <span class="pre">[,</span> <span class="pre">(bool)polarized=True])</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3SkyMapWeights(</span> <span class="pre">(object)skymap)</span></code></p>
 </dd>
 </dl>
 <p><em>Members:</em></p>
@@ -606,6 +607,7 @@ This class cannot be instantiated from Python</p>
 <li><p><a class="reference internal" href="#spt3g-maps-map-modules-removeweights">spt3g.maps.map_modules.RemoveWeights</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-map-modules-replicatemaps">spt3g.maps.map_modules.ReplicateMaps</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-map-modules-reprojectmaps">spt3g.maps.map_modules.ReprojectMaps</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-maps-map-modules-setpolconv">spt3g.maps.map_modules.SetPolConv</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-map-modules-validatemaps">spt3g.maps.map_modules.ValidateMaps</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-quathelpers-addtimingtopointingquats">spt3g.maps.quathelpers.AddTimingToPointingQuats</a></p></li>
 </ul>
@@ -1162,18 +1164,14 @@ argument to True.</p>
 <dt><em>Arguments:</em></dt><dd><dl class="simple">
 <dt>map_id<span class="classifier">string</span></dt><dd><p>Id to assign to the new map frame</p>
 </dd>
-<dt>map_stub<span class="classifier">G3SkyMap instance</span></dt><dd><p>Map stub from which to clone the Stokes maps and weights.</p>
-</dd>
-<dt>polarized<span class="classifier">bool</span></dt><dd><p>If True, add Q and U maps to stub frame, and ensure that weights are
-polarized.  Otherwise, only a T map is created.</p>
-</dd>
-<dt>weighted<span class="classifier">bool</span></dt><dd><p>If True, add weights to the stub frame.</p>
-</dd>
-<dt>pol_conv<span class="classifier">MapPolConv instance</span></dt><dd><p>Polarization convention to use.</p>
+<dt>map_stub<span class="classifier">G3SkyMap instance</span></dt><dd><p>Map stub from which to clone the Stokes maps and weights.  If the
+<cite>weighted</cite> attribute of the stub is True, the output frame will include
+weights.  If the <cite>pol_conv</cite> attribute of the stub is not None, the
+output frame will include Q and U maps (and polarized weights).</p>
 </dd>
 </dl>
 </dd>
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">InjectMapStub(self,</span> <span class="pre">map_id,</span> <span class="pre">map_stub,</span> <span class="pre">polarized=True,</span> <span class="pre">weighted=True,</span> <span class="pre">pol_conv=spt3g.maps.MapPolConv.IAU)</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">InjectMapStub(self,</span> <span class="pre">map_id,</span> <span class="pre">map_stub)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-maps-map-modules-injectmaps"><strong>spt3g.maps.map_modules.InjectMaps</strong></p>
@@ -1267,6 +1265,15 @@ map.  Otherwise, the nearest-neighbor value is used.</p>
 </dl>
 </dd>
 <dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">ReprojectMaps(self,</span> <span class="pre">map_stub=None,</span> <span class="pre">rebin=1,</span> <span class="pre">interp=False)</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-maps-map-modules-setpolconv"><strong>spt3g.maps.map_modules.SetPolConv</strong></p>
+<p>Set or change the polarization convention of the input polarized map frame.
+If switching between IAU and COSMO conventions, flip the sign of the U map
+and the TU and QU weights.  Otherwise, just set the polarization convention
+for all maps and weights.</p>
+<dl class="simple">
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">SetPolConv(frame,</span> <span class="pre">pol_conv=spt3g.maps.MapPolConv.IAU)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-maps-map-modules-validatemaps"><strong>spt3g.maps.map_modules.ValidateMaps</strong></p>

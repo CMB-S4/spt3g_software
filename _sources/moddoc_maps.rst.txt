@@ -27,7 +27,7 @@ The following attributes are common to all G3SkyMap subclasses:
   The Stokes polarization of the map object, which is an instance of the ``MapPolType`` enum, and can have the value ``T``, ``Q``, ``U`` or None.
 
 ``pol_conv``
-  The polarization convention used to encode the Q and U Stokes orientations relative to the coordinate axes.  This attribute is an instance of the ``MapPolConv`` enum, which can have the value ``IAU``, ``COSMO`` or None.  Both IAU and COSMO polarization conventions are supported in polarization-aware functions (e.g. ``FlattenPol``), but most default to using the IAU convention.  Warnings will be raised when a polarized map is used without a polarization convention set.  Changing the polarization convention between IAU and COSMO on a ``U`` map results in flipping the sign of all pixels in the map.
+  The polarization convention used to encode the Q and U Stokes orientations relative to the coordinate axes.  This attribute is an instance of the ``MapPolConv`` enum, which can have the value ``IAU``, ``COSMO`` or None.  Both IAU and COSMO polarization conventions are supported in polarization-aware functions (e.g. ``FlattenPol``), but most default to using the IAU convention.  Warnings will be raised when a polarized map is used without a polarization convention set.  Use the ``SetPolConv`` pipeline module to change the polarization convention between IAU and COSMO for an entire map frame.  This will result in flipping the sign of all pixels in the ``U`` map as well as the ``TU`` and ``QU`` weights.
   
 ``units``
   The units system in which the map is computed, stored as an instance of the ``G3TimestreamUnits`` enum, typically ``Tcmb``.
@@ -336,7 +336,9 @@ Base class for 1- and 2-D skymaps of various projections. Usually you want a sub
 
 * **pol_type**: Polarization type (maps.MapPolType) of the map (e.g. maps.MapPolType.Q).
 
-* **pol_conv**: Polarization convention (maps.MapPolConv) of the map (e.g. maps.MapPolConv.IAU or maps.MapPolConv.COSMO). Switching between IAU and COSMO conventions for a U map multiplies the U map by -1.
+* **pol_conv**: Polarization convention (maps.MapPolConv) of the map (e.g. maps.MapPolConv.IAU or maps.MapPolConv.COSMO).
+
+* **polarized**: True if the pol_conv property is set to IAU or COSMO, False otherwise.
 
 * **units**: Unit class (core.G3TimestreamUnits) of the map (e.g. core.G3TimestreamUnits.Tcmb). Within each unit class, further conversions, for example from K to uK, should use core.G3Units.
 
@@ -684,14 +686,14 @@ Boolean mask of a sky map. Set pixels to use to true, pixels to ignore to false.
 spt3g.maps.G3SkyMapWeights
 --------------------------
 
-Polarized (Mueller matrix) or unpolarized (scalar) map pixel weights.
+Polarized (Mueller matrix) or unpolarized (scalar) map pixel weights.Weights are polarized if the pol_conv attribute of the reference map is set.
 
 *Constructors:*
 	``G3SkyMapWeights()``
 	
 	``G3SkyMapWeights( (G3SkyMapWeights)arg2)``
 	
-	``G3SkyMapWeights( (object)skymap [, (bool)polarized=True])``
+	``G3SkyMapWeights( (object)skymap)``
 
 
 
@@ -883,6 +885,8 @@ Modules in spt3g.maps
 * spt3g.maps.map_modules.ReplicateMaps_
 
 * spt3g.maps.map_modules.ReprojectMaps_
+
+* spt3g.maps.map_modules.SetPolConv_
 
 * spt3g.maps.map_modules.ValidateMaps_
 
@@ -1561,17 +1565,13 @@ Inject a new map frame from a map stub.
 	map_id : string
 	    Id to assign to the new map frame
 	map_stub : G3SkyMap instance
-	    Map stub from which to clone the Stokes maps and weights.
-	polarized : bool
-	    If True, add Q and U maps to stub frame, and ensure that weights are
-	    polarized.  Otherwise, only a T map is created.
-	weighted : bool
-	    If True, add weights to the stub frame.
-	pol_conv : MapPolConv instance
-	    Polarization convention to use.
+	    Map stub from which to clone the Stokes maps and weights.  If the
+	    `weighted` attribute of the stub is True, the output frame will include
+	    weights.  If the `pol_conv` attribute of the stub is not None, the
+	    output frame will include Q and U maps (and polarized weights).
 
 *Constructor:*
-	``InjectMapStub(self, map_id, map_stub, polarized=True, weighted=True, pol_conv=spt3g.maps.MapPolConv.IAU)``
+	``InjectMapStub(self, map_id, map_stub)``
 
 
 
@@ -1703,6 +1703,22 @@ currently implemented.
 
 *Constructor:*
 	``ReprojectMaps(self, map_stub=None, rebin=1, interp=False)``
+
+
+
+
+.. _spt3g.maps.map_modules.SetPolConv:
+
+**spt3g.maps.map_modules.SetPolConv**
+
+Set or change the polarization convention of the input polarized map frame.
+If switching between IAU and COSMO conventions, flip the sign of the U map
+and the TU and QU weights.  Otherwise, just set the polarization convention
+for all maps and weights.
+
+
+*Definition:*
+        ``SetPolConv(frame, pol_conv=spt3g.maps.MapPolConv.IAU)``
 
 
 
