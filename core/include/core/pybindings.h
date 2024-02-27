@@ -352,8 +352,6 @@ public:
 	    .def(boost::python::init<const T &>()) \
 	    .def_pickle(g3frameobject_picklesuite<T>())
 
-#endif
-
 // Declare a python module with a name and the name of its enclosing package scope.
 // name should be be a bare token, while pkg should be a string literal, e.g.:
 //     SPT3G_PYTHON_MODULE_2(foo, "spt3g.bar")
@@ -384,3 +382,5 @@ void BOOST_PP_CAT(spt3g_init_module_, name)()
 // string literal.
 // If the enclosing package name is not specified, it will default to "spt3g".
 #define SPT3G_PYTHON_MODULE(...) BOOST_PP_OVERLOAD(SPT3G_PYTHON_MODULE_,__VA_ARGS__)(__VA_ARGS__)
+
+#endif
