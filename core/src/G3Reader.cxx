@@ -7,7 +7,8 @@
 G3Reader::G3Reader(std::string filename, int n_frames_to_read,
     float timeout, bool track_filename) :
     prefix_file_(false), n_frames_to_read_(n_frames_to_read),
-    n_frames_read_(0), timeout_(timeout), track_filename_(track_filename)
+    n_frames_read_(0), n_frames_cur_(0), timeout_(timeout),
+    track_filename_(track_filename)
 {
 	boost::filesystem::path fpath(filename);
 	if (filename.find("://") == std::string::npos &&
@@ -20,7 +21,8 @@ G3Reader::G3Reader(std::string filename, int n_frames_to_read,
 G3Reader::G3Reader(std::vector<std::string> filename, int n_frames_to_read,
     float timeout, bool track_filename) :
     prefix_file_(false), n_frames_to_read_(n_frames_to_read),
-    n_frames_read_(0), timeout_(timeout), track_filename_(track_filename)
+    n_frames_read_(0), n_frames_cur_(0), timeout_(timeout),
+    track_filename_(track_filename)
 {
 	if (filename.size() == 0)
 		log_fatal("Empty file list provided to G3Reader");
@@ -41,6 +43,7 @@ void G3Reader::StartFile(std::string path)
 {
 	log_info("Starting file %s\n", path.c_str());
 	cur_file_ = path;
+	n_frames_cur_ = 0;
 	(void) g3_istream_from_path(stream_, path, timeout_);
 }
 
@@ -80,7 +83,9 @@ void G3Reader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	if (Py_IsInitialized())
 		_save = PyEval_SaveThread();
 
-	if (stream_.peek() == EOF) {
+	while (stream_.peek() == EOF) {
+		if (n_frames_cur_ == 0)
+			log_error("Empty file %s", cur_file_.c_str());
 		if (filename_.size() > 0) {
 			StartFile(filename_.front());
 			filename_.pop_front();
@@ -109,6 +114,7 @@ void G3Reader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	out.push_back(frame);
 
 	n_frames_read_++;
+	n_frames_cur_++;
 }
 
 off_t G3Reader::Seek(off_t offset) {

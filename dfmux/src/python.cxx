@@ -2,7 +2,7 @@
 
 namespace bp = boost::python;
 
-BOOST_PYTHON_MODULE(dfmux)
+SPT3G_PYTHON_MODULE(dfmux)
 {
 	// Python bindings dependencies
 	bp::import("spt3g.core");

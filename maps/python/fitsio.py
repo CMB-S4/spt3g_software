@@ -474,7 +474,7 @@ def parse_wcs_header(header):
 
 @core.usefulfunc
 def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
-                     compress='GZIP_2', hdr=None):
+                     compress=False, quantize_level=16.0, hdr=None):
     """
     Save G3 map objects to a fits file.
 
@@ -508,7 +508,13 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
         FITS readers (e.g. idlastro). If defined, the compression algorithm to
         be used by the Astropy class astropy.io.fits.CompImageHDU.
         Can be: 'RICE_1', 'RICE_ONE', 'PLIO_1', 'GZIP_1', 'GZIP_2' or
-        'HCOMPRESS_1'. Only GZIP_1 and GZIP_2 are lossless.
+        'HCOMPRESS_1'. Only GZIP_1 and GZIP_2 are lossless, although only
+        for integer data.
+    quantize_level : float
+        Floating point quantization level for compression.  Higher values result
+        in more accurate floating point representation, but worse compression
+        ratio.  See the astropy FITS image documention for details:
+        https://docs.astropy.org/en/stable/io/fits/api/images.html
     hdr  : dict
        If defined, extra keywords to be appened to the FITS header. The dict
        can contain entries such as ``hdr['NEWKEY'] = 'New value'`` or
@@ -605,7 +611,12 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
         for m, name in zip(maps, names):
             if flat:
                 if compress:
-                    hdu = astropy.io.fits.CompImageHDU(np.asarray(m), header=header, compression_type=ctype)
+                    hdu = astropy.io.fits.CompImageHDU(
+                        np.asarray(m),
+                        header=header,
+                        compression_type=ctype,
+                        quantize_level=quantize_level,
+                    )
                 else:
                     hdu = astropy.io.fits.ImageHDU(np.asarray(m), header=header)
                 hdu.header['ISWEIGHT'] = False
@@ -665,7 +676,12 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
 
                 if flat:
                     if compress:
-                        hdu = astropy.io.fits.CompImageHDU(np.asarray(m), header=header, compression_type=ctype)
+                        hdu = astropy.io.fits.CompImageHDU(
+                            np.asarray(m),
+                            header=header,
+                            compression_type=ctype,
+                            quantize_level=quantize_level,
+                        )
                     else:
                         hdu = astropy.io.fits.ImageHDU(np.asarray(m), header=header)
                     hdu.header['ISWEIGHT'] = True
@@ -722,7 +738,14 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
 
 
 @core.indexmod
-def SaveMapFrame(frame, output_file=None, hdr=None, compress='GZIP_2', overwrite=False):
+def SaveMapFrame(
+    frame,
+    output_file=None,
+    hdr=None,
+    compress=False,
+    quantize_level=16.0,
+    overwrite=False,
+):
     """
     Save a map frame to a FITS file.  See ``save_skymap_fits`` for details.  The
     map frame should contain T maps and (optionally) unpolarized weights, or T/Q/U
@@ -745,7 +768,13 @@ def SaveMapFrame(frame, output_file=None, hdr=None, compress='GZIP_2', overwrite
         FITS readers (e.g. idlastro). If defined, the compression algorithm to
         be used by the Astropy class astropy.io.fits.CompImageHDU.
         Can be: 'RICE_1', 'RICE_ONE', 'PLIO_1', 'GZIP_1', 'GZIP_2' or
-        'HCOMPRESS_1'. Only GZIP_1 and GZIP_2 are lossless.
+        'HCOMPRESS_1'. Only GZIP_1 and GZIP_2 are lossless, although only
+        for integer data.
+    quantize_level : float
+        Floating point quantization level for compression.  Higher values result
+        in more accurate floating point representation, but worse compression
+        ratio.  See the astropy FITS image documention for details:
+        https://docs.astropy.org/en/stable/io/fits/api/images.html
     overwrite : bool
         If True, any existing file with the same name will be ovewritten.
     """
@@ -769,5 +798,6 @@ def SaveMapFrame(frame, output_file=None, hdr=None, compress='GZIP_2', overwrite
         W=W,
         overwrite=overwrite,
         compress=compress,
+        quantize_level=quantize_level,
         hdr=hdr,
     )

@@ -3,6 +3,152 @@
 #include <pybindings.h>
 #include <container_pybindings.h>
 #include <serialization.h>
+#include "int_storage.h"
+
+/* Special load/save for int64_t, using the same encoding at G3VectorInt */
+
+template <>
+template <class A>
+void G3Map<std::string, int64_t>::load(A &ar, const unsigned v)
+{
+	G3_CHECK_VERSION(v);
+
+	ar & cereal::make_nvp("G3FrameObject",
+	    cereal::base_class<G3FrameObject>(this));
+	int store_bits = 32;
+	if (v >= 2)
+		ar & cereal::make_nvp("store_bits", store_bits);
+
+	switch(store_bits) {
+	case 64:
+		ar & cereal::make_nvp("map",
+		    cereal::base_class<std::map<std::string, int64_t> >(this));
+		break;
+	case 32:
+		load_as<A, int32_t>(ar, *this);
+		break;
+	case 16:
+		load_as<A, int16_t>(ar, *this);
+		break;
+	case 8:
+		load_as<A, int8_t>(ar, *this);
+		break;
+	}
+}
+
+template <>
+template <class A>
+void G3Map<std::string, int64_t>::save(A &ar, const unsigned v) const
+{
+	// v == 2
+	ar & cereal::make_nvp("G3FrameObject",
+	    cereal::base_class<G3FrameObject>(this));
+	// Count the interesting bits, and convert to nearest power of 2.
+	int sig_bits = bit_count(*this);
+	int store_bits = 8;
+	while (store_bits < sig_bits)
+		store_bits *= 2;
+	ar & cereal::make_nvp("store_bits", store_bits);
+	switch(store_bits) {
+	case 8:
+		save_as<A, int8_t>(ar, *this);
+		break;
+	case 16:
+		save_as<A, int16_t>(ar, *this);
+		break;
+	case 32:
+		save_as<A, int32_t>(ar, *this);
+		break;
+	default:
+		ar & cereal::make_nvp("map",
+		    cereal::base_class<std::map<std::string, int64_t> >(this));
+	}
+}
+
+template <>
+template <class A>
+void G3Map<std::string, std::vector<int64_t> >::load(A &ar, const unsigned v)
+{
+	G3_CHECK_VERSION(v);
+
+	ar & cereal::make_nvp("G3FrameObject",
+	    cereal::base_class<G3FrameObject>(this));
+
+	if (v == 1) {
+		std::map<std::string, std::vector<int32_t> > temp;
+		ar & cereal::make_nvp("map", temp);
+		for (auto const &i: temp) {
+			std::vector<int64_t> v(i.second.begin(), i.second.end());
+			(*this)[i.first] = v;
+		}
+
+		return;
+	}
+
+	uint32_t len;
+	ar & cereal::make_nvp("len", len);
+
+	for (uint32_t i = 0; i < len; i++) {
+		std::pair<std::string, std::vector<int64_t> > item;
+		ar & cereal::make_nvp("key", item.first);
+		int store_bits;
+		ar & cereal::make_nvp("store_bits", store_bits);
+
+		switch(store_bits) {
+		case 64:
+			ar & cereal::make_nvp("vector", item.second);
+			break;
+		case 32:
+			load_as<A, int32_t>(ar, item.second);
+			break;
+		case 16:
+			load_as<A, int16_t>(ar, item.second);
+			break;
+		case 8:
+			load_as<A, int8_t>(ar, item.second);
+			break;
+		}
+
+		this->insert(item);
+	}
+}
+
+template <>
+template <class A>
+void G3Map<std::string, std::vector<int64_t> >::save(A &ar, const unsigned v) const
+{
+	// v == 2
+	ar & cereal::make_nvp("G3FrameObject",
+	    cereal::base_class<G3FrameObject>(this));
+
+	uint32_t len = size();
+	ar & cereal::make_nvp("len", len);
+
+	for (auto const &i: *this) {
+		ar & cereal::make_nvp("key", i.first);
+
+		// Count the interesting bits, and convert to nearest power of 2.
+		int sig_bits = bit_count(i.second);
+		int store_bits = 8;
+		while (store_bits < sig_bits)
+			store_bits *= 2;
+		ar & cereal::make_nvp("store_bits", store_bits);
+
+		switch(store_bits) {
+		case 8:
+			save_as<A, int8_t>(ar, i.second);
+			break;
+		case 16:
+			save_as<A, int16_t>(ar, i.second);
+			break;
+		case 32:
+			save_as<A, int32_t>(ar, i.second);
+			break;
+		default:
+			ar & cereal::make_nvp("vector", i.second);
+		}
+	}
+}
 
 template <class A> void G3MapFrameObject::save(A &ar, const unsigned v) const
 {
@@ -70,19 +216,20 @@ std::string G3MapFrameObject::Description() const
 	return s.str();
 }
 
-G3_SERIALIZABLE_CODE(G3MapInt);
 G3_SERIALIZABLE_CODE(G3MapDouble);
 G3_SERIALIZABLE_CODE(G3MapMapDouble);
 G3_SERIALIZABLE_CODE(G3MapString);
 G3_SERIALIZABLE_CODE(G3MapQuat);
 G3_SERIALIZABLE_CODE(G3MapVectorBool);
-G3_SERIALIZABLE_CODE(G3MapVectorInt);
 G3_SERIALIZABLE_CODE(G3MapVectorDouble);
 G3_SERIALIZABLE_CODE(G3MapVectorString);
 G3_SERIALIZABLE_CODE(G3MapVectorVectorString);
 G3_SERIALIZABLE_CODE(G3MapVectorComplexDouble);
 G3_SERIALIZABLE_CODE(G3MapVectorTime);
 G3_SERIALIZABLE_CODE(G3MapVectorQuat);
+
+G3_SPLIT_SERIALIZABLE_CODE(G3MapInt);
+G3_SPLIT_SERIALIZABLE_CODE(G3MapVectorInt);
 
 G3_SPLIT_SERIALIZABLE_CODE(G3MapFrameObject);
 

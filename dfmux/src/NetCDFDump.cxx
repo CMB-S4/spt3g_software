@@ -106,22 +106,32 @@ void NetCDFDump::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 			if (board == metasamp->end())
 				continue;
 
-			auto module = board->second.find(chan->second.module);
+			int mod_idx, chan_idx;
+			// slight hackery for indexing timepoint frames with modules split into blocks (e.g. with hidfmux)
+			if (board->second.nblocks > 1) {
+				mod_idx = chan->second.module * board->second.nblocks +
+				    (int)(chan->second.channel / board->second.nchannels);
+				chan_idx = chan->second.channel % board->second.nchannels;
+			} else {
+				mod_idx = chan->second.module;
+				chan_idx = chan->second.channel;
+			}
+
+			auto module = board->second.find(mod_idx);
 			if (module == board->second.end())
 				continue;
 
-			if (module->second->size()/2 <=
-			    size_t(chan->second.channel)) {
-				log_fatal("Board %d, module %d only has %zd "
+			if (module->second->size()/2 <= size_t(chan_idx)) {
+				log_fatal("Board %d, module block %d only has %zd "
 				    "channels, but trying to read %d",
 				    chan->second.board_serial,
-				    chan->second.module,
+				    mod_idx,
 				    module->second->size()/2,
-				    chan->second.channel);
+				    chan_idx);
 			}
 
-			i = (*module->second)[chan->second.channel*2];
-			q = (*module->second)[chan->second.channel*2 + 1];
+			i = (*module->second)[chan_idx*2];
+			q = (*module->second)[chan_idx*2 + 1];
 
 			nc_put_vara(nc_file_id_, ids.first, &start, &count, &i);
 			nc_put_vara(nc_file_id_, ids.second, &start, &count, &q);
