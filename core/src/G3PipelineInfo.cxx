@@ -21,7 +21,7 @@ template <class A> void G3ModuleConfig::save(A &ar, unsigned v) const
 
 	for (auto i : config) {
 		ar << cereal::make_nvp("key", i.first);
-    PyContext ctx; 
+    G3PyContext ctx; 
 		// Serialize frame objects (e.g. skymaps used as configs)
 		// directly. Serialize random python things through repr().
 		if (bp::extract<G3FrameObject>(i.second).check()) {
@@ -70,7 +70,7 @@ template <class A> void G3ModuleConfig::load(A &ar, unsigned v)
 		ar >> cereal::make_nvp("key", key);
 		ar >> cereal::make_nvp("frameobject", is_frameobject);
 		
-    PyContext ctx; 
+    G3PyContext ctx; 
 		// Frame objects (e.g. skymaps used as configs) serialized
 		// directly. Random python things serialized as repr(), so
 		// eval() them.
@@ -99,7 +99,7 @@ G3ModuleConfig::Summary() const
 {
 	std::string rv = "pipe.Add(" + modname;
 	for (auto i : config) {
-    PyContext ctx; 
+    G3PyContext ctx; 
 		std::string repr = bp::extract<std::string>(
 		    i.second.attr("__repr__")());
 		rv += ", " + i.first + "=" + repr;

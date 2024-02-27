@@ -596,12 +596,12 @@ BOOST_PYTHON_MODULE(core)
 	G3ModuleRegistrator::CallRegistrarsFor("core");
 }
 
-//PyContext Implementation
+//G3PyContext Implementation
 
 static PyThreadState * init_save_ = nullptr; 
 
 int 
-PyContext::initializePython() 
+G3PyContext::initializePython() 
 {
 		if (!Py_IsInitialized())
 		{
@@ -621,7 +621,7 @@ PyContext::initializePython()
 }
 
 int
-PyContext::deinitializePython() 
+G3PyContext::deinitializePython() 
 {
 	if (init_save_) 
 		PyEval_RestoreThread(init_save_); 
@@ -629,5 +629,5 @@ PyContext::deinitializePython()
 	return 0; 
 }
 
-std::mutex PyContext::mut_; 
-bool PyContext::enabled_ = false; 
+std::mutex G3PyContext::mut_; 
+bool G3PyContext::enabled_ = false; 

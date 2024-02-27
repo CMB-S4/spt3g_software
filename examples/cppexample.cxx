@@ -28,7 +28,7 @@ main(int argc, const char **argv)
 		std::cerr << "Too few arguments!" << std::endl;
 		return 1;
 	}
-	PyContext::initializePython(); 
+	G3PyContext::initializePython(); 
 
 	G3Pipeline pipe;
 
@@ -37,7 +37,7 @@ main(int argc, const char **argv)
 
 	pipe.Run();
 
-	PyContext::deinitializePython(); 
+	G3PyContext::deinitializePython(); 
 	
 	return 0;
 }

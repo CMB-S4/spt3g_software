@@ -351,10 +351,10 @@ public:
  *
  * This only matters if you're using a multithreaded C++ application
  * so everything is gated by an on/off switch to optimize the "normal" case. 
- * So that means you need to call PyContext::enable() at the beginning of your program
+ * So that means you need to call G3PyContext::enable() at the beginning of your program
  * for this to do anything. 
  *
- * Basically, anywhere we call python code we should have a PyContext. ensureGILState()
+ * Basically, anywhere we call python code we should have a G3PyContext. ensureGILState()
  * is called automatically by the constructor and releaseGILState() by the destructor,
  * so you only need to call them manually if there's a gap in the same scope 
  * betwen Python things. 
@@ -363,17 +363,17 @@ public:
  * method, as there are some tricks to getting this right across all Python versions.
  *
  **/ 
-class PyContext
+class G3PyContext
 {
 	public:
 		// Sets up a Pythoncontext and calls ensureGILState
-		PyContext() 
+		G3PyContext() 
 			: ensured_(false)
 		{
 			ensureGILState();
 		}
 
-		~PyContext()
+		~G3PyContext()
 		{
 			releaseGILState();
 		}

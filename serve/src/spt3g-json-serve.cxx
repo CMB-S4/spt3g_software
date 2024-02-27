@@ -335,8 +335,8 @@ int main(int nargs, char **argv)
 	}
 
 	//This is needed for "random python things" stored in frames to work
-	PyContext::initializePython(); 
-  PyContext::enable(); 
+	G3PyContext::initializePython(); 
+  G3PyContext::enable(); 
   signal(SIGPIPE, SIG_IGN);
 
 	httplib::Server server;
@@ -377,7 +377,7 @@ int main(int nargs, char **argv)
 		return 1;
 	}
 
-  PyContext::deinitializePython(); 
+  G3PyContext::deinitializePython(); 
 
 	return 0;
 }
