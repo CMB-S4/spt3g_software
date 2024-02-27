@@ -297,6 +297,17 @@ def ValidateMaps(frame, ignore_missing_weights=False):
                 unit="ValidateMaps",
             )
 
+        if k in ["Wpol", "Wunpol"]:
+            if frame[k].TT.pol_type == maps.MapPolType.TT:
+                continue
+            # set weights polarization properties
+            w = frame.pop(k)
+            for wk in w.keys():
+                w[wk].pol_type = getattr(maps.MapPolType, wk)
+                if k == "Wpol":
+                    w[wk].pol_conv = frame["U"].pol_conv
+            frame[k] = w
+
         if k in "TQU":
             if k == "U":
                 if isinstance(frame[k], maps.FlatSkyMap) and (
@@ -876,8 +887,8 @@ class ReprojectMaps(object):
                 "Coordinate rotation of polarized maps is not implemented"
             )
 
-        if "Q" in frame and not self.stub.polarized:
-            self.stub.pol_conv = frame["Q"].pol_conv
+        if "U" in frame and not self.stub.polarized:
+            self.stub.pol_conv = frame["U"].pol_conv
 
         for key in ["T", "Q", "U", "Wpol", "Wunpol", "H"]:
 
