@@ -177,6 +177,8 @@ del skymapweights_reshape
 def skymapweights_getattr(self, x):
     if x == "flat_pol" and isinstance(self.TQ, FlatSkyMap):
         return getattr(self.TQ, x)
+    if x == "pol_conv" and isinstance(self.TU, FlatSkyMap):
+        return getattr(self.TU, x)
     if hasattr(self.TT, x):
         return getattr(self.TT, x)
     raise AttributeError("'{}' object has no attribute '{}'".format(type(self), x))

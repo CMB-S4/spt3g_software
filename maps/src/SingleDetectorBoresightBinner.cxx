@@ -109,6 +109,7 @@ SingleDetectorBoresightBinner::SingleDetectorBoresightBinner(
 {
 	template_ = stub_map.Clone(false);
 	template_->pol_type = G3SkyMap::T;
+	template_->pol_conv = G3SkyMap::ConvNone;
 }
 
 void
@@ -172,7 +173,7 @@ SingleDetectorBoresightBinner::Process(G3FramePtr frame,
 			#endif
 		}
 		map_weights_ = G3SkyMapWeightsPtr(
-		    new G3SkyMapWeights(template_, false));
+		    new G3SkyMapWeights(template_));
 	} else {
 		if (template_->units != timestreams->GetUnits())
 			log_fatal("Timestreams have units that do not match "

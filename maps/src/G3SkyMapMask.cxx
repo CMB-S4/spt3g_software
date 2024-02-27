@@ -15,7 +15,7 @@ G3SkyMapMask::G3SkyMapMask(const G3SkyMap &parent, bool use_data,
 	G3SkyMapPtr tmp = parent.Clone(false);
 	tmp->units = G3Timestream::None;
 	tmp->pol_type = G3SkyMap::None;
-	tmp->SetPolConv(G3SkyMap::ConvNone);
+	tmp->pol_conv = G3SkyMap::ConvNone;
 	tmp->weighted = false;
 	parent_ = tmp;
 	data_ = std::vector<bool>(parent.size());
@@ -31,7 +31,7 @@ G3SkyMapMask::G3SkyMapMask(const G3SkyMap &parent, boost::python::object v,
 	G3SkyMapPtr tmp = parent.Clone(false);
 	tmp->units = G3Timestream::None;
 	tmp->pol_type = G3SkyMap::None;
-	tmp->SetPolConv(G3SkyMap::ConvNone);
+	tmp->pol_conv = G3SkyMap::ConvNone;
 	tmp->weighted = false;
 	parent_ = tmp;
 	data_ = std::vector<bool>(parent.size());

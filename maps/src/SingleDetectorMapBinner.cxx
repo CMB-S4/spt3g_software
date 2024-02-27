@@ -57,6 +57,7 @@ SingleDetectorMapBinner::SingleDetectorMapBinner(
 {
 	template_ = stub_map.Clone(false);
 	template_->pol_type = G3SkyMap::T;
+	template_->pol_conv = G3SkyMap::ConvNone;
 }
 
 void
@@ -120,7 +121,7 @@ SingleDetectorMapBinner::Process(G3FramePtr frame,
 
 			maps_[i.first].first = template_->Clone(false);
 			maps_[i.first].second = G3SkyMapWeightsPtr(
-			    new G3SkyMapWeights(template_, false));
+			    new G3SkyMapWeights(template_));
 #ifdef OPENMP_FOUND
 			// Create a list of detectors to satisfy OpenMP's need
 			// for scalar iteration.

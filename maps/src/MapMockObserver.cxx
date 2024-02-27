@@ -112,9 +112,9 @@ MapMockObserver::MapMockObserver(std::string pointing, std::string timestreams,
 		log_fatal("If simulating polarized maps, pass both Q and U.");
 
 	if (U_) {
-		if (U_->GetPolConv() == G3SkyMap::ConvNone)
+		if (!(U_->IsPolarized()))
 			log_fatal("Missing pol_conv");
-		pol_sign_ = (U_->GetPolConv() == G3SkyMap::COSMO) ? -1 : 1;
+		pol_sign_ = (U_->pol_conv == G3SkyMap::COSMO) ? -1 : 1;
 	}
 }
 

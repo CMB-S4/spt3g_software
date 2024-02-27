@@ -48,9 +48,9 @@ G3SkyMap::serialize(A &ar, unsigned v)
 	ar & cereal::make_nvp("weighted", weighted);
 
 	if (v > 2) {
-		ar & cereal::make_nvp("pol_conv", pol_conv_);
+		ar & cereal::make_nvp("pol_conv", pol_conv);
 	} else {
-		pol_conv_ = ConvNone;
+		pol_conv = ConvNone;
 	}
 
 }
@@ -90,13 +90,28 @@ G3SkyMapWeights::serialize(A &ar, unsigned v)
 G3_SERIALIZABLE_CODE(G3SkyMap);
 G3_SERIALIZABLE_CODE(G3SkyMapWeights);
 
+
+static bool
+isumap(const G3SkyMap &m)
+{
+	if (m.pol_type == G3SkyMap::U)
+		return true;
+	if (m.pol_type == G3SkyMap::TU)
+		return true;
+	if (m.pol_type == G3SkyMap::QU)
+		return true;
+
+	return false;
+}
+
+
 G3SkyMap::G3SkyMap(MapCoordReference coords, bool weighted,
     G3Timestream::TimestreamUnits units, MapPolType pol_type,
     MapPolConv pol_conv) :
     coord_ref(coords), units(units), pol_type(pol_type),
-    weighted(weighted), overflow(0), pol_conv_(pol_conv)
+    pol_conv(pol_conv), weighted(weighted), overflow(0)
 {
-	if (pol_type == U && pol_conv == ConvNone)
+	if (isumap(*this) && pol_conv == ConvNone)
 		log_warn("Map object has pol_type U and unknown pol_conv. "
 			 "Set the pol_conv attribute to IAU or COSMO.");
 }
@@ -111,20 +126,20 @@ G3SkyMap::ArrayClone(boost::python::object val) const
 }
 
 
-G3SkyMapWeights::G3SkyMapWeights(G3SkyMapConstPtr ref, bool polarized) :
-    TT(ref->Clone(false)), TQ(polarized ? ref->Clone(false) : NULL),
-    TU(polarized ? ref->Clone(false) : NULL),
-    QQ(polarized ? ref->Clone(false) : NULL),
-    QU(polarized ? ref->Clone(false) : NULL),
-    UU(polarized ? ref->Clone(false) : NULL)
+G3SkyMapWeights::G3SkyMapWeights(G3SkyMapConstPtr ref) :
+    TT(ref->Clone(false)), TQ(ref->IsPolarized() ? ref->Clone(false) : NULL),
+    TU(ref->IsPolarized() ? ref->Clone(false) : NULL),
+    QQ(ref->IsPolarized() ? ref->Clone(false) : NULL),
+    QU(ref->IsPolarized() ? ref->Clone(false) : NULL),
+    UU(ref->IsPolarized() ? ref->Clone(false) : NULL)
 {
-	TT->pol_type = G3SkyMap::None;
-	if (polarized){
-		TQ->pol_type = G3SkyMap::None;
-		TU->pol_type = G3SkyMap::None;
-		QQ->pol_type = G3SkyMap::None;
-		QU->pol_type = G3SkyMap::None;
-		UU->pol_type = G3SkyMap::None;
+	TT->pol_type = G3SkyMap::TT;
+	if (ref->IsPolarized()){
+		TQ->pol_type = G3SkyMap::TQ;
+		TU->pol_type = G3SkyMap::TU;
+		QQ->pol_type = G3SkyMap::QQ;
+		QU->pol_type = G3SkyMap::QU;
+		UU->pol_type = G3SkyMap::UU;
 	}
 }
 
@@ -476,30 +491,6 @@ skymap_setitem(G3SkyMap &skymap, ssize_t i, double val)
 	}
 
 	skymap[i] = val;
-}
-
-void
-G3SkyMap::SetPolConv(G3SkyMap::MapPolConv pol_conv)
-{
-	if (pol_type == G3SkyMap::U && pol_conv == G3SkyMap::ConvNone)
-		log_warn("Map object has pol_type U and unknown pol_conv. "
-			 "Set the pol_conv attribute to IAU or COSMO.");
-
-	if (pol_type != G3SkyMap::U ||
-	    pol_conv == G3SkyMap::ConvNone ||
-	    pol_conv_ == G3SkyMap::ConvNone) {
-		pol_conv_ = pol_conv;
-		return;
-	}
-
-	if (pol_conv != pol_conv_) {
-		log_warn("Sign of U map flipped in changing pol_conv from %s to %s",
-		    pol_conv == G3SkyMap::IAU ? "COSMO" : "IAU",
-		    pol_conv == G3SkyMap::IAU ? "IAU" : "COSMO");
-		(*this) *= -1;
-        }
-
-	pol_conv_ = pol_conv;
 }
 
 static bp::tuple
@@ -1426,6 +1417,17 @@ PYBINDINGS("maps") {
 	    .value("E", G3SkyMap::E)
 	    .value("B", G3SkyMap::B)
 	    .value("none", G3SkyMap::None) // "None" is reserved in python
+	    .value("TT", G3SkyMap::TT)
+	    .value("TQ", G3SkyMap::TQ)
+	    .value("TU", G3SkyMap::TU)
+	    .value("QQ", G3SkyMap::QQ)
+	    .value("QU", G3SkyMap::QU)
+	    .value("UU", G3SkyMap::UU)
+	    .value("TE", G3SkyMap::TE)
+	    .value("TB", G3SkyMap::TB)
+	    .value("EE", G3SkyMap::EE)
+	    .value("EB", G3SkyMap::EB)
+	    .value("BB", G3SkyMap::BB)
 	;
 	enum_none_converter::from_python<G3SkyMap::MapPolType>();
 
@@ -1448,11 +1450,11 @@ PYBINDINGS("maps") {
 	    .def_readwrite("pol_type", &G3SkyMap::pol_type,
 	      "Polarization type (maps.MapPolType) of the map "
 	      "(e.g. maps.MapPolType.Q).")
-	    .add_property("pol_conv", &G3SkyMap::GetPolConv, &G3SkyMap::SetPolConv,
+	    .def_readwrite("pol_conv", &G3SkyMap::pol_conv,
 	      "Polarization convention (maps.MapPolConv) of the map "
-	      "(e.g. maps.MapPolConv.IAU or maps.MapPolConv.COSMO). "
-	      "Switching between IAU and COSMO conventions for a U map "
-	      "multiplies the U map by -1.")
+	      "(e.g. maps.MapPolConv.IAU or maps.MapPolConv.COSMO).")
+	    .add_property("polarized", &G3SkyMap::IsPolarized,
+	      "True if the pol_conv property is set to IAU or COSMO, False otherwise.")
 	    .def_readwrite("units", &G3SkyMap::units,
 	      "Unit class (core.G3TimestreamUnits) of the map (e.g. "
 	      "core.G3TimestreamUnits.Tcmb). Within each unit class, further "
@@ -1674,9 +1676,10 @@ PYBINDINGS("maps") {
 	boost::python::implicitly_convertible<G3SkyMapPtr, G3SkyMapConstPtr>();
 
 	EXPORT_FRAMEOBJECT(G3SkyMapWeights, init<>(),
-	    "Polarized (Mueller matrix) or unpolarized (scalar) map pixel weights.")
-	    .def(bp::init<G3SkyMapConstPtr, bool>(
-	      (bp::arg("skymap"), bp::arg("polarized") = true)))
+	    "Polarized (Mueller matrix) or unpolarized (scalar) map pixel weights."
+	    "Weights are polarized if the pol_conv attribute of the reference map is set.")
+	    .def(bp::init<G3SkyMapConstPtr>(
+	      (bp::arg("skymap"))))
 	    .def_readwrite("TT",&G3SkyMapWeights::TT, "Mueller matrix component map")
 	    .def_readwrite("TQ",&G3SkyMapWeights::TQ, "Mueller matrix component map")
 	    .def_readwrite("TU",&G3SkyMapWeights::TU, "Mueller matrix component map")

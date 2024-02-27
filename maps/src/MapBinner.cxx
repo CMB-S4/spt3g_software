@@ -152,10 +152,9 @@ MapBinner::MapBinner(std::string output_map_id, const G3SkyMap &stub_map,
 	T_ = stub_map.Clone(false);
 	T_->pol_type = G3SkyMap::T;
 	if (store_weight_map)
-		map_weights_ = G3SkyMapWeightsPtr(new G3SkyMapWeights(T_,
-		    T_->GetPolConv() != G3SkyMap::ConvNone));
+		map_weights_ = G3SkyMapWeightsPtr(new G3SkyMapWeights(T_));
 
-	if (T_->GetPolConv() != G3SkyMap::ConvNone) {
+	if (T_->IsPolarized()) {
 		Q_ = stub_map.Clone(false);
 		Q_->pol_type = G3SkyMap::Q;
 		U_ = stub_map.Clone(false);
@@ -211,8 +210,7 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 
 		if (map_weights_) {
 			out_frame->Put((Q_) ? "Wpol" : "Wunpol", map_weights_);
-			map_weights_ = G3SkyMapWeightsPtr(new G3SkyMapWeights(
-			    T_, T_->GetPolConv() != G3SkyMap::ConvNone));
+			map_weights_ = map_weights_->Clone(false);
 		}
 
 		out_frame->Put("StartTime", G3TimePtr(new G3Time(start_)));

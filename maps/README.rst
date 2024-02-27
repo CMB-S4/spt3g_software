@@ -27,7 +27,7 @@ The following attributes are common to all G3SkyMap subclasses:
   The Stokes polarization of the map object, which is an instance of the ``MapPolType`` enum, and can have the value ``T``, ``Q``, ``U`` or None.
 
 ``pol_conv``
-  The polarization convention used to encode the Q and U Stokes orientations relative to the coordinate axes.  This attribute is an instance of the ``MapPolConv`` enum, which can have the value ``IAU``, ``COSMO`` or None.  Both IAU and COSMO polarization conventions are supported in polarization-aware functions (e.g. ``FlattenPol``), but most default to using the IAU convention.  Warnings will be raised when a polarized map is used without a polarization convention set.  Changing the polarization convention between IAU and COSMO on a ``U`` map results in flipping the sign of all pixels in the map.
+  The polarization convention used to encode the Q and U Stokes orientations relative to the coordinate axes.  This attribute is an instance of the ``MapPolConv`` enum, which can have the value ``IAU``, ``COSMO`` or None.  Both IAU and COSMO polarization conventions are supported in polarization-aware functions (e.g. ``FlattenPol``), but most default to using the IAU convention.  Warnings will be raised when a polarized map is used without a polarization convention set.  Use the ``SetPolConv`` pipeline module to change the polarization convention between IAU and COSMO for an entire map frame.  This will result in flipping the sign of all pixels in the ``U`` map as well as the ``TU`` and ``QU`` weights.
   
 ``units``
   The units system in which the map is computed, stored as an instance of the ``G3TimestreamUnits`` enum, typically ``Tcmb``.
