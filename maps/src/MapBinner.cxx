@@ -210,7 +210,7 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 
 		if (map_weights_) {
 			out_frame->Put((Q_) ? "Wpol" : "Wunpol", map_weights_);
-			map_weights_ = G3SkyMapWeightsPtr(new G3SkyMapWeights(T_));
+			map_weights_ = map_weights_->Clone(false);
 		}
 
 		out_frame->Put("StartTime", G3TimePtr(new G3Time(start_)));
