@@ -202,6 +202,13 @@ G3PipelineInfo_repr(const G3PipelineInfo &pi)
 	return rv;
 }
 
+G3ModuleConfig::~G3ModuleConfig()
+{
+	G3PythonContext ctx("G3ModuleConfig::~G3ModuleConfig", true);
+	config.clear();
+}
+
+
 G3_SPLIT_SERIALIZABLE_CODE(G3ModuleConfig);
 G3_SERIALIZABLE_CODE(G3PipelineInfo);
 
