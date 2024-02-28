@@ -32,6 +32,48 @@ void G3ModuleRegistrator::CallRegistrarsFor(const char *mod)
 		(*i)();
 }
 
+G3PythonContext::G3PythonContext(std::string name, bool hold_gil, bool init) :
+    name_(name), hold_(hold_gil), init_(init), thread_(nullptr)
+{
+	if (init_ && !Py_IsInitialized()) {
+		log_debug("%s: Initializing Python threads", name_.c_str());
+		Py_Initialize();
+#if (PY_MAJOR_VERSION == 3 && PY_MINOR_VERSION < 7)
+		PyEval_InitThreads();
+#endif
+	} else
+		init_ = false;
+
+	if (hold_) {
+		if (Py_IsInitialized() && !PyGILState_Check()) {
+			log_debug("%s: Ensuring GIL acquired", name_.c_str());
+			gil_ = PyGILState_Ensure();
+		} else
+			hold_ = false;
+	} else if (Py_IsInitialized() && PyGILState_Check()) {
+		log_debug("%s: Saving Python thread state", name_.c_str());
+		thread_ = PyEval_SaveThread();
+	}
+}
+
+G3PythonContext::~G3PythonContext()
+{
+	if (hold_ && Py_IsInitialized()) {
+		log_debug("%s: Releasing GIL", name_.c_str());
+		PyGILState_Release(gil_);
+	}
+
+	if (!!thread_) {
+		log_debug("%s: Restoring Python thread state", name_.c_str());
+		PyEval_RestoreThread(thread_);
+	}
+
+	if (init_) {
+		log_debug("%s: Finalizing Python threads", name_.c_str());
+		Py_Finalize();
+	}
+}
+
 G3FramePtr
 g3frame_char_constructor(std::string max_4_chars)
 {

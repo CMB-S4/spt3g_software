@@ -34,9 +34,7 @@ void G3EventBuilder::AddPolledDataModule(G3ModulePtr mod)
 
 void G3EventBuilder::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 {
-	PyThreadState *_save = nullptr;
-	if (Py_IsInitialized())
-		_save = PyEval_SaveThread();
+	G3PythonContext ctx("G3EventBuilder", false);
 
 	std::unique_lock<std::mutex> lock(out_queue_lock_);
 
@@ -45,9 +43,6 @@ void G3EventBuilder::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 
 	// If dead, out_queue_ will be empty, putting nothing in the queue
 	// and ending processing.
-
-	if (_save != nullptr)
-		PyEval_RestoreThread(_save);
 
 	out.swap(out_queue_);
 }

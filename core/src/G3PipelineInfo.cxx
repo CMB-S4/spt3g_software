@@ -17,11 +17,7 @@ template <class A> void G3ModuleConfig::save(A &ar, unsigned v) const
 
 	ar << cereal::make_nvp("size", config.size());
 
-	struct gil_holder{
-		PyGILState_STATE gs;
-		gil_holder():gs(PyGILState_Ensure()){}
-		~gil_holder(){ PyGILState_Release(gs); }
-	} gh;
+	G3PythonContext ctx("G3ModuleConfig::save", true);
 
 	for (auto i : config) {
 		ar << cereal::make_nvp("key", i.first);
@@ -34,6 +30,9 @@ template <class A> void G3ModuleConfig::save(A &ar, unsigned v) const
 			ar << cereal::make_nvp("frameobject", true);
 			ar << cereal::make_nvp("value", fo);
 		} else {
+			if (!Py_IsInitialized())
+				continue;
+
 			try {
 				PyObject *repr = PyObject_Repr(i.second.ptr());
 				bp::handle<> reprhand(repr);
@@ -56,9 +55,15 @@ template <class A> void G3ModuleConfig::save(A &ar, unsigned v) const
 
 template <class A> void G3ModuleConfig::load(A &ar, unsigned v)
 {
+	G3PythonContext ctx("G3ModuleConfig::load", true);
+
 	namespace bp = boost::python;
-	bp::object main = bp::import("__main__");
-	bp::object global = main.attr("__dict__");
+	bp::object global;
+
+	if (Py_IsInitialized()) {
+		bp::object main = bp::import("__main__");
+		global = main.attr("__dict__");
+	}
 
 	ar & cereal::make_nvp("G3FrameObject",
 	    cereal::base_class<G3FrameObject>(this));
@@ -84,6 +89,12 @@ template <class A> void G3ModuleConfig::load(A &ar, unsigned v)
 		} else {
 			std::string repr;
 			ar >> cereal::make_nvp("value", repr);
+
+			if (!Py_IsInitialized()) {
+				config[key] = boost::python::object(repr);
+				continue;
+			}
+
 			bp::object obj;
 			try {
 				obj = bp::eval(bp::str(repr), global, global);
@@ -99,10 +110,14 @@ template <class A> void G3ModuleConfig::load(A &ar, unsigned v)
 std::string
 G3ModuleConfig::Summary() const
 {
+	G3PythonContext ctx("G3ModuleConfig::Summary", true);
+
 	std::string rv = "pipe.Add(" + modname;
 	for (auto i : config) {
-		std::string repr = bp::extract<std::string>(
-		    i.second.attr("__repr__")());
+		std::string repr = "unknown";
+		if (Py_IsInitialized())
+			repr = bp::extract<std::string>(
+			    i.second.attr("__repr__")());
 		rv += ", " + i.first + "=" + repr;
 	}
 

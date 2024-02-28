@@ -79,9 +79,7 @@ void G3Reader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	// Python interpreter (pure C++ applications will fail the
 	// Py_IsInitialized test).  Make sure all paths out of this
 	// function reacquire the lock, if it was released.
-	PyThreadState *_save = nullptr;
-	if (Py_IsInitialized())
-		_save = PyEval_SaveThread();
+	G3PythonContext ctx("G3Reader", false);
 
 	while (stream_.peek() == EOF) {
 		if (n_frames_cur_ == 0)
@@ -91,8 +89,6 @@ void G3Reader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 			filename_.pop_front();
 		} else {
 			// Stop processing
-			if (_save != nullptr)
-				PyEval_RestoreThread(_save);
 			return;
 		}
 	}
@@ -102,12 +98,8 @@ void G3Reader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	} catch (...) {
 		log_error("Exception raised while reading file %s",
 		    cur_file_.c_str());
-		if (_save != nullptr)
-			PyEval_RestoreThread(_save);
 		throw;
 	}
-	if (_save != nullptr)
-		PyEval_RestoreThread(_save);
 
 	if (track_filename_)
 		frame->_filename = cur_file_;

@@ -799,9 +799,7 @@ void ARCFileReader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	uint8_t *buffer;
 	off_t off;
 
-	PyThreadState *_save = nullptr;
-	if (Py_IsInitialized() && PyGILState_Check())
-		_save = PyEval_SaveThread();
+	G3PythonContext ctx("ARCFileReader", false);
 
 	try {
 		while (stream_.peek() == EOF) {
@@ -810,8 +808,6 @@ void ARCFileReader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 				filename_.pop_front();
 				StartFile(path);
 			} else {
-				if (_save != nullptr)
-					PyEval_RestoreThread(_save);
 				return;
 			}
 		}
@@ -840,13 +836,9 @@ void ARCFileReader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		stream_.read((char *)buffer, size);
 
 	} catch (...) {
-		if (_save != nullptr)
-			PyEval_RestoreThread(_save);
+		log_error("Exception raised while reading file %s", cur_file_.c_str());
 		throw;
 	}
-
-	if (_save != nullptr)
-		PyEval_RestoreThread(_save);
 
 	for (auto temp = array_map_.begin(); temp != array_map_.end(); temp++) {
 		G3MapFrameObjectPtr templ(new G3MapFrameObject);

@@ -1,3 +1,4 @@
+#include <core/pybindings.h>
 #include <core/G3.h>
 #include <core/G3Pipeline.h>
 #include <core/G3Reader.h>
@@ -26,6 +27,9 @@ main(int argc, const char **argv)
 		std::cerr << "Too few arguments!" << std::endl;
 		return 1;
 	}
+
+	// Initialize the python interpreter, and release the GIL
+	G3PythonContext ctx("main", false, true);
 
 	G3Pipeline pipe;
 

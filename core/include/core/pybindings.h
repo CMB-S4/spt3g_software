@@ -3,6 +3,7 @@
 
 #include <G3.h>
 #include <G3Frame.h>
+#include <G3Logging.h>
 
 #include <boost/preprocessor/cat.hpp>
 #include <boost/preprocessor/facilities/overload.hpp>
@@ -382,5 +383,31 @@ void BOOST_PP_CAT(spt3g_init_module_, name)()
 // string literal.
 // If the enclosing package name is not specified, it will default to "spt3g".
 #define SPT3G_PYTHON_MODULE(...) BOOST_PP_OVERLOAD(SPT3G_PYTHON_MODULE_,__VA_ARGS__)(__VA_ARGS__)
+
+// Python runtime context to simplify acquiring or releasing the GIL as necessary.
+// To use, simply construct the context object where necessary, e.g.
+//    G3PythonContext ctx("mycontext", false);
+// The context destructor will clean up after itself (releasing the GIL if acquired, and
+// vice versa).  If hold_gil is true, the context will ensure the GIL is held at construction,
+// and released at destruction.  If hold_gil is false, the context will save the current thread
+// state and release the GIL at construction, and re-acquire it at destruction.  If init is
+// true, the context will initialize the python interpeter at construction (e.g. at the
+// beginning of a C++ compiled program), and immediately release the GIL.  At destruction, it
+// will re-acquire the GIL and finalize threads.  The python interpreter should be
+// initialized only once, typically at the beginning of the main program.
+class G3PythonContext {
+public:
+	G3PythonContext(std::string name, bool hold_gil=false, bool init=false);
+	~G3PythonContext();
+
+private:
+	std::string name_;
+	bool hold_;
+	bool init_;
+	PyGILState_STATE gil_;
+	PyThreadState *thread_;
+
+	SET_LOGGER("G3PythonContext");
+};
 
 #endif
