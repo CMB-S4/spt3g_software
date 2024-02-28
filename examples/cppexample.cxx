@@ -28,7 +28,10 @@ main(int argc, const char **argv)
 		return 1;
 	}
 
-	// Initialize the python interpreter, and release the GIL
+	// Initialize the python interpreter, and release the GIL.
+	// Set the second argument to true to instead hold the GIL.
+	// Set the last argument to false, or comment this out,
+	// to disable the interpreter.
 	G3PythonContext ctx("main", false, true);
 
 	G3Pipeline pipe;
