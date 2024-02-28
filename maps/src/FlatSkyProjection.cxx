@@ -7,6 +7,7 @@
 #include <G3Logging.h>
 #include <G3Units.h>
 
+#include <maps/pointing.h>
 #include <maps/FlatSkyProjection.h>
 
 #define COS cos
@@ -31,8 +32,8 @@ FlatSkyProjection::FlatSkyProjection()
 
 FlatSkyProjection::FlatSkyProjection(const FlatSkyProjection & fp)
 {
-	initialize(fp.xpix_, fp.ypix_, fp.y_res_, fp.alphac_, fp.deltac_,
-	    fp.x_res_, fp.proj_, fp.xc_, fp.yc_);
+	initialize(fp.xpix_, fp.ypix_, fp.y_res_, fp.alpha0_, fp.delta0_,
+	    fp.x_res_, fp.proj_, fp.x0_, fp.y0_);
 }
 
 template <class A> void FlatSkyProjection::load(A &ar, unsigned v)
@@ -45,8 +46,8 @@ template <class A> void FlatSkyProjection::load(A &ar, unsigned v)
 	ar & make_nvp("xdim", xpix_);
 	ar & make_nvp("ydim", ypix_);
 	ar & make_nvp("proj", proj_);
-	ar & make_nvp("alpha_center", alphac_);
-	ar & make_nvp("delta_center", deltac_);
+	ar & make_nvp("alpha_center", alpha0_);
+	ar & make_nvp("delta_center", delta0_);
 	// Fix a stupid pickling mistake
 	if (v == 1) {
 		ar & make_nvp("y_res", y_res_);
@@ -57,18 +58,18 @@ template <class A> void FlatSkyProjection::load(A &ar, unsigned v)
 	}
 
 	if (v > 2) {
-		ar & make_nvp("x_center", xc_);
-		ar & make_nvp("y_center", yc_);
+		ar & make_nvp("x_center", x0_);
+		ar & make_nvp("y_center", y0_);
 		if (v == 3) {
-			xc_ -= 1;
-			yc_ -= 1;
+			x0_ -= 1;
+			y0_ -= 1;
 		}
 	} else {
-		xc_ = 0.0 / 0.0;
-		yc_ = 0.0 / 0.0;
+		x0_ = 0.0 / 0.0;
+		y0_ = 0.0 / 0.0;
 	}
 
-	initialize(xpix_, ypix_, y_res_, alphac_, deltac_, x_res_, proj_, xc_, yc_);
+	initialize(xpix_, ypix_, y_res_, alpha0_, delta0_, x_res_, proj_, x0_, y0_);
 }
 
 template <class A> void FlatSkyProjection::save(A &ar, unsigned v) const
@@ -79,12 +80,12 @@ template <class A> void FlatSkyProjection::save(A &ar, unsigned v) const
 	ar & make_nvp("xdim", xpix_);
 	ar & make_nvp("ydim", ypix_);
 	ar & make_nvp("proj", proj_);
-	ar & make_nvp("alpha_center", alphac_);
-	ar & make_nvp("delta_center", deltac_);
+	ar & make_nvp("alpha_center", alpha0_);
+	ar & make_nvp("delta_center", delta0_);
 	ar & make_nvp("x_res", x_res_);
 	ar & make_nvp("y_res", y_res_);
-	ar & make_nvp("x_center", xc_);
-	ar & make_nvp("y_center", yc_);
+	ar & make_nvp("x_center", x0_);
+	ar & make_nvp("y_center", y0_);
 }
 
 std::string FlatSkyProjection::Description() const
@@ -126,11 +127,11 @@ std::string FlatSkyProjection::Description() const
 		os << "other (" << proj_ << ")";
 	}
 
-	os << " centered at (" << xc_ <<
-	    ", " << yc_ << ")";
+	os << " centered at (" << x0_ <<
+	    ", " << y0_ << ")";
 
-	os << " = (" << alphac_ / deg << ", "
-	    << deltac_ / deg << " deg)";
+	os << " = (" << alpha0_ / deg << ", "
+	    << delta0_ / deg << " deg)";
 
 	return os.str();
 }
@@ -159,49 +160,45 @@ void FlatSkyProjection::initialize(size_t xpix, size_t ypix, double res,
     double alpha_center, double delta_center, double x_res, MapProjection proj,
     double x_center, double y_center)
 {
-	init_ = false;
 	xpix_ = xpix;
 	ypix_ = ypix;
-	proj_ = proj;
+	SetProj(proj);
 	SetRes(res, x_res);
 	SetAngleCenter(alpha_center, delta_center);
 	SetXYCenter(x_center, y_center);
-	init_ = true;
 }
 
 void FlatSkyProjection::SetProj(MapProjection proj)
 {
 	proj_ = proj;
-	SetAngleCenter(alphac_, deltac_);
-	SetXYCenter(xc_, yc_);
+
+	switch (proj_) {
+	case Proj0:
+	case Proj1:
+	case Proj7:
+	case Proj9:
+		cyl_ = true;
+		break;
+	default:
+		cyl_ = false;
+		break;
+	}
 }
 
 void FlatSkyProjection::SetAlphaCenter(double alpha)
 {
-	alphac_ = alpha;
 	alpha0_ = alpha;
+	q0_ = get_origin_rotator(alpha0_, delta0_);
 }
 
 void FlatSkyProjection::SetDeltaCenter(double delta)
 {
 	if (fabs(delta) > 90 * deg)
 		log_fatal("Delta center out of range");
-	deltac_ = delta;
 	delta0_ = delta;
-	if (proj_ == Proj0 || proj_ == Proj1 || proj_ == Proj7 || proj_ == Proj9)
-		delta0_ = 0.0;
 	sindelta0_ = SIN(delta0_ / rad);
 	cosdelta0_ = COS(delta0_ / rad);
-	if (proj_ == Proj9) {
-		if (fabs(90 * deg - fabs(deltac_)) < 1e-12)
-			log_fatal("Projection %d is not valid at the poles", proj_);
-		pc_.resize(1);
-		pc_[0] = 1. / COS(deltac_ / rad);
-	} else {
-		pc_.clear();
-	}
-	if (init_)
-		SetYCenter(yc_);
+	q0_ = get_origin_rotator(alpha0_, delta0_);
 }
 
 void FlatSkyProjection::SetAngleCenter(double alpha, double delta)
@@ -212,16 +209,12 @@ void FlatSkyProjection::SetAngleCenter(double alpha, double delta)
 
 void FlatSkyProjection::SetXCenter(double x)
 {
-	xc_ = (x != x) ? (xpix_ / 2.0 - 0.5) : x;
-	x0_ = xc_;
+	x0_ = (x != x) ? (xpix_ / 2.0 - 0.5) : x;
 }
 
 void FlatSkyProjection::SetYCenter(double y)
 {
-	yc_ = (y != y) ? (ypix_ / 2.0 - 0.5) : y;
-	y0_ = yc_;
-	if (proj_ == Proj0 || proj_ == Proj1 || proj_ == Proj7 || proj_ == Proj9)
-		y0_ -= (proj_ == Proj7 ? SIN(deltac_ / rad) : deltac_) / y_res_;
+	y0_ = (y != y) ? (ypix_ / 2.0 - 0.5) : y;
 }
 
 void FlatSkyProjection::SetXYCenter(double x, double y)
@@ -246,7 +239,7 @@ void FlatSkyProjection::SetRes(double res, double x_res)
 	SetXRes(x_res);
 }
 
-long
+size_t
 FlatSkyProjection::XYToPixel(double x, double y) const
 {
 	// Truncate X/Y coordinates to integer pixels and wrap to 1D.
@@ -254,28 +247,35 @@ FlatSkyProjection::XYToPixel(double x, double y) const
 	// The floor() is important to properly truncate negative numbers,
 	// which otherwise pile up at zero from both directions.
 
-	long ix = (long)floor(x + 0.5);
-	long iy = (long)floor(y + 0.5);
+	ssize_t ix = (ssize_t)floor(x + 0.5);
+	ssize_t iy = (ssize_t)floor(y + 0.5);
 	return (ix < 0 || iy < 0 || ix >= xpix_ || iy >= ypix_) ?
 	    -1 : ix + iy * xpix_;
 }
 
 std::vector<double>
-FlatSkyProjection::PixelToXY(long pixel) const
+FlatSkyProjection::PixelToXY(size_t pixel) const
 {
 	std::vector<double> out(2, -1);
 
 	if (pixel >= 0 && pixel < xpix_ * ypix_) {
-		out[0] = (int)(pixel % xpix_);
-		out[1] = (int)(pixel / xpix_);
+		out[0] = (ssize_t)(pixel % xpix_);
+		out[1] = (ssize_t)(pixel / xpix_);
 	}
 
 	return out;
 }
 
 std::vector<double>
-FlatSkyProjection::XYToAngle(double x, double y, bool wrap_alpha) const
+FlatSkyProjection::XYToAngle(double x, double y) const
 {
+	if (!cyl_) {
+		quat q = XYToQuat(x, y);
+		double alpha, delta;
+		quat_to_ang(q, alpha, delta);
+		return {alpha, delta};
+	}
+
 	x = (x0_ - x) * x_res_;
 	y = (y0_ - y) * y_res_;
 
@@ -292,108 +292,14 @@ FlatSkyProjection::XYToAngle(double x, double y, bool wrap_alpha) const
 		alpha = x + alpha0_;
 		break;
 	}
-	case Proj2: {
-		x /= rad;
-		y /= rad;
-		double rho = sqrt(x * x + y * y);
-		double a, b;
-		if (rho < 1e-8) {
-			a = 0;
-			b = delta0_;
-		} else {
-			double c = ASIN(rho);
-			double cc = COS(c);
-			a = ATAN2(x, cc * cosdelta0_ + y * sindelta0_) * rad;
-			b = ASIN(cc * sindelta0_ - y * cosdelta0_) * rad;
-		}
-		delta = b;
-		alpha = a + alpha0_;
-		break;
-	}
-	case Proj3: {
-		x /= rad;
-		y /= rad;
-		double rho = sqrt(x * x + y * y);
-		double a, b;
-		if (rho < 1e-8) {
-			a = 0;
-			b = delta0_;
-		} else {
-			double c = rho;
-			double cc = COS(c);
-			double sc = SIN(c);
-			a = ATAN2(x * sc, rho * cc * cosdelta0_ + y * sc * sindelta0_) * rad;
-			b = ASIN(cc * sindelta0_ - y * sc / rho * cosdelta0_) * rad;
-		}
-		delta = b;
-		alpha = a + alpha0_;
-		break;
-	}
-	case Proj4: {
-		x /= rad;
-		y /= rad;
-		double rho = sqrt(x * x + y * y);
-		double a, b;
-		if (rho < 1e-8) {
-			a = 0;
-			b = delta0_;
-		} else {
-			double c = 2. * atan(rho / 2.);
-			double cc = COS(c);
-			double sc = SIN(c);
-			a = ATAN2(x * sc, rho * cc * cosdelta0_ + y * sc * sindelta0_) * rad;
-			b = ASIN(cc * sindelta0_ - y * sc / rho * cosdelta0_) * rad;
-		}
-		delta = b;
-		alpha = a + alpha0_;
-		break;
-	}
-	case Proj5: {
-		x /= rad;
-		y /= rad;
-		double rho = sqrt(x * x + y * y);
-		double a, b;
-		if (rho < 1e-8) {
-			a = 0;
-			b = delta0_;
-		} else {
-			double c = 2. * ASIN(rho / 2.);
-			double cc = COS(c);
-			double sc = SIN(c);
-			a = ATAN2(x * sc, rho * cc * cosdelta0_ + y * sc * sindelta0_) * rad;
-			b = ASIN(cc * sindelta0_ - y * sc / rho * cosdelta0_) * rad;
-		}
-		delta = b;
-		alpha = a + alpha0_;
-		break;
-	}
-	case Proj6: {
-		x /= rad;
-		y /= rad;
-		double rho = sqrt(x * x + y * y);
-		double a, b;
-		if (rho < 1e-8) {
-			a = 0;
-			b = delta0_;
-		} else {
-			double c = atan(rho);
-			double cc = COS(c);
-			double sc = SIN(c);
-			a = ATAN2(x * sc, rho * cc * cosdelta0_ + y * sc * sindelta0_) * rad;
-			b = ASIN(cc * sindelta0_ - y * sc / rho * cosdelta0_) * rad;
-		}
-		delta = b;
-		alpha = a + alpha0_;
-		break;
-	}
 	case Proj7: {
-		delta = delta0_ - ASIN(y) * rad;
+		delta = ASIN(sindelta0_ - y) * rad;
 		alpha = x + alpha0_;
 		break;
 	}
 	case Proj9: {
 		delta = delta0_ - y;
-		alpha = x * pc_[0] + alpha0_;
+		alpha = x / cosdelta0_ + alpha0_;
 		break;
 	}
 	default:
@@ -405,14 +311,10 @@ FlatSkyProjection::XYToAngle(double x, double y, bool wrap_alpha) const
 	static const double halfcirc = 180 * deg;
 	double dalpha = alpha - alpha0_;
 
-	if (wrap_alpha) {
-		alpha = fmod((alpha < 0) ? (circ * (1. + ceilf(fabs(alpha) / circ)) + alpha) : alpha, circ);
-	} else {
-		if (dalpha > halfcirc)
-			alpha -= circ;
-		if (dalpha < -halfcirc)
-			alpha += circ;
-	}
+	if (dalpha > halfcirc)
+		alpha -= circ;
+	if (dalpha < -halfcirc)
+		alpha += circ;
 
 	return {alpha, delta};
 }
@@ -420,6 +322,11 @@ FlatSkyProjection::XYToAngle(double x, double y, bool wrap_alpha) const
 std::vector<double>
 FlatSkyProjection::AngleToXY(double alpha, double delta) const
 {
+	if (!cyl_) {
+		quat q = ang_to_quat(alpha, delta);
+		return QuatToXY(q);
+	}
+
 	static const double circ = 360 * deg;
 	static const double halfcirc = 180 * deg;
 	static const double quartercirc = 90 * deg;
@@ -447,66 +354,13 @@ FlatSkyProjection::AngleToXY(double alpha, double delta) const
 		y = delta0_ - delta;
 		break;
 	}
-	case Proj2: {
-		dalpha /= rad;
-		delta /= rad;
-		double cosdelta = COS(delta);
-		y = (cosdelta * sindelta0_ * COS(dalpha) - cosdelta0_ * SIN(delta)) * rad;
-		x = cosdelta * SIN(dalpha) * rad;
-		break;
-	}
-	case Proj3: {
-		dalpha /= rad;
-		delta /= rad;
-		double cosdelta = COS(delta);
-		double sindelta = SIN(delta);
-		double cosdalpha = COS(dalpha);
-		double c = ASIN(sindelta0_ * sindelta + cosdelta0_ * cosdelta * cosdalpha);
-		double k = (90 * deg - rad * c) / COS(c);
-		y = k * (cosdelta * sindelta0_ * cosdalpha - cosdelta0_ * sindelta);
-		x = k * cosdelta * SIN(dalpha);
-		break;
-	}
-	case Proj4: {
-		dalpha /= rad;
-		delta /= rad;
-		double cosdelta = COS(delta);
-		double sindelta = SIN(delta);
-		double cosdalpha = COS(dalpha);
-		double k = rad * (2. / (1. + sindelta0_ * sindelta + cosdelta0_ * cosdelta * cosdalpha));
-		y = k * (cosdelta * sindelta0_ * cosdalpha - cosdelta0_ * sindelta);
-		x = k * cosdelta * SIN(dalpha);
-		break;
-	}
-	case Proj5: {
-		dalpha /= rad;
-		delta /= rad;
-		double cosdelta = COS(delta);
-		double sindelta = SIN(delta);
-		double cosdalpha = COS(dalpha);
-		double k = rad * sqrt(2. / (1. + sindelta0_ * sindelta + cosdelta0_ * cosdelta * cosdalpha));
-		y = k * (cosdelta * sindelta0_ * cosdalpha - cosdelta0_ * sindelta);
-		x = k * cosdelta * SIN(dalpha);
-		break;
-	}
-	case Proj6: {
-		dalpha /= rad;
-		delta /= rad;
-		double cosdelta = COS(delta);
-		double sindelta = SIN(delta);
-		double cosdalpha = COS(dalpha);
-		double k = rad / (sindelta0_ * sindelta + cosdelta0_ * cosdelta * cosdalpha);
-		y = k * (cosdelta * sindelta0_ * cosdalpha - cosdelta0_ * sindelta);
-		x = k * cosdelta * SIN(dalpha);
-		break;
-	}
 	case Proj7: {
 		x = dalpha;
-		y = SIN((delta0_ - delta) / rad);
+		y = sindelta0_ - SIN(delta / rad);
 		break;
 	}
 	case Proj9: {
-		x = dalpha / pc_[0];
+		x = dalpha * cosdelta0_;
 		y = delta0_ - delta;
 		break;
 	}
@@ -522,31 +376,144 @@ FlatSkyProjection::AngleToXY(double alpha, double delta) const
 }
 
 std::vector<double>
-FlatSkyProjection::PixelToAngle(long pixel, bool wrap_alpha) const
+FlatSkyProjection::QuatToXY(quat q) const
+{
+	if (cyl_) {
+		double a, d;
+		quat_to_ang(q, a, d);
+		return AngleToXY(a, d);
+	}
+
+	// Rotate to projection center
+	quat qr = ~q0_ * q * q0_;
+	double cc = qr.R_component_2();
+	double k;
+
+	switch(proj_) {
+	case Proj2: {
+		k = rad;
+		break;
+	}
+	case Proj3: {
+		k = rad * acos(cc) / sqrt((1. - cc) * (1. + cc));
+		break;
+	}
+	case Proj4: {
+		k = rad * (2. / (1. + cc));
+		break;
+	}
+	case Proj5: {
+		k = rad * sqrt(2. / (1. + cc));
+		break;
+	}
+	case Proj6: {
+		k = rad / cc;
+		break;
+	}
+	default:
+		log_fatal("Proj %d not implemented", proj_);
+		break;
+	}
+
+	double x = k * qr.R_component_3();
+	double y = -k * qr.R_component_4();
+
+	x = x0_ - x / x_res_;
+	y = y0_ - y / y_res_;
+
+	return {x, y};
+}
+
+quat
+FlatSkyProjection::XYToQuat(double x, double y) const
+{
+	if (cyl_) {
+		std::vector<double> alphadelta = XYToAngle(x, y);
+		return ang_to_quat(alphadelta[0], alphadelta[1]);
+	}
+
+	x = (x0_ - x) * x_res_ / rad;
+	y = (y0_ - y) * y_res_ / rad;
+
+	double rho = sqrt(x * x + y * y);
+	quat q;
+
+	if (rho < 1e-8) {
+		q = quat(0, 1, 0, 0);
+	} else if (proj_ == Proj2) {
+		double cc = sqrt((1. - rho) * (1. + rho));
+		q = quat(0, cc, x, -y);
+	} else {
+		double c;
+
+		switch (proj_) {
+		case Proj3:
+			c = rho;
+			break;
+		case Proj4:
+			c = 2. * atan(rho / 2.);
+			break;
+		case Proj5:
+			c = 2. * ASIN(rho / 2.);
+			break;
+		case Proj6:
+			c = atan(rho);
+			break;
+		default:
+			log_fatal("Proj %d not implemented", proj_);
+			break;
+		}
+
+		double cc = COS(c);
+		double sc = SIN(c) / rho;
+		q = quat(0, cc, x * sc, -y * sc);
+	}
+
+	// Rotate from projection center
+	return q0_ * q * ~q0_;
+}
+
+quat
+FlatSkyProjection::PixelToQuat(size_t pixel) const
+{
+	if (pixel < 0 || pixel >= xpix_ * ypix_)
+		return quat(0, 1, 0, 0);
+	std::vector<double> xy = PixelToXY(pixel);
+	return XYToQuat(xy[0], xy[1]);
+}
+
+size_t
+FlatSkyProjection::QuatToPixel(quat q) const
+{
+	std::vector<double> xy = QuatToXY(q);
+	return XYToPixel(xy[0], xy[1]);
+}
+
+std::vector<double>
+FlatSkyProjection::PixelToAngle(size_t pixel) const
 {
 	if (pixel < 0 || pixel >= xpix_ * ypix_)
 		return {0., 0.};
 	std::vector<double> xy = PixelToXY(pixel);
-	return XYToAngle(xy[0], xy[1], wrap_alpha);
+	return XYToAngle(xy[0], xy[1]);
 }
 
-long
+size_t
 FlatSkyProjection::AngleToPixel(double alpha, double delta) const
 {
 	std::vector<double> xy = AngleToXY(alpha, delta);
 	return XYToPixel(xy[0], xy[1]);
 }
 
-void FlatSkyProjection::GetRebinAngles(long pixel, size_t scale,
-    std::vector<double> & alphas, std::vector<double> & deltas,
-    bool wrap_alpha) const
+G3VectorQuat
+FlatSkyProjection::GetRebinQuats(size_t pixel, size_t scale) const
 {
-	alphas = std::vector<double>(scale * scale);
-	deltas = std::vector<double>(scale * scale);
+	G3VectorQuat quats(scale * scale, quat(0, 1, 0, 0));
 
 	if (pixel < 0 || pixel >= xpix_ * ypix_) {
 		log_debug("Point lies outside of pixel grid\n");
-		return;
+		quats.resize(0);
+		return quats;
 	}
 
 	std::vector <double> xy = PixelToXY(pixel);
@@ -558,12 +525,12 @@ void FlatSkyProjection::GetRebinAngles(long pixel, size_t scale,
 		double y = y0 + (j + 0.5) / (double) scale;
 		for (size_t i = 0; i < scale; i++) {
 			double x = x0 + (i + 0.5) / (double) scale;
-			std::vector<double> ang = XYToAngle(x, y, wrap_alpha);
-			alphas[count] = ang[0];
-			deltas[count] = ang[1];
+			quats[count] = XYToQuat(x, y);
 			count++;
 		}
 	}
+
+	return quats;
 }
 
 std::vector<double>
@@ -575,8 +542,8 @@ FlatSkyProjection::XYToAngleGrad(double x, double y, double h) const
 	const double halfcirc = 180 * deg;
 
 	// gradient along x
-	std::vector<double> ang1 = XYToAngle(x - h, y, false);
-	std::vector<double> ang2 = XYToAngle(x + h, y, false);
+	std::vector<double> ang1 = XYToAngle(x - h, y);
+	std::vector<double> ang2 = XYToAngle(x + h, y);
 	if (fabs(ang2[0] - ang1[0]) > halfcirc) {
 		ang1[0] = fmod(ang1[0] + halfcirc, circ);
 		ang2[0] = fmod(ang2[0] + halfcirc, circ);
@@ -585,8 +552,8 @@ FlatSkyProjection::XYToAngleGrad(double x, double y, double h) const
 	double ddx = (ang2[1] - ang1[1]) / hh;
 
 	// gradient along y
-	std::vector<double> ang3 = XYToAngle(x, y - h, false);
-	std::vector<double> ang4 = XYToAngle(x, y + h, false);
+	std::vector<double> ang3 = XYToAngle(x, y - h);
+	std::vector<double> ang4 = XYToAngle(x, y + h);
 	if (fabs(ang4[0] - ang3[0]) > halfcirc) {
 		ang3[0] = fmod(ang3[0] + halfcirc, circ);
 		ang4[0] = fmod(ang4[0] + halfcirc, circ);
@@ -598,7 +565,7 @@ FlatSkyProjection::XYToAngleGrad(double x, double y, double h) const
 }
 
 std::vector<double>
-FlatSkyProjection::PixelToAngleGrad(long pixel, double h) const
+FlatSkyProjection::PixelToAngleGrad(size_t pixel, double h) const
 {
 	if (pixel < 0 || pixel >= xpix_ * ypix_)
 		return {0., 0., 0., 0.};
@@ -606,20 +573,20 @@ FlatSkyProjection::PixelToAngleGrad(long pixel, double h) const
 	return XYToAngleGrad(xy[0], xy[1], h);
 }
 
-void FlatSkyProjection::GetInterpPixelsWeights(double alpha, double delta,
-    std::vector<long> & pixels, std::vector<double> & weights) const
+void FlatSkyProjection::GetInterpPixelsWeights(quat q,
+    std::vector<size_t> & pixels, std::vector<double> & weights) const
 {
-	std::vector<double> xy = AngleToXY(alpha, delta);
+	std::vector<double> xy = QuatToXY(q);
 	double x = xy[0];
 	double y = xy[1];
 
-	pixels = std::vector<long>(4, -1);
+	pixels = std::vector<size_t>(4, (size_t) -1);
 	weights = std::vector<double>(4, 0);
 
-	int x_1 = (int)floorf(x);
-	int x_2 = x_1 + 1;
-	int y_1 = (int)floorf(y);
-	int y_2 = y_1 + 1;
+	ssize_t x_1 = (ssize_t)floorf(x);
+	ssize_t x_2 = x_1 + 1;
+	ssize_t y_1 = (ssize_t)floorf(y);
+	ssize_t y_2 = y_1 + 1;
 	if (x_1 < 0 || y_1 < 0 || x_2 >= xpix_ || y_2 >= ypix_){
 		log_debug("Point lies outside of pixel grid\n");
 		return;
@@ -629,6 +596,63 @@ void FlatSkyProjection::GetInterpPixelsWeights(double alpha, double delta,
 	pixels[1] = x_2 + y_1 * xpix_;  weights[1] = (x - x_1) * (y_2 - y);
 	pixels[2] = x_1 + y_2 * xpix_;  weights[2] = (x_2 - x) * (y - y_1);
 	pixels[3] = x_2 + y_2 * xpix_;  weights[3] = (x - x_1) * (y - y_1);
+}
+
+std::vector<size_t>
+FlatSkyProjection::QueryDisc(quat q, double radius) const
+{
+	static const size_t npts = 72;
+	double dd = -2.0 * radius / sqrt(2.0);
+	quat qd = get_origin_rotator(0, dd);
+	quat p = qd * q * ~qd;
+	double pva = q.R_component_2();
+	double pvb = q.R_component_3();
+	double pvc = q.R_component_4();
+
+	ssize_t xmin = xpix_;
+	ssize_t xmax = 0;
+	ssize_t ymin = ypix_;
+	ssize_t ymax = 0;
+
+	double step = M_PI / (double)(npts);
+
+	// select square patch around center
+	for (size_t i = 0; i < npts; i++) {
+		double phi = i * step;
+		double c = COS(phi);
+		double s = SIN(phi);
+		quat qv = quat(c, pva * s, pvb * s, pvc * s);
+		auto xy = QuatToXY(qv * p * ~qv);
+		ssize_t fx = std::floor(xy[0]);
+		ssize_t cx = std::ceil(xy[0]);
+		ssize_t fy = std::floor(xy[1]);
+		ssize_t cy = std::ceil(xy[1]);
+		if (fx < xmin)
+			xmin = fx < 0 ? 0 : fx;
+		if (cx > xmax)
+			xmax = cx > xpix_ ? xpix_ : cx;
+		if (fy < ymin)
+			ymin = fy < 0 ? 0 : fy;
+		if (cy > ymax)
+			ymax = cy > ypix_ ? ypix_ : cy;
+	}
+
+	double crad = cos(radius / rad);
+
+	std::vector<size_t> pixels;
+	for (size_t x = xmin; x < xmax; x++) {
+		for (size_t y = ymin; y < ymax; y++) {
+			size_t pixel = y * xpix_ + x;
+			if (pixel > xpix_ * ypix_)
+				continue;
+			quat qp = PixelToQuat(pixel);
+			if (dot3(qp, q) > crad)
+				pixels.push_back(pixel);
+		}
+	}
+	std::sort(pixels.begin(), pixels.end());
+
+	return pixels;
 }
 
 FlatSkyProjection FlatSkyProjection::Rebin(size_t scale, double x_center, double y_center) const
@@ -641,9 +665,24 @@ FlatSkyProjection FlatSkyProjection::Rebin(size_t scale, double x_center, double
 	fp.xpix_ /= scale;
 	fp.ypix_ /= scale;
 	fp.SetRes(y_res_ * scale, x_res_ * scale);
+
+	// Use correct center for extracted patch
+	if (x_center != x_center && x0_ != (xpix_ / 2.0 - 0.5))
+		x_center = (x0_ - xpix_ / 2) / scale + fp.xpix_ / 2;
+
+	if (y_center != y_center && y0_ != (ypix_ / 2.0 - 0.5))
+		y_center = (y0_ - ypix_ / 2) / scale + fp.ypix_ / 2;
+
 	fp.SetXYCenter(x_center, y_center);
 
 	return fp;
+}
+
+size_t FlatSkyProjection::RebinPixel(size_t pixel, size_t scale) const
+{
+	size_t x = (pixel % xpix_) / scale;
+	size_t y = ((size_t)(pixel / xpix_)) / scale;
+	return x + y * (xpix_ / scale);
 }
 
 FlatSkyProjection FlatSkyProjection::OverlayPatch(double x0, double y0,
@@ -653,7 +692,7 @@ FlatSkyProjection FlatSkyProjection::OverlayPatch(double x0, double y0,
 
 	fp.xpix_ = width;
 	fp.ypix_ = height;
-	fp.SetXYCenter(xc_ - x0 + width / 2, yc_ - y0 + height / 2);
+	fp.SetXYCenter(x0_ - x0 + width / 2, y0_ - y0 + height / 2);
 
 	return fp;
 }
@@ -664,11 +703,11 @@ std::vector<double> FlatSkyProjection::GetPatchCenter(const FlatSkyProjection &p
 	FlatSkyProjection fp(proj);
 	fp.xpix_ = xpix_;
 	fp.ypix_ = ypix_;
-	fp.SetXYCenter(xc_, yc_);
+	fp.SetXYCenter(x0_, y0_);
 	g3_assert(IsCompatible(fp));
 
-	double x0 = xc_ - proj.xc_ + proj.xpix_ / 2;
-	double y0 = yc_ - proj.yc_ + proj.ypix_ / 2;
+	double x0 = x0_ - proj.x0_ + proj.xpix_ / 2;
+	double y0 = y0_ - proj.y0_ + proj.ypix_ / 2;
 
 	return {x0, y0};
 }

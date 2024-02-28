@@ -147,6 +147,47 @@ vi = np.asarray(vi)[ii]
 assert((ki == kr).all())
 assert((vi == vr).all())
 
+# angles
+pixels = np.arange(x.size, dtype=int)
+alpha, delta = x.pixels_to_angles(pixels)
+alpha, delta = np.asarray(alpha), np.asarray(delta)
+alpha[alpha < 0] += 360 * core.G3Units.deg
+theta, phi = hp.pix2ang(x.nside, pixels)
+
+assert(np.allclose(alpha, phi))
+assert(np.allclose(delta, np.pi / 2 - theta))
+
+pixels2 = x.angles_to_pixels(alpha, delta)
+assert(np.allclose(pixels, pixels2))
+
+# interpolation
+dx = x.res / 2.0
+vx = np.asarray(x.get_interp_values(alpha + dx, delta + dx))
+vh = hp.get_interp_val(np.asarray(x), theta - dx, phi + dx)
+assert(not np.allclose(vx, vh))
+
+# Query disc
+avec = []
+dvec = []
+rvec = []
+masked = set()
+alpha = 30 * core.G3Units.deg
+radius = 5 * core.G3Units.deg
+for delta in range(-90, 91, 10):
+    delta *= core.G3Units.deg
+    theta = 90 * core.G3Units.deg - delta
+    avec.append(alpha)
+    dvec.append(delta)
+    rvec.append(radius)
+    pix1 = np.asarray(x.query_disc(alpha, delta, radius), dtype=int)
+    v = hp.ang2vec(theta, alpha)
+    pix2 = np.asarray(hp.query_disc(x.nside, v, radius), dtype=int)
+    masked |= set(pix2)
+    assert not (set(pix1) ^ set(pix2))
+
+mask = maps.make_point_source_mask(x, np.asarray(avec), np.asarray(dvec), np.asarray(rvec))
+assert not (set(mask.nonzero()) ^ masked)
+
 # Conversion to/from flatsky maps
 fm_stub = maps.FlatSkyMap(
     300, 300, core.G3Units.arcmin, proj=maps.MapProjection.ProjZEA
@@ -180,3 +221,9 @@ maps.reproj_map(x, xeq)
 lon, lat = maps.azel.convert_radec_to_gal(alpha, delta)
 pix = xeq.angles_to_pixels(lon, lat)
 assert(np.allclose(np.asarray(pix), np.asarray(xeq)))
+
+# high-res
+hx = maps.HealpixSkyMap(16384)
+pix1 = hx.angle_to_pixel(0, -45 * core.G3Units.deg)
+pix2 = hp.ang2pix(16384, 3 * np.pi / 4, 0)
+assert(pix1 == pix2)

@@ -335,8 +335,7 @@ int main(int nargs, char **argv)
 	}
 
 	//This is needed for "random python things" stored in frames to work
-	G3PyContext::initializePython(); 
-  G3PyContext::enable(); 
+	G3PythonContext ctx("main", false, true);
   signal(SIGPIPE, SIG_IGN);
 
 	httplib::Server server;
@@ -377,7 +376,6 @@ int main(int nargs, char **argv)
 		return 1;
 	}
 
-  G3PyContext::deinitializePython(); 
 
 	return 0;
 }

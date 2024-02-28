@@ -3,7 +3,9 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
+#ifdef BZIP2_FOUND
 #include <boost/iostreams/filter/bzip2.hpp>
+#endif
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 #include <string>
@@ -141,6 +143,13 @@ G3MultiFileWriter::CheckNewFile(G3FramePtr frame)
 
 	if (boost::algorithm::ends_with(filename, ".gz"))
 		stream_.push(boost::iostreams::gzip_compressor());
+	if (boost::algorithm::ends_with(filename, ".bz2")) {
+#ifdef BZIP2_FOUND
+		stream_.push(boost::iostreams::bzip2_compressor());
+#else
+		log_fatal("Boost not compiled with bzip2 support.");
+#endif
+	}
 	stream_.push(boost::iostreams::counter64());
 	stream_.push(boost::iostreams::file_sink(filename, std::ios::binary));
 

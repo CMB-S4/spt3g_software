@@ -28,13 +28,13 @@ On Ubuntu/Debian, you can install the non-Python dependencies, including the opt
 
 .. code-block:: shell
 
-	apt-get install cmake libboost-all-dev libflac-dev libnetcdf-dev libfftw3-dev libgsl0-dev
+	apt-get install cmake libboost-all-dev libflac-dev libnetcdf-dev
 
 On RHEL-type systems (SL, CentOS, etc.), do this:
 
 .. code-block:: shell
 
-	yum install cmake netcdf-devel boost-devel flac-devel fftw-devel gsl-devel
+	yum install cmake netcdf-devel boost-devel flac-devel
 	
 If your system defaults to Python 2, but you wish to use Python 3, please do the following:
 
@@ -51,7 +51,7 @@ Note that on any RHEL6 system, you will need a newer compiler than ships with th
 
 .. code-block:: shell
 
-	eval `/cvmfs/spt.opensciencegrid.org/py3-v2/setup.sh`
+	eval `/cvmfs/spt.opensciencegrid.org/py3-v4/setup.sh`
 
 
 How to Build
@@ -79,8 +79,9 @@ This will construct an html version of the documentation.  This builds the docum
 Installation
 ------------
 
-For various reasons it may be useful to install the software after building, instead of continuing to use it out of the build directory. Two CMake variables control how the software is installed:
+For various reasons it may be useful to install the software after building, instead of continuing to use it out of the build directory. Several CMake variables control how the software is installed:
 
+ * ``WITH_BZIP2``, which defaults to ``TRUE``, is used to control whether the core library is built with support for bzip2 compression of G3 files.  Use ``-DWITH_BZIP2=FALSE`` when calling ``cmake`` to disable.
  * ``CMAKE_INSTALL_PREFIX``, which defaults to ``/usr/local`` is used as the root directory for installing all non-python components (header files, cmake export scripts, etc.)
  * ``PYTHON_MODULE_DIR``, which if not explicitly set defaults to the result of running `distutils.sysconfig.get_python_lib <https://docs.python.org/3/distutils/apiref.html#distutils.sysconfig.get_python_lib>` with the selected python interpreter, is where the python module will be installed.
 

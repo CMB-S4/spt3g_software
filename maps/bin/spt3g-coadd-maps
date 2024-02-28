@@ -1,0 +1,40 @@
+#!/usr/bin/env python
+
+import argparse as ap
+import os, glob
+from spt3g import maps
+
+P = ap.ArgumentParser(
+    description="Coadd map frames from input files into a single output map frame"
+)
+P.add_argument(
+    "input_files", nargs="+", help="Input g3 files.  May be glob-able strings"
+)
+P.add_argument("-o", "--output-file", default="map_coadd.g3", help="Output g3 file")
+P.add_argument(
+    "-m",
+    "--map-ids",
+    nargs="+",
+    help="Id's of map frames to include in the coadd.  If not set, all map frames are included.",
+)
+P.add_argument(
+    "-c",
+    "--collate",
+    action="store_true",
+    help="Coadd each input map Id into a separate output map frame.  In this case, the "
+    "output map Id is treated as a prefix, with the input map Id appended to the string.",
+)
+P.add_argument("-i", "--output-map-id", help="Id for output coadd map frame")
+P.add_argument(
+    "--no-check-weighted",
+    dest="weighted",
+    action="store_false",
+    help="Do not check that weights are applied before coadding.",
+)
+
+args = P.parse_args()
+
+args.input_files = sum([glob.glob(x) for x in args.input_files], [])
+args.input_files = [x for x in args.input_files if os.path.splitext(x)[-1].startswith(".g3")]
+
+maps.coadd_map_files(**vars(args))

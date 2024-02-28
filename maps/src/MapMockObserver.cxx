@@ -18,7 +18,7 @@ public:
 	MapMockObserver(std::string pointing, std::string timestreams,
 	    double band, G3SkyMapConstPtr T, G3SkyMapConstPtr Q,
 	    G3SkyMapConstPtr U, std::string bolo_properties_name,
-	    bool interp);
+	    bool interp, bool error_on_zero);
 	virtual ~MapMockObserver() {}
 
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
@@ -33,6 +33,8 @@ private:
 	BolometerPropertiesMapConstPtr boloprops_;
 
 	bool interp_;
+	bool error_on_zero_;
+	int pol_sign_;
 
 	SET_LOGGER("MapMockObserver");
 };
@@ -40,9 +42,10 @@ private:
 EXPORT_G3MODULE("maps", MapMockObserver,
     (init<std::string, std::string, double,
      G3SkyMapConstPtr, G3SkyMapConstPtr, G3SkyMapConstPtr,
-     std::string, bool>((arg("pointing"), arg("timestreams"), arg("band"),
+     std::string, bool, bool>((arg("pointing"), arg("timestreams"), arg("band"),
      arg("T"), arg("Q")=G3SkyMapConstPtr(), arg("U")=G3SkyMapConstPtr(),
-     arg("bolo_properties_name")="BolometerProperties", arg("interp")=false))),
+     arg("bolo_properties_name")="BolometerProperties", arg("interp")=false,
+     arg("error_on_zero")=true))),
 "MapMockObserver(pointing, timestreams, band, T, Q=None, U=None, bolo_properties_name=\"BolometerProperties\", interp=False)\n"
 "\n"
 "Creates a new set of timestreams by sampling from an input map.\n\n"
@@ -73,6 +76,10 @@ EXPORT_G3MODULE("maps", MapMockObserver,
 "interp : bool, optional\n"
 "    If True, use bilinear interpolation to sample the input map(s).  If \n"
 "    False (default), use the nearest-neighbor pixel value.\n"
+"error_on_zero : bool, optional\n"
+"    If True (default), complain loudly if the simulation scans across zeroes\n"
+"    in the input map or out of the input map boundaries. If False, allow\n"
+"    this to happen without comment.\n"
 "\n"
 "See Also\n"
 "--------\n"
@@ -96,33 +103,19 @@ EXPORT_G3MODULE("maps", MapMockObserver,
 
 MapMockObserver::MapMockObserver(std::string pointing, std::string timestreams,
     double band, G3SkyMapConstPtr T, G3SkyMapConstPtr Q, G3SkyMapConstPtr U,
-    std::string bolo_properties_name, bool interp) :
+    std::string bolo_properties_name, bool interp, bool error_on_zero) :
   pointing_(pointing), timestreams_(timestreams), band_(band),
   T_(T), Q_(Q), U_(U), boloprops_name_(bolo_properties_name),
-  interp_(interp)
+  interp_(interp), error_on_zero_(error_on_zero)
 {
 	if ((Q_ && !U_) || (U_ && !Q_))
 		log_fatal("If simulating polarized maps, pass both Q and U.");
-}
 
-// Following utility function copied from old map-maker and needs re-tooling
-// to handle boresight rotation.
-static void
-set_stokes_coupling(double pol_ang, double pol_eff,
-    StokesVector &stokes_coupling, G3SkyMap::MapPolConv pol_conv)
-{
-	stokes_coupling.t = 1.0;
-	stokes_coupling.q = cos(pol_ang/G3Units::rad *2.)*pol_eff/(2.0-pol_eff);
-	stokes_coupling.u = sin(pol_ang/G3Units::rad *2.)*pol_eff/(2.0-pol_eff);
-	if (pol_conv == G3SkyMap::COSMO)
-		stokes_coupling.u *= -1.0;
-	else if (pol_conv == G3SkyMap::ConvNone)
-		log_fatal("Missing pol_conv");
-
-	if (fabs(stokes_coupling.q) < 1e-12)
-		stokes_coupling.q = 0;
-	if (fabs(stokes_coupling.u) < 1e-12)
-		stokes_coupling.u = 0;
+	if (U_) {
+		if (!(U_->IsPolarized()))
+			log_fatal("Missing pol_conv");
+		pol_sign_ = (U_->pol_conv == G3SkyMap::COSMO) ? -1 : 1;
+	}
 }
 
 void
@@ -196,22 +189,20 @@ MapMockObserver::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		det.stop = pointing->stop;
 
 		// Get per-detector pointing timestream
-		std::vector<double> alpha, delta;
-		get_detector_pointing(bp.x_offset, bp.y_offset, *pointing,
-		    T_->coord_ref, alpha, delta);
+		auto detquats = get_detector_pointing_quats(bp.x_offset, bp.y_offset,
+		    *pointing, T_->coord_ref);
 		std::vector<size_t> detpointing;
 		if (!interp_)
-			detpointing = T_->AnglesToPixels(alpha, delta);
+			detpointing = T_->QuatsToPixels(detquats);
 
 		if (Q_) {
-			StokesVector pcoupling;
-			set_stokes_coupling(bp.pol_angle, bp.pol_efficiency,
-			    pcoupling, U_->GetPolConv());
+			// needs re-tooling to handle boresight rotation.
+			StokesVector pcoupling(bp.pol_angle * pol_sign_, bp.pol_efficiency);
 			for (size_t i = 0; i < det.size(); i++) {
 				if (interp_) {
-					std::vector<long> pixels;
+					std::vector<size_t> pixels;
 					std::vector<double> weights;
-					T_->GetInterpPixelsWeights(alpha[i], delta[i], pixels, weights);
+					T_->GetInterpPixelsWeights(detquats[i], pixels, weights);
 					det[i] =
 					    T_->GetInterpPrecalc(pixels, weights) * pcoupling.t +
 					    Q_->GetInterpPrecalc(pixels, weights) * pcoupling.q +
@@ -226,9 +217,20 @@ MapMockObserver::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		} else {
 			for (size_t i = 0; i < det.size(); i++) {
 				if (interp_)
-					det[i] = T_->GetInterpValue(alpha[i], delta[i]);
+					det[i] = T_->GetInterpValue(detquats[i]);
 				else
 					det[i] = T_->at(detpointing[i]);
+			}
+		}
+		if (error_on_zero_) {
+			for (size_t i = 0; i < det.size(); i++) {
+				if (det[i] == 0) {
+					log_fatal("Scanning across zero-valued "
+					    "pixels in input map. Input map is "
+					    "likely too small. If this is "
+					    "intended, unset parameter "
+					    "error_on_zero.");
+				}
 			}
 		}
 	}

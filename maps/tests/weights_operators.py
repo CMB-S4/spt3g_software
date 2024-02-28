@@ -3,11 +3,12 @@
 import numpy as np
 from spt3g import core
 from spt3g.maps import G3SkyMapWeights, FlatSkyMap, MapPolType, MapPolConv, MapProjection
-from spt3g.maps import get_mask_map, remove_weights, remove_weights_t, apply_weights, apply_weights_t, flatten_pol
+from spt3g.maps import remove_weights, remove_weights_t, apply_weights, apply_weights_t, flatten_pol
 
 for pol in [True, False]:
     # allocation
-    m = FlatSkyMap(500, 20, core.G3Units.arcmin, pol_conv=MapPolConv.IAU, proj=MapProjection.Proj5)
+    pol_conv = MapPolConv.IAU if pol else MapPolConv.none
+    m = FlatSkyMap(500, 20, core.G3Units.arcmin, pol_conv=pol_conv, proj=MapProjection.Proj5)
     mt = m.clone(False)
     mt.pol_type = MapPolType.T
     if pol:
@@ -15,7 +16,7 @@ for pol in [True, False]:
         mq.pol_type = MapPolType.Q
         mu = m.clone(False)
         mu.pol_type = MapPolType.U
-    mw = G3SkyMapWeights(m, polarized=pol)
+    mw = G3SkyMapWeights(m)
     assert(mw.size == m.size)
     assert(mw.shape == m.shape)
     assert(mw.npix_allocated == 0)
@@ -47,7 +48,11 @@ for pol in [True, False]:
     assert(np.allclose(mw[15], mat))
 
     # operators
-    mw += mw
+    mw += 2 * mw
+    assert(np.allclose(mw[15], mat * 3))
+    assert(mw.npix_allocated == 1)
+
+    mw -= mw / 3
     assert(np.allclose(mw[15], mat * 2))
     assert(mw.npix_allocated == 1)
 
@@ -116,9 +121,10 @@ for pol in [True, False]:
     mt.compact(zero_nans=True)
     assert(mt.npix_allocated == 1)
     assert(np.allclose(mt[15], np.atleast_1d(vec * 10)[0]))
-    mask = get_mask_map(mt)
+    mask = mt.to_mask()
     assert(mask[15] == 1)
-    assert(mask.npix_allocated == 1)
+    assert(mask.sum() == 1)
+    assert(mask.to_map().npix_allocated == 1)
 
     if pol:
         mq.compact(zero_nans=True)

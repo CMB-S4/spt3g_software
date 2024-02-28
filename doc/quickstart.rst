@@ -43,9 +43,9 @@ On an OSG or other system with OASIS configured, run this before anything else:
 
 .. code-block:: sh
 
-	eval `/cvmfs/spt.opensciencegrid.org/py3-v2/setup.sh`
+	eval `/cvmfs/spt.opensciencegrid.org/py3-v4/setup.sh`
 
-This sets up a software environment with all the packages installed by yum, etc. above that you need for the SPT3G software environment, as well as a variety of standard cosmology and astrophysics tasks. You will obtain best results if you place the line above in your ``.bash_profile``. Do *not* put it in ``.bashrc`` and make *sure* that this is the *only* software installation set up in your bash profile. In particular, take care that there are no references to other python installations (Anaconda, etc.).
+This sets up a software environment  with all the packages installed by yum, etc. above that you need for the SPT3G software environment, as well as a variety of standard cosmology and astrophysics tasks. As of late 2022, `py3-v4` is the most recent version of this `clustertools <https://github.com/SouthPoleTelescope/clustertools>`_ package; double check that you are using the correct version before you continue. You will obtain best results if you place the line above in your ``.bash_profile``. Do *not* put it in ``.bashrc`` and make *sure* that this is the *only* software installation set up in your bash profile. In particular, take care that there are no references to other python installations (Anaconda, etc.).
 
 Handling Dependencies on NERSC
 ==============================
@@ -83,11 +83,13 @@ Passing ``-jN`` to ``make``, where N is the number of cores you wish to use duri
 
 By default, this will use the system's standard Python installation (whatever you get if you just run ``python``). If you want a different python, you can specify that python through passing the argument ``-DPYTHON_EXECUTABLE=`` to cmake. For example, to use Python 3 if Python 3 is not the default, replace the cmake command above with ``cmake -DPYTHON_EXECUTABLE=`which python3```. Note that, if you do this, make *sure* that a Boost library built for the version of Python you are using exists -- generally, installing everything from the system package manager will ensure this.
 
-Once that is complete, you can use the ``env-shell.sh`` script in the build directory to set up the appropriate environment variables (PYTHONPATH, etc.):
+Once that is complete, you can either use the ``env-shell.sh`` script in the build directory to set up the appropriate environment variables (PYTHONPATH, etc.):
 
 .. code-block:: sh
 
 	./env-shell.sh
+
+or you can ``pip install -e /path/to/spt3g_software/build`` (needs pip>=22) or ``poetry add -e /path/to/spt3g_software/build`` to partially install spt3g_software and all of its Python dependencies in "editable mode" into whatever Python environment you'd like. In either case 1) the ``build`` directory should be kept around, since the installation will read directly from this folder, and 2) the version of Python in the environment you are using should be the same as the one used to build spt3g_software.  Note that this method does not install the headers and compiled binaries for use by downstream projects; the installation instructions below provide a more complete method for this.
 
 Installation
 ============

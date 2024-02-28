@@ -1,5 +1,3 @@
-from toast.tod import TODCache
-from toast import qarray as qa
 from spt3g import core, calibration, dfmux
 import numpy
 from .MPIAccumulator import MPIAccumulator
@@ -24,6 +22,7 @@ class TOASTFiller(object):
             self.invkeys = {k: i for i,k in enumerate(self.keys)}
 
         if frame.type == core.G3FrameType.Calibration:
+            # from toast import qarray as qa
             #self.detquat = {k: qa.from_angles(v.y_offset/core.G3Units.rad, v.x_offset/core.G3Units.rad, 0) for k,v in frame['BolometerProperties'].items()}
             self.detquat = None
 
@@ -39,6 +38,8 @@ class TOASTFiller(object):
         rv = self.mpia(frame)
         if frame.type != core.G3FrameType.EndProcessing:
             return rv
+
+        from toast.tod import TODCache
 
         # Build TOAST TOD from our full data set, now that we have it
         toastobses = []

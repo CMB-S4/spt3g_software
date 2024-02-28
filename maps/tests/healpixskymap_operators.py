@@ -68,6 +68,7 @@ assert(n[16] == 0)
 assert(n.npix_allocated == 1)
 assert(n.npix_nonzero == 1)
 
+m.ringsparse = True
 n = m ** 2
 assert(n[15] == 4)
 assert(n.npix_allocated == 1)
@@ -77,11 +78,12 @@ assert(n.npix_allocated == 1)
 m *= 2 # Get numbers bigger
 assert((m == n).all())
 assert((m > 0).any())
-assert((m > 0).npix_allocated == 1)
+assert((m > 0).sum() == 1)
+assert((m > 0).to_map().npix_allocated == 1)
 
 m1 = m
 m2 = m.copy()
-m2.ringsparse = True
+m2.indexedsparse = True
 m3 = m.copy()
 m3.dense = True
 

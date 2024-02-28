@@ -24,10 +24,6 @@ def checkinfo(fr):
 	m += 1
 
 if __name__ == '__main__':
-	if sys.version_info[:2] > (3, 7):
-		print('Subprocess option is disabled for python versions > 3.7')
-		raise SystemExit
-
 	pipe = core.G3Pipeline()
 	pipe.Add(core.G3InfiniteSource, type=core.G3FrameType.Timepoint, n=10)
 	pipe.Add(addinfo, subprocess=True)

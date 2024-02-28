@@ -15,7 +15,7 @@
 class MapTODMasker : public G3Module {
 public:
 	MapTODMasker(std::string pointing, std::string timestreams,
-	    G3SkyMapConstPtr mask, std::string tod_mask,
+	    G3SkyMapMaskConstPtr mask, std::string tod_mask,
 	    std::string bolo_properties_name);
 	virtual ~MapTODMasker() {}
 
@@ -24,7 +24,7 @@ public:
 private:
 	std::string pointing_;
 	std::string timestreams_;
-	G3SkyMapConstPtr mask_;
+	G3SkyMapMaskConstPtr mask_;
 	std::string output_;
 
 	std::string boloprops_name_;
@@ -34,7 +34,7 @@ private:
 };
 
 EXPORT_G3MODULE("maps", MapTODMasker,
-    (init<std::string, std::string, G3SkyMapConstPtr, std::string,
+    (init<std::string, std::string, G3SkyMapMaskConstPtr, std::string,
      std::string>((arg("pointing"), arg("timestreams"), arg("mask"),
      arg("tod_mask")="FilterMask",
      arg("bolo_properties_name")="BolometerProperties"))),
@@ -50,7 +50,7 @@ EXPORT_G3MODULE("maps", MapTODMasker,
 "can generally be left at its default value.");
 
 MapTODMasker::MapTODMasker(std::string pointing, std::string timestreams,
-    G3SkyMapConstPtr mask, std::string tod_mask,
+    G3SkyMapMaskConstPtr mask, std::string tod_mask,
     std::string bolo_properties_name) :
   pointing_(pointing), timestreams_(timestreams), mask_(mask),
   output_(tod_mask), boloprops_name_(bolo_properties_name)
@@ -81,6 +81,8 @@ MapTODMasker::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		return;
 	}
 
+	G3SkyMapConstPtr skymap = mask_->Parent();
+
 	G3TimestreamMapConstPtr tsm =
 	    frame->Get<G3TimestreamMap>(timestreams_);
 	G3MapVectorBoolPtr output(new G3MapVectorBool);
@@ -103,14 +105,12 @@ MapTODMasker::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		const BolometerProperties &bp = boloprops_->at(dets[i]);
 
 		// Get per-detector pointing timestream
-		std::vector<double> alpha, delta;
-		get_detector_pointing(bp.x_offset, bp.y_offset, *pointing,
-		    mask_->coord_ref, alpha, delta);
-		auto detpointing = mask_->AnglesToPixels(alpha, delta);
+		auto detpointing = get_detector_pointing_pixels(bp.x_offset, bp.y_offset,
+		    *pointing, skymap);
 
 		det.resize(pointing->size());
 		for (size_t j = 0; j < det.size(); j++)
-			det[j] = !!(mask_->at(detpointing[j]));
+			det[j] = mask_->at(detpointing[j]);
 
 		// Find out if any elements are set, delete entry if not
 		bool is_set = false;

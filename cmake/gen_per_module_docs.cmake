@@ -1,5 +1,6 @@
 set(CMAKE_SOURCE_DIR ${CMAKE_ARGV3})
 set(CMAKE_BINARY_DIR ${CMAKE_ARGV4})
+set(Python_EXECUTABLE ${CMAKE_ARGV5})
 file(GLOB cmake_projects RELATIVE ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}/*/CMakeLists.txt)
 foreach(d ${cmake_projects})
 	get_filename_component(proj ${d} PATH)
@@ -7,7 +8,7 @@ foreach(d ${cmake_projects})
 	# Copy header if exists, or create empty rst
 	if(EXISTS "${CMAKE_SOURCE_DIR}/${pname}/README.rst")
 		file(READ "${CMAKE_SOURCE_DIR}/${pname}/README.rst" MOD_HEADER)
-		file(WRITE "${CMAKE_SOURCE_DIR}/doc/moddoc_${pname}.rst" "${MOD_HEADER}")
+		file(WRITE "${CMAKE_SOURCE_DIR}/doc/moddoc_${pname}.rst" "${MOD_HEADER}\n")
 	else()
 		# Add an RST title. Cmake doesn't have the ability to generate
 		# a string of N dashes, so generate a random string in which
@@ -16,6 +17,6 @@ foreach(d ${cmake_projects})
 		string(RANDOM LENGTH ${pname_len} ALPHABET - pname_header)
 		file(WRITE "${CMAKE_SOURCE_DIR}/doc/moddoc_${pname}.rst" "${pname_header}\n${pname}\n${pname_header}\n\n")
 	endif()
-	execute_process(COMMAND spt3g-inspect "spt3g.${pname}" OUTPUT_VARIABLE MOD_DOC)
+	execute_process(COMMAND ${Python_EXECUTABLE} ${CMAKE_SOURCE_DIR}/core/bin/spt3g-inspect "spt3g.${pname}" OUTPUT_VARIABLE MOD_DOC)
 	file(APPEND "${CMAKE_SOURCE_DIR}/doc/moddoc_${pname}.rst" "${MOD_DOC}")
 endforeach()

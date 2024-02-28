@@ -95,7 +95,7 @@ def convert_azel_to_radec(az, el, location=spt, mjd=None):
         assert az.start == el.start
         assert az.stop == el.stop
         assert az.n_samples == el.n_samples
-        t = astropy.time.Time(np.asarray([i.mjd for i in az.times()]), format="mjd")
+        t = astropy.time.Time(np.asarray([i.mjd for i in az.times]), format="mjd")
     else:
         try:
             len(az)
@@ -168,7 +168,7 @@ def convert_radec_to_azel(ra, dec, location=spt, mjd=None):
         assert ra.start == dec.start
         assert ra.stop == dec.stop
         assert ra.n_samples == dec.n_samples
-        t = astropy.time.Time(np.asarray([i.mjd for i in ra.times()]), format="mjd")
+        t = astropy.time.Time(np.asarray([i.mjd for i in ra.times]), format="mjd")
     else:
         try:
             len(ra)

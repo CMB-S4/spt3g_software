@@ -16,7 +16,10 @@ class DfMuxSamplePacket : public G3FrameObject {
 public:
 	int32_t board;		/* Board serial number */
 	int32_t module;		/* Module number (0-7) */
-	int32_t nmodules;	/* Total number of modules on board (8) */
+	int32_t block;          /* Sub-module block number (0-7 for hidfmux, 0 for dfmux) */
+	int32_t nmodules;	/* Total number of modules on board (8 for dfmux) */
+	int32_t nblocks;        /* Total number of blocks per module (8 for hidfmux, 1 for dfmux) */
+	int32_t nchannels;      /* Total number of channels per block (128) */
 	DfMuxSamplePtr sample;	/* Pointer to the DfMuxSample */
 };
 
@@ -50,6 +53,10 @@ public:
 	int Start();	// Start listening thread
 	int Stop();	// Stop listening thread
 
+	// Configure iceboard clock rate (defaults to 100 MHz)
+	void SetClockRate(double rate);
+	double GetClockRate() { return clock_rate_; };
+
 private:
 	int SetupUDPSocket(const char *listenaddr);
 	int SetupSCTPSocket(std::vector<std::string> hosts);
@@ -67,6 +74,8 @@ private:
 	std::vector<int32_t> board_list_;
 	int fd_;
 	in_addr_t listenaddr_;
+	double clock_rate_;
+	double clock_scale_;
 
 	SET_LOGGER("DfMuxCollector");
 };

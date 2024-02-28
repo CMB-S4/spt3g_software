@@ -4,45 +4,22 @@ import inspect
 import textwrap
 import re
 
-def get_function_signature(f, replacement_kwargs = None):
+def get_function_signature(f, replacement_kwargs=None):
     '''
-    gets the function signature of f.
-     
-    if replacement_kwargs is supplied replaces the default values with 
-     the ones in replacement_kwargs
-    
+    Returns the function signature of f.  If replacement_kwargs is supplied
+    replaces the default values with the ones in replacement_kwargs.
     '''
-    args = inspect.getargspec(f)
-    name = f.__name__
-    #ereh sdrawkcab si gnihtyreve
-    if not args.args is None:
-        ar = list(args.args)
-    else:
-        ar = []
-    if not args.defaults is None:
-        d = list(args.defaults)
-    else:
-        d = []
-    ar.reverse()
-    d.reverse()
+    sig = inspect.signature(f)
 
-    if not replacement_kwargs is None:
-        for i, a in enumerate(ar):
-            if a in replacement_kwargs and i < len(d) :
-                d[i] = replacement_kwargs[a]
-    func_string = ')'
-    for i, a in enumerate(ar):
-        if i != 0:
-            func_string += ' ,'
-        if i < len(d):
-            # remove object hashes
-            s = re.sub('<(.*) at (.*)>', '<\\1>', repr(d[i]))
-            func_string += s[::-1]+'='
-        func_string += str(a)[::-1]
-    #and now things are forwards
-    func_string = name+'('+func_string[::-1]
-    return func_string
+    if replacement_kwargs is not None:
+        params = []
+        for name, par in sig.parameters.items():
+            if name in replacement_kwargs:
+                par = par.replace(default=replacement_kwargs[name])
+            params.append(par)
+        sig = sig.replace(parameters=params)
 
+    return f.__name__ + re.sub('<(.*) at (.*)>', '<\\1>', str(sig))
 
 
 class cache_frame_data(object):
@@ -112,7 +89,7 @@ Cached Values
 
             def __call__(self, frame):
                 for vname, stored_key in self.argument_map.items():
-                    if stored_key in frame:
+                    if stored_key and stored_key in frame:
                         self.kwargs[vname] = frame[stored_key]
                 if self_outer.type is None or frame.type == self_outer.type:
                     return f(frame, *(self.args), **(self.kwargs))

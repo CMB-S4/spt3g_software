@@ -1,3 +1,13 @@
+# Build a minimal library with a constant name which can be loaded as a python
+# module with a plain `import`, which can then load other modules which are
+# native libraries with normal names.
+add_library(dload SHARED src/dload.c)
+set_target_properties(dload PROPERTIES PREFIX "")
+set_target_properties(dload PROPERTIES SUFFIX ".so")
+install(TARGETS dload DESTINATION ${PYTHON_MODULE_DIR}/spt3g)
+target_include_directories(dload PRIVATE ${Python_INCLUDE_DIRS})
+target_link_libraries(dload PUBLIC ${Python_LIBRARIES})
+
 # OS X has a broken implementatin of pthreads.
 if(APPLE)
 	set(CORE_EXTRA_SRCS src/ApplePthreadBarrier.cxx)
@@ -15,6 +25,7 @@ add_spt3g_library(core SHARED
 	src/crc32.c ${CORE_EXTRA_SRCS}
 	src/G3NetworkSender.cxx src/G3SyslogLogger.cxx
 	src/G3PipelineInfo.cxx src/G3Quat.cxx
+	src/int_storage.cxx
 )
 
 
@@ -44,6 +55,17 @@ if(FLAC_FOUND)
 	target_link_libraries(core ${FLAC_LIBRARIES})
 endif()
 
+# Link against BZIP2 library
+if(NOT DEFINED WITH_BZIP2)
+	set(WITH_BZIP2 TRUE CACHE BOOL "Enable bzip2 file compression")
+endif()
+if(WITH_BZIP2)
+	find_package(BZip2)
+endif()
+if(BZIP2_FOUND)
+	target_compile_definitions(core PRIVATE -DBZIP2_FOUND)
+endif()
+
 link_python_dir()
 
 add_spt3g_program(bin/spt3g-dump)
@@ -69,16 +91,21 @@ add_spt3g_test(fileio)
 add_spt3g_test(multifileio)
 add_spt3g_test(splitfileio)
 add_spt3g_test(compressedfileio)
+if(BZIP2_FOUND)
+	add_spt3g_test(bz2fileio)
+endif()
 add_spt3g_test(portability)
 add_spt3g_test(vecint)
 add_spt3g_test(ts_bufferprotocol)
 add_spt3g_test(timestream_slicing)
 add_spt3g_test(timestream_times)
+add_spt3g_test(timestream_ops)
 add_spt3g_test(deduplicate)
 add_spt3g_test(timestrings)
 add_spt3g_test(testcomplexconv)
 add_spt3g_test(droporphanmetadata)
 add_spt3g_test(networktest SLOWTEST)
+add_spt3g_test(non_double_timestreams)
 add_spt3g_test(endprocessing)
 add_spt3g_test(lazyreader)
 add_spt3g_test(returnvals)
@@ -87,3 +114,9 @@ add_spt3g_test(cached_frame)
 add_spt3g_test(pipelineinfo)
 add_spt3g_test(quaternions)
 add_spt3g_test(timesample)
+
+add_spt3g_test_program(test
+                       SOURCE_FILES
+                         ${CMAKE_CURRENT_SOURCE_DIR}/tests/G3TimestreamTest.cxx
+                         ${CMAKE_CURRENT_SOURCE_DIR}/tests/G3TimestreamMapTest.cxx
+                       USE_PROJECTS core)

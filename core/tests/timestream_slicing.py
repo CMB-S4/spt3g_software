@@ -39,9 +39,12 @@ assert(numpy.isclose(ts[:5].sample_rate, ts.sample_rate, atol=0))
 assert(numpy.isclose(ts[-5:].sample_rate, ts.sample_rate, atol=0))
 
 # Test start and stop time accuracy
-assert(numpy.allclose([t.time for t in ts[:5].times()], [t.time for t in ts.times()][:5]))
-assert(numpy.allclose([t.time for t in ts[-10:].times()], [t.time for t in ts.times()][-10:]))
-assert(numpy.allclose([t.time for t in ts[5:-10].times()], [t.time for t in ts.times()][5:-10]))
+assert(numpy.allclose([t.time for t in ts[:5].times], [t.time for t in ts.times][:5]))
+assert(numpy.allclose([t.time for t in ts[:5].times], [t.time for t in ts.times[:5]]))
+assert(numpy.allclose([t.time for t in ts[-10:].times], [t.time for t in ts.times][-10:]))
+assert(numpy.allclose([t.time for t in ts[-10:].times], [t.time for t in ts.times[-10:]]))
+assert(numpy.allclose([t.time for t in ts[5:-10].times], [t.time for t in ts.times][5:-10]))
+assert(numpy.allclose([t.time for t in ts[5:-10].times], [t.time for t in ts.times[5:-10]]))
 
 # Test that we get the right sample rates when sparsely sampling
 assert(numpy.isclose(ts[::5].sample_rate, ts.sample_rate/5, atol=0))

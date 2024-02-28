@@ -32,6 +32,48 @@ void G3ModuleRegistrator::CallRegistrarsFor(const char *mod)
 		(*i)();
 }
 
+G3PythonContext::G3PythonContext(std::string name, bool hold_gil, bool init) :
+    name_(name), hold_(hold_gil), init_(init), thread_(nullptr)
+{
+	if (init_ && !Py_IsInitialized()) {
+		log_debug("%s: Initializing Python threads", name_.c_str());
+		Py_Initialize();
+#if (PY_MAJOR_VERSION == 3 && PY_MINOR_VERSION < 7)
+		PyEval_InitThreads();
+#endif
+	} else
+		init_ = false;
+
+	if (hold_) {
+		if (Py_IsInitialized() && !PyGILState_Check()) {
+			log_debug("%s: Ensuring GIL acquired", name_.c_str());
+			gil_ = PyGILState_Ensure();
+		} else
+			hold_ = false;
+	} else if (Py_IsInitialized() && PyGILState_Check()) {
+		log_debug("%s: Saving Python thread state", name_.c_str());
+		thread_ = PyEval_SaveThread();
+	}
+}
+
+G3PythonContext::~G3PythonContext()
+{
+	if (hold_ && Py_IsInitialized()) {
+		log_debug("%s: Releasing GIL", name_.c_str());
+		PyGILState_Release(gil_);
+	}
+
+	if (!!thread_) {
+		log_debug("%s: Restoring Python thread state", name_.c_str());
+		PyEval_RestoreThread(thread_);
+	}
+
+	if (init_) {
+		log_debug("%s: Finalizing Python threads", name_.c_str());
+		Py_Finalize();
+	}
+}
+
 G3FramePtr
 g3frame_char_constructor(std::string max_4_chars)
 {
@@ -223,6 +265,9 @@ G3Pipeline_halt_processing()
     (watt)(W)(milliwatt)(mW)(microwatt)(uW)(nanowatt)(nW)(picowatt)(pW) \
     (attowatt)(aW)(horsepower)(hp) \
     \
+    (sr)(steradian)(steradians)(deg2)(sqdeg)(squaredegree)(squaredegrees) \
+    (arcmin2)(sqarcmin)(squarearcmin) \
+    \
     (jansky)(Jy)(millijansky)(mJy)(megajansky)(MJy) \
     \
     (volt)(V)(millivolt)(mV)(microvolt)(uV) \
@@ -365,7 +410,7 @@ numpy_container_from_object(boost::python::object v)
 numpy_vector_infrastructure(std::complex<double>, cxdouble, "Zd");
 numpy_vector_infrastructure(std::complex<float>, cxfloat, "Zf");
 
-BOOST_PYTHON_MODULE(core)
+SPT3G_PYTHON_MODULE(core)
 {
 	bp::docstring_options docopts(true, true, false);
 
@@ -456,6 +501,8 @@ BOOST_PYTHON_MODULE(core)
 	    .def("__init__", bp::make_constructor(g3frame_char_constructor, bp::default_call_policies(), bp::args("adhoctypecode")), "Create a frame with an ad-hoc (non-standard) type code. Use sparingly and with care.")
 	    .def_readwrite("type", &G3Frame::type, "Type code for frame. "
 	      "See general G3Frame docstring.")
+	    .def_readonly("_filename", &G3Frame::_filename, "Source filename for frame, "
+	      "if read in using G3Reader. This attribute is fragile, use at your own risk.")
 	    .def("__setitem__", &g3frame_python_put)
 	    .def("__getitem__", &g3frame_python_get)
 	    .def("keys", &g3frame_keys, "Returns a list of keys in the frame.")
@@ -596,38 +643,3 @@ BOOST_PYTHON_MODULE(core)
 	G3ModuleRegistrator::CallRegistrarsFor("core");
 }
 
-//G3PyContext Implementation
-
-static PyThreadState * init_save_ = nullptr; 
-
-int 
-G3PyContext::initializePython() 
-{
-		if (!Py_IsInitialized())
-		{
-			Py_Initialize(); 
-			// ok, this is going to get removed in Python 3.11, but is necessary for Python <= 3.6
-			// for 3.7-3.8, should be called by Py_Initialize(), for 3.9-3.10, does nothing
-			// be lazy and take advantage of no Python 2.8... 
-#if (PY_MAJOR_VERSION <= 3 && PY_MINOR_VERSION < 8)
-      printf("PyEval_InitThreads()\n"); 
-			PyEval_InitThreads(); // this needs to be in one of the threads that calls this for some unknown reason...
-#endif 
-			//note the thread initialization takes the GIL (lol), so we need to release it. 
-      //to be good citizesn, we save the thread state for finalization
-			init_save_ = PyEval_SaveThread(); 
-		}
-		return 0; 
-}
-
-int
-G3PyContext::deinitializePython() 
-{
-	if (init_save_) 
-		PyEval_RestoreThread(init_save_); 
-	Py_Finalize(); 
-	return 0; 
-}
-
-std::mutex G3PyContext::mut_; 
-bool G3PyContext::enabled_ = false; 

@@ -2,9 +2,11 @@
 #include <serialization.h>
 #include <G3Units.h>
 #include <maps/G3SkyMap.h>
+#include <maps/G3SkyMapMask.h>
 #include <maps/FlatSkyMap.h>
 #include <maps/HealpixSkyMap.h>
 #include <maps/pointing.h>
+#include <cmath>
 
 namespace bp=boost::python;
 
@@ -46,9 +48,9 @@ G3SkyMap::serialize(A &ar, unsigned v)
 	ar & cereal::make_nvp("weighted", weighted);
 
 	if (v > 2) {
-		ar & cereal::make_nvp("pol_conv", pol_conv_);
+		ar & cereal::make_nvp("pol_conv", pol_conv);
 	} else {
-		pol_conv_ = ConvNone;
+		pol_conv = ConvNone;
 	}
 
 }
@@ -88,40 +90,65 @@ G3SkyMapWeights::serialize(A &ar, unsigned v)
 G3_SERIALIZABLE_CODE(G3SkyMap);
 G3_SERIALIZABLE_CODE(G3SkyMapWeights);
 
+
+static bool
+isumap(const G3SkyMap &m)
+{
+	if (m.pol_type == G3SkyMap::U)
+		return true;
+	if (m.pol_type == G3SkyMap::TU)
+		return true;
+	if (m.pol_type == G3SkyMap::QU)
+		return true;
+
+	return false;
+}
+
+
 G3SkyMap::G3SkyMap(MapCoordReference coords, bool weighted,
     G3Timestream::TimestreamUnits units, MapPolType pol_type,
     MapPolConv pol_conv) :
     coord_ref(coords), units(units), pol_type(pol_type),
-    weighted(weighted), overflow(0), pol_conv_(pol_conv)
+    pol_conv(pol_conv), weighted(weighted), overflow(0)
 {
-	if (pol_type == U && pol_conv == ConvNone)
+	if (isumap(*this) && pol_conv == ConvNone)
 		log_warn("Map object has pol_type U and unknown pol_conv. "
 			 "Set the pol_conv attribute to IAU or COSMO.");
 }
 
-G3SkyMapWeights::G3SkyMapWeights(G3SkyMapConstPtr ref, bool polarized) :
-    TT(ref->Clone(false)), TQ(polarized ? ref->Clone(false) : NULL),
-    TU(polarized ? ref->Clone(false) : NULL),
-    QQ(polarized ? ref->Clone(false) : NULL),
-    QU(polarized ? ref->Clone(false) : NULL),
-    UU(polarized ? ref->Clone(false) : NULL)
+G3SkyMapPtr
+G3SkyMap::ArrayClone(boost::python::object val) const
 {
-	TT->pol_type = G3SkyMap::None;
-	if (polarized){
-		TQ->pol_type = G3SkyMap::None;
-		TU->pol_type = G3SkyMap::None;
-		QQ->pol_type = G3SkyMap::None;
-		QU->pol_type = G3SkyMap::None;
-		UU->pol_type = G3SkyMap::None;
+
+	G3SkyMapPtr skymap = Clone(false);
+	skymap->FillFromArray(val);
+	return skymap;
+}
+
+
+G3SkyMapWeights::G3SkyMapWeights(G3SkyMapConstPtr ref) :
+    TT(ref->Clone(false)), TQ(ref->IsPolarized() ? ref->Clone(false) : NULL),
+    TU(ref->IsPolarized() ? ref->Clone(false) : NULL),
+    QQ(ref->IsPolarized() ? ref->Clone(false) : NULL),
+    QU(ref->IsPolarized() ? ref->Clone(false) : NULL),
+    UU(ref->IsPolarized() ? ref->Clone(false) : NULL)
+{
+	TT->pol_type = G3SkyMap::TT;
+	if (ref->IsPolarized()){
+		TQ->pol_type = G3SkyMap::TQ;
+		TU->pol_type = G3SkyMap::TU;
+		QQ->pol_type = G3SkyMap::QQ;
+		QU->pol_type = G3SkyMap::QU;
+		UU->pol_type = G3SkyMap::UU;
 	}
 }
 
-G3SkyMapWeights::G3SkyMapWeights(const G3SkyMapWeights &r) :
-    TT(r.TT->Clone(true)), TQ(!r.TQ ? NULL : r.TQ->Clone(true)),
-    TU(!r.TU ? NULL : r.TU->Clone(true)),
-    QQ(!r.QQ ? NULL : r.QQ->Clone(true)),
-    QU(!r.QU ? NULL : r.QU->Clone(true)),
-    UU(!r.UU ? NULL : r.UU->Clone(true))
+G3SkyMapWeights::G3SkyMapWeights(const G3SkyMapWeights &r, bool copy_data) :
+    TT(r.TT->Clone(copy_data)), TQ(!r.TQ ? NULL : r.TQ->Clone(copy_data)),
+    TU(!r.TU ? NULL : r.TU->Clone(copy_data)),
+    QQ(!r.QQ ? NULL : r.QQ->Clone(copy_data)),
+    QU(!r.QU ? NULL : r.QU->Clone(copy_data)),
+    UU(!r.UU ? NULL : r.UU->Clone(copy_data))
 {
 }
 
@@ -158,24 +185,21 @@ G3SkyMap::PixelsToAngles(const std::vector<size_t> & pixels,
 }
 
 size_t
-G3SkyMap::QuatToPixel(quat q) const
+G3SkyMap::AngleToPixel(double alpha, double delta) const
 {
-	double alpha, delta;
-	quat_to_ang(q, alpha, delta);
-	if (coord_ref == Local)
-		delta *= -1;
+	quat q = ang_to_quat(alpha, delta);
 
-	return AngleToPixel(alpha, delta);
+	return QuatToPixel(q);
 }
 
-quat
-G3SkyMap::PixelToQuat(size_t pixel) const
+std::vector<double>
+G3SkyMap::PixelToAngle(size_t pixel) const
 {
-	std::vector<double> alphadelta = PixelToAngle(pixel);
-	if (coord_ref == Local)
-		alphadelta[1] *= -1;
+	quat q = PixelToQuat(pixel);
+	double alpha, delta;
+	quat_to_ang(q, alpha, delta);
 
-	return ang_to_quat(alphadelta[0], alphadelta[1]);
+	return {alpha, delta};
 }
 
 std::vector<size_t>
@@ -224,6 +248,13 @@ size_t G3SkyMap::size() const
 	for (size_t i : shape())
 		s *= i;
 	return s;
+}
+
+G3SkyMapMaskPtr
+G3SkyMap::MakeMask(bool zero_nans, bool zero_infs) const
+{
+	G3SkyMapMaskPtr m(new G3SkyMapMask(*this, true, zero_nans, zero_infs));
+	return m;
 }
 
 G3SkyMap &G3SkyMap::operator+=(const G3SkyMap & rhs)
@@ -275,6 +306,17 @@ G3SkyMap &G3SkyMap::operator*=(const G3SkyMap &rhs)
 	return *this;
 }
 
+G3SkyMap &G3SkyMap::operator*=(const G3SkyMapMask &rhs)
+{
+	g3_assert(rhs.IsCompatible(*this));
+
+	for (size_t i = 0; i < size(); i++) {
+		if (!rhs.at(i) && this->at(i) != 0)
+			(*this)[i] = 0;
+	}
+	return *this;
+}
+
 G3SkyMap &G3SkyMap::operator*=(double rhs)
 {
 	for (size_t i = 0; i < size(); i++)
@@ -304,36 +346,31 @@ G3SkyMap &G3SkyMap::operator/=(double rhs)
 
 
 void
-G3SkyMap::GetInterpPixelsWeights(quat q, std::vector<long> & pixels,
-    std::vector<double> & weights) const
+G3SkyMap::GetInterpPixelsWeights(double alpha, double delta,
+    std::vector<size_t> & pixels, std::vector<double> & weights) const
 {
-	double alpha, delta;
-	quat_to_ang(q, alpha, delta);
-	if (coord_ref == Local)
-		delta *= -1;
-
-	GetInterpPixelsWeights(alpha, delta, pixels, weights);
+	quat q = ang_to_quat(alpha, delta);
+	GetInterpPixelsWeights(q, pixels, weights);
 }
 
-G3VectorQuat
-G3SkyMap::GetRebinQuats(long pixel, size_t scale) const
+void
+G3SkyMap::GetRebinAngles(size_t pixel, size_t scale,
+    std::vector<double> &alphas, std::vector<double> &deltas) const
 {
-	std::vector<double> alphas, deltas;
+	auto quats = GetRebinQuats(pixel, scale);
+	alphas = std::vector<double>(quats.size());
+	deltas = std::vector<double>(quats.size());
 
-	GetRebinAngles(pixel, scale, alphas, deltas);
-
-	G3VectorQuat q(alphas.size());
-	for (size_t i = 0; i < alphas.size(); i++) {
-		if (coord_ref == Local)
-			deltas[i] *= -1;
-		q[i] = ang_to_quat(alphas[i], deltas[i]);
+	for (size_t i = 0; i < quats.size(); i++) {
+		double alpha, delta;
+		quat_to_ang(quats[i], alpha, delta);
+		alphas[i] = alpha;
+		deltas[i] = delta;
 	}
-
-	return q;
 }
 
 double
-G3SkyMap::GetInterpPrecalc(const std::vector<long> & pix,
+G3SkyMap::GetInterpPrecalc(const std::vector<size_t> & pix,
     const std::vector<double> & weight) const
 {
 	double outval = 0;
@@ -346,10 +383,8 @@ G3SkyMap::GetInterpPrecalc(const std::vector<long> & pix,
 double
 G3SkyMap::GetInterpValue(double alpha, double delta) const
 {
-	std::vector<long> pix;
-	std::vector<double> weight;
-	GetInterpPixelsWeights(alpha, delta, pix, weight);
-	return GetInterpPrecalc(pix, weight);
+	quat q = ang_to_quat(alpha, delta);
+	return GetInterpValue(q);
 }
 
 std::vector<double>
@@ -368,12 +403,10 @@ G3SkyMap::GetInterpValues(const std::vector<double> & alphas,
 double
 G3SkyMap::GetInterpValue(quat q) const
 {
-	double alpha, delta;
-	quat_to_ang(q, alpha, delta);
-	if (coord_ref == Local)
-		delta *= -1;
-
-	return GetInterpValue(alpha, delta);
+	std::vector<size_t> pix;
+	std::vector<double> weight;
+	GetInterpPixelsWeights(q, pix, weight);
+	return GetInterpPrecalc(pix, weight);
 }
 
 std::vector<double>
@@ -387,9 +420,53 @@ G3SkyMap::GetInterpValues(const G3VectorQuat & quats) const
 	return outvals;
 }
 
+std::vector<size_t>
+G3SkyMap::QueryDisc(double alpha, double delta, double radius) const
+{
+	quat q = ang_to_quat(alpha, delta);
+	return QueryDisc(q, radius);
+}
+
+std::vector<size_t>
+G3SkyMap::QueryAlphaEllipse(double alpha ,double delta, double a, double b) const
+{
+	quat q = ang_to_quat(alpha, delta);
+	return QueryAlphaEllipse(q, a, b);
+}
+
+std::vector<size_t>
+G3SkyMap::QueryAlphaEllipse(quat q, double a, double b) const
+{
+	double rmaj = a > b ? a : b;
+	double rmin = a > b ? b : a;
+	double sd = q.R_component_4();
+	double cd = sqrt((1 - sd) * (1 + sd));
+
+	// focus distance from center
+	double da = ACOS(COS(rmaj) / COS(rmin)) / cd;
+
+	// focus locations
+	quat qda = get_origin_rotator(da, 0);
+	quat ql = qda * q * ~qda;
+	quat qr = ~qda * q * qda;
+
+	// narrow search to pixels within the major disc
+	auto disc = QueryDisc(q, rmaj);
+
+	// narrow further to locus of points within ellipse
+	std::vector<size_t> pixels;
+	for (auto i: disc) {
+		quat qp = PixelToQuat(i);
+		double d = quat_ang_sep(qp, ql) + quat_ang_sep(qp, qr);
+		if (d < 2 * rmaj)
+			pixels.push_back(i);
+	}
+
+	return pixels;
+}
 
 static double
-skymap_getitem(const G3SkyMap &skymap, int i)
+skymap_getitem(const G3SkyMap &skymap, ssize_t i)
 {
 
 	if (i < 0)
@@ -403,7 +480,7 @@ skymap_getitem(const G3SkyMap &skymap, int i)
 }
 
 static void
-skymap_setitem(G3SkyMap &skymap, int i, double val)
+skymap_setitem(G3SkyMap &skymap, ssize_t i, double val)
 {
 
 	if (i < 0)
@@ -414,30 +491,6 @@ skymap_setitem(G3SkyMap &skymap, int i, double val)
 	}
 
 	skymap[i] = val;
-}
-
-void
-G3SkyMap::SetPolConv(G3SkyMap::MapPolConv pol_conv)
-{
-	if (pol_type == G3SkyMap::U && pol_conv == G3SkyMap::ConvNone)
-		log_warn("Map object has pol_type U and unknown pol_conv. "
-			 "Set the pol_conv attribute to IAU or COSMO.");
-
-	if (pol_type != G3SkyMap::U ||
-	    pol_conv == G3SkyMap::ConvNone ||
-	    pol_conv_ == G3SkyMap::ConvNone) {
-		pol_conv_ = pol_conv;
-		return;
-	}
-
-	if (pol_conv != pol_conv_) {
-		log_warn("Sign of U map flipped in changing pol_conv from %s to %s",
-		    pol_conv == G3SkyMap::IAU ? "COSMO" : "IAU",
-		    pol_conv == G3SkyMap::IAU ? "IAU" : "COSMO");
-		(*this) *= -1;
-        }
-
-	pol_conv_ = pol_conv;
 }
 
 static bp::tuple
@@ -487,6 +540,26 @@ skymap_pynoninplace(mult, *=, G3SkyMap &)
 skymap_pynoninplace(multd, *=, double)
 skymap_pynoninplace(div, /=, G3SkyMap &)
 skymap_pynoninplace(divd, /=, double)
+
+static G3SkyMapPtr
+pyskymap_multm(const G3SkyMap &a, const G3SkyMapMask &b)
+{
+	g3_assert(b.IsCompatible(a));
+	G3SkyMapPtr rv = a.Clone(false);
+	for (auto i: b) {
+		if (b.at(i.first) && a.at(i.first) != 0)
+			(*rv)[i.first] = a.at(i.first);
+	}
+
+	return rv;
+}
+
+static G3SkyMapPtr
+pyskymap_imultm(G3SkyMapPtr a, const G3SkyMapMask &b)
+{
+	(*a) *= b;
+	return a;
+}
 
 static G3SkyMapPtr
 pyskymap_rsubd(const G3SkyMap &a, const double b)
@@ -565,66 +638,384 @@ pyskymap_pow(const G3SkyMap &a, const G3SkyMap &b)
 	return rv;
 }
 
-#define skymap_comp(name, oper) \
-static G3SkyMapPtr \
-pyskymap_##name(const G3SkyMap &a, const G3SkyMap &b) \
+#define skymap_comp(oper) \
+G3SkyMapMask \
+G3SkyMap::operator oper(const G3SkyMap &rhs) \
 { \
-	g3_assert(a.IsCompatible(b)); \
-	g3_assert(a.units == b.units); \
-	G3SkyMapPtr rv = a.Clone(false); \
-	rv->units = G3Timestream::None; \
-	rv->weighted = false; \
-	for (size_t i = 0; i < a.size(); i++) { \
-		if (a.at(i) oper b.at(i)) \
-			(*rv)[i] = 1; \
+	g3_assert(IsCompatible(rhs)); \
+	g3_assert(units == rhs.units); \
+	G3SkyMapMask rv(*this); \
+	for (size_t i = 0; i < size(); i++) { \
+		if (at(i) oper rhs.at(i)) \
+			rv[i] = true; \
 	} \
 	return rv; \
 }
 
-skymap_comp(lt, <)
-skymap_comp(le, <=)
-skymap_comp(eq, ==)
-skymap_comp(ne, !=)
-skymap_comp(ge, >=)
-skymap_comp(gt, >)
+skymap_comp(<)
+skymap_comp(<=)
+skymap_comp(==)
+skymap_comp(!=)
+skymap_comp(>=)
+skymap_comp(>)
 
-#define skymap_compd(name, oper) \
-static G3SkyMapPtr \
-pyskymap_##name(const G3SkyMap &a, const double b) \
+#define skymap_compd(oper) \
+G3SkyMapMask \
+G3SkyMap::operator oper(double rhs) \
 { \
-	G3SkyMapPtr rv = a.Clone(false); \
-	rv->units = G3Timestream::None; \
-	rv->weighted = false; \
-	for (size_t i = 0; i < a.size(); i++) { \
-		if (a.at(i) oper b) \
-			(*rv)[i] = 1; \
+	G3SkyMapMask rv(*this);	\
+	for (size_t i = 0; i < size(); i++) { \
+		if (at(i) oper rhs) \
+			rv[i] = true; \
 	} \
 	return rv; \
 }
 
-skymap_compd(ltd, <)
-skymap_compd(led, <=)
-skymap_compd(eqd, ==)
-skymap_compd(ned, !=)
-skymap_compd(ged, >=)
-skymap_compd(gtd, >)
+skymap_compd(<)
+skymap_compd(<=)
+skymap_compd(==)
+skymap_compd(!=)
+skymap_compd(>=)
+skymap_compd(>)
 
-static bool
-pyskymap_all(const G3SkyMap &a)
+bool
+G3SkyMap::all(G3SkyMapMaskConstPtr where) const
 {
-	for (size_t i = 0; i < a.size(); i++)
-		if (a.at(i) == 0)
-			return false;
+	if (!where) {
+		for (size_t i = 0; i < size(); i++) {
+			if (at(i) == 0)
+				return false;
+		}
+	} else {
+		g3_assert(where->IsCompatible(*this));
+
+		for (size_t i = 0; i < size(); i++) {
+			if (!where->at(i))
+				continue;
+			if (at(i) == 0)
+				return false;
+		}
+	}
+
 	return true;
 }
 
-static bool
-pyskymap_any(const G3SkyMap &a)
+bool
+G3SkyMap::any(G3SkyMapMaskConstPtr where) const
 {
-	for (size_t i = 0; i < a.size(); i++)
-		if (a.at(i) != 0)
-			return true;
+	if (!where) {
+		for (size_t i = 0; i < size(); i++) {
+			if (at(i) != 0)
+				return true;
+		}
+	} else {
+		g3_assert(where->IsCompatible(*this));
+
+		for (size_t i = 0; i < size(); i++) {
+			if (!where->at(i))
+				continue;
+			if (at(i) != 0)
+				return true;
+		}
+	}
+
 	return false;
+}
+
+double
+G3SkyMap::sum(G3SkyMapMaskConstPtr where) const
+{
+	double s = 0;
+
+	if (!where) {
+		for (size_t i = 0; i < size(); i++) {
+			s += at(i);
+		}
+	} else {
+		g3_assert(where->IsCompatible(*this));
+
+		for (size_t i = 0; i < size(); i++) {
+			if (!where->at(i))
+				continue;
+			s += at(i);
+		}
+	}
+
+	return s;
+}
+
+double
+G3SkyMap::mean(G3SkyMapMaskConstPtr where) const
+{
+	double m = 0;
+	size_t n = 0;
+
+	if (!where) {
+		n = size();
+		for (size_t i = 0; i < n; i++) {
+			m += at(i);
+		}
+	} else {
+		g3_assert(where->IsCompatible(*this));
+
+		for (size_t i = 0; i < size(); i++) {
+			if (!where->at(i))
+				continue;
+			m += at(i);
+			n++;
+		}
+	}
+
+	return m / n;
+}
+
+double
+G3SkyMap::var(size_t ddof, G3SkyMapMaskConstPtr where) const
+{
+	double m1 = 0;
+	double m2 = 0;
+	double a, b;
+	size_t n = 0;
+
+	if (!where) {
+		n = size();
+		for (size_t i = 0; i < n; i++) {
+			a = at(i);
+			m1 += a;
+			m2 += a * a;
+		}
+	} else {
+		g3_assert(where->IsCompatible(*this));
+
+		for (size_t i = 0; i < size(); i++) {
+			if (!where->at(i))
+				continue;
+			n++;
+			a = at(i);
+			m1 += a;
+			m2 += a * a;
+		}
+	}
+
+	return (m2 - m1 * m1 / (double)n) / (double)(n - ddof);
+}
+
+double
+G3SkyMap::std(size_t ddof, G3SkyMapMaskConstPtr where) const
+{
+	return sqrt(var(ddof, where));
+}
+
+double
+G3SkyMap::min(G3SkyMapMaskConstPtr where) const
+{
+	double m = std::numeric_limits<double>::infinity();
+	double v;
+
+	if (!where) {
+		for (size_t i = 0; i < size(); i++) {
+			v = at(i);
+			if (v < m)
+				m = v;
+		}
+	} else {
+		g3_assert(where->IsCompatible(*this));
+
+		for (size_t i = 0; i < size(); i++) {
+			if (!where->at(i))
+				continue;
+			v = at(i);
+			if (v < m)
+				m = v;
+		}
+	}
+
+	return m;
+}
+
+size_t
+G3SkyMap::argmin(G3SkyMapMaskConstPtr where) const
+{
+	double m = std::numeric_limits<double>::infinity();
+	double v;
+	size_t j = 0;
+
+	if (!where) {
+		for (size_t i = 0; i < size(); i++) {
+			v = at(i);
+			if (v < m) {
+				m = v;
+				j = i;
+			}
+		}
+	} else {
+		g3_assert(where->IsCompatible(*this));
+
+		for (size_t i = 0; i < size(); i++) {
+			if (!where->at(i))
+				continue;
+			v = at(i);
+			if (v < m) {
+				m = v;
+				j = i;
+			}
+		}
+	}
+
+	return j;
+}
+
+double
+G3SkyMap::max(G3SkyMapMaskConstPtr where) const
+{
+	double m = -1 * std::numeric_limits<double>::infinity();
+	double v;
+
+	if (!where) {
+		for (size_t i = 0; i < size(); i++) {
+			v = at(i);
+			if (v > m)
+				m = v;
+		}
+	} else {
+		g3_assert(where->IsCompatible(*this));
+
+		for (size_t i = 0; i < size(); i++) {
+			if (!where->at(i))
+				continue;
+			v = at(i);
+			if (v > m)
+				m = v;
+		}
+	}
+
+	return m;
+}
+
+size_t
+G3SkyMap::argmax(G3SkyMapMaskConstPtr where) const
+{
+	double m = -1 * std::numeric_limits<double>::infinity();
+	double v;
+	size_t j = 0;
+
+	if (!where) {
+		for (size_t i = 0; i < size(); i++) {
+			v = at(i);
+			if (v > m) {
+				m = v;
+				j = i;
+			}
+		}
+	} else {
+		g3_assert(where->IsCompatible(*this));
+
+		for (size_t i = 0; i < size(); i++) {
+			if (!where->at(i))
+				continue;
+			v = at(i);
+			if (v > m) {
+				m = v;
+				j = i;
+			}
+		}
+	}
+
+	return j;
+}
+
+double
+G3SkyMap::median(G3SkyMapMaskConstPtr where) const
+{
+	std::vector<double> data;
+	size_t npix = where ? where->sum() : size();
+	if (npix == 0)
+		return 0;
+
+	if (!where) {
+		for (size_t i = 0; i < size(); i++) {
+			data.push_back(at(i));
+		}
+	} else {
+		g3_assert(where->IsCompatible(*this));
+
+		for (size_t i = 0; i < size(); i++) {
+			if (!where->at(i))
+				continue;
+			data.push_back(at(i));
+		}
+	}
+
+	npix = data.size();
+	size_t n = npix / 2;
+
+	std::nth_element(data.begin(), data.begin() + n, data.end());
+
+	// odd-length array
+	if (npix % 2)
+		return data[n];
+
+	// even-length array
+	double m = data[n];
+	std::nth_element(data.begin(), data.begin() + n - 1, data.end());
+	return (m + data[n - 1]) / 2.;
+}
+
+#define skymap_test(oper) \
+G3SkyMapMask \
+G3SkyMap::oper(G3SkyMapMaskConstPtr where) const \
+{ \
+	G3SkyMapMask mask(*this); \
+	if (!where) { \
+		for (size_t i = 0; i < size(); i++) { \
+			if (std::oper(at(i))) \
+				mask[i] = true; \
+		} \
+	} else { \
+		g3_assert(where->IsCompatible(*this)); \
+		for (size_t i = 0; i < size(); i++) { \
+			if (!where->at(i)) \
+				continue; \
+			if (std::oper(at(i))) \
+				mask[i] = true; \
+		} \
+	} \
+	return mask; \
+}
+
+skymap_test(isinf);
+skymap_test(isnan);
+skymap_test(isfinite);
+
+#define skymap_nanoper(oper, type) \
+type \
+G3SkyMap::nan##oper(G3SkyMapMaskConstPtr where) const \
+{ \
+	G3SkyMapMask mask = isnan(where); \
+	mask.invert(); \
+	return oper(boost::make_shared<G3SkyMapMask>(mask)); \
+}
+
+skymap_nanoper(sum, double);
+skymap_nanoper(mean, double);
+skymap_nanoper(median, double);
+skymap_nanoper(min, double);
+skymap_nanoper(max, double);
+skymap_nanoper(argmin, size_t);
+skymap_nanoper(argmax, size_t);
+
+double
+G3SkyMap::nanvar(size_t ddof, G3SkyMapMaskConstPtr where) const
+{
+	G3SkyMapMask mask = isnan(where);
+	mask.invert();
+	return var(ddof, boost::make_shared<G3SkyMapMask>(mask));
+}
+
+double
+G3SkyMap::nanstd(size_t ddof, G3SkyMapMaskConstPtr where) const
+{
+	return sqrt(nanvar(ddof, where));
 }
 
 static bool
@@ -637,20 +1028,80 @@ pyskymap_bool(G3SkyMap &skymap)
 	return false;
 }
 
+static std::vector<uint64_t>
+pyskymap_nonzero(G3SkyMap &skymap)
+{
+	return skymap.MakeMask()->NonZeroPixels();
+}
+
+void
+G3SkyMap::ApplyMask(const G3SkyMapMask &mask, bool inverse)
+{
+	g3_assert(mask.IsCompatible(*this));
+
+	for (size_t i = 0; i < size(); i++) {
+		if (!at(i))
+			continue;
+		if (mask.at(i) == inverse)
+			(*this)[i] = 0;
+	}
+}
+
+void
+G3SkyMapWeights::ApplyMask(const G3SkyMapMask &mask, bool inverse)
+{
+	if (!!TT)
+		TT->ApplyMask(mask, inverse);
+	if (!!TQ)
+		TQ->ApplyMask(mask, inverse);
+	if (!!TU)
+		TU->ApplyMask(mask, inverse);
+	if (!!QQ)
+		QQ->ApplyMask(mask, inverse);
+	if (!!QU)
+		QU->ApplyMask(mask, inverse);
+	if (!!UU)
+		UU->ApplyMask(mask, inverse);
+}
+
 G3SkyMapWeights &
 G3SkyMapWeights::operator+=(const G3SkyMapWeights &rhs)
 {
 	g3_assert(IsPolarized() == rhs.IsPolarized());
 
-	*TT += *(rhs.TT);
-
-	if (IsPolarized()) {
+	if (!!TT)
+		*TT += *rhs.TT;
+	if (!!TQ)
 		*TQ += *rhs.TQ;
+	if (!!TU)
 		*TU += *rhs.TU;
+	if (!!QQ)
 		*QQ += *rhs.QQ;
+	if (!!QU)
 		*QU += *rhs.QU;
+	if (!!UU)
 		*UU += *rhs.UU;
-	}
+
+	return *this;
+}
+
+G3SkyMapWeights &
+G3SkyMapWeights::operator-=(const G3SkyMapWeights &rhs)
+{
+	g3_assert(IsPolarized() == rhs.IsPolarized());
+
+	if (!!TT)
+		*TT -= *rhs.TT;
+	if (!!TQ)
+		*TQ -= *rhs.TQ;
+	if (!!TU)
+		*TU -= *rhs.TU;
+	if (!!QQ)
+		*QQ -= *rhs.QQ;
+	if (!!QU)
+		*QU -= *rhs.QU;
+	if (!!UU)
+		*UU -= *rhs.UU;
 
 	return *this;
 }
@@ -658,18 +1109,23 @@ G3SkyMapWeights::operator+=(const G3SkyMapWeights &rhs)
 #define skymapweights_inplace(op, rhs_type) \
 G3SkyMapWeights &G3SkyMapWeights::operator op(rhs_type rhs) \
 { \
-	*TT op rhs; \
-	if (IsPolarized()) { \
+	if (!!TT) \
+		*TT op rhs; \
+	if (!!TQ) \
 		*TQ op rhs; \
+	if (!!TU) \
 		*TU op rhs; \
+	if (!!QQ) \
 		*QQ op rhs; \
+	if (!!QU) \
 		*QU op rhs; \
+	if (!!UU) \
 		*UU op rhs; \
-	} \
 	return *this; \
 }
 
 skymapweights_inplace(*=, const G3SkyMap &);
+skymapweights_inplace(*=, const G3SkyMapMask &);
 skymapweights_inplace(*=, double);
 skymapweights_inplace(/=, double);
 
@@ -683,14 +1139,54 @@ pyskymapweights_##name(const G3SkyMapWeights &a, const rhs_type b) \
 }
 
 skymapweights_pynoninplace(add, +=, G3SkyMapWeights &);
+skymapweights_pynoninplace(sub, -=, G3SkyMapWeights &);
 skymapweights_pynoninplace(multm, *=, G3SkyMap &);
 skymapweights_pynoninplace(multd, *=, double);
 skymapweights_pynoninplace(divd, /=, double);
 
-MuellerMatrix MuellerMatrix::Inv() const
+static G3SkyMapWeightsPtr
+pyskymapweights_multma(const G3SkyMapWeights &a, const G3SkyMapMask &b)
+{
+	G3SkyMapWeightsPtr rv(new G3SkyMapWeights());
+	if (!!a.TT)
+		rv->TT = pyskymap_multm(*a.TT, b);
+	if (!!a.TQ)
+		rv->TQ = pyskymap_multm(*a.TQ, b);
+	if (!!a.TU)
+		rv->TU = pyskymap_multm(*a.TU, b);
+	if (!!a.QQ)
+		rv->QQ = pyskymap_multm(*a.QQ, b);
+	if (!!a.QU)
+		rv->QU = pyskymap_multm(*a.QU, b);
+	if (!!a.UU)
+		rv->UU = pyskymap_multm(*a.UU, b);
+
+	return rv;
+}
+
+static G3SkyMapWeightsPtr
+pyskymapweights_imultma(G3SkyMapWeightsPtr a, const G3SkyMapMask &b)
+{
+	if (!!a->TT)
+		(*a->TT) *= b;
+	if (!!a->TQ)
+		(*a->TQ) *= b;
+	if (!!a->TU)
+		(*a->TU) *= b;
+	if (!!a->QQ)
+		(*a->QQ) *= b;
+	if (!!a->QU)
+		(*a->QU) *= b;
+	if (!!a->UU)
+		(*a->UU) *= b;
+
+	return a;
+}
+
+MuellerMatrix MuellerMatrix::inv() const
 {
 	MuellerMatrix m;
-	double c = Cond();
+	double c = cond();
 	if (tt == 0 || c != c || c > 1e12) {
 		if ((c != c || c > 1e12) && tt != 0)
 			log_trace("Singular matrix found when inverting!  Cond is %lE\n", c);
@@ -698,7 +1194,7 @@ MuellerMatrix MuellerMatrix::Inv() const
 		return m;
 	}
 
-	double d = Det();
+	double d = det();
 	m.tt = (qq * uu - qu * qu) / d;
 	m.tq = (tu * qu - tq * uu) / d;
 	m.tu = (tq * qu - tu * qq) / d;
@@ -709,7 +1205,7 @@ MuellerMatrix MuellerMatrix::Inv() const
 	return m;
 }
 
-double MuellerMatrix::Cond() const
+double MuellerMatrix::cond() const
 {
 	// Compute eigenvalues of a symmetrix 3x3 matrix
 	// See https://en.wikipedia.org/wiki/Eigenvalue_algorithm#3%C3%973_matrices
@@ -749,7 +1245,7 @@ double MuellerMatrix::Cond() const
 	B.tu = tu;
 	B.qu = qu;
 	B /= p;
-	double r = B.Det() / 2.0;
+	double r = B.det() / 2.0;
 
 	double phi;
 	if (r <= -1)
@@ -767,9 +1263,61 @@ double MuellerMatrix::Cond() const
 	return c;
 }
 
+StokesVector::StokesVector(double pol_ang, double pol_eff) :
+    t(backing[0]), q(backing[1]), u(backing[2])
+{
+	double phi = pol_ang / G3Units::rad * 2.0;
+	double gamma = pol_eff / (2.0 - pol_eff);
+
+	t = 1.0;
+	q = cos(phi) * gamma;
+	u = sin(phi) * gamma;
+
+	if (fabs(q) < 1e-12)
+		q = 0.0;
+	if (fabs(u) < 1e-12)
+		u = 0.0;
+}
+
+void StokesVector::rotate_pol(double pol_ang)
+{
+	double phi = pol_ang * 2.0 / G3Units::rad;
+	double c = cos(phi);
+	double s = sin(phi);
+
+	double qr = q * c - u * s;
+	double ur = q * s + u * c;
+
+	q = qr;
+	u = ur;
+}
+
+void MuellerMatrix::rotate_pol(double pol_ang)
+{
+	double phi = pol_ang * 2.0 / G3Units::rad;
+	double c = cos(phi);
+	double s = sin(phi);
+	double cc = c * c;
+	double ss = s * s;
+	double cs = c * s;
+	double xx = 2.0 * qu * cs;
+
+	double tqr = tq * c - tu * s;
+	double tur = tq * s + tu * c;
+	double qqr = qq * cc - xx + uu * ss;
+	double qur = (qq - uu) * cs + qu * (cc - ss);
+	double uur = qq * ss + xx + uu * cc;
+
+	tq = tqr;
+	tu = tur;
+	qq = qqr;
+	qu = qur;
+	uu = uur;
+}
+
 StokesVector & StokesVector::operator /=(const MuellerMatrix &r)
 {
-	MuellerMatrix ir = r.Inv();
+	MuellerMatrix ir = r.inv();
 	if (ir.tt != ir.tt)
 		t = q = u = 0.0 / 0.0;
 	else
@@ -782,7 +1330,7 @@ G3SkyMapPtr G3SkyMapWeights::Det() const
 	G3SkyMapPtr D = TT->Clone(false);
 
 	for (size_t i = 0; i < TT->size(); i++) {
-		double det = this->at(i).Det();
+		double det = this->at(i).det();
 		if (det != 0)
 			(*D)[i] = det;
 	}
@@ -796,7 +1344,7 @@ G3SkyMapPtr G3SkyMapWeights::Cond() const
 	C->ConvertToDense();
 
 	for (size_t i = 0; i < TT->size(); i++)
-		(*C)[i] = this->at(i).Cond();
+		(*C)[i] = this->at(i).cond();
 
 	return C;
 }
@@ -805,16 +1353,19 @@ G3SkyMapWeightsPtr G3SkyMapWeights::Inv() const
 {
 	G3SkyMapWeightsPtr out = this->Clone(false);
 	out->TT->ConvertToDense();
-	if (IsPolarized()) {
+	if (!!TQ)
 		out->TQ->ConvertToDense();
+	if (!!TU)
 		out->TU->ConvertToDense();
+	if (!!QQ)
 		out->QQ->ConvertToDense();
+	if (!!QU)
 		out->QU->ConvertToDense();
+	if (!!UU)
 		out->UU->ConvertToDense();
-	}
 
 	for (size_t i = 0; i < TT->size(); i++)
-		(*out)[i] = this->at(i).Inv();
+		(*out)[i] = this->at(i).inv();
 
 	return out;
 }
@@ -824,20 +1375,12 @@ G3SkyMapWeightsPtr G3SkyMapWeights::Rebin(size_t scale) const
 	g3_assert(IsCongruent());
 	G3SkyMapWeightsPtr out(new G3SkyMapWeights());
 
-	out->TT = TT->Rebin(scale, false);
-	if (IsPolarized()) {
-		out->TQ = TQ->Rebin(scale, false);
-		out->TU = TU->Rebin(scale, false);
-		out->QQ = QQ->Rebin(scale, false);
-		out->QU = QU->Rebin(scale, false);
-		out->UU = UU->Rebin(scale, false);
-	} else {
-		out->TQ = NULL;
-		out->TU = NULL;
-		out->QQ = NULL;
-		out->QU = NULL;
-		out->UU = NULL;
-	}
+	out->TT = !TT ? NULL : TT->Rebin(scale, false);
+	out->TQ = !TQ ? NULL : TQ->Rebin(scale, false);
+	out->TU = !TU ? NULL : TU->Rebin(scale, false);
+	out->QQ = !QQ ? NULL : QQ->Rebin(scale, false);
+	out->QU = !QU ? NULL : QU->Rebin(scale, false);
+	out->UU = !UU ? NULL : UU->Rebin(scale, false);
 
 	return out;
 }
@@ -846,14 +1389,18 @@ void G3SkyMapWeights::Compact(bool zero_nans)
 {
 	g3_assert(IsCongruent());
 
-	TT->Compact(zero_nans);
-	if (IsPolarized()) {
+	if (!!TT)
+		TT->Compact(zero_nans);
+	if (!!TQ)
 		TQ->Compact(zero_nans);
+	if (!!TU)
 		TU->Compact(zero_nans);
+	if (!!QQ)
 		QQ->Compact(zero_nans);
+	if (!!QU)
 		QU->Compact(zero_nans);
+	if (!!UU)
 		UU->Compact(zero_nans);
-	}
 }
 
 PYBINDINGS("maps") {
@@ -870,6 +1417,17 @@ PYBINDINGS("maps") {
 	    .value("E", G3SkyMap::E)
 	    .value("B", G3SkyMap::B)
 	    .value("none", G3SkyMap::None) // "None" is reserved in python
+	    .value("TT", G3SkyMap::TT)
+	    .value("TQ", G3SkyMap::TQ)
+	    .value("TU", G3SkyMap::TU)
+	    .value("QQ", G3SkyMap::QQ)
+	    .value("QU", G3SkyMap::QU)
+	    .value("UU", G3SkyMap::UU)
+	    .value("TE", G3SkyMap::TE)
+	    .value("TB", G3SkyMap::TB)
+	    .value("EE", G3SkyMap::EE)
+	    .value("EB", G3SkyMap::EB)
+	    .value("BB", G3SkyMap::BB)
 	;
 	enum_none_converter::from_python<G3SkyMap::MapPolType>();
 
@@ -892,11 +1450,11 @@ PYBINDINGS("maps") {
 	    .def_readwrite("pol_type", &G3SkyMap::pol_type,
 	      "Polarization type (maps.MapPolType) of the map "
 	      "(e.g. maps.MapPolType.Q).")
-	    .add_property("pol_conv", &G3SkyMap::GetPolConv, &G3SkyMap::SetPolConv,
+	    .def_readwrite("pol_conv", &G3SkyMap::pol_conv,
 	      "Polarization convention (maps.MapPolConv) of the map "
-	      "(e.g. maps.MapPolConv.IAU or maps.MapPolConv.COSMO). "
-	      "Switching between IAU and COSMO conventions for a U map "
-	      "multiplies the U map by -1.")
+	      "(e.g. maps.MapPolConv.IAU or maps.MapPolConv.COSMO).")
+	    .add_property("polarized", &G3SkyMap::IsPolarized,
+	      "True if the pol_conv property is set to IAU or COSMO, False otherwise.")
 	    .def_readwrite("units", &G3SkyMap::units,
 	      "Unit class (core.G3TimestreamUnits) of the map (e.g. "
 	      "core.G3TimestreamUnits.Tcmb). Within each unit class, further "
@@ -921,9 +1479,14 @@ PYBINDINGS("maps") {
 	      (bp::arg("copy_data")=true),
 	       "Return a map of the same type, populated with a copy of the data "
 	       "if the argument is true (default), empty otherwise.")
+	    .def("array_clone", &G3SkyMap::ArrayClone,
+	      (bp::arg("array")),
+	       "Return a map of the same type, populated with a copy of the input "
+	       "numpy array")
 	    .def("compatible", &G3SkyMap::IsCompatible,
 	      "Returns true if the input argument is a map with matching dimensions "
 	      "and boundaries on the sky.")
+	    .def("nonzero", &pyskymap_nonzero, "Return indices of non-zero pixels in the map")
 
 	    .def("angles_to_pixels", &G3SkyMap::AnglesToPixels,
 	      (bp::arg("alphas"), bp::arg("deltas")),
@@ -965,6 +1528,36 @@ PYBINDINGS("maps") {
 	       "Compute the sky coordinates, expressed as quaternion rotations "
 	       "from the pole, for each of the given 1-D pixel coordinates.")
 
+	    .def("query_disc",
+	      (std::vector<size_t> (G3SkyMap::*)(double, double, double) const)
+		&G3SkyMap::QueryDisc,
+	       (bp::arg("alpha"), bp::arg("delta"), bp::arg("radius")),
+	       "Return a list of pixel indices whose centers are located within "
+	       "a disc of the given radius at the given sky coordinates.")
+
+	    .def("query_disc",
+	      (std::vector<size_t> (G3SkyMap::*)(quat, double) const)
+		&G3SkyMap::QueryDisc,
+	       (bp::arg("quat"), bp::arg("radius")),
+	       "Return a list of pixel indices whose centers are located within "
+	       "a disc of the given radius at the given sky coordinates.")
+
+	    .def("query_alpha_ellipse",
+	      (std::vector<size_t> (G3SkyMap::*)(double, double, double, double) const)
+		&G3SkyMap::QueryAlphaEllipse,
+	       (bp::arg("alpha"), bp::arg("delta"), bp::arg("a"), bp::arg("b")),
+	       "Return a list of pixel indices whose centers are located within an "
+	       "ellipse extended in the alpha direction, at the given alpha and "
+	       "delta sky coordinates, with semimajor and semiminor axes a and b.")
+
+	    .def("query_alpha_ellipse",
+	      (std::vector<size_t> (G3SkyMap::*)(quat, double, double) const)
+		&G3SkyMap::QueryAlphaEllipse,
+	       (bp::arg("quat"), bp::arg("a"), bp::arg("b")),
+	       "Return a list of pixel indices whose centers are located within an "
+	       "ellipse extended in the alpha direction, at the given alpha and "
+	       "delta sky coordinates, with semimajor and semiminor axes a and b.")
+
 	    .def("get_interp_values",
 	      (std::vector<double> (G3SkyMap::*)(const std::vector<double> &,
 		const std::vector<double> &) const) &G3SkyMap::GetInterpValues,
@@ -992,6 +1585,18 @@ PYBINDINGS("maps") {
 	      "that is already sparse will be compactified in place in its "
 	      "current representation without additional memory overhead.")
 
+	    .def("to_mask", &G3SkyMap::MakeMask,
+	      (bp::arg("zero_nans")=false, bp::arg("zero_infs")=false),
+	      "Create a G3SkyMapMask object from the parent map, with pixels "
+	      "set to true where the map is non-zero (and optionally non-nan "
+	      "and/or finite).")
+
+	    .def("apply_mask", &G3SkyMap::ApplyMask,
+	      (bp::arg("mask"), bp::arg("inverse")=false),
+	      "Apply a mask in-place to the map, optionally inverting which "
+	      "pixels are zeroed.  If inverse = False, this is equivalent to "
+	      "in-place multiplication by the mask.")
+
 	    .def(bp::self += bp::self)
 	    .def(bp::self *= bp::self)
 	    .def(bp::self -= bp::self)
@@ -1007,8 +1612,11 @@ PYBINDINGS("maps") {
 	    .def("__sub__", &pyskymap_sub)
 	    .def("__sub__", &pyskymap_subd)
 	    .def("__rsub__", &pyskymap_rsubd)
+	    .def("__imul__", &pyskymap_imultm)
 	    .def("__mul__", &pyskymap_mult)
+	    .def("__mul__", &pyskymap_multm)
 	    .def("__mul__", &pyskymap_multd)
+	    .def("__rmul__", &pyskymap_multm)
 	    .def("__rmul__", &pyskymap_multd)
 	    .def("__div__", &pyskymap_div)
 	    .def("__div__", &pyskymap_divd)
@@ -1021,27 +1629,57 @@ PYBINDINGS("maps") {
 	    .def("__pow__", &pyskymap_pow)
 	    .def("__pow__", &pyskymap_powd)
 
-	    .def("__lt__", &pyskymap_lt)
-	    .def("__lt__", &pyskymap_ltd)
-	    .def("__le__", &pyskymap_le)
-	    .def("__le__", &pyskymap_led)
-	    .def("__eq__", &pyskymap_eq)
-	    .def("__eq__", &pyskymap_eqd)
-	    .def("__ne__", &pyskymap_ne)
-	    .def("__ne__", &pyskymap_ned)
-	    .def("__ge__", &pyskymap_ge)
-	    .def("__ge__", &pyskymap_ged)
-	    .def("__gt__", &pyskymap_gt)
-	    .def("__gt__", &pyskymap_gtd)
+	    .def(bp::self < bp::self)
+	    .def(bp::self <= bp::self)
+	    .def(bp::self == bp::self)
+	    .def(bp::self != bp::self)
+	    .def(bp::self >= bp::self)
+	    .def(bp::self > bp::self)
+	    .def(bp::self < double())
+	    .def(bp::self <= double())
+	    .def(bp::self == double())
+	    .def(bp::self != double())
+	    .def(bp::self >= double())
+	    .def(bp::self > double())
+
 	    .def("__bool__", &pyskymap_bool)
-	    .def("any", &pyskymap_any)
-	    .def("all", &pyskymap_all)
+	    .def("_cany", &G3SkyMap::any, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("_call", &G3SkyMap::all, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("_csum", &G3SkyMap::sum, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("_cmean", &G3SkyMap::mean, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("median", &G3SkyMap::median, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("_cvar", &G3SkyMap::var, (bp::arg("ddof")=0,
+	        bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("_cstd", &G3SkyMap::std, (bp::arg("ddof")=0,
+	        bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("_cmin", &G3SkyMap::min, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("_cmax", &G3SkyMap::max, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("_cargmin", &G3SkyMap::argmin, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("_cargmax", &G3SkyMap::argmax, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+
+	    .def("nansum", &G3SkyMap::nansum, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("nanmean", &G3SkyMap::nanmean, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("nanmedian", &G3SkyMap::nanmedian, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("nanvar", &G3SkyMap::nanvar, (bp::arg("ddof")=0,
+	        bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("nanstd", &G3SkyMap::nanstd, (bp::arg("ddof")=0,
+	        bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("nanmin", &G3SkyMap::nanmin, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("nanmax", &G3SkyMap::nanmax, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("nanargmin", &G3SkyMap::nanargmin, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("nanargmax", &G3SkyMap::nanargmax, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+
+	    .def("isinf", &G3SkyMap::isinf, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("isnan", &G3SkyMap::isnan, (bp::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("isfinite", &G3SkyMap::isfinite, (bp::arg("where")=G3SkyMapMaskConstPtr()))
 	;
+	boost::python::implicitly_convertible<G3SkyMapPtr, G3SkyMapConstPtr>();
 
 	EXPORT_FRAMEOBJECT(G3SkyMapWeights, init<>(),
-	    "Polarized (Mueller matrix) or unpolarized (scalar) map pixel weights.")
-	    .def(bp::init<G3SkyMapConstPtr, bool>(
-	      (bp::arg("skymap"), bp::arg("polarized") = true)))
+	    "Polarized (Mueller matrix) or unpolarized (scalar) map pixel weights."
+	    "Weights are polarized if the pol_conv attribute of the reference map is set.")
+	    .def(bp::init<G3SkyMapConstPtr>(
+	      (bp::arg("skymap"))))
 	    .def_readwrite("TT",&G3SkyMapWeights::TT, "Mueller matrix component map")
 	    .def_readwrite("TQ",&G3SkyMapWeights::TQ, "Mueller matrix component map")
 	    .def_readwrite("TU",&G3SkyMapWeights::TU, "Mueller matrix component map")
@@ -1074,19 +1712,31 @@ PYBINDINGS("maps") {
 	    .def("inv", &G3SkyMapWeights::Inv,
 	      "Return the inverse of the Mueller matrix for each pixel")
 
+	    .def("apply_mask", &G3SkyMapWeights::ApplyMask,
+	      (bp::arg("mask"), bp::arg("inverse")=false),
+	      "Apply a mask in-place to the weights, optionally inverting which "
+	      "pixels are zeroed.  If inverse = False, this is equivalent to "
+	      "in-place multiplication by the mask.")
+
 	    .def("clone", &G3SkyMapWeights::Clone, (bp::arg("copy_data")=true),
 	       "Return weights of the same type, populated with a copy of the data "
 	       "if the argument is true (default), empty otherwise.")
 
 	    .def(bp::self += bp::self)
+	    .def(bp::self -= bp::self)
 	    .def(bp::self *= FlatSkyMap())
 	    .def(bp::self *= HealpixSkyMap())
 	    .def(bp::self *= double())
 	    .def(bp::self /= double())
 
 	    .def("__add__", &pyskymapweights_add)
+	    .def("__sub__", &pyskymapweights_sub)
+	    .def("__imul__", &pyskymapweights_imultma)
 	    .def("__mul__", &pyskymapweights_multm)
+	    .def("__mul__", &pyskymapweights_multma)
 	    .def("__mul__", &pyskymapweights_multd)
+	    .def("__rmul__", &pyskymapweights_multm)
+	    .def("__rmul__", &pyskymapweights_multma)
 	    .def("__rmul__", &pyskymapweights_multd)
 	    .def("__div__", &pyskymapweights_divd)
 	    .def("__truediv__", &pyskymapweights_divd)

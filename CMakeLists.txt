@@ -70,13 +70,19 @@ set(Boost_NO_BOOST_CMAKE ON)
 # Find all the Boost and Python libraries
 include(Spt3gBoostPython)
 
+# Upgrade C++ standard to C++14 for Boost >= 1.80, which requires it
+if(Boost_VERSION VERSION_GREATER 1.79)
+	set(CMAKE_CXX_STANDARD 14)
+endif()
+
 target_include_directories(spt3g INTERFACE ${Boost_INCLUDE_DIR} ${Python_INCLUDE_DIRS})
 target_link_libraries(spt3g INTERFACE pthread ${Boost_LIBRARIES} ${Python_LIBRARIES})
 
 # Work around yet more bugs in GCC 4.4, this time with C++ 11 support
 # Also increase maximum number of arguments in python bindings
 target_compile_definitions(spt3g INTERFACE -DBOOST_NO_CXX11_SMART_PTR=1
-    -DBOOST_PYTHON_MAX_ARITY=20 -DBOOST_BIND_GLOBAL_PLACEHOLDERS)
+    -DBOOST_PYTHON_MAX_ARITY=20 -DBOOST_BIND_GLOBAL_PLACEHOLDERS
+    -DBOOST_ALLOW_DEPRECATED_HEADERS)
 
 # Shell script to set environment variables
 configure_file(${CMAKE_SOURCE_DIR}/cmake/env-shell.sh.in ${CMAKE_BINARY_DIR}/env-shell.sh @ONLY)
@@ -157,11 +163,15 @@ add_custom_target(fasttest COMMAND ctest -LE SLOWTEST COMMENT "Running fast test
 configure_file(${CMAKE_SOURCE_DIR}/cmake/test_env.py.in ${CMAKE_BINARY_DIR}/test_env.py @ONLY)
 configure_file(${CMAKE_SOURCE_DIR}/cmake/CTestCustom.cmake.in ${CMAKE_BINARY_DIR}/CTestCustom.cmake @ONLY)
 
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.17)
+	list(APPEND CMAKE_CTEST_ARGUMENTS "--output-on-failure")
+endif(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.17)
+
 # Target for version string
 add_custom_target(version ALL
-	COMMAND sh ${CMAKE_SOURCE_DIR}/cmake/getvers.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}/spt3g/version.py
-	COMMAND cmake -P ${CMAKE_SOURCE_DIR}/cmake/Spt3gVersion.cmake ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}
-	BYPRODUCTS ${CMAKE_BINARY_DIR}/spt3g/version.py ${CMAKE_BINARY_DIR}/cmake/Spt3gConfigVersion.cmake
+	COMMAND sh ${CMAKE_SOURCE_DIR}/cmake/getvers.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}
+	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_SOURCE_DIR}/cmake/Spt3gVersion.cmake ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}
+	BYPRODUCTS ${CMAKE_BINARY_DIR}/spt3g/version.py ${CMAKE_BINARY_DIR}/pyproject.toml ${CMAKE_BINARY_DIR}/cmake/Spt3gConfigVersion.cmake
 	COMMENT "Regenerating VCS version information"
 )
 
@@ -176,7 +186,7 @@ add_custom_target(tarball
 
 # Add target to generate documentation
 add_custom_target(docs
-	COMMAND cmake -P ${CMAKE_SOURCE_DIR}/cmake/gen_per_module_docs.cmake ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}
+	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_SOURCE_DIR}/cmake/gen_per_module_docs.cmake ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} ${Python_EXECUTABLE}
 	COMMAND mkdir -p ${CMAKE_BINARY_DIR}/docs
 	COMMAND which sphinx-build && sphinx-build -b html ${CMAKE_SOURCE_DIR}/doc ${CMAKE_BINARY_DIR}/docs || echo "Error: sphinx-build not found. Could not generate HTML docs."
 	COMMENT "Generate HTML documentation")
@@ -267,9 +277,16 @@ foreach(lib ${SPT3G_LIBRARIES})
 	endif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${lib}/include/)
 endforeach(lib ${SPT3G_LIBRARIES})
 
+# cmake doesn't generally have headers, but we want to provide the test header
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake/G3Test.h DESTINATION ${INCLUDE_INSTALL_DIR})
+
 # Target for uninstalling
 configure_file(
 	"${CMAKE_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
 	"${CMAKE_BINARY_DIR}/cmake/cmake_uninstall_cmake"
 	IMMEDIATE @ONLY)
 add_custom_target(uninstall "${CMAKE_COMMAND}" -P "${CMAKE_BINARY_DIR}/cmake/cmake_uninstall_cmake")
+
+if(NOT Python_FOUND)
+	message(FATAL_ERROR "Unable to find Python; build cannot proceed")
+endif(NOT Python_FOUND)

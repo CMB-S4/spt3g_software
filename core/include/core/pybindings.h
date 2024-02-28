@@ -3,7 +3,11 @@
 
 #include <G3.h>
 #include <G3Frame.h>
+#include <G3Logging.h>
 
+#include <boost/preprocessor/cat.hpp>
+#include <boost/preprocessor/facilities/overload.hpp>
+#include <boost/preprocessor/stringize.hpp>
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <boost/python/suite/indexing/container_utils.hpp>
@@ -346,93 +350,66 @@ public:
 	    .def(boost::python::init<const T &>()) \
 	    .def_pickle(g3frameobject_picklesuite<T>())
 
+#define EXPORT_FRAMEOBJECT_NOINITNAMESPACE(T, initf, docstring) \
+	boost::python::class_<T, boost::python::bases<G3FrameObject>, boost::shared_ptr<T> >(#T, docstring, initf) \
+	    .def(boost::python::init<const T &>()) \
+	    .def_pickle(g3frameobject_picklesuite<T>())
 
-/* RAII for a thread-safe Python context 
- *
- * This only matters if you're using a multithreaded C++ application
- * so everything is gated by an on/off switch to optimize the "normal" case. 
- * So that means you need to call G3PyContext::enable() at the beginning of your program
- * for this to do anything. 
- *
- * Basically, anywhere we call python code we should have a G3PyContext. ensureGILState()
- * is called automatically by the constructor and releaseGILState() by the destructor,
- * so you only need to call them manually if there's a gap in the same scope 
- * betwen Python things. 
- *
- * For convenience, Python initialization/finalization is also provided as a static
- * method, as there are some tricks to getting this right across all Python versions.
- *
- **/ 
-class G3PyContext
-{
-	public:
-		// Sets up a Pythoncontext and calls ensureGILState
-		G3PyContext() 
-			: ensured_(false)
-		{
-			ensureGILState();
-		}
+// Declare a python module with a name and the name of its enclosing package scope.
+// name should be be a bare token, while pkg should be a string literal, e.g.:
+//     SPT3G_PYTHON_MODULE_2(foo, "spt3g.bar")
+// for a package whose fully qualified name will be spt3g.bar.foo
+#define SPT3G_PYTHON_MODULE_2(name, pkg) \
+BOOST_PYTHON_MODULE(name) { \
+	namespace bp = boost::python; \
+	auto mod = bp::scope(); \
+	std::string package_prefix = pkg; \
+	std::string full_name = package_prefix + "." + bp::extract<std::string>(mod.attr("__name__"))(); \
+	mod.attr("__name__") = full_name; \
+	mod.attr("__package__") = package_prefix; \
+	void BOOST_PP_CAT(spt3g_init_module_, name)(); \
+	BOOST_PP_CAT(spt3g_init_module_, name)(); \
+	if(PY_MAJOR_VERSION < 3){ \
+		Py_INCREF(mod.ptr()); \
+		PyDict_SetItemString(PyImport_GetModuleDict(),full_name.c_str(),mod.ptr()); \
+	} \
+} \
+void BOOST_PP_CAT(spt3g_init_module_, name)()
 
-		~G3PyContext()
-		{
-			releaseGILState();
-		}
+// Declare a python module with the given name, assuming that the enclosing package 
+// is the default "spt3g".
+#define SPT3G_PYTHON_MODULE_1(name) SPT3G_PYTHON_MODULE_2(name, "spt3g")
 
-		// Make sure we can do python things in a C++ program. Does nothing if enable() hasn't been called before. 
-		// Automatically called by constructor, but you'll have to call it again
-		// if you call releaseGILState 
-		void 
-		ensureGILState()
-		{
-			if(!enabled_)
-				return; 
+// Declare a python module with a name and optionally the name of its enclosing package scope.
+// name should be be a bare token, while if provided the enclosing package name should be a
+// string literal.
+// If the enclosing package name is not specified, it will default to "spt3g".
+#define SPT3G_PYTHON_MODULE(...) BOOST_PP_OVERLOAD(SPT3G_PYTHON_MODULE_,__VA_ARGS__)(__VA_ARGS__)
 
-			if(ensured_)
-				return; 
+// Python runtime context to simplify acquiring or releasing the GIL as necessary.
+// To use, simply construct the context object where necessary, e.g.
+//    G3PythonContext ctx("mycontext", false);
+// The context destructor will clean up after itself (releasing the GIL if acquired, and
+// vice versa).  If hold_gil is true, the context will ensure the GIL is held at construction,
+// and released at destruction.  If hold_gil is false, the context will save the current thread
+// state and release the GIL at construction, and re-acquire it at destruction.  If init is
+// true, the context will initialize the python interpeter at construction (e.g. at the
+// beginning of a C++ compiled program), and immediately release the GIL.  At destruction, it
+// will re-acquire the GIL and finalize threads.  The python interpreter should be
+// initialized only once, typically at the beginning of the main program.
+class G3PythonContext {
+public:
+	G3PythonContext(std::string name, bool hold_gil=false, bool init=false);
+	~G3PythonContext();
 
-			mut_.lock();
-			st_ = PyGILState_Ensure();
-			ensured_ = true;
-		}
+private:
+	std::string name_;
+	bool hold_;
+	bool init_;
+	PyGILState_STATE gil_;
+	PyThreadState *thread_;
 
-		// not doing python things, can release state. 
-		void
-		releaseGILState()
-		{
-			if (ensured_)
-			{	
-				PyGILState_Release(st_); 
-				ensured_ = false;
-				mut_.unlock(); 
-			}
-		}
-
-		// ensureGILState and releaseGILState do nothing if not enabled once
-		// (to avoid unnecessarily taking a mutex) 
-		static void 
-		enable()
-		{ 
-			enabled_ = true;
-		}
-
-		// if we are done with threads, we can disable
-    static void
-		disable()
-		{ 
-			enabled_ = false;
-		} 
-
-		// these are helpers for initializing / deinitialing python
-		// from a C++ program. 
-		static int initializePython(); 
-		static int deinitializePython(); 
-
-	private:
-		bool ensured_;
-		PyGILState_STATE st_;
-		static std::mutex mut_;
-		static bool enabled_;
+	SET_LOGGER("G3PythonContext");
 };
-
 
 #endif

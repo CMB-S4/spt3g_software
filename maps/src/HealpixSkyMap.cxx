@@ -8,7 +8,7 @@
 
 #include <G3Units.h>
 #include <maps/HealpixSkyMap.h>
-#include <maps/chealpix.h>
+#include <maps/G3SkyMapMask.h>
 
 #include "mapdata.h"
 
@@ -16,21 +16,20 @@ HealpixSkyMap::HealpixSkyMap(size_t nside, bool weighted, bool nested,
     MapCoordReference coord_ref, G3Timestream::TimestreamUnits u,
     G3SkyMap::MapPolType pol_type, bool shift_ra, G3SkyMap::MapPolConv pol_conv) :
       G3SkyMap(coord_ref, weighted, u, pol_type, pol_conv),
-      nside_(nside), nested_(nested), dense_(NULL), ring_sparse_(NULL),
-      indexed_sparse_(NULL), shift_ra_(shift_ra)
+      info_(nside, nested, shift_ra),
+      dense_(NULL), ring_sparse_(NULL), indexed_sparse_(NULL)
 {
-	ring_info_ = init_map_info(nside, nested, shift_ra, 1);
-	npix_ = nside2npix(nside);
 }
 
 HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool weighted,
     bool nested, MapCoordReference coord_ref,
     G3Timestream::TimestreamUnits u, G3SkyMap::MapPolType pol_type,
     bool shift_ra, G3SkyMap::MapPolConv pol_conv) :
-      G3SkyMap(coord_ref, weighted, u, pol_type, pol_conv), nested_(nested),
-      dense_(NULL), ring_sparse_(NULL), indexed_sparse_(NULL), shift_ra_(shift_ra)
+      G3SkyMap(coord_ref, weighted, u, pol_type, pol_conv),
+      dense_(NULL), ring_sparse_(NULL), indexed_sparse_(NULL)
 {
 	Py_buffer view;
+	size_t nside;
 
 	if (boost::python::extract<size_t>(v).check()) {
 		// size_t from Python is also a bp::object,
@@ -38,9 +37,8 @@ HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool weighted,
 		// constructor can get here by accident since
 		// the signatures are degenerate. Handle the
 		// confusion gracefully.
-		nside_ = boost::python::extract<size_t>(v)();
-		ring_info_ = init_map_info(nside_, nested_, shift_ra_, 1);
-		npix_ = nside2npix(nside_);
+		nside = boost::python::extract<size_t>(v)();
+		info_.initialize(nside, nested, shift_ra);
 		return;
 	}
 
@@ -50,19 +48,380 @@ HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool weighted,
 		Py_buffer indexview, dataview;
 #if PY_MAJOR_VERSION < 3
 		if (PyInt_Check(PyTuple_GetItem(v.ptr(), 2))) {
-			nside_ = PyInt_AsSsize_t(PyTuple_GetItem(v.ptr(), 2));
+			nside = PyInt_AsSsize_t(PyTuple_GetItem(v.ptr(), 2));
 		} else 
 #endif
 		if (PyLong_Check(PyTuple_GetItem(v.ptr(), 2))) {
 #if PY_MAJOR_VERSION < 3
-			nside_ = PyLong_AsUnsignedLong(PyTuple_GetItem(v.ptr(), 2));
+			nside = PyLong_AsUnsignedLong(PyTuple_GetItem(v.ptr(), 2));
 #else
-			nside_ = PyLong_AsSize_t(PyTuple_GetItem(v.ptr(), 2));
+			nside = PyLong_AsSize_t(PyTuple_GetItem(v.ptr(), 2));
 #endif
 		} else {
 			PyErr_SetString(PyExc_TypeError,
 			    "Third tuple element for sparse maps needs to be "
 			    "nside");
+			throw bp::error_already_set();
+		}
+
+		info_.initialize(nside, nested, shift_ra);
+
+		FillFromArray(v);
+
+		return;
+	}
+
+	if (PyObject_GetBuffer(v.ptr(), &view,
+	    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) != -1) {
+		// Fall back to just 1-D
+		if (view.ndim != 1) {
+			PyBuffer_Release(&view);
+			log_fatal("Only 1-D maps supported");
+		}
+		ssize_t npix = view.shape[0];
+		PyBuffer_Release(&view);
+
+		info_.initialize(npix, nested, shift_ra, true);
+
+		FillFromArray(v);
+
+		return;
+	}
+
+	throw bp::error_already_set();
+}
+
+HealpixSkyMap::HealpixSkyMap() :
+    G3SkyMap(MapCoordReference::Local, false),
+    info_(0, false, false),
+    dense_(NULL), ring_sparse_(NULL), indexed_sparse_(NULL)
+{
+}
+
+HealpixSkyMap::HealpixSkyMap(const HealpixSkyMap & fm) :
+    G3SkyMap(fm), info_(fm.info_), dense_(NULL), ring_sparse_(NULL), indexed_sparse_(NULL)
+{
+	if (fm.dense_)
+		dense_ = new std::vector<double>(*fm.dense_);
+	else if (fm.ring_sparse_)
+		ring_sparse_ = new SparseMapData<double>(*fm.ring_sparse_);
+	else if (fm.indexed_sparse_)
+		indexed_sparse_ = new std::unordered_map<uint64_t, double>(
+		    *fm.indexed_sparse_);
+}
+
+HealpixSkyMap::~HealpixSkyMap()
+{
+	if (dense_)
+		delete dense_;
+	if (ring_sparse_)
+		delete ring_sparse_;
+	if (indexed_sparse_)
+		delete indexed_sparse_;
+}
+
+template <class A> void
+HealpixSkyMap::save(A &ar, unsigned v) const
+{
+	using namespace cereal;
+
+	ar & make_nvp("G3FrameObject", base_class<G3FrameObject>(this));
+	ar & make_nvp("G3SkyMap", base_class<G3SkyMap>(this));
+	ar & make_nvp("info", info_);
+	if (dense_) {
+		ar & make_nvp("store", 3);
+		ar & make_nvp("data", *dense_);
+	} else if (ring_sparse_) {
+		ar & make_nvp("store", 2);
+		ar & make_nvp("data", *ring_sparse_);
+	} else if (indexed_sparse_) {
+		ar & make_nvp("store", 1);
+		ar & make_nvp("data", *indexed_sparse_);
+	} else {
+		ar & make_nvp("store", 0);
+	}
+}
+
+template <class A> void
+HealpixSkyMap::load(A &ar, unsigned v)
+{
+	using namespace cereal;
+	int store;
+	uint32_t nside;
+	bool nested, shifted;
+
+	G3_CHECK_VERSION(v);
+
+	ar & make_nvp("G3FrameObject", base_class<G3FrameObject>(this));
+	ar & make_nvp("G3SkyMap", base_class<G3SkyMap>(this));
+
+	if (v < 3) {
+		ar & make_nvp("nside", nside);
+		ar & make_nvp("nested", nested);
+	} else {
+		ar & make_nvp("info", info_);
+	}
+
+	if (dense_) {
+		delete dense_;
+		dense_ = NULL;
+	}
+	if (ring_sparse_) {
+		delete ring_sparse_;
+		ring_sparse_ = NULL;
+	}
+	if (indexed_sparse_) {
+		delete indexed_sparse_;
+		indexed_sparse_ = NULL;
+	}
+
+	ar & make_nvp("store", store);
+	switch (store) {
+	case 3:
+		dense_ = new std::vector<double>();
+		ar & make_nvp("data", *dense_);
+		break;
+	case 2:
+		ring_sparse_ = new SparseMapData<double>(1,1);
+		ar & make_nvp("data", *ring_sparse_);
+		break;
+	case 1:
+		indexed_sparse_ = new std::unordered_map<uint64_t, double>;
+		ar & make_nvp("data", *indexed_sparse_);
+		break;
+	}
+
+	if (v == 2)
+		ar & make_nvp("shift_ra", shifted);
+	else if (v == 1)
+		shifted = false;
+
+	if (v < 3)
+		info_.initialize(nside, nested, shifted);
+}
+
+HealpixSkyMap::const_iterator::const_iterator(const HealpixSkyMap &map, bool begin) :
+    map_(map)
+{
+	if (map_.dense_) {
+		it_dense_ = begin ? map_.dense_->begin() : map_.dense_->end();
+		index_ = begin ? 0 : map_.size();
+	} else if (map_.ring_sparse_) {
+		auto iter = begin ? map_.ring_sparse_->begin() : map_.ring_sparse_->end();
+		j_ = iter.x;
+		k_ = iter.y;
+	} else if (map_.indexed_sparse_) {
+		it_indexed_sparse_ = begin ? map_.indexed_sparse_->begin() : map_.indexed_sparse_->end();
+	} else
+		index_ = 0;
+
+	set_value();
+}
+
+HealpixSkyMap::const_iterator::const_iterator(const HealpixSkyMap::const_iterator & iter) :
+    index_(iter.index_), value_(iter.value_), map_(iter.map_)
+{
+	if (map_.dense_)
+		it_dense_ = iter.it_dense_;
+	else if (map_.ring_sparse_) {
+		j_ = iter.j_;
+		k_ = iter.k_;
+	} else if (map_.indexed_sparse_)
+		it_indexed_sparse_ = iter.it_indexed_sparse_;
+}
+
+void
+HealpixSkyMap::const_iterator::set_value()
+{
+	if (map_.dense_) {
+		value_.second = index_ < map_.size() ? *it_dense_ : 0;
+	} else if (map_.ring_sparse_) {
+		index_ = map_.info_.RingToPixel(j_, k_);
+		if (index_ < 0 || index_ >= map_.size()) {
+			index_ = map_.size();
+			value_.second = 0;
+		} else {
+			value_.second = map_.ring_sparse_->at(j_, k_);
+		}
+	} else if (map_.indexed_sparse_) {
+		if (it_indexed_sparse_ != map_.indexed_sparse_->end()) {
+			index_ = it_indexed_sparse_->first;
+			value_.second = it_indexed_sparse_->second;
+		} else {
+			index_ = map_.size();
+			value_.second = 0;
+		}
+	}
+
+	value_.first = index_;
+}
+
+HealpixSkyMap::const_iterator
+HealpixSkyMap::const_iterator::operator++()
+{
+	if (map_.dense_) {
+		++index_;
+		++it_dense_;
+	} else if (map_.ring_sparse_) {
+		SparseMapData<double>::const_iterator iter(*map_.ring_sparse_, j_, k_);
+		++iter;
+		j_ = iter.x;
+		k_ = iter.y;
+	} else if (map_.indexed_sparse_)
+		++it_indexed_sparse_;
+
+	set_value();
+	return *this;
+}
+
+void
+HealpixSkyMap::ConvertToDense()
+{
+	if (dense_)
+		return;
+
+	dense_ = new std::vector<double>(size(), 0);
+
+	if (ring_sparse_) {
+		size_t idx;
+		for (auto i = ring_sparse_->begin(); i != ring_sparse_->end();
+		    i++) {
+			idx = info_.RingToPixel(i.x, i.y);
+			if (idx < 0 || idx >= size())
+				continue;
+			(*dense_)[idx] = (*i);
+		}
+		delete ring_sparse_;
+		ring_sparse_ = NULL;
+	} else if (indexed_sparse_) {
+		for (auto i : *indexed_sparse_)
+			(*dense_)[i.first] = i.second;
+		delete indexed_sparse_;
+		indexed_sparse_ = NULL;
+	}
+	/* otherwise leave it at zero since no data */
+}
+
+void
+HealpixSkyMap::ConvertToRingSparse()
+{
+	if (ring_sparse_)
+		return;
+
+	ring_sparse_ = new SparseMapData<double>(info_.nring(), info_.nring());
+
+	if (dense_) {
+		auto *old_dense = dense_;
+		dense_ = NULL;
+
+		for (size_t i = 0; i < old_dense->size(); i++)
+			if ((*old_dense)[i] != 0)
+				(*this)[i] = (*old_dense)[i];
+		
+		delete old_dense;
+	} else if (indexed_sparse_) {
+		auto *oldis = indexed_sparse_;
+		indexed_sparse_ = NULL;
+
+		for (auto i : *oldis)
+			if (i.second != 0)
+				(*this)[i.first] = i.second;
+
+		delete oldis;
+	}
+}
+
+void
+HealpixSkyMap::ConvertToIndexedSparse()
+{
+	if (indexed_sparse_)
+		return;
+
+	indexed_sparse_ = new std::unordered_map<uint64_t, double>;
+
+	if (ring_sparse_) {
+		size_t idx;
+		for (auto i = ring_sparse_->begin(); i != ring_sparse_->end();
+		    i++) {
+			if ((*i) == 0)
+				continue;
+			idx = info_.RingToPixel(i.x, i.y);
+			if (idx < 0 || idx >= size())
+				continue;
+			(*indexed_sparse_)[idx] = (*i);
+		}
+		delete ring_sparse_;
+		ring_sparse_ = NULL;
+	} else if (dense_) {
+		for (size_t i = 0; i < dense_->size(); i++)
+			if ((*dense_)[i] != 0)
+				(*indexed_sparse_)[i] = (*dense_)[i];
+		delete dense_;
+		dense_ = NULL;
+	}
+}
+
+void HealpixSkyMap::Compact(bool zero_nans)
+{
+	if (!dense_ && !indexed_sparse_ && !ring_sparse_)
+		return;
+
+	if (zero_nans) {
+		for (auto i : *this) {
+			if (i.second != i.second)
+				(*this)[i.first] = 0;
+		}
+	}
+
+	if (dense_) {
+		ConvertToRingSparse();
+	} else if (indexed_sparse_) {
+		for (auto i = indexed_sparse_->begin(); i != indexed_sparse_->end(); ) {
+			if (i->second == 0)
+				i = indexed_sparse_->erase(i);
+			else
+				i++;
+		}
+	} else if (ring_sparse_) {
+		ring_sparse_->compact();
+	}
+}
+
+void
+HealpixSkyMap::FillFromArray(boost::python::object v)
+{
+	if (PyTuple_Check(v.ptr())) {
+		// One option is that we got passed a tuple of numpy
+		// arrays: first indices, next data, next (optionally) nside.
+		Py_buffer indexview, dataview;
+
+		if (PyTuple_Size(v.ptr()) == 3) {
+			size_t nside;
+
+#if PY_MAJOR_VERSION < 3
+			if (PyInt_Check(PyTuple_GetItem(v.ptr(), 2))) {
+				nside = PyInt_AsSsize_t(PyTuple_GetItem(v.ptr(), 2));
+			} else
+#endif
+			if (PyLong_Check(PyTuple_GetItem(v.ptr(), 2))) {
+#if PY_MAJOR_VERSION < 3
+				nside = PyLong_AsUnsignedLong(PyTuple_GetItem(v.ptr(), 2));
+#else
+				nside = PyLong_AsSize_t(PyTuple_GetItem(v.ptr(), 2));
+#endif
+			} else {
+				PyErr_SetString(PyExc_TypeError,
+				    "Third tuple element for sparse maps needs to be "
+				    "nside");
+				throw bp::error_already_set();
+			}
+
+			if (nside != info_.nside())
+				log_fatal("Got nside %zu, expected %zu", nside, info_.nside());
+		} else if (PyTuple_Size(v.ptr()) != 2) {
+			PyErr_SetString(PyExc_TypeError,
+			    "Tuple argument for sparse maps should have two or "
+			    "three elements");
 			throw bp::error_already_set();
 		}
 
@@ -109,6 +468,11 @@ HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool weighted,
 		double phi_max_shift = 0;
 		for (size_t i = 0; i < sz; i++) {
 			unsigned long pix = ((unsigned long *)indexview.buf)[i];
+			if (pix < 0 || pix >= info_.npix()) {
+				PyBuffer_Release(&indexview);
+				PyBuffer_Release(&dataview);
+				log_fatal("Index %zu out of range", pix);
+			}
 			double ang = PixelToAngle(pix)[0];
 			if (ang < 0)
 				ang += 2 * M_PI * G3Units::rad;
@@ -123,28 +487,36 @@ HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool weighted,
 			if (ang > phi_max_shift)
 				phi_max_shift = ang;
 		}
-		shift_ra_ = (phi_max - phi_min) > (phi_max_shift - phi_min_shift);
+		bool shift_ra = (phi_max - phi_min) > (phi_max_shift - phi_min_shift);
 
-		ring_info_ = init_map_info(nside_, nested_, shift_ra_, 1);
-		npix_ = nside2npix(nside_);
-		ring_sparse_ = new SparseMapData(ring_info_->nring, ring_info_->nring);
+		SetShiftRa(shift_ra);
+		ConvertToRingSparse();
 
 		for (size_t i = 0; i < sz; i++)
 			(*this)[((unsigned long *)indexview.buf)[i]]=
 			    ((double *)dataview.buf)[i];
 		PyBuffer_Release(&indexview);
 		PyBuffer_Release(&dataview);
+
 		return;
 	}
 
+	Py_buffer view;
 	if (PyObject_GetBuffer(v.ptr(), &view,
-	    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) != -1) {
+	    PyBUF_FORMAT | PyBUF_C_CONTIGUOUS) != -1) {
 		// Fall back to just 1-D
-		if (view.ndim != 1)
+		if (view.ndim != 1) {
+			PyBuffer_Release(&view);
 			log_fatal("Only 1-D maps supported");
+		}
 
-		nside_ = npix2nside(view.shape[0]);
-		dense_ = new std::vector<double>(view.shape[0]);
+		size_t npix = view.shape[0];
+		if (npix != info_.npix()) {
+			PyBuffer_Release(&view);
+			log_fatal("Got array of shape (%zu,), expected (%zu,)", npix, info_.npix());
+		}
+
+		ConvertToDense();
 
 		double *d = &(*dense_)[0];
 
@@ -155,11 +527,15 @@ HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool weighted,
 #if BYTE_ORDER == LITTLE_ENDIAN
 		else if (format[0] == '<')
 			format++;
-		else if (format[0] == '>' || format[0] == '!')
+		else if (format[0] == '>' || format[0] == '!') {
+			PyBuffer_Release(&view);
 			log_fatal("Does not support big-endian numpy arrays");
+		}
 #else
-		else if (format[0] == '<')
+		else if (format[0] == '<') {
+			PyBuffer_Release(&view);
 			log_fatal("Does not support little-endian numpy arrays");
+		}
 		else if (format[0] == '>' || format[0] == '!')
 			format++;
 #endif
@@ -177,309 +553,20 @@ HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool weighted,
 				d[i] = ((unsigned int *)view.buf)[i];
 		} else if (strcmp(format, "l") == 0) {
 			for (size_t i = 0; i < view.len/sizeof(long); i++)
+				d[i] = ((long *)view.buf)[i];
+		} else if (strcmp(format, "L") == 0) {
+			for (size_t i = 0; i < view.len/sizeof(long); i++)
 				d[i] = ((unsigned long *)view.buf)[i];
 		} else {
+			PyBuffer_Release(&view);
 			log_fatal("Unknown type code %s", view.format);
 		}
 		PyBuffer_Release(&view);
-
-		ring_info_ = init_map_info(nside_, nested_, shift_ra_, 1);
-		npix_ = nside2npix(nside_);
 
 		return;
 	}
 
 	throw bp::error_already_set();
-}
-
-HealpixSkyMap::HealpixSkyMap() :
-    G3SkyMap(MapCoordReference::Local, false), nside_(0), nested_(false),
-    dense_(NULL), ring_sparse_(NULL), indexed_sparse_(NULL), shift_ra_(false)
-{
-	ring_info_ = init_map_info(nside_, nested_, shift_ra_, 1);
-	npix_ = nside2npix(nside_);
-}
-
-HealpixSkyMap::HealpixSkyMap(const HealpixSkyMap & fm) :
-    G3SkyMap(fm), nside_(fm.nside_), nested_(fm.nested_),
-    dense_(NULL), ring_sparse_(NULL), indexed_sparse_(NULL), shift_ra_(fm.shift_ra_)
-{
-	if (fm.dense_)
-		dense_ = new std::vector<double>(*fm.dense_);
-	else if (fm.ring_sparse_)
-		ring_sparse_ = new SparseMapData(*fm.ring_sparse_);
-	else if (fm.indexed_sparse_)
-		indexed_sparse_ = new std::unordered_map<uint64_t, double>(
-		    *fm.indexed_sparse_);
-	ring_info_ = init_map_info(nside_, nested_, shift_ra_, 1);
-	npix_ = nside2npix(nside_);
-}
-
-HealpixSkyMap::~HealpixSkyMap()
-{
-	if (dense_)
-		delete dense_;
-	if (ring_sparse_)
-		delete ring_sparse_;
-	if (indexed_sparse_)
-		delete indexed_sparse_;
-
-	free_map_info(ring_info_);
-}
-
-template <class A> void
-HealpixSkyMap::save(A &ar, unsigned v) const
-{
-	using namespace cereal;
-
-	ar & make_nvp("G3FrameObject", base_class<G3FrameObject>(this));
-	ar & make_nvp("G3SkyMap", base_class<G3SkyMap>(this));
-	ar & make_nvp("nside", nside_);
-	ar & make_nvp("nested", nested_);
-	if (dense_) {
-		ar & make_nvp("store", 3);
-		ar & make_nvp("data", *dense_);
-	} else if (ring_sparse_) {
-		ar & make_nvp("store", 2);
-		ar & make_nvp("data", *ring_sparse_);
-	} else if (indexed_sparse_) {
-		ar & make_nvp("store", 1);
-		ar & make_nvp("data", *indexed_sparse_);
-	} else {
-		ar & make_nvp("store", 0);
-	}
-	ar & make_nvp("shift_ra", shift_ra_);
-}
-
-template <class A> void
-HealpixSkyMap::load(A &ar, unsigned v)
-{
-	using namespace cereal;
-	int store;
-
-	G3_CHECK_VERSION(v);
-
-	ar & make_nvp("G3FrameObject", base_class<G3FrameObject>(this));
-	ar & make_nvp("G3SkyMap", base_class<G3SkyMap>(this));
-	ar & make_nvp("nside", nside_);
-	ar & make_nvp("nested", nested_);
-
-	if (dense_) {
-		delete dense_;
-		dense_ = NULL;
-	}
-	if (ring_sparse_) {
-		delete ring_sparse_;
-		ring_sparse_ = NULL;
-	}
-	if (indexed_sparse_) {
-		delete indexed_sparse_;
-		indexed_sparse_ = NULL;
-	}
-
-	ar & make_nvp("store", store);
-	switch (store) {
-	case 3:
-		dense_ = new std::vector<double>();
-		ar & make_nvp("data", *dense_);
-		break;
-	case 2:
-		ring_sparse_ = new SparseMapData(1,1);
-		ar & make_nvp("data", *ring_sparse_);
-		break;
-	case 1:
-		indexed_sparse_ = new std::unordered_map<uint64_t, double>;
-		ar & make_nvp("data", *indexed_sparse_);
-		break;
-	}
-
-	if (v > 1)
-		ar & make_nvp("shift_ra", shift_ra_);
-	else
-		shift_ra_ = false;
-
-	free_map_info(ring_info_);
-	ring_info_ = init_map_info(nside_, nested_, shift_ra_, 1);
-	npix_ = nside2npix(nside_);
-}
-
-HealpixSkyMap::const_iterator::const_iterator(const HealpixSkyMap &map, bool begin) :
-    map_(map)
-{
-	if (map_.dense_) {
-		it_dense_ = begin ? map_.dense_->begin() : map_.dense_->end();
-		index_ = begin ? 0 : map_.size();
-	} else if (map_.ring_sparse_) {
-		auto iter = begin ? map_.ring_sparse_->begin() : map_.ring_sparse_->end();
-		j_ = iter.x;
-		k_ = iter.y;
-	} else if (map_.indexed_sparse_) {
-		it_indexed_sparse_ = begin ? map_.indexed_sparse_->begin() : map_.indexed_sparse_->end();
-	} else
-		index_ = 0;
-
-	set_value();
-}
-
-HealpixSkyMap::const_iterator::const_iterator(const HealpixSkyMap::const_iterator & iter) :
-    index_(iter.index_), value_(iter.value_), map_(iter.map_)
-{
-	if (map_.dense_)
-		it_dense_ = iter.it_dense_;
-	else if (map_.ring_sparse_) {
-		j_ = iter.j_;
-		k_ = iter.k_;
-	} else if (map_.indexed_sparse_)
-		it_indexed_sparse_ = iter.it_indexed_sparse_;
-}
-
-void
-HealpixSkyMap::const_iterator::set_value()
-{
-	if (map_.dense_) {
-		value_.second = index_ < map_.size() ? *it_dense_ : 0;
-	} else if (map_.ring_sparse_) {
-		long idx;
-		get_pixel_index(map_.ring_info_, j_, k_, &idx);
-		index_ = idx;
-		value_.second = map_.ring_sparse_->at(j_, k_);
-	} else if (map_.indexed_sparse_) {
-		if (it_indexed_sparse_ != map_.indexed_sparse_->end()) {
-			index_ = it_indexed_sparse_->first;
-			value_.second = it_indexed_sparse_->second;
-		} else {
-			index_ = map_.size();
-			value_.second = 0;
-		}
-	}
-
-	value_.first = index_;
-}
-
-HealpixSkyMap::const_iterator
-HealpixSkyMap::const_iterator::operator++()
-{
-	if (map_.dense_) {
-		++index_;
-		++it_dense_;
-	} else if (map_.ring_sparse_) {
-		SparseMapData::const_iterator iter(*map_.ring_sparse_, j_, k_);
-		++iter;
-		j_ = iter.x;
-		k_ = iter.y;
-	} else if (map_.indexed_sparse_)
-		++it_indexed_sparse_;
-
-	set_value();
-	return *this;
-}
-
-void
-HealpixSkyMap::ConvertToDense()
-{
-	if (dense_)
-		return;
-
-	dense_ = new std::vector<double>(npix_, 0);
-
-	if (ring_sparse_) {
-		long idx;
-		for (auto i = ring_sparse_->begin(); i != ring_sparse_->end();
-		    i++) {
-			get_pixel_index(ring_info_, i.x, i.y, &idx);
-			(*dense_)[idx] = (*i);
-		}
-		delete ring_sparse_;
-		ring_sparse_ = NULL;
-	} else if (indexed_sparse_) {
-		for (auto i : *indexed_sparse_)
-			(*dense_)[i.first] = i.second;
-		delete indexed_sparse_;
-		indexed_sparse_ = NULL;
-	}
-	/* otherwise leave it at zero since no data */
-}
-
-void
-HealpixSkyMap::ConvertToRingSparse()
-{
-	if (ring_sparse_)
-		return;
-
-	ring_sparse_ = new SparseMapData(ring_info_->nring, ring_info_->nring);
-
-	if (dense_) {
-		auto *old_dense = dense_;
-		dense_ = NULL;
-
-		for (size_t i = 0; i < old_dense->size(); i++)
-			if ((*old_dense)[i] != 0)
-				(*this)[i] = (*old_dense)[i];
-		
-		delete old_dense;
-	} else if (indexed_sparse_) {
-		auto *oldis = indexed_sparse_;
-		indexed_sparse_ = NULL;
-
-		for (auto i : *oldis)
-			if (i.second != 0)
-				(*this)[i.first] = i.second;
-
-		delete oldis;
-	}
-}
-
-void
-HealpixSkyMap::ConvertToIndexedSparse()
-{
-	if (indexed_sparse_)
-		return;
-
-	indexed_sparse_ = new std::unordered_map<uint64_t, double>;
-
-	if (ring_sparse_) {
-		long idx;
-		for (auto i = ring_sparse_->begin(); i != ring_sparse_->end();
-		    i++) {
-			get_pixel_index(ring_info_, i.x, i.y, &idx);
-			if ((*i) != 0)
-				(*indexed_sparse_)[idx] = (*i);
-		}
-		delete ring_sparse_;
-		ring_sparse_ = NULL;
-	} else if (dense_) {
-		for (size_t i = 0; i < dense_->size(); i++)
-			if ((*dense_)[i] != 0)
-				(*indexed_sparse_)[i] = (*dense_)[i];
-		delete dense_;
-		dense_ = NULL;
-	}
-}
-
-void HealpixSkyMap::Compact(bool zero_nans)
-{
-	if (!dense_ && !indexed_sparse_ && !ring_sparse_)
-		return;
-
-	if (zero_nans) {
-		for (auto i : *this) {
-			if (i.second != i.second)
-				(*this)[i.first] = 0;
-		}
-	}
-
-	if (dense_) {
-		ConvertToRingSparse();
-	} else if (indexed_sparse_) {
-		for (auto i = indexed_sparse_->begin(); i != indexed_sparse_->end(); ) {
-			if (i->second == 0)
-				i = indexed_sparse_->erase(i);
-			else
-				i++;
-		}
-	} else if (ring_sparse_) {
-		ring_sparse_->compact();
-	}
 }
 
 G3SkyMapPtr
@@ -488,23 +575,21 @@ HealpixSkyMap::Clone(bool copy_data) const
 	if (copy_data)
 		return boost::make_shared<HealpixSkyMap>(*this);
 	else
-		return boost::make_shared<HealpixSkyMap>(nside_, weighted,
-		    nested_, coord_ref, units, pol_type, shift_ra_, pol_conv_);
+		return boost::make_shared<HealpixSkyMap>(nside(), weighted,
+		    nested(), coord_ref, units, pol_type, info_.shifted(), pol_conv);
 }
 
 double
 HealpixSkyMap::at(size_t i) const
 {
-	if (i < 0 || i >= npix_)
+	if (i < 0 || i >= info_.npix())
 		return 0;
 
 	if (dense_)
 		return (*dense_)[i];
 	if (ring_sparse_) {
-		long j, k;
-		if (get_ring_index(ring_info_, i, &j, &k))
-			return 0;
-		return ring_sparse_->at(j, k);
+		auto ridx = info_.PixelToRing(i);
+		return ring_sparse_->at(ridx.first, ridx.second);
 	}
 	if (indexed_sparse_) {
 		try {
@@ -520,7 +605,7 @@ HealpixSkyMap::at(size_t i) const
 double &
 HealpixSkyMap::operator [] (size_t i)
 {
-	g3_assert(!(i < 0 || i >= npix_));
+	g3_assert(!(i < 0 || i >= info_.npix()));
 
 	if (dense_)
 		return (*dense_)[i];
@@ -529,12 +614,10 @@ HealpixSkyMap::operator [] (size_t i)
 		return (*indexed_sparse_)[i];
 
 	if (!ring_sparse_)
-		ring_sparse_ = new SparseMapData(ring_info_->nring, ring_info_->nring);
+		ring_sparse_ = new SparseMapData<double>(info_.nring(), info_.nring());
 
-	long j, k;
-	int check = get_ring_index(ring_info_, i, &j, &k);
-	g3_assert(!check);
-	return (*ring_sparse_)(j, k);
+	auto ridx = info_.PixelToRing(i);
+	return (*ring_sparse_)(ridx.first, ridx.second);
 }
 
 
@@ -558,7 +641,7 @@ G3SkyMap &HealpixSkyMap::operator op(const G3SkyMap &rhs) { \
 				for (size_t i = 0; i < dense_->size(); i++) \
 					(*dense_)[i] op (*b.dense_)[i]; \
 			} else if (b.ring_sparse_) { \
-				SetShiftRa(b.shift_ra_); \
+				SetShiftRa(b.info_.shifted()); \
 				ConvertToRingSparse(); \
 				(*ring_sparse_) op (*b.ring_sparse_); \
 			} else if (b.indexed_sparse_) { \
@@ -615,6 +698,19 @@ G3SkyMap &HealpixSkyMap::operator *=(const G3SkyMap &rhs) {
 	return *this;
 }
 
+G3SkyMap &
+HealpixSkyMap::operator *=(const G3SkyMapMask &rhs)
+{
+	g3_assert(rhs.IsCompatible(*this));
+
+	for (auto i : *this) {
+		if (!rhs.at(i.first) && i.second != 0)
+			(*this)[i.first] = 0;
+	}
+
+	return *this;
+}
+
 G3SkyMap &HealpixSkyMap::operator /=(const G3SkyMap &rhs) {
 	g3_assert(IsCompatible(rhs));
 	if (units == G3Timestream::None)
@@ -631,7 +727,6 @@ G3SkyMap &HealpixSkyMap::operator /=(const G3SkyMap &rhs) {
 			} else
 				zero = true;
 		} else if (ring_sparse_) {
-			long i = 0;
 			if (b.dense_ || b.ring_sparse_ || b.indexed_sparse_) {
 				for (size_t i = 0; i < size(); i++) {
 					double valb = b.at(i);
@@ -657,7 +752,7 @@ G3SkyMap &HealpixSkyMap::operator /=(const G3SkyMap &rhs) {
 				for (size_t i = 0; i < dense_->size(); i++)
 					(*dense_)[i] /= (*b.dense_)[i];
 			} else if (b.ring_sparse_) {
-				SetShiftRa(b.shift_ra_);
+				SetShiftRa(b.info_.shifted());
 				ConvertToRingSparse();
 				for (size_t i = 0; i < size(); i++) {
 					double valb = b.at(i);
@@ -759,7 +854,7 @@ HealpixSkyMap::Description() const
 
 	os.precision(1);
 
-	os << "Nside-" << nside_ << " map in ";
+	os << info_.Description() << " in ";
 
 	switch (coord_ref) {
 	case Local:
@@ -774,42 +869,54 @@ HealpixSkyMap::Description() const
 	default:
 		os << "unknown";
 	}
-	os << " coordinates ";
-
-	switch (units) {
-	case G3Timestream::Counts:
-		os << " (Counts)";
+	switch (pol_conv) {
+	case IAU:
+		os << " IAU";
 		break;
-	case G3Timestream::Current:
-		os << " (Current)";
-		break;
-	case G3Timestream::Power:
-		os << " (Power)";
-		break;
-	case G3Timestream::Resistance:
-		os << " (Resistance)";
-		break;
-	case G3Timestream::Tcmb:
-		os << " (Tcmb)";
-		break;
-	case G3Timestream::Angle:
-		os << " (Angle)";
-		break;
-	case G3Timestream::Distance:
-		os << " (Distance)";
-		break;
-	case G3Timestream::Voltage:
-		os << " (Voltage)";
-		break;
-	case G3Timestream::Pressure:
-		os << " (Pressure)";
-		break;
-	case G3Timestream::FluxDensity:
-		os << " (FluxDensity)";
+	case COSMO:
+		os << " COSMO";
 		break;
 	default:
 		break;
 	}
+	os << " coordinates (";
+
+	switch (units) {
+	case G3Timestream::Counts:
+		os << "Counts";
+		break;
+	case G3Timestream::Current:
+		os << "Current";
+		break;
+	case G3Timestream::Power:
+		os << "Power";
+		break;
+	case G3Timestream::Resistance:
+		os << "Resistance";
+		break;
+	case G3Timestream::Tcmb:
+		os << "Tcmb";
+		break;
+	case G3Timestream::Angle:
+		os << "Angle";
+		break;
+	case G3Timestream::Distance:
+		os << "Distance";
+		break;
+	case G3Timestream::Voltage:
+		os << "Voltage";
+		break;
+	case G3Timestream::Pressure:
+		os << "Pressure";
+		break;
+	case G3Timestream::FluxDensity:
+		os << "FluxDensity";
+		break;
+	default:
+		break;
+	}
+
+	os << ", " << (weighted ? "" : "not ") << "weighted)";
 
 	return os.str();
 }
@@ -819,8 +926,7 @@ HealpixSkyMap::IsCompatible(const G3SkyMap & other) const
 {
 	try {
 		const HealpixSkyMap &healp = dynamic_cast<const HealpixSkyMap&>(other);
-		return (G3SkyMap::IsCompatible(other) &&
-			nside_ == healp.nside_);
+		return (G3SkyMap::IsCompatible(other) && info_.IsCompatible(healp.info_));
 	} catch(const std::bad_cast& e) {
 		return false;
 	}
@@ -848,19 +954,29 @@ HealpixSkyMap::NonZeroPixels(std::vector<uint64_t> &indices,
 	}
 }
 
+void
+HealpixSkyMap::ApplyMask(const G3SkyMapMask &mask, bool inverse)
+{
+	g3_assert(mask.IsCompatible(*this));
+
+	for (auto i: *this)
+		if (i.second != 0 && mask.at(i.first) == inverse)
+			(*this)[i.first] = 0;
+}
+
 
 std::vector<size_t>
 HealpixSkyMap::shape() const
 {
 	std::vector<size_t> shape(1);
-	shape[0] = npix_;
+	shape[0] = info_.npix();
 	return shape;
 }
 
 double
 HealpixSkyMap::res() const
 {
-	return sqrt(4.0 * M_PI / npix_) * G3Units::rad;
+	return info_.res();
 }
 
 size_t HealpixSkyMap::NpixAllocated() const
@@ -894,104 +1010,56 @@ size_t HealpixSkyMap::NpixNonZero() const
 size_t
 HealpixSkyMap::AngleToPixel(double alpha, double delta) const
 {
-	long outpix = -1;
-	double theta = (90 * G3Units::deg - delta) / G3Units::rad;
-
-	if (theta < 0 || theta > 180 * G3Units::deg)
-		return -1;
-
-	alpha /= G3Units::rad;
-	if (alpha < 0)
-		alpha += 2 * M_PI;
-
-	if ( std::isnan(theta) || std::isnan(alpha) )
-		return -1;
-
-	if (nested_)
-		ang2pix_nest(nside_, theta, alpha, &outpix);
-	else
-		ang2pix_ring(nside_, theta, alpha, &outpix);
-
-	return outpix;
+	return info_.AngleToPixel(alpha, delta);
 }
 
 std::vector<double>
 HealpixSkyMap::PixelToAngle(size_t pixel) const
 {
-	if (pixel < 0 || pixel >= npix_)
-		return {0., 0.};
-
-	double alpha, delta;
-	if (nested_)
-		pix2ang_nest(nside_, pixel, &delta, &alpha);
-	else
-		pix2ang_ring(nside_, pixel, &delta, &alpha);
-
-	if (alpha > M_PI)
-		alpha -= 2 * M_PI;
-
-	alpha *= G3Units::rad;
-	delta = 90 * G3Units::deg - delta * G3Units::rad;
-
-	return {alpha, delta};
+	return info_.PixelToAngle(pixel);
 }
 
-void HealpixSkyMap::GetRebinAngles(long pixel, size_t scale,
-    std::vector<double> & alphas, std::vector<double> & deltas) const
+size_t
+HealpixSkyMap::QuatToPixel(quat q) const
 {
-	if (nside_ % scale != 0)
-		log_fatal("Nside must be a multiple of rebinning scale");
+	return info_.QuatToPixel(q);
+}
 
-	if (!nested_)
-		ring2nest(nside_, pixel, &pixel);
+quat
+HealpixSkyMap::PixelToQuat(size_t pixel) const
+{
+	return info_.PixelToQuat(pixel);
+}
 
-	alphas = std::vector<double>(scale * scale);
-	deltas = std::vector<double>(scale * scale);
-
-	size_t nside_rebin = nside_ * scale;
-	long pixmin = pixel * scale * scale;
-	for (size_t i = 0; i < (scale * scale); i++) {
-		long p = pixmin + i;
-		double theta, phi;
-		pix2ang_nest(nside_rebin, p, &theta, &phi);
-		if (phi > M_PI)
-			phi -= 2 * M_PI;
-		alphas[i] = phi * G3Units::rad;
-		deltas[i] = 90 * G3Units::deg - theta * G3Units::rad;
-	}
+G3VectorQuat
+HealpixSkyMap::GetRebinQuats(size_t pixel, size_t scale) const
+{
+	return info_.GetRebinQuats(pixel, scale);
 }
 
 void
-HealpixSkyMap::GetInterpPixelsWeights(double alpha, double delta,
-    std::vector<long> & pixels, std::vector<double> & weights) const
+HealpixSkyMap::GetInterpPixelsWeights(quat q, std::vector<size_t> & pixels,
+    std::vector<double> & weights) const
 {
-	alpha /= G3Units::rad;
-	delta /= G3Units::rad;
+	info_.GetInterpPixelsWeights(q, pixels, weights);
+}
 
-	double theta = M_PI/2.0 - delta;
-	double phi = (alpha < 0) ? (alpha + 2 * M_PI) : alpha;
-	double w[4];
-	long fullpix[4];
-	get_interp_weights(ring_info_, theta, phi, fullpix, w);
-
-	pixels = std::vector<long>(4, -1);
-	weights = std::vector<double>(4, 0);
-	for (size_t i = 0; i < 4; i++) {
-		pixels[i] = fullpix[i];
-		weights[i] = w[i];
-	}
+std::vector<size_t>
+HealpixSkyMap::QueryDisc(quat q, double radius) const
+{
+	return info_.QueryDisc(q, radius);
 }
 
 G3SkyMapPtr HealpixSkyMap::Rebin(size_t scale, bool norm) const
 {
-	if (nside_ % scale != 0)
+	if (nside() % scale != 0)
 		log_fatal("Map nside must be a multiple of rebinning scale");
 
 	if (scale <= 1)
 		return Clone(true);
 
-	HealpixSkyMapPtr out(new HealpixSkyMap(nside_/scale, weighted,
-	    nested_, coord_ref, units, pol_type, shift_ra_, pol_conv_));
+	HealpixSkyMapPtr out(new HealpixSkyMap(nside()/scale, weighted,
+	    nested(), coord_ref, units, pol_type, info_.shifted(), pol_conv));
 
 	if (dense_)
 		out->ConvertToDense();
@@ -1002,18 +1070,12 @@ G3SkyMapPtr HealpixSkyMap::Rebin(size_t scale, bool norm) const
 	else
 		return out;
 
-	const size_t scale2 = scale * scale;
-	const double sqscal = norm ? scale2 : 1.0;
+	const double sqscal = norm ? scale * scale : 1.0;
 
 	for (auto i : *this) {
 		if (i.second == 0)
 			continue;
-		long ip = i.first;
-		if (!nested_)
-			ring2nest(nside_, ip, &ip);
-		ip /= scale2;
-		if (!nested_)
-			nest2ring(out->nside_, ip, &ip);
+		size_t ip = info_.RebinPixel(i.first, scale);
 		(*out)[ip] += i.second / sqscal;
 	}
 
@@ -1022,30 +1084,27 @@ G3SkyMapPtr HealpixSkyMap::Rebin(size_t scale, bool norm) const
 
 void HealpixSkyMap::SetShiftRa(bool shift)
 {
-	if (shift == shift_ra_)
+	if (shift == info_.shifted())
 		return;
 
 	if (!IsRingSparse()) {
-		shift_ra_ = shift;
-		free(ring_info_);
-		ring_info_ = init_map_info(nside_, nested_, shift, 1);
+		info_.SetShifted(shift);
 		return;
 	}
 
-	map_info *ring_info = init_map_info(nside_, nested_, shift, 1);
-	SparseMapData *ring_sparse = new SparseMapData(ring_info->nring, ring_info->nring);
-	long iring, ringpix;
+	HealpixSkyMapInfo info(info_);
+	info.SetShifted(shift);
+
+	SparseMapData<double> *ring_sparse = new SparseMapData<double>(info_.nring(), info_.nring());
 	for (auto i : *this) {
 		if (i.second != 0) {
-			get_ring_index(ring_info, i.first, &iring, &ringpix);
-			(*ring_sparse)(iring, ringpix) = i.second;
+			auto ridx = info.PixelToRing(i.first);
+			(*ring_sparse)(ridx.first, ridx.second) = i.second;
 		}
 	}
 
-	free(ring_info_);
 	delete ring_sparse_;
-	shift_ra_ = shift;
-	ring_info_ = ring_info;
+	info_.SetShifted(shift);
 	ring_sparse_ = ring_sparse;
 }
 
@@ -1105,6 +1164,73 @@ HealpixSkyMap_nonzeropixels(const HealpixSkyMap &m)
 	return boost::python::make_tuple(i, d);
 }
 
+static double
+skymap_getitem(const G3SkyMap &skymap, ssize_t i)
+{
+
+	if (i < 0)
+		i = skymap.size() + i;
+	if (size_t(i) >= skymap.size()) {
+		PyErr_SetString(PyExc_IndexError, "Index out of range");
+		bp::throw_error_already_set();
+	}
+
+	return skymap.at(i);
+}
+
+static void
+skymap_setitem(G3SkyMap &skymap, ssize_t i, double val)
+{
+
+	if (i < 0)
+		i = skymap.size() + i;
+	if (size_t(i) >= skymap.size()) {
+		PyErr_SetString(PyExc_IndexError, "Index out of range");
+		bp::throw_error_already_set();
+	}
+
+	skymap[i] = val;
+}
+
+static std::vector<double>
+HealpixSkyMap_getitem_masked(const HealpixSkyMap &skymap, const G3SkyMapMask &m)
+{
+	g3_assert(m.IsCompatible(skymap));
+	std::vector<double> out;
+
+	for (auto i : skymap) {
+		if (m.at(i.first))
+			out.push_back(i.second);
+	}
+
+	return out;
+}
+
+static void
+HealpixSkyMap_setitem_masked(HealpixSkyMap &skymap, const G3SkyMapMask &m,
+    bp::object val)
+{
+	g3_assert(m.IsCompatible(skymap));
+
+	if (bp::extract<double>(val).check()) {
+		double dval = bp::extract<double>(val)();
+		for (auto i : skymap) {
+			if (m.at(i.first))
+				skymap[i.first] = dval;
+		}
+	} else {
+		// XXX: the iterable case probably be optimized for numpy arrays
+		// XXX: check for size congruence first?
+		size_t j = 0;
+		for (auto i : skymap) {
+			if (m.at(i.first)) {
+				skymap[i.first] = bp::extract<double>(val[j])();
+				j++;
+			}
+		}
+	}
+}
+
 static int
 HealpixSkyMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 {
@@ -1149,6 +1275,30 @@ HealpixSkyMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 }
 
 static PyBufferProcs healpixskymap_bufferprocs;
+
+
+static void
+HealpixSkyMap_setitem_1d(G3SkyMap &skymap, ssize_t i, double val)
+{
+
+	if (i < 0)
+		i = skymap.size() + i;
+	if (size_t(i) >= skymap.size()) {
+		PyErr_SetString(PyExc_IndexError, "Index out of range");
+		bp::throw_error_already_set();
+	}
+
+	skymap[i] = val;
+}
+
+static void
+HealpixSkyMap_setslice_1d(G3SkyMap &skymap, bp::slice coords, bp::object val)
+{
+	if (coords.start().ptr() != Py_None || coords.stop().ptr() != Py_None)
+		log_fatal("1D slicing not supported");
+
+	skymap.FillFromArray(val);
+}
 
 
 G3_SPLIT_SERIALIZABLE_CODE(HealpixSkyMap);
@@ -1200,7 +1350,7 @@ PYBINDINGS("maps")
 	    .def(bp::init<const HealpixSkyMap&>(bp::arg("healpix_map")))
 	    .def(bp::init<>())
 	    .add_property("nside", &HealpixSkyMap::nside, "Healpix resolution parameter")
-	    .add_property("res", &HealpixSkyMap::nside, "Map resolution in angular units")
+	    .add_property("res", &HealpixSkyMap::res, "Map resolution in angular units")
 	    .add_property("nested", &HealpixSkyMap::nested,
 		"True if pixel ordering is nested, False if ring-ordered")
 	    .add_property("shift_ra", &HealpixSkyMap::IsRaShifted, HealpixSkyMap_setshiftra,
@@ -1223,9 +1373,17 @@ PYBINDINGS("maps")
 		"holes or very small filling factors. "
 		"If set to True, converts the map to this representation." )
 
+	    .def("__getitem__", &skymap_getitem)
+	    .def("__setitem__", &skymap_setitem)
+	    .def("__getitem__", HealpixSkyMap_getitem_masked)
+	    .def("__setitem__", HealpixSkyMap_setitem_masked)
+
 	    .def("nonzero_pixels", &HealpixSkyMap_nonzeropixels,
 		"Returns a list of the indices of the non-zero pixels in the "
 		"map and a list of the values of those non-zero pixels.")
+
+	    .def("__setitem__", HealpixSkyMap_setitem_1d)
+	    .def("__setitem__", HealpixSkyMap_setslice_1d)
 	;
 	register_pointer_conversions<HealpixSkyMap>();
 
@@ -1238,8 +1396,6 @@ PYBINDINGS("maps")
 #endif
 
 	implicitly_convertible<HealpixSkyMapPtr, G3SkyMapPtr>();
-	implicitly_convertible<HealpixSkyMapConstPtr, G3SkyMapConstPtr>();
 	implicitly_convertible<HealpixSkyMapPtr, G3SkyMapConstPtr>();
-	implicitly_convertible<HealpixSkyMapConstPtr, G3SkyMapConstPtr>();
 }
 

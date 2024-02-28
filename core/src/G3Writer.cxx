@@ -4,7 +4,9 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
+#ifdef BZIP2_FOUND
 #include <boost/iostreams/filter/bzip2.hpp>
+#endif
 #include <boost/filesystem.hpp>
 
 G3Writer::G3Writer(std::string filename,
@@ -20,6 +22,13 @@ G3Writer::G3Writer(std::string filename,
 
 	if (boost::algorithm::ends_with(filename, ".gz") && !append)
 		stream_.push(boost::iostreams::gzip_compressor());
+	if (boost::algorithm::ends_with(filename, ".bz2") && !append) {
+#ifdef BZIP2_FOUND
+		stream_.push(boost::iostreams::bzip2_compressor());
+#else
+		log_fatal("Boost not compiled with bzip2 support.");
+#endif
+	}
 
 	std::ios_base::openmode mode = std::ios::binary;
 	if (append)
@@ -39,9 +48,8 @@ void G3Writer::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	// because in some cases serialization requires calling back
 	// out to Python.
 	frame->GenerateBlobs();
-	PyThreadState *_save = nullptr;
-	if (Py_IsInitialized() && PyGILState_Check())
-		_save = PyEval_SaveThread();
+
+	G3PythonContext ctx("G3Writer", false);
 
 	if (frame->type == G3Frame::EndProcessing)
 		stream_.reset();
@@ -51,9 +59,6 @@ void G3Writer::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		frame->save(stream_);
 
 	out.push_back(frame);
-
-	if (_save != nullptr)
-		PyEval_RestoreThread(_save);
 }
 
 void G3Writer::Flush()

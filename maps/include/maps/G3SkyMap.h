@@ -7,6 +7,8 @@
 #include <vector>
 #include <map>
 
+#include <maps/G3SkyMapMask.h>
+
 #include <boost/python.hpp>
 
 enum MapCoordReference {
@@ -31,7 +33,18 @@ public:
 		U = 2,
 		E = 3,
 		B = 4,
-		None = 7
+		None = 7,
+		TT = 8,
+		TQ = 9,
+		TU = 10,
+		QQ = 11,
+		QU = 12,
+		UU = 13,
+		TE = 14,
+		TB = 15,
+		EE = 16,
+		EB = 17,
+		BB = 18,
 	};
 
 	enum MapPolConv {
@@ -46,11 +59,14 @@ public:
 	virtual ~G3SkyMap() {};
 
 	// Reimplement the following in subclasses
+	virtual void FillFromArray(boost::python::object v) = 0;
+	boost::shared_ptr<G3SkyMap> ArrayClone(boost::python::object v) const;
 	virtual boost::shared_ptr<G3SkyMap> Clone(bool copy_data = true) const = 0;
 
 	MapCoordReference coord_ref;
 	G3Timestream::TimestreamUnits units;
 	MapPolType pol_type;
+	MapPolConv pol_conv;
 	bool weighted;
 	double overflow;
 
@@ -71,8 +87,7 @@ public:
 	virtual size_t NpixNonZero(void) const = 0;  // nonzero
 	virtual std::vector<size_t> shape(void) const = 0;  // map shape
 
-	MapPolConv GetPolConv() const { return pol_conv_; };
-	void SetPolConv(MapPolConv pol_conv);
+	bool IsPolarized() const { return pol_conv != ConvNone; }
 
 	virtual bool IsCompatible(const G3SkyMap & other) const {
 		if (shape().size() != other.shape().size())
@@ -95,11 +110,60 @@ public:
 
 	// *
 	virtual G3SkyMap &operator*=(const G3SkyMap &rhs);
+	virtual G3SkyMap &operator*=(const G3SkyMapMask &rhs);
 	virtual G3SkyMap &operator*=(double rhs);
 
 	// /
 	virtual G3SkyMap &operator/=(const G3SkyMap &rhs);
 	virtual G3SkyMap &operator/=(double rhs);
+
+	// Comparison operations
+
+	// <
+	virtual G3SkyMapMask operator<(const G3SkyMap &rhs);
+	virtual G3SkyMapMask operator<=(const G3SkyMap &rhs);
+	virtual G3SkyMapMask operator<(double rhs);
+	virtual G3SkyMapMask operator<=(double rhs);
+
+	// ==
+	virtual G3SkyMapMask operator==(const G3SkyMap &rhs);
+	virtual G3SkyMapMask operator!=(const G3SkyMap &rhs);
+	virtual G3SkyMapMask operator==(double rhs);
+	virtual G3SkyMapMask operator!=(double rhs);
+
+	// <
+	virtual G3SkyMapMask operator>(const G3SkyMap &rhs);
+	virtual G3SkyMapMask operator>=(const G3SkyMap &rhs);
+	virtual G3SkyMapMask operator>(double rhs);
+	virtual G3SkyMapMask operator>=(double rhs);
+
+	virtual bool all(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual bool any(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double sum(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double mean(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double median(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double var(size_t ddof, G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double std(size_t ddof, G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double min(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double max(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual size_t argmin(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual size_t argmax(G3SkyMapMaskConstPtr where=NULL) const;
+
+	virtual double nansum(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double nanmean(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double nanmedian(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double nanvar(size_t ddof, G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double nanstd(size_t ddof, G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double nanmin(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual double nanmax(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual size_t nanargmin(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual size_t nanargmax(G3SkyMapMaskConstPtr where=NULL) const;
+
+	virtual G3SkyMapMask isinf(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual G3SkyMapMask isnan(G3SkyMapMaskConstPtr where=NULL) const;
+	virtual G3SkyMapMask isfinite(G3SkyMapMaskConstPtr where=NULL) const;
+
+	virtual void ApplyMask(const G3SkyMapMask &mask, bool inverse=false);
 
 	// Pointing information
 	std::vector<size_t> AnglesToPixels(const std::vector<double> & alphas,
@@ -109,20 +173,20 @@ public:
 	std::vector<size_t> QuatsToPixels(const G3VectorQuat &quats) const;
 	G3VectorQuat PixelsToQuats(const std::vector<size_t> &pixels) const;
 
-	virtual std::vector<double> PixelToAngle(size_t pixel) const = 0;
-	virtual size_t AngleToPixel(double alpha, double delta) const = 0;
-	quat PixelToQuat(size_t pixel) const;
-	size_t QuatToPixel(quat q) const;
+	virtual std::vector<double> PixelToAngle(size_t pixel) const;
+	virtual size_t AngleToPixel(double alpha, double delta) const;
+	virtual quat PixelToQuat(size_t pixel) const = 0;
+	virtual size_t QuatToPixel(quat q) const = 0;
 
 	// Rebinning and interpolation
-	virtual void GetRebinAngles(long pixel, size_t scale,
-	    std::vector<double> & alphas, std::vector<double> & deltas) const = 0;
-	G3VectorQuat GetRebinQuats(long pixel, size_t scale) const;
+	virtual void GetRebinAngles(size_t pixel, size_t scale,
+	    std::vector<double> & alphas, std::vector<double> & deltas) const;
+	virtual G3VectorQuat GetRebinQuats(size_t pixel, size_t scale) const = 0;
 	virtual void GetInterpPixelsWeights(double alpha, double delta,
-	    std::vector<long> & pixels, std::vector<double> & weights) const = 0;
-	void GetInterpPixelsWeights(quat q, std::vector<long> & pixels,
-	    std::vector<double> & weights) const;
-	double GetInterpPrecalc(const std::vector<long> &pixels,
+	    std::vector<size_t> & pixels, std::vector<double> & weights) const;
+	virtual void GetInterpPixelsWeights(quat q, std::vector<size_t> & pixels,
+	    std::vector<double> & weights) const = 0;
+	double GetInterpPrecalc(const std::vector<size_t> &pixels,
 	    const std::vector<double> &weights) const;
 	double GetInterpValue(double alpha, double delta) const;
 	double GetInterpValue(quat q) const;
@@ -131,6 +195,12 @@ public:
 	std::vector<double> GetInterpValues(const G3VectorQuat & quats) const;
 
 	virtual boost::shared_ptr<G3SkyMap> Rebin(size_t scale, bool norm = true) const = 0;
+
+	/* Analogue to healpy.query_disc, returns list of pixels within a disc */
+	std::vector<size_t> QueryDisc(double alpha, double delta, double radius) const;
+	virtual std::vector<size_t> QueryDisc(quat q, double radius) const = 0;
+	std::vector<size_t> QueryAlphaEllipse(double alpha, double delta, double a, double b) const;
+	std::vector<size_t> QueryAlphaEllipse(quat q, double a, double b) const;
 
 	virtual bool IsDense() const {
 		throw std::runtime_error("Checking array density not implemented");
@@ -142,9 +212,10 @@ public:
 		throw std::runtime_error("Compactification not implemented");
 	}
 
-protected:
-	MapPolConv pol_conv_;
+	virtual G3SkyMapMaskPtr MakeMask(bool zero_nans = false,
+	    bool zero_infs = false) const;
 
+protected:
 	virtual void InitFromV1Data(std::vector<size_t>,
 	    const std::vector<double> &) {
 		throw std::runtime_error("Initializing from V1 not implemented");
@@ -179,6 +250,9 @@ public:
 	// you initialize one of these statically and then use it in arithmetic.
 	StokesVector() : t(backing[0]), q(backing[1]), u(backing[2]) {}
 
+	// Constructor for polarization coupling
+	StokesVector(double pol_ang, double pol_eff);
+
 	double &t, &q, &u;
 
 	StokesVector &operator +=(const StokesVector &r) {
@@ -206,6 +280,8 @@ public:
 
 	StokesVector &operator /=(const MuellerMatrix &r);
 
+	void rotate_pol(double pol_ang);
+
 private:
 	double backing[3];
 };
@@ -230,7 +306,18 @@ public:
 	MuellerMatrix() : tt(backing[0]), tq(backing[1]),
 	    tu(backing[2]), qq(backing[3]), qu(backing[4]), uu(backing[5]) {}
 
+	// Constructor from Stokes vector
+	MuellerMatrix(const StokesVector &r) : tt(backing[0]), tq(backing[1]),
+	    tu(backing[2]), qq(backing[3]), qu(backing[4]), uu(backing[5]) {
+		from_vector(r);
+	}
+
 	double &tt, &tq, &tu, &qq, &qu, &uu;
+
+	void from_vector(const StokesVector &r) {
+		tt = r.t * r.t; tq = r.t * r.q; tu = r.t * r.u;
+		qq = r.q * r.q; qu = r.q * r.u; uu = r.u * r.u;
+	}
 
 	MuellerMatrix &operator +=(const MuellerMatrix &r) {
 		tt += r.tt; tq += r.tq; tu += r.tu;
@@ -280,14 +367,16 @@ public:
 		return s;
 	}
 
-	double Det() const {
+	double det() const {
 		return (tt * (qq * uu - qu * qu) -
 			tq * (tq * uu - qu * tu) +
 			tu * (tq * qu - qq * tu));
 	}
 
-	MuellerMatrix Inv() const;
-	double Cond() const;
+	MuellerMatrix inv() const;
+	double cond() const;
+
+	void rotate_pol(double pol_ang);
 
 private:
 	double backing[6];
@@ -298,9 +387,9 @@ public:
 	G3SkyMapWeights() {}
 
 	// Instantiate weight maps based on the metadata of a reference map
-	G3SkyMapWeights(G3SkyMapConstPtr ref_map, bool polarized = true);
+	G3SkyMapWeights(G3SkyMapConstPtr ref_map);
 
-	G3SkyMapWeights(const G3SkyMapWeights &r);
+	G3SkyMapWeights(const G3SkyMapWeights &r, bool copy_data = true);
 	G3SkyMapPtr TT, TQ, TU, QQ, QU, UU;
 
 	bool IsPolarized() const {
@@ -347,6 +436,7 @@ public:
 
 	// Coadd
 	G3SkyMapWeights &operator+=(const G3SkyMapWeights &rhs);
+	G3SkyMapWeights &operator-=(const G3SkyMapWeights &rhs);
 
 	// Scale
 	G3SkyMapWeights &operator*=(double rhs);
@@ -354,6 +444,7 @@ public:
 
 	// Mask
 	G3SkyMapWeights &operator*=(const G3SkyMap &rhs);
+	G3SkyMapWeights &operator*=(const G3SkyMapMask &rhs);
 
 	G3SkyMapPtr Det() const;
 	G3SkyMapPtr Cond() const;
@@ -361,13 +452,15 @@ public:
 
 	boost::shared_ptr<G3SkyMapWeights> Rebin(size_t scale) const;
 
+	void ApplyMask(const G3SkyMapMask &mask, bool inverse=false);
+
 	void Compact(bool zero_nans = false);
 
 	boost::shared_ptr<G3SkyMapWeights> Clone(bool copy_data) const {
 		if (copy_data)
-			return boost::make_shared<G3SkyMapWeights>(*this);
+			return boost::make_shared<G3SkyMapWeights>(*this, true);
 		else
-			return boost::make_shared<G3SkyMapWeights>(this->TT, this->IsPolarized());
+			return boost::make_shared<G3SkyMapWeights>(*this, false);
 	}
 private:
 	template <class A> void serialize(A &ar, const unsigned v);

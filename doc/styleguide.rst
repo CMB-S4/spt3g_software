@@ -94,9 +94,56 @@ For example:
         def class_method(self, input):
             do_things
 
+For classes, modules, and functions individuals are HIGHLY encouraged to use the standard SPT3G docstring format. 
+This includes individually defining each argument and output of a function along with their default values and types.
+Below is an example of a well written docstring using the numpy_ docstring format.
+Please adhere to this format for all spt3g_software code.
+
+Docsting example:
+
+.. code-block:: python 
+
+    def get_fft_scale_fac(res=None, n1=None, n2=None,
+                          apod_mask=None, parent=None):
+        """
+        Returns a scale factor to convert a 2d fft of a map into
+        sqrt(C_l) normalized units by scaling it by the sky area.
+        In particular it returns:
+          np.mean(apod_mask**2)**0.5 * (n1 * n2)**0.5 / reso_rad
+
+        For forward transforms: fft2(mp)  / scale_fac
+        For inverse transforms: ifft2(mp) * scale_fac
+
+        Arguments
+        ---------
+        res : float, default=None
+            Resolution of the map in G3Units. 
+            Must be specified if parent is None.
+        n1 : int, default=None
+            Number of map pixels in x direction. 
+            Must be specified if parent is None.
+        n2 : int, default=None
+            Number of map pixels in y direction.
+            Must be specified if parent is None.
+        apod_mask : FlatSkyMap or ndarray, default=None
+            An apodization mask.
+        parent : FlatSkyMap, default=None
+            Parent Map object containing resolution and shape info.
+            Must be specified if res, n1, and n2 are None.
+    
+        Returns
+        -------
+        float
+	    FFT normalization factor
+
+        See Also
+        -------
+        ft_to_map
+        """
 
 .. _PEP8: https://www.python.org/dev/peps/pep-0008/
 .. _readability: https://www.python.org/dev/peps/pep-0008/#a-foolish-consistency-is-the-hobgoblin-of-little-minds
+.. _numpy: https://numpydoc.readthedocs.io/en/latest/format.html
 
 C++ Style Guide
 ===============

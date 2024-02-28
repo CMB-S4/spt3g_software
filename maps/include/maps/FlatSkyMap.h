@@ -11,7 +11,7 @@
 #include <maps/FlatSkyProjection.h>
 
 class DenseMapData;
-class SparseMapData;
+template <typename T> class SparseMapData;
 
 class FlatSkyMap : public G3FrameObject, public G3SkyMap {
 public:
@@ -73,6 +73,7 @@ public:
 
 	// *
 	virtual G3SkyMap &operator*=(const G3SkyMap &rhs) override;
+	virtual G3SkyMap &operator*=(const G3SkyMapMask &rhs) override;
 	virtual G3SkyMap &operator*=(double rhs) override;
 
 	// /
@@ -81,8 +82,7 @@ public:
 
 	template <class A> void load(A &ar, unsigned v);
 	template <class A> void save(A &ar, unsigned v) const;
-	void FillFromArray(boost::python::object v);
-	G3SkyMapPtr ArrayClone(boost::python::object v);
+	virtual void FillFromArray(boost::python::object v) override;
 	virtual G3SkyMapPtr Clone(bool copy_data = true) const override;
 	std::string Description() const override;
 
@@ -92,6 +92,7 @@ public:
 	bool IsCompatible(const G3SkyMap & other) const override;
 	void NonZeroPixels(std::vector<uint64_t> &indices,
 	    std::vector<double> &data) const;
+	void ApplyMask(const G3SkyMapMask &mask, bool inverse=false) override;
 
 	void SetProj(MapProjection proj);
 	void SetAlphaCenter(double alpha);
@@ -114,16 +115,22 @@ public:
 	size_t AngleToPixel(double alpha, double delta) const override;
 	std::vector<double> PixelToAngle(size_t pixel) const override;
 	std::vector<double> PixelToAngle(size_t x_pix, size_t y_pix) const;
-	std::vector<double> PixelToAngleWrapRa(size_t pixel) const;
 	std::vector<double> AngleToXY(double alpha, double delta) const;
 	std::vector<double> XYToAngle(double x, double y) const;
+	size_t XYToPixel(double x, double y) const;
+	std::vector<double> PixelToXY(size_t pixel) const;
+	std::vector<double> QuatToXY(quat q) const;
+	quat XYToQuat(double x, double y) const;
+	size_t QuatToPixel(quat q) const override;
+	quat PixelToQuat(size_t pixel) const override;
 
 	std::vector<double> PixelToAngleGrad(size_t pixel, double h=0.001) const;
 
-	void GetRebinAngles(long pixel, size_t scale,
-	    std::vector<double> & alphas, std::vector<double> & deltas) const override;
-	void GetInterpPixelsWeights(double alpha, double delta,
-	    std::vector<long> & pixels, std::vector<double> & weights) const override;
+	G3VectorQuat GetRebinQuats(size_t pixel, size_t scale) const override;
+	void GetInterpPixelsWeights(quat q, std::vector<size_t> & pixels,
+	    std::vector<double> & weights) const override;
+
+	std::vector<size_t> QueryDisc(quat q, double radius) const override;
 
 	G3SkyMapPtr Rebin(size_t scale, bool norm = true) const override;
 	G3SkyMapPtr ExtractPatch(size_t x0, size_t y0, size_t width, size_t height,
@@ -181,7 +188,7 @@ private:
 	FlatSkyProjection proj_info; // projection parameters and functions
 
 	DenseMapData *dense_;
-	SparseMapData *sparse_;
+	SparseMapData<double> *sparse_;
 	uint64_t xpix_, ypix_;
 	bool flat_pol_;
 

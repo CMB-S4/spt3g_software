@@ -87,14 +87,14 @@ G3Time::G3Time(std::string t)
 	// 1. 26-Jan-2012:23:29:36
 	rv = strptime(t.c_str(), "%d-%b-%Y:%H:%M:%S", &tm);
 
-	// 2. 20120126_232936
+	// 2. 120126_232936
+	if (rv == NULL)
+		rv = strptime(t.c_str(), "%y%m%d_%H%M%S", &tm);
+
+	// 3. 20120126_232936
 	if (rv == NULL)
 		rv = strptime(t.c_str(), "%Y%m%d_%H%M%S", &tm);
 
-	// 3. 120126_232936
-	if (rv == NULL)
-		rv = strptime(t.c_str(), "%y%m%d_%H%M%S", &tm);
-	
 	// 4. 120126 23:29:36
 	if (rv == NULL)
 		rv = strptime(t.c_str(), "%y%m%d %H:%M:%S", &tm);

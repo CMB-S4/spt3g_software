@@ -1,22 +1,12 @@
 #include <G3EventBuilder.h>
 #include <G3Pipeline.h>
 #include <pybindings.h>
-
-#ifdef __FreeBSD__
-#include <pthread_np.h>
-#endif
+#include <core/SetThreadName.h>
 
 G3EventBuilder::G3EventBuilder(int warn_size) :
   G3Module(), warn_size_(warn_size), dead_(false)
 {
 	process_thread_ = std::thread(ProcessThread, this);
-
-#ifdef __linux__
-	pthread_setname_np(process_thread_.native_handle(), "event builder");
-#endif
-#ifdef __FreeBSD__
-	pthread_set_name_np(process_thread_.native_handle(), "event builder");
-#endif
 }
 
 G3EventBuilder::~G3EventBuilder()
@@ -44,9 +34,7 @@ void G3EventBuilder::AddPolledDataModule(G3ModulePtr mod)
 
 void G3EventBuilder::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 {
-	PyThreadState *_save = nullptr;
-	if (Py_IsInitialized())
-		_save = PyEval_SaveThread();
+	G3PythonContext ctx("G3EventBuilder", false);
 
 	std::unique_lock<std::mutex> lock(out_queue_lock_);
 
@@ -55,9 +43,6 @@ void G3EventBuilder::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 
 	// If dead, out_queue_ will be empty, putting nothing in the queue
 	// and ending processing.
-
-	if (_save != nullptr)
-		PyEval_RestoreThread(_save);
 
 	out.swap(out_queue_);
 }
@@ -102,6 +87,7 @@ void G3EventBuilder::CollectPolledData(G3FramePtr frame)
 
 void G3EventBuilder::ProcessThread(G3EventBuilder *builder)
 {
+	setThreadName("event builder");
 	std::unique_lock<std::mutex> lock(builder->queue_lock_);
 
 	while (1) {

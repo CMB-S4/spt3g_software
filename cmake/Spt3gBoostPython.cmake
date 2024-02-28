@@ -1,7 +1,6 @@
 # Locate Python
-if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.14)
-	find_package(Python COMPONENTS Interpreter Development NumPy)
-elseif(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.12)
+
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.12)
 	find_package(Python COMPONENTS Interpreter Development)
 else()
 	find_package(PythonInterp)
@@ -14,21 +13,15 @@ else()
 endif()
 
 # look for numpy
-if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.14)
-	set(NUMPY_FOUND ${Python_NumPy_FOUND} CACHE BOOL "Numpy found successfully")
-	set(NUMPY_INCLUDE_DIR ${Python_NumPy_INCLUDE_DIRS})
-	message(STATUS "Found NumPy: ${Python_NumPy_INCLUDE_DIRS}")
-else(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.14)
-	# Old, crummy cmake -- try our best. Use better cmake for special cases.
+execute_process(COMMAND ${Python_EXECUTABLE} -c "import numpy"
+	RESULT_VARIABLE NUMPY_FOUND ERROR_QUIET)
+if(NUMPY_FOUND EQUAL 0)
+	set(Python_NumPy_FOUND TRUE CACHE BOOL "Numpy found successfully" FORCE)
+else(NUMPY_FOUND EQUAL 0)
+	set(Python_NumPy_FOUND FALSE CACHE BOOL "Numpy found successfully" FORCE)
+endif(NUMPY_FOUND EQUAL 0)
 
-	execute_process(COMMAND ${Python_EXECUTABLE} -c "import numpy"
-		RESULT_VARIABLE NUMPY_FOUND)
-	if(NUMPY_FOUND EQUAL 0)
-		set(Python_NumPy_FOUND TRUE CACHE BOOL "Numpy found successfully")
-	else(NUMPY_FOUND EQUAL 0)
-		set(Python_NumPy_FOUND FALSE CACHE BOOL "Numpy found successfully")
-	endif(NUMPY_FOUND EQUAL 0)
-
+if(Python_NumPy_FOUND)
 	execute_process(COMMAND ${Python_EXECUTABLE} -c
 		"import numpy; print(numpy.get_include())"
 		OUTPUT_VARIABLE _NUMPY_INCLUDE_DIR
@@ -37,7 +30,9 @@ else(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.14)
 	find_path(NUMPY_INCLUDE_DIR NAMES numpy/ndarrayobject.h HINTS ${_NUMPY_INCLUDE_DIR})
 	set(Python_NumPy_INCLUDE_DIRS ${NUMPY_INCLUDE_DIR} CACHE STRING "Numpy inc directory")
 	message(STATUS "Found NumPy: ${Python_NumPy_INCLUDE_DIRS}")
-endif()
+else(Python_NumPy_FOUND)
+	message(STATUS "Found NumPy: NOT FOUND")
+endif(Python_NumPy_FOUND)
 
 ## look for scipy
 execute_process(COMMAND ${Python_EXECUTABLE} -c "import scipy"
@@ -51,7 +46,9 @@ else()
 endif()
 
 # suppress configuration warnings in newer cmake / boost versions
-set(CMAKE_FIND_PACKAGE_PREFER_CONFIG TRUE)
+if(NOT DEFINED CMAKE_FIND_PACKAGE_PREFER_CONFIG)
+	set(CMAKE_FIND_PACKAGE_PREFER_CONFIG TRUE)
+endif()
 
 if(NOT DEFINED Boost_PYTHON_TYPE)
 	set(Boost_PYTHON_TYPE python)

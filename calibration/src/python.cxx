@@ -2,7 +2,7 @@
 
 namespace bp = boost::python;
 
-BOOST_PYTHON_MODULE(calibration)
+SPT3G_PYTHON_MODULE(calibration)
 {
 	// Python bindings dependencies
 	bp::import("spt3g.core");

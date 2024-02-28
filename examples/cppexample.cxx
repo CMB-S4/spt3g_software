@@ -1,3 +1,4 @@
+#include <core/pybindings.h>
 #include <core/G3.h>
 #include <core/G3Pipeline.h>
 #include <core/G3Reader.h>
@@ -28,7 +29,12 @@ main(int argc, const char **argv)
 		std::cerr << "Too few arguments!" << std::endl;
 		return 1;
 	}
-	G3PyContext::initializePython(); 
+
+	// Initialize the python interpreter, and release the GIL.
+	// Set the second argument to true to instead hold the GIL.
+	// Set the last argument to false, or comment this out,
+	// to disable the interpreter.
+	G3PythonContext ctx("main", false, true);
 
 	G3Pipeline pipe;
 
@@ -37,7 +43,5 @@ main(int argc, const char **argv)
 
 	pipe.Run();
 
-	G3PyContext::deinitializePython(); 
-	
 	return 0;
 }

@@ -40,6 +40,7 @@ private:
 
 	G3SkyMapPtr T_, Q_, U_;
 	G3SkyMapWeightsPtr map_weights_;
+	G3Time start_, stop_;
 
 	BolometerPropertiesMapConstPtr boloprops_;
 
@@ -151,10 +152,9 @@ MapBinner::MapBinner(std::string output_map_id, const G3SkyMap &stub_map,
 	T_ = stub_map.Clone(false);
 	T_->pol_type = G3SkyMap::T;
 	if (store_weight_map)
-		map_weights_ = G3SkyMapWeightsPtr(new G3SkyMapWeights(T_,
-		    T_->GetPolConv() != G3SkyMap::ConvNone));
+		map_weights_ = G3SkyMapWeightsPtr(new G3SkyMapWeights(T_));
 
-	if (T_->GetPolConv() != G3SkyMap::ConvNone) {
+	if (T_->IsPolarized()) {
 		Q_ = stub_map.Clone(false);
 		Q_->pol_type = G3SkyMap::Q;
 		U_ = stub_map.Clone(false);
@@ -180,13 +180,19 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	if (frame->type == G3Frame::EndProcessing)
 		emit_map_now = true;
 	else if (frame->type == G3Frame::Scan) {
-		if (map_per_scan_ >= 0)
-			emit_map_now = map_per_scan_;
-		else
-			emit_map_now = map_per_scan_callback_(frame);
+		if (start_.time != 0) { // Data exist
+			if (map_per_scan_ >= 0)
+				emit_map_now = map_per_scan_;
+			else
+				emit_map_now = map_per_scan_callback_(frame);
+		}
 	}
 	
 	if (emit_map_now) {
+		if (start_.time == 0)
+			log_error("No valid scan frames found for map %s",
+			    output_id_.c_str());
+
 		G3FramePtr out_frame(new G3Frame(G3Frame::Map));
 		out_frame->Put("Id", G3StringPtr(new G3String(output_id_)));
 		out_frame->Put("T",
@@ -204,14 +210,23 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 
 		if (map_weights_) {
 			out_frame->Put((Q_) ? "Wpol" : "Wunpol", map_weights_);
-			map_weights_ = G3SkyMapWeightsPtr(new G3SkyMapWeights(
-			    T_, T_->GetPolConv() != G3SkyMap::ConvNone));
+			map_weights_ = map_weights_->Clone(false);
 		}
+
+		out_frame->Put("StartTime", G3TimePtr(new G3Time(start_)));
+		out_frame->Put("StopTime", G3TimePtr(new G3Time(stop_)));
+		start_.time = stop_.time = 0;
 
 		out.push_back(out_frame);
 	}
 
 	if (frame->type != G3Frame::Scan) {
+		out.push_back(frame);
+		return;
+	}
+
+	if (!frame->Has(timestreams_)) {
+		log_info("Missing timestreams %s", timestreams_.c_str());
 		out.push_back(frame);
 		return;
 	}
@@ -245,6 +260,12 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 			return;
 		}
 	}
+
+	// Update start and stop times for map
+	if (start_.time == 0 || start_ > timestreams->GetStartTime())
+		start_ = timestreams->GetStartTime();
+	if (stop_ < timestreams->GetStopTime())
+		stop_ = timestreams->GetStopTime();
 
 	if (!units_set_) {
 		T_->units = timestreams->GetUnits();
@@ -322,35 +343,6 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	out.push_back(frame);
 }
 
-// Following two utility functions copied from the old map-maker and need to
-// be re-tooled -- either moved into the constructors of the relevant objects
-// and/or improved to handle things like boresight rotation.
-static void
-fill_mueller_matrix_from_stokes_coupling(
-    const StokesVector &stokes_coupling, MuellerMatrix &pcm)
-{
-	pcm.tt = stokes_coupling.t * stokes_coupling.t;
-	pcm.tq = stokes_coupling.t * stokes_coupling.q;
-	pcm.tu = stokes_coupling.t * stokes_coupling.u;
-	pcm.qq = stokes_coupling.q * stokes_coupling.q;
-	pcm.qu = stokes_coupling.q * stokes_coupling.u;
-	pcm.uu = stokes_coupling.u * stokes_coupling.u;
-}
-
-static void
-set_stokes_coupling(double pol_ang, double pol_eff,
-    StokesVector &stokes_coupling)
-{
-	stokes_coupling.t = 1.0;
-	stokes_coupling.q = cos(pol_ang/G3Units::rad *2.)*pol_eff/(2.0-pol_eff);
-	stokes_coupling.u = sin(pol_ang/G3Units::rad *2.)*pol_eff/(2.0-pol_eff);
-
-	if (fabs(stokes_coupling.q) < 1e-12)
-		stokes_coupling.q = 0;
-	if (fabs(stokes_coupling.u) < 1e-12)
-		stokes_coupling.u = 0;
-}
-
 void
 MapBinner::BinTimestream(const G3Timestream &det, double weight,
     const BolometerProperties &bp, const G3VectorQuat &pointing,
@@ -359,22 +351,18 @@ MapBinner::BinTimestream(const G3Timestream &det, double weight,
 {
 	// Get per-detector pointing timestream
 
-	std::vector<double> alpha, delta;
-	get_detector_pointing(bp.x_offset, bp.y_offset, pointing, T->coord_ref,
-	    alpha, delta);
-
-	auto detpointing = T->AnglesToPixels(alpha, delta);
+	auto detpointing = get_detector_pointing_pixels(bp.x_offset, bp.y_offset,
+	    pointing, T);
 
 	if (Q) {
 		// And polarization coupling
 		// XXX: does not handle focal-plane rotation, since it assumes
 		// polarization coupling is constant for the whole scan.
-		StokesVector pcoupling;
-		set_stokes_coupling(bp.pol_angle, bp.pol_efficiency, pcoupling);
+		StokesVector pcoupling(bp.pol_angle, bp.pol_efficiency);
 
 		MuellerMatrix mueller;
 		if (W) {
-			fill_mueller_matrix_from_stokes_coupling(pcoupling, mueller);
+			mueller.from_vector(pcoupling);
 			mueller *= weight;
 		}
 

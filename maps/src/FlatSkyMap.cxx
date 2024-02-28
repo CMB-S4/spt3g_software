@@ -8,6 +8,7 @@
 
 #include <maps/FlatSkyMap.h>
 #include <maps/FlatSkyProjection.h>
+#include <maps/G3SkyMapMask.h>
 
 #include "mapdata.h"
 
@@ -42,6 +43,7 @@ FlatSkyMap::FlatSkyMap(boost::python::object v, double res,
 			ypix_ = view.shape[0];
 			xpix_ = view.shape[1];
 		} else {
+			PyBuffer_Release(&view);
 			log_fatal("Only 2-D maps supported");
 		}
 		PyBuffer_Release(&view);
@@ -80,7 +82,7 @@ FlatSkyMap::FlatSkyMap(const FlatSkyMap & fm) :
 	if (fm.dense_)
 		dense_ = new DenseMapData(*fm.dense_);
 	else if (fm.sparse_)
-		sparse_ = new SparseMapData(*fm.sparse_);
+		sparse_ = new SparseMapData<double>(*fm.sparse_);
 }
 
 FlatSkyMap::~FlatSkyMap()
@@ -158,7 +160,7 @@ FlatSkyMap::load(A &ar, unsigned v)
 			assert(dense_->ydim() == ypix_);
 			break;
 		case 1:
-			sparse_ = new SparseMapData(0, 0);
+			sparse_ = new SparseMapData<double>(0, 0);
 			ar & make_nvp("sparse", *sparse_);
 			assert(sparse_->xdim() == xpix_);
 			assert(sparse_->ydim() == ypix_);
@@ -194,10 +196,13 @@ FlatSkyMap::FillFromArray(boost::python::object v)
 		if (view.ndim == 2) {
 			size_t ypix = view.shape[0];
 			size_t xpix = view.shape[1];
-			if (xpix != xpix_ || ypix != ypix_)
+			if (xpix != xpix_ || ypix != ypix_) {
+				PyBuffer_Release(&view);
 				log_fatal("Got array of shape (%zu, %zu), expected (%zu, %zu)",
 				    ypix, xpix, (size_t) ypix_, (size_t) xpix_);
+			}
 		} else {
+			PyBuffer_Release(&view);
 			log_fatal("Only 2-D maps supported");
 		}
 		ConvertToDense();
@@ -211,11 +216,15 @@ FlatSkyMap::FillFromArray(boost::python::object v)
 #if BYTE_ORDER == LITTLE_ENDIAN
 		else if (format[0] == '<')
 			format++;
-		else if (format[0] == '>' || format[0] == '!')
+		else if (format[0] == '>' || format[0] == '!') {
+			PyBuffer_Release(&view);
 			log_fatal("Does not support big-endian numpy arrays");
+		}
 #else
-		else if (format[0] == '<')
+		else if (format[0] == '<') {
+			PyBuffer_Release(&view);
 			log_fatal("Does not support little-endian numpy arrays");
+		}
 		else if (format[0] == '>' || format[0] == '!')
 			format++;
 #endif
@@ -233,8 +242,12 @@ FlatSkyMap::FillFromArray(boost::python::object v)
 				d[i] = ((unsigned int *)view.buf)[i];
 		} else if (strcmp(format, "l") == 0) {
 			for (size_t i = 0; i < view.len/sizeof(long); i++)
+				d[i] = ((long *)view.buf)[i];
+		} else if (strcmp(format, "L") == 0) {
+			for (size_t i = 0; i < view.len/sizeof(long); i++)
 				d[i] = ((unsigned long *)view.buf)[i];
 		} else {
+			PyBuffer_Release(&view);
 			log_fatal("Unknown type code %s", view.format);
 		}
 		PyBuffer_Release(&view);
@@ -243,15 +256,6 @@ FlatSkyMap::FillFromArray(boost::python::object v)
 	}
 
 	throw bp::error_already_set();
-}
-
-G3SkyMapPtr
-FlatSkyMap::ArrayClone(boost::python::object val)
-{
-
-	FlatSkyMapPtr skymap = boost::dynamic_pointer_cast<FlatSkyMap>(Clone(false));
-	skymap->FillFromArray(val);
-	return skymap;
 }
 
 FlatSkyMap::const_iterator::const_iterator(const FlatSkyMap &map, bool begin) :
@@ -282,7 +286,7 @@ FlatSkyMap::const_iterator::operator++()
 		x_ = iter.x;
 		y_ = iter.y;
 	} else if (map_.sparse_) {
-		SparseMapData::const_iterator iter(*map_.sparse_, x_, y_);
+		SparseMapData<double>::const_iterator iter(*map_.sparse_, x_, y_);
 		++iter;
 		x_ = iter.x;
 		y_ = iter.y;
@@ -315,7 +319,7 @@ FlatSkyMap::ConvertToSparse()
 	if (!dense_)
 		return;
 
-	sparse_ = new SparseMapData(*dense_);
+	sparse_ = new SparseMapData<double>(*dense_);
 	delete dense_;
 	dense_ = NULL;
 }
@@ -345,7 +349,7 @@ FlatSkyMap::Clone(bool copy_data) const
 		return boost::make_shared<FlatSkyMap>(*this);
 	else
 		return boost::make_shared<FlatSkyMap>(proj_info,
-		    coord_ref, weighted, units, pol_type, flat_pol_, pol_conv_);
+		    coord_ref, weighted, units, pol_type, flat_pol_, pol_conv);
 }
 
 double
@@ -366,7 +370,7 @@ FlatSkyMap::operator () (size_t x, size_t y)
 	if (dense_)
 		return (*dense_)(x, y);
 	if (!sparse_)
-		sparse_ = new SparseMapData(xpix_, ypix_);
+		sparse_ = new SparseMapData<double>(xpix_, ypix_);
 	return (*sparse_)(x, y);
 }
 
@@ -410,7 +414,7 @@ G3SkyMap &FlatSkyMap::operator op(const G3SkyMap &rhs) {\
 				ConvertToDense(); \
 				(*dense_) op (*b.dense_); \
 			} else if (b.sparse_) { \
-				sparse_ = new SparseMapData(xpix_, ypix_); \
+				sparse_ = new SparseMapData<double>(xpix_, ypix_); \
 				(*sparse_) op (*b.sparse_); \
 			} else { \
 				sparsenull \
@@ -468,6 +472,19 @@ G3SkyMap &FlatSkyMap::operator *=(const G3SkyMap &rhs) {
 	} catch (const std::bad_cast& e) {
 		return G3SkyMap::operator *=(rhs);
 	}
+}
+
+G3SkyMap &
+FlatSkyMap::operator *=(const G3SkyMapMask &rhs)
+{
+	g3_assert(rhs.IsCompatible(*this));
+
+	for (auto i : *this) {
+		if (!rhs.at(i.first) && i.second != 0)
+			(*this)[i.first] = 0;
+	}
+
+	return *this;
 }
 
 G3SkyMap &
@@ -550,42 +567,58 @@ FlatSkyMap::Description() const
 	default:
 		os << "unknown";
 	}
-	os << " coordinates ";
-
-	switch (units) {
-	case G3Timestream::Counts:
-		os << " (Counts)";
+	switch (pol_conv) {
+	case IAU:
+		os << " IAU";
 		break;
-	case G3Timestream::Current:
-		os << " (Current)";
-		break;
-	case G3Timestream::Power:
-		os << " (Power)";
-		break;
-	case G3Timestream::Resistance:
-		os << " (Resistance)";
-		break;
-	case G3Timestream::Tcmb:
-		os << " (Tcmb)";
-		break;
-	case G3Timestream::Angle:
-		os << " (Angle)";
-		break;
-	case G3Timestream::Distance:
-		os << " (Distance)";
-		break;
-	case G3Timestream::Voltage:
-		os << " (Voltage)";
-		break;
-	case G3Timestream::Pressure:
-		os << " (Pressure)";
-		break;
-	case G3Timestream::FluxDensity:
-		os << " (FluxDensity)";
+	case COSMO:
+		os << " COSMO";
 		break;
 	default:
 		break;
 	}
+	os << " coordinates (";
+
+	switch (units) {
+	case G3Timestream::Counts:
+		os << "Counts";
+		break;
+	case G3Timestream::Current:
+		os << "Current";
+		break;
+	case G3Timestream::Power:
+		os << "Power";
+		break;
+	case G3Timestream::Resistance:
+		os << "Resistance";
+		break;
+	case G3Timestream::Tcmb:
+		os << "Tcmb";
+		break;
+	case G3Timestream::Angle:
+		os << "Angle";
+		break;
+	case G3Timestream::Distance:
+		os << "Distance";
+		break;
+	case G3Timestream::Voltage:
+		os << "Voltage";
+		break;
+	case G3Timestream::Pressure:
+		os << "Pressure";
+		break;
+	case G3Timestream::FluxDensity:
+		os << "FluxDensity";
+		break;
+	default:
+		break;
+	}
+
+	os << ", " << (weighted ? "" : "not ") << "weighted";
+	if (pol_type == G3SkyMap::Q || pol_type == G3SkyMap::U)
+		os << ", " << (flat_pol_ ? "" : "not ") << "flattened)";
+	else
+		os << ")";
 
 	return os.str();
 }
@@ -620,6 +653,16 @@ FlatSkyMap::NonZeroPixels(std::vector<uint64_t> &indices,
 			data.push_back(i.second);
 		}
 	}
+}
+
+void
+FlatSkyMap::ApplyMask(const G3SkyMapMask &mask, bool inverse)
+{
+	g3_assert(mask.IsCompatible(*this));
+
+	for (auto i: *this)
+		if (i.second != 0 && mask.at(i.first) == inverse)
+			(*this)[i.first] = 0;
 }
 
 std::vector<size_t> FlatSkyMap::shape() const {
@@ -666,7 +709,41 @@ std::vector<double> FlatSkyMap::AngleToXY(double alpha, double delta) const {
 }
 
 std::vector<double> FlatSkyMap::XYToAngle(double x, double y) const {
-	return proj_info.XYToAngle(x, y, false);
+	return proj_info.XYToAngle(x, y);
+}
+
+size_t
+FlatSkyMap::XYToPixel(double x, double y) const {
+	return proj_info.XYToPixel(x, y);
+}
+
+std::vector<double>
+FlatSkyMap::PixelToXY(size_t pixel) const {
+	return proj_info.PixelToXY(pixel);
+}
+
+std::vector<double>
+FlatSkyMap::QuatToXY(quat q) const
+{
+	return proj_info.QuatToXY(q);
+}
+
+size_t
+FlatSkyMap::QuatToPixel(quat q) const
+{
+	return proj_info.QuatToPixel(q);
+}
+
+quat
+FlatSkyMap::XYToQuat(double x, double y) const
+{
+	return proj_info.XYToQuat(x, y);
+}
+
+quat
+FlatSkyMap::PixelToQuat(size_t pixel) const
+{
+	return proj_info.PixelToQuat(pixel);
 }
 
 size_t FlatSkyMap::AngleToPixel(double alpha, double delta) const {
@@ -674,31 +751,34 @@ size_t FlatSkyMap::AngleToPixel(double alpha, double delta) const {
 }
 
 std::vector<double> FlatSkyMap::PixelToAngle(size_t pixel) const {
-	return proj_info.PixelToAngle(pixel, false);
+	return proj_info.PixelToAngle(pixel);
 }
 
 std::vector<double> FlatSkyMap::PixelToAngle(size_t x, size_t y) const {
-	return proj_info.PixelToAngle(y*xpix_ + x, false);
-}
-
-std::vector<double> FlatSkyMap::PixelToAngleWrapRa(size_t pixel) const {
-	return proj_info.PixelToAngle(pixel, true);
+	return proj_info.PixelToAngle(y*xpix_ + x);
 }
 
 std::vector<double> FlatSkyMap::PixelToAngleGrad(size_t pixel, double h) const {
 	return proj_info.PixelToAngleGrad(pixel, h);
 }
 
-void FlatSkyMap::GetRebinAngles(long pixel, size_t scale,
-    std::vector<double> & alphas, std::vector<double> & deltas) const
+G3VectorQuat
+FlatSkyMap::GetRebinQuats(size_t pixel, size_t scale) const
 {
-	proj_info.GetRebinAngles(pixel, scale, alphas, deltas, false);
+	return proj_info.GetRebinQuats(pixel, scale);
 }
 
-void FlatSkyMap::GetInterpPixelsWeights(double alpha, double delta,
-    std::vector<long> & pixels, std::vector<double> & weights) const
+void
+FlatSkyMap::GetInterpPixelsWeights(quat q, std::vector<size_t> & pixels,
+    std::vector<double> & weights) const
 {
-	proj_info.GetInterpPixelsWeights(alpha, delta, pixels, weights);
+	proj_info.GetInterpPixelsWeights(q, pixels, weights);
+}
+
+std::vector<size_t>
+FlatSkyMap::QueryDisc(quat q, double radius) const
+{
+	return proj_info.QueryDisc(q, radius);
 }
 
 G3SkyMapPtr FlatSkyMap::Rebin(size_t scale, bool norm) const
@@ -713,7 +793,7 @@ G3SkyMapPtr FlatSkyMap::Rebin(size_t scale, bool norm) const
 
 	FlatSkyProjection p(proj_info.Rebin(scale));
 	FlatSkyMapPtr out(new FlatSkyMap(p, coord_ref, weighted, units, pol_type,
-	    flat_pol_, pol_conv_));
+	    flat_pol_, pol_conv));
 
 	if (dense_)
 		out->ConvertToDense();
@@ -725,9 +805,7 @@ G3SkyMapPtr FlatSkyMap::Rebin(size_t scale, bool norm) const
 	for (auto i : *this) {
 		if (i.second == 0)
 			continue;
-		size_t x = (i.first % xpix_) / scale;
-		size_t y = ((size_t)(i.first / xpix_)) / scale;
-		size_t ip = x + y * out->xpix_;
+		size_t ip = proj_info.RebinPixel(i.first, scale);
 		(*out)[ip] += i.second / sqscal;
 	}
 
@@ -743,7 +821,7 @@ G3SkyMapPtr FlatSkyMap::ExtractPatch(size_t x0, size_t y0, size_t width, size_t 
 
 	FlatSkyProjection p(proj_info.OverlayPatch(x0, y0, width, height));
 	FlatSkyMapPtr out(new FlatSkyMap(p, coord_ref, weighted, units, pol_type,
-	    flat_pol_, pol_conv_));
+	    flat_pol_, pol_conv));
 
 	if (fill != 0 && (width > xpix_ || height > ypix_))
 		(*out) += fill;
@@ -996,6 +1074,45 @@ flatskymap_setitem_1d(G3SkyMap &skymap, size_t i, double val)
 	skymap[i] = val;
 }
 
+static std::vector<double>
+flatskymap_getitem_masked(const FlatSkyMap &skymap, const G3SkyMapMask &m)
+{
+	g3_assert(m.IsCompatible(skymap));
+	std::vector<double> out;
+
+	for (auto i : skymap) {
+		if (m.at(i.first))
+			out.push_back(i.second);
+	}
+
+	return out;
+}
+
+static void
+flatskymap_setitem_masked(FlatSkyMap &skymap, const G3SkyMapMask &m,
+    bp::object val)
+{
+	g3_assert(m.IsCompatible(skymap));
+
+	if (bp::extract<double>(val).check()) {
+		double dval = bp::extract<double>(val)();
+		for (auto i : skymap) {
+			if (m.at(i.first))
+				skymap[i.first] = dval;
+		}
+	} else {
+		// XXX: the iterable case probably be optimized for numpy arrays
+		// XXX: check for size congruence first?
+		size_t j = 0;
+		for (auto i : skymap) {
+			if (m.at(i.first)) {
+				skymap[i.first] = bp::extract<double>(val[j])();
+				j++;
+			}
+		}
+	}
+}
+
 static bool
 flatskymap_pysparsity_get(const FlatSkyMap &fsm)
 {
@@ -1052,6 +1169,33 @@ flatskymap_xy_to_angles(const FlatSkyMap & skymap, const std::vector<double> &x,
 	}
 
 	return boost::python::make_tuple(alpha, delta);
+}
+
+static boost::python::tuple
+flatskymap_pixels_to_xy(const FlatSkyMap & skymap, const std::vector<size_t> &pixel)
+{
+	std::vector<double> x(pixel.size()), y(pixel.size());
+	for (size_t i = 0; i < pixel.size(); i++) {
+		auto xy = skymap.PixelToXY(pixel[i]);
+		x[i] = xy[0];
+		y[i] = xy[1];
+	}
+
+	return boost::python::make_tuple(x, y);
+}
+
+static std::vector<size_t>
+flatskymap_xy_to_pixels(const FlatSkyMap & skymap, const std::vector<double> &x,
+    const std::vector<double> &y)
+{
+	g3_assert(x.size() == y.size());
+
+	std::vector<size_t> pixel(x.size());
+	for (size_t i = 0; i < x.size(); i++) {
+		pixel[i] = skymap.XYToPixel(x[i], y[i]);
+	}
+
+	return pixel;
 }
 
 
@@ -1153,6 +1297,19 @@ PYBINDINGS("maps")
 	      (bp::arg("alpha"), bp::arg("delta")),
 	       "Compute the flat 2D coordinates of the input sky coordinates (vectorized)")
 
+	    .def("xy_to_pixel", &FlatSkyMap::XYToPixel,
+	      (bp::arg("x"), bp::arg("y")),
+	       "Compute the pixel index of the input flat 2D coordinates")
+	    .def("xy_to_pixel", flatskymap_xy_to_pixels,
+	      (bp::arg("x"), bp::arg("y")),
+	       "Compute the pixel indices of the input flat 2D coordinates (vectorized)")
+	    .def("pixel_to_xy", &FlatSkyMap::PixelToXY,
+	      (bp::arg("pixel")),
+	       "Compute the flat 2D coordinates of the input pixel index")
+	    .def("pixel_to_xy", flatskymap_pixels_to_xy,
+	      (bp::arg("pixel")),
+	       "Compute the flat 2D coordinates of the input pixel indices (vectorized)")
+
 	    .add_property("sparse", flatskymap_pysparsity_get, flatskymap_pysparsity_set,
 	       "True if the map is stored with column and row zero-suppression, False if "
 	       "every pixel is stored. Map sparsity can be changed by setting this to True "
@@ -1193,6 +1350,8 @@ PYBINDINGS("maps")
 	    .def("__getitem__", flatskymap_getitem_2d)
 	    .def("__setitem__", flatskymap_setitem_2d)
 	    .def("__setitem__", flatskymap_setslice_1d)
+	    .def("__getitem__", flatskymap_getitem_masked)
+	    .def("__setitem__", flatskymap_setitem_masked)
 	;
 	register_pointer_conversions<FlatSkyMap>();
 
@@ -1205,8 +1364,6 @@ PYBINDINGS("maps")
 #endif
 
 	implicitly_convertible<FlatSkyMapPtr, G3SkyMapPtr>();
-	implicitly_convertible<FlatSkyMapConstPtr, G3SkyMapConstPtr>();
 	implicitly_convertible<FlatSkyMapPtr, G3SkyMapConstPtr>();
-	implicitly_convertible<FlatSkyMapConstPtr, G3SkyMapConstPtr>();
 }
 

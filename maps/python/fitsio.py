@@ -167,12 +167,11 @@ def load_skymap_fits(filename, hdu=None, keys=None, memmap=False, apply_units=Fa
             if map_type == 'flat' and hdr.get('ISWEIGHT', None):
                 # flat map weights
                 assert('T' in output)
-                if pol is None:
-                    pol = True if ('Q' in output and 'U' in output) else False
-                weight_map = output.setdefault(
-                    'W', G3SkyMapWeights(output['T'], polarized=pol)
-                )
-                fm = FlatSkyMap(data, **map_opts)
+                if 'W' not in output:
+                    output['W'] = G3SkyMapWeights()
+                weight_map = output['W']
+                pol_type = getattr(MapPolType, hdr['WTYPE'], None)
+                fm = FlatSkyMap(data, pol_type=pol_type, **map_opts)
                 fm.overflow = overflow
                 setattr(weight_map, hdr['WTYPE'], fm)
                 del data
@@ -242,24 +241,18 @@ def load_skymap_fits(filename, hdu=None, keys=None, memmap=False, apply_units=Fa
                         'TISWGT{:d}'.format(cidx + 1),
                         col in ['TT', 'TQ', 'TU', 'QQ', 'QU', 'UU'],
                     )
+                    pol_type = getattr(MapPolType, col, None)
+                    mdata = (pix, data, nside) if pix is not None else data
+
                     if weighted:
                         assert('T' in output)
-                        if pol is None:
-                            pol = True if ('Q' in output and 'U' in output) else False
-                        weight_map = output.setdefault(
-                            'W', G3SkyMapWeights(output['T'], polarized=pol)
-                        )
-
-                        mdata = (pix, data, nside) if pix is not None else data
-                        hm = HealpixSkyMap(mdata, **map_opts)
+                        if 'W' not in output:
+                            output['W'] = G3SkyMapWeights()
+                        weight_map = output['W']
+                        hm = HealpixSkyMap(mdata, pol_type=pol_type, **map_opts)
                         hm.overflow = overflow
-
                         setattr(weight_map, col, hm)
-
                     else:
-                        pol_type = getattr(MapPolType, col, None)
-                        mdata = (pix, data, nside) if pix is not None else data
-
                         hm = HealpixSkyMap(mdata, pol_type=pol_type, **map_opts)
                         output[col] = hm
 
@@ -481,7 +474,7 @@ def parse_wcs_header(header):
 
 @core.usefulfunc
 def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
-                     compress='GZIP_2', hdr=None):
+                     compress=False, quantize_level=16.0, hdr=None):
     """
     Save G3 map objects to a fits file.
 
@@ -508,14 +501,20 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
         Weights to save with the maps
     overwrite : bool
         If True, any existing file with the same name will be ovewritten.
-    compress : str
+    compress : str or bool
         If defined, and if input maps are FlatSkyMap objects, store these in a
         series of compressed image HDUs, one per map.  Otherwise, store input
         maps in a series of standard ImageHDUs, which are readable with older
-        FITS readers (e.g. idlastro). If defined the compression algorithm to
+        FITS readers (e.g. idlastro). If defined, the compression algorithm to
         be used by the Astropy class astropy.io.fits.CompImageHDU.
         Can be: 'RICE_1', 'RICE_ONE', 'PLIO_1', 'GZIP_1', 'GZIP_2' or
-        'HCOMPRESS_1'. Only GZIP_1 and GZIP_2 are lossless.
+        'HCOMPRESS_1'. Only GZIP_1 and GZIP_2 are lossless, although only
+        for integer data.
+    quantize_level : float
+        Floating point quantization level for compression.  Higher values result
+        in more accurate floating point representation, but worse compression
+        ratio.  See the astropy FITS image documention for details:
+        https://docs.astropy.org/en/stable/io/fits/api/images.html
     hdr  : dict
        If defined, extra keywords to be appened to the FITS header. The dict
        can contain entries such as ``hdr['NEWKEY'] = 'New value'`` or
@@ -528,6 +527,12 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
         flat = isinstance(T, FlatSkyMap)
     else:
         raise TypeError("Input map must be a FlatSkyMap or HealpixSkyMap instance")
+
+    ctype = None
+    if compress == True:
+        ctype = 'GZIP_2'
+    elif isinstance(compress, str):
+        ctype = compress
 
     if Q is not None:
         assert(U is not None)
@@ -605,8 +610,13 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
     try:
         for m, name in zip(maps, names):
             if flat:
-                if compress is not None:
-                    hdu = astropy.io.fits.CompImageHDU(np.asarray(m), header=header, compression_type=compress)
+                if compress:
+                    hdu = astropy.io.fits.CompImageHDU(
+                        np.asarray(m),
+                        header=header,
+                        compression_type=ctype,
+                        quantize_level=quantize_level,
+                    )
                 else:
                     hdu = astropy.io.fits.ImageHDU(np.asarray(m), header=header)
                 hdu.header['ISWEIGHT'] = False
@@ -666,7 +676,12 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
 
                 if flat:
                     if compress:
-                        hdu = astropy.io.fits.CompImageHDU(np.asarray(m), header=header)
+                        hdu = astropy.io.fits.CompImageHDU(
+                            np.asarray(m),
+                            header=header,
+                            compression_type=ctype,
+                            quantize_level=quantize_level,
+                        )
                     else:
                         hdu = astropy.io.fits.ImageHDU(np.asarray(m), header=header)
                     hdu.header['ISWEIGHT'] = True
@@ -723,9 +738,45 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
 
 
 @core.indexmod
-def SaveMapFrame(frame, output_file, hdr=None, compress=True, overwrite=False):
+def SaveMapFrame(
+    frame,
+    output_file=None,
+    hdr=None,
+    compress=False,
+    quantize_level=16.0,
+    overwrite=False,
+):
     """
-    Save a map frame to a FITS file.
+    Save a map frame to a FITS file.  See ``save_skymap_fits`` for details.  The
+    map frame should contain T maps and (optionally) unpolarized weights, or T/Q/U
+    maps and (optionally) polarized weights to store in the output file.
+
+    Arguments
+    ---------
+    output_file : str or callable
+        Fits filename to which the map will be written.  Maybe a callable
+        function that takes a frame object as its sole input argument and
+        returns a string filename.
+    hdr  : dict
+       If defined, extra keywords to be appened to the FITS header. The dict
+       can contain entries such as ``hdr['NEWKEY'] = 'New value'`` or
+       ``hdr['NEWKEY'] = ('New value', "Comment for New value")``.
+    compress : str or bool
+        If defined, and if input maps are FlatSkyMap objects, store these in a
+        series of compressed image HDUs, one per map.  Otherwise, store input
+        maps in a series of standard ImageHDUs, which are readable with older
+        FITS readers (e.g. idlastro). If defined, the compression algorithm to
+        be used by the Astropy class astropy.io.fits.CompImageHDU.
+        Can be: 'RICE_1', 'RICE_ONE', 'PLIO_1', 'GZIP_1', 'GZIP_2' or
+        'HCOMPRESS_1'. Only GZIP_1 and GZIP_2 are lossless, although only
+        for integer data.
+    quantize_level : float
+        Floating point quantization level for compression.  Higher values result
+        in more accurate floating point representation, but worse compression
+        ratio.  See the astropy FITS image documention for details:
+        https://docs.astropy.org/en/stable/io/fits/api/images.html
+    overwrite : bool
+        If True, any existing file with the same name will be ovewritten.
     """
 
     if frame.type != core.G3FrameType.Map:
@@ -736,6 +787,9 @@ def SaveMapFrame(frame, output_file, hdr=None, compress=True, overwrite=False):
     U = frame.get('U', None)
     W = frame.get('Wpol', frame.get('Wunpol', None))
 
+    if callable(output_file):
+        output_file = output_file(frame)
+
     save_skymap_fits(
         output_file,
         T=T,
@@ -744,5 +798,6 @@ def SaveMapFrame(frame, output_file, hdr=None, compress=True, overwrite=False):
         W=W,
         overwrite=overwrite,
         compress=compress,
+        quantize_level=quantize_level,
         hdr=hdr,
     )

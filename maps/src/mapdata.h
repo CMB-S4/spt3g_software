@@ -3,10 +3,9 @@
 #include <cereal/types/vector.hpp>
 #include <cereal/types/utility.hpp>
 
-class SparseMapData;
 class DenseMapData;
 
-
+template<typename T>
 class SparseMapData {
 public:
 	SparseMapData(size_t xlen, size_t ylen) :
@@ -34,7 +33,7 @@ public:
 		return nz;
 	}
 
-	double at(size_t x, size_t y) const {
+	T at(size_t x, size_t y) const {
 		if (x < offset_ || x >= offset_ + data_.size())
 			return 0;
 		const data_element &column = data_[x-offset_];
@@ -44,9 +43,9 @@ public:
 		return column.second[y-column.first];
 	}
 
-	double operator()(size_t x, size_t y) const { return at(x, y); }
+	T operator()(size_t x, size_t y) const { return at(x, y); }
 
-	double &operator()(size_t x, size_t y) {
+	typename std::vector<T>::reference operator()(size_t x, size_t y) {
 		assert(x >= 0);
 		assert(x < xlen_);
 		assert(y >= 0);
@@ -65,37 +64,49 @@ public:
 
 		if (column.second.size() == 0) {
 			column.first = y;
-			column.second.resize(1, double(0));
+			column.second.resize(1, T(0));
 		} else if (y < column.first) {
 			column.second.insert(column.second.begin(),
-			    column.first-y, double(0));
+			    column.first-y, T(0));
 			column.first = y;
 		} else if (y >= column.first + column.second.size()) {
-			column.second.resize(y - column.first + 1, double(0));
+			column.second.resize(y - column.first + 1, T(0));
 		}
 		return column.second[y - column.first];
 	}
 
-	SparseMapData &operator+=(const SparseMapData &r);
-	SparseMapData &operator-=(const SparseMapData &r);
-	SparseMapData &operator*=(const SparseMapData &r);
-	SparseMapData &operator/=(const SparseMapData &r);
+	SparseMapData<T> &operator+=(const SparseMapData<T> &r);
+	SparseMapData<T> &operator-=(const SparseMapData<T> &r);
+	SparseMapData<T> &operator*=(const SparseMapData<T> &r);
+	SparseMapData<T> &operator/=(const SparseMapData<T> &r);
 
-	SparseMapData &operator+=(const DenseMapData &r);
-	SparseMapData &operator-=(const DenseMapData &r);
-	SparseMapData &operator*=(const DenseMapData &r);
-	SparseMapData &operator/=(const DenseMapData &r);
+	SparseMapData<T> &operator+=(const DenseMapData &r);
+	SparseMapData<T> &operator-=(const DenseMapData &r);
+	SparseMapData<T> &operator*=(const DenseMapData &r);
+	SparseMapData<T> &operator/=(const DenseMapData &r);
 
-	SparseMapData &operator*=(double r);
-	SparseMapData &operator/=(double r);
+	SparseMapData<T> &operator*=(T r);
+	SparseMapData<T> &operator/=(T r);
 
-	SparseMapData *clone(bool copy_data = true) {
+	SparseMapData<T> *clone(bool copy_data = true) {
 		SparseMapData *m = new SparseMapData(xlen_, ylen_);
 		if (copy_data) {
 			m->data_ = data_;
 			m->offset_ = offset_;
 		}
 		return m;
+	}
+	template<typename T2>
+	SparseMapData<T2> *clone_to_type() {
+		SparseMapData<T2> *m = new SparseMapData<T2>(xlen_, ylen_);
+		m->offset_ = offset_;
+		m->data_.resize(data_.size());
+		for (size_t i = 0; i < data_.size(); i++) {
+			m->data_[i].first = data_[i].first;
+			m->data_[i].second.resize(data_[i].second.size());
+			for (size_t j = 0; j < data_[i].second.size(); j++)
+				m->data_[i].second[j] = data_[i].second[j];
+		}
 	}
 
 	DenseMapData *to_dense() const;
@@ -111,7 +122,7 @@ public:
 
 	class const_iterator {
 	public:
-		const_iterator(const SparseMapData &sparse, size_t x_, size_t y_) :
+		const_iterator(const SparseMapData<T> &sparse, size_t x_, size_t y_) :
 		    x(x_), y(y_), sparse_(sparse) {}
 
 		size_t x, y;
@@ -123,13 +134,13 @@ public:
 			return ((x != other.x) || (y != other.y));
 		}
 
-		double operator*() const { return sparse_.at(x, y); }
+		T operator*() const { return sparse_.at(x, y); }
 
 		const_iterator operator++();
 		const_iterator operator++(int) { const_iterator i = *this; ++(*this); return i; }
 
 	private:
-		const SparseMapData & sparse_;
+		const SparseMapData<T> & sparse_;
 	};
 
 	const_iterator begin() const {
@@ -149,11 +160,10 @@ public:
 
 private:
 	uint64_t xlen_, ylen_;
-	typedef std::pair<int, std::vector<double> > data_element;
+	typedef std::pair<int, std::vector<T> > data_element;
 	std::vector<data_element> data_;
 	uint64_t offset_;
 };
-
 
 class DenseMapData {
 public:
@@ -212,10 +222,10 @@ public:
 	DenseMapData &operator*=(const DenseMapData &r);
 	DenseMapData &operator/=(const DenseMapData &r);
 
-	DenseMapData &operator+=(const SparseMapData &r);
-	DenseMapData &operator-=(const SparseMapData &r);
-	DenseMapData &operator*=(const SparseMapData &r);
-	DenseMapData &operator/=(const SparseMapData &r);
+	DenseMapData &operator+=(const SparseMapData<double> &r);
+	DenseMapData &operator-=(const SparseMapData<double> &r);
+	DenseMapData &operator*=(const SparseMapData<double> &r);
+	DenseMapData &operator/=(const SparseMapData<double> &r);
 
 	DenseMapData &operator+=(double r);
 	DenseMapData &operator-=(double r);
@@ -288,5 +298,6 @@ private:
 	}
 };
 
-CEREAL_CLASS_VERSION(SparseMapData, 1);
+CEREAL_CLASS_VERSION(SparseMapData<double>, 1);
+CEREAL_CLASS_VERSION(SparseMapData<bool>, 1);
 CEREAL_CLASS_VERSION(DenseMapData, 1);

@@ -57,6 +57,7 @@ SingleDetectorMapBinner::SingleDetectorMapBinner(
 {
 	template_ = stub_map.Clone(false);
 	template_->pol_type = G3SkyMap::T;
+	template_->pol_conv = G3SkyMap::ConvNone;
 }
 
 void
@@ -120,7 +121,7 @@ SingleDetectorMapBinner::Process(G3FramePtr frame,
 
 			maps_[i.first].first = template_->Clone(false);
 			maps_[i.first].second = G3SkyMapWeightsPtr(
-			    new G3SkyMapWeights(template_, false));
+			    new G3SkyMapWeights(template_));
 #ifdef OPENMP_FOUND
 			// Create a list of detectors to satisfy OpenMP's need
 			// for scalar iteration.
@@ -156,14 +157,13 @@ SingleDetectorMapBinner::Process(G3FramePtr frame,
 		}
 	
 		// Get per-detector pointing timestream
-        	std::vector<double> alpha, delta;
 		auto bp = boloprops_->find(det);
 		if (bp == boloprops_->end())
 			log_fatal("Missing bolometer properties for %s",
 			    det.c_str());
-		get_detector_pointing(bp->second.x_offset, bp->second.y_offset,
-		    *pointing, m->coord_ref, alpha, delta);
-		auto pixels = m->AnglesToPixels(alpha, delta);
+		auto pixels = get_detector_pointing_pixels(
+		    bp->second.x_offset, bp->second.y_offset,
+		    *pointing, m);
 
 		g3_assert(ts->size() == pixels.size());
 		for (size_t j = 0; j < ts->size(); j++) {

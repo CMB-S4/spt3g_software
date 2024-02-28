@@ -60,7 +60,7 @@ Every C++ library must contain a file declaring the library to Python. This file
 	#include <pybindings.h>
 	#include <boost/python.hpp>
 
-	BOOST_PYTHON_MODULE(newthing)
+	SPT3G_PYTHON_MODULE(newthing)
 	{
 		boost::python::import("spt3g.core"); // Import core python bindings
 
@@ -82,6 +82,105 @@ You can also add C++ executables. Usually, there is not much reason to do this s
 	set(SPT3G_PROGRAMS ${SPT3G_PROGRAMS} PARENT_SCOPE)
 
 The ``target_link_libraries`` command works as in `Adding a C++ library`_ above. The first command produces an executable named ``newthingexec`` that will be placed in the ``bin`` subdirectory of the build directory. The ``list`` and ``set`` commands inform other parts of the build system that this executable will exist, so that it can be included during installation. 
+
+Adding tests
+~~~~~~~~~~~~
+
+Tests can be written in either Python or C++. Some tests must be written in one language  in order to test interfaces specific to it; otherwise, most tests are currently written in python. 
+
+The simplest way to run the full set of tests is by executing ``make test``. This does not allow for much flexibility, however, so in cases where more control is desirable, one should run tests using the ``ctest`` driver tool directly. Commonly useful options are ``ctest --output-on-failure`` which will show a test's output when it fails, which is frequently useful for understanding what the failure was in order to fix it, and ``ctest -R <regex>`` which will run any tests any part of whose name is matches the given regular expression, which is handy for running just a particular test to debug it, without having to wait while the entire test suite runs each time. 
+
+Python Tests
+^^^^^^^^^^^^
+
+Python tests should be placed in a ``tests`` subdirectory of the project. Each test must then also be declared in the project's ``CMakeLists.txt``, so that ``cmake`` will know to include it in the list of tests to be run by ``ctest`` or the ``test`` build target. This is done by using the ``add_spt3g_test`` macro:
+
+.. code-block:: cmake
+
+	add_spt3g_test(test_foo)
+
+will add a test which is implemented in ``tests/test_foo.py``. 
+
+The contents of a Python test script can be anything; the script is simply run, and if its exit value is 0, it is considered to have passed. Any non-zero exit status will be taken to indicate a failure. The simplest mechanism to do tests is to just write code with ``assert`` statements which check that properties of interest hold.
+
+C++ Tests
+^^^^^^^^^
+
+C++ tests consist of one or more implementation files which declare tests, organized into test groups. The implementation files for a test are linked together into a test executable. 
+
+Like Python tests, C++ tests must be declared in the project's CMake script, which is done using the ``add_spt3g_test_program`` command:
+
+.. code-block:: cmake
+
+	add_spt3g_test_program(test
+	                       SOURCE_FILES
+	                         ${PROJECT_SOURCE_DIR}/my_test.cpp
+	                       USE_PROJECTS core)
+
+The first argument is the name of the test executable, which will be prefixed with the project name. Several implementation files may be listed after ``SOURCE_FILES``, and the arguments after ``USE_PROJECTS`` indicate which projects the executable depends on, so suitable compiler options will be generated to give access to those projects' header paths and to link against their libraries. 
+Arbitrary labels can also be associated with a test by passing them after the ``TEST_LABELS`` argument.
+
+Typically, each implementation file defines one test group, but multiple implementation files may redeclare and contribute to the same test group. It is also possible to place multiple test groups in one translation unit by isolating each in its own namespace. Each test implementation file should include the ``G3Test.h`` header to have access to the test infrastructure definitions.
+
+A test group is declared using the ``TEST_GROUP`` macro:
+
+.. code-block:: c++
+
+	TEST_GROUP(MyTests)
+
+Individual tests are then defined using the ``TEST`` macro, followed by a function body which does the work of the test:
+
+.. code-block:: c++
+
+	TEST(Test1){
+		Num::InitializeNumbers();
+		auto n5 = Num::Get(5);
+		auto n7 = Num::Get(7);
+		ENSURE(n5 < n7, "5 should be less than 7");
+	}
+
+The argument to the ``TEST`` macro is the name of the test, which will then have a fully qualified name derived from its test group: ``MyTests::Test1``. 
+
+Since multiple C++ tests can run in the same executable, it is poor form to use ``assert``, ``exit``, or some other mechanism which can stop the whole process before other tests can run. Tests indicate failure by throwing an exception, but for convenience and readability, particularly of failure messages, a set of macros are provided. The simpest is ``ENSURE``, which takes a predicate to be tested, and optionally a message to be shown if the predicate evaluates to false. An example is shown above, and if that test fails, the output produced would look similar to the following:
+
+.. code-block:: none
+
+	MyTests::Test1: /some/path/my_test.cpp:50: n5 < n7: 5 should be less than 7
+	FAIL
+
+The ``FAIL`` macro can be used when a test has reached a point in its control flow which indicates failure without any further condition needing to be checked. This is particularly useful for ensuring that exceptions are or aren't thrown in correct places:
+
+.. code-block:: c++
+
+	TEST(Exceptions){
+		try{
+			some_func();
+		}
+		catch(...){
+			FAIL("some_func must not throw exceptions");
+		}
+		
+		try{
+			other_func(bad_val);
+			FAIL("other_func must throw an exception when passed bad_val");
+		}
+		catch(...){}
+	}
+
+There is also the ``ENSURE_EQUAL`` macro, which specifically checks to expressions for equality, and produces a detailed error message if they are not:
+
+.. code-block:: c++
+
+	TEST(Equality){
+		int a=4, b=5;
+		ENSURE_EQUAL(a,b,"a and b should be the same");
+	}
+
+which outputs:
+
+.. code-block:: none
+
+	MyTests::Equality: my_test.cpp:19: ENSURE_EQUAL(a, b): 4 != 5: a and b should be the same
 
 Mixing C++ and Python
 =====================

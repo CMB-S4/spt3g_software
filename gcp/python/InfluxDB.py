@@ -30,6 +30,16 @@ def build_field_list(fr):
         'tracker_lacking': ['TrackerStatus', 'tracker_lacking', None],
         'time_status': ['TrackerStatus', 'time_status', None],
         'schedule': ['TrackerStatus', 'schedule_name', None],
+        'raw_encoder_1': ['antenna0', 'tracker', 'raw_encoder', 0, U.deg],
+        'raw_encoder_2': ['antenna0', 'tracker', 'raw_encoder', 1, U.deg],
+        'drive_currents_el1': ['array', 'dc', 'currents', 0, U.volt],
+        'drive_currents_el2': ['array', 'dc', 'currents', 1, U.volt],
+        'drive_currents_el3': ['array', 'dc', 'currents', 2, U.volt],
+        'drive_currents_el4': ['array', 'dc', 'currents', 3, U.volt],
+        'drive_currents_az1': ['array', 'dc', 'currents', 4, U.volt],
+        'drive_currents_az2': ['array', 'dc', 'currents', 5, U.volt],
+        'drive_currents_az3': ['array', 'dc', 'currents', 6, U.volt],
+        'drive_currents_az4': ['array', 'dc', 'currents', 7, U.volt],
 
         # tracker pointing
         'features': ['TrackerPointing', 'features', 1],
@@ -62,14 +72,17 @@ def build_field_list(fr):
         'linsens_avg_l2': ['TrackerPointing', 'linsens_avg_l2', U.mm],
         'linsens_avg_r1': ['TrackerPointing', 'linsens_avg_r1', U.mm],
         'linsens_avg_r2': ['TrackerPointing', 'linsens_avg_r2', U.mm],
+        'linsens_daz': ['LinearSensorDeltas', 'delta_az', U.deg],
+        'linsens_del': ['LinearSensorDeltas', 'delta_el', U.deg],
+        'linsens_det': ['LinearSensorDeltas', 'delta_et', U.deg],
 
         # Weather
         'telescope_temp': ['Weather', 'telescope_temp', 'C'],
-        'inside_dsl_temp': ['Weather', 'inside_dsl_temp', None],
-        'telescope_pressure': ['Weather', 'telescope_pressure', None],
-        'wind_speed': ['Weather', 'wind_speed', None],
+        'inside_dsl_temp': ['Weather', 'inside_dsl_temp', 'C'],
+        'telescope_pressure': ['Weather', 'telescope_pressure', U.mb],
+        'wind_speed': ['Weather', 'wind_speed', U.m / U.s],
         'wind_direction': ['Weather', 'wind_direction', U.deg],
-        'battery': ['Weather', 'battery', None],
+        'battery': ['Weather', 'battery', U.mV],
         'rel_humidity': ['Weather', 'rel_humidity', None],
         'power': ['Weather', 'power', None],
         'tau': ['Weather', 'tau', None],
@@ -167,6 +180,17 @@ def build_field_list(fr):
         'flexure_cos': ['OnlinePointingModel', 'flexure', 1, U.deg],
         'fixed_collimation_x': ['OnlinePointingModel', 'fixedCollimation', 0, U.deg],
         'fixed_collimation_y': ['OnlinePointingModel', 'fixedCollimation', 1, U.deg],
+        'tilts_hr_angle_adjust': ['OnlinePointingModelCorrection', 'tilts', 0, U.deg],
+        'tilts_lat_adjust': ['OnlinePointingModelCorrection', 'tilts', 1, U.deg],
+        'tilts_el_adjust': ['OnlinePointingModelCorrection', 'tilts', 2, U.deg],
+        'flexure_sin_adjust': ['OnlinePointingModelCorrection', 'flexure', 0, U.deg],
+        'flexure_cos_adjust': ['OnlinePointingModelCorrection', 'flexure', 1, U.deg],
+        'fixed_collimation_x_adjust': ['OnlinePointingModelCorrection', 'fixedCollimation', 0, U.deg],
+        'fixed_collimation_y_adjust': ['OnlinePointingModelCorrection', 'fixedCollimation', 1, U.deg],
+        'linsens_coeff_az': ['OnlinePointingModel', 'linsensCoeffs', 0, None],
+        'linsens_coeff_el': ['OnlinePointingModel', 'linsensCoeffs', 1, None],
+        'linsens_coeff_et': ['OnlinePointingModel', 'linsensCoeffs', 2, None],
+        'linsens_enabled': ['OnlinePointingModel', 'linsensEnabled', 0, None],
 
         # Other
         'obs_id': ['ObservationID', None],
@@ -291,14 +315,36 @@ def WriteDB(fr, client, fields=None):
     dict_list = []
     for f in fields:
         field_dat = all_fields[f]
-        if len(field_dat) == 4:
+        if len(field_dat) == 5:
+            # raw register
+            stat = 'TrackerStatus'
+            tmp, brd, attr, ind, unit = field_dat
+            try:
+                dat = fr[tmp][brd][attr][ind]
+            except:
+                continue
+            try:
+                if 'utc' in fr[tmp][brd].keys():
+                    time = fr[tmp][brd]['utc'][0]
+                else:
+                    time = fr['antenna0']['tracker']['utc'][0][:len(dat)]
+            except:
+                continue
+        elif len(field_dat) == 4:
             stat, attr, ind, unit = field_dat
+            if stat not in fr:
+                # OnlinePointingModelCorrection
+                continue
             try:
                 dat = getattr(fr[stat], attr)[ind]
                 time = getattr(fr[stat], 'time')
             except AttributeError:
                 # OnlinePointingModel
-                dat = fr[stat][attr][ind]
+                try:
+                    dat = fr[stat][attr][ind]
+                except KeyError:
+                    # OnlinePointingModelCorrection
+                    continue
                 time = fr[stat]['time']
         elif len(field_dat) == 3:
             stat, attr, unit = field_dat
@@ -333,13 +379,19 @@ def WriteDB(fr, client, fields=None):
             try:
                 time = getattr(fr[stat], 'time')
             except AttributeError as err:
-                time = [tm for tm in fr['antenna0']['tracker']['utc'][0]]
+                time = fr['antenna0']['tracker']['utc'][0]
 
         # InfluxDB wants time in nanoseconds since the UNIX epoch in UTC
-        try:
-            time = [x.time/U.nanosecond for x in np.atleast_1d(time)]
-        except AttributeError:
-            time = [core.G3Time(t0).time/U.nanosecond for t0 in np.atleast_1d(time)]
+        if isinstance(time, core.G3Time):
+            time = np.asarray([time.time / U.nanosecond])
+        elif isinstance(time, core.G3VectorTime):
+            time = np.asarray(time) / U.nanosecond
+        else:
+            try:
+                time = np.asarray(core.G3VectorTime(np.atleast_1d(time))) / U.nanosecond
+            except Exception as e:
+                core.log_error("Error converting time: {}".format(str(e)), unit="InfluxDB")
+                continue
         if dat is None:
             core.log_warn('{} dat is None'.format(f), unit='InfluxDB')
             continue
@@ -400,6 +452,14 @@ def WriteDB(fr, client, fields=None):
         if 'Mux' in stat:
             stat = 'muxHousekeeping'
             tag2 = 'ib'+f.split('ib')[-1]
+
+        if 'linsens_coeff' in f:
+            tag2 = 'linsens_coeff'
+
+        if 'drive_currents_az' in f:
+            tag2 = 'drive_currents_az'
+        if 'drive_currents_el' in f:
+            tag2 = 'drive_currents_el'
 
         dict_list += make_lines(
             measurement=stat,

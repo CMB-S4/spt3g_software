@@ -130,6 +130,8 @@ static std::string FrameObjectClassName(G3FrameObjectConstPtr obj)
 {
 	// Try to give python name if possible
 	if (Py_IsInitialized()) {
+		G3PythonContext ctx("G3FrameObjectClassName", true);
+
 		try {
 			boost::python::object pyobj(
 			    boost::const_pointer_cast<G3FrameObject>(obj));
@@ -140,6 +142,8 @@ static std::string FrameObjectClassName(G3FrameObjectConstPtr obj)
 			     "." +
 			     boost::python::extract<std::string>(
 			      pyobj.attr("__class__").attr("__name__"))();
+		} catch (const boost::python::error_already_set& e) {
+			PyErr_Clear();
 		} catch (...) {
 			// Fall through to C++ name
 		}
