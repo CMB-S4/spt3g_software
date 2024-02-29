@@ -31,6 +31,7 @@ static unsigned short port = 9000;
 static std::string bind_address = "0.0.0.0";
 static std::string basedir = "." ;
 static unsigned short nthreads = 4;
+static bool use_python = false; 
 
 //mutex for cout synchronization on worker threads
 static std::mutex cout_mutex; 
@@ -39,11 +40,20 @@ static void
 usage()
 {
 	std::cout << "Usage: spt3g-json-serve [OPTION]" << std::endl;
-	std::cout << "  -h,--help  display this message" << std::endl;
-	std::cout << "  -p,--port  port to use (default 8080)" << std::endl;
-	std::cout << "  -b,--bind-address  bind address (default 0.0.0.0)" << std::endl;
-	std::cout << "  -d,--doc-root base dir to serve (default is .)" << std::endl;
-	std::cout << "  -t,--threads number of threads to use (default 4) " << std::endl;
+	std::cout << "-h,--help  display this message" << std::endl;
+	std::cout << "-P,--Python  initialize python interpreter" << std::endl;
+	std::cout << "-p,--port  port to use (default 8080)" << std::endl;
+	std::cout << "-b,--bind-address  bind address (default 0.0.0.0)" << std::endl;
+	std::cout << "-d,--doc-root base dir to serve (default is .)" << std::endl;
+	std::cout << "-t,--threads number of threads to use (default 4) " << std::endl;
+}
+
+// pointer to server for stopping
+httplib::Server * the_server = nullptr; 
+
+static void sig_handler(int signum) 
+{
+	if (the_server) the_server->stop(); 
 }
 
 
@@ -82,6 +92,10 @@ parse(int nargs, char ** args)
 			usage();
 			return 1;
 		}
+		else if (!strcmp(args[i],"-P") || !strcmp(args[i],"--Python"))
+		{
+			use_python = true; 
+		}
 		else
 		{
 			std::cerr << "Unknown argument: " << args[i] << std::endl;
@@ -97,8 +111,8 @@ static void
 invalid(const httplib::Request & req, httplib::Response & resp)
 {
 	resp.status = 500;
-  	std::string ans = "{ \"error\" : \"" + req.path + " is invalid\" }";
-  	resp.set_content(ans,"application/json");
+	std::string ans = "{ \"error\" : \"" + req.path + " is invalid\" }";
+	resp.set_content(ans,"application/json");
 }
 
 
@@ -213,9 +227,9 @@ static void handle_g3(const httplib::Request & req, httplib::Response & resp)
 			try
 			{
 				//write a preamble:
-				std::string preamble = "{\n  \"filename\" : \"";
+				std::string preamble = "{\n\"filename\" : \"";
 				preamble += req.path;
-				preamble += "\",\n  \"frames\": [";
+				preamble += "\",\n\"frames\": [";
 				os << preamble;
 
 				//set up the frame 
@@ -229,7 +243,7 @@ static void handle_g3(const httplib::Request & req, httplib::Response & resp)
 				while(ifs.peek() != EOF)
 				{
 					if (!first)
-						os << "  ,  "  << std::endl;
+						os << ",  "  << std::endl;
 
 					frame.load(ifs);
 					if (i++ >= n_skip) 
@@ -240,7 +254,7 @@ static void handle_g3(const httplib::Request & req, httplib::Response & resp)
 					if (n_frames_to_read >= 0 && i >= n_frames_to_read + n_skip) 
 						break;
 				}
-				std::string end = "  ]\n}\n" ;
+				std::string end = "]\n}\n" ;
 				os << end;
 				sinkstr.flush();
 				sink.done();
@@ -259,9 +273,9 @@ static void handle_g3(const httplib::Request & req, httplib::Response & resp)
 		[t0,&req](bool success) // prints out request and how long it took 
 		{
 			std::chrono::duration<double> diff = std::chrono::high_resolution_clock::now()-t0;
-      std::lock_guard<std::mutex> cout_guard(cout_mutex); 
-			std::cout<< "["<< req.remote_addr << "]" <<  req.path << "::" <<  
-				(success ? "success: " : "fail: ")  << diff.count() << " s" << std::endl;
+			std::lock_guard<std::mutex> cout_guard(cout_mutex); 
+			std::cout<< "["<< req.remote_addr << "]" <<req.path << "::" <<  
+				(success ? "success: " : "fail: ")<< diff.count() << " s" << std::endl;
 		}
 	);
 
@@ -286,16 +300,16 @@ handle_dir(const httplib::Request & req, httplib::Response & resp)
 	}
 
 	std::stringstream ss_dirs; ss_dirs << "[";
-	std::stringstream ss_files;  ss_files << "[";
-	std::stringstream ss_sizes;  ss_sizes << "[";
+	std::stringstream ss_files;ss_files << "[";
+	std::stringstream ss_sizes;ss_sizes << "[";
 
 	int ndirs = 0,nfiles = 0;
 
 	for (auto x : fs::directory_iterator(dir))
-    {
+  {
 		//skip hidden stuff
-		if (x.path().string()[0]  == '.' && (x.path().string().length() < 2 || x.path().string()[1] != '/'))
-		  continue;
+		if (x.path().string()[0]== '.' && (x.path().string().length() < 2 || x.path().string()[1] != '/'))
+		continue;
 
 		if (fs::is_directory(x.path()))
 		{
@@ -324,7 +338,7 @@ handle_dir(const httplib::Request & req, httplib::Response & resp)
 	ss_files << "]";
 	ss_sizes << "]";
 	resp.set_content("{\n\"files\" : " + ss_files.str() + ",\n" + "\"dirs\" :" + ss_dirs.str() +
-	                 ",\n\"file_sizes\" : " + ss_sizes.str() + "\n}" , "application/json");
+	               ",\n\"file_sizes\" : " + ss_sizes.str() + "\n}" , "application/json");
 }
 
 int main(int nargs, char **argv)
@@ -334,14 +348,16 @@ int main(int nargs, char **argv)
 		return 1;
 	}
 
-	//This is needed for "random python things" stored in frames to work
-	G3PythonInterpreter interp(false);
-  signal(SIGPIPE, SIG_IGN);
+	//  This is needed for "random python things" stored in frames to work
+	std::unique_ptr<G3PythonInterpreter> interp = use_python ? std::make_unique<G3PythonInterpreter>(false) : nullptr; 
+	
+	signal(SIGPIPE, SIG_IGN);
+	signal(SIGINT, sig_handler);
 
 	httplib::Server server;
 
 	//set number of threads
-	server.new_task_queue = [] { return new httplib::ThreadPool(nthreads); }  ;
+	server.new_task_queue = [] { return new httplib::ThreadPool(nthreads); };
 
 	//this might be useful in the future 
 	server.Get("/version", 
@@ -366,9 +382,11 @@ int main(int nargs, char **argv)
 	//handler for directory listing
 	server.Get(".*/", handle_dir);
 
-    // keep alive seems to delay sending response with content provider
-    // TODO: figure out what the right thing to do is here
-    server.set_keep_alive_timeout(0);
+// keep alive seems to delay sending response with content provider
+// TODO: figure out what the right thing to do is here
+server.set_keep_alive_timeout(0);
+
+the_server = &server; 
 
 	if (!server.listen(bind_address.c_str(), port))
 	{
