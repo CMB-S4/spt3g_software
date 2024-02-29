@@ -55,12 +55,12 @@ G3ModuleConfig::Summary() const
 	const std::string suffix = ")\"";
 	for (auto i : config) {
 		// drop repr wrapper added by python constructor
-		std::string val = i.second->Summary();
-		if (val.rfind(prefix, 0) == 0) {
-			val.replace(val.begin(), val.begin() + prefix.size(), "");
-			val.replace(val.end() - suffix.size(), val.end(), "");
+		std::string repr = i.second->Summary();
+		if (repr.rfind(prefix, 0) == 0) {
+			repr.replace(repr.begin(), repr.begin() + prefix.size(), "");
+			repr.replace(repr.end() - suffix.size(), repr.end(), "");
 		}
-		rv += ", " + i.first + "=" + val;
+		rv += ", " + i.first + "=" + repr;
 	}
 
 	if (instancename.size() != 0 && instancename != modname)
