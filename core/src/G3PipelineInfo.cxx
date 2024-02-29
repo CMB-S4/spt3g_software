@@ -36,12 +36,6 @@ template <class A> void G3ModuleConfig::load(A &ar, unsigned v)
 	G3PythonContext ctx("G3ModuleConfig::load", true);
 
 	namespace bp = boost::python;
-	bp::object global;
-
-	if (Py_IsInitialized()) {
-		bp::object main = bp::import("__main__");
-		global = main.attr("__dict__");
-	}
 
 	for (size_t i = 0; i < size; i++) {
 		std::string key;
@@ -67,7 +61,7 @@ template <class A> void G3ModuleConfig::load(A &ar, unsigned v)
 
 			// convert to frame object if possible
 			try {
-				bp::object obj = bp::eval(bp::str(repr), global, global);
+				bp::object obj = bp::eval(bp::str(repr));
 				config[key] = to_g3frameobject(obj);
 			} catch (const bp::error_already_set& e) {
 				config[key] = boost::make_shared<G3String>(repr);
