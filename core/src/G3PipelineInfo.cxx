@@ -2,10 +2,6 @@
 #include <serialization.h>
 #include <G3PipelineInfo.h>
 #include <G3Data.h>
-#include <std_map_indexing_suite.hpp>
-
-#include <cereal/types/map.hpp>
-#include <cereal/types/vector.hpp>
 
 template <class A> void G3ModuleConfig::save(A &ar, unsigned v) const
 {
@@ -152,11 +148,6 @@ G3_SPLIT_SERIALIZABLE_CODE(G3ModuleConfig);
 G3_SERIALIZABLE_CODE(G3PipelineInfo);
 
 PYBINDINGS("core") {
-	namespace bp = boost::python;
-
-	register_map<std::map<std::string, boost::python::object> >(
-	    "StringObjectMap", "Configuration options for a module");
-
 	EXPORT_FRAMEOBJECT(G3ModuleConfig, init<>(), "Stored configuration of a pipeline module or segment")
 	    .def_readwrite("modname", &G3ModuleConfig::modname)
 	    .def_readwrite("instancename", &G3ModuleConfig::instancename)
@@ -164,7 +155,7 @@ PYBINDINGS("core") {
 	    .def("__repr__", &G3ModuleConfig::Summary)
 	;
 	register_pointer_conversions<G3ModuleConfig>();
-	register_vector_of<G3ModuleConfig>("VectorStringObjectMap");
+	register_vector_of<G3ModuleConfig>("VectorModuleConfig");
 
 	EXPORT_FRAMEOBJECT(G3PipelineInfo, init<>(), "Stored configuration of a pipeline, including software version information")
 	    .def_readwrite("vcs_url", &G3PipelineInfo::vcs_url)
