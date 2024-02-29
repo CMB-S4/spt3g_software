@@ -4,7 +4,7 @@ import spt3g, os
 from spt3g import core
 
 p = core.G3Pipeline()
-p.Add(core.G3InfiniteSource, type=core.G3FrameType.Timepoint, n=10)
+p.Add(core.G3InfiniteSource, n=10)
 p.Add(core.Dump)
 p.Add(core.G3Writer, filename='testpi.g3')
 p.Run()
