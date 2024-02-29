@@ -181,6 +181,48 @@ class _add_pipeline_info(G3Module):
         del self.buffer
         return rv
 
+# monkeypatch transparent handling of arbitrary python arguments
+def modconfig_get(self, key):
+    """
+    Get the argument value.  Non-G3FrameObject values are converted to
+    their python representation if possible.
+    """
+    # eval repr'ed python objects
+    v = self.config[key]
+    if not isinstance(v, G3String) or not v.value.startswith("repr("):
+        return v
+    v = v.value[5:-1]
+    try:
+        return eval(v)
+    except:
+        return v
+
+
+def modconfig_set(self, key, value):
+    """
+    Set the argument value.  Non-G3FrameObject values are converted
+    to their string representation for storage.
+    """
+    if isinstance(value, G3FrameObject):
+        try:
+            if value.npix_allocated > 0:
+                # Don't store full sky maps as configuration options. It
+                # just wastes a ton of disk space with simulations.
+                value = value.clone(False)
+        except:
+            # If that threw an exception, it either isn't a map or dropping
+            # data didn't work, so just don't bother.
+            pass
+    else:
+        value = G3String("repr({})".format(repr(v)))
+    self.config[key] = value
+
+
+G3ModuleConfig.__getitem__ = modconfig_get
+G3ModuleConfig.__setitem__ = modconfig_set
+G3ModuleConfig.keys = lambda self: self.config.keys()
+
+
 def PipelineAddCallable(self, callable, name=None, subprocess=False, **kwargs):
     '''
     Add a processing module to the pipeline. It can be any subclass of
@@ -214,20 +256,7 @@ def PipelineAddCallable(self, callable, name=None, subprocess=False, **kwargs):
         modconfig.instancename = name
         modconfig.modname = '%s.%s' % (callable.__module__, callable_name)
         for k,v in kwargs.items():
-            if isinstance(v, G3FrameObject):
-                tostore = v
-                try:
-                    if v.npix_allocated > 0:
-                        # Don't store full sky maps as configuration options. It
-                        # just wastes a ton of disk space with simulations.
-                        tostore = v.clone(False)
-                except:
-                    # If that threw an exception, it either isn't a map or dropping
-                    # data didn't work, so just don't bother.
-                    pass
-            else:
-                tostore = G3String("repr({})".format(repr(v)))
-            modconfig.config[k] = tostore
+            modconfig[k] = v
         self._pipelineinfo.pipelineinfo.modules.append(modconfig)
 
     # Deal with the segment case
