@@ -35,15 +35,7 @@ template <class A> void G3ModuleConfig::load(A &ar, unsigned v)
 	size_t size;
 	ar >> cereal::make_nvp("size", size);
 
-	G3PythonContext ctx("G3ModuleConfig::load", true);
-
 	namespace bp = boost::python;
-	bp::object global;
-
-	if (Py_IsInitialized()) {
-		bp::object main = bp::import("__main__");
-		global = main.attr("__dict__");
-	}
 
 	for (size_t i = 0; i < size; i++) {
 		std::string key;
@@ -52,8 +44,7 @@ template <class A> void G3ModuleConfig::load(A &ar, unsigned v)
 		ar >> cereal::make_nvp("frameobject", is_frameobject);
 		
 		// Frame objects (e.g. skymaps used as configs) serialized
-		// directly. Random python things serialized as repr(), so
-		// eval() them.
+		// directly. Random python things serialized as repr()
 		if (is_frameobject) {
 			G3FrameObjectPtr fo;
 			ar >> cereal::make_nvp("value", fo);
@@ -61,20 +52,7 @@ template <class A> void G3ModuleConfig::load(A &ar, unsigned v)
 		} else {
 			std::string repr;
 			ar >> cereal::make_nvp("value", repr);
-
-			if (!Py_IsInitialized()) {
-				config[key] = boost::make_shared<G3String>(repr);
-				continue;
-			}
-
-			// convert to frame object if possible
-			try {
-				bp::object obj = bp::eval(bp::str(repr), global, global);
-				config[key] = to_g3frameobject(obj);
-			} catch (const bp::error_already_set& e) {
-				config[key] = boost::make_shared<G3String>(repr);
-				PyErr_Clear();
-			}
+			config[key] = boost::make_shared<G3String>("repr(" + repr + ")");
 		}
 	}
 }
@@ -84,7 +62,15 @@ G3ModuleConfig::Summary() const
 {
 	std::string rv = "pipe.Add(" + modname;
 	for (auto i : config) {
-		rv += ", " + i.first + "=" + i.second->Summary();
+		// drop repr wrapper added by python constructor
+		std::string val = i.second->Summary();
+		std::string prefix = "\"repr(";
+		std::string suffix = ")\"";
+		if (val.rfind(prefix, 0) == 0) {
+			val.replace(val.begin(), val.begin() + prefix.size(), "");
+			val.replace(val.end() - suffix.size(), val.end(), "");
+		}
+		rv += ", " + i.first + "=" + val;
 	}
 
 	if (instancename.size() != 0 && instancename != modname)
