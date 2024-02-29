@@ -335,7 +335,7 @@ int main(int nargs, char **argv)
 	}
 
 	//This is needed for "random python things" stored in frames to work
-	G3PythonContext ctx("main", false, true);
+	G3PythonInterpreter interp(false);
   signal(SIGPIPE, SIG_IGN);
 
 	httplib::Server server;
