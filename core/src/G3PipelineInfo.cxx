@@ -9,8 +9,6 @@
 
 template <class A> void G3ModuleConfig::save(A &ar, unsigned v) const
 {
-	namespace bp = boost::python;
-
 	ar & cereal::make_nvp("G3FrameObject",
 	    cereal::base_class<G3FrameObject>(this));
 	ar & cereal::make_nvp("modname", modname);
@@ -32,8 +30,6 @@ template <class A> void G3ModuleConfig::load(A &ar, unsigned v)
 
 	size_t size;
 	ar >> cereal::make_nvp("size", size);
-
-	namespace bp = boost::python;
 
 	for (size_t i = 0; i < size; i++) {
 		std::string key;
@@ -59,11 +55,11 @@ std::string
 G3ModuleConfig::Summary() const
 {
 	std::string rv = "pipe.Add(" + modname;
+	const std::string prefix = "\"repr(";
+	const std::string suffix = ")\"";
 	for (auto i : config) {
 		// drop repr wrapper added by python constructor
 		std::string val = i.second->Summary();
-		std::string prefix = "\"repr(";
-		std::string suffix = ")\"";
 		if (val.rfind(prefix, 0) == 0) {
 			val.replace(val.begin(), val.begin() + prefix.size(), "");
 			val.replace(val.end() - suffix.size(), val.end(), "");
