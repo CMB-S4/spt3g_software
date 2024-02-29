@@ -193,8 +193,17 @@ def modconfig_get(self, key):
         return v
     v = v.value[5:-1]
     try:
-        return eval(v)
-    except:
+        # limit namespace
+        import __main__
+        g = dict(__main__.__dict__)
+
+        if "spt3g" not in g:
+            import spt3g
+            g["spt3g"] = spt3g
+
+        return eval(v, g, g)
+    except Exception as e:
+        print(e)
         return v
 
 
@@ -221,6 +230,7 @@ def modconfig_set(self, key, value):
 G3ModuleConfig.__getitem__ = modconfig_get
 G3ModuleConfig.__setitem__ = modconfig_set
 G3ModuleConfig.keys = lambda self: self.config.keys()
+G3ModuleConfig.values = lambda self: [self[k] for k in self.config.keys()]
 
 
 def PipelineAddCallable(self, callable, name=None, subprocess=False, **kwargs):
