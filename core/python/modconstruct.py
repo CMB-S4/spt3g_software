@@ -202,8 +202,7 @@ def modconfig_get(self, key):
             g["spt3g"] = spt3g
 
         return eval(v, g, g)
-    except Exception as e:
-        print(e)
+    except:
         return v
 
 
