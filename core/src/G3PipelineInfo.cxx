@@ -155,7 +155,7 @@ PYBINDINGS("core") {
 	    .def("__repr__", &G3ModuleConfig::Summary)
 	;
 	register_pointer_conversions<G3ModuleConfig>();
-	register_vector_of<G3ModuleConfig>("VectorModuleConfig");
+	register_vector_of<G3ModuleConfig>("ModuleConfig");
 
 	EXPORT_FRAMEOBJECT(G3PipelineInfo, init<>(), "Stored configuration of a pipeline, including software version information")
 	    .def_readwrite("vcs_url", &G3PipelineInfo::vcs_url)
