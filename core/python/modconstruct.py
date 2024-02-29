@@ -214,7 +214,7 @@ def modconfig_set(self, key, value):
             # data didn't work, so just don't bother.
             pass
     else:
-        value = G3String("repr({})".format(repr(v)))
+        value = G3String("repr({})".format(repr(value)))
     self.config[key] = value
 
 
