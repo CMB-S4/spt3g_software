@@ -80,8 +80,6 @@ template <class A> void G3ModuleConfig::load(A &ar, unsigned v)
 std::string
 G3ModuleConfig::Summary() const
 {
-	G3PythonContext ctx("G3ModuleConfig::Summary", true);
-
 	std::string rv = "pipe.Add(" + modname;
 	for (auto i : config) {
 		rv += ", " + i.first + "=" + i.second->Summary();
