@@ -2,15 +2,15 @@
 #define _G3_PIPELINEINFO_H
 
 #include <G3Frame.h>
+#include <G3Map.h>
 #include <vector>
-#include <map>
 
 class G3ModuleConfig : public G3FrameObject {
 public:
 	std::string modname;
 	std::string instancename;
 
-	std::map<std::string, boost::python::object> config;
+	G3MapFrameObject config;
 
         template <class A> void load(A &ar, unsigned v);
         template <class A> void save(A &ar, unsigned v) const;
@@ -20,7 +20,6 @@ public:
 
 	bool operator ==(const G3ModuleConfig &) const;
 
-	~G3ModuleConfig();
 private:
 	SET_LOGGER("G3ModuleConfig");
 };
@@ -55,7 +54,7 @@ namespace cereal {
         template <class A> struct specialize<A, G3ModuleConfig, cereal::specialization::member_load_save> {};
 }
 
-G3_SERIALIZABLE(G3ModuleConfig, 1);
+G3_SERIALIZABLE(G3ModuleConfig, 2);
 G3_SERIALIZABLE(G3PipelineInfo, 2);
 
 #endif

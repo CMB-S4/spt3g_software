@@ -1,4 +1,5 @@
 from spt3g.core import G3Module, G3Pipeline, G3PipelineInfo, G3Frame, G3FrameType, G3Time, G3ModuleConfig, log_fatal
+from spt3g.core import G3String, G3FrameObject, to_g3frameobject
 try:
     from spt3g.core import multiprocess
     multiproc_avail = True
@@ -214,6 +215,11 @@ def PipelineAddCallable(self, callable, name=None, subprocess=False, **kwargs):
         modconfig.modname = '%s.%s' % (callable.__module__, callable_name)
         for k,v in kwargs.items():
             tostore = v
+            if not isinstance(v, G3FrameObject):
+                try:
+                    tostore = to_g3frameobject(v)
+                except TypeError:
+                    tostore = G3String(repr(v))
             try:
                 if v.npix_allocated > 0:
                     # Don't store full sky maps as configuration options. It

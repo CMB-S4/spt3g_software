@@ -2,6 +2,7 @@
 #include <core/G3.h>
 #include <core/G3Pipeline.h>
 #include <core/G3Reader.h>
+#include <core/G3Writer.h>
 
 /*
  * Example of a small C++ program that is the equivalent of the
@@ -37,6 +38,9 @@ main(int argc, const char **argv)
 
 	pipe.Add(G3ModulePtr(new G3Reader(argv[1])));
 	pipe.Add(G3ModulePtr(new Dump));
+
+	if (argc > 2)
+		pipe.Add(G3ModulePtr(new G3Writer(argv[2])));
 
 	pipe.Run();
 	
