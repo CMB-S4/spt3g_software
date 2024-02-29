@@ -390,24 +390,37 @@ void BOOST_PP_CAT(spt3g_init_module_, name)()
 // The context destructor will clean up after itself (releasing the GIL if acquired, and
 // vice versa).  If hold_gil is true, the context will ensure the GIL is held at construction,
 // and released at destruction.  If hold_gil is false, the context will save the current thread
-// state and release the GIL at construction, and re-acquire it at destruction.  If init is
-// true, the context will initialize the python interpeter at construction (e.g. at the
-// beginning of a C++ compiled program), and immediately release the GIL.  At destruction, it
-// will re-acquire the GIL and finalize threads.  The python interpreter should be
-// initialized only once, typically at the beginning of the main program.
+// state and release the GIL at construction, and re-acquire it at destruction.
 class G3PythonContext {
 public:
-	G3PythonContext(std::string name, bool hold_gil=false, bool init=false);
+	G3PythonContext(std::string name, bool hold_gil=false);
 	~G3PythonContext();
 
 private:
 	std::string name_;
 	bool hold_;
-	bool init_;
 	PyGILState_STATE gil_;
 	PyThreadState *thread_;
 
 	SET_LOGGER("G3PythonContext");
+};
+
+// Convenience class for initializing and finalizing the Python interpreter.  This class
+// will initialize the python interpeter at construction (e.g. at the beginning of a C++
+// compiled program), and immediately initialize the appropriate G3PythonContext depending
+// on the value of hold_gil.  At destruction, it will exit the python context and finalize
+// the interpreter.  The python interpreter should be initialized only once, typically at
+// the beginning of the main program.
+class G3PythonInterpreter {
+public:
+	G3PythonInterpreter(bool hold_gil=false);
+	~G3PythonInterpreter();
+
+private:
+	bool init_;
+	G3PythonContext *ctx_;
+
+	SET_LOGGER("G3PythonInterpreter");
 };
 
 #endif
