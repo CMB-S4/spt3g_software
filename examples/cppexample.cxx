@@ -2,8 +2,7 @@
 #include <core/G3.h>
 #include <core/G3Pipeline.h>
 #include <core/G3Reader.h>
-#include <core/pybindings.h>
-#include <boost/python.hpp>
+#include <core/G3Writer.h>
 
 /*
  * Example of a small C++ program that is the equivalent of the
@@ -31,15 +30,17 @@ main(int argc, const char **argv)
 	}
 
 	// Initialize the python interpreter, and release the GIL.
-	// Set the second argument to true to instead hold the GIL.
-	// Set the last argument to false, or comment this out,
-	// to disable the interpreter.
-	G3PythonContext ctx("main", false, true);
+	// Set the argument to true to instead hold the GIL.
+	// Comment this out to disable the interpreter.
+	G3PythonInterpreter interp(false);
 
 	G3Pipeline pipe;
 
 	pipe.Add(G3ModulePtr(new G3Reader(argv[1])));
 	pipe.Add(G3ModulePtr(new Dump));
+
+	if (argc > 2)
+		pipe.Add(G3ModulePtr(new G3Writer(argv[2])));
 
 	pipe.Run();
 

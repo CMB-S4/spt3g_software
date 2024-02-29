@@ -1,6 +1,7 @@
 #include <pybindings.h>
 #include <serialization.h>
 #include <G3PipelineInfo.h>
+#include <G3Data.h>
 #include <std_map_indexing_suite.hpp>
 
 #include <cereal/types/map.hpp>
@@ -16,46 +17,24 @@ template <class A> void G3ModuleConfig::save(A &ar, unsigned v) const
 	    cereal::base_class<G3FrameObject>(this));
 	ar & cereal::make_nvp("modname", modname);
 	ar & cereal::make_nvp("instancename", instancename);
-
-	ar << cereal::make_nvp("size", config.size());
-
-	G3PythonContext ctx("G3ModuleConfig::save", true);
-
-	for (auto i : config) {
-		ar << cereal::make_nvp("key", i.first);
-		// Serialize frame objects (e.g. skymaps used as configs)
-		// directly. Serialize random python things through repr().
-		if (bp::extract<G3FrameObject>(i.second).check()) {
-			G3FrameObjectConstPtr fo =
-			    bp::extract<G3FrameObjectConstPtr>(i.second)();
-			ar << cereal::make_nvp("frameobject", true);
-			ar << cereal::make_nvp("value", fo);
-		} else {
-			if (!Py_IsInitialized())
-				continue;
-
-			try {
-				PyObject *repr = PyObject_Repr(i.second.ptr());
-				bp::handle<> reprhand(repr);
-				bp::object reprobj(reprhand);
-				std::string reprstr =
-				    bp::extract<std::string>(reprobj);
-
-				ar << cereal::make_nvp("frameobject", false);
-				ar << cereal::make_nvp("value", reprstr);
-			} catch (...) {
-				log_error("Exception thrown while getting "
-				    "repr() of parameter %s of module %s (%s)",
-				    i.first.c_str(), instancename.c_str(),
-				    modname.c_str());
-				throw;
-			}
-		}
-	}
+	ar & cereal::make_nvp("config", config);
 }
 
 template <class A> void G3ModuleConfig::load(A &ar, unsigned v)
 {
+	ar & cereal::make_nvp("G3FrameObject",
+	    cereal::base_class<G3FrameObject>(this));
+	ar & cereal::make_nvp("modname", modname);
+	ar & cereal::make_nvp("instancename", instancename);
+
+	if (v > 1) {
+		ar & cereal::make_nvp("config", config);
+		return;
+	}
+
+	size_t size;
+	ar >> cereal::make_nvp("size", size);
+
 	G3PythonContext ctx("G3ModuleConfig::load", true);
 
 	namespace bp = boost::python;
@@ -65,14 +44,6 @@ template <class A> void G3ModuleConfig::load(A &ar, unsigned v)
 		bp::object main = bp::import("__main__");
 		global = main.attr("__dict__");
 	}
-
-	ar & cereal::make_nvp("G3FrameObject",
-	    cereal::base_class<G3FrameObject>(this));
-	ar & cereal::make_nvp("modname", modname);
-	ar & cereal::make_nvp("instancename", instancename);
-
-	size_t size;
-	ar >> cereal::make_nvp("size", size);
 
 	for (size_t i = 0; i < size; i++) {
 		std::string key;
@@ -86,25 +57,24 @@ template <class A> void G3ModuleConfig::load(A &ar, unsigned v)
 		if (is_frameobject) {
 			G3FrameObjectPtr fo;
 			ar >> cereal::make_nvp("value", fo);
-			config[key] = boost::python::object(fo);
+			config[key] = fo;
 		} else {
 			std::string repr;
 			ar >> cereal::make_nvp("value", repr);
 
 			if (!Py_IsInitialized()) {
-				config[key] = boost::python::object(repr);
+				config[key] = boost::make_shared<G3String>(repr);
 				continue;
 			}
 
-			bp::object obj;
+			// convert to frame object if possible
 			try {
-//				obj = bp::eval(bp::str(repr), bp::None, bp::None);
-				obj = bp::eval(repr.c_str());
+				bp::object obj = bp::eval(bp::str(repr), global, global);
+				config[key] = to_g3frameobject(obj);
 			} catch (const bp::error_already_set& e) {
-				obj = bp::object(repr);
+				config[key] = boost::make_shared<G3String>(repr);
 				PyErr_Clear();
 			}
-			config[key] = obj;
 		}
 	}
 }
@@ -112,15 +82,9 @@ template <class A> void G3ModuleConfig::load(A &ar, unsigned v)
 std::string
 G3ModuleConfig::Summary() const
 {
-	G3PythonContext ctx("G3ModuleConfig::Summary", true);
-
 	std::string rv = "pipe.Add(" + modname;
 	for (auto i : config) {
-		std::string repr = "unknown";
-		if (Py_IsInitialized())
-			repr = bp::extract<std::string>(
-			    i.second.attr("__repr__")());
-		rv += ", " + i.first + "=" + repr;
+		rv += ", " + i.first + "=" + i.second->Summary();
 	}
 
 	if (instancename.size() != 0 && instancename != modname)
@@ -206,7 +170,7 @@ G3PipelineInfo_repr(const G3PipelineInfo &pi)
 
 G3ModuleConfig::~G3ModuleConfig()
 {
-  G3PythonContext ctx("~G3ModuleConfig",true,false);
+  G3PythonContext ctx("~G3ModuleConfig",true); 
   config.clear();
 }
 

@@ -32,25 +32,17 @@ void G3ModuleRegistrator::CallRegistrarsFor(const char *mod)
 		(*i)();
 }
 
-G3PythonContext::G3PythonContext(std::string name, bool hold_gil, bool init) :
-    name_(name), hold_(hold_gil), init_(init), thread_(nullptr)
+G3PythonContext::G3PythonContext(std::string name, bool hold_gil) :
+    name_(name), hold_(false), thread_(nullptr)
 {
-	if (init_ && !Py_IsInitialized()) {
-		log_debug("%s: Initializing Python threads", name_.c_str());
-		Py_Initialize();
-#if (PY_MAJOR_VERSION == 3 && PY_MINOR_VERSION < 7)
-		PyEval_InitThreads();
-#endif
-	} else
-		init_ = false;
+	if (!Py_IsInitialized())
+		return;
 
-	if (hold_) {
-		if (Py_IsInitialized() && !PyGILState_Check()) {
-			log_debug("%s: Ensuring GIL acquired", name_.c_str());
-			gil_ = PyGILState_Ensure();
-		} else
-			hold_ = false;
-	} else if (Py_IsInitialized() && PyGILState_Check()) {
+	if (hold_gil && !PyGILState_Check()) {
+		log_debug("%s: Ensuring GIL acquired", name_.c_str());
+		gil_ = PyGILState_Ensure();
+		hold_ = true;
+	} else if (!hold_gil && PyGILState_Check()) {
 		log_debug("%s: Saving Python thread state", name_.c_str());
 		thread_ = PyEval_SaveThread();
 	}
@@ -58,19 +50,45 @@ G3PythonContext::G3PythonContext(std::string name, bool hold_gil, bool init) :
 
 G3PythonContext::~G3PythonContext()
 {
-	if (hold_ && Py_IsInitialized()) {
+	if (hold_) {
 		log_debug("%s: Releasing GIL", name_.c_str());
 		PyGILState_Release(gil_);
+		hold_ = false;
 	}
 
 	if (!!thread_) {
 		log_debug("%s: Restoring Python thread state", name_.c_str());
 		PyEval_RestoreThread(thread_);
+		thread_ = nullptr;
+	}
+}
+
+G3PythonInterpreter::G3PythonInterpreter(bool hold_gil) :
+    init_(false)
+{
+	if (!Py_IsInitialized()) {
+		log_debug("Initializing");
+		Py_Initialize();
+#if (PY_MAJOR_VERSION == 3 && PY_MINOR_VERSION < 7)
+		PyEval_InitThreads();
+#endif
+		init_ = true;
+	}
+
+	ctx_ = new G3PythonContext("G3PythonInterpreter", hold_gil);
+}
+
+G3PythonInterpreter::~G3PythonInterpreter()
+{
+	if (!!ctx_) {
+		delete ctx_;
+		ctx_ = nullptr;
 	}
 
 	if (init_) {
-		log_debug("%s: Finalizing Python threads", name_.c_str());
+		log_debug("Finalizing");
 		Py_Finalize();
+		init_ = false;
 	}
 }
 
@@ -136,22 +154,31 @@ boost::python::list g3frame_keys(const G3Frame &map)
         return keys;
 }
 
-static void g3frame_python_put(G3Frame &f, std::string name, bp::object obj)
+G3FrameObjectPtr to_g3frameobject(bp::object obj)
 {
+	G3FrameObjectPtr fo;
+
 	if (bp::extract<G3FrameObjectPtr>(obj).check())
-		f.Put(name, bp::extract<G3FrameObjectPtr>(obj)());
+		fo = bp::extract<G3FrameObjectPtr>(obj)();
 	else if (PyBool_Check(obj.ptr()))
-		f.Put(name, boost::make_shared<G3Bool>(bp::extract<bool>(obj)()));
+		fo = boost::make_shared<G3Bool>(bp::extract<bool>(obj)());
 	else if (bp::extract<int64_t>(obj).check())
-		f.Put(name, boost::make_shared<G3Int>(bp::extract<int64_t>(obj)()));
+		fo = boost::make_shared<G3Int>(bp::extract<int64_t>(obj)());
 	else if (bp::extract<double>(obj).check())
-		f.Put(name, boost::make_shared<G3Double>(bp::extract<double>(obj)()));
+		fo = boost::make_shared<G3Double>(bp::extract<double>(obj)());
 	else if (bp::extract<std::string>(obj).check())
-		f.Put(name, boost::make_shared<G3String>(bp::extract<std::string>(obj)()));
+		fo = boost::make_shared<G3String>(bp::extract<std::string>(obj)());
 	else {
 		PyErr_SetString(PyExc_TypeError, "Object is not a G3FrameObject derivative or a plain-old-data type");
 		bp::throw_error_already_set();
 	}
+
+	return fo;
+}
+
+static void g3frame_python_put(G3Frame &f, std::string name, bp::object obj)
+{
+	f.Put(name, to_g3frameobject(obj));
 }
 
 static bp::object g3frame_python_get(G3Frame &f, std::string name)
@@ -521,6 +548,10 @@ SPT3G_PYTHON_MODULE(core)
 	;
 	register_vector_of<G3FramePtr>("Frame");
 	register_vector_of<G3FrameObjectPtr>("FrameObject");
+
+	bp::def("to_g3frameobject", to_g3frameobject,
+	  "Convert the input argument to a G3FrameObject.  Raises a TypeError "
+	  "if the object cannot be converted.");
 
 	bp::class_<G3ModuleWrap, boost::shared_ptr<G3ModuleWrap>,
 	  boost::noncopyable>("G3Module", "Base class for functors that can be "
