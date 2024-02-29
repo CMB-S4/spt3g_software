@@ -40,12 +40,12 @@ static void
 usage()
 {
 	std::cout << "Usage: spt3g-json-serve [OPTION]" << std::endl;
-	std::cout << "-h,--help  display this message" << std::endl;
-	std::cout << "-P,--Python  initialize python interpreter" << std::endl;
-	std::cout << "-p,--port  port to use (default 8080)" << std::endl;
-	std::cout << "-b,--bind-address  bind address (default 0.0.0.0)" << std::endl;
-	std::cout << "-d,--doc-root base dir to serve (default is .)" << std::endl;
-	std::cout << "-t,--threads number of threads to use (default 4) " << std::endl;
+	std::cout << "\t-h,--help\t\tdisplay this message" << std::endl;
+	std::cout << "\t-P,--Python\t\tinitialize python interpreter" << std::endl;
+	std::cout << "\t-p,--port\t\tport to use (default 8080)" << std::endl;
+	std::cout << "\t-b,--bind-address\tbind address (default 0.0.0.0)" << std::endl;
+	std::cout << "\t-d,--doc-root\t\tbase dir to serve (default is .)" << std::endl;
+	std::cout << "\t-t,--threads\t\tnumber of threads to use (default 4) " << std::endl;
 }
 
 // pointer to server for stopping
