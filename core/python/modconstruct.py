@@ -1,5 +1,5 @@
 from spt3g.core import G3Module, G3Pipeline, G3PipelineInfo, G3Frame, G3FrameType, G3Time, G3ModuleConfig, log_fatal
-from spt3g.core import G3String, G3FrameObject, to_g3frameobject
+from spt3g.core import G3String, G3FrameObject
 try:
     from spt3g.core import multiprocess
     multiproc_avail = True
@@ -214,21 +214,19 @@ def PipelineAddCallable(self, callable, name=None, subprocess=False, **kwargs):
         modconfig.instancename = name
         modconfig.modname = '%s.%s' % (callable.__module__, callable_name)
         for k,v in kwargs.items():
-            tostore = v
-            if not isinstance(v, G3FrameObject):
+            if isinstance(v, G3FrameObject):
+                tostore = v
                 try:
-                    tostore = to_g3frameobject(v)
-                except TypeError:
-                    tostore = G3String(repr(v))
-            try:
-                if v.npix_allocated > 0:
-                    # Don't store full sky maps as configuration options. It
-                    # just wastes a ton of disk space with simulations.
-                    tostore = v.clone(False)
-            except:
-                # If that threw an exception, it either isn't a map or dropping
-                # data didn't work, so just don't bother.
-                pass
+                    if v.npix_allocated > 0:
+                        # Don't store full sky maps as configuration options. It
+                        # just wastes a ton of disk space with simulations.
+                        tostore = v.clone(False)
+                except:
+                    # If that threw an exception, it either isn't a map or dropping
+                    # data didn't work, so just don't bother.
+                    pass
+            else:
+                tostore = G3String("repr({})".format(repr(v)))
             modconfig.config[k] = tostore
         self._pipelineinfo.pipelineinfo.modules.append(modconfig)
 
