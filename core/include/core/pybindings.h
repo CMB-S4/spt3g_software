@@ -355,9 +355,6 @@ public:
 	    .def(boost::python::init<const T &>()) \
 	    .def_pickle(g3frameobject_picklesuite<T>())
 
-G3FrameObjectPtr
-to_g3frameobject(boost::python::object obj);
-
 // Declare a python module with a name and the name of its enclosing package scope.
 // name should be be a bare token, while pkg should be a string literal, e.g.:
 //     SPT3G_PYTHON_MODULE_2(foo, "spt3g.bar")

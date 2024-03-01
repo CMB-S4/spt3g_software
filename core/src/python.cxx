@@ -154,31 +154,22 @@ boost::python::list g3frame_keys(const G3Frame &map)
         return keys;
 }
 
-G3FrameObjectPtr to_g3frameobject(bp::object obj)
+static void g3frame_python_put(G3Frame &f, std::string name, bp::object obj)
 {
-	G3FrameObjectPtr fo;
-
 	if (bp::extract<G3FrameObjectPtr>(obj).check())
-		fo = bp::extract<G3FrameObjectPtr>(obj)();
+		f.Put(name, bp::extract<G3FrameObjectPtr>(obj)());
 	else if (PyBool_Check(obj.ptr()))
-		fo = boost::make_shared<G3Bool>(bp::extract<bool>(obj)());
+		f.Put(name, boost::make_shared<G3Bool>(bp::extract<bool>(obj)()));
 	else if (bp::extract<int64_t>(obj).check())
-		fo = boost::make_shared<G3Int>(bp::extract<int64_t>(obj)());
+		f.Put(name, boost::make_shared<G3Int>(bp::extract<int64_t>(obj)()));
 	else if (bp::extract<double>(obj).check())
-		fo = boost::make_shared<G3Double>(bp::extract<double>(obj)());
+		f.Put(name, boost::make_shared<G3Double>(bp::extract<double>(obj)()));
 	else if (bp::extract<std::string>(obj).check())
-		fo = boost::make_shared<G3String>(bp::extract<std::string>(obj)());
+		f.Put(name, boost::make_shared<G3String>(bp::extract<std::string>(obj)()));
 	else {
 		PyErr_SetString(PyExc_TypeError, "Object is not a G3FrameObject derivative or a plain-old-data type");
 		bp::throw_error_already_set();
 	}
-
-	return fo;
-}
-
-static void g3frame_python_put(G3Frame &f, std::string name, bp::object obj)
-{
-	f.Put(name, to_g3frameobject(obj));
 }
 
 static bp::object g3frame_python_get(G3Frame &f, std::string name)
@@ -548,10 +539,6 @@ SPT3G_PYTHON_MODULE(core)
 	;
 	register_vector_of<G3FramePtr>("Frame");
 	register_vector_of<G3FrameObjectPtr>("FrameObject");
-
-	bp::def("to_g3frameobject", to_g3frameobject,
-	  "Convert the input argument to a G3FrameObject.  Raises a TypeError "
-	  "if the object cannot be converted.");
 
 	bp::class_<G3ModuleWrap, boost::shared_ptr<G3ModuleWrap>,
 	  boost::noncopyable>("G3Module", "Base class for functors that can be "
