@@ -4,9 +4,14 @@ import spt3g, os
 from spt3g import core
 
 args = {"n": 10, "type": core.G3FrameType.Timepoint}
+arg = core.G3VectorDouble([1, 2, 3])
 
 p = core.G3Pipeline()
 p.Add(core.G3InfiniteSource, **args)
+def twiddle(fr, arg=None):
+	if fr.type == core.G3FrameType.Timepoint:
+		fr['arg'] = arg
+p.Add(twiddle, arg=arg)
 p.Add(core.Dump)
 p.Add(core.G3Writer, filename='testpi.g3')
 p.Run()
@@ -20,13 +25,16 @@ for i in core.G3File('testpi.g3'):
 
 os.remove('testpi.g3')
 print(repr(pi))
-exec(repr(pi))
-pipe.Run()
+pi.Run()
 
 # Check that module arguments survive round-trip to/from storage
 mod_args = dict(pi.modules[0])
 print(mod_args)
 assert(mod_args == args)
+obj_arg = pi.modules[1]['arg']
+print(obj_arg)
+assert(isinstance(obj_arg, type(arg)))
+assert((obj_arg == arg).all())
 
 assert(len(list(core.G3File('testpi.g3'))) == 11)
 
