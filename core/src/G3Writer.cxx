@@ -48,9 +48,8 @@ void G3Writer::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	// because in some cases serialization requires calling back
 	// out to Python.
 	frame->GenerateBlobs();
-	PyThreadState *_save = nullptr;
-	if (Py_IsInitialized() && PyGILState_Check())
-		_save = PyEval_SaveThread();
+
+	G3PythonContext ctx("G3Writer", false);
 
 	if (frame->type == G3Frame::EndProcessing)
 		stream_.reset();
@@ -60,9 +59,6 @@ void G3Writer::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		frame->save(stream_);
 
 	out.push_back(frame);
-
-	if (_save != nullptr)
-		PyEval_RestoreThread(_save);
 }
 
 void G3Writer::Flush()
