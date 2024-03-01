@@ -38,7 +38,7 @@ public:
 
 	template <class A> void serialize(A &ar, unsigned v);
 	std::string Description() const;
-	bool operator==(const G3Int & other) const {return value == other.value;}
+	bool operator==(const G3Double & other) const {return value == other.value;}
 };
 
 class G3String : public G3FrameObject {
