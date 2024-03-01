@@ -1,0 +1,6 @@
+--------
+examples
+--------
+
+Could not import module spt3g.examples:
+No module named 'spt3g.examples'
