@@ -32,7 +32,6 @@ public:
 
 	bool operator ==(const G3ModuleConfig &) const;
 
-	~G3ModuleConfig();
 private:
 	SET_LOGGER("G3ModuleConfig");
 };
