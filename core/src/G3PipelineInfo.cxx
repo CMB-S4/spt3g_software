@@ -184,8 +184,7 @@ G3ModuleConfig_set(G3ModuleConfigPtr mc, std::string key, bp::object obj)
 	}
 
 	std::string repr = bp::extract<std::string>(obj.attr("__repr__")());
-	auto arg = G3ModulePythonArgPtr(new G3ModulePythonArg(repr));
-	mc->config[key] = arg;
+	mc->config[key] = boost::make_shared<G3ModulePythonArg>(repr);
 }
 
 static bp::list
