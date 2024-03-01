@@ -3,8 +3,10 @@
 import spt3g, os
 from spt3g import core
 
+args = {"n": 10, "type": core.G3FrameType.Timepoint}
+
 p = core.G3Pipeline()
-p.Add(core.G3InfiniteSource, type=core.G3FrameType.Timepoint, n=10)
+p.Add(core.G3InfiniteSource, **args)
 p.Add(core.Dump)
 p.Add(core.G3Writer, filename='testpi.g3')
 p.Run()
@@ -20,6 +22,11 @@ os.remove('testpi.g3')
 print(repr(pi))
 exec(repr(pi))
 pipe.Run()
+
+# Check that module arguments survive round-trip to/from storage
+mod_args = dict(pi.modules[0])
+print(mod_args)
+assert(mod_args == args)
 
 assert(len(list(core.G3File('testpi.g3'))) == 11)
 
