@@ -1,5 +1,4 @@
 from spt3g.core import G3Module, G3Pipeline, G3PipelineInfo, G3Frame, G3FrameType, G3Time, G3ModuleConfig, log_fatal
-from spt3g.core import G3String, G3FrameObject
 try:
     from spt3g.core import multiprocess
     multiproc_avail = True
@@ -181,57 +180,6 @@ class _add_pipeline_info(G3Module):
         del self.buffer
         return rv
 
-# monkeypatch transparent handling of arbitrary python arguments
-def modconfig_get(self, key):
-    """
-    Get the argument value.  Non-G3FrameObject values are converted to
-    their python representation if possible.
-    """
-    # eval repr'ed python objects
-    v = self.config[key]
-    if not isinstance(v, G3String) or not v.value.startswith("repr("):
-        return v
-    v = v.value[5:-1]
-    try:
-        # limit namespace
-        import __main__
-        g = dict(__main__.__dict__)
-
-        if "spt3g" not in g:
-            import spt3g
-            g["spt3g"] = spt3g
-
-        return eval(v, g, g)
-    except:
-        return v
-
-
-def modconfig_set(self, key, value):
-    """
-    Set the argument value.  Non-G3FrameObject values are converted
-    to their string representation for storage.
-    """
-    if isinstance(value, G3FrameObject):
-        try:
-            if value.npix_allocated > 0:
-                # Don't store full sky maps as configuration options. It
-                # just wastes a ton of disk space with simulations.
-                value = value.clone(False)
-        except:
-            # If that threw an exception, it either isn't a map or dropping
-            # data didn't work, so just don't bother.
-            pass
-    else:
-        value = G3String("repr({})".format(repr(value)))
-    self.config[key] = value
-
-
-G3ModuleConfig.__getitem__ = modconfig_get
-G3ModuleConfig.__setitem__ = modconfig_set
-G3ModuleConfig.keys = lambda self: self.config.keys()
-G3ModuleConfig.values = lambda self: [self[k] for k in self.config.keys()]
-
-
 def PipelineAddCallable(self, callable, name=None, subprocess=False, **kwargs):
     '''
     Add a processing module to the pipeline. It can be any subclass of
@@ -265,7 +213,17 @@ def PipelineAddCallable(self, callable, name=None, subprocess=False, **kwargs):
         modconfig.instancename = name
         modconfig.modname = '%s.%s' % (callable.__module__, callable_name)
         for k,v in kwargs.items():
-            modconfig[k] = v
+            tostore = v
+            try:
+                if v.npix_allocated > 0:
+                    # Don't store full sky maps as configuration options. It
+                    # just wastes a ton of disk space with simulations.
+                    tostore = v.clone(False)
+            except:
+                # If that threw an exception, it either isn't a map or dropping
+                # data didn't work, so just don't bother.
+                pass
+            modconfig.config[k] = tostore
         self._pipelineinfo.pipelineinfo.modules.append(modconfig)
 
     # Deal with the segment case

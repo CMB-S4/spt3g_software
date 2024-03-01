@@ -1,28 +1,69 @@
 #include <pybindings.h>
 #include <serialization.h>
 #include <G3PipelineInfo.h>
-#include <G3Data.h>
+#include <std_map_indexing_suite.hpp>
+
+#include <cereal/types/map.hpp>
+#include <cereal/types/vector.hpp>
 
 template <class A> void G3ModuleConfig::save(A &ar, unsigned v) const
 {
+	namespace bp = boost::python;
+
 	ar & cereal::make_nvp("G3FrameObject",
 	    cereal::base_class<G3FrameObject>(this));
 	ar & cereal::make_nvp("modname", modname);
 	ar & cereal::make_nvp("instancename", instancename);
-	ar & cereal::make_nvp("config", config);
+
+	ar << cereal::make_nvp("size", config.size());
+
+	struct gil_holder{
+		PyGILState_STATE gs;
+		gil_holder():gs(PyGILState_Ensure()){}
+		~gil_holder(){ PyGILState_Release(gs); }
+	} gh;
+
+	for (auto i : config) {
+		ar << cereal::make_nvp("key", i.first);
+		
+		// Serialize frame objects (e.g. skymaps used as configs)
+		// directly. Serialize random python things through repr().
+		if (bp::extract<G3FrameObject>(i.second).check()) {
+			G3FrameObjectConstPtr fo =
+			    bp::extract<G3FrameObjectConstPtr>(i.second)();
+			ar << cereal::make_nvp("frameobject", true);
+			ar << cereal::make_nvp("value", fo);
+		} else {
+			try {
+				PyObject *repr = PyObject_Repr(i.second.ptr());
+				bp::handle<> reprhand(repr);
+				bp::object reprobj(reprhand);
+				std::string reprstr =
+				    bp::extract<std::string>(reprobj);
+
+				ar << cereal::make_nvp("frameobject", false);
+				ar << cereal::make_nvp("value", reprstr);
+			} catch (...) {
+				log_error("Exception thrown while getting "
+				    "repr() of parameter %s of module %s (%s)",
+				    i.first.c_str(), instancename.c_str(),
+				    modname.c_str());
+				throw;
+			}
+		}
+	}
 }
 
 template <class A> void G3ModuleConfig::load(A &ar, unsigned v)
 {
+	namespace bp = boost::python;
+	bp::object main = bp::import("__main__");
+	bp::object global = main.attr("__dict__");
+
 	ar & cereal::make_nvp("G3FrameObject",
 	    cereal::base_class<G3FrameObject>(this));
 	ar & cereal::make_nvp("modname", modname);
 	ar & cereal::make_nvp("instancename", instancename);
-
-	if (v > 1) {
-		ar & cereal::make_nvp("config", config);
-		return;
-	}
 
 	size_t size;
 	ar >> cereal::make_nvp("size", size);
@@ -34,15 +75,23 @@ template <class A> void G3ModuleConfig::load(A &ar, unsigned v)
 		ar >> cereal::make_nvp("frameobject", is_frameobject);
 		
 		// Frame objects (e.g. skymaps used as configs) serialized
-		// directly. Random python things serialized as repr()
+		// directly. Random python things serialized as repr(), so
+		// eval() them.
 		if (is_frameobject) {
 			G3FrameObjectPtr fo;
 			ar >> cereal::make_nvp("value", fo);
-			config[key] = fo;
+			config[key] = boost::python::object(fo);
 		} else {
 			std::string repr;
 			ar >> cereal::make_nvp("value", repr);
-			config[key] = boost::make_shared<G3String>("repr(" + repr + ")");
+			bp::object obj;
+			try {
+				obj = bp::eval(bp::str(repr), global, global);
+			} catch (const bp::error_already_set& e) {
+				obj = bp::object(repr);
+				PyErr_Clear();
+			}
+			config[key] = obj;
 		}
 	}
 }
@@ -51,15 +100,9 @@ std::string
 G3ModuleConfig::Summary() const
 {
 	std::string rv = "pipe.Add(" + modname;
-	const std::string prefix = "\"repr(";
-	const std::string suffix = ")\"";
 	for (auto i : config) {
-		// drop repr wrapper added by python constructor
-		std::string repr = i.second->Summary();
-		if (repr.rfind(prefix, 0) == 0) {
-			repr.replace(repr.begin(), repr.begin() + prefix.size(), "");
-			repr.replace(repr.end() - suffix.size(), repr.end(), "");
-		}
+		std::string repr = bp::extract<std::string>(
+		    i.second.attr("__repr__")());
 		rv += ", " + i.first + "=" + repr;
 	}
 
@@ -148,6 +191,11 @@ G3_SPLIT_SERIALIZABLE_CODE(G3ModuleConfig);
 G3_SERIALIZABLE_CODE(G3PipelineInfo);
 
 PYBINDINGS("core") {
+	namespace bp = boost::python;
+
+	register_map<std::map<std::string, boost::python::object> >(
+	    "StringObjectMap", "Configuration options for a module");
+
 	EXPORT_FRAMEOBJECT(G3ModuleConfig, init<>(), "Stored configuration of a pipeline module or segment")
 	    .def_readwrite("modname", &G3ModuleConfig::modname)
 	    .def_readwrite("instancename", &G3ModuleConfig::instancename)
@@ -155,7 +203,7 @@ PYBINDINGS("core") {
 	    .def("__repr__", &G3ModuleConfig::Summary)
 	;
 	register_pointer_conversions<G3ModuleConfig>();
-	register_vector_of<G3ModuleConfig>("ModuleConfig");
+	register_vector_of<G3ModuleConfig>("VectorStringObjectMap");
 
 	EXPORT_FRAMEOBJECT(G3PipelineInfo, init<>(), "Stored configuration of a pipeline, including software version information")
 	    .def_readwrite("vcs_url", &G3PipelineInfo::vcs_url)
