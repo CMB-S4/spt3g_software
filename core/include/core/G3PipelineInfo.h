@@ -16,7 +16,7 @@ public:
 	std::string repr() const { return repr_; };
 	G3FrameObjectPtr object() const { return obj_; };
 
-	std::string Summary() const { return repr_; };
+	std::string Description() const { return repr_; };
 	bool operator ==(const G3ModuleArg &other) const { return other.repr_ == repr_; };
 
 private:

@@ -69,9 +69,8 @@ std::string
 G3ModuleConfig::Summary() const
 {
 	std::string rv = "pipe.Add(" + modname;
-	for (auto i : config) {
-		rv += ", " + i.first + "=" + i.second.Summary();
-	}
+	for (auto i : config)
+		rv += ", " + i.first + "=" + i.second.repr();
 
 	if (instancename.size() != 0 && instancename != modname)
 		rv += ", name=" + instancename;
