@@ -5,6 +5,18 @@
 #include <G3Map.h>
 #include <vector>
 
+class G3ModulePythonArg : public G3FrameObject {
+public:
+	std::string value;
+
+	G3ModulePythonArg(const std::string &v) : value(v) {}
+	G3ModulePythonArg() {}
+
+	template <class A> void serialize(A &ar, unsigned v);
+	std::string Summary() const { return value; };
+	bool operator ==(const G3ModulePythonArg &other) const { return other.value == value; };
+};
+
 class G3ModuleConfig : public G3FrameObject {
 public:
 	std::string modname;
@@ -48,12 +60,15 @@ private:
 	SET_LOGGER("G3PipelineInfo");
 };
 
+G3_POINTERS(G3ModulePythonArg);
+G3_POINTERS(G3ModuleConfig);
 G3_POINTERS(G3PipelineInfo);
 
 namespace cereal {
         template <class A> struct specialize<A, G3ModuleConfig, cereal::specialization::member_load_save> {};
 }
 
+G3_SERIALIZABLE(G3ModulePythonArg, 1);
 G3_SERIALIZABLE(G3ModuleConfig, 2);
 G3_SERIALIZABLE(G3PipelineInfo, 2);
 
