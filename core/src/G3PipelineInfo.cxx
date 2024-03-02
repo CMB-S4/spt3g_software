@@ -2,8 +2,6 @@
 #include <serialization.h>
 #include <G3PipelineInfo.h>
 
-#include <cereal/types/map.hpp>
-
 namespace bp = boost::python;
 
 template <class A> void G3ModuleArg::serialize(A &ar, unsigned v)
