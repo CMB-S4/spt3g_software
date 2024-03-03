@@ -25,14 +25,18 @@ G3ModuleArg::Description() const {
 	return rv;
 }
 
+static std::string inline object_repr(bp::object obj)
+{
+	return bp::extract<std::string>(obj.attr("__repr__")());
+}
+
 static std::string
 G3ModuleArg_repr(const G3ModuleArg &arg)
 {
 	// Some frame objects (e.g. G3Vectors) have repr only
 	// defined properly via the python interface.
 	if (!arg.repr.size() && !!arg.object)
-		return bp::extract<std::string>(
-		    bp::object(arg.object).attr("__repr__")());
+		return object_repr(bp::object(arg.object));
 	return arg.repr;
 }
 
@@ -129,19 +133,18 @@ G3ModuleConfig_get(const G3ModuleConfig &mc, std::string key)
 	bp::dict global = bp::dict(main.attr("__dict__"));
 	global["__main__"] = main;
 
-	std::string repr = G3ModuleArg_repr(arg);
 	try {
-		return bp::eval(bp::str(repr), global, global);
+		return bp::eval(bp::str(arg.repr), global, global);
 	} catch (const bp::error_already_set& e) {
 		PyErr_Clear();
-		return bp::object(repr);
+		return bp::object(arg.repr);
 	}
 }
 
 static void
 G3ModuleConfig_set(G3ModuleConfig &mc, std::string key, bp::object obj)
 {
-	std::string repr = bp::extract<std::string>(obj.attr("__repr__")());
+	std::string repr = object_repr(obj);
 
 	if (!bp::extract<G3FrameObjectPtr>(obj).check()) {
 		mc.config[key] = G3ModuleArg(repr);
