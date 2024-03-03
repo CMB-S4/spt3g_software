@@ -1897,7 +1897,20 @@ Stored configuration of a pipeline module or segment
 
 * **instancename**: No Doc (Shame!)
 
-* **config**: No Doc (Shame!)
+
+*Methods:*
+
+.. _spt3g.core.G3ModuleConfig.keys:
+
+**spt3g.core.G3ModuleConfig.keys**
+
+``keys( (G3ModuleConfig)arg1) -> list``
+
+.. _spt3g.core.G3ModuleConfig.values:
+
+**spt3g.core.G3ModuleConfig.values**
+
+``values( (G3ModuleConfig)arg1) -> list``
 
 
 
@@ -1936,6 +1949,15 @@ Stored configuration of a pipeline, including software version information
 * **user**: No Doc (Shame!)
 
 * **modules**: No Doc (Shame!)
+
+
+*Methods:*
+
+.. _spt3g.core.G3PipelineInfo.Run:
+
+**spt3g.core.G3PipelineInfo.Run**
+
+``Run( (G3PipelineInfo)arg1) -> None``
 
 
 
@@ -2216,7 +2238,7 @@ Collection of timestreams indexed by logical detector ID
 	
 	``G3TimestreamMap( (G3TimestreamMap)arg2)``
 	
-	``G3TimestreamMap( (StringVector)keys, (object)data [, (G3Time)start=<spt3g.core.G3Time object at 0x7f73d037c510> [, (G3Time)stop=<spt3g.core.G3Time object at 0x7f73d037c580> [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None [, (int)compression_level=0 [, (bool)copy_data=True]]]]])`` :
+	``G3TimestreamMap( (StringVector)keys, (object)data [, (G3Time)start=<spt3g.core.G3Time object at 0x7f86ee166510> [, (G3Time)stop=<spt3g.core.G3Time object at 0x7f86ee166580> [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None [, (int)compression_level=0 [, (bool)copy_data=True]]]]])`` :
 	    Create a timestream map from a numpy array or other numeric python iterable. Each row of the 2D input array will correspond to a single timestream, with the key set to the correspondingly-indexed entry of <keys>. If <copy_data> is True (default), the data will be copied into the output data structure. If False, the timestream map will provide a view into the given numpy array.
 	
 	``G3TimestreamMap( (list)arg2)`` :
