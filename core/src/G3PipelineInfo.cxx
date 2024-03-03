@@ -1,69 +1,67 @@
 #include <pybindings.h>
 #include <serialization.h>
 #include <G3PipelineInfo.h>
-#include <std_map_indexing_suite.hpp>
 
-#include <cereal/types/map.hpp>
-#include <cereal/types/vector.hpp>
+namespace bp = boost::python;
+
+template <class A> void G3ModuleArg::serialize(A &ar, unsigned v)
+{
+	G3_CHECK_VERSION(v);
+
+	ar & cereal::make_nvp("G3FrameObject",
+	    cereal::base_class<G3FrameObject>(this));
+	ar & cereal::make_nvp("repr", repr);
+	ar & cereal::make_nvp("obj", object);
+}
+
+std::string
+G3ModuleArg::Description() const {
+	std::string rv = "G3ModuleArg(";
+	if (repr.size())
+		rv += repr;
+	else if (!!object)
+		rv += object->Summary();
+	rv += ")";
+	return rv;
+}
+
+static std::string inline object_repr(bp::object obj)
+{
+	return bp::extract<std::string>(obj.attr("__repr__")());
+}
+
+static std::string
+G3ModuleArg_repr(const G3ModuleArg &arg)
+{
+	// Some frame objects (e.g. G3Vectors) have repr only
+	// defined properly via the python interface.
+	if (!arg.repr.size() && !!arg.object)
+		return object_repr(bp::object(arg.object));
+	return arg.repr;
+}
 
 template <class A> void G3ModuleConfig::save(A &ar, unsigned v) const
 {
-	namespace bp = boost::python;
-
 	ar & cereal::make_nvp("G3FrameObject",
 	    cereal::base_class<G3FrameObject>(this));
 	ar & cereal::make_nvp("modname", modname);
 	ar & cereal::make_nvp("instancename", instancename);
-
-	ar << cereal::make_nvp("size", config.size());
-
-	struct gil_holder{
-		PyGILState_STATE gs;
-		gil_holder():gs(PyGILState_Ensure()){}
-		~gil_holder(){ PyGILState_Release(gs); }
-	} gh;
-
-	for (auto i : config) {
-		ar << cereal::make_nvp("key", i.first);
-		
-		// Serialize frame objects (e.g. skymaps used as configs)
-		// directly. Serialize random python things through repr().
-		if (bp::extract<G3FrameObject>(i.second).check()) {
-			G3FrameObjectConstPtr fo =
-			    bp::extract<G3FrameObjectConstPtr>(i.second)();
-			ar << cereal::make_nvp("frameobject", true);
-			ar << cereal::make_nvp("value", fo);
-		} else {
-			try {
-				PyObject *repr = PyObject_Repr(i.second.ptr());
-				bp::handle<> reprhand(repr);
-				bp::object reprobj(reprhand);
-				std::string reprstr =
-				    bp::extract<std::string>(reprobj);
-
-				ar << cereal::make_nvp("frameobject", false);
-				ar << cereal::make_nvp("value", reprstr);
-			} catch (...) {
-				log_error("Exception thrown while getting "
-				    "repr() of parameter %s of module %s (%s)",
-				    i.first.c_str(), instancename.c_str(),
-				    modname.c_str());
-				throw;
-			}
-		}
-	}
+	ar & cereal::make_nvp("config", config);
 }
 
 template <class A> void G3ModuleConfig::load(A &ar, unsigned v)
 {
-	namespace bp = boost::python;
-	bp::object main = bp::import("__main__");
-	bp::object global = main.attr("__dict__");
+	G3_CHECK_VERSION(v);
 
 	ar & cereal::make_nvp("G3FrameObject",
 	    cereal::base_class<G3FrameObject>(this));
 	ar & cereal::make_nvp("modname", modname);
 	ar & cereal::make_nvp("instancename", instancename);
+
+	if (v > 1) {
+		ar & cereal::make_nvp("config", config);
+		return;
+	}
 
 	size_t size;
 	ar >> cereal::make_nvp("size", size);
@@ -75,39 +73,28 @@ template <class A> void G3ModuleConfig::load(A &ar, unsigned v)
 		ar >> cereal::make_nvp("frameobject", is_frameobject);
 		
 		// Frame objects (e.g. skymaps used as configs) serialized
-		// directly. Random python things serialized as repr(), so
-		// eval() them.
+		// directly. Random python things serialized as repr()
 		if (is_frameobject) {
 			G3FrameObjectPtr fo;
 			ar >> cereal::make_nvp("value", fo);
-			config[key] = boost::python::object(fo);
+			config[key] = G3ModuleArg("", fo);
 		} else {
 			std::string repr;
 			ar >> cereal::make_nvp("value", repr);
-			bp::object obj;
-			try {
-				obj = bp::eval(bp::str(repr), global, global);
-			} catch (const bp::error_already_set& e) {
-				obj = bp::object(repr);
-				PyErr_Clear();
-			}
-			config[key] = obj;
+			config[key] = G3ModuleArg(repr);
 		}
 	}
 }
 
 std::string
-G3ModuleConfig::Summary() const
+G3ModuleConfig_repr(const G3ModuleConfig &mc)
 {
-	std::string rv = "pipe.Add(" + modname;
-	for (auto i : config) {
-		std::string repr = bp::extract<std::string>(
-		    i.second.attr("__repr__")());
-		rv += ", " + i.first + "=" + repr;
-	}
+	std::string rv = "pipe.Add(" + mc.modname;
+	for (auto i : mc.config)
+		rv += ", " + i.first + "=" + G3ModuleArg_repr(i.second);
 
-	if (instancename.size() != 0 && instancename != modname)
-		rv += ", name=" + instancename;
+	if (mc.instancename.size() != 0 && mc.instancename != mc.modname)
+		rv += ", name=" + mc.instancename;
 	rv += ")";
 	return rv;
 }
@@ -115,7 +102,10 @@ G3ModuleConfig::Summary() const
 std::string
 G3ModuleConfig::Description() const
 {
-	return Summary();
+	std::ostringstream rv;
+	rv << "G3ModuleConfig(" << modname;
+	rv << ", " << config.size() << " arguments)";
+	return rv.str();
 }
 
 bool
@@ -125,8 +115,71 @@ G3ModuleConfig::operator == (const G3ModuleConfig &b) const
 	    (b.config == config);
 }
 
+
+static bp::object
+G3ModuleConfig_get(const G3ModuleConfig &mc, std::string key)
+{
+	auto item = mc.config.find(key);
+	if (item == mc.config.end()) {
+		PyErr_SetString(PyExc_KeyError, key.c_str());
+		bp::throw_error_already_set();
+	}
+
+	auto arg = item->second;
+	if (!!arg.object)
+		return bp::object(arg.object);
+
+	bp::object main = bp::import("__main__");
+	bp::dict global = bp::dict(main.attr("__dict__"));
+	global["__main__"] = main;
+
+	try {
+		return bp::eval(bp::str(arg.repr), global, global);
+	} catch (const bp::error_already_set& e) {
+		PyErr_Clear();
+		return bp::object(arg.repr);
+	}
+}
+
+static void
+G3ModuleConfig_set(G3ModuleConfig &mc, std::string key, bp::object obj)
+{
+	std::string repr = object_repr(obj);
+
+	if (!bp::extract<G3FrameObjectPtr>(obj).check()) {
+		mc.config[key] = G3ModuleArg(repr);
+		return;
+	}
+
+	mc.config[key] = G3ModuleArg(repr, bp::extract<G3FrameObjectPtr>(obj)());
+}
+
+static bp::list
+G3ModuleConfig_keys(const G3ModuleConfig &mc)
+{
+	bp::list keys;
+
+	for (auto i: mc.config)
+		keys.append(i.first);
+
+	return keys;
+}
+
+static bp::list
+G3ModuleConfig_values(const G3ModuleConfig &mc)
+{
+	bp::list values;
+
+	for (auto i: mc.config)
+		values.append(G3ModuleConfig_get(mc, i.first));
+
+	return values;
+}
+
 template <class A> void G3PipelineInfo::serialize(A &ar, unsigned v)
 {
+	G3_CHECK_VERSION(v);
+
 	using namespace cereal;
 
 	ar & make_nvp("G3FrameObject", base_class<G3FrameObject>(this));
@@ -169,7 +222,7 @@ G3PipelineInfo::Description() const
 	rv << "Run by: " << user << " on " << hostname << "\n";
 
 	rv << modules.size();
-	rv << " modules\n";
+	rv << " modules";
 
 	return rv.str();
 }
@@ -178,32 +231,42 @@ static std::string
 G3PipelineInfo_repr(const G3PipelineInfo &pi)
 {
 	std::string rv;
-	rv = "pipe = spt3g.core.G3Pipeline()\n";
+	rv = "pipe = spt3g.core.G3Pipeline()";
 
-	for (auto i : pi.modules) {
-		rv += i.Summary();
-		rv += "\n";
-	}
+	for (auto i : pi.modules)
+		rv += "\n" + G3ModuleConfig_repr(i);
 	return rv;
 }
 
+static void
+G3PipelineInfo_run(const G3PipelineInfo &pi)
+{
+	bp::object main = bp::import("__main__");
+	bp::dict global = bp::dict(main.attr("__dict__"));
+	global["__main__"] = main;
+
+	std::string pipe = G3PipelineInfo_repr(pi);
+	pipe += "\npipe.Run()";
+
+	bp::exec(bp::str(pipe), global, global);
+}
+
+G3_SERIALIZABLE_CODE(G3ModuleArg);
 G3_SPLIT_SERIALIZABLE_CODE(G3ModuleConfig);
 G3_SERIALIZABLE_CODE(G3PipelineInfo);
 
 PYBINDINGS("core") {
-	namespace bp = boost::python;
-
-	register_map<std::map<std::string, boost::python::object> >(
-	    "StringObjectMap", "Configuration options for a module");
-
 	EXPORT_FRAMEOBJECT(G3ModuleConfig, init<>(), "Stored configuration of a pipeline module or segment")
 	    .def_readwrite("modname", &G3ModuleConfig::modname)
 	    .def_readwrite("instancename", &G3ModuleConfig::instancename)
-	    .def_readwrite("config", &G3ModuleConfig::config)
-	    .def("__repr__", &G3ModuleConfig::Summary)
+	    .def("__repr__", &G3ModuleConfig_repr)
+	    .def("__getitem__", &G3ModuleConfig_get)
+	    .def("__setitem__", &G3ModuleConfig_set)
+	    .def("keys", &G3ModuleConfig_keys)
+	    .def("values", &G3ModuleConfig_values)
 	;
 	register_pointer_conversions<G3ModuleConfig>();
-	register_vector_of<G3ModuleConfig>("VectorStringObjectMap");
+	register_vector_of<G3ModuleConfig>("ModuleConfig");
 
 	EXPORT_FRAMEOBJECT(G3PipelineInfo, init<>(), "Stored configuration of a pipeline, including software version information")
 	    .def_readwrite("vcs_url", &G3PipelineInfo::vcs_url)
@@ -217,6 +280,7 @@ PYBINDINGS("core") {
 	    .def_readwrite("user", &G3PipelineInfo::user)
 	    .def_readwrite("modules", &G3PipelineInfo::modules)
 	    .def("__repr__", &G3PipelineInfo_repr)
+	    .def("Run", &G3PipelineInfo_run)
 	;
 	register_pointer_conversions<G3PipelineInfo>();
 }

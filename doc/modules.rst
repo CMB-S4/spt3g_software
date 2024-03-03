@@ -341,9 +341,11 @@ This information is added immediately following the first added module or segmen
 
 Within some limits imposed by Python (related to lambda functions, most notably), calling ``repr()`` on a G3PipelineInfo object (or a G3Pipeline object) will yield an executable Python script reflecting the exact modules and configuration used to produce the data. To within the mentioned limitations, this script can be rerun to exactly reproduce stored data; it can also be inspected to learn the configuration of the data's source pipeline[s] and thus the processing that produced it.
 
+The G3PipelineInfo ``.Run()`` method provides a convenient way of rerunning the pipeline configuration within it, and the ``.modules`` attribute is a list of G3ModuleConfig objects with dict-like access to the arguments provided to each pipeline module.
+
 Limitations:
 
 - The content of functions defined inline in a script (either by ``def`` or ``lambda``), as opposed to functions defined in an imported Python module, will not appear in the output, though options will. Inline functions defined by ``def`` will at least give the name of the function.
 - Options passed to pre-instantiated modules will not be stored. Only options passed in ``pipe.Add()`` will be recorded. For example, ``pipe.Add(core.G3Reader, filename="test.g3")`` will fully record its arguments, but ``pipe.Add(core.G3Reader(filename="test.g3"))`` will not. Prefer the syntax that records options unless you have a compelling reason to do something else.
 - A G3Pipeline created in C++ will not record configuration; only G3Pipelines created in Python will.
-
+- If the code used to run the pipeline initially has changed, rerunning the configuration from the G3PipelineInfo object will produce different results.  Use the version control information stored in the object to ensure you are running the correct version of the software.

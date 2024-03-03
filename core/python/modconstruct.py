@@ -223,7 +223,7 @@ def PipelineAddCallable(self, callable, name=None, subprocess=False, **kwargs):
                 # If that threw an exception, it either isn't a map or dropping
                 # data didn't work, so just don't bother.
                 pass
-            modconfig.config[k] = tostore
+            modconfig[k] = tostore
         self._pipelineinfo.pipelineinfo.modules.append(modconfig)
 
     # Deal with the segment case
