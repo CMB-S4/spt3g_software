@@ -6,7 +6,7 @@ import os, sys
 # Test that we can read files written on a variety of platforms. Pass a path
 # to generate test data for whatever this platform is.
 
-testpath = os.path.join(os.environ['SPT3G_SOFTWARE_PATH'], 'core/tests/portability')
+testpath = os.path.join(os.path.dirname(__file__), "portability")
 
 # Test data. Exercise some complicated things (STL bits) that we don't
 # necessarily have control over, mapping a few primitive types.

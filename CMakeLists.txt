@@ -153,15 +153,8 @@ endforeach(subdir ${SUBDIRS})
 export(TARGETS ${SPT3G_LIBRARIES} NAMESPACE spt3g:: FILE ${CMAKE_BINARY_DIR}/cmake/Spt3gTargets.cmake)
 configure_file(${CMAKE_SOURCE_DIR}/cmake/Spt3gConfig.cmake.in ${CMAKE_BINARY_DIR}/cmake/Spt3gConfig.cmake @ONLY)
 
-# Add fetching of test data
-add_custom_target(testdata COMMAND rsync -vrlpt --delete rsync://bolo.berkeley.edu/testdata ${CMAKE_BINARY_DIR}/testdata COMMENT "Rsyncing test data from bolo.berkeley.edu")
-
-add_custom_target(fasttest COMMAND ctest -LE SLOWTEST COMMENT "Running fast test suite")
-
 # Custom things related to testing
-configure_file(${CMAKE_SOURCE_DIR}/cmake/test_env.py.in ${CMAKE_BINARY_DIR}/test_env.py @ONLY)
-configure_file(${CMAKE_SOURCE_DIR}/cmake/CTestCustom.cmake.in ${CMAKE_BINARY_DIR}/CTestCustom.cmake @ONLY)
-
+add_custom_target(fasttest COMMAND ctest -LE SLOWTEST COMMENT "Running fast test suite")
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.17)
 	list(APPEND CMAKE_CTEST_ARGUMENTS "--output-on-failure")
 endif(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.17)
