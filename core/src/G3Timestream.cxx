@@ -37,12 +37,7 @@ static FLAC__StreamEncoderWriteStatus flac_encoder_write_cb(
 }
 
 
-// This is only needed because cereal will generate code for loading json due
-// to the nature of serialize, even though this will never actually be called.
-//
-// I don't know if it works or not, but since it's never called, who cares?  (I
-// guess in the future we can have a fromJSON method in G3Frame as well if we
-// wanted to support round-tripping through JSON for some reason). 
+// Generic version of loadBinary for all archive types
 template <typename A>
 static void loadBinaryFn(A * inbuf, void * buffer, size_t size)
 {
@@ -50,6 +45,16 @@ static void loadBinaryFn(A * inbuf, void * buffer, size_t size)
 }
 
 #ifdef SPT3G_ENABLE_JSON_OUTPUT
+
+// SpecializedloadBinary  version for JSONInputArchive
+//
+// This is only needed because cereal will generate code for loading json due
+// to the nature of serialize, even though this will never actually be called.
+//
+// I don't know if it works or not, but since it's never called, who cares?  (I
+// guess in the future we can have a fromJSON method in G3Frame as well if we
+// wanted to support round-tripping through JSON for some reason).
+
 template <>
 void loadBinaryFn<cereal::JSONInputArchive>(cereal::JSONInputArchive * inbuf, void * buffer, size_t size)
 {
@@ -83,7 +88,7 @@ static FLAC__StreamDecoderReadStatus flac_decoder_read_cb(
 		return FLAC__STREAM_DECODER_READ_STATUS_CONTINUE;
 	}
 }
-  
+
 template<typename A>
 static FLAC__StreamDecoderWriteStatus flac_decoder_write_cb(
     const FLAC__StreamDecoder *decoder, const FLAC__Frame *frame,
@@ -98,7 +103,7 @@ static FLAC__StreamDecoderWriteStatus flac_decoder_write_cb(
 		(*args->outbuf)[oldsize + i] = buffer[0][i];
 	return FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE;
 }
-  
+
 static void flac_decoder_error_cb(const FLAC__StreamDecoder *decoder,
     FLAC__StreamDecoderErrorStatus status, void *client_data)
 {

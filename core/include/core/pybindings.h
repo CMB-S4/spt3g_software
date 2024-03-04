@@ -14,8 +14,6 @@
 
 #include <container_conversions.h>
 #include <std_map_indexing_suite.hpp>
-#include <mutex> 
-#include <thread>
 
 template <typename T>
 void

@@ -288,7 +288,7 @@ void G3Frame::saveJSON(T & os) const
 	ar << make_nvp("size", size);
 	std::string typestr(1,(char) type);
 	ar << make_nvp("type", typestr);
-	for (auto i = map_.begin(); i != map_.end(); i++) 
+	for (auto i = map_.begin(); i != map_.end(); i++)
 	{
 		//make sure it's deserialized so we don't just write a blob
 		blob_decode(i->second);
