@@ -2,20 +2,8 @@
 #define _G3_PIPELINEINFO_H
 
 #include <G3Frame.h>
-#include <G3Map.h>
 #include <vector>
-
-class G3ModulePythonArg : public G3FrameObject {
-public:
-	std::string value;
-
-	G3ModulePythonArg(const std::string &v) : value(v) {}
-	G3ModulePythonArg() {}
-
-	template <class A> void serialize(A &ar, unsigned v);
-	std::string Summary() const { return value; };
-	bool operator ==(const G3ModulePythonArg &other) const { return other.value == value; };
-};
+#include <map>
 
 class G3ModuleArg : public G3FrameObject {
 public:
@@ -39,7 +27,7 @@ public:
 	std::string modname;
 	std::string instancename;
 
-	G3MapFrameObject config;
+	std::map<std::string, G3ModuleArg> config;
 
         template <class A> void load(A &ar, unsigned v);
         template <class A> void save(A &ar, unsigned v) const;
