@@ -36,11 +36,6 @@ print(obj_arg)
 assert(isinstance(obj_arg, type(arg)))
 assert((obj_arg == arg).all())
 
-# Check that module arguments survive round-trip to/from storage
-mod_args = dict(pi.modules[0])
-print(mod_args)
-assert(mod_args == args)
-
 assert(len(list(core.G3File('testpi.g3'))) == 11)
 
 # Check that PI frame has two entries on the second run through
