@@ -65,10 +65,12 @@ macro(add_spt3g_library lib_name)
 endmacro(add_spt3g_library lib_name)
 
 macro(add_spt3g_test test_name)
-	add_test(${PROJECT}/${test_name} ${SPT3G_BUILD_DIR}/env-shell.sh ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/${test_name}.py)
+	add_test(${PROJECT}/${test_name} ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/${test_name}.py)
 
 	set(extra_macro_args ${ARGN})
 	list(LENGTH extra_macro_args num_extra_args)
+	set_tests_properties(${PROJECT}/${test_name} PROPERTIES ENVIRONMENT
+		"PATH=${SPT3G_BUILD_DIR}/bin:$ENV{PATH};PYTHONPATH=${SPT3G_BUILD_DIR}:$ENV{PYTHONPATH};LD_LIBRARY_PATH=${SPT3G_BUILD_DIR}/spt3g:$ENV{LD_LIBRARY_PATH}")
 	if (${num_extra_args} GREATER 0)
 		list(GET extra_macro_args 0 test_labels)
 		set_tests_properties(${PROJECT}/${test_name} PROPERTIES LABELS ${test_labels})
