@@ -32,7 +32,7 @@ Implemented endpoints
 ====================
 
 */[?json]
----
+---------
 
 List a directory within basedir. By default, this uses a clunky HTML browser,
 appending the ``?json`` parameter, the directory listing will be returned
@@ -40,7 +40,7 @@ in a json format more suited to be programtically used by a less clunky browser.
 
 
 *.g3[.gz|.bz2][?N=0&nskip=0]
----
+----------------------------
 
 List a .g3 file as JSON. Optional parameters ``N`` and ``nskip`` control the
 number of frames (0 means all) and the number of frames from the begining to
@@ -49,9 +49,9 @@ wire, the server must still deserialize the file up to nskip + N frames each
 time (in the future, caching may be implemented, though the OS file cache probably helps a little bit).
 
 /version
----
+--------
 List a version number (in JSON format)
 
 /favicon.ico
----
+------------
 What else, but a favicon?
