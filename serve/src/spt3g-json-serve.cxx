@@ -11,7 +11,7 @@
 /* enable compression, hopefully? */
 #define CPPHTTPLIB_ZLIB_SUPPORT
 #define CPPHTTPLIB_USE_POLL
-#define VERSION "0.0.0"
+#define VERSION "0.0.1"
 
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
@@ -304,7 +304,8 @@ static void handle_g3(const httplib::Request & req, httplib::Response & resp)
 template<typename T> static void
 append_str_array(std::string & s, std::vector<T> & v)
 {
-	std::stringstream ss("[");
+	std::stringstream ss;
+  ss << "[";
 	for (size_t i = 0; i < v.size(); i++) {
 		if (!std::is_arithmetic<T>::value) ss << "\"";
 		ss << v[i];
@@ -358,7 +359,7 @@ handle_dir(const httplib::Request & req, httplib::Response & resp)
 	}
 
 	if (verbose) {
-		std::cout << "[ " << req.path << "::" << "listing ]"  << std::endl;
+		std::cout << "[ " << req.path << "::" << "listing  " << (output_html ? "HTML" : "JSON") << "]"  << std::endl;
 	}
 	std::vector<std::string> dirs;
 	std::vector<std::string> files;
