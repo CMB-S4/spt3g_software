@@ -2,18 +2,18 @@
 serve
 =====
 
-Example web server for .g3 files
+Example web server(s) for .g3 files
 
-The spt3g-json-serve program will serves .g3 files within a directory hierarchy in json format, providing
+The spt3g-json-serve-files program will serves .g3 files within a directory hierarchy in json format, providing
 a crude way to expose a files to a web browser.
 
 
-Running the server
-==================
+Running the file server
+=======================
 
 Command line usage::
 
-  Usage: spt3g-json-serve [OPTION]
+  Usage: spt3g-json-serve-files [OPTION]
   	-h,--help		display this message
   	-P,--Python		initialize python interpreter
   	-p,--port		port to use (default 2726)
@@ -29,7 +29,7 @@ probably at least reverse proxy it behind a basic authentication screendoor.
 
 
 Implemented endpoints
-====================
+=====================
 
 */[?json]
 ---------

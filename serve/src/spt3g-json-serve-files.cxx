@@ -48,7 +48,7 @@ const int N_VALID_G3_EXTENSIONS = sizeof(VALID_G3_EXTENSIONS)/sizeof(*VALID_G3_E
 static void
 usage()
 {
-	std::cout << "Usage: spt3g-json-serve [OPTION]" << std::endl;
+	std::cout << "Usage: spt3g-json-serve-files [OPTION]" << std::endl;
 	std::cout << "\t-h,--help\t\tdisplay this message" << std::endl;
 	std::cout << "\t-P,--Python\t\tinitialize python interpreter" << std::endl;
 	std::cout << "\t-p,--port\t\tport to use (default 2726)" << std::endl;
