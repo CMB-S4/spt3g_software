@@ -39,7 +39,7 @@ static FLAC__StreamEncoderWriteStatus flac_encoder_write_cb(
 
 // Generic version of loadBinary for all archive types
 template <typename A>
-static void loadBinaryFn(A * inbuf, void * buffer, size_t size)
+static void load_binary_fn(A * inbuf, void * buffer, size_t size)
 {
 	inbuf->template loadBinary<1>(buffer,size);
 }
@@ -56,7 +56,7 @@ static void loadBinaryFn(A * inbuf, void * buffer, size_t size)
 // wanted to support round-tripping through JSON for some reason).
 
 template <>
-void loadBinaryFn<cereal::JSONInputArchive>(cereal::JSONInputArchive * inbuf, void * buffer, size_t size)
+void load_binary_fn<cereal::JSONInputArchive>(cereal::JSONInputArchive * inbuf, void * buffer, size_t size)
 {
 	inbuf->loadBinaryValue(buffer,size);
 }
@@ -79,11 +79,11 @@ static FLAC__StreamDecoderReadStatus flac_decoder_read_cb(
 		return FLAC__STREAM_DECODER_READ_STATUS_END_OF_STREAM;
 	} else if (*bytes >= size_t(bytes_left)) {
 		*bytes = bytes_left;
- 		loadBinaryFn(args->inbuf, buffer, bytes_left);
+ 		load_binary_fn(args->inbuf, buffer, bytes_left);
 		args->pos += bytes_left;
 		return FLAC__STREAM_DECODER_READ_STATUS_CONTINUE;
 	} else {
-		loadBinaryFn(args->inbuf, buffer, *bytes);
+		load_binary_fn(args->inbuf, buffer, *bytes);
 		args->pos += *bytes;
 		return FLAC__STREAM_DECODER_READ_STATUS_CONTINUE;
 	}
