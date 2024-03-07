@@ -1,6 +1,6 @@
 from spt3g.calibration import BolometerProperties
 from spt3g import core
-import math
+import numpy as np
 
 __all__ = ['SplitByProperty', 'SplitByBand', 'SplitTimestreamsByBand',
            'SplitByWafer', 'SplitByPixelType']
@@ -113,7 +113,8 @@ class SplitByBand(SplitByProperty):
     G3TimestreamMap, G3MapInt, etc.
     '''
     def __init__(self, input='CalTimestreams', output_root=None,
-                 bands=None, bpm='BolometerProperties', drop_empty=False):
+                 bands=None, bpm='BolometerProperties', drop_empty=False,
+                 precision=0):
         '''
         Split the input map given by input into several output
         maps named output_root + band + GHz (e.g. CalTimestreams150GHz with
@@ -122,20 +123,22 @@ class SplitByBand(SplitByProperty):
         creates maps for every band that exists in the input. Setting bpm
         to a non-default value causes this to get its band mapping from an
         alternative data source.
+
+        If precision > 0, then store the band string with this many decimal
+        places of precision.  Otherwise, assume an integer.
         '''
         super(SplitByBand, self).__init__(
             input=input, output_root=output_root, property_list=bands,
             bpm=bpm, property='band', drop_empty=drop_empty)
+        self.precision = precision
 
-    @staticmethod
-    def converter(band):
+    def converter(self, band):
         if isinstance(band, str):
             return band
-        if math.isnan(band) or math.isinf(band):
+        if not np.isfinite(band) or band < 0:
             return None
-        if band < 0:
-            return None
-        return '%dGHz' % int(band/core.G3Units.GHz)
+        band = np.round(band / core.G3Units.GHz, self.precision)
+        return '%%.%dfGHz' % self.precision % band
 
 
 @core.indexmod
