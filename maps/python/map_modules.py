@@ -684,7 +684,7 @@ class CoaddMaps(object):
 
     def __call__(self, frame):
 
-        if frame.type == core.G3FrameType.EndProcessing:
+        if isinstance(frame, core.G3Frame) and frame.type == core.G3FrameType.EndProcessing:
             if self.collate:
                 return list(self.coadd_frames.values()) + [frame]
             return [self.coadd_frame, frame]
@@ -694,7 +694,7 @@ class CoaddMaps(object):
                 frame["SourceName"], frame["ObservationID"]
             )
 
-        if frame.type != core.G3FrameType.Map:
+        if isinstance(frame, core.G3Frame) and frame.type != core.G3FrameType.Map:
             return
 
         map_id = self.get_map_id(frame)
