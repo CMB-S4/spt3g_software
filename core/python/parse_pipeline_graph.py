@@ -92,7 +92,7 @@ def plot_frame_processing_info(g3_pipeline):
     plt.gca().get_yaxis().set_ticks([])
     plt.ylim(n_times+.5, -0.5)
     plt.xlim(0, n_mods)
-    plt.ylabel("Time\n$\Longleftarrow$")
-    plt.xlabel("Module $\Longrightarrow$")
+    plt.ylabel("Time\n$\\Longleftarrow$")
+    plt.xlabel("Module $\\Longrightarrow$")
     plt.show()
 
