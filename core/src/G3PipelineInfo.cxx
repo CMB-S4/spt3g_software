@@ -27,7 +27,10 @@ G3ModuleArg::Description() const {
 
 static std::string inline object_repr(bp::object obj)
 {
-	return bp::extract<std::string>(obj.attr("__repr__")());
+	PyObject *repr = PyObject_Repr(obj.ptr());
+	bp::handle<> reprhand(repr);
+	bp::object reprobj(reprhand);
+	return bp::extract<std::string>(reprobj);
 }
 
 static std::string
