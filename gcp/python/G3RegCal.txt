@@ -48,7 +48,9 @@ antenna0.tracker.errors                         0.0000  1.745329e-02  deg
 antenna0.tracker.expected                       0.0000  1.745329e-02  deg
 antenna0.tracker.expected_rates                 0.0000  3.600000e+06  deg/s
 antenna0.tracker.fixedCollimation               0.0000  3.600000e+06  deg
+antenna0.tracker.fixedCollimationAdjust         0.0000  3.600000e+06  deg
 antenna0.tracker.flexure                        0.0000  3.600000e+06  deg
+antenna0.tracker.flexureAdjust                  0.0000  3.600000e+06  deg
 antenna0.tracker.horiz_geoc                     0.0000  3.600000e+06  deg
 antenna0.tracker.horiz_mount                    0.0000  1.745329e-02  deg
 antenna0.tracker.horiz_off                      0.0000  1.745329e-02  deg
@@ -73,6 +75,7 @@ antenna0.tracker.tilt_xy[0-1]                   0.0000  1.985747e+01  arcsec
 antenna0.tracker.tilt_xy_avg[0-1]               0.0000  1.000000e+03  arcsec
 antenna0.tracker.tilt_xy_offset[0-1]            0.0000  1.000000e+03  arcsec
 antenna0.tracker.tilts                          0.0000  3.600000e+06  degrees
+antenna0.tracker.tiltsAdjust                    0.0000  3.600000e+06  degrees
 antenna0.tracker.ut1utc                         0.0000  1.000000e+03  sec
 array.dc.currents[0-7]                      -1000.0000  1.000000e+02  volt
 array.weather.airTemperature                  273.1500  1.000000e+00  K
