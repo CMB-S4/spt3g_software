@@ -136,11 +136,16 @@ def extract_band_value(value):
 extract_band_value.__doc__ = BandFormat.extract_value.__doc__
 
 
-# monkeypatch a useful property attribute
+# monkeypatch useful property attributes
 def band_string(self):
     """String representation of frequency band center"""
     return _band_format.to_string(self.band)
 BolometerProperties.band_string = property(band_string)
+
+def band_vstring(self):
+    """String representation of frequency band center, without units name"""
+    return _band_format.to_string(self.band, include_units=False)
+BolometerProperties.band_vstring = property(band_vstring)
 
 
 @core.indexmod
