@@ -57,7 +57,7 @@ def band_regex(cls):
     match group returns the numerical portion of the string."""
     precision = cls.band_precision
     units = cls.band_units
-    prx = "\.[0-9]{{}}".format(precision) if precision else ""
+    prx = "\\.[0-9]{{}}".format(precision) if precision else ""
     return re.compile("([0-9]+{}){}".format(prx, units))
 BolometerProperties.band_regex = property(band_regex)
 
