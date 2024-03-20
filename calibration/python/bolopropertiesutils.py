@@ -40,7 +40,7 @@ class BandFormat:
     def __init__(self, precision=0, units="GHz"):
         self.set_format(precision, units)
 
-    def set_format(self, precision, units):
+    def set_format(self, precision=0, units="GHz"):
         """
         Set the band format precision and units for converting between a
         quantity in G3Units and its string representation.
@@ -56,12 +56,13 @@ class BandFormat:
             frequency band, e.g. "GHz" or "MHz".  Must correspond to a valid
             attribute of the core.G3Units namespace.
         """
-        cls._precision = int(precision)
+        self._precision = int(precision)
         assert hasattr(core.G3Units, units), "Invalid units {}".format(units)
-        cls._units = units
-        cls._format = "%%.%df%s" % (precision if precision > 0 else 0, units)
-        prx = "\\.[0-9]{{}}".format(precision) if precision > 0 else ""
-        cls._regex = re.compile("([0-9]+{}){}".format(prx, units))
+        self._units = units
+        self._format = "%%.%df%s" % (precision if precision > 0 else 0, units)
+        prx = r"\.[0-9]{%d}" % precision if precision > 0 else ""
+        self._pattern = "([0-9]+%s)%s" % (prx, units)
+        self._regex = re.compile(self._pattern)
 
     def to_string(self, value):
         """Convert a band value in G3Units to its string representation, using
