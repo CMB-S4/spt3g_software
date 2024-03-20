@@ -58,7 +58,7 @@ class BandFormat:
         """
         self._precision = int(precision)
         assert hasattr(core.G3Units, units), "Invalid units {}".format(units)
-        self._units = units
+        self._units = getattr(core.G3Units, self._units)
         self._format = "%%.%df%s" % (precision if precision > 0 else 0, units)
         prx = r"\.[0-9]{%d}" % precision if precision > 0 else ""
         self._pattern = "([0-9]+%s)%s" % (prx, units)
@@ -69,7 +69,7 @@ class BandFormat:
         the appropriate precision and units name."""
         if not np.isfinite(value) or value < 0:
             return ""
-        value = np.round(value / getattr(core.G3Units, self._units), self._precision)
+        value = np.round(value / self._units, self._precision)
         return self._format % value
 
     def to_value(self, value):
@@ -78,7 +78,7 @@ class BandFormat:
         m = self._regex.match(value)
         if not m:
             raise ValueError("Invalid band {}".format(value))
-        return float(m.group(1)) * getattr(core.G3Units, self._units)
+        return float(m.group(1)) * self._units
 
     def extract_string(self, value):
         """Return the band substring from the input string, or None if not
@@ -94,7 +94,7 @@ class BandFormat:
         m = self._regex.search(value)
         if not m:
             return None
-        return float(m.group(1)) * getattr(core.G3Units, self._units)
+        return float(m.group(1)) * self._units
 
 
 # global instance used by functions below
