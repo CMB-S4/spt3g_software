@@ -58,7 +58,7 @@ class BandFormat:
         """
         self._precision = int(precision)
         assert hasattr(core.G3Units, units), "Invalid units {}".format(units)
-        self._units = getattr(core.G3Units, self._units)
+        self._units = getattr(core.G3Units, units)
         self._format = "%%.%df%s" % (precision if precision > 0 else 0, units)
         prx = r"\.[0-9]{%d}" % precision if precision > 0 else ""
         self._pattern = "([0-9]+%s)%s" % (prx, units)
