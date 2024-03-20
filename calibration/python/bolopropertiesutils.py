@@ -82,7 +82,7 @@ class BandFormat:
     def extract_string(self, value):
         """Return the band substring from the input string, or None if not
         found."""
-        m = self._regex.search(s)
+        m = self._regex.search(value)
         if not m:
             return None
         return m.group(0)
@@ -90,7 +90,7 @@ class BandFormat:
     def extract_value(self, value):
         """Return the band in G3Units extracted from the input string, or None
         if not found."""
-        m = self._regex.search(s)
+        m = self._regex.search(value)
         if not m:
             return None
         return float(m.group(1)) * getattr(core.G3Units, self._units)
