@@ -3,49 +3,27 @@ from spt3g import core
 import numpy as np
 import re
 
-__all__ = ['SplitByProperty', 'SplitByBand', 'SplitTimestreamsByBand',
-           'SplitByWafer', 'SplitByPixelType']
+__all__ = [
+    "SplitByProperty",
+    "SplitByBand",
+    "SplitTimestreamsByBand",
+    "SplitByWafer",
+    "SplitByPixelType",
+    "BandFormat",
+    "set_band_format",
+    "band_to_string",
+    "band_to_value",
+    "extract_band_string",
+    "extract_band_value",
+]
 
 
 # framework for handling frequency band formatting
 
-BolometerProperties._band_precision = 0
-BolometerProperties._band_units = "GHz"
-BolometerProperties._band_format = None
-BolometerProperties._band_regex = None
-
-def get_band_precision(cls):
-    """Bolometer frequency band precision for string formatting"""
-    return cls._band_precision
-def set_band_precision(cls, precision):
-    cls._band_precision = int(precision)
-    cls._compile_band_format()
-BolometerProperties.band_precision = property(get_band_precision, set_band_precision)
-
-def get_band_units(cls):
-    """Bolometer units name for string formatting"""
-    return cls._band_units
-def set_band_units(cls, units):
-    assert hasattr(core.G3Units, units), "Invalid units {}".format(units)
-    cls._band_units = units
-    cls._compile_band_format()
-BolometerProperties.band_units = property(get_band_units, set_band_units)
-
-def _compile_band_format(cls):
-    precision = cls._band_precision
-    units = cls._band_units
-    cls._band_format = "%%.%df%s" % (precision if precision > 0 else 0, units)
-    prx = "\\.[0-9]{{}}".format(precision) if precision > 0 else ""
-    cls._band_regex = re.compile("([0-9]+{}){}".format(prx, units))
-BolometerProperties._compile_band_format = classmethod(_compile_band_format)
-
-# run once to compile defaults
-BolometerProperties._compile_band_format()
-
-def set_band_format(cls, precision, units):
+class BandFormat:
     """
-    Set the band format precision and units for converting between a quantity in
-    G3Units and its string representation.
+    Class for converting a frequency band between a quantity in G3Units and its
+    string representation.
 
     Arguments
     ---------
@@ -58,51 +36,105 @@ def set_band_format(cls, precision, units):
         band, e.g. "GHz" or "MHz".  Must correspond to a valid attribute of the
         core.G3Units namespace.
     """
-    set_band_precision(cls, precision)
-    set_band_units(cls, units)
-BolometerProperties.set_band_format = classmethod(set_band_format)
 
-def band_to_string(cls, band):
-    """Convert a band number in G3Units to its string representation, using the
-    appropriate precision and units name."""
-    if not np.isfinite(band) or band < 0:
-        return ""
-    precision = cls._band_precision
-    units = cls._band_units
-    band = np.round(band / getattr(core.G3Units, units), precision)
-    return cls._band_format % band
-BolometerProperties.band_to_string = classmethod(band_to_string)
+    def __init__(self, precision=0, units="GHz"):
+        self.set_format(precision, units)
 
+    def set_format(self, precision, units):
+        """
+        Set the band format precision and units for converting between a
+        quantity in G3Units and its string representation.
+
+        Arguments
+        ---------
+        precision : int
+            Float formatting precision for the band quantity.  If <=0, output
+            will be an integer.  If >0, output will be a floating point number
+            with this many decimal places of precision.
+        units : str
+            String name of the G3Units quantity in which to represent the
+            frequency band, e.g. "GHz" or "MHz".  Must correspond to a valid
+            attribute of the core.G3Units namespace.
+        """
+        cls._precision = int(precision)
+        assert hasattr(core.G3Units, units), "Invalid units {}".format(units)
+        cls._units = units
+        cls._format = "%%.%df%s" % (precision if precision > 0 else 0, units)
+        prx = "\\.[0-9]{{}}".format(precision) if precision > 0 else ""
+        cls._regex = re.compile("([0-9]+{}){}".format(prx, units))
+
+    def to_string(self, value):
+        """Convert a band value in G3Units to its string representation, using
+        the appropriate precision and units name."""
+        if not np.isfinite(value) or value < 0:
+            return ""
+        value = np.round(value / getattr(core.G3Units, self._units), self._precision)
+        return self._format % value
+
+    def to_value(self, value):
+        """Convert a band string to a value in G3Units, or raise a ValueError
+        if no match is found."""
+        m = self._regex.match(value)
+        if not m:
+            raise ValueError("Invalid band {}".format(value))
+        return float(m.group(1)) * getattr(core.G3Units, self._units)
+
+    def extract_string(self, value):
+        """Return the band substring from the input string, or None if not
+        found."""
+        m = self._regex.search(s)
+        if not m:
+            return None
+        return m.group(0)
+
+    def extract_value(self, value):
+        """Return the band in G3Units extracted from the input string, or None
+        if not found."""
+        m = self._regex.search(s)
+        if not m:
+            return None
+        return float(m.group(1)) * getattr(core.G3Units, self._units)
+
+
+# global instance used by functions below
+_band_format = BandFormat()
+
+
+@core.usefulfunc
+def set_band_format(precision, units):
+    _band_format.set_format(precision, units)
+set_band_format.__doc__ = BandFormat.set_format.__doc__
+
+
+@core.usefulfunc
+def band_to_string(value):
+    return _band_format.to_string(value)
+band_to_string.__doc__ = BandFormat.to_string.__doc__
+
+
+@core.usefulfunc
+def band_to_value(value):
+    return _band_format.to_value(value)
+band_to_value.__doc__ = BandFormat.to_value.__doc__
+
+
+@core.usefulfunc
+def extract_band_string(value):
+    return _band_format.extract_string(value)
+extract_band_string.__doc__ = BandFormat.extract_string.__doc__
+
+
+@core.usefulfunc
+def extract_band_value(value):
+    return _band_format.extract_value(value)
+extract_band_value.__doc__ = BandFormat.extract_value.__doc__
+
+
+# monkeypatch a useful property attribute
 def band_string(self):
-    """Band string representation"""
-    return self.band_to_string(self.band)
+    """String representation of frequency band center"""
+    return _band_format.to_string(self.band)
 BolometerProperties.band_string = property(band_string)
-
-def band_to_num(cls, band):
-    """Convert a band string to a number in G3Units, or raise a ValueError if no
-    match is found."""
-    m = cls._band_regex.match(band)
-    if not m:
-        raise ValueError("Invalid band {}".format(band))
-    return float(m.group(1)) * getattr(core.G3Units, cls._band_units)
-BolometerProperties.band_to_num = classmethod(band_to_num)
-
-def band_string_from_string(cls, s):
-    """Return the band substring from the input string, or None if not found."""
-    m = cls._band_regex.search(s)
-    if not m:
-        return None
-    return m.group(0)
-BolometerProperties.band_string_from_string = classmethod(band_string_from_string)
-
-def band_from_string(cls, s):
-    """Return the band in G3Units extracted from the input string, or None if
-    not found."""
-    m = cls._band_regex.search(s)
-    if not m:
-        return None
-    return float(m.group(1)) * getattr(core.G3Units, cls._band_units)
-BolometerProperties.band_from_string = classmethod(band_from_string)
 
 
 @core.indexmod
