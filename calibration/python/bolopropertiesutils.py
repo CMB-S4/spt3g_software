@@ -59,17 +59,20 @@ class BandFormat:
         self._precision = int(precision)
         assert hasattr(core.G3Units, units), "Invalid units {}".format(units)
         self._units = getattr(core.G3Units, units)
-        self._format = "%%.%df%s" % (precision if precision > 0 else 0, units)
+        self._vformat = "%%.%df" % (precision if precision > 0 else 0)
+        self._format = "%s%s" % (self._vformat, units)
         prx = r"\.[0-9]{%d}" % precision if precision > 0 else ""
         self._pattern = "([0-9]+%s)%s" % (prx, units)
         self._regex = re.compile(self._pattern)
 
-    def to_string(self, value):
+    def to_string(self, value, include_units=True):
         """Convert a band value in G3Units to its string representation, using
         the appropriate precision and units name."""
         if not np.isfinite(value) or value < 0:
             return ""
         value = np.round(value / self._units, self._precision)
+        if not include_units:
+            return self._vformat % value
         return self._format % value
 
     def to_value(self, value):
@@ -80,21 +83,23 @@ class BandFormat:
             raise ValueError("Invalid band {}".format(value))
         return float(m.group(1)) * self._units
 
-    def extract_string(self, value):
+    def extract_string(self, value, include_units=True):
         """Return the band substring from the input string, or None if not
         found."""
         m = self._regex.search(value)
         if not m:
             return None
+        if not include_units:
+            return m.group(1)
         return m.group(0)
 
     def extract_value(self, value):
         """Return the band in G3Units extracted from the input string, or None
         if not found."""
-        m = self._regex.search(value)
-        if not m:
+        s = extract_string(value, include_units=False)
+        if not s:
             return None
-        return float(m.group(1)) * self._units
+        return float(v) * self._units
 
 
 # global instance used by functions below
@@ -108,8 +113,8 @@ set_band_format.__doc__ = BandFormat.set_format.__doc__
 
 
 @core.usefulfunc
-def band_to_string(value):
-    return _band_format.to_string(value)
+def band_to_string(value, include_units=True):
+    return _band_format.to_string(value, include_units=include_units)
 band_to_string.__doc__ = BandFormat.to_string.__doc__
 
 
@@ -120,8 +125,8 @@ band_to_value.__doc__ = BandFormat.to_value.__doc__
 
 
 @core.usefulfunc
-def extract_band_string(value):
-    return _band_format.extract_string(value)
+def extract_band_string(value, include_units=True):
+    return _band_format.extract_string(value, include_units=include_units)
 extract_band_string.__doc__ = BandFormat.extract_string.__doc__
 
 
