@@ -10,6 +10,7 @@ __all__ = [
     "SplitByWafer",
     "SplitByPixelType",
     "BandFormat",
+    "get_band_units",
     "set_band_format",
     "band_to_string",
     "band_to_value",
@@ -60,10 +61,16 @@ class BandFormat:
         assert hasattr(core.G3Units, units), "Invalid units {}".format(units)
         self._units = getattr(core.G3Units, units)
         self._vformat = "%%.%df" % (precision if precision > 0 else 0)
+        self._uformat = units
         self._format = "%s%s" % (self._vformat, units)
         prx = r"\.[0-9]{%d}" % precision if precision > 0 else ""
         self._pattern = "([0-9]+%s)%s" % (prx, units)
         self._regex = re.compile(self._pattern)
+
+    @property
+    def units(self):
+        """Units string used for formatting"""
+        return self._uformat
 
     def to_string(self, value, include_units=True):
         """Convert a band value in G3Units to its string representation, using
@@ -104,6 +111,12 @@ class BandFormat:
 
 # global instance used by functions below
 _band_format = BandFormat()
+
+
+@core.usefulfunc
+def get_band_units():
+    """Return the units string used for formatting frequency band values."""
+    return _band_format.units
 
 
 @core.usefulfunc
