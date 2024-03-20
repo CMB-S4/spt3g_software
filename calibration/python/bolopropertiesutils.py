@@ -19,7 +19,7 @@ def set_band_precision(cls, precision):
     cls._band_precision = int(precision)
 BolometerProperties.band_precision = property(get_band_precision, set_band_precision)
 
-def get_band_units(cls, units):
+def get_band_units(cls):
     """Bolometer units name for string formatting"""
     return cls._band_units
 def set_band_units(cls, units):
