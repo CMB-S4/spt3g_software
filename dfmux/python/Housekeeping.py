@@ -126,10 +126,12 @@ class HousekeepingConsumer(object):
                                      # avoid overloading the network on the return
 
                 found = False
+                isv4 = False
                 for board in self.board_serials:
                     dat = self.tuber[board].GetReply()[0]['result']
 
                     boardhk = self.HousekeepingFromJSON(dat)
+                    isv4 = isv4 or boardhk.isv4
                     hkdata[int(boardhk.serial)] = boardhk
 
                     ip, crate, slot = self.board_map[board]
@@ -149,7 +151,7 @@ class HousekeepingConsumer(object):
 
                 hwmf = core.G3Frame(core.G3FrameType.Wiring)
                 hwmf['WiringMap'] = hwm
-                hwmf['ReadoutSystem'] = 'ICE'
+                hwmf['ReadoutSystem'] = 'ICE4' if isv4 else 'ICE'
 
                 if self.hwmf is None:
                     self.hwmf = hwmf
