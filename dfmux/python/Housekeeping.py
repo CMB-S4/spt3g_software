@@ -1,7 +1,6 @@
 from spt3g import core
 from spt3g.dfmux import DfMuxHousekeepingMap, HkBoardInfo, HkMezzanineInfo, HkModuleInfo, HkChannelInfo, DfMuxWiringMap, DfMuxChannelMapping
 
-from spt3g.dfmux.IceboardConversions import convert_TF
 from .TuberClient import TuberClient
 import socket, struct, time
 import numpy
@@ -198,6 +197,10 @@ class HousekeepingConsumer(object):
             boardhk.is128x = dat['is128x']
         else:
             boardhk.is128x = False
+        if 'isv4' in dat:
+            boardhk.isv4 = dat['isv4']
+        else:
+            boardhk.isv4 = False
         year = dat['timestamp']['y']
         if year == 0:
             # It probably isn't 1900
@@ -237,7 +240,8 @@ class HousekeepingConsumer(object):
                     mezzhk.voltages[str(i[0])] = i[1]
 
             if mezzhk.present and mezzhk.power:
-                mezzhk.temperature = mezz['temperature']
+                # this is not present in v4 firmware
+                mezzhk.temperature = mezz.get('temperature', 0.0)
                 # these parameters are not in the 64x housekeeping tuber
                 mezzhk.squid_heater = mezz.get('squid_heater', 0.0)
                 mezzhk.squid_controller_power = mezz.get('squid_controller_power', False)
@@ -275,7 +279,15 @@ class HousekeepingConsumer(object):
                     chanhk.nuller_amplitude = chan['nuller_amplitude']
                     chanhk.dan_gain = chan['dan_gain']
                     chanhk.dan_streaming_enable = chan['dan_streaming_enable']
-                    if boardhk.is128x:
+                    if boardhk.isv4:
+                        chanhk.carrier_frequency = chan['frequency'] * core.G3Units.Hz
+                        chanhk.demod_frequency = chan['frequency'] * core.G3Units.Hz
+                        chanhk.carrier_phase = chan['carrier_phase'] * core.G3Units.rad
+                        chanhk.nuller_phase = chan['nuller_phase'] * core.G3Units.rad
+                        chanhk.demod_phase = chan['demod_phase'] * core.G3Units.rad
+                        chanhk.dan_zero_enable = chan['dan_zero_enable']
+                        chanhk.dan_zeroed = chan['dan_zeroed']
+                    elif boardhk.is128x:
                         chanhk.carrier_frequency = chan['frequency']*core.G3Units.Hz
                         chanhk.demod_frequency = chan['frequency']*core.G3Units.Hz
                     else:
@@ -317,6 +329,7 @@ class HousekeepingConsumer(object):
         serial = int(dat['serial'])
         for imezz, mezz in enumerate(dat['mezzanines']):
             for imod, mod in enumerate(mezz['modules']):
+                module = imod + len(mezz['modules']) * imezz
                 for ichan, chan in enumerate(mod['channels']):
                     name = (chan.get('tuning', {}) or {}).get('name', None)
                     if not name:
@@ -326,7 +339,7 @@ class HousekeepingConsumer(object):
                     mapping.board_serial = serial
                     mapping.board_slot = slot
                     mapping.crate_serial = crate
-                    mapping.module = imod + 4 * imezz
+                    mapping.module = module
                     mapping.channel = ichan
                     try:
                         name = str(name)

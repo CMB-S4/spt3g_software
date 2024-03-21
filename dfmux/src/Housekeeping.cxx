@@ -48,6 +48,14 @@ template <class A> void HkChannelInfo::serialize(A &ar, unsigned v)
 	if (v > 4) {
 		ar & make_nvp("loopgain", loopgain);
 	}
+
+	if (v > 5) {
+		ar & make_nvp("carrier_phase", carrier_phase);
+		ar & make_nvp("nuller_phase", nuller_phase);
+		ar & make_nvp("demod_phase", demod_phase);
+		ar & make_nvp("dan_zero_enable", dan_zero_enable);
+		ar & make_nvp("dan_zeroed", dan_zeroed);
+	}
 }
 
 std::string HkModuleInfo::Description() const
@@ -146,6 +154,10 @@ template <class A> void HkBoardInfo::serialize(A &ar, unsigned v)
 	if (v >= 2) {
 		ar & make_nvp("is128x", is128x);
 	}
+
+	if (v >= 3) {
+		ar & make_nvp("isv4", isv4);
+	}
 }
 
 G3_SERIALIZABLE_CODE(HkChannelInfo);
@@ -197,6 +209,16 @@ PYBINDINGS("dfmux") {
 	    .def_readwrite("loopgain", &HkChannelInfo::loopgain,
 	       "Measured loopgain of the detector as stored by the "
 	       "control software tuning script.")
+	    .def_readwrite("carrier_phase", &HkChannelInfo::carrier_phase,
+	       "Carrier phase in standard angle units (v4 only)")
+	    .def_readwrite("nuller_phase", &HkChannelInfo::nuller_phase,
+	       "Nuller phase in standard angle units (v4 only)")
+	    .def_readwrite("demod_phase", &HkChannelInfo::demod_phase,
+	       "Demodulator phase in standard angle units (v4 only)")
+	    .def_readwrite("dan_zero_enable", &HkChannelInfo::dan_zero_enable,
+	       "True if the DAN zero enable functionality is turned on (v4 only)")
+	    .def_readwrite("dan_zeroed", &HkChannelInfo::dan_zeroed,
+	       "True if the DAN channel is zeroed (v4 only)")
 	;
 	register_map<std::map<int, HkChannelInfo> >("HkChannelInfoMap",
 	    "Mapping of channel number (1-indexed) to channel status "
@@ -288,6 +310,8 @@ PYBINDINGS("dfmux") {
 	       "faster and grow by factors of two with each decrement")
 	    .def_readwrite("is128x", &HkBoardInfo::is128x,
 		"Boolean for whether 128x firmware is running")
+	    .def_readwrite("isv4", &HkBoardInfo::isv4,
+		"Boolean for whether v4 firmware is running")
 	    .def_readwrite("currents", &HkBoardInfo::currents,
 	       "Dictionary of data from on-board current sensors")
 	    .def_readwrite("voltages", &HkBoardInfo::voltages,

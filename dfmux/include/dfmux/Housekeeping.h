@@ -25,7 +25,9 @@ public:
 	HkChannelInfo() : G3FrameObject(), channel_number(-1), carrier_amplitude(NAN),
         carrier_frequency(NAN), dan_accumulator_enable(false), dan_feedback_enable(false),
         dan_streaming_enable(false), dan_gain(NAN), demod_frequency(NAN), nuller_amplitude(NAN),
-        dan_railed(false), rlatched(NAN), rnormal(NAN), rfrac_achieved(NAN), loopgain(NAN) {}
+	dan_railed(false), rlatched(NAN), rnormal(NAN), rfrac_achieved(NAN), loopgain(NAN),
+	carrier_phase(NAN), nuller_phase(NAN), demod_phase(NAN), dan_zero_enable(false),
+	dan_zeroed(false) {}
 
 	int32_t channel_number; // 1-indexed
 	double carrier_amplitude;
@@ -45,12 +47,20 @@ public:
 	double rfrac_achieved;
 	double loopgain;
 
+	// hidfmux properties
+	double carrier_phase;
+	double nuller_phase;
+	double demod_phase;
+
+	bool dan_zero_enable;
+	bool dan_zeroed;
+
 	template <class A> void serialize(A &ar, unsigned v);
 	std::string Description() const;
 };
 
 G3_POINTERS(HkChannelInfo);
-G3_SERIALIZABLE(HkChannelInfo, 5);
+G3_SERIALIZABLE(HkChannelInfo, 6);
 
 class HkModuleInfo : public G3FrameObject
 {
@@ -124,7 +134,7 @@ G3_SERIALIZABLE(HkMezzanineInfo, 2);
 class HkBoardInfo : public G3FrameObject
 {
 public:
-	HkBoardInfo() : G3FrameObject(), fir_stage(-1), is128x(false) {}
+	HkBoardInfo() : G3FrameObject(), fir_stage(-1), is128x(false), isv4(false) {}
 
 	G3Time timestamp;
 
@@ -132,6 +142,7 @@ public:
 	std::string serial;
 	int32_t fir_stage;
 	bool is128x;
+	bool isv4;
 
 	std::map<std::string, double> currents;
 	std::map<std::string, double> voltages;
@@ -144,7 +155,7 @@ public:
 };
 
 G3_POINTERS(HkBoardInfo);
-G3_SERIALIZABLE(HkBoardInfo, 2);
+G3_SERIALIZABLE(HkBoardInfo, 3);
 
 G3MAP_OF(int32_t, HkBoardInfo, DfMuxHousekeepingMap);
 
