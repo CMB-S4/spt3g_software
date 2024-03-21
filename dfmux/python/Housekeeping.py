@@ -246,7 +246,7 @@ class HousekeepingConsumer(object):
             # Modules
             for m, mod in enumerate(mezz['modules']):
                 modhk = HkModuleInfo()
-                modhk.routing = str(mod['routing'][0])
+                modhk.routing_type = str(mod['routing'][0])
                 modhk.module_number = m+1
                 if mezzhk.present and mezzhk.power:
                     if 'gains' in mod:
