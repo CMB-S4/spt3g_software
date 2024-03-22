@@ -65,6 +65,7 @@ class BandFormat:
         self._format = "%s%s" % (self._vformat, units)
         prx = r"\.[0-9]{%d}" % precision if precision > 0 else ""
         self._pattern = "([0-9]+%s)%s" % (prx, units)
+        self._wregex = re.compile("^" + self._pattern + "$")
         self._regex = re.compile(self._pattern)
 
     @property
@@ -85,7 +86,7 @@ class BandFormat:
     def to_value(self, value):
         """Convert a band string to a value in G3Units, or raise a ValueError
         if no match is found."""
-        m = self._regex.match(value)
+        m = self._wregex.match(value)
         if not m:
             raise ValueError("Invalid band {}".format(value))
         return float(m.group(1)) * self._units
@@ -93,7 +94,7 @@ class BandFormat:
     def extract_string(self, value, include_units=True):
         """Return the band substring from the input string, or None if not
         found."""
-        m = self._regex.search(value)
+        m = self._regex.match(value)
         if not m:
             return None
         if not include_units:
