@@ -71,7 +71,7 @@ public:
         nuller_gain(-1), demod_gain(-1), carrier_railed(false), nuller_railed(false),
         demod_railed(false), squid_flux_bias(NAN), squid_current_bias(NAN),
 	squid_stage1_offset(NAN), squid_p2p(NAN), squid_transimpedance(NAN),
-	nco_frequency (NAN) {}
+	nco_frequency(NAN) {}
 
 	int32_t module_number; // 1-indexed
 
