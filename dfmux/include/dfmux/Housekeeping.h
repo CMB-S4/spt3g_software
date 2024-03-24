@@ -70,7 +70,8 @@ public:
 	HkModuleInfo() : G3FrameObject(), module_number(-1), carrier_gain(-1),
         nuller_gain(-1), demod_gain(-1), carrier_railed(false), nuller_railed(false),
         demod_railed(false), squid_flux_bias(NAN), squid_current_bias(NAN),
-        squid_stage1_offset(NAN), squid_p2p(NAN), squid_transimpedance(NAN) {}
+	squid_stage1_offset(NAN), squid_p2p(NAN), squid_transimpedance(NAN),
+	nco_frequency (NAN) {}
 
 	int32_t module_number; // 1-indexed
 
@@ -93,6 +94,8 @@ public:
 	std::string squid_feedback;
 	std::string routing_type;
 
+	double nco_frequency;
+
 	std::map<int32_t, HkChannelInfo> channels; // 1-indexed
 
 	template <class A> void serialize(A &ar, unsigned v);
@@ -100,7 +103,7 @@ public:
 };
 
 G3_POINTERS(HkModuleInfo);
-G3_SERIALIZABLE(HkModuleInfo, 2);
+G3_SERIALIZABLE(HkModuleInfo, 3);
 
 class HkMezzanineInfo : public G3FrameObject
 {
@@ -136,15 +139,16 @@ G3_SERIALIZABLE(HkMezzanineInfo, 2);
 class HkBoardInfo : public G3FrameObject
 {
 public:
-	HkBoardInfo() : G3FrameObject(), fir_stage(-1), is128x(false), isv4(false) {}
+	HkBoardInfo() : G3FrameObject(), fir_stage(-1), is128x(false) {}
 
 	G3Time timestamp;
 
 	std::string timestamp_port;
 	std::string serial;
+	std::string firmware_version;
+	std::string firmware_name;
 	int32_t fir_stage;
 	bool is128x;
-	bool isv4;
 
 	std::map<std::string, double> currents;
 	std::map<std::string, double> voltages;

@@ -92,6 +92,10 @@ template <class A> void HkModuleInfo::serialize(A &ar, unsigned v)
 		ar & make_nvp("squid_p2p", squid_p2p);
 		ar & make_nvp("squid_transimpedance", squid_transimpedance);
 	}
+
+	if (v >= 3) {
+		ar & make_nvp("nco_frequency", nco_frequency);
+	}
 }
 
 std::string HkMezzanineInfo::Description() const
@@ -157,7 +161,8 @@ template <class A> void HkBoardInfo::serialize(A &ar, unsigned v)
 	}
 
 	if (v >= 3) {
-		ar & make_nvp("isv4", isv4);
+		ar & make_nvp("firmware_version", firmware_version);
+		ar & make_nvp("firmware_name", firmware_name);
 	}
 }
 
@@ -211,17 +216,17 @@ PYBINDINGS("dfmux") {
 	       "Measured loopgain of the detector as stored by the "
 	       "control software tuning script.")
 	    .def_readwrite("demod_amplitude", &HkChannelInfo::demod_amplitude,
-	       "Demodulator amplitude in normalized units (0-1) (v4 only)")
+	       "Demodulator amplitude in normalized units (0-1) (mkid only)")
 	    .def_readwrite("carrier_phase", &HkChannelInfo::carrier_phase,
-	       "Carrier phase in standard angle units (v4 only)")
+	       "Carrier phase in standard angle units (mkid only)")
 	    .def_readwrite("nuller_phase", &HkChannelInfo::nuller_phase,
-	       "Nuller phase in standard angle units (v4 only)")
+	       "Nuller phase in standard angle units (mkid only)")
 	    .def_readwrite("demod_phase", &HkChannelInfo::demod_phase,
-	       "Demodulator phase in standard angle units (v4 only)")
+	       "Demodulator phase in standard angle units (mkid only)")
 	    .def_readwrite("dan_zero_enable", &HkChannelInfo::dan_zero_enable,
-	       "True if the DAN zero enable functionality is turned on (v4 only)")
+	       "True if the DAN zero enable functionality is turned on (mkid only)")
 	    .def_readwrite("dan_zeroed", &HkChannelInfo::dan_zeroed,
-	       "True if the DAN channel is zeroed (v4 only)")
+	       "True if the DAN channel is zeroed (mkid only)")
 	;
 	register_map<std::map<int, HkChannelInfo> >("HkChannelInfoMap",
 	    "Mapping of channel number (1-indexed) to channel status "
@@ -258,6 +263,9 @@ PYBINDINGS("dfmux") {
 	       "tuning script to describe SQUID state")
 	    .def_readwrite("squid_feedback", &HkModuleInfo::squid_feedback,
 	       "SQUID feedback mechanism employed")
+	    .def_readwrite("nco_frequency",
+	       &HkModuleInfo::nco_frequency,
+	       "NCO frequency in standard frequency units (mkid only)")
 	    .def_readwrite("routing_type", &HkModuleInfo::routing_type,
 	       "Whether DAC are routed directly to ADCs or to the cryostat")
 	    .def_readwrite("channels", &HkModuleInfo::channels,
@@ -313,8 +321,10 @@ PYBINDINGS("dfmux") {
 	       "faster and grow by factors of two with each decrement")
 	    .def_readwrite("is128x", &HkBoardInfo::is128x,
 		"Boolean for whether 128x firmware is running")
-	    .def_readwrite("isv4", &HkBoardInfo::isv4,
-		"Boolean for whether v4 firmware is running")
+	    .def_readwrite("firmware_version", &HkBoardInfo::firmware_version,
+	       "Firmware version")
+	    .def_readwrite("firmware_name", &HkBoardInfo::firmware_name,
+	       "Firmware name")
 	    .def_readwrite("currents", &HkBoardInfo::currents,
 	       "Dictionary of data from on-board current sensors")
 	    .def_readwrite("voltages", &HkBoardInfo::voltages,

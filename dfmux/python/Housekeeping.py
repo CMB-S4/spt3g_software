@@ -126,12 +126,12 @@ class HousekeepingConsumer(object):
                                      # avoid overloading the network on the return
 
                 found = False
-                isv4 = False
+                ismkid = False
                 for board in self.board_serials:
                     dat = self.tuber[board].GetReply()[0]['result']
 
                     boardhk = self.HousekeepingFromJSON(dat)
-                    isv4 = isv4 or boardhk.isv4
+                    ismkid = ismkid or "mkid" in boardhk.firmware_name.lower()
                     hkdata[int(boardhk.serial)] = boardhk
 
                     ip, crate, slot = self.board_map[board]
@@ -151,7 +151,7 @@ class HousekeepingConsumer(object):
 
                 hwmf = core.G3Frame(core.G3FrameType.Wiring)
                 hwmf['WiringMap'] = hwm
-                hwmf['ReadoutSystem'] = 'ICE4' if isv4 else 'ICE'
+                hwmf['ReadoutSystem'] = 'ICE-MKID' if ismkid else 'ICE'
 
                 if self.hwmf is None:
                     self.hwmf = hwmf
@@ -199,10 +199,6 @@ class HousekeepingConsumer(object):
             boardhk.is128x = dat['is128x']
         else:
             boardhk.is128x = False
-        if 'isv4' in dat:
-            boardhk.isv4 = dat['isv4']
-        else:
-            boardhk.isv4 = False
         year = dat['timestamp']['y']
         if year == 0:
             # It probably isn't 1900
@@ -219,6 +215,9 @@ class HousekeepingConsumer(object):
 
         boardhk.timestamp_port = str(dat['timestamp_port'])
         boardhk.serial = str(dat['serial'])
+        boardhk.firmware_name = str(dat.get('firmware_name', ''))
+        ismkid = 'mkid' in board.firmware_name.lower()
+        boardhk.firmware_version = str(dat.get('firmware_version', ''))
         boardhk.fir_stage = dat['fir_stage']
         for i in dat['currents'].items():
             boardhk.currents[str(i[0])] = i[1]
@@ -267,6 +266,8 @@ class HousekeepingConsumer(object):
                         modhk.squid_current_bias = mod['squid_flux_bias']
                     if 'squid_feedback' in mod:
                         modhk.squid_feedback = str(mod['squid_feedback'])
+                    if 'nco_frequency' in mod:
+                        modhk.nco_frequency = mod['nco_frequency'] * core.G3Units.Hz
 
                 if 'squid_tuning' in mod and mod['squid_tuning'] is not None:
                     modhk.squid_state = str(mod['squid_tuning']['state'])
@@ -280,10 +281,10 @@ class HousekeepingConsumer(object):
                     chanhk.nuller_amplitude = chan['nuller_amplitude']
                     chanhk.dan_gain = chan['dan_gain']
                     chanhk.dan_streaming_enable = chan['dan_streaming_enable']
-                    if boardhk.is128x or boardhk.isv4:
+                    if boardhk.is128x or ismkid:
                         chanhk.carrier_frequency = chan['frequency']*core.G3Units.Hz
                         chanhk.demod_frequency = chan['frequency']*core.G3Units.Hz
-                        if boardhk.isv4:
+                        if ismkid:
                             chanhk.demod_amplitude = chan['demod_amplitude']
                             chanhk.carrier_phase = chan['carrier_phase'] * core.G3Units.rad
                             chanhk.nuller_phase = chan['nuller_phase'] * core.G3Units.rad
