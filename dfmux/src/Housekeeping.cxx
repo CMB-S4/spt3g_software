@@ -50,6 +50,7 @@ template <class A> void HkChannelInfo::serialize(A &ar, unsigned v)
 	}
 
 	if (v > 5) {
+		ar & make_nvp("demod_amplitude", demod_amplitude);
 		ar & make_nvp("carrier_phase", carrier_phase);
 		ar & make_nvp("nuller_phase", nuller_phase);
 		ar & make_nvp("demod_phase", demod_phase);
@@ -209,6 +210,8 @@ PYBINDINGS("dfmux") {
 	    .def_readwrite("loopgain", &HkChannelInfo::loopgain,
 	       "Measured loopgain of the detector as stored by the "
 	       "control software tuning script.")
+	    .def_readwrite("demod_amplitude", &HkChannelInfo::demod_amplitude,
+	       "Demodulator amplitude in normalized units (0-1) (v4 only)")
 	    .def_readwrite("carrier_phase", &HkChannelInfo::carrier_phase,
 	       "Carrier phase in standard angle units (v4 only)")
 	    .def_readwrite("nuller_phase", &HkChannelInfo::nuller_phase,

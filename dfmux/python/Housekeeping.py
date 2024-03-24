@@ -242,8 +242,7 @@ class HousekeepingConsumer(object):
                     mezzhk.voltages[str(i[0])] = i[1]
 
             if mezzhk.present and mezzhk.power:
-                # this is not present in v4 firmware
-                mezzhk.temperature = mezz.get('temperature', 0.0)
+                mezzhk.temperature = mezz['temperature']
                 # these parameters are not in the 64x housekeeping tuber
                 mezzhk.squid_heater = mezz.get('squid_heater', 0.0)
                 mezzhk.squid_controller_power = mezz.get('squid_controller_power', False)
@@ -281,17 +280,16 @@ class HousekeepingConsumer(object):
                     chanhk.nuller_amplitude = chan['nuller_amplitude']
                     chanhk.dan_gain = chan['dan_gain']
                     chanhk.dan_streaming_enable = chan['dan_streaming_enable']
-                    if boardhk.isv4:
-                        chanhk.carrier_frequency = chan['frequency'] * core.G3Units.Hz
-                        chanhk.demod_frequency = chan['frequency'] * core.G3Units.Hz
-                        chanhk.carrier_phase = chan['carrier_phase'] * core.G3Units.rad
-                        chanhk.nuller_phase = chan['nuller_phase'] * core.G3Units.rad
-                        chanhk.demod_phase = chan['demod_phase'] * core.G3Units.rad
-                        chanhk.dan_zero_enable = chan['dan_zero_enable']
-                        chanhk.dan_zeroed = chan['dan_zeroed']
-                    elif boardhk.is128x:
+                    if boardhk.is128x or boardhk.isv4:
                         chanhk.carrier_frequency = chan['frequency']*core.G3Units.Hz
                         chanhk.demod_frequency = chan['frequency']*core.G3Units.Hz
+                        if boardhk.isv4:
+                            chanhk.demod_amplitude = chan['demod_amplitude']
+                            chanhk.carrier_phase = chan['carrier_phase'] * core.G3Units.rad
+                            chanhk.nuller_phase = chan['nuller_phase'] * core.G3Units.rad
+                            chanhk.demod_phase = chan['demod_phase'] * core.G3Units.rad
+                            chanhk.dan_zero_enable = chan['dan_zero_enable']
+                            chanhk.dan_zeroed = chan['dan_zeroed']
                     else:
                         chanhk.carrier_frequency = chan['carrier_frequency']*core.G3Units.Hz
                         chanhk.demod_frequency = chan['demod_frequency']*core.G3Units.Hz
