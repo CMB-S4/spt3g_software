@@ -215,8 +215,9 @@ class HousekeepingConsumer(object):
 
         boardhk.timestamp_port = str(dat['timestamp_port'])
         boardhk.serial = str(dat['serial'])
-        boardhk.firmware_name = str(dat.get('firmware_name', ''))
-        boardhk.firmware_version = str(dat.get('firmware_version', ''))
+        if 'firmware_name' in dat:
+            boardhk.firmware_name = str(dat['firmware_name'])
+            boardhk.firmware_version = str(dat['firmware_version'])
         boardhk.fir_stage = dat['fir_stage']
         for i in dat['currents'].items():
             boardhk.currents[str(i[0])] = i[1]
@@ -231,13 +232,16 @@ class HousekeepingConsumer(object):
             mezzhk.present = mezz['present']
             mezzhk.power = mezz['power']
             if mezzhk.present:
-                mezzhk.serial = str(mezz['ipmi']['product']['serial_number'])
-                mezzhk.part_number = str(mezz['ipmi']['product']['part_number'])
-                mezzhk.revision = str(mezz['ipmi']['product']['version_number'])
-                for i in mezz['currents'].items():
-                    mezzhk.currents[str(i[0])] = i[1]
-                for i in mezz['voltages'].items():
-                    mezzhk.voltages[str(i[0])] = i[1]
+                if 'ipmi' in mezz:
+                    mezzhk.serial = str(mezz['ipmi']['product']['serial_number'])
+                    mezzhk.part_number = str(mezz['ipmi']['product']['part_number'])
+                    mezzhk.revision = str(mezz['ipmi']['product']['version_number'])
+                if 'currents' in mezz:
+                    for i in mezz['currents'].items():
+                        mezzhk.currents[str(i[0])] = i[1]
+                if 'voltages' in mezz:
+                    for i in mezz['voltages'].items():
+                        mezzhk.voltages[str(i[0])] = i[1]
 
             if mezzhk.present and mezzhk.power:
                 if 'temperature' in mezz:
