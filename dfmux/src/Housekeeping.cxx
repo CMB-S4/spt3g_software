@@ -263,8 +263,7 @@ PYBINDINGS("dfmux") {
 	       "tuning script to describe SQUID state")
 	    .def_readwrite("squid_feedback", &HkModuleInfo::squid_feedback,
 	       "SQUID feedback mechanism employed")
-	    .def_readwrite("nco_frequency",
-	       &HkModuleInfo::nco_frequency,
+	    .def_readwrite("nco_frequency", &HkModuleInfo::nco_frequency,
 	       "NCO frequency in standard frequency units (mkid only)")
 	    .def_readwrite("routing_type", &HkModuleInfo::routing_type,
 	       "Whether DAC are routed directly to ADCs or to the cryostat")
