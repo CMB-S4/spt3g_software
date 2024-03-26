@@ -50,12 +50,9 @@ template <class A> void HkChannelInfo::serialize(A &ar, unsigned v)
 	}
 
 	if (v > 5) {
-		ar & make_nvp("demod_amplitude", demod_amplitude);
 		ar & make_nvp("carrier_phase", carrier_phase);
 		ar & make_nvp("nuller_phase", nuller_phase);
 		ar & make_nvp("demod_phase", demod_phase);
-		ar & make_nvp("dan_zero_enable", dan_zero_enable);
-		ar & make_nvp("dan_zeroed", dan_zeroed);
 	}
 }
 
@@ -215,18 +212,12 @@ PYBINDINGS("dfmux") {
 	    .def_readwrite("loopgain", &HkChannelInfo::loopgain,
 	       "Measured loopgain of the detector as stored by the "
 	       "control software tuning script.")
-	    .def_readwrite("demod_amplitude", &HkChannelInfo::demod_amplitude,
-	       "Demodulator amplitude in normalized units (0-1) (mkid only)")
 	    .def_readwrite("carrier_phase", &HkChannelInfo::carrier_phase,
 	       "Carrier phase in standard angle units (mkid only)")
 	    .def_readwrite("nuller_phase", &HkChannelInfo::nuller_phase,
 	       "Nuller phase in standard angle units (mkid only)")
 	    .def_readwrite("demod_phase", &HkChannelInfo::demod_phase,
 	       "Demodulator phase in standard angle units (mkid only)")
-	    .def_readwrite("dan_zero_enable", &HkChannelInfo::dan_zero_enable,
-	       "True if the DAN zero enable functionality is turned on (mkid only)")
-	    .def_readwrite("dan_zeroed", &HkChannelInfo::dan_zeroed,
-	       "True if the DAN channel is zeroed (mkid only)")
 	;
 	register_map<std::map<int, HkChannelInfo> >("HkChannelInfoMap",
 	    "Mapping of channel number (1-indexed) to channel status "

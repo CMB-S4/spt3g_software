@@ -216,7 +216,6 @@ class HousekeepingConsumer(object):
         boardhk.timestamp_port = str(dat['timestamp_port'])
         boardhk.serial = str(dat['serial'])
         boardhk.firmware_name = str(dat.get('firmware_name', ''))
-        ismkid = 'mkid' in board.firmware_name.lower()
         boardhk.firmware_version = str(dat.get('firmware_version', ''))
         boardhk.fir_stage = dat['fir_stage']
         for i in dat['currents'].items():
@@ -279,22 +278,23 @@ class HousekeepingConsumer(object):
                     chanhk.channel_number = k+1
                     chanhk.carrier_amplitude = chan['carrier_amplitude']
                     chanhk.nuller_amplitude = chan['nuller_amplitude']
-                    chanhk.dan_gain = chan['dan_gain']
-                    chanhk.dan_streaming_enable = chan['dan_streaming_enable']
-                    if boardhk.is128x or ismkid:
-                        chanhk.carrier_frequency = chan['frequency']*core.G3Units.Hz
-                        chanhk.demod_frequency = chan['frequency']*core.G3Units.Hz
-                        if ismkid:
-                            chanhk.demod_amplitude = chan['demod_amplitude']
-                            chanhk.carrier_phase = chan['carrier_phase'] * core.G3Units.rad
-                            chanhk.nuller_phase = chan['nuller_phase'] * core.G3Units.rad
-                            chanhk.demod_phase = chan['demod_phase'] * core.G3Units.rad
-                            chanhk.dan_zero_enable = chan['dan_zero_enable']
-                            chanhk.dan_zeroed = chan['dan_zeroed']
+                    if 'dan_gain' in chan:
+                        chanhk.dan_gain = chan['dan_gain']
+                    if 'dan_streaming_enable' in chan:
+                        chanhk.dan_streaming_enable = chan['dan_streaming_enable']
+                    if 'frequency' in chan:
+                        chanhk.carrier_frequency = chan['frequency'] * core.G3Units.Hz
+                        chanhk.demod_frequency = chan['frequency'] * core.G3Units.Hz
                     else:
-                        chanhk.carrier_frequency = chan['carrier_frequency']*core.G3Units.Hz
-                        chanhk.demod_frequency = chan['demod_frequency']*core.G3Units.Hz
+                        chanhk.carrier_frequency = chan['carrier_frequency'] * core.G3Units.Hz
+                        chanhk.demod_frequency = chan['demod_frequency'] * core.G3Units.Hz
+                    if 'carrier_phase' in chan:
+                        chanhk.carrier_phase = chan['carrier_phase'] * core.G3Units.deg
+                        chanhk.nuller_phase = chan['nuller_phase'] * core.G3Units.deg
+                        chanhk.demod_phase = chan['demod_phase'] * core.G3Units.deg
+                    if 'dan_accumulator_enable' in chan:
                         chanhk.dan_accumulator_enable = chan['dan_accumulator_enable']
+                    if 'dan_feedback_enable' in chan:
                         chanhk.dan_feedback_enable = chan['dan_feedback_enable']
                     if 'dan_railed' in chan:
                         chanhk.dan_railed = chan['dan_railed']

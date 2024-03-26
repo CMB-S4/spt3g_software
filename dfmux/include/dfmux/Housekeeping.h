@@ -26,8 +26,7 @@ public:
         carrier_frequency(NAN), dan_accumulator_enable(false), dan_feedback_enable(false),
         dan_streaming_enable(false), dan_gain(NAN), demod_frequency(NAN), nuller_amplitude(NAN),
 	dan_railed(false), rlatched(NAN), rnormal(NAN), rfrac_achieved(NAN), loopgain(NAN),
-	demod_amplitude(NAN), carrier_phase(NAN), nuller_phase(NAN), demod_phase(NAN),
-	dan_zero_enable(false), dan_zeroed(false) {}
+	carrier_phase(NAN), nuller_phase(NAN), demod_phase(NAN) {}
 
 	int32_t channel_number; // 1-indexed
 	double carrier_amplitude;
@@ -48,14 +47,9 @@ public:
 	double loopgain;
 
 	// hidfmux properties
-	double demod_amplitude;
-
 	double carrier_phase;
 	double nuller_phase;
 	double demod_phase;
-
-	bool dan_zero_enable;
-	bool dan_zeroed;
 
 	template <class A> void serialize(A &ar, unsigned v);
 	std::string Description() const;
