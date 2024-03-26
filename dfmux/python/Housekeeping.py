@@ -240,7 +240,8 @@ class HousekeepingConsumer(object):
                     mezzhk.voltages[str(i[0])] = i[1]
 
             if mezzhk.present and mezzhk.power:
-                mezzhk.temperature = mezz['temperature']
+                if 'temperature' in mezz:
+                    mezzhk.temperature = mezz['temperature']
                 # these parameters are not in the 64x housekeeping tuber
                 mezzhk.squid_heater = mezz.get('squid_heater', 0.0)
                 mezzhk.squid_controller_power = mezz.get('squid_controller_power', False)
