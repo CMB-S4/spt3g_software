@@ -5,3 +5,4 @@ target_link_libraries(calibration core)
 link_python_dir()
 
 add_spt3g_test(can_modify_bolo_props_in_map SLOWTEST)
+add_spt3g_test(band_format)
