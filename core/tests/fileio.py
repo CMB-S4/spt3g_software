@@ -113,3 +113,19 @@ pipe.Add(core.Dump)
 pipe.Run()
 
 assert cached.pos is None, "Missing wiring frame"
+
+# check EOF handling
+while cached.reader(None):
+    pass
+
+# can seek to EOF if at EOF
+pos = cached.reader.tell()
+cached.reader.seek(pos)
+
+# can't seek backward once at EOF
+try:
+    cached.reader.seek(0)
+except:
+    pass
+else:
+    assert False, "Expected RuntimeError seeking back from EOF"
