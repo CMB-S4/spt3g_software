@@ -110,6 +110,8 @@ void G3Reader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 }
 
 off_t G3Reader::Seek(off_t offset) {
+	if (stream_.peek() == EOF && offset != Tell())
+		log_fatal("Cannot seek %s; stream closed at EOF.", cur_file_.c_str());
 	return boost::iostreams::seek(stream_, offset, std::ios_base::beg);
 }
 
@@ -138,8 +140,11 @@ PYBINDINGS("core") {
 	    arg("n_frames_to_read")=0,arg("timeout")=-1.,arg("track_filename")=false)))
 	.def(init<std::vector<std::string>, int, float, bool>((arg("filename"),
 	    arg("n_frames_to_read")=0, arg("timeout")=-1.,arg("track_filename")=false)))
-	.def("tell", &G3Reader::Tell)
-	.def("seek", &G3Reader::Seek)
+	.def("tell", &G3Reader::Tell,
+	    "Return the current byte offset from start of stream.")
+	.def("seek", &G3Reader::Seek,
+	    "Position the stream read pointer at specific byte offset. "
+	    "Note that once EOF is reached, seek does not work anymore.")
 	.def_readonly("__g3module__", true)
 	;
 }
