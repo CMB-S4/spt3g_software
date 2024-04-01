@@ -151,7 +151,7 @@ class HousekeepingConsumer(object):
 
                 hwmf = core.G3Frame(core.G3FrameType.Wiring)
                 hwmf['WiringMap'] = hwm
-                hwmf['ReadoutSystem'] = 'ICE-MKID' if ismkid else 'ICE'
+                hwmf['ReadoutSystem'] = 'RF-ICE' if ismkid else 'ICE'
 
                 if self.hwmf is None:
                     self.hwmf = hwmf
