@@ -32,7 +32,7 @@ public:
 
 	// Run the pipeline to completion. If profile is set to true, will print
 	// statistics for each module at completion.
-	void Run(bool profile = false, bool graph = false);
+	void Run(bool profile = false, bool graph = false, bool signal_halt = true);
 
 	// If there is stored graph information get it
 	std::string GetGraphInfo() const {

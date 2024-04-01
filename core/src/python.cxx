@@ -578,17 +578,20 @@ SPT3G_PYTHON_MODULE(core)
 	  "\t  processing if returned by first module. Equivalent to [].\n")
 	    .def("_Add_", &G3Pipeline::Add, bp::arg("name")="")
 	    .def("Run", &G3Pipeline::Run,
-	      (bp::arg("profile")=false, bp::arg("graph")=false), 
+	      (bp::arg("profile")=false, bp::arg("graph")=false,
+	       bp::arg("signal_halt")=true),
 	      "Run pipeline. If profile is True, print execution time "
 	      "statistics for each module when complete. If graph is True, "
 	      "stores control flow data that can be processed with GraphViz "
-	      "once retrieved using GetGraphInfo().")
+	      "once retrieved using GetGraphInfo().  If signal_halt is True "
+	      "(default), the pipeline will stop processing new frames when "
+	      "SIGINT is sent to this process.  Equivalent to what happens when "
+	      "halt_processing() is called.")
 	    .def("GetGraphInfo", &G3Pipeline::GetGraphInfo,
 	      "Get stored control flow information from Run(graph=True)")
 	    .def("halt_processing", &G3Pipeline_halt_processing,
 	      "Halts all running pipelines after they flush all currently "
-	      "in-flight frames. Equivalent to what happens when SIGINT is "
-	      "sent to this process. Once set, the first module will not be "
+	      "in-flight frames. Once set, the first module will not be "
 	      "called again.")
 	    .staticmethod("halt_processing")
 	    .def_readonly("last_frame",
