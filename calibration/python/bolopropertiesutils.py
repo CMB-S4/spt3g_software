@@ -59,7 +59,7 @@ class BandFormat:
         """
         self._precision = int(precision)
         assert hasattr(core.G3Units, units), "Invalid units {}".format(units)
-        self._units = getattr(core.G3Units, units)
+        self._uvalue = getattr(core.G3Units, units)
         self._vformat = "%%.%df" % (precision if precision > 0 else 0)
         self._uformat = units
         self._format = "%s%s" % (self._vformat, units)
@@ -78,23 +78,23 @@ class BandFormat:
         the appropriate precision and units name."""
         if not np.isfinite(value) or value < 0:
             return ""
-        value = np.round(value / self._units, self._precision)
+        value = np.round(value / self._uvalue, self._precision)
         if not include_units:
             return self._vformat % value
         return self._format % value
 
-    def to_value(self, value):
+    def to_value(self, string):
         """Convert a band string to a value in G3Units, or raise a ValueError
         if no match is found."""
-        m = self._wregex.match(value)
+        m = self._wregex.match(string)
         if not m:
-            raise ValueError("Invalid band {}".format(value))
-        return float(m.group(1)) * self._units
+            raise ValueError("Invalid band {}".format(string))
+        return float(m.group(1)) * self._uvalue
 
-    def extract_string(self, value, include_units=True):
+    def extract_string(self, string, include_units=True):
         """Return the band substring from the input string, or None if not
         found."""
-        m = self._regex.match(value)
+        m = self._regex.match(string)
         if not m:
             return None
         if not include_units:
@@ -107,7 +107,7 @@ class BandFormat:
         s = extract_string(value, include_units=False)
         if not s:
             return None
-        return float(v) * self._units
+        return float(v) * self._uvalue
 
 
 # global instance used by functions below
@@ -133,20 +133,20 @@ band_to_string.__doc__ = BandFormat.to_string.__doc__
 
 
 @core.usefulfunc
-def band_to_value(value):
-    return _band_format.to_value(value)
+def band_to_value(string):
+    return _band_format.to_value(string)
 band_to_value.__doc__ = BandFormat.to_value.__doc__
 
 
 @core.usefulfunc
-def extract_band_string(value, include_units=True):
-    return _band_format.extract_string(value, include_units=include_units)
+def extract_band_string(string, include_units=True):
+    return _band_format.extract_string(string, include_units=include_units)
 extract_band_string.__doc__ = BandFormat.extract_string.__doc__
 
 
 @core.usefulfunc
-def extract_band_value(value):
-    return _band_format.extract_value(value)
+def extract_band_value(string):
+    return _band_format.extract_value(string)
 extract_band_value.__doc__ = BandFormat.extract_value.__doc__
 
 
