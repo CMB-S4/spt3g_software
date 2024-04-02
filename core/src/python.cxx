@@ -295,7 +295,7 @@ G3Pipeline_halt_processing()
     (kelvin)(K)(millikelvin)(mK)(microkelvin)(uK)(nanokelvin)(nK) \
     (picokelvin)(pK)(rankine)(R)(snausage) \
     \
-    (bar)(b)(millibar)(mb) \
+    (bar)(b)(millibar)(mb)(Pa)(kPa) \
     (byte)(B)(bit)(kilobyte)(KB)(megabyte)(MB)(gigabyte)(GB) \
     (gram)(g)(kilogram)(kg)(milligram)(mg)
 
