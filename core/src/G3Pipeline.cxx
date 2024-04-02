@@ -212,7 +212,7 @@ G3Pipeline::siginfo_catcher(int)
 #endif
 
 void
-G3Pipeline::Run(bool profile, bool graph)
+G3Pipeline::Run(bool profile, bool graph, bool signal_halt)
 {
 	struct rusage last_rusage;
 	std::vector<G3Pipeline_mod_data> mods;
@@ -239,12 +239,14 @@ G3Pipeline::Run(bool profile, bool graph)
 		getrusage(RUSAGE_THREAD, &last_rusage);
 #endif
 
-	// Catch SIGINT
-	sigint_catcher.sa_handler = &G3Pipeline::sigint_catcher;
-	sigint_catcher.sa_flags = SA_RESTART | SA_RESETHAND;
-	sigemptyset(&sigint_catcher.sa_mask);
-	sigaddset(&sigint_catcher.sa_mask, SIGINT);
-	sigaction(SIGINT, &sigint_catcher, &oldsigint);
+	if (signal_halt) {
+		// Catch SIGINT
+		sigint_catcher.sa_handler = &G3Pipeline::sigint_catcher;
+		sigint_catcher.sa_flags = SA_RESTART | SA_RESETHAND;
+		sigemptyset(&sigint_catcher.sa_mask);
+		sigaddset(&sigint_catcher.sa_mask, SIGINT);
+		sigaction(SIGINT, &sigint_catcher, &oldsigint);
+	}
 
 #ifdef SIGINFO
 	if (profile) {
@@ -288,7 +290,8 @@ G3Pipeline::Run(bool profile, bool graph)
 
 	// Restore old handler
 	G3Pipeline::halt_processing = false;
-	sigaction(SIGINT, &oldsigint, &sigint_catcher);
+	if (signal_halt)
+		sigaction(SIGINT, &oldsigint, &sigint_catcher);
 #ifdef SIGINFO
 	if (profile)
 		sigaction(SIGINFO, &oldsiginfo, &siginfo_catcher);
