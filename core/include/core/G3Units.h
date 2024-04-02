@@ -147,6 +147,8 @@ namespace G3Units {
 	const double b = bar;
 	const double millibar = b*1e-3;
 	const double mb = millibar;
+	const double Pa = 0.1 * b;
+	const double kPa = 1000 * Pa;
 
         /* File size: base unit is byte */
         const double byte = 1;
