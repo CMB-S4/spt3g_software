@@ -7,6 +7,10 @@ The calibration project contains data classes and analysis code for storing the 
 *Physical properties of the bolometers*
 	This includes the relative pointing offsets of the detectors on the focal plane, their polarization angles and efficiences, their bands, and the fabrication name (physical name) of the detector to which the channel corresponds. It does *not* include tuning-dependent parameters like time constants or responsivity. This information is stored in a ``BolometerPropertiesMap``, indexed by logical bolometer ID, in the Calibration frame. The standard name for this object is "BolometerProperties" and it is created from a composite of other calibration information.
 
+	The frequency band for a bolometer is often represented by a string name with units.  The ``BandFormat`` class provides some functions for converting numerical bands (in G3Units) to their string representation.  A global instance of this class is instantiated, for ensuring consistent band formatting throughout the library code.  By default, the band string is formatted with precision 0 (i.e. an integer) in units of GHz; these can be modified by using the ``set_band_format()`` function.  The ``band_to_string()`` and ``band_to_value()`` functions can be used to convert numerical band values to their string representation and vice versa.  The ``extract_band_string()`` and ``extract_band_value()`` functions can be used to extract band information in string or numerical form from other strings.  Library code should take care to use these functions wherever possible.
+
+	In addition, the ``.band_string`` property of a ``BolometerProperties`` instance returns the string representation of the given bolometer's frequency band, using the global formatting specification.
+
 
 Frame Objects in spt3g.calibration
 ==================================
@@ -58,6 +62,10 @@ Physical bolometer properties, such as detector angular offsets. Does not includ
 * **pixel_id**: Name of the pixel of which this detector is a part
 
 * **pixel_type**: Name of the pixel type of which this detector is a part
+
+* **band_string**: String representation of frequency band center
+
+* **band_vstring**: String representation of frequency band center, without units name
 
 
 
@@ -595,6 +603,107 @@ comes first. Other non-calibration frames will be ignored.
 	Ignores keys in the KeysToIgnore list during merging. By default, set
 	to values written by the flux/pointing calibration that are stored to
 	the BolometerPropertiesMap.
+
+
+
+Functions in spt3g.calibration
+==============================
+* spt3g.calibration.bolopropertiesutils.band_to_string_
+
+* spt3g.calibration.bolopropertiesutils.band_to_value_
+
+* spt3g.calibration.bolopropertiesutils.extract_band_string_
+
+* spt3g.calibration.bolopropertiesutils.extract_band_value_
+
+* spt3g.calibration.bolopropertiesutils.get_band_units_
+
+* spt3g.calibration.bolopropertiesutils.set_band_format_
+
+
+.. _spt3g.calibration.bolopropertiesutils.band_to_string:
+
+**spt3g.calibration.bolopropertiesutils.band_to_string**
+
+Convert a band value in G3Units to its string representation, using
+the appropriate precision and units name.
+
+*Definition:*
+        ``band_to_string(value, include_units=True)``
+
+
+
+
+.. _spt3g.calibration.bolopropertiesutils.band_to_value:
+
+**spt3g.calibration.bolopropertiesutils.band_to_value**
+
+Convert a band string to a value in G3Units, or raise a ValueError
+if no match is found.
+
+*Definition:*
+        ``band_to_value(string)``
+
+
+
+
+.. _spt3g.calibration.bolopropertiesutils.extract_band_string:
+
+**spt3g.calibration.bolopropertiesutils.extract_band_string**
+
+Return the band substring from the input string, or None if not
+found.
+
+*Definition:*
+        ``extract_band_string(string, include_units=True)``
+
+
+
+
+.. _spt3g.calibration.bolopropertiesutils.extract_band_value:
+
+**spt3g.calibration.bolopropertiesutils.extract_band_value**
+
+Return the band in G3Units extracted from the input string, or None
+if not found.
+
+*Definition:*
+        ``extract_band_value(string)``
+
+
+
+
+.. _spt3g.calibration.bolopropertiesutils.get_band_units:
+
+**spt3g.calibration.bolopropertiesutils.get_band_units**
+
+Return the units string used for formatting frequency band values.
+
+*Definition:*
+        ``get_band_units()``
+
+
+
+
+.. _spt3g.calibration.bolopropertiesutils.set_band_format:
+
+**spt3g.calibration.bolopropertiesutils.set_band_format**
+
+Set the band format precision and units for converting between a
+quantity in G3Units and its string representation.
+
+*Arguments:*
+	precision : int
+	    Float formatting precision for the band quantity.  If <=0, output
+	    will be an integer.  If >0, output will be a floating point number
+	    with this many decimal places of precision.
+	units : str
+	    String name of the G3Units quantity in which to represent the
+	    frequency band, e.g. "GHz" or "MHz".  Must correspond to a valid
+	    attribute of the core.G3Units namespace.
+
+*Definition:*
+        ``set_band_format(precision, units)``
 
 
 

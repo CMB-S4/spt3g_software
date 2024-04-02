@@ -41,8 +41,10 @@
   <section id="calibration">
 <h1>calibration<a class="headerlink" href="#calibration" title="Permalink to this heading">¶</a></h1>
 <p>The calibration project contains data classes and analysis code for storing the following things:</p>
-<dl class="simple">
+<dl>
 <dt><em>Physical properties of the bolometers</em></dt><dd><p>This includes the relative pointing offsets of the detectors on the focal plane, their polarization angles and efficiences, their bands, and the fabrication name (physical name) of the detector to which the channel corresponds. It does <em>not</em> include tuning-dependent parameters like time constants or responsivity. This information is stored in a <code class="docutils literal notranslate"><span class="pre">BolometerPropertiesMap</span></code>, indexed by logical bolometer ID, in the Calibration frame. The standard name for this object is “BolometerProperties” and it is created from a composite of other calibration information.</p>
+<p>The frequency band for a bolometer is often represented by a string name with units.  The <code class="docutils literal notranslate"><span class="pre">BandFormat</span></code> class provides some functions for converting numerical bands (in G3Units) to their string representation.  A global instance of this class is instantiated, for ensuring consistent band formatting throughout the library code.  By default, the band string is formatted with precision 0 (i.e. an integer) in units of GHz; these can be modified by using the <code class="docutils literal notranslate"><span class="pre">set_band_format()</span></code> function.  The <code class="docutils literal notranslate"><span class="pre">band_to_string()</span></code> and <code class="docutils literal notranslate"><span class="pre">band_to_value()</span></code> functions can be used to convert numerical band values to their string representation and vice versa.  The <code class="docutils literal notranslate"><span class="pre">extract_band_string()</span></code> and <code class="docutils literal notranslate"><span class="pre">extract_band_value()</span></code> functions can be used to extract band information in string or numerical form from other strings.  Library code should take care to use these functions wherever possible.</p>
+<p>In addition, the <code class="docutils literal notranslate"><span class="pre">.band_string</span></code> property of a <code class="docutils literal notranslate"><span class="pre">BolometerProperties</span></code> instance returns the string representation of the given bolometer’s frequency band, using the global formatting specification.</p>
 </dd>
 </dl>
 <section id="frame-objects-in-spt3g-calibration">
@@ -75,6 +77,8 @@
 <li><p><strong>wafer_id</strong>: Name of the wafer this detector is on</p></li>
 <li><p><strong>pixel_id</strong>: Name of the pixel of which this detector is a part</p></li>
 <li><p><strong>pixel_type</strong>: Name of the pixel type of which this detector is a part</p></li>
+<li><p><strong>band_string</strong>: String representation of frequency band center</p></li>
+<li><p><strong>band_vstring</strong>: String representation of frequency band center, without units name</p></li>
 </ul>
 </section>
 <section id="spt3g-calibration-bolometerpropertiesmap">
@@ -451,6 +455,69 @@ the BolometerPropertiesMap.</p>
 </dd>
 </dl>
 </section>
+<section id="functions-in-spt3g-calibration">
+<h2>Functions in spt3g.calibration<a class="headerlink" href="#functions-in-spt3g-calibration" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="#spt3g-calibration-bolopropertiesutils-band-to-string">spt3g.calibration.bolopropertiesutils.band_to_string</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-calibration-bolopropertiesutils-band-to-value">spt3g.calibration.bolopropertiesutils.band_to_value</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-calibration-bolopropertiesutils-extract-band-string">spt3g.calibration.bolopropertiesutils.extract_band_string</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-calibration-bolopropertiesutils-extract-band-value">spt3g.calibration.bolopropertiesutils.extract_band_value</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-calibration-bolopropertiesutils-get-band-units">spt3g.calibration.bolopropertiesutils.get_band_units</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-calibration-bolopropertiesutils-set-band-format">spt3g.calibration.bolopropertiesutils.set_band_format</a></p></li>
+</ul>
+<p id="spt3g-calibration-bolopropertiesutils-band-to-string"><strong>spt3g.calibration.bolopropertiesutils.band_to_string</strong></p>
+<p>Convert a band value in G3Units to its string representation, using
+the appropriate precision and units name.</p>
+<dl class="simple">
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">band_to_string(value,</span> <span class="pre">include_units=True)</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-calibration-bolopropertiesutils-band-to-value"><strong>spt3g.calibration.bolopropertiesutils.band_to_value</strong></p>
+<p>Convert a band string to a value in G3Units, or raise a ValueError
+if no match is found.</p>
+<dl class="simple">
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">band_to_value(string)</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-calibration-bolopropertiesutils-extract-band-string"><strong>spt3g.calibration.bolopropertiesutils.extract_band_string</strong></p>
+<p>Return the band substring from the input string, or None if not
+found.</p>
+<dl class="simple">
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">extract_band_string(string,</span> <span class="pre">include_units=True)</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-calibration-bolopropertiesutils-extract-band-value"><strong>spt3g.calibration.bolopropertiesutils.extract_band_value</strong></p>
+<p>Return the band in G3Units extracted from the input string, or None
+if not found.</p>
+<dl class="simple">
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">extract_band_value(string)</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-calibration-bolopropertiesutils-get-band-units"><strong>spt3g.calibration.bolopropertiesutils.get_band_units</strong></p>
+<p>Return the units string used for formatting frequency band values.</p>
+<dl class="simple">
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">get_band_units()</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-calibration-bolopropertiesutils-set-band-format"><strong>spt3g.calibration.bolopropertiesutils.set_band_format</strong></p>
+<p>Set the band format precision and units for converting between a
+quantity in G3Units and its string representation.</p>
+<dl class="simple">
+<dt><em>Arguments:</em></dt><dd><dl class="simple">
+<dt>precision<span class="classifier">int</span></dt><dd><p>Float formatting precision for the band quantity.  If &lt;=0, output
+will be an integer.  If &gt;0, output will be a floating point number
+with this many decimal places of precision.</p>
+</dd>
+<dt>units<span class="classifier">str</span></dt><dd><p>String name of the G3Units quantity in which to represent the
+frequency band, e.g. “GHz” or “MHz”.  Must correspond to a valid
+attribute of the core.G3Units namespace.</p>
+</dd>
+</dl>
+</dd>
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">set_band_format(precision,</span> <span class="pre">units)</span></code></p>
+</dd>
+</dl>
+</section>
 </section>
 
 
@@ -472,6 +539,7 @@ the BolometerPropertiesMap.</p>
 </ul>
 </li>
 <li><a class="reference internal" href="#modules-in-spt3g-calibration">Modules in spt3g.calibration</a></li>
+<li><a class="reference internal" href="#functions-in-spt3g-calibration">Functions in spt3g.calibration</a></li>
 </ul>
 </li>
 </ul>
