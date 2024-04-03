@@ -448,16 +448,14 @@ HealpixSkyMapInfo::GetInterpPixelsWeights(quat q, std::vector<size_t> & pixels,
 std::vector<size_t>
 HealpixSkyMapInfo::QueryDisc(quat q, double radius) const
 {
-	double r = radius / G3Units::rad;
-	size_t n = (r < 1) ? ((size_t) (r * r * npix_)) : npix_;
+	size_t n = 0;
 	auto pixels = std::vector<size_t>(n);
-	n = 0;
 
 	radius /= G3Units::rad;
 	if (radius >= M_PI) {
+		pixels.resize(npix_);
 		for (ssize_t i = 0; i < npix_; i++)
 			pixels[n++] = i;
-		pixels.resize(n);
 		return pixels;
 	}
 
@@ -478,6 +476,7 @@ HealpixSkyMapInfo::QueryDisc(quat q, double radius) const
 	if ((rlat1 <= 0) && (irmin > 1)) {
 		// north pole in the disk
 		const HealpixRingInfo & ring = rings_[irmin - 1];
+		pixels.resize(n + ring.pix0 + ring.npix);
 		for (ssize_t i = 0; i < ring.pix0 + ring.npix; i++)
 			pixels[n++] = i;
 	}
@@ -501,6 +500,7 @@ HealpixSkyMapInfo::QueryDisc(quat q, double radius) const
 
 		ssize_t ip_lo = (ssize_t)floor((phi - dphi) / ring.dphi - ring.shift) + 1;
 		ssize_t ip_hi = (ssize_t)floor((phi + dphi) / ring.dphi - ring.shift);
+
 		if (ip_lo > ip_hi)
 			continue;
 
@@ -508,13 +508,25 @@ HealpixSkyMapInfo::QueryDisc(quat q, double radius) const
 			ip_lo -= ring.npix;
 			ip_hi -= ring.npix;
 		}
+
+		ssize_t i0, i1;
 		if (ip_lo < 0) {
-			for (ssize_t i = ring.pix0; i < ring.pix0 + ip_hi + 1; i++)
+			i0 = ring.pix0;
+			i1 = ring.pix0 + ip_hi + 1;
+			pixels.resize(n + i1 - i0);
+			for (ssize_t i = i0; i < i1; i++)
 				pixels[n++] = i;
-			for (ssize_t i = ring.pix0 + ip_lo + ring.npix; i < ipix2 + 1; i++)
+
+			i0 = ring.pix0 + ip_lo + ring.npix;
+			i1 = ipix2 + 1;
+			pixels.resize(n + i1 - i0);
+			for (ssize_t i = i0; i < i1; i++)
 				pixels[n++] = i;
 		} else {
-			for (ssize_t i = ring.pix0 + ip_lo; i < ring.pix0 + ip_hi + 1; i++)
+			i0 = ring.pix0 + ip_lo;
+			i1 = ring.pix0 + ip_hi + 1;
+			pixels.resize(n + i1 - i0);
+			for (ssize_t i = i0; i < i1; i++)
 				pixels[n++] = i;
 		}
 	}
@@ -522,10 +534,10 @@ HealpixSkyMapInfo::QueryDisc(quat q, double radius) const
 	if ((rlat2 >= M_PI) && (irmax + 1 < nring_)) {
 		// south pole in the disk
 		const HealpixRingInfo & ring = rings_[irmax + 1];
+		pixels.resize(n + npix_ - ring.pix0);
 		for (ssize_t i = ring.pix0; i < npix_; i++)
 			pixels[n++] = i;
 	}
-	pixels.resize(n);
 
 	if (nested_) {
 		for (size_t i = 0; i < pixels.size(); i++) {
