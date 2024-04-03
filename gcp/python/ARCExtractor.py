@@ -337,6 +337,7 @@ def UnpackTrackerPointingData(f):
 
     f['OnlinePointingModel'] = p
     if len(pc.keys()):
+        pc['time'] = p['time']
         f['OnlinePointingModelCorrection'] = pc
 
 
