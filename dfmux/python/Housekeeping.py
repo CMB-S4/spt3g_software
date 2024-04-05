@@ -131,7 +131,8 @@ class HousekeepingConsumer(object):
                     dat = self.tuber[board].GetReply()[0]['result']
 
                     boardhk = self.HousekeepingFromJSON(dat)
-                    ismkid = ismkid or "mkid" in boardhk.firmware_name.lower()
+                    if boardhk.firmware_name:
+                        ismkid = ismkid or "mkid" in boardhk.firmware_name.lower()
                     hkdata[int(boardhk.serial)] = boardhk
 
                     ip, crate, slot = self.board_map[board]
