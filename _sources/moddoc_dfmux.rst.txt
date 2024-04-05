@@ -606,6 +606,10 @@ Mux board status. Includes both configuration and sensor readings for board gene
 
 * **is128x**: Boolean for whether 128x firmware is running
 
+* **firmware_version**: Firmware version
+
+* **firmware_name**: Firmware name
+
 * **currents**: Dictionary of data from on-board current sensors
 
 * **voltages**: Dictionary of data from on-board voltage sensors
@@ -661,6 +665,12 @@ Mux channel status (configuration and sensors). Usually a part of an HkModuleInf
 * **rfrac_achieved**: Achieved resistance of the detector when tuned as a fraction of rnormal, as stored by the control software tuning script.
 
 * **loopgain**: Measured loopgain of the detector as stored by the control software tuning script.
+
+* **carrier_phase**: Carrier phase in standard angle units (mkid only)
+
+* **nuller_phase**: Nuller phase in standard angle units (mkid only)
+
+* **demod_phase**: Demodulator phase in standard angle units (mkid only)
 
 
 
@@ -749,6 +759,8 @@ Mux module status
 * **squid_state**: Descriptive string (e.g. "Tuned") stored by control system tuning script to describe SQUID state
 
 * **squid_feedback**: SQUID feedback mechanism employed
+
+* **nco_frequency**: NCO frequency in standard frequency units (mkid only)
 
 * **routing_type**: Whether DAC are routed directly to ADCs or to the cryostat
 

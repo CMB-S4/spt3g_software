@@ -449,6 +449,8 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <li><p><strong>serial</strong>: Board serial number</p></li>
 <li><p><strong>fir_stage</strong>: Sample rate encoded as the “FIR Stage”. Smaller numbers are faster and grow by factors of two with each decrement</p></li>
 <li><p><strong>is128x</strong>: Boolean for whether 128x firmware is running</p></li>
+<li><p><strong>firmware_version</strong>: Firmware version</p></li>
+<li><p><strong>firmware_name</strong>: Firmware name</p></li>
 <li><p><strong>currents</strong>: Dictionary of data from on-board current sensors</p></li>
 <li><p><strong>voltages</strong>: Dictionary of data from on-board voltage sensors</p></li>
 <li><p><strong>temperatures</strong>: Dictionary of data from on-board temperature sensors (C)</p></li>
@@ -480,6 +482,9 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <li><p><strong>rnormal</strong>: Resistance of the detector when normal in standard impedance units as stored by the control software tuning script.</p></li>
 <li><p><strong>rfrac_achieved</strong>: Achieved resistance of the detector when tuned as a fraction of rnormal, as stored by the control software tuning script.</p></li>
 <li><p><strong>loopgain</strong>: Measured loopgain of the detector as stored by the control software tuning script.</p></li>
+<li><p><strong>carrier_phase</strong>: Carrier phase in standard angle units (mkid only)</p></li>
+<li><p><strong>nuller_phase</strong>: Nuller phase in standard angle units (mkid only)</p></li>
+<li><p><strong>demod_phase</strong>: Demodulator phase in standard angle units (mkid only)</p></li>
 </ul>
 </section>
 <section id="spt3g-dfmux-hkmezzanineinfo">
@@ -530,6 +535,7 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <li><p><strong>squid_transimpedance</strong>: Measured SQUID transimpedance, in resistance units</p></li>
 <li><p><strong>squid_state</strong>: Descriptive string (e.g. “Tuned”) stored by control system tuning script to describe SQUID state</p></li>
 <li><p><strong>squid_feedback</strong>: SQUID feedback mechanism employed</p></li>
+<li><p><strong>nco_frequency</strong>: NCO frequency in standard frequency units (mkid only)</p></li>
 <li><p><strong>routing_type</strong>: Whether DAC are routed directly to ADCs or to the cryostat</p></li>
 <li><p><strong>channels</strong>: Mapping from 1-indexed channel numbers to channel housekeeping data</p></li>
 </ul>
