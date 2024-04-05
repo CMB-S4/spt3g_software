@@ -126,10 +126,13 @@ class HousekeepingConsumer(object):
                                      # avoid overloading the network on the return
 
                 found = False
+                ismkid = False
                 for board in self.board_serials:
                     dat = self.tuber[board].GetReply()[0]['result']
 
                     boardhk = self.HousekeepingFromJSON(dat)
+                    if boardhk.firmware_name:
+                        ismkid = ismkid or "mkid" in boardhk.firmware_name.lower()
                     hkdata[int(boardhk.serial)] = boardhk
 
                     ip, crate, slot = self.board_map[board]
@@ -149,7 +152,7 @@ class HousekeepingConsumer(object):
 
                 hwmf = core.G3Frame(core.G3FrameType.Wiring)
                 hwmf['WiringMap'] = hwm
-                hwmf['ReadoutSystem'] = 'ICE'
+                hwmf['ReadoutSystem'] = 'RF-ICE' if ismkid else 'ICE'
 
                 if self.hwmf is None:
                     self.hwmf = hwmf
@@ -213,6 +216,9 @@ class HousekeepingConsumer(object):
 
         boardhk.timestamp_port = str(dat['timestamp_port'])
         boardhk.serial = str(dat['serial'])
+        if 'firmware_name' in dat:
+            boardhk.firmware_name = str(dat['firmware_name'])
+            boardhk.firmware_version = str(dat['firmware_version'])
         boardhk.fir_stage = dat['fir_stage']
         for i in dat['currents'].items():
             boardhk.currents[str(i[0])] = i[1]
@@ -227,16 +233,20 @@ class HousekeepingConsumer(object):
             mezzhk.present = mezz['present']
             mezzhk.power = mezz['power']
             if mezzhk.present:
-                mezzhk.serial = str(mezz['ipmi']['product']['serial_number'])
-                mezzhk.part_number = str(mezz['ipmi']['product']['part_number'])
-                mezzhk.revision = str(mezz['ipmi']['product']['version_number'])
-                for i in mezz['currents'].items():
-                    mezzhk.currents[str(i[0])] = i[1]
-                for i in mezz['voltages'].items():
-                    mezzhk.voltages[str(i[0])] = i[1]
+                if 'ipmi' in mezz:
+                    mezzhk.serial = str(mezz['ipmi']['product']['serial_number'])
+                    mezzhk.part_number = str(mezz['ipmi']['product']['part_number'])
+                    mezzhk.revision = str(mezz['ipmi']['product']['version_number'])
+                if 'currents' in mezz:
+                    for i in mezz['currents'].items():
+                        mezzhk.currents[str(i[0])] = i[1]
+                if 'voltages' in mezz:
+                    for i in mezz['voltages'].items():
+                        mezzhk.voltages[str(i[0])] = i[1]
 
             if mezzhk.present and mezzhk.power:
-                mezzhk.temperature = mezz['temperature']
+                if 'temperature' in mezz:
+                    mezzhk.temperature = mezz['temperature']
                 # these parameters are not in the 64x housekeeping tuber
                 mezzhk.squid_heater = mezz.get('squid_heater', 0.0)
                 mezzhk.squid_controller_power = mezz.get('squid_controller_power', False)
@@ -261,6 +271,8 @@ class HousekeepingConsumer(object):
                         modhk.squid_current_bias = mod['squid_flux_bias']
                     if 'squid_feedback' in mod:
                         modhk.squid_feedback = str(mod['squid_feedback'])
+                    if 'nco_frequency' in mod:
+                        modhk.nco_frequency = mod['nco_frequency'] * core.G3Units.Hz
 
                 if 'squid_tuning' in mod and mod['squid_tuning'] is not None:
                     modhk.squid_state = str(mod['squid_tuning']['state'])
@@ -272,15 +284,23 @@ class HousekeepingConsumer(object):
                     chanhk.channel_number = k+1
                     chanhk.carrier_amplitude = chan['carrier_amplitude']
                     chanhk.nuller_amplitude = chan['nuller_amplitude']
-                    chanhk.dan_gain = chan['dan_gain']
-                    chanhk.dan_streaming_enable = chan['dan_streaming_enable']
-                    if boardhk.is128x:
-                        chanhk.carrier_frequency = chan['frequency']*core.G3Units.Hz
-                        chanhk.demod_frequency = chan['frequency']*core.G3Units.Hz
+                    if 'dan_gain' in chan:
+                        chanhk.dan_gain = chan['dan_gain']
+                    if 'dan_streaming_enable' in chan:
+                        chanhk.dan_streaming_enable = chan['dan_streaming_enable']
+                    if 'frequency' in chan:
+                        chanhk.carrier_frequency = chan['frequency'] * core.G3Units.Hz
+                        chanhk.demod_frequency = chan['frequency'] * core.G3Units.Hz
                     else:
-                        chanhk.carrier_frequency = chan['carrier_frequency']*core.G3Units.Hz
-                        chanhk.demod_frequency = chan['demod_frequency']*core.G3Units.Hz
+                        chanhk.carrier_frequency = chan['carrier_frequency'] * core.G3Units.Hz
+                        chanhk.demod_frequency = chan['demod_frequency'] * core.G3Units.Hz
+                    if 'carrier_phase' in chan:
+                        chanhk.carrier_phase = chan['carrier_phase'] * core.G3Units.deg
+                        chanhk.nuller_phase = chan['nuller_phase'] * core.G3Units.deg
+                        chanhk.demod_phase = chan['demod_phase'] * core.G3Units.deg
+                    if 'dan_accumulator_enable' in chan:
                         chanhk.dan_accumulator_enable = chan['dan_accumulator_enable']
+                    if 'dan_feedback_enable' in chan:
                         chanhk.dan_feedback_enable = chan['dan_feedback_enable']
                     if 'dan_railed' in chan:
                         chanhk.dan_railed = chan['dan_railed']
@@ -316,6 +336,7 @@ class HousekeepingConsumer(object):
         serial = int(dat['serial'])
         for imezz, mezz in enumerate(dat['mezzanines']):
             for imod, mod in enumerate(mezz['modules']):
+                module = imod + len(mezz['modules']) * imezz
                 for ichan, chan in enumerate(mod['channels']):
                     name = (chan.get('tuning', {}) or {}).get('name', None)
                     if not name:
@@ -325,7 +346,7 @@ class HousekeepingConsumer(object):
                     mapping.board_serial = serial
                     mapping.board_slot = slot
                     mapping.crate_serial = crate
-                    mapping.module = imod + 4 * imezz
+                    mapping.module = module
                     mapping.channel = ichan
                     try:
                         name = str(name)

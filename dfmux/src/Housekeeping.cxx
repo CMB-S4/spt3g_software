@@ -48,6 +48,12 @@ template <class A> void HkChannelInfo::serialize(A &ar, unsigned v)
 	if (v > 4) {
 		ar & make_nvp("loopgain", loopgain);
 	}
+
+	if (v > 5) {
+		ar & make_nvp("carrier_phase", carrier_phase);
+		ar & make_nvp("nuller_phase", nuller_phase);
+		ar & make_nvp("demod_phase", demod_phase);
+	}
 }
 
 std::string HkModuleInfo::Description() const
@@ -82,6 +88,10 @@ template <class A> void HkModuleInfo::serialize(A &ar, unsigned v)
 		ar & make_nvp("squid_state", squid_state);
 		ar & make_nvp("squid_p2p", squid_p2p);
 		ar & make_nvp("squid_transimpedance", squid_transimpedance);
+	}
+
+	if (v >= 3) {
+		ar & make_nvp("nco_frequency", nco_frequency);
 	}
 }
 
@@ -146,6 +156,11 @@ template <class A> void HkBoardInfo::serialize(A &ar, unsigned v)
 	if (v >= 2) {
 		ar & make_nvp("is128x", is128x);
 	}
+
+	if (v >= 3) {
+		ar & make_nvp("firmware_version", firmware_version);
+		ar & make_nvp("firmware_name", firmware_name);
+	}
 }
 
 G3_SERIALIZABLE_CODE(HkChannelInfo);
@@ -197,6 +212,12 @@ PYBINDINGS("dfmux") {
 	    .def_readwrite("loopgain", &HkChannelInfo::loopgain,
 	       "Measured loopgain of the detector as stored by the "
 	       "control software tuning script.")
+	    .def_readwrite("carrier_phase", &HkChannelInfo::carrier_phase,
+	       "Carrier phase in standard angle units (mkid only)")
+	    .def_readwrite("nuller_phase", &HkChannelInfo::nuller_phase,
+	       "Nuller phase in standard angle units (mkid only)")
+	    .def_readwrite("demod_phase", &HkChannelInfo::demod_phase,
+	       "Demodulator phase in standard angle units (mkid only)")
 	;
 	register_map<std::map<int, HkChannelInfo> >("HkChannelInfoMap",
 	    "Mapping of channel number (1-indexed) to channel status "
@@ -233,6 +254,8 @@ PYBINDINGS("dfmux") {
 	       "tuning script to describe SQUID state")
 	    .def_readwrite("squid_feedback", &HkModuleInfo::squid_feedback,
 	       "SQUID feedback mechanism employed")
+	    .def_readwrite("nco_frequency", &HkModuleInfo::nco_frequency,
+	       "NCO frequency in standard frequency units (mkid only)")
 	    .def_readwrite("routing_type", &HkModuleInfo::routing_type,
 	       "Whether DAC are routed directly to ADCs or to the cryostat")
 	    .def_readwrite("channels", &HkModuleInfo::channels,
@@ -288,6 +311,10 @@ PYBINDINGS("dfmux") {
 	       "faster and grow by factors of two with each decrement")
 	    .def_readwrite("is128x", &HkBoardInfo::is128x,
 		"Boolean for whether 128x firmware is running")
+	    .def_readwrite("firmware_version", &HkBoardInfo::firmware_version,
+	       "Firmware version")
+	    .def_readwrite("firmware_name", &HkBoardInfo::firmware_name,
+	       "Firmware name")
 	    .def_readwrite("currents", &HkBoardInfo::currents,
 	       "Dictionary of data from on-board current sensors")
 	    .def_readwrite("voltages", &HkBoardInfo::voltages,
