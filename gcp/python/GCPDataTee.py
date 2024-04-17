@@ -127,6 +127,7 @@ class DAQWatchdog(PagerWatchdog):
             return False
 
         now = time.time()
+        retval = True
 
         # only ping if all expected modules are present
         data = frame['DfMux']
@@ -143,7 +144,7 @@ class DAQWatchdog(PagerWatchdog):
                 self.last_log_boards = now
                 self.boards_missing = boards_missing
             self.last_missing = now
-            return False
+            retval = False
         elif self.last_log_boards and now - self.last_missing > 10:
             # log recovery
             core.log_notice("All boards recovered in DAQ data stream", unit=self.unit)
@@ -159,7 +160,7 @@ class DAQWatchdog(PagerWatchdog):
                 )
                 self.last_log_cal = now
             self.last_missing = now
-            return False
+            retval = False
         elif self.calibrator and self.last_log_cal and now - self.last_missing > 10:
             # log recovery
             core.log_notice(
@@ -169,9 +170,9 @@ class DAQWatchdog(PagerWatchdog):
 
         # only ping if normal data acquisition has been going for a bit
         if self.last_missing and now - self.last_missing < 10:
-            return False
+            retval = False
 
-        return True
+        return retval
 
     def __call__(self, frame):
         self.run(frame)
