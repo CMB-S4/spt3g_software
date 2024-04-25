@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.5)
 if(POLICY CMP0060) # Avoid cmake misfeature that can link the wrong libraries
 	cmake_policy(SET CMP0060 NEW)
 endif()
