@@ -19,11 +19,19 @@ def addinfo(fr):
 	fr['count'] = n
 	n += 1
 pipe.Add(addinfo)
+
+class checkwriter(core.G3MultiFileWriter):
+	def __call__(self, frame):
+		if frame.type == core.G3FrameType.EndProcessing:
+			assert os.path.exists(self.current_file)
+		super().__call__(frame)
+
 pipe.Add(lambda fr: fr.type != core.G3FrameType.PipelineInfo) # Avoid extra frames that complicate accounting
-pipe.Add(core.G3MultiFileWriter, filename='multitest-%02u.g3', size_limit=20*1024)
-pipe.Add(core.G3MultiFileWriter, filename=lambda frame,seq: 'multitest2-%02d.g3' % seq, size_limit=20*1024)
-pipe.Add(core.G3MultiFileWriter, filename='multitest3-%02u.g3', size_limit=20*1024, divide_on=[core.G3FrameType.Timepoint])
-pipe.Add(core.G3MultiFileWriter, filename='multitest4-%02u.g3', size_limit=2000000*1024, divide_on=lambda fr: fr['count'] % 200 == 0)
+pipe.Add(checkwriter, filename='multitest-%02u.g3', size_limit=20*1024)
+pipe.Add(checkwriter, filename=lambda frame,seq: 'multitest2-%02d.g3' % seq, size_limit=20*1024)
+pipe.Add(checkwriter, filename='multitest3-%02u.g3', size_limit=20*1024, divide_on=[core.G3FrameType.Timepoint])
+pipe.Add(checkwriter, filename='multitest4-%02u.g3', size_limit=2000000*1024, divide_on=lambda fr: fr['count'] % 200 == 0)
+
 pipe.Run()
 
 # Check that various ways of splitting produce the right number of files
