@@ -16,17 +16,19 @@ class HousekeepingConsumer(object):
 
     Also emits a Wiring frame from the housekeeping data.  This requires a
     recent (as of November 2018) version of pydfmux in order to read mapped
-    channel names from each board.
+    channel names from each board.  If ignore_wiring=False, assumes that
+    the wiring map is handled by a separate process.
 
     If collecting real-time data, you may want to set subprocess=True when
     adding this module.
     '''
-    def __init__(self):
+    def __init__(self, ignore_wiring=False):
         self.tuber = {}
         self.board_map = {}
         self.board_serials = []
         self.buffer = []
         self.hwmf = None
+        self.ignore_wiring = ignore_wiring
 
     def map_boards(self):
         '''
@@ -77,9 +79,9 @@ class HousekeepingConsumer(object):
 
     def __call__(self, frame):
 
-        # If a wiring frame has been emitted once already, then process every frame
+        # If the boards have been mapped already, then process every frame
         # as received.
-        if self.hwmf is not None:
+        if len(self.board_serials):
             return self.ProcessBuffered(frame)
 
         # Otherwise, process at least one Timepoint frame first to gather
@@ -135,13 +137,16 @@ class HousekeepingConsumer(object):
                         ismkid = ismkid or "mkid" in boardhk.firmware_name.lower()
                     hkdata[int(boardhk.serial)] = boardhk
 
+                    if self.ignore_wiring:
+                        continue
+
                     ip, crate, slot = self.board_map[board]
                     boardw = self.WiringFromJSON(dat, ip, crate, slot)
                     for key in boardw.keys():
                         hwm[key] = boardw[key]
                         found = True
 
-                if not found:
+                if not found and not self.ignore_wiring:
                     core.log_fatal("No mapped channels found on any IceBoards. "
                                    "You may need to update pydfmux to a newer version of pydfmux "
                                    "that stores mapped channel names on the boards, and reload "
@@ -149,6 +154,9 @@ class HousekeepingConsumer(object):
                                    unit='HousekeepingConsumer')
 
                 frame['DfMuxHousekeeping'] = hkdata
+
+                if self.ignore_wiring:
+                    return [frame]
 
                 hwmf = core.G3Frame(core.G3FrameType.Wiring)
                 hwmf['WiringMap'] = hwm
