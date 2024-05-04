@@ -79,7 +79,7 @@ class HousekeepingConsumer(object):
 
     def __call__(self, frame):
 
-        # If a wiring frame been emitted once already, then process every frame
+        # If a wiring frame has been emitted once already, then process every frame
         # as received.
         if self.hwmf is not None or (self.ignore_wiring and len(self.board_serials)):
             return self.ProcessBuffered(frame)
