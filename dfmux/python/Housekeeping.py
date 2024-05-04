@@ -79,9 +79,9 @@ class HousekeepingConsumer(object):
 
     def __call__(self, frame):
 
-        # If the boards have been mapped already, then process every frame
+        # If a wiring frame been emitted once already, then process every frame
         # as received.
-        if len(self.board_serials):
+        if self.hwmf is not None or (self.ignore_wiring and len(self.board_serials)):
             return self.ProcessBuffered(frame)
 
         # Otherwise, process at least one Timepoint frame first to gather
