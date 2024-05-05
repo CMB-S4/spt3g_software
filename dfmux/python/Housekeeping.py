@@ -79,9 +79,9 @@ class HousekeepingConsumer(object):
 
     def __call__(self, frame):
 
-        # If a wiring frame has been emitted once already, then process every frame
+        # If boards have been mapped already, then process every frame
         # as received.
-        if self.hwmf is not None or (self.ignore_wiring and len(self.board_serials)):
+        if len(self.board_map):
             return self.ProcessBuffered(frame)
 
         # Otherwise, process at least one Timepoint frame first to gather
@@ -108,7 +108,7 @@ class HousekeepingConsumer(object):
             self.board_serials = [('%04d' % k) for k in frame['DfMux'].keys()]
             return [frame]
 
-        if frame.type == core.G3FrameType.Wiring:
+        if frame.type == core.G3FrameType.Wiring and not self.ignore_wiring:
             core.log_fatal("Received spurious wiring frame.  Do not use "
                            "PyDfMuxHardwareMapInjector with the HousekeepingConsumer.  "
                            "You may update pydfmux to a newer version of pydfmux "
