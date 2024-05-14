@@ -108,13 +108,23 @@ class HousekeepingConsumer(object):
             self.board_serials = [('%04d' % k) for k in frame['DfMux'].keys()]
             return [frame]
 
-        if frame.type == core.G3FrameType.Wiring and not self.ignore_wiring:
-            core.log_fatal("Received spurious wiring frame.  Do not use "
-                           "PyDfMuxHardwareMapInjector with the HousekeepingConsumer.  "
-                           "You may update pydfmux to a newer version of pydfmux "
-                           "that stores mapped channel names on the boards, and "
-                           "rearrange your data acquisition script.",
-                           unit='HousekeepingConsumer')
+        if frame.type == core.G3FrameType.Wiring:
+            if self.ignore_wiring:
+                core.log_warn(
+                    "Received a wiring frame, which may be inconsistent with "
+                    "board housekeeping data.  Store mapped channel names on the "
+                    "board using updated pydfmux/hidfmux software.",
+                    unit="HousekeepingConsumer",
+                )
+            else:
+                core.log_fatal(
+                    "Received spurious wiring frame.  Do not use "
+                    "PyDfMuxHardwareMapInjector with the HousekeepingConsumer.  "
+                    "You may update pydfmux/hidfmux to a newer version that "
+                    "stores mapped channel names on the boards, and rearrange "
+                    "your data acquisition script.",
+                    unit="HousekeepingConsumer",
+                )
 
         if frame.type == core.G3FrameType.Housekeeping:
             self.map_boards()
