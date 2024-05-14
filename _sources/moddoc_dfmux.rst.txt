@@ -878,13 +878,14 @@ data at fixed intervals.
 
 Also emits a Wiring frame from the housekeeping data.  This requires a
 recent (as of November 2018) version of pydfmux in order to read mapped
-channel names from each board.
+channel names from each board.  If ignore_wiring=False, assumes that
+the wiring map is handled by a separate process.
 
 If collecting real-time data, you may want to set subprocess=True when
 adding this module.
 
 *Constructor:*
-	``HousekeepingConsumer(self)``
+	``HousekeepingConsumer(self, ignore_wiring=False)``
 
 
 

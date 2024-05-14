@@ -599,11 +599,12 @@ Use in conjunction with a dfmux.PeriodicHousekeepingCollector to get
 data at fixed intervals.</p>
 <p>Also emits a Wiring frame from the housekeeping data.  This requires a
 recent (as of November 2018) version of pydfmux in order to read mapped
-channel names from each board.</p>
+channel names from each board.  If ignore_wiring=False, assumes that
+the wiring map is handled by a separate process.</p>
 <p>If collecting real-time data, you may want to set subprocess=True when
 adding this module.</p>
 <dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">HousekeepingConsumer(self)</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">HousekeepingConsumer(self,</span> <span class="pre">ignore_wiring=False)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-dfmux-housekeeping-periodichousekeepingcollector"><strong>spt3g.dfmux.Housekeeping.PeriodicHousekeepingCollector</strong></p>
