@@ -133,8 +133,13 @@ void DfMuxBuilder::ProcessNewData()
 
 	// Add to meta sample
 	int idx = pkt->module * pkt->nblocks + pkt->block;
-	g3_assert((*sample->sample)[pkt->board].find(idx) ==
-	    (*sample->sample)[pkt->board].end());
+	if ((*sample->sample)[pkt->board].find(idx) !=
+	    (*sample->sample)[pkt->board].end()) {
+		log_error("Duplicate packet from board %d module %d/%d at time %s",
+		    pkt->board, pkt->module, pkt->block,
+		    pkt->sample->Timestamp.Description().c_str());
+		return;
+	}
 	(*sample->sample)[pkt->board][idx] = pkt->sample;
 	(*sample->sample)[pkt->board].nmodules = pkt->nmodules;
 	(*sample->sample)[pkt->board].nblocks = pkt->nblocks;
