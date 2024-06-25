@@ -131,7 +131,7 @@ GCPLogger::Log(G3LogLevel level, const std::string &unit,
 	    log_description, unit.c_str(), message.c_str(),
 	    trimmed_filename.c_str(), line, func.c_str());
 
-	char log_message[messagesize + 1];
+	char *log_message = new char[messagesize + 1];
 
 	sprintf(log_message,
 	    "%s (%s): %s (%s:%d in %s)",
@@ -140,6 +140,7 @@ GCPLogger::Log(G3LogLevel level, const std::string &unit,
 
 	log_deque_lock_.lock();
 	log_deque_.push_back(log_message);
+	delete [] log_message;
 
 	// These are for human viewing. No one will look at > 100 messages.
 	if (log_deque_.size() > 100)
