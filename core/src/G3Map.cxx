@@ -177,6 +177,8 @@ template <class A> void G3MapFrameObject::save(A &ar, const unsigned v) const
 
 template <class A> void G3MapFrameObject::load(A &ar, const unsigned v)
 {
+	G3_CHECK_VERSION(v);
+
 	ar >> cereal::make_nvp("G3FrameObject",
 	    cereal::base_class<G3FrameObject>(this));
 

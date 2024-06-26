@@ -111,6 +111,8 @@ std::string G3TimesampleMap::Summary() const
 
 template <class A> void G3TimesampleMap::serialize(A &ar, unsigned v)
 {
+	G3_CHECK_VERSION(v);
+
 	using namespace cereal;
 	ar & make_nvp("parent", base_class<G3MapFrameObject>(this));
 	ar & make_nvp("times", times);

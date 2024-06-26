@@ -400,6 +400,9 @@ template <class A>
 void G3SkyMapMask::load(A &ar, unsigned v)
 {
 	using namespace cereal;
+
+	G3_CHECK_VERSION(v);
+
 	ar & make_nvp("G3FrameObject", base_class<G3FrameObject>(this));
 	ar & make_nvp("parent", parent_);
 	if (v < 2) {

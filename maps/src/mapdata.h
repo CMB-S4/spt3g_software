@@ -2,6 +2,7 @@
 
 #include <cereal/types/vector.hpp>
 #include <cereal/types/utility.hpp>
+#include <serialization.h>
 
 class DenseMapData;
 
@@ -114,6 +115,7 @@ public:
 
 	template <class A> void serialize(A &ar, unsigned v) {
 		using namespace cereal;
+		G3_CHECK_VERSION(v);
 		ar & make_nvp("xlen", xlen_);
 		ar & make_nvp("ylen", ylen_);
 		ar & make_nvp("offset", offset_);
@@ -242,6 +244,7 @@ public:
 
 	template <class A> void serialize(A &ar, unsigned v) {
 		using namespace cereal;
+		G3_CHECK_VERSION(v);
 		ar & make_nvp("xlen", xlen_);
 		ar & make_nvp("ylen", ylen_);
 		ar & make_nvp("data", data_);
