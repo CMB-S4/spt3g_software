@@ -69,6 +69,8 @@ quat_to_ang(quat q, double &alpha, double &delta)
 	QNORM(q);
 	delta = ASIN(q.R_component_4()) * G3Units::rad;
 	alpha = ATAN2(q.R_component_3(), q.R_component_2())*G3Units::rad;
+	if (alpha < 0)
+		alpha += 360 * deg;
 }
 
 static boost::python::tuple
