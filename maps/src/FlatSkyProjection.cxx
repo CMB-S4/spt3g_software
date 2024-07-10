@@ -148,10 +148,13 @@ bool FlatSkyProjection::IsCompatible(const FlatSkyProjection & other) const
 			 "(ProjNone) will raise an error.", proj_, other.proj_, ProjNone);
 		return check;
 	}
+	double da = fmod(fabs(alpha0_ - other.alpha0_), 360 * deg);
+	if (da > 180 * deg)
+		da = 360 * deg - da;
 	return (check &&
 		(proj_ == other.proj_) &&
 		(fabs(delta0_ - other.delta0_) < 1e-8) &&
-		(fmod(fabs(alpha0_ - other.alpha0_), 360 * deg) < 1e-8) &&
+		(da < 1e-8) &&
 		(fabs(x0_ - other.x0_) < 1e-8) &&
 		(fabs(y0_ - other.y0_) < 1e-8));
 }
@@ -187,6 +190,8 @@ void FlatSkyProjection::SetProj(MapProjection proj)
 
 void FlatSkyProjection::SetAlphaCenter(double alpha)
 {
+	if (alpha < 0)
+		alpha += 360 * deg;
 	alpha0_ = alpha;
 	q0_ = get_origin_rotator(alpha0_, delta0_);
 }
@@ -307,14 +312,8 @@ FlatSkyProjection::XYToAngle(double x, double y) const
 		break;
 	}
 
-	static const double circ = 360 * deg;
-	static const double halfcirc = 180 * deg;
-	double dalpha = alpha - alpha0_;
-
-	if (dalpha > halfcirc)
-		alpha -= circ;
-	if (dalpha < -halfcirc)
-		alpha += circ;
+	if (alpha < 0)
+		alpha += 360 * deg;
 
 	return {alpha, delta};
 }

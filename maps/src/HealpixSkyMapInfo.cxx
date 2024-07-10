@@ -273,8 +273,8 @@ HealpixSkyMapInfo::PixelToAngle(size_t pixel) const
 	else
 		pix2ang_ring64(nside_, pixel, &delta, &alpha);
 
-	if (alpha > M_PI)
-		alpha -= twopi;
+	if (alpha < 0)
+		alpha += twopi;
 
 	if (delta < 0 || delta > 180 * G3Units::deg)
 		return {0., 0.};
