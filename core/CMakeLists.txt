@@ -28,6 +28,15 @@ add_spt3g_library(core SHARED
 	src/int_storage.cxx
 )
 
+
+# json output option
+set(ENABLE_JSON_OUTPUT "FALSE" CACHE BOOL "Enable JSON output of frames (adds to compile time and binary size)")
+
+if (${ENABLE_JSON_OUTPUT})
+	target_compile_definitions(core PUBLIC -DSPT3G_ENABLE_JSON_OUTPUT)
+endif()
+
+
 # Link dependencies
 target_link_libraries(core spt3g)
 
@@ -60,6 +69,7 @@ endif()
 link_python_dir()
 
 add_spt3g_program(bin/spt3g-dump)
+add_spt3g_program(bin/spt3g-jsonify)
 add_spt3g_program(bin/spt3g-verify)
 add_spt3g_program(bin/spt3g-inspect)
 add_spt3g_program(bin/gen-analysis-doc)
