@@ -56,6 +56,17 @@ All frames emitted by ``dosomethings`` will be written to ``/path/to/file.g3``. 
 
 Like G3Reader, G3Writer supports gzip and will write compressed output if its output file name ends in ``.gz``.
 
+G3Writer can also be used outside of a pipeline as a context to write particular frames to file.  For example:
+
+.. code-block:: python
+
+	with core.G3Writer(filename='/path/to/file.g3') as writer:
+		writer(frame1)
+		writer(frame2)
+
+This will open the file, write both ``frame1`` and ``frame2``, then properly close the file.
+
+
 G3MultiFileWriter
 =================
 
@@ -96,6 +107,8 @@ For more complex cases, you can also pass a callable as divide_on that takes a f
 	pipe.Add(dosomethings)
 	pipe.Add(core.G3MultiFileWriter, filename='/path/to/file-%02u.g3', size_limit = 1024**3, divide_on=lambda frame: frame.type in [core.G3FrameType.Observation])
 	pipe.Run()
+
+G3MultiFileWriter can also be used as a python context object, just like G3Writer.
 
 G3File
 ======
