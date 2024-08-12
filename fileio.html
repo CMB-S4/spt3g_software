@@ -79,6 +79,13 @@
 </div>
 <p>All frames emitted by <code class="docutils literal notranslate"><span class="pre">dosomethings</span></code> will be written to <code class="docutils literal notranslate"><span class="pre">/path/to/file.g3</span></code>. If this file is read in a different scipt using G3Reader, modules following the G3Reader will operate exactly as though they followed <code class="docutils literal notranslate"><span class="pre">dosomethings</span></code>.</p>
 <p>Like G3Reader, G3Writer supports gzip and will write compressed output if its output file name ends in <code class="docutils literal notranslate"><span class="pre">.gz</span></code>.</p>
+<p>G3Writer can also be used outside of a pipeline as a context to write particular frames to file.  For example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">core</span><span class="o">.</span><span class="n">G3Writer</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s1">&#39;/path/to/file.g3&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">writer</span><span class="p">:</span>
+        <span class="n">writer</span><span class="p">(</span><span class="n">frame1</span><span class="p">)</span>
+        <span class="n">writer</span><span class="p">(</span><span class="n">frame2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This will open the file, write both <code class="docutils literal notranslate"><span class="pre">frame1</span></code> and <code class="docutils literal notranslate"><span class="pre">frame2</span></code>, then properly close the file.</p>
 </section>
 <section id="g3multifilewriter">
 <h2>G3MultiFileWriter<a class="headerlink" href="#g3multifilewriter" title="Permalink to this heading">¶</a></h2>
@@ -111,6 +118,7 @@
 <span class="n">pipe</span><span class="o">.</span><span class="n">Run</span><span class="p">()</span>
 </pre></div>
 </div>
+<p>G3MultiFileWriter can also be used as a python context object, just like G3Writer.</p>
 </section>
 <section id="g3file">
 <h2>G3File<a class="headerlink" href="#g3file" title="Permalink to this heading">¶</a></h2>
