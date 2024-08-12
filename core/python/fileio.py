@@ -22,6 +22,8 @@ class G3File(object):
         return self
 
     def next(self):
+        if self.reader is None:
+            raise StopIteration("Reader closed")
         frames = self.reader.Process(None)
         if len(frames) == 0:
             raise StopIteration("No more frames in file")
@@ -30,6 +32,13 @@ class G3File(object):
         return frames[0]
 
     __next__ = next
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args, **kwargs):
+        del self.reader
+        self.reader = None
 
 
 # writer context methods
