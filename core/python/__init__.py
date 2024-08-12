@@ -11,7 +11,7 @@ def fix_logging_crash():
 atexit.register(fix_logging_crash)
 del fix_logging_crash
 
-from spt3g.core.G3File import G3File
+from spt3g.core.fileio import *
 from spt3g.core.modconstruct import pipesegment, indexmod, pipesegment_nodoc
 from spt3g.core.funcconstruct import usefulfunc
 try:

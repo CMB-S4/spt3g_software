@@ -35,12 +35,11 @@ class TestVectorInt(unittest.TestCase):
     def test_serialize(self):
         """Confirm full ranges can be saved and loaded."""
 
-        w = core.G3Writer(test_filename)
-        for isize, val in bit_sizes:
-            f = core.G3Frame()
-            f['v'] = core.G3VectorInt([val] * 10)
-            w(f)
-        del w
+        with core.G3Writer(test_filename) as w:
+            for isize, val in bit_sizes:
+                f = core.G3Frame()
+                f['v'] = core.G3VectorInt([val] * 10)
+                w(f)
 
         r = core.G3Reader(test_filename)
         for isize, val in bit_sizes:
@@ -53,12 +52,11 @@ class TestVectorInt(unittest.TestCase):
     def test_serialize_map(self):
         """Confirm full ranges can be saved and loaded."""
 
-        w = core.G3Writer(test_filename)
-        for isize, val in bit_sizes:
-            f = core.G3Frame()
-            f['m'] = core.G3MapInt({str(i): val for i in range(10)})
-            w(f)
-        del w
+        with core.G3Writer(test_filename) as w:
+            for isize, val in bit_sizes:
+                f = core.G3Frame()
+                f['m'] = core.G3MapInt({str(i): val for i in range(10)})
+                w(f)
 
         r = core.G3Reader(test_filename)
         for isize, val in bit_sizes:
@@ -71,12 +69,11 @@ class TestVectorInt(unittest.TestCase):
     def test_serialize_map_vector(self):
         """Confirm full ranges can be saved and loaded."""
 
-        w = core.G3Writer(test_filename)
-        for isize, val in bit_sizes:
-            f = core.G3Frame()
-            f['m'] = core.G3MapVectorInt({'a': [val] * 10})
-            w(f)
-        del w
+        with core.G3Writer(test_filename) as w:
+            for isize, val in bit_sizes:
+                f = core.G3Frame()
+                f['m'] = core.G3MapVectorInt({'a': [val] * 10})
+                w(f)
 
         r = core.G3Reader(test_filename)
         for isize, val in bit_sizes:
@@ -91,11 +88,10 @@ class TestVectorInt(unittest.TestCase):
         count = 10000
         overhead = 200
         for isize, val in bit_sizes:
-            w = core.G3Writer(test_filename)
-            f = core.G3Frame()
-            f['v'] = core.G3VectorInt([val] * count)
-            w(f)
-            del w
+            with core.G3Writer(test_filename) as w:
+                f = core.G3Frame()
+                f['v'] = core.G3VectorInt([val] * count)
+                w(f)
             on_disk = os.path.getsize(test_filename)
             self.assertTrue(abs(on_disk - count * isize / 8) <= overhead,
                             "Storage for val %i took %.2f bytes/item, "
@@ -107,11 +103,10 @@ class TestVectorInt(unittest.TestCase):
         count = 10000
         overhead = 12
         for isize, val in bit_sizes:
-            w = core.G3Writer(test_filename)
-            f = core.G3Frame()
-            f['v'] = core.G3MapInt({str(i): val for i in range(count)})
-            w(f)
-            del w
+            with core.G3Writer(test_filename) as w:
+                f = core.G3Frame()
+                f['v'] = core.G3MapInt({str(i): val for i in range(count)})
+                w(f)
             on_disk = os.path.getsize(test_filename)
             self.assertTrue(abs(on_disk - count * isize / 8) <= (overhead * count),
                             "Storage for val %i took %.2f bytes/item, "
@@ -123,11 +118,10 @@ class TestVectorInt(unittest.TestCase):
         count = 10000
         overhead = 200
         for isize, val in bit_sizes:
-            w = core.G3Writer(test_filename)
-            f = core.G3Frame()
-            f['v'] = core.G3MapVectorInt({'a': [val] * count})
-            w(f)
-            del w
+            with core.G3Writer(test_filename) as w:
+                f = core.G3Frame()
+                f['v'] = core.G3MapVectorInt({'a': [val] * count})
+                w(f)
             on_disk = os.path.getsize(test_filename)
             self.assertTrue(abs(on_disk - count * isize / 8) <= overhead,
                             "Storage for val %i took %.2f bytes/item, "
