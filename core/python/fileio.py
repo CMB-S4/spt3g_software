@@ -6,9 +6,9 @@ __all__ = ["G3File"]
 class G3File(object):
     """Iterable class for G3 files, as created by G3Writer. Loop through frames by doing something like:
 
-        f = core.G3File("/path/to/file.g3")
-        for frame in f:
-            print( frame )
+        with core.G3File("/path/to/file.g3") as f:
+            for frame in f:
+                print(frame)
 
     An entire file can also be read into an indexable list by doing:
 
