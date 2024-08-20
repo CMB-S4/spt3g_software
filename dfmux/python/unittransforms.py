@@ -76,6 +76,9 @@ def get_timestream_unit_conversion(from_units, to_units, bolo, wiringmap=None, h
     if from_units == to_units:
         return 1.
 
+    if system not in ["ICE", "DfMux"]:
+        core.log_fatal(f"Cannot convert data for {system} readout system", unit="dfmux.unittransforms")
+
     I = counts_to_rms_amps(wiringmap, hkmap, bolo, system, tf)
     V = bolo_bias_voltage_rms(wiringmap, hkmap, bolo, system, tf)
 
