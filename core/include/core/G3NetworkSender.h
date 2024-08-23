@@ -45,7 +45,7 @@ private:
 			std::lock_guard<std::mutex> lg(lock);
 			// Refuse to put anything into stopped queues, and if a maximum
 			// queue size is set and would be exceeded, drop low priority data
-			if (die || (max_size && low_priority && queue.size()>=max_size))
+			if (die || (max_size && low_priority && queue.size()>=(size_t)max_size))
 				return false;
 			queue.push_back(std::move(item));
 			// If the queue is shared, only one worker needs to wake up, and if

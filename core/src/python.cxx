@@ -316,19 +316,7 @@ BOOST_PP_SEQ_FOR_EACH(CONSTANTS_INTERFACE,~,CONSTANTS)
 struct __XXX_fake_g3constants_namespace_XXX {};
 
 // Nonsense boilerplate for POD vector numpy bindings
-#define numpy_vector_infrastructure(T, name, conv) \
-template <> \
-boost::shared_ptr<std::vector<T> > \
-container_from_object(boost::python::object v) \
-{ \
-	return numpy_container_from_object<std::vector<T> >(v); \
-} \
-static int \
-vector_getbuffer_##name(PyObject *obj, Py_buffer *view, int flags) \
-{ \
-	return pyvector_getbuffer<T>(obj, view, flags, conv); \
-} \
-static PyBufferProcs vec_bufferprocs_##name; \
+#define numpy_vector_struct(T, name) \
 struct numpy_vector_from_python_##name { \
 	numpy_vector_from_python_##name() { \
 		boost::python::converter::registry::push_back( \
@@ -359,6 +347,21 @@ struct numpy_vector_from_python_##name { \
 		data->convertible = storage; \
 	} \
 };
+
+#define numpy_vector_infrastructure(T, name, conv) \
+template <> \
+boost::shared_ptr<std::vector<T> > \
+container_from_object(boost::python::object v) \
+{ \
+	return numpy_container_from_object<std::vector<T> >(v); \
+} \
+static int \
+vector_getbuffer_##name(PyObject *obj, Py_buffer *view, int flags) \
+{ \
+	return pyvector_getbuffer<T>(obj, view, flags, conv); \
+} \
+static PyBufferProcs vec_bufferprocs_##name; \
+numpy_vector_struct(T, name)
 
 #if PY_MAJOR_VERSION < 3
 #define numpy_vector_of(T, name, desc) \
@@ -397,8 +400,8 @@ numpy_vector_infrastructure(float, float, "f")
 //
 // Thanks, Apple. "Think Different!"
 #if defined(__APPLE__) && defined(__LP64__)
-numpy_vector_infrastructure(size_t, size_t, "L")
-numpy_vector_infrastructure(ssize_t, ssize_t, "l")
+numpy_vector_struct(size_t, size_t)
+numpy_vector_struct(ssize_t, ssize_t)
 struct apple_size
 {
 	static PyObject* convert(const std::vector<size_t> &arg) {

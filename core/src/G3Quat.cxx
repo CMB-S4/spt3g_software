@@ -523,16 +523,16 @@ quat_vec_container_from_object(boost::python::object v)
 		// Packed and simple, use memcpy()
 		memcpy((void *)&(*x)[0], view.buf, view.len);
 	} else if (strcmp(view.format, "d") == 0) {
-		for (size_t i = 0; i < view.shape[0]; i++)
+		for (size_t i = 0; i < (size_t)view.shape[0]; i++)
 			(*x)[i] = QUATI(double, i);
 	} else if (strcmp(view.format, "f") == 0) {
-		for (size_t i = 0; i < view.shape[0]; i++)
+		for (size_t i = 0; i < (size_t)view.shape[0]; i++)
 			(*x)[i] = QUATI(float, i);
 	} else if (strcmp(view.format, "i") == 0) {
-		for (size_t i = 0; i < view.shape[0]; i++)
+		for (size_t i = 0; i < (size_t)view.shape[0]; i++)
 			(*x)[i] = QUATI(int, i);
 	} else if (strcmp(view.format, "l") == 0) {
-		for (size_t i = 0; i < view.shape[0]; i++)
+		for (size_t i = 0; i < (size_t)view.shape[0]; i++)
 			(*x)[i] = QUATI(long, i);
 	} else {
 		PyBuffer_Release(&view);

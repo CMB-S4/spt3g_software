@@ -72,7 +72,7 @@ _g3_class_version(T *)
 }
 
 #define G3_CHECK_VERSION(v) \
-	if (v > _g3_class_version(this)) \
+	if ((int)v > _g3_class_version(this)) \
 		log_fatal("Trying to read newer class version (%d) than " \
 		    "supported (%d). Please upgrade your software.", v, \
 		    _g3_class_version(this));

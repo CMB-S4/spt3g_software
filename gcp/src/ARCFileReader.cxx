@@ -797,7 +797,6 @@ void ARCFileReader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	G3FramePtr outframe(new G3Frame(G3Frame::GcpSlow));
 	int32_t size, opcode;
 	uint8_t *buffer;
-	off_t off;
 
 	G3PythonContext ctx("ARCFileReader", false);
 

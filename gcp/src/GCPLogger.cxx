@@ -133,7 +133,7 @@ GCPLogger::Log(G3LogLevel level, const std::string &unit,
 
 	char *log_message = new char[messagesize + 1];
 
-	sprintf(log_message,
+	snprintf(log_message, messagesize + 1,
 	    "%s (%s): %s (%s:%d in %s)",
 	    log_description, unit.c_str(), message.c_str(),
 	    trimmed_filename.c_str(), line, func.c_str());

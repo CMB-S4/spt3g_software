@@ -31,8 +31,10 @@ cxx_demangle(const char *name)
 void
 G3Pipeline::Add(G3ModulePtr module, std::string name)
 {
-	if (name == "")
-		name = cxx_demangle(typeid(*module).name());
+	if (name == "") {
+		auto& r = *module;
+		name = cxx_demangle(typeid(r).name());
+	}
 
 	log_trace("Adding module \"%s\"", name.c_str());
 

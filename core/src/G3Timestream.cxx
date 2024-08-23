@@ -147,6 +147,8 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 				for (size_t i = 0; i < size(); i++)
 					inbuf[i] = ((int32_t(((int64_t *)data_)[i]) & 0x00ffffff) << 8) >> 8;
 				break;
+			default:
+				log_fatal("Unknown timestream datatype %d", data_type_);
 		}
 		chanmap[0] = &inbuf[0];
 
@@ -221,6 +223,8 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 				ar & cereal::make_nvp("data", data);
 				break;
 			}
+			default:
+				log_fatal("Unknown timestream datatype %d", data_type_);
 			}
 		}
 #ifdef G3_HAS_FLAC
@@ -401,6 +405,8 @@ G3Timestream::G3Timestream(const G3Timestream &r) :
 			element = 8;
 			break;
 		}
+		default:
+			log_fatal("Unknown timestream datatype %d", data_type_);
 		}
 		memcpy(data_, r.data_, element*len_);
 	}
@@ -515,24 +521,12 @@ G3Timestream G3Timestream::operator +(double r) const
 	return ret;
 }
 
-static
-G3Timestream operator +(double l, const G3Timestream &r)
-{
-	return r+l;
-}
-
 G3Timestream G3Timestream::operator -(double r) const
 {
 	G3Timestream ret(*this);
 	for (size_t i = 0; i < size(); i++)
 		ret[i] = (*this)[i] - r;
 	return ret;
-}
-
-static
-G3Timestream operator -(double l, const G3Timestream &r)
-{
-	return (r-l)*(-1);
 }
 
 G3Timestream G3Timestream::operator *(double r) const
@@ -557,26 +551,11 @@ G3Timestream &G3Timestream::operator /=(double r)
 	return *this;
 }
 
-static
-G3Timestream operator *(double l, const G3Timestream &r)
-{
-	return r*l;
-}
-
 G3Timestream G3Timestream::operator /(double r) const
 {
 	G3Timestream ret(*this);
 	for (size_t i = 0; i < size(); i++)
 		ret[i] = (*this)[i] / r;
-	return ret;
-}
-
-static
-G3Timestream operator /(double l, const G3Timestream &r)
-{
-	G3Timestream ret(r);
-	for (size_t i = 0; i < r.size(); i++)
-		ret[i] = l/r[i];
 	return ret;
 }
 
@@ -775,6 +754,8 @@ void G3TimestreamMap::Compactify()
 		case G3Timestream::TS_INT32:
 			element_size = 4;
 			break;
+		default:
+			log_fatal("Unknown timestream datatype %d", i.second->data_type_);
 		}
 		if (expected_base != NULL && i.second->data_ != expected_base) {
 			is_compact = false;
@@ -835,6 +816,8 @@ void G3TimestreamMap::Compactify()
 		row_bytes = begin()->second->size() * sizeof((*data)[0]);
 		break;
 	}
+	default:
+		log_fatal("Unknown timestream datatype %d", begin()->second->data_type_);
 	}
 
 	for (auto & i : *this) {
@@ -916,6 +899,10 @@ G3TimestreamMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 		view->format = (char *)"q";
 		view->itemsize = sizeof(int64_t);
 		break;
+	default:
+		PyErr_SetString(PyExc_BufferError, "Unsupported data type.");
+		view->obj = NULL;
+		return -1;
 	}
 	if (!(flags & PyBUF_FORMAT))
 		view->format = NULL;
@@ -1061,7 +1048,7 @@ G3TimestreamMap_from_numpy(std::vector<std::string> keys,
 	v = boost::make_shared<PyBufferOwner>(view);
 	}
 
-	if (keys.size() != v->v.shape[0]) {
+	if (keys.size() != (size_t)v->v.shape[0]) {
 		PyErr_SetString(PyExc_IndexError, "Number of keys does not "
 		    "match number of rows in data structure.");
 		boost::python::throw_error_already_set();
@@ -1078,7 +1065,6 @@ G3TimestreamMap_from_numpy(std::vector<std::string> keys,
 	templ.start = start;
 	templ.stop = stop;
 	templ.SetFLACCompression(compression_level);
-	templ.data_type_;
 	if (strcmp(v->v.format, "d") == 0) {
 		templ.data_type_ = G3Timestream::TS_DOUBLE;
 	} else if (strcmp(v->v.format, "f") == 0) {
@@ -1162,6 +1148,10 @@ G3Timestream_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 		view->format = (char *)"q";
 		view->itemsize = sizeof(int64_t);
 		break;
+	default:
+		PyErr_SetString(PyExc_ValueError, "Unsupported data type.");
+		view->obj = NULL;
+		return -1;
 	}
 	if (!(flags & PyBUF_FORMAT))
 		view->format = NULL;
@@ -1228,12 +1218,12 @@ G3Timestream_getslice(const G3Timestream &a, boost::python::slice slice)
 	if (stop < 0)
 		stop = a.size() + stop;
 
-	if (stop > a.size())
+	if (stop > (int)a.size())
 		stop = a.size();
-	if (step > a.size())
+	if (step > (int)a.size())
 		step = a.size();
 
-	if (start >= a.size() || start < 0)
+	if (start >= (int)a.size() || start < 0)
 		log_fatal("Start index %d out of range", start);
 	if (stop < 0)
 		log_fatal("Stop index %d out of range", stop);

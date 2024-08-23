@@ -53,7 +53,8 @@ std::ostream& operator<<(std::ostream& os, const G3FrameObject &frame)
 
 std::string G3FrameObject::Description() const
 {
-	return cxx_demangle(typeid(*this).name());
+	auto& r = *this;
+	return cxx_demangle(typeid(r).name());
 }
 
 std::string G3FrameObject::Summary() const
@@ -149,7 +150,8 @@ static std::string FrameObjectClassName(G3FrameObjectConstPtr obj)
 		}
 	}
 
-	return cxx_demangle(typeid(*obj).name());
+	auto &r = *obj;
+	return cxx_demangle(typeid(r).name());
 }
 
 std::ostream& operator<<(std::ostream& os, const G3Frame &frame)

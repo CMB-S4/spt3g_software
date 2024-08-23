@@ -54,8 +54,8 @@ std::string vec_repr(boost::python::object self)
 
 	if (selfobject.size() > 0)
 		s << selfobject[0];
-	for (int i=1; i<selfobject.size(); ++i) {
-		if (i == ellip_pos) {
+	for (size_t i=1; i<selfobject.size(); ++i) {
+		if ((int)i == ellip_pos) {
 			s << ", ...";
 			i = selfobject.size() - ellip_pos - 1;
 		} else
@@ -98,8 +98,8 @@ int pyvector_getbuffer(PyObject *obj, Py_buffer *view, int flags,
 
 	boost::python::handle<> self(boost::python::borrowed(obj));
 	boost::python::object selfobj(self);
-	const std::vector<T> &vec =
-	    boost::python::extract<const std::vector<T> &>(selfobj)();
+	const std::vector<T> vec =
+	    boost::python::extract<const std::vector<T>>(selfobj)();
 	view->obj = obj;
 	view->buf = (void*)&vec[0];
 	view->len = vec.size() * sizeof(T);

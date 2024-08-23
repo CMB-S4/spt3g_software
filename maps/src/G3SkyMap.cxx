@@ -774,7 +774,7 @@ G3SkyMap::var(size_t ddof, G3SkyMapMaskConstPtr where) const
 {
 	double m1 = 0;
 	double m2 = 0;
-	double a, b;
+	double a;
 	size_t n = 0;
 
 	if (!where) {
