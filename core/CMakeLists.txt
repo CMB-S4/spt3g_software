@@ -4,6 +4,7 @@
 if(BUILD_WHEELS)
 	Python_add_library(dload MODULE src/dload.c)
 else()
+	add_library(dload SHARED src/dload.c)
 	set_target_properties(dload PROPERTIES PREFIX "")
 	set_target_properties(dload PROPERTIES SUFFIX ".so")
 	target_include_directories(dload PRIVATE ${Python_INCLUDE_DIRS})
