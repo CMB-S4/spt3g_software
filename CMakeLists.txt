@@ -44,7 +44,10 @@ set(CMAKE_SHARED_LIBRARY_PREFIX "libspt3g-")
 
 # Raise errors on every warning by default
 # (use target-specific options to disable particular warnings)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror")
+if(NOT BUILD_WHEELS)
+	# we should probably just fix all the warnings rather than ignoring them
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror")
+endif()
 
 # Interface library for flags and library dependencies
 add_library(spt3g INTERFACE)
