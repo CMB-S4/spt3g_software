@@ -42,7 +42,7 @@ set(CMAKE_SHARED_LIBRARY_PREFIX "libspt3g-")
 
 # Raise errors on every warning by default
 # (use target-specific options to disable particular warnings)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
 # Interface library for flags and library dependencies
 add_library(spt3g INTERFACE)
@@ -56,10 +56,10 @@ if (SPT3G_VERSION)
 endif()
 
 # Ignore known warnings
-target_compile_options(spt3g INTERFACE -Wno-unknown-warning-option -Wno-unused -Wno-unused-result -Wno-deprecated-register -Wno-sign-compare -Wno-constant-conversion -Wno-self-assign-overloaded -Wno-deprecated-declarations -Wno-maybe-uninitialized)
+# target_compile_options(spt3g INTERFACE -Wno-unknown-warning-option -Wno-unused -Wno-unused-result -Wno-deprecated-register -Wno-sign-compare -Wno-constant-conversion -Wno-self-assign-overloaded -Wno-deprecated-declarations -Wno-maybe-uninitialized)
 
 # Fix bugs in GCC 4.4's strict aliasing code by turning it off
-target_compile_options(spt3g INTERFACE -fno-strict-aliasing)
+# target_compile_options(spt3g INTERFACE -fno-strict-aliasing)
 
 # Boost bits we need
 set(Boost_USE_STATIC_LIBS OFF)
