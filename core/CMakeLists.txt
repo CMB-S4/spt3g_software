@@ -1,12 +1,15 @@
 # Build a minimal library with a constant name which can be loaded as a python
 # module with a plain `import`, which can then load other modules which are
 # native libraries with normal names.
-add_library(dload SHARED src/dload.c)
-set_target_properties(dload PROPERTIES PREFIX "")
-set_target_properties(dload PROPERTIES SUFFIX ".so")
+if(BUILD_WHEELS)
+	Python_add_library(dload MODULE src/dload.c)
+else()
+	set_target_properties(dload PROPERTIES PREFIX "")
+	set_target_properties(dload PROPERTIES SUFFIX ".so")
+	target_include_directories(dload PRIVATE ${Python_INCLUDE_DIRS})
+	target_link_libraries(dload PUBLIC ${Python_LIBRARIES})
+endif()
 install(TARGETS dload DESTINATION ${PYTHON_MODULE_DIR}/spt3g)
-target_include_directories(dload PRIVATE ${Python_INCLUDE_DIRS})
-target_link_libraries(dload PUBLIC ${Python_LIBRARIES})
 
 # OS X has a broken implementatin of pthreads.
 if(APPLE)
@@ -105,8 +108,10 @@ add_spt3g_test(pipelineinfo)
 add_spt3g_test(quaternions)
 add_spt3g_test(timesample)
 
-add_spt3g_test_program(test
-                       SOURCE_FILES
-                         ${CMAKE_CURRENT_SOURCE_DIR}/tests/G3TimestreamTest.cxx
-                         ${CMAKE_CURRENT_SOURCE_DIR}/tests/G3TimestreamMapTest.cxx
-                       USE_PROJECTS core)
+if(NOT BUILD_WHEELS)
+	add_spt3g_test_program(test
+		SOURCE_FILES
+		${CMAKE_CURRENT_SOURCE_DIR}/tests/G3TimestreamTest.cxx
+		${CMAKE_CURRENT_SOURCE_DIR}/tests/G3TimestreamMapTest.cxx
+		USE_PROJECTS core)
+endif()

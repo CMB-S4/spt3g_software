@@ -17,6 +17,8 @@ if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel" FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
 
+option(BUILD_WHEELS "Configure build for python wheels")
+
 # Work around stupid broken Red Hat systems
 set(CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "")
 
@@ -61,6 +63,8 @@ target_compile_options(spt3g INTERFACE -Wno-unknown-warning-option -Wno-unused -
 # Fix bugs in GCC 4.4's strict aliasing code by turning it off
 target_compile_options(spt3g INTERFACE -fno-strict-aliasing)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 # Boost bits we need
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
@@ -76,7 +80,11 @@ if(Boost_VERSION VERSION_GREATER 1.79)
 endif()
 
 target_include_directories(spt3g INTERFACE ${Boost_INCLUDE_DIR} ${Python_INCLUDE_DIRS})
-target_link_libraries(spt3g INTERFACE pthread ${Boost_LIBRARIES} ${Python_LIBRARIES})
+if(BUILD_WHEELS)
+	target_link_libraries(spt3g INTERFACE pthread ${Boost_LIBRARIES} Python::Module)
+else()
+	target_link_libraries(spt3g INTERFACE pthread ${Boost_LIBRARIES} ${Python_LIBRARIES})
+endif()
 
 # Work around yet more bugs in GCC 4.4, this time with C++ 11 support
 # Also increase maximum number of arguments in python bindings
