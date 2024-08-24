@@ -31,6 +31,7 @@ jobs:
           sudo add-apt-repository ppa:ubuntu-toolchain-r/test
           sudo apt update
           sudo apt install gcc-13 g++-13 -y
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 13 --slave /usr/bin/g++ g++ /usr/bin/g++-13
           sudo apt-get install libbz2-dev libboost-all-dev libflac-dev libnetcdf-dev
         elif [ `echo ${{matrix.os}} | cut -d - -f 1` = "macOS" ]; then
           brew install bzip2 boost boost-python3 flac netcdf
