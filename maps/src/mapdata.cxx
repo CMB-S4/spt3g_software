@@ -21,11 +21,11 @@ SparseMapData<T>::const_iterator::operator++() {
 	}
 
 	const SparseMapData<T>::data_element &column = sparse_.data_[x - sparse_.offset_];
-	if (column.second.size() > 0 && y < column.first) {
+	if (column.second.size() > 0 && y < (size_t) column.first) {
 		y = column.first;
 		return *this;
 	}
-	if (column.second.size() > 0 && y < column.first + column.second.size() - 1) {
+	if (column.second.size() > 0 && y < (size_t) column.first + column.second.size() - 1) {
 		y++;
 		return *this;
 	}

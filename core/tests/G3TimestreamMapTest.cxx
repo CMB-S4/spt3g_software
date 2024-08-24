@@ -83,7 +83,7 @@ void testMakeCompactExisting(){
 	ENSURE_EQUAL(tsm.GetStopTime(),t2, "MakeCompact should produce a map with the given stop time");
 	ENSURE_EQUAL(tsm.NSamples(),nSamples, "MakeCompact should produce a map with the given number of samples");
 	ENSURE(tsm.CheckAlignment(), "MakeCompact should produce aligned timestreams");
-	ENSURE_EQUAL(data.use_count(), keys.size()+1, "Each timestream should hold a reference to the data block");
+	ENSURE_EQUAL((std::size_t)data.use_count(), keys.size()+1, "Each timestream should hold a reference to the data block");
 	
 	for(std::size_t i=0; i<keys.size(); i++){
 		const auto& key=keys[i];

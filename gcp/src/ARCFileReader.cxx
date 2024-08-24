@@ -143,7 +143,7 @@ ARCFileReader::ARCFileReader(const std::string &path,
 	}
 
 	boost::filesystem::path fpath(path);
-	if (path.find("://") == -1 && (!boost::filesystem::exists(fpath) ||
+	if (path.find("://") == path.npos && (!boost::filesystem::exists(fpath) ||
 	    !boost::filesystem::is_regular_file(fpath)))
 		log_fatal("Could not find file %s", path.c_str());
 	StartFile(path);

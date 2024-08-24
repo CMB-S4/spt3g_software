@@ -38,8 +38,8 @@ public:
 		if (x < offset_ || x >= offset_ + data_.size())
 			return 0;
 		const data_element &column = data_[x-offset_];
-		if (y < column.first ||
-		    y >= column.first + column.second.size())
+		if (y < (size_t) column.first ||
+		    y >= (size_t) column.first + column.second.size())
 			return 0;
 		return column.second[y-column.first];
 	}
@@ -66,11 +66,11 @@ public:
 		if (column.second.size() == 0) {
 			column.first = y;
 			column.second.resize(1, T(0));
-		} else if (y < column.first) {
+		} else if (y < (size_t) column.first) {
 			column.second.insert(column.second.begin(),
 			    column.first-y, T(0));
 			column.first = y;
-		} else if (y >= column.first + column.second.size()) {
+		} else if (y >= (size_t) column.first + column.second.size()) {
 			column.second.resize(y - column.first + 1, T(0));
 		}
 		return column.second[y - column.first];

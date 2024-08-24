@@ -113,7 +113,7 @@ GCPMuxDataDecoder::EmitWiringMap(G3FramePtr input)
 				const DfMuxChannelMapping &channel_info =
 				    cached_wiring_map_->at(id);
 				channels_.push_back(channel_info);
-				if (channel_info.channel > max_channel_count_)
+				if (channel_info.channel > (int) max_channel_count_)
 					max_channel_count_ =
 					    channel_info.channel + 1;
 			}
@@ -189,7 +189,7 @@ GCPMuxDataDecoder::EmitWiringMap(G3FramePtr input)
 		// Book-keeping assistance: we need to know how many channels
 		// these boards have (it is 16, but pretend we don't know for
 		// robustness) in order to build DfMuxSample objects later.
-		if (channel_info.channel >= max_channel_count_)
+		if (channel_info.channel >= (int) max_channel_count_)
 			max_channel_count_ = channel_info.channel + 1;
 	}
 

@@ -432,7 +432,7 @@ void G3SkyMapMask::save(A &ar, unsigned v) const
 	// Pack data in all bits up to a multiple of 8, then the remainder
 	// Two pieces so the compiler can unroll the inner loop in the first
 	// part
-	for (ssize_t i = 0; i < data_.size() / 8; i++) {
+	for (ssize_t i = 0; i < (ssize_t) data_.size() / 8; i++) {
 		packed[i] = 0;
 		for (int j = 0; j < 8; j++)
 			packed[i] |= !!data_[i*8 + j] << j;
@@ -440,7 +440,7 @@ void G3SkyMapMask::save(A &ar, unsigned v) const
 	if (data_.size() % 8) {
 		const ssize_t i = packed.size() - 1;
 		packed[i] = 0;
-		for (int j = 0; j < data_.size() - i*8; j++)
+		for (int j = 0; j < (ssize_t) data_.size() - i*8; j++)
 			packed[i] |= !!data_[i*8 + j] << j;
 	}
 
