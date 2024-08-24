@@ -46,20 +46,23 @@ std::string vec_repr(boost::python::object self)
 	    << "." << extract<std::string>(self.attr("__class__").attr("__name__"))()
 	    << "([";
 
-	std::vector<T> &selfobject = extract<std::vector<T> &>(self)();
+	extract <std::vector<T> &> extself(self);
+	if (extself.check()) {
+		std::vector<T> &selfobject = extself();
 
-	int ellip_pos = -1; // Position at which to insert "..."
-	if (selfobject.size() > 100)
-		ellip_pos = 3;
+		int ellip_pos = -1; // Position at which to insert "..."
+		if (selfobject.size() > 100)
+			ellip_pos = 3;
 
-	if (selfobject.size() > 0)
-		s << selfobject[0];
-	for (size_t i=1; i<selfobject.size(); ++i) {
-		if ((int)i == ellip_pos) {
-			s << ", ...";
-			i = selfobject.size() - ellip_pos - 1;
-		} else
-			s << ", " << selfobject[i];
+		if (selfobject.size() > 0)
+			s << selfobject[0];
+		for (size_t i=1; i<selfobject.size(); ++i) {
+			if ((int)i == ellip_pos) {
+				s << ", ...";
+				i = selfobject.size() - ellip_pos - 1;
+			} else
+				s << ", " << selfobject[i];
+		}
 	}
 	s << "])";
 
@@ -144,8 +147,9 @@ boost::shared_ptr<T>
 numpy_container_from_object(boost::python::object v)
 {
 	// There's a chance this is actually a copy operation, so try that first
-	if (bp::extract<T &>(v).check())
-		return boost::make_shared<T>(bp::extract<T &>(v)());
+	bp::extract<T &> extv(v);
+	if (extv.check())
+		return boost::make_shared<T>(extv());
 
 	boost::shared_ptr<T> x(new T);
 	size_t nelem;
