@@ -26,9 +26,6 @@ jobs:
       shell: bash
       run: |
         if [ `echo ${{matrix.os}} | cut -d - -f 1` = "ubuntu" ]; then
-          sudo apt-get install gcc-14 g++-14
-          echo "CC=gcc-14" >> $GITHUB_ENV
-          echo "CXX=g++-14" >> $GITHUB_ENV
           sudo apt-get --allow-releaseinfo-change update -y
           sudo apt-get install libbz2-dev libboost-all-dev libflac-dev libnetcdf-dev
         elif [ `echo ${{matrix.os}} | cut -d - -f 1` = "macOS" ]; then
