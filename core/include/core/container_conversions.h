@@ -219,6 +219,7 @@ namespace scitbx { namespace boost_python { namespace container_conversions {
         boost::python::extract<container_element_type>
           elem_proxy(py_elem_obj);
         if (!elem_proxy.check()) return false;
+	(void) elem_proxy();
         if (is_range) break; // in a range all elements are of the same type
       }
       return true;
