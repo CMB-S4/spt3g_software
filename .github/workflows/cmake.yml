@@ -11,32 +11,38 @@ jobs:
     strategy:
       matrix:
         #os: [ubuntu-18.04, ubuntu-20.04, macOS-latest]
-        os: [ubuntu-20.04]
+        os: [ubuntu-latest]
     runs-on: ${{ matrix.os}}
 
     steps:
     - uses: actions/checkout@v4
   
+    - name: Setup python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
     - name: Install OS Dependencies
       shell: bash
       run: |
         if [ `echo ${{matrix.os}} | cut -d - -f 1` = "ubuntu" ]; then
+          sudo apt-get install gcc-14 g++-14
+          echo "CC=gcc-14" >> $GITHUB_ENV
+          echo "CXX=g++-14" >> $GITHUB_ENV
           sudo apt-get --allow-releaseinfo-change update -y
-          [ `echo ${{matrix.os}} | cut -d . -f 1` = "ubuntu-20" ] && sudo apt-get install python-is-python3
-          sudo apt-get install libbz2-dev libboost-all-dev libflac-dev libnetcdf-dev python python3 python3-pip python3-setuptools
+          sudo apt-get install libbz2-dev libboost-all-dev libflac-dev libnetcdf-dev
         elif [ `echo ${{matrix.os}} | cut -d - -f 1` = "macOS" ]; then
-          brew install python@3.10
-          brew link --overwrite python@3.10
           brew install bzip2 boost boost-python3 flac netcdf
         else
           echo 'No installed package manager!'
           exit 1
         fi
-            
+
     - name: Install Python Packages
       run: |
+        python3 -m pip install --upgrade pip
         pip3 install numpy scipy matplotlib astropy healpy sphinx
-      
+
     - name: Create Build Environment
       # Some projects don't allow in-source building, so create a separate build directory
       # We'll use this as our working directory for all subsequent commands
@@ -63,18 +69,18 @@ jobs:
       shell: bash
       # Execute tests defined by the CMake configuration.  
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-      run: ./env-shell.sh ctest -C $BUILD_TYPE --output-on-failure
+      run: ctest -C $BUILD_TYPE --output-on-failure
 
     - name: Docs
       if: github.ref_name == 'master' && startsWith(matrix.os, 'ubuntu')
       working-directory: ${{runner.workspace}}/build
       shell: bash
       # Build docs
-      run: ./env-shell.sh cmake --build . --config $BUILD_TYPE --target docs
+      run: cmake --build . --config $BUILD_TYPE --target docs
 
     - name: Checkout gh_pages
       if: github.ref_name == 'master' && startsWith(matrix.os, 'ubuntu')
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         ref: gh-pages
         path: gh-pages
