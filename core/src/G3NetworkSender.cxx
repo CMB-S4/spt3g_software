@@ -147,7 +147,7 @@ G3NetworkSender::G3NetworkSender(std::string hostname, int port, int max_queue,
 
 	try {
 		serializer_threads_.reserve(n_serializers);
-		for (int i=0; i<n_serializers; i++) {
+		for (size_t i=0; i<n_serializers; i++) {
 			auto t = boost::make_shared<serializer_thread_data>(serialization_queue);
 			t->thread = std::thread(SerializeLoop, t);
 			serializer_threads_.push_back(t);

@@ -21,9 +21,9 @@ public:
 	uint64_t FramesDroppedFromSending() const{ return n_send_drops_; }
 private:
 	int fd_;
-	int max_queue_size_;
+	size_t max_queue_size_;
 	bool listening_;
-	int n_serializers_;
+	size_t n_serializers_;
 	uint64_t n_serial_drops_;
 	uint64_t n_send_drops_;
 
@@ -34,7 +34,7 @@ private:
 	struct input_queue {
 		input_queue():die(false) {}
 
-		int max_size;
+		size_t max_size;
 		std::mutex lock;
 		std::condition_variable sem;
 		std::deque<InputType> queue;
@@ -45,7 +45,7 @@ private:
 			std::lock_guard<std::mutex> lg(lock);
 			// Refuse to put anything into stopped queues, and if a maximum
 			// queue size is set and would be exceeded, drop low priority data
-			if (die || (max_size && low_priority && (int)queue.size()>=max_size))
+			if (die || (max_size && low_priority && queue.size()>=max_size))
 				return false;
 			queue.push_back(std::move(item));
 			// If the queue is shared, only one worker needs to wake up, and if
