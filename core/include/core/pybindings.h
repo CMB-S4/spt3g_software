@@ -98,8 +98,8 @@ int pyvector_getbuffer(PyObject *obj, Py_buffer *view, int flags,
 
 	boost::python::handle<> self(boost::python::borrowed(obj));
 	boost::python::object selfobj(self);
-	const std::vector<T> vec =
-	    boost::python::extract<const std::vector<T>>(selfobj)();
+	const std::vector<T> &vec =
+	    boost::python::extract<const std::vector<T> &>(selfobj)();
 	view->obj = obj;
 	view->buf = (void*)&vec[0];
 	view->len = vec.size() * sizeof(T);
