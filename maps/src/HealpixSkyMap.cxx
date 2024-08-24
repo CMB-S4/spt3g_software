@@ -1244,7 +1244,13 @@ HealpixSkyMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 
 	bp::handle<> self(bp::borrowed(obj));
 	bp::object selfobj(self);
-	HealpixSkyMapPtr sm = bp::extract<HealpixSkyMapPtr>(selfobj)();
+	bp::extract<HealpixSkyMapPtr> ext(selfobj);
+	if (!ext.check()) {
+		PyErr_SetString(PyExc_ValueError, "Invalid healpix map");
+		view->obj = NULL;
+		return -1;
+	}
+	HealpixSkyMapPtr sm = ext();
 
 	sm->ConvertToDense();
 

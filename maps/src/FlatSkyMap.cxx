@@ -889,7 +889,13 @@ FlatSkyMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 
 	bp::handle<> self(bp::borrowed(obj));
 	bp::object selfobj(self);
-	FlatSkyMapPtr sm = bp::extract<FlatSkyMapPtr>(selfobj)();
+	bp::extract<FlatSkyMapPtr> ext(selfobj);
+	if (!ext.check()) {
+		PyErr_SetString(PyExc_ValueError, "Invalid flat sky map");
+		view->obj = NULL;
+		return -1;
+	}
+	FlatSkyMapPtr sm = ext();
 
 	view->obj = obj;
 	if (sm->shape()[0] == 0 && sm->shape()[1] == 0) {

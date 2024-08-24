@@ -446,7 +446,13 @@ G3VectorQuat_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 
 	bp::handle<> self(bp::borrowed(obj));
 	bp::object selfobj(self);
-	G3VectorQuatPtr q = bp::extract<G3VectorQuatPtr>(selfobj)();
+	bp::extract<G3VectorQuatPtr> ext(selfobj);
+	if (!ext.check()) {
+		PyErr_SetString(PyExc_ValueError, "Invalid vector");
+		view->obj = NULL;
+		return -1;
+	}
+	G3VectorQuatPtr q = ext();
 
 	view->obj = obj;
 	view->buf = (void*)&(*q)[0];

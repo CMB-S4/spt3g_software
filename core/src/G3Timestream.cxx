@@ -856,8 +856,13 @@ G3TimestreamMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 
 	boost::python::handle<> self(boost::python::borrowed(obj));
 	boost::python::object selfobj(self);
-	G3TimestreamMapPtr ts =
-	    boost::python::extract<G3TimestreamMapPtr>(selfobj)();
+	boost::python::extract<G3TimestreamMapPtr> ext(selfobj);
+	if (!ext.check()) {
+		PyErr_SetString(PyExc_ValueError, "Invalid timestream");
+		view->obj = NULL;
+		return -1;
+	}
+	G3TimestreamMapPtr ts = ext();
 	if (!ts->CheckAlignment()) {
 		PyErr_SetString(PyExc_BufferError, "Timestream map is not "
 		    "aligned, cannot cast to a 2D array.");
@@ -1127,7 +1132,13 @@ G3Timestream_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 
 	boost::python::handle<> self(boost::python::borrowed(obj));
 	boost::python::object selfobj(self);
-	G3TimestreamPtr ts = boost::python::extract<G3TimestreamPtr>(selfobj)();
+	boost::python::extract<G3TimestreamPtr> ext(selfobj);
+	if (!ext.check()) {
+		PyErr_SetString(PyExc_ValueError, "Invalid timestream");
+		view->obj = NULL;
+		return -1;
+	}
+	G3TimestreamPtr ts = ext();
 	view->obj = obj;
 	view->buf = ts->data_;
 	view->readonly = 0;

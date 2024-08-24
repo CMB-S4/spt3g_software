@@ -98,8 +98,13 @@ int pyvector_getbuffer(PyObject *obj, Py_buffer *view, int flags,
 
 	boost::python::handle<> self(boost::python::borrowed(obj));
 	boost::python::object selfobj(self);
-	const std::vector<T> &vec =
-	    boost::python::extract<const std::vector<T> &>(selfobj)();
+	boost::python::extract<const std::vector<T> &> ext(selfobj);
+	if (!ext.check()) {
+		PyErr_SetString(PyExc_ValueError, "Invalid vector");
+		view->obj = NULL;
+		return -1;
+	}
+	const std::vector<T> &vec = ext();
 	view->obj = obj;
 	view->buf = (void*)&vec[0];
 	view->len = vec.size() * sizeof(T);
