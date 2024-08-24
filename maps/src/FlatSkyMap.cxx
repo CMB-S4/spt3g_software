@@ -850,9 +850,9 @@ void FlatSkyMap::InsertPatch(const FlatSkyMap &patch, bool ignore_zeros)
 		for (size_t y = 0; y < patch.ypix_; y++) {
 			ssize_t ix = x + x0;
 			ssize_t iy = y + y0;
-			if (ix < 0 || ix >= xpix_)
+			if (ix < 0 || ix >= (ssize_t) xpix_)
 				continue;
-			if (iy < 0 || iy >= ypix_)
+			if (iy < 0 || iy >= (ssize_t) ypix_)
 				continue;
 			double v = patch.at(x, y);
 			if (ignore_zeros && v == 0)

@@ -412,7 +412,7 @@ void G3SkyMapMask::load(A &ar, unsigned v)
 		size_t nbits;
 		ar & make_nvp("data", packed);
 		data_.resize(packed.size()*8);
-		for (ssize_t i = 0; i < packed.size(); i++)
+		for (size_t i = 0; i < packed.size(); i++)
 			for (int j = 0; j < 8; j++)
 				data_[i*8 + j] = (packed[i] >> j) & 1;
 		ar & make_nvp("nbits", nbits); // In case not a multiple of 8
@@ -432,7 +432,7 @@ void G3SkyMapMask::save(A &ar, unsigned v) const
 	// Pack data in all bits up to a multiple of 8, then the remainder
 	// Two pieces so the compiler can unroll the inner loop in the first
 	// part
-	for (ssize_t i = 0; i < (ssize_t) data_.size() / 8; i++) {
+	for (size_t i = 0; i < data_.size() / 8; i++) {
 		packed[i] = 0;
 		for (int j = 0; j < 8; j++)
 			packed[i] |= !!data_[i*8 + j] << j;
