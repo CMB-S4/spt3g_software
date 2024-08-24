@@ -502,8 +502,9 @@ pyconvolve_map(FlatSkyMapConstPtr map, bp::object val)
 {
 
 	FlatSkyMapConstPtr kernel;
-	if (bp::extract<FlatSkyMap>(val).check())
-		kernel = bp::extract<FlatSkyMapConstPtr>(val)();
+	bp::extract<FlatSkyMapConstPtr> ext(val);
+	if (ext.check())
+		kernel = ext();
 	else
 		kernel = FlatSkyMapConstPtr(new FlatSkyMap(val, map->yres()));
 	return ConvolveMap(map, kernel);

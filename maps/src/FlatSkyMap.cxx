@@ -1032,11 +1032,16 @@ flatskymap_setitem_2d(FlatSkyMap &skymap, bp::tuple coords,
 
 	FlatSkyMapPtr shallowclone =
 	    boost::dynamic_pointer_cast<FlatSkyMap>(skymap.Clone(false));
-	FlatSkyMapPtr dummy_subpatch = bp::extract<FlatSkyMapPtr>(
-	    flatskymap_getitem_2d(*shallowclone, coords));
+	bp::extract<FlatSkyMapPtr> dummyext(flatskymap_getitem_2d(*shallowclone, coords));
+	if (!dummyext.check()) {
+		PyErr_SetString(PyExc_ValueError, "Invalid patch");
+		bp::throw_error_already_set();
+	}
+	FlatSkyMapPtr dummy_subpatch = dummyext();
 
-	if (bp::extract<FlatSkyMap>(val).check()) {
-		const FlatSkyMap &patch = bp::extract<FlatSkyMap>(val)();
+	bp::extract<const FlatSkyMap &> mapext(val);
+	if (mapext.check()) {
+		const FlatSkyMap &patch = mapext();
 		if (!dummy_subpatch->IsCompatible(patch)) {
 			PyErr_SetString(PyExc_ValueError, "Provided patch to insert is "
 			    "not compatible with the given subregion of the map into "
