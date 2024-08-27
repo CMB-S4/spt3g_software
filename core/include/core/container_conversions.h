@@ -216,7 +216,7 @@ namespace scitbx { namespace boost_python { namespace container_conversions {
         }
         if (!py_elem_hdl.get()) break; // end of iteration
         boost::python::object py_elem_obj(py_elem_hdl);
-	if (!boost::python::extract<container_element_type>(py_elem_obj).check()) return false;
+        if (!boost::python::extract<container_element_type>(py_elem_obj).check()) return false;
         if (is_range) break; // in a range all elements are of the same type
       }
       return true;
