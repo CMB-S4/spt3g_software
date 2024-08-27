@@ -506,8 +506,9 @@ boost::shared_ptr<T>
 quat_vec_container_from_object(boost::python::object v)
 {
 	// There's a chance this is actually a copy operation, so try that first
-	if (bp::extract<T &>(v).check())
-		return boost::make_shared<T>(bp::extract<T &>(v)());
+	bp::extract<T &> extv(v);
+	if (extv.check())
+		return boost::make_shared<T>(extv());
 
         boost::shared_ptr<T> x(new (T));
 	Py_buffer view;
