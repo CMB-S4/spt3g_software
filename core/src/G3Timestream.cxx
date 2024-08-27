@@ -521,11 +521,24 @@ G3Timestream G3Timestream::operator +(double r) const
 	return ret;
 }
 
+G3Timestream operator +(double l, const G3Timestream &r)
+{
+	return r+l;
+}
+
 G3Timestream G3Timestream::operator -(double r) const
 {
 	G3Timestream ret(*this);
 	for (size_t i = 0; i < size(); i++)
 		ret[i] = (*this)[i] - r;
+	return ret;
+}
+
+G3Timestream operator -(double l, const G3Timestream &r)
+{
+	G3Timestream ret(r);
+	for (size_t i = 0; i < r.size(); i++)
+		ret[i] = l - r[i];
 	return ret;
 }
 
@@ -551,11 +564,24 @@ G3Timestream &G3Timestream::operator /=(double r)
 	return *this;
 }
 
+G3Timestream operator *(double l, const G3Timestream &r)
+{
+	return r*l;
+}
+
 G3Timestream G3Timestream::operator /(double r) const
 {
 	G3Timestream ret(*this);
 	for (size_t i = 0; i < size(); i++)
 		ret[i] = (*this)[i] / r;
+	return ret;
+}
+
+G3Timestream operator /(double l, const G3Timestream &r)
+{
+	G3Timestream ret(r);
+	for (size_t i = 0; i < r.size(); i++)
+		ret[i] = l/r[i];
 	return ret;
 }
 
