@@ -36,7 +36,6 @@ jobs:
 
     - name: Install Python Packages
       run: |
-        sudo python -m pip install --upgrade pip --break-system-packages
         sudo pip install numpy scipy matplotlib astropy healpy sphinx --break-system-packages
 
     - name: Create Build Environment
