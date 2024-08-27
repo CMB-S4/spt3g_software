@@ -17,11 +17,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
   
-    - name: Setup python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
-
     - name: Install OS Dependencies
       shell: bash
       run: |
@@ -31,7 +26,7 @@ jobs:
           sudo apt update
           sudo apt install gcc-14 g++-14 -y
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 14 --slave /usr/bin/g++ g++ /usr/bin/g++-14
-          sudo apt-get install libbz2-dev libboost-all-dev libflac-dev libnetcdf-dev
+          sudo apt-get install libbz2-dev libboost-all-dev libflac-dev libnetcdf-dev libpython3-dev
         elif [ `echo ${{matrix.os}} | cut -d - -f 1` = "macOS" ]; then
           brew install bzip2 boost boost-python3 flac netcdf
         else
@@ -41,8 +36,8 @@ jobs:
 
     - name: Install Python Packages
       run: |
-        python3 -m pip install --upgrade pip
-        pip3 install numpy scipy matplotlib astropy healpy sphinx
+        python -m pip install --upgrade pip
+        pip install numpy scipy matplotlib astropy healpy sphinx
 
     - name: Create Build Environment
       # Some projects don't allow in-source building, so create a separate build directory
