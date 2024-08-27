@@ -40,7 +40,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${SPT3G_RUNTIME_DIR})
 # Sneak in a namespace-like prefix for all libraries
 set(CMAKE_SHARED_LIBRARY_PREFIX "libspt3g-")
 
-# Raise errors on every warning by default
+# Raise every warning by default
 # (use target-specific options to disable particular warnings)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
@@ -54,12 +54,6 @@ if (SPT3G_VERSION)
 	message(STATUS "Building SPT3G software version ${SPT3G_VERSION}")
 	target_compile_definitions(spt3g INTERFACE -DSPT3G_VERSION="${SPT3G_VERSION}")
 endif()
-
-# Ignore known warnings
-# target_compile_options(spt3g INTERFACE -Wno-unknown-warning-option -Wno-unused -Wno-unused-result -Wno-deprecated-register -Wno-sign-compare -Wno-constant-conversion -Wno-self-assign-overloaded -Wno-deprecated-declarations -Wno-maybe-uninitialized)
-
-# Fix bugs in GCC 4.4's strict aliasing code by turning it off
-# target_compile_options(spt3g INTERFACE -fno-strict-aliasing)
 
 # Boost bits we need
 set(Boost_USE_STATIC_LIBS OFF)
