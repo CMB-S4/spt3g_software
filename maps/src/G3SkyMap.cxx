@@ -1599,8 +1599,15 @@ PYBINDINGS("maps") {
 
 	    .def(bp::self += bp::self)
 	    .def(bp::self *= bp::self)
+#ifdef __clang__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wself-assign-overloaded"
+#endif
 	    .def(bp::self -= bp::self)
 	    .def(bp::self /= bp::self)
+#ifdef __clang__
+#pragma GCC diagnostic pop
+#endif
 	    .def(bp::self += double())
 	    .def(bp::self *= double())
 	    .def(bp::self -= double())
@@ -1723,7 +1730,7 @@ PYBINDINGS("maps") {
 	       "if the argument is true (default), empty otherwise.")
 
 	    .def(bp::self += bp::self)
-	    .def(bp::self -= bp::self)
+	    .def(bp::self -= G3SkyMapWeights())
 	    .def(bp::self *= FlatSkyMap())
 	    .def(bp::self *= HealpixSkyMap())
 	    .def(bp::self *= double())
