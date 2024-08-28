@@ -11,8 +11,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        toolset: [build]
-        os: [ubuntu-24.04, macos-14]
+        include:
+          - os: ubuntu-24.04
+            toolset: build
+            docs: true
+          - os: macos-14
+            toolset: build
+            docs: false
     runs-on: ${{matrix.os}}
 
     steps:
@@ -21,7 +26,6 @@ jobs:
     - name: Install Linux Dependencies
       if: runner.environment == 'github-hosted' && runner.os == 'Linux'
       run: |
-        echo "MAKE_DOCS=yes" >> $GITHUB_ENV
         sudo apt-get --allow-releaseinfo-change update -y
         sudo add-apt-repository universe
         sudo apt update
@@ -66,24 +70,24 @@ jobs:
       run: ctest -C $BUILD_TYPE --output-on-failure
 
     - name: Docs
-      if: github.ref_name == 'master' && env.MAKE_DOCS == 'yes'
+      if: github.ref_name == 'master' && matrix.docs == 'true'
       working-directory: ${{runner.workspace}}/${{matrix.toolset}}
       shell: bash
       # Build docs
       run: |
-        rm -f $GITHUB_WORKSPACE/doc/moddoc_*.rst
+        rm -f ${{runner.workspace}}/doc/moddoc_*.rst
         rm -rf docs/
         cmake --build . --config $BUILD_TYPE --target docs
 
     - name: Checkout gh_pages
-      if: github.ref_name == 'master' && env.MAKE_DOCS == 'yes'
+      if: github.ref_name == 'master' && matrix.docs == 'true'
       uses: actions/checkout@v4
       with:
         ref: gh-pages
         path: gh-pages
 
     - name: Commit docs
-      if: github.ref_name == 'master' && env.MAKE_DOCS == 'yes'
+      if: github.ref_name == 'master' && matrix.docs == 'true'
       shell: bash
       run: |
         cp -r ${{runner.workspace}}/${{matrix.toolset}}/docs/* gh-pages/
