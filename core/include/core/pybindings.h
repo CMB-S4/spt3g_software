@@ -9,7 +9,10 @@
 #include <boost/preprocessor/facilities/overload.hpp>
 #include <boost/preprocessor/stringize.hpp>
 #include <boost/python.hpp>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#pragma GCC diagnostic pop
 #include <boost/python/suite/indexing/container_utils.hpp>
 
 #include <container_conversions.h>
