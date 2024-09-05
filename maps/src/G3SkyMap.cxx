@@ -1723,7 +1723,7 @@ PYBINDINGS("maps") {
 	       "if the argument is true (default), empty otherwise.")
 
 	    .def(bp::self += bp::self)
-	    .def(bp::self -= G3SkyMapWeights())
+	    .def(bp::self -= bp::self)
 	    .def(bp::self *= FlatSkyMap())
 	    .def(bp::self *= HealpixSkyMap())
 	    .def(bp::self *= double())
