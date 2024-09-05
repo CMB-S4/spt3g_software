@@ -1599,15 +1599,8 @@ PYBINDINGS("maps") {
 
 	    .def(bp::self += bp::self)
 	    .def(bp::self *= bp::self)
-#ifdef __clang__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wself-assign-overloaded"
-#endif
 	    .def(bp::self -= bp::self)
 	    .def(bp::self /= bp::self)
-#ifdef __clang__
-#pragma GCC diagnostic pop
-#endif
 	    .def(bp::self += double())
 	    .def(bp::self *= double())
 	    .def(bp::self -= double())

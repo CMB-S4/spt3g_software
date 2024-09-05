@@ -22,6 +22,10 @@
 #include <container_conversions.h>
 #include <std_map_indexing_suite.hpp>
 
+#ifdef __clang__
+#pragma GCC diagnostic ignored "-Wself-assign-overloaded"
+#endif
+
 template <typename T>
 void
 register_pointer_conversions()
