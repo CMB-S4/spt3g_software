@@ -14,10 +14,12 @@ G3Pipeline::G3Pipeline() :
 	log_trace("Initializing Pipeline");
 }
 
+template <typename T>
 static std::string
-cxx_demangle(const char *name)
+cxx_demangle(const T& v)
 {
 	int err;
+	const char* name = typeid(v).name();
 	char *demangled;
 
 	demangled = abi::__cxa_demangle(name, NULL, NULL, &err);
@@ -31,10 +33,8 @@ cxx_demangle(const char *name)
 void
 G3Pipeline::Add(G3ModulePtr module, std::string name)
 {
-	if (name == "") {
-		auto& r = *module;
-		name = cxx_demangle(typeid(r).name());
-	}
+	if (name == "")
+		name = cxx_demangle(*module);
 
 	log_trace("Adding module \"%s\"", name.c_str());
 
