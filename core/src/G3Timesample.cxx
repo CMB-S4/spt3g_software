@@ -120,13 +120,13 @@ template <class A> void G3TimesampleMap::serialize(A &ar, unsigned v)
 
 bool G3TimesampleMap::Check() const
 {
-	int n = times.size();
+	ssize_t n = times.size();
 
 	for (auto item = begin(); item != end(); ++item) {
 		auto name = item->first;
 		auto el = item->second;
 
-		int check_len;
+		ssize_t check_len;
 		if ((check_len = g3_vect_test_and_size(el)) < 0) {
 			std::ostringstream s;
 			s << "Vector type not supported for key: " << name << "\n";
@@ -153,7 +153,6 @@ G3TimesampleMap G3TimesampleMap::Concatenate(const G3TimesampleMap &other) const
 		}
 	}
 
-	int n_cat = times.size() + other.times.size();
 	G3TimesampleMap output;
 	vect_concat(output.times, times, other.times);
 
@@ -226,14 +225,14 @@ static
 void safe_set_item(G3TimesampleMap &self, const std::string key,
 		   G3FrameObjectPtr value)
 {
-	int check_len = g3_vect_test_and_size(value);
+	ssize_t check_len = g3_vect_test_and_size(value);
 	if (check_len < 0) {
 		std::ostringstream s;
 		s << "Cannot add member (" << key << "): "
 		  << "not a supported vector type.";
 		throw g3timesample_exception(s.str());
 	}
-	if (check_len != self.times.size()) {
+	if ((size_t)check_len != self.times.size()) {
 		std::ostringstream s;
 		s << "Cannot add member (" << key << "): "
 		  << "not the same length as .times.";

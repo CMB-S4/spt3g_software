@@ -143,7 +143,7 @@ ARCFileReader::ARCFileReader(const std::string &path,
 	}
 
 	boost::filesystem::path fpath(path);
-	if (path.find("://") == -1 && (!boost::filesystem::exists(fpath) ||
+	if (path.find("://") == path.npos && (!boost::filesystem::exists(fpath) ||
 	    !boost::filesystem::is_regular_file(fpath)))
 		log_fatal("Could not find file %s", path.c_str());
 	StartFile(path);
@@ -797,7 +797,6 @@ void ARCFileReader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	G3FramePtr outframe(new G3Frame(G3Frame::GcpSlow));
 	int32_t size, opcode;
 	uint8_t *buffer;
-	off_t off;
 
 	G3PythonContext ctx("ARCFileReader", false);
 

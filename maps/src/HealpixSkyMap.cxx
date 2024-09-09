@@ -45,7 +45,6 @@ HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool weighted,
 	if (PyTuple_Check(v.ptr()) && PyTuple_Size(v.ptr()) == 3) {
 		// One option is that we got passed a tuple of numpy
 		// arrays: first indices, next data, next nside.
-		Py_buffer indexview, dataview;
 #if PY_MAJOR_VERSION < 3
 		if (PyInt_Check(PyTuple_GetItem(v.ptr(), 2))) {
 			nside = PyInt_AsSsize_t(PyTuple_GetItem(v.ptr(), 2));
@@ -1245,7 +1244,13 @@ HealpixSkyMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 
 	bp::handle<> self(bp::borrowed(obj));
 	bp::object selfobj(self);
-	HealpixSkyMapPtr sm = bp::extract<HealpixSkyMapPtr>(selfobj)();
+	bp::extract<HealpixSkyMapPtr> ext(selfobj);
+	if (!ext.check()) {
+		PyErr_SetString(PyExc_ValueError, "Invalid healpix map");
+		view->obj = NULL;
+		return -1;
+	}
+	HealpixSkyMapPtr sm = ext();
 
 	sm->ConvertToDense();
 

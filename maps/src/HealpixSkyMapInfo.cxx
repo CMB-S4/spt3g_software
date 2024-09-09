@@ -238,7 +238,7 @@ HealpixSkyMapInfo::AngleToPixel(double alpha, double delta) const
 	else
 		ang2pix_ring64(nside_, theta, alpha, &outpix);
 
-	if (outpix < 0 || outpix >= npix_)
+	if (outpix < 0 || (size_t) outpix >= npix_)
 		return -1;
 
 	return outpix;
@@ -255,7 +255,7 @@ HealpixSkyMapInfo::QuatToPixel(quat q) const
 	else
 		vec2pix_ring64(nside_, &v[0], &outpix);
 
-	if (outpix < 0 || outpix >= npix_)
+	if (outpix < 0 || (size_t) outpix >= npix_)
 		return -1;
 
 	return outpix;
@@ -370,7 +370,7 @@ HealpixSkyMapInfo::GetInterpPixelsWeights(quat q, std::vector<size_t> & pixels,
 	size_t ir1 = RingAbove(z);
 	size_t ir2 = ir1 + 1;
 
-	double z1, z2;
+	double z1 = 0, z2 = 0;
 
 	if (ir1 > 0) {
 		const HealpixRingInfo & ring = rings_[ir1];
@@ -381,7 +381,7 @@ HealpixSkyMapInfo::GetInterpPixelsWeights(quat q, std::vector<size_t> & pixels,
 		if (i1 < 0)
 			i1 += ring.npix;
 		ssize_t i2 = i1 + 1;
-		if (i2 >= ring.npix)
+		if (i2 >= (ssize_t) ring.npix)
 			i2 -= ring.npix;
 		pixels[0] = ring.pix0 + i1;
 		pixels[1] = ring.pix0 + i2;
@@ -398,7 +398,7 @@ HealpixSkyMapInfo::GetInterpPixelsWeights(quat q, std::vector<size_t> & pixels,
 		if (i1 < 0)
 			i1 += ring.npix;
 		ssize_t i2 = i1 + 1;
-		if (i2 >= ring.npix)
+		if (i2 >= (ssize_t) ring.npix)
 			i2 -= ring.npix;
 		pixels[2] = ring.pix0 + i1;
 		pixels[3] = ring.pix0 + i2;
@@ -454,7 +454,7 @@ HealpixSkyMapInfo::QueryDisc(quat q, double radius) const
 	radius /= G3Units::rad;
 	if (radius >= M_PI) {
 		pixels.resize(npix_);
-		for (ssize_t i = 0; i < npix_; i++)
+		for (size_t i = 0; i < npix_; i++)
 			pixels[n++] = i;
 		return pixels;
 	}
@@ -477,7 +477,7 @@ HealpixSkyMapInfo::QueryDisc(quat q, double radius) const
 		// north pole in the disk
 		const HealpixRingInfo & ring = rings_[irmin - 1];
 		pixels.resize(n + ring.pix0 + ring.npix);
-		for (ssize_t i = 0; i < ring.pix0 + ring.npix; i++)
+		for (size_t i = 0; i < ring.pix0 + ring.npix; i++)
 			pixels[n++] = i;
 	}
 
@@ -504,7 +504,7 @@ HealpixSkyMapInfo::QueryDisc(quat q, double radius) const
 		if (ip_lo > ip_hi)
 			continue;
 
-		if (ip_hi >= ring.npix) {
+		if (ip_hi >= (ssize_t) ring.npix) {
 			ip_lo -= ring.npix;
 			ip_hi -= ring.npix;
 		}
@@ -535,7 +535,7 @@ HealpixSkyMapInfo::QueryDisc(quat q, double radius) const
 		// south pole in the disk
 		const HealpixRingInfo & ring = rings_[irmax + 1];
 		pixels.resize(n + npix_ - ring.pix0);
-		for (ssize_t i = ring.pix0; i < npix_; i++)
+		for (size_t i = ring.pix0; i < npix_; i++)
 			pixels[n++] = i;
 	}
 

@@ -254,7 +254,7 @@ FlatSkyProjection::XYToPixel(double x, double y) const
 
 	ssize_t ix = (ssize_t)floor(x + 0.5);
 	ssize_t iy = (ssize_t)floor(y + 0.5);
-	return (ix < 0 || iy < 0 || ix >= xpix_ || iy >= ypix_) ?
+	return (ix < 0 || iy < 0 || ix >= (ssize_t) xpix_ || iy >= (ssize_t) ypix_) ?
 	    -1 : ix + iy * xpix_;
 }
 
@@ -586,7 +586,7 @@ void FlatSkyProjection::GetInterpPixelsWeights(quat q,
 	ssize_t x_2 = x_1 + 1;
 	ssize_t y_1 = (ssize_t)floorf(y);
 	ssize_t y_2 = y_1 + 1;
-	if (x_1 < 0 || y_1 < 0 || x_2 >= xpix_ || y_2 >= ypix_){
+	if (x_1 < 0 || y_1 < 0 || x_2 >= (ssize_t) xpix_ || y_2 >= (ssize_t) ypix_){
 		log_debug("Point lies outside of pixel grid\n");
 		return;
 	}
@@ -629,18 +629,18 @@ FlatSkyProjection::QueryDisc(quat q, double radius) const
 		if (fx < xmin)
 			xmin = fx < 0 ? 0 : fx;
 		if (cx > xmax)
-			xmax = cx > xpix_ ? xpix_ : cx;
+			xmax = cx > (ssize_t) xpix_ ? xpix_ : cx;
 		if (fy < ymin)
 			ymin = fy < 0 ? 0 : fy;
 		if (cy > ymax)
-			ymax = cy > ypix_ ? ypix_ : cy;
+			ymax = cy > (ssize_t) ypix_ ? ypix_ : cy;
 	}
 
 	double crad = cos(radius / rad);
 
 	std::vector<size_t> pixels;
-	for (size_t x = xmin; x < xmax; x++) {
-		for (size_t y = ymin; y < ymax; y++) {
+	for (ssize_t x = xmin; x < xmax; x++) {
+		for (ssize_t y = ymin; y < ymax; y++) {
 			size_t pixel = y * xpix_ + x;
 			if (pixel > xpix_ * ypix_)
 				continue;

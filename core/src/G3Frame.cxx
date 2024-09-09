@@ -33,9 +33,11 @@ protected:
 	}
 };
 
-static std::string cxx_demangle(const char *name)
+template <typename T>
+static std::string cxx_demangle(const T& v)
 {
 	int err = 0;
+	const char *name = typeid(v).name();
 	char *demangled;
 
 	demangled = abi::__cxa_demangle(name, NULL, NULL, &err);
@@ -53,7 +55,7 @@ std::ostream& operator<<(std::ostream& os, const G3FrameObject &frame)
 
 std::string G3FrameObject::Description() const
 {
-	return cxx_demangle(typeid(*this).name());
+	return cxx_demangle(*this);
 }
 
 std::string G3FrameObject::Summary() const
@@ -149,7 +151,7 @@ static std::string FrameObjectClassName(G3FrameObjectConstPtr obj)
 		}
 	}
 
-	return cxx_demangle(typeid(*obj).name());
+	return cxx_demangle(*obj);
 }
 
 std::ostream& operator<<(std::ostream& os, const G3Frame &frame)

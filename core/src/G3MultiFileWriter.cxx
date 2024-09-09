@@ -104,7 +104,7 @@ G3MultiFileWriter::CheckNewFile(G3FramePtr frame)
 		if (!counter)
 			log_fatal("Could not get stream counter");
 
-		if (counter->characters() > size_limit_)
+		if ((size_t)counter->characters() > size_limit_)
 			start_new_ = true;
 
 		if (newfile_callback_.ptr() != Py_None &&

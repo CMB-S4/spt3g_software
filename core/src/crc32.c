@@ -219,9 +219,7 @@ local void make_crc_table()
 }
 
 #ifdef MAKECRCH
-local void write_table(out, table)
-    FILE *out;
-    const unsigned long FAR *table;
+local void write_table(FILE *out, const unsigned long FAR *table)
 {
     int n;
 
@@ -256,13 +254,12 @@ const unsigned long FAR * get_crc32c_table()
 
 /* ========================================================================= */
 #if defined(__i386__) || defined (__x86_64__)
-local unsigned long crc32c_tabular(crc, buf, len)
+local unsigned long
+crc32c_tabular(unsigned long crc, const unsigned char FAR *buf, uInt len)
 #else
-unsigned long crc32c(crc, buf, len)
+unsigned long
+crc32c(unsigned long crc, const unsigned char FAR *buf, uInt len)
 #endif
-    unsigned long crc;
-    const unsigned char FAR *buf;
-    uInt len;
 {
     if (buf == Z_NULL) return 0UL;
 
@@ -302,10 +299,8 @@ unsigned long crc32c(crc, buf, len)
 #define DOLIT32 DOLIT4; DOLIT4; DOLIT4; DOLIT4; DOLIT4; DOLIT4; DOLIT4; DOLIT4
 
 /* ========================================================================= */
-local unsigned long crc32_little(crc, buf, len)
-    unsigned long crc;
-    const unsigned char FAR *buf;
-    unsigned len;
+local unsigned long
+crc32_little(unsigned long crc, const unsigned char FAR *buf, unsigned len)
 {
     register u4 c;
     register const u4 FAR *buf4;
@@ -340,10 +335,8 @@ local unsigned long crc32_little(crc, buf, len)
 #define DOBIG32 DOBIG4; DOBIG4; DOBIG4; DOBIG4; DOBIG4; DOBIG4; DOBIG4; DOBIG4
 
 /* ========================================================================= */
-local unsigned long crc32_big(crc, buf, len)
-    unsigned long crc;
-    const unsigned char FAR *buf;
-    unsigned len;
+local unsigned long
+crc32_big(unsigned long crc, const unsigned char FAR *buf, unsigned len)
 {
     register u4 c;
     register const u4 FAR *buf4;
@@ -376,10 +369,8 @@ local unsigned long crc32_big(crc, buf, len)
 #endif /* BYFOUR */
 
 #if defined(__i386__) || defined (__x86_64__)
-local unsigned long crc32c_sse42(crc, buf, len)
-    unsigned int crc;
-    const unsigned char FAR *buf;
-    unsigned len;
+local unsigned long
+crc32c_sse42(unsigned long crc, const unsigned char FAR *buf, unsigned len)
 {
     /* From: http://byteworm.com/2010/10/13/crc32 */
     uint32_t q = len/sizeof(long);
@@ -407,10 +398,8 @@ local unsigned long crc32c_sse42(crc, buf, len)
     return crc;
 }
 
-unsigned long crc32c(crc, buf, len)
-    unsigned long crc;
-    const unsigned char FAR *buf;
-    unsigned len;
+unsigned long
+crc32c(unsigned long crc, const unsigned char FAR *buf, unsigned len)
 {
     static int has_sse42 = -1;
 

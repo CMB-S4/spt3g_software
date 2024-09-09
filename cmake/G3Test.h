@@ -258,7 +258,7 @@ int main(int argc, char* argv[]){ \
 	bool runAll=true; \
 	std::vector<std::string> testsToRun; \
  \
-	for(unsigned int i=1; i<argc; i++){ \
+	for(int i=1; i<argc; i++){ \
 		std::string opt=argv[i]; \
 		if(opt=="--help" || opt=="-h"){ \
 			std::cout << "Usage: \n" \
