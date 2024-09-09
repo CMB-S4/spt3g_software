@@ -850,9 +850,9 @@ void FlatSkyMap::InsertPatch(const FlatSkyMap &patch, bool ignore_zeros)
 		for (size_t y = 0; y < patch.ypix_; y++) {
 			ssize_t ix = x + x0;
 			ssize_t iy = y + y0;
-			if (ix < 0 || ix >= xpix_)
+			if (ix < 0 || ix >= (ssize_t) xpix_)
 				continue;
-			if (iy < 0 || iy >= ypix_)
+			if (iy < 0 || iy >= (ssize_t) ypix_)
 				continue;
 			double v = patch.at(x, y);
 			if (ignore_zeros && v == 0)
@@ -889,7 +889,13 @@ FlatSkyMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 
 	bp::handle<> self(bp::borrowed(obj));
 	bp::object selfobj(self);
-	FlatSkyMapPtr sm = bp::extract<FlatSkyMapPtr>(selfobj)();
+	bp::extract<FlatSkyMapPtr> ext(selfobj);
+	if (!ext.check()) {
+		PyErr_SetString(PyExc_ValueError, "Invalid flat sky map");
+		view->obj = NULL;
+		return -1;
+	}
+	FlatSkyMapPtr sm = ext();
 
 	view->obj = obj;
 	if (sm->shape()[0] == 0 && sm->shape()[1] == 0) {
@@ -925,6 +931,40 @@ FlatSkyMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 
 static PyBufferProcs flatskymap_bufferprocs;
 
+static G3SkyMapPtr
+flatskymap_getslice_2d(const FlatSkyMap &skymap, bp::slice yslice, bp::slice xslice)
+{
+	int ystart(0), ystop(skymap.shape()[1]);
+	int xstart(0), xstop(skymap.shape()[0]);
+
+	// Normalize and check slice boundaries
+	if (yslice.start().ptr() != Py_None)
+		ystart = bp::extract<int>(yslice.start())();
+	if (ystart < 0)
+		ystart += skymap.shape()[1];
+	if (yslice.stop().ptr() != Py_None)
+		ystop = bp::extract<int>(yslice.stop())();
+	if (ystop < 0)
+		ystop += skymap.shape()[1];
+	if (yslice.step().ptr() != Py_None)
+		log_fatal("Slicing with non-unity steps unsupported");
+	if (xslice.start().ptr() != Py_None)
+		xstart = bp::extract<int>(xslice.start())();
+	if (xstart < 0)
+		xstart += skymap.shape()[0];
+	if (xslice.stop().ptr() != Py_None)
+		xstop = bp::extract<int>(xslice.stop())();
+	if (xstop < 0)
+		xstop += skymap.shape()[0];
+	if (xslice.step().ptr() != Py_None)
+		log_fatal("Slicing with non-unity steps unsupported");
+
+	return skymap.ExtractPatch(
+	    (xstop + xstart)/2, (ystop + ystart)/2,
+	    xstop - xstart, ystop - ystart
+	);
+}
+
 static bp::object
 flatskymap_getitem_2d(const FlatSkyMap &skymap, bp::tuple coords)
 {
@@ -933,35 +973,7 @@ flatskymap_getitem_2d(const FlatSkyMap &skymap, bp::tuple coords)
 		// Slicing time!
 		bp::slice yslice = bp::extract<bp::slice>(coords[0]);
 		bp::slice xslice = bp::extract<bp::slice>(coords[1]);
-		int ystart(0), ystop(skymap.shape()[1]);
-		int xstart(0), xstop(skymap.shape()[0]);
-
-		// Normalize and check slice boundaries
-		if (yslice.start().ptr() != Py_None)
-			ystart = bp::extract<int>(yslice.start())();
-		if (ystart < 0)
-			ystart += skymap.shape()[1];
-		if (yslice.stop().ptr() != Py_None)
-			ystop = bp::extract<int>(yslice.stop())();
-		if (ystop < 0)
-			ystop += skymap.shape()[1];
-		if (yslice.step().ptr() != Py_None)
-			log_fatal("Slicing with non-unity steps unsupported");
-		if (xslice.start().ptr() != Py_None)
-			xstart = bp::extract<int>(xslice.start())();
-		if (xstart < 0)
-			xstart += skymap.shape()[0];
-		if (xslice.stop().ptr() != Py_None)
-			xstop = bp::extract<int>(xslice.stop())();
-		if (xstop < 0)
-			xstop += skymap.shape()[0];
-		if (xslice.step().ptr() != Py_None)
-			log_fatal("Slicing with non-unity steps unsupported");
-
-		return bp::object(skymap.ExtractPatch(
-		    (xstop + xstart)/2, (ystop + ystart)/2,
-		    xstop - xstart, ystop - ystart
-		));
+		return bp::object(flatskymap_getslice_2d(skymap, yslice, xslice));
 	}
 
 	ssize_t y = bp::extract<ssize_t>(coords[0]); // Swapped to match numpy
@@ -1024,13 +1036,17 @@ flatskymap_setitem_2d(FlatSkyMap &skymap, bp::tuple coords,
 	// This has the nice side-effect that all the irritating parsing of
 	// slice dimensions is done only once, in getitem().
 
+	bp::slice yslice = bp::extract<bp::slice>(coords[0]);
+	bp::slice xslice = bp::extract<bp::slice>(coords[1]);
 	FlatSkyMapPtr shallowclone =
 	    boost::dynamic_pointer_cast<FlatSkyMap>(skymap.Clone(false));
-	FlatSkyMapPtr dummy_subpatch = bp::extract<FlatSkyMapPtr>(
-	    flatskymap_getitem_2d(*shallowclone, coords));
+	FlatSkyMapPtr dummy_subpatch =
+	    boost::dynamic_pointer_cast<FlatSkyMap>(
+	        flatskymap_getslice_2d(*shallowclone, yslice, xslice));
 
-	if (bp::extract<FlatSkyMap>(val).check()) {
-		const FlatSkyMap &patch = bp::extract<FlatSkyMap>(val)();
+	bp::extract<const FlatSkyMap &> mapext(val);
+	if (mapext.check()) {
+		const FlatSkyMap &patch = mapext();
 		if (!dummy_subpatch->IsCompatible(patch)) {
 			PyErr_SetString(PyExc_ValueError, "Provided patch to insert is "
 			    "not compatible with the given subregion of the map into "

@@ -44,7 +44,7 @@ g3_istream_from_path(boost::iostreams::filtering_istream &stream,
 		//   and read until EOF
 
 		std::string host = path.substr(path.find("://") + 3);
-		if (host.find(":") == -1)
+		if (host.find(":") == host.npos)
 			log_fatal("Could not open URL %s: unspecified port",
 			    path.c_str());
 		std::string port = host.substr(host.find(":") + 1);

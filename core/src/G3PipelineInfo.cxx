@@ -149,12 +149,13 @@ G3ModuleConfig_set(G3ModuleConfig &mc, std::string key, bp::object obj)
 {
 	std::string repr = object_repr(obj);
 
-	if (!bp::extract<G3FrameObjectPtr>(obj).check()) {
+	bp::extract<G3FrameObjectPtr> extobj(obj);
+	if (!extobj.check()) {
 		mc.config[key] = G3ModuleArg(repr);
 		return;
 	}
 
-	mc.config[key] = G3ModuleArg(repr, bp::extract<G3FrameObjectPtr>(obj)());
+	mc.config[key] = G3ModuleArg(repr, extobj());
 }
 
 static bp::list

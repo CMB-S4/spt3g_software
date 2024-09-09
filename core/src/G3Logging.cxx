@@ -31,7 +31,7 @@ G3LoggingStringF(const char *format, ...)
 	char *log_message = new char[messagesize + 1];
 
 	va_start(args, format);
-	vsprintf(log_message, format, args);
+	vsnprintf(log_message, messagesize + 1, format, args);
 
 	std::string out(log_message);
 	delete [] log_message;
@@ -110,7 +110,7 @@ G3BasicLogger::Log(G3LogLevel level, const std::string &unit,
 	    log_description, unit.c_str(), message.c_str(), file.c_str(), line,
 	    func.c_str());
 	char *log_message = new char[messagesize + 1];
-	sprintf(log_message, "%s (%s): %s (%s:%d in %s)", log_description,
+	snprintf(log_message, messagesize + 1, "%s (%s): %s (%s:%d in %s)", log_description,
 	    unit.c_str(), message.c_str(), file.c_str(), line, func.c_str());
 
 	BasicLog(log_message);
@@ -128,7 +128,7 @@ g3_clogger(G3LogLevel level, const char *unit, const char *file, int line,
 	char *log_message = new char[messagesize + 1];
 
 	va_start(args, format);
-	vsprintf(log_message, format, args);
+	vsnprintf(log_message, messagesize + 1, format, args);
 
 	GetRootLogger()->Log(level, unit, file, line, func, log_message);
 	delete [] log_message;

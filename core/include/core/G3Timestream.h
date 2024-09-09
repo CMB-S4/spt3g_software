@@ -151,6 +151,11 @@ private:
 	};
 };
 
+G3Timestream operator +(double l, const G3Timestream &r);
+G3Timestream operator -(double l, const G3Timestream &r);
+G3Timestream operator *(double l, const G3Timestream &r);
+G3Timestream operator /(double l, const G3Timestream &r);
+
 G3_POINTERS(G3Timestream);
 
 template<>

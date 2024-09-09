@@ -21,11 +21,11 @@ SparseMapData<T>::const_iterator::operator++() {
 	}
 
 	const SparseMapData<T>::data_element &column = sparse_.data_[x - sparse_.offset_];
-	if (column.second.size() > 0 && y < column.first) {
+	if (column.second.size() > 0 && y < (size_t) column.first) {
 		y = column.first;
 		return *this;
 	}
-	if (column.second.size() > 0 && y < column.first + column.second.size() - 1) {
+	if (column.second.size() > 0 && y < (size_t) column.first + column.second.size() - 1) {
 		y++;
 		return *this;
 	}
@@ -229,10 +229,8 @@ SparseMapData<double> &
 SparseMapData<double>::operator*=(double r)
 {
 	for (size_t ix = 0; ix < data_.size(); ix++) {
-		size_t x = offset_ + ix;
 		data_element &column = data_[ix];
 		for (size_t iy = 0; iy < column.second.size(); iy++) {
-			size_t y = column.first + iy;
 			column.second[iy] *= r;
 		}
 	}
@@ -289,10 +287,8 @@ SparseMapData<double>::operator/=(double r)
 	assert(r != 0);
 
 	for (size_t ix = 0; ix < data_.size(); ix++) {
-		size_t x = offset_ + ix;
 		data_element &column = data_[ix];
 		for (size_t iy = 0; iy < column.second.size(); iy++) {
-			size_t y = column.first + iy;
 			column.second[iy] /= r;
 		}
 	}

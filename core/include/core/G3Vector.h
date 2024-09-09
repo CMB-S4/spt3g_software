@@ -58,7 +58,7 @@ public:
 		if (this->size() == 1) {
 			s << (*this)[0];
 		} else if (this->size() > 1) {
-			for (int i = 0; i < this->size()-1; i++)
+			for (size_t i = 0; i < this->size()-1; i++)
 				s << (*this)[i] << ", ";
 			s << (*this)[this->size() - 1];
 		}

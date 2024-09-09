@@ -446,7 +446,13 @@ G3VectorQuat_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 
 	bp::handle<> self(bp::borrowed(obj));
 	bp::object selfobj(self);
-	G3VectorQuatPtr q = bp::extract<G3VectorQuatPtr>(selfobj)();
+	bp::extract<G3VectorQuatPtr> ext(selfobj);
+	if (!ext.check()) {
+		PyErr_SetString(PyExc_ValueError, "Invalid vector");
+		view->obj = NULL;
+		return -1;
+	}
+	G3VectorQuatPtr q = ext();
 
 	view->obj = obj;
 	view->buf = (void*)&(*q)[0];
@@ -500,8 +506,9 @@ boost::shared_ptr<T>
 quat_vec_container_from_object(boost::python::object v)
 {
 	// There's a chance this is actually a copy operation, so try that first
-	if (bp::extract<T &>(v).check())
-		return boost::make_shared<T>(bp::extract<T &>(v)());
+	bp::extract<T &> extv(v);
+	if (extv.check())
+		return boost::make_shared<T>(extv());
 
         boost::shared_ptr<T> x(new (T));
 	Py_buffer view;
@@ -523,16 +530,16 @@ quat_vec_container_from_object(boost::python::object v)
 		// Packed and simple, use memcpy()
 		memcpy((void *)&(*x)[0], view.buf, view.len);
 	} else if (strcmp(view.format, "d") == 0) {
-		for (size_t i = 0; i < view.shape[0]; i++)
+		for (size_t i = 0; i < (size_t)view.shape[0]; i++)
 			(*x)[i] = QUATI(double, i);
 	} else if (strcmp(view.format, "f") == 0) {
-		for (size_t i = 0; i < view.shape[0]; i++)
+		for (size_t i = 0; i < (size_t)view.shape[0]; i++)
 			(*x)[i] = QUATI(float, i);
 	} else if (strcmp(view.format, "i") == 0) {
-		for (size_t i = 0; i < view.shape[0]; i++)
+		for (size_t i = 0; i < (size_t)view.shape[0]; i++)
 			(*x)[i] = QUATI(int, i);
 	} else if (strcmp(view.format, "l") == 0) {
-		for (size_t i = 0; i < view.shape[0]; i++)
+		for (size_t i = 0; i < (size_t)view.shape[0]; i++)
 			(*x)[i] = QUATI(long, i);
 	} else {
 		PyBuffer_Release(&view);

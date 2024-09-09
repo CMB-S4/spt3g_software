@@ -284,7 +284,7 @@ void DfMuxCollector::Listen(DfMuxCollector *collector)
 		    (struct sockaddr *)&addr, &addrlen);
 		nchan = (le16toh(buf.version) == 4) ? 128 : buf.channels_per_module;
 		target_size = base_size + nchan*sizeof(buf.s[0])*2;
-		if (len != target_size) {
+		if (len != (ssize_t)target_size) {
 			log_error("Badly-sized packet with %d channels from %s "
 			    "(%zd bytes should be %zd)",
 			    nchan, inet_ntoa(addr.sin_addr),
@@ -403,7 +403,7 @@ make_dfmux_collector_v2_from_dict(const char *listenaddr,
 	std::map<in_addr_t, int32_t> serial_map;
 	
 	bp::list items = board_serial_map.items();
-	for (size_t i = 0; i < bp::len(items); i++) {
+	for (ssize_t i = 0; i < bp::len(items); i++) {
 		int32_t serial = bp::extract<int>(items[i][1])();
 		in_addr_t ip;
 

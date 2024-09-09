@@ -156,16 +156,33 @@ boost::python::list g3frame_keys(const G3Frame &map)
 
 static void g3frame_python_put(G3Frame &f, std::string name, bp::object obj)
 {
-	if (bp::extract<G3FrameObjectPtr>(obj).check())
-		f.Put(name, bp::extract<G3FrameObjectPtr>(obj)());
-	else if (PyBool_Check(obj.ptr()))
-		f.Put(name, boost::make_shared<G3Bool>(bp::extract<bool>(obj)()));
-	else if (bp::extract<int64_t>(obj).check())
-		f.Put(name, boost::make_shared<G3Int>(bp::extract<int64_t>(obj)()));
-	else if (bp::extract<double>(obj).check())
-		f.Put(name, boost::make_shared<G3Double>(bp::extract<double>(obj)()));
-	else if (bp::extract<std::string>(obj).check())
-		f.Put(name, boost::make_shared<G3String>(bp::extract<std::string>(obj)()));
+	bp::extract<G3FrameObjectPtr> extframe(obj);
+	if (extframe.check()) {
+		f.Put(name, extframe());
+		return;
+	}
+
+	bp::extract<bool> extbool(obj);
+	if (PyBool_Check(obj.ptr()) && extbool.check()) {
+		f.Put(name, boost::make_shared<G3Bool>(extbool()));
+		return;
+	}
+
+	bp::extract<int64_t> extint(obj);
+	if (extint.check()) {
+		f.Put(name, boost::make_shared<G3Int>(extint()));
+		return;
+	}
+
+	bp::extract<double> extdouble(obj);
+	if (extdouble.check()) {
+		f.Put(name, boost::make_shared<G3Double>(extdouble()));
+		return;
+	}
+
+	bp::extract<std::string> extstr(obj);
+	if (extstr.check())
+		f.Put(name, boost::make_shared<G3String>(extstr()));
 	else {
 		PyErr_SetString(PyExc_TypeError, "Object is not a G3FrameObject derivative or a plain-old-data type");
 		bp::throw_error_already_set();
@@ -242,11 +259,18 @@ public:
 		bp::object ret = this->get_override("Process")(frame);
 		if (ret.ptr() == Py_None) {
 			out.push_back(frame);
-		} else if (bp::extract<G3FramePtr>(ret).check()) {
-			out.push_back(bp::extract<G3FramePtr>(ret)());
-		} else if (bp::extract<std::vector<G3FramePtr> >(ret).check()) {
-			std::vector<G3FramePtr> outlist =
-			    bp::extract<std::vector<G3FramePtr> >(ret)();
+			return;
+		}
+
+		bp::extract<G3FramePtr> extframe(ret);
+		if (extframe.check()) {
+			out.push_back(extframe());
+			return;
+		}
+
+		bp::extract<std::vector<G3FramePtr> > extvec(ret);
+		if (extvec.check()) {
+			std::vector<G3FramePtr> outlist = extvec();
 			for (auto i = outlist.begin(); i != outlist.end(); i++)
 				out.push_back(*i);
 		} else if (!!ret) {
@@ -316,19 +340,7 @@ BOOST_PP_SEQ_FOR_EACH(CONSTANTS_INTERFACE,~,CONSTANTS)
 struct __XXX_fake_g3constants_namespace_XXX {};
 
 // Nonsense boilerplate for POD vector numpy bindings
-#define numpy_vector_infrastructure(T, name, conv) \
-template <> \
-boost::shared_ptr<std::vector<T> > \
-container_from_object(boost::python::object v) \
-{ \
-	return numpy_container_from_object<std::vector<T> >(v); \
-} \
-static int \
-vector_getbuffer_##name(PyObject *obj, Py_buffer *view, int flags) \
-{ \
-	return pyvector_getbuffer<T>(obj, view, flags, conv); \
-} \
-static PyBufferProcs vec_bufferprocs_##name; \
+#define numpy_vector_struct(T, name) \
 struct numpy_vector_from_python_##name { \
 	numpy_vector_from_python_##name() { \
 		boost::python::converter::registry::push_back( \
@@ -359,6 +371,21 @@ struct numpy_vector_from_python_##name { \
 		data->convertible = storage; \
 	} \
 };
+
+#define numpy_vector_infrastructure(T, name, conv) \
+template <> \
+boost::shared_ptr<std::vector<T> > \
+container_from_object(boost::python::object v) \
+{ \
+	return numpy_container_from_object<std::vector<T> >(v); \
+} \
+static int \
+vector_getbuffer_##name(PyObject *obj, Py_buffer *view, int flags) \
+{ \
+	return pyvector_getbuffer<T>(obj, view, flags, conv); \
+} \
+static PyBufferProcs vec_bufferprocs_##name; \
+numpy_vector_struct(T, name)
 
 #if PY_MAJOR_VERSION < 3
 #define numpy_vector_of(T, name, desc) \
@@ -397,8 +424,8 @@ numpy_vector_infrastructure(float, float, "f")
 //
 // Thanks, Apple. "Think Different!"
 #if defined(__APPLE__) && defined(__LP64__)
-numpy_vector_infrastructure(size_t, size_t, "L")
-numpy_vector_infrastructure(ssize_t, ssize_t, "l")
+numpy_vector_struct(size_t, size_t)
+numpy_vector_struct(ssize_t, ssize_t)
 struct apple_size
 {
 	static PyObject* convert(const std::vector<size_t> &arg) {
