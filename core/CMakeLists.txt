@@ -110,7 +110,7 @@ add_spt3g_test(quaternions)
 add_spt3g_test(timesample)
 
 add_spt3g_test_program(test
-	SOURCE_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/tests/G3TimestreamTest.cxx
-	${CMAKE_CURRENT_SOURCE_DIR}/tests/G3TimestreamMapTest.cxx
-	USE_PROJECTS core)
+                       SOURCE_FILES
+                         ${CMAKE_CURRENT_SOURCE_DIR}/tests/G3TimestreamTest.cxx
+                         ${CMAKE_CURRENT_SOURCE_DIR}/tests/G3TimestreamMapTest.cxx
+                       USE_PROJECTS core)

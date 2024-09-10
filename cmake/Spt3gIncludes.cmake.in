@@ -78,8 +78,8 @@ macro(add_spt3g_test test_name)
 endmacro(add_spt3g_test test_name)
 
 if(BUILD_WHEEL)
-macro(add_spt3g_test_program test_name)
-endmacro(add_spt3g_test_program test_name)
+	macro(add_spt3g_test_program test_name)
+	endmacro(add_spt3g_test_program test_name)
 else(BUILD_WHEEL)
 
 macro(add_spt3g_test_program test_name)
