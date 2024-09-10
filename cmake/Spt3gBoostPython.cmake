@@ -1,6 +1,6 @@
 # Locate Python
 
-if(BUILD_WHEELS)
+if(BUILD_WHEEL)
 	find_package(Python COMPONENTS Interpreter Development.Module)
 elseif(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.12)
 	find_package(Python COMPONENTS Interpreter Development)

@@ -1,7 +1,7 @@
 # Build a minimal library with a constant name which can be loaded as a python
 # module with a plain `import`, which can then load other modules which are
 # native libraries with normal names.
-if(BUILD_WHEELS)
+if(BUILD_WHEEL)
 	Python_add_library(dload MODULE src/dload.c)
 else()
 	add_library(dload SHARED src/dload.c)
@@ -109,10 +109,8 @@ add_spt3g_test(pipelineinfo)
 add_spt3g_test(quaternions)
 add_spt3g_test(timesample)
 
-if(NOT BUILD_WHEELS)
-	add_spt3g_test_program(test
-		SOURCE_FILES
-		${CMAKE_CURRENT_SOURCE_DIR}/tests/G3TimestreamTest.cxx
-		${CMAKE_CURRENT_SOURCE_DIR}/tests/G3TimestreamMapTest.cxx
-		USE_PROJECTS core)
-endif()
+add_spt3g_test_program(test
+	SOURCE_FILES
+	${CMAKE_CURRENT_SOURCE_DIR}/tests/G3TimestreamTest.cxx
+	${CMAKE_CURRENT_SOURCE_DIR}/tests/G3TimestreamMapTest.cxx
+	USE_PROJECTS core)
