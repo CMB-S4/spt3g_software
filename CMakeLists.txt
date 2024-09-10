@@ -73,10 +73,11 @@ if(Boost_VERSION VERSION_GREATER 1.79)
 	set(CMAKE_CXX_STANDARD 14)
 endif()
 
-target_include_directories(spt3g INTERFACE ${Boost_INCLUDE_DIR} ${Python_INCLUDE_DIRS})
 if(BUILD_WHEEL)
-	target_link_libraries(spt3g INTERFACE pthread ${Boost_LIBRARIES} Python::Module)
+	find_package(Threads REQUIRED)
+	target_link_libraries(spt3g INTERFACE Threads::Threads Boost::system Boost::iostreams Boost::filesystem Boost::${Boost_PYTHON_TYPE} Python::Module)
 else()
+	target_include_directories(spt3g INTERFACE ${Boost_INCLUDE_DIR} ${Python_INCLUDE_DIRS})
 	target_link_libraries(spt3g INTERFACE pthread ${Boost_LIBRARIES} ${Python_LIBRARIES})
 endif()
 
