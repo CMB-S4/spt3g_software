@@ -35,7 +35,6 @@ target_link_libraries(core spt3g)
 target_include_directories(core PUBLIC
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/core>
 	$<INSTALL_INTERFACE:${SPT3G_INCLUDE_INSTALL_DIR}/core>
-	$<INSTALL_INTERFACE:${SPT3G_INCLUDE_INSTALL_DIR}>
 )
 
 # Link against FLAC library

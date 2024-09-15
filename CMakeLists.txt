@@ -63,14 +63,12 @@ set(Boost_NO_BOOST_CMAKE ON)
 
 # Find all the Boost and Python libraries
 include(Spt3gBoostPython)
+find_package(Threads REQUIRED)
 
-# Upgrade C++ standard to C++14 for Boost >= 1.80, which requires it
-if(Boost_VERSION VERSION_GREATER 1.79)
-	set(CMAKE_CXX_STANDARD 14)
-endif()
-
+target_compile_features(spt3g INTERFACE cxx_std_11)
 target_include_directories(spt3g INTERFACE ${Boost_INCLUDE_DIR} ${Python_INCLUDE_DIRS})
-target_link_libraries(spt3g INTERFACE pthread ${Boost_LIBRARIES} ${Python_LIBRARIES})
+target_link_libraries(spt3g INTERFACE Threads::Threads ${Boost_LIBRARIES} ${Python_LIBRARIES})
+target_include_directories(spt3g INTERFACE $<INSTALL_INTERFACE:${SPT3G_INCLUDE_INSTALL_DIR}>)
 
 # Work around yet more bugs in GCC 4.4, this time with C++ 11 support
 # Also increase maximum number of arguments in python bindings
@@ -277,7 +275,3 @@ configure_file(
 	"${CMAKE_BINARY_DIR}/cmake/cmake_uninstall_cmake"
 	IMMEDIATE @ONLY)
 add_custom_target(uninstall "${CMAKE_COMMAND}" -P "${CMAKE_BINARY_DIR}/cmake/cmake_uninstall_cmake")
-
-if(NOT Python_FOUND)
-	message(FATAL_ERROR "Unable to find Python; build cannot proceed")
-endif(NOT Python_FOUND)

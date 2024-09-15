@@ -1,10 +1,10 @@
 # Locate Python
 
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.12)
-	find_package(Python COMPONENTS Interpreter Development)
+	find_package(Python COMPONENTS Interpreter Development REQUIRED)
 else()
-	find_package(PythonInterp)
-	find_package(PythonLibs ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
+	find_package(PythonInterp REQUIRED)
+	find_package(PythonLibs ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR} REQUIRED)
 	string(REGEX REPLACE ".*libpython([0-9])\\.[0-9]+.*\\..*" "\\1" Python_VERSION_MAJOR ${PYTHON_LIBRARIES})
 	string(REGEX REPLACE ".*libpython[0-9]\\.([0-9]+).*\\..*" "\\1" Python_VERSION_MINOR ${PYTHON_LIBRARIES})
 	set(Python_INCLUDE_DIRS ${PYTHON_INCLUDE_DIRS} ${PYTHON_INCLUDE_PATH})
