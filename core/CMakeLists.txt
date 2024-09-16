@@ -1,16 +1,14 @@
 # Build a minimal library with a constant name which can be loaded as a python
 # module with a plain `import`, which can then load other modules which are
 # native libraries with normal names.
-if(BUILD_WHEEL)
-	Python_add_library(dload MODULE src/dload.c)
-else()
+if(NOT BUILD_WHEEL)
 	add_library(dload SHARED src/dload.c)
 	set_target_properties(dload PROPERTIES PREFIX "")
 	set_target_properties(dload PROPERTIES SUFFIX ".so")
 	target_include_directories(dload PRIVATE ${Python_INCLUDE_DIRS})
 	target_link_libraries(dload PUBLIC ${Python_LIBRARIES})
+	install(TARGETS dload DESTINATION ${PYTHON_MODULE_DIR}/spt3g)
 endif()
-install(TARGETS dload DESTINATION ${PYTHON_MODULE_DIR}/spt3g)
 
 # OS X has a broken implementatin of pthreads.
 if(APPLE)
@@ -19,7 +17,7 @@ else(APPLE)
 	set(CORE_EXTRA_SRCS "")
 endif(APPLE)
 
-add_spt3g_library(core SHARED
+add_spt3g_library(core
 	src/G3EventBuilder.cxx src/G3Frame.cxx src/G3TimeStamp.cxx
 	src/G3Pipeline.cxx src/G3Writer.cxx src/G3Reader.cxx src/python.cxx
 	src/G3InfiniteSource.cxx src/G3Logging.cxx src/G3PrintfLogger.cxx
@@ -33,7 +31,7 @@ add_spt3g_library(core SHARED
 )
 
 # Link dependencies
-target_link_libraries(core spt3g)
+target_link_libraries(core PUBLIC spt3g)
 
 # Make core includes available without directories
 target_include_directories(core PUBLIC
@@ -47,7 +45,7 @@ find_package(FLAC)
 if(FLAC_FOUND)
 	target_compile_definitions(core PRIVATE -DG3_HAS_FLAC)
 	target_include_directories(core PRIVATE ${FLAC_INCLUDE_DIR})
-	target_link_libraries(core ${FLAC_LIBRARIES})
+	target_link_libraries(core PUBLIC ${FLAC_LIBRARIES})
 endif()
 
 # Link against BZIP2 library

@@ -1,5 +1,9 @@
-from spt3g.core.load_pybindings import load_pybindings
-load_pybindings(__name__, __path__)
+try:
+    from .. import dfmux
+    from .._libgcp import *
+except ImportError:
+    from spt3g.core.load_pybindings import load_pybindings
+    load_pybindings(__name__, __path__)
 
 from .ARCExtractor import UnpackACUData, UnpackTrackerData, DecryptFeatureBit, ARCExtract, ARCExtractMinimal
 from .ARCHKExtractor import UnpackSPTpolHKData

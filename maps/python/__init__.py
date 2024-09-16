@@ -1,5 +1,9 @@
-from spt3g.core.load_pybindings import load_pybindings
-load_pybindings(__name__, __path__)
+try:
+    from .. import calibration
+    from .._libmaps import *
+except ImportError:
+    from spt3g.core.load_pybindings import load_pybindings
+    load_pybindings(__name__, __path__)
 
 # Just run this, no symbols we need though
 from .skymapaddons import *

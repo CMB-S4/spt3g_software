@@ -39,9 +39,6 @@ include(${CMAKE_BINARY_DIR}/cmake/Spt3gIncludes.cmake)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${SPT3G_LIBRARY_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${SPT3G_RUNTIME_DIR})
 
-# Sneak in a namespace-like prefix for all libraries
-set(CMAKE_SHARED_LIBRARY_PREFIX "libspt3g-")
-
 # Raise every warning by default
 # (use target-specific options to disable particular warnings)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
@@ -75,7 +72,8 @@ endif()
 
 if(BUILD_WHEEL)
 	find_package(Threads REQUIRED)
-	target_link_libraries(spt3g INTERFACE Threads::Threads ${Boost_LIBRARIES} Python::Module)
+	target_link_libraries(spt3g INTERFACE Threads::Threads ${Boost_LIBRARIES})
+	target_compile_definitions(spt3g INTERFACE -DBUILD_WHEEL)
 else()
 	target_include_directories(spt3g INTERFACE ${Boost_INCLUDE_DIR} ${Python_INCLUDE_DIRS})
 	target_link_libraries(spt3g INTERFACE pthread ${Boost_LIBRARIES} ${Python_LIBRARIES})
@@ -158,8 +156,10 @@ foreach(subdir ${SUBDIRS})
 endforeach(subdir ${SUBDIRS})
 
 # export configuration files for use in other projects
-export(TARGETS ${SPT3G_LIBRARIES} NAMESPACE spt3g:: FILE ${CMAKE_BINARY_DIR}/cmake/Spt3gTargets.cmake)
-configure_file(${CMAKE_SOURCE_DIR}/cmake/Spt3gConfig.cmake.in ${CMAKE_BINARY_DIR}/cmake/Spt3gConfig.cmake @ONLY)
+if(NOT BUILD_WHEEL)
+	export(TARGETS ${SPT3G_LIBRARIES} NAMESPACE spt3g:: FILE ${CMAKE_BINARY_DIR}/cmake/Spt3gTargets.cmake)
+	configure_file(${CMAKE_SOURCE_DIR}/cmake/Spt3gConfig.cmake.in ${CMAKE_BINARY_DIR}/cmake/Spt3gConfig.cmake @ONLY)
+endif()
 
 # Custom things related to testing
 add_custom_target(fasttest COMMAND ctest -LE SLOWTEST COMMENT "Running fast test suite")
@@ -192,9 +192,6 @@ add_custom_target(docs
 	COMMENT "Generate HTML documentation")
 
 # Set up installation
-
-# Export the phony library target
-INSTALL(TARGETS spt3g EXPORT ${PROJECT_NAME}Config)
 
 # The python module
 # First, one-off files
@@ -241,44 +238,49 @@ foreach(program ${SPT3G_PROGRAMS})
 	)
 endforeach(program ${SPT3G_PROGRAMS})
 
-# The CMake package definitions
-include(CMakePackageConfigHelpers)
+if(NOT BUILD_WHEEL)
+	# Export the phony library target
+	install(TARGETS spt3g EXPORT ${PROJECT_NAME}Config)
 
-set(INCLUDE_INSTALL_DIR include/spt3g )
-set(LIB_INSTALL_DIR lib/ )
-set(CMAKE_INSTALL_DIR share/${PROJECT_NAME}/cmake )
-configure_package_config_file(${CMAKE_SOURCE_DIR}/cmake/Spt3gConfig.cmake.in
-	${CMAKE_BINARY_DIR}/cmake-install/Spt3gConfig.cmake
-	INSTALL_DESTINATION ${CMAKE_INSTALL_DIR}
-	PATH_VARS INCLUDE_INSTALL_DIR LIB_INSTALL_DIR CMAKE_INSTALL_DIR
-)
+	# The CMake package definitions
+	include(CMakePackageConfigHelpers)
 
-install(EXPORT ${PROJECT_NAME}Config
-	DESTINATION ${CMAKE_INSTALL_DIR}
-	NAMESPACE spt3g::
-	FILE Spt3gTargets.cmake)
-install(FILES
-	"${CMAKE_BINARY_DIR}/cmake-install/Spt3gConfig.cmake"
-	"${CMAKE_BINARY_DIR}/cmake/Spt3gIncludes.cmake"
-	DESTINATION ${CMAKE_INSTALL_DIR})
+	set(INCLUDE_INSTALL_DIR include/spt3g )
+	set(LIB_INSTALL_DIR lib/ )
+	set(CMAKE_INSTALL_DIR share/${PROJECT_NAME}/cmake )
+	configure_package_config_file(${CMAKE_SOURCE_DIR}/cmake/Spt3gConfig.cmake.in
+		${CMAKE_BINARY_DIR}/cmake-install/Spt3gConfig.cmake
+		INSTALL_DESTINATION ${CMAKE_INSTALL_DIR}
+		PATH_VARS INCLUDE_INSTALL_DIR LIB_INSTALL_DIR CMAKE_INSTALL_DIR
+	)
 
-# The header files
-foreach(lib ${SPT3G_LIBRARIES})
-	if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${lib}/include/)
-		file(GLOB INCLUDE_ITEMS LIST_DIRECTORIES TRUE
-			RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/${lib}/include/
-			CONFIGURE_DEPENDS
-			"${CMAKE_CURRENT_SOURCE_DIR}/${lib}/include/*")
-		foreach(item ${INCLUDE_ITEMS})
-			install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${lib}/include/${item}
-				DESTINATION ${INCLUDE_INSTALL_DIR}
-			)
-		endforeach(item ${INCLUDE_ITEMS})
-	endif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${lib}/include/)
-endforeach(lib ${SPT3G_LIBRARIES})
+	install(EXPORT ${PROJECT_NAME}Config
+		DESTINATION ${CMAKE_INSTALL_DIR}
+		NAMESPACE spt3g::
+		FILE Spt3gTargets.cmake)
+	install(FILES
+		"${CMAKE_BINARY_DIR}/cmake-install/Spt3gConfig.cmake"
+		"${CMAKE_BINARY_DIR}/cmake/Spt3gIncludes.cmake"
+		DESTINATION ${CMAKE_INSTALL_DIR})
 
-# cmake doesn't generally have headers, but we want to provide the test header
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake/G3Test.h DESTINATION ${INCLUDE_INSTALL_DIR})
+	# The header files
+	foreach(lib ${SPT3G_LIBRARIES})
+		if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${lib}/include/)
+			file(GLOB INCLUDE_ITEMS LIST_DIRECTORIES TRUE
+				RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/${lib}/include/
+				CONFIGURE_DEPENDS
+				"${CMAKE_CURRENT_SOURCE_DIR}/${lib}/include/*")
+			foreach(item ${INCLUDE_ITEMS})
+				install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${lib}/include/${item}
+					DESTINATION ${INCLUDE_INSTALL_DIR}
+				)
+			endforeach(item ${INCLUDE_ITEMS})
+		endif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${lib}/include/)
+	endforeach(lib ${SPT3G_LIBRARIES})
+
+	# cmake doesn't generally have headers, but we want to provide the test header
+	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake/G3Test.h DESTINATION ${INCLUDE_INSTALL_DIR})
+endif()
 
 # Target for uninstalling
 configure_file(

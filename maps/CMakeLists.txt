@@ -1,4 +1,4 @@
-add_spt3g_library(maps SHARED
+add_spt3g_library(maps
   src/chealpix.c
   src/G3SkyMap.cxx
   src/G3SkyMapMask.cxx
@@ -19,7 +19,11 @@ add_spt3g_library(maps SHARED
   src/python.cxx
 )
 
-target_link_libraries(maps core calibration)
+if(BUILD_WHEEL)
+	target_include_directories(maps PUBLIC ${CMAKE_SOURCE_DIR}/calibration/include)
+else()
+	target_link_libraries(maps PUBLIC core calibration)
+endif()
 link_openmp(maps)
 
 link_python_dir()
