@@ -9,6 +9,7 @@ on:
   release:
     types: [ published ]
 
+jobs:
   build_wheels:
     name: Build wheels for ${{ matrix.os }}-${{ matrix.arch }}
     runs-on: ${{ matrix.os }}
