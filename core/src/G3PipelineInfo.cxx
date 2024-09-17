@@ -210,7 +210,7 @@ G3PipelineInfo::Summary() const
 	if (vcs_branch.size() != 0)
 		return vcs_branch + " branch, " + ((vcs_localdiffs) ? "" : "no ") +
 		    "local diffs";
-	return "version " + ((vcs_versionname) ? "unknown" : vcs_versionname);
+	return "version " + (!(vcs_versionname.size()) ? "unknown" : vcs_versionname);
 }
 
 std::string
