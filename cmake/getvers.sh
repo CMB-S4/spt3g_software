@@ -11,7 +11,6 @@ if [ -e .git ]; then
 	fullversion_pep440=$(echo $(git describe --always --tags 2>/dev/null) | sed 's/-/.dev/' | sed 's/-/+/')
 fi
 fullversion_pep440="${fullversion_pep440:-0.1.0+unknown}" # fallback for SVN or error above
-sed "s/\\\$Version\\\$/$fullversion_pep440/" $1/cmake/pyproject.toml.in > $2/pyproject.toml
 
 
 # version.py version info

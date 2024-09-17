@@ -66,4 +66,5 @@ setup(
     cmdclass={"build_ext": CMakeBuild},
     packages=list(pdirs),
     package_dir=pdirs,
+    exclude_package_data={k: ["CMakeLists.txt"] for k in pdirs},
 )
