@@ -11,7 +11,7 @@ on:
 
 jobs:
   build_wheels:
-    name: Build wheels for ${{ matrix.python }}-${{ matrix.image }}_${{ matrix.arch }}
+    name: Build wheels for ${{ matrix.build }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -19,72 +19,58 @@ jobs:
         include:
           # macos-13 is an intel runner, macos-14 is apple silicon
           - os: macos-13
-            arch: x86_64
-            python: 38
-            image: macosx
+            build: cp38-macosx_x86_64
+            python: 3.8
             target: 10.15
           - os: macos-13
-            arch: x86_64
-            python: 39
-            image: macosx
+            build: cp39-macosx_x86_64
+            python: 3.9
             target: 10.15
           - os: macos-13
-            arch: x86_64
-            python: 310
-            image: macosx
+            build: cp310-macosx_x86_64
+            python: 3.10
             target: 10.15
           - os: macos-13
-            arch: x86_64
-            python: 311
-            image: macosx
+            build: cp311-macosx_x86_64
+            python: 3.11
             target: 10.15
           - os: macos-13
-            arch: x86_64
-            python: 312
-            image: macosx
+            build: cp312-macosx_x86_64
+            python: 3.12
             target: 10.15
 
           - os: macos-14
-            arch: arm64
-            python: 39
-            image: macosx
+            build: cp39-macosx_arm64
+            python: 3.9
             target: 11.0
           - os: macos-14
-            arch: arm64
-            python: 310
-            image: macosx
+            build: cp310-macosx_arm64
+            python: 3.10
             target: 11.0
           - os: macos-14
-            arch: arm64
-            python: 311
-            image: macosx
+            build: cp311-macosx_arm64
+            python: 3.11
             target: 11.0
           - os: macos-14
-            arch: arm64
-            python: 312
-            image: macosx
+            build: cp312-macosx_arm64
+            python: 3.12
             target: 11.0
 
           - os: ubuntu-latest
-            arch: x86_64
-            python: 38
-            image: manylinux
+            build: cp38-manylinux_x86_64
+            python: 3.8
           - os: ubuntu-latest
-            arch: x86_64
-            python: 39
-            image: manylinux
+            build: cp39-manylinux_x86_64
+            python: 3.9
           - os: ubuntu-latest
-            arch: x86_64
-            python: 310
-            image: manylinux
+            build: cp310-manylinux_x86_64
+            python: 3.10
           - os: ubuntu-latest
-            arch: x86_64
-            python: 311
-            image: manylinux
+            build: cp311-manylinux_x86_64
+            python: 3.11
           - os: ubuntu-latest
-            arch: x86_64
-            python: 312
-            image: manylinux
+            build: cp312-manylinux_x86_64
+            python: 3.12
 
     steps:
       # need more recent deployment targets for std::filesystem
@@ -102,6 +88,11 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
+
+      - name: Setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.20.0
