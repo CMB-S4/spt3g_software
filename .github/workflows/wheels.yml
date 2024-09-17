@@ -97,7 +97,7 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.20.0
         env:
-          CIBW_BUILD: cp${{ matrix.python }}-${{ matrix.image }}_${{ matrix.arch }}
+          CIBW_BUILD: ${{ matrix.build }}
           CIBW_BEFORE_ALL_LINUX: yum install -y bzip2-devel flac-devel netcdf-devel
           CIBW_BEFORE_ALL_MACOS: brew install bzip2 flac netcdf
           CIBW_BEFORE_BUILD: ./wheel/install_boost.sh
@@ -107,7 +107,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: cibw-wheel-${{ matrix.python }}-${{ matrix.image }}_${{ matrix.arch }}
+          name: cibw-wheel-${{ matrix.build }}
           path: ./wheelhouse/spt3g*.whl
 
   build_sdist:
