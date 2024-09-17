@@ -28,9 +28,13 @@ pyincl=$(for d in $(python3-config --includes | sed -e 's/-I//g'); do echo "incl
 
 echo "Building boost..."
 cd ${boost_dir}
-./bootstrap.sh --prefix=${PREFIX} --with-python=$(which python3) --with-python-root=$(python3-config --prefix)
-./b2 -j2 -d0 \
-     --with-system --with-iostreams --with-filesystem --with-python \
-     ${pyincl} \
-     variant=release threading=multi link=shared runtime-link=shared \
-     install
+./bootstrap.sh \
+    --prefix=${PREFIX} \
+    --with-python=$(which python3) \
+    --with-python-root=$(python3-config --prefix) \
+    --with-libraries="system,iostreams,filesystem,python"
+./b2 \
+    -j2 -d0 \
+    ${pyincl} \
+    variant=release threading=multi link=shared runtime-link=shared \
+    install
