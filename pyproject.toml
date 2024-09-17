@@ -25,3 +25,12 @@ version_file = "./wheel/spt3g/_version.py"
 version_scheme = "only-version"
 local_scheme = "no-local-version"
 fallback_version = "0.0"
+
+[tool.cibuildwheel]
+test-extras = ["dev"]
+
+[tool.cibuildwheel.linux]
+before-all = "yum install -y boost-devel bzip2-devel flac-devel netcdf-devel"
+
+[tool.cibuildwheel.macos]
+before-all = "brew install boost boost-python3 bzip2 flac netcdf"
