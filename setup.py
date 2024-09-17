@@ -34,6 +34,10 @@ class CMakeBuild(build_ext):
         broot = Path("wheel/deps").resolve()
         if broot.exists():
             cmake_args += [f"-DBOOST_ROOT={broot}"]
+        if sys.platform.startswith("darwin"):
+            if not any(["NetCDF_DIR" in a for a in cmake_args]):
+                ndir = Path(subprocess.check_call("brew --prefix").decode()) / "lib/cmake/netCDF"
+                cmake_args += [f"-DNetCDF_DIR={ndir}"]
 
         build_temp = Path("wheel/build" if self.editable_mode else self.build_temp)
         if not build_temp.exists():

@@ -21,40 +21,40 @@ jobs:
           - os: macos-13
             build: cp38-macosx_x86_64
             python: "3.8"
-            target: 10.15
+            target: 13.0
           - os: macos-13
             build: cp39-macosx_x86_64
             python: "3.9"
-            target: 10.15
+            target: 13.0
           - os: macos-13
             build: cp310-macosx_x86_64
             python: "3.10"
-            target: 10.15
+            target: 13.0
           - os: macos-13
             build: cp311-macosx_x86_64
             python: "3.11"
-            target: 10.15
+            target: 13.0
           - os: macos-13
             build: cp312-macosx_x86_64
             python: "3.12"
-            target: 10.15
+            target: 13.0
 
           - os: macos-14
             build: cp39-macosx_arm64
             python: "3.9"
-            target: 11.0
+            target: 14.0
           - os: macos-14
             build: cp310-macosx_arm64
             python: "3.10"
-            target: 11.0
+            target: 14.0
           - os: macos-14
             build: cp311-macosx_arm64
             python: "3.11"
-            target: 11.0
+            target: 14.0
           - os: macos-14
             build: cp312-macosx_arm64
             python: "3.12"
-            target: 11.0
+            target: 14.0
 
           - os: ubuntu-latest
             build: cp38-manylinux_x86_64
