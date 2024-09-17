@@ -54,9 +54,9 @@ class CMakeBuild(build_ext):
             with open("wheel/run_tests.sh", "w") as f:
                 f.write("set -e\n")
                 for t in json.loads(out.decode())["tests"]:
-                    caller, script = t["command"]
-                    f.write(f"echo {script}\n")
-                    f.write(f"{caller} {script} >/dev/null 2>&1\n")
+                    _, script = t["command"]
+                    f.write(f"echo '===== {script} ====='\n")
+                    f.write(f"{sys.executable} {script}\n")
 
         # add modules
         spt3g_lib = Path(self.build_lib) / "spt3g"
