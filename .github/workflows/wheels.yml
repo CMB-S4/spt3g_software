@@ -102,6 +102,7 @@ jobs:
           CIBW_BEFORE_ALL_MACOS: brew install bzip2 flac netcdf
           CIBW_BEFORE_BUILD: ./wheel/install_boost.sh
           CIBW_BUILD_VERBOSITY: 1
+          CMAKE_BUILD_PARALLEL_LEVEL: 2
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4

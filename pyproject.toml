@@ -18,7 +18,7 @@ dependencies = ["numpy", "scipy", "astropy"]
 dynamic=["version"]
 
 [project.optional-dependencies]
-dev = ["unittest", "pytest", "healpy"]
+dev = ["pytest", "healpy"]
 
 [tool.setuptools_scm]
 version_file = "./wheel/spt3g/_version.py"
