@@ -92,7 +92,7 @@ jobs:
       - name: Setup python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python }}
+          python-version: "${{ matrix.python }}"
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.20.0
