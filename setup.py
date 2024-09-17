@@ -36,7 +36,7 @@ class CMakeBuild(build_ext):
             cmake_args += [f"-DBOOST_ROOT={broot}"]
 
         wbdir = Path(ext.sourcedir) / "wheel/build"
-        if self.editable_mode or "CIBW_BUILD" in os.environ:
+        if self.editable_mode or "CI_BUILD" in os.environ:
             build_temp = wbdir
         else:
             build_temp = Path(self.build_temp)
@@ -46,6 +46,7 @@ class CMakeBuild(build_ext):
         libfile = build_temp / "spt3g" / self.get_ext_filename(ext.name.split(".")[-1])
         if not libfile.exists():
             # build once
+            print(f"Building library in {build_temp}")
             subprocess.run(
                 ["cmake", ext.sourcedir, *cmake_args], cwd=build_temp, check=True
             )
