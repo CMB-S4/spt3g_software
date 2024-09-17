@@ -35,12 +35,16 @@ class CMakeBuild(build_ext):
         if broot.exists():
             cmake_args += [f"-DBOOST_ROOT={broot}"]
 
-        build_temp = Path("wheel/build" if self.editable_mode else self.build_temp)
+        bdir = Path(ext.sourcedir) / "wheel/build"
+        if self.editable_mode:
+            build_temp = bdir
+        else:
+            build_temp = Path(self.build_temp)
+            # symlink to build directory for tests
+            if not bdir.exists():
+                bdir.symlink_to(build_temp)
         if not build_temp.exists():
             build_temp.mkdir(parents=True)
-        if not self.editable_mode and "CIBW_BUILD" in os.environ:
-            # symlink to build directory for tests
-            Path("wheel/build").symlink_to(build_temp)
 
         libfile = build_temp / "spt3g" / self.get_ext_filename(ext.name.split(".")[-1])
         if not libfile.exists():
