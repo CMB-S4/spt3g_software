@@ -1,3 +1,4 @@
+import json
 import os
 import subprocess
 import sys
@@ -40,6 +41,17 @@ class CMakeBuild(build_ext):
                 ["cmake", ext.sourcedir, *cmake_args], cwd=build_temp, check=True
             )
             subprocess.run(["cmake", "--build", "."], cwd=build_temp, check=True)
+
+            # compile tests
+            out = subprocess.check_output(
+                ["ctest", "--show-only=json-v1"], cwd=build_temp
+            )
+            with open("wheel/run_tests.sh", "w") as f:
+                f.write("set -e\n")
+                for t in json.loads(out.decode())["tests"]:
+                    caller, script = t["command"]
+                    f.write(f"echo {script}\n")
+                    f.write(f"{caller} {script} >/dev/null 2>&1\n")
 
         # add modules
         spt3g_lib = Path(self.build_lib) / "spt3g"

@@ -11,7 +11,7 @@ on:
 
 jobs:
   build_wheels:
-    name: Build wheels for ${{ matrix.os }}-${{ matrix.arch }}
+    name: Build wheels for ${{ matrix.python }}-${{ matrix.image }}_${{ matrix.arch }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -20,12 +20,71 @@ jobs:
           # macos-13 is an intel runner, macos-14 is apple silicon
           - os: macos-13
             arch: x86_64
+            python: 38
+            image: macosx
             target: 10.15
+          - os: macos-13
+            arch: x86_64
+            python: 39
+            image: macosx
+            target: 10.15
+          - os: macos-13
+            arch: x86_64
+            python: 310
+            image: macosx
+            target: 10.15
+          - os: macos-13
+            arch: x86_64
+            python: 311
+            image: macosx
+            target: 10.15
+          - os: macos-13
+            arch: x86_64
+            python: 312
+            image: macosx
+            target: 10.15
+
           - os: macos-14
             arch: arm64
+            python: 39
+            image: macosx
             target: 11.0
+          - os: macos-14
+            arch: arm64
+            python: 310
+            image: macosx
+            target: 11.0
+          - os: macos-14
+            arch: arm64
+            python: 311
+            image: macosx
+            target: 11.0
+          - os: macos-14
+            arch: arm64
+            python: 312
+            image: macosx
+            target: 11.0
+
           - os: ubuntu-latest
             arch: x86_64
+            python: 38
+            image: manylinux
+          - os: ubuntu-latest
+            arch: x86_64
+            python: 39
+            image: manylinux
+          - os: ubuntu-latest
+            arch: x86_64
+            python: 310
+            image: manylinux
+          - os: ubuntu-latest
+            arch: x86_64
+            python: 311
+            image: manylinux
+          - os: ubuntu-latest
+            arch: x86_64
+            python: 312
+            image: manylinux
 
     steps:
       # need more recent deployment targets for std::filesystem
@@ -47,15 +106,17 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.20.0
         env:
-          CIBW_ARCHS: ${{ matrix.arch }}
-          CIBW_SKIP: "pp* cp36-* cp37-* *-musllinux* cp38-macosx_arm64"
-          CIBW_TEST_SKIP: "*"
+          CIBW_BUILD: cp${{ matrix.python }}-${{ matrix.image }}_${{ matrix.arch }}
+          CIBW_BEFORE_ALL_LINUX: yum install -y bzip2-devel flac-devel netcdf-devel
+          CIBW_BEFORE_ALL_MACOS: brew install bzip2 flac netcdf
+          CIBW_BEFORE_BUILD: ./wheel/install_boost.sh
+          CIBW_ENVIRONMENT: "BOOST_ROOT=./wheel/deps"
           CIBW_BUILD_VERBOSITY: 1
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: cibw-wheels-${{ matrix.os }}-${{ matrix.arch }}
+          name: cibw-wheel-${{ matrix.python }}-${{ matrix.image }}_${{ matrix.arch }}
           path: ./wheelhouse/spt3g*.whl
 
   build_sdist:
