@@ -35,14 +35,16 @@ class CMakeBuild(build_ext):
         if broot.exists():
             cmake_args += [f"-DBOOST_ROOT={broot}"]
 
-        bdir = Path(ext.sourcedir) / "wheel/build"
+        wbdir = Path(ext.sourcedir) / "wheel/build"
         if self.editable_mode:
-            build_temp = bdir
+            build_temp = wbdir
         else:
             build_temp = Path(self.build_temp)
-            # symlink to build directory for tests
-            if not bdir.exists():
-                bdir.symlink_to(build_temp)
+            if not wbdir.exists(follow_symlinks=False):
+                # symlink to build directory for tests
+                subprocess.run(
+                    ["ln", "-s", build_temp, wbdir.name], cwd=wbdir.parent, check=True
+                )
         if not build_temp.exists():
             build_temp.mkdir(parents=True)
 
