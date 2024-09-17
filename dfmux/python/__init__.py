@@ -1,4 +1,5 @@
 try:
+    from .. import core
     from .._libdfmux import *
 except ImportError:
     from spt3g.core.load_pybindings import load_pybindings
