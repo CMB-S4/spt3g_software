@@ -20,57 +20,57 @@ jobs:
           # macos-13 is an intel runner, macos-14 is apple silicon
           - os: macos-13
             build: cp38-macosx_x86_64
-            python: 3.8
+            python: "3.8"
             target: 10.15
           - os: macos-13
             build: cp39-macosx_x86_64
-            python: 3.9
+            python: "3.9"
             target: 10.15
           - os: macos-13
             build: cp310-macosx_x86_64
-            python: 3.10
+            python: "3.10"
             target: 10.15
           - os: macos-13
             build: cp311-macosx_x86_64
-            python: 3.11
+            python: "3.11"
             target: 10.15
           - os: macos-13
             build: cp312-macosx_x86_64
-            python: 3.12
+            python: "3.12"
             target: 10.15
 
           - os: macos-14
             build: cp39-macosx_arm64
-            python: 3.9
+            python: "3.9"
             target: 11.0
           - os: macos-14
             build: cp310-macosx_arm64
-            python: 3.10
+            python: "3.10"
             target: 11.0
           - os: macos-14
             build: cp311-macosx_arm64
-            python: 3.11
+            python: "3.11"
             target: 11.0
           - os: macos-14
             build: cp312-macosx_arm64
-            python: 3.12
+            python: "3.12"
             target: 11.0
 
           - os: ubuntu-latest
             build: cp38-manylinux_x86_64
-            python: 3.8
+            python: "3.8"
           - os: ubuntu-latest
             build: cp39-manylinux_x86_64
-            python: 3.9
+            python: "3.9"
           - os: ubuntu-latest
             build: cp310-manylinux_x86_64
-            python: 3.10
+            python: "3.10"
           - os: ubuntu-latest
             build: cp311-manylinux_x86_64
-            python: 3.11
+            python: "3.11"
           - os: ubuntu-latest
             build: cp312-manylinux_x86_64
-            python: 3.12
+            python: "3.12"
 
     steps:
       # need more recent deployment targets for std::filesystem
@@ -92,7 +92,7 @@ jobs:
       - name: Setup python
         uses: actions/setup-python@v5
         with:
-          python-version: "${{ matrix.python }}"
+          python-version: ${{ matrix.python }}
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.20.0
