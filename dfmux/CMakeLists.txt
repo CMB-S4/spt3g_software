@@ -15,7 +15,7 @@ if(NOT BUILD_WHEEL)
 	target_link_libraries(dfmux PUBLIC core)
 endif()
 if (NetCDF_FOUND)
-	target_link_libraries(dfmux PUBLIC ${NetCDF_LIBRARIES})
+	target_link_libraries(dfmux PUBLIC NetCDF::NetCDF)
 endif()
 
 if (NetCDF_FOUND)
