@@ -131,7 +131,10 @@ def build_pymodule(pycallable, *args, **kwargs):
 
 class _add_pipeline_info(G3Module):
     def __init__(self):
-        from spt3g import version
+        try:
+            from spt3g import version
+        except ImportError:
+            from spt3g import _version as version
         import socket, getpass
 
         G3Module.__init__(self)
@@ -139,13 +142,17 @@ class _add_pipeline_info(G3Module):
         self.buffer = []
 
         self.pipelineinfo = G3PipelineInfo()
-        self.pipelineinfo.vcs_url = version.upstream_url
-        self.pipelineinfo.vcs_branch = version.upstream_branch
-        self.pipelineinfo.vcs_revision = version.revision
-        self.pipelineinfo.vcs_localdiffs = version.localdiffs
-        self.pipelineinfo.vcs_versionname = version.versionname
-        self.pipelineinfo.vcs_fullversion = version.fullversion
-        self.pipelineinfo.vcs_githash = version.gitrevision
+
+        if hasattr(version, "fullversion"):
+            self.pipelineinfo.vcs_url = version.upstream_url
+            self.pipelineinfo.vcs_branch = version.upstream_branch
+            self.pipelineinfo.vcs_revision = version.revision
+            self.pipelineinfo.vcs_localdiffs = version.localdiffs
+            self.pipelineinfo.vcs_versionname = version.versionname
+            self.pipelineinfo.vcs_fullversion = version.fullversion
+            self.pipelineinfo.vcs_githash = version.gitrevision
+        else:
+            self.pipelineinfo.vcs_versionname = version.__version__
 
         self.pipelineinfo.hostname = socket.gethostname()
         self.pipelineinfo.user = getpass.getuser()

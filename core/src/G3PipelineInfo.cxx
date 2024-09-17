@@ -207,18 +207,22 @@ template <class A> void G3PipelineInfo::serialize(A &ar, unsigned v)
 std::string
 G3PipelineInfo::Summary() const
 {
-	return vcs_branch + " branch, " + ((vcs_localdiffs) ? "" : "no ") +
-	    "local diffs";
+	if (vcs_branch.size() != 0)
+		return vcs_branch + " branch, " + ((vcs_localdiffs) ? "" : "no ") +
+		    "local diffs";
+	return "version " + ((vcs_versionname) ? "unknown" : vcs_versionname);
 }
 
 std::string
 G3PipelineInfo::Description() const
 {
 	std::ostringstream rv;
-	rv << "Branch: " << vcs_branch <<  ", " <<
-	    ((vcs_localdiffs) ? "" : "no ") << "local diffs\n";
-	rv << "URL: " << vcs_url << "\n";
-	rv << "Revision: " << vcs_revision << "\n";
+	if (vcs_branch.size() != 0) {
+		rv << "Branch: " << vcs_branch <<  ", " <<
+		    ((vcs_localdiffs) ? "" : "no ") << "local diffs\n";
+		rv << "URL: " << vcs_url << "\n";
+		rv << "Revision: " << vcs_revision << "\n";
+	}
 	if (vcs_versionname.size() != 0)
 		rv << "Version: " << vcs_versionname << "\n";
 	if (vcs_fullversion.size() != 0)
