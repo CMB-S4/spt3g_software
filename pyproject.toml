@@ -28,4 +28,3 @@ fallback_version = "0.0"
 
 [tool.cibuildwheel]
 test-extras = ["dev"]
-test-command = "sh {package}/wheel/run_tests.sh"

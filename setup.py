@@ -38,6 +38,9 @@ class CMakeBuild(build_ext):
         build_temp = Path("wheel/build" if self.editable_mode else self.build_temp)
         if not build_temp.exists():
             build_temp.mkdir(parents=True)
+        if not self.editable_mode and "CIBW_BUILD" in os.environ:
+            # symlink to build directory for tests
+            Path("wheel/build").symlink_to(build_temp)
 
         libfile = build_temp / "spt3g" / self.get_ext_filename(ext.name.split(".")[-1])
         if not libfile.exists():
@@ -46,17 +49,6 @@ class CMakeBuild(build_ext):
                 ["cmake", ext.sourcedir, *cmake_args], cwd=build_temp, check=True
             )
             subprocess.run(["cmake", "--build", "."], cwd=build_temp, check=True)
-
-            # compile tests
-            out = subprocess.check_output(
-                ["ctest", "--show-only=json-v1"], cwd=build_temp
-            )
-            with open("wheel/run_tests.sh", "w") as f:
-                f.write("set -e\n")
-                for t in json.loads(out.decode())["tests"]:
-                    _, script = t["command"]
-                    f.write(f"echo '===== {script} ====='\n")
-                    f.write(f"{sys.executable} {script}\n")
 
         # add modules
         spt3g_lib = Path(self.build_lib) / "spt3g"

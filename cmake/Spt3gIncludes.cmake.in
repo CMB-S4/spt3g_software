@@ -84,8 +84,11 @@ macro(add_spt3g_test test_name)
 
 	set(extra_macro_args ${ARGN})
 	list(LENGTH extra_macro_args num_extra_args)
-	set_tests_properties(${PROJECT}/${test_name} PROPERTIES ENVIRONMENT
-		"PATH=${SPT3G_BUILD_DIR}/bin:$ENV{PATH};PYTHONPATH=${SPT3G_BUILD_DIR}:$ENV{PYTHONPATH};LD_LIBRARY_PATH=${SPT3G_BUILD_DIR}/spt3g:$ENV{LD_LIBRARY_PATH}")
+	if(NOT BUILD_WHEEL)
+		# install wheel before testing
+		set_tests_properties(${PROJECT}/${test_name} PROPERTIES ENVIRONMENT
+			"PATH=${SPT3G_BUILD_DIR}/bin:$ENV{PATH};PYTHONPATH=${SPT3G_BUILD_DIR}:$ENV{PYTHONPATH};LD_LIBRARY_PATH=${SPT3G_BUILD_DIR}/spt3g:$ENV{LD_LIBRARY_PATH}")
+	endif()
 	if (${num_extra_args} GREATER 0)
 		list(GET extra_macro_args 0 test_labels)
 		set_tests_properties(${PROJECT}/${test_name} PROPERTIES LABELS ${test_labels})
