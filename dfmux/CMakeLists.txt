@@ -1,10 +1,8 @@
-find_package(NetCDF)
-if (NETCDF_FOUND)
+find_package(NetCDF MODULE)
+if (NetCDF_FOUND)
 	set(DFMUX_LIB_EXTRA_SRC src/NetCDFDump.cxx)
-	set(DFMUX_LIB_EXTRA_LIB ${NETCDF_LIBRARIES})
 else()
 	set(DFMUX_LIB_EXTRA_SRC "")
-	set(DFMUX_LIB_EXTRA_LIB "")
 endif()
 
 add_spt3g_library(dfmux
@@ -16,12 +14,11 @@ add_spt3g_library(dfmux
 if(NOT BUILD_WHEEL)
 	target_link_libraries(dfmux PUBLIC core)
 endif()
-if (NETCDF_FOUND)
-	target_link_libraries(dfmux PUBLIC ${NETCDF_LIBRARIES})
-	target_include_directories(dfmux PRIVATE ${NETCDF_INCLUDES})
+if (NetCDF_FOUND)
+	target_link_libraries(dfmux PUBLIC ${NetCDF_LIBRARIES})
 endif()
 
-if (NETCDF_FOUND)
+if (NetCDF_FOUND)
 	add_spt3g_program(bin/ledgerman.py ledgerman)
 endif()
 
