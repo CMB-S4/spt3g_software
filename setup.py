@@ -29,7 +29,7 @@ class CMakeBuild(build_ext):
             pyroot = sysconfig.get_config_var("prefix")
             cmake_args += [f"-DPython_ROOT_DIR={pyroot}"]
 
-        build_temp = Path("wheel/build")
+        build_temp = Path("wheel/build" if self.editable_mode else self.build_temp)
         if not build_temp.exists():
             build_temp.mkdir(parents=True)
 
