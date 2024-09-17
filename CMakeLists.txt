@@ -63,6 +63,7 @@ set(Boost_NO_BOOST_CMAKE ON)
 
 # Find all the Boost and Python libraries
 include(Spt3gBoostPython)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 target_compile_features(spt3g INTERFACE cxx_std_11)

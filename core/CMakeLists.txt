@@ -38,11 +38,10 @@ target_include_directories(core PUBLIC
 )
 
 # Link against FLAC library
-find_package(FLAC)
+find_package(FLAC MODULE)
 if(FLAC_FOUND)
 	target_compile_definitions(core PRIVATE -DG3_HAS_FLAC)
-	target_include_directories(core PRIVATE ${FLAC_INCLUDE_DIR})
-	target_link_libraries(core ${FLAC_LIBRARIES})
+	target_link_libraries(core FLAC::FLAC)
 endif()
 
 # Link against BZIP2 library

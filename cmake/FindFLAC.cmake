@@ -1,33 +1,67 @@
-# - Try to find Flac, the Free Lossless Audio Codec
-# Once done this will define
+# - Find FLAC
+# Find the native FLAC includes and libraries
 #
-#  FLAC_FOUND - system has Flac
-#  FLAC_INCLUDE_DIR - the Flac include directory
-#  FLAC_LIBRARIES - Link these to use Flac
-#  FLAC_OGGFLAC_LIBRARIES - Link these to use OggFlac
-#
-# No version checking is done - use FLAC_API_VERSION_CURRENT to
-# conditionally compile version-dependent code
+#  FLAC_INCLUDE_DIRS - where to find FLAC headers.
+#  FLAC_LIBRARIES    - List of libraries when using libFLAC.
+#  FLAC_FOUND        - True if libFLAC found.
+#  FLAC_DEFINITIONS  - FLAC compile definitions 
 
-# Copyright (c) 2006, Laurent Montel, <montel@kde.org>
-# Copyright (c) 2006, Alexander Neundorf, <neundorf@kde.org>
-#
-# Redistribution and use is allowed according to the terms of the BSD license.
-# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
+if (FLAC_INCLUDE_DIR)
+    # Already in cache, be silent
+    set (FLAC_FIND_QUIETLY TRUE)
+endif ()
 
-FIND_PATH(FLAC_INCLUDE_DIR FLAC/metadata.h)
+find_package (Ogg QUIET)
 
-FIND_LIBRARY(FLAC_LIBRARIES NAMES FLAC )
+find_package (PkgConfig QUIET)
+pkg_check_modules(PC_FLAC QUIET flac)
 
-FIND_LIBRARY(FLAC_OGG_LIBRARY NAMES OggFLAC)
+set(FLAC_VERSION ${PC_FLAC_VERSION})
 
+find_path (FLAC_INCLUDE_DIR FLAC/stream_decoder.h
+	HINTS
+		${PC_FLAC_INCLUDEDIR}
+		${PC_FLAC_INCLUDE_DIRS}
+		${FLAC_ROOT}
+	)
 
-IF(FLAC_LIBRARIES AND FLAC_OGG_LIBRARY)
-   SET(FLAC_OGGFLAC_LIBRARIES ${FLAC_OGG_LIBRARY} ${FLAC_LIBRARIES})
-ENDIF(FLAC_LIBRARIES AND FLAC_OGG_LIBRARY)
+# MSVC built libraries can name them *_static, which is good as it
+# distinguishes import libraries from static libraries with the same extension.
+find_library (FLAC_LIBRARY
+	NAMES
+		FLAC
+		libFLAC
+		libFLAC_dynamic
+		libFLAC_static
+	HINTS
+		${PC_FLAC_LIBDIR}
+		${PC_FLAC_LIBRARY_DIRS}
+		${FLAC_ROOT}
+	)
 
-INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(FLAC  REQUIRED_VARS  FLAC_LIBRARIES FLAC_INCLUDE_DIR)
+# Handle the QUIETLY and REQUIRED arguments and set FLAC_FOUND to TRUE if
+# all listed variables are TRUE.
+include (FindPackageHandleStandardArgs)
+find_package_handle_standard_args (FLAC
+	REQUIRED_VARS
+		FLAC_LIBRARY
+		FLAC_INCLUDE_DIR
+		Ogg_FOUND
+	VERSION_VAR
+        FLAC_VERSION
+	)
 
-# show the FLAC_INCLUDE_DIR and FLAC_LIBRARIES variables only in the advanced view
-MARK_AS_ADVANCED(FLAC_INCLUDE_DIR FLAC_LIBRARIES FLAC_OGG_LIBRARY)
+if (FLAC_FOUND)
+	set (FLAC_INCLUDE_DIRS ${FLAC_INCLUDE_DIR})
+	set (FLAC_LIBRARIES ${FLAC_LIBRARY} ${OGG_LIBRARIES})
+    if (NOT TARGET FLAC::FLAC)
+		add_library(FLAC::FLAC UNKNOWN IMPORTED)
+		set_target_properties(FLAC::FLAC PROPERTIES
+			INTERFACE_INCLUDE_DIRECTORIES "${FLAC_INCLUDE_DIR}"
+			IMPORTED_LOCATION "${FLAC_LIBRARY}"
+			INTERFACE_LINK_LIBRARIES Ogg::ogg
+			)
+	endif ()
+endif ()
+
+mark_as_advanced(FLAC_INCLUDE_DIR FLAC_LIBRARY)

@@ -1,10 +1,8 @@
-find_package(NetCDF)
-if (NETCDF_FOUND)
+find_package(NetCDF MODULE)
+if (NetCDF_FOUND)
 	set(DFMUX_LIB_EXTRA_SRC src/NetCDFDump.cxx)
-	set(DFMUX_LIB_EXTRA_LIB ${NETCDF_LIBRARIES})
 else()
 	set(DFMUX_LIB_EXTRA_SRC "")
-	set(DFMUX_LIB_EXTRA_LIB "")
 endif()
 
 add_spt3g_library(dfmux SHARED
@@ -13,12 +11,12 @@ add_spt3g_library(dfmux SHARED
 	src/Housekeeping.cxx src/python.cxx
 	${DFMUX_LIB_EXTRA_SRC}
 )
-target_link_libraries(dfmux core ${DFMUX_LIB_EXTRA_LIB})
-if (NETCDF_FOUND)
-	target_include_directories(dfmux PRIVATE ${NETCDF_INCLUDES})
+target_link_libraries(dfmux PUBLIC core)
+if (NetCDF_FOUND)
+	target_link_libraries(dfmux PUBLIC NetCDF::NetCDF)
 endif()
 
-if (NETCDF_FOUND)
+if (NetCDF_FOUND)
 	add_spt3g_program(bin/ledgerman.py ledgerman)
 endif()
 
