@@ -7,7 +7,7 @@ from pathlib import Path
 
 from setuptools import Extension, setup
 from setuptools.command.build_ext import build_ext
-from setuptools.command.install import install
+from setuptools.command.install_scripts import install_scripts
 
 
 # A CMakeExtension needs a sourcedir instead of a file list.
@@ -42,11 +42,12 @@ class CMakeBuild(build_ext):
             build_temp = Path(self.build_temp)
         if not build_temp.exists():
             build_temp.mkdir(parents=True)
+        self.build_dir = build_temp
 
         libfile = build_temp / "spt3g" / self.get_ext_filename(ext.name.split(".")[-1])
         if not libfile.exists():
             # build once
-            print(f"Building library in {build_temp}")
+            self.announce(f"Building library in {build_temp}")
             subprocess.run(
                 ["cmake", ext.sourcedir, *cmake_args], cwd=build_temp, check=True
             )
@@ -57,6 +58,19 @@ class CMakeBuild(build_ext):
         if not spt3g_lib.exists():
             spt3g_lib.mkdir(parents=True)
         self.copy_file(libfile, spt3g_lib)
+
+
+class CMakeInstallScripts(install_scripts):
+    def run(self):
+        super().run()
+
+        self.announce("Installing scripts")
+        install_dir = Path(self.install_dir)
+        if not install_dir.exists():
+            install_dir.mkdir(parents=True)
+
+        for src in self.get_finalized_command("build_ext").build_dir.glob("bin/*"):
+            self.copy_file(src, install_dir)
 
 
 # gather libraries
@@ -74,7 +88,7 @@ for d in sorted(Path("./").glob("*/CMakeLists.txt")):
 
 setup(
     ext_modules=[CMakeExtension(f"spt3g._lib{lib}") for lib in clibs],
-    cmdclass={"build_ext": CMakeBuild},
+    cmdclass={"build_ext": CMakeBuild, "install_scripts": CMakeInstallScripts},
     packages=list(pdirs),
     package_dir=pdirs,
     exclude_package_data={k: ["CMakeLists.txt"] for k in pdirs},
