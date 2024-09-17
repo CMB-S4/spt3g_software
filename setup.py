@@ -29,10 +29,9 @@ class CMakeBuild(build_ext):
         if not any(["Python_ROOT_DIR" in a for a in cmake_args]):
             pyroot = sysconfig.get_config_var("prefix")
             cmake_args += [f"-DPython_ROOT_DIR={pyroot}"]
-        if not any(["Python_EXECUTABLE" in a for a in cmake_args]):
-            cmake_args += [f"-DPython_EXECUTABLE={sys.executable}"]
-        if not any(["Boost_PYTHON_TYPE" in a for a in cmake_args]):
-            cmake_args += [f"-DBoost_PYTHON_TYPE=python"]
+        broot = Path("wheel/deps").resolve()
+        if broot.exists():
+            cmake_args += [f"-DBOOST_ROOT={broot}"]
 
         build_temp = Path("wheel/build" if self.editable_mode else self.build_temp)
         if not build_temp.exists():

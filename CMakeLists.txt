@@ -60,7 +60,9 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-set(Boost_NO_BOOST_CMAKE ON)
+if(NOT BUILD_WHEEL)
+	set(Boost_NO_BOOST_CMAKE ON)
+endif()
 
 # Find all the Boost and Python libraries
 include(Spt3gBoostPython)

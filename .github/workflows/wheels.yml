@@ -101,7 +101,6 @@ jobs:
           CIBW_BEFORE_ALL_LINUX: yum install -y bzip2-devel flac-devel netcdf-devel
           CIBW_BEFORE_ALL_MACOS: brew install bzip2 flac netcdf
           CIBW_BEFORE_BUILD: ./wheel/install_boost.sh
-          CIBW_ENVIRONMENT: "BOOST_ROOT=./wheel/deps"
           CIBW_BUILD_VERBOSITY: 1
 
       - name: Upload artifacts
