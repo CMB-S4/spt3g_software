@@ -24,7 +24,9 @@ if [ ! -e ${boost_dir} ]; then
     tar xjf ${boost_pkg}
 fi
 
+pyincl=$(for d in $(python3-config --includes | sed -e 's/-I//g'); do echo "include=${d}"; done | xargs)
+
 echo "Building boost..."
 cd ${boost_dir}
 ./bootstrap.sh --prefix=${PREFIX} --with-python=$(which python3) --with-python-root=$(python3-config --prefix)
-./b2 -j2 install
+./b2 -j2 --layout=tagged ${pyincl} variant=release threading=multi link=shared runtime-link=shared install
