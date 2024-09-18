@@ -39,6 +39,9 @@ include(${CMAKE_BINARY_DIR}/cmake/Spt3gIncludes.cmake)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${SPT3G_LIBRARY_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${SPT3G_RUNTIME_DIR})
 
+# Sneak in a namespace-like prefix for all libraries
+set(CMAKE_SHARED_LIBRARY_PREFIX "libspt3g-")
+
 # Raise every warning by default
 # (use target-specific options to disable particular warnings)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
@@ -47,11 +50,13 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 add_library(spt3g INTERFACE)
 
 # get version info
-include(Spt3gVersion)
-get_spt3g_version()
-if (SPT3G_VERSION)
-	message(STATUS "Building SPT3G software version ${SPT3G_VERSION}")
-	target_compile_definitions(spt3g INTERFACE -DSPT3G_VERSION="${SPT3G_VERSION}")
+if(NOT BUILD_WHEEL)
+	include(Spt3gVersion)
+	get_spt3g_version()
+	if (SPT3G_VERSION)
+		message(STATUS "Building SPT3G software version ${SPT3G_VERSION}")
+		target_compile_definitions(spt3g INTERFACE -DSPT3G_VERSION="${SPT3G_VERSION}")
+	endif()
 endif()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -92,13 +97,9 @@ if(Boost_VERSION VERSION_LESS 1.82)
 	target_compile_definitions(spt3g INTERFACE -DBOOST_NO_CXX11_SMART_PTR=1)
 endif()
 
-# Shell script to set environment variables
-configure_file(${CMAKE_SOURCE_DIR}/cmake/env-shell.sh.in ${CMAKE_BINARY_DIR}/env-shell.sh @ONLY)
-
 # Set up python importability
 execute_process(COMMAND mkdir -p ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 execute_process(COMMAND mkdir -p ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-execute_process(COMMAND ln -fsn ${CMAKE_SOURCE_DIR}/cmake/init.py ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/__init__.py)
 
 set(BUILD_PROJECTS "${BUILD_PROJECTS}" CACHE STRING "The subset of available projects to actually build")
 if(NOT "${BUILD_PROJECTS}" STREQUAL "")
@@ -112,26 +113,6 @@ if(${USE_PROJECT_LIST} AND WILL_BUILD_CORE EQUAL -1)
 	message(STATUS "Automatically adding the core project to the manually specified BUILD_PROJECTS list")
 	list(APPEND BUILD_PROJECTS core)
 endif(${USE_PROJECT_LIST} AND WILL_BUILD_CORE EQUAL -1)
-
-# If not set by the user, ask python where it keeps modules
-if(NOT PYTHON_MODULE_DIR)
-	EXECUTE_PROCESS (COMMAND ${Python_EXECUTABLE} -c
-		"import sysconfig; print(sysconfig.get_path(\"platlib\"))"
-		OUTPUT_VARIABLE PYTHON_MODULE_DIR
-		OUTPUT_STRIP_TRAILING_WHITESPACE
-	)
-endif(NOT PYTHON_MODULE_DIR)
-message(STATUS "Python modules will be installed to ${PYTHON_MODULE_DIR}")
-
-include(GNUInstallDirs)
-if(APPLE)
-       # See: https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
-	set(CMAKE_MACOSX_RPATH TRUE)
-	set(CMAKE_SKIP_BUILD_RPATH FALSE)
-	set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-	set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${PYTHON_MODULE_DIR}/spt3g")
-	set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-endif(APPLE)
 
 # Find all sub-projects
 file(GLOB cmake_projects RELATIVE ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}/*/CMakeLists.txt)
@@ -157,23 +138,48 @@ foreach(subdir ${SUBDIRS})
 	add_subdirectory(${CMAKE_SOURCE_DIR}/${pname})
 endforeach(subdir ${SUBDIRS})
 
-# export configuration files for use in other projects
-if(NOT BUILD_WHEEL)
-	export(TARGETS ${SPT3G_LIBRARIES} NAMESPACE spt3g:: FILE ${CMAKE_BINARY_DIR}/cmake/Spt3gTargets.cmake)
-	configure_file(${CMAKE_SOURCE_DIR}/cmake/Spt3gConfig.cmake.in ${CMAKE_BINARY_DIR}/cmake/Spt3gConfig.cmake @ONLY)
-endif()
-
 # Custom things related to testing
 add_custom_target(fasttest COMMAND ctest -LE SLOWTEST COMMENT "Running fast test suite")
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.17)
 	list(APPEND CMAKE_CTEST_ARGUMENTS "--output-on-failure")
 endif(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.17)
 
+# Everything below deals with package installation
+if(BUILD_WHEEL)
+	return()
+endif()
+
+# Set up python importability
+execute_process(COMMAND ln -fsn ${CMAKE_SOURCE_DIR}/cmake/init.py ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/__init__.py)
+
+# Shell script to set environment variables
+configure_file(${CMAKE_SOURCE_DIR}/cmake/env-shell.sh.in ${CMAKE_BINARY_DIR}/env-shell.sh @ONLY)
+
+include(GNUInstallDirs)
+if(APPLE)
+       # See: https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
+	set(CMAKE_MACOSX_RPATH TRUE)
+	set(CMAKE_SKIP_BUILD_RPATH FALSE)
+	set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+	set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${PYTHON_MODULE_DIR}/spt3g")
+	set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+endif(APPLE)
+
+# If not set by the user, ask python where it keeps modules
+if(NOT PYTHON_MODULE_DIR)
+	EXECUTE_PROCESS (COMMAND ${Python_EXECUTABLE} -c
+		"import sysconfig; print(sysconfig.get_path(\"platlib\"))"
+		OUTPUT_VARIABLE PYTHON_MODULE_DIR
+		OUTPUT_STRIP_TRAILING_WHITESPACE
+	)
+endif(NOT PYTHON_MODULE_DIR)
+message(STATUS "Python modules will be installed to ${PYTHON_MODULE_DIR}")
+
 # Target for version string
 add_custom_target(version ALL
 	COMMAND sh ${CMAKE_SOURCE_DIR}/cmake/getvers.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}
 	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_SOURCE_DIR}/cmake/Spt3gVersion.cmake ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}
-	BYPRODUCTS ${CMAKE_BINARY_DIR}/spt3g/version.py ${CMAKE_BINARY_DIR}/pyproject.toml ${CMAKE_BINARY_DIR}/cmake/Spt3gConfigVersion.cmake
+	BYPRODUCTS ${CMAKE_BINARY_DIR}/spt3g/version.py ${CMAKE_BINARY_DIR}/cmake/Spt3gConfigVersion.cmake
 	COMMENT "Regenerating VCS version information"
 )
 
@@ -194,6 +200,13 @@ add_custom_target(docs
 	COMMENT "Generate HTML documentation")
 
 # Set up installation
+
+# export configuration files for use in other projects
+export(TARGETS ${SPT3G_LIBRARIES} NAMESPACE spt3g:: FILE ${CMAKE_BINARY_DIR}/cmake/Spt3gTargets.cmake)
+configure_file(${CMAKE_SOURCE_DIR}/cmake/Spt3gConfig.cmake.in ${CMAKE_BINARY_DIR}/cmake/Spt3gConfig.cmake @ONLY)
+
+# Export the phony library target
+INSTALL(TARGETS spt3g EXPORT ${PROJECT_NAME}Config)
 
 # The python module
 # First, one-off files
@@ -240,49 +253,44 @@ foreach(program ${SPT3G_PROGRAMS})
 	)
 endforeach(program ${SPT3G_PROGRAMS})
 
-if(NOT BUILD_WHEEL)
-	# Export the phony library target
-	install(TARGETS spt3g EXPORT ${PROJECT_NAME}Config)
+# The CMake package definitions
+include(CMakePackageConfigHelpers)
 
-	# The CMake package definitions
-	include(CMakePackageConfigHelpers)
+set(INCLUDE_INSTALL_DIR include/spt3g )
+set(LIB_INSTALL_DIR lib/ )
+set(CMAKE_INSTALL_DIR share/${PROJECT_NAME}/cmake )
+configure_package_config_file(${CMAKE_SOURCE_DIR}/cmake/Spt3gConfig.cmake.in
+	${CMAKE_BINARY_DIR}/cmake-install/Spt3gConfig.cmake
+	INSTALL_DESTINATION ${CMAKE_INSTALL_DIR}
+	PATH_VARS INCLUDE_INSTALL_DIR LIB_INSTALL_DIR CMAKE_INSTALL_DIR
+)
 
-	set(INCLUDE_INSTALL_DIR include/spt3g )
-	set(LIB_INSTALL_DIR lib/ )
-	set(CMAKE_INSTALL_DIR share/${PROJECT_NAME}/cmake )
-	configure_package_config_file(${CMAKE_SOURCE_DIR}/cmake/Spt3gConfig.cmake.in
-		${CMAKE_BINARY_DIR}/cmake-install/Spt3gConfig.cmake
-		INSTALL_DESTINATION ${CMAKE_INSTALL_DIR}
-		PATH_VARS INCLUDE_INSTALL_DIR LIB_INSTALL_DIR CMAKE_INSTALL_DIR
-	)
+install(EXPORT ${PROJECT_NAME}Config
+	DESTINATION ${CMAKE_INSTALL_DIR}
+	NAMESPACE spt3g::
+	FILE Spt3gTargets.cmake)
+install(FILES
+	"${CMAKE_BINARY_DIR}/cmake-install/Spt3gConfig.cmake"
+	"${CMAKE_BINARY_DIR}/cmake/Spt3gIncludes.cmake"
+	DESTINATION ${CMAKE_INSTALL_DIR})
 
-	install(EXPORT ${PROJECT_NAME}Config
-		DESTINATION ${CMAKE_INSTALL_DIR}
-		NAMESPACE spt3g::
-		FILE Spt3gTargets.cmake)
-	install(FILES
-		"${CMAKE_BINARY_DIR}/cmake-install/Spt3gConfig.cmake"
-		"${CMAKE_BINARY_DIR}/cmake/Spt3gIncludes.cmake"
-		DESTINATION ${CMAKE_INSTALL_DIR})
+# The header files
+foreach(lib ${SPT3G_LIBRARIES})
+	if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${lib}/include/)
+		file(GLOB INCLUDE_ITEMS LIST_DIRECTORIES TRUE
+			RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/${lib}/include/
+			CONFIGURE_DEPENDS
+			"${CMAKE_CURRENT_SOURCE_DIR}/${lib}/include/*")
+		foreach(item ${INCLUDE_ITEMS})
+			install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${lib}/include/${item}
+				DESTINATION ${INCLUDE_INSTALL_DIR}
+			)
+		endforeach(item ${INCLUDE_ITEMS})
+	endif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${lib}/include/)
+endforeach(lib ${SPT3G_LIBRARIES})
 
-	# The header files
-	foreach(lib ${SPT3G_LIBRARIES})
-		if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${lib}/include/)
-			file(GLOB INCLUDE_ITEMS LIST_DIRECTORIES TRUE
-				RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/${lib}/include/
-				CONFIGURE_DEPENDS
-				"${CMAKE_CURRENT_SOURCE_DIR}/${lib}/include/*")
-			foreach(item ${INCLUDE_ITEMS})
-				install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${lib}/include/${item}
-					DESTINATION ${INCLUDE_INSTALL_DIR}
-				)
-			endforeach(item ${INCLUDE_ITEMS})
-		endif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${lib}/include/)
-	endforeach(lib ${SPT3G_LIBRARIES})
-
-	# cmake doesn't generally have headers, but we want to provide the test header
-	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake/G3Test.h DESTINATION ${INCLUDE_INSTALL_DIR})
-endif()
+# cmake doesn't generally have headers, but we want to provide the test header
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake/G3Test.h DESTINATION ${INCLUDE_INSTALL_DIR})
 
 # Target for uninstalling
 configure_file(

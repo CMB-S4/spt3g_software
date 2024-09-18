@@ -19,11 +19,7 @@ add_spt3g_library(maps
   src/python.cxx
 )
 
-if(BUILD_WHEEL)
-	target_include_directories(maps PUBLIC ${CMAKE_SOURCE_DIR}/calibration/include)
-else()
-	target_link_libraries(maps PUBLIC core calibration)
-endif()
+target_link_libraries(maps PUBLIC core calibration)
 link_openmp(maps)
 
 link_python_dir()

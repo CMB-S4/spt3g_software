@@ -1,5 +1,5 @@
 from spt3g.core.load_pybindings import load_pybindings
-load_pybindings(__name__, __path__, "..calibration")
+load_pybindings(__name__, __path__)
 
 # Just run this, no symbols we need though
 from .skymapaddons import *

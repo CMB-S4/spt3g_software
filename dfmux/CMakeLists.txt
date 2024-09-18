@@ -11,14 +11,10 @@ add_spt3g_library(dfmux
 	src/Housekeeping.cxx src/python.cxx
 	${DFMUX_LIB_EXTRA_SRC}
 )
-if(NOT BUILD_WHEEL)
-	target_link_libraries(dfmux PUBLIC core)
-endif()
-if (NetCDF_FOUND)
-	target_link_libraries(dfmux PUBLIC NetCDF::NetCDF)
-endif()
+target_link_libraries(dfmux PUBLIC core)
 
 if (NetCDF_FOUND)
+	target_link_libraries(dfmux PUBLIC NetCDF::NetCDF)
 	add_spt3g_program(bin/ledgerman.py ledgerman)
 endif()
 

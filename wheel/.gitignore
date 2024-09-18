@@ -1,2 +1,3 @@
 spt3g/*.so
-spt3g/_version.py
+spt3g/*.dylib
+spt3g/version.py

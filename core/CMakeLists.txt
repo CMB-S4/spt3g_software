@@ -1,7 +1,9 @@
 # Build a minimal library with a constant name which can be loaded as a python
 # module with a plain `import`, which can then load other modules which are
 # native libraries with normal names.
-if(NOT BUILD_WHEEL)
+if(BUILD_WHEEL)
+	Python_add_library(dload MODULE WITH_SOABI src/dload.c)
+else()
 	add_library(dload SHARED src/dload.c)
 	set_target_properties(dload PROPERTIES PREFIX "")
 	set_target_properties(dload PROPERTIES SUFFIX ".so")

@@ -72,6 +72,18 @@ jobs:
             build: cp312-manylinux_x86_64
             python: "3.12"
 
+    env:
+      CIBW_BUILD: ${{ matrix.build }}
+      CIBW_BEFORE_ALL_LINUX: yum install -y bzip2-devel flac-devel netcdf-devel
+      CIBW_BEFORE_ALL_MACOS: brew install bzip2 flac netcdf
+      CIBW_BEFORE_BUILD: pip install wheel setuptools setuptools-scm cmake && ./wheel/install_boost.sh
+      CIBW_REPAIR_WHEEL_COMMAND_MACOS: |
+        DYLD_LIBRARY_PATH=$PWD/wheel/deps/lib delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}
+      CIBW_BUILD_VERBOSITY: 1
+      CIBW_ENVIRONMENT: CMAKE_BUILD_PARALLEL_LEVEL=2 CI_BUILD=1
+      CIBW_BUILD_FRONTEND: "pip; args: --no-build-isolation"
+      CIBW_TEST_COMMAND: cd {package}/wheel/build && make test
+
     steps:
       # need more recent deployment targets for std::filesystem
       - name: Set macOS deployment target
@@ -94,19 +106,13 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
 
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v2.20.0
-        env:
-          CIBW_BUILD: ${{ matrix.build }}
-          CIBW_BEFORE_ALL_LINUX: yum install -y bzip2-devel flac-devel netcdf-devel
-          CIBW_BEFORE_ALL_MACOS: brew install bzip2 flac netcdf
-          CIBW_BEFORE_BUILD: pip install wheel setuptools setuptools-scm cmake && ./wheel/install_boost.sh
-          CIBW_REPAIR_WHEEL_COMMAND_MACOS: |
-            DYLD_LIBRARY_PATH=$PWD/wheel/deps/lib delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}
-          CIBW_BUILD_VERBOSITY: 1
-          CIBW_ENVIRONMENT: CMAKE_BUILD_PARALLEL_LEVEL=2 CI_BUILD=1
-          CIBW_BUILD_FRONTEND: "pip; args: --no-build-isolation"
-          CIBW_TEST_COMMAND: cd {package}/wheel/build && make test
+      - name: Install cibuildwheel
+        run: |
+          python -m pip install cibuildwheel==2.20.0
+
+      - name: Build wheel
+        run: |
+          python -m cibuildwheel --output-dir wheelhouse
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4

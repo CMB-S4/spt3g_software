@@ -377,24 +377,14 @@ public:
 // name should be be a bare token, while pkg should be a string literal, e.g.:
 //     SPT3G_PYTHON_MODULE_2(foo, "spt3g.bar")
 // for a package whose fully qualified name will be spt3g.bar.foo
-#ifdef BUILD_WHEEL
-#define SPT3G_MODULE_NAME(name) BOOST_PP_CAT(_lib, name)
-#define SPT3G_SET_MODULE_FULL_NAME(name, pkg) \
-	std::string full_name = bp::extract<std::string>(mod.attr("__name__"))()
-#else
-#define SPT3G_MODULE_NAME(name) name
-#define SPT3G_SET_MODULE_FULL_NAME(name, pkg) \
+#define SPT3G_PYTHON_MODULE_2(name, pkg) \
+BOOST_PYTHON_MODULE(name) { \
+	namespace bp = boost::python; \
+	auto mod = bp::scope(); \
 	std::string package_prefix = pkg; \
 	std::string full_name = package_prefix + "." + bp::extract<std::string>(mod.attr("__name__"))(); \
 	mod.attr("__name__") = full_name; \
-	mod.attr("__package__") = package_prefix;
-#endif
-
-#define SPT3G_PYTHON_MODULE_2(name, pkg) \
-BOOST_PYTHON_MODULE(SPT3G_MODULE_NAME(name)) { \
-	namespace bp = boost::python; \
-	auto mod = bp::scope(); \
-	SPT3G_SET_MODULE_FULL_NAME(name, pkg); \
+	mod.attr("__package__") = package_prefix; \
 	void BOOST_PP_CAT(spt3g_init_module_, name)(); \
 	BOOST_PP_CAT(spt3g_init_module_, name)(); \
 	if(PY_MAJOR_VERSION < 3){ \
