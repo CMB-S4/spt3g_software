@@ -384,7 +384,7 @@ private:
 
 class G3SkyMapWeights : public G3FrameObject {
 public:
-	G3SkyMapWeights() : G3FrameObject() {}
+	G3SkyMapWeights() {}
 
 	// Instantiate weight maps based on the metadata of a reference map
 	G3SkyMapWeights(G3SkyMapConstPtr ref_map);

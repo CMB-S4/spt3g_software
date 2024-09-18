@@ -110,7 +110,7 @@ public:
 	const_iterator end() const { return const_iterator(*this, false); };
 
 private:
-	G3SkyMapMask() : G3FrameObject() {} // Fake out for serialization
+	G3SkyMapMask() {} // Fake out for serialization
 	template <class A> void load(A &ar, const unsigned v);
 	template <class A> void save(A &ar, const unsigned v) const;
 	friend class cereal::access;
