@@ -1,6 +1,9 @@
 #ifndef _G3_SKYMAPMASK_H
 #define _G3_SKYMAPMASK_H
 
+#include <G3Frame.h>
+#include <G3Logging.h>
+
 #include <vector>
 
 #include <boost/python.hpp>
