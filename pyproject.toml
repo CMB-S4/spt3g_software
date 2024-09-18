@@ -21,7 +21,7 @@ dynamic=["version"]
 dev = ["pytest", "healpy"]
 
 [tool.setuptools_scm]
-version_file = "./wheel/spt3g/_version.py"
+version_file = "./wheel/spt3g/version.py"
 version_scheme = "only-version"
 local_scheme = "no-local-version"
 fallback_version = "0.0"
