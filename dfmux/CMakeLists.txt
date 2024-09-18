@@ -5,16 +5,16 @@ else()
 	set(DFMUX_LIB_EXTRA_SRC "")
 endif()
 
-add_spt3g_library(dfmux
+add_spt3g_library(dfmux SHARED
 	src/DfMuxBuilder.cxx src/DfMuxCollector.cxx src/DfMuxSample.cxx
 	src/LegacyDfMuxCollector.cxx src/HardwareMap.cxx src/DfMuxCollator.cxx
 	src/Housekeeping.cxx src/python.cxx
 	${DFMUX_LIB_EXTRA_SRC}
 )
-target_link_libraries(dfmux PUBLIC core)
+target_link_libraries(dfmux core)
 
 if (NetCDF_FOUND)
-	target_link_libraries(dfmux PUBLIC NetCDF::NetCDF)
+	target_link_libraries(dfmux NetCDF::NetCDF)
 	add_spt3g_program(bin/ledgerman.py ledgerman)
 endif()
 

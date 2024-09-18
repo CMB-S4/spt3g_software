@@ -1,4 +1,4 @@
-add_spt3g_library(maps
+add_spt3g_library(maps SHARED
   src/chealpix.c
   src/G3SkyMap.cxx
   src/G3SkyMapMask.cxx
@@ -19,7 +19,7 @@ add_spt3g_library(maps
   src/python.cxx
 )
 
-target_link_libraries(maps PUBLIC core calibration)
+target_link_libraries(maps core calibration)
 link_openmp(maps)
 
 link_python_dir()

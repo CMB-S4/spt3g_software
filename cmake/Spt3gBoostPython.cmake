@@ -1,7 +1,7 @@
 # Locate Python
 
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.12)
-	find_package(Python COMPONENTS Interpreter Development REQUIRED)
+	find_package(Python COMPONENTS Interpreter Development)
 else()
 	find_package(PythonInterp)
 	find_package(PythonLibs ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
@@ -11,6 +11,10 @@ else()
 	set(Python_LIBRARIES ${PYTHON_LIBRARIES})
 	set(Python_EXECUTABLE ${PYTHON_EXECUTABLE})
 endif()
+
+if(NOT Python_FOUND)
+	message(FATAL_ERROR "Unable to find Python; build cannot proceed")
+endif(NOT Python_FOUND)
 
 # look for numpy
 execute_process(COMMAND ${Python_EXECUTABLE} -c "import numpy"
@@ -69,4 +73,4 @@ if(NOT DEFINED Boost_PYTHON_TYPE)
 endif()
 
 find_package(Boost COMPONENTS system iostreams filesystem ${Boost_PYTHON_TYPE} REQUIRED)
-message(STATUS "Found Boost: ${Boost_LIBRARIES} (${Boost_VERSION})")
+message(STATUS "Found Boost: ${Boost_INCLUDE_DIR} (found version \"${Boost_VERSION}\")")

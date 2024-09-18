@@ -19,7 +19,7 @@ else(APPLE)
 	set(CORE_EXTRA_SRCS "")
 endif(APPLE)
 
-add_spt3g_library(core
+add_spt3g_library(core SHARED
 	src/G3EventBuilder.cxx src/G3Frame.cxx src/G3TimeStamp.cxx
 	src/G3Pipeline.cxx src/G3Writer.cxx src/G3Reader.cxx src/python.cxx
 	src/G3InfiniteSource.cxx src/G3Logging.cxx src/G3PrintfLogger.cxx
@@ -33,7 +33,7 @@ add_spt3g_library(core
 )
 
 # Link dependencies
-target_link_libraries(core PUBLIC spt3g)
+target_link_libraries(core spt3g)
 
 # Make core includes available without directories
 target_include_directories(core PUBLIC
@@ -47,7 +47,7 @@ find_package(FLAC)
 if(FLAC_FOUND)
 	target_compile_definitions(core PRIVATE -DG3_HAS_FLAC)
 	target_include_directories(core PRIVATE ${FLAC_INCLUDE_DIR})
-	target_link_libraries(core PUBLIC ${FLAC_LIBRARIES})
+	target_link_libraries(core ${FLAC_LIBRARIES})
 endif()
 
 # Link against BZIP2 library
