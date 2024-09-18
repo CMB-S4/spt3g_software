@@ -91,6 +91,13 @@ if(Boost_VERSION VERSION_LESS 1.82)
 	target_compile_definitions(spt3g INTERFACE -DBOOST_NO_CXX11_SMART_PTR=1)
 endif()
 
+if(APPLE)
+	# See: https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
+	set(CMAKE_MACOSX_RPATH TRUE)
+	set(CMAKE_SKIP_BUILD_RPATH FALSE)
+	set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+endif(APPLE)
+
 # Set up python importability
 execute_process(COMMAND mkdir -p ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 execute_process(COMMAND mkdir -p ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
@@ -151,10 +158,7 @@ configure_file(${CMAKE_SOURCE_DIR}/cmake/env-shell.sh.in ${CMAKE_BINARY_DIR}/env
 
 include(GNUInstallDirs)
 if(APPLE)
-       # See: https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
-	set(CMAKE_MACOSX_RPATH TRUE)
-	set(CMAKE_SKIP_BUILD_RPATH FALSE)
-	set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+	# See: https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
 	set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${PYTHON_MODULE_DIR}/spt3g")
 	set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 endif(APPLE)
