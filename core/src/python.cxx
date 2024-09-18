@@ -9,8 +9,7 @@
 #include <G3Module.h>
 #include <G3EventBuilder.h>
 #include <G3Pipeline.h>
-#include <G3Timestream.h>
-#include <G3SimpleLoggers.h>
+#include <G3TimeStamp.h>
 #include <G3Constants.h>
 
 namespace bp = boost::python;
@@ -624,67 +623,6 @@ SPT3G_PYTHON_MODULE(core)
 	    .def_readonly("last_frame",
 	        &G3Pipeline::last_frame)
 	;
-
-	bp::enum_<G3LogLevel>("G3LogLevel")
-	    .value("LOG_TRACE",  G3LOG_TRACE)
-	    .value("LOG_DEBUG",  G3LOG_DEBUG)
-	    .value("LOG_INFO",   G3LOG_INFO)
-	    .value("LOG_NOTICE", G3LOG_NOTICE)
-	    .value("LOG_WARN",   G3LOG_WARN)
-	    .value("LOG_ERROR",  G3LOG_ERROR)
-	    .value("LOG_FATAL",  G3LOG_FATAL)
-	;
-
-	bp::class_<G3Logger, G3LoggerPtr, boost::noncopyable>("G3Logger",
-	  "C++ logging abstract base class", bp::no_init)
-	    .add_static_property("global_logger", &GetRootLogger, &SetRootLogger)
-	    .def("log", &G3Logger::Log)
-	    .def("get_level_for_unit", &G3Logger::LogLevelForUnit)
-	    .def("set_level_for_unit", &G3Logger::SetLogLevelForUnit)
-	    .def("set_level", &G3Logger::SetLogLevel)
-        ;
-	register_vector_of<G3LoggerPtr>("G3Logger");
-
-	bp::class_<G3NullLogger, bp::bases<G3Logger>,
-	  boost::shared_ptr<G3NullLogger>, boost::noncopyable>(
-	  "G3NullLogger", "Logger that does not log. Useful if you don't want log messages");
-	bp::class_<G3PrintfLogger, bp::bases<G3Logger>,
-	  boost::shared_ptr<G3PrintfLogger>, boost::noncopyable>(
-	  "G3PrintfLogger", "Logger that prints error messages to stderr (in color, if stderr is a tty).",
-	  bp::init<bp::optional<G3LogLevel> >())
-	    .def_readwrite("trim_file_names", &G3PrintfLogger::TrimFileNames)
-	    .def_readwrite("timestamps", &G3PrintfLogger::Timestamps)
-	;
-	bp::class_<G3MultiLogger, bp::bases<G3Logger>,
-	  boost::shared_ptr<G3MultiLogger>, boost::noncopyable>(
-	  "G3MultiLogger", "Log to multiple loggers at once",
-	  bp::init<std::vector<G3LoggerPtr> >());
-	bp::class_<G3SyslogLogger, bp::bases<G3Logger>,
-	  boost::shared_ptr<G3SyslogLogger>, boost::noncopyable>(
-	  "G3SyslogLogger", "Pass log messages to the syslog service. Initialize with "
-	  "a string identifier and a logging facility. See syslog(3) for details. Example:\n"
-	  "\timport syslog\n\tlogger = core.G3SyslogLogger('myprogram', syslog.LOG_USER)",
-	  bp::init<std::string, int, bp::optional<G3LogLevel> >());
-
-	// A few things that need to be in a particular order
-	bp::enum_<G3Timestream::TimestreamUnits>("G3TimestreamUnits",
-	  "Unit scheme for timestreams and maps. Designates different classes "
-	  "of units (power, current, on-sky temperature) rather than choices "
-	  "of unit within a class (watts vs. horsepower, or K vs. uK), "
-	  "transformations between which are handled by core.G3Units.")
-	    .value("None",  G3Timestream::None)
-	    .value("Counts",  G3Timestream::Counts)
-	    .value("Current",  G3Timestream::Current)
-	    .value("Power",  G3Timestream::Power)
-	    .value("Resistance",  G3Timestream::Resistance)
-	    .value("Tcmb",  G3Timestream::Tcmb)
-	    .value("Angle",  G3Timestream::Angle)
-	    .value("Distance",  G3Timestream::Distance)
-	    .value("Voltage",  G3Timestream::Voltage)
-	    .value("Pressure",  G3Timestream::Pressure)
-	    .value("FluxDensity",  G3Timestream::FluxDensity)
-	;
-	enum_none_converter::from_python<G3Timestream::TimestreamUnits>();
 
 	// Do everything else
 	G3ModuleRegistrator::CallRegistrarsFor("core");
