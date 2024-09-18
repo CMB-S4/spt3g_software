@@ -45,8 +45,7 @@ class CMakeBuild(build_ext):
         self.build_dir = build_temp
 
         libname = ext.name.split(".")[-1]
-        libglob = build_temp.glob(f"spt3g/*{libname}.*")
-        if not len(list(libglob)):
+        if libname == "dload":
             # build once
             self.announce(f"Building library in {build_temp}")
             subprocess.run(
