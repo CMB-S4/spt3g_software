@@ -9,6 +9,9 @@ popd >/dev/null 2>&1
 echo "Wheel script directory = ${scriptdir}"
 
 PREFIX=${scriptdir}/deps
+if [ ! -e ${PREFIX} ]; then
+    mkdir -p ${PREFIX}
+fi
 cd ${PREFIX}
 
 boost_version=1_86_0
