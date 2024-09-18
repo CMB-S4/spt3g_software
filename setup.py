@@ -44,8 +44,9 @@ class CMakeBuild(build_ext):
             build_temp.mkdir(parents=True)
         self.build_dir = build_temp
 
-        libfile = build_temp / "spt3g" / self.get_ext_filename(ext.name.split(".")[-1])
-        if not libfile.exists():
+        libname = ext.name.split(".")[-1]
+        libglob = build_temp.glob(f"spt3g/*{libname}.*")
+        if not len(list(libglob)):
             # build once
             self.announce(f"Building library in {build_temp}")
             subprocess.run(
@@ -57,8 +58,7 @@ class CMakeBuild(build_ext):
         spt3g_lib = Path(self.build_lib) / "spt3g"
         if not spt3g_lib.exists():
             spt3g_lib.mkdir(parents=True)
-        self.copy_file(libfile, spt3g_lib)
-        for lib in build_temp.glob("spt3g/libspt3g-*"):
+        for lib in build_temp.glob(f"spt3g/*{libname}.*"):
             self.copy_file(lib, spt3g_lib)
 
 
@@ -76,17 +76,20 @@ class CMakeInstallScripts(install_scripts):
 
 
 # gather libraries
+clibs = ["dload"]
 pdirs = {"spt3g": "./wheel/spt3g"}
 
 for d in sorted(Path("./").glob("*/CMakeLists.txt")):
     lib = d.parent.name
+    if (d.parent / "src").exists():
+        clibs.append(lib)
     if (d.parent / "python").exists():
         pdirs[f"spt3g.{lib}"] = d.parent / "python"
     elif (d.parent / "__init__.py").exists():
         pdirs[f"spt3g.{lib}"] = d.parent
 
 setup(
-    ext_modules=[CMakeExtension(f"spt3g.dload")],
+    ext_modules=[CMakeExtension(f"spt3g.{lib}") for lib in clibs],
     cmdclass={"build_ext": CMakeBuild, "install_scripts": CMakeInstallScripts},
     packages=list(pdirs),
     package_dir=pdirs,
