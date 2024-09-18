@@ -1,6 +1,8 @@
 # Locate Python
 
-if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.12)
+if (BUILD_WHEEL)
+	find_package(Python COMPONENTS Interpreter REQUIRED)
+elseif(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.12)
 	find_package(Python COMPONENTS Interpreter Development)
 else()
 	find_package(PythonInterp)
@@ -11,10 +13,6 @@ else()
 	set(Python_LIBRARIES ${PYTHON_LIBRARIES})
 	set(Python_EXECUTABLE ${PYTHON_EXECUTABLE})
 endif()
-
-if(NOT Python_FOUND)
-	message(FATAL_ERROR "Unable to find Python; build cannot proceed")
-endif(NOT Python_FOUND)
 
 # look for numpy
 execute_process(COMMAND ${Python_EXECUTABLE} -c "import numpy"
