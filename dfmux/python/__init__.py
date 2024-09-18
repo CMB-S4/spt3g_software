@@ -1,9 +1,5 @@
-try:
-    from .. import core
-    from .._libdfmux import *
-except ImportError:
-    from spt3g.core.load_pybindings import load_pybindings
-    load_pybindings(__name__, __path__)
+from spt3g.core.load_pybindings import load_pybindings
+load_pybindings(__name__, __path__)
 
 from .HardwareMapTools import (
     GenerateFakeHardwareMap,
