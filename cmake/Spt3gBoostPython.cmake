@@ -1,7 +1,11 @@
 # Locate Python
 
-if (BUILD_WHEEL)
-	find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
+if(BUILD_WHEEL)
+	if(APPLE)
+		find_package(Python COMPONENTS Interpreter Development REQUIRED)
+	else()
+		find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
+	endif()
 elseif(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.12)
 	find_package(Python COMPONENTS Interpreter Development)
 else()
@@ -71,4 +75,4 @@ if(NOT DEFINED Boost_PYTHON_TYPE)
 endif()
 
 find_package(Boost COMPONENTS system iostreams filesystem ${Boost_PYTHON_TYPE} REQUIRED)
-message(STATUS "Found Boost: ${Boost_INCLUDE_DIR} (found version \"${Boost_VERSION}\")")
+message(STATUS "Found Boost: ${Boost_INCLUDE_DIRS} (found version \"${Boost_VERSION}\")")
