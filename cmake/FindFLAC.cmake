@@ -63,7 +63,7 @@ if (FLAC_FOUND)
 			IMPORTED_LOCATION "${FLAC_LIBRARY}"
 			)
 		if (Ogg_FOUND)
-			target_link_libraries(FLAC::FLAC INTERFACE Ogg:ogg)
+			target_link_libraries(FLAC::FLAC INTERFACE Ogg::ogg)
 		endif()
 	endif ()
 endif ()
