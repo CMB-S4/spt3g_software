@@ -19,11 +19,15 @@ class CMakeExtension(Extension):
 
 class CMakeBuild(build_ext):
     def build_extension(self, ext):
-        cmake_args = ["-DBUILD_WHEEL=yes"]
+        cmake_args = []
 
         # Adding CMake arguments set as environment variable
         if "CMAKE_ARGS" in os.environ:
             cmake_args += [item for item in os.environ["CMAKE_ARGS"].split(" ") if item]
+
+        if not any(["BUILD_WHEEL" in a for a in cmake_args]):
+            if "CI_BUILD" in os.environ:
+                cmake_args += ["-DBUILD_WHEEL=yes"]
 
         # sensible defaults
         if not any(["Python_ROOT_DIR" in a for a in cmake_args]):
@@ -45,7 +49,11 @@ class CMakeBuild(build_ext):
         self.build_dir = build_temp
 
         libname = ext.name.split(".")[-1]
-        if libname == "dload":
+        libfiles = [
+            build_temp / "spt3g" / self.get_ext_filename(libname),
+            build_temp / "spt3g" / f"{libname}.so",
+        ]
+        if not any([f.exists() for f in libfiles]):
             # build once
             self.announce(f"Building library in {build_temp}")
             subprocess.run(
@@ -57,8 +65,12 @@ class CMakeBuild(build_ext):
         spt3g_lib = Path(self.build_lib) / "spt3g"
         if not spt3g_lib.exists():
             spt3g_lib.mkdir(parents=True)
-        for lib in build_temp.glob(f"spt3g/*{libname}.*"):
-            self.copy_file(lib, spt3g_lib)
+        for f in libfiles:
+            if f.exists():
+                self.copy_file(f, spt3g_lib)
+                break
+        else:
+            raise RuntimeError(f"Missing extension module {libname}")
 
 
 class CMakeInstallScripts(install_scripts):
@@ -75,7 +87,7 @@ class CMakeInstallScripts(install_scripts):
 
 
 # gather libraries
-clibs = ["dload"]
+clibs = []
 pdirs = {"spt3g": "./wheel/spt3g"}
 
 for d in sorted(Path("./").glob("*/CMakeLists.txt")):
@@ -88,7 +100,7 @@ for d in sorted(Path("./").glob("*/CMakeLists.txt")):
         pdirs[f"spt3g.{lib}"] = d.parent
 
 setup(
-    ext_modules=[CMakeExtension(f"spt3g.{lib}") for lib in clibs],
+    ext_modules=[CMakeExtension(f"spt3g._lib{lib}") for lib in clibs],
     cmdclass={"build_ext": CMakeBuild, "install_scripts": CMakeInstallScripts},
     packages=list(pdirs),
     package_dir=pdirs,

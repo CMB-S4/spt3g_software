@@ -39,9 +39,6 @@ include(${CMAKE_BINARY_DIR}/cmake/Spt3gIncludes.cmake)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${SPT3G_LIBRARY_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${SPT3G_RUNTIME_DIR})
 
-# Sneak in a namespace-like prefix for all libraries
-set(CMAKE_SHARED_LIBRARY_PREFIX "libspt3g-")
-
 # Raise every warning by default
 # (use target-specific options to disable particular warnings)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
@@ -151,7 +148,7 @@ if(BUILD_WHEEL)
 endif()
 
 # Set up python importability
-execute_process(COMMAND ln -fsn ${CMAKE_SOURCE_DIR}/cmake/init.py ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/__init__.py)
+execute_process(COMMAND ln -fsn ${CMAKE_SOURCE_DIR}/cmake/init.py ${SPT3G_MODULE_DIR}/__init__.py)
 
 # Shell script to set environment variables
 configure_file(${CMAKE_SOURCE_DIR}/cmake/env-shell.sh.in ${CMAKE_BINARY_DIR}/env-shell.sh @ONLY)

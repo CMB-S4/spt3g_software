@@ -1,5 +1,4 @@
-from .load_pybindings import load_pybindings
-load_pybindings(__name__, __path__)
+from .._libcore import *
 
 from .g3logging import log_trace, log_debug, log_info, log_notice, log_warn, log_error, log_fatal, set_log_level
 

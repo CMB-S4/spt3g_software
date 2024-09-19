@@ -8,10 +8,12 @@ endif()
 add_spt3g_library(dfmux SHARED
 	src/DfMuxBuilder.cxx src/DfMuxCollector.cxx src/DfMuxSample.cxx
 	src/LegacyDfMuxCollector.cxx src/HardwareMap.cxx src/DfMuxCollator.cxx
-	src/Housekeeping.cxx src/python.cxx
+	src/Housekeeping.cxx
 	${DFMUX_LIB_EXTRA_SRC}
 )
 target_link_libraries(dfmux core)
+
+add_spt3g_module(dfmux src/python.cxx)
 
 if (NetCDF_FOUND)
 	target_link_libraries(dfmux NetCDF::NetCDF)

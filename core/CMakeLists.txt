@@ -1,15 +1,3 @@
-# Build a minimal library with a constant name which can be loaded as a python
-# module with a plain `import`, which can then load other modules which are
-# native libraries with normal names.
-add_library(dload SHARED src/dload.c)
-set_target_properties(dload PROPERTIES PREFIX "")
-set_target_properties(dload PROPERTIES SUFFIX ".so")
-if(NOT BUILD_WHEEL)
-	install(TARGETS dload DESTINATION ${PYTHON_MODULE_DIR}/spt3g)
-endif()
-target_include_directories(dload PRIVATE ${Python_INCLUDE_DIRS})
-target_link_libraries(dload PUBLIC ${Python_LIBRARIES})
-
 # OS X has a broken implementatin of pthreads.
 if(APPLE)
 	set(CORE_EXTRA_SRCS src/ApplePthreadBarrier.cxx)
@@ -19,7 +7,7 @@ endif(APPLE)
 
 add_spt3g_library(core SHARED
 	src/G3EventBuilder.cxx src/G3Frame.cxx src/G3TimeStamp.cxx
-	src/G3Pipeline.cxx src/G3Writer.cxx src/G3Reader.cxx src/python.cxx
+	src/G3Pipeline.cxx src/G3Writer.cxx src/G3Reader.cxx
 	src/G3InfiniteSource.cxx src/G3Logging.cxx src/G3PrintfLogger.cxx
 	src/G3Data.cxx src/G3Vector.cxx src/G3Map.cxx src/G3Timestream.cxx
         src/G3Timesample.cxx
@@ -32,6 +20,9 @@ add_spt3g_library(core SHARED
 
 # Link dependencies
 target_link_libraries(core spt3g)
+
+# add python bindings
+add_spt3g_module(core src/python.cxx)
 
 # Make core includes available without directories
 target_include_directories(core PUBLIC

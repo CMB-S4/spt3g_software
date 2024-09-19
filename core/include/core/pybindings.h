@@ -6,8 +6,6 @@
 #include <G3Logging.h>
 
 #include <boost/preprocessor/cat.hpp>
-#include <boost/preprocessor/facilities/overload.hpp>
-#include <boost/preprocessor/stringize.hpp>
 #include <boost/python.hpp>
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic push
@@ -373,36 +371,11 @@ public:
 	    .def(boost::python::init<const T &>()) \
 	    .def_pickle(g3frameobject_picklesuite<T>())
 
-// Declare a python module with a name and the name of its enclosing package scope.
-// name should be be a bare token, while pkg should be a string literal, e.g.:
-//     SPT3G_PYTHON_MODULE_2(foo, "spt3g.bar")
-// for a package whose fully qualified name will be spt3g.bar.foo
-#define SPT3G_PYTHON_MODULE_2(name, pkg) \
-BOOST_PYTHON_MODULE(name) { \
-	namespace bp = boost::python; \
-	auto mod = bp::scope(); \
-	std::string package_prefix = pkg; \
-	std::string full_name = package_prefix + "." + bp::extract<std::string>(mod.attr("__name__"))(); \
-	mod.attr("__name__") = full_name; \
-	mod.attr("__package__") = package_prefix; \
-	void BOOST_PP_CAT(spt3g_init_module_, name)(); \
-	BOOST_PP_CAT(spt3g_init_module_, name)(); \
-	if(PY_MAJOR_VERSION < 3){ \
-		Py_INCREF(mod.ptr()); \
-		PyDict_SetItemString(PyImport_GetModuleDict(),full_name.c_str(),mod.ptr()); \
-	} \
-} \
-void BOOST_PP_CAT(spt3g_init_module_, name)()
-
-// Declare a python module with the given name, assuming that the enclosing package 
-// is the default "spt3g".
-#define SPT3G_PYTHON_MODULE_1(name) SPT3G_PYTHON_MODULE_2(name, "spt3g")
-
-// Declare a python module with a name and optionally the name of its enclosing package scope.
-// name should be be a bare token, while if provided the enclosing package name should be a
-// string literal.
-// If the enclosing package name is not specified, it will default to "spt3g".
-#define SPT3G_PYTHON_MODULE(...) BOOST_PP_OVERLOAD(SPT3G_PYTHON_MODULE_,__VA_ARGS__)(__VA_ARGS__)
+// Declare a python module with a name that is a bare token:
+//     SPT3G_PYTHON_MODULE(foo)
+// for a package whose name will be _libfoo
+#define SPT3G_PYTHON_MODULE(name) \
+BOOST_PYTHON_MODULE(BOOST_PP_CAT(_lib, name))
 
 // Python runtime context to simplify acquiring or releasing the GIL as necessary.
 // To use, simply construct the context object where necessary, e.g.
