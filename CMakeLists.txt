@@ -18,6 +18,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif(NOT CMAKE_BUILD_TYPE)
 
 option(BUILD_WHEEL "Configure build for python wheel")
+option(USER_TEST_ENV "Configure tests with user environment")
 
 # Work around stupid broken Red Hat systems
 set(CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "")

@@ -58,6 +58,7 @@ add_spt3g_program(bin/spt3g-inspect)
 add_spt3g_program(bin/gen-analysis-doc)
 
 #Tests
+add_spt3g_test(imports)
 add_spt3g_test(copycons)
 add_spt3g_test(framepickle)
 add_spt3g_test(pipeline)

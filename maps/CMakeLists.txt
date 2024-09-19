@@ -18,7 +18,7 @@ add_spt3g_library(maps SHARED
   src/pointing.cxx
 )
 
-target_link_libraries(maps core calibration)
+target_link_libraries(maps PUBLIC core calibration)
 link_openmp(maps)
 
 add_spt3g_module(maps src/python.cxx)
@@ -27,6 +27,7 @@ link_python_dir()
 
 add_spt3g_program(bin/spt3g-coadd-maps)
 
+add_spt3g_test(imports)
 add_spt3g_test(quatangtest)
 add_spt3g_test(transtest SLOWTEST)
 add_spt3g_test(flatsky_maps)

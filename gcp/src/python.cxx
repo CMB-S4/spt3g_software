@@ -1,15 +1,14 @@
 #include <pybindings.h>
-#include <G3Frame.h>
 #include <gcp/Experiments.h>
-
-#include <boost/python.hpp>
-#include <boost/preprocessor.hpp>
 
 namespace bp = boost::python;
 
 SPT3G_PYTHON_MODULE(gcp)
 {
-	bp::import("spt3g.core");
+	// Python bindings dependencies
+	bp::import("spt3g._libcore");
+	bp::import("spt3g._libdfmux");
+
 	bp::docstring_options docopts(true, true, false);
 
 	// Supported Experiments
@@ -21,4 +20,3 @@ SPT3G_PYTHON_MODULE(gcp)
 
 	G3ModuleRegistrator::CallRegistrarsFor("gcp");
 }
-

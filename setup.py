@@ -41,7 +41,9 @@ class CMakeBuild(build_ext):
             cmake_args += [f"-DBOOST_ROOT={broot}"]
 
         wbdir = Path(ext.sourcedir) / "wheel/build"
-        if self.editable_mode or "CI_BUILD" in os.environ:
+        if "BUILD_DIR" in os.environ:
+            build_temp = Path(os.getenv("BUILD_DIR"))
+        elif self.editable_mode or "CI_BUILD" in os.environ:
             build_temp = wbdir
         else:
             build_temp = Path(self.build_temp)
@@ -49,12 +51,7 @@ class CMakeBuild(build_ext):
             build_temp.mkdir(parents=True)
         self.build_dir = build_temp
 
-        libname = ext.name.split(".")[-1]
-        libfiles = [
-            build_temp / "spt3g" / self.get_ext_filename(libname),
-            build_temp / "spt3g" / f"{libname}.so",
-        ]
-        if not any([f.exists() for f in libfiles]):
+        if ext.name.endswith("core"):
             # build once
             self.announce(f"Building library in {build_temp}")
             subprocess.run(
@@ -66,12 +63,18 @@ class CMakeBuild(build_ext):
         spt3g_lib = Path(self.build_lib) / "spt3g"
         if not spt3g_lib.exists():
             spt3g_lib.mkdir(parents=True)
+
+        libname = ext.name.split(".")[-1]
+        libfiles = [
+            build_temp / "spt3g" / self.get_ext_filename(libname),
+            build_temp / "spt3g" / f"{libname}.so",
+        ]
         for f in libfiles:
             if f.exists():
                 self.copy_file(f, spt3g_lib)
                 break
         else:
-            raise RuntimeError(f"Missing extension module {libname}")
+            raise RuntimeError(f"Missing extension module {ext.name}")
 
 
 class CMakeInstallScripts(install_scripts):
@@ -100,12 +103,12 @@ class CMakeInstall(install):
 
 
 # gather libraries
-clibs = []
+clibs = ["core"]
 pdirs = {"spt3g": "./wheel/spt3g"}
 
 for d in sorted(Path("./").glob("*/CMakeLists.txt")):
     lib = d.parent.name
-    if (d.parent / "src").exists():
+    if (d.parent / "src").exists() and lib not in clibs:
         clibs.append(lib)
     if (d.parent / "python").exists():
         pdirs[f"spt3g.{lib}"] = d.parent / "python"

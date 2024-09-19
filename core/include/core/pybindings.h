@@ -339,6 +339,8 @@ class G3ModuleRegistrator {
 public:
 	G3ModuleRegistrator(const char *mod, void (*def)());
 	static void CallRegistrarsFor(const char *mod);
+
+	SET_LOGGER("G3ModuleRegistrator");
 };
 
 #define EXPORT_G3MODULE_AND(mod, T, init, docstring, other_defs)   \

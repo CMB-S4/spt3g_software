@@ -8,11 +8,15 @@ scriptdir=$(pwd)
 popd >/dev/null 2>&1
 echo "Wheel script directory = ${scriptdir}"
 
-PREFIX=${scriptdir}/deps
-if [ ! -e ${PREFIX} ]; then
-    mkdir -p ${PREFIX}
+if [ -n "$1" ]; then
+    PREFIX=$1
+else
+    PREFIX=${scriptdir}/deps
+    if [ ! -e ${PREFIX} ]; then
+        mkdir -p ${PREFIX}
+    fi
+    cd ${PREFIX}
 fi
-cd ${PREFIX}
 
 boost_version=1_86_0
 boost_dir=boost_${boost_version}
@@ -34,13 +38,13 @@ if [ ! -e b2 ]; then
         --prefix=${PREFIX} \
         --with-python=$(which python3) \
         --with-python-root=$(python3-config --prefix) \
-        --with-libraries="system,iostreams,filesystem,python"
+        --with-libraries="system,iostreams,filesystem,python,regex"
 fi
 
 echo "Building boost..."
 pyincl=$(for d in $(python3-config --includes | sed -e 's/-I//g'); do echo "include=${d}"; done | xargs)
 ./b2 \
-    -j2 -d0 \
+    -j4 -d0 \
     ${pyincl} \
     variant=release threading=multi link=shared runtime-link=shared \
     install

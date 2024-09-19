@@ -10,13 +10,16 @@ G3ModuleRegistrator::G3ModuleRegistrator(const char *mod, void (*def)())
 {
 	if (modregs == NULL)
 		modregs = new module_reg_t;
+	log_debug("Adding registrar for module %s", mod);
 	(*modregs)[mod].push_back(def);
 }
 
 void G3ModuleRegistrator::CallRegistrarsFor(const char *mod)
 {
-	for (auto i = (*modregs)[mod].begin(); i != (*modregs)[mod].end(); i++)
+	for (auto i = (*modregs)[mod].begin(); i != (*modregs)[mod].end(); i++) {
+		log_debug("Calling registrar for module %s", mod);
 		(*i)();
+	}
 }
 
 G3PythonContext::G3PythonContext(std::string name, bool hold_gil) :
