@@ -7,6 +7,7 @@ from pathlib import Path
 
 from setuptools import Extension, setup
 from setuptools.command.build_ext import build_ext
+from setuptools.command.install import install
 from setuptools.command.install_scripts import install_scripts
 
 
@@ -86,6 +87,18 @@ class CMakeInstallScripts(install_scripts):
             self.copy_file(src, install_dir)
 
 
+class CMakeInstall(install):
+    def run(self):
+        super().run()
+
+        if "CI_BUILD" in os.environ:
+            return
+
+        self.announce("Installing libraries and headers")
+        build_dir = self.get_finalized_command("build_ext").build_dir
+        subprocess.run(["make", "install"], cwd=build_dir, check=True)
+
+
 # gather libraries
 clibs = []
 pdirs = {"spt3g": "./wheel/spt3g"}
@@ -101,7 +114,11 @@ for d in sorted(Path("./").glob("*/CMakeLists.txt")):
 
 setup(
     ext_modules=[CMakeExtension(f"spt3g._lib{lib}") for lib in clibs],
-    cmdclass={"build_ext": CMakeBuild, "install_scripts": CMakeInstallScripts},
+    cmdclass={
+        "build_ext": CMakeBuild,
+        "install_scripts": CMakeInstallScripts,
+        "install": CMakeInstall,
+    },
     packages=list(pdirs),
     package_dir=pdirs,
     exclude_package_data={k: ["CMakeLists.txt"] for k in pdirs},
