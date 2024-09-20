@@ -36,3 +36,4 @@ if(NOT DEFINED Boost_PYTHON_TYPE)
 endif()
 
 find_package(Boost COMPONENTS system iostreams filesystem ${Boost_PYTHON_TYPE} REQUIRED)
+message(STATUS "Found Boost: ${Boost_INCLUDE_DIRS} (found version \"${Boost_VERSION}\")")
