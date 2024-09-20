@@ -12,6 +12,7 @@ add_spt3g_library(dfmux SHARED
 	${DFMUX_LIB_EXTRA_SRC}
 )
 target_link_libraries(dfmux PUBLIC core)
+
 if (NetCDF_FOUND)
 	target_link_libraries(dfmux PUBLIC NetCDF::NetCDF)
 	add_spt3g_program(bin/ledgerman.py ledgerman)
