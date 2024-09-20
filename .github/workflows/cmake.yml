@@ -61,14 +61,21 @@ jobs:
       working-directory: ${{runner.workspace}}/${{matrix.toolset}}
       shell: bash
       # Execute the build.  You can specify a specific target with "--target <NAME>"
-      run: cmake --build . --config $BUILD_TYPE --parallel 4 --verbose
+      run: cmake --build . --config $BUILD_TYPE --parallel 4
+
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      if: runner.environment == 'github-hosted'
+      with:
+        name: cmake-${{matrix.os}}-${{matrix.toolset}}
+        path: ${{runner.workspace}}/${{matrix.toolset}}
 
     - name: Test
       working-directory: ${{runner.workspace}}/${{matrix.toolset}}
       shell: bash
       # Execute tests defined by the CMake configuration.  
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-      run: ctest -C $BUILD_TYPE --output-on-failure --verbose
+      run: ctest -C $BUILD_TYPE --output-on-failure
 
     - name: Docs
       if: github.ref_name == 'master' && matrix.docs == 'true'
