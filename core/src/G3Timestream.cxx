@@ -1292,6 +1292,25 @@ static PyBufferProcs timestreammap_bufferprocs;
 PYBINDINGS("core") {
 	namespace bp = boost::python;
 
+	bp::enum_<G3Timestream::TimestreamUnits>("G3TimestreamUnits",
+	  "Unit scheme for timestreams and maps. Designates different classes "
+	  "of units (power, current, on-sky temperature) rather than choices "
+	  "of unit within a class (watts vs. horsepower, or K vs. uK), "
+	  "transformations between which are handled by core.G3Units.")
+	    .value("None",  G3Timestream::None)
+	    .value("Counts",  G3Timestream::Counts)
+	    .value("Current",  G3Timestream::Current)
+	    .value("Power",  G3Timestream::Power)
+	    .value("Resistance",  G3Timestream::Resistance)
+	    .value("Tcmb",  G3Timestream::Tcmb)
+	    .value("Angle",  G3Timestream::Angle)
+	    .value("Distance",  G3Timestream::Distance)
+	    .value("Voltage",  G3Timestream::Voltage)
+	    .value("Pressure",  G3Timestream::Pressure)
+	    .value("FluxDensity",  G3Timestream::FluxDensity)
+	;
+	enum_none_converter::from_python<G3Timestream::TimestreamUnits>();
+
 	bp::object ts =
 	  EXPORT_FRAMEOBJECT(G3Timestream, init<>(), "Detector timestream. "
 	   "Includes a units field and start and stop times. Can otherwise be "

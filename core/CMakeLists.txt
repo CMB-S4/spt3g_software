@@ -25,7 +25,7 @@ add_spt3g_library(core SHARED
 	src/crc32.c ${CORE_EXTRA_SRCS}
 	src/G3NetworkSender.cxx src/G3SyslogLogger.cxx
 	src/G3PipelineInfo.cxx src/G3Quat.cxx
-	src/int_storage.cxx
+	src/int_storage.cxx src/pybindings.cxx
 )
 
 # Link dependencies
