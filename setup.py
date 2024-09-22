@@ -26,9 +26,10 @@ class CMakeBuild(build_ext):
         if "CMAKE_ARGS" in os.environ:
             cmake_args += [item for item in os.environ["CMAKE_ARGS"].split(" ") if item]
 
+        # wheel workflow
         if not any(["BUILD_WHEEL" in a for a in cmake_args]):
-            if "CI_BUILD" in os.environ:
-                cmake_args += ["-DBUILD_WHEEL=yes"]
+            if "CIBUILDWHEEL" in os.environ:
+                cmake_args += ["-DBUILD_WHEEL=ON"]
 
         # sensible defaults
         if not any(["Python_ROOT_DIR" in a for a in cmake_args]):
@@ -40,11 +41,26 @@ class CMakeBuild(build_ext):
         if broot.exists():
             cmake_args += [f"-DBOOST_ROOT={broot}"]
 
-        wbdir = Path(ext.sourcedir) / "wheel/build"
+        # install libraries and headers into virtual environment too
+        if "VIRTUAL_ENV" in os.environ:
+            if not any(["CMAKE_INSTALL_PREFIX" in a for a in cmake_args]):
+                envroot = os.getenv("VIRTUAL_ENV")
+                cmake_args += [f"-DCMAKE_INSTALL_PREFIX={envroot}"]
+
+        # default to using the native test environment
+        if not any(["USER_TEST_ENV" in a for a in cmake_args]):
+            cmake_args += ["-DUSER_TEST_ENV=ON"]
+
+        # ensure that build directory isn't removed on completion, so that
+        # shared libraries are accessible
+        if self.editable_mode:
+            if "BUILD_DIR" not in os.environ:
+                raise RuntimeError(
+                    "BUILD_DIR environment variable required in editable mode"
+                )
+
         if "BUILD_DIR" in os.environ:
             build_temp = Path(os.getenv("BUILD_DIR"))
-        elif self.editable_mode or "CI_BUILD" in os.environ:
-            build_temp = wbdir
         else:
             build_temp = Path(self.build_temp)
         if not build_temp.exists():
@@ -94,7 +110,7 @@ class CMakeInstall(install):
     def run(self):
         super().run()
 
-        if "CI_BUILD" in os.environ:
+        if "CIBUILDWHEEL" in os.environ:
             return
 
         self.announce("Installing libraries and headers")

@@ -67,6 +67,21 @@ To build:
 	cmake ..
 	make
 
+This will collect all of the necessary python tools into the ``build/spt3g`` directory, which can then be imported in python.  To set the appropriate python environment *without* installing the python package, use the shell script in ``build/env_shell.sh`` to run commands that know where to find the ``spt3g`` package and libraries:
+
+.. code-block:: shell
+
+	./env-shell.sh python my_script.py  # to run a python script
+	./env-shell.sh ipython  # to start an ipython session
+
+Alternatively, for users that only use a single build environment, set the following environment variables (e.g. in your ``.bash_profile`` file):
+
+.. code-block:: shell
+
+	export SPT3G_SOFTWARE_BUILD_PATH=path/to/spt3g_software/build
+	export PYTHONPATH=$SPT3G_SOFTWARE_BUILD_PATH:$PYTHONPATH
+	export LD_LIBRARY_PATH=$SPT3G_SOFTWARE_BUILD_PATH/lib:$LD_LIBRARY_PATH
+	export PATH=$SPT3G_SOFTWARE_BUILD_PATH/bin:$PATH
 
 To build the documentation in the build directory type:
 
@@ -82,21 +97,46 @@ Installation
 For various reasons it may be useful to install the software after building, instead of continuing to use it out of the build directory. Several CMake variables control how the software is installed:
 
  * ``WITH_BZIP2``, which defaults to ``TRUE``, is used to control whether the core library is built with support for bzip2 compression of G3 files.  Use ``-DWITH_BZIP2=FALSE`` when calling ``cmake`` to disable.
- * ``CMAKE_INSTALL_PREFIX``, which defaults to ``/usr/local`` is used as the root directory for installing all non-python components (header files, cmake export scripts, etc.)
- * ``PYTHON_MODULE_DIR``, which if not explicitly set defaults to the result of running `distutils.sysconfig.get_python_lib <https://docs.python.org/3/distutils/apiref.html#distutils.sysconfig.get_python_lib>` with the selected python interpreter, is where the python module will be installed.
+ * ``CMAKE_INSTALL_PREFIX``, which defaults to ``/usr/local`` is used as the root directory for installing all non-python components (header files, cmake export scripts, etc.).  This variable is frequently useful when installing into a python virtual environment.
+ * ``CMAKE_BUILD_PARALLEL_LEVEL`` is an environment variable (*not* a cmake option) used to control how many parallel processes are used to compile the shared libraries.  This option provides the same behavior as running ``make`` with the ``-j`` flag (e.g. ``make -j4``).
 
-It is rarely necessary to set ``PYTHON_MODULE_DIR`` if ``python`` has been detected correctly, but setting ``CMAKE_INSTALL_PREFIX`` is frequently useful when installing into a python virtual environment. In such a case, one may want build as follows:
+Installation with Pip
+---------------------
+
+Use ``pip`` to install the python package.  Ensure that you use the appropriate options as necessary for your installation, e.g. ``--user`` or ``--prefix``.
+
+For pre-built wheels hosted on PyPI, available for most Linux x86_64, macOS x86_64 and macOS arm64 platforms, simply install the package without any additional options:
+
+.. code-block:: shell
+
+	pip install spt3g
+
+The hosted wheels will include the necessary libraries (Boost, etc) bundled with the package.  Otherwise, ensure that the dependency libraries are installed as explained above, and processed to one of the following steps.
+
+To install the package from the github repo, ensure that the build is done without build isolation (this may take a while, so consider setting the ``CMAKE_BUILD_PARALLEL_LEVEL`` environment variable):
 
 .. code-block:: shell
 
 	cd spt3g_software
-	mkdir build
-	cd build
-	cmake .. -DCMAKE_INSTALL_PREFIX="${VIRTUAL_ENV}"
-	make
-	make install
+	pip install setuptools-scm
+	CMAKE_BUILD_PARALLEL_LEVEL=4 pip install --no-build-isolation -v .
 
-After this completes, it should be possible when using the virtual environment to ``import spt3g`` in python without needing to make use of ``env-shell.sh``.
+For development builds, ensure that the ``BUILD_DIR`` environment variable is set, so that the shared libraries remain accessible for running the python library and for incrementally rebuilding the package when changes are made.  Use the ``--editable`` option to assemble the python package from the appropriate compiled extensions and python directories:
+
+.. code-block:: shell
+
+	cd spt3g_software
+	CMAKE_BUILD_PARALLEL_LEVEL=4 BUILD_DIR=build pip install --no-build-isolation -v --editable .
+
+An editable build adds references to the python directories to your python path, so that edits to library python files are immediately reflected in a fresh python session.
+
+To pass arguments to the cmake build system, use the ``CMAKE_ARGS`` environment variable with arguments separated by spaces.  For example:
+
+.. code-block:: shell
+
+	cd spt3g_software
+	CMAKE_ARGS="-DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_MODULE_PATH=/usr/local/share/cmake" pip install --no-build-isolation -v --prefix=/usr/local .
+
 
 Release Version Tracking
 ------------------------
