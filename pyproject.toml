@@ -22,8 +22,7 @@ dev = ["pytest", "healpy"]
 
 [tool.setuptools_scm]
 version_file = "./wheel/spt3g/version.py"
-version_scheme = "only-version"
-local_scheme = "no-local-version"
+version_scheme = "no-guess-dev"
 fallback_version = "0.0"
 
 [tool.cibuildwheel]
