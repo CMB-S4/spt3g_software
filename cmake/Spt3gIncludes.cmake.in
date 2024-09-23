@@ -65,6 +65,9 @@ macro(add_spt3g_library lib_name)
 			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 			$<INSTALL_INTERFACE:${SPT3G_INCLUDE_INSTALL_DIR}/${lib_name}>)
 	endif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/include)
+	# remove old libraries to avoid linking against the wrong one
+	file(REMOVE ${CMAKE_BINARY_DIR}/spt3g/libspt3g-${lib_name}.so)
+	file(REMOVE ${CMAKE_BINARY_DIR}/spt3g/libspt3g-${lib_name}.dylib)
 	list(APPEND SPT3G_LIBRARIES ${lib_name})
 	set(SPT3G_LIBRARIES ${SPT3G_LIBRARIES} PARENT_SCOPE)
 	if(NOT BUILD_WHEEL)
