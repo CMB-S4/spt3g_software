@@ -8,10 +8,8 @@ static module_reg_t *modregs = NULL;
 
 G3ModuleRegistrator::G3ModuleRegistrator(const char *mod, void (*def)())
 {
-	if (modregs == NULL) {
-		log_debug("Creating registry with module %s", mod);
+	if (modregs == NULL)
 		modregs = new module_reg_t;
-	}
 	log_debug("Adding registrar for module %s", mod);
 	(*modregs)[mod].push_back(def);
 }

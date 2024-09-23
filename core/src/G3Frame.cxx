@@ -596,7 +596,10 @@ PYBINDINGS("core") {
 	  "different rates.")
 	    .def(bp::init<G3Frame::FrameType>())
 	    .def(bp::init<G3Frame>())
-	    .def("__init__", bp::make_constructor(g3frame_char_constructor, bp::default_call_policies(), bp::args("adhoctypecode")), "Create a frame with an ad-hoc (non-standard) type code. Use sparingly and with care.")
+	    .def("__init__", bp::make_constructor(g3frame_char_constructor,
+	      bp::default_call_policies(), bp::args("adhoctypecode")),
+	      "Create a frame with an ad-hoc (non-standard) type code. "
+	      "Use sparingly and with care.")
 	    .def_readwrite("type", &G3Frame::type, "Type code for frame. "
 	      "See general G3Frame docstring.")
 	    .def_readonly("_filename", &G3Frame::_filename, "Source filename for frame, "
@@ -611,9 +614,19 @@ PYBINDINGS("core") {
 	       &G3Frame::Has)
 	    .def("__str__", &g3frame_str)
 	    .def("__len__", &G3Frame::size)
-	    .def("drop_blobs", &G3Frame::DropBlobs, bp::arg("decode_all")=false, "Drop all serialized data either for already-decoded objects (default) or all objects after decoding them (if decode_all is true). Saves memory at the expense of CPU time if reserialized.")
-	    .def("generate_blobs", &G3Frame::GenerateBlobs, bp::arg("drop_objects")=false, "Force immediate serialization of all objects. Will save some CPU time later during serialization of the frame in exchange for spending the exact same amount of CPU time right now.")
-	    .def("drop_objects", &G3Frame::DropObjects, "Drop all decoded objects in favor of their serialized copies, where those serialized copies already exist. Saves memory for frames about to be written at the expense of CPU time to re-decode them if they are accessed again later.")
+	    .def("drop_blobs", &G3Frame::DropBlobs, bp::arg("decode_all")=false,
+	      "Drop all serialized data either for already-decoded objects (default) "
+	      "or all objects after decoding them (if decode_all is true). "
+	      "Saves memory at the expense of CPU time if reserialized.")
+	    .def("generate_blobs", &G3Frame::GenerateBlobs, bp::arg("drop_objects")=false,
+	      "Force immediate serialization of all objects. Will save some "
+	      "CPU time later during serialization of the frame in exchange "
+	      "for spending the exact same amount of CPU time right now.")
+	    .def("drop_objects", &G3Frame::DropObjects,
+	      "Drop all decoded objects in favor of their serialized copies, "
+	      "where those serialized copies already exist. Saves memory for "
+	      "frames about to be written at the expense of CPU time to "
+	      "re-decode them if they are accessed again later.")
 	    .def_pickle(g3frame_picklesuite())
 	;
 	register_vector_of<G3FramePtr>("Frame");
