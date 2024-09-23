@@ -52,10 +52,8 @@ find_package(Boost COMPONENTS system iostreams filesystem python REQUIRED)
 add_library(spt3g INTERFACE)
 
 # get version info
-if(NOT SPT3G_VERSION)
-	include(Spt3gVersion)
-	get_spt3g_version()
-endif()
+include(Spt3gVersion)
+get_spt3g_version()
 if (SPT3G_VERSION)
 	message(STATUS "Building SPT3G software version ${SPT3G_VERSION}")
 	target_compile_definitions(spt3g INTERFACE -DSPT3G_VERSION="${SPT3G_VERSION}")
@@ -146,7 +144,7 @@ endif(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.17)
 # Target for version string
 add_custom_target(version ALL
 	COMMAND sh ${CMAKE_SOURCE_DIR}/cmake/getvers.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}
-	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_SOURCE_DIR}/cmake/Spt3gVersion.cmake ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}
+	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_SOURCE_DIR}/cmake/Spt3gVersion.cmake ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} -DSPT3G_VERSION=${SPT3G_VERSION}
 	BYPRODUCTS ${CMAKE_BINARY_DIR}/spt3g/version.py ${CMAKE_BINARY_DIR}/cmake/Spt3gConfigVersion.cmake
 	COMMENT "Regenerating VCS version information"
 )

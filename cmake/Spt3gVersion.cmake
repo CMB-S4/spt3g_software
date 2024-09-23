@@ -4,6 +4,10 @@ if (NOT CMAKE_PARENT_LIST_FILE)
 endif()
 
 function(get_spt3g_version)
+	if(SPT3G_VERSION)
+		return()
+	endif()
+
 	# Check VERSION file (sensible in exported source tree)
 	file(READ ${CMAKE_SOURCE_DIR}/VERSION GIT_VERSION)
 	string(REGEX REPLACE "\\$Version: (.*)\\$" "\\1" GIT_VERSION "${GIT_VERSION}")
