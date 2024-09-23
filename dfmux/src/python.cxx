@@ -13,3 +13,4 @@ SPT3G_PYTHON_MODULE(dfmux)
 	// Python bindings for this module
 	G3ModuleRegistrator::CallRegistrarsFor("dfmux");
 }
+

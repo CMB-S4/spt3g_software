@@ -77,16 +77,14 @@ if(Boost_VERSION VERSION_LESS 1.82)
 	target_compile_definitions(spt3g INTERFACE -DBOOST_NO_CXX11_SMART_PTR=1)
 endif()
 
-if(APPLE)
-	# See: https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
-	set(CMAKE_MACOSX_RPATH TRUE)
-	set(CMAKE_SKIP_BUILD_RPATH FALSE)
-	set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-endif(APPLE)
+# Shell script to set environment variables
+configure_file(${CMAKE_SOURCE_DIR}/cmake/env-shell.sh.in ${CMAKE_BINARY_DIR}/env-shell.sh @ONLY)
 
 # Set up python importability
 execute_process(COMMAND mkdir -p ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 execute_process(COMMAND mkdir -p ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+execute_process(COMMAND mkdir -p ${SPT3G_MODULE_DIR})
+execute_process(COMMAND ln -fsn ${CMAKE_SOURCE_DIR}/cmake/init.py ${SPT3G_MODULE_DIR}/__init__.py)
 
 set(BUILD_PROJECTS "${BUILD_PROJECTS}" CACHE STRING "The subset of available projects to actually build")
 if(NOT "${BUILD_PROJECTS}" STREQUAL "")
@@ -100,6 +98,16 @@ if(${USE_PROJECT_LIST} AND WILL_BUILD_CORE EQUAL -1)
 	message(STATUS "Automatically adding the core project to the manually specified BUILD_PROJECTS list")
 	list(APPEND BUILD_PROJECTS core)
 endif(${USE_PROJECT_LIST} AND WILL_BUILD_CORE EQUAL -1)
+
+include(GNUInstallDirs)
+if(APPLE)
+       # See: https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
+	set(CMAKE_MACOSX_RPATH TRUE)
+	set(CMAKE_SKIP_BUILD_RPATH FALSE)
+	set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+	set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
+	set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+endif(APPLE)
 
 # Find all sub-projects
 file(GLOB cmake_projects RELATIVE ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}/*/CMakeLists.txt)
@@ -125,25 +133,15 @@ foreach(subdir ${SUBDIRS})
 	add_subdirectory(${CMAKE_SOURCE_DIR}/${pname})
 endforeach(subdir ${SUBDIRS})
 
+# export configuration files for use in other projects
+export(TARGETS ${SPT3G_LIBRARIES} NAMESPACE spt3g:: FILE ${CMAKE_BINARY_DIR}/cmake/Spt3gTargets.cmake)
+configure_file(${CMAKE_SOURCE_DIR}/cmake/Spt3gConfig.cmake.in ${CMAKE_BINARY_DIR}/cmake/Spt3gConfig.cmake @ONLY)
+
 # Custom things related to testing
 add_custom_target(fasttest COMMAND ctest -LE SLOWTEST COMMENT "Running fast test suite")
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.17)
 	list(APPEND CMAKE_CTEST_ARGUMENTS "--output-on-failure")
 endif(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.17)
-
-# Set up python importability
-execute_process(COMMAND ln -fsn ${CMAKE_SOURCE_DIR}/cmake/init.py ${SPT3G_MODULE_DIR}/__init__.py)
-
-# Shell script to set environment variables
-configure_file(${CMAKE_SOURCE_DIR}/cmake/env-shell.sh.in ${CMAKE_BINARY_DIR}/env-shell.sh @ONLY)
-
-# Everything below deals with package installation
-include(GNUInstallDirs)
-if(APPLE)
-	# See: https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
-	set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
-	set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-endif(APPLE)
 
 # Target for version string
 add_custom_target(version ALL
@@ -170,10 +168,6 @@ add_custom_target(docs
 	COMMENT "Generate HTML documentation")
 
 # Set up installation
-
-# export configuration files for use in other projects
-export(TARGETS ${SPT3G_LIBRARIES} NAMESPACE spt3g:: FILE ${CMAKE_BINARY_DIR}/cmake/Spt3gTargets.cmake)
-configure_file(${CMAKE_SOURCE_DIR}/cmake/Spt3gConfig.cmake.in ${CMAKE_BINARY_DIR}/cmake/Spt3gConfig.cmake @ONLY)
 
 # Export the phony library target
 INSTALL(TARGETS spt3g EXPORT ${PROJECT_NAME}Config)

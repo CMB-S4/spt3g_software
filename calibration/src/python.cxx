@@ -13,3 +13,4 @@ SPT3G_PYTHON_MODULE(calibration)
 	// Python bindings for this module
 	G3ModuleRegistrator::CallRegistrarsFor("calibration");
 }
+

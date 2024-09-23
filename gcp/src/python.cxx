@@ -20,3 +20,4 @@ SPT3G_PYTHON_MODULE(gcp)
 
 	G3ModuleRegistrator::CallRegistrarsFor("gcp");
 }
+
