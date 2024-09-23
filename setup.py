@@ -26,11 +26,6 @@ class CMakeBuild(build_ext):
         if "CMAKE_ARGS" in os.environ:
             cmake_args += [item for item in os.environ["CMAKE_ARGS"].split(" ") if item]
 
-        # wheel workflow
-        if not any(["BUILD_WHEEL" in a for a in cmake_args]):
-            if "CIBUILDWHEEL" in os.environ:
-                cmake_args += ["-DBUILD_WHEEL=ON"]
-
         # sensible defaults
         if not any(["Python_ROOT_DIR" in a for a in cmake_args]):
             pyroot = sysconfig.get_config_var("prefix")
