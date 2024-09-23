@@ -53,12 +53,10 @@ endmacro(add_spt3g_program prog_name)
 
 macro(add_spt3g_library lib_name)
 	add_library(${lib_name} ${ARGN})
-	target_compile_features(${lib_name} PUBLIC cxx_std_11)
 	set_target_properties(${lib_name} PROPERTIES PREFIX "libspt3g-")
 	if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/include)
 		target_include_directories(${lib_name} PUBLIC
-			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-			$<INSTALL_INTERFACE:${SPT3G_INCLUDE_INSTALL_DIR}/${lib_name}>)
+			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 	endif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/include)
 	# remove old libraries to avoid linking against the wrong one
 	file(REMOVE ${CMAKE_BINARY_DIR}/spt3g/libspt3g-${lib_name}.so)
@@ -119,11 +117,9 @@ macro(add_spt3g_test_program test_name)
 	if(PROJECT_NAME STREQUAL "spt3g") # internal use by this code
 		set(TEST_NAME_PREFIX ${PROJECT})
 		set(TEST_PROJECT_PREFIX "")
-		set(IS_INTERNAL_TEST TRUE)
 	else() # external use by down-stream code
 		set(TEST_NAME_PREFIX ${PROJECT_NAME})
 		set(TEST_PROJECT_PREFIX "spt3g::")
-		set(IS_INTERNAL_TEST FALSE)
 	endif()
 	
 	cmake_parse_arguments("ADD_TEST_PROGRAM"
@@ -153,28 +149,10 @@ macro(add_spt3g_test_program test_name)
 	target_include_directories(${TEST_NAME_PREFIX}-${test_name} PRIVATE ${CMAKE_SOURCE_DIR}/cmake)
 	
 	foreach(USED_PROJECT ${ADD_TEST_PROGRAM_USE_PROJECTS})
-		if(IS_INTERNAL_TEST)
-			if(NOT IS_DIRECTORY ${CMAKE_SOURCE_DIR}/${USED_PROJECT})
-				message(FATAL_ERROR "Attempt to use nonexistent project '${USED_PROJECT}'")
-			endif(NOT IS_DIRECTORY ${CMAKE_SOURCE_DIR}/${USED_PROJECT})
-			if(NOT EXISTS ${CMAKE_SOURCE_DIR}/${USED_PROJECT}/CMakeLists.txt)
-				message(FATAL_ERROR "Attempt to use project '${USED_PROJECT}'. There is a directory but no CMakeLists.txt. . . is this a valid project?")
-			endif(NOT EXISTS ${CMAKE_SOURCE_DIR}/${USED_PROJECT}/CMakeLists.txt)
-		
-			target_include_directories(${TEST_NAME_PREFIX}-${test_name} PRIVATE ${CMAKE_SOURCE_DIR}/${USED_PROJECT}/include)
-		else(IS_INTERNAL_TEST)
-			list(FIND SPT3G_LIBRARIES "${TEST_PROJECT_PREFIX}${USED_PROJECT}" PROJECT_INDEX)
-			if(PROJECT_INDEX EQUAL -1)
-				message(FATAL_ERROR "Attempt to use nonexistent project '${USED_PROJECT}'")
-			endif(PROJECT_INDEX EQUAL -1)
-			
-			target_include_directories(${TEST_NAME_PREFIX}-${test_name} PRIVATE "${SPT3G_INCLUDE_INSTALL_DIR}/${USED_PROJECT}")
-		endif(IS_INTERNAL_TEST)
-		
-		target_link_libraries(${TEST_NAME_PREFIX}-${test_name} PRIVATE ${TEST_PROJECT_PREFIX}${USED_PROJECT})
+		if(NOT TARGET ${TEST_PROJECT_PREFIX}${USED_PROJECT})
+			message(FATAL_ERROR "Target ${TEST_PROJECT_PREFIX}${USED_PROJECT} not found")
+		endif()
+		target_link_libraries(${TEST_NAME_PREFIX}-${test_name} ${TEST_PROJECT_PREFIX}${USED_PROJECT})
 	endforeach(USED_PROJECT ${ADD_TEST_PROGRAM_USE_PROJECTS})
-	if(NOT IS_INTERNAL_TEST)
-		target_include_directories(dependent PRIVATE ${SPT3G_INCLUDE_DIRS})
-	endif()
 endmacro(add_spt3g_test_program test_name)
 endif()

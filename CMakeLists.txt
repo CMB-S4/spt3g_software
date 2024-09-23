@@ -1,13 +1,7 @@
-cmake_minimum_required(VERSION 3.5)
-if(POLICY CMP0060) # Avoid cmake misfeature that can link the wrong libraries
-	cmake_policy(SET CMP0060 NEW)
-endif()
-cmake_policy(SET CMP0012 NEW) # Allow use of true in boolean expressions
-if(POLICY CMP0042) # Enable RPATH on OSX
-	cmake_policy(SET CMP0042 NEW)
-endif()
-if(POLICY CMP0057) # Allow IN_LIST operator in if() statements
-	cmake_policy(SET CMP0057 NEW)
+cmake_minimum_required(VERSION 3.12)
+# Don't warn about removal of FindBoost in cmake 3.30+
+if(POLICY CMP0167)
+	cmake_policy(SET CMP0167 NEW)
 endif()
 
 project(spt3g)
@@ -41,6 +35,19 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${SPT3G_RUNTIME_DIR})
 # (use target-specific options to disable particular warnings)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+# Find all the Boost and Python libraries
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+find_package(Python COMPONENTS Interpreter Development REQUIRED)
+
+set(Boost_USE_STATIC_LIBS OFF)
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
+set(Boost_PYTHON_VERSION ${Python_VERSION})
+find_package(Boost COMPONENTS system iostreams filesystem python REQUIRED)
+
 # Interface library for flags and library dependencies
 add_library(spt3g INTERFACE)
 
@@ -54,23 +61,10 @@ if (SPT3G_VERSION)
 	target_compile_definitions(spt3g INTERFACE -DSPT3G_VERSION="${SPT3G_VERSION}")
 endif()
 
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-# Boost bits we need
-set(Boost_USE_STATIC_LIBS OFF)
-set(Boost_USE_MULTITHREADED ON)
-set(Boost_USE_STATIC_RUNTIME OFF)
-
-# Find all the Boost and Python libraries
-include(Spt3gBoostPython)
-
-# Upgrade C++ standard to C++14 for Boost >= 1.80, which requires it
-if(Boost_VERSION VERSION_GREATER 1.79)
-	set(CMAKE_CXX_STANDARD 14)
-endif()
-
+target_compile_features(spt3g INTERFACE cxx_std_11)
 target_include_directories(spt3g INTERFACE ${Boost_INCLUDE_DIR} ${Python_INCLUDE_DIRS})
-target_link_libraries(spt3g INTERFACE pthread ${Boost_LIBRARIES} ${Python_LIBRARIES})
+target_link_libraries(spt3g INTERFACE Threads::Threads ${Boost_LIBRARIES} ${Python_LIBRARIES})
+target_include_directories(spt3g INTERFACE $<INSTALL_INTERFACE:${SPT3G_INCLUDE_INSTALL_DIR}>)
 
 # Work around yet more bugs in GCC 4.4, this time with C++ 11 support
 # Also increase maximum number of arguments in python bindings
@@ -243,7 +237,3 @@ configure_file(
 	"${CMAKE_BINARY_DIR}/cmake/cmake_uninstall_cmake"
 	IMMEDIATE @ONLY)
 add_custom_target(uninstall "${CMAKE_COMMAND}" -P "${CMAKE_BINARY_DIR}/cmake/cmake_uninstall_cmake")
-
-if(NOT Python_FOUND)
-	message(FATAL_ERROR "Unable to find Python; build cannot proceed")
-endif(NOT Python_FOUND)
