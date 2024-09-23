@@ -29,21 +29,19 @@ add_spt3g_library(core SHARED
 )
 
 # Link dependencies
-target_link_libraries(core spt3g)
+target_link_libraries(core PUBLIC spt3g)
 
 # Make core includes available without directories
 target_include_directories(core PUBLIC
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/core>
 	$<INSTALL_INTERFACE:${SPT3G_INCLUDE_INSTALL_DIR}/core>
-	$<INSTALL_INTERFACE:${SPT3G_INCLUDE_INSTALL_DIR}>
 )
 
 # Link against FLAC library
-find_package(FLAC)
+find_package(FLAC MODULE)
 if(FLAC_FOUND)
 	target_compile_definitions(core PRIVATE -DG3_HAS_FLAC)
-	target_include_directories(core PRIVATE ${FLAC_INCLUDE_DIR})
-	target_link_libraries(core ${FLAC_LIBRARIES})
+	target_link_libraries(core PUBLIC FLAC::FLAC)
 endif()
 
 # Link against BZIP2 library
