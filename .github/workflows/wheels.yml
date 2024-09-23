@@ -20,73 +20,45 @@ jobs:
           # macos-13 is an intel runner, macos-14 is apple silicon
           - os: macos-13
             build: cp38-macosx_x86_64
-            python: "3.8"
             target: 13.0
           - os: macos-13
             build: cp39-macosx_x86_64
-            python: "3.9"
             target: 13.0
           - os: macos-13
             build: cp310-macosx_x86_64
-            python: "3.10"
             target: 13.0
           - os: macos-13
             build: cp311-macosx_x86_64
-            python: "3.11"
             target: 13.0
           - os: macos-13
             build: cp312-macosx_x86_64
-            python: "3.12"
             target: 13.0
 
           - os: macos-14
             build: cp39-macosx_arm64
-            python: "3.9"
             target: 14.0
           - os: macos-14
             build: cp310-macosx_arm64
-            python: "3.10"
             target: 14.0
           - os: macos-14
             build: cp311-macosx_arm64
-            python: "3.11"
             target: 14.0
           - os: macos-14
             build: cp312-macosx_arm64
-            python: "3.12"
             target: 14.0
 
           - os: ubuntu-latest
             build: cp38-manylinux_x86_64
-            python: "3.8"
           - os: ubuntu-latest
             build: cp39-manylinux_x86_64
-            python: "3.9"
           - os: ubuntu-latest
             build: cp310-manylinux_x86_64
-            python: "3.10"
           - os: ubuntu-latest
             build: cp311-manylinux_x86_64
-            python: "3.11"
           - os: ubuntu-latest
             build: cp312-manylinux_x86_64
-            python: "3.12"
-
-    env:
-      CIBW_BUILD: ${{ matrix.build }}
-      CIBW_BEFORE_ALL_LINUX: yum install -y bzip2-devel flac-devel netcdf-devel
-      CIBW_BEFORE_ALL_MACOS: brew install bzip2 flac netcdf
-      CIBW_BEFORE_BUILD: pip install wheel setuptools setuptools-scm cmake && ./wheel/install_boost.sh
-      CIBW_REPAIR_WHEEL_COMMAND_LINUX: auditwheel -v repair -w {dest_dir} {wheel}
-      CIBW_REPAIR_WHEEL_COMMAND_MACOS: |
-        DYLD_LIBRARY_PATH=$PWD/wheel/deps/lib delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel} -e Python.framework
-      CIBW_BUILD_VERBOSITY: 1
-      CIBW_ENVIRONMENT: CMAKE_BUILD_PARALLEL_LEVEL=4 BUILD_DIR=$PWD/wheel/build CMAKE_PREFIX_PATH=$PWD/wheel/deps
-      CIBW_BUILD_FRONTEND: "pip; args: --no-build-isolation"
-      CIBW_TEST_COMMAND: cd {package}/wheel/build && make test
 
     steps:
-      # need more recent deployment targets for std::filesystem
       - name: Set macOS deployment target
         if: runner.os == 'macOS'
         run: echo "MACOSX_DEPLOYMENT_TARGET=${{ matrix.target }}" >> $GITHUB_ENV
@@ -102,18 +74,23 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
-      - name: Setup python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python }}
-
-      - name: Install cibuildwheel
-        run: |
-          python -m pip install cibuildwheel==2.20.0
-
-      - name: Build wheel
-        run: |
-          python -m cibuildwheel --output-dir wheelhouse
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.20.0
+        env:
+          CIBW_BUILD: ${{ matrix.build }}
+          CIBW_BEFORE_ALL_LINUX: yum install -y bzip2-devel flac-devel netcdf-devel
+          CIBW_BEFORE_ALL_MACOS: brew install bzip2 flac netcdf
+          CIBW_BEFORE_BUILD: >
+            pip install wheel setuptools setuptools-scm cmake &&
+            ./wheel/install_boost.sh
+          CIBW_REPAIR_WHEEL_COMMAND_LINUX: auditwheel -v repair -w {dest_dir} {wheel}
+          CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
+            DYLD_LIBRARY_PATH=$PWD/wheel/deps/lib delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel} -e Python.framework
+          CIBW_BUILD_VERBOSITY: 1
+          CIBW_ENVIRONMENT: >
+            CMAKE_BUILD_PARALLEL_LEVEL=4 BUILD_DIR=$PWD/wheel/build CMAKE_PREFIX_PATH=$PWD/wheel/deps
+          CIBW_BUILD_FRONTEND: "pip; args: --no-build-isolation"
+          CIBW_TEST_COMMAND: cd {package}/wheel/build && make test
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -144,7 +121,6 @@ jobs:
     environment: pypi
     permissions:
       id-token: write
-    if: github.event_name == 'release' && github.event.action == 'published'
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v4
@@ -156,3 +132,4 @@ jobs:
 
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+        if: github.event_name == 'release' && github.event.action == 'published'
