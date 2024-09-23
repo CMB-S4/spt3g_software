@@ -37,9 +37,6 @@ class CMakeBuild(build_ext):
             cmake_args += [f"-DPython_ROOT_DIR={pyroot}"]
         if not any(["Python_EXECUTABLE" in a for a in cmake_args]):
             cmake_args += [f"-DPython_EXECUTABLE={sys.executable}"]
-        broot = Path("wheel/deps").resolve()
-        if broot.exists():
-            cmake_args += [f"-DBOOST_ROOT={broot}"]
 
         # install libraries and headers into virtual environment too
         if "VIRTUAL_ENV" in os.environ:

@@ -48,3 +48,7 @@ pyincl=$(for d in $(python3-config --includes | sed -e 's/-I//g'); do echo "incl
     ${pyincl} \
     variant=release threading=multi link=shared runtime-link=shared \
     install
+
+pushd $PREFIX/deps/lib/cmake
+ln -sf Boost-${boost_version//_/.} boost
+popd
