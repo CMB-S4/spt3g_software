@@ -139,17 +139,13 @@ class _add_pipeline_info(G3Module):
         self.buffer = []
 
         self.pipelineinfo = G3PipelineInfo()
-
-        if hasattr(version, "__version__"):
-            self.pipelineinfo.vcs_versionname = version.__version__
-        else:
-            self.pipelineinfo.vcs_url = version.upstream_url
-            self.pipelineinfo.vcs_branch = version.upstream_branch
-            self.pipelineinfo.vcs_revision = version.revision
-            self.pipelineinfo.vcs_localdiffs = version.localdiffs
-            self.pipelineinfo.vcs_versionname = version.versionname
-            self.pipelineinfo.vcs_fullversion = version.fullversion
-            self.pipelineinfo.vcs_githash = version.gitrevision
+        self.pipelineinfo.vcs_url = version.upstream_url
+        self.pipelineinfo.vcs_branch = version.upstream_branch
+        self.pipelineinfo.vcs_revision = version.revision
+        self.pipelineinfo.vcs_localdiffs = version.localdiffs
+        self.pipelineinfo.vcs_versionname = version.versionname
+        self.pipelineinfo.vcs_fullversion = version.fullversion
+        self.pipelineinfo.vcs_githash = version.gitrevision
 
         self.pipelineinfo.hostname = socket.gethostname()
         self.pipelineinfo.user = getpass.getuser()

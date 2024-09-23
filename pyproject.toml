@@ -21,6 +21,25 @@ dynamic=["version"]
 dev = ["pytest", "healpy"]
 
 [tool.setuptools_scm]
+version_file_template = """
+__version__ = version = '{version}'
+__version_tuple = version_tuple = {version_tuple}
+
+fullversion = version
+if len(version_tuple) == 2:
+    versionname = version
+else:
+    versionname = 'UNKNOWN'
+
+localdiffs = len(version_tuple) == 4
+if localdiffs:
+    gitrevision = revision = version[-1].split('.')[0][1:]
+else:
+    gitrevision = revision = 'UNKNOWN'
+
+upstream_branch = 'UNKNOWN VCS'
+upstream_url = 'UNKNOWN VCS'
+"""
 version_file = "./wheel/spt3g/version.py"
 version_scheme = "no-guess-dev"
 fallback_version = "0.0"
