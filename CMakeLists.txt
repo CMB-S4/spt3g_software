@@ -40,7 +40,13 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # Find all the Boost and Python libraries
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
-find_package(Python COMPONENTS Interpreter Development REQUIRED)
+
+if(DEFINED ENV{CIBUILDWHEEL} AND NOT APPLE)
+	# Can't compile binaries against libpython in CI
+	find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
+else()
+	find_package(Python COMPONENTS Interpreter Development REQUIRED)
+endif()
 
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
