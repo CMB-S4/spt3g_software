@@ -1,3 +1,4 @@
 spt3g/*.so
 spt3g/*.dylib
 spt3g/version.py
+deps

@@ -23,7 +23,7 @@ dev = ["pytest", "healpy"]
 [tool.setuptools_scm]
 version_file_template = """
 __version__ = version = '{version}'
-__version_tuple = version_tuple = {version_tuple}
+__version_tuple__ = version_tuple = {version_tuple}
 
 fullversion = version
 if len(version_tuple) == 2:
