@@ -34,6 +34,17 @@ set(CMAKE_SHARED_LIBRARY_PREFIX "libspt3g-")
 # (use target-specific options to disable particular warnings)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
+# Find all the Boost and Python libraries
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+find_package(Python COMPONENTS Interpreter Development REQUIRED)
+
+set(Boost_USE_STATIC_LIBS OFF)
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
+set(Boost_PYTHON_VERSION ${Python_VERSION})
+find_package(Boost COMPONENTS system iostreams filesystem python REQUIRED)
+
 # Interface library for flags and library dependencies
 add_library(spt3g INTERFACE)
 
@@ -44,11 +55,6 @@ if (SPT3G_VERSION)
 	message(STATUS "Building SPT3G software version ${SPT3G_VERSION}")
 	target_compile_definitions(spt3g INTERFACE -DSPT3G_VERSION="${SPT3G_VERSION}")
 endif()
-
-# Find all the Boost and Python libraries
-include(Spt3gBoostPython)
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
 
 target_compile_features(spt3g INTERFACE cxx_std_11)
 target_include_directories(spt3g INTERFACE ${Boost_INCLUDE_DIR} ${Python_INCLUDE_DIRS})
