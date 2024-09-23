@@ -1,4 +1,8 @@
 cmake_minimum_required(VERSION 3.12)
+# Don't warn about removal of FindBoost in cmake 3.30+
+if(POLICY CMP0167)
+	cmake_policy(SET CMP0167 NEW)
+endif()
 
 project(spt3g)
 enable_testing()
