@@ -94,6 +94,10 @@ endmacro(add_spt3g_module lib_name)
 
 macro(add_spt3g_test test_name)
 	if(DEFINED ENV{CIBUILDWHEEL})
+		# The cibuildwheel builder runs tests in a separate virtual
+		# environment with its own python executable that is not known
+		# ahead of time.  Detect this, and assume that the correct
+		# executable is already on the PATH.
 		set(TEST_PYEXEC python)
 	else()
 		set(TEST_PYEXEC ${Python_EXECUTABLE})
