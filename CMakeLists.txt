@@ -18,7 +18,6 @@ if(NOT CMAKE_BUILD_TYPE)
 endif(NOT CMAKE_BUILD_TYPE)
 
 option(BUILD_WHEEL "Configure build for python wheel")
-option(USER_TEST_ENV "Configure tests with user environment")
 
 # Work around stupid broken Red Hat systems
 set(CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "")
@@ -48,13 +47,13 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 add_library(spt3g INTERFACE)
 
 # get version info
-if(NOT BUILD_WHEEL)
+if(NOT SPT3G_VERSION)
 	include(Spt3gVersion)
 	get_spt3g_version()
-	if (SPT3G_VERSION)
-		message(STATUS "Building SPT3G software version ${SPT3G_VERSION}")
-		target_compile_definitions(spt3g INTERFACE -DSPT3G_VERSION="${SPT3G_VERSION}")
-	endif()
+endif()
+if (SPT3G_VERSION)
+	message(STATUS "Building SPT3G software version ${SPT3G_VERSION}")
+	target_compile_definitions(spt3g INTERFACE -DSPT3G_VERSION="${SPT3G_VERSION}")
 endif()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -63,7 +62,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-if(NOT BUILD_WHEEL)
+if(${CMAKE_VERSION} VERSION_LESS 3.30)
 	set(Boost_NO_BOOST_CMAKE ON)
 endif()
 

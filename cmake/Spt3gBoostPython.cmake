@@ -1,6 +1,6 @@
 # Locate Python
 
-if(BUILD_WHEEL)
+if(DEFINED ENV{CIBUILDWHEEL})
 	if(APPLE)
 		find_package(Python COMPONENTS Interpreter Development REQUIRED)
 	else()

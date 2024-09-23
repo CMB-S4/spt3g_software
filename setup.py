@@ -47,10 +47,7 @@ class CMakeBuild(build_ext):
                 envroot = os.getenv("VIRTUAL_ENV")
                 cmake_args += [f"-DCMAKE_INSTALL_PREFIX={envroot}"]
 
-        # default to using the native test environment
-        if not any(["USER_TEST_ENV" in a for a in cmake_args]):
-            cmake_args += ["-DUSER_TEST_ENV=ON"]
-
+        # pass version to C++ code
         if not any(["SPT3G_VERSION" in a for a in cmake_args]):
             sys.path.insert(0, "wheel")
             from spt3g.version import __version_tuple__ as version

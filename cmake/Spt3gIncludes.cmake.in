@@ -90,8 +90,8 @@ macro(add_spt3g_module lib_name)
 endmacro(add_spt3g_module lib_name)
 
 macro(add_spt3g_test test_name)
-	if(BUILD_WHEEL OR USER_TEST_ENV)
-		set(TEST_PYEXEC python3)
+	if(DEFINED ENV{CIBUILDWHEEL})
+		set(TEST_PYEXEC python)
 	else()
 		set(TEST_PYEXEC ${Python_EXECUTABLE})
 	endif()
@@ -99,7 +99,7 @@ macro(add_spt3g_test test_name)
 
 	set(extra_macro_args ${ARGN})
 	list(LENGTH extra_macro_args num_extra_args)
-	if(NOT BUILD_WHEEL AND NOT USER_TEST_ENV)
+	if(NOT DEFINED ENV{CIBUILDWHEEL})
 		# install wheel before testing
 		set_tests_properties(${PROJECT}/${test_name} PROPERTIES ENVIRONMENT
 			"PATH=${SPT3G_BUILD_DIR}/bin:$ENV{PATH};PYTHONPATH=${SPT3G_BUILD_DIR}:$ENV{PYTHONPATH};LD_LIBRARY_PATH=${SPT3G_BUILD_DIR}/lib:${SPT3G_BUILD_DIR}/spt3g:$ENV{LD_LIBRARY_PATH}")
