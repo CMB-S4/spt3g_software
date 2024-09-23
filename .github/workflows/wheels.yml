@@ -81,7 +81,7 @@ jobs:
       CIBW_REPAIR_WHEEL_COMMAND_MACOS: |
         DYLD_LIBRARY_PATH=$PWD/wheel/deps/lib delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel} -e Python.framework
       CIBW_BUILD_VERBOSITY: 1
-      CIBW_ENVIRONMENT: CMAKE_BUILD_PARALLEL_LEVEL=4 BUILD_DIR=./wheel/build Boost_DIR=./wheel/deps/lib/cmake/boost
+      CIBW_ENVIRONMENT: CMAKE_BUILD_PARALLEL_LEVEL=4 BUILD_DIR=$PWD/wheel/build CMAKE_PREFIX_PATH=$PWD/wheel/deps
       CIBW_BUILD_FRONTEND: "pip; args: --no-build-isolation"
       CIBW_TEST_COMMAND: cd {package}/wheel/build && make test
 
