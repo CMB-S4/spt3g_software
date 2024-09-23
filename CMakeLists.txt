@@ -17,8 +17,6 @@ if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel" FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
 
-option(BUILD_WHEEL "Configure build for python wheel")
-
 # Work around stupid broken Red Hat systems
 set(CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "")
 
@@ -139,17 +137,13 @@ if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.17)
 	list(APPEND CMAKE_CTEST_ARGUMENTS "--output-on-failure")
 endif(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.17)
 
-# Everything below deals with package installation
-if(BUILD_WHEEL)
-	return()
-endif()
-
 # Set up python importability
 execute_process(COMMAND ln -fsn ${CMAKE_SOURCE_DIR}/cmake/init.py ${SPT3G_MODULE_DIR}/__init__.py)
 
 # Shell script to set environment variables
 configure_file(${CMAKE_SOURCE_DIR}/cmake/env-shell.sh.in ${CMAKE_BINARY_DIR}/env-shell.sh @ONLY)
 
+# Everything below deals with package installation
 include(GNUInstallDirs)
 if(APPLE)
 	# See: https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
