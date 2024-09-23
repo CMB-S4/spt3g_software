@@ -45,12 +45,6 @@ if (SPT3G_VERSION)
 	target_compile_definitions(spt3g INTERFACE -DSPT3G_VERSION="${SPT3G_VERSION}")
 endif()
 
-# Boost bits we need
-set(Boost_USE_STATIC_LIBS OFF)
-set(Boost_USE_MULTITHREADED ON)
-set(Boost_USE_STATIC_RUNTIME OFF)
-set(Boost_NO_BOOST_CMAKE ON)
-
 # Find all the Boost and Python libraries
 include(Spt3gBoostPython)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
