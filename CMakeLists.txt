@@ -54,7 +54,6 @@ add_library(spt3g INTERFACE)
 
 # get version info
 include(Spt3gVersion)
-get_spt3g_version()
 if (SPT3G_VERSION)
 	message(STATUS "Building SPT3G software version ${SPT3G_VERSION}")
 	target_compile_definitions(spt3g INTERFACE -DSPT3G_VERSION="${SPT3G_VERSION}")
@@ -154,8 +153,7 @@ endif(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.17)
 # Target for version string
 add_custom_target(version ALL
 	COMMAND sh ${CMAKE_SOURCE_DIR}/cmake/getvers.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}
-	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_SOURCE_DIR}/cmake/Spt3gVersion.cmake ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}
-	BYPRODUCTS ${CMAKE_BINARY_DIR}/spt3g/version.py ${CMAKE_BINARY_DIR}/pyproject.toml ${CMAKE_BINARY_DIR}/cmake/Spt3gConfigVersion.cmake
+	BYPRODUCTS ${CMAKE_BINARY_DIR}/spt3g/version.py ${CMAKE_BINARY_DIR}/pyproject.toml
 	COMMENT "Regenerating VCS version information"
 )
 
@@ -230,7 +228,7 @@ include(CMakePackageConfigHelpers)
 
 set(INCLUDE_INSTALL_DIR include/spt3g )
 set(LIB_INSTALL_DIR lib/ )
-set(CMAKE_INSTALL_DIR share/${PROJECT_NAME}/cmake )
+set(CMAKE_INSTALL_DIR lib/cmake/${PROJECT_NAME} )
 configure_package_config_file(${CMAKE_SOURCE_DIR}/cmake/Spt3gConfig.cmake.in
 	${CMAKE_BINARY_DIR}/cmake-install/Spt3gConfig.cmake
 	INSTALL_DESTINATION ${CMAKE_INSTALL_DIR}
@@ -243,7 +241,11 @@ install(EXPORT ${PROJECT_NAME}Config
 	FILE Spt3gTargets.cmake)
 install(FILES
 	"${CMAKE_BINARY_DIR}/cmake-install/Spt3gConfig.cmake"
+	"${CMAKE_BINARY_DIR}/cmake/Spt3gConfigVersion.cmake"
 	"${CMAKE_BINARY_DIR}/cmake/Spt3gIncludes.cmake"
+	"${CMAKE_SOURCE_DIR}/cmake/FindFLAC.cmake"
+	"${CMAKE_SOURCE_DIR}/cmake/FindNetCDF.cmake"
+	"${CMAKE_SOURCE_DIR}/cmake/FindOgg.cmake"
 	DESTINATION ${CMAKE_INSTALL_DIR})
 
 # The header files

@@ -16,6 +16,7 @@ target_link_libraries(dfmux PUBLIC core)
 if (NetCDF_FOUND)
 	target_link_libraries(dfmux PUBLIC NetCDF::NetCDF)
 	add_spt3g_program(bin/ledgerman.py ledgerman)
+	set(NetCDF_FOUND ${NetCDF_FOUND} PARENT_SCOPE)
 endif()
 
 link_python_dir()
