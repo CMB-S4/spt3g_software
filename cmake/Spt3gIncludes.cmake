@@ -1,10 +1,3 @@
-# Use cmake directory for packages
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} $ENV{SITE_CMAKE_DIR} "${SPT3G_SOURCE_DIR}/cmake")
-
-# Convenience variables
-set(SPT3G_LIBRARY_DIR ${SPT3G_BUILD_DIR}/spt3g)
-set(SPT3G_RUNTIME_DIR ${SPT3G_BUILD_DIR}/bin)
-
 # Convenience macros
 macro(link_python_dir)
 	execute_process(COMMAND mkdir -p ${SPT3G_LIBRARY_DIR})
@@ -18,20 +11,12 @@ macro(link_python_dir)
 	set(SPT3G_PYTHON_DIRS ${SPT3G_PYTHON_DIRS} PARENT_SCOPE)
 endmacro(link_python_dir)
 
-find_package(OpenMP QUIET)
-if(OPENMP_FOUND AND NOT TARGET OpenMP::OpenMP_CXX)
-	find_package(Threads REQUIRED)
-	add_library(OpenMP::OpenMP_CXX IMPORTED INTERFACE)
-	set_property(TARGET OpenMP::OpenMP_CXX
-		PROPERTY INTERFACE_COMPILE_OPTIONS ${OpenMP_CXX_FLAGS})
-	# Only works if the same flag is passed to the linker; use CMake 3.9+ otherwise (Intel, AppleClang)
-	set_property(TARGET OpenMP::OpenMP_CXX
-		PROPERTY INTERFACE_LINK_LIBRARIES ${OpenMP_CXX_FLAGS} Threads::Threads)
-endif()
 macro(link_openmp lib_name)
-	if (OPENMP_FOUND)
+	find_package(OpenMP)
+	if (OpenMP_FOUND)
 		target_link_libraries(${lib_name} PUBLIC OpenMP::OpenMP_CXX)
 		target_compile_definitions(${lib_name} PUBLIC -DOPENMP_FOUND)
+		set(OpenMP_FOUND ${OpenMP_FOUND} PARENT_SCOPE)
 	endif()
 endmacro(link_openmp lib_name)
 
@@ -68,7 +53,7 @@ macro(add_spt3g_test test_name)
 	set(extra_macro_args ${ARGN})
 	list(LENGTH extra_macro_args num_extra_args)
 	set_tests_properties(${PROJECT}/${test_name} PROPERTIES ENVIRONMENT
-		"PATH=${SPT3G_BUILD_DIR}/bin:$ENV{PATH};PYTHONPATH=${SPT3G_BUILD_DIR}:$ENV{PYTHONPATH};LD_LIBRARY_PATH=${SPT3G_BUILD_DIR}/spt3g:$ENV{LD_LIBRARY_PATH}")
+		"PATH=${CMAKE_BINARY_DIR}/bin:$ENV{PATH};PYTHONPATH=${CMAKE_BINARY_DIR}:$ENV{PYTHONPATH};LD_LIBRARY_PATH=${CMAKE_BINARY_DIR}/spt3g:$ENV{LD_LIBRARY_PATH}")
 	if (${num_extra_args} GREATER 0)
 		list(GET extra_macro_args 0 test_labels)
 		set_tests_properties(${PROJECT}/${test_name} PROPERTIES LABELS ${test_labels})
@@ -76,14 +61,6 @@ macro(add_spt3g_test test_name)
 endmacro(add_spt3g_test test_name)
 
 macro(add_spt3g_test_program test_name)
-	if(PROJECT_NAME STREQUAL "spt3g") # internal use by this code
-		set(TEST_NAME_PREFIX ${PROJECT})
-		set(TEST_PROJECT_PREFIX "")
-	else() # external use by down-stream code
-		set(TEST_NAME_PREFIX ${PROJECT_NAME})
-		set(TEST_PROJECT_PREFIX "spt3g::")
-	endif()
-	
 	cmake_parse_arguments("ADD_TEST_PROGRAM"
 	                      "" # options
 	                      "" # one value keywords
@@ -91,29 +68,26 @@ macro(add_spt3g_test_program test_name)
 	                      ${ARGN}
 	                      )
 	
-	add_test(NAME ${TEST_NAME_PREFIX}/${test_name}
+	add_test(NAME ${PROJECT}/${test_name}
 	         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-	         COMMAND ${TEST_NAME_PREFIX}-${test_name}
+	         COMMAND ${PROJECT}-${test_name}
 	         )
 	
 	if(ADD_TEST_PROGRAM_TEST_LABELS)
-		set_tests_properties(${TEST_NAME_PREFIX}/${test_name} PROPERTIES LABELS ${ADD_TEST_PROGRAM_TEST_LABELS})
+		set_tests_properties(${PROJECT}/${test_name} PROPERTIES LABELS ${ADD_TEST_PROGRAM_TEST_LABELS})
 	endif(ADD_TEST_PROGRAM_TEST_LABELS)
 	
 	if(NOT EXISTS ${PROJECT_BINARY_DIR}/Spt3gTestMain.cxx)
 		file(WRITE ${PROJECT_BINARY_DIR}/Spt3gTestMain.cxx "#include <G3Test.h>\nG3TEST_MAIN_IMPL\n")
 	endif(NOT EXISTS ${PROJECT_BINARY_DIR}/Spt3gTestMain.cxx)
 	
-	add_executable(${TEST_NAME_PREFIX}-${test_name}
+	add_executable(${PROJECT}-${test_name}
 	               ${PROJECT_BINARY_DIR}/Spt3gTestMain.cxx
 	               ${ADD_TEST_PROGRAM_SOURCE_FILES}
 	               )
-	target_include_directories(${TEST_NAME_PREFIX}-${test_name} PRIVATE ${CMAKE_SOURCE_DIR}/cmake)
+	target_include_directories(${PROJECT}-${test_name} PRIVATE ${CMAKE_SOURCE_DIR}/cmake)
 	
 	foreach(USED_PROJECT ${ADD_TEST_PROGRAM_USE_PROJECTS})
-		if(NOT TARGET ${TEST_PROJECT_PREFIX}${USED_PROJECT})
-			message(FATAL_ERROR "Target ${TEST_PROJECT_PREFIX}${USED_PROJECT} not found")
-		endif()
-		target_link_libraries(${TEST_NAME_PREFIX}-${test_name} ${TEST_PROJECT_PREFIX}${USED_PROJECT})
+		target_link_libraries(${PROJECT}-${test_name} ${USED_PROJECT})
 	endforeach(USED_PROJECT ${ADD_TEST_PROGRAM_USE_PROJECTS})
 endmacro(add_spt3g_test_program test_name)
