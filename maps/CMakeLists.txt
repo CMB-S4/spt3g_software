@@ -19,7 +19,12 @@ add_spt3g_library(maps SHARED
 )
 
 target_link_libraries(maps PUBLIC core calibration)
-link_openmp(maps)
+
+find_package(OpenMP)
+if(OpenMP_FOUND)
+  target_link_libraries(maps PUBLIC OpenMP::OpenMP_CXX)
+  set(OpenMP_FOUND ${OpenMP_FOUND} PARENT_SCOPE)
+endif()
 
 add_spt3g_module(maps src/python.cxx)
 

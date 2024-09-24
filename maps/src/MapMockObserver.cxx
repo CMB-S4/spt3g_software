@@ -1,5 +1,5 @@
 #include <pybindings.h>
-#ifdef OPENMP_FOUND
+#ifdef _OPENMP
 #include <omp.h>
 #endif
 
@@ -168,7 +168,7 @@ MapMockObserver::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		    new G3Timestream(pointing->size()));
 	}
 
-#ifdef OPENMP_FOUND
+#ifdef _OPENMP
 	// Create a list of detectors to satisfy OpenMP's need for scalar
 	// iteration
 	std::vector<std::string> dets;

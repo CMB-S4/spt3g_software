@@ -1,5 +1,5 @@
 #include <pybindings.h>
-#ifdef OPENMP_FOUND
+#ifdef _OPENMP
 #include <omp.h>
 #endif
 
@@ -27,7 +27,7 @@ private:
 	std::map<std::string, G3SkyMapPtr> maps_;
 	G3SkyMapWeightsPtr map_weights_;
 
-#ifdef OPENMP_FOUND
+#ifdef _OPENMP
 	std::vector<std::string> dets_;
 #endif
 
@@ -131,7 +131,7 @@ SingleDetectorBoresightBinner::Process(G3FramePtr frame,
 			out_queue.push_back(out);
 		}
 		maps_.clear(); // Don't sit on this memory anymore
-#ifdef OPENMP_FOUND
+#ifdef _OPENMP
 		dets_.clear();
 #endif
 		out_queue.push_back(frame);
@@ -166,7 +166,7 @@ SingleDetectorBoresightBinner::Process(G3FramePtr frame,
 		for (auto i : *timestreams) {
 			maps_[i.first] = template_->Clone(false);
 
-			#ifdef OPENMP_FOUND
+			#ifdef _OPENMP
 			// Create a list of detectors to satisfy OpenMP's need
 			// for scalar iteration
 			dets_.push_back(i.first);
@@ -190,7 +190,7 @@ SingleDetectorBoresightBinner::Process(G3FramePtr frame,
 	for (size_t i = 0; i < pixels.size(); i++)
 		(*map_weights_->TT)[pixels[i]] += 1;
 
-#ifdef OPENMP_FOUND
+#ifdef _OPENMP
 	#pragma omp parallel for
 	for (size_t i = 0; i < dets_.size(); i++) {
 		const std::string &det = dets_[i];

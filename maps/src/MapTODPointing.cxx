@@ -1,5 +1,5 @@
 #include <pybindings.h>
-#ifdef OPENMP_FOUND
+#ifdef _OPENMP
 #include <omp.h>
 #endif
 
@@ -148,7 +148,7 @@ MapTODPointing::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		dets.push_back(i.first);
 	}
 
-#ifdef OPENMP_FOUND
+#ifdef _OPENMP
 	#pragma omp parallel for
 #endif
 	for (size_t i = 0; i < dets.size(); i++) {

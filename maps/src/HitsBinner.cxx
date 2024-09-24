@@ -1,5 +1,5 @@
 #include <pybindings.h>
-#ifdef OPENMP_FOUND
+#ifdef _OPENMP
 #include <omp.h>
 #endif
 
@@ -215,7 +215,7 @@ HitsBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	if (stop_ < pointing->stop)
 		stop_ = pointing->stop;
 
-#ifdef OPENMP_FOUND
+#ifdef _OPENMP
 	if (omp_get_num_threads() > 1) {
 		// G3SkyMap is not thread-safe when sparse. Avoid the cost of locks
 		// by making one set of sparse maps per thread per scan (which use
@@ -252,7 +252,7 @@ HitsBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		for (auto ts : *timestreams) {
 			BinHits(boloprops_->at(ts.first), *pointing, H_);
 		}
-#ifdef OPENMP_FOUND
+#ifdef _OPENMP
 	}
 #endif
 
