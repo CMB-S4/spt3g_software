@@ -1,5 +1,5 @@
 #include <pybindings.h>
-#ifdef OPENMP_FOUND
+#ifdef _OPENMP
 #include <omp.h>
 #endif
 
@@ -31,7 +31,7 @@ private:
 	std::map<std::string,
 	    std::pair<G3SkyMapPtr, G3SkyMapWeightsPtr> > maps_;
 
-#ifdef OPENMP_FOUND
+#ifdef _OPENMP
 	std::vector<std::string> dets_;
 #endif
 
@@ -78,7 +78,7 @@ SingleDetectorMapBinner::Process(G3FramePtr frame,
 			out_queue.push_back(out);
 		}
 		maps_.clear(); // Don't sit on this memory anymore
-#ifdef OPENMP_FOUND
+#ifdef _OPENMP
 		dets_.clear();
 #endif
 		out_queue.push_back(frame);
@@ -122,7 +122,7 @@ SingleDetectorMapBinner::Process(G3FramePtr frame,
 			maps_[i.first].first = template_->Clone(false);
 			maps_[i.first].second = G3SkyMapWeightsPtr(
 			    new G3SkyMapWeights(template_));
-#ifdef OPENMP_FOUND
+#ifdef _OPENMP
 			// Create a list of detectors to satisfy OpenMP's need
 			// for scalar iteration.
 			dets_.push_back(i.first);
@@ -135,7 +135,7 @@ SingleDetectorMapBinner::Process(G3FramePtr frame,
 	}
 
 
-#ifdef OPENMP_FOUND
+#ifdef _OPENMP
 	#pragma omp parallel for
 	for (size_t i = 0; i < dets_.size(); i++) {
 		const std::string &det = dets_[i];
