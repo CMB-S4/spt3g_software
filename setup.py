@@ -41,11 +41,13 @@ class CMakeBuild(build_ext):
 
         # pass version to C++ code
         if not any(["SPT3G_VERSION" in a for a in cmake_args]):
-            sys.path.insert(0, "wheel")
-            from spt3g.version import __version_tuple__ as version
+            sys.path.insert(0, str(Path(ext.sourcedir) / "wheel"))
+            from spt3g import version as spt3g_version
             sys.path.pop(0)
-            if len(version) == 2:
-                v = "{}.{}".format(*version)
+            cmake_args += [f"-DSPT3G_VERSION_FILE={spt3g_version.__file__}"]
+            vtup = spt3g_version.version_tuple
+            if len(vtup) == 2:
+                v = "{}.{}".format(*vtup)
                 cmake_args += [f"-DSPT3G_VERSION={repr(v)}"]
 
         # ensure that build directory isn't removed on completion, so that

@@ -147,11 +147,15 @@ if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.17)
 endif(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.17)
 
 # Target for version string
-add_custom_target(version ALL
-	COMMAND sh ${CMAKE_SOURCE_DIR}/cmake/getvers.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}
-	BYPRODUCTS ${CMAKE_BINARY_DIR}/spt3g/version.py
-	COMMENT "Regenerating VCS version information"
-)
+if(SPT3G_VERSION_FILE)
+	execute_process(COMMAND ln -fsn ${SPT3G_VERSION_FILE} ${SPT3G_MODULE_DIR}/version.py)
+else()
+	add_custom_target(version ALL
+		COMMAND sh ${CMAKE_SOURCE_DIR}/cmake/getvers.sh ${CMAKE_SOURCE_DIR} ${SPT3G_MODULE_DIR}/version.py
+		BYPRODUCTS ${SPT3G_MODULE_DIR}/version.py
+		COMMENT "Regenerating VCS version information"
+	)
+endif()
 
 # Add mechanism to make a tarball for the grid
 add_custom_target(tarball
