@@ -18,7 +18,7 @@ dependencies = ["numpy", "scipy", "astropy"]
 dynamic=["version"]
 
 [project.optional-dependencies]
-dev = ["pytest", "healpy"]
+dev = ["cmake", "pytest", "healpy"]
 
 [tool.setuptools_scm]
 version_file_template = """
