@@ -11,23 +11,20 @@ if(NOT "@PACKAGE_CMAKE_INSTALL_DIR@" STREQUAL "") # installed
 	set_and_check(_core_dir "@PACKAGE_INCLUDE_INSTALL_DIR@/core")
 	set(Spt3g_INCLUDE_DIRS ${Spt3g_INCLUDE_DIR} ${_core_dir})
 
-	include("@PACKAGE_CMAKE_INSTALL_DIR@/Spt3gIncludes.cmake")
 	include("@PACKAGE_CMAKE_INSTALL_DIR@/Spt3gTargets.cmake")
 
 	set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "@PACKAGE_CMAKE_INSTALL_DIR@")
-	check_required_components(Spt3g)
 else(NOT "@PACKAGE_CMAKE_INSTALL_DIR@" STREQUAL "") # not installed
 	set(Spt3g_INCLUDE_DIRS "@CMAKE_SOURCE_DIR@/core/include/core")
+	list(APPEND Spt3g_INCLUDE_DIRS "@CMAKE_SOURCE_DIR@/cmake")
 	foreach(lib @SPT3G_LIBRARIES@)
 		list(APPEND Spt3g_INCLUDE_DIRS "@CMAKE_SOURCE_DIR@/${lib}/include")
 	endforeach(lib @SPT3G_LIBRARIES@)
 	set(Spt3g_INCLUDE_DIR "@CMAKE_SOURCE_DIR@/core/include")
 
-	include("@CMAKE_BINARY_DIR@/cmake/Spt3gIncludes.cmake")
 	include("@CMAKE_BINARY_DIR@/cmake/Spt3gTargets.cmake")
 
 	set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "@CMAKE_SOURCE_DIR@/cmake")
-	set(Spt3g_FOUND true)
 endif(NOT "@PACKAGE_CMAKE_INSTALL_DIR@" STREQUAL "")
 
 include(CMakeFindDependencyMacro)
@@ -61,3 +58,20 @@ include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Spt3g
 	REQUIRED_VARS Spt3g_INCLUDE_DIR Spt3g_INCLUDE_DIRS Spt3g_LIBRARIES
 	VERSION_VAR Spt3g_VERSION)
+
+# Convenience macros
+
+# Create an executable that runs a set of tests using the G3Test implementation
+# The first argument is the name of both the executable target and test target
+# Remaining arguments are passed to add_executable
+# Use target_link_libraries to link the test program to the appropriate libraries
+# Use set_tests_properties to set test properties
+macro(add_spt3g_test_program test_name)
+	add_test(NAME ${test_name} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} COMMAND ${test_name})
+
+	if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/Spt3gTestMain.cxx)
+		file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/Spt3gTestMain.cxx "#include <G3Test.h>\nG3TEST_MAIN_IMPL\n")
+	endif()
+
+	add_executable(${test_name} ${ARGN} ${CMAKE_CURRENT_BINARY_DIR}/Spt3gTestMain.cxx)
+endmacro(add_spt3g_test_program test_name)

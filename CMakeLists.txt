@@ -11,6 +11,9 @@ if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel" FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
 
+# Use cmake directory for packages
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} $ENV{SITE_CMAKE_DIR} "${CMAKE_SOURCE_DIR}/cmake")
+
 # Work around stupid broken Red Hat systems
 set(CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "")
 
@@ -19,17 +22,14 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Compiler and include configurations
-set(SPT3G_SOURCE_DIR ${CMAKE_SOURCE_DIR})
-set(SPT3G_BUILD_DIR ${CMAKE_BINARY_DIR})
-
+# Convenience variables
+set(SPT3G_MODULE_DIR ${CMAKE_BINARY_DIR}/spt3g)
 set(SPT3G_INCLUDE_INSTALL_DIR "include/spt3g")
 
-configure_file(${CMAKE_SOURCE_DIR}/cmake/Spt3gIncludes.cmake.in ${CMAKE_BINARY_DIR}/cmake/Spt3gIncludes.cmake @ONLY)
-include(${CMAKE_BINARY_DIR}/cmake/Spt3gIncludes.cmake)
+include(Spt3gIncludes)
 
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${SPT3G_LIBRARY_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${SPT3G_RUNTIME_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Raise every warning by default
 # (use target-specific options to disable particular warnings)
@@ -191,7 +191,7 @@ endforeach(program ${SPT3G_PROGRAMS})
 # The CMake package definitions
 include(CMakePackageConfigHelpers)
 
-set(INCLUDE_INSTALL_DIR include/spt3g )
+set(INCLUDE_INSTALL_DIR ${SPT3G_INCLUDE_INSTALL_DIR} )
 set(LIB_INSTALL_DIR lib/ )
 set(CMAKE_INSTALL_DIR lib/cmake/${PROJECT_NAME} )
 configure_package_config_file(${CMAKE_SOURCE_DIR}/cmake/Spt3gConfig.cmake.in
@@ -206,12 +206,13 @@ install(EXPORT ${PROJECT_NAME}Config
 	FILE Spt3gTargets.cmake)
 install(FILES
 	"${CMAKE_BINARY_DIR}/cmake-install/Spt3gConfig.cmake"
-	"${CMAKE_BINARY_DIR}/cmake/Spt3gConfigVersion.cmake"
-	"${CMAKE_BINARY_DIR}/cmake/Spt3gIncludes.cmake"
 	"${CMAKE_SOURCE_DIR}/cmake/FindFLAC.cmake"
 	"${CMAKE_SOURCE_DIR}/cmake/FindNetCDF.cmake"
 	"${CMAKE_SOURCE_DIR}/cmake/FindOgg.cmake"
 	DESTINATION ${CMAKE_INSTALL_DIR})
+if(SPT3G_VERSION)
+	install(FILES "${CMAKE_BINARY_DIR}/cmake/Spt3gConfigVersion.cmake" DESTINATION ${CMAKE_INSTALL_DIR})
+endif()
 
 # The header files
 foreach(lib ${SPT3G_LIBRARIES})
