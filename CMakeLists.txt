@@ -41,7 +41,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-if(DEFINED ENV{CIBUILDWHEEL} AND NOT APPLE)
+if(DEFINED ENV{CIBUILDWHEEL})
 	# Can't compile binaries against libpython in CI
 	find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
 else()
@@ -65,9 +65,19 @@ if (SPT3G_VERSION)
 endif()
 
 target_compile_features(spt3g INTERFACE cxx_std_11)
-target_include_directories(spt3g INTERFACE ${Boost_INCLUDE_DIR} ${Python_INCLUDE_DIRS})
-target_link_libraries(spt3g INTERFACE Threads::Threads ${Boost_LIBRARIES} ${Python_LIBRARIES})
+target_include_directories(spt3g INTERFACE ${Boost_INCLUDE_DIR})
+target_link_libraries(spt3g INTERFACE Threads::Threads ${Boost_LIBRARIES})
 target_include_directories(spt3g INTERFACE $<INSTALL_INTERFACE:${SPT3G_INCLUDE_INSTALL_DIR}>)
+
+# Python bindings
+if(TARGET Python::Module)
+	target_link_libraries(spt3g INTERFACE Python::Module)
+else()
+	target_include_directories(spt3g INTERFACE ${Python_INCLUDE_DIRS})
+	if(APPLE)
+		target_link_options(spt3g INTERFACE "LINKER:-undefined,dynamic_lookup")
+	endif()
+endif()
 
 # Work around yet more bugs in GCC 4.4, this time with C++ 11 support
 # Also increase maximum number of arguments in python bindings

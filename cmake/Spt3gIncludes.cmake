@@ -26,6 +26,15 @@ macro(add_spt3g_program prog_name)
 	execute_process(COMMAND ln -fsn ${prog_in} ${prog_out})
 endmacro(add_spt3g_program prog_name)
 
+macro(add_spt3g_executable prog_name)
+	add_executable(${prog_name} ${ARGN})
+	if(TARGET Python::Python)
+		target_link_libraries(${prog_name} Python::Python)
+	else()
+		target_link_libraries(${prog_name} ${Python_LIBRARIES})
+	endif()
+endmacro(add_spt3g_executable prog_name)
+
 macro(add_spt3g_library lib_name)
 	add_library(${lib_name} ${ARGN})
 	set_target_properties(${lib_name} PROPERTIES PREFIX "libspt3g-")
@@ -109,10 +118,10 @@ macro(add_spt3g_test_program test_name)
 		file(WRITE ${PROJECT_BINARY_DIR}/Spt3gTestMain.cxx "#include <G3Test.h>\nG3TEST_MAIN_IMPL\n")
 	endif(NOT EXISTS ${PROJECT_BINARY_DIR}/Spt3gTestMain.cxx)
 	
-	add_executable(${PROJECT}-${test_name}
-	               ${PROJECT_BINARY_DIR}/Spt3gTestMain.cxx
-	               ${ADD_TEST_PROGRAM_SOURCE_FILES}
-	               )
+	add_spt3g_executable(${PROJECT}-${test_name}
+	                     ${PROJECT_BINARY_DIR}/Spt3gTestMain.cxx
+	                     ${ADD_TEST_PROGRAM_SOURCE_FILES}
+	                     )
 	target_include_directories(${PROJECT}-${test_name} PRIVATE ${CMAKE_SOURCE_DIR}/cmake)
 	
 	foreach(USED_PROJECT ${ADD_TEST_PROGRAM_USE_PROJECTS})
