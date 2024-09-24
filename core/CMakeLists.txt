@@ -35,6 +35,7 @@ find_package(FLAC MODULE)
 if(FLAC_FOUND)
 	target_compile_definitions(core PRIVATE -DG3_HAS_FLAC)
 	target_link_libraries(core PUBLIC FLAC::FLAC)
+	set(FLAC_FOUND ${FLAC_FOUND} PARENT_SCOPE)
 endif()
 
 # Link against BZIP2 library
