@@ -31,11 +31,12 @@ if len(version_tuple) == 2:
 else:
     versionname = 'UNKNOWN'
 
-localdiffs = len(version_tuple) == 4
-if localdiffs:
-    gitrevision = revision = version[-1].split('.')[0][1:]
+if len(version_tuple) == 4:
+    gitrevision = revision = version_tuple[-1].split('.')[0][1:]
+    localdiffs = len(version_tuple[-1].split(".")) == 2
 else:
     gitrevision = revision = 'UNKNOWN'
+    localdiffs = False
 
 upstream_branch = 'UNKNOWN VCS'
 upstream_url = 'UNKNOWN VCS'
