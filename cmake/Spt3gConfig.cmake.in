@@ -35,7 +35,11 @@ include(CMakeFindDependencyMacro)
 set(THREADS_PREFER_PTHREAD_FLAG @THREADS_PREFER_PTHREAD_FLAG@)
 find_dependency(Threads REQUIRED)
 
-find_dependency(Python COMPONENTS Interpreter Development REQUIRED)
+if(DEFINED ENV{CIBUILDWHEEL} AND NOT APPLE)
+	find_dependency(Python COMPONENTS Interpreter Development.Module REQUIRED)
+else()
+	find_dependency(Python COMPONENTS Interpreter Development REQUIRED)
+endif()
 
 set(Boost_USE_STATIC_LIBS @Boost_USE_STATIC_LIBS@)
 set(Boost_USE_MULTITHREADED @Boost_USE_MULTITHREADED@)
