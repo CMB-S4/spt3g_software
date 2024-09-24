@@ -1,3 +1,12 @@
+.. image:: https://badge.fury.io/py/spt3g.svg
+    :target: https://badge.fury.io/py/spt3g
+
+.. image:: https://github.com/CMB-S4/spt3g_software/actions/workflows/cmake.yml/badge.svg
+    :target: https://github.com/CMB-S4/spt3g_software/actions/workflows/cmake.yml
+
+.. image:: https://github.com/CMB-S4/spt3g_software/actions/workflows/wheels.yml/badge.svg
+    :target: https://github.com/CMB-S4/spt3g_software/actions/workflows/wheels.yml
+
 About
 -----
 
