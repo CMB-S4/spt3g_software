@@ -14,6 +14,7 @@ fullversion_pep440="${fullversion_pep440:-0.1.0+unknown}" # fallback for SVN or 
 
 
 # version.py version info
+rm -f $2
 exec 1>"$2"
 
 

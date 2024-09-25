@@ -122,9 +122,16 @@ class CMakeInstall(install):
         subprocess.run(["make", "install"], cwd=build_dir, check=True)
 
 
+# create package
+pkgdir = Path("./wheel/spt3g")
+pkgdir.mkdir(parents=True, exist_ok=True)
+initpy = pkgdir / "__init__.py"
+if not initpy.is_symlink():
+    initpy.symlink_to(Path("./cmake/init.py").resolve())
+
 # gather libraries
 clibs = ["core"]
-pdirs = {"spt3g": "./wheel/spt3g"}
+pdirs = {"spt3g": str(pkgdir)}
 
 for d in sorted(Path("./").glob("*/CMakeLists.txt")):
     lib = d.parent.name
