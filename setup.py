@@ -74,6 +74,11 @@ class CMakeBuild(build_ext):
             )
             subprocess.run(["cmake", "--build", "."], cwd=build_temp, check=True)
 
+            # trigger script installer for all python scripts
+            self.distribution.scripts = [
+                str(f) for f in build_temp.glob("bin/*") if f.is_symlink()
+            ]
+
         # add modules
         spt3g_lib = Path(self.build_lib) / "spt3g"
         if not spt3g_lib.exists():
