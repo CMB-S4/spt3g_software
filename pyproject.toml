@@ -41,7 +41,7 @@ else:
 upstream_branch = 'UNKNOWN VCS'
 upstream_url = 'UNKNOWN VCS'
 """
-version_file = "./wheel/spt3g/version.py"
+version_file = "./cmake/package/version.py"
 version_scheme = "no-guess-dev"
 fallback_version = "0.0"
 

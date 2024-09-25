@@ -1,5 +1,6 @@
-import json
+import logging
 import os
+import re
 import subprocess
 import sys
 import sysconfig
@@ -11,15 +12,18 @@ from setuptools.command.install import install
 from setuptools.command.install_scripts import install_scripts
 
 
-# A CMakeExtension needs a sourcedir instead of a file list.
+# A CMakeExtension does not need a source list
 class CMakeExtension(Extension):
-    def __init__(self, name, sourcedir=""):
+    def __init__(self, name):
         super().__init__(name, sources=[])
-        self.sourcedir = os.fspath(Path(sourcedir).resolve())
 
 
-class CMakeBuild(build_ext):
-    def build_extension(self, ext):
+class CMakeBuildExt(build_ext):
+    def initialize_options(self):
+        super().initialize_options()
+        self.source_dir = Path(".").resolve()
+        self.build_dir = Path(os.getenv("BUILD_DIR", "./build")).resolve()
+
         cmake_args = []
 
         # Adding CMake arguments set as environment variable
@@ -41,43 +45,40 @@ class CMakeBuild(build_ext):
 
         # pass version to C++ code
         if not any(["SPT3G_VERSION" in a for a in cmake_args]):
-            sys.path.insert(0, str(Path(ext.sourcedir) / "wheel"))
-            from spt3g import version as spt3g_version
-            sys.path.pop(0)
-            cmake_args += [f"-DSPT3G_VERSION_FILE={spt3g_version.__file__}"]
-            vtup = spt3g_version.version_tuple
-            if len(vtup) == 2:
-                v = "{}.{}".format(*vtup)
-                cmake_args += [f"-DSPT3G_VERSION={repr(v)}"]
+            cmake_args += [f"-DPIP_SPT3G_VERSION_FILE=ON"]
+            version = self.distribution.metadata.version
+            if re.match(r"^[0-9]+\.[0-9]+$", version):
+                cmake_args += [f"-DSPT3G_VERSION={repr(version)}"]
 
-        # ensure that build directory isn't removed on completion, so that
-        # shared libraries are accessible
-        if self.editable_mode:
-            if "BUILD_DIR" not in os.environ:
-                raise RuntimeError(
-                    "BUILD_DIR environment variable required in editable mode"
-                )
+        self.cmake_args = cmake_args
+        self.cmake_done = False
 
-        if "BUILD_DIR" in os.environ:
-            build_temp = Path(os.getenv("BUILD_DIR"))
-        else:
-            build_temp = Path(self.build_temp)
-        if not build_temp.exists():
-            build_temp.mkdir(parents=True)
-        self.build_dir = build_temp
-
-        if ext.name.endswith("core"):
+    def build_extension(self, ext):
+        if not self.cmake_done:
             # build once
-            self.announce(f"Building library in {build_temp}")
+            self.announce(f"Building library in {self.build_dir}", logging.INFO)
+            if not self.build_dir.exists():
+                self.build_dir.mkdir(parents=True, exist_ok=True)
             subprocess.run(
-                ["cmake", ext.sourcedir, *cmake_args], cwd=build_temp, check=True
+                ["cmake", self.source_dir, *self.cmake_args], cwd=self.build_dir, check=True
             )
-            subprocess.run(["cmake", "--build", "."], cwd=build_temp, check=True)
+            subprocess.run(["cmake", "--build", "."], cwd=self.build_dir, check=True)
+
+            # update package directory
+            if self.editable_mode:
+                pkgdir = self.build_dir.relative_to(self.source_dir) / "spt3g"
+                self.distribution.package_dir["spt3g"] = pkgdir
+                build_py = self.get_finalized_command("build_py")
+                build_py.package_dir["spt3g"] = pkgdir
+
+            # update version file
+            self.copy_file(self.source_dir / "cmake/package/version.py", self.build_dir)
 
             # trigger script installer for all python scripts
             self.distribution.scripts = [
-                str(f) for f in build_temp.glob("bin/*") if f.is_symlink()
+                str(f) for f in self.build_dir.glob("bin/*") if f.is_symlink()
             ]
+            self.cmake_done = True
 
         # add modules
         spt3g_lib = Path(self.build_lib) / "spt3g"
@@ -86,8 +87,8 @@ class CMakeBuild(build_ext):
 
         libname = ext.name.split(".")[-1]
         libfiles = [
-            build_temp / "spt3g" / self.get_ext_filename(libname),
-            build_temp / "spt3g" / f"{libname}.so",
+            self.build_dir / "spt3g" / self.get_ext_filename(libname),
+            self.build_dir / "spt3g" / f"{libname}.so",
         ]
         for f in libfiles:
             if f.exists():
@@ -101,7 +102,7 @@ class CMakeInstallScripts(install_scripts):
     def run(self):
         super().run()
 
-        self.announce("Installing scripts")
+        self.announce("Installing cmake programs", logging.INFO)
         install_dir = Path(self.install_dir)
         if not install_dir.exists():
             install_dir.mkdir(parents=True)
@@ -117,35 +118,28 @@ class CMakeInstall(install):
         if "CIBUILDWHEEL" in os.environ:
             return
 
-        self.announce("Installing libraries and headers")
+        self.announce("Installing cmake libraries and headers", logging.INFO)
         build_dir = self.get_finalized_command("build_ext").build_dir
         subprocess.run(["make", "install"], cwd=build_dir, check=True)
 
 
-# create package
-pkgdir = Path("./wheel/spt3g")
-pkgdir.mkdir(parents=True, exist_ok=True)
-initpy = pkgdir / "__init__.py"
-if not initpy.is_symlink():
-    initpy.symlink_to(Path("./cmake/init.py").resolve())
-
 # gather libraries
-clibs = ["core"]
-pdirs = {"spt3g": str(pkgdir)}
+clibs = []
+pdirs = {"spt3g": "cmake/package"}
 
 for d in sorted(Path("./").glob("*/CMakeLists.txt")):
     lib = d.parent.name
-    if (d.parent / "src").exists() and lib not in clibs:
-        clibs.append(lib)
+    if (d.parent / "src").exists():
+        clibs.append(f"spt3g._lib{lib}")
     if (d.parent / "python").exists():
         pdirs[f"spt3g.{lib}"] = d.parent / "python"
     elif (d.parent / "__init__.py").exists():
         pdirs[f"spt3g.{lib}"] = d.parent
 
 setup(
-    ext_modules=[CMakeExtension(f"spt3g._lib{lib}") for lib in clibs],
+    ext_modules=[CMakeExtension(lib) for lib in clibs],
     cmdclass={
-        "build_ext": CMakeBuild,
+        "build_ext": CMakeBuildExt,
         "install_scripts": CMakeInstallScripts,
         "install": CMakeInstall,
     },

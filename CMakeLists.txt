@@ -97,7 +97,7 @@ configure_file(${CMAKE_SOURCE_DIR}/cmake/env-shell.sh.in ${CMAKE_BINARY_DIR}/env
 execute_process(COMMAND mkdir -p ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 execute_process(COMMAND mkdir -p ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 execute_process(COMMAND mkdir -p ${SPT3G_MODULE_DIR})
-execute_process(COMMAND ln -fsn ${CMAKE_SOURCE_DIR}/cmake/init.py ${SPT3G_MODULE_DIR}/__init__.py)
+execute_process(COMMAND ln -fsn ${CMAKE_SOURCE_DIR}/cmake/package/__init__.py ${SPT3G_MODULE_DIR}/__init__.py)
 
 set(BUILD_PROJECTS "${BUILD_PROJECTS}" CACHE STRING "The subset of available projects to actually build")
 if(NOT "${BUILD_PROJECTS}" STREQUAL "")
@@ -157,9 +157,7 @@ if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.17)
 endif(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.17)
 
 # Target for version string
-if(SPT3G_VERSION_FILE)
-	execute_process(COMMAND ln -fsn ${SPT3G_VERSION_FILE} ${SPT3G_MODULE_DIR}/version.py)
-else()
+if(NOT PIP_SPT3G_VERSION_FILE)
 	add_custom_target(version ALL
 		COMMAND sh ${CMAKE_SOURCE_DIR}/cmake/getvers.sh ${CMAKE_SOURCE_DIR} ${SPT3G_MODULE_DIR}/version.py
 		BYPRODUCTS ${SPT3G_MODULE_DIR}/version.py
