@@ -104,10 +104,7 @@ jobs:
           fetch-tags: true
 
       - name: Build sdist
-        run: |
-          cmake/config_export.sh
-          git archive HEAD .git_archival.txt VERSION | tar -xv
-          pipx run build --sdist
+        run: pipx run build --sdist
 
       - uses: actions/upload-artifact@v4
         with:

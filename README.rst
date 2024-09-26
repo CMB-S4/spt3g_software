@@ -30,7 +30,7 @@ Minimum versions:
 
 	- GCC >= 5.0 or clang >= 3.4
 	- Boost >= 1.48
-	- cmake >= 3.5
+	- cmake >= 3.12
 	- Python >= 2.7 (although pre-Python-3 support is best-effort)
 
 On Ubuntu/Debian, you can install the non-Python dependencies, including the optional ones, by doing:
@@ -105,9 +105,9 @@ Installation
 
 For various reasons it may be useful to install the software after building, instead of continuing to use it out of the build directory. Several CMake variables control how the software is installed:
 
- * ``WITH_BZIP2``, which defaults to ``TRUE``, is used to control whether the core library is built with support for bzip2 compression of G3 files.  Use ``-DWITH_BZIP2=FALSE`` when calling ``cmake`` to disable.
- * ``CMAKE_INSTALL_PREFIX``, which defaults to ``/usr/local`` is used as the root directory for installing all non-python components (header files, cmake export scripts, etc.).  This variable is frequently useful when installing into a python virtual environment.
- * ``CMAKE_BUILD_PARALLEL_LEVEL`` is an environment variable (*not* a cmake option) used to control how many parallel processes are used to compile the shared libraries.  This option provides the same behavior as running ``make`` with the ``-j`` flag (e.g. ``make -j4``).
+* ``WITH_BZIP2``, which defaults to ``TRUE``, is used to control whether the core library is built with support for bzip2 compression of G3 files.  Use ``-DWITH_BZIP2=FALSE`` when calling ``cmake`` to disable.
+* ``CMAKE_INSTALL_PREFIX``, which defaults to ``/usr/local`` is used as the root directory for installing all non-python components (header files, cmake export scripts, etc.).  This variable is frequently useful when installing into a python virtual environment.
+* ``CMAKE_BUILD_PARALLEL_LEVEL`` is an environment variable (*not* a cmake option) used to control how many parallel processes are used to compile the shared libraries.  This option provides the same behavior as running ``make`` with the ``-j`` flag (e.g. ``make -j4``).
 
 Installation with Pip
 ---------------------
@@ -159,17 +159,11 @@ Release Version Tracking
 Use git tags to keep track of release versions.  Tags should be of the form "v0.1.2" for release with major version 0, minor version 1 and patch version 2.
 If such a tag is defined, cmake will populate the following outputs:
 
- * A `cmake/Spt3gConfigVersion.cmake` file that contains the version number to be checked when including the Spt3g libraries in another cmake project
- * A `spt3g/version.py` file containing VCS parameters for access in python and stored in PipelineInfo frames
- * Add a `SPT3G_VERSION` compiler definition for accessing the version string in C++ code
+* A ``cmake/Spt3gConfigVersion.cmake`` file that contains the version number to be checked when including the Spt3g libraries in another cmake project
+* A ``spt3g/version.py`` file containing VCS parameters for access in python and stored in PipelineInfo frames
+* Add a ``SPT3G_VERSION`` compiler definition for accessing the version string in C++ code
 
-When exporting the source tree to a standalone archive, run the following command in the source directory to ensure that the source version is correctly exported:
-
-.. code-block:: shell
-
-	cmake/config_export.sh
-
-Then archive the source tree using  `git archive` as usual.
+Use the ``git archive`` command or the Python ``build`` package to export the source tree to a standalone archive.
 
 Version Control Hygiene
 -----------------------

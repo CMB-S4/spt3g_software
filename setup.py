@@ -10,6 +10,7 @@ from setuptools import Extension, setup
 from setuptools.command.build_ext import build_ext
 from setuptools.command.install import install
 from setuptools.command.install_scripts import install_scripts
+from setuptools.command.sdist import sdist
 
 
 # A CMakeExtension does not need a source list
@@ -123,6 +124,20 @@ class CMakeInstall(install):
         subprocess.run(["make", "install"], cwd=build_dir, check=True)
 
 
+class ArchiveDist(sdist):
+    def run(self):
+
+        if Path(".git").exists():
+            ar = subprocess.run(
+                ["git", "archive", "HEAD", ".git_archival.txt"],
+                check=True,
+                capture_output=True,
+            )
+            subprocess.run(["tar", "-x"], input=ar.stdout, check=True)
+
+        super().run()
+
+
 # gather libraries
 clibs = []
 pdirs = {"spt3g": "cmake/package"}
@@ -142,6 +157,7 @@ setup(
         "build_ext": CMakeBuildExt,
         "install_scripts": CMakeInstallScripts,
         "install": CMakeInstall,
+        "sdist": ArchiveDist,
     },
     packages=list(pdirs),
     package_dir=pdirs,
