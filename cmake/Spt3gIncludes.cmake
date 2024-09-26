@@ -1,11 +1,11 @@
 # Convenience macros
 macro(link_python_dir)
-	execute_process(COMMAND mkdir -p ${SPT3G_LIBRARY_DIR})
+	execute_process(COMMAND mkdir -p ${SPT3G_MODULE_DIR})
 	if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/python)
-		execute_process(COMMAND ln -fsn ${CMAKE_CURRENT_SOURCE_DIR}/python ${SPT3G_LIBRARY_DIR}/${PROJECT})
+		execute_process(COMMAND ln -fsn ${CMAKE_CURRENT_SOURCE_DIR}/python ${SPT3G_MODULE_DIR}/${PROJECT})
 		list(APPEND SPT3G_PYTHON_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/python)
 	else(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/python)
-		execute_process(COMMAND ln -fsn ${CMAKE_CURRENT_SOURCE_DIR} ${SPT3G_LIBRARY_DIR}/${PROJECT})
+		execute_process(COMMAND ln -fsn ${CMAKE_CURRENT_SOURCE_DIR} ${SPT3G_MODULE_DIR}/${PROJECT})
 		list(APPEND SPT3G_PYTHON_DIRS ${CMAKE_CURRENT_SOURCE_DIR})
 	endif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/python)
 	set(SPT3G_PYTHON_DIRS ${SPT3G_PYTHON_DIRS} PARENT_SCOPE)
@@ -26,17 +26,47 @@ macro(add_spt3g_program prog_name)
 	execute_process(COMMAND ln -fsn ${prog_in} ${prog_out})
 endmacro(add_spt3g_program prog_name)
 
+macro(add_spt3g_executable prog_name)
+	add_executable(${prog_name} ${ARGN})
+	if(TARGET Python::Python)
+		target_link_libraries(${prog_name} Python::Python)
+	else()
+		target_link_libraries(${prog_name} ${Python_LIBRARIES})
+	endif()
+endmacro(add_spt3g_executable prog_name)
+
 macro(add_spt3g_library lib_name)
 	add_library(${lib_name} ${ARGN})
+	set_target_properties(${lib_name} PROPERTIES PREFIX "libspt3g-")
 	if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/include)
 		target_include_directories(${lib_name} PUBLIC
 			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 	endif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/include)
+	# remove old libraries to avoid linking against the wrong one
+	file(REMOVE ${SPT3G_MODULE_DIR}/libspt3g-${lib_name}.so)
+	file(REMOVE ${SPT3G_MODULE_DIR}/libspt3g-${lib_name}.dylib)
 	list(APPEND SPT3G_LIBRARIES ${lib_name})
 	set(SPT3G_LIBRARIES ${SPT3G_LIBRARIES} PARENT_SCOPE)
 	install(TARGETS ${lib_name} EXPORT ${PROJECT_NAME}Config LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
-	install(TARGETS ${lib_name} DESTINATION ${PYTHON_MODULE_DIR}/spt3g)
 endmacro(add_spt3g_library lib_name)
+
+macro(add_spt3g_module lib_name)
+	set(mod_name "_lib${lib_name}")
+	if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.17)
+		Python_add_library(${mod_name} MODULE WITH_SOABI ${ARGN})
+		if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+			target_link_options(${mod_name} PUBLIC "LINKER:--no-as-needed")
+		endif()
+	else()
+		add_library(${mod_name} SHARED ${ARGN})
+		set_target_properties(${mod_name} PROPERTIES PREFIX "" SUFFIX ".so")
+		target_include_directories(${mod_name} PRIVATE ${Python_INCLUDE_DIRS})
+		target_link_libraries(${mod_name} PUBLIC ${Python_LIBRARIES})
+	endif()
+	target_link_libraries(${mod_name} PUBLIC ${lib_name})
+	set_target_properties(${mod_name} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${SPT3G_MODULE_DIR})
+	install(TARGETS ${mod_name} DESTINATION ${PYTHON_MODULE_DIR}/spt3g)
+endmacro(add_spt3g_module lib_name)
 
 macro(add_spt3g_test test_name)
 	add_test(${PROJECT}/${test_name} ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/${test_name}.py)
@@ -44,7 +74,7 @@ macro(add_spt3g_test test_name)
 	set(extra_macro_args ${ARGN})
 	list(LENGTH extra_macro_args num_extra_args)
 	set_tests_properties(${PROJECT}/${test_name} PROPERTIES ENVIRONMENT
-		"PATH=${CMAKE_BINARY_DIR}/bin:$ENV{PATH};PYTHONPATH=${CMAKE_BINARY_DIR}:$ENV{PYTHONPATH};LD_LIBRARY_PATH=${CMAKE_BINARY_DIR}/spt3g:$ENV{LD_LIBRARY_PATH}")
+		"PATH=${CMAKE_BINARY_DIR}/bin:$ENV{PATH};PYTHONPATH=${CMAKE_BINARY_DIR}:$ENV{PYTHONPATH};LD_LIBRARY_PATH=${CMAKE_BINARY_DIR}/lib:$ENV{LD_LIBRARY_PATH}")
 	if (${num_extra_args} GREATER 0)
 		list(GET extra_macro_args 0 test_labels)
 		set_tests_properties(${PROJECT}/${test_name} PROPERTIES LABELS ${test_labels})
@@ -72,10 +102,10 @@ macro(add_spt3g_test_program test_name)
 		file(WRITE ${PROJECT_BINARY_DIR}/Spt3gTestMain.cxx "#include <G3Test.h>\nG3TEST_MAIN_IMPL\n")
 	endif(NOT EXISTS ${PROJECT_BINARY_DIR}/Spt3gTestMain.cxx)
 	
-	add_executable(${PROJECT}-${test_name}
-	               ${PROJECT_BINARY_DIR}/Spt3gTestMain.cxx
-	               ${ADD_TEST_PROGRAM_SOURCE_FILES}
-	               )
+	add_spt3g_executable(${PROJECT}-${test_name}
+	                     ${PROJECT_BINARY_DIR}/Spt3gTestMain.cxx
+	                     ${ADD_TEST_PROGRAM_SOURCE_FILES}
+	                     )
 	target_include_directories(${PROJECT}-${test_name} PRIVATE ${CMAKE_SOURCE_DIR}/cmake)
 	
 	foreach(USED_PROJECT ${ADD_TEST_PROGRAM_USE_PROJECTS})

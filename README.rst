@@ -21,7 +21,7 @@ Minimum versions:
 
 	- GCC >= 5.0 or clang >= 3.4
 	- Boost >= 1.48
-	- cmake >= 3.5
+	- cmake >= 3.12
 	- Python >= 2.7 (although pre-Python-3 support is best-effort)
 
 On Ubuntu/Debian, you can install the non-Python dependencies, including the optional ones, by doing:
@@ -67,6 +67,21 @@ To build:
 	cmake ..
 	make
 
+This will collect all of the necessary python tools into the ``build/spt3g`` directory, which can then be imported in python.  To set the appropriate python environment *without* installing the python package, use the shell script in ``build/env_shell.sh`` to run commands that know where to find the ``spt3g`` package and libraries:
+
+.. code-block:: shell
+
+	./env-shell.sh python my_script.py  # to run a python script
+	./env-shell.sh ipython  # to start an ipython session
+
+Alternatively, for users that only use a single build environment, set the following environment variables (e.g. in your ``.bash_profile`` file):
+
+.. code-block:: shell
+
+	export SPT3G_SOFTWARE_BUILD_PATH=path/to/spt3g_software/build
+	export PYTHONPATH=$SPT3G_SOFTWARE_BUILD_PATH:$PYTHONPATH
+	export LD_LIBRARY_PATH=$SPT3G_SOFTWARE_BUILD_PATH/lib:$LD_LIBRARY_PATH
+	export PATH=$SPT3G_SOFTWARE_BUILD_PATH/bin:$PATH
 
 To build the documentation in the build directory type:
 

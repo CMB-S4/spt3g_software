@@ -1,5 +1,4 @@
-from spt3g.core.load_pybindings import load_pybindings
-load_pybindings(__name__, __path__)
+from .._libcalibration import *
 
 from . import build_cal_frames
 

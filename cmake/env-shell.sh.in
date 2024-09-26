@@ -22,7 +22,7 @@ if [ "$SPT3G_SOFTWARE_PATH" != "@CMAKE_SOURCE_DIR@" ]; then
 	# Add binaries to PATH, relative to this script to allow files to be movable
 	SPT3G_BUILD_ROOT=$(cd `dirname $0`; pwd)
 	export PATH=${SPT3G_BUILD_ROOT}/bin:$PATH
-	export LD_LIBRARY_PATH=${SPT3G_BUILD_ROOT}/spt3g:$LD_LIBRARY_PATH
+	export LD_LIBRARY_PATH=${SPT3G_BUILD_ROOT}/lib:$LD_LIBRARY_PATH
 
 	# And python bits...
 	export PYTHONPATH=${SPT3G_BUILD_ROOT}:$PYTHONPATH
