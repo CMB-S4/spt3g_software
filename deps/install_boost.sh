@@ -11,10 +11,7 @@ echo "Wheel script directory = ${scriptdir}"
 if [ -n "$1" ]; then
     PREFIX=$1
 else
-    PREFIX=${scriptdir}/deps
-    if [ ! -e ${PREFIX} ]; then
-        mkdir -p ${PREFIX}
-    fi
+    PREFIX=${scriptdir}
     cd ${PREFIX}
 fi
 

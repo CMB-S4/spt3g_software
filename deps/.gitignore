@@ -1,0 +1,4 @@
+# ignore everything...
+*
+# ...except these files
+!install_boost.sh

@@ -80,12 +80,12 @@ jobs:
           CIBW_BUILD: ${{ matrix.build }}
           CIBW_BEFORE_ALL_LINUX: yum install -y bzip2-devel flac-devel netcdf-devel
           CIBW_BEFORE_ALL_MACOS: brew install bzip2 flac netcdf
-          CIBW_BEFORE_BUILD: ./wheel/install_boost.sh
+          CIBW_BEFORE_BUILD: ./deps/install_boost.sh
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
-            DYLD_LIBRARY_PATH=$PWD/wheel/deps/lib delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}
+            DYLD_LIBRARY_PATH=$PWD/deps/lib delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}
           CIBW_BUILD_VERBOSITY: 1
           CIBW_ENVIRONMENT: >
-            CMAKE_BUILD_PARALLEL_LEVEL=4 CMAKE_PREFIX_PATH=$PWD/wheel/deps
+            CMAKE_BUILD_PARALLEL_LEVEL=4 CMAKE_PREFIX_PATH=$PWD/deps
           CIBW_TEST_COMMAND: ctest --test-dir {package}/build --output-on-failure
 
       - name: Upload artifacts
