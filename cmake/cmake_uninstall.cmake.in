@@ -27,7 +27,7 @@ ENDFOREACH(file)
 
 # remove project-specific directories which should no longer contain anything
 set(dirs_to_clean
-	"@CMAKE_INSTALL_PREFIX@/share/spt3g"
+	"@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_DIR@"
 	"@CMAKE_INSTALL_PREFIX@/@INCLUDE_INSTALL_DIR@"
 )
 FOREACH(dir ${dirs_to_clean})
