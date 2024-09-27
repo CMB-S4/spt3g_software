@@ -2,9 +2,9 @@ file(REMOVE ${CMAKE_BINARY_DIR}/cmake/Spt3gConfigVersion.cmake)
 
 if (NOT SPT3G_VERSION)
 	# Check VERSION file (sensible in exported source tree)
-	file(READ ${CMAKE_SOURCE_DIR}/VERSION GIT_VERSION)
-	string(REGEX REPLACE "\\$Version: (.*)\\$" "\\1" GIT_VERSION "${GIT_VERSION}")
-	string(REPLACE "$Version$" "" GIT_VERSION "${GIT_VERSION}")
+	file(READ ${CMAKE_SOURCE_DIR}/.git_archival.txt GIT_VERSION)
+	string(REGEX REPLACE ".*describe-name: (.*)$" "\\1" GIT_VERSION "${GIT_VERSION}")
+	string(REGEX REPLACE "\\$Format:.*" "" GIT_VERSION "${GIT_VERSION}")
 	string(STRIP "${GIT_VERSION}" GIT_VERSION)
 
 	if (NOT GIT_VERSION)

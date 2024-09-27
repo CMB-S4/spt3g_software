@@ -65,22 +65,38 @@ macro(add_spt3g_module lib_name)
 	endif()
 	target_link_libraries(${mod_name} PUBLIC ${lib_name})
 	set_target_properties(${mod_name} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${SPT3G_MODULE_DIR})
-	install(TARGETS ${mod_name} DESTINATION ${PYTHON_MODULE_DIR}/spt3g)
 endmacro(add_spt3g_module lib_name)
 
 macro(add_spt3g_test test_name)
-	add_test(${PROJECT}/${test_name} ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/${test_name}.py)
+	if(DEFINED ENV{CIBUILDWHEEL})
+		# The cibuildwheel builder runs tests in a separate virtual
+		# environment with its own python executable that is not known
+		# ahead of time.  Detect this, and assume that the correct
+		# executable is already on the PATH.
+		set(TEST_PYEXEC python)
+	else()
+		set(TEST_PYEXEC ${Python_EXECUTABLE})
+	endif()
+	add_test(${PROJECT}/${test_name} ${TEST_PYEXEC} ${CMAKE_CURRENT_SOURCE_DIR}/tests/${test_name}.py)
 
 	set(extra_macro_args ${ARGN})
 	list(LENGTH extra_macro_args num_extra_args)
-	set_tests_properties(${PROJECT}/${test_name} PROPERTIES ENVIRONMENT
-		"PATH=${CMAKE_BINARY_DIR}/bin:$ENV{PATH};PYTHONPATH=${CMAKE_BINARY_DIR}:$ENV{PYTHONPATH};LD_LIBRARY_PATH=${CMAKE_BINARY_DIR}/lib:$ENV{LD_LIBRARY_PATH}")
+	if(NOT DEFINED ENV{CIBUILDWHEEL})
+		# install wheel before testing
+		set_tests_properties(${PROJECT}/${test_name} PROPERTIES ENVIRONMENT
+			"PATH=${CMAKE_BINARY_DIR}/bin:$ENV{PATH};PYTHONPATH=${CMAKE_BINARY_DIR}:$ENV{PYTHONPATH};LD_LIBRARY_PATH=${CMAKE_BINARY_DIR}/lib:$ENV{LD_LIBRARY_PATH}")
+	endif()
 	if (${num_extra_args} GREATER 0)
 		list(GET extra_macro_args 0 test_labels)
 		set_tests_properties(${PROJECT}/${test_name} PROPERTIES LABELS ${test_labels})
 	endif ()
 endmacro(add_spt3g_test test_name)
 
+if(DEFINED ENV{CIBUILDWHEEL})
+	# Can't compile binaries against libpython in CI
+	macro(add_spt3g_test_program test_name)
+	endmacro(add_spt3g_test_program test_name)
+else()
 macro(add_spt3g_test_program test_name)
 	cmake_parse_arguments("ADD_TEST_PROGRAM"
 	                      "" # options
@@ -112,3 +128,4 @@ macro(add_spt3g_test_program test_name)
 		target_link_libraries(${PROJECT}-${test_name} ${USED_PROJECT})
 	endforeach(USED_PROJECT ${ADD_TEST_PROGRAM_USE_PROJECTS})
 endmacro(add_spt3g_test_program test_name)
+endif()

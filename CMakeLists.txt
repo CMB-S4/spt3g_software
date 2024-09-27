@@ -40,7 +40,13 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # Find all the Boost and Python libraries
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
-find_package(Python COMPONENTS Interpreter Development REQUIRED)
+
+if(DEFINED ENV{CIBUILDWHEEL})
+	# Can't compile binaries against libpython in CI
+	find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
+else()
+	find_package(Python COMPONENTS Interpreter Development REQUIRED)
+endif()
 
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
@@ -91,7 +97,7 @@ configure_file(${CMAKE_SOURCE_DIR}/cmake/env-shell.sh.in ${CMAKE_BINARY_DIR}/env
 execute_process(COMMAND mkdir -p ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 execute_process(COMMAND mkdir -p ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 execute_process(COMMAND mkdir -p ${SPT3G_MODULE_DIR})
-execute_process(COMMAND ln -fsn ${CMAKE_SOURCE_DIR}/cmake/init.py ${SPT3G_MODULE_DIR}/__init__.py)
+execute_process(COMMAND ln -fsn ${CMAKE_SOURCE_DIR}/cmake/package/__init__.py ${SPT3G_MODULE_DIR}/__init__.py)
 
 set(BUILD_PROJECTS "${BUILD_PROJECTS}" CACHE STRING "The subset of available projects to actually build")
 if(NOT "${BUILD_PROJECTS}" STREQUAL "")
@@ -105,16 +111,6 @@ if(${USE_PROJECT_LIST} AND WILL_BUILD_CORE EQUAL -1)
 	message(STATUS "Automatically adding the core project to the manually specified BUILD_PROJECTS list")
 	list(APPEND BUILD_PROJECTS core)
 endif(${USE_PROJECT_LIST} AND WILL_BUILD_CORE EQUAL -1)
-
-# If not set by the user, ask python where it keeps modules
-if(NOT PYTHON_MODULE_DIR)
-	EXECUTE_PROCESS (COMMAND ${Python_EXECUTABLE} -c
-		"import sysconfig; print(sysconfig.get_path(\"platlib\"))"
-		OUTPUT_VARIABLE PYTHON_MODULE_DIR
-		OUTPUT_STRIP_TRAILING_WHITESPACE
-	)
-endif(NOT PYTHON_MODULE_DIR)
-message(STATUS "Python modules will be installed to ${PYTHON_MODULE_DIR}")
 
 include(GNUInstallDirs)
 if(APPLE)
@@ -161,11 +157,13 @@ if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.17)
 endif(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.17)
 
 # Target for version string
-add_custom_target(version ALL
-	COMMAND sh ${CMAKE_SOURCE_DIR}/cmake/getvers.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}
-	BYPRODUCTS ${CMAKE_BINARY_DIR}/spt3g/version.py ${CMAKE_BINARY_DIR}/pyproject.toml
-	COMMENT "Regenerating VCS version information"
-)
+if(NOT PIP_SPT3G_VERSION_FILE)
+	add_custom_target(version ALL
+		COMMAND sh ${CMAKE_SOURCE_DIR}/cmake/getvers.sh ${CMAKE_SOURCE_DIR} ${SPT3G_MODULE_DIR}/version.py
+		BYPRODUCTS ${SPT3G_MODULE_DIR}/version.py
+		COMMENT "Regenerating VCS version information"
+	)
+endif()
 
 # Add mechanism to make a tarball for the grid
 add_custom_target(tarball
@@ -187,37 +185,6 @@ add_custom_target(docs
 
 # Export the phony library target
 INSTALL(TARGETS spt3g EXPORT ${PROJECT_NAME}Config)
-
-# The python module
-# First, one-off files
-INSTALL(FILES ${CMAKE_SOURCE_DIR}/cmake/init.py DESTINATION ${PYTHON_MODULE_DIR}/spt3g RENAME __init__.py)
-INSTALL(FILES ${CMAKE_BINARY_DIR}/spt3g/version.py DESTINATION ${PYTHON_MODULE_DIR}/spt3g)
-
-# Python scripts
-foreach(dir ${SPT3G_PYTHON_DIRS})
-	get_filename_component(dir_name "${dir}" NAME)
-	if("${dir_name}" STREQUAL "python")
-		# If the directory name is "python", need to walk up the path to find out what it should be called.
-		get_filename_component(dir_name "${dir}" DIRECTORY)
-		get_filename_component(lib "${dir_name}" NAME)
-		# The INSTALL conmmand does not support the RENAME option in directory mode, which makes this a pain.
-		file(GLOB_RECURSE project_py_files LIST_DIRECTORIES false RELATIVE ${dir} ${dir}/*)
-		foreach(file ${project_py_files})
-			get_filename_component(subdir "${file}" DIRECTORY)
-			if(file MATCHES ".*pyc" OR file MATCHES ".*pyo")
-				continue() # skip existing compiled python files
-			endif(file MATCHES ".*pyc" OR file MATCHES ".*pyo")
-			install(FILES "${dir}/${file}" DESTINATION ${PYTHON_MODULE_DIR}/spt3g/${lib}/${subdir})
-		endforeach(file ${project_py_files})
-	else("${dir_name}" STREQUAL "python")
-		install(DIRECTORY ${dir} DESTINATION ${PYTHON_MODULE_DIR}/spt3g/
-			PATTERN "*.pyc" EXCLUDE # skip existing compiled python files
-			PATTERN "*.pyo" EXCLUDE)
-	endif("${dir_name}" STREQUAL "python")
-endforeach(dir SPT3G_PYTHON_DIRS)
-# Ensure that python scripts are precompiled, in case they will be executed from a read-only perspective
-install(CODE "MESSAGE(STATUS \"Pre-compiling python scripts in ${PYTHON_MODULE_DIR}/spt3g/\")
-EXECUTE_PROCESS(COMMAND ${Python_EXECUTABLE} -O -m compileall -fq ${PYTHON_MODULE_DIR}/spt3g/)")
 
 # The exectutables
 foreach(program ${SPT3G_PROGRAMS})
