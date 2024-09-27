@@ -28,10 +28,10 @@ This depends on Boost and cmake, as well as the usual Python packages. Some addi
 
 Minimum versions:
 
-	- GCC >= 5.0 or clang >= 3.4
-	- Boost >= 1.48
-	- cmake >= 3.12
-	- Python >= 2.7 (although pre-Python-3 support is best-effort)
+- GCC >= 5.0 or clang >= 3.4
+- Boost >= 1.48
+- cmake >= 3.12
+- Python >= 2.7 (although pre-Python-3 support is best-effort)
 
 On Ubuntu/Debian, you can install the non-Python dependencies, including the optional ones, by doing:
 
@@ -47,10 +47,10 @@ On RHEL-type systems (SL, CentOS, etc.), do this:
 	
 If your system defaults to Python 2, but you wish to use Python 3, please do the following:
 
-	1. Install Python 3 *from the system package manager*
-	2. Make sure the python-3 version of the Boost library is installed (on Ubuntu, this is part of the standard boost-python package referenced above)
-	3. When you run cmake below, pass ``-DPython_EXECUTABLE=`which python3```
-	
+1. Install Python 3 *from the system package manager*
+2. Make sure the python-3 version of the Boost library is installed (on Ubuntu, this is part of the standard boost-python package referenced above)
+3. When you run cmake below, pass ``-DPython_EXECUTABLE=`which python3```
+
 On any system, this software requires numpy and scipy (hard requirements), plus astropy and healpy (optional).
 
 Setup on RHEL6
