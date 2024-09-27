@@ -78,7 +78,7 @@ jobs:
       run: ctest -C $BUILD_TYPE --output-on-failure
 
     - name: Docs
-      if: github.ref_name == 'master' && matrix.docs == 'true'
+      if: github.ref_name == 'master' && matrix.docs
       working-directory: ${{runner.workspace}}/${{matrix.toolset}}
       shell: bash
       # Build docs
@@ -88,14 +88,14 @@ jobs:
         cmake --build . --config $BUILD_TYPE --target docs
 
     - name: Checkout gh_pages
-      if: github.ref_name == 'master' && matrix.docs == 'true'
+      if: github.ref_name == 'master' && matrix.docs
       uses: actions/checkout@v4
       with:
         ref: gh-pages
         path: gh-pages
 
     - name: Commit docs
-      if: github.ref_name == 'master' && matrix.docs == 'true'
+      if: github.ref_name == 'master' && matrix.docs
       shell: bash
       run: |
         cp -r ${{runner.workspace}}/${{matrix.toolset}}/docs/* gh-pages/
