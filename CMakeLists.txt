@@ -23,20 +23,19 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Convenience variables
-set(SPT3G_LIBRARY_DIR ${CMAKE_BINARY_DIR}/spt3g)
+set(SPT3G_MODULE_DIR ${CMAKE_BINARY_DIR}/spt3g)
 set(SPT3G_INCLUDE_INSTALL_DIR "include/spt3g")
 
 include(Spt3gIncludes)
 
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${SPT3G_LIBRARY_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
-# Sneak in a namespace-like prefix for all libraries
-set(CMAKE_SHARED_LIBRARY_PREFIX "libspt3g-")
 
 # Raise every warning by default
 # (use target-specific options to disable particular warnings)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Find all the Boost and Python libraries
 set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -60,9 +59,19 @@ if (SPT3G_VERSION)
 endif()
 
 target_compile_features(spt3g INTERFACE cxx_std_11)
-target_include_directories(spt3g INTERFACE ${Boost_INCLUDE_DIR} ${Python_INCLUDE_DIRS})
-target_link_libraries(spt3g INTERFACE Threads::Threads ${Boost_LIBRARIES} ${Python_LIBRARIES})
+target_include_directories(spt3g INTERFACE ${Boost_INCLUDE_DIR})
+target_link_libraries(spt3g INTERFACE Threads::Threads ${Boost_LIBRARIES})
 target_include_directories(spt3g INTERFACE $<INSTALL_INTERFACE:${SPT3G_INCLUDE_INSTALL_DIR}>)
+
+# Python bindings
+if(TARGET Python::Module)
+	target_link_libraries(spt3g INTERFACE Python::Module)
+else()
+	target_include_directories(spt3g INTERFACE ${Python_INCLUDE_DIRS})
+	if(APPLE)
+		target_link_options(spt3g INTERFACE "LINKER:-undefined,dynamic_lookup")
+	endif()
+endif()
 
 # Work around yet more bugs in GCC 4.4, this time with C++ 11 support
 # Also increase maximum number of arguments in python bindings
@@ -81,7 +90,8 @@ configure_file(${CMAKE_SOURCE_DIR}/cmake/env-shell.sh.in ${CMAKE_BINARY_DIR}/env
 # Set up python importability
 execute_process(COMMAND mkdir -p ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 execute_process(COMMAND mkdir -p ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-execute_process(COMMAND ln -fsn ${CMAKE_SOURCE_DIR}/cmake/init.py ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/__init__.py)
+execute_process(COMMAND mkdir -p ${SPT3G_MODULE_DIR})
+execute_process(COMMAND ln -fsn ${CMAKE_SOURCE_DIR}/cmake/init.py ${SPT3G_MODULE_DIR}/__init__.py)
 
 set(BUILD_PROJECTS "${BUILD_PROJECTS}" CACHE STRING "The subset of available projects to actually build")
 if(NOT "${BUILD_PROJECTS}" STREQUAL "")
@@ -112,7 +122,7 @@ if(APPLE)
 	set(CMAKE_MACOSX_RPATH TRUE)
 	set(CMAKE_SKIP_BUILD_RPATH FALSE)
 	set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-	set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${PYTHON_MODULE_DIR}/spt3g")
+	set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
 	set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 endif(APPLE)
 
