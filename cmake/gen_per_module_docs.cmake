@@ -17,6 +17,7 @@ foreach(d ${cmake_projects})
 		string(RANDOM LENGTH ${pname_len} ALPHABET - pname_header)
 		file(WRITE "${CMAKE_SOURCE_DIR}/doc/moddoc_${pname}.rst" "${pname_header}\n${pname}\n${pname_header}\n\n")
 	endif()
-	execute_process(COMMAND ${Python_EXECUTABLE} ${CMAKE_SOURCE_DIR}/core/bin/spt3g-inspect "spt3g.${pname}" OUTPUT_VARIABLE MOD_DOC)
+	execute_process(COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}:$ENV{PYTHONPATH} LD_LIBRARY_PATH=${CMAKE_BINARY_DIR}/lib:$ENV{LD_LIBRARY_PATH}
+		${Python_EXECUTABLE} ${CMAKE_SOURCE_DIR}/core/bin/spt3g-inspect "spt3g.${pname}" OUTPUT_VARIABLE MOD_DOC)
 	file(APPEND "${CMAKE_SOURCE_DIR}/doc/moddoc_${pname}.rst" "${MOD_DOC}")
 endforeach()

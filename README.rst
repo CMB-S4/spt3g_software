@@ -96,7 +96,7 @@ To build the documentation in the build directory type:
 
 .. code-block:: shell
 
-	./env-shell.sh make docs
+	make docs
 
 This will construct an html version of the documentation.  This builds the documentation in the build/docs folder.  Open build/docs/index.html in your favorite web browser.  You should at least read the quick start portion of the documentation before getting started.
 
@@ -109,12 +109,14 @@ For various reasons it may be useful to install the software after building, ins
 * ``CMAKE_INSTALL_PREFIX``, which defaults to ``/usr/local`` is used as the root directory for installing all non-python components (header files, cmake export scripts, etc.).  This variable is frequently useful when installing into a python virtual environment.
 * ``CMAKE_BUILD_PARALLEL_LEVEL`` is an environment variable (*not* a cmake option) used to control how many parallel processes are used to compile the shared libraries.  This option provides the same behavior as running ``make`` with the ``-j`` flag (e.g. ``make -j4``).
 
+An uninstall target is also provided, so running ``make uninstall`` from the build directory should remove all files created by a previous ``make install``. 
+
 Installation with Pip
 ---------------------
 
 Use ``pip`` to install the python package.  Ensure that you use the appropriate options as necessary for your installation, e.g. ``--user`` or ``--prefix``.
 
-For pre-built wheels hosted on PyPI, available for most Linux x86_64, macOS x86_64 and macOS arm64 platforms, simply install the package without any additional options:
+For pre-built wheels hosted on `PyPI`_, available for most Linux x86_64, macOS x86_64 and macOS arm64 platforms, simply install the package without any additional options:
 
 .. code-block:: shell
 
@@ -151,6 +153,8 @@ To run the test suite on the compiled package, you must have ``cmake``, and in p
 .. code-block:: shell
 
 	ctest --test-dir path/to/spt3g_software/build --output-on-failure
+
+.. _PyPI: https://pypi.org/p/spt3g
 
 
 Release Version Tracking
