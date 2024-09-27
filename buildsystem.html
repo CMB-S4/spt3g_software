@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Build System &#8212; SPT3G Software  documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="_static/nature.css?v=8fc2db88" />
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=b3ba4146"></script>
-    <script src="_static/doctools.js?v=888ff710"></script>
-    <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="stylesheet" type="text/css" href="_static/nature.css?v=0f882399" />
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Style Guide" href="styleguide.html" />
     <link rel="prev" title="Auto-documentation" href="autodoc.html" /> 
   </head><body>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -39,9 +39,9 @@
           <div class="body" role="main">
             
   <section id="build-system">
-<h1>Build System<a class="headerlink" href="#build-system" title="Permalink to this heading">¶</a></h1>
+<h1>Build System<a class="headerlink" href="#build-system" title="Link to this heading">¶</a></h1>
 <section id="cmake-overview">
-<h2>CMake Overview<a class="headerlink" href="#cmake-overview" title="Permalink to this heading">¶</a></h2>
+<h2>CMake Overview<a class="headerlink" href="#cmake-overview" title="Link to this heading">¶</a></h2>
 <p>We use cmake as a build system, which provides a number of nice features for finding dependencies and managing the build process. cmake generates Makefiles (or XCode projects) from files called <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code> in each directory. cmake in general is designed to perform so-called “out-of-tree” builds, which keep the source directories unmodified by object files. The process for doing this is something like this:</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span>build
 git<span class="w"> </span>clone<span class="w"> </span>https://github.com/CMB-S4/spt3g_software<span class="w"> </span>src
@@ -61,10 +61,10 @@ make
 </div></blockquote>
 </section>
 <section id="adding-a-project">
-<h2>Adding a Project<a class="headerlink" href="#adding-a-project" title="Permalink to this heading">¶</a></h2>
+<h2>Adding a Project<a class="headerlink" href="#adding-a-project" title="Link to this heading">¶</a></h2>
 <p>To add another project to the repository (corresponding to a python module, e.g. <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">spt3g</span> <span class="pre">import</span> <span class="pre">newthing</span></code>), make a new directory at the root of the repository. This directory must contain a file called CMakeLists.txt.</p>
 <section id="adding-python-code">
-<h3>Adding Python code<a class="headerlink" href="#adding-python-code" title="Permalink to this heading">¶</a></h3>
+<h3>Adding Python code<a class="headerlink" href="#adding-python-code" title="Link to this heading">¶</a></h3>
 <p>To include Python code, include a line like the following in your CMakeLists.txt:</p>
 <div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">execute_process</span><span class="p">(</span><span class="s">COMMAND</span><span class="w"> </span><span class="s">ln</span><span class="w"> </span><span class="s">-fsn</span><span class="w"> </span><span class="o">${</span><span class="nv">CMAKE_CURRENT_SOURCE_DIR</span><span class="o">}</span><span class="s">/python</span><span class="w"> </span><span class="o">${</span><span class="nv">CMAKE_LIBRARY_OUTPUT_DIRECTORY</span><span class="o">}</span><span class="s">/newthing</span><span class="p">)</span>
 </pre></div>
@@ -72,7 +72,7 @@ make
 <p>Here, <code class="docutils literal notranslate"><span class="pre">newthing</span></code> is the name of your project (which <strong>must</strong> match the directory name) and <code class="docutils literal notranslate"><span class="pre">python</span></code> is the name of the directory inside your project containing the Python source code. If your project contains only Python code, this need not be a subdirectory and you can remove the “/python”.</p>
 </section>
 <section id="adding-a-c-library">
-<h3>Adding a C++ library<a class="headerlink" href="#adding-a-c-library" title="Permalink to this heading">¶</a></h3>
+<h3>Adding a C++ library<a class="headerlink" href="#adding-a-c-library" title="Link to this heading">¶</a></h3>
 <p>To add a C++ component to your project, add some lines like the following:</p>
 <div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">add_library</span><span class="p">(</span><span class="s">newthing</span><span class="w"> </span><span class="s">SHARED</span>
 <span class="w">        </span><span class="s">src/MyNewThing.cxx</span><span class="w"> </span><span class="s">src/python.cxx</span>
@@ -97,7 +97,7 @@ make
 <p>This is sufficient for most uses (with “newthing” replaced by the name of the project).</p>
 </section>
 <section id="adding-a-c-executable">
-<h3>Adding a C++ executable<a class="headerlink" href="#adding-a-c-executable" title="Permalink to this heading">¶</a></h3>
+<h3>Adding a C++ executable<a class="headerlink" href="#adding-a-c-executable" title="Link to this heading">¶</a></h3>
 <p>You can also add C++ executables. Usually, there is not much reason to do this since everything is designed to be interacted with by Python. A few projects contain small standalone executables nonetheless, typically as test programs.</p>
 <div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">add_executable</span><span class="p">(</span><span class="s">newthingexec</span><span class="w"> </span><span class="s">MyNewThingExecutable.cxx</span><span class="p">)</span>
 <span class="nb">target_link_libraries</span><span class="p">(</span><span class="s">newthingexec</span><span class="w"> </span><span class="s">core</span><span class="w"> </span><span class="s">newthing</span><span class="p">)</span>
@@ -108,11 +108,11 @@ make
 <p>The <code class="docutils literal notranslate"><span class="pre">target_link_libraries</span></code> command works as in <a class="reference internal" href="#adding-a-c-library">Adding a C++ library</a> above. The first command produces an executable named <code class="docutils literal notranslate"><span class="pre">newthingexec</span></code> that will be placed in the <code class="docutils literal notranslate"><span class="pre">bin</span></code> subdirectory of the build directory. The <code class="docutils literal notranslate"><span class="pre">list</span></code> and <code class="docutils literal notranslate"><span class="pre">set</span></code> commands inform other parts of the build system that this executable will exist, so that it can be included during installation.</p>
 </section>
 <section id="adding-tests">
-<h3>Adding tests<a class="headerlink" href="#adding-tests" title="Permalink to this heading">¶</a></h3>
+<h3>Adding tests<a class="headerlink" href="#adding-tests" title="Link to this heading">¶</a></h3>
 <p>Tests can be written in either Python or C++. Some tests must be written in one language  in order to test interfaces specific to it; otherwise, most tests are currently written in python.</p>
 <p>The simplest way to run the full set of tests is by executing <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">test</span></code>. This does not allow for much flexibility, however, so in cases where more control is desirable, one should run tests using the <code class="docutils literal notranslate"><span class="pre">ctest</span></code> driver tool directly. Commonly useful options are <code class="docutils literal notranslate"><span class="pre">ctest</span> <span class="pre">--output-on-failure</span></code> which will show a test’s output when it fails, which is frequently useful for understanding what the failure was in order to fix it, and <code class="docutils literal notranslate"><span class="pre">ctest</span> <span class="pre">-R</span> <span class="pre">&lt;regex&gt;</span></code> which will run any tests any part of whose name is matches the given regular expression, which is handy for running just a particular test to debug it, without having to wait while the entire test suite runs each time.</p>
 <section id="python-tests">
-<h4>Python Tests<a class="headerlink" href="#python-tests" title="Permalink to this heading">¶</a></h4>
+<h4>Python Tests<a class="headerlink" href="#python-tests" title="Link to this heading">¶</a></h4>
 <p>Python tests should be placed in a <code class="docutils literal notranslate"><span class="pre">tests</span></code> subdirectory of the project. Each test must then also be declared in the project’s <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code>, so that <code class="docutils literal notranslate"><span class="pre">cmake</span></code> will know to include it in the list of tests to be run by <code class="docutils literal notranslate"><span class="pre">ctest</span></code> or the <code class="docutils literal notranslate"><span class="pre">test</span></code> build target. This is done by using the <code class="docutils literal notranslate"><span class="pre">add_spt3g_test</span></code> macro:</p>
 <div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">add_spt3g_test</span><span class="p">(</span><span class="s">test_foo</span><span class="p">)</span>
 </pre></div>
@@ -121,7 +121,7 @@ make
 <p>The contents of a Python test script can be anything; the script is simply run, and if its exit value is 0, it is considered to have passed. Any non-zero exit status will be taken to indicate a failure. The simplest mechanism to do tests is to just write code with <code class="docutils literal notranslate"><span class="pre">assert</span></code> statements which check that properties of interest hold.</p>
 </section>
 <section id="c-tests">
-<h4>C++ Tests<a class="headerlink" href="#c-tests" title="Permalink to this heading">¶</a></h4>
+<h4>C++ Tests<a class="headerlink" href="#c-tests" title="Link to this heading">¶</a></h4>
 <p>C++ tests consist of one or more implementation files which declare tests, organized into test groups. The implementation files for a test are linked together into a test executable.</p>
 <p>Like Python tests, C++ tests must be declared in the project’s CMake script, which is done using the <code class="docutils literal notranslate"><span class="pre">add_spt3g_test_program</span></code> command:</p>
 <div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">add_spt3g_test_program</span><span class="p">(</span><span class="s">test</span>
@@ -184,7 +184,7 @@ FAIL
 </section>
 </section>
 <section id="mixing-c-and-python">
-<h2>Mixing C++ and Python<a class="headerlink" href="#mixing-c-and-python" title="Permalink to this heading">¶</a></h2>
+<h2>Mixing C++ and Python<a class="headerlink" href="#mixing-c-and-python" title="Link to this heading">¶</a></h2>
 <p>If your project has both a C++ and a Python component, place the following into your <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">spt3g.core.load_pybindings</span> <span class="kn">import</span> <span class="n">load_pybindings</span>
 <span class="n">load_pybindings</span><span class="p">(</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">__path__</span><span class="p">)</span>
@@ -199,7 +199,7 @@ FAIL
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
   <div>
     <h3><a href="index.html">Table of Contents</a></h3>
@@ -240,7 +240,7 @@ FAIL
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
@@ -248,13 +248,13 @@ FAIL
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -272,7 +272,7 @@ FAIL
     </div>
     <div class="footer" role="contentinfo">
     &#169; Copyright .
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.0.2.
     </div>
   </body>
 </html>

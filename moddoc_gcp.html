@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>gcp &#8212; SPT3G Software  documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="_static/nature.css?v=8fc2db88" />
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=b3ba4146"></script>
-    <script src="_static/doctools.js?v=888ff710"></script>
-    <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="stylesheet" type="text/css" href="_static/nature.css?v=0f882399" />
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="maps" href="moddoc_maps.html" />
     <link rel="prev" title="examples" href="moddoc_examples.html" /> 
   </head><body>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -39,113 +39,10 @@
           <div class="body" role="main">
             
   <section id="gcp">
-<h1>gcp<a class="headerlink" href="#gcp" title="Permalink to this heading">¶</a></h1>
+<h1>gcp<a class="headerlink" href="#gcp" title="Link to this heading">¶</a></h1>
 <p>The GCP package contains tools for interacting with the telescope control system (GCP). This includes both offline tools for processing data products from the GCP (ARCFileReader) and associated container classes (ACUStatus, TrackerStatus), as well as online tools designed for coordination of data taking with the control system (the various data tees and signalling modules).</p>
-<section id="frame-objects-in-spt3g-gcp">
-<h2>Frame Objects in spt3g.gcp<a class="headerlink" href="#frame-objects-in-spt3g-gcp" title="Permalink to this heading">¶</a></h2>
-<ul class="simple">
-<li><p><a class="reference internal" href="#spt3g-gcp-acustatus">spt3g.gcp.ACUStatus</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-acustatusvector">spt3g.gcp.ACUStatusVector</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-trackerpointing">spt3g.gcp.TrackerPointing</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-trackerstatus">spt3g.gcp.TrackerStatus</a></p></li>
-</ul>
-<section id="spt3g-gcp-acustatus">
-<span id="id1"></span><h3>spt3g.gcp.ACUStatus<a class="headerlink" href="#spt3g-gcp-acustatus" title="Permalink to this heading">¶</a></h3>
-<p>ACU Status information, as reported by the ACU</p>
-<dl>
-<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">ACUStatus()</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">ACUStatus(</span> <span class="pre">(ACUStatus)arg2)</span></code></p>
-</dd>
-</dl>
-<p><em>Members:</em></p>
-<ul class="simple">
-<li><p><strong>time</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>az_pos</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>el_pos</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>az_rate</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>el_rate</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>px_checksum_error_count</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>px_resync_count</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>px_resync_timeout_count</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>px_timeout_count</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>restart_count</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>px_resyncing</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>state</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>acu_status</strong>: No Doc (Shame!)</p></li>
-</ul>
-</section>
-<section id="spt3g-gcp-acustatusvector">
-<span id="id2"></span><h3>spt3g.gcp.ACUStatusVector<a class="headerlink" href="#spt3g-gcp-acustatusvector" title="Permalink to this heading">¶</a></h3>
-<p>Array of ACUStatus objects, usually time-ordered</p>
-<dl>
-<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">ACUStatusVector()</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">ACUStatusVector(</span> <span class="pre">(object)arg2)</span></code></p>
-</dd>
-</dl>
-<p><em>Methods:</em></p>
-<p id="spt3g-gcp-acustatusvector-append"><strong>spt3g.gcp.ACUStatusVector.append</strong></p>
-<p><code class="docutils literal notranslate"><span class="pre">append(</span> <span class="pre">(ACUStatusVector)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
-<p id="spt3g-gcp-acustatusvector-extend"><strong>spt3g.gcp.ACUStatusVector.extend</strong></p>
-<p><code class="docutils literal notranslate"><span class="pre">extend(</span> <span class="pre">(ACUStatusVector)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
-</section>
-<section id="spt3g-gcp-trackerpointing">
-<span id="id3"></span><h3>spt3g.gcp.TrackerPointing<a class="headerlink" href="#spt3g-gcp-trackerpointing" title="Permalink to this heading">¶</a></h3>
-<p>GCP Tracker Pointing</p>
-<dl>
-<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">TrackerPointing()</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">TrackerPointing(</span> <span class="pre">(TrackerPointing)arg2)</span></code></p>
-</dd>
-</dl>
-<p><em>Members:</em></p>
-<ul class="simple">
-<li><p><strong>time</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>scu_temp</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>features</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>encoder_off_x</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>encoder_off_y</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>horiz_mount_x</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>horiz_mount_y</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>horiz_off_x</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>horiz_off_y</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>tilts_x</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>tilts_y</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>linsens_avg_l1</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>linsens_avg_l2</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>linsens_avg_r1</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>linsens_avg_r2</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>telescope_temp</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>telescope_pressure</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>refraction</strong>: No Doc (Shame!)</p></li>
-</ul>
-</section>
-<section id="spt3g-gcp-trackerstatus">
-<span id="id4"></span><h3>spt3g.gcp.TrackerStatus<a class="headerlink" href="#spt3g-gcp-trackerstatus" title="Permalink to this heading">¶</a></h3>
-<p>GCP Tracker Status</p>
-<dl>
-<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">TrackerStatus()</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">TrackerStatus(</span> <span class="pre">(TrackerStatus)arg2)</span></code></p>
-</dd>
-</dl>
-<p><em>Members:</em></p>
-<ul class="simple">
-<li><p><strong>time</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>az_pos</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>el_pos</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>az_rate</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>el_rate</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>az_command</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>el_command</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>az_rate_command</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>el_rate_command</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>state</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>acu_seq</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>in_control</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>scan_flag</strong>: No Doc (Shame!)</p></li>
-</ul>
-</section>
-</section>
 <section id="modules-in-spt3g-gcp">
-<h2>Modules in spt3g.gcp<a class="headerlink" href="#modules-in-spt3g-gcp" title="Permalink to this heading">¶</a></h2>
+<h2>Modules in spt3g.gcp<a class="headerlink" href="#modules-in-spt3g-gcp" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-arcextract">spt3g.gcp.ARCExtractor.ARCExtract</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-arcextractminimal">spt3g.gcp.ARCExtractor.ARCExtractMinimal</a></p></li>
@@ -161,14 +58,12 @@
 <li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-unpacktrackerpointingdata">spt3g.gcp.ARCExtractor.UnpackTrackerPointingData</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-unpackweatherdata">spt3g.gcp.ARCExtractor.UnpackWeatherData</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-updatelinearsensordeltas">spt3g.gcp.ARCExtractor.UpdateLinearSensorDeltas</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-arcfilereader">spt3g.gcp.ARCFileReader</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-archkextractor-unpacksptpolhkdata">spt3g.gcp.ARCHKExtractor.UnpackSPTpolHKData</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-calfile-calfilereader">spt3g.gcp.CalFile.CalFileReader</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-gcpdatatee-daqwatchdog">spt3g.gcp.GCPDataTee.DAQWatchdog</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-gcpdatatee-gcpbolodatatee">spt3g.gcp.GCPDataTee.GCPBoloDataTee</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-gcpdatatee-gcphousekeepingtee">spt3g.gcp.GCPDataTee.GCPHousekeepingTee</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-gcpdatatee-gcpsignalledhousekeeping">spt3g.gcp.GCPDataTee.GCPSignalledHousekeeping</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-gcpmuxdatadecoder">spt3g.gcp.GCPMuxDataDecoder</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-influxdb-updatedb">spt3g.gcp.InfluxDB.UpdateDB</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-influxdb-writedb">spt3g.gcp.InfluxDB.WriteDB</a></p></li>
 </ul>
@@ -289,8 +184,6 @@ in frame</p>
 <dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">UpdateLinearSensorDeltas(f)</span></code></p>
 </dd>
 </dl>
-<p id="spt3g-gcp-arcfilereader"><strong>spt3g.gcp.ARCFileReader</strong></p>
-<p>Read GCP archive file (or files if you pass an iterable of paths). For non-SPT ARC file formats, please set Experiment to the appropriate value.  Set track_filename to True to record the filename for each frame in the ._filename attribute (fragile).</p>
 <p id="spt3g-gcp-archkextractor-unpacksptpolhkdata"><strong>spt3g.gcp.ARCHKExtractor.UnpackSPTpolHKData</strong></p>
 <p>Extracts SPTpol housekeeping information from ARC files</p>
 <dl class="simple">
@@ -346,9 +239,6 @@ unconditionally at startup.</p>
 <dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">GCPSignalledHousekeeping(self,</span> <span class="pre">port=50011,</span> <span class="pre">collect_on_start=True)</span></code></p>
 </dd>
 </dl>
-<p id="spt3g-gcp-gcpmuxdatadecoder"><strong>spt3g.gcp.GCPMuxDataDecoder</strong></p>
-<p>Extracts contents of receiver registers in SPTpol-style ARC files into a wiring map and timepoint frames. This is designed to convert SPTpol-style data in which GCP records bolometer data into the ARC files into a format equivalent to that for SPT-3G.</p>
-<p>For old (100d SPTpol) data not containing wiring information, insert a wiring map into the pipeline ahead of this module. The board_serial should be set to a real (positive) value for all bolometer channels and -1 for the calibrator sync readout.</p>
 <p id="spt3g-gcp-influxdb-updatedb"><strong>spt3g.gcp.InfluxDB.UpdateDB</strong></p>
 <p>Update InfluxDB with data in frame</p>
 <dl class="simple">
@@ -385,7 +275,7 @@ None, add all.</p>
 </dl>
 </section>
 <section id="functions-in-spt3g-gcp">
-<h2>Functions in spt3g.gcp<a class="headerlink" href="#functions-in-spt3g-gcp" title="Permalink to this heading">¶</a></h2>
+<h2>Functions in spt3g.gcp<a class="headerlink" href="#functions-in-spt3g-gcp" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-calibratevalue">spt3g.gcp.ARCExtractor.CalibrateValue</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-unitvalue">spt3g.gcp.ARCExtractor.UnitValue</a></p></li>
@@ -422,19 +312,12 @@ hard-coded info.)</p>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
   <div>
     <h3><a href="index.html">Table of Contents</a></h3>
     <ul>
 <li><a class="reference internal" href="#">gcp</a><ul>
-<li><a class="reference internal" href="#frame-objects-in-spt3g-gcp">Frame Objects in spt3g.gcp</a><ul>
-<li><a class="reference internal" href="#spt3g-gcp-acustatus">spt3g.gcp.ACUStatus</a></li>
-<li><a class="reference internal" href="#spt3g-gcp-acustatusvector">spt3g.gcp.ACUStatusVector</a></li>
-<li><a class="reference internal" href="#spt3g-gcp-trackerpointing">spt3g.gcp.TrackerPointing</a></li>
-<li><a class="reference internal" href="#spt3g-gcp-trackerstatus">spt3g.gcp.TrackerStatus</a></li>
-</ul>
-</li>
 <li><a class="reference internal" href="#modules-in-spt3g-gcp">Modules in spt3g.gcp</a></li>
 <li><a class="reference internal" href="#functions-in-spt3g-gcp">Functions in spt3g.gcp</a></li>
 </ul>
@@ -459,7 +342,7 @@ hard-coded info.)</p>
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
@@ -467,13 +350,13 @@ hard-coded info.)</p>
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -491,7 +374,7 @@ hard-coded info.)</p>
     </div>
     <div class="footer" role="contentinfo">
     &#169; Copyright .
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.0.2.
     </div>
   </body>
 </html>

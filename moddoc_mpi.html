@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>mpi &#8212; SPT3G Software  documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="_static/nature.css?v=8fc2db88" />
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=b3ba4146"></script>
-    <script src="_static/doctools.js?v=888ff710"></script>
-    <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="stylesheet" type="text/css" href="_static/nature.css?v=0f882399" />
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="prev" title="maps" href="moddoc_maps.html" /> 
   </head><body>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -35,26 +35,26 @@
           <div class="body" role="main">
             
   <section id="mpi">
-<h1>mpi<a class="headerlink" href="#mpi" title="Permalink to this heading">¶</a></h1>
+<h1>mpi<a class="headerlink" href="#mpi" title="Link to this heading">¶</a></h1>
 <p>mpi contains several modules build to interface with HPC systems using the installed MPI library (through mpi4py). This comes in two pieces: parallelization of frame processing and accumulation.</p>
 <section id="frame-io-parallelization">
-<h2>Frame IO Parallelization<a class="headerlink" href="#frame-io-parallelization" title="Permalink to this heading">¶</a></h2>
+<h2>Frame IO Parallelization<a class="headerlink" href="#frame-io-parallelization" title="Link to this heading">¶</a></h2>
 <p>The MPIFileIO sub-module contains a few modules that will add frame-level parallelism to a G3Pipeline by reading files within an observation in parallel and (optionally, with MPIIODistributor or MPIFrameParallelizer) distributes the data frame-by-frame across any number of processes with an M:N IO:CPU node distribution.</p>
 <p>This processing will make sure all metadata frames are seen by all processes in the same order with respect to both each other and all data frames and are thus strongly ordered across all processes. Data frames (scans, typically) are ordered on a node, but are not ordered between nodes and thus should be considered weakly ordered. For a frame sequence MN12345PQ67, where letters denote metadata frames (calibration, etc.) and numbers data frames, a possible ordering seen by the pipelines on two processing nodes would be MN134PQ7 and MN25PQ6, respectively. A consequence of these ordering rules is that you <em>must not use any modules that depend on frame ordering and continuity</em>. Examples of such would be modules that buffer multiple scans together to get longer-time-period data; by their nature, these only work for observation-level parallelism, rather than frame-level or file-level.</p>
 <p>Parallelization in this sense can be achieved by replacement of G3Reader in a normal G3Pipeline with MPIIODistributor.</p>
 </section>
 <section id="frame-accumulation">
-<h2>Frame Accumulation<a class="headerlink" href="#frame-accumulation" title="Permalink to this heading">¶</a></h2>
+<h2>Frame Accumulation<a class="headerlink" href="#frame-accumulation" title="Link to this heading">¶</a></h2>
 <p>At the end of a sequence of parallel pipelines, you in general want to join the data from all the processes in the communicator back together again. Typical cases are stitching processed scans back together again, for example to feed to a maximum-likelihood map-maker or some other algorithm that needs very large quantities of distributed data, or doing a parallel reduction, for example by coadding map frames produced by N parallel map-makers.</p>
 <p>The first of these cases (restitching an observation processed on many parallel processes) is more complicated than the second, so this library provides a helper module (MPIAccumulator) that does it for you, placing the result in a member variable inspected after the pipelines end.</p>
 <p>The second case is easier, but potentially common enough that a module should be added in future.</p>
 </section>
 <section id="interface-to-toast">
-<h2>Interface to TOAST<a class="headerlink" href="#interface-to-toast" title="Permalink to this heading">¶</a></h2>
+<h2>Interface to TOAST<a class="headerlink" href="#interface-to-toast" title="Link to this heading">¶</a></h2>
 <p>There is an experimental module (TOASTFiller) that uses MPIAccumulator to fill frame contents after processing in many parallel pipelines into a TOAST TOD object in order to use TOAST’s set of parallel timestream algorithms and map-making. Basic functionality is present, but it should be considered in-development at present.</p>
 </section>
 <section id="modules-in-spt3g-mpi">
-<h2>Modules in spt3g.mpi<a class="headerlink" href="#modules-in-spt3g-mpi" title="Permalink to this heading">¶</a></h2>
+<h2>Modules in spt3g.mpi<a class="headerlink" href="#modules-in-spt3g-mpi" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="#spt3g-mpi-mpifileio-mpiiodistributor">spt3g.mpi.MPIFileIO.MPIIODistributor</a></p></li>
 </ul>
@@ -81,7 +81,7 @@ core.G3Reader.</p>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
   <div>
     <h3><a href="index.html">Table of Contents</a></h3>
@@ -108,7 +108,7 @@ core.G3Reader.</p>
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
@@ -116,13 +116,13 @@ core.G3Reader.</p>
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -137,7 +137,7 @@ core.G3Reader.</p>
     </div>
     <div class="footer" role="contentinfo">
     &#169; Copyright .
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.0.2.
     </div>
   </body>
 </html>

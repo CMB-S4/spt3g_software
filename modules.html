@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Modules &#8212; SPT3G Software  documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="_static/nature.css?v=8fc2db88" />
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=b3ba4146"></script>
-    <script src="_static/doctools.js?v=888ff710"></script>
-    <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="stylesheet" type="text/css" href="_static/nature.css?v=0f882399" />
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Frames" href="frames.html" />
     <link rel="prev" title="Quick Start" href="quickstart.html" /> 
   </head><body>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -39,7 +39,7 @@
           <div class="body" role="main">
             
   <section id="modules">
-<h1><a class="toc-backref" href="#id1" role="doc-backlink">Modules</a><a class="headerlink" href="#modules" title="Permalink to this heading">¶</a></h1>
+<h1><a class="toc-backref" href="#id1" role="doc-backlink">Modules</a><a class="headerlink" href="#modules" title="Link to this heading">¶</a></h1>
 <p>A module is a processing step for data. Modules operate on frames, and pass frames from their input to their output queues, applying some processing in between. A typical module will operate on one frame at a time, reading data (e.g. bolometer timestreams) from a single input frame, adding new data (e.g. a filtered version of the bolometer timestreams), and then pushing the frame to its output queue for the next module in the chain.</p>
 <p>More complex manipulations are possible: the module can create new frames, throw frames away, operate on more than one frame at a time, or some combination of all three. Examples of how to do these things, as well as rationales, appear below.</p>
 <nav class="contents" id="contents">
@@ -73,10 +73,10 @@
 </ul>
 </nav>
 <section id="writing-a-module-in-python">
-<h2><a class="toc-backref" href="#id2" role="doc-backlink">Writing a module in Python</a><a class="headerlink" href="#writing-a-module-in-python" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">Writing a module in Python</a><a class="headerlink" href="#writing-a-module-in-python" title="Link to this heading">¶</a></h2>
 <p>Modules can be written in Python in any one of three styles: as python functions, as subclasses of the base class core.G3Module, or as generic Python callables.</p>
 <section id="python-modules-as-functions">
-<h3><a class="toc-backref" href="#id3" role="doc-backlink">Python Modules as Functions</a><a class="headerlink" href="#python-modules-as-functions" title="Permalink to this heading">¶</a></h3>
+<h3><a class="toc-backref" href="#id3" role="doc-backlink">Python Modules as Functions</a><a class="headerlink" href="#python-modules-as-functions" title="Link to this heading">¶</a></h3>
 <p>The simplest, and most common, case of a Python module is one that receives one frame, (potentially) modifies it, then passes it to the next module. This can be easily written as a simple Python function:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">simplemod</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
@@ -132,7 +132,7 @@
 </div></blockquote>
 </section>
 <section id="return-values-from-python-modules">
-<h3><a class="toc-backref" href="#id4" role="doc-backlink">Return values from Python modules</a><a class="headerlink" href="#return-values-from-python-modules" title="Permalink to this heading">¶</a></h3>
+<h3><a class="toc-backref" href="#id4" role="doc-backlink">Return values from Python modules</a><a class="headerlink" href="#return-values-from-python-modules" title="Link to this heading">¶</a></h3>
 <p>The examples above return <code class="docutils literal notranslate"><span class="pre">None</span></code> and so implicitly pass their input frame to the next module in the chain. Modules that need more control over data processing convey this by their return values:</p>
 <blockquote>
 <div><dl class="simple">
@@ -148,7 +148,7 @@
 </div></blockquote>
 </section>
 <section id="im-mutability-of-frame-objects">
-<h3><a class="toc-backref" href="#id5" role="doc-backlink">(Im)mutability of frame objects</a><a class="headerlink" href="#im-mutability-of-frame-objects" title="Permalink to this heading">¶</a></h3>
+<h3><a class="toc-backref" href="#id5" role="doc-backlink">(Im)mutability of frame objects</a><a class="headerlink" href="#im-mutability-of-frame-objects" title="Link to this heading">¶</a></h3>
 <p>Objects stored in a G3Frame are <em>immutable</em> – once added to a frame, they should not be modified. If you want to change the contents of a frame object, delete it from the frame, modify a copy, and add the copy to be frame. (In C++, the compiler will prevent in-place modifications since <code class="docutils literal notranslate"><span class="pre">G3Frame::Get()</span></code> returns a const pointer, but Python doesn’t have a concept of <code class="docutils literal notranslate"><span class="pre">const</span></code> so you just have to pay attention to the rules yourself and don’t get the compiler’s help). Copying the most common objects (e.g. G3TimestreamMaps) is designed to be particularly lightweight to facilitate this.</p>
 <p>The immutability allows three particularly useful features of the software:</p>
 <blockquote>
@@ -162,12 +162,12 @@
 <p>For software connoisseurs: this is similar to, and exists for largely the same reasons as, the “single-static-assignment” architecture popular in modern compilers.</p>
 </section>
 <section id="the-first-module">
-<h3><a class="toc-backref" href="#id6" role="doc-backlink">The first module</a><a class="headerlink" href="#the-first-module" title="Permalink to this heading">¶</a></h3>
+<h3><a class="toc-backref" href="#id6" role="doc-backlink">The first module</a><a class="headerlink" href="#the-first-module" title="Link to this heading">¶</a></h3>
 <p>The first module added to a <code class="docutils literal notranslate"><span class="pre">G3Pipeline</span></code> object is special: unlike all others, it does not act on input frames, since these frames cannot have come from anywhere. Instead, it is responsible for generating them. The <code class="docutils literal notranslate"><span class="pre">G3Reader</span></code> module is an example of this: it generates frames by reading them from disk.</p>
 <p>Unlike all other modules, the first module will be passed <code class="docutils literal notranslate"><span class="pre">None</span></code> instead of a frame. This module then inserts data into the processing queue by returning new frames (see <a class="reference internal" href="#return-values-from-python-modules">Return values from Python modules</a>). Data processing will stop when it returns an empty list (<code class="docutils literal notranslate"><span class="pre">[]</span></code>).</p>
 </section>
 <section id="callable-objects-as-functions">
-<h3><a class="toc-backref" href="#id7" role="doc-backlink">Callable Objects as Functions</a><a class="headerlink" href="#callable-objects-as-functions" title="Permalink to this heading">¶</a></h3>
+<h3><a class="toc-backref" href="#id7" role="doc-backlink">Callable Objects as Functions</a><a class="headerlink" href="#callable-objects-as-functions" title="Link to this heading">¶</a></h3>
 <p>In addition to Python functions, any Python callable (anything that implements the <code class="docutils literal notranslate"><span class="pre">__call__</span></code> method) can be used as a processing module. This can be useful for processing steps that need to maintain state, such as a map making module that needs to keep its in-progress map between scans. Semantics and return values are the same as for Python functions (see <a class="reference internal" href="#return-values-from-python-modules">Return values from Python modules</a>).</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">NumberOfCalls</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Output</span><span class="o">=</span><span class="s1">&#39;NCalls&#39;</span><span class="p">):</span>
@@ -193,7 +193,7 @@
 </div>
 </section>
 <section id="autodocumentation-of-modules">
-<h3><a class="toc-backref" href="#id8" role="doc-backlink">Autodocumentation of modules</a><a class="headerlink" href="#autodocumentation-of-modules" title="Permalink to this heading">¶</a></h3>
+<h3><a class="toc-backref" href="#id8" role="doc-backlink">Autodocumentation of modules</a><a class="headerlink" href="#autodocumentation-of-modules" title="Link to this heading">¶</a></h3>
 <p>Preceding your module with the <code class="docutils literal notranslate"><span class="pre">&#64;core.indexmod</span></code> decorator will allow the <code class="docutils literal notranslate"><span class="pre">spt3g-inspect</span></code> tool to list it. This should be used for processing steps designed for public use <em>only</em> rather than one-off functions for internal use in larger blocks of code.</p>
 <p>For example:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
@@ -211,7 +211,7 @@ Print frame to console</p>
 </section>
 </section>
 <section id="writing-a-module-in-c">
-<h2><a class="toc-backref" href="#id9" role="doc-backlink">Writing a module in C++</a><a class="headerlink" href="#writing-a-module-in-c" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id9" role="doc-backlink">Writing a module in C++</a><a class="headerlink" href="#writing-a-module-in-c" title="Link to this heading">¶</a></h2>
 <p>The process of writing a processing module in C++ is similar to the Python one. C++ modules use a slightly different interface than Python; in particular, they behave like the callable object interface where all methods return lists.</p>
 <p>A C++ module must inherit from the <code class="docutils literal notranslate"><span class="pre">G3Module</span></code> class. Data processing happens through the <code class="docutils literal notranslate"><span class="pre">Process</span></code> method, which takes two arguments: an input frame and an output queue. Output frames are pushed onto the queue; the semantics of this output queue are identical to those for Python processing modules returning lists.</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;G3Frame.h&gt;</span>
@@ -254,7 +254,7 @@ Print frame to console</p>
 <p>Here, the <code class="docutils literal notranslate"><span class="pre">init&lt;&gt;</span></code> arguments are modified to reflect that the configuration parameter is a string, that it is optional (leaving out the <code class="docutils literal notranslate"><span class="pre">optional&lt;&gt;</span></code> will make it mandatory), and that it maps to a Python keyword argument named “output”. If your constructor takes multiple arguments, enclose the entire init section in parentheses to avoid preprocessor errors.</p>
 </section>
 <section id="pipeline-segments">
-<h2><a class="toc-backref" href="#id10" role="doc-backlink">Pipeline Segments</a><a class="headerlink" href="#pipeline-segments" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id10" role="doc-backlink">Pipeline Segments</a><a class="headerlink" href="#pipeline-segments" title="Link to this heading">¶</a></h2>
 <p>The use of pipeline segments allows you to have a canned collection of modules that can be added to a pipeline as though it were a single module. An example would be a pipeline segment that performs standard timestream filtering, which may be made of many separate modules but where specifying them individually would be tedious and prone to error.</p>
 <p>A pipeline segment is defined by a Python function that is marked by the <code class="docutils literal notranslate"><span class="pre">&#64;core.pipesegment</span></code> decorator and takes a pipeline as its first argument. For example:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@core</span><span class="o">.</span><span class="n">pipesegment</span>
@@ -272,7 +272,7 @@ Print frame to console</p>
 <p>By default, the <code class="docutils literal notranslate"><span class="pre">core.pipesegment</span></code> decorator will introspect these functions by running them against a fake pipeline object. This information about what the segment does is then automatically appended to the docstring for the segment. This makes it easy for a user to discover what your wrapper does in a way that cannot become inconsistent with documentation. If your pipeline segment has side effects (e.g. opening files) or cannot be run with its default arguments, you may wish to disable this behavior by passing the <code class="docutils literal notranslate"><span class="pre">autodoc=False</span></code> keyword argument to the decorator.</p>
 </section>
 <section id="advanced-techniques-buffering-data">
-<h2><a class="toc-backref" href="#id11" role="doc-backlink">Advanced Techniques: Buffering Data</a><a class="headerlink" href="#advanced-techniques-buffering-data" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id11" role="doc-backlink">Advanced Techniques: Buffering Data</a><a class="headerlink" href="#advanced-techniques-buffering-data" title="Link to this heading">¶</a></h2>
 <p>Modules that need to work on granularilty coarser than a scan (e.g. notch filtering) can <strong>buffer</strong> frames. This can be implemented using the Python callable interface. For example:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Buffered</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -295,7 +295,7 @@ Print frame to console</p>
 <p>This implements a processing step that works on five scans at a time. From the perspective of a module either before or after this one in the chain, nothing unusual happens: frames appear in order one at a time in both cases. When <code class="docutils literal notranslate"><span class="pre">__call__</span></code> returns an empty list, the pipeline goes back to the first module to get a new frame instead of continuing to the next. These accumulate inside the internal queue of <code class="docutils literal notranslate"><span class="pre">Buffered</span></code> until there are five scans present. At that point, they are processed as a group and then moved to the output queue. When the pipeline sees five frames in the output queue, it will call the next module five times, with each frame in sequence. Once that is complete, it will then go back to the first module for new frames.</p>
 </section>
 <section id="caching-previous-data">
-<h2><a class="toc-backref" href="#id12" role="doc-backlink">Caching Previous Data</a><a class="headerlink" href="#caching-previous-data" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id12" role="doc-backlink">Caching Previous Data</a><a class="headerlink" href="#caching-previous-data" title="Link to this heading">¶</a></h2>
 <p>The previous example can be adapted to cache data from previous frames when that data is required to operate on current frames.  This is useful for caching e.g. calibration data.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Caching</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calibrator_key</span><span class="o">=</span><span class="s1">&#39;CalibratorResponse&#39;</span><span class="p">):</span>
@@ -319,10 +319,10 @@ Print frame to console</p>
 <p><code class="docutils literal notranslate"><span class="pre">core.scan_func_cache_data</span></code> is a special case of <code class="docutils literal notranslate"><span class="pre">core.cache_frame_data</span></code> where <code class="docutils literal notranslate"><span class="pre">type</span></code> is set to <code class="docutils literal notranslate"><span class="pre">core.G3FrameType.Scan</span></code>.</p>
 </section>
 <section id="pipelines">
-<h2><a class="toc-backref" href="#id13" role="doc-backlink">Pipelines</a><a class="headerlink" href="#pipelines" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id13" role="doc-backlink">Pipelines</a><a class="headerlink" href="#pipelines" title="Link to this heading">¶</a></h2>
 <p>Modules are connected to one another by a pipeline object, of which there is currently one implementation: G3Pipeline. Any pipeline has two interesting methods, <code class="docutils literal notranslate"><span class="pre">Add</span></code> and <code class="docutils literal notranslate"><span class="pre">Run</span></code>.</p>
 <section id="pipeline-add">
-<h3><a class="toc-backref" href="#id14" role="doc-backlink">Pipeline.Add</a><a class="headerlink" href="#pipeline-add" title="Permalink to this heading">¶</a></h3>
+<h3><a class="toc-backref" href="#id14" role="doc-backlink">Pipeline.Add</a><a class="headerlink" href="#pipeline-add" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">Add()</span></code> method adds a module to the pipeline immediately following the last added module. It accepts any of the module types described above, as well as pipeline segments. For classes (either C++ or Python), it can accept either an instance of the module or the class. If passed a class, keyword arguments following the class are passed to the class constructor. The following two pieces of code are equivalent:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span> <span class="o">=</span> <span class="n">G3Pipeline</span><span class="p">()</span>
 <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">G3Reader</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s2">&quot;test.g3&quot;</span><span class="p">))</span>
@@ -337,11 +337,11 @@ Print frame to console</p>
 <p>If the <code class="docutils literal notranslate"><span class="pre">subprocess</span></code> argument to <code class="docutils literal notranslate"><span class="pre">Add()</span></code> is set to True, the module passed will be run in a python subprocess using the multiprocessing framework. Note that this does <em>not</em> work yet for segments.</p>
 </section>
 <section id="pipeline-run">
-<h3><a class="toc-backref" href="#id15" role="doc-backlink">Pipeline.Run</a><a class="headerlink" href="#pipeline-run" title="Permalink to this heading">¶</a></h3>
+<h3><a class="toc-backref" href="#id15" role="doc-backlink">Pipeline.Run</a><a class="headerlink" href="#pipeline-run" title="Link to this heading">¶</a></h3>
 <p>The <code class="docutils literal notranslate"><span class="pre">Run()</span></code> method runs the pipeline until completion (see <a class="reference internal" href="#the-first-module">The first module</a>). It takes one optional keyword argument (<code class="docutils literal notranslate"><span class="pre">profile</span></code>). If set to <code class="docutils literal notranslate"><span class="pre">True</span></code>, it will print out the amount of system and user time spent in that module during processing after completion.</p>
 </section>
 <section id="g3pipelineinfo">
-<h3><a class="toc-backref" href="#id16" role="doc-backlink">G3PipelineInfo</a><a class="headerlink" href="#g3pipelineinfo" title="Permalink to this heading">¶</a></h3>
+<h3><a class="toc-backref" href="#id16" role="doc-backlink">G3PipelineInfo</a><a class="headerlink" href="#g3pipelineinfo" title="Link to this heading">¶</a></h3>
 <p>G3Pipeline will automatically insert information about its configuration into the data stream by internally emitting a PipelineInfo frame containing a timestamped G3PipelineInfo object with the following information:</p>
 <ul class="simple">
 <li><p>Version control information (branch, revision number, source URL, version name if any, presence of local diffs, etc.) reflecting the software currently running.</p></li>
@@ -367,7 +367,7 @@ Print frame to console</p>
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
   <div>
     <h3><a href="index.html">Table of Contents</a></h3>
@@ -414,7 +414,7 @@ Print frame to console</p>
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
@@ -422,13 +422,13 @@ Print frame to console</p>
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -446,7 +446,7 @@ Print frame to console</p>
     </div>
     <div class="footer" role="contentinfo">
     &#169; Copyright .
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.0.2.
     </div>
   </body>
 </html>

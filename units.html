@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Units &#8212; SPT3G Software  documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="_static/nature.css?v=8fc2db88" />
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=b3ba4146"></script>
-    <script src="_static/doctools.js?v=888ff710"></script>
-    <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="stylesheet" type="text/css" href="_static/nature.css?v=0f882399" />
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Data Acquisition" href="dataacquisition.html" />
     <link rel="prev" title="File IO" href="fileio.html" /> 
   </head><body>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -39,10 +39,10 @@
           <div class="body" role="main">
             
   <section id="units">
-<h1>Units<a class="headerlink" href="#units" title="Permalink to this heading">¶</a></h1>
+<h1>Units<a class="headerlink" href="#units" title="Link to this heading">¶</a></h1>
 <p>This software includes a units system that is meant to end wondering whether a given function takes radians or degrees as an argument, or whether a stored time is in milliseconds or seconds. The support code is accessible to both C++ and Python as part of the <code class="docutils literal notranslate"><span class="pre">G3Units</span></code> namespace (<code class="docutils literal notranslate"><span class="pre">core.G3Units.X</span></code> in Python and <code class="docutils literal notranslate"><span class="pre">G3Units::X</span></code> in C++).</p>
 <section id="defining-a-quantity-with-units">
-<h2>Defining a quantity with units<a class="headerlink" href="#defining-a-quantity-with-units" title="Permalink to this heading">¶</a></h2>
+<h2>Defining a quantity with units<a class="headerlink" href="#defining-a-quantity-with-units" title="Link to this heading">¶</a></h2>
 <p>Defining a quantity with units is meant to work the way you would write it down. The period of time 5 seconds would be represented in Python as:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="mi">5</span><span class="o">*</span><span class="n">core</span><span class="o">.</span><span class="n">G3Units</span><span class="o">.</span><span class="n">s</span>
 </pre></div>
@@ -50,7 +50,7 @@
 <p>Under the hood, these are multiplicative constants that have the appropriate scalings relative to one another (e.g. <code class="docutils literal notranslate"><span class="pre">core.G3Units.s</span></code> is a thousand times larger than <code class="docutils literal notranslate"><span class="pre">core.G3Units.ms</span></code>).</p>
 </section>
 <section id="converting-to-different-units">
-<h2>Converting to different units<a class="headerlink" href="#converting-to-different-units" title="Permalink to this heading">¶</a></h2>
+<h2>Converting to different units<a class="headerlink" href="#converting-to-different-units" title="Link to this heading">¶</a></h2>
 <p>If you want a numeric quantity in specific units, you divide by the unit you want (think of doing unit analysis in freshman physics courses).</p>
 <p>For example, to take a passed angle and return its sin, irrespective of the user’s preferred units:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">sinofstuff</span><span class="p">(</span><span class="n">angle</span><span class="p">):</span>
@@ -61,7 +61,7 @@
 </div>
 </section>
 <section id="available-units">
-<h2>Available units<a class="headerlink" href="#available-units" title="Permalink to this heading">¶</a></h2>
+<h2>Available units<a class="headerlink" href="#available-units" title="Link to this heading">¶</a></h2>
 <p>We currently define units for times, angles, lengths, power, voltage, current, and temperature. Some of these have aliases with abbreviated names (e.g. both ms and millisecond). Where this occurs, all names for a unit are separated with commas. For a value <code class="docutils literal notranslate"><span class="pre">X</span></code> in the following lists, it is exposed to Python as <code class="docutils literal notranslate"><span class="pre">core.G3Units.X</span></code> and to C++ as <code class="docutils literal notranslate"><span class="pre">G3Units::X</span></code>.</p>
 <p>Time:</p>
 <ul class="simple">
@@ -140,7 +140,7 @@
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
   <div>
     <h3><a href="index.html">Table of Contents</a></h3>
@@ -171,7 +171,7 @@
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
@@ -179,13 +179,13 @@
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -203,7 +203,7 @@
     </div>
     <div class="footer" role="contentinfo">
     &#169; Copyright .
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.0.2.
     </div>
   </body>
 </html>

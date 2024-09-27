@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Style Guide &#8212; SPT3G Software  documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="_static/nature.css?v=8fc2db88" />
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=b3ba4146"></script>
-    <script src="_static/doctools.js?v=888ff710"></script>
-    <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="stylesheet" type="text/css" href="_static/nature.css?v=0f882399" />
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Network Streaming" href="networkstreaming.html" />
     <link rel="prev" title="Build System" href="buildsystem.html" /> 
   </head><body>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -39,12 +39,12 @@
           <div class="body" role="main">
             
   <section id="style-guide">
-<h1>Style Guide<a class="headerlink" href="#style-guide" title="Permalink to this heading">¶</a></h1>
+<h1>Style Guide<a class="headerlink" href="#style-guide" title="Link to this heading">¶</a></h1>
 <section id="version-control-hygiene">
-<h2>Version Control Hygiene<a class="headerlink" href="#version-control-hygiene" title="Permalink to this heading">¶</a></h2>
+<h2>Version Control Hygiene<a class="headerlink" href="#version-control-hygiene" title="Link to this heading">¶</a></h2>
 <p>You can use two mechanisms to access the repository: git and SVN. The following is a brief overview of how to use these in a way that your collaborators will appreciate.</p>
 <section id="git">
-<h3>Git<a class="headerlink" href="#git" title="Permalink to this heading">¶</a></h3>
+<h3>Git<a class="headerlink" href="#git" title="Link to this heading">¶</a></h3>
 <p>To initially check out the repository:</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://user@github.com/CMB-S4/spt3g_software.git
 </pre></div>
@@ -61,7 +61,7 @@ git<span class="w"> </span>push
 </div>
 </section>
 <section id="svn">
-<h3>SVN<a class="headerlink" href="#svn" title="Permalink to this heading">¶</a></h3>
+<h3>SVN<a class="headerlink" href="#svn" title="Link to this heading">¶</a></h3>
 <p>To initially check out the repository:</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>svn<span class="w"> </span>co<span class="w"> </span>https://user@github.com/CMB-S4/spt3g_software/trunk<span class="w"> </span>spt3g_software
 </pre></div>
@@ -78,10 +78,10 @@ svn<span class="w"> </span>ci<span class="w"> </span>files_to_commit
 </section>
 </section>
 <section id="coding-style">
-<h2>Coding Style<a class="headerlink" href="#coding-style" title="Permalink to this heading">¶</a></h2>
+<h2>Coding Style<a class="headerlink" href="#coding-style" title="Link to this heading">¶</a></h2>
 <p>We have style guidelines for both Python and C code. These are intended to keep code readable and avoid jarring transitions before code written by different people. These are summarized below. In general, the guiding principle is to make new code look like existing code. If you run into a file that obviously violates these style guidelines, please (a) hit the author with a stick and (b) do <em>not</em> change the style yourself. When adding to files that conform to some consistent, but different, style, prefer the style of the existing code to these guidelines unless you are replacing more than 50% of the file.</p>
 <section id="python-style-guide">
-<h3>Python Style Guide<a class="headerlink" href="#python-style-guide" title="Permalink to this heading">¶</a></h3>
+<h3>Python Style Guide<a class="headerlink" href="#python-style-guide" title="Link to this heading">¶</a></h3>
 <p>For python we will be following <a class="reference external" href="https://www.python.org/dev/peps/pep-0008/">PEP8</a> (the style guide for the python standard library).
 PEP8 is a fairly significant document, so I will summarize the important points.
 Nonetheless, it is a generally good idea to read at least the section on <a class="reference external" href="https://www.python.org/dev/peps/pep-0008/#a-foolish-consistency-is-the-hobgoblin-of-little-minds">readability</a>.
@@ -160,7 +160,7 @@ Please adhere to this format for all spt3g_software code.</p>
 </div>
 </section>
 <section id="c-style-guide">
-<h3>C++ Style Guide<a class="headerlink" href="#c-style-guide" title="Permalink to this heading">¶</a></h3>
+<h3>C++ Style Guide<a class="headerlink" href="#c-style-guide" title="Link to this heading">¶</a></h3>
 <p>C and C++ code in the tree is supposed to follow the <a class="reference external" href="https://www.freebsd.org/cgi/man.cgi?query=style&amp;sektion=9">KNF</a> conventions. On Mac OS X systems, you have a local copy of this guide installed in a man page named <code class="docutils literal notranslate"><span class="pre">style</span></code>. Like PEP8, the document is long, so a brief summary follows. The general rules are similar to PEP8 in most cases.</p>
 <ul class="simple">
 <li><p>Variable and global function names should be lower case, with words separated by underscores when it improves readability.</p></li>
@@ -213,7 +213,7 @@ For reference, most terminals open at 80 characters wide. If you need to continu
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
   <div>
     <h3><a href="index.html">Table of Contents</a></h3>
@@ -251,7 +251,7 @@ For reference, most terminals open at 80 characters wide. If you need to continu
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
@@ -259,13 +259,13 @@ For reference, most terminals open at 80 characters wide. If you need to continu
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -283,7 +283,7 @@ For reference, most terminals open at 80 characters wide. If you need to continu
     </div>
     <div class="footer" role="contentinfo">
     &#169; Copyright .
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.0.2.
     </div>
   </body>
 </html>

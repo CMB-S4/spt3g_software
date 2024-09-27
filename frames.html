@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Frames &#8212; SPT3G Software  documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="_static/nature.css?v=8fc2db88" />
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=b3ba4146"></script>
-    <script src="_static/doctools.js?v=888ff710"></script>
-    <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="stylesheet" type="text/css" href="_static/nature.css?v=0f882399" />
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Logging" href="logging.html" />
     <link rel="prev" title="Modules" href="modules.html" /> 
   </head><body>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -39,7 +39,7 @@
           <div class="body" role="main">
             
   <section id="frames">
-<h1><a class="toc-backref" href="#id1" role="doc-backlink">Frames</a><a class="headerlink" href="#frames" title="Permalink to this heading">¶</a></h1>
+<h1><a class="toc-backref" href="#id1" role="doc-backlink">Frames</a><a class="headerlink" href="#frames" title="Link to this heading">¶</a></h1>
 <p>The basic unit of data processing is the frame. Each frame is a free-form mapping from strings to data of a type derived from G3FrameObject. In general, they behave as Python dictionaries. Wrappers are provided for Python plain-old-data types (numbers, strings, etc.) so that they can be used directly.</p>
 <p>Frames have fast serialization to and from disk (see the G3Reader and G3Writer modules in <a class="reference internal" href="fileio.html"><span class="doc">File IO</span></a>) with built-in data integrity protection. This serialization is accessible programmatically in Python through the Python pickle libraries, which are overridden to use the internal serialization.</p>
 <p>Each frame has a type defined under the <code class="docutils literal notranslate"><span class="pre">core.G3FrameType</span></code> namespace. These are meant to indicate different types of data (calibration vs. scan data, for example) and, in general, many types of frames will be interleaved in the same data stream. A good general rule for whether data should be in a different frame type is to consider the rates at which the data change: data that change at the same speed (e.g. bolometer data and pointing) should share a frame, while data that change at different speeds (e.g. calibration constants and bolometer data) should be separated.</p>
@@ -65,7 +65,7 @@
 </ul>
 </nav>
 <section id="scan">
-<h2><a class="toc-backref" href="#id2" role="doc-backlink">Scan</a><a class="headerlink" href="#scan" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">Scan</a><a class="headerlink" href="#scan" title="Link to this heading">¶</a></h2>
 <p>Scan frames are the most common unit of data for analysis. They contain the data from a single left-to-right (or right-to-left) scan of the telescope. Where quantities are bolometer-indexed, the names match those in the Wiring map.</p>
 <table class="docutils align-default">
 <thead>
@@ -139,7 +139,7 @@
 </table>
 </section>
 <section id="pipelineinfo">
-<h2><a class="toc-backref" href="#id3" role="doc-backlink">PipelineInfo</a><a class="headerlink" href="#pipelineinfo" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">PipelineInfo</a><a class="headerlink" href="#pipelineinfo" title="Link to this heading">¶</a></h2>
 <p>PipelineInfo frames contain information on the processing applied to make the remainder of the data. They typically occur at the beginning of the data stream and are automatically inserted by G3Pipeline, if not previously present. The frame will contain at least one element of type G3PipelineInfo that gives information on the version of the software that made the data and the configuration of all modules and/or segments added to the pipeline. Other data (G3PipelineInfo from previous scripts, configuration information added by other modules) may also be present.</p>
 <table class="docutils align-default">
 <thead>
@@ -157,7 +157,7 @@
 </table>
 </section>
 <section id="timepoint">
-<h2><a class="toc-backref" href="#id4" role="doc-backlink">Timepoint</a><a class="headerlink" href="#timepoint" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">Timepoint</a><a class="headerlink" href="#timepoint" title="Link to this heading">¶</a></h2>
 <p>Timepoint frames include sample-by-sample data from the mux system. They are emitted directly by the DfMuxBuilder as part of primary data acquisition and are generally not seen outside the South Pole or the lab. These are transformed into <a class="reference internal" href="#scan">Scan</a> frames by DfMuxCollator.</p>
 <table class="docutils align-default">
 <thead>
@@ -179,7 +179,7 @@
 </table>
 </section>
 <section id="housekeeping">
-<h2><a class="toc-backref" href="#id5" role="doc-backlink">Housekeeping</a><a class="headerlink" href="#housekeeping" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">Housekeeping</a><a class="headerlink" href="#housekeeping" title="Link to this heading">¶</a></h2>
 <p>Contains housekeeping data. Issued periodically when housekeeping data is taken. Like <a class="reference internal" href="#timepoint">Timepoint</a> frames, these are rolled into <a class="reference internal" href="#scan">Scan</a> frames during processing and do not appear in general in stored data.</p>
 <table class="docutils align-default">
 <thead>
@@ -197,7 +197,7 @@
 </table>
 </section>
 <section id="map">
-<h2><a class="toc-backref" href="#id6" role="doc-backlink">Map</a><a class="headerlink" href="#map" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id6" role="doc-backlink">Map</a><a class="headerlink" href="#map" title="Link to this heading">¶</a></h2>
 <p>Contains either the result of the map maker or the input to simulation.</p>
 <table class="docutils align-default">
 <thead>
@@ -235,7 +235,7 @@
 </table>
 </section>
 <section id="calibration">
-<h2><a class="toc-backref" href="#id7" role="doc-backlink">Calibration</a><a class="headerlink" href="#calibration" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id7" role="doc-backlink">Calibration</a><a class="headerlink" href="#calibration" title="Link to this heading">¶</a></h2>
 <p>This frame contains all measured calibration information (pointing, response, etc.) that may change when remeasured. It does <em>not</em> include static information describing how the instrument is set up (see <a class="reference internal" href="#wiring">Wiring</a> below).</p>
 <table class="docutils align-default">
 <thead>
@@ -273,7 +273,7 @@
 </table>
 </section>
 <section id="observation">
-<h2><a class="toc-backref" href="#id8" role="doc-backlink">Observation</a><a class="headerlink" href="#observation" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id8" role="doc-backlink">Observation</a><a class="headerlink" href="#observation" title="Link to this heading">¶</a></h2>
 <p>Indicates global observation parameters. Changes at the beginning of a new observation, though, as with all metadata, repeat observation frames may appear during processing.</p>
 <table class="docutils align-default">
 <thead>
@@ -295,7 +295,7 @@
 </table>
 </section>
 <section id="wiring">
-<h2><a class="toc-backref" href="#id9" role="doc-backlink">Wiring</a><a class="headerlink" href="#wiring" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id9" role="doc-backlink">Wiring</a><a class="headerlink" href="#wiring" title="Link to this heading">¶</a></h2>
 <p>Gives the description of how the system is wired: notably, the connection between board serial number, module, channel and a bolometer ID.</p>
 <table class="docutils align-default">
 <thead>
@@ -317,7 +317,7 @@
 </table>
 </section>
 <section id="gcpslow">
-<h2><a class="toc-backref" href="#id10" role="doc-backlink">GcpSlow</a><a class="headerlink" href="#gcpslow" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id10" role="doc-backlink">GcpSlow</a><a class="headerlink" href="#gcpslow" title="Link to this heading">¶</a></h2>
 <p>Holds all the GCP data sampled once per second. Like <a class="reference internal" href="#timepoint">Timepoint</a> and <a class="reference internal" href="#housekeeping">Housekeeping</a> frames, these data are consolidated in the Scan frames and do not appear in final data products. The data stored here begins as a strict copy of the GCP register map (see the GCP documentation for details, a few notable entries are summarized below). A few other keys are added transiently in the course of generating <a class="reference internal" href="#scan">Scan</a> frames.</p>
 <table class="docutils align-default">
 <thead>
@@ -339,7 +339,7 @@
 </table>
 </section>
 <section id="endprocessing">
-<h2><a class="toc-backref" href="#id11" role="doc-backlink">EndProcessing</a><a class="headerlink" href="#endprocessing" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id11" role="doc-backlink">EndProcessing</a><a class="headerlink" href="#endprocessing" title="Link to this heading">¶</a></h2>
 <p>EndProcessing is a special-purpose frame emitted implicitly by G3Pipeline at the end of processing. No further frames will occur after this and reception of an EndProcessing frame is intended as a signal to modules that they should clear any internally buffered data and clean up.</p>
 <p>EndProcessing frames should, in general, contain no data.</p>
 </section>
@@ -350,7 +350,7 @@
           </div>
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
   <div>
     <h3><a href="index.html">Table of Contents</a></h3>
@@ -388,7 +388,7 @@
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
@@ -396,13 +396,13 @@
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related" role="navigation" aria-label="related navigation">
+    <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -420,7 +420,7 @@
     </div>
     <div class="footer" role="contentinfo">
     &#169; Copyright .
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.1.2.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.0.2.
     </div>
   </body>
 </html>
