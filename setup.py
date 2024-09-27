@@ -137,6 +137,9 @@ class ArchiveDist(sdist):
 
         super().run()
 
+        if Path(".git").exists():
+            subprocess.run(["git", "checkout", ".git_archival.txt"], check=True)
+
 
 # gather libraries
 clibs = []
