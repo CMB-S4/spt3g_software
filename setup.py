@@ -52,6 +52,7 @@ class CMakeBuildExt(build_ext):
                 cmake_args += [f"-DSPT3G_VERSION={repr(version)}"]
 
         self.cmake_args = cmake_args
+        self.cmake_bin = os.getenv("CMAKE_BIN", "cmake")
         self.cmake_done = False
 
     def build_extension(self, ext):
@@ -61,9 +62,9 @@ class CMakeBuildExt(build_ext):
             if not self.build_dir.exists():
                 self.build_dir.mkdir(parents=True, exist_ok=True)
             subprocess.run(
-                ["cmake", self.source_dir, *self.cmake_args], cwd=self.build_dir, check=True
+                [self.cmake_bin, self.source_dir, *self.cmake_args], cwd=self.build_dir, check=True
             )
-            subprocess.run(["cmake", "--build", "."], cwd=self.build_dir, check=True)
+            subprocess.run([self.cmake_bin, "--build", "."], cwd=self.build_dir, check=True)
 
             # update package directory
             if self.editable_mode:
