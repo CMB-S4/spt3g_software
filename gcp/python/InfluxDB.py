@@ -1,8 +1,8 @@
 import numpy as np
 import re
 import datetime as dt
-from spt3g import core
-from spt3g.core import G3Units as U
+from .. import core
+from ..core import G3Units as U
 from . import ARCExtractor
 
 def build_field_list(fr):

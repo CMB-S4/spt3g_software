@@ -1,4 +1,4 @@
-from spt3g.core import G3Frame, G3FrameType
+from . import G3Frame, G3FrameType
 
 @staticmethod
 def str_to_frame_types(types):

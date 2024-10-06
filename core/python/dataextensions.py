@@ -1,4 +1,4 @@
-from spt3g.core import G3Bool, G3Int, G3Double, G3String
+from . import G3Bool, G3Int, G3Double, G3String
 
 __all__ = []
 

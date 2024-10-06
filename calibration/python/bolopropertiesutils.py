@@ -1,5 +1,5 @@
-from spt3g.calibration import BolometerProperties
-from spt3g import core
+from . import BolometerProperties
+from .. import core
 import numpy as np
 import re
 

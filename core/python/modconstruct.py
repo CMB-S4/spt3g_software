@@ -1,6 +1,6 @@
-from spt3g.core import G3Module, G3Pipeline, G3PipelineInfo, G3Frame, G3FrameType, G3Time, G3ModuleConfig, log_fatal
+from . import G3Module, G3Pipeline, G3PipelineInfo, G3Frame, G3FrameType, G3Time, G3ModuleConfig, log_fatal
 try:
-    from spt3g.core import multiprocess
+    from . import multiprocess
     multiproc_avail = True
 except ImportError:
     multiproc_avail = False
@@ -131,7 +131,7 @@ def build_pymodule(pycallable, *args, **kwargs):
 
 class _add_pipeline_info(G3Module):
     def __init__(self):
-        from spt3g import version
+        from .. import version
         import socket, getpass
 
         G3Module.__init__(self)

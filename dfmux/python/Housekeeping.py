@@ -1,5 +1,5 @@
-from spt3g import core
-from spt3g.dfmux import DfMuxHousekeepingMap, HkBoardInfo, HkMezzanineInfo, HkModuleInfo, HkChannelInfo, DfMuxWiringMap, DfMuxChannelMapping
+from .. import core
+from . import DfMuxHousekeepingMap, HkBoardInfo, HkMezzanineInfo, HkModuleInfo, HkChannelInfo, DfMuxWiringMap, DfMuxChannelMapping
 
 from .TuberClient import TuberClient
 import socket, struct, time

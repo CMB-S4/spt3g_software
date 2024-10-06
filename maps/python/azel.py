@@ -3,7 +3,7 @@ import os
 import astropy.coordinates, astropy.units, astropy.time
 from astropy.utils import iers
 
-from spt3g import core
+from .. import core
 
 spt = astropy.coordinates.EarthLocation(
     lat=-89.991066 * astropy.units.deg,

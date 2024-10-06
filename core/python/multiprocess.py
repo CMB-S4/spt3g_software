@@ -1,7 +1,7 @@
 from multiprocessing import get_context
 import socket, pickle, errno, struct, time
 
-from spt3g.core import G3FrameType, G3Frame
+from . import G3FrameType, G3Frame
 
 # Require fork to avoid pickling errors
 ctx = get_context("fork")

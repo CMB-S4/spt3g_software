@@ -1,5 +1,5 @@
 import numpy
-from spt3g import core
+from .. import core
 from .Housekeeping import HousekeepingForBolo
 
 # Transfer functions for 3G and SPTpol boards

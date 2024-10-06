@@ -1,5 +1,5 @@
 import sys, inspect, re, textwrap
-from spt3g.core import G3Module, G3FrameObject
+from . import G3Module, G3FrameObject
 
 def format_doc(x, simple=False):
     """

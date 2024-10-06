@@ -1,4 +1,4 @@
-from spt3g import core, maps
+from .. import core, maps
 import numpy as np
 
 __all__ = [

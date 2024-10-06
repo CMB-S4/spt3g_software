@@ -1,5 +1,5 @@
 import struct, socket, errno, numpy, time, threading
-from spt3g import core, dfmux
+from .. import core, dfmux
 
 
 class PagerWatchdog(object):

@@ -1,4 +1,4 @@
-from spt3g import core, calibration, dfmux
+from .. import core, calibration, dfmux
 import numpy
 from .MPIAccumulator import MPIAccumulator
 import pickle

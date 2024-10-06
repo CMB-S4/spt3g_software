@@ -1,6 +1,6 @@
-from spt3g import core
-from spt3g.maps import HealpixSkyMap, FlatSkyMap, G3SkyMapWeights
-from spt3g.maps import MapPolType, MapPolConv, MapCoordReference, MapProjection
+from .. import core
+from . import HealpixSkyMap, FlatSkyMap, G3SkyMapWeights
+from . import MapPolType, MapPolConv, MapCoordReference, MapProjection
 
 import numpy as np
 import os

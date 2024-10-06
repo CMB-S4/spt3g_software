@@ -1,4 +1,4 @@
-from spt3g.core import G3Units, quat, G3VectorQuat, G3TimestreamQuat, usefulfunc, indexmod
+from ..core import G3Units, quat, G3VectorQuat, G3TimestreamQuat, usefulfunc, indexmod
 import numpy
 
 
