@@ -12,6 +12,334 @@ The calibration project contains data classes and analysis code for storing the 
 	In addition, the ``.band_string`` property of a ``BolometerProperties`` instance returns the string representation of the given bolometer's frequency band, using the global formatting specification.
 
 
+Frame Objects in spt3g.calibration
+==================================
+* spt3g.calibration.BolometerProperties_
+
+* spt3g.calibration.BolometerPropertiesMap_
+
+* spt3g.calibration.PointingProperties_
+
+* spt3g.calibration.PointingPropertiesMap_
+
+
+.. _spt3g.calibration.BolometerProperties:
+
+spt3g.calibration.BolometerProperties
+-----------------------------------------
+
+Physical bolometer properties, such as detector angular offsets. Does not include tuning-dependent properties of the detectors.
+
+*Constructors:*
+	``BolometerProperties()``
+	
+	``BolometerProperties( (BolometerProperties)arg2)``
+
+
+
+*Members:*
+
+* **physical_name**: Physical name of the detector (e.g. some polarization at some particular pixel on the wafer)
+
+* **x_offset**: Horizontal pointing offset relative to boresight in angular units.
+
+* **y_offset**: Vertical pointing offset relative to boresight in angular units.
+
+* **band**: Nominal center of detector observing band in frequency units
+
+* **center_frequency**: Measured center of detector observing band in frequency units
+
+* **bandwidth**: Measured bandwidth of detector observing band in frequency units
+
+* **pol_angle**: Polarization angle in angular units
+
+* **pol_efficiency**: Polarization efficiency (0-1)
+
+* **coupling**: Optical coupling type
+
+* **wafer_id**: Name of the wafer this detector is on
+
+* **pixel_id**: Name of the pixel of which this detector is a part
+
+* **pixel_type**: Name of the pixel type of which this detector is a part
+
+* **band_string**: String representation of frequency band center
+
+* **band_vstring**: String representation of frequency band center, without units name
+
+
+
+.. _spt3g.calibration.BolometerPropertiesMap:
+
+spt3g.calibration.BolometerPropertiesMap
+--------------------------------------------
+
+Container for bolometer properties for focal plane, mapping logical bolometer IDs to their physical properties.
+
+*Constructors:*
+	``BolometerPropertiesMap()``
+	
+	``BolometerPropertiesMap( (BolometerPropertiesMap)arg2)``
+	
+	``BolometerPropertiesMap( (list)arg2)`` :
+	    Initialize with keys and values from a Python dictionary: {'key':'value'}
+	
+	
+	``BolometerPropertiesMap( (dict)arg2)`` :
+	    Initialize with keys and values as tuples in a Python list: [('key','value')]
+	
+	
+	``BolometerPropertiesMap()``
+
+
+
+*Methods:*
+
+.. _spt3g.calibration.BolometerPropertiesMap.keys:
+
+**spt3g.calibration.BolometerPropertiesMap.keys**
+
+``keys( (BolometerPropertiesMap)arg1) -> list :``
+    D.keys() -> list of D's keys
+
+.. _spt3g.calibration.BolometerPropertiesMap.has_key:
+
+**spt3g.calibration.BolometerPropertiesMap.has_key**
+
+``has_key( (BolometerPropertiesMap)arg1, (str)arg2) -> bool :``
+    D.has_key(k) -> True if D has a key k, else False
+
+.. _spt3g.calibration.BolometerPropertiesMap.values:
+
+**spt3g.calibration.BolometerPropertiesMap.values**
+
+``values( (BolometerPropertiesMap)arg1) -> list :``
+    D.values() -> list of D's values
+
+.. _spt3g.calibration.BolometerPropertiesMap.items:
+
+**spt3g.calibration.BolometerPropertiesMap.items**
+
+``items( (BolometerPropertiesMap)arg1) -> list :``
+    D.items() -> list of D's (key, value) pairs, as 2-tuples
+
+.. _spt3g.calibration.BolometerPropertiesMap.clear:
+
+**spt3g.calibration.BolometerPropertiesMap.clear**
+
+``clear( (BolometerPropertiesMap)arg1) -> None :``
+    D.clear() -> None.  Remove all items from D.
+
+.. _spt3g.calibration.BolometerPropertiesMap.copy:
+
+**spt3g.calibration.BolometerPropertiesMap.copy**
+
+``copy( (BolometerPropertiesMap)arg1) -> BolometerPropertiesMap :``
+    D.copy() -> a shallow copy of D
+
+.. _spt3g.calibration.BolometerPropertiesMap.get:
+
+**spt3g.calibration.BolometerPropertiesMap.get**
+
+``get( (BolometerPropertiesMap)arg1, (str)arg2 [, (object)default_val]) -> object :``
+    D.get(k[,d]) -> D[k] if k in D, else d.  d defaults to None.
+
+.. _spt3g.calibration.BolometerPropertiesMap.pop:
+
+**spt3g.calibration.BolometerPropertiesMap.pop**
+
+``pop( (BolometerPropertiesMap)arg1, (str)arg2) -> object``
+
+``pop( (BolometerPropertiesMap)arg1, (str)arg2, (object)arg3) -> object :``
+    D.pop(k[,d]) -> v, remove specified key and return the corresponding value
+    If key is not found, d is returned if given, otherwise KeyError is raised
+
+.. _spt3g.calibration.BolometerPropertiesMap.popitem:
+
+**spt3g.calibration.BolometerPropertiesMap.popitem**
+
+``popitem( (BolometerPropertiesMap)arg1) -> object :``
+    D.popitem() -> (k, v), remove and return some (key, value) pair as a
+    2-tuple; but raise KeyError if D is empty
+
+.. _spt3g.calibration.BolometerPropertiesMap.update:
+
+**spt3g.calibration.BolometerPropertiesMap.update**
+
+``update( (object)arg1, (object)arg2) -> None :``
+    D.update(E) -> None.  Update D from E: for k in E: D[k] = E[k]
+
+.. _spt3g.calibration.BolometerPropertiesMap.iteritems:
+
+**spt3g.calibration.BolometerPropertiesMap.iteritems**
+
+``iteritems( (object)arg1) -> object :``
+    D.iteritems() -> an iterator over the (key, value) items of D
+
+.. _spt3g.calibration.BolometerPropertiesMap.iterkeys:
+
+**spt3g.calibration.BolometerPropertiesMap.iterkeys**
+
+``iterkeys( (object)arg1) -> object :``
+    D.iterkeys() -> an iterator over the keys of D
+
+.. _spt3g.calibration.BolometerPropertiesMap.itervalues:
+
+**spt3g.calibration.BolometerPropertiesMap.itervalues**
+
+``itervalues( (object)arg1) -> object :``
+    D.itervalues() -> an iterator over the values of D
+
+
+
+.. _spt3g.calibration.PointingProperties:
+
+spt3g.calibration.PointingProperties
+----------------------------------------
+
+Pointing model parameters to be used for offline pointing corrections.
+
+*Constructors:*
+	``PointingProperties()``
+	
+	``PointingProperties( (PointingProperties)arg2)``
+
+
+
+*Members:*
+
+* **tiltLat**: Azimuth lateral tilt parameter.
+
+* **tiltHA**: Azimuth hour angle tilt parameter.
+
+* **tiltMag**: Magnitude of azimuth tilt.
+
+* **tiltAngle**: Orientation of azimuth tilt.
+
+
+
+.. _spt3g.calibration.PointingPropertiesMap:
+
+spt3g.calibration.PointingPropertiesMap
+-------------------------------------------
+
+Container for pointing model parameters for offline pointing.
+
+*Constructors:*
+	``PointingPropertiesMap()``
+	
+	``PointingPropertiesMap( (PointingPropertiesMap)arg2)``
+	
+	``PointingPropertiesMap( (list)arg2)`` :
+	    Initialize with keys and values from a Python dictionary: {'key':'value'}
+	
+	
+	``PointingPropertiesMap( (dict)arg2)`` :
+	    Initialize with keys and values as tuples in a Python list: [('key','value')]
+	
+	
+	``PointingPropertiesMap()``
+
+
+
+*Methods:*
+
+.. _spt3g.calibration.PointingPropertiesMap.keys:
+
+**spt3g.calibration.PointingPropertiesMap.keys**
+
+``keys( (PointingPropertiesMap)arg1) -> list :``
+    D.keys() -> list of D's keys
+
+.. _spt3g.calibration.PointingPropertiesMap.has_key:
+
+**spt3g.calibration.PointingPropertiesMap.has_key**
+
+``has_key( (PointingPropertiesMap)arg1, (str)arg2) -> bool :``
+    D.has_key(k) -> True if D has a key k, else False
+
+.. _spt3g.calibration.PointingPropertiesMap.values:
+
+**spt3g.calibration.PointingPropertiesMap.values**
+
+``values( (PointingPropertiesMap)arg1) -> list :``
+    D.values() -> list of D's values
+
+.. _spt3g.calibration.PointingPropertiesMap.items:
+
+**spt3g.calibration.PointingPropertiesMap.items**
+
+``items( (PointingPropertiesMap)arg1) -> list :``
+    D.items() -> list of D's (key, value) pairs, as 2-tuples
+
+.. _spt3g.calibration.PointingPropertiesMap.clear:
+
+**spt3g.calibration.PointingPropertiesMap.clear**
+
+``clear( (PointingPropertiesMap)arg1) -> None :``
+    D.clear() -> None.  Remove all items from D.
+
+.. _spt3g.calibration.PointingPropertiesMap.copy:
+
+**spt3g.calibration.PointingPropertiesMap.copy**
+
+``copy( (PointingPropertiesMap)arg1) -> PointingPropertiesMap :``
+    D.copy() -> a shallow copy of D
+
+.. _spt3g.calibration.PointingPropertiesMap.get:
+
+**spt3g.calibration.PointingPropertiesMap.get**
+
+``get( (PointingPropertiesMap)arg1, (str)arg2 [, (object)default_val]) -> object :``
+    D.get(k[,d]) -> D[k] if k in D, else d.  d defaults to None.
+
+.. _spt3g.calibration.PointingPropertiesMap.pop:
+
+**spt3g.calibration.PointingPropertiesMap.pop**
+
+``pop( (PointingPropertiesMap)arg1, (str)arg2) -> object``
+
+``pop( (PointingPropertiesMap)arg1, (str)arg2, (object)arg3) -> object :``
+    D.pop(k[,d]) -> v, remove specified key and return the corresponding value
+    If key is not found, d is returned if given, otherwise KeyError is raised
+
+.. _spt3g.calibration.PointingPropertiesMap.popitem:
+
+**spt3g.calibration.PointingPropertiesMap.popitem**
+
+``popitem( (PointingPropertiesMap)arg1) -> object :``
+    D.popitem() -> (k, v), remove and return some (key, value) pair as a
+    2-tuple; but raise KeyError if D is empty
+
+.. _spt3g.calibration.PointingPropertiesMap.update:
+
+**spt3g.calibration.PointingPropertiesMap.update**
+
+``update( (object)arg1, (object)arg2) -> None :``
+    D.update(E) -> None.  Update D from E: for k in E: D[k] = E[k]
+
+.. _spt3g.calibration.PointingPropertiesMap.iteritems:
+
+**spt3g.calibration.PointingPropertiesMap.iteritems**
+
+``iteritems( (object)arg1) -> object :``
+    D.iteritems() -> an iterator over the (key, value) items of D
+
+.. _spt3g.calibration.PointingPropertiesMap.iterkeys:
+
+**spt3g.calibration.PointingPropertiesMap.iterkeys**
+
+``iterkeys( (object)arg1) -> object :``
+    D.iterkeys() -> an iterator over the keys of D
+
+.. _spt3g.calibration.PointingPropertiesMap.itervalues:
+
+**spt3g.calibration.PointingPropertiesMap.itervalues**
+
+``itervalues( (object)arg1) -> object :``
+    D.itervalues() -> an iterator over the values of D
+
+
 Modules in spt3g.calibration
 ============================
 * spt3g.calibration.bolopropertiesutils.SplitByBand_

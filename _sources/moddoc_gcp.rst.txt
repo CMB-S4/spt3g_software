@@ -5,8 +5,194 @@ gcp
 The GCP package contains tools for interacting with the telescope control system (GCP). This includes both offline tools for processing data products from the GCP (ARCFileReader) and associated container classes (ACUStatus, TrackerStatus), as well as online tools designed for coordination of data taking with the control system (the various data tees and signalling modules).
 
 
+Frame Objects in spt3g.gcp
+==========================
+* spt3g.gcp.ACUStatus_
+
+* spt3g.gcp.ACUStatusVector_
+
+* spt3g.gcp.TrackerPointing_
+
+* spt3g.gcp.TrackerStatus_
+
+
+.. _spt3g.gcp.ACUStatus:
+
+spt3g.gcp.ACUStatus
+-----------------------
+
+ACU Status information, as reported by the ACU
+
+*Constructors:*
+	``ACUStatus()``
+	
+	``ACUStatus( (ACUStatus)arg2)``
+
+
+
+*Members:*
+
+* **time**: No Doc (Shame!)
+
+* **az_pos**: No Doc (Shame!)
+
+* **el_pos**: No Doc (Shame!)
+
+* **az_rate**: No Doc (Shame!)
+
+* **el_rate**: No Doc (Shame!)
+
+* **px_checksum_error_count**: No Doc (Shame!)
+
+* **px_resync_count**: No Doc (Shame!)
+
+* **px_resync_timeout_count**: No Doc (Shame!)
+
+* **px_timeout_count**: No Doc (Shame!)
+
+* **restart_count**: No Doc (Shame!)
+
+* **px_resyncing**: No Doc (Shame!)
+
+* **state**: No Doc (Shame!)
+
+* **acu_status**: No Doc (Shame!)
+
+
+
+.. _spt3g.gcp.ACUStatusVector:
+
+spt3g.gcp.ACUStatusVector
+-----------------------------
+
+Array of ACUStatus objects, usually time-ordered
+
+*Constructors:*
+	``ACUStatusVector()``
+	
+	``ACUStatusVector( (object)arg2)``
+
+
+
+*Methods:*
+
+.. _spt3g.gcp.ACUStatusVector.append:
+
+**spt3g.gcp.ACUStatusVector.append**
+
+``append( (ACUStatusVector)arg1, (object)arg2) -> None``
+
+.. _spt3g.gcp.ACUStatusVector.extend:
+
+**spt3g.gcp.ACUStatusVector.extend**
+
+``extend( (ACUStatusVector)arg1, (object)arg2) -> None``
+
+
+
+.. _spt3g.gcp.TrackerPointing:
+
+spt3g.gcp.TrackerPointing
+-----------------------------
+
+GCP Tracker Pointing
+
+*Constructors:*
+	``TrackerPointing()``
+	
+	``TrackerPointing( (TrackerPointing)arg2)``
+
+
+
+*Members:*
+
+* **time**: No Doc (Shame!)
+
+* **scu_temp**: No Doc (Shame!)
+
+* **features**: No Doc (Shame!)
+
+* **encoder_off_x**: No Doc (Shame!)
+
+* **encoder_off_y**: No Doc (Shame!)
+
+* **horiz_mount_x**: No Doc (Shame!)
+
+* **horiz_mount_y**: No Doc (Shame!)
+
+* **horiz_off_x**: No Doc (Shame!)
+
+* **horiz_off_y**: No Doc (Shame!)
+
+* **tilts_x**: No Doc (Shame!)
+
+* **tilts_y**: No Doc (Shame!)
+
+* **linsens_avg_l1**: No Doc (Shame!)
+
+* **linsens_avg_l2**: No Doc (Shame!)
+
+* **linsens_avg_r1**: No Doc (Shame!)
+
+* **linsens_avg_r2**: No Doc (Shame!)
+
+* **telescope_temp**: No Doc (Shame!)
+
+* **telescope_pressure**: No Doc (Shame!)
+
+* **refraction**: No Doc (Shame!)
+
+
+
+.. _spt3g.gcp.TrackerStatus:
+
+spt3g.gcp.TrackerStatus
+---------------------------
+
+GCP Tracker Status
+
+*Constructors:*
+	``TrackerStatus()``
+	
+	``TrackerStatus( (TrackerStatus)arg2)``
+
+
+
+*Members:*
+
+* **time**: No Doc (Shame!)
+
+* **az_pos**: No Doc (Shame!)
+
+* **el_pos**: No Doc (Shame!)
+
+* **az_rate**: No Doc (Shame!)
+
+* **el_rate**: No Doc (Shame!)
+
+* **az_command**: No Doc (Shame!)
+
+* **el_command**: No Doc (Shame!)
+
+* **az_rate_command**: No Doc (Shame!)
+
+* **el_rate_command**: No Doc (Shame!)
+
+* **state**: No Doc (Shame!)
+
+* **acu_seq**: No Doc (Shame!)
+
+* **in_control**: No Doc (Shame!)
+
+* **scan_flag**: No Doc (Shame!)
+
+
 Modules in spt3g.gcp
 ====================
+* spt3g.gcp.ARCFileReader_
+
+* spt3g.gcp.GCPMuxDataDecoder_
+
 * spt3g.gcp.ARCExtractor.ARCExtract_
 
 * spt3g.gcp.ARCExtractor.ARCExtractMinimal_
@@ -50,6 +236,24 @@ Modules in spt3g.gcp
 * spt3g.gcp.InfluxDB.UpdateDB_
 
 * spt3g.gcp.InfluxDB.WriteDB_
+
+
+.. _spt3g.gcp.ARCFileReader:
+
+**spt3g.gcp.ARCFileReader**
+
+Read GCP archive file (or files if you pass an iterable of paths). For non-SPT ARC file formats, please set Experiment to the appropriate value.  Set track_filename to True to record the filename for each frame in the ._filename attribute (fragile).
+
+
+
+.. _spt3g.gcp.GCPMuxDataDecoder:
+
+**spt3g.gcp.GCPMuxDataDecoder**
+
+Extracts contents of receiver registers in SPTpol-style ARC files into a wiring map and timepoint frames. This is designed to convert SPTpol-style data in which GCP records bolometer data into the ARC files into a format equivalent to that for SPT-3G. 
+
+For old (100d SPTpol) data not containing wiring information, insert a wiring map into the pipeline ahead of this module. The board_serial should be set to a real (positive) value for all bolometer channels and -1 for the calibrator sync readout.
+
 
 
 .. _spt3g.gcp.ARCExtractor.ARCExtract:
