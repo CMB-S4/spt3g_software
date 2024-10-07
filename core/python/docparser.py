@@ -44,7 +44,12 @@ def get_doc_for_module(module_path, include_link_list = True):
         print('Could not import module %s:' % module_path)
         print(e)
         sys.exit(1)
-    
+
+    if module_path.startswith("spt3g."):
+        p = module_path.rsplit(".", 1)
+        module_lib_path = "%s._lib%s" % (p[0], p[1])
+    else:
+        module_lib_path = module_path
 
     def format_object(modname, x):
         name = '%s.%s' % (modname, x)
@@ -76,7 +81,7 @@ def get_doc_for_module(module_path, include_link_list = True):
                     itemname = '%s.%s' % (modname, obj.__name__)
                 else:
                     itemname = obj.__name__ #helps with files imported in __init__
-                if not itemname.startswith(module_path):
+                if not itemname.startswith(module_path) and not itemname.startswith(module_lib_path):
                     continue
                 if itemname in anti_recursion_protector:
                     continue
@@ -142,7 +147,7 @@ def get_doc_for_module(module_path, include_link_list = True):
                     modname = obj.__module__
                 else:
                     itemname = obj.__name__ #helps with files imported in __init__
-                if not itemname.startswith(module_path):
+                if not itemname.startswith(module_path) and not itemname.startswith(module_lib_path):
                     continue
                 if itemname in other_anti_recursion_protector:
                     continue
@@ -187,7 +192,7 @@ def get_doc_for_module(module_path, include_link_list = True):
                     modname = obj.__module__
                 else:
                     itemname = obj.__name__ #helps with files imported in __init__
-                if not itemname.startswith(module_path):
+                if not itemname.startswith(module_path) and not itemname.startswith(module_lib_path):
                     continue
                 if itemname in other_other_anti_recursion_protector:
                     continue
@@ -197,7 +202,7 @@ def get_doc_for_module(module_path, include_link_list = True):
             subclasstest = False
             try:
                 subclasstest = issubclass( obj, G3FrameObject)
-            except TypeError:
+            except TypeError as e:
                 pass
             if hasattr(obj, '__g3frameobject__') or subclasstest:
                 out_str = add_str(out_str, format_object(modname, x))
@@ -282,4 +287,7 @@ def get_doc_for_module(module_path, include_link_list = True):
                 out_str = add_str(out_str,'* %s_\n' % m)
         doc_str = '\n'.join([fun_dict[k] for k in fun_lst])
         out_str = add_str(out_str,doc_str)
+
+    if module_lib_path != module_path:
+        out_str = out_str.replace(module_lib_path, module_path)
     return out_str, mod_lst, fun_lst, obj_lst
