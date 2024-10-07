@@ -74,7 +74,7 @@ class CMakeBuildExt(build_ext):
                 build_py.package_dir["spt3g"] = pkgdir
 
             # update version file
-            self.copy_file(self.source_dir / "cmake/package/version.py", self.build_dir)
+            self.copy_file(self.source_dir / "cmake/package/version.py", self.build_dir / "spt3g")
 
             # trigger script installer for all python scripts
             self.distribution.scripts = [
