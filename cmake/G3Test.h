@@ -9,7 +9,6 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include <boost/preprocessor/stringize.hpp>
 
 namespace G3Test{
 
@@ -89,7 +88,7 @@ inline void testEquivalence(const std::string& file, unsigned int line,
 /// TEST_GROUP(MyTests)
 #define TEST_GROUP(GROUPNAME) \
 namespace{ \
-static const char* GetTestGroup(){ return BOOST_PP_STRINGIZE(GROUPNAME); } \
+static const char* GetTestGroup(){ return #GROUPNAME; } \
 }
 
 /// Define a test. Use like:
@@ -101,7 +100,7 @@ static const char* GetTestGroup(){ return BOOST_PP_STRINGIZE(GROUPNAME); } \
 static void test_implementation_ ## TESTNAME(); \
 namespace{ \
 static G3Test::TestRegisterer register_ ## TESTNAME (GetTestGroup(), \
-	BOOST_PP_STRINGIZE(TESTNAME), \
+	#TESTNAME, \
 	test_implementation_ ## TESTNAME); \
 } \
 static void test_implementation_ ## TESTNAME()
@@ -109,7 +108,7 @@ static void test_implementation_ ## TESTNAME()
 /// Require that a predicate must be true, or mark the containing test as
 /// failed. An optional message may be passed after the predicate.
 #define ENSURE(predicate,...) \
-G3Test::testAssertion(__FILE__, __LINE__, BOOST_PP_STRINGIZE(predicate), (predicate), ##__VA_ARGS__);
+G3Test::testAssertion(__FILE__, __LINE__, #predicate, (predicate), ##__VA_ARGS__);
 
 /// Unconditionally mark the containing test as failed. A message may
 /// optionally be passed.
@@ -127,7 +126,7 @@ G3Test::testAssertion(__FILE__, __LINE__, "FAILURE", false, ##__VA_ARGS__);
 /// left and right operands and their values are printed in the event of a
 /// failure.
 #define ENSURE_EQUAL(left,right,...) \
-G3Test::testEquivalence(__FILE__, __LINE__, left, right, BOOST_PP_STRINGIZE(left), BOOST_PP_STRINGIZE(right), ##__VA_ARGS__);
+G3Test::testEquivalence(__FILE__, __LINE__, left, right, #left, #right, ##__VA_ARGS__);
 
 
 //=============================================================================
