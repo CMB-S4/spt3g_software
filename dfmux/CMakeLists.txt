@@ -1,5 +1,6 @@
 find_package(NetCDF MODULE)
-if (NetCDF_FOUND)
+find_package(HDF5)
+if (NetCDF_FOUND AND HDF5_FOUND)
 	set(DFMUX_LIB_EXTRA_SRC src/NetCDFDump.cxx)
 else()
 	set(DFMUX_LIB_EXTRA_SRC "")
@@ -15,7 +16,7 @@ target_link_libraries(dfmux PUBLIC core)
 
 add_spt3g_module(dfmux src/python.cxx)
 
-if (NetCDF_FOUND)
+if (NetCDF_FOUND AND HDF5_FOUND)
 	target_link_libraries(dfmux PUBLIC NetCDF::NetCDF)
 	add_spt3g_program(bin/ledgerman.py ledgerman)
 	set(NetCDF_FOUND ${NetCDF_FOUND} PARENT_SCOPE)
