@@ -40,17 +40,17 @@ public:
 
 	std::vector<double> PixelToAngle(size_t pixel) const;
 	size_t AngleToPixel(double alpha, double delta) const;
-	quat PixelToQuat(size_t pixel) const;
-	size_t QuatToPixel(quat q) const;
+	G3Quat PixelToQuat(size_t pixel) const;
+	size_t QuatToPixel(const G3Quat &q) const;
 
 	size_t RebinPixel(size_t pixel, size_t scale) const;
 
 	G3VectorQuat GetRebinQuats(size_t pixel, size_t scale) const;
 
-	void GetInterpPixelsWeights(quat q, std::vector<size_t> & pixels,
+	void GetInterpPixelsWeights(const G3Quat &q, std::vector<size_t> & pixels,
 	    std::vector<double> & weights) const;
 
-	std::vector<size_t> QueryDisc(quat q, double radius) const;
+	std::vector<size_t> QueryDisc(const G3Quat &q, double radius) const;
 
 private:
 	// scheme

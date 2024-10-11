@@ -275,7 +275,7 @@ std::vector<double>
 FlatSkyProjection::XYToAngle(double x, double y) const
 {
 	if (!cyl_) {
-		quat q = XYToQuat(x, y);
+		G3Quat q = XYToQuat(x, y);
 		double alpha, delta;
 		quat_to_ang(q, alpha, delta);
 		return {alpha, delta};
@@ -322,7 +322,7 @@ std::vector<double>
 FlatSkyProjection::AngleToXY(double alpha, double delta) const
 {
 	if (!cyl_) {
-		quat q = ang_to_quat(alpha, delta);
+		G3Quat q = ang_to_quat(alpha, delta);
 		return QuatToXY(q);
 	}
 
@@ -375,7 +375,7 @@ FlatSkyProjection::AngleToXY(double alpha, double delta) const
 }
 
 std::vector<double>
-FlatSkyProjection::QuatToXY(quat q) const
+FlatSkyProjection::QuatToXY(const G3Quat &q) const
 {
 	if (cyl_) {
 		double a, d;
@@ -384,8 +384,8 @@ FlatSkyProjection::QuatToXY(quat q) const
 	}
 
 	// Rotate to projection center
-	quat qr = ~q0_ * q * q0_;
-	double cc = qr.R_component_2();
+	G3Quat qr = ~q0_ * q * q0_;
+	double cc = qr.b();
 	double k;
 
 	switch(proj_) {
@@ -414,8 +414,8 @@ FlatSkyProjection::QuatToXY(quat q) const
 		break;
 	}
 
-	double x = k * qr.R_component_3();
-	double y = -k * qr.R_component_4();
+	double x = k * qr.c();
+	double y = -k * qr.d();
 
 	x = x0_ - x / x_res_;
 	y = y0_ - y / y_res_;
@@ -423,7 +423,7 @@ FlatSkyProjection::QuatToXY(quat q) const
 	return {x, y};
 }
 
-quat
+G3Quat
 FlatSkyProjection::XYToQuat(double x, double y) const
 {
 	if (cyl_) {
@@ -435,13 +435,13 @@ FlatSkyProjection::XYToQuat(double x, double y) const
 	y = (y0_ - y) * y_res_ / rad;
 
 	double rho = sqrt(x * x + y * y);
-	quat q;
+	G3Quat q;
 
 	if (rho < 1e-8) {
-		q = quat(0, 1, 0, 0);
+		q = G3Quat(0, 1, 0, 0);
 	} else if (proj_ == Proj2) {
 		double cc = sqrt((1. - rho) * (1. + rho));
-		q = quat(0, cc, x, -y);
+		q = G3Quat(0, cc, x, -y);
 	} else {
 		double c;
 
@@ -465,24 +465,24 @@ FlatSkyProjection::XYToQuat(double x, double y) const
 
 		double cc = COS(c);
 		double sc = SIN(c) / rho;
-		q = quat(0, cc, x * sc, -y * sc);
+		q = G3Quat(0, cc, x * sc, -y * sc);
 	}
 
 	// Rotate from projection center
 	return q0_ * q * ~q0_;
 }
 
-quat
+G3Quat
 FlatSkyProjection::PixelToQuat(size_t pixel) const
 {
 	if (pixel < 0 || pixel >= xpix_ * ypix_)
-		return quat(0, 1, 0, 0);
+		return G3Quat(0, 1, 0, 0);
 	std::vector<double> xy = PixelToXY(pixel);
 	return XYToQuat(xy[0], xy[1]);
 }
 
 size_t
-FlatSkyProjection::QuatToPixel(quat q) const
+FlatSkyProjection::QuatToPixel(const G3Quat &q) const
 {
 	std::vector<double> xy = QuatToXY(q);
 	return XYToPixel(xy[0], xy[1]);
@@ -507,7 +507,7 @@ FlatSkyProjection::AngleToPixel(double alpha, double delta) const
 G3VectorQuat
 FlatSkyProjection::GetRebinQuats(size_t pixel, size_t scale) const
 {
-	G3VectorQuat quats(scale * scale, quat(0, 1, 0, 0));
+	G3VectorQuat quats(scale * scale, G3Quat(0, 1, 0, 0));
 
 	if (pixel < 0 || pixel >= xpix_ * ypix_) {
 		log_debug("Point lies outside of pixel grid\n");
@@ -572,7 +572,7 @@ FlatSkyProjection::PixelToAngleGrad(size_t pixel, double h) const
 	return XYToAngleGrad(xy[0], xy[1], h);
 }
 
-void FlatSkyProjection::GetInterpPixelsWeights(quat q,
+void FlatSkyProjection::GetInterpPixelsWeights(const G3Quat &q,
     std::vector<size_t> & pixels, std::vector<double> & weights) const
 {
 	std::vector<double> xy = QuatToXY(q);
@@ -598,15 +598,15 @@ void FlatSkyProjection::GetInterpPixelsWeights(quat q,
 }
 
 std::vector<size_t>
-FlatSkyProjection::QueryDisc(quat q, double radius) const
+FlatSkyProjection::QueryDisc(const G3Quat &q, double radius) const
 {
 	static const size_t npts = 72;
 	double dd = -2.0 * radius / sqrt(2.0);
-	quat qd = get_origin_rotator(0, dd);
-	quat p = qd * q * ~qd;
-	double pva = q.R_component_2();
-	double pvb = q.R_component_3();
-	double pvc = q.R_component_4();
+	G3Quat qd = get_origin_rotator(0, dd);
+	G3Quat p = qd * q * ~qd;
+	double pva = q.b();
+	double pvb = q.c();
+	double pvc = q.d();
 
 	ssize_t xmin = xpix_;
 	ssize_t xmax = 0;
@@ -620,7 +620,7 @@ FlatSkyProjection::QueryDisc(quat q, double radius) const
 		double phi = i * step;
 		double c = COS(phi);
 		double s = SIN(phi);
-		quat qv = quat(c, pva * s, pvb * s, pvc * s);
+		G3Quat qv = G3Quat(c, pva * s, pvb * s, pvc * s);
 		auto xy = QuatToXY(qv * p * ~qv);
 		ssize_t fx = std::floor(xy[0]);
 		ssize_t cx = std::ceil(xy[0]);
@@ -644,7 +644,7 @@ FlatSkyProjection::QueryDisc(quat q, double radius) const
 			size_t pixel = y * xpix_ + x;
 			if (pixel > xpix_ * ypix_)
 				continue;
-			quat qp = PixelToQuat(pixel);
+			G3Quat qp = PixelToQuat(pixel);
 			if (dot3(qp, q) > crad)
 				pixels.push_back(pixel);
 		}

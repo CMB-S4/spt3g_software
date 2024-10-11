@@ -80,14 +80,14 @@ public:
 
 	size_t AngleToPixel(double alpha, double delta) const override;
 	std::vector<double> PixelToAngle(size_t pixel) const override;
-	size_t QuatToPixel(quat q) const override;
-	quat PixelToQuat(size_t pixel) const override;
+	size_t QuatToPixel(const G3Quat &q) const override;
+	G3Quat PixelToQuat(size_t pixel) const override;
 
 	G3VectorQuat GetRebinQuats(size_t pixel, size_t scale) const override;
-	void GetInterpPixelsWeights(quat q, std::vector<size_t> & pixels,
+	void GetInterpPixelsWeights(const G3Quat &q, std::vector<size_t> & pixels,
 	    std::vector<double> & weights) const override;
 
-	std::vector<size_t> QueryDisc(quat q, double radius) const override;
+	std::vector<size_t> QueryDisc(const G3Quat &q, double radius) const override;
 
 	G3SkyMapPtr Rebin(size_t scale, bool norm = true) const override;
 
