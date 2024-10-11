@@ -2,12 +2,7 @@
 #include <G3Data.h>
 #include <serialization.h>
 #include <pybindings.h>
-
-#include <boost/iostreams/stream.hpp>
-#include <boost/iostreams/device/array.hpp>
-#include <boost/iostreams/device/back_inserter.hpp>
-#include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
+#include <dataio.h>
 
 #include <sstream>
 #include <stdlib.h>
@@ -395,9 +390,8 @@ void G3Frame::blob_encode(struct blob_container &blob)
 
 	// If no encoded frameobject, serialize it
 	blob.blob = boost::make_shared<std::vector<char> >();
-	boost::iostreams::stream<
-	  boost::iostreams::back_insert_device<std::vector<char> > >
-	  item_os(*blob.blob);
+	boost::iostreams::filtering_ostream item_os;
+	g3_ostream_to_buffer(item_os, *blob.blob);
 	cereal::PortableBinaryOutputArchive item_ar(item_os);
 	item_ar << make_nvp("val", blob.frameobject);
 	item_os.flush();
@@ -437,8 +431,8 @@ struct g3frame_picklesuite : boost::python::pickle_suite
 	{
 		namespace bp = boost::python;
 		std::vector<char> buffer;
-		boost::iostreams::filtering_ostream os(
-		    boost::iostreams::back_inserter(buffer));
+		boost::iostreams::filtering_ostream os;
+		g3_ostream_to_buffer(os, buffer);
 		(bp::extract<const G3Frame &>(obj))().save(os);
 		os.flush();
 

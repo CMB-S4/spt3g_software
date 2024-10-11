@@ -9,9 +9,6 @@
 #include <dataio.h>
 #include <gcp/Experiments.h>
 
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/filesystem.hpp>
-
 #include <string.h>
 #include <arpa/inet.h>
 
@@ -142,10 +139,7 @@ ARCFileReader::ARCFileReader(const std::string &path,
 		log_fatal("Unrecognized Experiment");
 	}
 
-	boost::filesystem::path fpath(path);
-	if (path.find("://") == path.npos && (!boost::filesystem::exists(fpath) ||
-	    !boost::filesystem::is_regular_file(fpath)))
-		log_fatal("Could not find file %s", path.c_str());
+	g3_check_input_path(path);
 	StartFile(path);
 }
 
@@ -167,10 +161,7 @@ ARCFileReader::ARCFileReader(const std::vector<std::string> &filename,
 		log_fatal("Empty file list provided to G3Reader");
 
 	for (auto i = filename.begin(); i != filename.end(); i++){
-		boost::filesystem::path fpath(*i);
-		if (!boost::filesystem::exists(fpath) ||
-		    !boost::filesystem::is_regular_file(fpath)) 
-			log_fatal("Could not find file %s", i->c_str());
+		g3_check_input_path(*i);
 		filename_.push_back(*i);
 	}
 
