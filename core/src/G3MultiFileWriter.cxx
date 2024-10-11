@@ -1,9 +1,17 @@
 #include <pybindings.h>
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/iostreams/device/file.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
+#ifdef BZIP2_FOUND
+#include <boost/iostreams/filter/bzip2.hpp>
+#endif
+#include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 #include <string>
 #include <G3Module.h>
 
-#include <dataio.h>
+#include "counter64.hpp"
 
 class G3MultiFileWriter : public G3Module {
 public:
@@ -39,7 +47,11 @@ G3MultiFileWriter::G3MultiFileWriter(boost::python::object filename,
 
 	if (fstr.check()) {
 		filename_ = fstr();
-		g3_check_output_path(filename_);
+		boost::filesystem::path fpath(filename_);
+		if (fpath.empty() || (fpath.has_parent_path() &&
+		    !boost::filesystem::exists(fpath.parent_path())))
+			log_fatal("Parent path does not exist: %s",
+			    fpath.parent_path().string().c_str());
 
 		boost::format f(filename_);
 		try {
@@ -86,7 +98,13 @@ G3MultiFileWriter::CheckNewFile(G3FramePtr frame)
 	if (!stream_.empty()) {
 		bool start_new_ = false;
 
-		if (g3_ostream_count(stream_) > size_limit_)
+		boost::iostreams::counter64 *counter =
+		    stream_.component<boost::iostreams::counter64>(
+		    stream_.size() - 2);
+		if (!counter)
+			log_fatal("Could not get stream counter");
+
+		if ((size_t)counter->characters() > size_limit_)
 			start_new_ = true;
 
 		if (newfile_callback_.ptr() != Py_None &&
@@ -117,11 +135,27 @@ G3MultiFileWriter::CheckNewFile(G3FramePtr frame)
 		filename = boost::python::extract<std::string>(
 		    filename_callback_(frame, seqno++))();
 
-		g3_check_output_path(filename);
+		boost::filesystem::path fpath(filename);
+		if (fpath.empty() || (fpath.has_parent_path() &&
+		    !boost::filesystem::exists(fpath.parent_path())))
+			log_fatal("Parent path does not exist: %s",
+			    fpath.parent_path().string().c_str());
+
 	}
 
 	current_filename_ = filename;
-	g3_ostream_from_path(stream_, filename, false, true);
+
+	if (boost::algorithm::ends_with(filename, ".gz"))
+		stream_.push(boost::iostreams::gzip_compressor());
+	if (boost::algorithm::ends_with(filename, ".bz2")) {
+#ifdef BZIP2_FOUND
+		stream_.push(boost::iostreams::bzip2_compressor());
+#else
+		log_fatal("Boost not compiled with bzip2 support.");
+#endif
+	}
+	stream_.push(boost::iostreams::counter64());
+	stream_.push(boost::iostreams::file_sink(filename, std::ios::binary));
 
 	for (auto i = metadata_cache_.begin(); i != metadata_cache_.end(); i++)
 		(*i)->save(stream_);

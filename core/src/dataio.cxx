@@ -18,8 +18,6 @@
 #include <netdb.h>
 #include <stdlib.h>
 
-#include "counter64.hpp"
-
 int
 g3_istream_from_path(boost::iostreams::filtering_istream &stream,
     const std::string &path, float timeout)
@@ -153,60 +151,4 @@ g3_istream_from_path(boost::iostreams::filtering_istream &stream,
 	}
 
 	return fd;
-}
-
-void
-g3_ostream_from_path(boost::iostreams::filtering_ostream &stream,
-    const std::string &path, bool append, bool counter)
-{
-	if (boost::algorithm::ends_with(path, ".gz") && !append)
-		stream.push(boost::iostreams::gzip_compressor());
-	if (boost::algorithm::ends_with(path, ".bz2") && !append) {
-#ifdef BZIP2_FOUND
-		stream.push(boost::iostreams::bzip2_compressor());
-#else
-		log_fatal("Boost not compiled with bzip2 support.");
-#endif
-	}
-
-	if (counter)
-		stream.push(boost::iostreams::counter64());
-	std::ios_base::openmode mode = std::ios::binary;
-	if (append)
-		mode |= std::ios::app;
-	stream.push(boost::iostreams::file_sink(path, mode));
-}
-
-size_t
-g3_ostream_count(boost::iostreams::filtering_ostream &stream)
-{
-	boost::iostreams::counter64 *counter =
-	    stream.component<boost::iostreams::counter64>(
-	    stream.size() - 2);
-	if (!counter)
-		log_fatal("Could not get stream counter");
-
-	return counter->characters();
-}
-
-void
-g3_check_input_path(const std::string &path)
-{
-	if (path.find("://") == path.npos)
-		return;
-
-	boost::filesystem::path fpath(path);
-	if (!boost::filesystem::exists(fpath) ||
-	    !boost::filesystem::is_regular_file(fpath))
-		log_fatal("Could not find file %s", path.c_str());
-}
-
-void
-g3_check_output_path(const std::string &path)
-{
-	boost::filesystem::path fpath(path);
-	if (fpath.empty() || (fpath.has_parent_path() &&
-	    !boost::filesystem::exists(fpath.parent_path())))
-		log_fatal("Parent path does not exist: %s",
-		    fpath.parent_path().string().c_str());
 }
