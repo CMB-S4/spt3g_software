@@ -4,8 +4,6 @@
 #include <G3Map.h>
 #include <G3Units.h>
 
-#include <boost/math/constants/constants.hpp>
-
 #include <vector>
 #include <math.h>
 #include <iostream>
@@ -13,10 +11,6 @@
 
 #include <stdlib.h>
 #include <time.h>
-
-using namespace boost::math;
-
-const double PI = constants::pi<double>();
 
 #define ASIN asin
 #define ATAN2 atan2
@@ -92,7 +86,7 @@ quat_ang_sep(quat a, quat b)
 	if (d > 1)
 		return 0;
 	if (d < -1)
-		return PI * G3Units::rad;
+		return M_PI * G3Units::rad;
 	return acos(d) * G3Units::rad;
 }
 
