@@ -175,6 +175,9 @@ public:
 #define SPT3G_PYTHON_MODULE(name) \
 BOOST_PYTHON_MODULE(_lib ## name)
 
+// Create a namespace (importable sub-module) within some parent scope
+bp::object export_namespace(bp::object scope, std::string name);
+
 // Python runtime context to simplify acquiring or releasing the GIL as necessary.
 // To use, simply construct the context object where necessary, e.g.
 //    G3PythonContext ctx("mycontext", false);
