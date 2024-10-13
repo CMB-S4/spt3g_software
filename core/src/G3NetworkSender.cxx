@@ -1,10 +1,7 @@
 #include <pybindings.h>
 #include <G3NetworkSender.h>
 
-#include <boost/iostreams/stream.hpp>
-#include <boost/iostreams/device/array.hpp>
-#include <boost/iostreams/device/back_inserter.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
+#include <dataio.h>
 
 #include <chrono>
 
@@ -176,8 +173,8 @@ void G3NetworkSender::SerializeFrame(serialization_task& task)
 {
 	try{
 		netbuf_type buf(new std::vector<char>);
-		boost::iostreams::filtering_ostream os(
-			boost::iostreams::back_inserter(*buf));
+		g3_ostream os;
+		g3_ostream_to_buffer(os, *buf);
 		task.input->save(os);
 		os.flush();
 		task.output.set_value(buf);

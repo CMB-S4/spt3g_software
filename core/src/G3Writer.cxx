@@ -1,39 +1,14 @@
 #include <pybindings.h>
 #include <G3Writer.h>
-
-#include <boost/algorithm/string.hpp>
-#include <boost/iostreams/device/file.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
-#ifdef BZIP2_FOUND
-#include <boost/iostreams/filter/bzip2.hpp>
-#endif
-#include <boost/filesystem.hpp>
+#include <dataio.h>
 
 G3Writer::G3Writer(std::string filename,
     std::vector<G3Frame::FrameType> streams,
     bool append) :
     filename_(filename), streams_(streams)
 {
-	boost::filesystem::path fpath(filename);
-	if (fpath.empty() || (fpath.has_parent_path() &&
-	    !boost::filesystem::exists(fpath.parent_path())))
-		throw std::runtime_error(std::string("Parent path does not "
-		    "exist: ") + fpath.parent_path().string());
-
-	if (boost::algorithm::ends_with(filename, ".gz") && !append)
-		stream_.push(boost::iostreams::gzip_compressor());
-	if (boost::algorithm::ends_with(filename, ".bz2") && !append) {
-#ifdef BZIP2_FOUND
-		stream_.push(boost::iostreams::bzip2_compressor());
-#else
-		log_fatal("Boost not compiled with bzip2 support.");
-#endif
-	}
-
-	std::ios_base::openmode mode = std::ios::binary;
-	if (append)
-		mode |= std::ios::app;
-	stream_.push(boost::iostreams::file_sink(filename, mode));
+	g3_check_output_path(filename);
+	g3_ostream_to_path(stream_, filename, append);
 }
 
 G3Writer::~G3Writer()
