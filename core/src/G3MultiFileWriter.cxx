@@ -24,7 +24,7 @@ private:
 	std::vector<G3Frame::FrameType> always_break_on_;
 	boost::python::object newfile_callback_;
 
-	boost::iostreams::filtering_ostream stream_;
+	g3_ostream stream_;
 	std::vector<G3FramePtr> metadata_cache_;
 	int seqno;
 

@@ -29,7 +29,7 @@ struct g3frameobject_picklesuite : boost::python::pickle_suite
 	{
 		namespace bp = boost::python;
 		std::vector<char> buffer;
-		boost::iostreams::filtering_ostream os;
+		g3_ostream os;
 		g3_ostream_to_buffer(os, buffer);
 		{
 			cereal::PortableBinaryOutputArchive ar(os);
@@ -50,7 +50,7 @@ struct g3frameobject_picklesuite : boost::python::pickle_suite
 		PyObject_GetBuffer(bp::object(state[1]).ptr(), &view,
 		    PyBUF_SIMPLE);
 
-		boost::iostreams::filtering_istream fis;
+		g3_istream fis;
 		g3_istream_from_buffer(fis, (char *)view.buf, view.len);
 		cereal::PortableBinaryInputArchive ar(fis);
 

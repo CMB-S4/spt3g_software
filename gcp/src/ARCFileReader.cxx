@@ -89,7 +89,7 @@ public:
 private:
 	void StartFile(const std::string & path);
 	
-	boost::iostreams::filtering_istream stream_;
+	g3_istream stream_;
 
 	struct block_stats {
 		int flags;
