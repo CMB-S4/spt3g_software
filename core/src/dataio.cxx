@@ -209,7 +209,7 @@ g3_ostream_to_buffer(boost::iostreams::filtering_ostream &stream,
 void
 g3_check_input_path(const std::string &path)
 {
-	if (path.find("://") == path.npos)
+	if (path.find("://") != path.npos)
 		return;
 
 	boost::filesystem::path fpath(path);
