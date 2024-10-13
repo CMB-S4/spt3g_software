@@ -2,7 +2,7 @@
 #define _G3_ARCWRITER_H
 
 #include <string>
-#include <boost/iostreams/filtering_stream.hpp>
+#include <dataio.h>
 
 #include <G3Module.h>
 
@@ -18,7 +18,7 @@ public:
 	void Flush();
 private:
 	std::string filename_;
-	boost::iostreams::filtering_ostream stream_;
+	g3_ostream stream_;
 	std::vector<G3Frame::FrameType> streams_;
 
 	SET_LOGGER("G3Writer");

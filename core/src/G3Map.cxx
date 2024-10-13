@@ -159,7 +159,7 @@ template <class A> void G3MapFrameObject::save(A &ar, const unsigned v) const
 	uint32_t len = size();
 	ar << cereal::make_nvp("len", len);
 
-	boost::iostreams::filtering_ostream os;
+	g3_ostream os;
 	for (auto i = begin(); i != end(); i++) {
 		ar << cereal::make_nvp("key", i->first);
 
@@ -184,7 +184,7 @@ template <class A> void G3MapFrameObject::load(A &ar, const unsigned v)
 
 	uint32_t len;
 	ar >> cereal::make_nvp("len", len);
-	boost::iostreams::filtering_istream fis;
+	g3_istream fis;
 	for (uint32_t i = 0; i < len; i++) {
 		std::pair<std::string, G3FrameObjectPtr> item;
 		std::vector<char> buffer;

@@ -100,13 +100,15 @@ void G3Reader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 }
 
 off_t G3Reader::Seek(off_t offset) {
-	if (stream_.peek() == EOF && offset != Tell())
+	try {
+		return g3_istream_seek(stream_, offset);
+	} catch (...) {
 		log_fatal("Cannot seek %s; stream closed at EOF.", cur_file_.c_str());
-	return boost::iostreams::seek(stream_, offset, std::ios_base::beg);
+	}
 }
 
 off_t G3Reader::Tell() {
-	return boost::iostreams::seek(stream_, 0, std::ios_base::cur);
+	return g3_istream_tell(stream_);
 }
 
 PYBINDINGS("core") {

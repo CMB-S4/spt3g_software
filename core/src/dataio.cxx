@@ -20,8 +20,7 @@
 #include "counter64.hpp"
 
 int
-g3_istream_from_path(boost::iostreams::filtering_istream &stream,
-    const std::string &path, float timeout)
+g3_istream_from_path(g3_istream &stream, const std::string &path, float timeout)
 {
 	stream.reset();
 	if (!path.compare(path.size() - 3, 3, ".gz"))
@@ -154,17 +153,30 @@ g3_istream_from_path(boost::iostreams::filtering_istream &stream,
 	return fd;
 }
 
+off_t
+g3_istream_seek(g3_istream &stream, off_t offset)
+{
+	if (stream.peek() == EOF || offset != g3_istream_tell(stream))
+		log_fatal("Cannot seek stream, closed at EOF.");
+	return boost::iostreams::seek(stream, offset, std::ios_base::beg);
+}
+
+off_t
+g3_istream_tell(g3_istream &stream)
+{
+	return boost::iostreams::seek(stream, 0, std::ios_base::cur);
+}
+
 void
-g3_istream_from_buffer(boost::iostreams::filtering_istream &stream,
-    const char *buf, size_t len)
+g3_istream_from_buffer(g3_istream &stream, const char *buf, size_t len)
 {
 	stream.reset();
 	stream.push(boost::iostreams::array_source(buf, len));
 }
 
 void
-g3_ostream_to_path(boost::iostreams::filtering_ostream &stream,
-    const std::string &path, bool append, bool counter)
+g3_ostream_to_path(g3_ostream &stream, const std::string &path,
+    bool append, bool counter)
 {
 	stream.reset();
 	if (!path.compare(path.size() - 3, 3, ".gz") && !append)
@@ -186,7 +198,7 @@ g3_ostream_to_path(boost::iostreams::filtering_ostream &stream,
 }
 
 size_t
-g3_ostream_count(boost::iostreams::filtering_ostream &stream)
+g3_ostream_count(g3_ostream &stream)
 {
 	boost::iostreams::counter64 *counter =
 	    stream.component<boost::iostreams::counter64>(
@@ -198,7 +210,7 @@ g3_ostream_count(boost::iostreams::filtering_ostream &stream)
 }
 
 void
-g3_ostream_to_buffer(boost::iostreams::filtering_ostream &stream,
+g3_ostream_to_buffer(g3_ostream &stream,
     std::vector<char> &buf)
 {
 	stream.reset();
