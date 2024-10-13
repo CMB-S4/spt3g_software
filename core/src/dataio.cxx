@@ -222,8 +222,14 @@ void
 g3_check_output_path(const std::string &path)
 {
 	boost::filesystem::path fpath(path);
-	if (fpath.empty() || (fpath.has_parent_path() &&
-	    !boost::filesystem::exists(fpath.parent_path())))
+
+	if (fpath.empty())
+		log_fatal("Empty file path");
+
+	if (!fpath.has_parent_path())
+		return;
+
+	if (!boost::filesystem::exists(fpath.parent_path()))
 		log_fatal("Parent path does not exist: %s",
 		    fpath.parent_path().string().c_str());
 }
