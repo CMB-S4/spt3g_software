@@ -1,5 +1,4 @@
 #include <pybindings.h>
-#include <boost/format.hpp>
 #include <string>
 #include <G3Module.h>
 
@@ -41,13 +40,9 @@ G3MultiFileWriter::G3MultiFileWriter(boost::python::object filename,
 		filename_ = fstr();
 		g3_check_output_path(filename_);
 
-		boost::format f(filename_);
-		try {
-			f % 0;
-		} catch (const std::exception &e) {
+		if (snprintf(NULL, 0, filename_.c_str(), 0) < 0)
 			log_fatal("Cannot format filename. Should be "
 			    "outfile-%%03u.g3");
-		}
 	} else if (PyCallable_Check(filename.ptr())) {
 		filename_ = "";
 		filename_callback_ = filename;
@@ -105,14 +100,15 @@ G3MultiFileWriter::CheckNewFile(G3FramePtr frame)
 
 	std::string filename;
 	if (filename_ != "") {
-		boost::format f(filename_);
-		try {
-			f % seqno++;
-		} catch (const std::exception &e) {
+		int sz = snprintf(NULL, 0, filename_.c_str(), seqno);
+		if (sz < 0)
 			log_fatal("Cannot format filename. Should be "
 			    "outfile-%%03u.g3");
-		}
-		filename = f.str();
+		char *msg = new char[sz + 1];
+		snprintf(msg, sz + 1, filename_.c_str(), seqno);
+		filename = std::string(msg);
+		delete [] msg;
+		seqno++;
 	} else {
 		filename = boost::python::extract<std::string>(
 		    filename_callback_(frame, seqno++))();

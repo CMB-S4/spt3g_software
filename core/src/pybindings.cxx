@@ -2,6 +2,16 @@
 
 namespace bp = boost::python;
 
+// Create a namespace (importable sub-module) within some parent scope
+bp::object
+export_namespace(bp::object scope, std::string name)
+{
+	std::string modname = bp::extract<std::string>(scope.attr("__name__") + "." + name);
+	bp::object mod(bp::handle<>(bp::borrowed(PyImport_AddModule(modname.c_str()))));
+	scope.attr(name.c_str()) = mod;
+	return mod;
+}
+
 // The following implements the headerless module registration code
 typedef std::map<std::string, std::vector<void (*)()> > module_reg_t;
 static module_reg_t *modregs = NULL;
