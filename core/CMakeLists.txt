@@ -14,7 +14,7 @@ add_spt3g_library(core SHARED
 	src/G3TriggeredBuilder.cxx src/G3MultiFileWriter.cxx src/dataio.cxx
 	src/crc32.c ${CORE_EXTRA_SRCS}
 	src/G3NetworkSender.cxx src/G3SyslogLogger.cxx
-	src/G3PipelineInfo.cxx src/G3Quat.cxx
+	src/G3PipelineInfo.cxx src/G3Quat.cxx src/G3Units.cxx
 	src/int_storage.cxx src/pybindings.cxx
 )
 
