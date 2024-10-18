@@ -175,8 +175,8 @@ public:
 
 	virtual std::vector<double> PixelToAngle(size_t pixel) const;
 	virtual size_t AngleToPixel(double alpha, double delta) const;
-	virtual G3Quat PixelToQuat(size_t pixel) const = 0;
-	virtual size_t QuatToPixel(const G3Quat &q) const = 0;
+	virtual Quat PixelToQuat(size_t pixel) const = 0;
+	virtual size_t QuatToPixel(const Quat &q) const = 0;
 
 	// Rebinning and interpolation
 	virtual void GetRebinAngles(size_t pixel, size_t scale,
@@ -184,12 +184,12 @@ public:
 	virtual G3VectorQuat GetRebinQuats(size_t pixel, size_t scale) const = 0;
 	virtual void GetInterpPixelsWeights(double alpha, double delta,
 	    std::vector<size_t> & pixels, std::vector<double> & weights) const;
-	virtual void GetInterpPixelsWeights(const G3Quat &q, std::vector<size_t> & pixels,
+	virtual void GetInterpPixelsWeights(const Quat &q, std::vector<size_t> & pixels,
 	    std::vector<double> & weights) const = 0;
 	double GetInterpPrecalc(const std::vector<size_t> &pixels,
 	    const std::vector<double> &weights) const;
 	double GetInterpValue(double alpha, double delta) const;
-	double GetInterpValue(const G3Quat &q) const;
+	double GetInterpValue(const Quat &q) const;
 	std::vector<double> GetInterpValues(const std::vector<double> &alphas,
 	    const std::vector<double> &deltas) const;
 	std::vector<double> GetInterpValues(const G3VectorQuat & quats) const;
@@ -198,9 +198,9 @@ public:
 
 	/* Analogue to healpy.query_disc, returns list of pixels within a disc */
 	std::vector<size_t> QueryDisc(double alpha, double delta, double radius) const;
-	virtual std::vector<size_t> QueryDisc(const G3Quat &q, double radius) const = 0;
+	virtual std::vector<size_t> QueryDisc(const Quat &q, double radius) const = 0;
 	std::vector<size_t> QueryAlphaEllipse(double alpha, double delta, double a, double b) const;
-	std::vector<size_t> QueryAlphaEllipse(const G3Quat &q, double a, double b) const;
+	std::vector<size_t> QueryAlphaEllipse(const Quat &q, double a, double b) const;
 
 	virtual bool IsDense() const {
 		throw std::runtime_error("Checking array density not implemented");

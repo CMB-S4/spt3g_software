@@ -1,5 +1,6 @@
 #include <G3Frame.h>
 #include <G3Data.h>
+#include <G3Quat.h>
 #include <serialization.h>
 #include <pybindings.h>
 
@@ -499,6 +500,12 @@ static void g3frame_python_put(G3Frame &f, std::string name, bp::object obj)
 		return;
 	}
 
+	bp::extract<Quat> extquat(obj);
+	if (extquat.check()) {
+		f.Put(name, boost::make_shared<G3Quat>(extquat()));
+		return;
+	}
+
 	bp::extract<std::string> extstr(obj);
 	if (extstr.check())
 		f.Put(name, boost::make_shared<G3String>(extstr()));
@@ -526,6 +533,8 @@ static bp::object g3frame_python_get(G3Frame &f, std::string name)
 		return bp::object(boost::dynamic_pointer_cast<const G3String>(element)->value);
 	else if (!!boost::dynamic_pointer_cast<const G3Bool>(element))
 		return bp::object(boost::dynamic_pointer_cast<const G3Bool>(element)->value);
+	else if (!!boost::dynamic_pointer_cast<const G3Quat>(element))
+		return bp::object(boost::dynamic_pointer_cast<const G3Quat>(element)->value);
 	else
 		return bp::object(boost::const_pointer_cast<G3FrameObject>(element));
 }

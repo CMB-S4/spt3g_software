@@ -1,4 +1,4 @@
-from ..core import G3Units, G3Quat, G3VectorQuat, G3TimestreamQuat, usefulfunc, indexmod
+from ..core import G3Units, Quat, G3VectorQuat, G3TimestreamQuat, usefulfunc, indexmod
 import numpy
 
 
@@ -9,7 +9,7 @@ def quat_to_ang(q):
     vector of them) specified as a (longitude, latitude) pair.
     """
     single = False
-    if isinstance(q, G3Quat):
+    if isinstance(q, Quat):
         q = numpy.array(G3VectorQuat([q]))
         single = True
     elif isinstance(q, list):
@@ -54,7 +54,7 @@ def ang_to_quat(alpha, delta, start=None, stop=None):
     )
 
     if len(q) == 1:
-        return G3Quat(q[0, :])
+        return Quat(q[0, :])
     else:
         if start is not None:
             out = G3TimestreamQuat(q)

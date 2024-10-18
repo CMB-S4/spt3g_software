@@ -25,34 +25,34 @@
  * the z coordinate = -sin(elevation) = sin(declination)
  */
 
-static G3Quat
-project_on_plane(const G3Quat &plane_normal, const G3Quat &point)
+static Quat
+project_on_plane(const Quat &plane_normal, const Quat &point)
 {
 	// Projects the quaternion onto a plane with unit normal plane_normal
 	//   The plane is defined as going through the origin 
 	//   with normal = plane_normal
 
-	G3Quat out_q(point);
+	Quat out_q(point);
 	//ensure unit vec
-	G3Quat un = plane_normal.unreal().versor();
+	auto un = plane_normal.unreal().versor();
 	out_q -= un * dot3(un, point);
 	return out_q.versor();
 }
 
-G3Quat
+Quat
 ang_to_quat(double alpha, double delta)
 {
 	double c_delta = cos(delta / G3Units::rad);
-	return G3Quat(0, 
+	return Quat(0, 
 		    c_delta * cos(alpha/G3Units::rad),
 		    c_delta * sin(alpha/G3Units::rad),
 		    sin(delta / G3Units::rad)).versor();
 }
 
 void
-quat_to_ang(const G3Quat &q, double &alpha, double &delta)
+quat_to_ang(const Quat &q, double &alpha, double &delta)
 {
-	G3Quat uq = q.unreal().versor();
+	auto uq = q.unreal().versor();
 	delta = ASIN(uq.d()) * G3Units::rad;
 	alpha = ATAN2(uq.c(), uq.b())*G3Units::rad;
 	if (alpha < 0)
@@ -60,7 +60,7 @@ quat_to_ang(const G3Quat &q, double &alpha, double &delta)
 }
 
 static boost::python::tuple
-py_quat_to_ang(const G3Quat &q)
+py_quat_to_ang(const Quat &q)
 {
 	double a,d;
 	quat_to_ang(q, a, d);
@@ -69,10 +69,10 @@ py_quat_to_ang(const G3Quat &q)
 }
 
 double
-quat_ang_sep(const G3Quat &a, const G3Quat &b)
+quat_ang_sep(const Quat &a, const Quat &b)
 {
-	G3Quat ua = a.unreal().versor();
-	G3Quat ub = b.unreal().versor();
+	auto ua = a.unreal().versor();
+	auto ub = b.unreal().versor();
 
 	double d = dot3(ua, ub);
 	if (d > 1)
@@ -82,37 +82,37 @@ quat_ang_sep(const G3Quat &a, const G3Quat &b)
 	return acos(d) * G3Units::rad;
 }
 
-static G3Quat
-coord_quat_to_delta_hat(const G3Quat &q)
+static Quat
+coord_quat_to_delta_hat(const Quat &q)
 {
 	// computes the delta hat vector for a given point on the unit sphere
 	// specified by q
 	// 
 	// (The delta hat is equal to -alpha hat)
-	G3Quat uq = q.unreal().versor();
+	auto uq = q.unreal().versor();
 	double st = sqrt(1 - (uq.d()*uq.d()));
-	return G3Quat(0,
+	return Quat(0,
 		     -1 * (uq.b() * uq.d())/st,
 		     -1 * (uq.c() * uq.d())/st,
 		     st).versor();
 }
 
 static double
-get_rot_ang(const G3Quat &start_q, const G3Quat &trans)
+get_rot_ang(const Quat &start_q, const Quat &trans)
 {
 	// delta is the physicist spherical coordinates delta
 	// Computes delta hat for the start q applies trans to it
 	// and then computes the angle between that and end_q's delta hat.
 
-	G3Quat t = trans * coord_quat_to_delta_hat(start_q) * ~trans;
-	G3Quat end_q = trans * start_q * ~trans;
-	G3Quat t_p = coord_quat_to_delta_hat(end_q);
+	auto t = trans * coord_quat_to_delta_hat(start_q) * ~trans;
+	auto end_q = trans * start_q * ~trans;
+	auto t_p = coord_quat_to_delta_hat(end_q);
 	double sf = (dot3(end_q, cross3(t, t_p)) < 0) ? -1 : 1;
 	return sf * quat_ang_sep(t, t_p);
 }
 
 
-static G3Quat
+static Quat
 get_transform_quat(double as_0, double ds_0, double ae_0, double de_0,
     double as_1, double ds_1, double ae_1, double de_1)
 {
@@ -129,51 +129,51 @@ get_transform_quat(double as_0, double ds_0, double ae_0, double de_0,
 	 *
 	 */
 
-	G3Quat asds_0 = ang_to_quat(as_0, ds_0);
-	G3Quat asds_1 = ang_to_quat(as_1, ds_1);
-	G3Quat aede_0 = ang_to_quat(ae_0, de_0);
-	G3Quat aede_1 = ang_to_quat(ae_1, de_1);
+	auto asds_0 = ang_to_quat(as_0, ds_0);
+	auto asds_1 = ang_to_quat(as_1, ds_1);
+	auto aede_0 = ang_to_quat(ae_0, de_0);
+	auto aede_1 = ang_to_quat(ae_1, de_1);
 
-	G3Quat tquat = cross3(asds_0, aede_0);
+	auto tquat = cross3(asds_0, aede_0);
 	double mag = sqrt(dot3(tquat, tquat));
 	double ang = quat_ang_sep(asds_0, aede_0);
 	tquat *= sin(ang/2.0) / mag;
-	tquat += G3Quat(cos(ang/2.0),0,0,0);
+	tquat += Quat(cos(ang/2.0),0,0,0);
 
 	// trans_asds_1 and aede_1 should now be the same up to a rotation
 	// around aede_0
-	G3Quat trans_asds_1 = tquat * asds_1 * ~tquat;
+	auto trans_asds_1 = tquat * asds_1 * ~tquat;
 
 	// Project them on to a plane and find the angle between the two vectors
 	// using (ae_0, de_0) as the normal since we are rotating around that
 	// vector.
-	G3Quat p_asds1 = project_on_plane(aede_0, trans_asds_1);	
-	G3Quat p_aede1 = project_on_plane(aede_0, aede_1);
+	auto p_asds1 = project_on_plane(aede_0, trans_asds_1);	
+	auto p_aede1 = project_on_plane(aede_0, aede_1);
 
 	double rot_ang = quat_ang_sep(p_asds1, p_aede1);
 	double sf = (dot3(aede_0, cross3(p_asds1, p_aede1)) < 0) ? -1 : 1;
 	rot_ang *= sf;
 
 	double sin_rot_ang_ov_2 = sin(rot_ang/2.0);
-	G3Quat rot_quat = G3Quat(cos(rot_ang/2.0),
-			     sin_rot_ang_ov_2 * aede_0.b(),
-			     sin_rot_ang_ov_2 * aede_0.c(),
-			     sin_rot_ang_ov_2 * aede_0.d());
-	G3Quat final_trans = rot_quat * tquat;
+	Quat rot_quat(cos(rot_ang/2.0),
+		     sin_rot_ang_ov_2 * aede_0.b(),
+		     sin_rot_ang_ov_2 * aede_0.c(),
+		     sin_rot_ang_ov_2 * aede_0.d());
+	auto final_trans = rot_quat * tquat;
 
 	return final_trans;
 }
 
-G3Quat
+Quat
 get_fk5_j2000_to_gal_quat()
 {
 	// returns the quaternion that rotates FK5 J2000 to galactic J2000 coordinates
 	// return get_transform_quat(0,0, 1.6814025470759737, -1.050488399695429,
 	//     0,-0.7853981633974483, 5.750520098164818, -1.2109809382060603);
-	return G3Quat(0.4889475076,-0.483210684,0.1962537583,0.699229742);
+	return Quat(0.4889475076,-0.483210684,0.1962537583,0.699229742);
 }
 
-G3Quat
+Quat
 offsets_to_quat(double x_offset, double y_offset)
 {
 	// Rotates the point (1,0,0) by the rotation matrix for the y_offset
@@ -185,13 +185,13 @@ offsets_to_quat(double x_offset, double y_offset)
 	return ang_to_quat(x_offset, -y_offset);
 }
 
-G3Quat
+Quat
 get_origin_rotator(double alpha, double delta)
 {
 	// Rotates the point (1,0,0) to the point specified by alpha and
 	// delta via a rotation about the y axis and then the z axis
-        return (G3Quat(cos(alpha/2.0), 0, 0, sin(alpha/2.0)) *
-                G3Quat(cos(delta/2.0), 0, -sin(delta/2.0), 0));
+        return (Quat(cos(alpha/2.0), 0, 0, sin(alpha/2.0)) *
+                Quat(cos(delta/2.0), 0, -sin(delta/2.0), 0));
 }
 
 static G3TimestreamQuat
@@ -202,7 +202,7 @@ get_origin_rotator_timestream(const G3Timestream &alpha, const G3Timestream &del
 	// for why it's -el see the comment at the top of this document
 
 	g3_assert(alpha.size() == delta.size());
-	G3TimestreamQuat trans_quats(alpha.size(), G3Quat(1,0,0,0));
+	G3TimestreamQuat trans_quats(alpha.size(), Quat(1,0,0,0));
 	trans_quats.start = alpha.start;
 	trans_quats.stop = alpha.stop;
 	if (coord_sys == Local)
@@ -234,7 +234,7 @@ get_boresight_rotator_timestream(const G3Timestream &az_0, const G3Timestream &e
 	g3_assert(az_0.size() == dec_1.size());
 	g3_assert(az_0.size() == ra_0.size());
 	g3_assert(az_0.size() == ra_1.size());
-	G3TimestreamQuat trans_quats(ra_0.size(), G3Quat(1,0,0,0));
+	G3TimestreamQuat trans_quats(ra_0.size(), Quat(1,0,0,0));
 	trans_quats.start = az_0.start;
 	trans_quats.stop = az_0.stop;
 
@@ -254,17 +254,17 @@ G3VectorQuat
 get_detector_pointing_quats(double x_offset, double y_offset,
     const G3VectorQuat &trans_quat, MapCoordReference coord_sys)
 {
-	G3Quat q_off = offsets_to_quat(x_offset, y_offset);
+	auto q_off = offsets_to_quat(x_offset, y_offset);
 	size_t nsamp = trans_quat.size();
-	G3VectorQuat det_quats(nsamp, G3Quat(0, 1, 0, 0));
+	G3VectorQuat det_quats(nsamp, Quat(0, 1, 0, 0));
 
 	for (size_t i = 0; i < nsamp; i++)
 		det_quats[i] = trans_quat[i] * q_off * ~trans_quat[i];
 
 	if (coord_sys == Local) {
 		for (size_t i = 0; i < nsamp; i++) {
-			const G3Quat &q = det_quats[i];
-			det_quats[i] = G3Quat(q.a(), q.b(), q.c(), -q.d());
+			const auto &q = det_quats[i];
+			det_quats[i] = Quat(q.a(), q.b(), q.c(), -q.d());
 		}
 	}
 
@@ -275,15 +275,15 @@ std::vector<size_t>
 get_detector_pointing_pixels(double x_offset, double y_offset,
     const G3VectorQuat &trans_quat, G3SkyMapConstPtr skymap)
 {
-	G3Quat q_off = offsets_to_quat(x_offset, y_offset);
+	auto q_off = offsets_to_quat(x_offset, y_offset);
 	size_t nsamp = trans_quat.size();
 	std::vector<size_t> pixels(nsamp, (size_t) -1);
-	G3Quat q;
+	Quat q;
 
 	if (skymap->coord_ref == Local) {
 		for (size_t i = 0; i < nsamp; i++) {
 			q = trans_quat[i] * q_off * ~trans_quat[i];
-			q = G3Quat(q.a(), q.b(), q.c(), -q.d());
+			q = Quat(q.a(), q.b(), q.c(), -q.d());
 			pixels[i] = skymap->QuatToPixel(q);
 		}
 	} else {
@@ -305,7 +305,7 @@ get_detector_pointing(double x_offset, double y_offset,
 	// trans_quat with a given coordinate system coord_sys,
 	// computes the individual detector pointing coordinates.
 
-	G3Quat det_pos = offsets_to_quat(x_offset, y_offset);
+	auto det_pos = offsets_to_quat(x_offset, y_offset);
 	delta.resize(trans_quat.size());
 	alpha.resize(trans_quat.size());
 
@@ -320,7 +320,7 @@ get_detector_pointing(double x_offset, double y_offset,
 
 	for (size_t i = 0; i < alpha.size(); i++) {
 		//uses an inverse that assumes we are on the unit sphere
-		G3Quat q = trans_quat[i] * det_pos * ~trans_quat[i];
+		auto q = trans_quat[i] * det_pos * ~trans_quat[i];
 		quat_to_ang(q, alpha[i], delta[i]);
 	}
 	if (coord_sys == Local) {
@@ -337,7 +337,7 @@ get_detector_rotation(double x_offset, double y_offset,
 	// Computes the polarization angle rotation that occurs under the
 	// transform trans_quat and stores it in rot.
 	std::vector<double> rot(trans_quat.size(), 0);
-	G3Quat det_pos = offsets_to_quat(x_offset, y_offset);
+	auto det_pos = offsets_to_quat(x_offset, y_offset);
 	for (size_t i = 0; i < rot.size(); i++)
 		rot[i] = get_rot_ang(det_pos, trans_quat[i]);
 

@@ -723,24 +723,24 @@ FlatSkyMap::PixelToXY(size_t pixel) const {
 }
 
 std::vector<double>
-FlatSkyMap::QuatToXY(const G3Quat &q) const
+FlatSkyMap::QuatToXY(const Quat &q) const
 {
 	return proj_info.QuatToXY(q);
 }
 
 size_t
-FlatSkyMap::QuatToPixel(const G3Quat &q) const
+FlatSkyMap::QuatToPixel(const Quat &q) const
 {
 	return proj_info.QuatToPixel(q);
 }
 
-G3Quat
+Quat
 FlatSkyMap::XYToQuat(double x, double y) const
 {
 	return proj_info.XYToQuat(x, y);
 }
 
-G3Quat
+Quat
 FlatSkyMap::PixelToQuat(size_t pixel) const
 {
 	return proj_info.PixelToQuat(pixel);
@@ -769,14 +769,14 @@ FlatSkyMap::GetRebinQuats(size_t pixel, size_t scale) const
 }
 
 void
-FlatSkyMap::GetInterpPixelsWeights(const G3Quat &q, std::vector<size_t> & pixels,
+FlatSkyMap::GetInterpPixelsWeights(const Quat &q, std::vector<size_t> & pixels,
     std::vector<double> & weights) const
 {
 	proj_info.GetInterpPixelsWeights(q, pixels, weights);
 }
 
 std::vector<size_t>
-FlatSkyMap::QueryDisc(const G3Quat &q, double radius) const
+FlatSkyMap::QueryDisc(const Quat &q, double radius) const
 {
 	return proj_info.QueryDisc(q, radius);
 }

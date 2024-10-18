@@ -6,211 +6,124 @@
 
 // Quaternion utilities
 
-std::string
-G3Quat::Description() const
+std::ostream&
+operator<<(std::ostream& os, const Quat &q)
 {
-	std::ostringstream desc;
-	desc << "[" << buf_[0] << ", " << buf_[1] << ", " << buf_[2] << ", " << buf_[3] << "]";
-	if (versor_)
-		desc << ", versor=True";
-	return desc.str();
+	os << "(" << q.a() << ", " << q.b() << ", " << q.c() << ", " << q.d() << ")";
+	return os;
 }
 
 template <class A>
-void G3Quat::serialize(A &ar, const unsigned v)
+void
+Quat::serialize(A &ar, const unsigned v)
 {
 	G3_CHECK_VERSION(v);
 
-	ar & cereal::make_nvp("G3FrameObject",
-	    cereal::base_class<G3FrameObject>(this));
 	ar & cereal::make_nvp("a", buf_[0]);
 	ar & cereal::make_nvp("b", buf_[1]);
 	ar & cereal::make_nvp("c", buf_[2]);
 	ar & cereal::make_nvp("d", buf_[3]);
-	ar & cereal::make_nvp("versor", versor_);
 }
 
-typedef struct {
-	double a, b, c, d;
-} V1Quat;
-
-template<class A>
-void serialize(A &ar, V1Quat &q, unsigned version)
+std::string
+G3Quat::Description() const
 {
-	using namespace cereal;
-	ar & make_nvp("a", q.a);
-	ar & make_nvp("b", q.b);
-	ar & make_nvp("c", q.c);
-	ar & make_nvp("d", q.d);
+	std::ostringstream oss;
+	oss << value;
+	return oss.str();
 }
 
-template<>
 template <class A>
-void G3VectorQuat::load(A &ar, unsigned v)
+void
+G3Quat::serialize(A &ar, unsigned v)
 {
 	G3_CHECK_VERSION(v);
 
 	ar & cereal::make_nvp("G3FrameObject",
 	    cereal::base_class<G3FrameObject>(this));
-
-	if (v > 1) {
-		ar & cereal::make_nvp("vector",
-		    cereal::base_class<std::vector<G3Quat> >(this));
-	} else {
-		std::vector<V1Quat> vec;
-		ar & cereal::make_nvp("vector", vec);
-
-		this->resize(0);
-		for (auto &v: vec)
-			this->push_back(G3Quat(v.a, v.b, v.c, v.d));
-	}
+	ar & cereal::make_nvp("value", value);
 }
 
-template<>
-template <class A>
-void G3VectorQuat::save(A &ar, unsigned v) const
+Quat
+Quat::versor() const
 {
-	G3_CHECK_VERSION(v);
-
-	ar & cereal::make_nvp("G3FrameObject",
-	    cereal::base_class<G3FrameObject>(this));
-	ar & cereal::make_nvp("vector",
-	    cereal::base_class<std::vector<G3Quat> >(this));
-}
-
-template<>
-template <class A>
-void G3MapQuat::load(A &ar, unsigned v)
-{
-	G3_CHECK_VERSION(v);
-
-	ar & cereal::make_nvp("G3FrameObject",
-	    cereal::base_class<G3FrameObject>(this));
-
-	if (v > 1) {
-		ar & cereal::make_nvp("map",
-		    cereal::base_class<std::map<std::string, G3Quat> >(this));
-	} else {
-		std::map<std::string, V1Quat> m;
-		ar & cereal::make_nvp("map", m);
-
-		this->clear();
-		for (auto &i: m)
-			(*this)[i.first] = G3Quat(i.second.a, i.second.b,
-			    i.second.c, i.second.d);
-	}
-}
-
-template<>
-template <class A>
-void G3MapQuat::save(A &ar, unsigned v) const
-{
-	G3_CHECK_VERSION(v);
-
-	ar & cereal::make_nvp("G3FrameObject",
-	    cereal::base_class<G3FrameObject>(this));
-	ar & cereal::make_nvp("map",
-	    cereal::base_class<std::map<std::string, G3Quat> >(this));
-}
-
-void G3Quat::versor_inplace()
-{
-	if (!versor_) {
-		double n = norm();
-		if (fabs(n - 1.0) > 1e-6)
-			*this /= sqrt(n);
-		versor_ = true;
-	}
-}
-
-G3Quat
-G3Quat::versor() const
-{
-	G3Quat out(*this);
-	out.versor_inplace();
-	return out;
+	double n = norm();
+	if (fabs(n - 1.0) > 1e-6)
+		return *this / sqrt(n);
+	return *this;
 }
 
 double
-G3Quat::real() const
+Quat::real() const
 {
 	return buf_[0];
 }
 
-G3Quat
-G3Quat::unreal() const
+Quat
+Quat::unreal() const
 {
 	if (!buf_[0])
 		return *this;
-	return G3Quat(0, buf_[1], buf_[2], buf_[3]);
+	return Quat(0, buf_[1], buf_[2], buf_[3]);
 }
 
-G3Quat
-G3Quat::conj() const
+Quat
+Quat::conj() const
 {
-	return G3Quat(buf_[0], -buf_[1], -buf_[2], -buf_[3], versor_);
+	return Quat(buf_[0], -buf_[1], -buf_[2], -buf_[3]);
 }
 
 double
-G3Quat::norm() const
+Quat::norm() const
 {
 	return buf_[0] * buf_[0] + buf_[1] * buf_[1] +
 	    buf_[2] * buf_[2] + buf_[3] * buf_[3];
 }
 
 double
-G3Quat::abs() const
+Quat::abs() const
 {
 	return sqrt(norm());
 }
 
-void *
-G3Quat::buffer()
-{
-	return (void *)(&(buf_[0]));
-}
-
-G3Quat
-G3Quat::operator ~() const
+Quat
+Quat::operator ~() const
 {
 	return conj();
 }
 
-G3Quat &
-G3Quat::operator +=(const G3Quat &rhs)
+Quat &
+Quat::operator +=(const Quat &rhs)
 {
 	buf_[0] += rhs.buf_[0];
 	buf_[1] += rhs.buf_[1];
 	buf_[2] += rhs.buf_[2];
 	buf_[3] += rhs.buf_[3];
-	versor_ = false;
 	return *this;
 }
 
-G3Quat &
-G3Quat::operator -=(const G3Quat &rhs)
+Quat &
+Quat::operator -=(const Quat &rhs)
 {
 	buf_[0] -= rhs.buf_[0];
 	buf_[1] -= rhs.buf_[1];
 	buf_[2] -= rhs.buf_[2];
 	buf_[3] -= rhs.buf_[3];
-	versor_ = false;
 	return *this;
 }
 
-G3Quat &
-G3Quat::operator *=(double rhs)
+Quat &
+Quat::operator *=(double rhs)
 {
 	buf_[0] *= rhs;
 	buf_[1] *= rhs;
 	buf_[2] *= rhs;
 	buf_[3] *= rhs;
-	versor_ = false;
 	return *this;
 }
 
-G3Quat &
-G3Quat::operator *=(const G3Quat &rhs)
+Quat &
+Quat::operator *=(const Quat &rhs)
 {
 	const double *vr = (const double *)(&(rhs.buf_[0]));
 	double a = buf_[0] * vr[0] - buf_[1] * vr[1] - buf_[2] * vr[2] - buf_[3] * vr[3];
@@ -221,26 +134,21 @@ G3Quat::operator *=(const G3Quat &rhs)
 	buf_[1] = b;
 	buf_[2] = c;
 	buf_[3] = d;
-	if (is_versor() && rhs.is_versor())
-		versor_inplace();
-	else
-		versor_ = false;
 	return *this;
 }
 
-G3Quat &
-G3Quat::operator /=(double rhs)
+Quat &
+Quat::operator /=(double rhs)
 {
 	buf_[0] /= rhs;
 	buf_[1] /= rhs;
 	buf_[2] /= rhs;
 	buf_[3] /= rhs;
-	versor_ = false;
 	return *this;
 }
 
-G3Quat &
-G3Quat::operator /=(const G3Quat &rhs)
+Quat &
+Quat::operator /=(const Quat &rhs)
 {
 	double n = rhs.norm();
 	const double *vr = (const double *)(&(rhs.buf_[0]));
@@ -252,86 +160,82 @@ G3Quat::operator /=(const G3Quat &rhs)
 	buf_[1] = b / n;
 	buf_[2] = c / n;
 	buf_[3] = d / n;
-	if (is_versor() && rhs.is_versor())
-		versor_inplace();
-	else
-		versor_ = false;
 	return *this;
 }
 
-G3Quat
-G3Quat::operator +(const G3Quat &rhs) const
+Quat
+Quat::operator +(const Quat &rhs) const
 {
-	return G3Quat(buf_[0] + rhs.buf_[0], buf_[1] + rhs.buf_[1],
+	return Quat(buf_[0] + rhs.buf_[0], buf_[1] + rhs.buf_[1],
 	    buf_[2] + rhs.buf_[2], buf_[3] + rhs.buf_[3]);
 }
 
-G3Quat
-G3Quat::operator -(const G3Quat &rhs) const
+Quat
+Quat::operator -(const Quat &rhs) const
 {
-	return G3Quat(buf_[0] - rhs.buf_[0], buf_[1] - rhs.buf_[1],
+	return Quat(buf_[0] - rhs.buf_[0], buf_[1] - rhs.buf_[1],
 	    buf_[2] - rhs.buf_[2], buf_[3] - rhs.buf_[3]);
 }
 
-G3Quat
-G3Quat::operator *(double rhs) const
+Quat
+Quat::operator *(double rhs) const
 {
-	return G3Quat(buf_[0] * rhs, buf_[1] * rhs, buf_[2] * rhs, buf_[3] * rhs);
+	return Quat(buf_[0] * rhs, buf_[1] * rhs, buf_[2] * rhs, buf_[3] * rhs);
 }
 
-G3Quat
-G3Quat::operator *(const G3Quat &rhs) const
+Quat
+Quat::operator *(const Quat &rhs) const
 {
-	G3Quat out(*this);
+	Quat out(*this);
 	out *= rhs;
 	return out;
 }
 
-G3Quat
-operator *(double a, const G3Quat &b)
+Quat
+operator *(double a, const Quat &b)
 {
 	return b * a;
 }
 
-G3Quat
-G3Quat::operator /(double rhs) const
+Quat
+Quat::operator /(double rhs) const
 {
-	return G3Quat(buf_[0] / rhs, buf_[1] / rhs, buf_[2] / rhs, buf_[3] / rhs);
+	return Quat(buf_[0] / rhs, buf_[1] / rhs, buf_[2] / rhs, buf_[3] / rhs);
 }
 
-G3Quat
-G3Quat::operator /(const G3Quat &rhs) const
+Quat
+Quat::operator /(const Quat &rhs) const
 {
-	G3Quat out(*this);
+	Quat out(*this);
 	out /= rhs;
 	return out;
 }
 
-G3Quat
-operator /(double a, const G3Quat &b)
+Quat
+operator /(double a, const Quat &b)
 {
-	return G3Quat(a, 0, 0, 0) / b;
+	return Quat(a, 0, 0, 0) / b;
 }
 
 bool
-G3Quat::operator ==(const G3Quat &rhs) const
+Quat::operator ==(const Quat &rhs) const
 {
 	return ((buf_[0] == rhs.buf_[0]) && (buf_[1] == rhs.buf_[1]) &&
 	    (buf_[2] == rhs.buf_[2]) && (buf_[3] == rhs.buf_[3]));
 }
 
 bool
-G3Quat::operator !=(const G3Quat &rhs) const
+Quat::operator !=(const Quat &rhs) const
 {
 	return !(*this == rhs);
 }
 
-G3Quat
-pow(const G3Quat &q, int n)
+Quat
+pow(const Quat &q, int n)
 {
 	if (n > 1) {
 		int m = (n >> 1);
-		G3Quat r = pow(q, m);
+		Quat r = pow(q, m);
 		r *= r;
 		// n odd
 		if (n & 1)
@@ -343,28 +247,26 @@ pow(const G3Quat &q, int n)
 		return q;
 
 	if (n == 0)
-		return G3Quat(1, 0, 0, 0);
+		return Quat(1, 0, 0, 0);
 
 	// n < 0
-	return pow(G3Quat(1, 0, 0, 0) / q, -n);
+	return pow(Quat(1, 0, 0, 0) / q, -n);
 }
 
-G3Quat
-cross3(const G3Quat &u, const G3Quat &v)
+Quat
+cross3(const Quat &u, const Quat &v)
 {
 	// Computes Euclidean cross product from the last three entries in the
 	// quaternion
-	G3Quat out(0,
+	Quat out(0,
 	    u.c()*v.d() - (u.d()*v.c()),
 	    u.d()*v.b() - (u.b()*v.d()),
 	    u.b()*v.c() - (u.c()*v.b()));
-	if (u.is_versor() && v.is_versor())
-		return out.versor();
 	return out;
 }
 
 double
-dot3(const G3Quat &a, const G3Quat &b)
+dot3(const Quat &a, const Quat &b)
 {
 	// Computes Euclidean dot product from the last three entries in the
 	// quaternion
@@ -418,7 +320,7 @@ operator *(double b, const G3VectorQuat &a)
 G3VectorQuat &
 operator *=(G3VectorQuat &a, double b)
 {
-	for (G3Quat &i: a)
+	for (Quat &i: a)
 		i *= b;
 	return a;
 }
@@ -442,7 +344,7 @@ operator /(double a, const G3VectorQuat &b)
 }
 
 G3VectorQuat
-operator /(const G3VectorQuat &a, const G3Quat &b)
+operator /(const G3VectorQuat &a, const Quat &b)
 {
 	G3VectorQuat out(a.size());
 	for (unsigned i = 0; i < a.size(); i++)
@@ -451,7 +353,7 @@ operator /(const G3VectorQuat &a, const G3Quat &b)
 }
 
 G3VectorQuat
-operator /(const G3Quat &a, const G3VectorQuat &b)
+operator /(const Quat &a, const G3VectorQuat &b)
 {
 	G3VectorQuat out(b.size());
 	for (unsigned i = 0; i < b.size(); i++)
@@ -472,13 +374,13 @@ operator /(const G3VectorQuat &a, const G3VectorQuat &b)
 G3VectorQuat &
 operator /=(G3VectorQuat &a, double b)
 {
-	for (G3Quat &i: a)
+	for (Quat &i: a)
 		i /= b;
 	return a;
 }
 
 G3VectorQuat &
-operator /=(G3VectorQuat &a, const G3Quat &b)
+operator /=(G3VectorQuat &a, const Quat &b)
 {
 	for (unsigned i = 0; i < a.size(); i++)
 		a[i] /= b;
@@ -514,7 +416,7 @@ operator *=(G3VectorQuat &a, const G3VectorQuat &b)
 }
 
 G3VectorQuat
-operator *(const G3VectorQuat &a, const G3Quat &b)
+operator *(const G3VectorQuat &a, const Quat &b)
 {
 	G3VectorQuat out(a.size());
 	for (unsigned i = 0; i < a.size(); i++)
@@ -523,7 +425,7 @@ operator *(const G3VectorQuat &a, const G3Quat &b)
 }
 
 G3VectorQuat
-operator *(const G3Quat &b, const G3VectorQuat &a)
+operator *(const Quat &b, const G3VectorQuat &a)
 {
 	G3VectorQuat out(a.size());
 	for (unsigned i = 0; i < a.size(); i++)
@@ -532,9 +434,9 @@ operator *(const G3Quat &b, const G3VectorQuat &a)
 }
 
 G3VectorQuat &
-operator *=(G3VectorQuat &a, const G3Quat &b)
+operator *=(G3VectorQuat &a, const Quat &b)
 {
-	for (G3Quat &i: a)
+	for (Quat &i: a)
 		i *= b;
 	return a;
 }
@@ -609,7 +511,7 @@ operator *(double b, const G3TimestreamQuat &a)
 G3TimestreamQuat &
 operator *=(G3TimestreamQuat &a, double b)
 {
-	for (G3Quat &i: a)
+	for (Quat &i: a)
 		i *= b;
 	return a;
 }
@@ -635,7 +537,7 @@ operator /(double a, const G3TimestreamQuat &b)
 }
 
 G3TimestreamQuat
-operator /(const G3TimestreamQuat &a, const G3Quat &b)
+operator /(const G3TimestreamQuat &a, const Quat &b)
 {
 	G3TimestreamQuat out(a.size());
 	out.start = a.start; out.stop = a.stop;
@@ -645,7 +547,7 @@ operator /(const G3TimestreamQuat &a, const G3Quat &b)
 }
 
 G3TimestreamQuat
-operator /(const G3Quat &a, const G3TimestreamQuat &b)
+operator /(const Quat &a, const G3TimestreamQuat &b)
 {
 	G3TimestreamQuat out(b.size());
 	out.start = b.start; out.stop = b.stop;
@@ -668,13 +570,13 @@ operator /(const G3TimestreamQuat &a, const G3VectorQuat &b)
 G3TimestreamQuat &
 operator /=(G3TimestreamQuat &a, double b)
 {
-	for (G3Quat &i: a)
+	for (Quat &i: a)
 		i /= b;
 	return a;
 }
 
 G3TimestreamQuat &
-operator /=(G3TimestreamQuat &a, const G3Quat &b)
+operator /=(G3TimestreamQuat &a, const Quat &b)
 {
 	for (unsigned i = 0; i < a.size(); i++)
 		a[i] /= b;
@@ -711,7 +613,7 @@ operator *=(G3TimestreamQuat &a, const G3VectorQuat &b)
 }
 
 G3TimestreamQuat
-operator *(const G3TimestreamQuat &a, const G3Quat &b)
+operator *(const G3TimestreamQuat &a, const Quat &b)
 {
 	G3TimestreamQuat out(a.size());
 	out.start = a.start; out.stop = a.stop;
@@ -721,7 +623,7 @@ operator *(const G3TimestreamQuat &a, const G3Quat &b)
 }
 
 G3TimestreamQuat
-operator *(const G3Quat &b, const G3TimestreamQuat &a)
+operator *(const Quat &b, const G3TimestreamQuat &a)
 {
 	G3TimestreamQuat out(a.size());
 	out.start = a.start; out.stop = a.stop;
@@ -731,9 +633,9 @@ operator *(const G3Quat &b, const G3TimestreamQuat &a)
 }
 
 G3TimestreamQuat &
-operator *=(G3TimestreamQuat &a, const G3Quat &b)
+operator *=(G3TimestreamQuat &a, const Quat &b)
 {
-	for (G3Quat &i: a)
+	for (Quat &i: a)
 		i *= b;
 	return a;
 }
@@ -749,15 +651,16 @@ pow(const G3TimestreamQuat &a, int b)
 }
 
 
+G3_SERIALIZABLE_CODE(Quat);
 G3_SERIALIZABLE_CODE(G3Quat);
-G3_SPLIT_SERIALIZABLE_CODE(G3VectorQuat);
+G3_SERIALIZABLE_CODE(G3VectorQuat);
 G3_SERIALIZABLE_CODE(G3TimestreamQuat);
-G3_SPLIT_SERIALIZABLE_CODE(G3MapQuat);
+G3_SERIALIZABLE_CODE(G3MapQuat);
 G3_SERIALIZABLE_CODE(G3MapVectorQuat);
 
 namespace {
 static int
-G3Quat_getbuffer(PyObject *obj, Py_buffer *view, int flags)
+Quat_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 {
 	if (view == NULL) {
 		PyErr_SetString(PyExc_ValueError, "NULL view");
@@ -768,16 +671,16 @@ G3Quat_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 
 	bp::handle<> self(bp::borrowed(obj));
 	bp::object selfobj(self);
-	bp::extract<G3QuatPtr> ext(selfobj);
+	bp::extract<QuatPtr> ext(selfobj);
 	if (!ext.check()) {
 		PyErr_SetString(PyExc_ValueError, "Invalid quat");
 		view->obj = NULL;
 		return -1;
 	}
-	G3QuatPtr q = ext();
+	QuatPtr q = ext();
 
 	view->obj = obj;
-	view->buf = q->buffer();
+	view->buf = (void*)&(*q);
 	view->len = 4 * sizeof(double);
 	view->readonly = 0;
 	view->itemsize = sizeof(double);
@@ -817,13 +720,9 @@ G3VectorQuat_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 	}
 	G3VectorQuatPtr q = ext();
 
-	G3Quat potemkin[2];
-	static Py_ssize_t stride0 = (uintptr_t)potemkin[1].buffer() -
-	    (uintptr_t)potemkin[0].buffer();
-
 	view->obj = obj;
-	view->buf = (*q)[0].buffer();
-	view->len = q->size() * stride0;
+	view->buf = (void*)&(*q)[0];
+	view->len = q->size() * sizeof(double) * 4;
 	view->readonly = 0;
 	view->itemsize = sizeof(double);
 	if (flags & PyBUF_FORMAT)
@@ -838,7 +737,7 @@ G3VectorQuat_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 	view->ndim = 2;
 	view->shape[0] = q->size();
 	view->shape[1] = 4;
-	view->strides[0] = stride0;
+	view->strides[0] = view->shape[1]*view->itemsize;
 	view->strides[1] = view->itemsize;
 
 	view->suboffsets = NULL;
@@ -853,24 +752,31 @@ static PyBufferProcs vectorquat_bufferprocs;
 static PyBufferProcs timestreamquat_bufferprocs;
 
 static std::string
-quat_repr(const G3Quat &q)
+quat_str(const Quat &q)
 {
 	std::ostringstream oss;
-	oss << "spt3g.core.G3Quat(" << q.Description() << ")";
+	oss << q;
+	return oss.str();
+}
+
+static std::string
+quat_repr(const Quat &q)
+{
+	std::ostringstream oss;
+	oss << "spt3g.core.Quat" << q;
 	return oss.str();
 }
 }
 
-boost::shared_ptr<G3Quat>
-quat_container_from_object(boost::python::object v, bool versor)
+boost::shared_ptr<Quat>
+quat_container_from_object(boost::python::object v)
 {
 	// There's a chance this is actually a copy operation, so try that first
-	bp::extract<G3Quat &> extv(v);
+	bp::extract<Quat &> extv(v);
 	if (extv.check())
-		return boost::make_shared<G3Quat>(extv());
+		return boost::make_shared<Quat>(extv());
 
-	boost::shared_ptr<G3Quat> x(new G3Quat(0, 0, 0, 0, versor));
-	double *data = (double *)(x->buffer());
+	Quat q;
 
 	Py_buffer view;
 	if (PyObject_GetBuffer(v.ptr(), &view,
@@ -878,35 +784,28 @@ quat_container_from_object(boost::python::object v, bool versor)
 		goto slowpython;
 
 #define QELEM(t, i) *((t *)((char *)view.buf + i*view.strides[0]))
+#define QUATI(t) Quat(QELEM(t, 0), QELEM(t, 1), QELEM(t, 2), QELEM(t, 3))
 
 	if (view.ndim != 1 || view.shape[0] != 4) {
 		PyBuffer_Release(&view);
 		goto slowpython;
-	} else if (PyBuffer_IsContiguous(&view, 'C') &&
-	    strcmp(view.format, "d") == 0 &&
-	    view.strides[0] == sizeof(double)) {
-		// Packed and simple, use memcpy()
-		memcpy(data, (double *)((char *)view.buf), 4 * sizeof(double));
 	} else if (strcmp(view.format, "d") == 0) {
-		for (size_t i = 0; i < (size_t)view.shape[0]; i++)
-			data[i] = QELEM(double, i);
+		q = QUATI(double);
 	} else if (strcmp(view.format, "f") == 0) {
-		for (size_t i = 0; i < (size_t)view.shape[0]; i++)
-			data[i] = QELEM(float, i);
+		q = QUATI(float);
 	} else if (strcmp(view.format, "i") == 0) {
-		for (size_t i = 0; i < (size_t)view.shape[0]; i++)
-			data[i] = QELEM(int, i);
+		q = QUATI(int);
 	} else if (strcmp(view.format, "l") == 0) {
-		for (size_t i = 0; i < (size_t)view.shape[0]; i++)
-			data[i] = QELEM(long, i);
+		q = QUATI(long);
 	} else {
 		PyBuffer_Release(&view);
 		goto slowpython;
 	}
 	PyBuffer_Release(&view);
-	return x;
+	return boost::make_shared<Quat>(q);
 
 #undef QELEM
+#undef QUATI
 
 slowpython:
 	PyErr_Clear();
@@ -915,8 +814,7 @@ slowpython:
 	if (xv.size() != 4)
 		throw std::runtime_error("Invalid quat");
 
-	memcpy(data, &(xv[0]), 4 * sizeof(double));
-	return x;
+	return boost::make_shared<Quat>(xv[0], xv[1], xv[2], xv[3]);
 }
 
 template <typename T>
@@ -935,7 +833,7 @@ quat_vec_container_from_object(boost::python::object v)
 		goto slowpython;
 
 #define QELEM(t, i, j) *((t *)((char *)view.buf + i*view.strides[0] + j*view.strides[1]))
-#define QUATI(t, i) G3Quat(QELEM(t, i, 0), QELEM(t, i, 1), QELEM(t, i, 2), QELEM(t, i, 3))
+#define QUATI(t, i) Quat(QELEM(t, i, 0), QELEM(t, i, 1), QELEM(t, i, 2), QELEM(t, i, 3))
 
 	x->resize(view.shape[0]);
 	if (view.ndim != 2 || view.shape[1] != 4) {
@@ -946,10 +844,7 @@ quat_vec_container_from_object(boost::python::object v)
 	    view.strides[0] == 4*sizeof(double) &&
 	    view.strides[1] == sizeof(double)) {
 		// Packed and simple, use memcpy()
-		for (size_t i = 0; i < (size_t)view.shape[0]; i++)
-			memcpy((*x)[i].buffer(),
-			    (double *)((char *)view.buf + i*view.strides[0]),
-			    4 * sizeof(double));
+		memcpy((void *)&(*x)[0], view.buf, view.len);
 	} else if (strcmp(view.format, "d") == 0) {
 		for (size_t i = 0; i < (size_t)view.shape[0]; i++)
 			(*x)[i] = QUATI(double, i);
@@ -1002,19 +897,21 @@ PYBINDINGS("core")
 {
 	using namespace boost::python;
 
-	object q = EXPORT_FRAMEOBJECT(G3Quat, init<>(), "Representation of a quaternion. Data in a,b,c,d.")
-	     .def(init<double, double, double, double, bool>(
-	         "Create a quaternion (or a unit quaternion if versor is True) from its four elements.",
-	         (arg("a"), arg("b"), arg("c"), arg("d"), arg("versor")=false)))
+	object q =
+	    class_<Quat, boost::shared_ptr<Quat> >("Quat",
+	      "Representation of a quaternion. Data in a,b,c,d.", init<>())
+	     .def(init<const Quat &>())
+	     .def(init<double, double, double, double>(
+	         "Create a quaternion from its four elements.", args("a", "b", "c", "d")))
+	     .def_pickle(g3frameobject_picklesuite<Quat>())
 	     .def("__init__", make_constructor(quat_container_from_object, default_call_policies(),
-	         (arg("data"), arg("versor")=false)), "Create a quaternion (or versor) from a numpy array")
-	     .add_property("a", &G3Quat::a, "Scalar component")
-	     .add_property("b", &G3Quat::b, "First vector component")
-	     .add_property("c", &G3Quat::c, "Second vector component")
-	     .add_property("d", &G3Quat::d, "Third vector component")
-	     .add_property("is_versor", &G3Quat::is_versor, "True if this is a unit quaternion")
-	     .add_property("real", &G3Quat::real, "The real (scalar) part of the quaternion")
-	     .add_property("unreal", &G3Quat::unreal, "The unreal (vector) part of the quaternion")
+	         (arg("data"))), "Create a quaternion from a numpy array")
+	     .add_property("a", &Quat::a, "Scalar component")
+	     .add_property("b", &Quat::b, "First vector component")
+	     .add_property("c", &Quat::c, "Second vector component")
+	     .add_property("d", &Quat::d, "Third vector component")
+	     .add_property("real", &Quat::real, "The real (scalar) part of the quaternion")
+	     .add_property("unreal", &Quat::unreal, "The unreal (vector) part of the quaternion")
 	     .def(~self)
 	     .def(self == self)
 	     .def(self != self)
@@ -1033,25 +930,30 @@ PYBINDINGS("core")
 	     .def(double() / self)
 	     .def(self /= self)
 	     .def(self /= double())
-	     .def("__abs__", &G3Quat::abs)
+	     .def("__abs__", &Quat::abs)
+	     .def("__str__", quat_str)
 	     .def("__repr__", quat_repr)
-	     .def("norm", &G3Quat::norm, "Return the Cayley norm of the quaternion")
-	     .def("abs", &G3Quat::abs, "Return the Euclidean norm of the quaternion")
-	     .def("versor", &G3Quat::versor, "Return a versor (unit quaternion) with the same orientation")
+	     .def("norm", &Quat::norm, "Return the Cayley norm of the quaternion")
+	     .def("abs", &Quat::abs, "Return the Euclidean norm of the quaternion")
+	     .def("versor", &Quat::versor, "Return a versor (unit quaternion) with the same orientation")
 	     .def("dot3", dot3, "Dot product of last three entries")
 	     .def("cross3", cross3, "Cross product of last three entries")
 	;
-	register_pointer_conversions<G3Quat>();
+	implicitly_convertible<QuatPtr, QuatConstPtr>();
 	PyTypeObject *qclass = (PyTypeObject *)q.ptr();
-	quat_bufferprocs.bf_getbuffer = G3Quat_getbuffer;
+	quat_bufferprocs.bf_getbuffer = Quat_getbuffer;
 	qclass->tp_as_buffer = &quat_bufferprocs;
 #if PY_MAJOR_VERSION < 3
 	qclass->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
 #endif
 
-	register_vector_of<G3Quat>("Quat");
+	EXPORT_FRAMEOBJECT(G3Quat, init<Quat>(), "Serializable quaternion")
+	    .def_readwrite("value", &G3Quat::value)
+	;
+
+	register_vector_of<Quat>("Quat");
 	object vq =
-	    register_g3vector<G3Quat>("G3VectorQuat",
+	    register_g3vector<Quat>("G3VectorQuat",
 	     "List of quaternions. Convertible to a 4xN numpy array. "
 	     "Arithmetic operations on this object are fast and provide "
 	     "results given proper quaternion math rather than "
@@ -1060,19 +962,19 @@ PYBINDINGS("core")
 	     .def(self * double())
 	     .def(double() * self)
 	     .def(self * self)
-	     .def(self * G3Quat())
-	     .def(G3Quat() * self)
+	     .def(self * Quat())
+	     .def(Quat() * self)
 	     .def(self *= double())
-	     .def(self *= G3Quat())
+	     .def(self *= Quat())
 	     .def(self *= self)
 	     .def(self / double())
 	     .def(double() / self)
 	     .def(self /= double())
 	     .def(self / self)
 	     .def(self /= self)
-	     .def(self / G3Quat())
-	     .def(self /= G3Quat())
-	     .def(G3Quat() / self)
+	     .def(self / Quat())
+	     .def(self /= Quat())
+	     .def(Quat() / self)
 	     .def(pow(self, int()))
 	     .def("__abs__", vec_abs)
 	     .def("abs", vec_abs, "Return the Euclidean norm of each quaternion")
@@ -1098,19 +1000,19 @@ PYBINDINGS("core")
 	     .def(self * double())
 	     .def(double() * self)
 	     .def(self * G3VectorQuat())
-	     .def(self * G3Quat())
-	     .def(G3Quat() * self)
+	     .def(self * Quat())
+	     .def(Quat() * self)
 	     .def(self *= double())
-	     .def(self *= G3Quat())
+	     .def(self *= Quat())
 	     .def(self *= G3VectorQuat())
 	     .def(self / double())
 	     .def(double() / self)
 	     .def(self /= double())
 	     .def(self / G3VectorQuat())
 	     .def(self /= G3VectorQuat())
-	     .def(self / G3Quat())
-	     .def(self /= G3Quat())
-	     .def(G3Quat() / self)
+	     .def(self / Quat())
+	     .def(self /= Quat())
+	     .def(Quat() / self)
 	     .def(pow(self, int()))
 	     .def("__abs__", vec_abs)
 	     .def("abs", vec_abs, "Return the Euclidean norm of each quaternion")

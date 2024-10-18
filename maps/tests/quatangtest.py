@@ -2,8 +2,8 @@
 from spt3g import core, maps
 import numpy as np
 
-a = core.G3Quat(2,3,4,5)
-a2 = core.G3Quat(2,1,8,5)
+a = core.Quat(2,3,4,5)
+a2 = core.Quat(2,1,8,5)
 b = core.G3VectorQuat([a, a**2, 2*a, a2])
 
 assert(np.allclose(maps.quat_to_ang(a), maps.c_quat_to_ang_(a)))

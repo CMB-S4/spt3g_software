@@ -91,10 +91,10 @@ public:
 	std::vector<double> AngleToXY(double alpha, double delta) const;
 	std::vector<double> PixelToAngle(size_t pixel) const;
 	size_t AngleToPixel(double alpha, double delta) const;
-	std::vector<double> QuatToXY(const G3Quat &q) const;
-	G3Quat XYToQuat(double x, double y) const;
-	size_t QuatToPixel(const G3Quat &q) const;
-	G3Quat PixelToQuat(size_t pixel) const;
+	std::vector<double> QuatToXY(const Quat &q) const;
+	Quat XYToQuat(double x, double y) const;
+	size_t QuatToPixel(const Quat &q) const;
+	Quat PixelToQuat(size_t pixel) const;
 
 	std::vector<double> XYToAngleGrad(double x, double y, double h=0.001) const;
 	std::vector<double> PixelToAngleGrad(size_t pixel, double h=0.001) const;
@@ -102,10 +102,10 @@ public:
 	size_t RebinPixel(size_t pixel, size_t scale) const;
 
 	G3VectorQuat GetRebinQuats(size_t pixel, size_t scale) const;
-	void GetInterpPixelsWeights(const G3Quat &q, std::vector<size_t> & pixels,
+	void GetInterpPixelsWeights(const Quat &q, std::vector<size_t> & pixels,
 	    std::vector<double> & weights) const;
 
-	std::vector<size_t> QueryDisc(const G3Quat &q, double radius) const;
+	std::vector<size_t> QueryDisc(const Quat &q, double radius) const;
 
 	FlatSkyProjection Rebin(size_t scale, double x_center = 0.0 / 0.0,
 	    double y_center = 0.0 / 0.0) const;
@@ -129,7 +129,7 @@ private:
 	bool cyl_;
 	double sindelta0_;
 	double cosdelta0_;
-	G3Quat q0_;
+	Quat q0_;
 
 	SET_LOGGER("FlatSkyProjection");
 };

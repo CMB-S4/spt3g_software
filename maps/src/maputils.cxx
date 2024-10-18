@@ -282,7 +282,7 @@ void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, G3SkyMapWeightsPtr W, double h
 void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool interp)
 {
 	bool rotate = false; // no transform
-	G3Quat q_rot; // quaternion for rotating from output to input coordinate system
+	Quat q_rot; // quaternion for rotating from output to input coordinate system
 	if (in_map->coord_ref != out_map->coord_ref &&
 	    in_map->coord_ref != MapCoordReference::Local &&
 	    out_map->coord_ref != MapCoordReference::Local) {

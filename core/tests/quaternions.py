@@ -2,7 +2,7 @@
 from spt3g import core
 import numpy as np
 
-a = core.G3Quat(2,3,4,5)
+a = core.Quat(2,3,4,5)
 
 assert(a.real == 2)
 assert(a.real == np.real(a))
@@ -32,9 +32,9 @@ c = np.asarray(b)
 
 assert(c.shape == (3,4))
 
-assert(core.G3Quat(*c[0]) == a)
-assert(core.G3Quat(*c[1]) == b[1])
-assert(core.G3Quat(*c[1]) != b[2])
+assert(core.Quat(*c[0]) == a)
+assert(core.Quat(*c[1]) == b[1])
+assert(core.Quat(*c[1]) != b[2])
 
 d = core.G3VectorQuat(c)
 
@@ -53,7 +53,7 @@ assert((np.asarray(b)/2 == np.asarray(e)).all())
 
 assert((np.asarray(b*b) == np.asarray(core.G3VectorQuat([x**2 for x in b]))).all())
 
-assert(1./a == core.G3Quat(1.,0,0,0)/a)
+assert(1./a == core.Quat(1.,0,0,0)/a)
 assert(np.allclose(core.G3VectorQuat([1./a]), core.G3VectorQuat([(~a) / abs(a)**2])))
 assert(len(np.abs(b)) == len(b))
 assert((np.abs(b) == np.asarray(abs(b))).all())
@@ -68,10 +68,10 @@ quats = np.array([[1., 2., 3., 4., 5.],   # a
                   [18., -23., 5., 0., 0.]])  # d
 
 # numpy slicing and conversions of single quaternions
-assert(core.G3Quat(quats[0, :4]) == core.G3Quat(*quats[0, :4]))
-assert((quats[0, :4] == np.asarray(core.G3Quat(*quats[0, :4]))).all())
-assert(core.G3Quat(quats[:, 0]) == core.G3Quat(*quats[:, 0]))
-assert((quats[:, 0] == np.asarray(core.G3Quat(*quats[:, 0]))).all())
+assert(core.Quat(quats[0, :4]) == core.Quat(*quats[0, :4]))
+assert((quats[0, :4] == np.asarray(core.Quat(*quats[0, :4]))).all())
+assert(core.Quat(quats[:, 0]) == core.Quat(*quats[:, 0]))
+assert((quats[:, 0] == np.asarray(core.Quat(*quats[:, 0]))).all())
 
 try:
 	q = core.G3VectorQuat(quats)
@@ -83,32 +83,38 @@ else:
 
 # Non-trivial strides
 q = core.G3VectorQuat(quats[:,:4])
-assert(q[0] == core.G3Quat(*quats[0,:4]))
-assert(q[1] == core.G3Quat(*quats[1,:4]))
-assert(q[2] == core.G3Quat(*quats[2,:4]))
-assert(q[3] == core.G3Quat(*quats[3,:4]))
+assert(q[0] == core.Quat(*quats[0,:4]))
+assert(q[1] == core.Quat(*quats[1,:4]))
+assert(q[2] == core.Quat(*quats[2,:4]))
+assert(q[3] == core.Quat(*quats[3,:4]))
 
 # When transposed, has right shape to convert
 q = core.G3VectorQuat(quats.T) # Strides, but simple ones
-assert(q[0] == core.G3Quat(*quats[:, 0]))
-assert(q[1] == core.G3Quat(*quats[:, 1]))
-assert(q[2] == core.G3Quat(*quats[:, 2]))
-assert(q[3] == core.G3Quat(*quats[:, 3]))
-assert(q[4] == core.G3Quat(*quats[:, 4]))
+assert(q[0] == core.Quat(*quats[:, 0]))
+assert(q[1] == core.Quat(*quats[:, 1]))
+assert(q[2] == core.Quat(*quats[:, 2]))
+assert(q[3] == core.Quat(*quats[:, 3]))
+assert(q[4] == core.Quat(*quats[:, 4]))
 
 # Trivial case, packed
 q = core.G3VectorQuat(quats.T.copy())
-assert(q[0] == core.G3Quat(*quats[:, 0]))
-assert(q[1] == core.G3Quat(*quats[:, 1]))
-assert(q[2] == core.G3Quat(*quats[:, 2]))
-assert(q[3] == core.G3Quat(*quats[:, 3]))
-assert(q[4] == core.G3Quat(*quats[:, 4]))
+assert(q[0] == core.Quat(*quats[:, 0]))
+assert(q[1] == core.Quat(*quats[:, 1]))
+assert(q[2] == core.Quat(*quats[:, 2]))
+assert(q[3] == core.Quat(*quats[:, 3]))
+assert(q[4] == core.Quat(*quats[:, 4]))
 
 # Test conversion of integers
 
 qint = np.asarray(quats[:,:4], dtype='int64')
 q = core.G3VectorQuat(qint)
-assert(q[0] == core.G3Quat(1,2,3,4))
-assert(q[1] == core.G3Quat(0,0,0,3))
-assert(q[3] == core.G3Quat(18, -23, 5, 0))
+assert(q[0] == core.Quat(1,2,3,4))
+assert(q[1] == core.Quat(0,0,0,3))
+assert(q[3] == core.Quat(18, -23, 5, 0))
 
+# Test serialization
+
+frame = core.G3Frame()
+q = core.Quat(1, 2, 3, 4)
+frame["Quat"] = q
+assert frame["Quat"] == q
