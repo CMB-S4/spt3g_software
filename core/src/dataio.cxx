@@ -23,9 +23,9 @@ int
 g3_istream_from_path(g3_istream &stream, const std::string &path, float timeout)
 {
 	stream.reset();
-	if (!path.compare(path.size() - 3, 3, ".gz"))
+	if (path.size() > 3 && !path.compare(path.size() - 3, 3, ".gz"))
 		stream.push(boost::iostreams::gzip_decompressor());
-	if (!path.compare(path.size() - 4, 4, ".bz2")) {
+	if (path.size() > 4 && !path.compare(path.size() - 4, 4, ".bz2")) {
 #ifdef BZIP2_FOUND
 		stream.push(boost::iostreams::bzip2_decompressor());
 #else
@@ -179,9 +179,9 @@ g3_ostream_to_path(g3_ostream &stream, const std::string &path,
     bool append, bool counter)
 {
 	stream.reset();
-	if (!path.compare(path.size() - 3, 3, ".gz") && !append)
+	if (path.size() > 3 && !path.compare(path.size() - 3, 3, ".gz") && !append)
 		stream.push(boost::iostreams::gzip_compressor());
-	if (!path.compare(path.size() - 4, 4, ".bz2") && !append) {
+	if (path.size() > 4 && !path.compare(path.size() - 4, 4, ".bz2") && !append) {
 #ifdef BZIP2_FOUND
 		stream.push(boost::iostreams::bzip2_compressor());
 #else
