@@ -34,13 +34,15 @@ jobs:
         sudo apt-get install libbz2-dev libboost-all-dev libflac-dev libnetcdf-dev libpython3-dev
         sudo pip install numpy scipy matplotlib astropy healpy sphinx --break-system-packages
 
+    - name: Setup python on macOS
+      if: runner.environment == 'github-hosted' && runner.os == 'macOS'
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
     - name: Install macOS Dependencies
       if: runner.environment == 'github-hosted' && runner.os == 'macOS'
       run: |
-        brew install python@3.12
-        brew link --overwrite python@3.12
-        export PATH=$(brew --prefix python@3.12)/libexec/bin:$(brew --prefix python@3.12)/bin:$PATH
-        echo PATH=$PATH >> $GITHUB_ENV
         brew install bzip2 boost boost-python3 flac netcdf
         python3.12 -m pip install numpy scipy matplotlib astropy healpy sphinx --break-system-packages
 
