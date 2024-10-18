@@ -59,7 +59,7 @@ jobs:
       # access regardless of the host operating system
       shell: bash
       working-directory: ${{runner.workspace}}/${{matrix.toolset}}
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_COMPILE_WARNING_AS_ERROR=yes
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_COMPILE_WARNING_AS_ERROR=yes -DPython_EXECUTABLE=`which python3`
 
     - name: Build
       working-directory: ${{runner.workspace}}/${{matrix.toolset}}
