@@ -5,7 +5,6 @@
 #include <G3Frame.h>
 #include <G3Logging.h>
 
-#include <boost/preprocessor/cat.hpp>
 #include <boost/python.hpp>
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic push
@@ -174,7 +173,10 @@ public:
 //     SPT3G_PYTHON_MODULE(foo)
 // for a package whose name will be _libfoo
 #define SPT3G_PYTHON_MODULE(name) \
-BOOST_PYTHON_MODULE(BOOST_PP_CAT(_lib, name))
+BOOST_PYTHON_MODULE(_lib ## name)
+
+// Create a namespace (importable sub-module) within some parent scope
+bp::object export_namespace(bp::object scope, std::string name);
 
 // Python runtime context to simplify acquiring or releasing the GIL as necessary.
 // To use, simply construct the context object where necessary, e.g.
