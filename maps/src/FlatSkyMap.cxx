@@ -723,24 +723,24 @@ FlatSkyMap::PixelToXY(size_t pixel) const {
 }
 
 std::vector<double>
-FlatSkyMap::QuatToXY(quat q) const
+FlatSkyMap::QuatToXY(const Quat &q) const
 {
 	return proj_info.QuatToXY(q);
 }
 
 size_t
-FlatSkyMap::QuatToPixel(quat q) const
+FlatSkyMap::QuatToPixel(const Quat &q) const
 {
 	return proj_info.QuatToPixel(q);
 }
 
-quat
+Quat
 FlatSkyMap::XYToQuat(double x, double y) const
 {
 	return proj_info.XYToQuat(x, y);
 }
 
-quat
+Quat
 FlatSkyMap::PixelToQuat(size_t pixel) const
 {
 	return proj_info.PixelToQuat(pixel);
@@ -769,14 +769,14 @@ FlatSkyMap::GetRebinQuats(size_t pixel, size_t scale) const
 }
 
 void
-FlatSkyMap::GetInterpPixelsWeights(quat q, std::vector<size_t> & pixels,
+FlatSkyMap::GetInterpPixelsWeights(const Quat &q, std::vector<size_t> & pixels,
     std::vector<double> & weights) const
 {
 	proj_info.GetInterpPixelsWeights(q, pixels, weights);
 }
 
 std::vector<size_t>
-FlatSkyMap::QueryDisc(quat q, double radius) const
+FlatSkyMap::QueryDisc(const Quat &q, double radius) const
 {
 	return proj_info.QueryDisc(q, radius);
 }
@@ -1214,6 +1214,32 @@ flatskymap_xy_to_pixels(const FlatSkyMap & skymap, const std::vector<double> &x,
 	return pixel;
 }
 
+static boost::python::tuple
+flatskymap_quats_to_xy(const FlatSkyMap & skymap, const G3VectorQuat &quats)
+{
+	std::vector<double> x(quats.size()), y(quats.size());
+	for (size_t i = 0; i < quats.size(); i++) {
+		auto xy = skymap.QuatToXY(quats[i]);
+		x[i] = xy[0];
+		y[i] = xy[1];
+	}
+
+	return boost::python::make_tuple(x, y);
+}
+
+static G3VectorQuat
+flatskymap_xy_to_quats(const FlatSkyMap & skymap, const std::vector<double> &x,
+    const std::vector<double> &y)
+{
+	g3_assert(x.size() == y.size());
+
+	G3VectorQuat quats;
+	for (size_t i = 0; i < x.size(); i++)
+		quats.push_back(skymap.XYToQuat(x[i], y[i]));
+
+	return quats;
+}
+
 
 G3_SPLIT_SERIALIZABLE_CODE(FlatSkyMap);
 
@@ -1325,6 +1351,19 @@ PYBINDINGS("maps")
 	    .def("pixel_to_xy", flatskymap_pixels_to_xy,
 	      (bp::arg("pixel")),
 	       "Compute the flat 2D coordinates of the input pixel indices (vectorized)")
+
+	    .def("xy_to_quat", &FlatSkyMap::XYToQuat,
+	      (bp::arg("x"), bp::arg("y")),
+	       "Compute the quaternion rotation of the input flat 2D coordinates")
+	    .def("xy_to_quat", flatskymap_xy_to_quats,
+	      (bp::arg("x"), bp::arg("y")),
+	       "Compute the quaternion rotations of the input flat 2D coordinates (vectorized)")
+	    .def("quat_to_xy", &FlatSkyMap::QuatToXY,
+	      (bp::arg("quat")),
+	       "Compute the flat 2D coordinates of the input quaternion rotation")
+	    .def("quat_to_xy", flatskymap_quats_to_xy,
+	      (bp::arg("quat")),
+	       "Compute the flat 2D coordinates of the input quaternion rotations (vectorized)")
 
 	    .add_property("sparse", flatskymap_pysparsity_get, flatskymap_pysparsity_set,
 	       "True if the map is stored with column and row zero-suppression, False if "

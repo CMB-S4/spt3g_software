@@ -1019,12 +1019,12 @@ HealpixSkyMap::PixelToAngle(size_t pixel) const
 }
 
 size_t
-HealpixSkyMap::QuatToPixel(quat q) const
+HealpixSkyMap::QuatToPixel(const Quat &q) const
 {
 	return info_.QuatToPixel(q);
 }
 
-quat
+Quat
 HealpixSkyMap::PixelToQuat(size_t pixel) const
 {
 	return info_.PixelToQuat(pixel);
@@ -1037,14 +1037,14 @@ HealpixSkyMap::GetRebinQuats(size_t pixel, size_t scale) const
 }
 
 void
-HealpixSkyMap::GetInterpPixelsWeights(quat q, std::vector<size_t> & pixels,
+HealpixSkyMap::GetInterpPixelsWeights(const Quat &q, std::vector<size_t> & pixels,
     std::vector<double> & weights) const
 {
 	info_.GetInterpPixelsWeights(q, pixels, weights);
 }
 
 std::vector<size_t>
-HealpixSkyMap::QueryDisc(quat q, double radius) const
+HealpixSkyMap::QueryDisc(const Quat &q, double radius) const
 {
 	return info_.QueryDisc(q, radius);
 }

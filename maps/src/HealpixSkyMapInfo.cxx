@@ -245,9 +245,9 @@ HealpixSkyMapInfo::AngleToPixel(double alpha, double delta) const
 }
 
 size_t
-HealpixSkyMapInfo::QuatToPixel(quat q) const
+HealpixSkyMapInfo::QuatToPixel(const Quat &q) const
 {
-	std::vector<double> v = {q.R_component_2(), q.R_component_3(), q.R_component_4()};
+	std::vector<double> v = {q.b(), q.c(), q.d()};
 	ssize_t outpix;
 
 	if (nested_)
@@ -285,11 +285,11 @@ HealpixSkyMapInfo::PixelToAngle(size_t pixel) const
 	return {alpha, delta};
 }
 
-quat
+Quat
 HealpixSkyMapInfo::PixelToQuat(size_t pixel) const
 {
 	if (pixel < 0 || pixel >= npix_)
-		return quat(0, 1, 0, 0);
+		return Quat(0, 1, 0, 0);
 
 	std::vector<double> v(3);
 	if (nested_)
@@ -297,7 +297,7 @@ HealpixSkyMapInfo::PixelToQuat(size_t pixel) const
 	else
 		pix2vec_ring64(nside_, pixel, &v[0]);
 
-	return quat(0, v[0], v[1], v[2]);
+	return Quat(0, v[0], v[1], v[2]);
 }
 
 size_t
@@ -320,7 +320,7 @@ HealpixSkyMapInfo::GetRebinQuats(size_t pixel, size_t scale) const
 	if (nside_ % scale != 0)
 		log_fatal("Nside must be a multiple of rebinning scale");
 
-	G3VectorQuat quats(scale * scale, quat(0, 1, 0, 0));
+	G3VectorQuat quats(scale * scale, Quat(0, 1, 0, 0));
 
 	if (pixel >= npix_) {
 		quats.resize(0);
@@ -339,7 +339,7 @@ HealpixSkyMapInfo::GetRebinQuats(size_t pixel, size_t scale) const
 
 	for (size_t i = 0; i < (scale * scale); i++) {
 		pix2vec_nest64(nside_rebin, pixmin + i, &v[0]);
-		quats[i] = quat(0, v[0], v[1], v[2]);
+		quats[i] = Quat(0, v[0], v[1], v[2]);
 	}
 
 	return quats;
@@ -356,14 +356,14 @@ HealpixSkyMapInfo::RingAbove(double z) const
 }
 
 void
-HealpixSkyMapInfo::GetInterpPixelsWeights(quat q, std::vector<size_t> & pixels,
+HealpixSkyMapInfo::GetInterpPixelsWeights(const Quat &q, std::vector<size_t> & pixels,
     std::vector<double> & weights) const
 {
 	pixels = std::vector<size_t>(4, (size_t) -1);
 	weights = std::vector<double>(4, 0);
 
-	double z = q.R_component_4() / sqrt(dot3(q, q));
-	double phi = atan2(q.R_component_3(), q.R_component_2());
+	double z = q.d() / sqrt(dot3(q, q));
+	double phi = atan2(q.c(), q.b());
 	if (phi < 0)
 		phi += twopi;
 
@@ -446,7 +446,7 @@ HealpixSkyMapInfo::GetInterpPixelsWeights(quat q, std::vector<size_t> & pixels,
 }
 
 std::vector<size_t>
-HealpixSkyMapInfo::QueryDisc(quat q, double radius) const
+HealpixSkyMapInfo::QueryDisc(const Quat &q, double radius) const
 {
 	size_t n = 0;
 	auto pixels = std::vector<size_t>(n);
@@ -461,11 +461,11 @@ HealpixSkyMapInfo::QueryDisc(quat q, double radius) const
 
 	double cosrad = cos(radius);
 	double sinrad = sin(radius);
-	double z = q.R_component_4() / sqrt(dot3(q, q));
+	double z = q.d() / sqrt(dot3(q, q));
 	double theta = acos(z);
 	double s = sqrt((1 - z) * (1 + z));
 	double xa = 1.0 / s;
-	double phi = atan2(q.R_component_3(), q.R_component_2());
+	double phi = atan2(q.c(), q.b());
 	if (phi < 0)
 		phi += twopi;
 

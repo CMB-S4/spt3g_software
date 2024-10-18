@@ -119,18 +119,18 @@ public:
 	std::vector<double> XYToAngle(double x, double y) const;
 	size_t XYToPixel(double x, double y) const;
 	std::vector<double> PixelToXY(size_t pixel) const;
-	std::vector<double> QuatToXY(quat q) const;
-	quat XYToQuat(double x, double y) const;
-	size_t QuatToPixel(quat q) const override;
-	quat PixelToQuat(size_t pixel) const override;
+	std::vector<double> QuatToXY(const Quat &q) const;
+	Quat XYToQuat(double x, double y) const;
+	size_t QuatToPixel(const Quat &q) const override;
+	Quat PixelToQuat(size_t pixel) const override;
 
 	std::vector<double> PixelToAngleGrad(size_t pixel, double h=0.001) const;
 
 	G3VectorQuat GetRebinQuats(size_t pixel, size_t scale) const override;
-	void GetInterpPixelsWeights(quat q, std::vector<size_t> & pixels,
+	void GetInterpPixelsWeights(const Quat &q, std::vector<size_t> & pixels,
 	    std::vector<double> & weights) const override;
 
-	std::vector<size_t> QueryDisc(quat q, double radius) const override;
+	std::vector<size_t> QueryDisc(const Quat &q, double radius) const override;
 
 	G3SkyMapPtr Rebin(size_t scale, bool norm = true) const override;
 	G3SkyMapPtr ExtractPatch(size_t x0, size_t y0, size_t width, size_t height,

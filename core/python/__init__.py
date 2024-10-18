@@ -27,5 +27,6 @@ from .docparser import *
 from .dataextensions import *
 from .frameextensions import *
 from .timestreamextensions import *
+from .quatextensions import *
 
 from .g3decorators import cache_frame_data, scan_func_cache_data

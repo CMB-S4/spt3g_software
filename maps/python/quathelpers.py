@@ -1,4 +1,4 @@
-from ..core import G3Units, quat, G3VectorQuat, G3TimestreamQuat, usefulfunc, indexmod
+from ..core import G3Units, Quat, G3VectorQuat, G3TimestreamQuat, usefulfunc, indexmod
 import numpy
 
 
@@ -9,13 +9,13 @@ def quat_to_ang(q):
     vector of them) specified as a (longitude, latitude) pair.
     """
     single = False
-    if isinstance(q, quat):
-        q = numpy.asarray(G3VectorQuat([q]))
+    if isinstance(q, Quat):
+        q = numpy.array(G3VectorQuat([q]))
         single = True
     elif isinstance(q, list):
-        q = numpy.asarray(G3VectorQuat(q))
+        q = numpy.array(G3VectorQuat(q))
     else:
-        q = numpy.asarray(q)
+        q = numpy.array(q)
 
     # Copied from C code
     d = q[:, 1] ** 2 + q[:, 2] ** 2 + q[:, 3] ** 2
@@ -40,21 +40,21 @@ def ang_to_quat(alpha, delta, start=None, stop=None):
     G3TimestreamQuat with start and stop times set to the provided values.
     """
 
-    alpha = numpy.asarray(alpha)
-    delta = numpy.asarray(delta)
+    alpha = numpy.asarray(alpha) / G3Units.rad
+    delta = numpy.asarray(delta) / G3Units.rad
     # Copied from C code
-    c_delta = numpy.cos(delta / G3Units.rad)
+    c_delta = numpy.cos(delta)
     q = numpy.column_stack(
         (
             0 * c_delta,  # 0s with the right shape
-            c_delta * numpy.cos(alpha / G3Units.rad),
-            c_delta * numpy.sin(alpha / G3Units.rad),
-            numpy.sin(delta / G3Units.rad),
+            c_delta * numpy.cos(alpha),
+            c_delta * numpy.sin(alpha),
+            numpy.sin(delta),
         )
     )
 
     if len(q) == 1:
-        return quat(q[0, 0], q[0, 1], q[0, 2], q[0, 3])
+        return Quat(q[0, :])
     else:
         if start is not None:
             out = G3TimestreamQuat(q)
