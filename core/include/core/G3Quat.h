@@ -24,6 +24,7 @@ public:
 	double norm() const;
 	double abs() const;
 
+	Quat operator -() const;
 	Quat operator ~() const;
 
 	Quat &operator +=(const Quat &);

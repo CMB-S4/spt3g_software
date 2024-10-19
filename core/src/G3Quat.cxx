@@ -3,6 +3,7 @@
 #include <G3Quat.h>
 #include <G3Map.h>
 #include <G3Units.h>
+#include <G3Timestream.h>
 
 // Quaternion utilities
 
@@ -84,6 +85,12 @@ double
 Quat::abs() const
 {
 	return sqrt(norm());
+}
+
+Quat
+Quat::operator -() const
+{
+	return Quat(-buf_[0], -buf_[1], -buf_[2], -buf_[3]);
 }
 
 Quat
@@ -284,6 +291,12 @@ vec_abs(const G3VectorQuat &a)
 	return out;
 }
 
+static G3VectorQuat
+vec_neg(const G3VectorQuat &a)
+{
+	return -1 * a;
+}
+
 static G3VectorDouble
 vec_real(const G3VectorQuat &a)
 {
@@ -291,6 +304,32 @@ vec_real(const G3VectorQuat &a)
 	for (unsigned i = 0; i < a.size(); i++)
 		out[i] = real(a[i]);
 	return out;
+}
+
+static G3Timestream
+ts_abs(const G3TimestreamQuat &a)
+{
+	G3Timestream out(a.size());
+	out.start = a.start; out.stop = a.stop;
+	for (unsigned i = 0; i < a.size(); i++)
+		out[i] = abs(a[i]);
+	return out;
+}
+
+static G3Timestream
+ts_real(const G3TimestreamQuat &a)
+{
+	G3Timestream out(a.size());
+	out.start = a.start; out.stop = a.stop;
+	for (unsigned i = 0; i < a.size(); i++)
+		out[i] = real(a[i]);
+	return out;
+}
+
+static G3TimestreamQuat
+ts_neg(const G3TimestreamQuat &a)
+{
+	return -1 * a;
 }
 
 G3VectorQuat
@@ -913,6 +952,7 @@ PYBINDINGS("core")
 	     .add_property("real", &Quat::real, "The real (scalar) part of the quaternion")
 	     .add_property("unreal", &Quat::unreal, "The unreal (vector) part of the quaternion")
 	     .def(~self)
+	     .def(-self)
 	     .def(self == self)
 	     .def(self != self)
 	     .def(self + self)
@@ -977,6 +1017,7 @@ PYBINDINGS("core")
 	     .def(Quat() / self)
 	     .def(pow(self, int()))
 	     .def("__abs__", vec_abs)
+	     .def("__neg__", vec_neg)
 	     .def("abs", vec_abs, "Return the Euclidean norm of each quaternion")
 	     .add_property("real", vec_real, "Return the real (scalar) part of each quaternion");
 	PyTypeObject *vqclass = (PyTypeObject *)vq.ptr();
@@ -1014,9 +1055,10 @@ PYBINDINGS("core")
 	     .def(self /= Quat())
 	     .def(Quat() / self)
 	     .def(pow(self, int()))
-	     .def("__abs__", vec_abs)
-	     .def("abs", vec_abs, "Return the Euclidean norm of each quaternion")
-	     .add_property("real", vec_real, "Return the real (scalar) part of each quaternion")
+	     .def("__abs__", ts_abs)
+	     .def("__neg__", ts_neg)
+	     .def("abs", ts_abs, "Return the Euclidean norm of each quaternion")
+	     .add_property("real", ts_real, "Return the real (scalar) part of each quaternion")
 	    .def_readwrite("start", &G3TimestreamQuat::start,
 	      "Time of the first sample in the time stream")
 	    .def_readwrite("stop", &G3TimestreamQuat::stop,
