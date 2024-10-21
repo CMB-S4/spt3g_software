@@ -7,15 +7,15 @@
 class Quat
 {
 public:
-	Quat() : buf_{0, 0, 0, 0} {}
+	Quat() : a_(0), b_(0), c_(0), d_(0) {}
 	Quat(double a, double b, double c, double d) :
-	    buf_{a, b, c, d} {}
-	Quat(const Quat &q) : buf_{q.a(), q.b(), q.c(), q.d()} {}
+	    a_(a), b_(b), c_(c), d_(d) {}
+	Quat(const Quat &q) : a_(q.a_), b_(q.b_), c_(q.c_), d_(q.d_) {}
 
-	double a() const { return buf_[0]; }
-	double b() const { return buf_[1]; }
-	double c() const { return buf_[2]; }
-	double d() const { return buf_[3]; }
+	double a() const { return a_; }
+	double b() const { return b_; }
+	double c() const { return c_; }
+	double d() const { return d_; }
 
 	Quat versor() const;
 	double real() const;
@@ -23,6 +23,8 @@ public:
 	Quat conj() const;
 	double norm() const;
 	double abs() const;
+	double dot3(const Quat &b) const;
+	Quat cross3(const Quat &b) const;
 
 	Quat operator -() const;
 	Quat operator ~() const;
@@ -46,7 +48,7 @@ public:
 
 	template <class A> void serialize(A &ar, unsigned v);
 private:
-	double buf_[4];
+	double a_, b_, c_, d_;
 };
 
 std::ostream& operator<<(std::ostream& os, const Quat &);

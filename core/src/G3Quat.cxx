@@ -20,10 +20,10 @@ Quat::serialize(A &ar, const unsigned v)
 {
 	G3_CHECK_VERSION(v);
 
-	ar & cereal::make_nvp("a", buf_[0]);
-	ar & cereal::make_nvp("b", buf_[1]);
-	ar & cereal::make_nvp("c", buf_[2]);
-	ar & cereal::make_nvp("d", buf_[3]);
+	ar & cereal::make_nvp("a", a_);
+	ar & cereal::make_nvp("b", b_);
+	ar & cereal::make_nvp("c", c_);
+	ar & cereal::make_nvp("d", d_);
 }
 
 std::string
@@ -57,28 +57,27 @@ Quat::versor() const
 double
 Quat::real() const
 {
-	return buf_[0];
+	return a_;
 }
 
 Quat
 Quat::unreal() const
 {
-	if (!buf_[0])
+	if (!a_)
 		return *this;
-	return Quat(0, buf_[1], buf_[2], buf_[3]);
+	return Quat(0, b_, c_, d_);
 }
 
 Quat
 Quat::conj() const
 {
-	return Quat(buf_[0], -buf_[1], -buf_[2], -buf_[3]);
+	return Quat(a_, -b_, -c_, -d_);
 }
 
 double
 Quat::norm() const
 {
-	return buf_[0] * buf_[0] + buf_[1] * buf_[1] +
-	    buf_[2] * buf_[2] + buf_[3] * buf_[3];
+	return a_ * a_ + b_ * b_ + c_ * c_ + d_ * d_;
 }
 
 double
@@ -90,7 +89,7 @@ Quat::abs() const
 Quat
 Quat::operator -() const
 {
-	return Quat(-buf_[0], -buf_[1], -buf_[2], -buf_[3]);
+	return Quat(-a_, -b_, -c_, -d_);
 }
 
 Quat
@@ -102,55 +101,54 @@ Quat::operator ~() const
 Quat &
 Quat::operator +=(const Quat &rhs)
 {
-	buf_[0] += rhs.buf_[0];
-	buf_[1] += rhs.buf_[1];
-	buf_[2] += rhs.buf_[2];
-	buf_[3] += rhs.buf_[3];
+	a_ += rhs.a_;
+	b_ += rhs.b_;
+	c_ += rhs.c_;
+	d_ += rhs.d_;
 	return *this;
 }
 
 Quat &
 Quat::operator -=(const Quat &rhs)
 {
-	buf_[0] -= rhs.buf_[0];
-	buf_[1] -= rhs.buf_[1];
-	buf_[2] -= rhs.buf_[2];
-	buf_[3] -= rhs.buf_[3];
+	a_ -= rhs.a_;
+	b_ -= rhs.b_;
+	c_ -= rhs.c_;
+	d_ -= rhs.d_;
 	return *this;
 }
 
 Quat &
 Quat::operator *=(double rhs)
 {
-	buf_[0] *= rhs;
-	buf_[1] *= rhs;
-	buf_[2] *= rhs;
-	buf_[3] *= rhs;
+	a_ *= rhs;
+	b_ *= rhs;
+	c_ *= rhs;
+	d_ *= rhs;
 	return *this;
 }
 
 Quat &
 Quat::operator *=(const Quat &rhs)
 {
-	const double *vr = (const double *)(&(rhs.buf_[0]));
-	double a = buf_[0] * vr[0] - buf_[1] * vr[1] - buf_[2] * vr[2] - buf_[3] * vr[3];
-	double b = buf_[0] * vr[1] + buf_[1] * vr[0] + buf_[2] * vr[3] - buf_[3] * vr[2];
-	double c = buf_[0] * vr[2] - buf_[1] * vr[3] + buf_[2] * vr[0] + buf_[3] * vr[1];
-	double d = buf_[0] * vr[3] + buf_[1] * vr[2] - buf_[2] * vr[1] + buf_[3] * vr[0];
-	buf_[0] = a;
-	buf_[1] = b;
-	buf_[2] = c;
-	buf_[3] = d;
+	double a = a_ * rhs.a_ - b_ * rhs.b_ - c_ * rhs.c_ - d_ * rhs.d_;
+	double b = a_ * rhs.b_ + b_ * rhs.a_ + c_ * rhs.d_ - d_ * rhs.c_;
+	double c = a_ * rhs.c_ - b_ * rhs.d_ + c_ * rhs.a_ + d_ * rhs.b_;
+	double d = a_ * rhs.d_ + b_ * rhs.c_ - c_ * rhs.b_ + d_ * rhs.a_;
+	a_ = a;
+	b_ = b;
+	c_ = c;
+	d_ = d;
 	return *this;
 }
 
 Quat &
 Quat::operator /=(double rhs)
 {
-	buf_[0] /= rhs;
-	buf_[1] /= rhs;
-	buf_[2] /= rhs;
-	buf_[3] /= rhs;
+	a_ /= rhs;
+	b_ /= rhs;
+	c_ /= rhs;
+	d_ /= rhs;
 	return *this;
 }
 
@@ -158,36 +156,33 @@ Quat &
 Quat::operator /=(const Quat &rhs)
 {
 	double n = rhs.norm();
-	const double *vr = (const double *)(&(rhs.buf_[0]));
-	double a =  buf_[0] * vr[0] + buf_[1] * vr[1] + buf_[2] * vr[2] + buf_[3] * vr[3];
-	double b = -buf_[0] * vr[1] + buf_[1] * vr[0] - buf_[2] * vr[3] + buf_[3] * vr[2];
-	double c = -buf_[0] * vr[2] + buf_[1] * vr[3] + buf_[2] * vr[0] - buf_[3] * vr[1];
-	double d = -buf_[0] * vr[3] - buf_[1] * vr[2] + buf_[2] * vr[1] + buf_[3] * vr[0];
-	buf_[0] = a / n;
-	buf_[1] = b / n;
-	buf_[2] = c / n;
-	buf_[3] = d / n;
+	double a =  a_ * rhs.a_ + b_ * rhs.b_ + c_ * rhs.c_ + d_ * rhs.d_;
+	double b = -a_ * rhs.b_ + b_ * rhs.a_ - c_ * rhs.d_ + d_ * rhs.c_;
+	double c = -a_ * rhs.c_ + b_ * rhs.d_ + c_ * rhs.a_ - d_ * rhs.b_;
+	double d = -a_ * rhs.d_ - b_ * rhs.c_ + c_ * rhs.b_ + d_ * rhs.a_;
+	a_ = a / n;
+	b_ = b / n;
+	c_ = c / n;
+	d_ = d / n;
 	return *this;
 }
 
 Quat
 Quat::operator +(const Quat &rhs) const
 {
-	return Quat(buf_[0] + rhs.buf_[0], buf_[1] + rhs.buf_[1],
-	    buf_[2] + rhs.buf_[2], buf_[3] + rhs.buf_[3]);
+	return Quat(a_ + rhs.a_, b_ + rhs.b_, c_ + rhs.c_, d_ + rhs.d_);
 }
 
 Quat
 Quat::operator -(const Quat &rhs) const
 {
-	return Quat(buf_[0] - rhs.buf_[0], buf_[1] - rhs.buf_[1],
-	    buf_[2] - rhs.buf_[2], buf_[3] - rhs.buf_[3]);
+	return Quat(a_ - rhs.a_, b_ - rhs.b_, c_ - rhs.c_, d_ - rhs.d_);
 }
 
 Quat
 Quat::operator *(double rhs) const
 {
-	return Quat(buf_[0] * rhs, buf_[1] * rhs, buf_[2] * rhs, buf_[3] * rhs);
+	return Quat(a_ * rhs, b_ * rhs, c_ * rhs, d_ * rhs);
 }
 
 Quat
@@ -207,7 +202,7 @@ operator *(double a, const Quat &b)
 Quat
 Quat::operator /(double rhs) const
 {
-	return Quat(buf_[0] / rhs, buf_[1] / rhs, buf_[2] / rhs, buf_[3] / rhs);
+	return Quat(a_ / rhs, b_ / rhs, c_ / rhs, d_ / rhs);
 }
 
 Quat
@@ -227,8 +222,8 @@ operator /(double a, const Quat &b)
 bool
 Quat::operator ==(const Quat &rhs) const
 {
-	return ((buf_[0] == rhs.buf_[0]) && (buf_[1] == rhs.buf_[1]) &&
-	    (buf_[2] == rhs.buf_[2]) && (buf_[3] == rhs.buf_[3]));
+	return ((a_ == rhs.a_) && (b_ == rhs.b_) &&
+	    (c_ == rhs.c_) && (d_ == rhs.d_));
 }
 
 bool
@@ -261,25 +256,34 @@ pow(const Quat &q, int n)
 }
 
 Quat
-cross3(const Quat &u, const Quat &v)
+Quat::cross3(const Quat &v) const
 {
 	// Computes Euclidean cross product from the last three entries in the
 	// quaternion
-	Quat out(0,
-	    u.c()*v.d() - (u.d()*v.c()),
-	    u.d()*v.b() - (u.b()*v.d()),
-	    u.b()*v.c() - (u.c()*v.b()));
-	return out;
+	return Quat(0,
+	    c_ * v.d_ - d_ * v.c_,
+	    d_ * v.b_ - b_ * v.d_,
+	    b_ * v.c_ - c_ * v.b_);
+}
+
+Quat
+cross3(const Quat &u, const Quat &v)
+{
+	return u.cross3(v);
+}
+
+double
+Quat::dot3(const Quat &b) const
+{
+	// Computes Euclidean dot product from the last three entries in the
+	// quaternion
+	return (b_ * b.b_ + c_ * b.c_ + d_ * b.d_);
 }
 
 double
 dot3(const Quat &a, const Quat &b)
 {
-	// Computes Euclidean dot product from the last three entries in the
-	// quaternion
-	return (a.b()*b.b() +
-		a.c()*b.c() +
-		a.d()*b.d());
+	return a.dot3(b);
 }
 
 static G3VectorDouble
@@ -976,8 +980,8 @@ PYBINDINGS("core")
 	     .def("norm", &Quat::norm, "Return the Cayley norm of the quaternion")
 	     .def("abs", &Quat::abs, "Return the Euclidean norm of the quaternion")
 	     .def("versor", &Quat::versor, "Return a versor (unit quaternion) with the same orientation")
-	     .def("dot3", dot3, "Dot product of last three entries")
-	     .def("cross3", cross3, "Cross product of last three entries")
+	     .def("dot3", &Quat::dot3, "Dot product of last three entries")
+	     .def("cross3", &Quat::cross3, "Cross product of last three entries")
 	;
 	implicitly_convertible<QuatPtr, QuatConstPtr>();
 	PyTypeObject *qclass = (PyTypeObject *)q.ptr();
