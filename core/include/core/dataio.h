@@ -20,8 +20,9 @@ typedef boost::iostreams::filtering_ostream g3_ostream;
  *                  extension.  Supported compression schemes are gzip or bzip2.
  *                  If a socket address may be in one of two forms:
  *                  "tcp://host:port" to connect to a host on a specific port
- *                  and read until EOF, or "tcp://*:port" to listed on a specifc
- *                  port for the first connection and read until EOF.
+ *                  and read until EOF, or use an asterisk instead of a hostname
+ *                  to listen on a specific port for the first connection and
+ *                  read until EOF.
  * @param  timeout  Timeout in seconds for socket connections.
  * @return File descriptor for socket connections, or -1 for file input.
  */
