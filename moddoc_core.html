@@ -41,6 +41,1930 @@
   <section id="core">
 <h1>core<a class="headerlink" href="#core" title="Link to this heading">¶</a></h1>
 <p>The core directory includes infrastructural components of the software: file IO, python bindings, basic containers for plain data, the definition of G3Pipeline, etc.</p>
+<section id="frame-objects-in-spt3g-core">
+<h2>Frame Objects in spt3g.core<a class="headerlink" href="#frame-objects-in-spt3g-core" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="#spt3g-core-g3bool">spt3g.core.G3Bool</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3double">spt3g.core.G3Double</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3frameobject">spt3g.core.G3FrameObject</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3int">spt3g.core.G3Int</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3mapdouble">spt3g.core.G3MapDouble</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3mapframeobject">spt3g.core.G3MapFrameObject</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3mapint">spt3g.core.G3MapInt</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3mapmapdouble">spt3g.core.G3MapMapDouble</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3mapquat">spt3g.core.G3MapQuat</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3mapstring">spt3g.core.G3MapString</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3mapvectorbool">spt3g.core.G3MapVectorBool</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3mapvectorcomplexdouble">spt3g.core.G3MapVectorComplexDouble</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3mapvectordouble">spt3g.core.G3MapVectorDouble</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3mapvectorint">spt3g.core.G3MapVectorInt</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3mapvectorquat">spt3g.core.G3MapVectorQuat</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3mapvectorstring">spt3g.core.G3MapVectorString</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3mapvectortime">spt3g.core.G3MapVectorTime</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3mapvectorvectorstring">spt3g.core.G3MapVectorVectorString</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3moduleconfig">spt3g.core.G3ModuleConfig</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3pipelineinfo">spt3g.core.G3PipelineInfo</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3string">spt3g.core.G3String</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3time">spt3g.core.G3Time</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3timesamplemap">spt3g.core.G3TimesampleMap</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3timestream">spt3g.core.G3Timestream</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3timestreammap">spt3g.core.G3TimestreamMap</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3timestreamquat">spt3g.core.G3TimestreamQuat</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3vectorbool">spt3g.core.G3VectorBool</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3vectorcomplexdouble">spt3g.core.G3VectorComplexDouble</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3vectordouble">spt3g.core.G3VectorDouble</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3vectorframeobject">spt3g.core.G3VectorFrameObject</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3vectorint">spt3g.core.G3VectorInt</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3vectorquat">spt3g.core.G3VectorQuat</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3vectorstring">spt3g.core.G3VectorString</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3vectortime">spt3g.core.G3VectorTime</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3vectorunsignedchar">spt3g.core.G3VectorUnsignedChar</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3vectorvectorstring">spt3g.core.G3VectorVectorString</a></p></li>
+</ul>
+<section id="spt3g-core-g3bool">
+<span id="id1"></span><h3>spt3g.core.G3Bool<a class="headerlink" href="#spt3g-core-g3bool" title="Link to this heading">¶</a></h3>
+<p>Serializable boolean type</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3Bool(</span> <span class="pre">(bool)arg2)</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3Bool(</span> <span class="pre">(G3Bool)arg2)</span></code></p>
+</dd>
+</dl>
+</section>
+<section id="spt3g-core-g3double">
+<span id="id2"></span><h3>spt3g.core.G3Double<a class="headerlink" href="#spt3g-core-g3double" title="Link to this heading">¶</a></h3>
+<p>Serializable double</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3Double(</span> <span class="pre">(float)arg2)</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3Double(</span> <span class="pre">(G3Double)arg2)</span></code></p>
+</dd>
+</dl>
+</section>
+<section id="spt3g-core-g3frameobject">
+<span id="id3"></span><h3>spt3g.core.G3FrameObject<a class="headerlink" href="#spt3g-core-g3frameobject" title="Link to this heading">¶</a></h3>
+<p>Base class for objects that can be added to a frame. All such must inherit from G3FrameObject in C++. Pickle hooks are overridden to use the fast internal serialization</p>
+<dl class="simple">
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3FrameObject()</span></code></p>
+</dd>
+</dl>
+<p><em>Methods:</em></p>
+<p id="spt3g-core-g3frameobject-description"><strong>spt3g.core.G3FrameObject.Description</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">Description(</span> <span class="pre">(G3FrameObject)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Long-form human-readable description of the object</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3frameobject-summary"><strong>spt3g.core.G3FrameObject.Summary</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">Summary(</span> <span class="pre">(G3FrameObject)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Short (one-line) description of the object</p>
+</dd>
+</dl>
+</section>
+<section id="spt3g-core-g3int">
+<span id="id4"></span><h3>spt3g.core.G3Int<a class="headerlink" href="#spt3g-core-g3int" title="Link to this heading">¶</a></h3>
+<p>Serializable integer type</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3Int(</span> <span class="pre">(int)arg2)</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3Int(</span> <span class="pre">(G3Int)arg2)</span></code></p>
+</dd>
+</dl>
+</section>
+<section id="spt3g-core-g3mapdouble">
+<span id="id5"></span><h3>spt3g.core.G3MapDouble<a class="headerlink" href="#spt3g-core-g3mapdouble" title="Link to this heading">¶</a></h3>
+<p>Mapping from strings to floats</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3MapDouble()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3MapDouble(</span> <span class="pre">(G3MapDouble)arg2)</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">G3MapDouble(</span> <span class="pre">(list)arg2)</span></code> :</dt><dd><p>Initialize with keys and values from a Python dictionary: {‘key’:’value’}</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">G3MapDouble(</span> <span class="pre">(dict)arg2)</span></code> :</dt><dd><p>Initialize with keys and values as tuples in a Python list: [(‘key’,’value’)]</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">G3MapDouble()</span></code></p>
+</dd>
+</dl>
+<p><em>Methods:</em></p>
+<p id="spt3g-core-g3mapdouble-keys"><strong>spt3g.core.G3MapDouble.keys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">keys(</span> <span class="pre">(G3MapDouble)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.keys() -&gt; list of D’s keys</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapdouble-has-key"><strong>spt3g.core.G3MapDouble.has_key</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">has_key(</span> <span class="pre">(G3MapDouble)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span> <span class="pre">:</span></code></dt><dd><p>D.has_key(k) -&gt; True if D has a key k, else False</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapdouble-values"><strong>spt3g.core.G3MapDouble.values</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">values(</span> <span class="pre">(G3MapDouble)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.values() -&gt; list of D’s values</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapdouble-items"><strong>spt3g.core.G3MapDouble.items</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">items(</span> <span class="pre">(G3MapDouble)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.items() -&gt; list of D’s (key, value) pairs, as 2-tuples</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapdouble-clear"><strong>spt3g.core.G3MapDouble.clear</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">clear(</span> <span class="pre">(G3MapDouble)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.clear() -&gt; None.  Remove all items from D.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapdouble-copy"><strong>spt3g.core.G3MapDouble.copy</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">copy(</span> <span class="pre">(G3MapDouble)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">G3MapDouble</span> <span class="pre">:</span></code></dt><dd><p>D.copy() -&gt; a shallow copy of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapdouble-get"><strong>spt3g.core.G3MapDouble.get</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">get(</span> <span class="pre">(G3MapDouble)arg1,</span> <span class="pre">(str)arg2</span> <span class="pre">[,</span> <span class="pre">(object)default_val])</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.get(k[,d]) -&gt; D[k] if k in D, else d.  d defaults to None.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapdouble-pop"><strong>spt3g.core.G3MapDouble.pop</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3MapDouble)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">object</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3MapDouble)arg1,</span> <span class="pre">(str)arg2,</span> <span class="pre">(object)arg3)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.pop(k[,d]) -&gt; v, remove specified key and return the corresponding value
+If key is not found, d is returned if given, otherwise KeyError is raised</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapdouble-popitem"><strong>spt3g.core.G3MapDouble.popitem</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">popitem(</span> <span class="pre">(G3MapDouble)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.popitem() -&gt; (k, v), remove and return some (key, value) pair as a
+2-tuple; but raise KeyError if D is empty</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapdouble-update"><strong>spt3g.core.G3MapDouble.update</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">update(</span> <span class="pre">(object)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.update(E) -&gt; None.  Update D from E: for k in E: D[k] = E[k]</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapdouble-iteritems"><strong>spt3g.core.G3MapDouble.iteritems</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iteritems(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iteritems() -&gt; an iterator over the (key, value) items of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapdouble-iterkeys"><strong>spt3g.core.G3MapDouble.iterkeys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iterkeys(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iterkeys() -&gt; an iterator over the keys of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapdouble-itervalues"><strong>spt3g.core.G3MapDouble.itervalues</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">itervalues(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.itervalues() -&gt; an iterator over the values of D</p>
+</dd>
+</dl>
+</section>
+<section id="spt3g-core-g3mapframeobject">
+<span id="id6"></span><h3>spt3g.core.G3MapFrameObject<a class="headerlink" href="#spt3g-core-g3mapframeobject" title="Link to this heading">¶</a></h3>
+<p>Mapping strings to generic frame objects. Can lead to a variety of paradoxes; please avoid general use of this class.</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3MapFrameObject()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3MapFrameObject(</span> <span class="pre">(G3MapFrameObject)arg2)</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">G3MapFrameObject(</span> <span class="pre">(list)arg2)</span></code> :</dt><dd><p>Initialize with keys and values from a Python dictionary: {‘key’:’value’}</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">G3MapFrameObject(</span> <span class="pre">(dict)arg2)</span></code> :</dt><dd><p>Initialize with keys and values as tuples in a Python list: [(‘key’,’value’)]</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">G3MapFrameObject()</span></code></p>
+</dd>
+</dl>
+<p><em>Methods:</em></p>
+<p id="spt3g-core-g3mapframeobject-keys"><strong>spt3g.core.G3MapFrameObject.keys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">keys(</span> <span class="pre">(G3MapFrameObject)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.keys() -&gt; list of D’s keys</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapframeobject-has-key"><strong>spt3g.core.G3MapFrameObject.has_key</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">has_key(</span> <span class="pre">(G3MapFrameObject)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span> <span class="pre">:</span></code></dt><dd><p>D.has_key(k) -&gt; True if D has a key k, else False</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapframeobject-values"><strong>spt3g.core.G3MapFrameObject.values</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">values(</span> <span class="pre">(G3MapFrameObject)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.values() -&gt; list of D’s values</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapframeobject-items"><strong>spt3g.core.G3MapFrameObject.items</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">items(</span> <span class="pre">(G3MapFrameObject)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.items() -&gt; list of D’s (key, value) pairs, as 2-tuples</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapframeobject-clear"><strong>spt3g.core.G3MapFrameObject.clear</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">clear(</span> <span class="pre">(G3MapFrameObject)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.clear() -&gt; None.  Remove all items from D.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapframeobject-copy"><strong>spt3g.core.G3MapFrameObject.copy</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">copy(</span> <span class="pre">(G3MapFrameObject)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">G3MapFrameObject</span> <span class="pre">:</span></code></dt><dd><p>D.copy() -&gt; a shallow copy of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapframeobject-get"><strong>spt3g.core.G3MapFrameObject.get</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">get(</span> <span class="pre">(G3MapFrameObject)arg1,</span> <span class="pre">(str)arg2</span> <span class="pre">[,</span> <span class="pre">(object)default_val])</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.get(k[,d]) -&gt; D[k] if k in D, else d.  d defaults to None.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapframeobject-pop"><strong>spt3g.core.G3MapFrameObject.pop</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3MapFrameObject)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">object</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3MapFrameObject)arg1,</span> <span class="pre">(str)arg2,</span> <span class="pre">(object)arg3)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.pop(k[,d]) -&gt; v, remove specified key and return the corresponding value
+If key is not found, d is returned if given, otherwise KeyError is raised</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapframeobject-popitem"><strong>spt3g.core.G3MapFrameObject.popitem</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">popitem(</span> <span class="pre">(G3MapFrameObject)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.popitem() -&gt; (k, v), remove and return some (key, value) pair as a
+2-tuple; but raise KeyError if D is empty</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapframeobject-update"><strong>spt3g.core.G3MapFrameObject.update</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">update(</span> <span class="pre">(object)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.update(E) -&gt; None.  Update D from E: for k in E: D[k] = E[k]</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapframeobject-iteritems"><strong>spt3g.core.G3MapFrameObject.iteritems</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iteritems(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iteritems() -&gt; an iterator over the (key, value) items of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapframeobject-iterkeys"><strong>spt3g.core.G3MapFrameObject.iterkeys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iterkeys(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iterkeys() -&gt; an iterator over the keys of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapframeobject-itervalues"><strong>spt3g.core.G3MapFrameObject.itervalues</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">itervalues(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.itervalues() -&gt; an iterator over the values of D</p>
+</dd>
+</dl>
+</section>
+<section id="spt3g-core-g3mapint">
+<span id="id7"></span><h3>spt3g.core.G3MapInt<a class="headerlink" href="#spt3g-core-g3mapint" title="Link to this heading">¶</a></h3>
+<p>Mapping from strings to ints.</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3MapInt()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3MapInt(</span> <span class="pre">(G3MapInt)arg2)</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">G3MapInt(</span> <span class="pre">(list)arg2)</span></code> :</dt><dd><p>Initialize with keys and values from a Python dictionary: {‘key’:’value’}</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">G3MapInt(</span> <span class="pre">(dict)arg2)</span></code> :</dt><dd><p>Initialize with keys and values as tuples in a Python list: [(‘key’,’value’)]</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">G3MapInt()</span></code></p>
+</dd>
+</dl>
+<p><em>Methods:</em></p>
+<p id="spt3g-core-g3mapint-keys"><strong>spt3g.core.G3MapInt.keys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">keys(</span> <span class="pre">(G3MapInt)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.keys() -&gt; list of D’s keys</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapint-has-key"><strong>spt3g.core.G3MapInt.has_key</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">has_key(</span> <span class="pre">(G3MapInt)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span> <span class="pre">:</span></code></dt><dd><p>D.has_key(k) -&gt; True if D has a key k, else False</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapint-values"><strong>spt3g.core.G3MapInt.values</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">values(</span> <span class="pre">(G3MapInt)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.values() -&gt; list of D’s values</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapint-items"><strong>spt3g.core.G3MapInt.items</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">items(</span> <span class="pre">(G3MapInt)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.items() -&gt; list of D’s (key, value) pairs, as 2-tuples</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapint-clear"><strong>spt3g.core.G3MapInt.clear</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">clear(</span> <span class="pre">(G3MapInt)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.clear() -&gt; None.  Remove all items from D.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapint-copy"><strong>spt3g.core.G3MapInt.copy</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">copy(</span> <span class="pre">(G3MapInt)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">G3MapInt</span> <span class="pre">:</span></code></dt><dd><p>D.copy() -&gt; a shallow copy of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapint-get"><strong>spt3g.core.G3MapInt.get</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">get(</span> <span class="pre">(G3MapInt)arg1,</span> <span class="pre">(str)arg2</span> <span class="pre">[,</span> <span class="pre">(object)default_val])</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.get(k[,d]) -&gt; D[k] if k in D, else d.  d defaults to None.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapint-pop"><strong>spt3g.core.G3MapInt.pop</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3MapInt)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">object</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3MapInt)arg1,</span> <span class="pre">(str)arg2,</span> <span class="pre">(object)arg3)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.pop(k[,d]) -&gt; v, remove specified key and return the corresponding value
+If key is not found, d is returned if given, otherwise KeyError is raised</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapint-popitem"><strong>spt3g.core.G3MapInt.popitem</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">popitem(</span> <span class="pre">(G3MapInt)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.popitem() -&gt; (k, v), remove and return some (key, value) pair as a
+2-tuple; but raise KeyError if D is empty</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapint-update"><strong>spt3g.core.G3MapInt.update</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">update(</span> <span class="pre">(object)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.update(E) -&gt; None.  Update D from E: for k in E: D[k] = E[k]</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapint-iteritems"><strong>spt3g.core.G3MapInt.iteritems</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iteritems(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iteritems() -&gt; an iterator over the (key, value) items of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapint-iterkeys"><strong>spt3g.core.G3MapInt.iterkeys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iterkeys(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iterkeys() -&gt; an iterator over the keys of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapint-itervalues"><strong>spt3g.core.G3MapInt.itervalues</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">itervalues(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.itervalues() -&gt; an iterator over the values of D</p>
+</dd>
+</dl>
+</section>
+<section id="spt3g-core-g3mapmapdouble">
+<span id="id8"></span><h3>spt3g.core.G3MapMapDouble<a class="headerlink" href="#spt3g-core-g3mapmapdouble" title="Link to this heading">¶</a></h3>
+<p>Mapping from strings to maps of strings to floats. For example, m[‘Det1’][‘Det2’] = 5.3</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3MapMapDouble()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3MapMapDouble(</span> <span class="pre">(G3MapMapDouble)arg2)</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">G3MapMapDouble(</span> <span class="pre">(list)arg2)</span></code> :</dt><dd><p>Initialize with keys and values from a Python dictionary: {‘key’:’value’}</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">G3MapMapDouble(</span> <span class="pre">(dict)arg2)</span></code> :</dt><dd><p>Initialize with keys and values as tuples in a Python list: [(‘key’,’value’)]</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">G3MapMapDouble()</span></code></p>
+</dd>
+</dl>
+<p><em>Methods:</em></p>
+<p id="spt3g-core-g3mapmapdouble-keys"><strong>spt3g.core.G3MapMapDouble.keys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">keys(</span> <span class="pre">(G3MapMapDouble)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.keys() -&gt; list of D’s keys</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapmapdouble-has-key"><strong>spt3g.core.G3MapMapDouble.has_key</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">has_key(</span> <span class="pre">(G3MapMapDouble)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span> <span class="pre">:</span></code></dt><dd><p>D.has_key(k) -&gt; True if D has a key k, else False</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapmapdouble-values"><strong>spt3g.core.G3MapMapDouble.values</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">values(</span> <span class="pre">(G3MapMapDouble)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.values() -&gt; list of D’s values</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapmapdouble-items"><strong>spt3g.core.G3MapMapDouble.items</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">items(</span> <span class="pre">(G3MapMapDouble)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.items() -&gt; list of D’s (key, value) pairs, as 2-tuples</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapmapdouble-clear"><strong>spt3g.core.G3MapMapDouble.clear</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">clear(</span> <span class="pre">(G3MapMapDouble)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.clear() -&gt; None.  Remove all items from D.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapmapdouble-copy"><strong>spt3g.core.G3MapMapDouble.copy</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">copy(</span> <span class="pre">(G3MapMapDouble)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">G3MapMapDouble</span> <span class="pre">:</span></code></dt><dd><p>D.copy() -&gt; a shallow copy of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapmapdouble-get"><strong>spt3g.core.G3MapMapDouble.get</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">get(</span> <span class="pre">(G3MapMapDouble)arg1,</span> <span class="pre">(str)arg2</span> <span class="pre">[,</span> <span class="pre">(object)default_val])</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.get(k[,d]) -&gt; D[k] if k in D, else d.  d defaults to None.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapmapdouble-pop"><strong>spt3g.core.G3MapMapDouble.pop</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3MapMapDouble)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">object</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3MapMapDouble)arg1,</span> <span class="pre">(str)arg2,</span> <span class="pre">(object)arg3)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.pop(k[,d]) -&gt; v, remove specified key and return the corresponding value
+If key is not found, d is returned if given, otherwise KeyError is raised</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapmapdouble-popitem"><strong>spt3g.core.G3MapMapDouble.popitem</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">popitem(</span> <span class="pre">(G3MapMapDouble)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.popitem() -&gt; (k, v), remove and return some (key, value) pair as a
+2-tuple; but raise KeyError if D is empty</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapmapdouble-update"><strong>spt3g.core.G3MapMapDouble.update</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">update(</span> <span class="pre">(object)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.update(E) -&gt; None.  Update D from E: for k in E: D[k] = E[k]</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapmapdouble-iteritems"><strong>spt3g.core.G3MapMapDouble.iteritems</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iteritems(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iteritems() -&gt; an iterator over the (key, value) items of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapmapdouble-iterkeys"><strong>spt3g.core.G3MapMapDouble.iterkeys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iterkeys(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iterkeys() -&gt; an iterator over the keys of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapmapdouble-itervalues"><strong>spt3g.core.G3MapMapDouble.itervalues</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">itervalues(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.itervalues() -&gt; an iterator over the values of D</p>
+</dd>
+</dl>
+</section>
+<section id="spt3g-core-g3mapquat">
+<span id="id9"></span><h3>spt3g.core.G3MapQuat<a class="headerlink" href="#spt3g-core-g3mapquat" title="Link to this heading">¶</a></h3>
+<p>Mapping from strings to quaternions.</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3MapQuat()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3MapQuat(</span> <span class="pre">(G3MapQuat)arg2)</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">G3MapQuat(</span> <span class="pre">(list)arg2)</span></code> :</dt><dd><p>Initialize with keys and values from a Python dictionary: {‘key’:’value’}</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">G3MapQuat(</span> <span class="pre">(dict)arg2)</span></code> :</dt><dd><p>Initialize with keys and values as tuples in a Python list: [(‘key’,’value’)]</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">G3MapQuat()</span></code></p>
+</dd>
+</dl>
+<p><em>Methods:</em></p>
+<p id="spt3g-core-g3mapquat-keys"><strong>spt3g.core.G3MapQuat.keys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">keys(</span> <span class="pre">(G3MapQuat)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.keys() -&gt; list of D’s keys</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapquat-has-key"><strong>spt3g.core.G3MapQuat.has_key</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">has_key(</span> <span class="pre">(G3MapQuat)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span> <span class="pre">:</span></code></dt><dd><p>D.has_key(k) -&gt; True if D has a key k, else False</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapquat-values"><strong>spt3g.core.G3MapQuat.values</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">values(</span> <span class="pre">(G3MapQuat)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.values() -&gt; list of D’s values</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapquat-items"><strong>spt3g.core.G3MapQuat.items</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">items(</span> <span class="pre">(G3MapQuat)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.items() -&gt; list of D’s (key, value) pairs, as 2-tuples</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapquat-clear"><strong>spt3g.core.G3MapQuat.clear</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">clear(</span> <span class="pre">(G3MapQuat)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.clear() -&gt; None.  Remove all items from D.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapquat-copy"><strong>spt3g.core.G3MapQuat.copy</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">copy(</span> <span class="pre">(G3MapQuat)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">G3MapQuat</span> <span class="pre">:</span></code></dt><dd><p>D.copy() -&gt; a shallow copy of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapquat-get"><strong>spt3g.core.G3MapQuat.get</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">get(</span> <span class="pre">(G3MapQuat)arg1,</span> <span class="pre">(str)arg2</span> <span class="pre">[,</span> <span class="pre">(object)default_val])</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.get(k[,d]) -&gt; D[k] if k in D, else d.  d defaults to None.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapquat-pop"><strong>spt3g.core.G3MapQuat.pop</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3MapQuat)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">object</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3MapQuat)arg1,</span> <span class="pre">(str)arg2,</span> <span class="pre">(object)arg3)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.pop(k[,d]) -&gt; v, remove specified key and return the corresponding value
+If key is not found, d is returned if given, otherwise KeyError is raised</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapquat-popitem"><strong>spt3g.core.G3MapQuat.popitem</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">popitem(</span> <span class="pre">(G3MapQuat)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.popitem() -&gt; (k, v), remove and return some (key, value) pair as a
+2-tuple; but raise KeyError if D is empty</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapquat-update"><strong>spt3g.core.G3MapQuat.update</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">update(</span> <span class="pre">(object)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.update(E) -&gt; None.  Update D from E: for k in E: D[k] = E[k]</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapquat-iteritems"><strong>spt3g.core.G3MapQuat.iteritems</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iteritems(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iteritems() -&gt; an iterator over the (key, value) items of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapquat-iterkeys"><strong>spt3g.core.G3MapQuat.iterkeys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iterkeys(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iterkeys() -&gt; an iterator over the keys of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapquat-itervalues"><strong>spt3g.core.G3MapQuat.itervalues</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">itervalues(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.itervalues() -&gt; an iterator over the values of D</p>
+</dd>
+</dl>
+</section>
+<section id="spt3g-core-g3mapstring">
+<span id="id10"></span><h3>spt3g.core.G3MapString<a class="headerlink" href="#spt3g-core-g3mapstring" title="Link to this heading">¶</a></h3>
+<p>Mapping from strings to strings.</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3MapString()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3MapString(</span> <span class="pre">(G3MapString)arg2)</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">G3MapString(</span> <span class="pre">(list)arg2)</span></code> :</dt><dd><p>Initialize with keys and values from a Python dictionary: {‘key’:’value’}</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">G3MapString(</span> <span class="pre">(dict)arg2)</span></code> :</dt><dd><p>Initialize with keys and values as tuples in a Python list: [(‘key’,’value’)]</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">G3MapString()</span></code></p>
+</dd>
+</dl>
+<p><em>Methods:</em></p>
+<p id="spt3g-core-g3mapstring-keys"><strong>spt3g.core.G3MapString.keys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">keys(</span> <span class="pre">(G3MapString)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.keys() -&gt; list of D’s keys</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapstring-has-key"><strong>spt3g.core.G3MapString.has_key</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">has_key(</span> <span class="pre">(G3MapString)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span> <span class="pre">:</span></code></dt><dd><p>D.has_key(k) -&gt; True if D has a key k, else False</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapstring-values"><strong>spt3g.core.G3MapString.values</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">values(</span> <span class="pre">(G3MapString)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.values() -&gt; list of D’s values</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapstring-items"><strong>spt3g.core.G3MapString.items</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">items(</span> <span class="pre">(G3MapString)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.items() -&gt; list of D’s (key, value) pairs, as 2-tuples</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapstring-clear"><strong>spt3g.core.G3MapString.clear</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">clear(</span> <span class="pre">(G3MapString)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.clear() -&gt; None.  Remove all items from D.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapstring-copy"><strong>spt3g.core.G3MapString.copy</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">copy(</span> <span class="pre">(G3MapString)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">G3MapString</span> <span class="pre">:</span></code></dt><dd><p>D.copy() -&gt; a shallow copy of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapstring-get"><strong>spt3g.core.G3MapString.get</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">get(</span> <span class="pre">(G3MapString)arg1,</span> <span class="pre">(str)arg2</span> <span class="pre">[,</span> <span class="pre">(object)default_val])</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.get(k[,d]) -&gt; D[k] if k in D, else d.  d defaults to None.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapstring-pop"><strong>spt3g.core.G3MapString.pop</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3MapString)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">object</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3MapString)arg1,</span> <span class="pre">(str)arg2,</span> <span class="pre">(object)arg3)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.pop(k[,d]) -&gt; v, remove specified key and return the corresponding value
+If key is not found, d is returned if given, otherwise KeyError is raised</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapstring-popitem"><strong>spt3g.core.G3MapString.popitem</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">popitem(</span> <span class="pre">(G3MapString)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.popitem() -&gt; (k, v), remove and return some (key, value) pair as a
+2-tuple; but raise KeyError if D is empty</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapstring-update"><strong>spt3g.core.G3MapString.update</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">update(</span> <span class="pre">(object)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.update(E) -&gt; None.  Update D from E: for k in E: D[k] = E[k]</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapstring-iteritems"><strong>spt3g.core.G3MapString.iteritems</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iteritems(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iteritems() -&gt; an iterator over the (key, value) items of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapstring-iterkeys"><strong>spt3g.core.G3MapString.iterkeys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iterkeys(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iterkeys() -&gt; an iterator over the keys of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapstring-itervalues"><strong>spt3g.core.G3MapString.itervalues</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">itervalues(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.itervalues() -&gt; an iterator over the values of D</p>
+</dd>
+</dl>
+</section>
+<section id="spt3g-core-g3mapvectorbool">
+<span id="id11"></span><h3>spt3g.core.G3MapVectorBool<a class="headerlink" href="#spt3g-core-g3mapvectorbool" title="Link to this heading">¶</a></h3>
+<p>Mapping from strings to arrays of booleans.</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3MapVectorBool()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3MapVectorBool(</span> <span class="pre">(G3MapVectorBool)arg2)</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">G3MapVectorBool(</span> <span class="pre">(list)arg2)</span></code> :</dt><dd><p>Initialize with keys and values from a Python dictionary: {‘key’:’value’}</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">G3MapVectorBool(</span> <span class="pre">(dict)arg2)</span></code> :</dt><dd><p>Initialize with keys and values as tuples in a Python list: [(‘key’,’value’)]</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">G3MapVectorBool()</span></code></p>
+</dd>
+</dl>
+<p><em>Methods:</em></p>
+<p id="spt3g-core-g3mapvectorbool-keys"><strong>spt3g.core.G3MapVectorBool.keys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">keys(</span> <span class="pre">(G3MapVectorBool)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.keys() -&gt; list of D’s keys</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorbool-has-key"><strong>spt3g.core.G3MapVectorBool.has_key</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">has_key(</span> <span class="pre">(G3MapVectorBool)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span> <span class="pre">:</span></code></dt><dd><p>D.has_key(k) -&gt; True if D has a key k, else False</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorbool-values"><strong>spt3g.core.G3MapVectorBool.values</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">values(</span> <span class="pre">(G3MapVectorBool)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.values() -&gt; list of D’s values</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorbool-items"><strong>spt3g.core.G3MapVectorBool.items</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">items(</span> <span class="pre">(G3MapVectorBool)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.items() -&gt; list of D’s (key, value) pairs, as 2-tuples</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorbool-clear"><strong>spt3g.core.G3MapVectorBool.clear</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">clear(</span> <span class="pre">(G3MapVectorBool)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.clear() -&gt; None.  Remove all items from D.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorbool-copy"><strong>spt3g.core.G3MapVectorBool.copy</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">copy(</span> <span class="pre">(G3MapVectorBool)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">G3MapVectorBool</span> <span class="pre">:</span></code></dt><dd><p>D.copy() -&gt; a shallow copy of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorbool-get"><strong>spt3g.core.G3MapVectorBool.get</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">get(</span> <span class="pre">(G3MapVectorBool)arg1,</span> <span class="pre">(str)arg2</span> <span class="pre">[,</span> <span class="pre">(object)default_val])</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.get(k[,d]) -&gt; D[k] if k in D, else d.  d defaults to None.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorbool-pop"><strong>spt3g.core.G3MapVectorBool.pop</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3MapVectorBool)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">object</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3MapVectorBool)arg1,</span> <span class="pre">(str)arg2,</span> <span class="pre">(object)arg3)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.pop(k[,d]) -&gt; v, remove specified key and return the corresponding value
+If key is not found, d is returned if given, otherwise KeyError is raised</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorbool-popitem"><strong>spt3g.core.G3MapVectorBool.popitem</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">popitem(</span> <span class="pre">(G3MapVectorBool)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.popitem() -&gt; (k, v), remove and return some (key, value) pair as a
+2-tuple; but raise KeyError if D is empty</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorbool-update"><strong>spt3g.core.G3MapVectorBool.update</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">update(</span> <span class="pre">(object)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.update(E) -&gt; None.  Update D from E: for k in E: D[k] = E[k]</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorbool-iteritems"><strong>spt3g.core.G3MapVectorBool.iteritems</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iteritems(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iteritems() -&gt; an iterator over the (key, value) items of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorbool-iterkeys"><strong>spt3g.core.G3MapVectorBool.iterkeys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iterkeys(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iterkeys() -&gt; an iterator over the keys of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorbool-itervalues"><strong>spt3g.core.G3MapVectorBool.itervalues</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">itervalues(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.itervalues() -&gt; an iterator over the values of D</p>
+</dd>
+</dl>
+</section>
+<section id="spt3g-core-g3mapvectorcomplexdouble">
+<span id="id12"></span><h3>spt3g.core.G3MapVectorComplexDouble<a class="headerlink" href="#spt3g-core-g3mapvectorcomplexdouble" title="Link to this heading">¶</a></h3>
+<p>Mapping from strings to arrays of complex numbers.</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3MapVectorComplexDouble()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3MapVectorComplexDouble(</span> <span class="pre">(G3MapVectorComplexDouble)arg2)</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">G3MapVectorComplexDouble(</span> <span class="pre">(list)arg2)</span></code> :</dt><dd><p>Initialize with keys and values from a Python dictionary: {‘key’:’value’}</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">G3MapVectorComplexDouble(</span> <span class="pre">(dict)arg2)</span></code> :</dt><dd><p>Initialize with keys and values as tuples in a Python list: [(‘key’,’value’)]</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">G3MapVectorComplexDouble()</span></code></p>
+</dd>
+</dl>
+<p><em>Methods:</em></p>
+<p id="spt3g-core-g3mapvectorcomplexdouble-keys"><strong>spt3g.core.G3MapVectorComplexDouble.keys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">keys(</span> <span class="pre">(G3MapVectorComplexDouble)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.keys() -&gt; list of D’s keys</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorcomplexdouble-has-key"><strong>spt3g.core.G3MapVectorComplexDouble.has_key</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">has_key(</span> <span class="pre">(G3MapVectorComplexDouble)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span> <span class="pre">:</span></code></dt><dd><p>D.has_key(k) -&gt; True if D has a key k, else False</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorcomplexdouble-values"><strong>spt3g.core.G3MapVectorComplexDouble.values</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">values(</span> <span class="pre">(G3MapVectorComplexDouble)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.values() -&gt; list of D’s values</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorcomplexdouble-items"><strong>spt3g.core.G3MapVectorComplexDouble.items</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">items(</span> <span class="pre">(G3MapVectorComplexDouble)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.items() -&gt; list of D’s (key, value) pairs, as 2-tuples</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorcomplexdouble-clear"><strong>spt3g.core.G3MapVectorComplexDouble.clear</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">clear(</span> <span class="pre">(G3MapVectorComplexDouble)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.clear() -&gt; None.  Remove all items from D.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorcomplexdouble-copy"><strong>spt3g.core.G3MapVectorComplexDouble.copy</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">copy(</span> <span class="pre">(G3MapVectorComplexDouble)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">G3MapVectorComplexDouble</span> <span class="pre">:</span></code></dt><dd><p>D.copy() -&gt; a shallow copy of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorcomplexdouble-get"><strong>spt3g.core.G3MapVectorComplexDouble.get</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">get(</span> <span class="pre">(G3MapVectorComplexDouble)arg1,</span> <span class="pre">(str)arg2</span> <span class="pre">[,</span> <span class="pre">(object)default_val])</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.get(k[,d]) -&gt; D[k] if k in D, else d.  d defaults to None.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorcomplexdouble-pop"><strong>spt3g.core.G3MapVectorComplexDouble.pop</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3MapVectorComplexDouble)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">object</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3MapVectorComplexDouble)arg1,</span> <span class="pre">(str)arg2,</span> <span class="pre">(object)arg3)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.pop(k[,d]) -&gt; v, remove specified key and return the corresponding value
+If key is not found, d is returned if given, otherwise KeyError is raised</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorcomplexdouble-popitem"><strong>spt3g.core.G3MapVectorComplexDouble.popitem</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">popitem(</span> <span class="pre">(G3MapVectorComplexDouble)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.popitem() -&gt; (k, v), remove and return some (key, value) pair as a
+2-tuple; but raise KeyError if D is empty</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorcomplexdouble-update"><strong>spt3g.core.G3MapVectorComplexDouble.update</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">update(</span> <span class="pre">(object)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.update(E) -&gt; None.  Update D from E: for k in E: D[k] = E[k]</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorcomplexdouble-iteritems"><strong>spt3g.core.G3MapVectorComplexDouble.iteritems</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iteritems(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iteritems() -&gt; an iterator over the (key, value) items of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorcomplexdouble-iterkeys"><strong>spt3g.core.G3MapVectorComplexDouble.iterkeys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iterkeys(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iterkeys() -&gt; an iterator over the keys of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorcomplexdouble-itervalues"><strong>spt3g.core.G3MapVectorComplexDouble.itervalues</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">itervalues(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.itervalues() -&gt; an iterator over the values of D</p>
+</dd>
+</dl>
+</section>
+<section id="spt3g-core-g3mapvectordouble">
+<span id="id13"></span><h3>spt3g.core.G3MapVectorDouble<a class="headerlink" href="#spt3g-core-g3mapvectordouble" title="Link to this heading">¶</a></h3>
+<p>Mapping from strings to arrays of floats.</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3MapVectorDouble()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3MapVectorDouble(</span> <span class="pre">(G3MapVectorDouble)arg2)</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">G3MapVectorDouble(</span> <span class="pre">(list)arg2)</span></code> :</dt><dd><p>Initialize with keys and values from a Python dictionary: {‘key’:’value’}</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">G3MapVectorDouble(</span> <span class="pre">(dict)arg2)</span></code> :</dt><dd><p>Initialize with keys and values as tuples in a Python list: [(‘key’,’value’)]</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">G3MapVectorDouble()</span></code></p>
+</dd>
+</dl>
+<p><em>Methods:</em></p>
+<p id="spt3g-core-g3mapvectordouble-keys"><strong>spt3g.core.G3MapVectorDouble.keys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">keys(</span> <span class="pre">(G3MapVectorDouble)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.keys() -&gt; list of D’s keys</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectordouble-has-key"><strong>spt3g.core.G3MapVectorDouble.has_key</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">has_key(</span> <span class="pre">(G3MapVectorDouble)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span> <span class="pre">:</span></code></dt><dd><p>D.has_key(k) -&gt; True if D has a key k, else False</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectordouble-values"><strong>spt3g.core.G3MapVectorDouble.values</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">values(</span> <span class="pre">(G3MapVectorDouble)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.values() -&gt; list of D’s values</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectordouble-items"><strong>spt3g.core.G3MapVectorDouble.items</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">items(</span> <span class="pre">(G3MapVectorDouble)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.items() -&gt; list of D’s (key, value) pairs, as 2-tuples</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectordouble-clear"><strong>spt3g.core.G3MapVectorDouble.clear</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">clear(</span> <span class="pre">(G3MapVectorDouble)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.clear() -&gt; None.  Remove all items from D.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectordouble-copy"><strong>spt3g.core.G3MapVectorDouble.copy</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">copy(</span> <span class="pre">(G3MapVectorDouble)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">G3MapVectorDouble</span> <span class="pre">:</span></code></dt><dd><p>D.copy() -&gt; a shallow copy of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectordouble-get"><strong>spt3g.core.G3MapVectorDouble.get</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">get(</span> <span class="pre">(G3MapVectorDouble)arg1,</span> <span class="pre">(str)arg2</span> <span class="pre">[,</span> <span class="pre">(object)default_val])</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.get(k[,d]) -&gt; D[k] if k in D, else d.  d defaults to None.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectordouble-pop"><strong>spt3g.core.G3MapVectorDouble.pop</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3MapVectorDouble)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">object</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3MapVectorDouble)arg1,</span> <span class="pre">(str)arg2,</span> <span class="pre">(object)arg3)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.pop(k[,d]) -&gt; v, remove specified key and return the corresponding value
+If key is not found, d is returned if given, otherwise KeyError is raised</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectordouble-popitem"><strong>spt3g.core.G3MapVectorDouble.popitem</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">popitem(</span> <span class="pre">(G3MapVectorDouble)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.popitem() -&gt; (k, v), remove and return some (key, value) pair as a
+2-tuple; but raise KeyError if D is empty</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectordouble-update"><strong>spt3g.core.G3MapVectorDouble.update</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">update(</span> <span class="pre">(object)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.update(E) -&gt; None.  Update D from E: for k in E: D[k] = E[k]</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectordouble-iteritems"><strong>spt3g.core.G3MapVectorDouble.iteritems</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iteritems(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iteritems() -&gt; an iterator over the (key, value) items of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectordouble-iterkeys"><strong>spt3g.core.G3MapVectorDouble.iterkeys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iterkeys(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iterkeys() -&gt; an iterator over the keys of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectordouble-itervalues"><strong>spt3g.core.G3MapVectorDouble.itervalues</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">itervalues(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.itervalues() -&gt; an iterator over the values of D</p>
+</dd>
+</dl>
+</section>
+<section id="spt3g-core-g3mapvectorint">
+<span id="id14"></span><h3>spt3g.core.G3MapVectorInt<a class="headerlink" href="#spt3g-core-g3mapvectorint" title="Link to this heading">¶</a></h3>
+<p>Mapping from strings to arrays of integers.</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3MapVectorInt()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3MapVectorInt(</span> <span class="pre">(G3MapVectorInt)arg2)</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">G3MapVectorInt(</span> <span class="pre">(list)arg2)</span></code> :</dt><dd><p>Initialize with keys and values from a Python dictionary: {‘key’:’value’}</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">G3MapVectorInt(</span> <span class="pre">(dict)arg2)</span></code> :</dt><dd><p>Initialize with keys and values as tuples in a Python list: [(‘key’,’value’)]</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">G3MapVectorInt()</span></code></p>
+</dd>
+</dl>
+<p><em>Methods:</em></p>
+<p id="spt3g-core-g3mapvectorint-keys"><strong>spt3g.core.G3MapVectorInt.keys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">keys(</span> <span class="pre">(G3MapVectorInt)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.keys() -&gt; list of D’s keys</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorint-has-key"><strong>spt3g.core.G3MapVectorInt.has_key</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">has_key(</span> <span class="pre">(G3MapVectorInt)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span> <span class="pre">:</span></code></dt><dd><p>D.has_key(k) -&gt; True if D has a key k, else False</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorint-values"><strong>spt3g.core.G3MapVectorInt.values</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">values(</span> <span class="pre">(G3MapVectorInt)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.values() -&gt; list of D’s values</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorint-items"><strong>spt3g.core.G3MapVectorInt.items</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">items(</span> <span class="pre">(G3MapVectorInt)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.items() -&gt; list of D’s (key, value) pairs, as 2-tuples</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorint-clear"><strong>spt3g.core.G3MapVectorInt.clear</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">clear(</span> <span class="pre">(G3MapVectorInt)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.clear() -&gt; None.  Remove all items from D.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorint-copy"><strong>spt3g.core.G3MapVectorInt.copy</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">copy(</span> <span class="pre">(G3MapVectorInt)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">G3MapVectorInt</span> <span class="pre">:</span></code></dt><dd><p>D.copy() -&gt; a shallow copy of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorint-get"><strong>spt3g.core.G3MapVectorInt.get</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">get(</span> <span class="pre">(G3MapVectorInt)arg1,</span> <span class="pre">(str)arg2</span> <span class="pre">[,</span> <span class="pre">(object)default_val])</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.get(k[,d]) -&gt; D[k] if k in D, else d.  d defaults to None.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorint-pop"><strong>spt3g.core.G3MapVectorInt.pop</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3MapVectorInt)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">object</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3MapVectorInt)arg1,</span> <span class="pre">(str)arg2,</span> <span class="pre">(object)arg3)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.pop(k[,d]) -&gt; v, remove specified key and return the corresponding value
+If key is not found, d is returned if given, otherwise KeyError is raised</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorint-popitem"><strong>spt3g.core.G3MapVectorInt.popitem</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">popitem(</span> <span class="pre">(G3MapVectorInt)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.popitem() -&gt; (k, v), remove and return some (key, value) pair as a
+2-tuple; but raise KeyError if D is empty</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorint-update"><strong>spt3g.core.G3MapVectorInt.update</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">update(</span> <span class="pre">(object)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.update(E) -&gt; None.  Update D from E: for k in E: D[k] = E[k]</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorint-iteritems"><strong>spt3g.core.G3MapVectorInt.iteritems</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iteritems(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iteritems() -&gt; an iterator over the (key, value) items of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorint-iterkeys"><strong>spt3g.core.G3MapVectorInt.iterkeys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iterkeys(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iterkeys() -&gt; an iterator over the keys of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorint-itervalues"><strong>spt3g.core.G3MapVectorInt.itervalues</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">itervalues(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.itervalues() -&gt; an iterator over the values of D</p>
+</dd>
+</dl>
+</section>
+<section id="spt3g-core-g3mapvectorquat">
+<span id="id15"></span><h3>spt3g.core.G3MapVectorQuat<a class="headerlink" href="#spt3g-core-g3mapvectorquat" title="Link to this heading">¶</a></h3>
+<p>Mapping from strings to lists of quaternions.</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3MapVectorQuat()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3MapVectorQuat(</span> <span class="pre">(G3MapVectorQuat)arg2)</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">G3MapVectorQuat(</span> <span class="pre">(list)arg2)</span></code> :</dt><dd><p>Initialize with keys and values from a Python dictionary: {‘key’:’value’}</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">G3MapVectorQuat(</span> <span class="pre">(dict)arg2)</span></code> :</dt><dd><p>Initialize with keys and values as tuples in a Python list: [(‘key’,’value’)]</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">G3MapVectorQuat()</span></code></p>
+</dd>
+</dl>
+<p><em>Methods:</em></p>
+<p id="spt3g-core-g3mapvectorquat-keys"><strong>spt3g.core.G3MapVectorQuat.keys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">keys(</span> <span class="pre">(G3MapVectorQuat)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.keys() -&gt; list of D’s keys</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorquat-has-key"><strong>spt3g.core.G3MapVectorQuat.has_key</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">has_key(</span> <span class="pre">(G3MapVectorQuat)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span> <span class="pre">:</span></code></dt><dd><p>D.has_key(k) -&gt; True if D has a key k, else False</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorquat-values"><strong>spt3g.core.G3MapVectorQuat.values</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">values(</span> <span class="pre">(G3MapVectorQuat)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.values() -&gt; list of D’s values</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorquat-items"><strong>spt3g.core.G3MapVectorQuat.items</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">items(</span> <span class="pre">(G3MapVectorQuat)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.items() -&gt; list of D’s (key, value) pairs, as 2-tuples</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorquat-clear"><strong>spt3g.core.G3MapVectorQuat.clear</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">clear(</span> <span class="pre">(G3MapVectorQuat)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.clear() -&gt; None.  Remove all items from D.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorquat-copy"><strong>spt3g.core.G3MapVectorQuat.copy</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">copy(</span> <span class="pre">(G3MapVectorQuat)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">G3MapVectorQuat</span> <span class="pre">:</span></code></dt><dd><p>D.copy() -&gt; a shallow copy of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorquat-get"><strong>spt3g.core.G3MapVectorQuat.get</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">get(</span> <span class="pre">(G3MapVectorQuat)arg1,</span> <span class="pre">(str)arg2</span> <span class="pre">[,</span> <span class="pre">(object)default_val])</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.get(k[,d]) -&gt; D[k] if k in D, else d.  d defaults to None.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorquat-pop"><strong>spt3g.core.G3MapVectorQuat.pop</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3MapVectorQuat)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">object</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3MapVectorQuat)arg1,</span> <span class="pre">(str)arg2,</span> <span class="pre">(object)arg3)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.pop(k[,d]) -&gt; v, remove specified key and return the corresponding value
+If key is not found, d is returned if given, otherwise KeyError is raised</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorquat-popitem"><strong>spt3g.core.G3MapVectorQuat.popitem</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">popitem(</span> <span class="pre">(G3MapVectorQuat)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.popitem() -&gt; (k, v), remove and return some (key, value) pair as a
+2-tuple; but raise KeyError if D is empty</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorquat-update"><strong>spt3g.core.G3MapVectorQuat.update</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">update(</span> <span class="pre">(object)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.update(E) -&gt; None.  Update D from E: for k in E: D[k] = E[k]</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorquat-iteritems"><strong>spt3g.core.G3MapVectorQuat.iteritems</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iteritems(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iteritems() -&gt; an iterator over the (key, value) items of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorquat-iterkeys"><strong>spt3g.core.G3MapVectorQuat.iterkeys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iterkeys(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iterkeys() -&gt; an iterator over the keys of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorquat-itervalues"><strong>spt3g.core.G3MapVectorQuat.itervalues</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">itervalues(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.itervalues() -&gt; an iterator over the values of D</p>
+</dd>
+</dl>
+</section>
+<section id="spt3g-core-g3mapvectorstring">
+<span id="id16"></span><h3>spt3g.core.G3MapVectorString<a class="headerlink" href="#spt3g-core-g3mapvectorstring" title="Link to this heading">¶</a></h3>
+<p>Mapping from strings to lists of strings.</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3MapVectorString()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3MapVectorString(</span> <span class="pre">(G3MapVectorString)arg2)</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">G3MapVectorString(</span> <span class="pre">(list)arg2)</span></code> :</dt><dd><p>Initialize with keys and values from a Python dictionary: {‘key’:’value’}</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">G3MapVectorString(</span> <span class="pre">(dict)arg2)</span></code> :</dt><dd><p>Initialize with keys and values as tuples in a Python list: [(‘key’,’value’)]</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">G3MapVectorString()</span></code></p>
+</dd>
+</dl>
+<p><em>Methods:</em></p>
+<p id="spt3g-core-g3mapvectorstring-keys"><strong>spt3g.core.G3MapVectorString.keys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">keys(</span> <span class="pre">(G3MapVectorString)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.keys() -&gt; list of D’s keys</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorstring-has-key"><strong>spt3g.core.G3MapVectorString.has_key</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">has_key(</span> <span class="pre">(G3MapVectorString)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span> <span class="pre">:</span></code></dt><dd><p>D.has_key(k) -&gt; True if D has a key k, else False</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorstring-values"><strong>spt3g.core.G3MapVectorString.values</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">values(</span> <span class="pre">(G3MapVectorString)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.values() -&gt; list of D’s values</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorstring-items"><strong>spt3g.core.G3MapVectorString.items</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">items(</span> <span class="pre">(G3MapVectorString)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.items() -&gt; list of D’s (key, value) pairs, as 2-tuples</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorstring-clear"><strong>spt3g.core.G3MapVectorString.clear</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">clear(</span> <span class="pre">(G3MapVectorString)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.clear() -&gt; None.  Remove all items from D.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorstring-copy"><strong>spt3g.core.G3MapVectorString.copy</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">copy(</span> <span class="pre">(G3MapVectorString)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">G3MapVectorString</span> <span class="pre">:</span></code></dt><dd><p>D.copy() -&gt; a shallow copy of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorstring-get"><strong>spt3g.core.G3MapVectorString.get</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">get(</span> <span class="pre">(G3MapVectorString)arg1,</span> <span class="pre">(str)arg2</span> <span class="pre">[,</span> <span class="pre">(object)default_val])</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.get(k[,d]) -&gt; D[k] if k in D, else d.  d defaults to None.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorstring-pop"><strong>spt3g.core.G3MapVectorString.pop</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3MapVectorString)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">object</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3MapVectorString)arg1,</span> <span class="pre">(str)arg2,</span> <span class="pre">(object)arg3)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.pop(k[,d]) -&gt; v, remove specified key and return the corresponding value
+If key is not found, d is returned if given, otherwise KeyError is raised</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorstring-popitem"><strong>spt3g.core.G3MapVectorString.popitem</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">popitem(</span> <span class="pre">(G3MapVectorString)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.popitem() -&gt; (k, v), remove and return some (key, value) pair as a
+2-tuple; but raise KeyError if D is empty</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorstring-update"><strong>spt3g.core.G3MapVectorString.update</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">update(</span> <span class="pre">(object)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.update(E) -&gt; None.  Update D from E: for k in E: D[k] = E[k]</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorstring-iteritems"><strong>spt3g.core.G3MapVectorString.iteritems</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iteritems(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iteritems() -&gt; an iterator over the (key, value) items of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorstring-iterkeys"><strong>spt3g.core.G3MapVectorString.iterkeys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iterkeys(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iterkeys() -&gt; an iterator over the keys of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorstring-itervalues"><strong>spt3g.core.G3MapVectorString.itervalues</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">itervalues(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.itervalues() -&gt; an iterator over the values of D</p>
+</dd>
+</dl>
+</section>
+<section id="spt3g-core-g3mapvectortime">
+<span id="id17"></span><h3>spt3g.core.G3MapVectorTime<a class="headerlink" href="#spt3g-core-g3mapvectortime" title="Link to this heading">¶</a></h3>
+<p>Mapping from strings to lists of G3 time objects.</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3MapVectorTime()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3MapVectorTime(</span> <span class="pre">(G3MapVectorTime)arg2)</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">G3MapVectorTime(</span> <span class="pre">(list)arg2)</span></code> :</dt><dd><p>Initialize with keys and values from a Python dictionary: {‘key’:’value’}</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">G3MapVectorTime(</span> <span class="pre">(dict)arg2)</span></code> :</dt><dd><p>Initialize with keys and values as tuples in a Python list: [(‘key’,’value’)]</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">G3MapVectorTime()</span></code></p>
+</dd>
+</dl>
+<p><em>Methods:</em></p>
+<p id="spt3g-core-g3mapvectortime-keys"><strong>spt3g.core.G3MapVectorTime.keys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">keys(</span> <span class="pre">(G3MapVectorTime)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.keys() -&gt; list of D’s keys</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectortime-has-key"><strong>spt3g.core.G3MapVectorTime.has_key</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">has_key(</span> <span class="pre">(G3MapVectorTime)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span> <span class="pre">:</span></code></dt><dd><p>D.has_key(k) -&gt; True if D has a key k, else False</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectortime-values"><strong>spt3g.core.G3MapVectorTime.values</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">values(</span> <span class="pre">(G3MapVectorTime)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.values() -&gt; list of D’s values</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectortime-items"><strong>spt3g.core.G3MapVectorTime.items</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">items(</span> <span class="pre">(G3MapVectorTime)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.items() -&gt; list of D’s (key, value) pairs, as 2-tuples</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectortime-clear"><strong>spt3g.core.G3MapVectorTime.clear</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">clear(</span> <span class="pre">(G3MapVectorTime)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.clear() -&gt; None.  Remove all items from D.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectortime-copy"><strong>spt3g.core.G3MapVectorTime.copy</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">copy(</span> <span class="pre">(G3MapVectorTime)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">G3MapVectorTime</span> <span class="pre">:</span></code></dt><dd><p>D.copy() -&gt; a shallow copy of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectortime-get"><strong>spt3g.core.G3MapVectorTime.get</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">get(</span> <span class="pre">(G3MapVectorTime)arg1,</span> <span class="pre">(str)arg2</span> <span class="pre">[,</span> <span class="pre">(object)default_val])</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.get(k[,d]) -&gt; D[k] if k in D, else d.  d defaults to None.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectortime-pop"><strong>spt3g.core.G3MapVectorTime.pop</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3MapVectorTime)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">object</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3MapVectorTime)arg1,</span> <span class="pre">(str)arg2,</span> <span class="pre">(object)arg3)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.pop(k[,d]) -&gt; v, remove specified key and return the corresponding value
+If key is not found, d is returned if given, otherwise KeyError is raised</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectortime-popitem"><strong>spt3g.core.G3MapVectorTime.popitem</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">popitem(</span> <span class="pre">(G3MapVectorTime)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.popitem() -&gt; (k, v), remove and return some (key, value) pair as a
+2-tuple; but raise KeyError if D is empty</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectortime-update"><strong>spt3g.core.G3MapVectorTime.update</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">update(</span> <span class="pre">(object)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.update(E) -&gt; None.  Update D from E: for k in E: D[k] = E[k]</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectortime-iteritems"><strong>spt3g.core.G3MapVectorTime.iteritems</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iteritems(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iteritems() -&gt; an iterator over the (key, value) items of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectortime-iterkeys"><strong>spt3g.core.G3MapVectorTime.iterkeys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iterkeys(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iterkeys() -&gt; an iterator over the keys of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectortime-itervalues"><strong>spt3g.core.G3MapVectorTime.itervalues</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">itervalues(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.itervalues() -&gt; an iterator over the values of D</p>
+</dd>
+</dl>
+</section>
+<section id="spt3g-core-g3mapvectorvectorstring">
+<span id="id18"></span><h3>spt3g.core.G3MapVectorVectorString<a class="headerlink" href="#spt3g-core-g3mapvectorvectorstring" title="Link to this heading">¶</a></h3>
+<p>Mapping from strings to lists of lists of strings.</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3MapVectorVectorString()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3MapVectorVectorString(</span> <span class="pre">(G3MapVectorVectorString)arg2)</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">G3MapVectorVectorString(</span> <span class="pre">(list)arg2)</span></code> :</dt><dd><p>Initialize with keys and values from a Python dictionary: {‘key’:’value’}</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">G3MapVectorVectorString(</span> <span class="pre">(dict)arg2)</span></code> :</dt><dd><p>Initialize with keys and values as tuples in a Python list: [(‘key’,’value’)]</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">G3MapVectorVectorString()</span></code></p>
+</dd>
+</dl>
+<p><em>Methods:</em></p>
+<p id="spt3g-core-g3mapvectorvectorstring-keys"><strong>spt3g.core.G3MapVectorVectorString.keys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">keys(</span> <span class="pre">(G3MapVectorVectorString)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.keys() -&gt; list of D’s keys</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorvectorstring-has-key"><strong>spt3g.core.G3MapVectorVectorString.has_key</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">has_key(</span> <span class="pre">(G3MapVectorVectorString)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span> <span class="pre">:</span></code></dt><dd><p>D.has_key(k) -&gt; True if D has a key k, else False</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorvectorstring-values"><strong>spt3g.core.G3MapVectorVectorString.values</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">values(</span> <span class="pre">(G3MapVectorVectorString)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.values() -&gt; list of D’s values</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorvectorstring-items"><strong>spt3g.core.G3MapVectorVectorString.items</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">items(</span> <span class="pre">(G3MapVectorVectorString)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.items() -&gt; list of D’s (key, value) pairs, as 2-tuples</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorvectorstring-clear"><strong>spt3g.core.G3MapVectorVectorString.clear</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">clear(</span> <span class="pre">(G3MapVectorVectorString)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.clear() -&gt; None.  Remove all items from D.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorvectorstring-copy"><strong>spt3g.core.G3MapVectorVectorString.copy</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">copy(</span> <span class="pre">(G3MapVectorVectorString)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">G3MapVectorVectorString</span> <span class="pre">:</span></code></dt><dd><p>D.copy() -&gt; a shallow copy of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorvectorstring-get"><strong>spt3g.core.G3MapVectorVectorString.get</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">get(</span> <span class="pre">(G3MapVectorVectorString)arg1,</span> <span class="pre">(str)arg2</span> <span class="pre">[,</span> <span class="pre">(object)default_val])</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.get(k[,d]) -&gt; D[k] if k in D, else d.  d defaults to None.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorvectorstring-pop"><strong>spt3g.core.G3MapVectorVectorString.pop</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3MapVectorVectorString)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">object</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3MapVectorVectorString)arg1,</span> <span class="pre">(str)arg2,</span> <span class="pre">(object)arg3)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.pop(k[,d]) -&gt; v, remove specified key and return the corresponding value
+If key is not found, d is returned if given, otherwise KeyError is raised</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorvectorstring-popitem"><strong>spt3g.core.G3MapVectorVectorString.popitem</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">popitem(</span> <span class="pre">(G3MapVectorVectorString)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.popitem() -&gt; (k, v), remove and return some (key, value) pair as a
+2-tuple; but raise KeyError if D is empty</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorvectorstring-update"><strong>spt3g.core.G3MapVectorVectorString.update</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">update(</span> <span class="pre">(object)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.update(E) -&gt; None.  Update D from E: for k in E: D[k] = E[k]</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorvectorstring-iteritems"><strong>spt3g.core.G3MapVectorVectorString.iteritems</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iteritems(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iteritems() -&gt; an iterator over the (key, value) items of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorvectorstring-iterkeys"><strong>spt3g.core.G3MapVectorVectorString.iterkeys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iterkeys(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iterkeys() -&gt; an iterator over the keys of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3mapvectorvectorstring-itervalues"><strong>spt3g.core.G3MapVectorVectorString.itervalues</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">itervalues(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.itervalues() -&gt; an iterator over the values of D</p>
+</dd>
+</dl>
+</section>
+<section id="spt3g-core-g3moduleconfig">
+<span id="id19"></span><h3>spt3g.core.G3ModuleConfig<a class="headerlink" href="#spt3g-core-g3moduleconfig" title="Link to this heading">¶</a></h3>
+<p>Stored configuration of a pipeline module or segment</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3ModuleConfig()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3ModuleConfig(</span> <span class="pre">(G3ModuleConfig)arg2)</span></code></p>
+</dd>
+</dl>
+<p><em>Members:</em></p>
+<ul class="simple">
+<li><p><strong>modname</strong>: No Doc (Shame!)</p></li>
+<li><p><strong>instancename</strong>: No Doc (Shame!)</p></li>
+</ul>
+<p><em>Methods:</em></p>
+<p id="spt3g-core-g3moduleconfig-keys"><strong>spt3g.core.G3ModuleConfig.keys</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">keys(</span> <span class="pre">(G3ModuleConfig)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span></code></p>
+<p id="spt3g-core-g3moduleconfig-values"><strong>spt3g.core.G3ModuleConfig.values</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">values(</span> <span class="pre">(G3ModuleConfig)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span></code></p>
+</section>
+<section id="spt3g-core-g3pipelineinfo">
+<span id="id20"></span><h3>spt3g.core.G3PipelineInfo<a class="headerlink" href="#spt3g-core-g3pipelineinfo" title="Link to this heading">¶</a></h3>
+<p>Stored configuration of a pipeline, including software version information</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3PipelineInfo()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3PipelineInfo(</span> <span class="pre">(G3PipelineInfo)arg2)</span></code></p>
+</dd>
+</dl>
+<p><em>Members:</em></p>
+<ul class="simple">
+<li><p><strong>vcs_url</strong>: No Doc (Shame!)</p></li>
+<li><p><strong>vcs_branch</strong>: No Doc (Shame!)</p></li>
+<li><p><strong>vcs_revision</strong>: No Doc (Shame!)</p></li>
+<li><p><strong>vcs_localdiffs</strong>: No Doc (Shame!)</p></li>
+<li><p><strong>vcs_versionname</strong>: No Doc (Shame!)</p></li>
+<li><p><strong>vcs_fullversion</strong>: No Doc (Shame!)</p></li>
+<li><p><strong>vcs_githash</strong>: No Doc (Shame!)</p></li>
+<li><p><strong>hostname</strong>: No Doc (Shame!)</p></li>
+<li><p><strong>user</strong>: No Doc (Shame!)</p></li>
+<li><p><strong>modules</strong>: No Doc (Shame!)</p></li>
+</ul>
+<p><em>Methods:</em></p>
+<p id="spt3g-core-g3pipelineinfo-run"><strong>spt3g.core.G3PipelineInfo.Run</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">Run(</span> <span class="pre">(G3PipelineInfo)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
+</section>
+<section id="spt3g-core-g3string">
+<span id="id21"></span><h3>spt3g.core.G3String<a class="headerlink" href="#spt3g-core-g3string" title="Link to this heading">¶</a></h3>
+<p>Serializable string</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3String(</span> <span class="pre">(str)arg2)</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3String(</span> <span class="pre">(G3String)arg2)</span></code></p>
+</dd>
+</dl>
+</section>
+<section id="spt3g-core-g3time">
+<span id="id22"></span><h3>spt3g.core.G3Time<a class="headerlink" href="#spt3g-core-g3time" title="Link to this heading">¶</a></h3>
+<p>UTC Time</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3Time()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3Time(</span> <span class="pre">(G3Time)arg2)</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">G3Time(</span> <span class="pre">(int)y,</span> <span class="pre">(int)d,</span> <span class="pre">(int)h,</span> <span class="pre">(int)m,</span> <span class="pre">(int)s,</span> <span class="pre">(int)ss)</span></code> :</dt><dd><p>Create a timestamp object from IRIG B code</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">G3Time(</span> <span class="pre">(str)arg2)</span></code> :</dt><dd><p>Create a time object from a string representation. Supported formats are: YYYYMMDD_HHMMSS, YYMMDD_HHMMSS, YYMMDD HH:MM:SS, DD-Mon-YYYY:HH:MM:SS, YYYY-MM-DDTHH:MM:SS[+TZ] (ISO 8601). All can have a fraction of second field after a dot.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">G3Time(</span> <span class="pre">(object)timestamp)</span></code> :</dt><dd><p>Create a G3Time from a numeric timestamp</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p><em>Members:</em></p>
+<ul class="simple">
+<li><p><strong>time</strong>: Time relative to the UNIX epoch</p></li>
+<li><p><strong>mjd</strong>: Time in MJD</p></li>
+</ul>
+<p><em>Methods:</em></p>
+<p id="spt3g-core-g3time-getfileformatstring"><strong>spt3g.core.G3Time.GetFileFormatString</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">GetFileFormatString(</span> <span class="pre">(G3Time)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Get a string corresponding to how SPTpol and GCP name files for this time</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3time-isoformat"><strong>spt3g.core.G3Time.isoformat</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">isoformat(</span> <span class="pre">(G3Time)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Return the ISO 8601 formatted timestamp string</p>
+</dd>
+</dl>
+</section>
+<section id="spt3g-core-g3timesamplemap">
+<span id="id23"></span><h3>spt3g.core.G3TimesampleMap<a class="headerlink" href="#spt3g-core-g3timesamplemap" title="Link to this heading">¶</a></h3>
+<p>Mapping from string to vectors of data, with an associated vector of timestamps.  This object is for storing multiple co-sampled vectors with a single set of (irregular) timestamps.</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3TimesampleMap()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3TimesampleMap(</span> <span class="pre">(G3TimesampleMap)arg2)</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">G3TimesampleMap(</span> <span class="pre">(list)arg2)</span></code> :</dt><dd><p>Initialize with keys and values from a Python dictionary: {‘key’:’value’}</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">G3TimesampleMap(</span> <span class="pre">(dict)arg2)</span></code> :</dt><dd><p>Initialize with keys and values as tuples in a Python list: [(‘key’,’value’)]</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">G3TimesampleMap()</span></code></p>
+</dd>
+</dl>
+<p><em>Members:</em></p>
+<ul class="simple">
+<li><p><strong>times</strong>: Times vector.  Setting this stores a copy, but getting returns a reference.</p></li>
+</ul>
+<p><em>Methods:</em></p>
+<p id="spt3g-core-g3timesamplemap-keys"><strong>spt3g.core.G3TimesampleMap.keys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">keys(</span> <span class="pre">(G3TimesampleMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.keys() -&gt; list of D’s keys</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3timesamplemap-has-key"><strong>spt3g.core.G3TimesampleMap.has_key</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">has_key(</span> <span class="pre">(G3TimesampleMap)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span> <span class="pre">:</span></code></dt><dd><p>D.has_key(k) -&gt; True if D has a key k, else False</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3timesamplemap-values"><strong>spt3g.core.G3TimesampleMap.values</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">values(</span> <span class="pre">(G3TimesampleMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.values() -&gt; list of D’s values</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3timesamplemap-items"><strong>spt3g.core.G3TimesampleMap.items</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">items(</span> <span class="pre">(G3TimesampleMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.items() -&gt; list of D’s (key, value) pairs, as 2-tuples</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3timesamplemap-clear"><strong>spt3g.core.G3TimesampleMap.clear</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">clear(</span> <span class="pre">(G3TimesampleMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.clear() -&gt; None.  Remove all items from D.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3timesamplemap-copy"><strong>spt3g.core.G3TimesampleMap.copy</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">copy(</span> <span class="pre">(G3TimesampleMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">G3TimesampleMap</span> <span class="pre">:</span></code></dt><dd><p>D.copy() -&gt; a shallow copy of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3timesamplemap-get"><strong>spt3g.core.G3TimesampleMap.get</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">get(</span> <span class="pre">(G3TimesampleMap)arg1,</span> <span class="pre">(str)arg2</span> <span class="pre">[,</span> <span class="pre">(object)default_val])</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.get(k[,d]) -&gt; D[k] if k in D, else d.  d defaults to None.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3timesamplemap-pop"><strong>spt3g.core.G3TimesampleMap.pop</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3TimesampleMap)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">object</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3TimesampleMap)arg1,</span> <span class="pre">(str)arg2,</span> <span class="pre">(object)arg3)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.pop(k[,d]) -&gt; v, remove specified key and return the corresponding value
+If key is not found, d is returned if given, otherwise KeyError is raised</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3timesamplemap-popitem"><strong>spt3g.core.G3TimesampleMap.popitem</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">popitem(</span> <span class="pre">(G3TimesampleMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.popitem() -&gt; (k, v), remove and return some (key, value) pair as a
+2-tuple; but raise KeyError if D is empty</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3timesamplemap-update"><strong>spt3g.core.G3TimesampleMap.update</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">update(</span> <span class="pre">(object)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.update(E) -&gt; None.  Update D from E: for k in E: D[k] = E[k]</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3timesamplemap-iteritems"><strong>spt3g.core.G3TimesampleMap.iteritems</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iteritems(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iteritems() -&gt; an iterator over the (key, value) items of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3timesamplemap-iterkeys"><strong>spt3g.core.G3TimesampleMap.iterkeys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iterkeys(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iterkeys() -&gt; an iterator over the keys of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3timesamplemap-itervalues"><strong>spt3g.core.G3TimesampleMap.itervalues</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">itervalues(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.itervalues() -&gt; an iterator over the values of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3timesamplemap-check"><strong>spt3g.core.G3TimesampleMap.check</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">check(</span> <span class="pre">(G3TimesampleMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span> <span class="pre">:</span></code></dt><dd><p>Check for internal consistency.  Raises ValueError if there are problems.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3timesamplemap-concatenate"><strong>spt3g.core.G3TimesampleMap.concatenate</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">concatenate(</span> <span class="pre">(G3TimesampleMap)arg1,</span> <span class="pre">(G3TimesampleMap)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">G3TimesampleMap</span> <span class="pre">:</span></code></dt><dd><p>Concatenate two compatible G3TimesampleMap.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3timesamplemap-sort"><strong>spt3g.core.G3TimesampleMap.sort</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">sort(</span> <span class="pre">(G3TimesampleMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>Sort all element vectors by time, in-place.</p>
+</dd>
+</dl>
+</section>
+<section id="spt3g-core-g3timestream">
+<span id="id24"></span><h3>spt3g.core.G3Timestream<a class="headerlink" href="#spt3g-core-g3timestream" title="Link to this heading">¶</a></h3>
+<p>Detector timestream. Includes a units field and start and stop times. Can otherwise be treated as a numpy array with a float64 dtype. Conversions to and from such arrays (e.g. with numpy.asarray) are fast. Note that a numpy array constructed from a timestream will share a memory buffer: changes to the array affect the timestream and vice versa. Most binary timestream arithmetic operations (+, -) check that the units and start/stop times are congruent.</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3Timestream()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3Timestream(</span> <span class="pre">(G3Timestream)arg2)</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">G3Timestream(</span> <span class="pre">(object)data</span> <span class="pre">[,</span> <span class="pre">(G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None])</span></code> :</dt><dd><p>Create a timestream from a numpy array or other numeric python iterable</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p><em>Members:</em></p>
+<ul class="simple">
+<li><p><strong>units</strong>: Units of the data in the timestream, stored as one of the members of core.G3TimestreamUnits.</p></li>
+<li><p><strong>start</strong>: Time of the first sample in the time stream</p></li>
+<li><p><strong>stop</strong>: Time of the final sample in the timestream</p></li>
+<li><p><strong>sample_rate</strong>: Computed sample rate of the timestream.</p></li>
+<li><p><strong>n_samples</strong>: Number of samples in the timestream. Equivalent to len(ts)</p></li>
+<li><p><strong>compression_level</strong>: Level of FLAC compression used for this timestream. This can only be non-zero if the timestream is in units of counts.</p></li>
+<li><p><strong>shape</strong>: No Doc (Shame!)</p></li>
+<li><p><strong>ndim</strong>: No Doc (Shame!)</p></li>
+<li><p><strong>dtype</strong>: No Doc (Shame!)</p></li>
+<li><p><strong>elapsed</strong>: Compute elapsed time array for samples.</p></li>
+<li><p><strong>times</strong>: Compute time vector for samples.</p></li>
+</ul>
+<p><em>Methods:</em></p>
+<p id="spt3g-core-g3timestream-setflaccompression"><strong>spt3g.core.G3Timestream.SetFLACCompression</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">SetFLACCompression(</span> <span class="pre">(G3Timestream)arg1,</span> <span class="pre">(int)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>Pass True to turn on FLAC compression when serialized. FLAC compression only works if the timestream is in units of counts.</p>
+</dd>
+</dl>
+</section>
+<section id="spt3g-core-g3timestreammap">
+<span id="id25"></span><h3>spt3g.core.G3TimestreamMap<a class="headerlink" href="#spt3g-core-g3timestreammap" title="Link to this heading">¶</a></h3>
+<p>Collection of timestreams indexed by logical detector ID</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3TimestreamMap()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3TimestreamMap(</span> <span class="pre">(G3TimestreamMap)arg2)</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">G3TimestreamMap(</span> <span class="pre">(StringVector)keys,</span> <span class="pre">(object)data</span> <span class="pre">[,</span> <span class="pre">(G3Time)start=&lt;spt3g.core.G3Time</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7f6347509d90&gt;</span> <span class="pre">[,</span> <span class="pre">(G3Time)stop=&lt;spt3g.core.G3Time</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7f6347509e00&gt;</span> <span class="pre">[,</span> <span class="pre">(G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None</span> <span class="pre">[,</span> <span class="pre">(int)compression_level=0</span> <span class="pre">[,</span> <span class="pre">(bool)copy_data=True]]]]])</span></code> :</dt><dd><p>Create a timestream map from a numpy array or other numeric python iterable. Each row of the 2D input array will correspond to a single timestream, with the key set to the correspondingly-indexed entry of &lt;keys&gt;. If &lt;copy_data&gt; is True (default), the data will be copied into the output data structure. If False, the timestream map will provide a view into the given numpy array.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">G3TimestreamMap(</span> <span class="pre">(list)arg2)</span></code> :</dt><dd><p>Initialize with keys and values from a Python dictionary: {‘key’:’value’}</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">G3TimestreamMap(</span> <span class="pre">(dict)arg2)</span></code> :</dt><dd><p>Initialize with keys and values as tuples in a Python list: [(‘key’,’value’)]</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">G3TimestreamMap()</span></code></p>
+</dd>
+</dl>
+<p><em>Members:</em></p>
+<ul class="simple">
+<li><p><strong>start</strong>: Time of the first sample in the time stream</p></li>
+<li><p><strong>stop</strong>: Time of the final sample in the time stream</p></li>
+<li><p><strong>sample_rate</strong>: Computed sample rate of the timestream.</p></li>
+<li><p><strong>n_samples</strong>: Number of samples in the timestream. Equivalent to the length of one of the timestreams.</p></li>
+<li><p><strong>units</strong>: Units of the data in the timestream, stored as one of the members of core.G3TimestreamUnits.</p></li>
+<li><p><strong>dtype</strong>: No Doc (Shame!)</p></li>
+<li><p><strong>elapsed</strong>: Compute elapsed time array for samples.</p></li>
+<li><p><strong>times</strong>: Compute time vector for samples.</p></li>
+<li><p><strong>names</strong>: Get timestream map channel names.</p></li>
+<li><p><strong>data</strong>: Return a numpy array view into the underlying 2D array of the timestream map</p></li>
+</ul>
+<p><em>Methods:</em></p>
+<p id="spt3g-core-g3timestreammap-keys"><strong>spt3g.core.G3TimestreamMap.keys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">keys(</span> <span class="pre">(G3TimestreamMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.keys() -&gt; list of D’s keys</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3timestreammap-has-key"><strong>spt3g.core.G3TimestreamMap.has_key</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">has_key(</span> <span class="pre">(G3TimestreamMap)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span> <span class="pre">:</span></code></dt><dd><p>D.has_key(k) -&gt; True if D has a key k, else False</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3timestreammap-values"><strong>spt3g.core.G3TimestreamMap.values</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">values(</span> <span class="pre">(G3TimestreamMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.values() -&gt; list of D’s values</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3timestreammap-items"><strong>spt3g.core.G3TimestreamMap.items</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">items(</span> <span class="pre">(G3TimestreamMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.items() -&gt; list of D’s (key, value) pairs, as 2-tuples</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3timestreammap-clear"><strong>spt3g.core.G3TimestreamMap.clear</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">clear(</span> <span class="pre">(G3TimestreamMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.clear() -&gt; None.  Remove all items from D.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3timestreammap-copy"><strong>spt3g.core.G3TimestreamMap.copy</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">copy(</span> <span class="pre">(G3TimestreamMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">G3TimestreamMap</span> <span class="pre">:</span></code></dt><dd><p>D.copy() -&gt; a shallow copy of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3timestreammap-get"><strong>spt3g.core.G3TimestreamMap.get</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">get(</span> <span class="pre">(G3TimestreamMap)arg1,</span> <span class="pre">(str)arg2</span> <span class="pre">[,</span> <span class="pre">(object)default_val])</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.get(k[,d]) -&gt; D[k] if k in D, else d.  d defaults to None.</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3timestreammap-pop"><strong>spt3g.core.G3TimestreamMap.pop</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3TimestreamMap)arg1,</span> <span class="pre">(str)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">object</span></code></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">pop(</span> <span class="pre">(G3TimestreamMap)arg1,</span> <span class="pre">(str)arg2,</span> <span class="pre">(object)arg3)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.pop(k[,d]) -&gt; v, remove specified key and return the corresponding value
+If key is not found, d is returned if given, otherwise KeyError is raised</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3timestreammap-popitem"><strong>spt3g.core.G3TimestreamMap.popitem</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">popitem(</span> <span class="pre">(G3TimestreamMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.popitem() -&gt; (k, v), remove and return some (key, value) pair as a
+2-tuple; but raise KeyError if D is empty</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3timestreammap-update"><strong>spt3g.core.G3TimestreamMap.update</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">update(</span> <span class="pre">(object)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>D.update(E) -&gt; None.  Update D from E: for k in E: D[k] = E[k]</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3timestreammap-iteritems"><strong>spt3g.core.G3TimestreamMap.iteritems</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iteritems(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iteritems() -&gt; an iterator over the (key, value) items of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3timestreammap-iterkeys"><strong>spt3g.core.G3TimestreamMap.iterkeys</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">iterkeys(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.iterkeys() -&gt; an iterator over the keys of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3timestreammap-itervalues"><strong>spt3g.core.G3TimestreamMap.itervalues</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">itervalues(</span> <span class="pre">(object)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">object</span> <span class="pre">:</span></code></dt><dd><p>D.itervalues() -&gt; an iterator over the values of D</p>
+</dd>
+</dl>
+<p id="spt3g-core-g3timestreammap-checkalignment"><strong>spt3g.core.G3TimestreamMap.CheckAlignment</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">CheckAlignment(</span> <span class="pre">(G3TimestreamMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">bool</span></code></p>
+<p id="spt3g-core-g3timestreammap-compactify"><strong>spt3g.core.G3TimestreamMap.Compactify</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">Compactify(</span> <span class="pre">(G3TimestreamMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>If member timestreams are stored non-contiguously, repack all data into a contiguous block. Requires timestreams be aligned and the same data type. Done implicitly by numpy.asarray().</p>
+</dd>
+</dl>
+</section>
+<section id="spt3g-core-g3timestreamquat">
+<span id="id26"></span><h3>spt3g.core.G3TimestreamQuat<a class="headerlink" href="#spt3g-core-g3timestreamquat" title="Link to this heading">¶</a></h3>
+<p>Timestream of quaternions. Identical to a G3VectorQuat except for the addition of start and stop times.</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3TimestreamQuat()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3TimestreamQuat(</span> <span class="pre">(object)arg2)</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3TimestreamQuat(</span> <span class="pre">(G3TimestreamQuat)arg2)</span></code></p>
+</dd>
+</dl>
+<p><em>Members:</em></p>
+<ul class="simple">
+<li><p><strong>start</strong>: Time of the first sample in the time stream</p></li>
+<li><p><strong>stop</strong>: Time of the final sample in the timestream</p></li>
+<li><p><strong>sample_rate</strong>: Computed sample rate of the timestream.</p></li>
+<li><p><strong>n_samples</strong>: Number of samples in the timestream. Equivalent to len(ts)</p></li>
+</ul>
+</section>
+<section id="spt3g-core-g3vectorbool">
+<span id="id27"></span><h3>spt3g.core.G3VectorBool<a class="headerlink" href="#spt3g-core-g3vectorbool" title="Link to this heading">¶</a></h3>
+<p>List of booleans.</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3VectorBool()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3VectorBool(</span> <span class="pre">(object)arg2)</span></code></p>
+</dd>
+</dl>
+<p><em>Methods:</em></p>
+<p id="spt3g-core-g3vectorbool-append"><strong>spt3g.core.G3VectorBool.append</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">append(</span> <span class="pre">(G3VectorBool)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
+<p id="spt3g-core-g3vectorbool-extend"><strong>spt3g.core.G3VectorBool.extend</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">extend(</span> <span class="pre">(G3VectorBool)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
+</section>
+<section id="spt3g-core-g3vectorcomplexdouble">
+<span id="id28"></span><h3>spt3g.core.G3VectorComplexDouble<a class="headerlink" href="#spt3g-core-g3vectorcomplexdouble" title="Link to this heading">¶</a></h3>
+<p>Array of complex floats. Treat as a serializable version of numpy.array(dtype=complex128). Can be efficiently cast to and from numpy arrays.</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3VectorComplexDouble()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3VectorComplexDouble(</span> <span class="pre">(object)arg2)</span></code></p>
+</dd>
+</dl>
+<p><em>Methods:</em></p>
+<p id="spt3g-core-g3vectorcomplexdouble-append"><strong>spt3g.core.G3VectorComplexDouble.append</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">append(</span> <span class="pre">(G3VectorComplexDouble)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
+<p id="spt3g-core-g3vectorcomplexdouble-extend"><strong>spt3g.core.G3VectorComplexDouble.extend</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">extend(</span> <span class="pre">(G3VectorComplexDouble)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
+</section>
+<section id="spt3g-core-g3vectordouble">
+<span id="id29"></span><h3>spt3g.core.G3VectorDouble<a class="headerlink" href="#spt3g-core-g3vectordouble" title="Link to this heading">¶</a></h3>
+<p>Array of floats. Treat as a serializable version of numpy.array(dtype=float64). Can be efficiently cast to and from numpy arrays.</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3VectorDouble()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3VectorDouble(</span> <span class="pre">(object)arg2)</span></code></p>
+</dd>
+</dl>
+<p><em>Methods:</em></p>
+<p id="spt3g-core-g3vectordouble-append"><strong>spt3g.core.G3VectorDouble.append</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">append(</span> <span class="pre">(G3VectorDouble)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
+<p id="spt3g-core-g3vectordouble-extend"><strong>spt3g.core.G3VectorDouble.extend</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">extend(</span> <span class="pre">(G3VectorDouble)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
+</section>
+<section id="spt3g-core-g3vectorframeobject">
+<span id="id30"></span><h3>spt3g.core.G3VectorFrameObject<a class="headerlink" href="#spt3g-core-g3vectorframeobject" title="Link to this heading">¶</a></h3>
+<p>List of generic frame objects. Can lead to paradoxes; avoid use of this class unless you are sure you need it.</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3VectorFrameObject()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3VectorFrameObject(</span> <span class="pre">(object)arg2)</span></code></p>
+</dd>
+</dl>
+<p><em>Methods:</em></p>
+<p id="spt3g-core-g3vectorframeobject-append"><strong>spt3g.core.G3VectorFrameObject.append</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">append(</span> <span class="pre">(G3VectorFrameObject)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
+<p id="spt3g-core-g3vectorframeobject-extend"><strong>spt3g.core.G3VectorFrameObject.extend</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">extend(</span> <span class="pre">(G3VectorFrameObject)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
+</section>
+<section id="spt3g-core-g3vectorint">
+<span id="id31"></span><h3>spt3g.core.G3VectorInt<a class="headerlink" href="#spt3g-core-g3vectorint" title="Link to this heading">¶</a></h3>
+<p>Array of integers. Treat as a serializable version of numpy.array(dtype=int64). Can be efficiently cast to and from numpy arrays.</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3VectorInt()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3VectorInt(</span> <span class="pre">(object)arg2)</span></code></p>
+</dd>
+</dl>
+<p><em>Methods:</em></p>
+<p id="spt3g-core-g3vectorint-append"><strong>spt3g.core.G3VectorInt.append</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">append(</span> <span class="pre">(G3VectorInt)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
+<p id="spt3g-core-g3vectorint-extend"><strong>spt3g.core.G3VectorInt.extend</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">extend(</span> <span class="pre">(G3VectorInt)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
+</section>
+<section id="spt3g-core-g3vectorquat">
+<span id="id32"></span><h3>spt3g.core.G3VectorQuat<a class="headerlink" href="#spt3g-core-g3vectorquat" title="Link to this heading">¶</a></h3>
+<p>List of quaternions. Convertible to a 4xN numpy array. Arithmetic operations on this object are fast and provide results given proper quaternion math rather than element-by-element numpy-ish results.</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3VectorQuat()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3VectorQuat(</span> <span class="pre">(object)arg2)</span></code></p>
+</dd>
+</dl>
+<p><em>Methods:</em></p>
+<p id="spt3g-core-g3vectorquat-append"><strong>spt3g.core.G3VectorQuat.append</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">append(</span> <span class="pre">(G3VectorQuat)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
+<p id="spt3g-core-g3vectorquat-extend"><strong>spt3g.core.G3VectorQuat.extend</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">extend(</span> <span class="pre">(G3VectorQuat)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
+</section>
+<section id="spt3g-core-g3vectorstring">
+<span id="id33"></span><h3>spt3g.core.G3VectorString<a class="headerlink" href="#spt3g-core-g3vectorstring" title="Link to this heading">¶</a></h3>
+<p>List of strings.</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3VectorString()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3VectorString(</span> <span class="pre">(object)arg2)</span></code></p>
+</dd>
+</dl>
+<p><em>Methods:</em></p>
+<p id="spt3g-core-g3vectorstring-append"><strong>spt3g.core.G3VectorString.append</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">append(</span> <span class="pre">(G3VectorString)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
+<p id="spt3g-core-g3vectorstring-extend"><strong>spt3g.core.G3VectorString.extend</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">extend(</span> <span class="pre">(G3VectorString)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
+</section>
+<section id="spt3g-core-g3vectortime">
+<span id="id34"></span><h3>spt3g.core.G3VectorTime<a class="headerlink" href="#spt3g-core-g3vectortime" title="Link to this heading">¶</a></h3>
+<p>List of times.</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3VectorTime()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3VectorTime(</span> <span class="pre">(object)arg2)</span></code></p>
+</dd>
+</dl>
+<p><em>Methods:</em></p>
+<p id="spt3g-core-g3vectortime-append"><strong>spt3g.core.G3VectorTime.append</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">append(</span> <span class="pre">(G3VectorTime)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
+<p id="spt3g-core-g3vectortime-extend"><strong>spt3g.core.G3VectorTime.extend</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">extend(</span> <span class="pre">(G3VectorTime)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
+</section>
+<section id="spt3g-core-g3vectorunsignedchar">
+<span id="id35"></span><h3>spt3g.core.G3VectorUnsignedChar<a class="headerlink" href="#spt3g-core-g3vectorunsignedchar" title="Link to this heading">¶</a></h3>
+<p>List of 8-bit integers</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3VectorUnsignedChar()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3VectorUnsignedChar(</span> <span class="pre">(object)arg2)</span></code></p>
+</dd>
+</dl>
+<p><em>Methods:</em></p>
+<p id="spt3g-core-g3vectorunsignedchar-append"><strong>spt3g.core.G3VectorUnsignedChar.append</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">append(</span> <span class="pre">(G3VectorUnsignedChar)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
+<p id="spt3g-core-g3vectorunsignedchar-extend"><strong>spt3g.core.G3VectorUnsignedChar.extend</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">extend(</span> <span class="pre">(G3VectorUnsignedChar)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
+</section>
+<section id="spt3g-core-g3vectorvectorstring">
+<span id="id36"></span><h3>spt3g.core.G3VectorVectorString<a class="headerlink" href="#spt3g-core-g3vectorvectorstring" title="Link to this heading">¶</a></h3>
+<p>List of lists of strings.</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3VectorVectorString()</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3VectorVectorString(</span> <span class="pre">(object)arg2)</span></code></p>
+</dd>
+</dl>
+<p><em>Methods:</em></p>
+<p id="spt3g-core-g3vectorvectorstring-append"><strong>spt3g.core.G3VectorVectorString.append</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">append(</span> <span class="pre">(G3VectorVectorString)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
+<p id="spt3g-core-g3vectorvectorstring-extend"><strong>spt3g.core.G3VectorVectorString.extend</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">extend(</span> <span class="pre">(G3VectorVectorString)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
+</section>
+</section>
+<section id="modules-in-spt3g-core">
+<h2>Modules in spt3g.core<a class="headerlink" href="#modules-in-spt3g-core" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="#spt3g-core-g3eventbuilder">spt3g.core.G3EventBuilder</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3infinitesource">spt3g.core.G3InfiniteSource</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3module">spt3g.core.G3Module</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3multifilewriter">spt3g.core.G3MultiFileWriter</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3networksender">spt3g.core.G3NetworkSender</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3reader">spt3g.core.G3Reader</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3writer">spt3g.core.G3Writer</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-modconstruct-pipelinesegment">spt3g.core.modconstruct.PipelineSegment</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-util-abortafternframes">spt3g.core.util.AbortAfterNFrames</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-util-deduplicatemetadata">spt3g.core.util.DeduplicateMetadata</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-util-delete">spt3g.core.util.Delete</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-util-droporphanmetadata">spt3g.core.util.DropOrphanMetadata</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-util-dump">spt3g.core.util.Dump</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-util-g3networkreceiver">spt3g.core.util.G3NetworkReceiver</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-util-g3throttlednetworksender">spt3g.core.util.G3ThrottledNetworkSender</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-util-injectdebug">spt3g.core.util.InjectDebug</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-util-injectframe">spt3g.core.util.InjectFrame</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-util-rename">spt3g.core.util.Rename</a></p></li>
+</ul>
+<p id="spt3g-core-g3eventbuilder"><strong>spt3g.core.G3EventBuilder</strong></p>
+<p>Base class for functors that can be added to a G3Pipeline.</p>
+<p id="spt3g-core-g3infinitesource"><strong>spt3g.core.G3InfiniteSource</strong></p>
+<p>Emits infinite frames, up to an optional maximum number n</p>
+<p id="spt3g-core-g3module"><strong>spt3g.core.G3Module</strong></p>
+<p>Base class for functors that can be added to a G3Pipeline.</p>
+<p id="spt3g-core-g3multifilewriter"><strong>spt3g.core.G3MultiFileWriter</strong></p>
+<p>Writes frames to disk into a sequence of files. Once a file exceeds the number of bytes specified in size_limit, it will start a new file. Files are named based on filename. If passed a string for filename with a printf-style specifier, that specifier will be replaced by a zero-indexed sequence number. For example, outfile-%03u.g3.gz would produce a sequence of files named outfile-000.g3.gz, outfile-001.g3.gz, etc. Alternatively, you can pass a callable that is passed the first frame in the new file and the sequence number and returns a path to the new file. Any frames besides Timepoint and Scan frames have the most recent frame of each type prepended to all new files.</p>
+<p>More complex behavior can be obtained with the optional divide_on argument. This can be an iterable of frame types (e.g. [core.G3FrameType.Observation]) or a callable. In the iterable case, the presence of any frame with a type in the list will cause the creation of a new file even if the file size threshold has not yet been met. This is useful to create files based on, for example, observation boundaries. For more flexibility, you can also pass a python callable as divide_on. This callable will be passed each frame in turn. If it returns True (or something with positive truth-value), a new file will be started at that frame.</p>
+<p id="spt3g-core-g3networksender"><strong>spt3g.core.G3NetworkSender</strong></p>
+<p>Writes frames to a network socket. If hostname is set to ‘*’, will listen on the given port, on all interfaces, instead of connecting to the given port on a remote host. In listen mode, metadata frames (Calibration, Wiring, etc. – everything but Scan and Timepoint) will be accumulated and the most recent of each will be sent to new clients on connect. Scan and Timepoint frames will be broadcast live to all connected clients. If max_queue_size is set to a non-zero value, Scan and Timepoint frames may be dropped if more than max_queue_size frames are queued for transmission. If n_serializers is set to a non-zero value, the task of serializing frames to be sent will be distributed across that many background threads, which is useful when high throughput of large frames is required, but is otherwise typically not necessary.</p>
+<p id="spt3g-core-g3reader"><strong>spt3g.core.G3Reader</strong></p>
+<p>Read frames from disk. Takes either the path to a file to read or an iterable of files to be read in sequence. If n_frames_to_read is greater than zero, will stop after n_frames_to_read frames rather than at the end of the file[s]. The timeout parameter can used to enable socket timeout for tcp streams, resulting in EOF behavior on expiry; unfortunately this cannot be used for polling, you have to close the connection. Use the <cite>tell</cite> and <cite>seek</cite> methods to record the position of and seek to the beginning of a particular frame in the file.  Set track_filename to True to record the filename for each frame in the ._filename attribute (fragile).</p>
+<p id="spt3g-core-g3writer"><strong>spt3g.core.G3Writer</strong></p>
+<p>Writes frames to disk. Frames will be written to the file specified by filename. If filename ends in .gz, output will be compressed using gzip. To write only some types of frames, pass a list of the desired frame types to the second optional argument (streams). If no streams argument is given, writes all types of frames. If append is set to True, will append frames to its output file rather than overwriting it.</p>
+<p id="spt3g-core-modconstruct-pipelinesegment"><strong>spt3g.core.modconstruct.PipelineSegment</strong></p>
+<p>No documentation</p>
+<dl class="simple">
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">PipelineSegment(func,</span> <span class="pre">autodoc=True)</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-core-util-abortafternframes"><strong>spt3g.core.util.AbortAfterNFrames</strong></p>
+<p>Stops processing after n_frames frames go by</p>
+<dl class="simple">
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">AbortAfterNFrames(self,</span> <span class="pre">type,</span> <span class="pre">n_frames)</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-core-util-deduplicatemetadata"><strong>spt3g.core.util.DeduplicateMetadata</strong></p>
+<p>Drop metadata frames (e.g. Calibration, Wiring) for which the previous
+metadata frame of the same type is byte-for-byte identical. This can be
+handy when, for example, reading in many files from the G3MultiFileWriter,
+which copies metadata frames to the beginning of each file. Considers
+all frames not in &lt;dataframetypes&gt; to be metadata (by default, everything
+except Timepoint and Scan frames).</p>
+<dl class="simple">
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">DeduplicateMetadata(self,</span> <span class="pre">dataframetype=[spt3g.core.G3FrameType.Timepoint,</span> <span class="pre">spt3g.core.G3FrameType.Scan])</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-core-util-delete"><strong>spt3g.core.util.Delete</strong></p>
+<p>Deletes specified keys from frame. If optional type specified, only acts on frames of the given type.</p>
+<dl class="simple">
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">Delete(frame,</span> <span class="pre">keys=[],</span> <span class="pre">type=None)</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-core-util-droporphanmetadata"><strong>spt3g.core.util.DropOrphanMetadata</strong></p>
+<p>Remove metadata frames (e.g. Calibration, Wiring) without
+intervening data frames (e.g. Timepoint, Scan, specified by the
+&lt;dataframetype&gt; argument to the constructor). The metadata frames that
+do show up will be the most recent of each type and appear in their
+original order.</p>
+<dl class="simple">
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">DropOrphanMetadata(self,</span> <span class="pre">dataframetype=[spt3g.core.G3FrameType.Timepoint,</span> <span class="pre">spt3g.core.G3FrameType.Scan])</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-core-util-dump"><strong>spt3g.core.util.Dump</strong></p>
+<p>Prints frames to console. If optional type specified, only acts on frames of the given type.</p>
+<dl class="simple">
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">Dump(frame,</span> <span class="pre">type=None,</span> <span class="pre">added_message=None)</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-core-util-g3networkreceiver"><strong>spt3g.core.util.G3NetworkReceiver</strong></p>
+<p>Emulation of old G3NetworkReceiver class. Equivalent to pointing
+G3Reader at a TCP URL.</p>
+<p><em>Equivalent to:</em></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">G3Reader</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;tcp://localhost:5978&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3NetworkReceiver(pipe,</span> <span class="pre">hostname='localhost',</span> <span class="pre">port=5978)</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-core-util-g3throttlednetworksender"><strong>spt3g.core.util.G3ThrottledNetworkSender</strong></p>
+<p>Send every Nth frame of certain types using a wrapped G3NetworkSender.
+All instances of frames not in the dictionary frame_decimation will be sent
+at their full rate.</p>
+<dl class="simple">
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3ThrottledNetworkSender(self,</span> <span class="pre">hostname='*',</span> <span class="pre">port=5978,</span> <span class="pre">frame_decimation={spt3g.core.G3FrameType.Timepoint:</span> <span class="pre">10},</span> <span class="pre">max_queue_size=0)</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-core-util-injectdebug"><strong>spt3g.core.util.InjectDebug</strong></p>
+<p>starts a pdb session when a frame of type shows up.</p>
+<p>The frame data is stored in the variable names “frame”.</p>
+<dl class="simple">
+<dt>If debug_start_func is not None, only starts a debug session when</dt><dd><p>debug_start_func(frame) == True</p>
+</dd>
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">InjectDebug(frame,</span> <span class="pre">type=None,</span> <span class="pre">debug_start_func=None)</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-core-util-injectframe"><strong>spt3g.core.util.InjectFrame</strong></p>
+<p>Inject an arbitrary frame into a pipeline.</p>
+<dl class="simple">
+<dt><em>Arguments:</em></dt><dd><dl class="simple">
+<dt>frame<span class="classifier">G3Frame</span></dt><dd><p>The frame to inject</p>
+</dd>
+</dl>
+</dd>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">InjectFrame(self,</span> <span class="pre">frame)</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-core-util-rename"><strong>spt3g.core.util.Rename</strong></p>
+<p>Renames specified keys in frame. If optional type specified, only acts on frames of the given type. Argument is a dictionary mapping old names to new ones.</p>
+<dl class="simple">
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">Rename(frame,</span> <span class="pre">keys={},</span> <span class="pre">type=None)</span></code></p>
+</dd>
+</dl>
+</section>
+<section id="functions-in-spt3g-core">
+<h2>Functions in spt3g.core<a class="headerlink" href="#functions-in-spt3g-core" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="#spt3g-core-timestreamextensions-concatenate-timestreams">spt3g.core.timestreamextensions.concatenate_timestreams</a></p></li>
+</ul>
+<p id="spt3g-core-timestreamextensions-concatenate-timestreams"><strong>spt3g.core.timestreamextensions.concatenate_timestreams</strong></p>
+<p>Concatenate G3Timestream or G3TimestreamMap objects together.</p>
+<dl class="simple">
+<dt><em>Arguments:</em></dt><dd><dl class="simple">
+<dt>ts_lst<span class="classifier">list</span></dt><dd><p>list of G3Timestream or G3TimestreamMap objects.  Must all be
+the same type.</p>
+</dd>
+<dt>ts_rounding_error<span class="classifier">float</span></dt><dd><p>allowed error in timestream separation such that timestreams are
+contiguous, as a fraction of the sample rate. This should be
+0 by default, but is 0.5 to allow for downsampler shifting,
+and then bumpted again to 0.6 to allow for floating-point
+errors in what 0.5 is.</p>
+</dd>
+<dt>ts_interp_threshold<span class="classifier">float</span></dt><dd><p>allowed timestream separation below which gaps between timestreams are
+interpolated to be made continuous</p>
+</dd>
+</dl>
+</dd>
+<dt><em>Returns:</em></dt><dd><dl class="simple">
+<dt>ts<span class="classifier">G3Timestream or G3TimestreamMap object</span></dt><dd><p>The concatenation of the input list of objects</p>
+</dd>
+</dl>
+</dd>
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">concatenate_timestreams(ts_lst,</span> <span class="pre">ts_rounding_error=0.6,</span> <span class="pre">ts_interp_threshold=0)</span></code></p>
+</dd>
+</dl>
+</section>
 </section>
 
 
@@ -50,6 +1974,56 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">core</a><ul>
+<li><a class="reference internal" href="#frame-objects-in-spt3g-core">Frame Objects in spt3g.core</a><ul>
+<li><a class="reference internal" href="#spt3g-core-g3bool">spt3g.core.G3Bool</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3double">spt3g.core.G3Double</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3frameobject">spt3g.core.G3FrameObject</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3int">spt3g.core.G3Int</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3mapdouble">spt3g.core.G3MapDouble</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3mapframeobject">spt3g.core.G3MapFrameObject</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3mapint">spt3g.core.G3MapInt</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3mapmapdouble">spt3g.core.G3MapMapDouble</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3mapquat">spt3g.core.G3MapQuat</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3mapstring">spt3g.core.G3MapString</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3mapvectorbool">spt3g.core.G3MapVectorBool</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3mapvectorcomplexdouble">spt3g.core.G3MapVectorComplexDouble</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3mapvectordouble">spt3g.core.G3MapVectorDouble</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3mapvectorint">spt3g.core.G3MapVectorInt</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3mapvectorquat">spt3g.core.G3MapVectorQuat</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3mapvectorstring">spt3g.core.G3MapVectorString</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3mapvectortime">spt3g.core.G3MapVectorTime</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3mapvectorvectorstring">spt3g.core.G3MapVectorVectorString</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3moduleconfig">spt3g.core.G3ModuleConfig</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3pipelineinfo">spt3g.core.G3PipelineInfo</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3string">spt3g.core.G3String</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3time">spt3g.core.G3Time</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3timesamplemap">spt3g.core.G3TimesampleMap</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3timestream">spt3g.core.G3Timestream</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3timestreammap">spt3g.core.G3TimestreamMap</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3timestreamquat">spt3g.core.G3TimestreamQuat</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3vectorbool">spt3g.core.G3VectorBool</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3vectorcomplexdouble">spt3g.core.G3VectorComplexDouble</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3vectordouble">spt3g.core.G3VectorDouble</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3vectorframeobject">spt3g.core.G3VectorFrameObject</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3vectorint">spt3g.core.G3VectorInt</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3vectorquat">spt3g.core.G3VectorQuat</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3vectorstring">spt3g.core.G3VectorString</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3vectortime">spt3g.core.G3VectorTime</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3vectorunsignedchar">spt3g.core.G3VectorUnsignedChar</a></li>
+<li><a class="reference internal" href="#spt3g-core-g3vectorvectorstring">spt3g.core.G3VectorVectorString</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#modules-in-spt3g-core">Modules in spt3g.core</a></li>
+<li><a class="reference internal" href="#functions-in-spt3g-core">Functions in spt3g.core</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
   <div>
     <h4>Previous topic</h4>
     <p class="topless"><a href="moddoc_calibration.html"

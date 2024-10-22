@@ -27,4 +27,35 @@ Interface to TOAST
 
 There is an experimental module (TOASTFiller) that uses MPIAccumulator to fill frame contents after processing in many parallel pipelines into a TOAST TOD object in order to use TOAST's set of parallel timestream algorithms and map-making. Basic functionality is present, but it should be considered in-development at present.
 
+Modules in spt3g.mpi
+====================
+* spt3g.mpi.MPIFileIO.MPIIODistributor_
+
+
+.. _spt3g.mpi.MPIFileIO.MPIIODistributor:
+
+**spt3g.mpi.MPIFileIO.MPIIODistributor**
+
+
+Read files from disk using the first n_io processes in mpicomm (COMM_WORLD
+by default), with processing of frames in those files occurring on the other
+processes in mpicomm. See documentation for MPIFileReader for the format of
+the files argument and MPIFrameParallelizer for information on the semantics
+of processing. Add this as the first module in your pipeline in place of
+core.G3Reader.
+
+
+
+*Equivalent to:*
+
+.. code-block:: python
+
+    Exception evaluating equivalence (No module named 'mpi4py')
+
+
+
+*Definition:*
+        ``MPIIODistributor(pipe, mpicomm=None, n_io=10, files=[])``
+
+
 
