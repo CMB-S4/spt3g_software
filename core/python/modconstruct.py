@@ -7,34 +7,39 @@ except ImportError:
     pass
 import types
 import re
+import inspect
 
-def pipesegment(func, autodoc=True):
-    '''
-    Use as a decorator for a pre-assembled set of pipeline modules. Makes a
-    pseudo-module consisting of several inputs. If autodoc is True (the
-    default), will attempt to introspect the segment to find out what it
-    does. Set this to False if your module does anything complicated.
 
-    For example:
+class PipelineSegment:
+    """
+    Wrapper class for pipeline segments.  Used by the `pipesegment` function
+    decorator to enable auto-documentation of pipeline segments by
+    introspection.
+    """
+    __pipesegment__ = True
 
-    @core.pipesegment
-    def standardfiltering(pipe, PolyOrder=4, MaskedHighPassEll=6000, Input='CalTimestreams', Output='FilteredTimestreams'):
-        pipe.Add(analysis.PolyFilter, PolyOrder=PolyOrder, Input=Input,
-            Output='__Temp' + Output)
-        pipe.Add(analysis.MaskedHighPass, MaskedHighPassEll=MaskedHighPassEll, Input='__Temp' + Output, Output=Output)
-        def cleanup(frame):
-            del frame['__Temp' + Output]
-        pipe.Add(cleanup)
+    def __init__(self, func, autodoc=True):
+        self.func = func
+        self._do_autodoc = autodoc
 
-    pipe.Add(standardfiltering, PolyOrder=3)
-    '''
+    def __call__(self, *args, **kwargs):
+        return self.func(*args, **kwargs)
 
-    func.__pipesegment__ = True
+    def autodoc(self):
+        """
+        Create a dummy pipeline for introspection.  Generates a docstring when
+        the __doc__ attribute is accessed.
+        """
+        if not self._do_autodoc:
+            self._autodoc = getattr(self.func, "__doc__", None)
+            self._rstdoc = None
+            return self._autodoc
+        if hasattr(self, "_autodoc"):
+            return self._autodoc
 
-    if autodoc:
-        introdoc = ''
-        if hasattr(func, '__doc__') and func.__doc__ is not None:
-            introdoc = func.__doc__ + '\n\n'
+        introdoc = getattr(self.func, "__doc__", None) or ""
+        if introdoc:
+            introdoc += "\n\n"
         from .docparser import format_doc
         rstintrodoc = format_doc(introdoc)
         introdoc += 'Equivalent to:\n'
@@ -57,17 +62,56 @@ def pipesegment(func, autodoc=True):
                 doclines.append(doc)
         fake = PotemkinPipe()
         try:
-            func(fake)
+            self.func(fake)
         except Exception as e:
             doclines.append('Exception evaluating equivalence (%s)' % (str(e), ))
         introdoc += '\n'.join(doclines)
         rstintrodoc += '.. code-block:: python\n\n    '
         rstintrodoc += '\n    '.join(doclines)
         rstintrodoc += '\n'
-        func.__doc__ = introdoc
-        func.__rstdoc__ = rstintrodoc
 
-    return func
+        self._autodoc = introdoc
+        self._rstdoc = rstintrodoc
+        return self._autodoc
+
+    @property
+    def __rstdoc__(self):
+        self.autodoc()
+        return self._rstdoc
+
+    @property
+    def __signature__(self):
+        return inspect.signature(self.func)
+
+    @property
+    def __doc__(self):
+        self.autodoc()
+        return self._autodoc
+
+
+def pipesegment(func, autodoc=True):
+    '''
+    Use as a decorator for a pre-assembled set of pipeline modules. Makes a
+    pseudo-module consisting of several inputs. If autodoc is True (the
+    default), will attempt to introspect the segment to find out what it
+    does. Set this to False if your module does anything complicated.
+
+    For example:
+
+    @core.pipesegment
+    def standardfiltering(pipe, PolyOrder=4, MaskedHighPassEll=6000, Input='CalTimestreams', Output='FilteredTimestreams'):
+        pipe.Add(analysis.PolyFilter, PolyOrder=PolyOrder, Input=Input,
+            Output='__Temp' + Output)
+        pipe.Add(analysis.MaskedHighPass, MaskedHighPassEll=MaskedHighPassEll, Input='__Temp' + Output, Output=Output)
+        def cleanup(frame):
+            del frame['__Temp' + Output]
+        pipe.Add(cleanup)
+
+    pipe.Add(standardfiltering, PolyOrder=3)
+    '''
+
+    return PipelineSegment(func, autodoc)
+
 
 def pipesegment_nodoc(func):
     return pipesegment(func, autodoc = False)

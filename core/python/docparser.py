@@ -120,7 +120,7 @@ def get_doc_for_module(module_path, include_link_list = True):
             elif hasattr(obj, '__pipesegment__'):
                 out_str = add_str(out_str, format_name(modname, x))
                 if format_doc(obj) is not None:
-                    if hasattr(obj, '__rstdoc__'):
+                    if getattr(obj, '__rstdoc__', None):
                         out_str = add_str(out_str, obj.__rstdoc__)
                     else:
                         baredoc = format_doc(obj)
