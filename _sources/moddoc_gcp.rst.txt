@@ -193,10 +193,6 @@ Modules in spt3g.gcp
 
 * spt3g.gcp.GCPMuxDataDecoder_
 
-* spt3g.gcp.ARCExtractor.ARCExtract_
-
-* spt3g.gcp.ARCExtractor.ARCExtractMinimal_
-
 * spt3g.gcp.ARCExtractor.AddBenchData_
 
 * spt3g.gcp.ARCExtractor.CalibrateFrame_
@@ -233,8 +229,6 @@ Modules in spt3g.gcp
 
 * spt3g.gcp.GCPDataTee.GCPSignalledHousekeeping_
 
-* spt3g.gcp.InfluxDB.UpdateDB_
-
 * spt3g.gcp.InfluxDB.WriteDB_
 
 
@@ -253,62 +247,6 @@ Read GCP archive file (or files if you pass an iterable of paths). For non-SPT A
 Extracts contents of receiver registers in SPTpol-style ARC files into a wiring map and timepoint frames. This is designed to convert SPTpol-style data in which GCP records bolometer data into the ARC files into a format equivalent to that for SPT-3G. 
 
 For old (100d SPTpol) data not containing wiring information, insert a wiring map into the pipeline ahead of this module. The board_serial should be set to a real (positive) value for all bolometer channels and -1 for the calibrator sync readout.
-
-
-
-.. _spt3g.gcp.ARCExtractor.ARCExtract:
-
-**spt3g.gcp.ARCExtractor.ARCExtract**
-
-Extract GCP registers into native objects
-
-
-*Equivalent to:*
-
-.. code-block:: python
-
-    pipe.Add(spt3g.gcp.ARCExtractor.CalibrateFrame)
-    pipe.Add(spt3g.gcp.ARCExtractor.UnpackACUData)
-    pipe.Add(spt3g.gcp.ARCExtractor.UnpackTrackerPointingData)
-    pipe.Add(spt3g.gcp.ARCExtractor.UpdateLinearSensorDeltas)
-    pipe.Add(spt3g.gcp.ARCExtractor.DecryptFeatureBit)
-    pipe.Add(spt3g.gcp.ARCExtractor.UnpackTrackerData)
-    pipe.Add(spt3g.gcp.ARCExtractor.AddBenchData)
-    pipe.Add(spt3g.gcp.ARCExtractor.UnpackCryoData)
-    pipe.Add(spt3g.gcp.ARCExtractor.UnpackPTData)
-    pipe.Add(spt3g.gcp.ARCExtractor.UnpackMuxData)
-    pipe.Add(spt3g.gcp.ARCExtractor.UnpackWeatherData)
-
-
-
-*Definition:*
-        ``ARCExtract(pipe)``
-
-
-
-.. _spt3g.gcp.ARCExtractor.ARCExtractMinimal:
-
-**spt3g.gcp.ARCExtractor.ARCExtractMinimal**
-
-
-Extract bare minimum GCP registers into native objects.
-
-Includes only GCPFeatureBits, SourceName and ObservationID keys.
-Use ARCExtract to calibrate and extract the complete frame.
-
-
-
-*Equivalent to:*
-
-.. code-block:: python
-
-    pipe.Add(spt3g.gcp.ARCExtractor.DecryptFeatureBit)
-    pipe.Add(spt3g.gcp.ARCExtractor.UnpackTrackerMinimal)
-
-
-
-*Definition:*
-        ``ARCExtractMinimal(pipe)``
 
 
 
@@ -570,35 +508,6 @@ unconditionally at startup.
 *Constructor:*
 	``GCPSignalledHousekeeping(self, port=50011, collect_on_start=True)``
 
-
-
-
-.. _spt3g.gcp.InfluxDB.UpdateDB:
-
-**spt3g.gcp.InfluxDB.UpdateDB**
-
-
-Update InfluxDB with data in frame
-
-*Arguments:*
-	client :
-	    InfluxDB client
-	fields :
-	    Which gcp fields to add to database. See parse_field for options. If
-	    None, add all.
-	
-	
-	
-*Equivalent to:*
-
-.. code-block:: python
-
-    Exception evaluating equivalence (UpdateDB() missing 1 required positional argument: 'client')
-
-
-
-*Definition:*
-        ``UpdateDB(pipe, client, fields=None)``
 
 
 

@@ -149,8 +149,6 @@
 <ul class="simple">
 <li><p><a class="reference internal" href="#spt3g-gcp-arcfilereader">spt3g.gcp.ARCFileReader</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-gcpmuxdatadecoder">spt3g.gcp.GCPMuxDataDecoder</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-arcextract">spt3g.gcp.ARCExtractor.ARCExtract</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-arcextractminimal">spt3g.gcp.ARCExtractor.ARCExtractMinimal</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-addbenchdata">spt3g.gcp.ARCExtractor.AddBenchData</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-calibrateframe">spt3g.gcp.ARCExtractor.CalibrateFrame</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-decryptfeaturebit">spt3g.gcp.ARCExtractor.DecryptFeatureBit</a></p></li>
@@ -169,7 +167,6 @@
 <li><p><a class="reference internal" href="#spt3g-gcp-gcpdatatee-gcpbolodatatee">spt3g.gcp.GCPDataTee.GCPBoloDataTee</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-gcpdatatee-gcphousekeepingtee">spt3g.gcp.GCPDataTee.GCPHousekeepingTee</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-gcpdatatee-gcpsignalledhousekeeping">spt3g.gcp.GCPDataTee.GCPSignalledHousekeeping</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-influxdb-updatedb">spt3g.gcp.InfluxDB.UpdateDB</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-influxdb-writedb">spt3g.gcp.InfluxDB.WriteDB</a></p></li>
 </ul>
 <p id="spt3g-gcp-arcfilereader"><strong>spt3g.gcp.ARCFileReader</strong></p>
@@ -177,39 +174,6 @@
 <p id="spt3g-gcp-gcpmuxdatadecoder"><strong>spt3g.gcp.GCPMuxDataDecoder</strong></p>
 <p>Extracts contents of receiver registers in SPTpol-style ARC files into a wiring map and timepoint frames. This is designed to convert SPTpol-style data in which GCP records bolometer data into the ARC files into a format equivalent to that for SPT-3G.</p>
 <p>For old (100d SPTpol) data not containing wiring information, insert a wiring map into the pipeline ahead of this module. The board_serial should be set to a real (positive) value for all bolometer channels and -1 for the calibrator sync readout.</p>
-<p id="spt3g-gcp-arcextractor-arcextract"><strong>spt3g.gcp.ARCExtractor.ARCExtract</strong></p>
-<p>Extract GCP registers into native objects</p>
-<p><em>Equivalent to:</em></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">CalibrateFrame</span><span class="p">)</span>
-<span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UnpackACUData</span><span class="p">)</span>
-<span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UnpackTrackerPointingData</span><span class="p">)</span>
-<span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UpdateLinearSensorDeltas</span><span class="p">)</span>
-<span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">DecryptFeatureBit</span><span class="p">)</span>
-<span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UnpackTrackerData</span><span class="p">)</span>
-<span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">AddBenchData</span><span class="p">)</span>
-<span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UnpackCryoData</span><span class="p">)</span>
-<span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UnpackPTData</span><span class="p">)</span>
-<span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UnpackMuxData</span><span class="p">)</span>
-<span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UnpackWeatherData</span><span class="p">)</span>
-</pre></div>
-</div>
-<dl class="simple">
-<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">ARCExtract(pipe)</span></code></p>
-</dd>
-</dl>
-<p id="spt3g-gcp-arcextractor-arcextractminimal"><strong>spt3g.gcp.ARCExtractor.ARCExtractMinimal</strong></p>
-<p>Extract bare minimum GCP registers into native objects.</p>
-<p>Includes only GCPFeatureBits, SourceName and ObservationID keys.
-Use ARCExtract to calibrate and extract the complete frame.</p>
-<p><em>Equivalent to:</em></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">DecryptFeatureBit</span><span class="p">)</span>
-<span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UnpackTrackerMinimal</span><span class="p">)</span>
-</pre></div>
-</div>
-<dl class="simple">
-<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">ARCExtractMinimal(pipe)</span></code></p>
-</dd>
-</dl>
 <p id="spt3g-gcp-arcextractor-addbenchdata"><strong>spt3g.gcp.ARCExtractor.AddBenchData</strong></p>
 <p>Add the optical bench positions to the frame.</p>
 <dl class="simple">
@@ -347,26 +311,6 @@ collect_on_start is True (the default), injects an HK frame
 unconditionally at startup.</p>
 <dl class="simple">
 <dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">GCPSignalledHousekeeping(self,</span> <span class="pre">port=50011,</span> <span class="pre">collect_on_start=True)</span></code></p>
-</dd>
-</dl>
-<p id="spt3g-gcp-influxdb-updatedb"><strong>spt3g.gcp.InfluxDB.UpdateDB</strong></p>
-<p>Update InfluxDB with data in frame</p>
-<dl class="simple">
-<dt><em>Arguments:</em></dt><dd><dl class="simple">
-<dt>client :</dt><dd><p>InfluxDB client</p>
-</dd>
-<dt>fields :</dt><dd><p>Which gcp fields to add to database. See parse_field for options. If
-None, add all.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p><em>Equivalent to:</em></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="ne">Exception</span> <span class="n">evaluating</span> <span class="n">equivalence</span> <span class="p">(</span><span class="n">UpdateDB</span><span class="p">()</span> <span class="n">missing</span> <span class="mi">1</span> <span class="n">required</span> <span class="n">positional</span> <span class="n">argument</span><span class="p">:</span> <span class="s1">&#39;client&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-<dl class="simple">
-<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">UpdateDB(pipe,</span> <span class="pre">client,</span> <span class="pre">fields=None)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-gcp-influxdb-writedb"><strong>spt3g.gcp.InfluxDB.WriteDB</strong></p>
