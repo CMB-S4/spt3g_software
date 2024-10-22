@@ -7,7 +7,6 @@ except ImportError:
     pass
 import types
 import re
-import inspect
 
 
 class PipelineSegment:
@@ -19,7 +18,7 @@ class PipelineSegment:
     __pipesegment__ = True
 
     def __init__(self, func, autodoc=True):
-        self.func = func
+        self.func = self.__wrapped__ = func
         self._do_autodoc = autodoc
 
     def __call__(self, *args, **kwargs):
@@ -80,13 +79,13 @@ class PipelineSegment:
         return self._rstdoc
 
     @property
-    def __signature__(self):
-        return inspect.signature(self.func)
-
-    @property
     def __doc__(self):
         self.autodoc()
         return self._autodoc
+
+    @property
+    def __name__(self):
+        return self.func.__name__
 
 
 def pipesegment(func, autodoc=True):
