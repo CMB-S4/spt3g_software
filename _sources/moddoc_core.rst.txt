@@ -2238,7 +2238,7 @@ Collection of timestreams indexed by logical detector ID
 	
 	``G3TimestreamMap( (G3TimestreamMap)arg2)``
 	
-	``G3TimestreamMap( (StringVector)keys, (object)data [, (G3Time)start=<spt3g.core.G3Time object at 0x7f6347509d90> [, (G3Time)stop=<spt3g.core.G3Time object at 0x7f6347509e00> [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None [, (int)compression_level=0 [, (bool)copy_data=True]]]]])`` :
+	``G3TimestreamMap( (StringVector)keys, (object)data [, (G3Time)start=<spt3g.core.G3Time object at 0x7f6525509d90> [, (G3Time)stop=<spt3g.core.G3Time object at 0x7f6525509e00> [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None [, (int)compression_level=0 [, (bool)copy_data=True]]]]])`` :
 	    Create a timestream map from a numpy array or other numeric python iterable. Each row of the 2D input array will correspond to a single timestream, with the key set to the correspondingly-indexed entry of <keys>. If <copy_data> is True (default), the data will be copied into the output data structure. If False, the timestream map will provide a view into the given numpy array.
 	
 	``G3TimestreamMap( (list)arg2)`` :
@@ -2731,7 +2731,7 @@ Modules in spt3g.core
 
 * spt3g.core.G3Writer_
 
-* spt3g.core.modconstruct.PipelineSegment_
+* spt3g.core.modconstruct.pipesegment_
 
 * spt3g.core.util.AbortAfterNFrames_
 
@@ -2812,9 +2812,9 @@ Writes frames to disk. Frames will be written to the file specified by filename.
 
 
 
-.. _spt3g.core.modconstruct.PipelineSegment:
+.. _spt3g.core.modconstruct.pipesegment:
 
-**spt3g.core.modconstruct.PipelineSegment**
+**spt3g.core.modconstruct.pipesegment**
 
 
 No documentation
@@ -2822,7 +2822,7 @@ No documentation
 
 
 *Definition:*
-        ``PipelineSegment(func, autodoc=True)``
+        ``pipesegment(func, autodoc=True)``
 
 
 
