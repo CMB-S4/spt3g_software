@@ -175,8 +175,8 @@
 <p>FlatSkyMap is a G3SkyMap with the extra meta information about the particular flat sky projection included.  In practice it behaves (mostly) like a 2d numpy array.  The pixels are normally indexed with an 1d pixel index.  If you find that you need numpy functionality from a FlatSkyMap, e.g. for slicing across the two dimensions, you can access a numpy representation of the map using <cite>np.asarray(m)</cite>. This does not copy the data, so any changes to the resulting array will affect the data stored in the map.  Alternatively, you can use 2d slice indexing directly on the map to access a copy of the data with the coordinate representation intact.  The latter method is most efficient for extracting small patches from sparse maps.</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">FlatSkyMap(</span> <span class="pre">(FlatSkyMap)arg2)</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">FlatSkyMap(</span> <span class="pre">(int)x_len,</span> <span class="pre">(int)y_len,</span> <span class="pre">(float)res</span> <span class="pre">[,</span> <span class="pre">(bool)weighted=True</span> <span class="pre">[,</span> <span class="pre">(MapProjection)proj=spt3g.maps.MapProjection.ProjNone</span> <span class="pre">[,</span> <span class="pre">(float)alpha_center=0</span> <span class="pre">[,</span> <span class="pre">(float)delta_center=0</span> <span class="pre">[,</span> <span class="pre">(MapCoordReference)coord_ref=spt3g.maps.MapCoordReference.Equatorial</span> <span class="pre">[,</span> <span class="pre">(G3TimestreamUnits)units=spt3g._libcore.G3TimestreamUnits.Tcmb</span> <span class="pre">[,</span> <span class="pre">(MapPolType)pol_type=spt3g.maps.MapPolType.none</span> <span class="pre">[,</span> <span class="pre">(float)x_res=nan</span> <span class="pre">[,</span> <span class="pre">(float)x_center=nan</span> <span class="pre">[,</span> <span class="pre">(float)y_center=nan</span> <span class="pre">[,</span> <span class="pre">(bool)flat_pol=False</span> <span class="pre">[,</span> <span class="pre">(MapPolConv)pol_conv=spt3g.maps.MapPolConv.none]]]]]]]]]]]])</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">FlatSkyMap(</span> <span class="pre">(object)obj,</span> <span class="pre">(float)res</span> <span class="pre">[,</span> <span class="pre">(bool)weighted=True</span> <span class="pre">[,</span> <span class="pre">(MapProjection)proj=spt3g.maps.MapProjection.ProjNone</span> <span class="pre">[,</span> <span class="pre">(float)alpha_center=0</span> <span class="pre">[,</span> <span class="pre">(float)delta_center=0</span> <span class="pre">[,</span> <span class="pre">(MapCoordReference)coord_ref=spt3g.maps.MapCoordReference.Equatorial</span> <span class="pre">[,</span> <span class="pre">(G3TimestreamUnits)units=spt3g._libcore.G3TimestreamUnits.Tcmb</span> <span class="pre">[,</span> <span class="pre">(MapPolType)pol_type=spt3g.maps.MapPolType.none</span> <span class="pre">[,</span> <span class="pre">(float)x_res=nan</span> <span class="pre">[,</span> <span class="pre">(float)x_center=nan</span> <span class="pre">[,</span> <span class="pre">(float)y_center=nan</span> <span class="pre">[,</span> <span class="pre">(bool)flat_pol=False</span> <span class="pre">[,</span> <span class="pre">(MapPolConv)pol_conv=spt3g.maps.MapPolConv.none]]]]]]]]]]]])</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">FlatSkyMap(</span> <span class="pre">(int)x_len,</span> <span class="pre">(int)y_len,</span> <span class="pre">(float)res</span> <span class="pre">[,</span> <span class="pre">(bool)weighted=True</span> <span class="pre">[,</span> <span class="pre">(MapProjection)proj=spt3g.maps.MapProjection.ProjNone</span> <span class="pre">[,</span> <span class="pre">(float)alpha_center=0</span> <span class="pre">[,</span> <span class="pre">(float)delta_center=0</span> <span class="pre">[,</span> <span class="pre">(MapCoordReference)coord_ref=spt3g.maps.MapCoordReference.Equatorial</span> <span class="pre">[,</span> <span class="pre">(G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.Tcmb</span> <span class="pre">[,</span> <span class="pre">(MapPolType)pol_type=spt3g.maps.MapPolType.none</span> <span class="pre">[,</span> <span class="pre">(float)x_res=nan</span> <span class="pre">[,</span> <span class="pre">(float)x_center=nan</span> <span class="pre">[,</span> <span class="pre">(float)y_center=nan</span> <span class="pre">[,</span> <span class="pre">(bool)flat_pol=False</span> <span class="pre">[,</span> <span class="pre">(MapPolConv)pol_conv=spt3g.maps.MapPolConv.none]]]]]]]]]]]])</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">FlatSkyMap(</span> <span class="pre">(object)obj,</span> <span class="pre">(float)res</span> <span class="pre">[,</span> <span class="pre">(bool)weighted=True</span> <span class="pre">[,</span> <span class="pre">(MapProjection)proj=spt3g.maps.MapProjection.ProjNone</span> <span class="pre">[,</span> <span class="pre">(float)alpha_center=0</span> <span class="pre">[,</span> <span class="pre">(float)delta_center=0</span> <span class="pre">[,</span> <span class="pre">(MapCoordReference)coord_ref=spt3g.maps.MapCoordReference.Equatorial</span> <span class="pre">[,</span> <span class="pre">(G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.Tcmb</span> <span class="pre">[,</span> <span class="pre">(MapPolType)pol_type=spt3g.maps.MapPolType.none</span> <span class="pre">[,</span> <span class="pre">(float)x_res=nan</span> <span class="pre">[,</span> <span class="pre">(float)x_center=nan</span> <span class="pre">[,</span> <span class="pre">(float)y_center=nan</span> <span class="pre">[,</span> <span class="pre">(bool)flat_pol=False</span> <span class="pre">[,</span> <span class="pre">(MapPolConv)pol_conv=spt3g.maps.MapPolConv.none]]]]]]]]]]]])</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">FlatSkyMap(</span> <span class="pre">[</span> <span class="pre">(FlatSkyMap)flat_map])</span></code></p>
 </dd>
 </dl>
@@ -553,9 +553,9 @@ This class cannot be instantiated from Python</p>
 <dl>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">HealpixSkyMap(</span> <span class="pre">(HealpixSkyMap)arg2)</span></code></p>
 <dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">HealpixSkyMap(</span> <span class="pre">(int)nside</span> <span class="pre">[,</span> <span class="pre">(bool)weighted=True</span> <span class="pre">[,</span> <span class="pre">(bool)nested=False</span> <span class="pre">[,</span> <span class="pre">(MapCoordReference)coord_ref=spt3g.maps.MapCoordReference.Equatorial</span> <span class="pre">[,</span> <span class="pre">(G3TimestreamUnits)units=spt3g._libcore.G3TimestreamUnits.Tcmb</span> <span class="pre">[,</span> <span class="pre">(MapPolType)pol_type=spt3g.maps.MapPolType.none</span> <span class="pre">[,</span> <span class="pre">(bool)shift_ra=False</span> <span class="pre">[,</span> <span class="pre">(MapPolConv)pol_conv=spt3g.maps.MapPolConv.none]]]]]]])</span></code> :</dt><dd><p>Instantiate a HealpixSkyMap with given nside</p>
+<dt><code class="docutils literal notranslate"><span class="pre">HealpixSkyMap(</span> <span class="pre">(int)nside</span> <span class="pre">[,</span> <span class="pre">(bool)weighted=True</span> <span class="pre">[,</span> <span class="pre">(bool)nested=False</span> <span class="pre">[,</span> <span class="pre">(MapCoordReference)coord_ref=spt3g.maps.MapCoordReference.Equatorial</span> <span class="pre">[,</span> <span class="pre">(G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.Tcmb</span> <span class="pre">[,</span> <span class="pre">(MapPolType)pol_type=spt3g.maps.MapPolType.none</span> <span class="pre">[,</span> <span class="pre">(bool)shift_ra=False</span> <span class="pre">[,</span> <span class="pre">(MapPolConv)pol_conv=spt3g.maps.MapPolConv.none]]]]]]])</span></code> :</dt><dd><p>Instantiate a HealpixSkyMap with given nside</p>
 </dd>
-<dt><code class="docutils literal notranslate"><span class="pre">HealpixSkyMap(</span> <span class="pre">(object)data</span> <span class="pre">[,</span> <span class="pre">(bool)weighted=True</span> <span class="pre">[,</span> <span class="pre">(bool)nested=False</span> <span class="pre">[,</span> <span class="pre">(MapCoordReference)coord_ref=spt3g.maps.MapCoordReference.Equatorial</span> <span class="pre">[,</span> <span class="pre">(G3TimestreamUnits)units=spt3g._libcore.G3TimestreamUnits.Tcmb</span> <span class="pre">[,</span> <span class="pre">(MapPolType)pol_type=spt3g.maps.MapPolType.none</span> <span class="pre">[,</span> <span class="pre">(bool)shift_ra=False</span> <span class="pre">[,</span> <span class="pre">(MapPolConv)pol_conv=spt3g.maps.MapPolConv.none]]]]]]])</span></code> :</dt><dd><p>Instantiate a Healpix map from existing data. If the data are a single numpy array, assumes this is a dense map. Otherwise, pass an (indices, data, nside) tuple.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">HealpixSkyMap(</span> <span class="pre">(object)data</span> <span class="pre">[,</span> <span class="pre">(bool)weighted=True</span> <span class="pre">[,</span> <span class="pre">(bool)nested=False</span> <span class="pre">[,</span> <span class="pre">(MapCoordReference)coord_ref=spt3g.maps.MapCoordReference.Equatorial</span> <span class="pre">[,</span> <span class="pre">(G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.Tcmb</span> <span class="pre">[,</span> <span class="pre">(MapPolType)pol_type=spt3g.maps.MapPolType.none</span> <span class="pre">[,</span> <span class="pre">(bool)shift_ra=False</span> <span class="pre">[,</span> <span class="pre">(MapPolConv)pol_conv=spt3g.maps.MapPolConv.none]]]]]]])</span></code> :</dt><dd><p>Instantiate a Healpix map from existing data. If the data are a single numpy array, assumes this is a dense map. Otherwise, pass an (indices, data, nside) tuple.</p>
 </dd>
 </dl>
 <p><code class="docutils literal notranslate"><span class="pre">HealpixSkyMap(</span> <span class="pre">[</span> <span class="pre">(HealpixSkyMap)healpix_map])</span></code></p>
@@ -670,6 +670,8 @@ map:</p>
 </pre></div>
 </div>
 </dd>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">HitsBinner(</span> <span class="pre">(str)map_id,</span> <span class="pre">(G3SkyMap)stub_map,</span> <span class="pre">(str)pointing,</span> <span class="pre">(str)timestreams</span> <span class="pre">[,</span> <span class="pre">(str)bolo_properties_name='BolometerProperties'</span> <span class="pre">[,</span> <span class="pre">(object)map_per_scan=False]])</span></code></p>
+</dd>
 </dl>
 <p id="spt3g-maps-mapbinner"><strong>spt3g.maps.MapBinner</strong></p>
 <p>MapBinner(map_id, stub_map, pointing, timestreams, detector_weights, bolo_properties_name=”BolometerProperties”, store_weight_map=True, map_per_scan=False)</p>
@@ -753,6 +755,8 @@ map:</p>
 </pre></div>
 </div>
 </dd>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">MapBinner(</span> <span class="pre">(str)map_id,</span> <span class="pre">(G3SkyMap)stub_map,</span> <span class="pre">(str)pointing,</span> <span class="pre">(str)timestreams</span> <span class="pre">[,</span> <span class="pre">(str)detector_weights=''</span> <span class="pre">[,</span> <span class="pre">(str)bolo_properties_name='BolometerProperties'</span> <span class="pre">[,</span> <span class="pre">(bool)store_weight_map=True</span> <span class="pre">[,</span> <span class="pre">(object)map_per_scan=False]]]])</span></code></p>
+</dd>
 </dl>
 <p id="spt3g-maps-mapmockobserver"><strong>spt3g.maps.MapMockObserver</strong></p>
 <p>MapMockObserver(pointing, timestreams, band, T, Q=None, U=None, bolo_properties_name=”BolometerProperties”, interp=False)</p>
@@ -807,9 +811,15 @@ this to happen without comment.</p>
 </pre></div>
 </div>
 </dd>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">MapMockObserver(</span> <span class="pre">(str)pointing,</span> <span class="pre">(str)timestreams,</span> <span class="pre">(float)band,</span> <span class="pre">(object)T</span> <span class="pre">[,</span> <span class="pre">(object)Q=None</span> <span class="pre">[,</span> <span class="pre">(object)U=None</span> <span class="pre">[,</span> <span class="pre">(str)bolo_properties_name='BolometerProperties'</span> <span class="pre">[,</span> <span class="pre">(bool)interp=False</span> <span class="pre">[,</span> <span class="pre">(bool)error_on_zero=True]]]]])</span></code></p>
+</dd>
 </dl>
 <p id="spt3g-maps-maptodmasker"><strong>spt3g.maps.MapTODMasker</strong></p>
 <p>Creates a filter mask &lt;tod_mask&gt; to indicate to later TOD filtering that a detector has passed over a “bad” part of the sky. This is used, for example, to avoid fitting a polynomial to a timestream while the detector is looking at a bright point source. All timestream values for the detectors in &lt;timestreams&gt; are set to be ignored (true in the output &lt;tod_mask&gt;) if they point at pixels of the input &lt;mask&gt; map containing a non-zero value. Boresight pointing is obtained from the quaternion vector specified by &lt;pointing&gt;. Detector pointing offsets and polarization angles and efficiencies are obtained from the specified BolometerPropertiesMap, which can generally be left at its default value.</p>
+<dl class="simple">
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">MapTODMasker(</span> <span class="pre">(str)pointing,</span> <span class="pre">(str)timestreams,</span> <span class="pre">(G3SkyMapMask)mask</span> <span class="pre">[,</span> <span class="pre">(str)tod_mask='FilterMask'</span> <span class="pre">[,</span> <span class="pre">(str)bolo_properties_name='BolometerProperties']])</span></code></p>
+</dd>
+</dl>
 <p id="spt3g-maps-maptodpointing"><strong>spt3g.maps.MapTODPointing</strong></p>
 <p>MapTODPointing(pointing, timestreams, stub_map, tod_pointing, bolo_properties_name=”BolometerProperties”)</p>
 <p>Compute pixel pointing for timestreams for a map with properties (projection, etc.) specified
@@ -867,6 +877,8 @@ alternative values.</p>
 <span class="p">)</span>
 </pre></div>
 </div>
+</dd>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">MapTODPointing(</span> <span class="pre">(str)pointing,</span> <span class="pre">(str)timestreams,</span> <span class="pre">(object)stub_map,</span> <span class="pre">(str)tod_pointing</span> <span class="pre">[,</span> <span class="pre">(str)bolo_properties_name='BolometerProperties'])</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-maps-singledetectorboresightbinner"><strong>spt3g.maps.SingleDetectorBoresightBinner</strong></p>
@@ -931,9 +943,15 @@ taking into account individual-detector pointing offsets.</p>
 </pre></div>
 </div>
 </dd>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">SingleDetectorBoresightBinner(</span> <span class="pre">(G3SkyMap)stub_map,</span> <span class="pre">(str)pointing,</span> <span class="pre">(str)timestreams)</span></code></p>
+</dd>
 </dl>
 <p id="spt3g-maps-singledetectormapbinner"><strong>spt3g.maps.SingleDetectorMapBinner</strong></p>
 <p>Makes a simple binned map of the sky, in sky coordinates, for every detector present in the given &lt;timestreams&gt;. Boresight pointing is specified by the &lt;pointing&gt; argument, with per-detector offsets from boresight as stored in the given bolometer properties map. The map parameters are copied from &lt;stub_map&gt;. When processing ends, this module will emit one map frame per detector, including per-detector (unpolarized) weights.</p>
+<dl class="simple">
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">SingleDetectorMapBinner(</span> <span class="pre">(G3SkyMap)stub_map,</span> <span class="pre">(str)pointing,</span> <span class="pre">(str)timestreams</span> <span class="pre">[,</span> <span class="pre">(str)bolo_properties_name='BolometerProperties'])</span></code></p>
+</dd>
+</dl>
 <p id="spt3g-maps-azel-equatorialtogalacticpointing"><strong>spt3g.maps.azel.EquatorialToGalacticPointing</strong></p>
 <p>Converts a set of timestreams in Scan frames representing RA and Declination
 pointing of the telescope into Galactic longitude and latitude timestreams,
@@ -1111,7 +1129,7 @@ If False, only the map frame ID is included.</p>
 </dd>
 </dl>
 </dd>
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">CoaddMaps(self,</span> <span class="pre">map_ids=None,</span> <span class="pre">output_map_id='Coadd',</span> <span class="pre">collate=False,</span> <span class="pre">weighted=True,</span> <span class="pre">ignore_missing_weights=False,</span> <span class="pre">drop_input_frames=False,</span> <span class="pre">record_obs_id=False)</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">CoaddMaps(map_ids=None,</span> <span class="pre">output_map_id='Coadd',</span> <span class="pre">collate=False,</span> <span class="pre">weighted=True,</span> <span class="pre">ignore_missing_weights=False,</span> <span class="pre">drop_input_frames=False,</span> <span class="pre">record_obs_id=False)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-maps-map-modules-compactmaps"><strong>spt3g.maps.map_modules.CompactMaps</strong></p>
@@ -1140,7 +1158,7 @@ single bolometer map frames with common weights through a pipeline.</p>
 </dd>
 </dl>
 </dd>
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">ExtractMaps(self,</span> <span class="pre">map_id=None,</span> <span class="pre">copy=False,</span> <span class="pre">ignore_missing_weights=False)</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">ExtractMaps(map_id=None,</span> <span class="pre">copy=False,</span> <span class="pre">ignore_missing_weights=False)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-maps-map-modules-flattenpol"><strong>spt3g.maps.map_modules.FlattenPol</strong></p>
@@ -1171,7 +1189,7 @@ output frame will include Q and U maps (and polarized weights).</p>
 </dd>
 </dl>
 </dd>
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">InjectMapStub(self,</span> <span class="pre">map_id,</span> <span class="pre">map_stub)</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">InjectMapStub(map_id,</span> <span class="pre">map_stub)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-maps-map-modules-injectmaps"><strong>spt3g.maps.map_modules.InjectMaps</strong></p>
@@ -1188,7 +1206,7 @@ by the standard map frame names.</p>
 </dd>
 </dl>
 </dd>
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">InjectMaps(self,</span> <span class="pre">map_id,</span> <span class="pre">maps_in,</span> <span class="pre">ignore_missing_weights=False)</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">InjectMaps(map_id,</span> <span class="pre">maps_in,</span> <span class="pre">ignore_missing_weights=False)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-maps-map-modules-makemapspolarized"><strong>spt3g.maps.map_modules.MakeMapsPolarized</strong></p>
@@ -1264,7 +1282,7 @@ map.  Otherwise, the nearest-neighbor value is used.</p>
 </dd>
 </dl>
 </dd>
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">ReprojectMaps(self,</span> <span class="pre">map_stub=None,</span> <span class="pre">rebin=1,</span> <span class="pre">interp=False)</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">ReprojectMaps(map_stub=None,</span> <span class="pre">rebin=1,</span> <span class="pre">interp=False)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-maps-map-modules-setpolconv"><strong>spt3g.maps.map_modules.SetPolConv</strong></p>
@@ -1304,7 +1322,13 @@ one.</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="#spt3g-maps-apply-weights">spt3g.maps.apply_weights</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-apply-weights-t">spt3g.maps.apply_weights_t</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-maps-azel-convert-azel-to-radec">spt3g.maps.azel.convert_azel_to_radec</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-maps-azel-convert-gal-to-radec">spt3g.maps.azel.convert_gal_to_radec</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-maps-azel-convert-radec-to-azel">spt3g.maps.azel.convert_radec_to_azel</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-maps-azel-convert-radec-to-gal">spt3g.maps.azel.convert_radec_to_gal</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-convolve-map">spt3g.maps.convolve_map</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-maps-fitsio-load-skymap-fits">spt3g.maps.fitsio.load_skymap_fits</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-maps-fitsio-save-skymap-fits">spt3g.maps.fitsio.save_skymap_fits</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-flatten-pol">spt3g.maps.flatten_pol</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-get-boresight-rotator-timestream">spt3g.maps.get_boresight_rotator_timestream</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-get-fk5-j2000-to-gal-quat">spt3g.maps.get_fk5_j2000_to_gal_quat</a></p></li>
@@ -1317,21 +1341,15 @@ one.</p>
 <li><p><a class="reference internal" href="#spt3g-maps-get-rot-ang">spt3g.maps.get_rot_ang</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-get-transform-quat">spt3g.maps.get_transform_quat</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-make-point-source-mask">spt3g.maps.make_point_source_mask</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-maps-offsets-to-quat">spt3g.maps.offsets_to_quat</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-maps-remove-weights">spt3g.maps.remove_weights</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-maps-remove-weights-t">spt3g.maps.remove_weights_t</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-maps-reproj-map">spt3g.maps.reproj_map</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-maps-azel-convert-azel-to-radec">spt3g.maps.azel.convert_azel_to_radec</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-maps-azel-convert-gal-to-radec">spt3g.maps.azel.convert_gal_to_radec</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-maps-azel-convert-radec-to-azel">spt3g.maps.azel.convert_radec_to_azel</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-maps-azel-convert-radec-to-gal">spt3g.maps.azel.convert_radec_to_gal</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-maps-fitsio-load-skymap-fits">spt3g.maps.fitsio.load_skymap_fits</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-maps-fitsio-save-skymap-fits">spt3g.maps.fitsio.save_skymap_fits</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-map-modules-coadd-map-files">spt3g.maps.map_modules.coadd_map_files</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-maputils-flatsky-to-healpix">spt3g.maps.maputils.flatsky_to_healpix</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-maputils-healpix-to-flatsky">spt3g.maps.maputils.healpix_to_flatsky</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-maps-offsets-to-quat">spt3g.maps.offsets_to_quat</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-quathelpers-ang-to-quat">spt3g.maps.quathelpers.ang_to_quat</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-quathelpers-quat-to-ang">spt3g.maps.quathelpers.quat_to_ang</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-maps-remove-weights">spt3g.maps.remove_weights</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-maps-remove-weights-t">spt3g.maps.remove_weights_t</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-maps-reproj-map">spt3g.maps.reproj_map</a></p></li>
 </ul>
 <p id="spt3g-maps-apply-weights"><strong>spt3g.maps.apply_weights</strong></p>
 <dl class="simple">
@@ -1341,93 +1359,6 @@ one.</p>
 <p id="spt3g-maps-apply-weights-t"><strong>spt3g.maps.apply_weights_t</strong></p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">apply_weights_t(</span> <span class="pre">(G3SkyMap)T,</span> <span class="pre">(G3SkyMapWeights)W)</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>Apply weights to unpolarized maps.</p>
-</dd>
-</dl>
-<p id="spt3g-maps-convolve-map"><strong>spt3g.maps.convolve_map</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">convolve_map(</span> <span class="pre">(FlatSkyMap)map,</span> <span class="pre">(object)kernel)</span> <span class="pre">-&gt;</span> <span class="pre">FlatSkyMap</span> <span class="pre">:</span></code></dt><dd><p>Convolve the input flat sky map with the given map-space kernel. The kernel must have odd dimensions and the same resolution as the map.</p>
-</dd>
-</dl>
-<p id="spt3g-maps-flatten-pol"><strong>spt3g.maps.flatten_pol</strong></p>
-<dl>
-<dt><code class="docutils literal notranslate"><span class="pre">flatten_pol(</span> <span class="pre">(FlatSkyMap)Q,</span> <span class="pre">(FlatSkyMap)U</span> <span class="pre">[,</span> <span class="pre">(G3SkyMapWeights)W=None</span> <span class="pre">[,</span> <span class="pre">(float)h=0.001</span> <span class="pre">[,</span> <span class="pre">(bool)invert=False]]])</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>For maps defined on the sphere the direction of the polarization angle is is defined relative to the direction of North.  When making maps we follow this definition.</p>
-<p>For any flat sky estimators, the polarization angle is defined relative to the vertical axis.  For some map projections the direction of north is not the same as the vertical axis.  This function applies a rotation to the Q and U values to switch the curved sky Q/U definition to the flat sky Q/U definition.</p>
-<p>If for whatever reason you want to reverse the process set the invert argument to True. Also applies the appropriate rotation to the Q and u elements of the associated weights.</p>
-</dd>
-</dl>
-<p id="spt3g-maps-get-boresight-rotator-timestream"><strong>spt3g.maps.get_boresight_rotator_timestream</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">get_boresight_rotator_timestream(</span> <span class="pre">(G3Timestream)arg1,</span> <span class="pre">(G3Timestream)arg2,</span> <span class="pre">(G3Timestream)arg3,</span> <span class="pre">(G3Timestream)arg4,</span> <span class="pre">(G3Timestream)arg5,</span> <span class="pre">(G3Timestream)arg6,</span> <span class="pre">(G3Timestream)arg7,</span> <span class="pre">(G3Timestream)arg8)</span> <span class="pre">-&gt;</span> <span class="pre">G3TimestreamQuat</span> <span class="pre">:</span></code></dt><dd><p>Construct a transform quaternion timestream from timestreams of local and equatorial boresight pointing coordinates.  Computes the transform from local (az_0, el_0) coordinates to equatorial (ra_0, dec_0), accounting for rotation about the boresight by including the second set of points.</p>
-</dd>
-</dl>
-<p id="spt3g-maps-get-fk5-j2000-to-gal-quat"><strong>spt3g.maps.get_fk5_j2000_to_gal_quat</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">get_fk5_j2000_to_gal_quat()</span> <span class="pre">-&gt;</span> <span class="pre">quat</span> <span class="pre">:</span></code></dt><dd><p>Return the rotation quaternion to rotate from equatorial to galactic coordinates.</p>
-</dd>
-</dl>
-<p id="spt3g-maps-get-map-hist"><strong>spt3g.maps.get_map_hist</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">get_map_hist(</span> <span class="pre">(object)map,</span> <span class="pre">(DoubleVector)bin_edges</span> <span class="pre">[,</span> <span class="pre">(G3SkyMapMask)mask=None</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_zeros=False</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_nans=False</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_infs=False]]]])</span> <span class="pre">-&gt;</span> <span class="pre">DoubleVector</span> <span class="pre">:</span></code></dt><dd><p>Computes the histogram of the input map into bins defined by the array of bin edges, optionally ignoring zero, nan and/or inf values in the map.  If a mask is supplied, then only the non-zero pixels in the mask are included.</p>
-</dd>
-</dl>
-<p id="spt3g-maps-get-map-moments"><strong>spt3g.maps.get_map_moments</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">get_map_moments(</span> <span class="pre">(object)map</span> <span class="pre">[,</span> <span class="pre">(G3SkyMapMask)mask=None</span> <span class="pre">[,</span> <span class="pre">(int)order=2</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_zeros=False</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_nans=False</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_infs=False]]]]])</span> <span class="pre">-&gt;</span> <span class="pre">DoubleVector</span> <span class="pre">:</span></code></dt><dd><p>Computes moment statistics of the input map, optionally ignoring zero, nan and/or inf values in the map.  If order = 1, only the mean is returned.  If order = 2, 3 or 4 then the variance, skew and kurtosis are also included, respectively.  If a mask is supplied, then only the non-zero pixels in the mask are included.</p>
-</dd>
-</dl>
-<p id="spt3g-maps-get-origin-rotator"><strong>spt3g.maps.get_origin_rotator</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">get_origin_rotator(</span> <span class="pre">(float)alpha,</span> <span class="pre">(float)delta)</span> <span class="pre">-&gt;</span> <span class="pre">quat</span> <span class="pre">:</span></code></dt><dd><p>Compute the transformation quaternion that would rotate the vector (1, 0, 0) to point in the given direction.</p>
-</dd>
-</dl>
-<p id="spt3g-maps-get-origin-rotator-timestream"><strong>spt3g.maps.get_origin_rotator_timestream</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">get_origin_rotator_timestream(</span> <span class="pre">(G3Timestream)alpha,</span> <span class="pre">(G3Timestream)delta,</span> <span class="pre">(MapCoordReference)coord_sys)</span> <span class="pre">-&gt;</span> <span class="pre">G3TimestreamQuat</span> <span class="pre">:</span></code></dt><dd><p>Construct a transform quaternion timestream from timestreams of sky coordinates. Equivalent to <code class="docutils literal notranslate"><span class="pre">R_z(alpha)</span> <span class="pre">*</span> <span class="pre">R_y(delta)</span></code>.</p>
-</dd>
-</dl>
-<p id="spt3g-maps-get-ra-dec-map"><strong>spt3g.maps.get_ra_dec_map</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">get_ra_dec_map(</span> <span class="pre">(object)map_in)</span> <span class="pre">-&gt;</span> <span class="pre">tuple</span> <span class="pre">:</span></code></dt><dd><p>Returns maps of the ra and dec angles for each pixel in the input map</p>
-</dd>
-</dl>
-<p id="spt3g-maps-get-ra-dec-mask"><strong>spt3g.maps.get_ra_dec_mask</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">get_ra_dec_mask(</span> <span class="pre">(object)map_in,</span> <span class="pre">(float)ra_left,</span> <span class="pre">(float)ra_right,</span> <span class="pre">(float)dec_bottom,</span> <span class="pre">(float)dec_top)</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMapMask</span> <span class="pre">:</span></code></dt><dd><p>Returns a mask that is nonzero for any pixels within the given ra and dec ranges</p>
-</dd>
-</dl>
-<p id="spt3g-maps-get-rot-ang"><strong>spt3g.maps.get_rot_ang</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">get_rot_ang(</span> <span class="pre">(quat)start_q,</span> <span class="pre">(quat)trans)</span> <span class="pre">-&gt;</span> <span class="pre">float</span> <span class="pre">:</span></code></dt><dd><p>Computes the boresight rotation of the vector start_q when rotated by trans.</p>
-</dd>
-</dl>
-<p id="spt3g-maps-get-transform-quat"><strong>spt3g.maps.get_transform_quat</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">get_transform_quat(</span> <span class="pre">(float)arg1,</span> <span class="pre">(float)arg2,</span> <span class="pre">(float)arg3,</span> <span class="pre">(float)arg4,</span> <span class="pre">(float)arg5,</span> <span class="pre">(float)arg6,</span> <span class="pre">(float)arg7,</span> <span class="pre">(float)arg8)</span> <span class="pre">-&gt;</span> <span class="pre">quat</span> <span class="pre">:</span></code></dt><dd><p>Computes a rotation that will take (as_0,ds_0) to (ae_0, de_0) and (as_1, ds_1) to (ae_1, de_1)</p>
-</dd>
-</dl>
-<p id="spt3g-maps-make-point-source-mask"><strong>spt3g.maps.make_point_source_mask</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">make_point_source_mask(</span> <span class="pre">(object)map,</span> <span class="pre">(DoubleVector)ra,</span> <span class="pre">(DoubleVector)dec,</span> <span class="pre">(DoubleVector)radius)</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMapMask</span> <span class="pre">:</span></code></dt><dd><p>Construct a mask from the input stub map with pixels within the given radius around each point source position set to 1.</p>
-</dd>
-</dl>
-<p id="spt3g-maps-offsets-to-quat"><strong>spt3g.maps.offsets_to_quat</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">offsets_to_quat(</span> <span class="pre">(float)x,</span> <span class="pre">(float)y)</span> <span class="pre">-&gt;</span> <span class="pre">quat</span> <span class="pre">:</span></code></dt><dd><p>Returns the vector quaternion (0,1,0,0) rotated by the given x and y offsets.  Equivalent to <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">*</span> <span class="pre">quat(0,1,0,0)</span> <span class="pre">/</span> <span class="pre">t</span></code>, where <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">=</span> <span class="pre">get_origin_rotator(x,</span> <span class="pre">-y)</span></code></p>
-</dd>
-</dl>
-<p id="spt3g-maps-remove-weights"><strong>spt3g.maps.remove_weights</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">remove_weights(</span> <span class="pre">(G3SkyMap)T,</span> <span class="pre">(G3SkyMap)Q,</span> <span class="pre">(G3SkyMap)U,</span> <span class="pre">(G3SkyMapWeights)W</span> <span class="pre">[,</span> <span class="pre">(bool)zero_nans=False])</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>Remove weights from polarized maps.  If zero_nans is true, empty pixels are skipped, and pixels with zero weight are set to 0 instead of nan.</p>
-</dd>
-</dl>
-<p id="spt3g-maps-remove-weights-t"><strong>spt3g.maps.remove_weights_t</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">remove_weights_t(</span> <span class="pre">(G3SkyMap)T,</span> <span class="pre">(G3SkyMapWeights)W</span> <span class="pre">[,</span> <span class="pre">(bool)zero_nans=False])</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>Remove weights from unpolarized maps.       If zero_nans is true, empty pixels are skipped, and pixels with zero weight are set to 0 instead of nan.</p>
-</dd>
-</dl>
-<p id="spt3g-maps-reproj-map"><strong>spt3g.maps.reproj_map</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">reproj_map(</span> <span class="pre">(object)in_map,</span> <span class="pre">(G3SkyMap)out_map</span> <span class="pre">[,</span> <span class="pre">(int)rebin=1</span> <span class="pre">[,</span> <span class="pre">(bool)interp=False]])</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>Reprojects the data from in_map onto out_map.  out_map can have a different projection, size, resolution, etc.  Optionally account for sub-pixel structure by setting rebin &gt; 1 and/or enable bilinear interpolation of values from the input map by setting interp=True.  Use the maps’ coord_ref attributes to rotate between Equatorial and Galactic coordinate systems.  Use the maps’ pol_conv attributes to switch between COSMO and IAU polarization conventions.  If output attributes are not set, they will be copied from the input map.</p>
 </dd>
 </dl>
 <p id="spt3g-maps-azel-convert-azel-to-radec"><strong>spt3g.maps.azel.convert_azel_to_radec</strong></p>
@@ -1500,6 +1431,11 @@ objects, G3Timestreams are also returned.</p>
 <dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">convert_radec_to_gal(ra,</span> <span class="pre">dec)</span></code></p>
 </dd>
 </dl>
+<p id="spt3g-maps-convolve-map"><strong>spt3g.maps.convolve_map</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">convolve_map(</span> <span class="pre">(FlatSkyMap)map,</span> <span class="pre">(object)kernel)</span> <span class="pre">-&gt;</span> <span class="pre">FlatSkyMap</span> <span class="pre">:</span></code></dt><dd><p>Convolve the input flat sky map with the given map-space kernel. The kernel must have odd dimensions and the same resolution as the map.</p>
+</dd>
+</dl>
 <p id="spt3g-maps-fitsio-load-skymap-fits"><strong>spt3g.maps.fitsio.load_skymap_fits</strong></p>
 <p>Load a fits file containing a sky map.</p>
 <dl class="simple">
@@ -1569,6 +1505,68 @@ can contain entries such as <code class="docutils literal notranslate"><span cla
 </dl>
 </dd>
 <dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">save_skymap_fits(filename,</span> <span class="pre">T,</span> <span class="pre">Q=None,</span> <span class="pre">U=None,</span> <span class="pre">W=None,</span> <span class="pre">overwrite=False,</span> <span class="pre">compress=False,</span> <span class="pre">quantize_level=16.0,</span> <span class="pre">hdr=None)</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-maps-flatten-pol"><strong>spt3g.maps.flatten_pol</strong></p>
+<dl>
+<dt><code class="docutils literal notranslate"><span class="pre">flatten_pol(</span> <span class="pre">(FlatSkyMap)Q,</span> <span class="pre">(FlatSkyMap)U</span> <span class="pre">[,</span> <span class="pre">(G3SkyMapWeights)W=None</span> <span class="pre">[,</span> <span class="pre">(float)h=0.001</span> <span class="pre">[,</span> <span class="pre">(bool)invert=False]]])</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>For maps defined on the sphere the direction of the polarization angle is is defined relative to the direction of North.  When making maps we follow this definition.</p>
+<p>For any flat sky estimators, the polarization angle is defined relative to the vertical axis.  For some map projections the direction of north is not the same as the vertical axis.  This function applies a rotation to the Q and U values to switch the curved sky Q/U definition to the flat sky Q/U definition.</p>
+<p>If for whatever reason you want to reverse the process set the invert argument to True. Also applies the appropriate rotation to the Q and u elements of the associated weights.</p>
+</dd>
+</dl>
+<p id="spt3g-maps-get-boresight-rotator-timestream"><strong>spt3g.maps.get_boresight_rotator_timestream</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">get_boresight_rotator_timestream(</span> <span class="pre">(G3Timestream)arg1,</span> <span class="pre">(G3Timestream)arg2,</span> <span class="pre">(G3Timestream)arg3,</span> <span class="pre">(G3Timestream)arg4,</span> <span class="pre">(G3Timestream)arg5,</span> <span class="pre">(G3Timestream)arg6,</span> <span class="pre">(G3Timestream)arg7,</span> <span class="pre">(G3Timestream)arg8)</span> <span class="pre">-&gt;</span> <span class="pre">G3TimestreamQuat</span> <span class="pre">:</span></code></dt><dd><p>Construct a transform quaternion timestream from timestreams of local and equatorial boresight pointing coordinates.  Computes the transform from local (az_0, el_0) coordinates to equatorial (ra_0, dec_0), accounting for rotation about the boresight by including the second set of points.</p>
+</dd>
+</dl>
+<p id="spt3g-maps-get-fk5-j2000-to-gal-quat"><strong>spt3g.maps.get_fk5_j2000_to_gal_quat</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">get_fk5_j2000_to_gal_quat()</span> <span class="pre">-&gt;</span> <span class="pre">quat</span> <span class="pre">:</span></code></dt><dd><p>Return the rotation quaternion to rotate from equatorial to galactic coordinates.</p>
+</dd>
+</dl>
+<p id="spt3g-maps-get-map-hist"><strong>spt3g.maps.get_map_hist</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">get_map_hist(</span> <span class="pre">(object)map,</span> <span class="pre">(DoubleVector)bin_edges</span> <span class="pre">[,</span> <span class="pre">(G3SkyMapMask)mask=None</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_zeros=False</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_nans=False</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_infs=False]]]])</span> <span class="pre">-&gt;</span> <span class="pre">DoubleVector</span> <span class="pre">:</span></code></dt><dd><p>Computes the histogram of the input map into bins defined by the array of bin edges, optionally ignoring zero, nan and/or inf values in the map.  If a mask is supplied, then only the non-zero pixels in the mask are included.</p>
+</dd>
+</dl>
+<p id="spt3g-maps-get-map-moments"><strong>spt3g.maps.get_map_moments</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">get_map_moments(</span> <span class="pre">(object)map</span> <span class="pre">[,</span> <span class="pre">(G3SkyMapMask)mask=None</span> <span class="pre">[,</span> <span class="pre">(int)order=2</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_zeros=False</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_nans=False</span> <span class="pre">[,</span> <span class="pre">(bool)ignore_infs=False]]]]])</span> <span class="pre">-&gt;</span> <span class="pre">DoubleVector</span> <span class="pre">:</span></code></dt><dd><p>Computes moment statistics of the input map, optionally ignoring zero, nan and/or inf values in the map.  If order = 1, only the mean is returned.  If order = 2, 3 or 4 then the variance, skew and kurtosis are also included, respectively.  If a mask is supplied, then only the non-zero pixels in the mask are included.</p>
+</dd>
+</dl>
+<p id="spt3g-maps-get-origin-rotator"><strong>spt3g.maps.get_origin_rotator</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">get_origin_rotator(</span> <span class="pre">(float)alpha,</span> <span class="pre">(float)delta)</span> <span class="pre">-&gt;</span> <span class="pre">quat</span> <span class="pre">:</span></code></dt><dd><p>Compute the transformation quaternion that would rotate the vector (1, 0, 0) to point in the given direction.</p>
+</dd>
+</dl>
+<p id="spt3g-maps-get-origin-rotator-timestream"><strong>spt3g.maps.get_origin_rotator_timestream</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">get_origin_rotator_timestream(</span> <span class="pre">(G3Timestream)alpha,</span> <span class="pre">(G3Timestream)delta,</span> <span class="pre">(MapCoordReference)coord_sys)</span> <span class="pre">-&gt;</span> <span class="pre">G3TimestreamQuat</span> <span class="pre">:</span></code></dt><dd><p>Construct a transform quaternion timestream from timestreams of sky coordinates. Equivalent to <code class="docutils literal notranslate"><span class="pre">R_z(alpha)</span> <span class="pre">*</span> <span class="pre">R_y(delta)</span></code>.</p>
+</dd>
+</dl>
+<p id="spt3g-maps-get-ra-dec-map"><strong>spt3g.maps.get_ra_dec_map</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">get_ra_dec_map(</span> <span class="pre">(object)map_in)</span> <span class="pre">-&gt;</span> <span class="pre">tuple</span> <span class="pre">:</span></code></dt><dd><p>Returns maps of the ra and dec angles for each pixel in the input map</p>
+</dd>
+</dl>
+<p id="spt3g-maps-get-ra-dec-mask"><strong>spt3g.maps.get_ra_dec_mask</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">get_ra_dec_mask(</span> <span class="pre">(object)map_in,</span> <span class="pre">(float)ra_left,</span> <span class="pre">(float)ra_right,</span> <span class="pre">(float)dec_bottom,</span> <span class="pre">(float)dec_top)</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMapMask</span> <span class="pre">:</span></code></dt><dd><p>Returns a mask that is nonzero for any pixels within the given ra and dec ranges</p>
+</dd>
+</dl>
+<p id="spt3g-maps-get-rot-ang"><strong>spt3g.maps.get_rot_ang</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">get_rot_ang(</span> <span class="pre">(quat)start_q,</span> <span class="pre">(quat)trans)</span> <span class="pre">-&gt;</span> <span class="pre">float</span> <span class="pre">:</span></code></dt><dd><p>Computes the boresight rotation of the vector start_q when rotated by trans.</p>
+</dd>
+</dl>
+<p id="spt3g-maps-get-transform-quat"><strong>spt3g.maps.get_transform_quat</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">get_transform_quat(</span> <span class="pre">(float)arg1,</span> <span class="pre">(float)arg2,</span> <span class="pre">(float)arg3,</span> <span class="pre">(float)arg4,</span> <span class="pre">(float)arg5,</span> <span class="pre">(float)arg6,</span> <span class="pre">(float)arg7,</span> <span class="pre">(float)arg8)</span> <span class="pre">-&gt;</span> <span class="pre">quat</span> <span class="pre">:</span></code></dt><dd><p>Computes a rotation that will take (as_0,ds_0) to (ae_0, de_0) and (as_1, ds_1) to (ae_1, de_1)</p>
+</dd>
+</dl>
+<p id="spt3g-maps-make-point-source-mask"><strong>spt3g.maps.make_point_source_mask</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">make_point_source_mask(</span> <span class="pre">(object)map,</span> <span class="pre">(DoubleVector)ra,</span> <span class="pre">(DoubleVector)dec,</span> <span class="pre">(DoubleVector)radius)</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMapMask</span> <span class="pre">:</span></code></dt><dd><p>Construct a mask from the input stub map with pixels within the given radius around each point source position set to 1.</p>
 </dd>
 </dl>
 <p id="spt3g-maps-map-modules-coadd-map-files"><strong>spt3g.maps.map_modules.coadd_map_files</strong></p>
@@ -1702,6 +1700,11 @@ that of the input map.</p>
 <dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">healpix_to_flatsky(map_in,</span> <span class="pre">nest=False,</span> <span class="pre">map_stub=None,</span> <span class="pre">rebin=1,</span> <span class="pre">interp=False,</span> <span class="pre">**kwargs)</span></code></p>
 </dd>
 </dl>
+<p id="spt3g-maps-offsets-to-quat"><strong>spt3g.maps.offsets_to_quat</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">offsets_to_quat(</span> <span class="pre">(float)x,</span> <span class="pre">(float)y)</span> <span class="pre">-&gt;</span> <span class="pre">quat</span> <span class="pre">:</span></code></dt><dd><p>Returns the vector quaternion (0,1,0,0) rotated by the given x and y offsets.  Equivalent to <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">*</span> <span class="pre">quat(0,1,0,0)</span> <span class="pre">/</span> <span class="pre">t</span></code>, where <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">=</span> <span class="pre">get_origin_rotator(x,</span> <span class="pre">-y)</span></code></p>
+</dd>
+</dl>
 <p id="spt3g-maps-quathelpers-ang-to-quat"><strong>spt3g.maps.quathelpers.ang_to_quat</strong></p>
 <p>Convert a set of angles (or vector of them) specified as a (longitude,
 latitude) pair to a pointing quaternion (or vector of them). If start
@@ -1716,6 +1719,21 @@ G3TimestreamQuat with start and stop times set to the provided values.</p>
 vector of them) specified as a (longitude, latitude) pair.</p>
 <dl class="simple">
 <dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">quat_to_ang(q)</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-maps-remove-weights"><strong>spt3g.maps.remove_weights</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">remove_weights(</span> <span class="pre">(G3SkyMap)T,</span> <span class="pre">(G3SkyMap)Q,</span> <span class="pre">(G3SkyMap)U,</span> <span class="pre">(G3SkyMapWeights)W</span> <span class="pre">[,</span> <span class="pre">(bool)zero_nans=False])</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>Remove weights from polarized maps.  If zero_nans is true, empty pixels are skipped, and pixels with zero weight are set to 0 instead of nan.</p>
+</dd>
+</dl>
+<p id="spt3g-maps-remove-weights-t"><strong>spt3g.maps.remove_weights_t</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">remove_weights_t(</span> <span class="pre">(G3SkyMap)T,</span> <span class="pre">(G3SkyMapWeights)W</span> <span class="pre">[,</span> <span class="pre">(bool)zero_nans=False])</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>Remove weights from unpolarized maps.       If zero_nans is true, empty pixels are skipped, and pixels with zero weight are set to 0 instead of nan.</p>
+</dd>
+</dl>
+<p id="spt3g-maps-reproj-map"><strong>spt3g.maps.reproj_map</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">reproj_map(</span> <span class="pre">(object)in_map,</span> <span class="pre">(G3SkyMap)out_map</span> <span class="pre">[,</span> <span class="pre">(int)rebin=1</span> <span class="pre">[,</span> <span class="pre">(bool)interp=False]])</span> <span class="pre">-&gt;</span> <span class="pre">None</span> <span class="pre">:</span></code></dt><dd><p>Reprojects the data from in_map onto out_map.  out_map can have a different projection, size, resolution, etc.  Optionally account for sub-pixel structure by setting rebin &gt; 1 and/or enable bilinear interpolation of values from the input map by setting interp=True.  Use the maps’ coord_ref attributes to rotate between Equatorial and Galactic coordinate systems.  Use the maps’ pol_conv attributes to switch between COSMO and IAU polarization conventions.  If output attributes are not set, they will be copied from the input map.</p>
 </dd>
 </dl>
 </section>

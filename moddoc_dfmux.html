@@ -546,7 +546,6 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="#spt3g-dfmux-dfmuxbuilder">spt3g.dfmux.DfMuxBuilder</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-dfmux-dfmuxcollator">spt3g.dfmux.DfMuxCollator</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-dfmux-netcdfdump">spt3g.dfmux.NetCDFDump</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-dfmux-hardwaremaptools-dfmlhardwaremapinjector">spt3g.dfmux.HardwareMapTools.DfmlHardwareMapInjector</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-dfmux-hardwaremaptools-generatefakehardwaremap">spt3g.dfmux.HardwareMapTools.GenerateFakeHardwareMap</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-dfmux-hardwaremaptools-pydfmuxbolometerpropertiesinjector">spt3g.dfmux.HardwareMapTools.PyDfMuxBolometerPropertiesInjector</a></p></li>
@@ -554,24 +553,32 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <li><p><a class="reference internal" href="#spt3g-dfmux-housekeeping-housekeepingconsumer">spt3g.dfmux.Housekeeping.HousekeepingConsumer</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-dfmux-housekeeping-periodichousekeepingcollector">spt3g.dfmux.Housekeeping.PeriodicHousekeepingCollector</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-dfmux-legacyhousekeeping-legacyhousekeepingconsumer">spt3g.dfmux.LegacyHousekeeping.LegacyHousekeepingConsumer</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-dfmux-netcdfdump">spt3g.dfmux.NetCDFDump</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-dfmux-scantools-fixedlengthscans">spt3g.dfmux.ScanTools.FixedLengthScans</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-dfmux-unittransforms-converttimestreamunits">spt3g.dfmux.unittransforms.ConvertTimestreamUnits</a></p></li>
 </ul>
 <p id="spt3g-dfmux-dfmuxbuilder"><strong>spt3g.dfmux.DfMuxBuilder</strong></p>
 <p>Processing module for data from DfMux boards. Reads data from boards data acquisition boards, requiring that data from all be timestamped to within collation_tolerance (default 10 microseconds) to be considered part of a single sample. If boards is an integer, listens for that number. If a list of integers, DfMuxBuilder will filter for only boards with serial numbers in the list.</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">DfMuxBuilder(</span> <span class="pre">(int)boards</span> <span class="pre">[,</span> <span class="pre">(int)collation_tolerance])</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">DfMuxBuilder(</span> <span class="pre">(IntVector)boards</span> <span class="pre">[,</span> <span class="pre">(int)collation_tolerance])</span></code></p>
+</dd>
+</dl>
 <p id="spt3g-dfmux-dfmuxcollator"><strong>spt3g.dfmux.DfMuxCollator</strong></p>
 <p>Collects DfMux timepoints into scan frames using a provided wiring map. Scan frames are created when an empty Scan frame appears in the data stream. This frame will contain all subsequent timepoints until either the next Scan frame is detected or the stream ends. In addition to dfmux timestreams, any scalar floating numbers that recur in every input Timepoint frame will be combined into a G3Timestream of the same name stored in the output scan frame.</p>
-<p id="spt3g-dfmux-netcdfdump"><strong>spt3g.dfmux.NetCDFDump</strong></p>
-<p>Writes DfMux streamer data to a NetCDF file</p>
+<dl class="simple">
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">DfMuxCollator(</span> <span class="pre">[</span> <span class="pre">(bool)flac_compress</span> <span class="pre">[,</span> <span class="pre">(bool)drop_timepoints</span> <span class="pre">[,</span> <span class="pre">(bool)record_sampletimes]]])</span></code></p>
+</dd>
+</dl>
 <p id="spt3g-dfmux-hardwaremaptools-dfmlhardwaremapinjector"><strong>spt3g.dfmux.HardwareMapTools.DfmlHardwareMapInjector</strong></p>
 <dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">DfmlHardwareMapInjector(self,</span> <span class="pre">dfml_hwm)</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">DfmlHardwareMapInjector(dfml_hwm)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-dfmux-hardwaremaptools-generatefakehardwaremap"><strong>spt3g.dfmux.HardwareMapTools.GenerateFakeHardwareMap</strong></p>
 <p>Inserts a fake hardware map into the data stream. Takes a wiring frame as an argument to the constructor, which it will inject before any other frames.</p>
 <dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">GenerateFakeHardwareMap(self,</span> <span class="pre">frame)</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">GenerateFakeHardwareMap(frame)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-dfmux-hardwaremaptools-pydfmuxbolometerpropertiesinjector"><strong>spt3g.dfmux.HardwareMapTools.PyDfMuxBolometerPropertiesInjector</strong></p>
@@ -590,7 +597,7 @@ stream ahead of what would otherwise be the first frame.</p>
 (see pydfmux documentation for hwm.channel_maps_from_pstring()) and
 detectors in one of the states identified by the state argument.</p>
 <dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">PyDfMuxWiringMapInjector(self,</span> <span class="pre">pydfmux_hwm,</span> <span class="pre">pathstring=None,</span> <span class="pre">state=[])</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">PyDfMuxWiringMapInjector(pydfmux_hwm,</span> <span class="pre">pathstring=None,</span> <span class="pre">state=[])</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-dfmux-housekeeping-housekeepingconsumer"><strong>spt3g.dfmux.Housekeeping.HousekeepingConsumer</strong></p>
@@ -606,13 +613,13 @@ the wiring map is handled by a separate process.</p>
 <p>If collecting real-time data, you may want to set subprocess=True when
 adding this module.</p>
 <dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">HousekeepingConsumer(self,</span> <span class="pre">ignore_wiring=False)</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">HousekeepingConsumer(ignore_wiring=False)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-dfmux-housekeeping-periodichousekeepingcollector"><strong>spt3g.dfmux.Housekeeping.PeriodicHousekeepingCollector</strong></p>
 <p>Inserts housekeeping frames every N timepoints.</p>
 <dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">PeriodicHousekeepingCollector(self,</span> <span class="pre">N=15200)</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">PeriodicHousekeepingCollector(N=15200)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-dfmux-legacyhousekeeping-legacyhousekeepingconsumer"><strong>spt3g.dfmux.LegacyHousekeeping.LegacyHousekeepingConsumer</strong></p>
@@ -627,10 +634,16 @@ adding this module.</p>
 <dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">LegacyHousekeepingConsumer(self)</span></code></p>
 </dd>
 </dl>
+<p id="spt3g-dfmux-netcdfdump"><strong>spt3g.dfmux.NetCDFDump</strong></p>
+<p>Writes DfMux streamer data to a NetCDF file</p>
+<dl class="simple">
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">NetCDFDump(</span> <span class="pre">(str)filename)</span></code></p>
+</dd>
+</dl>
 <p id="spt3g-dfmux-scantools-fixedlengthscans"><strong>spt3g.dfmux.ScanTools.FixedLengthScans</strong></p>
 <p>Makes scans of length N timepoints.</p>
 <dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">FixedLengthScans(self,</span> <span class="pre">N=1000)</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">FixedLengthScans(N=1000)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-dfmux-unittransforms-converttimestreamunits"><strong>spt3g.dfmux.unittransforms.ConvertTimestreamUnits</strong></p>
@@ -639,7 +652,7 @@ another (e.g. Power). Currents and power are time averaged quantities
 (i.e. currents give RMS values).</p>
 <p>Note that this does not handle conversions to on-sky quantities (e.g. K_cmb)</p>
 <dl>
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">ConvertTimestreamUnits(self,</span> <span class="pre">Input='RawTimestreams',</span> <span class="pre">Output='CalTimestreams',</span> <span class="pre">Units=spt3g._libcore.G3TimestreamUnits.Power,</span> <span class="pre">SkipUncalibratable=False,</span> <span class="pre">KeepConversionsForObservation=True)</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">ConvertTimestreamUnits(Input='RawTimestreams',</span> <span class="pre">Output='CalTimestreams',</span> <span class="pre">Units=spt3g.core.G3TimestreamUnits.Power,</span> <span class="pre">SkipUncalibratable=False,</span> <span class="pre">KeepConversionsForObservation=True)</span></code></p>
 </dd>
 <dt><em>Constructor:</em></dt><dd><p>Copy data in the timestream map Input to the timestream map Output,
 converting the units from whatever they were to those specified by

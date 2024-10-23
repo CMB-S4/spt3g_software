@@ -26,7 +26,7 @@ Frame Objects in spt3g.calibration
 .. _spt3g.calibration.BolometerProperties:
 
 spt3g.calibration.BolometerProperties
------------------------------------------
+-------------------------------------
 
 Physical bolometer properties, such as detector angular offsets. Does not include tuning-dependent properties of the detectors.
 
@@ -72,7 +72,7 @@ Physical bolometer properties, such as detector angular offsets. Does not includ
 .. _spt3g.calibration.BolometerPropertiesMap:
 
 spt3g.calibration.BolometerPropertiesMap
---------------------------------------------
+----------------------------------------
 
 Container for bolometer properties for focal plane, mapping logical bolometer IDs to their physical properties.
 
@@ -195,7 +195,7 @@ Container for bolometer properties for focal plane, mapping logical bolometer ID
 .. _spt3g.calibration.PointingProperties:
 
 spt3g.calibration.PointingProperties
-----------------------------------------
+------------------------------------
 
 Pointing model parameters to be used for offline pointing corrections.
 
@@ -221,7 +221,7 @@ Pointing model parameters to be used for offline pointing corrections.
 .. _spt3g.calibration.PointingPropertiesMap:
 
 spt3g.calibration.PointingPropertiesMap
--------------------------------------------
+---------------------------------------
 
 Container for pointing model parameters for offline pointing.
 
@@ -372,8 +372,7 @@ Return the same type of maps as the one it was handed, e.g.
 G3TimestreamMap, G3MapInt, etc.
 
 *Constructor:*
-	``SplitByBand(self, input='CalTimestreams', output_root=None, bands=None, bpm='BolometerProperties', drop_empty=False)``
-
+	``SplitByBand(input='CalTimestreams', output_root=None, bands=None, bpm='BolometerProperties', drop_empty=False)``
 
 *Constructor:*
 	Split the input map given by input into several output
@@ -398,8 +397,7 @@ Return the same type of maps as the one it was handed, e.g.
 G3TimestreamMap, G3MapInt, etc.
 
 *Constructor:*
-	``SplitByPixelType(self, input='CalTimestreams', output_root=None, types=None, bpm='BolometerProperties', drop_empty=False)``
-
+	``SplitByPixelType(input='CalTimestreams', output_root=None, types=None, bpm='BolometerProperties', drop_empty=False)``
 
 *Constructor:*
 	Split the input map given by input into several output
@@ -424,8 +422,7 @@ Return the same type of maps as the one it was handed, e.g.
 G3TimestreamMap, G3MapInt, etc.
 
 *Constructor:*
-	``SplitByProperty(self, input='CalTimestreams', property=None, property_list=None, output_root=None, bpm='BolometerProperties', drop_empty=False)``
-
+	``SplitByProperty(input='CalTimestreams', property=None, property_list=None, output_root=None, bpm='BolometerProperties', drop_empty=False)``
 
 *Constructor:*
 	Split the input map given by input into several output
@@ -467,8 +464,7 @@ Return the same type of maps as the one it was handed, e.g.
 G3TimestreamMap, G3MapInt, etc.
 
 *Constructor:*
-	``SplitByWafer(self, input='CalTimestreams', output_root=None, wafers=None, bpm='BolometerProperties', drop_empty=False)``
-
+	``SplitByWafer(input='CalTimestreams', output_root=None, wafers=None, bpm='BolometerProperties', drop_empty=False)``
 
 *Constructor:*
 	Split the input map given by input into several output
@@ -493,8 +489,7 @@ Return the same type of maps as the one it was handed, e.g.
 G3TimestreamMap, G3MapInt, etc.
 
 *Constructor:*
-	``SplitTimestreamsByBand(self, input='CalTimestreams', output_root=None, bands=None, bpm='BolometerProperties', drop_empty=False)``
-
+	``SplitTimestreamsByBand(input='CalTimestreams', output_root=None, bands=None, bpm='BolometerProperties', drop_empty=False)``
 
 *Constructor:*
 	Split the input map given by input into several output
@@ -525,8 +520,7 @@ Expects to be passed frames from:
 - Physical Name Data (Key: 'PhysicalBoloIDs')
 
 *Constructor:*
-	``BuildBoloPropertiesMap(self, drop_original_frames=True, fiducial_detectors=[], bpm_name='NominalBolometerProperties', use_bpm_pointing=False)``
-
+	``BuildBoloPropertiesMap(drop_original_frames=True, fiducial_detectors=[], bpm_name='NominalBolometerProperties', use_bpm_pointing=False)``
 
 *Constructor:*
 	If drop_original_frames is True, will drop all input Calibration frames.
@@ -560,8 +554,7 @@ Expects to be passed frames from:
 - Az tilt fit parameters (Keys: 'tiltAngle', 'tiltHA', 'tiltLat', 'tiltMag')
 
 *Constructor:*
-	``BuildPointingProperties(self, drop_original_frames=True)``
-
+	``BuildPointingProperties(drop_original_frames=True)``
 
 *Constructor:*
 	If drop_original_frames is True, will drop all input Calibration frames.
@@ -596,8 +589,7 @@ that follows a calibration frame or at the end of processing, whichever
 comes first. Other non-calibration frames will be ignored.
 
 *Constructor:*
-	``MergeCalibrationFrames(self, KeysToIgnore=['PointingOffsetX', 'PointingOffsetY'])``
-
+	``MergeCalibrationFrames(KeysToIgnore=['PointingOffsetX', 'PointingOffsetY'])``
 
 *Constructor:*
 	Ignores keys in the KeysToIgnore list during merging. By default, set

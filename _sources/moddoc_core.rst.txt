@@ -83,7 +83,7 @@ Frame Objects in spt3g.core
 .. _spt3g.core.G3Bool:
 
 spt3g.core.G3Bool
----------------------
+-----------------
 
 Serializable boolean type
 
@@ -98,7 +98,7 @@ Serializable boolean type
 .. _spt3g.core.G3Double:
 
 spt3g.core.G3Double
------------------------
+-------------------
 
 Serializable double
 
@@ -113,7 +113,7 @@ Serializable double
 .. _spt3g.core.G3FrameObject:
 
 spt3g.core.G3FrameObject
-----------------------------
+------------------------
 
 Base class for objects that can be added to a frame. All such must inherit from G3FrameObject in C++. Pickle hooks are overridden to use the fast internal serialization
 
@@ -143,7 +143,7 @@ Base class for objects that can be added to a frame. All such must inherit from 
 .. _spt3g.core.G3Int:
 
 spt3g.core.G3Int
---------------------
+----------------
 
 Serializable integer type
 
@@ -158,7 +158,7 @@ Serializable integer type
 .. _spt3g.core.G3MapDouble:
 
 spt3g.core.G3MapDouble
---------------------------
+----------------------
 
 Mapping from strings to floats
 
@@ -281,7 +281,7 @@ Mapping from strings to floats
 .. _spt3g.core.G3MapFrameObject:
 
 spt3g.core.G3MapFrameObject
--------------------------------
+---------------------------
 
 Mapping strings to generic frame objects. Can lead to a variety of paradoxes; please avoid general use of this class.
 
@@ -404,7 +404,7 @@ Mapping strings to generic frame objects. Can lead to a variety of paradoxes; pl
 .. _spt3g.core.G3MapInt:
 
 spt3g.core.G3MapInt
------------------------
+-------------------
 
 Mapping from strings to ints.
 
@@ -527,7 +527,7 @@ Mapping from strings to ints.
 .. _spt3g.core.G3MapMapDouble:
 
 spt3g.core.G3MapMapDouble
------------------------------
+-------------------------
 
 Mapping from strings to maps of strings to floats. For example, m['Det1']['Det2'] = 5.3
 
@@ -650,7 +650,7 @@ Mapping from strings to maps of strings to floats. For example, m['Det1']['Det2'
 .. _spt3g.core.G3MapQuat:
 
 spt3g.core.G3MapQuat
-------------------------
+--------------------
 
 Mapping from strings to quaternions.
 
@@ -773,7 +773,7 @@ Mapping from strings to quaternions.
 .. _spt3g.core.G3MapString:
 
 spt3g.core.G3MapString
---------------------------
+----------------------
 
 Mapping from strings to strings.
 
@@ -896,7 +896,7 @@ Mapping from strings to strings.
 .. _spt3g.core.G3MapVectorBool:
 
 spt3g.core.G3MapVectorBool
-------------------------------
+--------------------------
 
 Mapping from strings to arrays of booleans.
 
@@ -1019,7 +1019,7 @@ Mapping from strings to arrays of booleans.
 .. _spt3g.core.G3MapVectorComplexDouble:
 
 spt3g.core.G3MapVectorComplexDouble
----------------------------------------
+-----------------------------------
 
 Mapping from strings to arrays of complex numbers.
 
@@ -1142,7 +1142,7 @@ Mapping from strings to arrays of complex numbers.
 .. _spt3g.core.G3MapVectorDouble:
 
 spt3g.core.G3MapVectorDouble
---------------------------------
+----------------------------
 
 Mapping from strings to arrays of floats.
 
@@ -1265,7 +1265,7 @@ Mapping from strings to arrays of floats.
 .. _spt3g.core.G3MapVectorInt:
 
 spt3g.core.G3MapVectorInt
------------------------------
+-------------------------
 
 Mapping from strings to arrays of integers.
 
@@ -1388,7 +1388,7 @@ Mapping from strings to arrays of integers.
 .. _spt3g.core.G3MapVectorQuat:
 
 spt3g.core.G3MapVectorQuat
-------------------------------
+--------------------------
 
 Mapping from strings to lists of quaternions.
 
@@ -1511,7 +1511,7 @@ Mapping from strings to lists of quaternions.
 .. _spt3g.core.G3MapVectorString:
 
 spt3g.core.G3MapVectorString
---------------------------------
+----------------------------
 
 Mapping from strings to lists of strings.
 
@@ -1634,7 +1634,7 @@ Mapping from strings to lists of strings.
 .. _spt3g.core.G3MapVectorTime:
 
 spt3g.core.G3MapVectorTime
-------------------------------
+--------------------------
 
 Mapping from strings to lists of G3 time objects.
 
@@ -1757,7 +1757,7 @@ Mapping from strings to lists of G3 time objects.
 .. _spt3g.core.G3MapVectorVectorString:
 
 spt3g.core.G3MapVectorVectorString
---------------------------------------
+----------------------------------
 
 Mapping from strings to lists of lists of strings.
 
@@ -1880,7 +1880,7 @@ Mapping from strings to lists of lists of strings.
 .. _spt3g.core.G3ModuleConfig:
 
 spt3g.core.G3ModuleConfig
------------------------------
+-------------------------
 
 Stored configuration of a pipeline module or segment
 
@@ -1917,7 +1917,7 @@ Stored configuration of a pipeline module or segment
 .. _spt3g.core.G3PipelineInfo:
 
 spt3g.core.G3PipelineInfo
------------------------------
+-------------------------
 
 Stored configuration of a pipeline, including software version information
 
@@ -1964,7 +1964,7 @@ Stored configuration of a pipeline, including software version information
 .. _spt3g.core.G3String:
 
 spt3g.core.G3String
------------------------
+-------------------
 
 Serializable string
 
@@ -1979,7 +1979,7 @@ Serializable string
 .. _spt3g.core.G3Time:
 
 spt3g.core.G3Time
----------------------
+-----------------
 
 UTC Time
 
@@ -2027,7 +2027,7 @@ UTC Time
 .. _spt3g.core.G3TimesampleMap:
 
 spt3g.core.G3TimesampleMap
-------------------------------
+--------------------------
 
 Mapping from string to vectors of data, with an associated vector of timestamps.  This object is for storing multiple co-sampled vectors with a single set of (irregular) timestamps.
 
@@ -2176,7 +2176,7 @@ Mapping from string to vectors of data, with an associated vector of timestamps.
 .. _spt3g.core.G3Timestream:
 
 spt3g.core.G3Timestream
----------------------------
+-----------------------
 
 Detector timestream. Includes a units field and start and stop times. Can otherwise be treated as a numpy array with a float64 dtype. Conversions to and from such arrays (e.g. with numpy.asarray) are fast. Note that a numpy array constructed from a timestream will share a memory buffer: changes to the array affect the timestream and vice versa. Most binary timestream arithmetic operations (+, -) check that the units and start/stop times are congruent.
 
@@ -2229,7 +2229,7 @@ Detector timestream. Includes a units field and start and stop times. Can otherw
 .. _spt3g.core.G3TimestreamMap:
 
 spt3g.core.G3TimestreamMap
-------------------------------
+--------------------------
 
 Collection of timestreams indexed by logical detector ID
 
@@ -2238,7 +2238,7 @@ Collection of timestreams indexed by logical detector ID
 	
 	``G3TimestreamMap( (G3TimestreamMap)arg2)``
 	
-	``G3TimestreamMap( (StringVector)keys, (object)data [, (G3Time)start=<spt3g.core.G3Time object at 0x7f6525509d90> [, (G3Time)stop=<spt3g.core.G3Time object at 0x7f6525509e00> [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None [, (int)compression_level=0 [, (bool)copy_data=True]]]]])`` :
+	``G3TimestreamMap( (StringVector)keys, (object)data [, (G3Time)start=<spt3g.core.G3Time object at 0x7fc76bd05d90> [, (G3Time)stop=<spt3g.core.G3Time object at 0x7fc76bd05e00> [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None [, (int)compression_level=0 [, (bool)copy_data=True]]]]])`` :
 	    Create a timestream map from a numpy array or other numeric python iterable. Each row of the 2D input array will correspond to a single timestream, with the key set to the correspondingly-indexed entry of <keys>. If <copy_data> is True (default), the data will be copied into the output data structure. If False, the timestream map will provide a view into the given numpy array.
 	
 	``G3TimestreamMap( (list)arg2)`` :
@@ -2391,7 +2391,7 @@ Collection of timestreams indexed by logical detector ID
 .. _spt3g.core.G3TimestreamQuat:
 
 spt3g.core.G3TimestreamQuat
--------------------------------
+---------------------------
 
 Timestream of quaternions. Identical to a G3VectorQuat except for the addition of start and stop times.
 
@@ -2419,7 +2419,7 @@ Timestream of quaternions. Identical to a G3VectorQuat except for the addition o
 .. _spt3g.core.G3VectorBool:
 
 spt3g.core.G3VectorBool
----------------------------
+-----------------------
 
 List of booleans.
 
@@ -2449,7 +2449,7 @@ List of booleans.
 .. _spt3g.core.G3VectorComplexDouble:
 
 spt3g.core.G3VectorComplexDouble
-------------------------------------
+--------------------------------
 
 Array of complex floats. Treat as a serializable version of numpy.array(dtype=complex128). Can be efficiently cast to and from numpy arrays.
 
@@ -2479,7 +2479,7 @@ Array of complex floats. Treat as a serializable version of numpy.array(dtype=co
 .. _spt3g.core.G3VectorDouble:
 
 spt3g.core.G3VectorDouble
------------------------------
+-------------------------
 
 Array of floats. Treat as a serializable version of numpy.array(dtype=float64). Can be efficiently cast to and from numpy arrays.
 
@@ -2509,7 +2509,7 @@ Array of floats. Treat as a serializable version of numpy.array(dtype=float64). 
 .. _spt3g.core.G3VectorFrameObject:
 
 spt3g.core.G3VectorFrameObject
-----------------------------------
+------------------------------
 
 List of generic frame objects. Can lead to paradoxes; avoid use of this class unless you are sure you need it.
 
@@ -2539,7 +2539,7 @@ List of generic frame objects. Can lead to paradoxes; avoid use of this class un
 .. _spt3g.core.G3VectorInt:
 
 spt3g.core.G3VectorInt
---------------------------
+----------------------
 
 Array of integers. Treat as a serializable version of numpy.array(dtype=int64). Can be efficiently cast to and from numpy arrays.
 
@@ -2569,7 +2569,7 @@ Array of integers. Treat as a serializable version of numpy.array(dtype=int64). 
 .. _spt3g.core.G3VectorQuat:
 
 spt3g.core.G3VectorQuat
----------------------------
+-----------------------
 
 List of quaternions. Convertible to a 4xN numpy array. Arithmetic operations on this object are fast and provide results given proper quaternion math rather than element-by-element numpy-ish results.
 
@@ -2599,7 +2599,7 @@ List of quaternions. Convertible to a 4xN numpy array. Arithmetic operations on 
 .. _spt3g.core.G3VectorString:
 
 spt3g.core.G3VectorString
------------------------------
+-------------------------
 
 List of strings.
 
@@ -2629,7 +2629,7 @@ List of strings.
 .. _spt3g.core.G3VectorTime:
 
 spt3g.core.G3VectorTime
----------------------------
+-----------------------
 
 List of times.
 
@@ -2659,7 +2659,7 @@ List of times.
 .. _spt3g.core.G3VectorUnsignedChar:
 
 spt3g.core.G3VectorUnsignedChar
------------------------------------
+-------------------------------
 
 List of 8-bit integers
 
@@ -2689,7 +2689,7 @@ List of 8-bit integers
 .. _spt3g.core.G3VectorVectorString:
 
 spt3g.core.G3VectorVectorString
------------------------------------
+-------------------------------
 
 List of lists of strings.
 
@@ -2731,8 +2731,6 @@ Modules in spt3g.core
 
 * spt3g.core.G3Writer_
 
-* spt3g.core.modconstruct.pipesegment_
-
 * spt3g.core.util.AbortAfterNFrames_
 
 * spt3g.core.util.DeduplicateMetadata_
@@ -2761,6 +2759,12 @@ Modules in spt3g.core
 Base class for functors that can be added to a G3Pipeline.
 
 
+*Constructors:*
+	Raises an exception
+	This class cannot be instantiated from Python
+
+
+
 
 .. _spt3g.core.G3InfiniteSource:
 
@@ -2769,12 +2773,22 @@ Base class for functors that can be added to a G3Pipeline.
 Emits infinite frames, up to an optional maximum number n
 
 
+*Constructors:*
+	``G3InfiniteSource( [ (G3FrameType)type=spt3g.core.G3FrameType.none [, (int)n=-1]])``
+
+
+
 
 .. _spt3g.core.G3Module:
 
 **spt3g.core.G3Module**
 
 Base class for functors that can be added to a G3Pipeline.
+
+
+*Constructors:*
+	``G3Module()``
+
 
 
 
@@ -2787,12 +2801,22 @@ Writes frames to disk into a sequence of files. Once a file exceeds the number o
 More complex behavior can be obtained with the optional divide_on argument. This can be an iterable of frame types (e.g. [core.G3FrameType.Observation]) or a callable. In the iterable case, the presence of any frame with a type in the list will cause the creation of a new file even if the file size threshold has not yet been met. This is useful to create files based on, for example, observation boundaries. For more flexibility, you can also pass a python callable as divide_on. This callable will be passed each frame in turn. If it returns True (or something with positive truth-value), a new file will be started at that frame.
 
 
+*Constructors:*
+	``G3MultiFileWriter( (object)filename, (int)size_limit [, (object)divide_on=None])``
+
+
+
 
 .. _spt3g.core.G3NetworkSender:
 
 **spt3g.core.G3NetworkSender**
 
 Writes frames to a network socket. If hostname is set to '*', will listen on the given port, on all interfaces, instead of connecting to the given port on a remote host. In listen mode, metadata frames (Calibration, Wiring, etc. -- everything but Scan and Timepoint) will be accumulated and the most recent of each will be sent to new clients on connect. Scan and Timepoint frames will be broadcast live to all connected clients. If max_queue_size is set to a non-zero value, Scan and Timepoint frames may be dropped if more than max_queue_size frames are queued for transmission. If n_serializers is set to a non-zero value, the task of serializing frames to be sent will be distributed across that many background threads, which is useful when high throughput of large frames is required, but is otherwise typically not necessary.
+
+
+*Constructors:*
+	``G3NetworkSender( (str)hostname, (int)port [, (int)max_queue_size=0 [, (int)n_serializers=0]])``
+
 
 
 
@@ -2803,6 +2827,13 @@ Writes frames to a network socket. If hostname is set to '*', will listen on the
 Read frames from disk. Takes either the path to a file to read or an iterable of files to be read in sequence. If n_frames_to_read is greater than zero, will stop after n_frames_to_read frames rather than at the end of the file[s]. The timeout parameter can used to enable socket timeout for tcp streams, resulting in EOF behavior on expiry; unfortunately this cannot be used for polling, you have to close the connection. Use the `tell` and `seek` methods to record the position of and seek to the beginning of a particular frame in the file.  Set track_filename to True to record the filename for each frame in the ._filename attribute (fragile).
 
 
+*Constructors:*
+	``G3Reader( (str)filename [, (int)n_frames_to_read=0 [, (float)timeout=-1.0 [, (bool)track_filename=False]]])``
+	
+	``G3Reader( (StringVector)filename [, (int)n_frames_to_read=0 [, (float)timeout=-1.0 [, (bool)track_filename=False]]])``
+
+
+
 
 .. _spt3g.core.G3Writer:
 
@@ -2811,18 +2842,9 @@ Read frames from disk. Takes either the path to a file to read or an iterable of
 Writes frames to disk. Frames will be written to the file specified by filename. If filename ends in .gz, output will be compressed using gzip. To write only some types of frames, pass a list of the desired frame types to the second optional argument (streams). If no streams argument is given, writes all types of frames. If append is set to True, will append frames to its output file rather than overwriting it.
 
 
+*Constructors:*
+	``G3Writer( (str)filename [, (FrameTypeVector)streams=spt3g.core.FrameTypeVector([]) [, (bool)append=False]])``
 
-.. _spt3g.core.modconstruct.pipesegment:
-
-**spt3g.core.modconstruct.pipesegment**
-
-
-No documentation
-
-
-
-*Definition:*
-        ``pipesegment(func, autodoc=True)``
 
 
 
@@ -2833,7 +2855,7 @@ No documentation
 Stops processing after n_frames frames go by
 
 *Constructor:*
-	``AbortAfterNFrames(self, type, n_frames)``
+	``AbortAfterNFrames(type, n_frames)``
 
 
 
@@ -2850,7 +2872,7 @@ all frames not in <dataframetypes> to be metadata (by default, everything
 except Timepoint and Scan frames).
 
 *Constructor:*
-	``DeduplicateMetadata(self, dataframetype=[spt3g.core.G3FrameType.Timepoint, spt3g.core.G3FrameType.Scan])``
+	``DeduplicateMetadata(dataframetype=[spt3g.core.G3FrameType.Timepoint, spt3g.core.G3FrameType.Scan])``
 
 
 
@@ -2879,7 +2901,7 @@ do show up will be the most recent of each type and appear in their
 original order.
 
 *Constructor:*
-	``DropOrphanMetadata(self, dataframetype=[spt3g.core.G3FrameType.Timepoint, spt3g.core.G3FrameType.Scan])``
+	``DropOrphanMetadata(dataframetype=[spt3g.core.G3FrameType.Timepoint, spt3g.core.G3FrameType.Scan])``
 
 
 
@@ -2929,7 +2951,7 @@ All instances of frames not in the dictionary frame_decimation will be sent
 at their full rate.
 
 *Constructor:*
-	``G3ThrottledNetworkSender(self, hostname='*', port=5978, frame_decimation={spt3g.core.G3FrameType.Timepoint: 10}, max_queue_size=0)``
+	``G3ThrottledNetworkSender(hostname='*', port=5978, frame_decimation={spt3g.core.G3FrameType.Timepoint: 10}, max_queue_size=0)``
 
 
 
@@ -2964,7 +2986,7 @@ Inject an arbitrary frame into a pipeline.
 	    The frame to inject
 
 *Constructor:*
-	``InjectFrame(self, frame)``
+	``InjectFrame(frame)``
 
 
 

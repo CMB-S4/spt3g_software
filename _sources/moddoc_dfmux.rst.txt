@@ -31,7 +31,7 @@ Frame Objects in spt3g.dfmux
 .. _spt3g.dfmux.DfMuxBoardSamples:
 
 spt3g.dfmux.DfMuxBoardSamples
----------------------------------
+-----------------------------
 
 Container structure for samples from modules on one board, mapping 0-indexed module and block IDs to a dfmux.DfMuxSample.
 
@@ -168,7 +168,7 @@ Container structure for samples from modules on one board, mapping 0-indexed mod
 .. _spt3g.dfmux.DfMuxChannelMapping:
 
 spt3g.dfmux.DfMuxChannelMapping
------------------------------------
+-------------------------------
 
 Bolometer wiring information. Module and channel IDs are stored zero-indexed, but be aware that they often printed one-indexed for compatibility with pydfmux.
 
@@ -198,7 +198,7 @@ Bolometer wiring information. Module and channel IDs are stored zero-indexed, bu
 .. _spt3g.dfmux.DfMuxHousekeepingMap:
 
 spt3g.dfmux.DfMuxHousekeepingMap
-------------------------------------
+--------------------------------
 
 Container structure for housekeeping data from all DfMux boards, indexed by board serial number.
 
@@ -321,7 +321,7 @@ Container structure for housekeeping data from all DfMux boards, indexed by boar
 .. _spt3g.dfmux.DfMuxMetaSample:
 
 spt3g.dfmux.DfMuxMetaSample
--------------------------------
+---------------------------
 
 Container structure for coincident samples from all boards. Individual board data, stored in dfmux.DfMuxBoardSamples classes, is contained indexed by board serial number.
 
@@ -442,7 +442,7 @@ Container structure for coincident samples from all boards. Individual board dat
 .. _spt3g.dfmux.DfMuxSample:
 
 spt3g.dfmux.DfMuxSample
----------------------------
+-----------------------
 
 Samples from all channels on one readout module, stored with I and Q interleaved, such that the first element is channel 1 I, followed by channel 1 Q, followed by channel 2 I, etc.
 
@@ -460,7 +460,7 @@ Samples from all channels on one readout module, stored with I and Q interleaved
 .. _spt3g.dfmux.DfMuxWiringMap:
 
 spt3g.dfmux.DfMuxWiringMap
-------------------------------
+--------------------------
 
 Mapping from logical detector ID string (same as used in timestreams) to wiring information (the board, module, and channel to which a given detector is connected)
 
@@ -583,7 +583,7 @@ Mapping from logical detector ID string (same as used in timestreams) to wiring 
 .. _spt3g.dfmux.HkBoardInfo:
 
 spt3g.dfmux.HkBoardInfo
----------------------------
+-----------------------
 
 Mux board status. Includes both configuration and sensor readings for board generic quantities and a list of quantities for the mezzanines.
 
@@ -623,7 +623,7 @@ Mux board status. Includes both configuration and sensor readings for board gene
 .. _spt3g.dfmux.HkChannelInfo:
 
 spt3g.dfmux.HkChannelInfo
------------------------------
+-------------------------
 
 Mux channel status (configuration and sensors). Usually a part of an HkModuleInfo.
 
@@ -677,7 +677,7 @@ Mux channel status (configuration and sensors). Usually a part of an HkModuleInf
 .. _spt3g.dfmux.HkMezzanineInfo:
 
 spt3g.dfmux.HkMezzanineInfo
--------------------------------
+---------------------------
 
 Mux mezzanine status
 
@@ -719,7 +719,7 @@ Mux mezzanine status
 .. _spt3g.dfmux.HkModuleInfo:
 
 spt3g.dfmux.HkModuleInfo
-----------------------------
+------------------------
 
 Mux module status
 
@@ -773,8 +773,6 @@ Modules in spt3g.dfmux
 
 * spt3g.dfmux.DfMuxCollator_
 
-* spt3g.dfmux.NetCDFDump_
-
 * spt3g.dfmux.HardwareMapTools.DfmlHardwareMapInjector_
 
 * spt3g.dfmux.HardwareMapTools.GenerateFakeHardwareMap_
@@ -789,6 +787,8 @@ Modules in spt3g.dfmux
 
 * spt3g.dfmux.LegacyHousekeeping.LegacyHousekeepingConsumer_
 
+* spt3g.dfmux.NetCDFDump_
+
 * spt3g.dfmux.ScanTools.FixedLengthScans_
 
 * spt3g.dfmux.unittransforms.ConvertTimestreamUnits_
@@ -801,6 +801,13 @@ Modules in spt3g.dfmux
 Processing module for data from DfMux boards. Reads data from boards data acquisition boards, requiring that data from all be timestamped to within collation_tolerance (default 10 microseconds) to be considered part of a single sample. If boards is an integer, listens for that number. If a list of integers, DfMuxBuilder will filter for only boards with serial numbers in the list.
 
 
+*Constructors:*
+	``DfMuxBuilder( (int)boards [, (int)collation_tolerance])``
+	
+	``DfMuxBuilder( (IntVector)boards [, (int)collation_tolerance])``
+
+
+
 
 .. _spt3g.dfmux.DfMuxCollator:
 
@@ -809,12 +816,9 @@ Processing module for data from DfMux boards. Reads data from boards data acquis
 Collects DfMux timepoints into scan frames using a provided wiring map. Scan frames are created when an empty Scan frame appears in the data stream. This frame will contain all subsequent timepoints until either the next Scan frame is detected or the stream ends. In addition to dfmux timestreams, any scalar floating numbers that recur in every input Timepoint frame will be combined into a G3Timestream of the same name stored in the output scan frame.
 
 
+*Constructors:*
+	``DfMuxCollator( [ (bool)flac_compress [, (bool)drop_timepoints [, (bool)record_sampletimes]]])``
 
-.. _spt3g.dfmux.NetCDFDump:
-
-**spt3g.dfmux.NetCDFDump**
-
-Writes DfMux streamer data to a NetCDF file
 
 
 
@@ -824,7 +828,7 @@ Writes DfMux streamer data to a NetCDF file
 
 
 *Constructor:*
-	``DfmlHardwareMapInjector(self, dfml_hwm)``
+	``DfmlHardwareMapInjector(dfml_hwm)``
 
 
 
@@ -836,7 +840,7 @@ Writes DfMux streamer data to a NetCDF file
 Inserts a fake hardware map into the data stream. Takes a wiring frame as an argument to the constructor, which it will inject before any other frames.
 
 *Constructor:*
-	``GenerateFakeHardwareMap(self, frame)``
+	``GenerateFakeHardwareMap(frame)``
 
 
 
@@ -869,7 +873,7 @@ Optionally filter for detectors described by the mask in <pathstring>
 detectors in one of the states identified by the state argument.
 
 *Constructor:*
-	``PyDfMuxWiringMapInjector(self, pydfmux_hwm, pathstring=None, state=[])``
+	``PyDfMuxWiringMapInjector(pydfmux_hwm, pathstring=None, state=[])``
 
 
 
@@ -893,7 +897,7 @@ If collecting real-time data, you may want to set subprocess=True when
 adding this module.
 
 *Constructor:*
-	``HousekeepingConsumer(self, ignore_wiring=False)``
+	``HousekeepingConsumer(ignore_wiring=False)``
 
 
 
@@ -905,7 +909,7 @@ adding this module.
 Inserts housekeeping frames every N timepoints.
 
 *Constructor:*
-	``PeriodicHousekeepingCollector(self, N=15200)``
+	``PeriodicHousekeepingCollector(N=15200)``
 
 
 
@@ -929,6 +933,19 @@ adding this module.
 
 
 
+.. _spt3g.dfmux.NetCDFDump:
+
+**spt3g.dfmux.NetCDFDump**
+
+Writes DfMux streamer data to a NetCDF file
+
+
+*Constructors:*
+	``NetCDFDump( (str)filename)``
+
+
+
+
 .. _spt3g.dfmux.ScanTools.FixedLengthScans:
 
 **spt3g.dfmux.ScanTools.FixedLengthScans**
@@ -936,7 +953,7 @@ adding this module.
 Makes scans of length N timepoints.
 
 *Constructor:*
-	``FixedLengthScans(self, N=1000)``
+	``FixedLengthScans(N=1000)``
 
 
 
@@ -952,8 +969,7 @@ another (e.g. Power). Currents and power are time averaged quantities
 Note that this does not handle conversions to on-sky quantities (e.g. K_cmb)
 
 *Constructor:*
-	``ConvertTimestreamUnits(self, Input='RawTimestreams', Output='CalTimestreams', Units=spt3g._libcore.G3TimestreamUnits.Power, SkipUncalibratable=False, KeepConversionsForObservation=True)``
-
+	``ConvertTimestreamUnits(Input='RawTimestreams', Output='CalTimestreams', Units=spt3g.core.G3TimestreamUnits.Power, SkipUncalibratable=False, KeepConversionsForObservation=True)``
 
 *Constructor:*
 	Copy data in the timestream map Input to the timestream map Output,

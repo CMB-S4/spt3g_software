@@ -188,16 +188,16 @@ Frame Objects in spt3g.maps
 .. _spt3g.maps.FlatSkyMap:
 
 spt3g.maps.FlatSkyMap
--------------------------
+---------------------
 
 FlatSkyMap is a G3SkyMap with the extra meta information about the particular flat sky projection included.  In practice it behaves (mostly) like a 2d numpy array.  The pixels are normally indexed with an 1d pixel index.  If you find that you need numpy functionality from a FlatSkyMap, e.g. for slicing across the two dimensions, you can access a numpy representation of the map using `np.asarray(m)`. This does not copy the data, so any changes to the resulting array will affect the data stored in the map.  Alternatively, you can use 2d slice indexing directly on the map to access a copy of the data with the coordinate representation intact.  The latter method is most efficient for extracting small patches from sparse maps.
 
 *Constructors:*
 	``FlatSkyMap( (FlatSkyMap)arg2)``
 	
-	``FlatSkyMap( (int)x_len, (int)y_len, (float)res [, (bool)weighted=True [, (MapProjection)proj=spt3g.maps.MapProjection.ProjNone [, (float)alpha_center=0 [, (float)delta_center=0 [, (MapCoordReference)coord_ref=spt3g.maps.MapCoordReference.Equatorial [, (G3TimestreamUnits)units=spt3g._libcore.G3TimestreamUnits.Tcmb [, (MapPolType)pol_type=spt3g.maps.MapPolType.none [, (float)x_res=nan [, (float)x_center=nan [, (float)y_center=nan [, (bool)flat_pol=False [, (MapPolConv)pol_conv=spt3g.maps.MapPolConv.none]]]]]]]]]]]])``
+	``FlatSkyMap( (int)x_len, (int)y_len, (float)res [, (bool)weighted=True [, (MapProjection)proj=spt3g.maps.MapProjection.ProjNone [, (float)alpha_center=0 [, (float)delta_center=0 [, (MapCoordReference)coord_ref=spt3g.maps.MapCoordReference.Equatorial [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.Tcmb [, (MapPolType)pol_type=spt3g.maps.MapPolType.none [, (float)x_res=nan [, (float)x_center=nan [, (float)y_center=nan [, (bool)flat_pol=False [, (MapPolConv)pol_conv=spt3g.maps.MapPolConv.none]]]]]]]]]]]])``
 	
-	``FlatSkyMap( (object)obj, (float)res [, (bool)weighted=True [, (MapProjection)proj=spt3g.maps.MapProjection.ProjNone [, (float)alpha_center=0 [, (float)delta_center=0 [, (MapCoordReference)coord_ref=spt3g.maps.MapCoordReference.Equatorial [, (G3TimestreamUnits)units=spt3g._libcore.G3TimestreamUnits.Tcmb [, (MapPolType)pol_type=spt3g.maps.MapPolType.none [, (float)x_res=nan [, (float)x_center=nan [, (float)y_center=nan [, (bool)flat_pol=False [, (MapPolConv)pol_conv=spt3g.maps.MapPolConv.none]]]]]]]]]]]])``
+	``FlatSkyMap( (object)obj, (float)res [, (bool)weighted=True [, (MapProjection)proj=spt3g.maps.MapProjection.ProjNone [, (float)alpha_center=0 [, (float)delta_center=0 [, (MapCoordReference)coord_ref=spt3g.maps.MapCoordReference.Equatorial [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.Tcmb [, (MapPolType)pol_type=spt3g.maps.MapPolType.none [, (float)x_res=nan [, (float)x_center=nan [, (float)y_center=nan [, (bool)flat_pol=False [, (MapPolConv)pol_conv=spt3g.maps.MapPolConv.none]]]]]]]]]]]])``
 	
 	``FlatSkyMap( [ (FlatSkyMap)flat_map])``
 
@@ -320,7 +320,7 @@ FlatSkyMap is a G3SkyMap with the extra meta information about the particular fl
 .. _spt3g.maps.G3SkyMap:
 
 spt3g.maps.G3SkyMap
------------------------
+-------------------
 
 Base class for 1- and 2-D skymaps of various projections. Usually you want a subclass of this (e.g. FlatSkyMap) rather than using it directly.
 
@@ -601,7 +601,7 @@ Base class for 1- and 2-D skymaps of various projections. Usually you want a sub
 .. _spt3g.maps.G3SkyMapMask:
 
 spt3g.maps.G3SkyMapMask
----------------------------
+-----------------------
 
 Boolean mask of a sky map. Set pixels to use to true, pixels to ignore to false. If use_data set in contrast, mask initialized to true where input map is non-zero; otherwise, all elements are initialized to zero.  Use zero_nans or zero_infs to exclude nan or inf elements from the mask.
 
@@ -684,7 +684,7 @@ Boolean mask of a sky map. Set pixels to use to true, pixels to ignore to false.
 .. _spt3g.maps.G3SkyMapWeights:
 
 spt3g.maps.G3SkyMapWeights
-------------------------------
+--------------------------
 
 Polarized (Mueller matrix) or unpolarized (scalar) map pixel weights.Weights are polarized if the pol_conv attribute of the reference map is set.
 
@@ -790,17 +790,17 @@ Polarized (Mueller matrix) or unpolarized (scalar) map pixel weights.Weights are
 .. _spt3g.maps.HealpixSkyMap:
 
 spt3g.maps.HealpixSkyMap
-----------------------------
+------------------------
 
 HealpixSkyMap is a G3SkyMap with the extra meta information about the particular Healpix pixelization used.  In practice it behaves (mostly) like a 1d numpy array.  If you find that you need numpy functionality from a HealpixSkyMap, e.g. for slicing across the array, you can access a numpy representation of the map using `np.asarray(m)`. This does not copy the data, so any changes to the resulting array will affect the data stored in the map.
 
 *Constructors:*
 	``HealpixSkyMap( (HealpixSkyMap)arg2)``
 	
-	``HealpixSkyMap( (int)nside [, (bool)weighted=True [, (bool)nested=False [, (MapCoordReference)coord_ref=spt3g.maps.MapCoordReference.Equatorial [, (G3TimestreamUnits)units=spt3g._libcore.G3TimestreamUnits.Tcmb [, (MapPolType)pol_type=spt3g.maps.MapPolType.none [, (bool)shift_ra=False [, (MapPolConv)pol_conv=spt3g.maps.MapPolConv.none]]]]]]])`` :
+	``HealpixSkyMap( (int)nside [, (bool)weighted=True [, (bool)nested=False [, (MapCoordReference)coord_ref=spt3g.maps.MapCoordReference.Equatorial [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.Tcmb [, (MapPolType)pol_type=spt3g.maps.MapPolType.none [, (bool)shift_ra=False [, (MapPolConv)pol_conv=spt3g.maps.MapPolConv.none]]]]]]])`` :
 	    Instantiate a HealpixSkyMap with given nside
 	
-	``HealpixSkyMap( (object)data [, (bool)weighted=True [, (bool)nested=False [, (MapCoordReference)coord_ref=spt3g.maps.MapCoordReference.Equatorial [, (G3TimestreamUnits)units=spt3g._libcore.G3TimestreamUnits.Tcmb [, (MapPolType)pol_type=spt3g.maps.MapPolType.none [, (bool)shift_ra=False [, (MapPolConv)pol_conv=spt3g.maps.MapPolConv.none]]]]]]])`` :
+	``HealpixSkyMap( (object)data [, (bool)weighted=True [, (bool)nested=False [, (MapCoordReference)coord_ref=spt3g.maps.MapCoordReference.Equatorial [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.Tcmb [, (MapPolType)pol_type=spt3g.maps.MapPolType.none [, (bool)shift_ra=False [, (MapPolConv)pol_conv=spt3g.maps.MapPolConv.none]]]]]]])`` :
 	    Instantiate a Healpix map from existing data. If the data are a single numpy array, assumes this is a dense map. Otherwise, pass an (indices, data, nside) tuple.
 	
 	``HealpixSkyMap( [ (HealpixSkyMap)healpix_map])``
@@ -958,6 +958,11 @@ specified by the stub_map argument.
 	    )
 
 
+*Constructors:*
+	``HitsBinner( (str)map_id, (G3SkyMap)stub_map, (str)pointing, (str)timestreams [, (str)bolo_properties_name='BolometerProperties' [, (object)map_per_scan=False]])``
+
+
+
 
 .. _spt3g.maps.MapBinner:
 
@@ -1049,6 +1054,11 @@ by the stub_map argument.
 	    )
 
 
+*Constructors:*
+	``MapBinner( (str)map_id, (G3SkyMap)stub_map, (str)pointing, (str)timestreams [, (str)detector_weights='' [, (str)bolo_properties_name='BolometerProperties' [, (bool)store_weight_map=True [, (object)map_per_scan=False]]]])``
+
+
+
 
 .. _spt3g.maps.MapMockObserver:
 
@@ -1107,12 +1117,22 @@ Creates a new set of timestreams by sampling from an input map.
 	    )
 
 
+*Constructors:*
+	``MapMockObserver( (str)pointing, (str)timestreams, (float)band, (object)T [, (object)Q=None [, (object)U=None [, (str)bolo_properties_name='BolometerProperties' [, (bool)interp=False [, (bool)error_on_zero=True]]]]])``
+
+
+
 
 .. _spt3g.maps.MapTODMasker:
 
 **spt3g.maps.MapTODMasker**
 
 Creates a filter mask <tod_mask> to indicate to later TOD filtering that a detector has passed over a "bad" part of the sky. This is used, for example, to avoid fitting a polynomial to a timestream while the detector is looking at a bright point source. All timestream values for the detectors in <timestreams> are set to be ignored (true in the output <tod_mask>) if they point at pixels of the input <mask> map containing a non-zero value. Boresight pointing is obtained from the quaternion vector specified by <pointing>. Detector pointing offsets and polarization angles and efficiencies are obtained from the specified BolometerPropertiesMap, which can generally be left at its default value.
+
+
+*Constructors:*
+	``MapTODMasker( (str)pointing, (str)timestreams, (G3SkyMapMask)mask [, (str)tod_mask='FilterMask' [, (str)bolo_properties_name='BolometerProperties']])``
+
 
 
 
@@ -1179,6 +1199,11 @@ The outputs are not consumed by any stage of the map-making pipeline.
 	        stub_map=map_params,
 	        tod_pointing="TodPointing",
 	    )
+
+
+*Constructors:*
+	``MapTODPointing( (str)pointing, (str)timestreams, (object)stub_map, (str)tod_pointing [, (str)bolo_properties_name='BolometerProperties'])``
+
 
 
 
@@ -1248,12 +1273,22 @@ when making maps for detector-pointing calibration.
 	    )
 
 
+*Constructors:*
+	``SingleDetectorBoresightBinner( (G3SkyMap)stub_map, (str)pointing, (str)timestreams)``
+
+
+
 
 .. _spt3g.maps.SingleDetectorMapBinner:
 
 **spt3g.maps.SingleDetectorMapBinner**
 
 Makes a simple binned map of the sky, in sky coordinates, for every detector present in the given <timestreams>. Boresight pointing is specified by the <pointing> argument, with per-detector offsets from boresight as stored in the given bolometer properties map. The map parameters are copied from <stub_map>. When processing ends, this module will emit one map frame per detector, including per-detector (unpolarized) weights.
+
+
+*Constructors:*
+	``SingleDetectorMapBinner( (G3SkyMap)stub_map, (str)pointing, (str)timestreams [, (str)bolo_properties_name='BolometerProperties'])``
+
 
 
 
@@ -1485,7 +1520,7 @@ complex pipelines.
 	    If False, only the map frame ID is included.
 
 *Constructor:*
-	``CoaddMaps(self, map_ids=None, output_map_id='Coadd', collate=False, weighted=True, ignore_missing_weights=False, drop_input_frames=False, record_obs_id=False)``
+	``CoaddMaps(map_ids=None, output_map_id='Coadd', collate=False, weighted=True, ignore_missing_weights=False, drop_input_frames=False, record_obs_id=False)``
 
 
 
@@ -1526,7 +1561,7 @@ are stored in the .maps attribute of the object after the pipeline is run.
 	    single bolometer map frames with common weights through a pipeline.
 
 *Constructor:*
-	``ExtractMaps(self, map_id=None, copy=False, ignore_missing_weights=False)``
+	``ExtractMaps(map_id=None, copy=False, ignore_missing_weights=False)``
 
 
 
@@ -1571,7 +1606,7 @@ Inject a new map frame from a map stub.
 	    output frame will include Q and U maps (and polarized weights).
 
 *Constructor:*
-	``InjectMapStub(self, map_id, map_stub)``
+	``InjectMapStub(map_id, map_stub)``
 
 
 
@@ -1593,7 +1628,7 @@ Inject a set of maps into a new map frame.
 	    Skip warning about missing weights.  Useful for masks.
 
 *Constructor:*
-	``InjectMaps(self, map_id, maps_in, ignore_missing_weights=False)``
+	``InjectMaps(map_id, maps_in, ignore_missing_weights=False)``
 
 
 
@@ -1702,7 +1737,7 @@ currently implemented.
 	    map.  Otherwise, the nearest-neighbor value is used.
 
 *Constructor:*
-	``ReprojectMaps(self, map_stub=None, rebin=1, interp=False)``
+	``ReprojectMaps(map_stub=None, rebin=1, interp=False)``
 
 
 
@@ -1765,7 +1800,19 @@ Functions in spt3g.maps
 
 * spt3g.maps.apply_weights_t_
 
+* spt3g.maps.azel.convert_azel_to_radec_
+
+* spt3g.maps.azel.convert_gal_to_radec_
+
+* spt3g.maps.azel.convert_radec_to_azel_
+
+* spt3g.maps.azel.convert_radec_to_gal_
+
 * spt3g.maps.convolve_map_
+
+* spt3g.maps.fitsio.load_skymap_fits_
+
+* spt3g.maps.fitsio.save_skymap_fits_
 
 * spt3g.maps.flatten_pol_
 
@@ -1791,35 +1838,23 @@ Functions in spt3g.maps
 
 * spt3g.maps.make_point_source_mask_
 
-* spt3g.maps.offsets_to_quat_
-
-* spt3g.maps.remove_weights_
-
-* spt3g.maps.remove_weights_t_
-
-* spt3g.maps.reproj_map_
-
-* spt3g.maps.azel.convert_azel_to_radec_
-
-* spt3g.maps.azel.convert_gal_to_radec_
-
-* spt3g.maps.azel.convert_radec_to_azel_
-
-* spt3g.maps.azel.convert_radec_to_gal_
-
-* spt3g.maps.fitsio.load_skymap_fits_
-
-* spt3g.maps.fitsio.save_skymap_fits_
-
 * spt3g.maps.map_modules.coadd_map_files_
 
 * spt3g.maps.maputils.flatsky_to_healpix_
 
 * spt3g.maps.maputils.healpix_to_flatsky_
 
+* spt3g.maps.offsets_to_quat_
+
 * spt3g.maps.quathelpers.ang_to_quat_
 
 * spt3g.maps.quathelpers.quat_to_ang_
+
+* spt3g.maps.remove_weights_
+
+* spt3g.maps.remove_weights_t_
+
+* spt3g.maps.reproj_map_
 
 
 .. _spt3g.maps.apply_weights:
@@ -1838,12 +1873,190 @@ Functions in spt3g.maps
     Apply weights to unpolarized maps.
 
 
+.. _spt3g.maps.azel.convert_azel_to_radec:
+
+**spt3g.maps.azel.convert_azel_to_radec**
+
+Convert timestreams of local azimuth and elevation to right ascension and
+declination.
+
+*Arguments:*
+	az, el : np.ndarray or G3Timestream
+	    Array of local coordinates. If inputs are G3Timestream objects,
+	    G3Timestreams are also returned.
+	location : astropy.coordinates.EarthLocation instance
+	    The telescope location on Earth.
+	mjd : np.ndarray
+	    An array of times for each az/el sample.  If input az and el
+	    are not G3Timestreams, this argument is required.
+	
+*Returns:*
+	ra, dec : np.ndarray or G3Timestream
+
+*Definition:*
+        ``convert_azel_to_radec(az, el, location=<EarthLocation (710.21505704, -701.59071905, -6359587.23641261) m>, mjd=None)``
+
+
+
+
+.. _spt3g.maps.azel.convert_gal_to_radec:
+
+**spt3g.maps.azel.convert_gal_to_radec**
+
+Convert timestreams of Galactic longitude and latitude to right ascension
+and declination.
+
+*Arguments:*
+	glon, glat : np.ndarray or G3Timestream
+	    Array of Galactic sky coordinates. If inputs are G3Timestream
+	    objects, G3Timestreams are also returned.
+	
+*Returns:*
+	ra, dec : np.ndarray or G3Timestream
+
+*Definition:*
+        ``convert_gal_to_radec(glon, glat)``
+
+
+
+
+.. _spt3g.maps.azel.convert_radec_to_azel:
+
+**spt3g.maps.azel.convert_radec_to_azel**
+
+Convert timestreams of right ascension and declination to local
+azimuth and elevation.
+
+*Arguments:*
+	ra, dec : np.ndarray or G3Timestream
+	    Array of Equatorial sky coordinates. If inputs are G3Timestream
+	    objects, G3Timestreams are also returned.
+	location : astropy.coordinates.EarthLocation instance
+	    The telescope location on Earth.
+	mjd : np.ndarray
+	    An array of times for each ra/dec sample.  If input ra and dec
+	    are not G3Timestreams, this argument is required.
+	
+*Returns:*
+	az, el : np.ndarray or G3Timestream
+
+*Definition:*
+        ``convert_radec_to_azel(ra, dec, location=<EarthLocation (710.21505704, -701.59071905, -6359587.23641261) m>, mjd=None)``
+
+
+
+
+.. _spt3g.maps.azel.convert_radec_to_gal:
+
+**spt3g.maps.azel.convert_radec_to_gal**
+
+Convert timestreams of right ascension and declination to Galactic
+longitude and latitude.
+
+*Arguments:*
+	ra, dec : np.ndarray or G3Timestream
+	    Array of Equatorial sky coordinates. If inputs are G3Timestream
+	    objects, G3Timestreams are also returned.
+	
+*Returns:*
+	glon, glat : np.ndarray or G3Timestream
+
+*Definition:*
+        ``convert_radec_to_gal(ra, dec)``
+
+
+
+
 .. _spt3g.maps.convolve_map:
 
 **spt3g.maps.convolve_map**
 
 ``convolve_map( (FlatSkyMap)map, (object)kernel) -> FlatSkyMap :``
     Convolve the input flat sky map with the given map-space kernel. The kernel must have odd dimensions and the same resolution as the map.
+
+
+.. _spt3g.maps.fitsio.load_skymap_fits:
+
+**spt3g.maps.fitsio.load_skymap_fits**
+
+Load a fits file containing a sky map.
+
+*Arguments:*
+	filename : str
+	    Path to fits file
+	hdu : int, optional
+	    If supplied, the data are extract from the given HDU index.
+	keys : list of strings, optional
+	    If supplied, return only these keys in the output dictionary.
+	    Options are: T, Q, U, W.
+	memmap : bool, optional
+	    Argument passed to astropy.io.fits.open. If True, the map is not read
+	    into memory, but only the required pixels are read when needed. Default:
+	    False.
+	apply_units : bool, optional
+	    If True, and input maps have known units, multiply by the appropriate
+	    conversion factor to return maps in G3Units.
+	
+*Returns:*
+	a dictionary of maps keyed with e.g. 'T', 'Q', 'U' and 'W'.
+
+*Definition:*
+        ``load_skymap_fits(filename, hdu=None, keys=None, memmap=False, apply_units=False)``
+
+
+
+
+.. _spt3g.maps.fitsio.save_skymap_fits:
+
+**spt3g.maps.fitsio.save_skymap_fits**
+
+Save G3 map objects to a fits file.
+
+`FlatSkyMap` objects are stored in a series of (optionally compressed)
+`ImageHDU` entries, in which each HDU contains the projection information in
+its header in standard WCS format, along with the image data for a single
+map (one of the Stokes maps or a weight map component).
+
+`HealpixSkyMap` objects are stored in a `BinTableHDU` extension, which
+contains the necessary header information for compatiblity with healpix map
+readers (e.g. `healpix.read_map`), and a single table with one column per
+Stokes map or weight map component.  Sparse maps are stored as cut-sky
+pixel-indexed tables, while dense maps are stored with implicit indexing
+over all pixels.  The former produces output that is equivalent to using
+`healpy.write_map` with the `partial=True` option.
+
+*Arguments:*
+	filename : str
+	    Path to output file.  Must not exist, unless overwrite is True.
+	T[, Q, U] : FlatSkyMap or HealpixSkyMap
+	    Maps to save
+	W : G3SkyMapWeights
+	    Weights to save with the maps
+	overwrite : bool
+	    If True, any existing file with the same name will be ovewritten.
+	compress : str or bool
+	    If defined, and if input maps are FlatSkyMap objects, store these in a
+	    series of compressed image HDUs, one per map.  Otherwise, store input
+	    maps in a series of standard ImageHDUs, which are readable with older
+	    FITS readers (e.g. idlastro). If defined, the compression algorithm to
+	    be used by the Astropy class astropy.io.fits.CompImageHDU.
+	    Can be: 'RICE_1', 'RICE_ONE', 'PLIO_1', 'GZIP_1', 'GZIP_2' or
+	    'HCOMPRESS_1'. Only GZIP_1 and GZIP_2 are lossless, although only
+	    for integer data.
+	quantize_level : float
+	    Floating point quantization level for compression.  Higher values result
+	    in more accurate floating point representation, but worse compression
+	    ratio.  See the astropy FITS image documention for details:
+	    https://docs.astropy.org/en/stable/io/fits/api/images.html
+	hdr  : dict
+	   If defined, extra keywords to be appened to the FITS header. The dict
+	   can contain entries such as ``hdr['NEWKEY'] = 'New value'`` or
+	   ``hdr['NEWKEY'] = ('New value', "Comment for New value")``.
+
+*Definition:*
+        ``save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False, compress=False, quantize_level=16.0, hdr=None)``
+
+
 
 
 .. _spt3g.maps.flatten_pol:
@@ -1944,216 +2157,6 @@ Functions in spt3g.maps
 
 ``make_point_source_mask( (object)map, (DoubleVector)ra, (DoubleVector)dec, (DoubleVector)radius) -> G3SkyMapMask :``
     Construct a mask from the input stub map with pixels within the given radius around each point source position set to 1.
-
-
-.. _spt3g.maps.offsets_to_quat:
-
-**spt3g.maps.offsets_to_quat**
-
-``offsets_to_quat( (float)x, (float)y) -> quat :``
-    Returns the vector quaternion (0,1,0,0) rotated by the given x and y offsets.  Equivalent to ``t * quat(0,1,0,0) / t``, where ``t = get_origin_rotator(x, -y)``
-
-
-.. _spt3g.maps.remove_weights:
-
-**spt3g.maps.remove_weights**
-
-``remove_weights( (G3SkyMap)T, (G3SkyMap)Q, (G3SkyMap)U, (G3SkyMapWeights)W [, (bool)zero_nans=False]) -> None :``
-    Remove weights from polarized maps.  If zero_nans is true, empty pixels are skipped, and pixels with zero weight are set to 0 instead of nan.
-
-
-.. _spt3g.maps.remove_weights_t:
-
-**spt3g.maps.remove_weights_t**
-
-``remove_weights_t( (G3SkyMap)T, (G3SkyMapWeights)W [, (bool)zero_nans=False]) -> None :``
-    Remove weights from unpolarized maps.       If zero_nans is true, empty pixels are skipped, and pixels with zero weight are set to 0 instead of nan.
-
-
-.. _spt3g.maps.reproj_map:
-
-**spt3g.maps.reproj_map**
-
-``reproj_map( (object)in_map, (G3SkyMap)out_map [, (int)rebin=1 [, (bool)interp=False]]) -> None :``
-    Reprojects the data from in_map onto out_map.  out_map can have a different projection, size, resolution, etc.  Optionally account for sub-pixel structure by setting rebin > 1 and/or enable bilinear interpolation of values from the input map by setting interp=True.  Use the maps' coord_ref attributes to rotate between Equatorial and Galactic coordinate systems.  Use the maps' pol_conv attributes to switch between COSMO and IAU polarization conventions.  If output attributes are not set, they will be copied from the input map.
-
-
-.. _spt3g.maps.azel.convert_azel_to_radec:
-
-**spt3g.maps.azel.convert_azel_to_radec**
-
-Convert timestreams of local azimuth and elevation to right ascension and
-declination.
-
-*Arguments:*
-	az, el : np.ndarray or G3Timestream
-	    Array of local coordinates. If inputs are G3Timestream objects,
-	    G3Timestreams are also returned.
-	location : astropy.coordinates.EarthLocation instance
-	    The telescope location on Earth.
-	mjd : np.ndarray
-	    An array of times for each az/el sample.  If input az and el
-	    are not G3Timestreams, this argument is required.
-	
-*Returns:*
-	ra, dec : np.ndarray or G3Timestream
-
-*Definition:*
-        ``convert_azel_to_radec(az, el, location=<EarthLocation (710.21505704, -701.59071905, -6359587.23641261) m>, mjd=None)``
-
-
-
-
-.. _spt3g.maps.azel.convert_gal_to_radec:
-
-**spt3g.maps.azel.convert_gal_to_radec**
-
-Convert timestreams of Galactic longitude and latitude to right ascension
-and declination.
-
-*Arguments:*
-	glon, glat : np.ndarray or G3Timestream
-	    Array of Galactic sky coordinates. If inputs are G3Timestream
-	    objects, G3Timestreams are also returned.
-	
-*Returns:*
-	ra, dec : np.ndarray or G3Timestream
-
-*Definition:*
-        ``convert_gal_to_radec(glon, glat)``
-
-
-
-
-.. _spt3g.maps.azel.convert_radec_to_azel:
-
-**spt3g.maps.azel.convert_radec_to_azel**
-
-Convert timestreams of right ascension and declination to local
-azimuth and elevation.
-
-*Arguments:*
-	ra, dec : np.ndarray or G3Timestream
-	    Array of Equatorial sky coordinates. If inputs are G3Timestream
-	    objects, G3Timestreams are also returned.
-	location : astropy.coordinates.EarthLocation instance
-	    The telescope location on Earth.
-	mjd : np.ndarray
-	    An array of times for each ra/dec sample.  If input ra and dec
-	    are not G3Timestreams, this argument is required.
-	
-*Returns:*
-	az, el : np.ndarray or G3Timestream
-
-*Definition:*
-        ``convert_radec_to_azel(ra, dec, location=<EarthLocation (710.21505704, -701.59071905, -6359587.23641261) m>, mjd=None)``
-
-
-
-
-.. _spt3g.maps.azel.convert_radec_to_gal:
-
-**spt3g.maps.azel.convert_radec_to_gal**
-
-Convert timestreams of right ascension and declination to Galactic
-longitude and latitude.
-
-*Arguments:*
-	ra, dec : np.ndarray or G3Timestream
-	    Array of Equatorial sky coordinates. If inputs are G3Timestream
-	    objects, G3Timestreams are also returned.
-	
-*Returns:*
-	glon, glat : np.ndarray or G3Timestream
-
-*Definition:*
-        ``convert_radec_to_gal(ra, dec)``
-
-
-
-
-.. _spt3g.maps.fitsio.load_skymap_fits:
-
-**spt3g.maps.fitsio.load_skymap_fits**
-
-Load a fits file containing a sky map.
-
-*Arguments:*
-	filename : str
-	    Path to fits file
-	hdu : int, optional
-	    If supplied, the data are extract from the given HDU index.
-	keys : list of strings, optional
-	    If supplied, return only these keys in the output dictionary.
-	    Options are: T, Q, U, W.
-	memmap : bool, optional
-	    Argument passed to astropy.io.fits.open. If True, the map is not read
-	    into memory, but only the required pixels are read when needed. Default:
-	    False.
-	apply_units : bool, optional
-	    If True, and input maps have known units, multiply by the appropriate
-	    conversion factor to return maps in G3Units.
-	
-*Returns:*
-	a dictionary of maps keyed with e.g. 'T', 'Q', 'U' and 'W'.
-
-*Definition:*
-        ``load_skymap_fits(filename, hdu=None, keys=None, memmap=False, apply_units=False)``
-
-
-
-
-.. _spt3g.maps.fitsio.save_skymap_fits:
-
-**spt3g.maps.fitsio.save_skymap_fits**
-
-Save G3 map objects to a fits file.
-
-`FlatSkyMap` objects are stored in a series of (optionally compressed)
-`ImageHDU` entries, in which each HDU contains the projection information in
-its header in standard WCS format, along with the image data for a single
-map (one of the Stokes maps or a weight map component).
-
-`HealpixSkyMap` objects are stored in a `BinTableHDU` extension, which
-contains the necessary header information for compatiblity with healpix map
-readers (e.g. `healpix.read_map`), and a single table with one column per
-Stokes map or weight map component.  Sparse maps are stored as cut-sky
-pixel-indexed tables, while dense maps are stored with implicit indexing
-over all pixels.  The former produces output that is equivalent to using
-`healpy.write_map` with the `partial=True` option.
-
-*Arguments:*
-	filename : str
-	    Path to output file.  Must not exist, unless overwrite is True.
-	T[, Q, U] : FlatSkyMap or HealpixSkyMap
-	    Maps to save
-	W : G3SkyMapWeights
-	    Weights to save with the maps
-	overwrite : bool
-	    If True, any existing file with the same name will be ovewritten.
-	compress : str or bool
-	    If defined, and if input maps are FlatSkyMap objects, store these in a
-	    series of compressed image HDUs, one per map.  Otherwise, store input
-	    maps in a series of standard ImageHDUs, which are readable with older
-	    FITS readers (e.g. idlastro). If defined, the compression algorithm to
-	    be used by the Astropy class astropy.io.fits.CompImageHDU.
-	    Can be: 'RICE_1', 'RICE_ONE', 'PLIO_1', 'GZIP_1', 'GZIP_2' or
-	    'HCOMPRESS_1'. Only GZIP_1 and GZIP_2 are lossless, although only
-	    for integer data.
-	quantize_level : float
-	    Floating point quantization level for compression.  Higher values result
-	    in more accurate floating point representation, but worse compression
-	    ratio.  See the astropy FITS image documention for details:
-	    https://docs.astropy.org/en/stable/io/fits/api/images.html
-	hdr  : dict
-	   If defined, extra keywords to be appened to the FITS header. The dict
-	   can contain entries such as ``hdr['NEWKEY'] = 'New value'`` or
-	   ``hdr['NEWKEY'] = ('New value', "Comment for New value")``.
-
-*Definition:*
-        ``save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False, compress=False, quantize_level=16.0, hdr=None)``
-
-
 
 
 .. _spt3g.maps.map_modules.coadd_map_files:
@@ -2311,6 +2314,14 @@ Re-pixelize a map from Healpix to one of the flat sky projections.
 
 
 
+.. _spt3g.maps.offsets_to_quat:
+
+**spt3g.maps.offsets_to_quat**
+
+``offsets_to_quat( (float)x, (float)y) -> quat :``
+    Returns the vector quaternion (0,1,0,0) rotated by the given x and y offsets.  Equivalent to ``t * quat(0,1,0,0) / t``, where ``t = get_origin_rotator(x, -y)``
+
+
 .. _spt3g.maps.quathelpers.ang_to_quat:
 
 **spt3g.maps.quathelpers.ang_to_quat**
@@ -2337,5 +2348,29 @@ vector of them) specified as a (longitude, latitude) pair.
         ``quat_to_ang(q)``
 
 
+
+
+.. _spt3g.maps.remove_weights:
+
+**spt3g.maps.remove_weights**
+
+``remove_weights( (G3SkyMap)T, (G3SkyMap)Q, (G3SkyMap)U, (G3SkyMapWeights)W [, (bool)zero_nans=False]) -> None :``
+    Remove weights from polarized maps.  If zero_nans is true, empty pixels are skipped, and pixels with zero weight are set to 0 instead of nan.
+
+
+.. _spt3g.maps.remove_weights_t:
+
+**spt3g.maps.remove_weights_t**
+
+``remove_weights_t( (G3SkyMap)T, (G3SkyMapWeights)W [, (bool)zero_nans=False]) -> None :``
+    Remove weights from unpolarized maps.       If zero_nans is true, empty pixels are skipped, and pixels with zero weight are set to 0 instead of nan.
+
+
+.. _spt3g.maps.reproj_map:
+
+**spt3g.maps.reproj_map**
+
+``reproj_map( (object)in_map, (G3SkyMap)out_map [, (int)rebin=1 [, (bool)interp=False]]) -> None :``
+    Reprojects the data from in_map onto out_map.  out_map can have a different projection, size, resolution, etc.  Optionally account for sub-pixel structure by setting rebin > 1 and/or enable bilinear interpolation of values from the input map by setting interp=True.  Use the maps' coord_ref attributes to rotate between Equatorial and Galactic coordinate systems.  Use the maps' pol_conv attributes to switch between COSMO and IAU polarization conventions.  If output attributes are not set, they will be copied from the input map.
 
 

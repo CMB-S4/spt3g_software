@@ -288,7 +288,7 @@ the BolometerProperties key.
 Return the same type of maps as the one it was handed, e.g.
 G3TimestreamMap, G3MapInt, etc.</p>
 <dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">SplitByBand(self,</span> <span class="pre">input='CalTimestreams',</span> <span class="pre">output_root=None,</span> <span class="pre">bands=None,</span> <span class="pre">bpm='BolometerProperties',</span> <span class="pre">drop_empty=False)</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">SplitByBand(input='CalTimestreams',</span> <span class="pre">output_root=None,</span> <span class="pre">bands=None,</span> <span class="pre">bpm='BolometerProperties',</span> <span class="pre">drop_empty=False)</span></code></p>
 </dd>
 <dt><em>Constructor:</em></dt><dd><p>Split the input map given by input into several output
 maps named output_root + band + GHz (e.g. CalTimestreams150GHz with
@@ -306,7 +306,7 @@ the BolometerProperties key.
 Return the same type of maps as the one it was handed, e.g.
 G3TimestreamMap, G3MapInt, etc.</p>
 <dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">SplitByPixelType(self,</span> <span class="pre">input='CalTimestreams',</span> <span class="pre">output_root=None,</span> <span class="pre">types=None,</span> <span class="pre">bpm='BolometerProperties',</span> <span class="pre">drop_empty=False)</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">SplitByPixelType(input='CalTimestreams',</span> <span class="pre">output_root=None,</span> <span class="pre">types=None,</span> <span class="pre">bpm='BolometerProperties',</span> <span class="pre">drop_empty=False)</span></code></p>
 </dd>
 <dt><em>Constructor:</em></dt><dd><p>Split the input map given by input into several output
 maps named output_root + wafer (e.g. CalTimestreamsW172 with
@@ -324,7 +324,7 @@ the BolometerProperties key.
 Return the same type of maps as the one it was handed, e.g.
 G3TimestreamMap, G3MapInt, etc.</p>
 <dl>
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">SplitByProperty(self,</span> <span class="pre">input='CalTimestreams',</span> <span class="pre">property=None,</span> <span class="pre">property_list=None,</span> <span class="pre">output_root=None,</span> <span class="pre">bpm='BolometerProperties',</span> <span class="pre">drop_empty=False)</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">SplitByProperty(input='CalTimestreams',</span> <span class="pre">property=None,</span> <span class="pre">property_list=None,</span> <span class="pre">output_root=None,</span> <span class="pre">bpm='BolometerProperties',</span> <span class="pre">drop_empty=False)</span></code></p>
 </dd>
 <dt><em>Constructor:</em></dt><dd><p>Split the input map given by input into several output
 maps named output_root + key (e.g. CalTimestreams + str(property)) with
@@ -362,7 +362,7 @@ the BolometerProperties key.
 Return the same type of maps as the one it was handed, e.g.
 G3TimestreamMap, G3MapInt, etc.</p>
 <dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">SplitByWafer(self,</span> <span class="pre">input='CalTimestreams',</span> <span class="pre">output_root=None,</span> <span class="pre">wafers=None,</span> <span class="pre">bpm='BolometerProperties',</span> <span class="pre">drop_empty=False)</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">SplitByWafer(input='CalTimestreams',</span> <span class="pre">output_root=None,</span> <span class="pre">wafers=None,</span> <span class="pre">bpm='BolometerProperties',</span> <span class="pre">drop_empty=False)</span></code></p>
 </dd>
 <dt><em>Constructor:</em></dt><dd><p>Split the input map given by input into several output
 maps named output_root + wafer (e.g. CalTimestreamsW172 with
@@ -380,7 +380,7 @@ the BolometerProperties key.
 Return the same type of maps as the one it was handed, e.g.
 G3TimestreamMap, G3MapInt, etc.</p>
 <dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">SplitTimestreamsByBand(self,</span> <span class="pre">input='CalTimestreams',</span> <span class="pre">output_root=None,</span> <span class="pre">bands=None,</span> <span class="pre">bpm='BolometerProperties',</span> <span class="pre">drop_empty=False)</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">SplitTimestreamsByBand(input='CalTimestreams',</span> <span class="pre">output_root=None,</span> <span class="pre">bands=None,</span> <span class="pre">bpm='BolometerProperties',</span> <span class="pre">drop_empty=False)</span></code></p>
 </dd>
 <dt><em>Constructor:</em></dt><dd><p>Split the input map given by input into several output
 maps named output_root + band + GHz (e.g. CalTimestreams150GHz with
@@ -403,7 +403,7 @@ of the input values.</p>
 - Band Calibration (Key: ‘BoloBands’)
 - Physical Name Data (Key: ‘PhysicalBoloIDs’)</p>
 <dl>
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">BuildBoloPropertiesMap(self,</span> <span class="pre">drop_original_frames=True,</span> <span class="pre">fiducial_detectors=[],</span> <span class="pre">bpm_name='NominalBolometerProperties',</span> <span class="pre">use_bpm_pointing=False)</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">BuildBoloPropertiesMap(drop_original_frames=True,</span> <span class="pre">fiducial_detectors=[],</span> <span class="pre">bpm_name='NominalBolometerProperties',</span> <span class="pre">use_bpm_pointing=False)</span></code></p>
 </dd>
 <dt><em>Constructor:</em></dt><dd><p>If drop_original_frames is True, will drop all input Calibration frames.</p>
 <p>If fiducial_detectors is set, will use the average of the position[s] of
@@ -426,7 +426,7 @@ tilt information, and eventually other pointing model values.</p>
 <p>Expects to be passed frames from:
 - Az tilt fit parameters (Keys: ‘tiltAngle’, ‘tiltHA’, ‘tiltLat’, ‘tiltMag’)</p>
 <dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">BuildPointingProperties(self,</span> <span class="pre">drop_original_frames=True)</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">BuildPointingProperties(drop_original_frames=True)</span></code></p>
 </dd>
 <dt><em>Constructor:</em></dt><dd><p>If drop_original_frames is True, will drop all input Calibration frames.</p>
 </dd>
@@ -447,7 +447,7 @@ calibration frame will be emitted before the first non-calibration frame
 that follows a calibration frame or at the end of processing, whichever
 comes first. Other non-calibration frames will be ignored.</p>
 <dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">MergeCalibrationFrames(self,</span> <span class="pre">KeysToIgnore=['PointingOffsetX',</span> <span class="pre">'PointingOffsetY'])</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">MergeCalibrationFrames(KeysToIgnore=['PointingOffsetX',</span> <span class="pre">'PointingOffsetY'])</span></code></p>
 </dd>
 <dt><em>Constructor:</em></dt><dd><p>Ignores keys in the KeysToIgnore list during merging. By default, set
 to values written by the flux/pointing calibration that are stored to

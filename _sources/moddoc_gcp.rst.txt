@@ -19,7 +19,7 @@ Frame Objects in spt3g.gcp
 .. _spt3g.gcp.ACUStatus:
 
 spt3g.gcp.ACUStatus
------------------------
+-------------------
 
 ACU Status information, as reported by the ACU
 
@@ -63,7 +63,7 @@ ACU Status information, as reported by the ACU
 .. _spt3g.gcp.ACUStatusVector:
 
 spt3g.gcp.ACUStatusVector
------------------------------
+-------------------------
 
 Array of ACUStatus objects, usually time-ordered
 
@@ -93,7 +93,7 @@ Array of ACUStatus objects, usually time-ordered
 .. _spt3g.gcp.TrackerPointing:
 
 spt3g.gcp.TrackerPointing
------------------------------
+-------------------------
 
 GCP Tracker Pointing
 
@@ -147,7 +147,7 @@ GCP Tracker Pointing
 .. _spt3g.gcp.TrackerStatus:
 
 spt3g.gcp.TrackerStatus
----------------------------
+-----------------------
 
 GCP Tracker Status
 
@@ -189,10 +189,6 @@ GCP Tracker Status
 
 Modules in spt3g.gcp
 ====================
-* spt3g.gcp.ARCFileReader_
-
-* spt3g.gcp.GCPMuxDataDecoder_
-
 * spt3g.gcp.ARCExtractor.ARCExtract_
 
 * spt3g.gcp.ARCExtractor.ARCExtractMinimal_
@@ -221,6 +217,8 @@ Modules in spt3g.gcp
 
 * spt3g.gcp.ARCExtractor.UpdateLinearSensorDeltas_
 
+* spt3g.gcp.ARCFileReader_
+
 * spt3g.gcp.ARCHKExtractor.UnpackSPTpolHKData_
 
 * spt3g.gcp.CalFile.CalFileReader_
@@ -233,27 +231,11 @@ Modules in spt3g.gcp
 
 * spt3g.gcp.GCPDataTee.GCPSignalledHousekeeping_
 
+* spt3g.gcp.GCPMuxDataDecoder_
+
 * spt3g.gcp.InfluxDB.UpdateDB_
 
 * spt3g.gcp.InfluxDB.WriteDB_
-
-
-.. _spt3g.gcp.ARCFileReader:
-
-**spt3g.gcp.ARCFileReader**
-
-Read GCP archive file (or files if you pass an iterable of paths). For non-SPT ARC file formats, please set Experiment to the appropriate value.  Set track_filename to True to record the filename for each frame in the ._filename attribute (fragile).
-
-
-
-.. _spt3g.gcp.GCPMuxDataDecoder:
-
-**spt3g.gcp.GCPMuxDataDecoder**
-
-Extracts contents of receiver registers in SPTpol-style ARC files into a wiring map and timepoint frames. This is designed to convert SPTpol-style data in which GCP records bolometer data into the ARC files into a format equivalent to that for SPT-3G. 
-
-For old (100d SPTpol) data not containing wiring information, insert a wiring map into the pipeline ahead of this module. The board_serial should be set to a real (positive) value for all bolometer channels and -1 for the calibrator sync readout.
-
 
 
 .. _spt3g.gcp.ARCExtractor.ARCExtract:
@@ -332,7 +314,7 @@ Add the optical bench positions to the frame.
 Apply gain / offset / units from G3 cal file
 
 *Constructor:*
-	``CalibrateFrame(self, calibration_file=None)``
+	``CalibrateFrame(calibration_file=None)``
 
 
 
@@ -481,6 +463,21 @@ in frame
 
 
 
+.. _spt3g.gcp.ARCFileReader:
+
+**spt3g.gcp.ARCFileReader**
+
+Read GCP archive file (or files if you pass an iterable of paths). For non-SPT ARC file formats, please set Experiment to the appropriate value.  Set track_filename to True to record the filename for each frame in the ._filename attribute (fragile).
+
+
+*Constructors:*
+	``ARCFileReader( (str)filename [, (Experiment)experiment=spt3g.gcp.Experiment.SPT [, (bool)track_filename=False]])``
+	
+	``ARCFileReader( (StringVector)filename [, (Experiment)experiment=spt3g.gcp.Experiment.SPT [, (bool)track_filename=False]])``
+
+
+
+
 .. _spt3g.gcp.ARCHKExtractor.UnpackSPTpolHKData:
 
 **spt3g.gcp.ARCHKExtractor.UnpackSPTpolHKData**
@@ -501,7 +498,7 @@ For now just reads a G3 calibration file and loads the contents into
 a dictionary
 
 *Constructor:*
-	``CalFileReader(self, calibration_file=None)``
+	``CalFileReader(calibration_file=None)``
 
 
 
@@ -513,8 +510,7 @@ a dictionary
 Watchdog that issues a ping to the GCP pager when the DAQ is operational.
 
 *Constructor:*
-	``DAQWatchdog(self, calibrator=False, interval=600, sim=False)``
-
+	``DAQWatchdog(calibrator=False, interval=600, sim=False)``
 
 *Constructor:*
 	*Arguments:*
@@ -536,8 +532,7 @@ If a boolean key appears in the timepoint frames named "DataOK",
 this will be sent to GCP as a data quality indicator for paging.
 
 *Constructor:*
-	``GCPBoloDataTee(self, port=50020, verbose=False, bolometers=[])``
-
+	``GCPBoloDataTee(port=50020, verbose=False, bolometers=[])``
 
 *Constructor:*
 	Send data from the given list of bolometer logical IDs to the GCP.
@@ -554,7 +549,7 @@ named "DataOK" exists in the housekeeping frames, will also transmit
 that information to GCP for paging purposes.
 
 *Constructor:*
-	``GCPHousekeepingTee(self, port=50010, verbose=False)``
+	``GCPHousekeepingTee(port=50010, verbose=False)``
 
 
 
@@ -568,7 +563,22 @@ collect_on_start is True (the default), injects an HK frame
 unconditionally at startup.
 
 *Constructor:*
-	``GCPSignalledHousekeeping(self, port=50011, collect_on_start=True)``
+	``GCPSignalledHousekeeping(port=50011, collect_on_start=True)``
+
+
+
+
+.. _spt3g.gcp.GCPMuxDataDecoder:
+
+**spt3g.gcp.GCPMuxDataDecoder**
+
+Extracts contents of receiver registers in SPTpol-style ARC files into a wiring map and timepoint frames. This is designed to convert SPTpol-style data in which GCP records bolometer data into the ARC files into a format equivalent to that for SPT-3G. 
+
+For old (100d SPTpol) data not containing wiring information, insert a wiring map into the pipeline ahead of this module. The board_serial should be set to a real (positive) value for all bolometer channels and -1 for the calibrator sync readout.
+
+
+*Constructors:*
+	``GCPMuxDataDecoder()``
 
 
 

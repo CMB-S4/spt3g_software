@@ -1547,7 +1547,7 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3TimestreamMap()</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">G3TimestreamMap(</span> <span class="pre">(G3TimestreamMap)arg2)</span></code></p>
 <dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">G3TimestreamMap(</span> <span class="pre">(StringVector)keys,</span> <span class="pre">(object)data</span> <span class="pre">[,</span> <span class="pre">(G3Time)start=&lt;spt3g.core.G3Time</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7f6525509d90&gt;</span> <span class="pre">[,</span> <span class="pre">(G3Time)stop=&lt;spt3g.core.G3Time</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7f6525509e00&gt;</span> <span class="pre">[,</span> <span class="pre">(G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None</span> <span class="pre">[,</span> <span class="pre">(int)compression_level=0</span> <span class="pre">[,</span> <span class="pre">(bool)copy_data=True]]]]])</span></code> :</dt><dd><p>Create a timestream map from a numpy array or other numeric python iterable. Each row of the 2D input array will correspond to a single timestream, with the key set to the correspondingly-indexed entry of &lt;keys&gt;. If &lt;copy_data&gt; is True (default), the data will be copied into the output data structure. If False, the timestream map will provide a view into the given numpy array.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">G3TimestreamMap(</span> <span class="pre">(StringVector)keys,</span> <span class="pre">(object)data</span> <span class="pre">[,</span> <span class="pre">(G3Time)start=&lt;spt3g.core.G3Time</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7fc76bd05d90&gt;</span> <span class="pre">[,</span> <span class="pre">(G3Time)stop=&lt;spt3g.core.G3Time</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7fc76bd05e00&gt;</span> <span class="pre">[,</span> <span class="pre">(G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None</span> <span class="pre">[,</span> <span class="pre">(int)compression_level=0</span> <span class="pre">[,</span> <span class="pre">(bool)copy_data=True]]]]])</span></code> :</dt><dd><p>Create a timestream map from a numpy array or other numeric python iterable. Each row of the 2D input array will correspond to a single timestream, with the key set to the correspondingly-indexed entry of &lt;keys&gt;. If &lt;copy_data&gt; is True (default), the data will be copied into the output data structure. If False, the timestream map will provide a view into the given numpy array.</p>
 </dd>
 <dt><code class="docutils literal notranslate"><span class="pre">G3TimestreamMap(</span> <span class="pre">(list)arg2)</span></code> :</dt><dd><p>Initialize with keys and values from a Python dictionary: {‘key’:’value’}</p>
 </dd>
@@ -1815,7 +1815,6 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <li><p><a class="reference internal" href="#spt3g-core-g3networksender">spt3g.core.G3NetworkSender</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-core-g3reader">spt3g.core.G3Reader</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-core-g3writer">spt3g.core.G3Writer</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-core-modconstruct-pipesegment">spt3g.core.modconstruct.pipesegment</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-core-util-abortafternframes">spt3g.core.util.AbortAfterNFrames</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-core-util-deduplicatemetadata">spt3g.core.util.DeduplicateMetadata</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-core-util-delete">spt3g.core.util.Delete</a></p></li>
@@ -1829,29 +1828,53 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 </ul>
 <p id="spt3g-core-g3eventbuilder"><strong>spt3g.core.G3EventBuilder</strong></p>
 <p>Base class for functors that can be added to a G3Pipeline.</p>
+<dl class="simple">
+<dt><em>Constructors:</em></dt><dd><p>Raises an exception
+This class cannot be instantiated from Python</p>
+</dd>
+</dl>
 <p id="spt3g-core-g3infinitesource"><strong>spt3g.core.G3InfiniteSource</strong></p>
 <p>Emits infinite frames, up to an optional maximum number n</p>
+<dl class="simple">
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3InfiniteSource(</span> <span class="pre">[</span> <span class="pre">(G3FrameType)type=spt3g.core.G3FrameType.none</span> <span class="pre">[,</span> <span class="pre">(int)n=-1]])</span></code></p>
+</dd>
+</dl>
 <p id="spt3g-core-g3module"><strong>spt3g.core.G3Module</strong></p>
 <p>Base class for functors that can be added to a G3Pipeline.</p>
+<dl class="simple">
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3Module()</span></code></p>
+</dd>
+</dl>
 <p id="spt3g-core-g3multifilewriter"><strong>spt3g.core.G3MultiFileWriter</strong></p>
 <p>Writes frames to disk into a sequence of files. Once a file exceeds the number of bytes specified in size_limit, it will start a new file. Files are named based on filename. If passed a string for filename with a printf-style specifier, that specifier will be replaced by a zero-indexed sequence number. For example, outfile-%03u.g3.gz would produce a sequence of files named outfile-000.g3.gz, outfile-001.g3.gz, etc. Alternatively, you can pass a callable that is passed the first frame in the new file and the sequence number and returns a path to the new file. Any frames besides Timepoint and Scan frames have the most recent frame of each type prepended to all new files.</p>
 <p>More complex behavior can be obtained with the optional divide_on argument. This can be an iterable of frame types (e.g. [core.G3FrameType.Observation]) or a callable. In the iterable case, the presence of any frame with a type in the list will cause the creation of a new file even if the file size threshold has not yet been met. This is useful to create files based on, for example, observation boundaries. For more flexibility, you can also pass a python callable as divide_on. This callable will be passed each frame in turn. If it returns True (or something with positive truth-value), a new file will be started at that frame.</p>
+<dl class="simple">
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3MultiFileWriter(</span> <span class="pre">(object)filename,</span> <span class="pre">(int)size_limit</span> <span class="pre">[,</span> <span class="pre">(object)divide_on=None])</span></code></p>
+</dd>
+</dl>
 <p id="spt3g-core-g3networksender"><strong>spt3g.core.G3NetworkSender</strong></p>
 <p>Writes frames to a network socket. If hostname is set to ‘*’, will listen on the given port, on all interfaces, instead of connecting to the given port on a remote host. In listen mode, metadata frames (Calibration, Wiring, etc. – everything but Scan and Timepoint) will be accumulated and the most recent of each will be sent to new clients on connect. Scan and Timepoint frames will be broadcast live to all connected clients. If max_queue_size is set to a non-zero value, Scan and Timepoint frames may be dropped if more than max_queue_size frames are queued for transmission. If n_serializers is set to a non-zero value, the task of serializing frames to be sent will be distributed across that many background threads, which is useful when high throughput of large frames is required, but is otherwise typically not necessary.</p>
+<dl class="simple">
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3NetworkSender(</span> <span class="pre">(str)hostname,</span> <span class="pre">(int)port</span> <span class="pre">[,</span> <span class="pre">(int)max_queue_size=0</span> <span class="pre">[,</span> <span class="pre">(int)n_serializers=0]])</span></code></p>
+</dd>
+</dl>
 <p id="spt3g-core-g3reader"><strong>spt3g.core.G3Reader</strong></p>
 <p>Read frames from disk. Takes either the path to a file to read or an iterable of files to be read in sequence. If n_frames_to_read is greater than zero, will stop after n_frames_to_read frames rather than at the end of the file[s]. The timeout parameter can used to enable socket timeout for tcp streams, resulting in EOF behavior on expiry; unfortunately this cannot be used for polling, you have to close the connection. Use the <cite>tell</cite> and <cite>seek</cite> methods to record the position of and seek to the beginning of a particular frame in the file.  Set track_filename to True to record the filename for each frame in the ._filename attribute (fragile).</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3Reader(</span> <span class="pre">(str)filename</span> <span class="pre">[,</span> <span class="pre">(int)n_frames_to_read=0</span> <span class="pre">[,</span> <span class="pre">(float)timeout=-1.0</span> <span class="pre">[,</span> <span class="pre">(bool)track_filename=False]]])</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">G3Reader(</span> <span class="pre">(StringVector)filename</span> <span class="pre">[,</span> <span class="pre">(int)n_frames_to_read=0</span> <span class="pre">[,</span> <span class="pre">(float)timeout=-1.0</span> <span class="pre">[,</span> <span class="pre">(bool)track_filename=False]]])</span></code></p>
+</dd>
+</dl>
 <p id="spt3g-core-g3writer"><strong>spt3g.core.G3Writer</strong></p>
 <p>Writes frames to disk. Frames will be written to the file specified by filename. If filename ends in .gz, output will be compressed using gzip. To write only some types of frames, pass a list of the desired frame types to the second optional argument (streams). If no streams argument is given, writes all types of frames. If append is set to True, will append frames to its output file rather than overwriting it.</p>
-<p id="spt3g-core-modconstruct-pipesegment"><strong>spt3g.core.modconstruct.pipesegment</strong></p>
-<p>No documentation</p>
 <dl class="simple">
-<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">pipesegment(func,</span> <span class="pre">autodoc=True)</span></code></p>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3Writer(</span> <span class="pre">(str)filename</span> <span class="pre">[,</span> <span class="pre">(FrameTypeVector)streams=spt3g.core.FrameTypeVector([])</span> <span class="pre">[,</span> <span class="pre">(bool)append=False]])</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-core-util-abortafternframes"><strong>spt3g.core.util.AbortAfterNFrames</strong></p>
 <p>Stops processing after n_frames frames go by</p>
 <dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">AbortAfterNFrames(self,</span> <span class="pre">type,</span> <span class="pre">n_frames)</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">AbortAfterNFrames(type,</span> <span class="pre">n_frames)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-core-util-deduplicatemetadata"><strong>spt3g.core.util.DeduplicateMetadata</strong></p>
@@ -1862,7 +1885,7 @@ which copies metadata frames to the beginning of each file. Considers
 all frames not in &lt;dataframetypes&gt; to be metadata (by default, everything
 except Timepoint and Scan frames).</p>
 <dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">DeduplicateMetadata(self,</span> <span class="pre">dataframetype=[spt3g.core.G3FrameType.Timepoint,</span> <span class="pre">spt3g.core.G3FrameType.Scan])</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">DeduplicateMetadata(dataframetype=[spt3g.core.G3FrameType.Timepoint,</span> <span class="pre">spt3g.core.G3FrameType.Scan])</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-core-util-delete"><strong>spt3g.core.util.Delete</strong></p>
@@ -1878,7 +1901,7 @@ intervening data frames (e.g. Timepoint, Scan, specified by the
 do show up will be the most recent of each type and appear in their
 original order.</p>
 <dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">DropOrphanMetadata(self,</span> <span class="pre">dataframetype=[spt3g.core.G3FrameType.Timepoint,</span> <span class="pre">spt3g.core.G3FrameType.Scan])</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">DropOrphanMetadata(dataframetype=[spt3g.core.G3FrameType.Timepoint,</span> <span class="pre">spt3g.core.G3FrameType.Scan])</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-core-util-dump"><strong>spt3g.core.util.Dump</strong></p>
@@ -1903,7 +1926,7 @@ G3Reader at a TCP URL.</p>
 All instances of frames not in the dictionary frame_decimation will be sent
 at their full rate.</p>
 <dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3ThrottledNetworkSender(self,</span> <span class="pre">hostname='*',</span> <span class="pre">port=5978,</span> <span class="pre">frame_decimation={spt3g.core.G3FrameType.Timepoint:</span> <span class="pre">10},</span> <span class="pre">max_queue_size=0)</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3ThrottledNetworkSender(hostname='*',</span> <span class="pre">port=5978,</span> <span class="pre">frame_decimation={spt3g.core.G3FrameType.Timepoint:</span> <span class="pre">10},</span> <span class="pre">max_queue_size=0)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-core-util-injectdebug"><strong>spt3g.core.util.InjectDebug</strong></p>
@@ -1923,7 +1946,7 @@ at their full rate.</p>
 </dd>
 </dl>
 </dd>
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">InjectFrame(self,</span> <span class="pre">frame)</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">InjectFrame(frame)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-core-util-rename"><strong>spt3g.core.util.Rename</strong></p>

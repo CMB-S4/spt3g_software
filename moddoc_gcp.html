@@ -147,8 +147,6 @@
 <section id="modules-in-spt3g-gcp">
 <h2>Modules in spt3g.gcp<a class="headerlink" href="#modules-in-spt3g-gcp" title="Link to this heading">¶</a></h2>
 <ul class="simple">
-<li><p><a class="reference internal" href="#spt3g-gcp-arcfilereader">spt3g.gcp.ARCFileReader</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-gcpmuxdatadecoder">spt3g.gcp.GCPMuxDataDecoder</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-arcextract">spt3g.gcp.ARCExtractor.ARCExtract</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-arcextractminimal">spt3g.gcp.ARCExtractor.ARCExtractMinimal</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-addbenchdata">spt3g.gcp.ARCExtractor.AddBenchData</a></p></li>
@@ -163,20 +161,17 @@
 <li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-unpacktrackerpointingdata">spt3g.gcp.ARCExtractor.UnpackTrackerPointingData</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-unpackweatherdata">spt3g.gcp.ARCExtractor.UnpackWeatherData</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-updatelinearsensordeltas">spt3g.gcp.ARCExtractor.UpdateLinearSensorDeltas</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-gcp-arcfilereader">spt3g.gcp.ARCFileReader</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-archkextractor-unpacksptpolhkdata">spt3g.gcp.ARCHKExtractor.UnpackSPTpolHKData</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-calfile-calfilereader">spt3g.gcp.CalFile.CalFileReader</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-gcpdatatee-daqwatchdog">spt3g.gcp.GCPDataTee.DAQWatchdog</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-gcpdatatee-gcpbolodatatee">spt3g.gcp.GCPDataTee.GCPBoloDataTee</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-gcpdatatee-gcphousekeepingtee">spt3g.gcp.GCPDataTee.GCPHousekeepingTee</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-gcpdatatee-gcpsignalledhousekeeping">spt3g.gcp.GCPDataTee.GCPSignalledHousekeeping</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-gcp-gcpmuxdatadecoder">spt3g.gcp.GCPMuxDataDecoder</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-influxdb-updatedb">spt3g.gcp.InfluxDB.UpdateDB</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-influxdb-writedb">spt3g.gcp.InfluxDB.WriteDB</a></p></li>
 </ul>
-<p id="spt3g-gcp-arcfilereader"><strong>spt3g.gcp.ARCFileReader</strong></p>
-<p>Read GCP archive file (or files if you pass an iterable of paths). For non-SPT ARC file formats, please set Experiment to the appropriate value.  Set track_filename to True to record the filename for each frame in the ._filename attribute (fragile).</p>
-<p id="spt3g-gcp-gcpmuxdatadecoder"><strong>spt3g.gcp.GCPMuxDataDecoder</strong></p>
-<p>Extracts contents of receiver registers in SPTpol-style ARC files into a wiring map and timepoint frames. This is designed to convert SPTpol-style data in which GCP records bolometer data into the ARC files into a format equivalent to that for SPT-3G.</p>
-<p>For old (100d SPTpol) data not containing wiring information, insert a wiring map into the pipeline ahead of this module. The board_serial should be set to a real (positive) value for all bolometer channels and -1 for the calibrator sync readout.</p>
 <p id="spt3g-gcp-arcextractor-arcextract"><strong>spt3g.gcp.ARCExtractor.ARCExtract</strong></p>
 <p>Extract GCP registers into native objects</p>
 <p><em>Equivalent to:</em></p>
@@ -219,7 +214,7 @@ Use ARCExtract to calibrate and extract the complete frame.</p>
 <p id="spt3g-gcp-arcextractor-calibrateframe"><strong>spt3g.gcp.ARCExtractor.CalibrateFrame</strong></p>
 <p>Apply gain / offset / units from G3 cal file</p>
 <dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">CalibrateFrame(self,</span> <span class="pre">calibration_file=None)</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">CalibrateFrame(calibration_file=None)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-gcp-arcextractor-decryptfeaturebit"><strong>spt3g.gcp.ARCExtractor.DecryptFeatureBit</strong></p>
@@ -294,6 +289,13 @@ in frame</p>
 <dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">UpdateLinearSensorDeltas(f)</span></code></p>
 </dd>
 </dl>
+<p id="spt3g-gcp-arcfilereader"><strong>spt3g.gcp.ARCFileReader</strong></p>
+<p>Read GCP archive file (or files if you pass an iterable of paths). For non-SPT ARC file formats, please set Experiment to the appropriate value.  Set track_filename to True to record the filename for each frame in the ._filename attribute (fragile).</p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">ARCFileReader(</span> <span class="pre">(str)filename</span> <span class="pre">[,</span> <span class="pre">(Experiment)experiment=spt3g.gcp.Experiment.SPT</span> <span class="pre">[,</span> <span class="pre">(bool)track_filename=False]])</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">ARCFileReader(</span> <span class="pre">(StringVector)filename</span> <span class="pre">[,</span> <span class="pre">(Experiment)experiment=spt3g.gcp.Experiment.SPT</span> <span class="pre">[,</span> <span class="pre">(bool)track_filename=False]])</span></code></p>
+</dd>
+</dl>
 <p id="spt3g-gcp-archkextractor-unpacksptpolhkdata"><strong>spt3g.gcp.ARCHKExtractor.UnpackSPTpolHKData</strong></p>
 <p>Extracts SPTpol housekeeping information from ARC files</p>
 <dl class="simple">
@@ -304,13 +306,13 @@ in frame</p>
 <p>For now just reads a G3 calibration file and loads the contents into
 a dictionary</p>
 <dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">CalFileReader(self,</span> <span class="pre">calibration_file=None)</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">CalFileReader(calibration_file=None)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-gcp-gcpdatatee-daqwatchdog"><strong>spt3g.gcp.GCPDataTee.DAQWatchdog</strong></p>
 <p>Watchdog that issues a ping to the GCP pager when the DAQ is operational.</p>
 <dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">DAQWatchdog(self,</span> <span class="pre">calibrator=False,</span> <span class="pre">interval=600,</span> <span class="pre">sim=False)</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">DAQWatchdog(calibrator=False,</span> <span class="pre">interval=600,</span> <span class="pre">sim=False)</span></code></p>
 </dd>
 <dt><em>Constructor:</em></dt><dd><dl class="simple">
 <dt><em>Arguments:</em></dt><dd><dl class="simple">
@@ -328,7 +330,7 @@ will serve the data from the previous second of bolometer data.</p>
 <p>If a boolean key appears in the timepoint frames named “DataOK”,
 this will be sent to GCP as a data quality indicator for paging.</p>
 <dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">GCPBoloDataTee(self,</span> <span class="pre">port=50020,</span> <span class="pre">verbose=False,</span> <span class="pre">bolometers=[])</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">GCPBoloDataTee(port=50020,</span> <span class="pre">verbose=False,</span> <span class="pre">bolometers=[])</span></code></p>
 </dd>
 <dt><em>Constructor:</em></dt><dd><p>Send data from the given list of bolometer logical IDs to the GCP.</p>
 </dd>
@@ -338,7 +340,7 @@ this will be sent to GCP as a data quality indicator for paging.</p>
 named “DataOK” exists in the housekeeping frames, will also transmit
 that information to GCP for paging purposes.</p>
 <dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">GCPHousekeepingTee(self,</span> <span class="pre">port=50010,</span> <span class="pre">verbose=False)</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">GCPHousekeepingTee(port=50010,</span> <span class="pre">verbose=False)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-gcp-gcpdatatee-gcpsignalledhousekeeping"><strong>spt3g.gcp.GCPDataTee.GCPSignalledHousekeeping</strong></p>
@@ -346,7 +348,14 @@ that information to GCP for paging purposes.</p>
 collect_on_start is True (the default), injects an HK frame
 unconditionally at startup.</p>
 <dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">GCPSignalledHousekeeping(self,</span> <span class="pre">port=50011,</span> <span class="pre">collect_on_start=True)</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">GCPSignalledHousekeeping(port=50011,</span> <span class="pre">collect_on_start=True)</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-gcp-gcpmuxdatadecoder"><strong>spt3g.gcp.GCPMuxDataDecoder</strong></p>
+<p>Extracts contents of receiver registers in SPTpol-style ARC files into a wiring map and timepoint frames. This is designed to convert SPTpol-style data in which GCP records bolometer data into the ARC files into a format equivalent to that for SPT-3G.</p>
+<p>For old (100d SPTpol) data not containing wiring information, insert a wiring map into the pipeline ahead of this module. The board_serial should be set to a real (positive) value for all bolometer channels and -1 for the calibrator sync readout.</p>
+<dl class="simple">
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">GCPMuxDataDecoder()</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-gcp-influxdb-updatedb"><strong>spt3g.gcp.InfluxDB.UpdateDB</strong></p>
