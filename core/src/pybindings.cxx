@@ -8,6 +8,7 @@ export_namespace(bp::object scope, std::string name)
 {
 	std::string modname = bp::extract<std::string>(scope.attr("__name__") + "." + name);
 	bp::object mod(bp::handle<>(bp::borrowed(PyImport_AddModule(modname.c_str()))));
+	mod.attr("__package__") = scope.attr("__name__");
 	scope.attr(name.c_str()) = mod;
 	return mod;
 }
