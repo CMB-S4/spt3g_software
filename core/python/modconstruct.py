@@ -9,20 +9,34 @@ import types
 import re
 
 
-class PipelineSegment:
-    """
-    Wrapper class for pipeline segments.  Used by the `pipesegment` function
-    decorator to enable auto-documentation of pipeline segments by
-    introspection.
-    """
+class pipesegment:
+    '''
+    Use as a decorator for a pre-assembled set of pipeline modules. Makes a
+    pseudo-module consisting of several inputs. If autodoc is True (the
+    default), will attempt to introspect the segment to find out what it
+    does. Set this to False if your module does anything complicated.
+
+    For example:
+
+    @core.pipesegment
+    def standardfiltering(pipe, PolyOrder=4, MaskedHighPassEll=6000, Input='CalTimestreams', Output='FilteredTimestreams'):
+        pipe.Add(analysis.PolyFilter, PolyOrder=PolyOrder, Input=Input,
+            Output='__Temp' + Output)
+        pipe.Add(analysis.MaskedHighPass, MaskedHighPassEll=MaskedHighPassEll, Input='__Temp' + Output, Output=Output)
+        def cleanup(frame):
+            del frame['__Temp' + Output]
+        pipe.Add(cleanup)
+
+    pipe.Add(standardfiltering, PolyOrder=3)
+    '''
     __pipesegment__ = True
 
     def __init__(self, func, autodoc=True):
         self.func = self.__wrapped__ = func
         self._do_autodoc = autodoc
 
-    def __call__(self, *args, **kwargs):
-        return self.func(*args, **kwargs)
+    def __call__(self, pipe, *args, **kwargs):
+        return self.func(pipe, *args, **kwargs)
 
     def autodoc(self):
         """
@@ -86,30 +100,6 @@ class PipelineSegment:
     @property
     def __name__(self):
         return self.func.__name__
-
-
-def pipesegment(func, autodoc=True):
-    '''
-    Use as a decorator for a pre-assembled set of pipeline modules. Makes a
-    pseudo-module consisting of several inputs. If autodoc is True (the
-    default), will attempt to introspect the segment to find out what it
-    does. Set this to False if your module does anything complicated.
-
-    For example:
-
-    @core.pipesegment
-    def standardfiltering(pipe, PolyOrder=4, MaskedHighPassEll=6000, Input='CalTimestreams', Output='FilteredTimestreams'):
-        pipe.Add(analysis.PolyFilter, PolyOrder=PolyOrder, Input=Input,
-            Output='__Temp' + Output)
-        pipe.Add(analysis.MaskedHighPass, MaskedHighPassEll=MaskedHighPassEll, Input='__Temp' + Output, Output=Output)
-        def cleanup(frame):
-            del frame['__Temp' + Output]
-        pipe.Add(cleanup)
-
-    pipe.Add(standardfiltering, PolyOrder=3)
-    '''
-
-    return PipelineSegment(func, autodoc)
 
 
 def pipesegment_nodoc(func):
