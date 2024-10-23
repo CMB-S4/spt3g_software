@@ -8,7 +8,8 @@ except ImportError:
 import types
 import re
 
-def pipesegment(func, autodoc=True):
+
+class pipesegment:
     '''
     Use as a decorator for a pre-assembled set of pipeline modules. Makes a
     pseudo-module consisting of several inputs. If autodoc is True (the
@@ -28,13 +29,30 @@ def pipesegment(func, autodoc=True):
 
     pipe.Add(standardfiltering, PolyOrder=3)
     '''
+    __pipesegment__ = True
 
-    func.__pipesegment__ = True
+    def __init__(self, func, autodoc=True):
+        self.func = self.__wrapped__ = func
+        self._do_autodoc = autodoc
 
-    if autodoc:
-        introdoc = ''
-        if hasattr(func, '__doc__') and func.__doc__ is not None:
-            introdoc = func.__doc__ + '\n\n'
+    def __call__(self, pipe, *args, **kwargs):
+        return self.func(pipe, *args, **kwargs)
+
+    def autodoc(self):
+        """
+        Create a dummy pipeline for introspection.  Generates a docstring when
+        the __doc__ attribute is accessed.
+        """
+        if not self._do_autodoc:
+            self._autodoc = getattr(self.func, "__doc__", None)
+            self._rstdoc = None
+            return self._autodoc
+        if hasattr(self, "_autodoc"):
+            return self._autodoc
+
+        introdoc = getattr(self.func, "__doc__", None) or ""
+        if introdoc:
+            introdoc += "\n\n"
         from .docparser import format_doc
         rstintrodoc = format_doc(introdoc)
         introdoc += 'Equivalent to:\n'
@@ -57,17 +75,32 @@ def pipesegment(func, autodoc=True):
                 doclines.append(doc)
         fake = PotemkinPipe()
         try:
-            func(fake)
+            self.func(fake)
         except Exception as e:
             doclines.append('Exception evaluating equivalence (%s)' % (str(e), ))
         introdoc += '\n'.join(doclines)
         rstintrodoc += '.. code-block:: python\n\n    '
         rstintrodoc += '\n    '.join(doclines)
         rstintrodoc += '\n'
-        func.__doc__ = introdoc
-        func.__rstdoc__ = rstintrodoc
 
-    return func
+        self._autodoc = introdoc
+        self._rstdoc = rstintrodoc
+        return self._autodoc
+
+    @property
+    def __rstdoc__(self):
+        self.autodoc()
+        return self._rstdoc
+
+    @property
+    def __doc__(self):
+        self.autodoc()
+        return self._autodoc
+
+    @property
+    def __name__(self):
+        return self.func.__name__
+
 
 def pipesegment_nodoc(func):
     return pipesegment(func, autodoc = False)
