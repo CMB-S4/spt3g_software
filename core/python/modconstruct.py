@@ -29,11 +29,10 @@ class pipesegment:
 
     pipe.Add(standardfiltering, PolyOrder=3)
     '''
-    __pipesegment__ = True
-
     def __init__(self, func, autodoc=True):
         self.func = self.__wrapped__ = func
         self._do_autodoc = autodoc
+        self.__pipesegment__ = True
 
     def __call__(self, pipe, *args, **kwargs):
         return self.func(pipe, *args, **kwargs)

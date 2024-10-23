@@ -170,10 +170,22 @@ public:
 	    .def_pickle(g3frameobject_picklesuite<T>())
 
 // Declare a python module with a name that is a bare token:
+//     SPT3G_PYTHON_SUBMODULE(foo, "pkg")
+// for a package whose fully qualified name will be pkg.foo
+#define SPT3G_PYTHON_SUBMODULE(name, pkg) \
+BOOST_PYTHON_MODULE(_lib ## name) { \
+	auto mod = boost::python::scope(); \
+	mod.attr("__name__") = std::string(pkg) + "." + #name; \
+	void (spt3g_init_module_ ## name)(); \
+	(spt3g_init_module_ ## name)(); \
+} \
+void (spt3g_init_module_ ## name)()
+
+// Declare a python module with a name that is a bare token:
 //     SPT3G_PYTHON_MODULE(foo)
-// for a package whose name will be _libfoo
+// for a package whose fully qualified name will be spt3g.foo
 #define SPT3G_PYTHON_MODULE(name) \
-BOOST_PYTHON_MODULE(_lib ## name)
+SPT3G_PYTHON_SUBMODULE(name, "spt3g")
 
 // Create a namespace (importable sub-module) within some parent scope
 bp::object export_namespace(bp::object scope, std::string name);

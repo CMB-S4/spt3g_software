@@ -45,12 +45,6 @@ def get_doc_for_module(module_path, include_link_list = True):
         print(e)
         sys.exit(1)
 
-    if module_path.startswith("spt3g."):
-        p = module_path.rsplit(".", 1)
-        module_lib_path = "%s._lib%s" % (p[0], p[1])
-    else:
-        module_lib_path = module_path
-
     def format_object(modname, x):
         name = '%s.%s' % (modname, x)
         return '\n.. _%s:\n\n%s\n%s\n' % (name, name, '-' * len(name))
@@ -61,6 +55,30 @@ def get_doc_for_module(module_path, include_link_list = True):
     def format_definition(name, obj):
         argdef = '%s%s' % (name, format_signature(obj))
         return '\n\n*Definition:*\n        ``%s``\n' % argdef.strip()
+    def format_init(x, obj):
+        try:
+            sig = format_signature(obj.__init__).replace("(self, ", "(")
+            out_str = '\n*Constructor:*\n\t``%s%s``\n' % (x, sig)
+            if format_doc(obj.__init__):
+                con_str = '\n*Constructor:*\n\t%s\n' % format_doc(obj.__init__).replace('\n', '\n\t')
+                con_str = con_str.replace(' -> None', ' -> None``')
+                con_str = con_str.replace('__init__', '``__init__')
+                out_str += con_str
+            return out_str
+        except:
+            pass
+        try:
+            if format_doc(obj.__init__):
+                con_str = '\n\n*Constructors:*\n\t%s\n' % format_doc(obj.__init__).replace('\n', '\n\t')
+                con_str = con_str.replace(' -> None', '``')
+                con_str = con_str.replace(' -> object', '``')
+                con_str = con_str.replace('__init__( (object)arg1,', '``{}('.format(x))
+                con_str = con_str.replace('__init__( (object)arg1)', '``{}()'.format(x))
+                con_str = con_str.replace('__init__( (object)arg1 [,', '``{}( ['.format(x))
+                return con_str
+        except:
+            pass
+        return ""
     def add_str(s0, s1):
         return s0 + s1 + '\n'
     
@@ -81,7 +99,7 @@ def get_doc_for_module(module_path, include_link_list = True):
                     itemname = '%s.%s' % (modname, obj.__name__)
                 else:
                     itemname = obj.__name__ #helps with files imported in __init__
-                if not itemname.startswith(module_path) and not itemname.startswith(module_lib_path):
+                if not itemname.startswith(module_path):
                     continue
                 if itemname in anti_recursion_protector:
                     continue
@@ -106,13 +124,7 @@ def get_doc_for_module(module_path, include_link_list = True):
                     if inspect.isfunction(obj):
                         out_str = add_str(out_str, format_definition(x, obj))
                     else:
-                        out_str = add_str(out_str, '\n*Constructor:*\n\t``%s%s``\n' %
-                                          ((x, format_signature(obj.__init__)) ) )
-                        if format_doc(obj.__init__):
-                            con_str = '\n*Constructor:*\n\t%s\n' % format_doc(obj.__init__).replace('\n', '\n\t')
-                            con_str = con_str.replace(' -> None', ' -> None``')
-                            con_str = con_str.replace('__init__', '``__init__')
-                            out_str += con_str + '\n'
+                        out_str = add_str(out_str, format_init(x, obj))
                 except:
                     pass
                 out_str = add_str(out_str, '')
@@ -147,7 +159,7 @@ def get_doc_for_module(module_path, include_link_list = True):
                     modname = obj.__module__
                 else:
                     itemname = obj.__name__ #helps with files imported in __init__
-                if not itemname.startswith(module_path) and not itemname.startswith(module_lib_path):
+                if not itemname.startswith(module_path):
                     continue
                 if itemname in other_anti_recursion_protector:
                     continue
@@ -192,7 +204,7 @@ def get_doc_for_module(module_path, include_link_list = True):
                     modname = obj.__module__
                 else:
                     itemname = obj.__name__ #helps with files imported in __init__
-                if not itemname.startswith(module_path) and not itemname.startswith(module_lib_path):
+                if not itemname.startswith(module_path):
                     continue
                 if itemname in other_other_anti_recursion_protector:
                     continue
@@ -202,21 +214,14 @@ def get_doc_for_module(module_path, include_link_list = True):
             subclasstest = False
             try:
                 subclasstest = issubclass( obj, G3FrameObject)
-            except TypeError as e:
+            except TypeError:
                 pass
             if hasattr(obj, '__g3frameobject__') or subclasstest:
                 out_str = add_str(out_str, format_object(modname, x))
                 if format_doc(obj) is not None:
                     tmp_str = format_doc(obj).strip()
                     out_str = out_str + tmp_str
-                    if format_doc(obj.__init__):
-                        con_str = '\n\n*Constructors:*\n\t%s\n' % format_doc(obj.__init__).replace('\n', '\n\t')
-                        con_str = con_str.replace(' -> None', '``')
-                        con_str = con_str.replace(' -> object', '``')
-                        con_str = con_str.replace('__init__( (object)arg1,', '``{}('.format(obj.__name__))
-                        con_str = con_str.replace('__init__( (object)arg1)', '``{}()'.format(obj.__name__))
-                        con_str = con_str.replace('__init__( (object)arg1 [,', '``{}( ['.format(obj.__name__))
-                        out_str += con_str + '\n'
+                    out_str = add_str(out_str, format_init(x, obj))
                     #after we have gotten the documention, find the properties and load their documentation
                     prop_str = ''
                     for p_name, p_obj in obj.__dict__.items():
@@ -287,7 +292,4 @@ def get_doc_for_module(module_path, include_link_list = True):
                 out_str = add_str(out_str,'* %s_\n' % m)
         doc_str = '\n'.join([fun_dict[k] for k in fun_lst])
         out_str = add_str(out_str,doc_str)
-
-    if module_lib_path != module_path:
-        out_str = out_str.replace(module_lib_path, module_path)
     return out_str, mod_lst, fun_lst, obj_lst
