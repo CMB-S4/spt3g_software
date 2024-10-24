@@ -45,15 +45,6 @@ G3Quat::serialize(A &ar, unsigned v)
 	ar & cereal::make_nvp("value", value);
 }
 
-Quat
-Quat::versor() const
-{
-	double n = norm();
-	if (fabs(n - 1.0) > 1e-6)
-		return *this / sqrt(n);
-	return *this;
-}
-
 double
 Quat::real() const
 {
@@ -78,6 +69,12 @@ double
 Quat::norm() const
 {
 	return a_ * a_ + b_ * b_ + c_ * c_ + d_ * d_;
+}
+
+double
+Quat::vnorm() const
+{
+	return b_ * b_ + c_ * c_ + d_ * d_;
 }
 
 double
@@ -978,8 +975,8 @@ PYBINDINGS("core")
 	     .def("__str__", quat_str)
 	     .def("__repr__", quat_repr)
 	     .def("norm", &Quat::norm, "Return the Cayley norm of the quaternion")
+	     .def("vnorm", &Quat::norm, "Return the Cayley norm of the unreal (vector) part of the quaternion")
 	     .def("abs", &Quat::abs, "Return the Euclidean norm of the quaternion")
-	     .def("versor", &Quat::versor, "Return a versor (unit quaternion) with the same orientation")
 	     .def("dot3", &Quat::dot3, "Dot product of last three entries")
 	     .def("cross3", &Quat::cross3, "Cross product of last three entries")
 	;

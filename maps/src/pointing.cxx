@@ -26,6 +26,15 @@
  */
 
 static Quat
+unit_vector(const Quat &q)
+{
+	double n = q.vnorm();
+	if (fabs(n - 1.0) > 1e-6)
+		return q / sqrt(n);
+	return q;
+}
+
+static Quat
 project_on_plane(const Quat &plane_normal, const Quat &point)
 {
 	// Projects the quaternion onto a plane with unit normal plane_normal
@@ -34,27 +43,27 @@ project_on_plane(const Quat &plane_normal, const Quat &point)
 
 	Quat out_q(point);
 	//ensure unit vec
-	auto un = plane_normal.unreal().versor();
+	auto un = unit_vector(plane_normal);
 	out_q -= un * dot3(un, point);
-	return out_q.versor();
+	return unit_vector(out_q);
 }
 
 Quat
 ang_to_quat(double alpha, double delta)
 {
 	double c_delta = cos(delta / G3Units::rad);
-	return Quat(0, 
+	return Quat(0,
 		    c_delta * cos(alpha/G3Units::rad),
 		    c_delta * sin(alpha/G3Units::rad),
-		    sin(delta / G3Units::rad)).versor();
+		    sin(delta / G3Units::rad));
 }
 
 void
 quat_to_ang(const Quat &q, double &alpha, double &delta)
 {
-	auto uq = q.unreal().versor();
+	auto uq = unit_vector(q);
 	delta = ASIN(uq.d()) * G3Units::rad;
-	alpha = ATAN2(uq.c(), uq.b())*G3Units::rad;
+	alpha = ATAN2(uq.c(), uq.b()) * G3Units::rad;
 	if (alpha < 0)
 		alpha += 360 * G3Units::deg;
 }
@@ -71,8 +80,8 @@ py_quat_to_ang(const Quat &q)
 double
 quat_ang_sep(const Quat &a, const Quat &b)
 {
-	auto ua = a.unreal().versor();
-	auto ub = b.unreal().versor();
+	auto ua = unit_vector(a);
+	auto ub = unit_vector(b);
 
 	double d = dot3(ua, ub);
 	if (d > 1)
@@ -89,12 +98,11 @@ coord_quat_to_delta_hat(const Quat &q)
 	// specified by q
 	// 
 	// (The delta hat is equal to -alpha hat)
-	auto uq = q.unreal().versor();
-	double st = sqrt(1 - (uq.d()*uq.d()));
-	return Quat(0,
-		     -1 * (uq.b() * uq.d())/st,
-		     -1 * (uq.c() * uq.d())/st,
-		     st).versor();
+	auto uq = unit_vector(q);
+	double st = sqrt(1 - uq.d() * uq.d());
+	double ct = -1.0 * uq.d() / st;
+	Quat qd(0, uq.b() * ct, uq.c() * ct, st);
+	return unit_vector(qd);
 }
 
 static double
@@ -135,10 +143,10 @@ get_transform_quat(double as_0, double ds_0, double ae_0, double de_0,
 	auto aede_1 = ang_to_quat(ae_1, de_1);
 
 	auto tquat = cross3(asds_0, aede_0);
-	double mag = sqrt(dot3(tquat, tquat));
+	double mag = sqrt(tquat.vnorm());
 	double ang = quat_ang_sep(asds_0, aede_0);
 	tquat *= sin(ang/2.0) / mag;
-	tquat += Quat(cos(ang/2.0),0,0,0);
+	tquat += Quat(cos(ang/2.0), 0, 0, 0);
 
 	// trans_asds_1 and aede_1 should now be the same up to a rotation
 	// around aede_0
@@ -147,7 +155,7 @@ get_transform_quat(double as_0, double ds_0, double ae_0, double de_0,
 	// Project them on to a plane and find the angle between the two vectors
 	// using (ae_0, de_0) as the normal since we are rotating around that
 	// vector.
-	auto p_asds1 = project_on_plane(aede_0, trans_asds_1);	
+	auto p_asds1 = project_on_plane(aede_0, trans_asds_1);
 	auto p_aede1 = project_on_plane(aede_0, aede_1);
 
 	double rot_ang = quat_ang_sep(p_asds1, p_aede1);
@@ -159,9 +167,7 @@ get_transform_quat(double as_0, double ds_0, double ae_0, double de_0,
 		     sin_rot_ang_ov_2 * aede_0.b(),
 		     sin_rot_ang_ov_2 * aede_0.c(),
 		     sin_rot_ang_ov_2 * aede_0.d());
-	auto final_trans = rot_quat * tquat;
-
-	return final_trans;
+	return rot_quat * tquat;
 }
 
 Quat

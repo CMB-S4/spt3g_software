@@ -17,11 +17,11 @@ public:
 	double c() const { return c_; }
 	double d() const { return d_; }
 
-	Quat versor() const;
 	double real() const;
 	Quat unreal() const;
 	Quat conj() const;
 	double norm() const;
+	double vnorm() const;
 	double abs() const;
 	double dot3(const Quat &b) const;
 	Quat cross3(const Quat &b) const;
@@ -67,6 +67,7 @@ inline double real(const Quat &q) { return q.real(); };
 inline Quat unreal(const Quat &q) { return q.unreal(); };
 inline Quat conj(const Quat &q) { return q.conj(); };
 inline double norm(const Quat &q) { return q.norm(); }
+inline double vnorm(const Quat &q) { return q.vnorm(); }
 inline double abs(const Quat &q) { return q.abs(); }
 
 Quat pow(const Quat &, int);
