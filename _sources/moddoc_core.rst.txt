@@ -2238,7 +2238,7 @@ Collection of timestreams indexed by logical detector ID
 	
 	``G3TimestreamMap( (G3TimestreamMap)arg2)``
 	
-	``G3TimestreamMap( (StringVector)keys, (object)data [, (G3Time)start=<spt3g.core.G3Time object at 0x7f74ecac5d90> [, (G3Time)stop=<spt3g.core.G3Time object at 0x7f74ecac5e00> [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None [, (int)compression_level=0 [, (bool)copy_data=True]]]]])`` :
+	``G3TimestreamMap( (StringVector)keys, (object)data [, (G3Time)start=<spt3g.core.G3Time object at 0x7f5785855d90> [, (G3Time)stop=<spt3g.core.G3Time object at 0x7f5785855e00> [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None [, (int)compression_level=0 [, (bool)copy_data=True]]]]])`` :
 	    Create a timestream map from a numpy array or other numeric python iterable. Each row of the 2D input array will correspond to a single timestream, with the key set to the correspondingly-indexed entry of <keys>. If <copy_data> is True (default), the data will be copied into the output data structure. If False, the timestream map will provide a view into the given numpy array.
 	
 	``G3TimestreamMap( (list)arg2)`` :
@@ -2264,6 +2264,8 @@ Collection of timestreams indexed by logical detector ID
 * **n_samples**: Number of samples in the timestream. Equivalent to the length of one of the timestreams.
 
 * **units**: Units of the data in the timestream, stored as one of the members of core.G3TimestreamUnits.
+
+* **compression_level**: Level of FLAC compression used for this timestream map. This can only be non-zero if the timestream is in units of counts.
 
 * **dtype**: No Doc (Shame!)
 
@@ -2385,6 +2387,13 @@ Collection of timestreams indexed by logical detector ID
 
 ``Compactify( (G3TimestreamMap)arg1) -> None :``
     If member timestreams are stored non-contiguously, repack all data into a contiguous block. Requires timestreams be aligned and the same data type. Done implicitly by numpy.asarray().
+
+.. _spt3g.core.G3TimestreamMap.SetFLACCompression:
+
+**spt3g.core.G3TimestreamMap.SetFLACCompression**
+
+``SetFLACCompression( (G3TimestreamMap)arg1, (int)arg2) -> None :``
+    Pass True to turn on FLAC compression when serialized. FLAC compression only works if the timestreams are in units of counts.
 
 
 
