@@ -872,7 +872,8 @@ class ReprojectMaps(object):
 
     def __init__(self, map_stub=None, rebin=1, interp=False):
         assert map_stub is not None, "map_stub argument required"
-        self.stub = map_stub
+        self.stub = map_stub.clone(False)
+        self.stub.pol_type = None
         self.rebin = rebin
         self.interp = interp
 
