@@ -868,14 +868,18 @@ class ReprojectMaps(object):
     interp : bool
         If True, use bilinear interpolation to extract values from the input
         map.  Otherwise, the nearest-neighbor value is used.
+    weighted : bool
+        If True (default), ensure that maps have had weights applied before
+        reprojection.  Otherwise, reproject maps without checking the weights.
     """
 
-    def __init__(self, map_stub=None, rebin=1, interp=False):
+    def __init__(self, map_stub=None, rebin=1, interp=False, weighted=True):
         assert map_stub is not None, "map_stub argument required"
         self.stub = map_stub.clone(False)
         self.stub.pol_type = None
         self.rebin = rebin
         self.interp = interp
+        self.weighted = weighted
 
     def __call__(self, frame):
         if isinstance(frame, core.G3Frame) and frame.type != core.G3FrameType.Map:
@@ -885,6 +889,9 @@ class ReprojectMaps(object):
             raise RuntimeError(
                 "Coordinate rotation of polarized maps is not implemented"
             )
+
+        if self.weighted:
+            ApplyWeights(frame)
 
         if "U" in frame and not self.stub.polarized:
             self.stub.pol_conv = frame["U"].pol_conv
