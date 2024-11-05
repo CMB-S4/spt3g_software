@@ -1317,7 +1317,7 @@ under their respective names.
 
 
 *Definition:*
-        ``LocalToAstronomicalPointing(frame, az_timestream='BoresightAz', el_timestream='BoresightEl', ra_timestream='BoresightRa', dec_timestream='BoresightDec', Telescope=<EarthLocation (710.21505704, -701.59071905, -6359587.23641261) m>)``
+        ``LocalToAstronomicalPointing(frame, az_timestream='BoresightAz', el_timestream='BoresightEl', ra_timestream='BoresightRa', dec_timestream='BoresightDec', Telescope='spt')``
 
 
 
@@ -1884,7 +1884,7 @@ declination.
 	az, el : np.ndarray or G3Timestream
 	    Array of local coordinates. If inputs are G3Timestream objects,
 	    G3Timestreams are also returned.
-	location : astropy.coordinates.EarthLocation instance
+	location : str or astropy.coordinates.EarthLocation instance
 	    The telescope location on Earth.
 	mjd : np.ndarray
 	    An array of times for each az/el sample.  If input az and el
@@ -1894,7 +1894,7 @@ declination.
 	ra, dec : np.ndarray or G3Timestream
 
 *Definition:*
-        ``convert_azel_to_radec(az, el, location=<EarthLocation (710.21505704, -701.59071905, -6359587.23641261) m>, mjd=None)``
+        ``convert_azel_to_radec(az, el, location='spt', mjd=None)``
 
 
 
@@ -1931,7 +1931,7 @@ azimuth and elevation.
 	ra, dec : np.ndarray or G3Timestream
 	    Array of Equatorial sky coordinates. If inputs are G3Timestream
 	    objects, G3Timestreams are also returned.
-	location : astropy.coordinates.EarthLocation instance
+	location : str or astropy.coordinates.EarthLocation instance
 	    The telescope location on Earth.
 	mjd : np.ndarray
 	    An array of times for each ra/dec sample.  If input ra and dec
@@ -1941,7 +1941,7 @@ azimuth and elevation.
 	az, el : np.ndarray or G3Timestream
 
 *Definition:*
-        ``convert_radec_to_azel(ra, dec, location=<EarthLocation (710.21505704, -701.59071905, -6359587.23641261) m>, mjd=None)``
+        ``convert_radec_to_azel(ra, dec, location='spt', mjd=None)``
 
 
 

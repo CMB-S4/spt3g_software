@@ -965,7 +965,7 @@ stored in the frame under their respective names.</p>
 of the telescope into RA and Declination timestreams, stored in the frame
 under their respective names.</p>
 <dl class="simple">
-<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">LocalToAstronomicalPointing(frame,</span> <span class="pre">az_timestream='BoresightAz',</span> <span class="pre">el_timestream='BoresightEl',</span> <span class="pre">ra_timestream='BoresightRa',</span> <span class="pre">dec_timestream='BoresightDec',</span> <span class="pre">Telescope=&lt;EarthLocation</span> <span class="pre">(710.21505704,</span> <span class="pre">-701.59071905,</span> <span class="pre">-6359587.23641261)</span> <span class="pre">m&gt;)</span></code></p>
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">LocalToAstronomicalPointing(frame,</span> <span class="pre">az_timestream='BoresightAz',</span> <span class="pre">el_timestream='BoresightEl',</span> <span class="pre">ra_timestream='BoresightRa',</span> <span class="pre">dec_timestream='BoresightDec',</span> <span class="pre">Telescope='spt')</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-maps-coordsysmodules-addlocaltransrotations"><strong>spt3g.maps.coordsysmodules.AddLocalTransRotations</strong></p>
@@ -1369,7 +1369,7 @@ declination.</p>
 <dt>az, el<span class="classifier">np.ndarray or G3Timestream</span></dt><dd><p>Array of local coordinates. If inputs are G3Timestream objects,
 G3Timestreams are also returned.</p>
 </dd>
-<dt>location<span class="classifier">astropy.coordinates.EarthLocation instance</span></dt><dd><p>The telescope location on Earth.</p>
+<dt>location<span class="classifier">str or astropy.coordinates.EarthLocation instance</span></dt><dd><p>The telescope location on Earth.</p>
 </dd>
 <dt>mjd<span class="classifier">np.ndarray</span></dt><dd><p>An array of times for each az/el sample.  If input az and el
 are not G3Timestreams, this argument is required.</p>
@@ -1378,7 +1378,7 @@ are not G3Timestreams, this argument is required.</p>
 </dd>
 <dt><em>Returns:</em></dt><dd><p>ra, dec : np.ndarray or G3Timestream</p>
 </dd>
-<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">convert_azel_to_radec(az,</span> <span class="pre">el,</span> <span class="pre">location=&lt;EarthLocation</span> <span class="pre">(710.21505704,</span> <span class="pre">-701.59071905,</span> <span class="pre">-6359587.23641261)</span> <span class="pre">m&gt;,</span> <span class="pre">mjd=None)</span></code></p>
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">convert_azel_to_radec(az,</span> <span class="pre">el,</span> <span class="pre">location='spt',</span> <span class="pre">mjd=None)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-maps-azel-convert-gal-to-radec"><strong>spt3g.maps.azel.convert_gal_to_radec</strong></p>
@@ -1404,7 +1404,7 @@ azimuth and elevation.</p>
 <dt>ra, dec<span class="classifier">np.ndarray or G3Timestream</span></dt><dd><p>Array of Equatorial sky coordinates. If inputs are G3Timestream
 objects, G3Timestreams are also returned.</p>
 </dd>
-<dt>location<span class="classifier">astropy.coordinates.EarthLocation instance</span></dt><dd><p>The telescope location on Earth.</p>
+<dt>location<span class="classifier">str or astropy.coordinates.EarthLocation instance</span></dt><dd><p>The telescope location on Earth.</p>
 </dd>
 <dt>mjd<span class="classifier">np.ndarray</span></dt><dd><p>An array of times for each ra/dec sample.  If input ra and dec
 are not G3Timestreams, this argument is required.</p>
@@ -1413,7 +1413,7 @@ are not G3Timestreams, this argument is required.</p>
 </dd>
 <dt><em>Returns:</em></dt><dd><p>az, el : np.ndarray or G3Timestream</p>
 </dd>
-<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">convert_radec_to_azel(ra,</span> <span class="pre">dec,</span> <span class="pre">location=&lt;EarthLocation</span> <span class="pre">(710.21505704,</span> <span class="pre">-701.59071905,</span> <span class="pre">-6359587.23641261)</span> <span class="pre">m&gt;,</span> <span class="pre">mjd=None)</span></code></p>
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">convert_radec_to_azel(ra,</span> <span class="pre">dec,</span> <span class="pre">location='spt',</span> <span class="pre">mjd=None)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-maps-azel-convert-radec-to-gal"><strong>spt3g.maps.azel.convert_radec_to_gal</strong></p>
