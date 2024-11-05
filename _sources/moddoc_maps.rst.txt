@@ -1735,9 +1735,12 @@ currently implemented.
 	interp : bool
 	    If True, use bilinear interpolation to extract values from the input
 	    map.  Otherwise, the nearest-neighbor value is used.
+	weighted : bool
+	    If True (default), ensure that maps have had weights applied before
+	    reprojection.  Otherwise, reproject maps without checking the weights.
 
 *Constructor:*
-	``ReprojectMaps(map_stub=None, rebin=1, interp=False)``
+	``ReprojectMaps(map_stub=None, rebin=1, interp=False, weighted=True)``
 
 
 

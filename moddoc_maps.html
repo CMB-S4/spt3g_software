@@ -1280,9 +1280,12 @@ pixel’s Nyquist.</p>
 <dt>interp<span class="classifier">bool</span></dt><dd><p>If True, use bilinear interpolation to extract values from the input
 map.  Otherwise, the nearest-neighbor value is used.</p>
 </dd>
+<dt>weighted<span class="classifier">bool</span></dt><dd><p>If True (default), ensure that maps have had weights applied before
+reprojection.  Otherwise, reproject maps without checking the weights.</p>
+</dd>
 </dl>
 </dd>
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">ReprojectMaps(map_stub=None,</span> <span class="pre">rebin=1,</span> <span class="pre">interp=False)</span></code></p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">ReprojectMaps(map_stub=None,</span> <span class="pre">rebin=1,</span> <span class="pre">interp=False,</span> <span class="pre">weighted=True)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-maps-map-modules-setpolconv"><strong>spt3g.maps.map_modules.SetPolConv</strong></p>
