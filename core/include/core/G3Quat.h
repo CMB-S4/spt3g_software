@@ -57,7 +57,6 @@ namespace cereal {
 	template <class A> struct specialize<A, Quat, cereal::specialization::member_serialize> {};
 }
 
-G3_POINTERS(Quat);
 CEREAL_CLASS_VERSION(Quat, 1);
 
 Quat operator *(double, const Quat &);

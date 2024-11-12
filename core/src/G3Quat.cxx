@@ -711,16 +711,16 @@ Quat_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 
 	bp::handle<> self(bp::borrowed(obj));
 	bp::object selfobj(self);
-	bp::extract<QuatPtr> ext(selfobj);
+	bp::extract<Quat &> ext(selfobj);
 	if (!ext.check()) {
 		PyErr_SetString(PyExc_ValueError, "Invalid quat");
 		view->obj = NULL;
 		return -1;
 	}
-	QuatPtr q = ext();
+	Quat &q = ext();
 
 	view->obj = obj;
-	view->buf = (void*)&(*q);
+	view->buf = (void*)&q;
 	view->len = 4 * sizeof(double);
 	view->readonly = 0;
 	view->itemsize = sizeof(double);
@@ -980,7 +980,6 @@ PYBINDINGS("core")
 	     .def("dot3", &Quat::dot3, "Dot product of last three entries")
 	     .def("cross3", &Quat::cross3, "Cross product of last three entries")
 	;
-	implicitly_convertible<QuatPtr, QuatConstPtr>();
 	PyTypeObject *qclass = (PyTypeObject *)q.ptr();
 	quat_bufferprocs.bf_getbuffer = Quat_getbuffer;
 	qclass->tp_as_buffer = &quat_bufferprocs;
