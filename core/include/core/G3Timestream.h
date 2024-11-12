@@ -203,6 +203,7 @@ public:
 	G3Timestream::TimestreamUnits GetUnits() const;
 	void SetUnits(G3Timestream::TimestreamUnits units);
 	/// FLAC compression levels range from 0-9. 0 means do not use FLAC.
+	uint8_t GetCompressionLevel() const;
 	void SetFLACCompression(int compression_level);
 
 	// Compact underlying data storage into a contiguous 2D block.

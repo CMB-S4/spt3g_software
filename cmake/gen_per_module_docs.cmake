@@ -5,6 +5,11 @@ file(GLOB cmake_projects RELATIVE ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}/*/CMak
 foreach(d ${cmake_projects})
 	get_filename_component(proj ${d} PATH)
 	get_filename_component(pname ${proj} NAME_WE)
+	# Skip any excluded projects
+	if(EXISTS "${CMAKE_SOURCE_DIR}/${pname}/.nodocs")
+		file(REMOVE "${CMAKE_SOURCE_DIR}/doc/moddoc_${pname}.rst")
+		continue()
+	endif()
 	# Copy header if exists, or create empty rst
 	if(EXISTS "${CMAKE_SOURCE_DIR}/${pname}/README.rst")
 		file(READ "${CMAKE_SOURCE_DIR}/${pname}/README.rst" MOD_HEADER)

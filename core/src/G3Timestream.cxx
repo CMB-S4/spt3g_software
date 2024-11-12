@@ -744,6 +744,14 @@ void G3TimestreamMap::SetUnits(G3Timestream::TimestreamUnits units)
 		ts.second->units = units;
 }
 
+uint8_t G3TimestreamMap::GetCompressionLevel() const
+{
+	if (begin() == end())
+		return 0;
+
+	return begin()->second->use_flac_;
+}
+
 void G3TimestreamMap::SetFLACCompression(int compression_level)
 {
 	for (auto& ts : *this)
@@ -1372,6 +1380,10 @@ PYBINDINGS("core") {
 	       "If member timestreams are stored non-contiguously, repack all "
 	       "data into a contiguous block. Requires timestreams be aligned "
 	       "and the same data type. Done implicitly by numpy.asarray().")
+	    .def("SetFLACCompression", &G3TimestreamMap::SetFLACCompression,
+	      "Pass True to turn on FLAC compression when serialized. "
+	      "FLAC compression only works if the timestreams are in units of "
+	      "counts.")
 	    .add_property("start", &G3TimestreamMap::GetStartTime,
 	      &G3TimestreamMap::SetStartTime,
 	      "Time of the first sample in the time stream")
@@ -1384,8 +1396,13 @@ PYBINDINGS("core") {
 	      "Number of samples in the timestream. Equivalent to the length "
 	      "of one of the timestreams.")
 	    .add_property("units", &G3TimestreamMap::GetUnits,
+	      &G3TimestreamMap::SetUnits,
 	      "Units of the data in the timestream, stored as one of the "
 	      "members of core.G3TimestreamUnits.")
+	    .add_property("compression_level", &G3TimestreamMap::GetCompressionLevel,
+	      &G3TimestreamMap::SetFLACCompression,
+	      "Level of FLAC compression used for this timestream map. "
+	      "This can only be non-zero if the timestream is in units of counts.")
 	;
 	register_pointer_conversions<G3TimestreamMap>();
 

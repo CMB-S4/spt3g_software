@@ -1,24 +1,7 @@
 import numpy as np
 import os
-import astropy.coordinates, astropy.units, astropy.time
-from astropy.utils import iers
 
 from .. import core
-
-spt = astropy.coordinates.EarthLocation(
-    lat=-89.991066 * astropy.units.deg,
-    lon=-44.65 * astropy.units.deg,
-    height=2835.0 * astropy.units.meter,
-)
-
-try:
-    if os.getenv("SPT3G_IERS_AUTO_URL"):
-        iers.conf.iers_auto_url = os.getenv("SPT3G_IERS_AUTO_URL")
-    if os.getenv("SPT3G_IERS_REMOTE_TIMEOUT"):
-        iers.conf.remote_timeout = float(os.getenv("SPT3G_IERS_REMOTE_TIMEOUT"))
-except:
-    pass
-
 
 __all__ = [
     "convert_azel_to_radec",
@@ -30,32 +13,85 @@ __all__ = [
 ]
 
 
-def check_iers(g3_time):
+def get_location(location="spt"):
+    """
+    Return the astropy EarthLocation for the given location name.
+
+    Arguments
+    ---------
+    location : str or EarthLocation instance
+        If a string, must be a recognized location name.  Currently
+        only "spt" is supported.
+    """
+    from astropy.coordinates import EarthLocation
+    import astropy.units
+
+    if isinstance(location, EarthLocation):
+        return location
+
+    location = str(location).lower()
+    if location == "spt":
+        return EarthLocation(
+            lat=-89.991066 * astropy.units.deg,
+            lon=-44.65 * astropy.units.deg,
+            height=2835.0 * astropy.units.meter,
+        )
+
+    raise NotImplementedError
+
+
+iers_checked = False
+
+
+def check_iers(mjd):
     """
     Check whether IERS calculations will work, and load an IERS database file
     from backup if all else fails.
 
     Arguments
     ---------
-    g3_time : G3Time instance
-        Most recent time for which an IERS calculation must be computed.
+    mjd : Array-like
+        MJD timestamps for which an IERS calculation must be computed.
+
+    Returns
+    -------
+    t : astropy.time.Time instance
+        Time instance for the input MJD(s).
     """
-    t = astropy.time.Time(g3_time.mjd, format="mjd")
+    from astropy.utils import iers
+    import astropy.time
+
+    global iers_checked
+    if iers_checked:
+        return astropy.time.Time(mjd, format="mjd")
+
+    try:
+        if os.getenv("SPT3G_IERS_AUTO_URL"):
+            iers.conf.iers_auto_url = os.getenv("SPT3G_IERS_AUTO_URL")
+        if os.getenv("SPT3G_IERS_REMOTE_TIMEOUT"):
+            iers.conf.remote_timeout = float(os.getenv("SPT3G_IERS_REMOTE_TIMEOUT"))
+    except:
+        pass
+
+    mjd1 = np.atleast_1d(mjd)[-1]
+    t1 = astropy.time.Time(mjd1, format="mjd")
 
     # check if accessing the IERS table outright works.
     try:
-        t.ut1
-        return
+        t1.ut1
+        iers_checked = True
+        return astropy.time.Time(mjd, format="mjd")
     except:
         pass
 
     # if that fails, allow extrapolation
     iers.conf.auto_max_age = None
-    t = astropy.time.Time(g3_time.mjd, format="mjd")
+    t1 = astropy.time.Time(mjd1, format="mjd")
     try:
-        t.ut1
+        t1.ut1
         core.log_warn("IERS auto update failed, allowing extrapolation", unit="IERS")
-        return
+        iers_checked = True
+        return astropy.time.Time(mjd, format="mjd")
     except:
         pass
 
@@ -63,13 +99,40 @@ def check_iers(g3_time):
     fname = os.path.join(os.path.dirname(os.path.abspath(__file__)), "finals2000A.all")
     iers.conf.auto_download = False
     iers.IERS.iers_table = iers.IERS_A.open(fname)
-    t = astropy.time.Time(g3_time.mjd, format="mjd")
-    t.ut1
+    t1 = astropy.time.Time(mjd1, format="mjd")
+    t1.ut1
     core.log_warn("Using IERS table from local cache {}".format(fname), unit="IERS")
+    iers_checked = True
+    return astropy.time.Time(mjd, format="mjd")
+
+
+def convert_deg(d, system="g3"):
+    """
+    Convert the input array to the appropriate system of units.
+
+    Arguments
+    ---------
+    d : array_like
+        Data vector
+    system : str
+        System to convert to, either "g3" or "astropy".  Assumes conversion from
+        the other system.
+    """
+    import astropy.units
+
+    system = str(system).lower()
+    if system == "astropy":
+        c = astropy.units.deg / core.G3Units.deg
+    elif system == "g3":
+        c = core.G3Units.deg / astropy.units.deg
+    else:
+        raise NotImplementedError
+
+    return np.asarray(d) * c
 
 
 @core.usefulfunc
-def convert_azel_to_radec(az, el, location=spt, mjd=None):
+def convert_azel_to_radec(az, el, location="spt", mjd=None):
     """
     Convert timestreams of local azimuth and elevation to right ascension and
     declination.
@@ -79,7 +142,7 @@ def convert_azel_to_radec(az, el, location=spt, mjd=None):
     az, el : np.ndarray or G3Timestream
         Array of local coordinates. If inputs are G3Timestream objects,
         G3Timestreams are also returned.
-    location : astropy.coordinates.EarthLocation instance
+    location : str or astropy.coordinates.EarthLocation instance
         The telescope location on Earth.
     mjd : np.ndarray
         An array of times for each az/el sample.  If input az and el
@@ -89,13 +152,14 @@ def convert_azel_to_radec(az, el, location=spt, mjd=None):
     -------
     ra, dec : np.ndarray or G3Timestream
     """
+    import astropy.coordinates
 
     singleton = False
     if isinstance(az, core.G3Timestream):
         assert az.start == el.start
         assert az.stop == el.stop
         assert az.n_samples == el.n_samples
-        t = astropy.time.Time(np.asarray([i.mjd for i in az.times]), format="mjd")
+        mjd = np.asarray([i.mjd for i in az.times])
     else:
         try:
             len(az)
@@ -106,9 +170,8 @@ def convert_azel_to_radec(az, el, location=spt, mjd=None):
             el = np.atleast_1d(el)
             mjd = np.atleast_1d(mjd)
         assert len(az) == len(el)
-        t = astropy.time.Time(mjd, format="mjd")
 
-    check_iers(t[-1])
+    t = check_iers(mjd)
 
     # record locations of bad elevation values to mark them later
     badel_inds = np.where(
@@ -117,16 +180,16 @@ def convert_azel_to_radec(az, el, location=spt, mjd=None):
     el[badel_inds] = 0.0 * core.G3Units.deg
 
     k = astropy.coordinates.AltAz(
-        az=np.asarray(az) / core.G3Units.deg * astropy.units.deg,
-        alt=np.asarray(el) / core.G3Units.deg * astropy.units.deg,
+        az=convert_deg(az, "astropy"),
+        alt=convert_deg(el, "astropy"),
         obstime=t,
-        location=location,
+        location=get_location(location),
         pressure=0,
     )
     kt = k.transform_to(astropy.coordinates.FK5())
 
-    ra = np.asarray(kt.ra / astropy.units.deg) * core.G3Units.deg
-    dec = np.asarray(kt.dec / astropy.units.deg) * core.G3Units.deg
+    ra = convert_deg(kt.ra, "g3")
+    dec = convert_deg(kt.dec, "g3")
     dec[badel_inds] = np.nan
 
     if isinstance(az, core.G3Timestream):
@@ -142,7 +205,7 @@ def convert_azel_to_radec(az, el, location=spt, mjd=None):
 
 
 @core.usefulfunc
-def convert_radec_to_azel(ra, dec, location=spt, mjd=None):
+def convert_radec_to_azel(ra, dec, location="spt", mjd=None):
     """
     Convert timestreams of right ascension and declination to local
     azimuth and elevation.
@@ -152,7 +215,7 @@ def convert_radec_to_azel(ra, dec, location=spt, mjd=None):
     ra, dec : np.ndarray or G3Timestream
         Array of Equatorial sky coordinates. If inputs are G3Timestream
         objects, G3Timestreams are also returned.
-    location : astropy.coordinates.EarthLocation instance
+    location : str or astropy.coordinates.EarthLocation instance
         The telescope location on Earth.
     mjd : np.ndarray
         An array of times for each ra/dec sample.  If input ra and dec
@@ -162,13 +225,14 @@ def convert_radec_to_azel(ra, dec, location=spt, mjd=None):
     -------
     az, el : np.ndarray or G3Timestream
     """
+    import astropy.coordinates
 
     singleton = False
     if isinstance(ra, core.G3Timestream):
         assert ra.start == dec.start
         assert ra.stop == dec.stop
         assert ra.n_samples == dec.n_samples
-        t = astropy.time.Time(np.asarray([i.mjd for i in ra.times]), format="mjd")
+        mjd = np.asarray([i.mjd for i in ra.times])
     else:
         try:
             len(ra)
@@ -179,20 +243,22 @@ def convert_radec_to_azel(ra, dec, location=spt, mjd=None):
             dec = np.atleast_1d(dec)
             mjd = np.atleast_1d(mjd)
         assert len(ra) == len(dec)
-        t = astropy.time.Time(mjd, format="mjd")
 
-    check_iers(t[-1])
+    t = check_iers(mjd)
 
     k = astropy.coordinates.FK5(
-        ra=np.asarray(ra) / core.G3Units.deg * astropy.units.deg,
-        dec=np.asarray(dec) / core.G3Units.deg * astropy.units.deg,
+        ra=convert_deg(ra, "astropy"), dec=convert_deg(dec, "astropy"),
     )
     kt = k.transform_to(
-        astropy.coordinates.AltAz(obstime=t, location=location, pressure=0)
+        astropy.coordinates.AltAz(
+            obstime=t,
+            location=get_location(location),
+            pressure=0,
+        )
     )
 
-    az = np.asarray(kt.az / astropy.units.deg) * core.G3Units.deg
-    el = np.asarray(kt.alt / astropy.units.deg) * core.G3Units.deg
+    az = convert_deg(kt.az, "g3")
+    el = convert_deg(kt.alt, "g3")
 
     if isinstance(ra, core.G3Timestream):
         az = core.G3Timestream(az)
@@ -222,6 +288,7 @@ def convert_radec_to_gal(ra, dec):
     -------
     glon, glat : np.ndarray or G3Timestream
     """
+    import astropy.coordinates
 
     singleton = False
     if isinstance(ra, core.G3Timestream):
@@ -239,13 +306,12 @@ def convert_radec_to_gal(ra, dec):
         assert len(ra) == len(dec)
 
     k = astropy.coordinates.FK5(
-        ra=np.asarray(ra) / core.G3Units.deg * astropy.units.deg,
-        dec=np.asarray(dec) / core.G3Units.deg * astropy.units.deg,
+        ra=convert_deg(ra, "astropy"), dec=convert_deg(dec, "astropy"),
     )
     kt = k.transform_to(astropy.coordinates.Galactic())
 
-    glon = np.asarray(kt.l / astropy.units.deg) * core.G3Units.deg
-    glat = np.asarray(kt.b / astropy.units.deg) * core.G3Units.deg
+    glon = convert_deg(kt.l, "g3")
+    glat = convert_deg(kt.b, "g3")
 
     if isinstance(ra, core.G3Timestream):
         glon = core.G3Timestream(glon)
@@ -275,6 +341,7 @@ def convert_gal_to_radec(glon, glat):
     -------
     ra, dec : np.ndarray or G3Timestream
     """
+    import astropy.coordinates
 
     singleton = False
     if isinstance(glon, core.G3Timestream):
@@ -292,13 +359,12 @@ def convert_gal_to_radec(glon, glat):
         assert len(glon) == len(glat)
 
     k = astropy.coordinates.Galactic(
-        l=np.asarray(glon) / core.G3Units.deg * astropy.units.deg,
-        b=np.asarray(glat) / core.G3Units.deg * astropy.units.deg,
+        l=convert_deg(glon, "astropy"), b=convert_deg(glat, "astropy"),
     )
     kt = k.transform_to(astropy.coordinates.FK5())
 
-    ra = np.asarray(kt.ra / astropy.units.deg) * core.G3Units.deg
-    dec = np.asarray(kt.dec / astropy.units.deg) * core.G3Units.deg
+    ra = convert_deg(kt.ra, "g3")
+    dec = convert_deg(kt.dec, "g3")
 
     if isinstance(ra, core.G3Timestream):
         ra = core.G3Timestream(ra)
@@ -319,7 +385,7 @@ def LocalToAstronomicalPointing(
     el_timestream="BoresightEl",
     ra_timestream="BoresightRa",
     dec_timestream="BoresightDec",
-    Telescope=spt,
+    Telescope="spt",
 ):
     """
     Converts a set of timestreams in Scan frames representing Az and El pointing
