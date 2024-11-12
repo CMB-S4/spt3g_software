@@ -360,7 +360,7 @@ operator *(double b, const G3VectorQuat &a)
 G3VectorQuat &
 operator *=(G3VectorQuat &a, double b)
 {
-	for (Quat &i: a)
+	for (auto &i: a)
 		i *= b;
 	return a;
 }
@@ -414,7 +414,7 @@ operator /(const G3VectorQuat &a, const G3VectorQuat &b)
 G3VectorQuat &
 operator /=(G3VectorQuat &a, double b)
 {
-	for (Quat &i: a)
+	for (auto &i: a)
 		i /= b;
 	return a;
 }
@@ -476,7 +476,7 @@ operator *(const Quat &b, const G3VectorQuat &a)
 G3VectorQuat &
 operator *=(G3VectorQuat &a, const Quat &b)
 {
-	for (Quat &i: a)
+	for (auto &i: a)
 		i *= b;
 	return a;
 }
@@ -551,7 +551,7 @@ operator *(double b, const G3TimestreamQuat &a)
 G3TimestreamQuat &
 operator *=(G3TimestreamQuat &a, double b)
 {
-	for (Quat &i: a)
+	for (auto &i: a)
 		i *= b;
 	return a;
 }
@@ -610,7 +610,7 @@ operator /(const G3TimestreamQuat &a, const G3VectorQuat &b)
 G3TimestreamQuat &
 operator /=(G3TimestreamQuat &a, double b)
 {
-	for (Quat &i: a)
+	for (auto &i: a)
 		i /= b;
 	return a;
 }
@@ -675,7 +675,7 @@ operator *(const Quat &b, const G3TimestreamQuat &a)
 G3TimestreamQuat &
 operator *=(G3TimestreamQuat &a, const Quat &b)
 {
-	for (Quat &i: a)
+	for (auto &i: a)
 		i *= b;
 	return a;
 }

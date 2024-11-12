@@ -620,7 +620,7 @@ FlatSkyProjection::QueryDisc(const Quat &q, double radius) const
 		double phi = i * step;
 		double c = COS(phi);
 		double s = SIN(phi);
-		Quat qv = Quat(c, pva * s, pvb * s, pvc * s);
+		Quat qv(c, pva * s, pvb * s, pvc * s);
 		auto xy = QuatToXY(qv * p * ~qv);
 		ssize_t fx = std::floor(xy[0]);
 		ssize_t cx = std::ceil(xy[0]);

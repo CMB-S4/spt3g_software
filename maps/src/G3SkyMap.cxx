@@ -187,7 +187,7 @@ G3SkyMap::PixelsToAngles(const std::vector<size_t> & pixels,
 size_t
 G3SkyMap::AngleToPixel(double alpha, double delta) const
 {
-	Quat q = ang_to_quat(alpha, delta);
+	auto q = ang_to_quat(alpha, delta);
 
 	return QuatToPixel(q);
 }
@@ -195,7 +195,7 @@ G3SkyMap::AngleToPixel(double alpha, double delta) const
 std::vector<double>
 G3SkyMap::PixelToAngle(size_t pixel) const
 {
-	Quat q = PixelToQuat(pixel);
+	auto q = PixelToQuat(pixel);
 	double alpha, delta;
 	quat_to_ang(q, alpha, delta);
 
@@ -349,7 +349,7 @@ void
 G3SkyMap::GetInterpPixelsWeights(double alpha, double delta,
     std::vector<size_t> & pixels, std::vector<double> & weights) const
 {
-	Quat q = ang_to_quat(alpha, delta);
+	auto q = ang_to_quat(alpha, delta);
 	GetInterpPixelsWeights(q, pixels, weights);
 }
 
@@ -383,7 +383,7 @@ G3SkyMap::GetInterpPrecalc(const std::vector<size_t> & pix,
 double
 G3SkyMap::GetInterpValue(double alpha, double delta) const
 {
-	Quat q = ang_to_quat(alpha, delta);
+	auto q = ang_to_quat(alpha, delta);
 	return GetInterpValue(q);
 }
 
@@ -423,14 +423,14 @@ G3SkyMap::GetInterpValues(const G3VectorQuat & quats) const
 std::vector<size_t>
 G3SkyMap::QueryDisc(double alpha, double delta, double radius) const
 {
-	Quat q = ang_to_quat(alpha, delta);
+	auto q = ang_to_quat(alpha, delta);
 	return QueryDisc(q, radius);
 }
 
 std::vector<size_t>
 G3SkyMap::QueryAlphaEllipse(double alpha ,double delta, double a, double b) const
 {
-	Quat q = ang_to_quat(alpha, delta);
+	auto q = ang_to_quat(alpha, delta);
 	return QueryAlphaEllipse(q, a, b);
 }
 
@@ -446,9 +446,9 @@ G3SkyMap::QueryAlphaEllipse(const Quat &q, double a, double b) const
 	double da = ACOS(COS(rmaj) / COS(rmin)) / cd;
 
 	// focus locations
-	Quat qda = get_origin_rotator(da, 0);
-	Quat ql = qda * q * ~qda;
-	Quat qr = ~qda * q * qda;
+	auto qda = get_origin_rotator(da, 0);
+	auto ql = qda * q * ~qda;
+	auto qr = ~qda * q * qda;
 
 	// narrow search to pixels within the major disc
 	auto disc = QueryDisc(q, rmaj);
@@ -456,7 +456,7 @@ G3SkyMap::QueryAlphaEllipse(const Quat &q, double a, double b) const
 	// narrow further to locus of points within ellipse
 	std::vector<size_t> pixels;
 	for (auto i: disc) {
-		Quat qp = PixelToQuat(i);
+		auto qp = PixelToQuat(i);
 		double d = quat_ang_sep(qp, ql) + quat_ang_sep(qp, qr);
 		if (d < 2 * rmaj)
 			pixels.push_back(i);
