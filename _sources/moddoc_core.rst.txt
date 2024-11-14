@@ -47,6 +47,8 @@ Frame Objects in spt3g.core
 
 * spt3g.core.G3PipelineInfo_
 
+* spt3g.core.G3Quat_
+
 * spt3g.core.G3String_
 
 * spt3g.core.G3Time_
@@ -1961,6 +1963,21 @@ Stored configuration of a pipeline, including software version information
 
 
 
+.. _spt3g.core.G3Quat:
+
+spt3g.core.G3Quat
+-----------------
+
+Serializable quaternion
+
+*Constructors:*
+	``G3Quat( (Quat)arg2)``
+	
+	``G3Quat( (G3Quat)arg2)``
+
+
+
+
 .. _spt3g.core.G3String:
 
 spt3g.core.G3String
@@ -2238,7 +2255,7 @@ Collection of timestreams indexed by logical detector ID
 	
 	``G3TimestreamMap( (G3TimestreamMap)arg2)``
 	
-	``G3TimestreamMap( (StringVector)keys, (object)data [, (G3Time)start=<spt3g.core.G3Time object at 0x7f70f0cc5d90> [, (G3Time)stop=<spt3g.core.G3Time object at 0x7f70f0cc5e00> [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None [, (int)compression_level=0 [, (bool)copy_data=True]]]]])`` :
+	``G3TimestreamMap( (StringVector)keys, (object)data [, (G3Time)start=<spt3g.core.G3Time object at 0x7f85ced09150> [, (G3Time)stop=<spt3g.core.G3Time object at 0x7f85ced091c0> [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None [, (int)compression_level=0 [, (bool)copy_data=True]]]]])`` :
 	    Create a timestream map from a numpy array or other numeric python iterable. Each row of the 2D input array will correspond to a single timestream, with the key set to the correspondingly-indexed entry of <keys>. If <copy_data> is True (default), the data will be copied into the output data structure. If False, the timestream map will provide a view into the given numpy array.
 	
 	``G3TimestreamMap( (list)arg2)`` :
@@ -2415,6 +2432,8 @@ Timestream of quaternions. Identical to a G3VectorQuat except for the addition o
 
 *Members:*
 
+* **real**: Return the real (scalar) part of each quaternion
+
 * **start**: Time of the first sample in the time stream
 
 * **stop**: Time of the final sample in the timestream
@@ -2422,6 +2441,16 @@ Timestream of quaternions. Identical to a G3VectorQuat except for the addition o
 * **sample_rate**: Computed sample rate of the timestream.
 
 * **n_samples**: Number of samples in the timestream. Equivalent to len(ts)
+
+
+*Methods:*
+
+.. _spt3g.core.G3TimestreamQuat.abs:
+
+**spt3g.core.G3TimestreamQuat.abs**
+
+``abs( (G3TimestreamQuat)arg1) -> G3Timestream :``
+    Return the Euclidean norm of each quaternion
 
 
 
@@ -2589,6 +2618,11 @@ List of quaternions. Convertible to a 4xN numpy array. Arithmetic operations on 
 
 
 
+*Members:*
+
+* **real**: Return the real (scalar) part of each quaternion
+
+
 *Methods:*
 
 .. _spt3g.core.G3VectorQuat.append:
@@ -2602,6 +2636,13 @@ List of quaternions. Convertible to a 4xN numpy array. Arithmetic operations on 
 **spt3g.core.G3VectorQuat.extend**
 
 ``extend( (G3VectorQuat)arg1, (object)arg2) -> None``
+
+.. _spt3g.core.G3VectorQuat.abs:
+
+**spt3g.core.G3VectorQuat.abs**
+
+``abs( (G3VectorQuat)arg1) -> G3VectorDouble :``
+    Return the Euclidean norm of each quaternion
 
 
 

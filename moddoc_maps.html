@@ -235,6 +235,20 @@
 <dt><code class="docutils literal notranslate"><span class="pre">pixel_to_xy(</span> <span class="pre">(FlatSkyMap)arg1,</span> <span class="pre">(UInt64Vector)pixel)</span> <span class="pre">-&gt;</span> <span class="pre">tuple</span> <span class="pre">:</span></code></dt><dd><p>Compute the flat 2D coordinates of the input pixel indices (vectorized)</p>
 </dd>
 </dl>
+<p id="spt3g-maps-flatskymap-xy-to-quat"><strong>spt3g.maps.FlatSkyMap.xy_to_quat</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">xy_to_quat(</span> <span class="pre">(FlatSkyMap)arg1,</span> <span class="pre">(float)x,</span> <span class="pre">(float)y)</span> <span class="pre">-&gt;</span> <span class="pre">Quat</span> <span class="pre">:</span></code></dt><dd><p>Compute the quaternion rotation of the input flat 2D coordinates</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">xy_to_quat(</span> <span class="pre">(FlatSkyMap)arg1,</span> <span class="pre">(DoubleVector)x,</span> <span class="pre">(DoubleVector)y)</span> <span class="pre">-&gt;</span> <span class="pre">G3VectorQuat</span> <span class="pre">:</span></code></dt><dd><p>Compute the quaternion rotations of the input flat 2D coordinates (vectorized)</p>
+</dd>
+</dl>
+<p id="spt3g-maps-flatskymap-quat-to-xy"><strong>spt3g.maps.FlatSkyMap.quat_to_xy</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">quat_to_xy(</span> <span class="pre">(FlatSkyMap)arg1,</span> <span class="pre">(Quat)quat)</span> <span class="pre">-&gt;</span> <span class="pre">DoubleVector</span> <span class="pre">:</span></code></dt><dd><p>Compute the flat 2D coordinates of the input quaternion rotation</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">quat_to_xy(</span> <span class="pre">(FlatSkyMap)arg1,</span> <span class="pre">(G3VectorQuat)quat)</span> <span class="pre">-&gt;</span> <span class="pre">tuple</span> <span class="pre">:</span></code></dt><dd><p>Compute the flat 2D coordinates of the input quaternion rotations (vectorized)</p>
+</dd>
+</dl>
 <p id="spt3g-maps-flatskymap-nonzero-pixels"><strong>spt3g.maps.FlatSkyMap.nonzero_pixels</strong></p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">nonzero_pixels(</span> <span class="pre">(FlatSkyMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">tuple</span> <span class="pre">:</span></code></dt><dd><p>Returns a list of the indices of the non-zero pixels in the map and a list of the values of those non-zero pixels.</p>
@@ -340,14 +354,14 @@ This class cannot be instantiated from Python</p>
 </dl>
 <p id="spt3g-maps-g3skymap-quat-to-pixel"><strong>spt3g.maps.G3SkyMap.quat_to_pixel</strong></p>
 <dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">quat_to_pixel(</span> <span class="pre">(G3SkyMap)arg1,</span> <span class="pre">(quat)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">int</span> <span class="pre">:</span></code></dt><dd><p>Compute the 1D pixel location of the given sky position, expressed as a quaternion rotation from the pole.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">quat_to_pixel(</span> <span class="pre">(G3SkyMap)arg1,</span> <span class="pre">(Quat)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">int</span> <span class="pre">:</span></code></dt><dd><p>Compute the 1D pixel location of the given sky position, expressed as a quaternion rotation from the pole.</p>
 </dd>
 <dt><code class="docutils literal notranslate"><span class="pre">quat_to_pixel(</span> <span class="pre">(G3SkyMap)arg1,</span> <span class="pre">(G3VectorQuat)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">UInt64Vector</span> <span class="pre">:</span></code></dt><dd><p>Compute the 1D pixel location for each of the sky coordinates (vectorized), expressed as quaternion rotations from the pole.</p>
 </dd>
 </dl>
 <p id="spt3g-maps-g3skymap-pixel-to-quat"><strong>spt3g.maps.G3SkyMap.pixel_to_quat</strong></p>
 <dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">pixel_to_quat(</span> <span class="pre">(G3SkyMap)arg1,</span> <span class="pre">(int)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">quat</span> <span class="pre">:</span></code></dt><dd><p>Compute the quaternion rotation from the pole corresponding to the given 1D pixel.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">pixel_to_quat(</span> <span class="pre">(G3SkyMap)arg1,</span> <span class="pre">(int)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">Quat</span> <span class="pre">:</span></code></dt><dd><p>Compute the quaternion rotation from the pole corresponding to the given 1D pixel.</p>
 </dd>
 <dt><code class="docutils literal notranslate"><span class="pre">pixel_to_quat(</span> <span class="pre">(G3SkyMap)arg1,</span> <span class="pre">(UInt64Vector)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">G3VectorQuat</span> <span class="pre">:</span></code></dt><dd><p>Compute the sky coordinates, expressed as quaternion rotations from the pole, for each of the given 1-D pixel coordinates.</p>
 </dd>
@@ -356,14 +370,14 @@ This class cannot be instantiated from Python</p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">query_disc(</span> <span class="pre">(G3SkyMap)arg1,</span> <span class="pre">(float)alpha,</span> <span class="pre">(float)delta,</span> <span class="pre">(float)radius)</span> <span class="pre">-&gt;</span> <span class="pre">UInt64Vector</span> <span class="pre">:</span></code></dt><dd><p>Return a list of pixel indices whose centers are located within a disc of the given radius at the given sky coordinates.</p>
 </dd>
-<dt><code class="docutils literal notranslate"><span class="pre">query_disc(</span> <span class="pre">(G3SkyMap)arg1,</span> <span class="pre">(quat)quat,</span> <span class="pre">(float)radius)</span> <span class="pre">-&gt;</span> <span class="pre">UInt64Vector</span> <span class="pre">:</span></code></dt><dd><p>Return a list of pixel indices whose centers are located within a disc of the given radius at the given sky coordinates.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">query_disc(</span> <span class="pre">(G3SkyMap)arg1,</span> <span class="pre">(Quat)quat,</span> <span class="pre">(float)radius)</span> <span class="pre">-&gt;</span> <span class="pre">UInt64Vector</span> <span class="pre">:</span></code></dt><dd><p>Return a list of pixel indices whose centers are located within a disc of the given radius at the given sky coordinates.</p>
 </dd>
 </dl>
 <p id="spt3g-maps-g3skymap-query-alpha-ellipse"><strong>spt3g.maps.G3SkyMap.query_alpha_ellipse</strong></p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">query_alpha_ellipse(</span> <span class="pre">(G3SkyMap)arg1,</span> <span class="pre">(float)alpha,</span> <span class="pre">(float)delta,</span> <span class="pre">(float)a,</span> <span class="pre">(float)b)</span> <span class="pre">-&gt;</span> <span class="pre">UInt64Vector</span> <span class="pre">:</span></code></dt><dd><p>Return a list of pixel indices whose centers are located within an ellipse extended in the alpha direction, at the given alpha and delta sky coordinates, with semimajor and semiminor axes a and b.</p>
 </dd>
-<dt><code class="docutils literal notranslate"><span class="pre">query_alpha_ellipse(</span> <span class="pre">(G3SkyMap)arg1,</span> <span class="pre">(quat)quat,</span> <span class="pre">(float)a,</span> <span class="pre">(float)b)</span> <span class="pre">-&gt;</span> <span class="pre">UInt64Vector</span> <span class="pre">:</span></code></dt><dd><p>Return a list of pixel indices whose centers are located within an ellipse extended in the alpha direction, at the given alpha and delta sky coordinates, with semimajor and semiminor axes a and b.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">query_alpha_ellipse(</span> <span class="pre">(G3SkyMap)arg1,</span> <span class="pre">(Quat)quat,</span> <span class="pre">(float)a,</span> <span class="pre">(float)b)</span> <span class="pre">-&gt;</span> <span class="pre">UInt64Vector</span> <span class="pre">:</span></code></dt><dd><p>Return a list of pixel indices whose centers are located within an ellipse extended in the alpha direction, at the given alpha and delta sky coordinates, with semimajor and semiminor axes a and b.</p>
 </dd>
 </dl>
 <p id="spt3g-maps-g3skymap-get-interp-values"><strong>spt3g.maps.G3SkyMap.get_interp_values</strong></p>
@@ -1524,7 +1538,7 @@ can contain entries such as <code class="docutils literal notranslate"><span cla
 </dl>
 <p id="spt3g-maps-get-fk5-j2000-to-gal-quat"><strong>spt3g.maps.get_fk5_j2000_to_gal_quat</strong></p>
 <dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">get_fk5_j2000_to_gal_quat()</span> <span class="pre">-&gt;</span> <span class="pre">quat</span> <span class="pre">:</span></code></dt><dd><p>Return the rotation quaternion to rotate from equatorial to galactic coordinates.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">get_fk5_j2000_to_gal_quat()</span> <span class="pre">-&gt;</span> <span class="pre">Quat</span> <span class="pre">:</span></code></dt><dd><p>Return the rotation quaternion to rotate from equatorial to galactic coordinates.</p>
 </dd>
 </dl>
 <p id="spt3g-maps-get-map-hist"><strong>spt3g.maps.get_map_hist</strong></p>
@@ -1539,7 +1553,7 @@ can contain entries such as <code class="docutils literal notranslate"><span cla
 </dl>
 <p id="spt3g-maps-get-origin-rotator"><strong>spt3g.maps.get_origin_rotator</strong></p>
 <dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">get_origin_rotator(</span> <span class="pre">(float)alpha,</span> <span class="pre">(float)delta)</span> <span class="pre">-&gt;</span> <span class="pre">quat</span> <span class="pre">:</span></code></dt><dd><p>Compute the transformation quaternion that would rotate the vector (1, 0, 0) to point in the given direction.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">get_origin_rotator(</span> <span class="pre">(float)alpha,</span> <span class="pre">(float)delta)</span> <span class="pre">-&gt;</span> <span class="pre">Quat</span> <span class="pre">:</span></code></dt><dd><p>Compute the transformation quaternion that would rotate the vector (1, 0, 0) to point in the given direction.</p>
 </dd>
 </dl>
 <p id="spt3g-maps-get-origin-rotator-timestream"><strong>spt3g.maps.get_origin_rotator_timestream</strong></p>
@@ -1559,12 +1573,12 @@ can contain entries such as <code class="docutils literal notranslate"><span cla
 </dl>
 <p id="spt3g-maps-get-rot-ang"><strong>spt3g.maps.get_rot_ang</strong></p>
 <dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">get_rot_ang(</span> <span class="pre">(quat)start_q,</span> <span class="pre">(quat)trans)</span> <span class="pre">-&gt;</span> <span class="pre">float</span> <span class="pre">:</span></code></dt><dd><p>Computes the boresight rotation of the vector start_q when rotated by trans.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">get_rot_ang(</span> <span class="pre">(Quat)start_q,</span> <span class="pre">(Quat)trans)</span> <span class="pre">-&gt;</span> <span class="pre">float</span> <span class="pre">:</span></code></dt><dd><p>Computes the boresight rotation of the vector start_q when rotated by trans.</p>
 </dd>
 </dl>
 <p id="spt3g-maps-get-transform-quat"><strong>spt3g.maps.get_transform_quat</strong></p>
 <dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">get_transform_quat(</span> <span class="pre">(float)arg1,</span> <span class="pre">(float)arg2,</span> <span class="pre">(float)arg3,</span> <span class="pre">(float)arg4,</span> <span class="pre">(float)arg5,</span> <span class="pre">(float)arg6,</span> <span class="pre">(float)arg7,</span> <span class="pre">(float)arg8)</span> <span class="pre">-&gt;</span> <span class="pre">quat</span> <span class="pre">:</span></code></dt><dd><p>Computes a rotation that will take (as_0,ds_0) to (ae_0, de_0) and (as_1, ds_1) to (ae_1, de_1)</p>
+<dt><code class="docutils literal notranslate"><span class="pre">get_transform_quat(</span> <span class="pre">(float)arg1,</span> <span class="pre">(float)arg2,</span> <span class="pre">(float)arg3,</span> <span class="pre">(float)arg4,</span> <span class="pre">(float)arg5,</span> <span class="pre">(float)arg6,</span> <span class="pre">(float)arg7,</span> <span class="pre">(float)arg8)</span> <span class="pre">-&gt;</span> <span class="pre">Quat</span> <span class="pre">:</span></code></dt><dd><p>Computes a rotation that will take (as_0,ds_0) to (ae_0, de_0) and (as_1, ds_1) to (ae_1, de_1)</p>
 </dd>
 </dl>
 <p id="spt3g-maps-make-point-source-mask"><strong>spt3g.maps.make_point_source_mask</strong></p>
@@ -1705,7 +1719,7 @@ that of the input map.</p>
 </dl>
 <p id="spt3g-maps-offsets-to-quat"><strong>spt3g.maps.offsets_to_quat</strong></p>
 <dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">offsets_to_quat(</span> <span class="pre">(float)x,</span> <span class="pre">(float)y)</span> <span class="pre">-&gt;</span> <span class="pre">quat</span> <span class="pre">:</span></code></dt><dd><p>Returns the vector quaternion (0,1,0,0) rotated by the given x and y offsets.  Equivalent to <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">*</span> <span class="pre">quat(0,1,0,0)</span> <span class="pre">/</span> <span class="pre">t</span></code>, where <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">=</span> <span class="pre">get_origin_rotator(x,</span> <span class="pre">-y)</span></code></p>
+<dt><code class="docutils literal notranslate"><span class="pre">offsets_to_quat(</span> <span class="pre">(float)x,</span> <span class="pre">(float)y)</span> <span class="pre">-&gt;</span> <span class="pre">Quat</span> <span class="pre">:</span></code></dt><dd><p>Returns the vector quaternion (0,1,0,0) rotated by the given x and y offsets.  Equivalent to <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">*</span> <span class="pre">quat(0,1,0,0)</span> <span class="pre">/</span> <span class="pre">t</span></code>, where <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">=</span> <span class="pre">get_origin_rotator(x,</span> <span class="pre">-y)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-maps-quathelpers-ang-to-quat"><strong>spt3g.maps.quathelpers.ang_to_quat</strong></p>

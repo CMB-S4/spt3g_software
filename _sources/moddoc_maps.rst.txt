@@ -287,6 +287,26 @@ FlatSkyMap is a G3SkyMap with the extra meta information about the particular fl
 ``pixel_to_xy( (FlatSkyMap)arg1, (UInt64Vector)pixel) -> tuple :``
     Compute the flat 2D coordinates of the input pixel indices (vectorized)
 
+.. _spt3g.maps.FlatSkyMap.xy_to_quat:
+
+**spt3g.maps.FlatSkyMap.xy_to_quat**
+
+``xy_to_quat( (FlatSkyMap)arg1, (float)x, (float)y) -> Quat :``
+    Compute the quaternion rotation of the input flat 2D coordinates
+
+``xy_to_quat( (FlatSkyMap)arg1, (DoubleVector)x, (DoubleVector)y) -> G3VectorQuat :``
+    Compute the quaternion rotations of the input flat 2D coordinates (vectorized)
+
+.. _spt3g.maps.FlatSkyMap.quat_to_xy:
+
+**spt3g.maps.FlatSkyMap.quat_to_xy**
+
+``quat_to_xy( (FlatSkyMap)arg1, (Quat)quat) -> DoubleVector :``
+    Compute the flat 2D coordinates of the input quaternion rotation
+
+``quat_to_xy( (FlatSkyMap)arg1, (G3VectorQuat)quat) -> tuple :``
+    Compute the flat 2D coordinates of the input quaternion rotations (vectorized)
+
 .. _spt3g.maps.FlatSkyMap.nonzero_pixels:
 
 **spt3g.maps.FlatSkyMap.nonzero_pixels**
@@ -444,7 +464,7 @@ Base class for 1- and 2-D skymaps of various projections. Usually you want a sub
 
 **spt3g.maps.G3SkyMap.quat_to_pixel**
 
-``quat_to_pixel( (G3SkyMap)arg1, (quat)arg2) -> int :``
+``quat_to_pixel( (G3SkyMap)arg1, (Quat)arg2) -> int :``
     Compute the 1D pixel location of the given sky position, expressed as a quaternion rotation from the pole.
 
 ``quat_to_pixel( (G3SkyMap)arg1, (G3VectorQuat)arg2) -> UInt64Vector :``
@@ -454,7 +474,7 @@ Base class for 1- and 2-D skymaps of various projections. Usually you want a sub
 
 **spt3g.maps.G3SkyMap.pixel_to_quat**
 
-``pixel_to_quat( (G3SkyMap)arg1, (int)arg2) -> quat :``
+``pixel_to_quat( (G3SkyMap)arg1, (int)arg2) -> Quat :``
     Compute the quaternion rotation from the pole corresponding to the given 1D pixel.
 
 ``pixel_to_quat( (G3SkyMap)arg1, (UInt64Vector)arg2) -> G3VectorQuat :``
@@ -467,7 +487,7 @@ Base class for 1- and 2-D skymaps of various projections. Usually you want a sub
 ``query_disc( (G3SkyMap)arg1, (float)alpha, (float)delta, (float)radius) -> UInt64Vector :``
     Return a list of pixel indices whose centers are located within a disc of the given radius at the given sky coordinates.
 
-``query_disc( (G3SkyMap)arg1, (quat)quat, (float)radius) -> UInt64Vector :``
+``query_disc( (G3SkyMap)arg1, (Quat)quat, (float)radius) -> UInt64Vector :``
     Return a list of pixel indices whose centers are located within a disc of the given radius at the given sky coordinates.
 
 .. _spt3g.maps.G3SkyMap.query_alpha_ellipse:
@@ -477,7 +497,7 @@ Base class for 1- and 2-D skymaps of various projections. Usually you want a sub
 ``query_alpha_ellipse( (G3SkyMap)arg1, (float)alpha, (float)delta, (float)a, (float)b) -> UInt64Vector :``
     Return a list of pixel indices whose centers are located within an ellipse extended in the alpha direction, at the given alpha and delta sky coordinates, with semimajor and semiminor axes a and b.
 
-``query_alpha_ellipse( (G3SkyMap)arg1, (quat)quat, (float)a, (float)b) -> UInt64Vector :``
+``query_alpha_ellipse( (G3SkyMap)arg1, (Quat)quat, (float)a, (float)b) -> UInt64Vector :``
     Return a list of pixel indices whose centers are located within an ellipse extended in the alpha direction, at the given alpha and delta sky coordinates, with semimajor and semiminor axes a and b.
 
 .. _spt3g.maps.G3SkyMap.get_interp_values:
@@ -2086,7 +2106,7 @@ over all pixels.  The former produces output that is equivalent to using
 
 **spt3g.maps.get_fk5_j2000_to_gal_quat**
 
-``get_fk5_j2000_to_gal_quat() -> quat :``
+``get_fk5_j2000_to_gal_quat() -> Quat :``
     Return the rotation quaternion to rotate from equatorial to galactic coordinates.
 
 
@@ -2110,7 +2130,7 @@ over all pixels.  The former produces output that is equivalent to using
 
 **spt3g.maps.get_origin_rotator**
 
-``get_origin_rotator( (float)alpha, (float)delta) -> quat :``
+``get_origin_rotator( (float)alpha, (float)delta) -> Quat :``
     Compute the transformation quaternion that would rotate the vector (1, 0, 0) to point in the given direction.
 
 
@@ -2142,7 +2162,7 @@ over all pixels.  The former produces output that is equivalent to using
 
 **spt3g.maps.get_rot_ang**
 
-``get_rot_ang( (quat)start_q, (quat)trans) -> float :``
+``get_rot_ang( (Quat)start_q, (Quat)trans) -> float :``
     Computes the boresight rotation of the vector start_q when rotated by trans.
 
 
@@ -2150,7 +2170,7 @@ over all pixels.  The former produces output that is equivalent to using
 
 **spt3g.maps.get_transform_quat**
 
-``get_transform_quat( (float)arg1, (float)arg2, (float)arg3, (float)arg4, (float)arg5, (float)arg6, (float)arg7, (float)arg8) -> quat :``
+``get_transform_quat( (float)arg1, (float)arg2, (float)arg3, (float)arg4, (float)arg5, (float)arg6, (float)arg7, (float)arg8) -> Quat :``
     Computes a rotation that will take (as_0,ds_0) to (ae_0, de_0) and (as_1, ds_1) to (ae_1, de_1)
 
 
@@ -2321,7 +2341,7 @@ Re-pixelize a map from Healpix to one of the flat sky projections.
 
 **spt3g.maps.offsets_to_quat**
 
-``offsets_to_quat( (float)x, (float)y) -> quat :``
+``offsets_to_quat( (float)x, (float)y) -> Quat :``
     Returns the vector quaternion (0,1,0,0) rotated by the given x and y offsets.  Equivalent to ``t * quat(0,1,0,0) / t``, where ``t = get_origin_rotator(x, -y)``
 
 
