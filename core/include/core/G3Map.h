@@ -3,7 +3,6 @@
 
 #include <G3Frame.h>
 #include <G3Vector.h>
-#include <G3Quat.h>
 #include <map>
 #include <sstream>
 #include <complex>
@@ -80,8 +79,6 @@ G3MAP_OF(std::string, G3VectorVectorString, G3MapVectorVectorString);
 G3MAP_OF(std::string, std::vector<std::complex<double> >, G3MapVectorComplexDouble);
 G3MAP_OF(std::string, G3VectorTime, G3MapVectorTime);
 G3MAP_OF(std::string, std::string, G3MapString);
-G3MAP_OF(std::string, quat, G3MapQuat);
-G3MAP_OF(std::string, G3VectorQuat, G3MapVectorQuat);
 
 #define G3MAP_SPLIT(key, value, name, version) \
 typedef G3Map< key, value > name; \

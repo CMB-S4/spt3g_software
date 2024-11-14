@@ -32,22 +32,22 @@ get_detector_rotation(double x_offset, double y_offset,
 
 // Compute a vector quaternion that is the boresight rotated
 // by the given x and y offsets.
-quat offsets_to_quat(double x_offset, double y_offset);
+Quat offsets_to_quat(double x_offset, double y_offset);
 
 // Conversion functions between sky coordinates and vector quaternions
-void quat_to_ang(quat q, double &alpha, double &delta);
-quat ang_to_quat(double alpha, double delta);
+void quat_to_ang(const Quat &q, double &alpha, double &delta);
+Quat ang_to_quat(double alpha, double delta);
 
 // Compute the angular separation between two vector quaternions
-double quat_ang_sep(quat q0, quat q1);
+double quat_ang_sep(const Quat &q0, const Quat &q1);
 
 // Compute a rotation quaternion that would rotate the boresight vector
 // to point in the given sky direction.
-quat get_origin_rotator(double alpha, double delta);
+Quat get_origin_rotator(double alpha, double delta);
 
 // Compute the quaternion for rotating FK5 J2000 coordinates to
 // Galactic J2000 coordinates
-quat get_fk5_j2000_to_gal_quat();
+Quat get_fk5_j2000_to_gal_quat();
 
 #endif
 
