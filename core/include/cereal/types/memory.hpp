@@ -12,14 +12,14 @@
       * Redistributions in binary form must reproduce the above copyright
         notice, this list of conditions and the following disclaimer in the
         documentation and/or other materials provided with the distribution.
-      * Neither the name of cereal nor the
+      * Neither the name of the copyright holder nor the
         names of its contributors may be used to endorse or promote products
         derived from this software without specific prior written permission.
 
   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-  DISCLAIMED. IN NO EVENT SHALL RANDOLPH VOORHIES OR SHANE GRANT BE LIABLE FOR ANY
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY
   DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -115,7 +115,7 @@ namespace cereal
         T * myActualPointer;
         {
           EnableSharedStateHelper<T> helper( myActualPointer ); // save the state
-          boost::shared_ptr<T> myPtr( myActualPointer ); // modifies the internal weak_ptr
+          std::shared_ptr<T> myPtr( myActualPointer ); // modifies the internal weak_ptr
           // helper restores state when it goes out of scope
         }
         @endcode
@@ -202,18 +202,18 @@ namespace cereal
     }
   } // end namespace memory_detail
 
-  //! Saving boost::shared_ptr for non polymorphic types
+  //! Saving std::shared_ptr for non polymorphic types
   template <class Archive, class T> inline
   typename std::enable_if<!std::is_polymorphic<T>::value, void>::type
-  CEREAL_SAVE_FUNCTION_NAME( Archive & ar, boost::shared_ptr<T> const & ptr )
+  CEREAL_SAVE_FUNCTION_NAME( Archive & ar, std::shared_ptr<T> const & ptr )
   {
     ar( CEREAL_NVP_("ptr_wrapper", memory_detail::make_ptr_wrapper( ptr )) );
   }
 
-  //! Loading boost::shared_ptr, case when no user load and construct for non polymorphic types
+  //! Loading std::shared_ptr, case when no user load and construct for non polymorphic types
   template <class Archive, class T> inline
   typename std::enable_if<!std::is_polymorphic<T>::value, void>::type
-  CEREAL_LOAD_FUNCTION_NAME( Archive & ar, boost::shared_ptr<T> & ptr )
+  CEREAL_LOAD_FUNCTION_NAME( Archive & ar, std::shared_ptr<T> & ptr )
   {
     ar( CEREAL_NVP_("ptr_wrapper", memory_detail::make_ptr_wrapper( ptr )) );
   }
@@ -232,7 +232,7 @@ namespace cereal
   typename std::enable_if<!std::is_polymorphic<T>::value, void>::type
   CEREAL_LOAD_FUNCTION_NAME( Archive & ar, std::weak_ptr<T> & ptr )
   {
-    boost::shared_ptr<T> sptr;
+    std::shared_ptr<T> sptr;
     ar( CEREAL_NVP_("ptr_wrapper", memory_detail::make_ptr_wrapper( sptr )) );
     ptr = sptr;
   }
@@ -256,14 +256,14 @@ namespace cereal
   // ######################################################################
   // Pointer wrapper implementations follow below
 
-  //! Saving boost::shared_ptr (wrapper implementation)
+  //! Saving std::shared_ptr (wrapper implementation)
   /*! @internal */
   template <class Archive, class T> inline
-  void CEREAL_SAVE_FUNCTION_NAME( Archive & ar, memory_detail::PtrWrapper<boost::shared_ptr<T> const &> const & wrapper )
+  void CEREAL_SAVE_FUNCTION_NAME( Archive & ar, memory_detail::PtrWrapper<std::shared_ptr<T> const &> const & wrapper )
   {
     auto & ptr = wrapper.ptr;
 
-    uint32_t id = ar.registerSharedPointer( ptr.get() );
+    uint32_t id = ar.registerSharedPointer( ptr );
     ar( CEREAL_NVP_("id", id) );
 
     if( id & detail::msb_32bit )
@@ -272,11 +272,11 @@ namespace cereal
     }
   }
 
-  //! Loading boost::shared_ptr, case when user load and construct (wrapper implementation)
+  //! Loading std::shared_ptr, case when user load and construct (wrapper implementation)
   /*! @internal */
   template <class Archive, class T> inline
   typename std::enable_if<traits::has_load_and_construct<T, Archive>::value, void>::type
-  CEREAL_LOAD_FUNCTION_NAME( Archive & ar, memory_detail::PtrWrapper<boost::shared_ptr<T> &> & wrapper )
+  CEREAL_LOAD_FUNCTION_NAME( Archive & ar, memory_detail::PtrWrapper<std::shared_ptr<T> &> & wrapper )
   {
     uint32_t id;
 
@@ -291,12 +291,12 @@ namespace cereal
       // Valid flag - set to true once construction finishes
       //  This prevents us from calling the destructor on
       //  uninitialized data.
-      auto valid = boost::make_shared<bool>( false );
+      auto valid = std::make_shared<bool>( false );
 
       // Allocate our storage, which we will treat as
       //  uninitialized until initialized with placement new
       using NonConstT = typename std::remove_const<T>::type;
-      boost::shared_ptr<NonConstT> ptr(reinterpret_cast<NonConstT *>(new ST()),
+      std::shared_ptr<NonConstT> ptr(reinterpret_cast<NonConstT *>(new ST()),
           [=]( NonConstT * t )
           {
             if( *valid )
@@ -316,14 +316,14 @@ namespace cereal
       wrapper.ptr = std::move(ptr);
     }
     else
-      wrapper.ptr = boost::static_pointer_cast<T>(ar.getSharedPointer(id));
+      wrapper.ptr = std::static_pointer_cast<T>(ar.getSharedPointer(id));
   }
 
-  //! Loading boost::shared_ptr, case when no user load and construct (wrapper implementation)
+  //! Loading std::shared_ptr, case when no user load and construct (wrapper implementation)
   /*! @internal */
   template <class Archive, class T> inline
   typename std::enable_if<!traits::has_load_and_construct<T, Archive>::value, void>::type
-  CEREAL_LOAD_FUNCTION_NAME( Archive & ar, memory_detail::PtrWrapper<boost::shared_ptr<T> &> & wrapper )
+  CEREAL_LOAD_FUNCTION_NAME( Archive & ar, memory_detail::PtrWrapper<std::shared_ptr<T> &> & wrapper )
   {
     uint32_t id;
 
@@ -332,13 +332,13 @@ namespace cereal
     if( id & detail::msb_32bit )
     {
       using NonConstT = typename std::remove_const<T>::type;
-      boost::shared_ptr<NonConstT> ptr( detail::Construct<NonConstT, Archive>::load_andor_construct() );
+      std::shared_ptr<NonConstT> ptr( detail::Construct<NonConstT, Archive>::load_andor_construct() );
       ar.registerSharedPointer( id, ptr );
       ar( CEREAL_NVP_("data", *ptr) );
       wrapper.ptr = std::move(ptr);
     }
     else
-      wrapper.ptr = boost::static_pointer_cast<T>(ar.getSharedPointer(id));
+      wrapper.ptr = std::static_pointer_cast<T>(ar.getSharedPointer(id));
   }
 
   //! Saving std::unique_ptr (wrapper implementation)
