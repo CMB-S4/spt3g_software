@@ -122,13 +122,10 @@ def convert_deg(d, system="g3"):
 
     system = str(system).lower()
     if system == "astropy":
-        c = astropy.units.deg / core.G3Units.deg
+        return np.asarray(d) / core.G3Units.deg * astropy.units.deg
     elif system == "g3":
-        c = core.G3Units.deg / astropy.units.deg
-    else:
-        raise NotImplementedError
-
-    return np.asarray(d) * c
+        return np.asarray(d / astropy.units.deg) * core.G3Units.deg
+    raise NotImplementedError
 
 
 @core.usefulfunc
