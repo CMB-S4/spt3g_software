@@ -72,7 +72,7 @@ SingleDetectorMapBinner::Process(G3FramePtr frame,
 		for (auto i : maps_) {
 			G3FramePtr out(new G3Frame(G3Frame::Map));
 			out->Put("Id", G3StringPtr(new G3String(i.first)));
-			out->Put("T", boost::dynamic_pointer_cast<G3FrameObject>
+			out->Put("T", std::dynamic_pointer_cast<G3FrameObject>
 			    (i.second.first));
 			out->Put("Wunpol", i.second.second);
 			out_queue.push_back(out);

@@ -346,9 +346,9 @@ G3SkyMapPtr
 FlatSkyMap::Clone(bool copy_data) const
 {
 	if (copy_data)
-		return boost::make_shared<FlatSkyMap>(*this);
+		return std::make_shared<FlatSkyMap>(*this);
 	else
-		return boost::make_shared<FlatSkyMap>(proj_info,
+		return std::make_shared<FlatSkyMap>(proj_info,
 		    coord_ref, weighted, units, pol_type, flat_pol_, pol_conv);
 }
 
@@ -1039,9 +1039,9 @@ flatskymap_setitem_2d(FlatSkyMap &skymap, bp::tuple coords,
 	bp::slice yslice = bp::extract<bp::slice>(coords[0]);
 	bp::slice xslice = bp::extract<bp::slice>(coords[1]);
 	FlatSkyMapPtr shallowclone =
-	    boost::dynamic_pointer_cast<FlatSkyMap>(skymap.Clone(false));
+	    std::dynamic_pointer_cast<FlatSkyMap>(skymap.Clone(false));
 	FlatSkyMapPtr dummy_subpatch =
-	    boost::dynamic_pointer_cast<FlatSkyMap>(
+	    std::dynamic_pointer_cast<FlatSkyMap>(
 	        flatskymap_getslice_2d(*shallowclone, yslice, xslice));
 
 	bp::extract<const FlatSkyMap &> mapext(val);

@@ -115,7 +115,7 @@ PYBINDINGS("core") {
 	using namespace boost::python;
 
 	// Instead of EXPORT_G3MODULE since there are two constructors
-	class_<G3Reader, bases<G3Module>, boost::shared_ptr<G3Reader>,
+	class_<G3Reader, bases<G3Module>, std::shared_ptr<G3Reader>,
 	    boost::noncopyable>("G3Reader",
 	      "Read frames from disk. Takes either the path to a file to read "
 	      "or an iterable of files to be read in sequence. If "

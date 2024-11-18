@@ -17,7 +17,7 @@ template <typename g3vectype>
 inline
 ssize_t vect_size(const G3FrameObjectPtr &vp)
 {
-	auto v = boost::dynamic_pointer_cast<const g3vectype>(vp);
+	auto v = std::dynamic_pointer_cast<const g3vectype>(vp);
 	return v == nullptr ? -1 : v->size();
 }
 
@@ -53,11 +53,11 @@ inline
 G3FrameObjectPtr test_and_concat(const G3FrameObjectPtr &src1,
 				 const G3FrameObjectPtr &src2)
 {
-	auto v1 = boost::dynamic_pointer_cast<const g3vectype>(src1);
-	auto v2 = boost::dynamic_pointer_cast<const g3vectype>(src2);
+	auto v1 = std::dynamic_pointer_cast<const g3vectype>(src1);
+	auto v2 = std::dynamic_pointer_cast<const g3vectype>(src2);
 	if (v1 == nullptr || v2 == nullptr)
 		return nullptr;
-	auto output = boost::shared_ptr<g3vectype>(new g3vectype());
+	auto output = std::shared_ptr<g3vectype>(new g3vectype());
 	vect_concat(*output, *v1, *v2);
 	return output;
 }
@@ -80,7 +80,7 @@ template <typename g3vectype>
 inline
 bool test_and_reorder(G3FrameObjectPtr &src, const std::vector<size_t> &idx)
 {
-	auto v = boost::dynamic_pointer_cast<g3vectype>(src);
+	auto v = std::dynamic_pointer_cast<g3vectype>(src);
 	if (v == nullptr)
 		return false;
 	g3vectype v2 = *v; // copy
@@ -271,7 +271,7 @@ PYBINDINGS("core")
 	bp::class_<G3TimesampleMap, bp::bases<G3FrameObject,
 	    std::map<typename G3TimesampleMap::key_type,
                      typename G3TimesampleMap::mapped_type> >,
-	    boost::shared_ptr<G3TimesampleMap> >("G3TimesampleMap",
+	    std::shared_ptr<G3TimesampleMap> >("G3TimesampleMap",
               "Mapping from string to vectors of data, with an associated "
               "vector of timestamps.  This object is for storing multiple "
               "co-sampled vectors with a single set of (irregular) timestamps.")

@@ -572,9 +572,9 @@ G3SkyMapPtr
 HealpixSkyMap::Clone(bool copy_data) const
 {
 	if (copy_data)
-		return boost::make_shared<HealpixSkyMap>(*this);
+		return std::make_shared<HealpixSkyMap>(*this);
 	else
-		return boost::make_shared<HealpixSkyMap>(nside(), weighted,
+		return std::make_shared<HealpixSkyMap>(nside(), weighted,
 		    nested(), coord_ref, units, pol_type, info_.shifted(), pol_conv);
 }
 

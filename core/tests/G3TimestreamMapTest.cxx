@@ -4,8 +4,6 @@
 
 #include <core/G3Timestream.h>
 
-#include <boost/make_shared.hpp>
-
 TEST_GROUP(G3TimestreamMap)
 
 //These things can be checked purely at compile time
@@ -68,7 +66,7 @@ void testMakeCompactExisting(){
 	std::vector<std::string> keys={"a","b","c","d"};
 	G3Time t1(0), t2(3);
 	const std::size_t nSamples=4;
-	boost::shared_ptr<SampleType[]> data=boost::make_shared<SampleType[]>(keys.size()*nSamples);
+	std::shared_ptr<SampleType[]> data=std::make_shared<SampleType[]>(keys.size()*nSamples);
 	//construct a recognizable data pattern
 	for(std::size_t i=0; i<keys.size(); i++){
 		for(std::size_t j=0; j<nSamples; j++){

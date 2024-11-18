@@ -213,7 +213,7 @@ void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, G3SkyMapWeightsPtr W, double h
 	FlatSkyMapPtr flatptr;
 	if (!!W) {
 		g3_assert(W->IsCompatible(*Q));
-		flatptr = boost::dynamic_pointer_cast<FlatSkyMap>(W->TQ);
+		flatptr = std::dynamic_pointer_cast<FlatSkyMap>(W->TQ);
 		g3_assert(flatptr->IsPolFlat() == Q->IsPolFlat());
 	}
 
@@ -263,17 +263,17 @@ void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, G3SkyMapWeightsPtr W, double h
 	U->SetFlatPol(!invert);
 
 	if (!!W) {
-		flatptr = boost::dynamic_pointer_cast<FlatSkyMap>(W->TT);
+		flatptr = std::dynamic_pointer_cast<FlatSkyMap>(W->TT);
 		flatptr->SetFlatPol(!invert);
-		flatptr = boost::dynamic_pointer_cast<FlatSkyMap>(W->TQ);
+		flatptr = std::dynamic_pointer_cast<FlatSkyMap>(W->TQ);
 		flatptr->SetFlatPol(!invert);
-		flatptr = boost::dynamic_pointer_cast<FlatSkyMap>(W->TU);
+		flatptr = std::dynamic_pointer_cast<FlatSkyMap>(W->TU);
 		flatptr->SetFlatPol(!invert);
-		flatptr = boost::dynamic_pointer_cast<FlatSkyMap>(W->QQ);
+		flatptr = std::dynamic_pointer_cast<FlatSkyMap>(W->QQ);
 		flatptr->SetFlatPol(!invert);
-		flatptr = boost::dynamic_pointer_cast<FlatSkyMap>(W->QU);
+		flatptr = std::dynamic_pointer_cast<FlatSkyMap>(W->QU);
 		flatptr->SetFlatPol(!invert);
-		flatptr = boost::dynamic_pointer_cast<FlatSkyMap>(W->UU);
+		flatptr = std::dynamic_pointer_cast<FlatSkyMap>(W->UU);
 		flatptr->SetFlatPol(!invert);
 	}
 }
@@ -464,7 +464,7 @@ ConvolveMap(FlatSkyMapConstPtr map, FlatSkyMapConstPtr kernel)
 	if ((nx % 2 == 0) || (ny % 2 == 0))
 		log_fatal("Kernel must have odd map dimensions");
 
-	FlatSkyMapPtr outmap = boost::dynamic_pointer_cast<FlatSkyMap>(map->Clone(false));
+	FlatSkyMapPtr outmap = std::dynamic_pointer_cast<FlatSkyMap>(map->Clone(false));
 	if (map->IsDense())
 		outmap->ConvertToDense();
 

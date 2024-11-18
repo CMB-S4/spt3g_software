@@ -856,7 +856,7 @@ PYBINDINGS("gcp") {
 	using namespace boost::python;
 
 	// Instead of EXPORT_G3MODULE since there are two constructors
-	class_<ARCFileReader, bases<G3Module>, boost::shared_ptr<ARCFileReader>,
+	class_<ARCFileReader, bases<G3Module>, std::shared_ptr<ARCFileReader>,
 	    boost::noncopyable>("ARCFileReader",
 	    "Read GCP archive file (or files if you pass an iterable of paths). "
 	    "For non-SPT ARC file formats, please set Experiment to the "

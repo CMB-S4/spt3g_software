@@ -56,9 +56,9 @@ G3SkyMapMaskPtr
 G3SkyMapMask::Clone(bool copy_data) const
 {
 	if (copy_data)
-		return boost::make_shared<G3SkyMapMask>(*this);
+		return std::make_shared<G3SkyMapMask>(*this);
 	else
-		return boost::make_shared<G3SkyMapMask>(*Parent());
+		return std::make_shared<G3SkyMapMask>(*Parent());
 }
 
 void
@@ -466,7 +466,7 @@ skymapmask_getitem(const G3SkyMapMask &m, boost::python::object index)
 		int x, y;
 
 		tuple t = extract<tuple>(index)();
-		FlatSkyMapConstPtr fsm = boost::dynamic_pointer_cast<const FlatSkyMap>(m.Parent());
+		FlatSkyMapConstPtr fsm = std::dynamic_pointer_cast<const FlatSkyMap>(m.Parent());
 		if (!fsm) {
 			PyErr_SetString(PyExc_TypeError,
 			    "N-D pixels, but underlying map is not a flat sky map");
@@ -515,7 +515,7 @@ skymapmask_setitem(G3SkyMapMask &m, boost::python::object index, bool val)
 		int x, y;
 
 		tuple t = extract<tuple>(index)();
-		FlatSkyMapConstPtr fsm = boost::dynamic_pointer_cast<const FlatSkyMap>(m.Parent());
+		FlatSkyMapConstPtr fsm = std::dynamic_pointer_cast<const FlatSkyMap>(m.Parent());
 		if (!fsm) {
 			PyErr_SetString(PyExc_TypeError,
 			    "N-D pixels, but underlying map is not a flat sky map");
@@ -563,7 +563,7 @@ skymapmask_pyinvert(G3SkyMapMaskPtr m)
 static G3SkyMapPtr
 skymapmask_pyparent(G3SkyMapMaskPtr m)
 {
-	return boost::const_pointer_cast<G3SkyMap>(m->Parent());
+	return std::const_pointer_cast<G3SkyMap>(m->Parent());
 }
 
 static bool

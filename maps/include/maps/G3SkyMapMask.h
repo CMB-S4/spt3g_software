@@ -32,8 +32,8 @@ public:
 	virtual ~G3SkyMapMask() {};
 
 	// Copy
-	boost::shared_ptr<G3SkyMapMask> Clone(bool copy_data = true) const;
-	boost::shared_ptr<G3SkyMapMask> ArrayClone(boost::python::object v,
+	std::shared_ptr<G3SkyMapMask> Clone(bool copy_data = true) const;
+	std::shared_ptr<G3SkyMapMask> ArrayClone(boost::python::object v,
 	    bool zero_nans = false, bool zero_infs = false) const;
 
 	// Return a (modifiable) pixel value
@@ -68,10 +68,10 @@ public:
 	bool IsDense() const { return true; }
 
 	// The map for projection info
-	boost::shared_ptr<const G3SkyMap> Parent() const { return parent_; }
+	std::shared_ptr<const G3SkyMap> Parent() const { return parent_; }
 
 	// Return a 1-or-0 sky-map with the contents of the mask (e.g. for plotting)
-	boost::shared_ptr<G3SkyMap> MakeBinaryMap() const;
+	std::shared_ptr<G3SkyMap> MakeBinaryMap() const;
 
 	class const_iterator {
 	public:
@@ -116,7 +116,7 @@ private:
 	friend class cereal::access;
 
 	std::vector<bool> data_;
-	boost::shared_ptr<const G3SkyMap> parent_;
+	std::shared_ptr<const G3SkyMap> parent_;
 
 	// Populate
 	void FillFromMap(const G3SkyMap &m, bool zero_nans = false, bool zero_infs = false);
