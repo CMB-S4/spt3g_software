@@ -224,7 +224,7 @@ public:
 	                                   G3Time start, G3Time stop,
 	                                   G3Timestream::TimestreamUnits units=G3Timestream::None,
 	                                   int compression_level=0){
-		std::shared_ptr<std::vector<SampleType> > data(new std::vector<SampleType>(n_samples*keys.size()));
+		std::shared_ptr<SampleType[]> data(new SampleType[n_samples*keys.size()]);
 		return MakeCompact(keys, n_samples, data, start, stop, units, compression_level);
 	}
 
@@ -239,7 +239,7 @@ public:
 	/// \pre keys must be in sorted order
 	template<typename SampleType>
 	static G3TimestreamMap MakeCompact(const std::vector<std::string>& keys, std::size_t n_samples,
-	                                   std::shared_ptr<std::vector<SampleType> > data,
+	                                   std::shared_ptr<SampleType[]> data,
 	                                   G3Time start, G3Time stop,
 	                                   G3Timestream::TimestreamUnits units=G3Timestream::None,
 	                                   int compression_level=0){
@@ -255,7 +255,7 @@ public:
 			ts->units=units;
 			ts->use_flac_=compression_level;
 			ts->root_data_ref_=data;
-			ts->data_=&(*data.get())[0]+offset;
+			ts->data_=data.get()+offset;
 			ts->data_type_=data_type;
 			ts->len_=n_samples;
 			map.emplace(key, std::move(ts));

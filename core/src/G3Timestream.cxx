@@ -286,25 +286,25 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 		// reference FLAC encoder we use, so no data are lost, and
 		// allow NaNs, unlike int32_ts, which we try to pull through
 		// the process to signal missing data.
-		std::vector<float> *data = new std::vector<float>(callback.outbuf->size());
-		root_data_ref_ = std::shared_ptr<std::vector<float> >(data);
+		float *data = new float[callback.outbuf->size()];
+		root_data_ref_ = std::shared_ptr<float[]>(data);
 		data_type_ = TS_FLOAT;
 		len_ = callback.outbuf->size();
-		data_ = &(*data)[0];
+		data_ = data;
 
 		// Convert data format
 		for (size_t i = 0; i < size(); i++)
-			(*data)[i] = (*callback.outbuf)[i];
+			data[i] = (*callback.outbuf)[i];
 		delete callback.outbuf;
 
 		// Apply NaN mask
 		if (nanflag == AllNan) {
 			for (size_t i = 0; i < size(); i++)
-				(*data)[i] = NAN;
+				data[i] = NAN;
 		} else if (nanflag == SomeNan) {
 			for (size_t i = 0; i < size(); i++)
 				if (nanbuf[i])
-					(*data)[i] = NAN;
+					data[i] = NAN;
 		}
 #else
 		log_fatal("Trying to read FLAC-compressed timestreams but built without FLAC support");
@@ -995,11 +995,11 @@ timestream_from_iterable(boost::python::object v,
 			x = G3TimestreamPtr(new G3Timestream());
 			delete x->buffer_; x->buffer_ = NULL;
 			x->data_type_ = G3Timestream::TS_FLOAT;
+			float *data = new float[view.len/sizeof(float)];
+			x->root_data_ref_ = std::shared_ptr<float[]>(data);
+			x->data_ = data;
 			x->len_ = view.len/sizeof(float);
-			std::vector<float> *data = new std::vector<float>(x->len_);
-			x->root_data_ref_ = std::shared_ptr<std::vector<float> >(data);
-			x->data_ = &(*data)[0];
-			memcpy(x->data_, view.buf, view.len);
+			memcpy(data, view.buf, view.len);
 #ifdef __LP64__
 		} else if (strcmp(view.format, "i") == 0) {
 #else
@@ -1008,11 +1008,11 @@ timestream_from_iterable(boost::python::object v,
 			x = G3TimestreamPtr(new G3Timestream());
 			delete x->buffer_; x->buffer_ = NULL;
 			x->data_type_ = G3Timestream::TS_INT32;
+			int32_t *data = new int32_t[view.len/sizeof(int32_t)];
+			x->root_data_ref_ = std::shared_ptr<int32_t[]>(data);
+			x->data_ = data;
 			x->len_ = view.len/sizeof(int32_t);
-			std::vector<int32_t> *data = new std::vector<int32_t>(x->len_);
-			x->root_data_ref_ = std::shared_ptr<std::vector<int32_t> >(data);
-			x->data_ = &(*data)[0];
-			memcpy(x->data_, view.buf, view.len);
+			memcpy(data, view.buf, view.len);
 			assert(view.itemsize == sizeof(int32_t));
 #ifdef __LP64__
 		} else if (strcmp(view.format, "q") == 0 || strcmp(view.format, "l") == 0) {
@@ -1022,11 +1022,11 @@ timestream_from_iterable(boost::python::object v,
 			x = G3TimestreamPtr(new G3Timestream());
 			delete x->buffer_; x->buffer_ = NULL;
 			x->data_type_ = G3Timestream::TS_INT64;
+			int64_t *data = new int64_t[view.len/sizeof(int64_t)];
+			x->root_data_ref_ = std::shared_ptr<int64_t[]>(data);
+			x->data_ = data;
 			x->len_ = view.len/sizeof(int64_t);
-			std::vector<int64_t> *data = new std::vector<int64_t>(x->len_);
-			x->root_data_ref_ = std::shared_ptr<std::vector<int64_t> >(data);
-			x->data_ = &(*data)[0];
-			memcpy(x->data_, view.buf, view.len);
+			memcpy(data, view.buf, view.len);
 			assert(view.itemsize == sizeof(int64_t));
 		} else {
 			// We could add more types, but why do that?
@@ -1130,9 +1130,8 @@ G3TimestreamMap_from_numpy(std::vector<std::string> keys,
 	size_t len = v->v.shape[1];
 	ptrdiff_t step = v->v.strides[0];
 	if (copy_data) {
-		std::vector<uint8_t> *udata = new std::vector<uint8_t>(v->v.len);
-		data_ref = std::shared_ptr<std::vector<uint8_t> >(udata);
-		buf = &(*udata)[0];
+		buf = new uint8_t[v->v.len];
+		data_ref = std::shared_ptr<uint8_t[]>(buf);
 		memcpy(buf, v->v.buf, v->v.len);
 		v.reset(); // Release Python Buffer view
 	} else {
