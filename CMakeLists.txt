@@ -86,9 +86,6 @@ target_compile_definitions(spt3g INTERFACE -DBOOST_PYTHON_MAX_ARITY=20
 if(Boost_VERSION VERSION_LESS 1.77)
 	target_compile_definitions(spt3g INTERFACE -DBOOST_BIND_GLOBAL_PLACEHOLDERS)
 endif()
-if(Boost_VERSION VERSION_LESS 1.82)
-	target_compile_definitions(spt3g INTERFACE -DBOOST_NO_CXX11_SMART_PTR=1)
-endif()
 
 # Shell script to set environment variables
 configure_file(${CMAKE_SOURCE_DIR}/cmake/env-shell.sh.in ${CMAKE_BINARY_DIR}/env-shell.sh @ONLY)
