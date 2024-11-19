@@ -66,7 +66,7 @@ void testMakeCompactExisting(){
 	std::vector<std::string> keys={"a","b","c","d"};
 	G3Time t1(0), t2(3);
 	const std::size_t nSamples=4;
-	std::shared_ptr<SampleType[]> data=std::make_shared<SampleType[]>(keys.size()*nSamples);
+	auto data=std::shared_ptr<SampleType[]>(new SampleType[keys.size()*nSamples]);
 	//construct a recognizable data pattern
 	for(std::size_t i=0; i<keys.size(); i++){
 		for(std::size_t j=0; j<nSamples; j++){
