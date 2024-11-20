@@ -73,12 +73,13 @@ parse(int nargs, char ** args)
 	for (int i = 1; i < nargs; i++)
 	{
 		if (!strcmp(args[i],"-p") || !strcmp(args[i],"--port")) {
-			port = atoi(args[++i]);
-			if (port <= 0 || port > 65536)
+			int iport = atoi(args[++i]);
+			if (iport <= 0 || iport > 65536)
 			{
-				std::cerr << "Invalid port: " << port << std::endl;
+				std::cerr << "Invalid port: " << iport << std::endl;
 				return 1;
 			}
+			port = (unsigned short)iport;
 		}
 		else if (!strcmp(args[i],"-b") || !strcmp(args[i],"--bind-address")) {
     bind_address = args[++i];
@@ -469,7 +470,7 @@ handle_dir(const httplib::Request & req, httplib::Response & resp)
 	for (size_t i = 0; i < files.size(); i++) {
 		double sz = file_sizes[i];
 		const char  size_suffixes[] = { 'B','K','M','G','T' };
-		int suffix_index = 0;
+		unsigned int suffix_index = 0;
 		while (sz > 1024 && suffix_index < sizeof(size_suffixes) - 1) {
 			sz /= 1024;
 			suffix_index++;

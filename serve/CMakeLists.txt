@@ -11,11 +11,12 @@ endfunction()
 
 make_embedded_resource(favicon favicon.ico ${CMAKE_BINARY_DIR}/serve/favicon.h)
 
-add_executable(spt3g-json-serve-files src/spt3g-json-serve-files.cxx)
+if(NOT DEFINED ENV{CIBUILDWHEEL})
+  add_spt3g_executable(spt3g-json-serve-files src/spt3g-json-serve-files.cxx)
 
-target_link_libraries(spt3g-json-serve-files core z)
-target_include_directories(spt3g-json-serve-files PRIVATE
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
-)
-
+  target_link_libraries(spt3g-json-serve-files core z)
+  target_include_directories(spt3g-json-serve-files PRIVATE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
+  )
+endif()
