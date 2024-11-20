@@ -2,6 +2,7 @@ name: Wheels
 
 on:
   workflow_dispatch:
+  push:
   release:
     types: [ published ]
 
@@ -14,45 +15,45 @@ jobs:
       matrix:
         include:
           # macos-13 is an intel runner, macos-14 is apple silicon
-          - os: macos-13
-            build: cp38-macosx_x86_64
-            target: 13.0
-          - os: macos-13
-            build: cp39-macosx_x86_64
-            target: 13.0
-          - os: macos-13
-            build: cp310-macosx_x86_64
-            target: 13.0
+          # - os: macos-13
+          #   build: cp38-macosx_x86_64
+          #   target: 13.0
+          # - os: macos-13
+          #   build: cp39-macosx_x86_64
+          #   target: 13.0
+          # - os: macos-13
+          #   build: cp310-macosx_x86_64
+          #   target: 13.0
           - os: macos-13
             build: cp311-macosx_x86_64
             target: 13.0
-          - os: macos-13
-            build: cp312-macosx_x86_64
-            target: 13.0
+          # - os: macos-13
+          #   build: cp312-macosx_x86_64
+          #   target: 13.0
 
-          - os: macos-14
-            build: cp39-macosx_arm64
-            target: 14.0
-          - os: macos-14
-            build: cp310-macosx_arm64
-            target: 14.0
-          - os: macos-14
-            build: cp311-macosx_arm64
-            target: 14.0
-          - os: macos-14
-            build: cp312-macosx_arm64
-            target: 14.0
+          # - os: macos-14
+          #   build: cp39-macosx_arm64
+          #   target: 14.0
+          # - os: macos-14
+          #   build: cp310-macosx_arm64
+          #   target: 14.0
+          # - os: macos-14
+          #   build: cp311-macosx_arm64
+          #   target: 14.0
+          # - os: macos-14
+          #   build: cp312-macosx_arm64
+          #   target: 14.0
 
-          - os: ubuntu-latest
-            build: cp38-manylinux_x86_64
-          - os: ubuntu-latest
-            build: cp39-manylinux_x86_64
-          - os: ubuntu-latest
-            build: cp310-manylinux_x86_64
+          # - os: ubuntu-latest
+          #   build: cp38-manylinux_x86_64
+          # - os: ubuntu-latest
+          #   build: cp39-manylinux_x86_64
+          # - os: ubuntu-latest
+          #   build: cp310-manylinux_x86_64
           - os: ubuntu-latest
             build: cp311-manylinux_x86_64
-          - os: ubuntu-latest
-            build: cp312-manylinux_x86_64
+          # - os: ubuntu-latest
+          #   build: cp312-manylinux_x86_64
 
     steps:
       - name: Set macOS deployment target

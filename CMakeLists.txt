@@ -12,6 +12,8 @@ if(DEFINED ENV{CIBUILDWHEEL} OR NOT CMAKE_BUILD_TYPE)
 endif()
 message(STATUS "Configuring build type: ${CMAKE_BUILD_TYPE}")
 
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
 # Use cmake directory for packages
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} $ENV{SITE_CMAKE_DIR} "${CMAKE_SOURCE_DIR}/cmake")
 
