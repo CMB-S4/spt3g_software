@@ -27,7 +27,7 @@ jobs:
           # - os: macos-13
           #   build: cp311-macosx_x86_64
           #   target: 13.0
-          - os: macos-13
+          - os: macos-12
             build: cp312-macosx_x86_64
             target: 13.0
 
