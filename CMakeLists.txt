@@ -78,6 +78,9 @@ else()
 		target_link_options(spt3g INTERFACE "LINKER:-undefined,dynamic_lookup")
 	endif()
 endif()
+if(APPLE)
+	target_link_options(spt3g INTERFACE "LINKER:-no_fixup_chains")
+endif()
 
 # Work around yet more bugs in GCC 4.4, this time with C++ 11 support
 # Also increase maximum number of arguments in python bindings
