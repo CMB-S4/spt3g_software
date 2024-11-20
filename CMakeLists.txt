@@ -17,8 +17,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} $ENV{SITE_CMAKE_DIR} "${CMAKE_SOURCE_
 # Work around stupid broken Red Hat systems
 set(CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "")
 
-# Require C++ 14
-set(CMAKE_CXX_STANDARD 14)
+# Require C++ 17
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -52,7 +52,7 @@ set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 set(Boost_PYTHON_VERSION ${Python_VERSION})
-find_package(Boost COMPONENTS system iostreams filesystem python REQUIRED)
+find_package(Boost COMPONENTS iostreams python REQUIRED)
 
 # Interface library for flags and library dependencies
 add_library(spt3g INTERFACE)
