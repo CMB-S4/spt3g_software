@@ -12,14 +12,14 @@
       * Redistributions in binary form must reproduce the above copyright
         notice, this list of conditions and the following disclaimer in the
         documentation and/or other materials provided with the distribution.
-      * Neither the name of cereal nor the
+      * Neither the name of the copyright holder nor the
         names of its contributors may be used to endorse or promote products
         derived from this software without specific prior written permission.
 
   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-  DISCLAIMED. IN NO EVENT SHALL RANDOLPH VOORHIES OR SHANE GRANT BE LIABLE FOR ANY
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY
   DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -69,12 +69,26 @@
     have been registered with CEREAL_REGISTER_ARCHIVE.  This must be called
     after all archives are registered (usually after the archives themselves
     have been included). */
+#ifdef CEREAL_HAS_CPP17
 #define CEREAL_BIND_TO_ARCHIVES(...)                                     \
     namespace cereal {                                                   \
     namespace detail {                                                   \
     template<>                                                           \
     struct init_binding<__VA_ARGS__> {                                   \
-        static bind_to_archives<__VA_ARGS__> const & b;                  \
+        static inline bind_to_archives<__VA_ARGS__> const & b=           \
+        ::cereal::detail::StaticObject<                                  \
+            bind_to_archives<__VA_ARGS__>                                \
+        >::getInstance().bind();                                         \
+        CEREAL_BIND_TO_ARCHIVES_UNUSED_FUNCTION                          \
+    };                                                                   \
+    }} /* end namespaces */
+#else
+#define CEREAL_BIND_TO_ARCHIVES(...)                                     \
+    namespace cereal {                                                   \
+    namespace detail {                                                   \
+    template<>                                                           \
+    struct init_binding<__VA_ARGS__> {                                   \
+        static bind_to_archives<__VA_ARGS__> const& b;                   \
         CEREAL_BIND_TO_ARCHIVES_UNUSED_FUNCTION                          \
     };                                                                   \
     bind_to_archives<__VA_ARGS__> const & init_binding<__VA_ARGS__>::b = \
@@ -82,6 +96,7 @@
             bind_to_archives<__VA_ARGS__>                                \
         >::getInstance().bind();                                         \
     }} /* end namespaces */
+#endif
 
 namespace cereal
 {
@@ -115,7 +130,7 @@ namespace cereal
       //! Upcast to proper base type
       virtual void * upcast( void * const ptr ) const = 0;
       //! Upcast to proper base type, shared_ptr version
-      virtual boost::shared_ptr<void> upcast( boost::shared_ptr<void> const & ptr ) const = 0;
+      virtual std::shared_ptr<void> upcast( std::shared_ptr<void> const & ptr ) const = 0;
     };
 
     //! Holds registered mappings between base and derived types for casting
@@ -211,11 +226,11 @@ namespace cereal
 
       //! Upcasts for shared pointers
       template <class Derived> inline
-      static boost::shared_ptr<void> upcast( boost::shared_ptr<Derived> const & dptr, std::type_info const & baseInfo )
+      static std::shared_ptr<void> upcast( std::shared_ptr<Derived> const & dptr, std::type_info const & baseInfo )
       {
         auto const & mapping = lookup( baseInfo, typeid(Derived), [&](){ UNREGISTERED_POLYMORPHIC_CAST_EXCEPTION(load) } );
 
-        boost::shared_ptr<void> uptr = dptr;
+        std::shared_ptr<void> uptr = dptr;
         for( auto mIter = mapping.rbegin(), mEnd = mapping.rend(); mIter != mEnd; ++mIter )
           uptr = (*mIter)->upcast( uptr );
 
@@ -406,9 +421,9 @@ namespace cereal
       }
 
       //! Performs the proper upcast with the templated types (shared_ptr version)
-      boost::shared_ptr<void> upcast( boost::shared_ptr<void> const & ptr ) const override
+      std::shared_ptr<void> upcast( std::shared_ptr<void> const & ptr ) const override
       {
-        return boost::dynamic_pointer_cast<Base>( boost::static_pointer_cast<Derived>( ptr ) );
+        return std::dynamic_pointer_cast<Base>( std::static_pointer_cast<Derived>( ptr ) );
       }
     };
 
@@ -488,7 +503,7 @@ namespace cereal
           a shared_ptr (or unique_ptr for the unique case) of any base
           type, and the type id of said base type as the third parameter.
           Internally it will properly be loaded and cast to the correct type. */
-      typedef std::function<void(void*, boost::shared_ptr<void> &, std::type_info const &)> SharedSerializer;
+      typedef std::function<void(void*, std::shared_ptr<void> &, std::type_info const &)> SharedSerializer;
       //! Unique ptr serializer function
       typedef std::function<void(void*, std::unique_ptr<void, EmptyDeleter<void>> &, std::type_info const &)> UniqueSerializer;
 
@@ -528,10 +543,10 @@ namespace cereal
         typename InputBindingMap<Archive>::Serializers serializers;
 
         serializers.shared_ptr =
-          [](void * arptr, boost::shared_ptr<void> & dptr, std::type_info const & baseInfo)
+          [](void * arptr, std::shared_ptr<void> & dptr, std::type_info const & baseInfo)
           {
             Archive & ar = *static_cast<Archive*>(arptr);
-            boost::shared_ptr<T> ptr;
+            std::shared_ptr<T> ptr;
 
             ar( CEREAL_NVP_("ptr_wrapper", ::cereal::memory_detail::make_ptr_wrapper(ptr)) );
 
@@ -598,11 +613,11 @@ namespace cereal
           { }
 
           //! Get the wrapped shared_ptr */
-          inline boost::shared_ptr<T const> const & operator()() const { return wrappedPtr; }
+          inline std::shared_ptr<T const> const & operator()() const { return wrappedPtr; }
 
         private:
-          boost::shared_ptr<void> refCount;      //!< The ownership pointer
-          boost::shared_ptr<T const> wrappedPtr; //!< The wrapped pointer
+          std::shared_ptr<void> refCount;      //!< The ownership pointer
+          std::shared_ptr<T const> wrappedPtr; //!< The wrapped pointer
       };
 
       //! Does the actual work of saving a polymorphic shared_ptr
@@ -654,7 +669,7 @@ namespace cereal
 
             auto ptr = PolymorphicCasters::template downcast<T>( dptr, baseInfo );
 
-            #ifdef _MSC_VER
+            #if defined(_MSC_VER) && _MSC_VER < 1916 && !defined(__clang__)
             savePolymorphicSharedPtr( ar, ptr, ::cereal::traits::has_shared_from_this<T>::type() ); // MSVC doesn't like typename here
             #else // not _MSC_VER
             savePolymorphicSharedPtr( ar, ptr, typename ::cereal::traits::has_shared_from_this<T>::type() );
@@ -680,9 +695,23 @@ namespace cereal
     //! of instantiate_polymorphic_binding
     struct adl_tag {};
 
-    //! Tag for init_binding, bind_to_archives and instantiate_polymorphic_binding. Due to the use of anonymous
-    //! namespace it becomes a different type in each translation unit.
+    //! Tag for init_binding, bind_to_archives and instantiate_polymorphic_binding.
+    //! For C++14 and below, we must instantiate a unique StaticObject per TU that is
+    //! otherwise identical -- otherwise we get multiple definition problems (ODR violations).
+    //! To achieve this, put a tag in an anonymous namespace and use it as a template argument.
+    //!
+    //! For C++17, we can use static inline global variables to unify these definitions across
+    //! all TUs in the same shared object (DLL).  The tag is therefore not necessary.
+    //! For convenience, keep it to not complicate other code, but don't put it in
+    //! an anonymous namespace.  Now the template instantiations will correspond
+    //! to the same type, and since they are marked inline with C++17, they will be merged
+    //! across all TUs.
+#ifdef CEREAL_HAS_CPP17
+    struct polymorphic_binding_tag {};
+#else
     namespace { struct polymorphic_binding_tag {}; }
+#endif
+
 
     //! Causes the static object bindings between an archive type and a serializable type T
     template <class Archive, class T>

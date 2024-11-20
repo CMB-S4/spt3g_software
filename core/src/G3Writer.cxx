@@ -47,7 +47,7 @@ PYBINDINGS("core") {
 	using namespace boost::python;
 
 	// Instead of EXPORT_G3MODULE since there is an extra Flush function
-	class_<G3Writer, bases<G3Module>, boost::shared_ptr<G3Writer>,
+	class_<G3Writer, bases<G3Module>, std::shared_ptr<G3Writer>,
 	    boost::noncopyable>("G3Writer",
 	      "Writes frames to disk. Frames will be written to the file specified by "
 	      "filename. If filename ends in .gz, output will be compressed using gzip. "

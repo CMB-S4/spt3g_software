@@ -27,7 +27,7 @@ private:
 	uint64_t n_serial_drops_;
 	uint64_t n_send_drops_;
 
-	using netbuf_type = boost::shared_ptr<std::vector<char>>;
+	using netbuf_type = std::shared_ptr<std::vector<char>>;
 	using buffer_future = std::shared_future<netbuf_type>;
 
 	template<typename InputType>
@@ -100,12 +100,12 @@ private:
 	};
 
 	input_queue<serialization_task> serialization_queue;
-	std::vector<boost::shared_ptr<serializer_thread_data>> serializer_threads_;
-	std::vector<boost::shared_ptr<network_thread_data>> network_threads_;
+	std::vector<std::shared_ptr<serializer_thread_data>> serializer_threads_;
+	std::vector<std::shared_ptr<network_thread_data>> network_threads_;
 	std::deque<output_rcord> outstanding_frames;
 	static void SerializeFrame(serialization_task& task);
-	static void SerializeLoop(boost::shared_ptr<serializer_thread_data>);
-	static void SendLoop(boost::shared_ptr<network_thread_data>);
+	static void SerializeLoop(std::shared_ptr<serializer_thread_data>);
+	static void SendLoop(std::shared_ptr<network_thread_data>);
 	void StartThread(int fd);
 	void StopAllThreads();
 	void ReapDeadThreads();

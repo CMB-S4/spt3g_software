@@ -12,14 +12,14 @@
       * Redistributions in binary form must reproduce the above copyright
         notice, this list of conditions and the following disclaimer in the
         documentation and/or other materials provided with the distribution.
-      * Neither the name of cereal nor the
+      * Neither the name of the copyright holder nor the
         names of its contributors may be used to endorse or promote products
         derived from this software without specific prior written permission.
 
   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-  DISCLAIMED. IN NO EVENT SHALL RANDOLPH VOORHIES OR SHANE GRANT BE LIABLE FOR ANY
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY
   DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -38,7 +38,7 @@
 #include "cereal/details/traits.hpp"
 #include "cereal/details/polymorphic_impl.hpp"
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && _MSC_VER < 1916
 #define CEREAL_STATIC_CONSTEXPR static
 #else
 #define CEREAL_STATIC_CONSTEXPR static constexpr
@@ -200,7 +200,7 @@ namespace cereal
       if(nameid == 0)
       {
         typename ::cereal::detail::InputBindingMap<Archive>::Serializers emptySerializers;
-        emptySerializers.shared_ptr = [](void*, boost::shared_ptr<void> & ptr, std::type_info const &) { ptr.reset(); };
+        emptySerializers.shared_ptr = [](void*, std::shared_ptr<void> & ptr, std::type_info const &) { ptr.reset(); };
         emptySerializers.unique_ptr = [](void*, std::unique_ptr<void, ::cereal::detail::EmptyDeleter<void>> & ptr, std::type_info const &) { ptr.reset( nullptr ); };
         return emptySerializers;
       }
@@ -233,7 +233,7 @@ namespace cereal
     typename std::enable_if<(traits::is_default_constructible<T>::value
                              || traits::has_load_and_construct<T, Archive>::value)
                              && !std::is_abstract<T>::value, bool>::type
-    serialize_wrapper(Archive & ar, boost::shared_ptr<T> & ptr, std::uint32_t const nameid)
+    serialize_wrapper(Archive & ar, std::shared_ptr<T> & ptr, std::uint32_t const nameid)
     {
       if(nameid & detail::msb2_32bit)
       {
@@ -271,7 +271,7 @@ namespace cereal
     typename std::enable_if<(!traits::is_default_constructible<T>::value
                              && !traits::has_load_and_construct<T, Archive>::value)
                              || std::is_abstract<T>::value, bool>::type
-    serialize_wrapper(Archive &, boost::shared_ptr<T> &, std::uint32_t const nameid)
+    serialize_wrapper(Archive &, std::shared_ptr<T> &, std::uint32_t const nameid)
     {
       if(nameid & detail::msb2_32bit)
         throw cereal::Exception("Cannot load a polymorphic type that is not default constructable and does not have a load_and_construct function");
@@ -299,10 +299,10 @@ namespace cereal
   // ######################################################################
   // Pointer serialization for polymorphic types
 
-  //! Saving boost::shared_ptr for polymorphic types, abstract
+  //! Saving std::shared_ptr for polymorphic types, abstract
   template <class Archive, class T> inline
   typename std::enable_if<std::is_polymorphic<T>::value && std::is_abstract<T>::value, void>::type
-  CEREAL_SAVE_FUNCTION_NAME( Archive & ar, boost::shared_ptr<T> const & ptr )
+  CEREAL_SAVE_FUNCTION_NAME( Archive & ar, std::shared_ptr<T> const & ptr )
   {
     if(!ptr)
     {
@@ -326,10 +326,10 @@ namespace cereal
     binding->second.shared_ptr(&ar, ptr.get(), tinfo);
   }
 
-  //! Saving boost::shared_ptr for polymorphic types, not abstract
+  //! Saving std::shared_ptr for polymorphic types, not abstract
   template <class Archive, class T> inline
   typename std::enable_if<std::is_polymorphic<T>::value && !std::is_abstract<T>::value, void>::type
-  CEREAL_SAVE_FUNCTION_NAME( Archive & ar, boost::shared_ptr<T> const & ptr )
+  CEREAL_SAVE_FUNCTION_NAME( Archive & ar, std::shared_ptr<T> const & ptr )
   {
     if(!ptr)
     {
@@ -361,10 +361,10 @@ namespace cereal
     binding->second.shared_ptr(&ar, ptr.get(), tinfo);
   }
 
-  //! Loading boost::shared_ptr for polymorphic types
+  //! Loading std::shared_ptr for polymorphic types
   template <class Archive, class T> inline
   typename std::enable_if<std::is_polymorphic<T>::value, void>::type
-  CEREAL_LOAD_FUNCTION_NAME( Archive & ar, boost::shared_ptr<T> & ptr )
+  CEREAL_LOAD_FUNCTION_NAME( Archive & ar, std::shared_ptr<T> & ptr )
   {
     std::uint32_t nameid;
     ar( CEREAL_NVP_("polymorphic_id", nameid) );
@@ -374,9 +374,9 @@ namespace cereal
       return;
 
     auto binding = polymorphic_detail::getInputBinding(ar, nameid);
-    boost::shared_ptr<void> result;
+    std::shared_ptr<void> result;
     binding.shared_ptr(&ar, result, typeid(T));
-    ptr = boost::static_pointer_cast<T>(result);
+    ptr = std::static_pointer_cast<T>(result);
   }
 
   //! Saving std::weak_ptr for polymorphic types
@@ -393,7 +393,7 @@ namespace cereal
   typename std::enable_if<std::is_polymorphic<T>::value, void>::type
   CEREAL_LOAD_FUNCTION_NAME( Archive & ar, std::weak_ptr<T> & ptr )
   {
-    boost::shared_ptr<T> sptr;
+    std::shared_ptr<T> sptr;
     ar( CEREAL_NVP_("locked_ptr", sptr) );
     ptr = sptr;
   }

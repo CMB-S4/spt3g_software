@@ -75,7 +75,7 @@ void DfMuxBuilder::ProcessNewData()
 	DfMuxSamplePacketConstPtr pkt;
 	{
 		std::lock_guard<std::mutex> lock(queue_lock_);
-		pkt = boost::dynamic_pointer_cast<const DfMuxSamplePacket>(
+		pkt = std::dynamic_pointer_cast<const DfMuxSamplePacket>(
 		    queue_.front().second);
 		queue_.pop_front();
 	}
@@ -122,11 +122,11 @@ void DfMuxBuilder::ProcessNewData()
 				break;
 		}
 
-		metasamp.frame = boost::make_shared<G3Frame>(G3Frame::Timepoint);
-		metasamp.sample = boost::make_shared<DfMuxMetaSample>();
+		metasamp.frame = std::make_shared<G3Frame>(G3Frame::Timepoint);
+		metasamp.sample = std::make_shared<DfMuxMetaSample>();
 		metasamp.time = timecode;
 		metasamp.frame->Put("EventHeader",
-		    boost::make_shared<G3Time>(timecode));
+		    std::make_shared<G3Time>(timecode));
 		sample = oqueue_.insert(sample, metasamp);
 		CollectPolledData(metasamp.frame);
 	}

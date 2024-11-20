@@ -157,21 +157,21 @@ PYBINDINGS("core") {
 	register_vector_of<G3LoggerPtr>("G3Logger");
 
 	bp::class_<G3NullLogger, bp::bases<G3Logger>,
-	  boost::shared_ptr<G3NullLogger>, boost::noncopyable>(
+	  std::shared_ptr<G3NullLogger>, boost::noncopyable>(
 	  "G3NullLogger", "Logger that does not log. Useful if you don't want log messages");
 	bp::class_<G3PrintfLogger, bp::bases<G3Logger>,
-	  boost::shared_ptr<G3PrintfLogger>, boost::noncopyable>(
+	  std::shared_ptr<G3PrintfLogger>, boost::noncopyable>(
 	  "G3PrintfLogger", "Logger that prints error messages to stderr (in color, if stderr is a tty).",
 	  bp::init<bp::optional<G3LogLevel> >())
 	    .def_readwrite("trim_file_names", &G3PrintfLogger::TrimFileNames)
 	    .def_readwrite("timestamps", &G3PrintfLogger::Timestamps)
 	;
 	bp::class_<G3MultiLogger, bp::bases<G3Logger>,
-	  boost::shared_ptr<G3MultiLogger>, boost::noncopyable>(
+	  std::shared_ptr<G3MultiLogger>, boost::noncopyable>(
 	  "G3MultiLogger", "Log to multiple loggers at once",
 	  bp::init<std::vector<G3LoggerPtr> >());
 	bp::class_<G3SyslogLogger, bp::bases<G3Logger>,
-	  boost::shared_ptr<G3SyslogLogger>, boost::noncopyable>(
+	  std::shared_ptr<G3SyslogLogger>, boost::noncopyable>(
 	  "G3SyslogLogger", "Pass log messages to the syslog service. Initialize with "
 	  "a string identifier and a logging facility. See syslog(3) for details. Example:\n"
 	  "\timport syslog\n\tlogger = core.G3SyslogLogger('myprogram', syslog.LOG_USER)",

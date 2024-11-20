@@ -60,8 +60,8 @@ public:
 
 	// Reimplement the following in subclasses
 	virtual void FillFromArray(boost::python::object v) = 0;
-	boost::shared_ptr<G3SkyMap> ArrayClone(boost::python::object v) const;
-	virtual boost::shared_ptr<G3SkyMap> Clone(bool copy_data = true) const = 0;
+	std::shared_ptr<G3SkyMap> ArrayClone(boost::python::object v) const;
+	virtual std::shared_ptr<G3SkyMap> Clone(bool copy_data = true) const = 0;
 
 	MapCoordReference coord_ref;
 	G3Timestream::TimestreamUnits units;
@@ -194,7 +194,7 @@ public:
 	    const std::vector<double> &deltas) const;
 	std::vector<double> GetInterpValues(const G3VectorQuat & quats) const;
 
-	virtual boost::shared_ptr<G3SkyMap> Rebin(size_t scale, bool norm = true) const = 0;
+	virtual std::shared_ptr<G3SkyMap> Rebin(size_t scale, bool norm = true) const = 0;
 
 	/* Analogue to healpy.query_disc, returns list of pixels within a disc */
 	std::vector<size_t> QueryDisc(double alpha, double delta, double radius) const;
@@ -448,19 +448,19 @@ public:
 
 	G3SkyMapPtr Det() const;
 	G3SkyMapPtr Cond() const;
-	boost::shared_ptr<G3SkyMapWeights> Inv() const;
+	std::shared_ptr<G3SkyMapWeights> Inv() const;
 
-	boost::shared_ptr<G3SkyMapWeights> Rebin(size_t scale) const;
+	std::shared_ptr<G3SkyMapWeights> Rebin(size_t scale) const;
 
 	void ApplyMask(const G3SkyMapMask &mask, bool inverse=false);
 
 	void Compact(bool zero_nans = false);
 
-	boost::shared_ptr<G3SkyMapWeights> Clone(bool copy_data) const {
+	std::shared_ptr<G3SkyMapWeights> Clone(bool copy_data) const {
 		if (copy_data)
-			return boost::make_shared<G3SkyMapWeights>(*this, true);
+			return std::make_shared<G3SkyMapWeights>(*this, true);
 		else
-			return boost::make_shared<G3SkyMapWeights>(*this, false);
+			return std::make_shared<G3SkyMapWeights>(*this, false);
 	}
 private:
 	template <class A> void serialize(A &ar, const unsigned v);

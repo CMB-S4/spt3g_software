@@ -208,7 +208,7 @@ void GCPLogger::ListenThread(GCPLogger *logger)
 PYBINDINGS("gcp") {
         using namespace boost::python;
 
-	class_<GCPLogger, bp::bases<G3Logger>, boost::shared_ptr<GCPLogger>,
+	class_<GCPLogger, bp::bases<G3Logger>, std::shared_ptr<GCPLogger>,
 	  boost::noncopyable>("GCPLogger",
 	  "Logger that relays error messages to the GCP mediator over TCP",
 	  init<int, G3LogLevel>((arg("port")=50030,

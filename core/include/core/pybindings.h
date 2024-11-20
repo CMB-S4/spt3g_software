@@ -29,16 +29,16 @@ register_pointer_conversions()
 {
 	using boost::python::implicitly_convertible;
 
-	implicitly_convertible<boost::shared_ptr<T>, G3FrameObjectPtr>();
-	implicitly_convertible<boost::shared_ptr<T>, boost::shared_ptr<const T> >();
-	implicitly_convertible<boost::shared_ptr<T>, G3FrameObjectConstPtr>();
+	implicitly_convertible<std::shared_ptr<T>, G3FrameObjectPtr>();
+	implicitly_convertible<std::shared_ptr<T>, std::shared_ptr<const T> >();
+	implicitly_convertible<std::shared_ptr<T>, G3FrameObjectConstPtr>();
 }
 
 template <typename T>
-static boost::shared_ptr<T>
+static std::shared_ptr<T>
 container_from_object(boost::python::object v)
 {
-	boost::shared_ptr<T> x(new T());
+	std::shared_ptr<T> x(new T());
 
 	boost::python::container_utils::extend_container(*x, v);
 	return x;
@@ -99,7 +99,7 @@ void
 register_map(std::string name, const char *docstring)
 {
 	using namespace boost::python;
-	class_<T, boost::shared_ptr<T> >(name.c_str())
+	class_<T, std::shared_ptr<T> >(name.c_str())
 	    .def(init<const T &>())
 	    .def(std_map_indexing_suite<T, proxy>())
 	;
@@ -142,7 +142,7 @@ public:
 #define EXPORT_G3MODULE_AND(mod, T, init, docstring, other_defs)   \
 	static void registerfunc##T() { \
 		using namespace boost::python; \
-		class_<T, bases<G3Module>, boost::shared_ptr<T>, \
+		class_<T, bases<G3Module>, std::shared_ptr<T>, \
 		  boost::noncopyable>(#T, docstring, init) \
 		    .def_readonly("__g3module__", true) \
                 other_defs \
@@ -160,12 +160,12 @@ public:
 	static void ___pybindings_registerfunc() 
 
 #define EXPORT_FRAMEOBJECT(T, initf, docstring) \
-	boost::python::class_<T, boost::python::bases<G3FrameObject>, boost::shared_ptr<T> >(#T, docstring, boost::python::initf) \
+	boost::python::class_<T, boost::python::bases<G3FrameObject>, std::shared_ptr<T> >(#T, docstring, boost::python::initf) \
 	    .def(boost::python::init<const T &>()) \
 	    .def_pickle(g3frameobject_picklesuite<T>())
 
 #define EXPORT_FRAMEOBJECT_NOINITNAMESPACE(T, initf, docstring) \
-	boost::python::class_<T, boost::python::bases<G3FrameObject>, boost::shared_ptr<T> >(#T, docstring, initf) \
+	boost::python::class_<T, boost::python::bases<G3FrameObject>, std::shared_ptr<T> >(#T, docstring, initf) \
 	    .def(boost::python::init<const T &>()) \
 	    .def_pickle(g3frameobject_picklesuite<T>())
 

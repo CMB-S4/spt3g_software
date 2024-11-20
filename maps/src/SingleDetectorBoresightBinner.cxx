@@ -122,7 +122,7 @@ SingleDetectorBoresightBinner::Process(G3FramePtr frame,
 			G3FramePtr out(new G3Frame(G3Frame::Map));
 			out->Put("Id", G3StringPtr(new G3String(i.first)));
 			out->Put("T",
-			  boost::dynamic_pointer_cast<G3FrameObject>(i.second));
+			  std::dynamic_pointer_cast<G3FrameObject>(i.second));
 
 			if (map_weights_) {
 				out->Put("Wunpol", map_weights_);

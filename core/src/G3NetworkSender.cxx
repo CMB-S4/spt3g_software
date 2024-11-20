@@ -145,7 +145,7 @@ G3NetworkSender::G3NetworkSender(std::string hostname, int port, int max_queue,
 	try {
 		serializer_threads_.reserve(n_serializers_);
 		for (size_t i=0; i<n_serializers_; i++) {
-			auto t = boost::make_shared<serializer_thread_data>(serialization_queue);
+			auto t = std::make_shared<serializer_thread_data>(serialization_queue);
 			t->thread = std::thread(SerializeLoop, t);
 			serializer_threads_.push_back(t);
 		}
@@ -185,7 +185,7 @@ void G3NetworkSender::SerializeFrame(serialization_task& task)
 }
 
 void
-G3NetworkSender::SerializeLoop(boost::shared_ptr<serializer_thread_data> t)
+G3NetworkSender::SerializeLoop(std::shared_ptr<serializer_thread_data> t)
 {
 	setThreadName("G3NetSnd Srlize");
 	std::unique_lock<std::mutex> lock(t->queue.lock);
@@ -211,7 +211,7 @@ G3NetworkSender::SerializeLoop(boost::shared_ptr<serializer_thread_data> t)
 }
 
 void
-G3NetworkSender::SendLoop(boost::shared_ptr<network_thread_data> t)
+G3NetworkSender::SendLoop(std::shared_ptr<network_thread_data> t)
 {
 	setThreadName("G3NetSnd Send");
 	// Iteratively pop frames out of the queue and send them
@@ -259,7 +259,7 @@ G3NetworkSender::SendLoop(boost::shared_ptr<network_thread_data> t)
 void
 G3NetworkSender::StartThread(int fd)
 {
-	auto t = boost::make_shared<network_thread_data>();
+	auto t = std::make_shared<network_thread_data>();
 
 	// Initialize the outbound queue with the metadata frames
 	for (auto i = metadata_.begin(); i != metadata_.end(); i++)
@@ -292,7 +292,7 @@ G3NetworkSender::ReapDeadThreads(void)
 {
 	// Wait for all threads marked for death to complete
 	auto it=std::remove_if(network_threads_.begin(), network_threads_.end(),
-		[](boost::shared_ptr<network_thread_data>& t)->bool{
+		[](std::shared_ptr<network_thread_data>& t)->bool{
 			std::unique_lock<std::mutex> lock(t->queue.lock);
 			if(t->queue.die){
 				lock.unlock();

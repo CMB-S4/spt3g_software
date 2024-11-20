@@ -993,7 +993,7 @@ G3SkyMap::nan##oper(G3SkyMapMaskConstPtr where) const \
 { \
 	G3SkyMapMask mask = isnan(where); \
 	mask.invert(); \
-	return oper(boost::make_shared<G3SkyMapMask>(mask)); \
+	return oper(std::make_shared<G3SkyMapMask>(mask)); \
 }
 
 skymap_nanoper(sum, double);
@@ -1009,7 +1009,7 @@ G3SkyMap::nanvar(size_t ddof, G3SkyMapMaskConstPtr where) const
 {
 	G3SkyMapMask mask = isnan(where);
 	mask.invert();
-	return var(ddof, boost::make_shared<G3SkyMapMask>(mask));
+	return var(ddof, std::make_shared<G3SkyMapMask>(mask));
 }
 
 double

@@ -135,7 +135,7 @@ private:
 	uint8_t use_flac_;
 
 	std::vector<double> *buffer_;
-	boost::shared_ptr<void> root_data_ref_;
+	std::shared_ptr<void> root_data_ref_;
 	void *data_;
 	size_t len_;
 	enum {
@@ -224,7 +224,7 @@ public:
 	                                   G3Time start, G3Time stop,
 	                                   G3Timestream::TimestreamUnits units=G3Timestream::None,
 	                                   int compression_level=0){
-		boost::shared_ptr<SampleType[]> data(new SampleType[n_samples*keys.size()]);
+		std::shared_ptr<SampleType[]> data(new SampleType[n_samples*keys.size()]);
 		return MakeCompact(keys, n_samples, data, start, stop, units, compression_level);
 	}
 
@@ -239,7 +239,7 @@ public:
 	/// \pre keys must be in sorted order
 	template<typename SampleType>
 	static G3TimestreamMap MakeCompact(const std::vector<std::string>& keys, std::size_t n_samples,
-	                                   boost::shared_ptr<SampleType[]> data,
+	                                   std::shared_ptr<SampleType[]> data,
 	                                   G3Time start, G3Time stop,
 	                                   G3Timestream::TimestreamUnits units=G3Timestream::None,
 	                                   int compression_level=0){
@@ -249,7 +249,7 @@ public:
 		G3TimestreamMap map;
 		std::size_t offset=0;
 		for(const auto& key : keys){
-			auto ts=boost::make_shared<G3Timestream>(0);
+			auto ts=std::make_shared<G3Timestream>(0);
 			ts->start=start;
 			ts->stop=stop;
 			ts->units=units;
