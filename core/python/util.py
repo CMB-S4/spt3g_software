@@ -1,4 +1,4 @@
-from spt3g.core import indexmod, pipesegment, G3FrameType, log_fatal, G3Reader, G3NetworkSender
+from . import indexmod, pipesegment, G3FrameType, log_fatal, G3Reader, G3NetworkSender
 
 @indexmod
 def Delete(frame, keys=[], type=None):

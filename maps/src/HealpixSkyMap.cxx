@@ -45,7 +45,6 @@ HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool weighted,
 	if (PyTuple_Check(v.ptr()) && PyTuple_Size(v.ptr()) == 3) {
 		// One option is that we got passed a tuple of numpy
 		// arrays: first indices, next data, next nside.
-		Py_buffer indexview, dataview;
 #if PY_MAJOR_VERSION < 3
 		if (PyInt_Check(PyTuple_GetItem(v.ptr(), 2))) {
 			nside = PyInt_AsSsize_t(PyTuple_GetItem(v.ptr(), 2));
@@ -1020,12 +1019,12 @@ HealpixSkyMap::PixelToAngle(size_t pixel) const
 }
 
 size_t
-HealpixSkyMap::QuatToPixel(quat q) const
+HealpixSkyMap::QuatToPixel(const Quat &q) const
 {
 	return info_.QuatToPixel(q);
 }
 
-quat
+Quat
 HealpixSkyMap::PixelToQuat(size_t pixel) const
 {
 	return info_.PixelToQuat(pixel);
@@ -1038,14 +1037,14 @@ HealpixSkyMap::GetRebinQuats(size_t pixel, size_t scale) const
 }
 
 void
-HealpixSkyMap::GetInterpPixelsWeights(quat q, std::vector<size_t> & pixels,
+HealpixSkyMap::GetInterpPixelsWeights(const Quat &q, std::vector<size_t> & pixels,
     std::vector<double> & weights) const
 {
 	info_.GetInterpPixelsWeights(q, pixels, weights);
 }
 
 std::vector<size_t>
-HealpixSkyMap::QueryDisc(quat q, double radius) const
+HealpixSkyMap::QueryDisc(const Quat &q, double radius) const
 {
 	return info_.QueryDisc(q, radius);
 }
@@ -1245,7 +1244,13 @@ HealpixSkyMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 
 	bp::handle<> self(bp::borrowed(obj));
 	bp::object selfobj(self);
-	HealpixSkyMapPtr sm = bp::extract<HealpixSkyMapPtr>(selfobj)();
+	bp::extract<HealpixSkyMapPtr> ext(selfobj);
+	if (!ext.check()) {
+		PyErr_SetString(PyExc_ValueError, "Invalid healpix map");
+		view->obj = NULL;
+		return -1;
+	}
+	HealpixSkyMapPtr sm = ext();
 
 	sm->ConvertToDense();
 

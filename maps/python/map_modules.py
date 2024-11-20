@@ -1,4 +1,4 @@
-from spt3g import core, maps
+from .. import core, maps
 import numpy as np
 
 __all__ = [
@@ -172,7 +172,7 @@ def FlattenPol(frame, invert=False):
     if any(not isinstance(frame[k], maps.FlatSkyMap) for k in "QU"):
         return
 
-    ValidateMaps(frame)
+    ValidateMaps(frame, ignore_missing_weights=True)
     tmap, qmap, umap = frame.pop("T"), frame.pop("Q"), frame.pop("U")
 
     if "Wpol" in frame:
@@ -327,7 +327,8 @@ def ValidateMaps(frame, ignore_missing_weights=False):
                 if "Wpol" not in frame and "Wunpol" not in frame:
                     if not check_weights:
                         core.log_warn(
-                            "Map frame %s: Missing weights" % map_id, unit="ValidateMaps"
+                            "Map frame %s: Missing weights" % map_id,
+                            unit="ValidateMaps",
                         )
                         check_weights = True
                 else:
@@ -684,7 +685,7 @@ class CoaddMaps(object):
 
     def __call__(self, frame):
 
-        if frame.type == core.G3FrameType.EndProcessing:
+        if isinstance(frame, core.G3Frame) and frame.type == core.G3FrameType.EndProcessing:
             if self.collate:
                 return list(self.coadd_frames.values()) + [frame]
             return [self.coadd_frame, frame]
@@ -694,7 +695,7 @@ class CoaddMaps(object):
                 frame["SourceName"], frame["ObservationID"]
             )
 
-        if frame.type != core.G3FrameType.Map:
+        if isinstance(frame, core.G3Frame) and frame.type != core.G3FrameType.Map:
             return
 
         map_id = self.get_map_id(frame)
@@ -739,9 +740,7 @@ class CoaddMaps(object):
             input_files = []
         if "InputFiles" in frame:
             # allow for recursive coadds
-            input_files += [
-                f for f in frame["InputFiles"] if f not in input_files
-            ]
+            input_files += [f for f in frame["InputFiles"] if f not in input_files]
         elif getattr(frame, "_filename", None):
             if frame._filename not in input_files:
                 input_files += [frame._filename]
@@ -869,16 +868,20 @@ class ReprojectMaps(object):
     interp : bool
         If True, use bilinear interpolation to extract values from the input
         map.  Otherwise, the nearest-neighbor value is used.
+    weighted : bool
+        If True (default), ensure that maps have had weights applied before
+        reprojection.  Otherwise, reproject maps without checking the weights.
     """
 
-    def __init__(self, map_stub=None, rebin=1, interp=False):
+    def __init__(self, map_stub=None, rebin=1, interp=False, weighted=True):
         assert map_stub is not None, "map_stub argument required"
-        self.stub = map_stub
+        self.stub = map_stub.clone(False)
+        self.stub.pol_type = None
         self.rebin = rebin
         self.interp = interp
+        self.weighted = weighted
 
     def __call__(self, frame):
-
         if isinstance(frame, core.G3Frame) and frame.type != core.G3FrameType.Map:
             return
 
@@ -886,6 +889,9 @@ class ReprojectMaps(object):
             raise RuntimeError(
                 "Coordinate rotation of polarized maps is not implemented"
             )
+
+        if self.weighted:
+            ApplyWeights(frame)
 
         if "U" in frame and not self.stub.polarized:
             self.stub.pol_conv = frame["U"].pol_conv

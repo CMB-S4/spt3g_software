@@ -1,13 +1,7 @@
-cmake_minimum_required(VERSION 3.1)
-if(POLICY CMP0060) # Avoid cmake misfeature that can link the wrong libraries
-	cmake_policy(SET CMP0060 NEW)
-endif()
-cmake_policy(SET CMP0012 NEW) # Allow use of true in boolean expressions
-if(POLICY CMP0042) # Enable RPATH on OSX
-	cmake_policy(SET CMP0042 NEW)
-endif()
-if(POLICY CMP0057) # Allow IN_LIST operator in if() statements
-	cmake_policy(SET CMP0057 NEW)
+cmake_minimum_required(VERSION 3.12)
+# Don't warn about removal of FindBoost in cmake 3.30+
+if(POLICY CMP0167)
+	cmake_policy(SET CMP0167 NEW)
 endif()
 
 project(spt3g)
@@ -17,6 +11,9 @@ if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel" FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
 
+# Use cmake directory for packages
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} $ENV{SITE_CMAKE_DIR} "${CMAKE_SOURCE_DIR}/cmake")
+
 # Work around stupid broken Red Hat systems
 set(CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "")
 
@@ -25,64 +22,73 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Compiler and include configurations
-set(SPT3G_SOURCE_DIR ${CMAKE_SOURCE_DIR})
-set(SPT3G_BUILD_DIR ${CMAKE_BINARY_DIR})
-
+# Convenience variables
+set(SPT3G_MODULE_DIR ${CMAKE_BINARY_DIR}/spt3g)
 set(SPT3G_INCLUDE_INSTALL_DIR "include/spt3g")
 
-configure_file(${CMAKE_SOURCE_DIR}/cmake/Spt3gIncludes.cmake.in ${CMAKE_BINARY_DIR}/cmake/Spt3gIncludes.cmake @ONLY)
-include(${CMAKE_BINARY_DIR}/cmake/Spt3gIncludes.cmake)
+include(Spt3gIncludes)
 
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${SPT3G_LIBRARY_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${SPT3G_RUNTIME_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-# Sneak in a namespace-like prefix for all libraries
-set(CMAKE_SHARED_LIBRARY_PREFIX "libspt3g-")
-
-# Raise errors on every warning by default
+# Raise every warning by default
 # (use target-specific options to disable particular warnings)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+# Find all the Boost and Python libraries
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
+if(DEFINED ENV{CIBUILDWHEEL})
+	# Can't compile binaries against libpython in CI
+	find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
+else()
+	find_package(Python COMPONENTS Interpreter Development REQUIRED)
+endif()
+
+set(Boost_USE_STATIC_LIBS OFF)
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
+set(Boost_PYTHON_VERSION ${Python_VERSION})
+find_package(Boost COMPONENTS system iostreams filesystem python REQUIRED)
 
 # Interface library for flags and library dependencies
 add_library(spt3g INTERFACE)
 
 # get version info
 include(Spt3gVersion)
-get_spt3g_version()
 if (SPT3G_VERSION)
 	message(STATUS "Building SPT3G software version ${SPT3G_VERSION}")
 	target_compile_definitions(spt3g INTERFACE -DSPT3G_VERSION="${SPT3G_VERSION}")
 endif()
 
-# Ignore known warnings
-target_compile_options(spt3g INTERFACE -Wno-unknown-warning-option -Wno-unused -Wno-unused-result -Wno-deprecated-register -Wno-sign-compare -Wno-constant-conversion -Wno-self-assign-overloaded -Wno-deprecated-declarations -Wno-maybe-uninitialized)
+target_compile_features(spt3g INTERFACE cxx_std_11)
+target_include_directories(spt3g INTERFACE ${Boost_INCLUDE_DIR})
+target_link_libraries(spt3g INTERFACE Threads::Threads ${Boost_LIBRARIES})
+target_include_directories(spt3g INTERFACE $<INSTALL_INTERFACE:${SPT3G_INCLUDE_INSTALL_DIR}>)
 
-# Fix bugs in GCC 4.4's strict aliasing code by turning it off
-target_compile_options(spt3g INTERFACE -fno-strict-aliasing)
-
-# Boost bits we need
-set(Boost_USE_STATIC_LIBS OFF)
-set(Boost_USE_MULTITHREADED ON)
-set(Boost_USE_STATIC_RUNTIME OFF)
-set(Boost_NO_BOOST_CMAKE ON)
-
-# Find all the Boost and Python libraries
-include(Spt3gBoostPython)
-
-# Upgrade C++ standard to C++14 for Boost >= 1.80, which requires it
-if(Boost_VERSION VERSION_GREATER 1.79)
-	set(CMAKE_CXX_STANDARD 14)
+# Python bindings
+if(TARGET Python::Module)
+	target_link_libraries(spt3g INTERFACE Python::Module)
+else()
+	target_include_directories(spt3g INTERFACE ${Python_INCLUDE_DIRS})
+	if(APPLE)
+		target_link_options(spt3g INTERFACE "LINKER:-undefined,dynamic_lookup")
+	endif()
 endif()
-
-target_include_directories(spt3g INTERFACE ${Boost_INCLUDE_DIR} ${Python_INCLUDE_DIRS})
-target_link_libraries(spt3g INTERFACE pthread ${Boost_LIBRARIES} ${Python_LIBRARIES})
 
 # Work around yet more bugs in GCC 4.4, this time with C++ 11 support
 # Also increase maximum number of arguments in python bindings
-target_compile_definitions(spt3g INTERFACE -DBOOST_NO_CXX11_SMART_PTR=1
-    -DBOOST_PYTHON_MAX_ARITY=20 -DBOOST_BIND_GLOBAL_PLACEHOLDERS
-    -DBOOST_ALLOW_DEPRECATED_HEADERS)
+target_compile_definitions(spt3g INTERFACE -DBOOST_PYTHON_MAX_ARITY=20
+	-DBOOST_ALLOW_DEPRECATED_HEADERS)
+if(Boost_VERSION VERSION_LESS 1.77)
+	target_compile_definitions(spt3g INTERFACE -DBOOST_BIND_GLOBAL_PLACEHOLDERS)
+endif()
+if(Boost_VERSION VERSION_LESS 1.82)
+	target_compile_definitions(spt3g INTERFACE -DBOOST_NO_CXX11_SMART_PTR=1)
+endif()
 
 # Shell script to set environment variables
 configure_file(${CMAKE_SOURCE_DIR}/cmake/env-shell.sh.in ${CMAKE_BINARY_DIR}/env-shell.sh @ONLY)
@@ -90,7 +96,8 @@ configure_file(${CMAKE_SOURCE_DIR}/cmake/env-shell.sh.in ${CMAKE_BINARY_DIR}/env
 # Set up python importability
 execute_process(COMMAND mkdir -p ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 execute_process(COMMAND mkdir -p ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-execute_process(COMMAND ln -fsn ${CMAKE_SOURCE_DIR}/cmake/init.py ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/__init__.py)
+execute_process(COMMAND mkdir -p ${SPT3G_MODULE_DIR})
+execute_process(COMMAND ln -fsn ${CMAKE_SOURCE_DIR}/cmake/package/__init__.py ${SPT3G_MODULE_DIR}/__init__.py)
 
 set(BUILD_PROJECTS "${BUILD_PROJECTS}" CACHE STRING "The subset of available projects to actually build")
 if(NOT "${BUILD_PROJECTS}" STREQUAL "")
@@ -105,23 +112,13 @@ if(${USE_PROJECT_LIST} AND WILL_BUILD_CORE EQUAL -1)
 	list(APPEND BUILD_PROJECTS core)
 endif(${USE_PROJECT_LIST} AND WILL_BUILD_CORE EQUAL -1)
 
-# If not set by the user, ask python where it keeps modules
-if(NOT PYTHON_MODULE_DIR)
-	EXECUTE_PROCESS (COMMAND ${Python_EXECUTABLE} -c
-		"import sysconfig; print(sysconfig.get_path(\"platlib\"))"
-		OUTPUT_VARIABLE PYTHON_MODULE_DIR
-		OUTPUT_STRIP_TRAILING_WHITESPACE
-	)
-endif(NOT PYTHON_MODULE_DIR)
-message(STATUS "Python modules will be installed to ${PYTHON_MODULE_DIR}")
-
 include(GNUInstallDirs)
 if(APPLE)
        # See: https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
 	set(CMAKE_MACOSX_RPATH TRUE)
 	set(CMAKE_SKIP_BUILD_RPATH FALSE)
 	set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-	set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib;${PYTHON_MODULE_DIR}/spt3g")
+	set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
 	set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 endif(APPLE)
 
@@ -160,12 +157,13 @@ if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.17)
 endif(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.17)
 
 # Target for version string
-add_custom_target(version ALL
-	COMMAND sh ${CMAKE_SOURCE_DIR}/cmake/getvers.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}
-	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_SOURCE_DIR}/cmake/Spt3gVersion.cmake ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR}
-	BYPRODUCTS ${CMAKE_BINARY_DIR}/spt3g/version.py ${CMAKE_BINARY_DIR}/pyproject.toml ${CMAKE_BINARY_DIR}/cmake/Spt3gConfigVersion.cmake
-	COMMENT "Regenerating VCS version information"
-)
+if(NOT PIP_SPT3G_VERSION_FILE)
+	add_custom_target(version ALL
+		COMMAND sh ${CMAKE_SOURCE_DIR}/cmake/getvers.sh ${CMAKE_SOURCE_DIR} ${SPT3G_MODULE_DIR}/version.py
+		BYPRODUCTS ${SPT3G_MODULE_DIR}/version.py
+		COMMENT "Regenerating VCS version information"
+	)
+endif()
 
 # Add mechanism to make a tarball for the grid
 add_custom_target(tarball
@@ -188,37 +186,6 @@ add_custom_target(docs
 # Export the phony library target
 INSTALL(TARGETS spt3g EXPORT ${PROJECT_NAME}Config)
 
-# The python module
-# First, one-off files
-INSTALL(FILES ${CMAKE_SOURCE_DIR}/cmake/init.py DESTINATION ${PYTHON_MODULE_DIR}/spt3g RENAME __init__.py)
-INSTALL(FILES ${CMAKE_BINARY_DIR}/spt3g/version.py DESTINATION ${PYTHON_MODULE_DIR}/spt3g)
-
-# Python scripts
-foreach(dir ${SPT3G_PYTHON_DIRS})
-	get_filename_component(dir_name "${dir}" NAME)
-	if("${dir_name}" STREQUAL "python")
-		# If the directory name is "python", need to walk up the path to find out what it should be called.
-		get_filename_component(dir_name "${dir}" DIRECTORY)
-		get_filename_component(lib "${dir_name}" NAME)
-		# The INSTALL conmmand does not support the RENAME option in directory mode, which makes this a pain.
-		file(GLOB_RECURSE project_py_files LIST_DIRECTORIES false RELATIVE ${dir} ${dir}/*)
-		foreach(file ${project_py_files})
-			get_filename_component(subdir "${file}" DIRECTORY)
-			if(file MATCHES ".*pyc" OR file MATCHES ".*pyo")
-				continue() # skip existing compiled python files
-			endif(file MATCHES ".*pyc" OR file MATCHES ".*pyo")
-			install(FILES "${dir}/${file}" DESTINATION ${PYTHON_MODULE_DIR}/spt3g/${lib}/${subdir})
-		endforeach(file ${project_py_files})
-	else("${dir_name}" STREQUAL "python")
-		install(DIRECTORY ${dir} DESTINATION ${PYTHON_MODULE_DIR}/spt3g/
-			PATTERN "*.pyc" EXCLUDE # skip existing compiled python files
-			PATTERN "*.pyo" EXCLUDE)
-	endif("${dir_name}" STREQUAL "python")
-endforeach(dir SPT3G_PYTHON_DIRS)
-# Ensure that python scripts are precompiled, in case they will be executed from a read-only perspective
-install(CODE "MESSAGE(STATUS \"Pre-compiling python scripts in ${PYTHON_MODULE_DIR}/spt3g/\")
-EXECUTE_PROCESS(COMMAND ${Python_EXECUTABLE} -O -m compileall -fq ${PYTHON_MODULE_DIR}/spt3g/)")
-
 # The exectutables
 foreach(program ${SPT3G_PROGRAMS})
 	# programs are likely to by symlinks, so resolve those before installing
@@ -236,9 +203,9 @@ endforeach(program ${SPT3G_PROGRAMS})
 # The CMake package definitions
 include(CMakePackageConfigHelpers)
 
-set(INCLUDE_INSTALL_DIR include/spt3g )
+set(INCLUDE_INSTALL_DIR ${SPT3G_INCLUDE_INSTALL_DIR} )
 set(LIB_INSTALL_DIR lib/ )
-set(CMAKE_INSTALL_DIR share/${PROJECT_NAME}/cmake )
+set(CMAKE_INSTALL_DIR lib/cmake/${PROJECT_NAME} )
 configure_package_config_file(${CMAKE_SOURCE_DIR}/cmake/Spt3gConfig.cmake.in
 	${CMAKE_BINARY_DIR}/cmake-install/Spt3gConfig.cmake
 	INSTALL_DESTINATION ${CMAKE_INSTALL_DIR}
@@ -251,8 +218,13 @@ install(EXPORT ${PROJECT_NAME}Config
 	FILE Spt3gTargets.cmake)
 install(FILES
 	"${CMAKE_BINARY_DIR}/cmake-install/Spt3gConfig.cmake"
-	"${CMAKE_BINARY_DIR}/cmake/Spt3gIncludes.cmake"
+	"${CMAKE_SOURCE_DIR}/cmake/FindFLAC.cmake"
+	"${CMAKE_SOURCE_DIR}/cmake/FindNetCDF.cmake"
+	"${CMAKE_SOURCE_DIR}/cmake/FindOgg.cmake"
 	DESTINATION ${CMAKE_INSTALL_DIR})
+if(SPT3G_VERSION)
+	install(FILES "${CMAKE_BINARY_DIR}/cmake/Spt3gConfigVersion.cmake" DESTINATION ${CMAKE_INSTALL_DIR})
+endif()
 
 # The header files
 foreach(lib ${SPT3G_LIBRARIES})
@@ -278,7 +250,3 @@ configure_file(
 	"${CMAKE_BINARY_DIR}/cmake/cmake_uninstall_cmake"
 	IMMEDIATE @ONLY)
 add_custom_target(uninstall "${CMAKE_COMMAND}" -P "${CMAKE_BINARY_DIR}/cmake/cmake_uninstall_cmake")
-
-if(NOT Python_FOUND)
-	message(FATAL_ERROR "Unable to find Python; build cannot proceed")
-endif(NOT Python_FOUND)

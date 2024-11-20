@@ -282,7 +282,7 @@ void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, G3SkyMapWeightsPtr W, double h
 void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool interp)
 {
 	bool rotate = false; // no transform
-	quat q_rot; // quaternion for rotating from output to input coordinate system
+	Quat q_rot; // quaternion for rotating from output to input coordinate system
 	if (in_map->coord_ref != out_map->coord_ref &&
 	    in_map->coord_ref != MapCoordReference::Local &&
 	    out_map->coord_ref != MapCoordReference::Local) {
@@ -330,7 +330,7 @@ void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool int
 	} else {
 		for (size_t i = 0; i < out_map->size(); i++) {
 			double val = 0;
-			quat q = out_map->PixelToQuat(i);
+			auto q = out_map->PixelToQuat(i);
 			if (rotate)
 				q = q_rot * q * ~q_rot;
 			if (interp)
@@ -457,10 +457,10 @@ GetMapHist(G3SkyMapConstPtr m, const std::vector<double> &bin_edges, G3SkyMapMas
 FlatSkyMapPtr
 ConvolveMap(FlatSkyMapConstPtr map, FlatSkyMapConstPtr kernel)
 {
-	int xdim = map->shape()[0];
-	int ydim = map->shape()[1];
-	int nx = kernel->shape()[0];
-	int ny = kernel->shape()[1];
+	size_t xdim = map->shape()[0];
+	size_t ydim = map->shape()[1];
+	size_t nx = kernel->shape()[0];
+	size_t ny = kernel->shape()[1];
 	if ((nx % 2 == 0) || (ny % 2 == 0))
 		log_fatal("Kernel must have odd map dimensions");
 
@@ -469,7 +469,7 @@ ConvolveMap(FlatSkyMapConstPtr map, FlatSkyMapConstPtr kernel)
 		outmap->ConvertToDense();
 
 	// loop over only non-zero kernel values
-	std::vector<int> xk, yk;
+	std::vector<ssize_t> xk, yk;
 	std::vector<double> vk;
 	for (auto i: *kernel) {
 		if (i.second == 0)
@@ -502,8 +502,9 @@ pyconvolve_map(FlatSkyMapConstPtr map, bp::object val)
 {
 
 	FlatSkyMapConstPtr kernel;
-	if (bp::extract<FlatSkyMap>(val).check())
-		kernel = bp::extract<FlatSkyMapConstPtr>(val)();
+	bp::extract<FlatSkyMapConstPtr> ext(val);
+	if (ext.check())
+		kernel = ext();
 	else
 		kernel = FlatSkyMapConstPtr(new FlatSkyMap(val, map->yres()));
 	return ConvolveMap(map, kernel);

@@ -1,4 +1,4 @@
-from spt3g.core import G3Logger, G3LogLevel
+from . import G3Logger, G3LogLevel
 import traceback
 from functools import reduce
 

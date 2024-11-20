@@ -1,7 +1,7 @@
 import numpy as np
 import copy
-from spt3g import core
-from spt3g.gcp import ACUStatus, ACUState, TrackerStatus, TrackerState, TrackerPointing, CalFile
+from .. import core
+from . import ACUStatus, ACUState, TrackerStatus, TrackerState, TrackerPointing, CalFile
 
 @core.usefulfunc
 def UnitValue(caldict_entry):
@@ -337,6 +337,7 @@ def UnpackTrackerPointingData(f):
 
     f['OnlinePointingModel'] = p
     if len(pc.keys()):
+        pc['time'] = p['time']
         f['OnlinePointingModelCorrection'] = pc
 
 

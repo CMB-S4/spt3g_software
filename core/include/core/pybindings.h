@@ -5,15 +5,23 @@
 #include <G3Frame.h>
 #include <G3Logging.h>
 
-#include <boost/preprocessor/cat.hpp>
-#include <boost/preprocessor/facilities/overload.hpp>
-#include <boost/preprocessor/stringize.hpp>
 #include <boost/python.hpp>
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 #include <boost/python/suite/indexing/container_utils.hpp>
 
 #include <container_conversions.h>
 #include <std_map_indexing_suite.hpp>
+
+#ifdef __clang__
+#pragma GCC diagnostic ignored "-Wself-assign-overloaded"
+#endif
 
 template <typename T>
 void
@@ -46,20 +54,23 @@ std::string vec_repr(boost::python::object self)
 	    << "." << extract<std::string>(self.attr("__class__").attr("__name__"))()
 	    << "([";
 
-	std::vector<T> &selfobject = extract<std::vector<T> &>(self)();
+	extract <std::vector<T> &> extself(self);
+	if (extself.check()) {
+		std::vector<T> &selfobject = extself();
 
-	int ellip_pos = -1; // Position at which to insert "..."
-	if (selfobject.size() > 100)
-		ellip_pos = 3;
+		int ellip_pos = -1; // Position at which to insert "..."
+		if (selfobject.size() > 100)
+			ellip_pos = 3;
 
-	if (selfobject.size() > 0)
-		s << selfobject[0];
-	for (int i=1; i<selfobject.size(); ++i) {
-		if (i == ellip_pos) {
-			s << ", ...";
-			i = selfobject.size() - ellip_pos - 1;
-		} else
-			s << ", " << selfobject[i];
+		if (selfobject.size() > 0)
+			s << selfobject[0];
+		for (size_t i=1; i<selfobject.size(); ++i) {
+			if ((int)i == ellip_pos) {
+				s << ", ...";
+				i = selfobject.size() - ellip_pos - 1;
+			} else
+				s << ", " << selfobject[i];
+		}
 	}
 	s << "])";
 
@@ -81,203 +92,6 @@ register_vector_of(std::string name)
 	;
 	scitbx::boost_python::container_conversions::from_python_sequence<std::vector<T>,  scitbx::boost_python::container_conversions::variable_capacity_policy>();
         return cls;
-}
-
-// Code to get a python buffer (for numpy) from one of our classes. "pyformat"
-// is the python type code for the type T.
-template <typename T>
-int pyvector_getbuffer(PyObject *obj, Py_buffer *view, int flags,
-    const char *pyformat)
-{
-	if (view == NULL) {
-		PyErr_SetString(PyExc_ValueError, "NULL view");
-		return -1;
-	}
-
-	view->shape = NULL;
-
-	boost::python::handle<> self(boost::python::borrowed(obj));
-	boost::python::object selfobj(self);
-	const std::vector<T> &vec =
-	    boost::python::extract<const std::vector<T> &>(selfobj)();
-	view->obj = obj;
-	view->buf = (void*)&vec[0];
-	view->len = vec.size() * sizeof(T);
-	view->readonly = 0;
-	view->itemsize = sizeof(T);
-	if (flags & PyBUF_FORMAT)
-		view->format = (char *)pyformat;
-	else
-		view->format = NULL;
-	view->ndim = 1;
-#if (PY_MAJOR_VERSION == 2 && PY_MINOR_VERSION < 7) || (PY_MAJOR_VERSION >= 3)
-	// Abuse internal pointer in the absence of smalltable. This is safe
-	// on all architectures except MIPS N32.
-	view->internal = (void *)vec.size();
-	view->shape = (Py_ssize_t *)(&view->internal);
-#else
-	view->smalltable[0] = vec.size();
-	view->shape = &view->smalltable[0];
-	view->internal = NULL;
-#endif
-	view->strides = &view->itemsize;
-	view->suboffsets = NULL;
-
-	// Try to hold onto our collective hats. This is still very dangerous if
-	// the vector's underlying vector is resized.
-	Py_INCREF(obj);
-
-	return 0;
-}
-
-// For numeric vectors, instantiate this as container_from_object ahead of
-// registering the class.
-//
-// XXX: Should be automatic via SFINAE, but that cleanup is for later.
-template <typename T>
-boost::shared_ptr<T>
-numpy_container_from_object(boost::python::object v)
-{
-	// There's a chance this is actually a copy operation, so try that first
-	if (bp::extract<T &>(v).check())
-		return boost::make_shared<T>(bp::extract<T &>(v)());
-
-	boost::shared_ptr<T> x(new T);
-	size_t nelem;
-	Py_buffer view;
-
-	// See if we can get a numpy-ish buffer protocol interface next
-	if (PyObject_GetBuffer(v.ptr(), &view, PyBUF_FORMAT | PyBUF_STRIDES)
-	    == -1)
-		goto slowpython;
-
-	// Only 1D arrays here
-	if (view.ndim != 1)
-		goto bufferwasbad;
-
-	if (view.shape != NULL)
-		nelem = view.shape[0];
-	else
-		nelem = view.len/view.itemsize;
-	x->resize(nelem);
-
-	// Try to get a contiguous buffer first for common data types, since
-	// contiguous-copy is likely to be optimizable to memcpy(). In the
-	// non-contiguous case below, even if the copy is contiguous, the
-	// compiler won't see that. Note that Python's "contiguous" doesn't
-	// always mean exactly "contiguous", so we need to check strides too.
-	if (PyBuffer_IsContiguous(&view, 'A')) {
-		if (strcmp(view.format, "d") == 0) {
-			if (view.strides[0] != sizeof(double))
-				goto noncontiguous;
-			for (size_t i = 0; i < nelem; i++)
-				(*x)[i] = ((double *)view.buf)[i];
-			goto goodbuffer;
-		}
-	}
-
-noncontiguous:
-	if (strcmp(view.format, "d") == 0) {
-		for (size_t i = 0; i < nelem; i++)
-			(*x)[i] = *(double *)((char *)view.buf +
-			    i*view.strides[0]);
-	} else if (strcmp(view.format, "f") == 0) {
-		for (size_t i = 0; i < nelem; i++)
-			(*x)[i] = *(float *)((char *)view.buf +
-			    i*view.strides[0]);
-	} else if (strcmp(view.format, "n") == 0) {
-		for (size_t i = 0; i < nelem; i++)
-			(*x)[i] = *(ssize_t *)((char *)view.buf +
-			    i*view.strides[0]);
-	} else if (strcmp(view.format, "N") == 0) {
-		for (size_t i = 0; i < nelem; i++)
-			(*x)[i] = *(size_t *)((char *)view.buf +
-			    i*view.strides[0]);
-	} else if (strcmp(view.format, "?") == 0) { 
-		for (size_t i = 0; i < nelem; i++)
-			(*x)[i] = *(bool *)((char *)view.buf +
-			    i*view.strides[0]);
-	} else if (strcmp(view.format, "i") == 0) { 
-		for (size_t i = 0; i < nelem; i++)
-			(*x)[i] = *(int *)((char *)view.buf +
-			    i*view.strides[0]);
-	} else if (strcmp(view.format, "I") == 0) { 
-		for (size_t i = 0; i < nelem; i++)
-			(*x)[i] = *(unsigned int *)((char *)view.buf +
-			    i*view.strides[0]);
-	} else if (strcmp(view.format, "l") == 0) {
-		for (size_t i = 0; i < nelem; i++)
-			(*x)[i] = *(long *)((char *)view.buf +
-			    i*view.strides[0]);
-	} else if (strcmp(view.format, "L") == 0) {
-		for (size_t i = 0; i < nelem; i++)
-			(*x)[i] = *(unsigned long *)((char *)view.buf +
-			    i*view.strides[0]);
-	} else if (strcmp(view.format, "q") == 0) {
-		for (size_t i = 0; i < nelem; i++)
-			(*x)[i] = *(int64_t *)((char *)view.buf +
-			    i*view.strides[0]);
-	} else if (strcmp(view.format, "Q") == 0) {
-		for (size_t i = 0; i < nelem; i++)
-			(*x)[i] = *(uint64_t *)((char *)view.buf +
-			    i*view.strides[0]);
-	} else {
-		// We could add more types, but why do that?
-		// Let Python do the work for obscure cases
-		goto bufferwasbad;
-	}
-
-goodbuffer:
-	PyBuffer_Release(&view);
-        return x;
-
-bufferwasbad:
-	PyBuffer_Release(&view);
-
-slowpython:
-	// Failing all of that, try to do element-by-element conversion
-	// using Python iteration. If *that* fails, we just give up and
-	// go home (TypeError will be set inside extend_container()).
-	PyErr_Clear();
-	x->resize(0);
-	boost::python::container_utils::extend_container(*x, v);
-        
-        return x;
-}
-
-// Some special handling is needed for complex vectors
-
-template <typename T>
-boost::shared_ptr<T>
-complex_numpy_container_from_object(boost::python::object v)
-{
-	boost::shared_ptr<T> x(new T);
-	Py_buffer view;
-	if (PyObject_GetBuffer(v.ptr(), &view,
-	    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) != -1) {
-		if (strcmp(view.format, "Zd") == 0) {
-			x->resize(view.len/sizeof(std::complex<double>));
-			for (size_t i = 0; i < view.len/sizeof(std::complex<double>); i++)
-				(*x)[i] = ((std::complex<double> *)view.buf)[i];
-		} else if (strcmp(view.format, "Zf") == 0) {
-			x->resize(view.len/sizeof(std::complex<float>));
-			for (size_t i = 0; i < view.len/sizeof(std::complex<float>); i++)
-				(*x)[i] = ((std::complex<float> *)view.buf)[i];
-		} else {
-			// Fall back to scalar case otherwise
-			auto scalar =
-			   numpy_container_from_object<std::vector<double> >(v);
-			x->resize(scalar->size());
-			for (size_t i = 0; i < scalar->size(); i++)
-				(*x)[i] = (*scalar)[i];
-		}
-		PyBuffer_Release(&view);
-	} else {
-		PyErr_Clear();
-		boost::python::container_utils::extend_container(*x, v);
-	}
-
-	return x;
 }
 
 template <typename T, bool proxy=true>
@@ -321,6 +135,8 @@ class G3ModuleRegistrator {
 public:
 	G3ModuleRegistrator(const char *mod, void (*def)());
 	static void CallRegistrarsFor(const char *mod);
+
+	SET_LOGGER("G3ModuleRegistrator");
 };
 
 #define EXPORT_G3MODULE_AND(mod, T, init, docstring, other_defs)   \
@@ -353,36 +169,26 @@ public:
 	    .def(boost::python::init<const T &>()) \
 	    .def_pickle(g3frameobject_picklesuite<T>())
 
-// Declare a python module with a name and the name of its enclosing package scope.
-// name should be be a bare token, while pkg should be a string literal, e.g.:
-//     SPT3G_PYTHON_MODULE_2(foo, "spt3g.bar")
-// for a package whose fully qualified name will be spt3g.bar.foo
-#define SPT3G_PYTHON_MODULE_2(name, pkg) \
-BOOST_PYTHON_MODULE(name) { \
-	namespace bp = boost::python; \
-	auto mod = bp::scope(); \
-	std::string package_prefix = pkg; \
-	std::string full_name = package_prefix + "." + bp::extract<std::string>(mod.attr("__name__"))(); \
-	mod.attr("__name__") = full_name; \
-	mod.attr("__package__") = package_prefix; \
-	void BOOST_PP_CAT(spt3g_init_module_, name)(); \
-	BOOST_PP_CAT(spt3g_init_module_, name)(); \
-	if(PY_MAJOR_VERSION < 3){ \
-		Py_INCREF(mod.ptr()); \
-		PyDict_SetItemString(PyImport_GetModuleDict(),full_name.c_str(),mod.ptr()); \
-	} \
+// Declare a python module with a name that is a bare token:
+//     SPT3G_PYTHON_SUBMODULE(foo, "pkg")
+// for a package whose fully qualified name will be pkg.foo
+#define SPT3G_PYTHON_SUBMODULE(name, pkg) \
+BOOST_PYTHON_MODULE(_lib ## name) { \
+	auto mod = boost::python::scope(); \
+	mod.attr("__name__") = std::string(pkg) + "." + #name; \
+	void (spt3g_init_module_ ## name)(); \
+	(spt3g_init_module_ ## name)(); \
 } \
-void BOOST_PP_CAT(spt3g_init_module_, name)()
+void (spt3g_init_module_ ## name)()
 
-// Declare a python module with the given name, assuming that the enclosing package 
-// is the default "spt3g".
-#define SPT3G_PYTHON_MODULE_1(name) SPT3G_PYTHON_MODULE_2(name, "spt3g")
+// Declare a python module with a name that is a bare token:
+//     SPT3G_PYTHON_MODULE(foo)
+// for a package whose fully qualified name will be spt3g.foo
+#define SPT3G_PYTHON_MODULE(name) \
+SPT3G_PYTHON_SUBMODULE(name, "spt3g")
 
-// Declare a python module with a name and optionally the name of its enclosing package scope.
-// name should be be a bare token, while if provided the enclosing package name should be a
-// string literal.
-// If the enclosing package name is not specified, it will default to "spt3g".
-#define SPT3G_PYTHON_MODULE(...) BOOST_PP_OVERLOAD(SPT3G_PYTHON_MODULE_,__VA_ARGS__)(__VA_ARGS__)
+// Create a namespace (importable sub-module) within some parent scope
+bp::object export_namespace(bp::object scope, std::string name);
 
 // Python runtime context to simplify acquiring or releasing the GIL as necessary.
 // To use, simply construct the context object where necessary, e.g.

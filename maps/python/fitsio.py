@@ -1,6 +1,6 @@
-from spt3g import core
-from spt3g.maps import HealpixSkyMap, FlatSkyMap, G3SkyMapWeights
-from spt3g.maps import MapPolType, MapPolConv, MapCoordReference, MapProjection
+from .. import core
+from . import HealpixSkyMap, FlatSkyMap, G3SkyMapWeights
+from . import MapPolType, MapPolConv, MapCoordReference, MapProjection
 
 import numpy as np
 import os
@@ -207,6 +207,9 @@ def load_skymap_fits(filename, hdu=None, keys=None, memmap=False, apply_units=Fa
                     'QQ_COV': 'QQ',
                     'QU_COV': 'QU',
                     'UU_COV': 'UU',
+                    'I_MEAN': 'T',
+                    'Q_MEAN': 'Q',
+                    'U_MEAN': 'U',
                 }
 
                 pix = None

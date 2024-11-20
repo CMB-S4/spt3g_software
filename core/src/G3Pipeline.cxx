@@ -1,5 +1,7 @@
+#include <pybindings.h>
 #include <G3Pipeline.h>
 
+#include <G3EventBuilder.h>
 #include <G3Data.h>
 
 #include <sys/time.h>
@@ -14,10 +16,12 @@ G3Pipeline::G3Pipeline() :
 	log_trace("Initializing Pipeline");
 }
 
+template <typename T>
 static std::string
-cxx_demangle(const char *name)
+cxx_demangle(const T& v)
 {
 	int err;
+	const char* name = typeid(v).name();
 	char *demangled;
 
 	demangled = abi::__cxa_demangle(name, NULL, NULL, &err);
@@ -32,7 +36,7 @@ void
 G3Pipeline::Add(G3ModulePtr module, std::string name)
 {
 	if (name == "")
-		name = cxx_demangle(typeid(*module).name());
+		name = cxx_demangle(*module);
 
 	log_trace("Adding module \"%s\"", name.c_str());
 
@@ -212,7 +216,7 @@ G3Pipeline::siginfo_catcher(int)
 #endif
 
 void
-G3Pipeline::Run(bool profile, bool graph)
+G3Pipeline::Run(bool profile, bool graph, bool signal_halt)
 {
 	struct rusage last_rusage;
 	std::vector<G3Pipeline_mod_data> mods;
@@ -239,12 +243,14 @@ G3Pipeline::Run(bool profile, bool graph)
 		getrusage(RUSAGE_THREAD, &last_rusage);
 #endif
 
-	// Catch SIGINT
-	sigint_catcher.sa_handler = &G3Pipeline::sigint_catcher;
-	sigint_catcher.sa_flags = SA_RESTART | SA_RESETHAND;
-	sigemptyset(&sigint_catcher.sa_mask);
-	sigaddset(&sigint_catcher.sa_mask, SIGINT);
-	sigaction(SIGINT, &sigint_catcher, &oldsigint);
+	if (signal_halt) {
+		// Catch SIGINT
+		sigint_catcher.sa_handler = &G3Pipeline::sigint_catcher;
+		sigint_catcher.sa_flags = SA_RESTART | SA_RESETHAND;
+		sigemptyset(&sigint_catcher.sa_mask);
+		sigaddset(&sigint_catcher.sa_mask, SIGINT);
+		sigaction(SIGINT, &sigint_catcher, &oldsigint);
+	}
 
 #ifdef SIGINFO
 	if (profile) {
@@ -288,7 +294,8 @@ G3Pipeline::Run(bool profile, bool graph)
 
 	// Restore old handler
 	G3Pipeline::halt_processing = false;
-	sigaction(SIGINT, &oldsigint, &sigint_catcher);
+	if (signal_halt)
+		sigaction(SIGINT, &oldsigint, &sigint_catcher);
 #ifdef SIGINFO
 	if (profile)
 		sigaction(SIGINFO, &oldsiginfo, &siginfo_catcher);
@@ -349,3 +356,127 @@ G3Pipeline::Run(bool profile, bool graph)
 	}
 }
 
+namespace bp = boost::python;
+
+static bp::list G3Module_Process(G3Module &mod, G3FramePtr ptr)
+{
+	std::deque<G3FramePtr> queue;
+	bp::list vec;
+
+	mod.Process(ptr, queue);
+
+	for (auto i = queue.begin(); i != queue.end(); i++)
+		vec.append(*i);
+
+	return vec;
+}
+
+// Python Process() has a different API from the C++ version, since we have
+// variable return types. It is passed the frame, but returns its output:
+// - If it returns None, the input frame is pushed to the output (usual case)
+// - If it returns True, the input frame is pushed to the output
+// - If it returns False, the input frame is dropped
+// - If it returns a frame, that frame is pushed to the output instead of the
+//   input
+// - If it returns an iterable of frames, that iterable is pushed instead of
+//   the input
+
+class G3ModuleWrap : public G3Module, public boost::python::wrapper<G3Module>
+{
+public:
+	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out) {
+		bp::object ret = this->get_override("Process")(frame);
+		if (ret.ptr() == Py_None) {
+			out.push_back(frame);
+			return;
+		}
+
+		bp::extract<G3FramePtr> extframe(ret);
+		if (extframe.check()) {
+			out.push_back(extframe());
+			return;
+		}
+
+		bp::extract<std::vector<G3FramePtr> > extvec(ret);
+		if (extvec.check()) {
+			std::vector<G3FramePtr> outlist = extvec();
+			for (auto i = outlist.begin(); i != outlist.end(); i++)
+				out.push_back(*i);
+		} else if (!!ret) {
+			out.push_back(frame);
+		} else {
+			// If module returns false on an EndProcessing frame,
+			// just let it run through. Doing this is always a bug,
+			// so overriding it is safe.
+			if (frame->type == G3Frame::EndProcessing)
+				out.push_back(frame);
+		}
+	}
+};
+
+static void
+G3Pipeline_halt_processing()
+{
+	G3Pipeline::halt_processing = true;
+}
+
+PYBINDINGS("core") {
+	bp::class_<G3ModuleWrap, boost::shared_ptr<G3ModuleWrap>,
+	  boost::noncopyable>("G3Module", "Base class for functors that can be "
+	  "added to a G3Pipeline.")
+	    .def("__call__", &G3Module_Process)
+	    .def("Process", boost::python::pure_virtual(&G3Module_Process))
+	;
+	bp::implicitly_convertible<boost::shared_ptr<G3ModuleWrap>, G3ModulePtr>();
+
+	bp::class_<G3EventBuilder, bp::bases<G3Module>, G3EventBuilderPtr,
+	  boost::noncopyable>("G3EventBuilder", bp::no_init)
+	;
+
+	bp::class_<G3Pipeline, boost::shared_ptr<G3Pipeline> >("G3Pipeline",
+	  "A collection of core.G3Modules and Python callables. Added "
+	  "callables are called sequentially and are passed a frame as their "
+	  "only positional argument. If the added callable is a python "
+	  "function, it is also passed any keyword arguments given to Add(). "
+	  "If it is a class, those keyword arguments are passed to the "
+	  "class constructor."
+	  "\n\n"
+	  "The first module is passed None and returns one or more frames to "
+	  "be passed to the next module. Processing will halt if it returns []."
+	  "\n\n"
+	  "Following modules are passed the frames, one at a time, returned by "
+	  "the previous module. The return value from these modules then "
+	  "becomes the input queue for the next. Once the last module returns, "
+	  "or a module returns [] (or False, which is equivalent), control "
+	  "returns to the first module and new data is pushed through the pipe."
+	  "\n\n"
+	  "Return value semantics for modules:\n"
+	  "\t- A single frame: pass frame to next module\n"
+	  "\t- An iterable (e.g. a list) of frames: pass frames to next module "
+	  "\t  in order\n"
+	  "\t- None: pass input frame to next module (implicit if no return)\n"
+	  "\t- True: pass input frame to next module\n"
+	  "\t- False: discard input frame and return to first module, or end "
+	  "\t  processing if returned by first module. Equivalent to [].\n")
+	    .def("_Add_", &G3Pipeline::Add, bp::arg("name")="")
+	    .def("Run", &G3Pipeline::Run,
+	      (bp::arg("profile")=false, bp::arg("graph")=false,
+	       bp::arg("signal_halt")=true),
+	      "Run pipeline. If profile is True, print execution time "
+	      "statistics for each module when complete. If graph is True, "
+	      "stores control flow data that can be processed with GraphViz "
+	      "once retrieved using GetGraphInfo().  If signal_halt is True "
+	      "(default), the pipeline will stop processing new frames when "
+	      "SIGINT is sent to this process.  Equivalent to what happens when "
+	      "halt_processing() is called.")
+	    .def("GetGraphInfo", &G3Pipeline::GetGraphInfo,
+	      "Get stored control flow information from Run(graph=True)")
+	    .def("halt_processing", &G3Pipeline_halt_processing,
+	      "Halts all running pipelines after they flush all currently "
+	      "in-flight frames. Once set, the first module will not be "
+	      "called again.")
+	    .staticmethod("halt_processing")
+	    .def_readonly("last_frame",
+	        &G3Pipeline::last_frame)
+	;
+}

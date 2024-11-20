@@ -27,7 +27,10 @@ G3ModuleArg::Description() const {
 
 static std::string inline object_repr(bp::object obj)
 {
-	return bp::extract<std::string>(obj.attr("__repr__")());
+	PyObject *repr = PyObject_Repr(obj.ptr());
+	bp::handle<> reprhand(repr);
+	bp::object reprobj(reprhand);
+	return bp::extract<std::string>(reprobj);
 }
 
 static std::string
@@ -146,12 +149,13 @@ G3ModuleConfig_set(G3ModuleConfig &mc, std::string key, bp::object obj)
 {
 	std::string repr = object_repr(obj);
 
-	if (!bp::extract<G3FrameObjectPtr>(obj).check()) {
+	bp::extract<G3FrameObjectPtr> extobj(obj);
+	if (!extobj.check()) {
 		mc.config[key] = G3ModuleArg(repr);
 		return;
 	}
 
-	mc.config[key] = G3ModuleArg(repr, bp::extract<G3FrameObjectPtr>(obj)());
+	mc.config[key] = G3ModuleArg(repr, extobj());
 }
 
 static bp::list

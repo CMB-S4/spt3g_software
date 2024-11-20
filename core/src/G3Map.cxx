@@ -3,6 +3,7 @@
 #include <pybindings.h>
 #include <container_pybindings.h>
 #include <serialization.h>
+#include <dataio.h>
 #include "int_storage.h"
 
 /* Special load/save for int64_t, using the same encoding at G3VectorInt */
@@ -158,13 +159,12 @@ template <class A> void G3MapFrameObject::save(A &ar, const unsigned v) const
 	uint32_t len = size();
 	ar << cereal::make_nvp("len", len);
 
+	g3_ostream os;
 	for (auto i = begin(); i != end(); i++) {
 		ar << cereal::make_nvp("key", i->first);
 
 		std::vector<char> buffer;
-		boost::iostreams::stream<
-		    boost::iostreams::back_insert_device<std::vector<char> > >
-		    os(buffer);
+		g3_ostream_to_buffer(os, buffer);
 		{
 			A subar(os);
 			subar << cereal::make_nvp("item",
@@ -177,11 +177,14 @@ template <class A> void G3MapFrameObject::save(A &ar, const unsigned v) const
 
 template <class A> void G3MapFrameObject::load(A &ar, const unsigned v)
 {
+	G3_CHECK_VERSION(v);
+
 	ar >> cereal::make_nvp("G3FrameObject",
 	    cereal::base_class<G3FrameObject>(this));
 
 	uint32_t len;
 	ar >> cereal::make_nvp("len", len);
+	g3_istream fis;
 	for (uint32_t i = 0; i < len; i++) {
 		std::pair<std::string, G3FrameObjectPtr> item;
 		std::vector<char> buffer;
@@ -189,9 +192,7 @@ template <class A> void G3MapFrameObject::load(A &ar, const unsigned v)
 		ar >> cereal::make_nvp("key", item.first);
 		ar >> cereal::make_nvp("value", buffer);
 
-		boost::iostreams::array_source src((char *)&buffer[0],
-		    buffer.size());
-		boost::iostreams::filtering_istream fis(src);
+		g3_istream_from_buffer(fis, (char *)&buffer[0], buffer.size());
 
 		A subar(fis);
 		subar >> cereal::make_nvp("item", item.second);
@@ -219,14 +220,12 @@ std::string G3MapFrameObject::Description() const
 G3_SERIALIZABLE_CODE(G3MapDouble);
 G3_SERIALIZABLE_CODE(G3MapMapDouble);
 G3_SERIALIZABLE_CODE(G3MapString);
-G3_SERIALIZABLE_CODE(G3MapQuat);
 G3_SERIALIZABLE_CODE(G3MapVectorBool);
 G3_SERIALIZABLE_CODE(G3MapVectorDouble);
 G3_SERIALIZABLE_CODE(G3MapVectorString);
 G3_SERIALIZABLE_CODE(G3MapVectorVectorString);
 G3_SERIALIZABLE_CODE(G3MapVectorComplexDouble);
 G3_SERIALIZABLE_CODE(G3MapVectorTime);
-G3_SERIALIZABLE_CODE(G3MapVectorQuat);
 
 G3_SPLIT_SERIALIZABLE_CODE(G3MapInt);
 G3_SPLIT_SERIALIZABLE_CODE(G3MapVectorInt);
@@ -244,8 +243,6 @@ PYBINDINGS("core") {
 	register_g3map<G3MapInt>("G3MapInt", "Mapping from strings to ints.");
 	register_g3map<G3MapString>("G3MapString", "Mapping from strings to "
 	    "strings.");
-	register_g3map<G3MapQuat>("G3MapQuat", "Mapping from strings to "
-	    "quaternions.");
 	register_g3map<G3MapVectorBool>("G3MapVectorBool", "Mapping from "
 	    "strings to arrays of booleans.");
 	register_g3map<G3MapVectorDouble>("G3MapVectorDouble", "Mapping from "
@@ -260,8 +257,6 @@ PYBINDINGS("core") {
 	    "Mapping from strings to lists of lists of strings.");
 	register_g3map<G3MapVectorTime>("G3MapVectorTime", "Mapping from "
 	    "strings to lists of G3 time objects.");
-	register_g3map<G3MapVectorQuat>("G3MapVectorQuat", "Mapping from "
-	    "strings to lists of quaternions.");
 
 	// Special handling to get the object proxying right
 	register_g3map<G3MapFrameObject, true>("G3MapFrameObject", "Mapping "

@@ -10,7 +10,6 @@
 #include <dfmux/DfMuxSample.h>
 #include <dfmux/DfMuxBuilder.h>
 
-#include <boost/tokenizer.hpp>
 #include <arpa/inet.h>
 
 // Construct a fake board IP 192.168.1.X. This is used for internal
@@ -113,7 +112,7 @@ GCPMuxDataDecoder::EmitWiringMap(G3FramePtr input)
 				const DfMuxChannelMapping &channel_info =
 				    cached_wiring_map_->at(id);
 				channels_.push_back(channel_info);
-				if (channel_info.channel > max_channel_count_)
+				if (channel_info.channel > (int) max_channel_count_)
 					max_channel_count_ =
 					    channel_info.channel + 1;
 			}
@@ -160,11 +159,12 @@ GCPMuxDataDecoder::EmitWiringMap(G3FramePtr input)
 			continue;
 		}
 
-		boost::char_separator<char> sep("_");
-		boost::tokenizer<boost::char_separator<char> > tok(
-		    channel_path, sep);
-		for (auto j = tok.begin(); j != tok.end(); j++)
-			channel_parts.push_back(atoi(j->c_str()));
+		size_t pos;
+		while ((pos = channel_path.find("_")) != std::string::npos) {
+			std::string tok = channel_path.substr(0, pos);
+			channel_parts.push_back(atoi(tok.c_str()));
+			channel_path.erase(0, pos + 1);
+		}
 
 		// Assign to structure. GCP channel IDs are 1-indexed. 3G's are
 		// 0-indexed, so shift by 1.
@@ -189,7 +189,7 @@ GCPMuxDataDecoder::EmitWiringMap(G3FramePtr input)
 		// Book-keeping assistance: we need to know how many channels
 		// these boards have (it is 16, but pretend we don't know for
 		// robustness) in order to build DfMuxSample objects later.
-		if (channel_info.channel >= max_channel_count_)
+		if (channel_info.channel >= (int) max_channel_count_)
 			max_channel_count_ = channel_info.channel + 1;
 	}
 

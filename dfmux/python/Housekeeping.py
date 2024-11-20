@@ -1,7 +1,6 @@
-from spt3g import core
-from spt3g.dfmux import DfMuxHousekeepingMap, HkBoardInfo, HkMezzanineInfo, HkModuleInfo, HkChannelInfo, DfMuxWiringMap, DfMuxChannelMapping
+from .. import core
+from . import DfMuxHousekeepingMap, HkBoardInfo, HkMezzanineInfo, HkModuleInfo, HkChannelInfo, DfMuxWiringMap, DfMuxChannelMapping
 
-from spt3g.dfmux.IceboardConversions import convert_TF
 from .TuberClient import TuberClient
 import socket, struct, time
 import numpy
@@ -17,17 +16,19 @@ class HousekeepingConsumer(object):
 
     Also emits a Wiring frame from the housekeeping data.  This requires a
     recent (as of November 2018) version of pydfmux in order to read mapped
-    channel names from each board.
+    channel names from each board.  If ignore_wiring=False, assumes that
+    the wiring map is handled by a separate process.
 
     If collecting real-time data, you may want to set subprocess=True when
     adding this module.
     '''
-    def __init__(self):
+    def __init__(self, ignore_wiring=False):
         self.tuber = {}
         self.board_map = {}
         self.board_serials = []
         self.buffer = []
         self.hwmf = None
+        self.ignore_wiring = ignore_wiring
 
     def map_boards(self):
         '''
@@ -78,9 +79,9 @@ class HousekeepingConsumer(object):
 
     def __call__(self, frame):
 
-        # If a wiring frame has been emitted once already, then process every frame
+        # If boards have been mapped already, then process every frame
         # as received.
-        if self.hwmf is not None:
+        if len(self.board_map):
             return self.ProcessBuffered(frame)
 
         # Otherwise, process at least one Timepoint frame first to gather
@@ -108,12 +109,22 @@ class HousekeepingConsumer(object):
             return [frame]
 
         if frame.type == core.G3FrameType.Wiring:
-            core.log_fatal("Received spurious wiring frame.  Do not use "
-                           "PyDfMuxHardwareMapInjector with the HousekeepingConsumer.  "
-                           "You may update pydfmux to a newer version of pydfmux "
-                           "that stores mapped channel names on the boards, and "
-                           "rearrange your data acquisition script.",
-                           unit='HousekeepingConsumer')
+            if self.ignore_wiring:
+                core.log_warn(
+                    "Received a wiring frame, which may be inconsistent with "
+                    "board housekeeping data.  Store mapped channel names on the "
+                    "board using updated pydfmux/hidfmux software.",
+                    unit="HousekeepingConsumer",
+                )
+            else:
+                core.log_fatal(
+                    "Received spurious wiring frame.  Do not use "
+                    "PyDfMuxHardwareMapInjector with the HousekeepingConsumer.  "
+                    "You may update pydfmux/hidfmux to a newer version that "
+                    "stores mapped channel names on the boards, and rearrange "
+                    "your data acquisition script.",
+                    unit="HousekeepingConsumer",
+                )
 
         if frame.type == core.G3FrameType.Housekeeping:
             self.map_boards()
@@ -127,11 +138,17 @@ class HousekeepingConsumer(object):
                                      # avoid overloading the network on the return
 
                 found = False
+                ismkid = False
                 for board in self.board_serials:
                     dat = self.tuber[board].GetReply()[0]['result']
 
                     boardhk = self.HousekeepingFromJSON(dat)
+                    if boardhk.firmware_name:
+                        ismkid = ismkid or "mkid" in boardhk.firmware_name.lower()
                     hkdata[int(boardhk.serial)] = boardhk
+
+                    if self.ignore_wiring:
+                        continue
 
                     ip, crate, slot = self.board_map[board]
                     boardw = self.WiringFromJSON(dat, ip, crate, slot)
@@ -139,7 +156,7 @@ class HousekeepingConsumer(object):
                         hwm[key] = boardw[key]
                         found = True
 
-                if not found:
+                if not found and not self.ignore_wiring:
                     core.log_fatal("No mapped channels found on any IceBoards. "
                                    "You may need to update pydfmux to a newer version of pydfmux "
                                    "that stores mapped channel names on the boards, and reload "
@@ -148,9 +165,12 @@ class HousekeepingConsumer(object):
 
                 frame['DfMuxHousekeeping'] = hkdata
 
+                if self.ignore_wiring:
+                    return [frame]
+
                 hwmf = core.G3Frame(core.G3FrameType.Wiring)
                 hwmf['WiringMap'] = hwm
-                hwmf['ReadoutSystem'] = 'ICE'
+                hwmf['ReadoutSystem'] = 'RF-ICE' if ismkid else 'ICE'
 
                 if self.hwmf is None:
                     self.hwmf = hwmf
@@ -214,6 +234,9 @@ class HousekeepingConsumer(object):
 
         boardhk.timestamp_port = str(dat['timestamp_port'])
         boardhk.serial = str(dat['serial'])
+        if 'firmware_name' in dat:
+            boardhk.firmware_name = str(dat['firmware_name'])
+            boardhk.firmware_version = str(dat['firmware_version'])
         boardhk.fir_stage = dat['fir_stage']
         for i in dat['currents'].items():
             boardhk.currents[str(i[0])] = i[1]
@@ -228,16 +251,20 @@ class HousekeepingConsumer(object):
             mezzhk.present = mezz['present']
             mezzhk.power = mezz['power']
             if mezzhk.present:
-                mezzhk.serial = str(mezz['ipmi']['product']['serial_number'])
-                mezzhk.part_number = str(mezz['ipmi']['product']['part_number'])
-                mezzhk.revision = str(mezz['ipmi']['product']['version_number'])
-                for i in mezz['currents'].items():
-                    mezzhk.currents[str(i[0])] = i[1]
-                for i in mezz['voltages'].items():
-                    mezzhk.voltages[str(i[0])] = i[1]
+                if 'ipmi' in mezz:
+                    mezzhk.serial = str(mezz['ipmi']['product']['serial_number'])
+                    mezzhk.part_number = str(mezz['ipmi']['product']['part_number'])
+                    mezzhk.revision = str(mezz['ipmi']['product']['version_number'])
+                if 'currents' in mezz:
+                    for i in mezz['currents'].items():
+                        mezzhk.currents[str(i[0])] = i[1]
+                if 'voltages' in mezz:
+                    for i in mezz['voltages'].items():
+                        mezzhk.voltages[str(i[0])] = i[1]
 
             if mezzhk.present and mezzhk.power:
-                mezzhk.temperature = mezz['temperature']
+                if 'temperature' in mezz:
+                    mezzhk.temperature = mezz['temperature']
                 # these parameters are not in the 64x housekeeping tuber
                 mezzhk.squid_heater = mezz.get('squid_heater', 0.0)
                 mezzhk.squid_controller_power = mezz.get('squid_controller_power', False)
@@ -246,7 +273,7 @@ class HousekeepingConsumer(object):
             # Modules
             for m, mod in enumerate(mezz['modules']):
                 modhk = HkModuleInfo()
-                modhk.routing = str(mod['routing'][0])
+                modhk.routing_type = str(mod['routing'][0])
                 modhk.module_number = m+1
                 if mezzhk.present and mezzhk.power:
                     if 'gains' in mod:
@@ -262,6 +289,8 @@ class HousekeepingConsumer(object):
                         modhk.squid_current_bias = mod['squid_flux_bias']
                     if 'squid_feedback' in mod:
                         modhk.squid_feedback = str(mod['squid_feedback'])
+                    if 'nco_frequency' in mod:
+                        modhk.nco_frequency = mod['nco_frequency'] * core.G3Units.Hz
 
                 if 'squid_tuning' in mod and mod['squid_tuning'] is not None:
                     modhk.squid_state = str(mod['squid_tuning']['state'])
@@ -273,15 +302,23 @@ class HousekeepingConsumer(object):
                     chanhk.channel_number = k+1
                     chanhk.carrier_amplitude = chan['carrier_amplitude']
                     chanhk.nuller_amplitude = chan['nuller_amplitude']
-                    chanhk.dan_gain = chan['dan_gain']
-                    chanhk.dan_streaming_enable = chan['dan_streaming_enable']
-                    if boardhk.is128x:
-                        chanhk.carrier_frequency = chan['frequency']*core.G3Units.Hz
-                        chanhk.demod_frequency = chan['frequency']*core.G3Units.Hz
+                    if 'dan_gain' in chan:
+                        chanhk.dan_gain = chan['dan_gain']
+                    if 'dan_streaming_enable' in chan:
+                        chanhk.dan_streaming_enable = chan['dan_streaming_enable']
+                    if 'frequency' in chan:
+                        chanhk.carrier_frequency = chan['frequency'] * core.G3Units.Hz
+                        chanhk.demod_frequency = chan['frequency'] * core.G3Units.Hz
                     else:
-                        chanhk.carrier_frequency = chan['carrier_frequency']*core.G3Units.Hz
-                        chanhk.demod_frequency = chan['demod_frequency']*core.G3Units.Hz
+                        chanhk.carrier_frequency = chan['carrier_frequency'] * core.G3Units.Hz
+                        chanhk.demod_frequency = chan['demod_frequency'] * core.G3Units.Hz
+                    if 'carrier_phase' in chan:
+                        chanhk.carrier_phase = chan['carrier_phase'] * core.G3Units.deg
+                        chanhk.nuller_phase = chan['nuller_phase'] * core.G3Units.deg
+                        chanhk.demod_phase = chan['demod_phase'] * core.G3Units.deg
+                    if 'dan_accumulator_enable' in chan:
                         chanhk.dan_accumulator_enable = chan['dan_accumulator_enable']
+                    if 'dan_feedback_enable' in chan:
                         chanhk.dan_feedback_enable = chan['dan_feedback_enable']
                     if 'dan_railed' in chan:
                         chanhk.dan_railed = chan['dan_railed']
@@ -317,6 +354,7 @@ class HousekeepingConsumer(object):
         serial = int(dat['serial'])
         for imezz, mezz in enumerate(dat['mezzanines']):
             for imod, mod in enumerate(mezz['modules']):
+                module = imod + len(mezz['modules']) * imezz
                 for ichan, chan in enumerate(mod['channels']):
                     name = (chan.get('tuning', {}) or {}).get('name', None)
                     if not name:
@@ -326,7 +364,7 @@ class HousekeepingConsumer(object):
                     mapping.board_serial = serial
                     mapping.board_slot = slot
                     mapping.crate_serial = crate
-                    mapping.module = imod + 4 * imezz
+                    mapping.module = module
                     mapping.channel = ichan
                     try:
                         name = str(name)

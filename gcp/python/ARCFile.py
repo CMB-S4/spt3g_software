@@ -1,4 +1,4 @@
-from spt3g.gcp import ARCFileReader, ARCExtract
+from . import ARCFileReader, ARCExtract
 
 class ARCFile(object):
     '''Iterable class for ARC files, as created by GCP. Loop through frames by doing something like:
@@ -26,7 +26,7 @@ class ARCFile(object):
 
         if self.extract:
             # calibrate and parse arc frames
-            from spt3g.core import G3Pipeline, G3InfiniteSource, InjectFrame
+            from ..core import G3Pipeline, G3InfiniteSource, InjectFrame
 
             pipe = G3Pipeline()
             pipe.Add(G3InfiniteSource, n=1)

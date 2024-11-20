@@ -1,17 +1,16 @@
 #include <G3Frame.h>
+#include <G3Data.h>
+#include <G3Quat.h>
 #include <serialization.h>
 #include <pybindings.h>
-
-#include <boost/iostreams/stream.hpp>
-#include <boost/iostreams/device/array.hpp>
-#include <boost/iostreams/device/back_inserter.hpp>
-#include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
+#include <dataio.h>
 
 #include <sstream>
 #include <stdlib.h>
 #include <cxxabi.h>
 #include <algorithm>
+
+namespace bp = boost::python;
 
 extern "C" unsigned long crc32c(unsigned long crc, const uint8_t *buf, unsigned int len);
 
@@ -33,9 +32,11 @@ protected:
 	}
 };
 
-static std::string cxx_demangle(const char *name)
+template <typename T>
+static std::string cxx_demangle(const T& v)
 {
 	int err = 0;
+	const char *name = typeid(v).name();
 	char *demangled;
 
 	demangled = abi::__cxa_demangle(name, NULL, NULL, &err);
@@ -53,7 +54,7 @@ std::ostream& operator<<(std::ostream& os, const G3FrameObject &frame)
 
 std::string G3FrameObject::Description() const
 {
-	return cxx_demangle(typeid(*this).name());
+	return cxx_demangle(*this);
 }
 
 std::string G3FrameObject::Summary() const
@@ -149,7 +150,7 @@ static std::string FrameObjectClassName(G3FrameObjectConstPtr obj)
 		}
 	}
 
-	return cxx_demangle(typeid(*obj).name());
+	return cxx_demangle(*obj);
 }
 
 std::ostream& operator<<(std::ostream& os, const G3Frame &frame)
@@ -421,19 +422,18 @@ void G3Frame::blob_encode(struct blob_container &blob)
 
 	// If no encoded frameobject, serialize it
 	blob.blob = boost::make_shared<std::vector<char> >();
-	boost::iostreams::stream<
-	  boost::iostreams::back_insert_device<std::vector<char> > >
-	  item_os(*blob.blob);
+	g3_ostream item_os;
+	g3_ostream_to_buffer(item_os, *blob.blob);
 	cereal::PortableBinaryOutputArchive item_ar(item_os);
 	item_ar << make_nvp("val", blob.frameobject);
 	item_os.flush();
 }
 
-template void G3Frame::load(boost::iostreams::filtering_istream &);
+template void G3Frame::load(g3_istream &);
 template void G3Frame::load(std::istream &);
 template void G3Frame::load(std::istringstream &);
 
-template void G3Frame::save(boost::iostreams::filtering_ostream &) const;
+template void G3Frame::save(g3_ostream &) const;
 template void G3Frame::save(std::ostream &) const;
 template void G3Frame::save(std::ostringstream &) const;
 
@@ -441,3 +441,233 @@ template void G3Frame::saveJSON(std::ostream &) const;
 template void G3Frame::saveJSON(std::ostringstream &) const;
 template void G3Frame::saveJSON(boost::iostreams::filtering_ostream &) const;
 
+G3FramePtr
+g3frame_char_constructor(std::string max_4_chars)
+{
+	if (max_4_chars.size() > 4) {
+		PyErr_SetString(PyExc_ValueError, "Ad-hoc frame type must be 4 "
+		    "or fewer characters.");
+		bp::throw_error_already_set();
+	}
+
+	// Right-justify the character string in the constant in native
+	// endianness, such that code = max_4_chars[0] for a 1-character
+	// code.
+	uint32_t code = 0;
+	for (int i = max_4_chars.size()-1, j = 0; i >= 0; i--, j += 8)
+		code |= (uint32_t(max_4_chars[i]) << j);
+
+	return G3FramePtr(new G3Frame(G3Frame::FrameType(code)));
+}
+
+// Use G3Frame::save()/G3Frame::load() to provide a pickle interface for frames
+struct g3frame_picklesuite : boost::python::pickle_suite
+{
+	static boost::python::tuple getstate(boost::python::object obj)
+	{
+		namespace bp = boost::python;
+		std::vector<char> buffer;
+		g3_ostream os;
+		g3_ostream_to_buffer(os, buffer);
+		(bp::extract<const G3Frame &>(obj))().save(os);
+		os.flush();
+
+		return boost::python::make_tuple(obj.attr("__dict__"),
+		    bp::object(bp::handle<>(
+		    PyBytes_FromStringAndSize(&buffer[0], buffer.size()))));
+	}
+
+	static void setstate(boost::python::object obj,
+	    boost::python::tuple state)
+	{
+		namespace bp = boost::python;
+		Py_buffer view;
+		PyObject_GetBuffer(bp::object(state[1]).ptr(), &view,
+		    PyBUF_SIMPLE);
+
+		std::vector<char> buf((char *)view.buf, (char *)view.buf + view.len);
+		bp::extract<bp::dict>(obj.attr("__dict__"))().update(state[0]);
+		(bp::extract<G3Frame &>(obj))().load(buf);
+		PyBuffer_Release(&view);
+	}
+};
+
+static boost::python::list g3frame_keys(const G3Frame &map)
+{
+        boost::python::list keys;
+	std::vector<std::string> keyvec = map.Keys();
+
+        for (auto i = keyvec.begin(); i != keyvec.end(); i++)
+                keys.append(*i);
+
+        return keys;
+}
+
+static void g3frame_python_put(G3Frame &f, std::string name, bp::object obj)
+{
+	bp::extract<G3FrameObjectPtr> extframe(obj);
+	if (extframe.check()) {
+		f.Put(name, extframe());
+		return;
+	}
+
+	bp::extract<bool> extbool(obj);
+	if (PyBool_Check(obj.ptr()) && extbool.check()) {
+		f.Put(name, boost::make_shared<G3Bool>(extbool()));
+		return;
+	}
+
+	bp::extract<int64_t> extint(obj);
+	if (extint.check()) {
+		f.Put(name, boost::make_shared<G3Int>(extint()));
+		return;
+	}
+
+	bp::extract<double> extdouble(obj);
+	if (extdouble.check()) {
+		f.Put(name, boost::make_shared<G3Double>(extdouble()));
+		return;
+	}
+
+	bp::extract<Quat> extquat(obj);
+	if (extquat.check()) {
+		f.Put(name, boost::make_shared<G3Quat>(extquat()));
+		return;
+	}
+
+	bp::extract<std::string> extstr(obj);
+	if (extstr.check())
+		f.Put(name, boost::make_shared<G3String>(extstr()));
+	else {
+		PyErr_SetString(PyExc_TypeError, "Object is not a G3FrameObject derivative or a plain-old-data type");
+		bp::throw_error_already_set();
+	}
+}
+
+static bp::object g3frame_python_get(G3Frame &f, std::string name)
+{
+	// Python doesn't have a concept of const. Add subterfuge.
+	G3FrameObjectConstPtr element = f[name];
+	if (!element) {
+		std::string err = "Key \'" + name + "\' not found";
+		PyErr_SetString(PyExc_KeyError, err.c_str());
+		bp::throw_error_already_set();
+	}
+
+	if (!!boost::dynamic_pointer_cast<const G3Int>(element))
+		return bp::object(boost::dynamic_pointer_cast<const G3Int>(element)->value);
+	else if (!!boost::dynamic_pointer_cast<const G3Double>(element))
+		return bp::object(boost::dynamic_pointer_cast<const G3Double>(element)->value);
+	else if (!!boost::dynamic_pointer_cast<const G3String>(element))
+		return bp::object(boost::dynamic_pointer_cast<const G3String>(element)->value);
+	else if (!!boost::dynamic_pointer_cast<const G3Bool>(element))
+		return bp::object(boost::dynamic_pointer_cast<const G3Bool>(element)->value);
+	else if (!!boost::dynamic_pointer_cast<const G3Quat>(element))
+		return bp::object(boost::dynamic_pointer_cast<const G3Quat>(element)->value);
+	else
+		return bp::object(boost::const_pointer_cast<G3FrameObject>(element));
+}
+
+static std::string g3frame_str(const G3Frame &f)
+{
+	std::ostringstream oss;
+	oss << f;
+	return oss.str();
+}
+
+static bp::list g3frame_python_values(G3Frame &f)
+{
+	bp::list values;
+	std::vector<std::string> keyvec = f.Keys();
+
+	for (auto i = keyvec.begin(); i != keyvec.end(); i++)
+		values.append(g3frame_python_get(f, *i));
+
+	return values;
+}
+
+PYBINDINGS("core") {
+	// Internal stuff
+	bp::class_<G3FrameObject, G3FrameObjectPtr>("G3FrameObject",
+	  "Base class for objects that can be added to a frame. All such "
+	  "must inherit from G3FrameObject in C++. Pickle hooks are overridden "
+	  "to use the fast internal serialization")
+	    .def("Description", &G3FrameObject::Description,
+	      "Long-form human-readable description of the object")
+	    .def("Summary", &G3FrameObject::Summary,
+	      "Short (one-line) description of the object")
+	    .def("__str__", &G3FrameObject::Summary)
+	    .def_pickle(g3frameobject_picklesuite<G3FrameObject>())
+	;
+	register_pointer_conversions<G3FrameObject>();
+
+	bp::enum_<G3Frame::FrameType>("G3FrameType")
+	    .value("Timepoint",       G3Frame::Timepoint)
+	    .value("Housekeeping",    G3Frame::Housekeeping)
+	    .value("Observation",     G3Frame::Observation)
+	    .value("Scan",            G3Frame::Scan)
+	    .value("Map",             G3Frame::Map)
+	    .value("InstrumentStatus",G3Frame::InstrumentStatus)
+	    .value("PipelineInfo",    G3Frame::PipelineInfo)
+	    .value("EndProcessing",   G3Frame::EndProcessing)
+	    .value("Calibration",     G3Frame::Calibration)
+	    .value("Wiring",          G3Frame::Wiring)
+	    .value("GcpSlow",         G3Frame::GcpSlow)
+	    .value("Ephemeris",       G3Frame::Ephemeris)
+	    .value("LightCurve",      G3Frame::LightCurve)
+	    .value("Statistics",      G3Frame::Statistics)
+	    .value("none",            G3Frame::None)
+	;
+	enum_none_converter::from_python<G3Frame::FrameType>();
+	register_vector_of<G3Frame::FrameType>("FrameType");
+
+	bp::class_<G3Frame, G3FramePtr>("G3Frame",
+	  "Frames are the core datatype of the analysis software. They behave "
+	  "like Python dictionaries except that they can only store subclasses "
+	  "of core.G3FrameObject and the dictionary keys must be strings. "
+	  "Pickling and unpickling them uses internal serialization and is "
+	  "extremely fast."
+	  "\n\n"
+	  "In addition to dictionary-like contents, frames have a type code "
+	  "(G3Frame.Type) that designates what kind of data are contained in "
+	  "it. These types usually indicates information that changes at "
+	  "different rates.")
+	    .def(bp::init<G3Frame::FrameType>())
+	    .def(bp::init<G3Frame>())
+	    .def("__init__", bp::make_constructor(g3frame_char_constructor,
+	      bp::default_call_policies(), bp::args("adhoctypecode")),
+	      "Create a frame with an ad-hoc (non-standard) type code. "
+	      "Use sparingly and with care.")
+	    .def_readwrite("type", &G3Frame::type, "Type code for frame. "
+	      "See general G3Frame docstring.")
+	    .def_readonly("_filename", &G3Frame::_filename, "Source filename for frame, "
+	      "if read in using G3Reader. This attribute is fragile, use at your own risk.")
+	    .def("__setitem__", &g3frame_python_put)
+	    .def("__getitem__", &g3frame_python_get)
+	    .def("keys", &g3frame_keys, "Returns a list of keys in the frame.")
+	    .def("__delitem__", &G3Frame::Delete)
+	    .def("values", &g3frame_python_values, "Returns a list of the "
+	      "values of the items in the frame.")
+	    .def("__contains__", (bool (G3Frame::*)(const std::string &) const)
+	       &G3Frame::Has)
+	    .def("__str__", &g3frame_str)
+	    .def("__len__", &G3Frame::size)
+	    .def("drop_blobs", &G3Frame::DropBlobs, bp::arg("decode_all")=false,
+	      "Drop all serialized data either for already-decoded objects (default) "
+	      "or all objects after decoding them (if decode_all is true). "
+	      "Saves memory at the expense of CPU time if reserialized.")
+	    .def("generate_blobs", &G3Frame::GenerateBlobs, bp::arg("drop_objects")=false,
+	      "Force immediate serialization of all objects. Will save some "
+	      "CPU time later during serialization of the frame in exchange "
+	      "for spending the exact same amount of CPU time right now.")
+	    .def("drop_objects", &G3Frame::DropObjects,
+	      "Drop all decoded objects in favor of their serialized copies, "
+	      "where those serialized copies already exist. Saves memory for "
+	      "frames about to be written at the expense of CPU time to "
+	      "re-decode them if they are accessed again later.")
+	    .def("as_json", &G3Frame::asJSON, "JSON representation of frame")
+	    .def_pickle(g3frame_picklesuite())
+	;
+	register_vector_of<G3FramePtr>("Frame");
+	register_vector_of<G3FrameObjectPtr>("FrameObject");
+}

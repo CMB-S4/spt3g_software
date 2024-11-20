@@ -1,4 +1,4 @@
-from spt3g import core
+from .. import core
 
 class MPIAccumulator(object):
     '''

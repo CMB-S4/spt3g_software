@@ -1,4 +1,4 @@
-from spt3g.core import G3FrameType
+from . import G3FrameType
 from copy import copy
 import inspect
 import textwrap

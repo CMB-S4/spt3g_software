@@ -1,10 +1,7 @@
 #ifndef _G3_SERIALIZATION_H
 #define _G3_SERIALIZATION_H
 
-#include <boost/iostreams/stream.hpp>
-#include <boost/iostreams/device/array.hpp>
-#include <boost/iostreams/device/back_inserter.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
+#include <dataio.h>
 
 #include <cereal/archives/portable_binary.hpp>
 #ifdef SPT3G_ENABLE_JSON_OUTPUT
@@ -53,9 +50,8 @@ struct g3frameobject_picklesuite : boost::python::pickle_suite
 	{
 		namespace bp = boost::python;
 		std::vector<char> buffer;
-		boost::iostreams::stream<
-		    boost::iostreams::back_insert_device<std::vector<char> > >
-		    os(buffer);
+		g3_ostream os;
+		g3_ostream_to_buffer(os, buffer);
 		{
 			cereal::PortableBinaryOutputArchive ar(os);
 			ar << bp::extract<const T &>(obj)();
@@ -75,8 +71,8 @@ struct g3frameobject_picklesuite : boost::python::pickle_suite
 		PyObject_GetBuffer(bp::object(state[1]).ptr(), &view,
 		    PyBUF_SIMPLE);
 
-		boost::iostreams::array_source src((char *)view.buf, view.len);
-		boost::iostreams::filtering_istream fis(src);
+		g3_istream fis;
+		g3_istream_from_buffer(fis, (char *)view.buf, view.len);
 		cereal::PortableBinaryInputArchive ar(fis);
 
 		bp::extract<bp::dict>(obj.attr("__dict__"))().update(state[0]);
@@ -86,14 +82,14 @@ struct g3frameobject_picklesuite : boost::python::pickle_suite
 };
 
 template <class T>
-inline int
+inline uint32_t
 _g3_class_version(T *)
 {
 	return cereal::detail::Version<T>::version;
 }
 
 #define G3_CHECK_VERSION(v) \
-	if (v > _g3_class_version(this)) \
+	if ((uint32_t)v > _g3_class_version(this)) \
 		log_fatal("Trying to read newer class version (%d) than " \
 		    "supported (%d). Please upgrade your software.", v, \
 		    _g3_class_version(this));

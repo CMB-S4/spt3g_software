@@ -1,13 +1,3 @@
-# Build a minimal library with a constant name which can be loaded as a python
-# module with a plain `import`, which can then load other modules which are
-# native libraries with normal names.
-add_library(dload SHARED src/dload.c)
-set_target_properties(dload PROPERTIES PREFIX "")
-set_target_properties(dload PROPERTIES SUFFIX ".so")
-install(TARGETS dload DESTINATION ${PYTHON_MODULE_DIR}/spt3g)
-target_include_directories(dload PRIVATE ${Python_INCLUDE_DIRS})
-target_link_libraries(dload PUBLIC ${Python_LIBRARIES})
-
 # OS X has a broken implementatin of pthreads.
 if(APPLE)
 	set(CORE_EXTRA_SRCS src/ApplePthreadBarrier.cxx)
@@ -17,15 +7,15 @@ endif(APPLE)
 
 add_spt3g_library(core SHARED
 	src/G3EventBuilder.cxx src/G3Frame.cxx src/G3TimeStamp.cxx
-	src/G3Pipeline.cxx src/G3Writer.cxx src/G3Reader.cxx src/python.cxx
+	src/G3Pipeline.cxx src/G3Writer.cxx src/G3Reader.cxx
 	src/G3InfiniteSource.cxx src/G3Logging.cxx src/G3PrintfLogger.cxx
 	src/G3Data.cxx src/G3Vector.cxx src/G3Map.cxx src/G3Timestream.cxx
         src/G3Timesample.cxx
 	src/G3TriggeredBuilder.cxx src/G3MultiFileWriter.cxx src/dataio.cxx
 	src/crc32.c ${CORE_EXTRA_SRCS}
 	src/G3NetworkSender.cxx src/G3SyslogLogger.cxx
-	src/G3PipelineInfo.cxx src/G3Quat.cxx
-	src/int_storage.cxx
+	src/G3PipelineInfo.cxx src/G3Quat.cxx src/G3Units.cxx
+	src/int_storage.cxx src/pybindings.cxx
 )
 
 
@@ -38,21 +28,23 @@ endif()
 
 
 # Link dependencies
-target_link_libraries(core spt3g)
+target_link_libraries(core PUBLIC spt3g)
+
+# add python bindings
+add_spt3g_module(core src/python.cxx)
 
 # Make core includes available without directories
 target_include_directories(core PUBLIC
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/core>
 	$<INSTALL_INTERFACE:${SPT3G_INCLUDE_INSTALL_DIR}/core>
-	$<INSTALL_INTERFACE:${SPT3G_INCLUDE_INSTALL_DIR}>
 )
 
 # Link against FLAC library
-find_package(FLAC)
+find_package(FLAC MODULE)
 if(FLAC_FOUND)
 	target_compile_definitions(core PRIVATE -DG3_HAS_FLAC)
-	target_include_directories(core PRIVATE ${FLAC_INCLUDE_DIR})
-	target_link_libraries(core ${FLAC_LIBRARIES})
+	target_link_libraries(core PUBLIC FLAC::FLAC)
+	set(FLAC_FOUND ${FLAC_FOUND} PARENT_SCOPE)
 endif()
 
 # Link against BZIP2 library
@@ -75,6 +67,7 @@ add_spt3g_program(bin/spt3g-inspect)
 add_spt3g_program(bin/gen-analysis-doc)
 
 #Tests
+add_spt3g_test(imports)
 add_spt3g_test(copycons)
 add_spt3g_test(framepickle)
 add_spt3g_test(pipeline)

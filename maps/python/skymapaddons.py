@@ -1,6 +1,6 @@
 import numpy
 import warnings
-from spt3g.maps import G3SkyMapWeights, G3SkyMap, FlatSkyMap, G3SkyMapMask
+from . import G3SkyMapWeights, G3SkyMap, FlatSkyMap, G3SkyMapMask
 
 # This file adds extra functionality to the python interface to G3SkyMap and
 # G3SkyMapWeights. This is done in ways that exploit a large fraction of

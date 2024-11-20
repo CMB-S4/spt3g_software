@@ -1,0 +1,49 @@
+[build-system]
+requires = [
+    "cmake>=3.12",
+    "setuptools>=61",
+    "setuptools_scm[toml]>=6.3",
+    "wheel",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "spt3g"
+readme = "README.rst"
+description = "Public Subset of Analysis Software Developed by the SPT-3G Collaboration"
+urls = {source = "https://github.com/CMB-S4/spt3g_software"}
+license = {file = "LICENSE"}
+requires-python = ">=3.7"
+dependencies = ["numpy", "scipy", "astropy"]
+dynamic=["version"]
+
+[project.optional-dependencies]
+dev = ["cmake", "pytest", "healpy"]
+
+[tool.setuptools_scm]
+version_file_template = """
+__version__ = version = '{version}'
+__version_tuple__ = version_tuple = {version_tuple}
+
+fullversion = version
+if len(version_tuple) == 2:
+    versionname = version
+else:
+    versionname = 'UNKNOWN'
+
+if len(version_tuple) == 4:
+    gitrevision = revision = version_tuple[-1].split('.')[0][1:]
+    localdiffs = len(version_tuple[-1].split(".")) == 2
+else:
+    gitrevision = revision = 'UNKNOWN'
+    localdiffs = False
+
+upstream_branch = 'UNKNOWN VCS'
+upstream_url = 'UNKNOWN VCS'
+"""
+version_file = "./cmake/package/version.py"
+version_scheme = "no-guess-dev"
+fallback_version = "0.0"
+
+[tool.cibuildwheel]
+test-extras = ["dev"]

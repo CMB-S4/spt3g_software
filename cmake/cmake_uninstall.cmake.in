@@ -12,10 +12,10 @@ FILE (STRINGS "@CMAKE_CURRENT_BINARY_DIR@/install_manifest.txt" files)
 FOREACH(file ${files})
   MESSAGE(STATUS "Uninstalling $ENV{DESTDIR}${file}")
   IF(EXISTS "$ENV{DESTDIR}${file}")
-    EXEC_PROGRAM(
-      "@CMAKE_COMMAND@" ARGS "-E rm $ENV{DESTDIR}${file}"
+    EXECUTE_PROCESS(
+      COMMAND @CMAKE_COMMAND@ -E rm $ENV{DESTDIR}${file}
       OUTPUT_VARIABLE rm_out
-      RETURN_VALUE rm_retval
+      RESULT_VARIABLE rm_retval
       )
     IF(NOT "${rm_retval}" STREQUAL 0)
       MESSAGE(FATAL_ERROR "Problem when removing $ENV{DESTDIR}${file}")
@@ -27,17 +27,16 @@ ENDFOREACH(file)
 
 # remove project-specific directories which should no longer contain anything
 set(dirs_to_clean
-	"@CMAKE_INSTALL_PREFIX@/share/spt3g"
+	"@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_DIR@"
 	"@CMAKE_INSTALL_PREFIX@/@INCLUDE_INSTALL_DIR@"
-	"@PYTHON_MODULE_DIR@/spt3g"
 )
 FOREACH(dir ${dirs_to_clean})
   MESSAGE(STATUS "Removing directory $ENV{DESTDIR}${dir}")
   IF(EXISTS "$ENV{DESTDIR}${dir}")
-    EXEC_PROGRAM(
-      "@CMAKE_COMMAND@" ARGS -E rm -r "$ENV{DESTDIR}${dir}"
+    EXECUTE_PROCESS(
+      COMMAND @CMAKE_COMMAND@ -E rm -r $ENV{DESTDIR}${dir}
       OUTPUT_VARIABLE rm_out
-      RETURN_VALUE rm_retval
+      RESULT_VARIABLE rm_retval
       )
     IF(NOT "${rm_retval}" STREQUAL 0)
       MESSAGE(FATAL_ERROR "Problem when removing $ENV{DESTDIR}${dir}")

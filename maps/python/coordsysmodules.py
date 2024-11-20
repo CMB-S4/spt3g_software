@@ -1,8 +1,8 @@
-from spt3g import core
-from spt3g.core import G3TimestreamQuat
-from spt3g.maps import MapCoordReference
-from spt3g.maps import get_origin_rotator_timestream, get_boresight_rotator_timestream
-from spt3g.maps import get_fk5_j2000_to_gal_quat
+from .. import core
+from ..core import G3TimestreamQuat
+from . import MapCoordReference
+from . import get_origin_rotator_timestream, get_boresight_rotator_timestream
+from . import get_fk5_j2000_to_gal_quat
 
 
 __all__ = [

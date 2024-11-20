@@ -1,3 +1,4 @@
+#include <pybindings.h>
 #include <G3Logging.h>
 #include <G3SimpleLoggers.h>
 
@@ -28,12 +29,15 @@ G3LoggingStringF(const char *format, ...)
 	va_start(args, format);
 
 	int messagesize = vsnprintf(NULL, 0, format, args);
-	char log_message[messagesize + 1];
+	char *log_message = new char[messagesize + 1];
 
 	va_start(args, format);
-	vsprintf(log_message, format, args);
+	vsnprintf(log_message, messagesize + 1, format, args);
 
-	return std::string(log_message);
+	std::string out(log_message);
+	delete [] log_message;
+
+	return out;
 }
 
 G3Logger::G3Logger(G3LogLevel default_level) :
@@ -106,11 +110,12 @@ G3BasicLogger::Log(G3LogLevel level, const std::string &unit,
 	int messagesize = snprintf(NULL, 0, "%s (%s): %s (%s:%d in %s)",
 	    log_description, unit.c_str(), message.c_str(), file.c_str(), line,
 	    func.c_str());
-	char log_message[messagesize + 1];
-	sprintf(log_message, "%s (%s): %s (%s:%d in %s)", log_description,
+	char *log_message = new char[messagesize + 1];
+	snprintf(log_message, messagesize + 1, "%s (%s): %s (%s:%d in %s)", log_description,
 	    unit.c_str(), message.c_str(), file.c_str(), line, func.c_str());
 
 	BasicLog(log_message);
+	delete [] log_message;
 }
 
 void
@@ -121,11 +126,54 @@ g3_clogger(G3LogLevel level, const char *unit, const char *file, int line,
 	va_start(args, format);
 
 	int messagesize = vsnprintf(NULL, 0, format, args);
-	char log_message[messagesize + 1];
+	char *log_message = new char[messagesize + 1];
 
 	va_start(args, format);
-	vsprintf(log_message, format, args);
+	vsnprintf(log_message, messagesize + 1, format, args);
 
 	GetRootLogger()->Log(level, unit, file, line, func, log_message);
+	delete [] log_message;
 }
 
+PYBINDINGS("core") {
+	bp::enum_<G3LogLevel>("G3LogLevel")
+	    .value("LOG_TRACE",  G3LOG_TRACE)
+	    .value("LOG_DEBUG",  G3LOG_DEBUG)
+	    .value("LOG_INFO",   G3LOG_INFO)
+	    .value("LOG_NOTICE", G3LOG_NOTICE)
+	    .value("LOG_WARN",   G3LOG_WARN)
+	    .value("LOG_ERROR",  G3LOG_ERROR)
+	    .value("LOG_FATAL",  G3LOG_FATAL)
+	;
+
+	bp::class_<G3Logger, G3LoggerPtr, boost::noncopyable>("G3Logger",
+	  "C++ logging abstract base class", bp::no_init)
+	    .add_static_property("global_logger", &GetRootLogger, &SetRootLogger)
+	    .def("log", &G3Logger::Log)
+	    .def("get_level_for_unit", &G3Logger::LogLevelForUnit)
+	    .def("set_level_for_unit", &G3Logger::SetLogLevelForUnit)
+	    .def("set_level", &G3Logger::SetLogLevel)
+        ;
+	register_vector_of<G3LoggerPtr>("G3Logger");
+
+	bp::class_<G3NullLogger, bp::bases<G3Logger>,
+	  boost::shared_ptr<G3NullLogger>, boost::noncopyable>(
+	  "G3NullLogger", "Logger that does not log. Useful if you don't want log messages");
+	bp::class_<G3PrintfLogger, bp::bases<G3Logger>,
+	  boost::shared_ptr<G3PrintfLogger>, boost::noncopyable>(
+	  "G3PrintfLogger", "Logger that prints error messages to stderr (in color, if stderr is a tty).",
+	  bp::init<bp::optional<G3LogLevel> >())
+	    .def_readwrite("trim_file_names", &G3PrintfLogger::TrimFileNames)
+	    .def_readwrite("timestamps", &G3PrintfLogger::Timestamps)
+	;
+	bp::class_<G3MultiLogger, bp::bases<G3Logger>,
+	  boost::shared_ptr<G3MultiLogger>, boost::noncopyable>(
+	  "G3MultiLogger", "Log to multiple loggers at once",
+	  bp::init<std::vector<G3LoggerPtr> >());
+	bp::class_<G3SyslogLogger, bp::bases<G3Logger>,
+	  boost::shared_ptr<G3SyslogLogger>, boost::noncopyable>(
+	  "G3SyslogLogger", "Pass log messages to the syslog service. Initialize with "
+	  "a string identifier and a logging facility. See syslog(3) for details. Example:\n"
+	  "\timport syslog\n\tlogger = core.G3SyslogLogger('myprogram', syslog.LOG_USER)",
+	  bp::init<std::string, int, bp::optional<G3LogLevel> >());
+}

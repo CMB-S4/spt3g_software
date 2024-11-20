@@ -1,7 +1,7 @@
 import numpy
-from spt3g.core import G3Timestream, DoubleVector, G3VectorDouble, G3TimestreamMap, G3VectorTime, G3Time, IntVector, G3VectorInt, \
+from . import G3Timestream, DoubleVector, G3VectorDouble, G3TimestreamMap, G3VectorTime, G3Time, IntVector, G3VectorInt, \
     G3VectorComplexDouble, ComplexDoubleVector, BoolVector, G3VectorBool
-from spt3g.core import G3Units, log_fatal, log_warn, usefulfunc, G3FrameObject
+from . import G3Units, log_fatal, log_warn, usefulfunc, G3FrameObject
 
 __all__ = ['concatenate_timestreams']
 

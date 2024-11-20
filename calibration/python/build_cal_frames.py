@@ -1,7 +1,7 @@
-from spt3g import core
-from spt3g.calibration import BolometerProperties, BolometerPropertiesMap
-from spt3g.calibration import PointingProperties, PointingPropertiesMap
-import numpy, scipy.stats, os, re
+from .. import core
+from . import BolometerProperties, BolometerPropertiesMap
+from . import PointingProperties, PointingPropertiesMap
+import numpy, os, re
 
 '''
 Utilities for bringing together calibration data from a number of sources
@@ -59,11 +59,12 @@ class BuildBoloPropertiesMap(object):
 
             # Technique to average together points while ignoring outliers
             def robust_avg(data):
+                from scipy.stats import sigmaclip
+
                 gooddata = numpy.asarray(data)[numpy.isfinite(data)]
                 if len(gooddata) == 1:
                     return gooddata[0]
-                return numpy.median(scipy.stats.sigmaclip(gooddata, 
-                                                          low=2.0, high=2.0)[0])
+                return numpy.median(sigmaclip(gooddata, low=2.0, high=2.0)[0])
 
             if len(self.fiducial_detectors) == 0:
                 always_dets = set([bolo for bolo in self.props if numpy.isfinite(self.props[bolo].get('xoffsets', [numpy.nan])).all()])

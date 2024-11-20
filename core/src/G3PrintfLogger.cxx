@@ -74,20 +74,10 @@ G3PrintfLogger::Log(G3LogLevel level, const std::string &unit,
 		    " %d-%b-%Y:%H:%M:%S %Z", &tm);
 	}
 
-	int messagesize = snprintf(NULL, 0,
+	fprintf(stderr,
 	    "%s%s (%s)%s:%s %s (%s%s:%d%s in %s%s%s)\n",
 	    log_prolog, log_description, unit.c_str(), timestamp, log_epilog,
 	    message.c_str(), file_prolog, trimmed_filename.c_str(), line,
 	    log_epilog, file_prolog, func.c_str(), log_epilog);
-
-	char log_message[messagesize + 1];
-
-	sprintf(log_message,
-	    "%s%s (%s)%s:%s %s (%s%s:%d%s in %s%s%s)\n",
-	    log_prolog, log_description, unit.c_str(), timestamp, log_epilog,
-	    message.c_str(), file_prolog, trimmed_filename.c_str(), line,
-	    log_epilog, file_prolog, func.c_str(), log_epilog);
-
-	fputs(log_message, stderr);
 }
 

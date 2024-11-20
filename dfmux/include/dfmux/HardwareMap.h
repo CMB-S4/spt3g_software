@@ -13,6 +13,9 @@
 class DfMuxChannelMapping : public G3FrameObject
 {
 public:
+	DfMuxChannelMapping() : G3FrameObject(), board_ip(-1), board_serial(-1),
+	    board_slot(-1), crate_serial(-1), module(-1), channel(-1) {}
+
 	int32_t board_ip;
 	int32_t board_serial;
 	int32_t board_slot;

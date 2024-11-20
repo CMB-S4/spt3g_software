@@ -1,25 +1,27 @@
-find_package(NetCDF)
-if (NETCDF_FOUND)
+find_package(NetCDF MODULE)
+find_package(HDF5)
+if (NetCDF_FOUND AND HDF5_FOUND)
 	set(DFMUX_LIB_EXTRA_SRC src/NetCDFDump.cxx)
-	set(DFMUX_LIB_EXTRA_LIB ${NETCDF_LIBRARIES})
 else()
 	set(DFMUX_LIB_EXTRA_SRC "")
-	set(DFMUX_LIB_EXTRA_LIB "")
 endif()
 
 add_spt3g_library(dfmux SHARED
 	src/DfMuxBuilder.cxx src/DfMuxCollector.cxx src/DfMuxSample.cxx
 	src/LegacyDfMuxCollector.cxx src/HardwareMap.cxx src/DfMuxCollator.cxx
-	src/Housekeeping.cxx src/python.cxx
+	src/Housekeeping.cxx
 	${DFMUX_LIB_EXTRA_SRC}
 )
-target_link_libraries(dfmux core ${DFMUX_LIB_EXTRA_LIB})
-if (NETCDF_FOUND)
-	target_include_directories(dfmux PRIVATE ${NETCDF_INCLUDES})
-endif()
+target_link_libraries(dfmux PUBLIC core)
 
-if (NETCDF_FOUND)
+add_spt3g_module(dfmux src/python.cxx)
+
+if (NetCDF_FOUND AND HDF5_FOUND)
+	target_link_libraries(dfmux PUBLIC NetCDF::NetCDF)
 	add_spt3g_program(bin/ledgerman.py ledgerman)
+	set(NetCDF_FOUND ${NetCDF_FOUND} PARENT_SCOPE)
 endif()
 
 link_python_dir()
+
+add_spt3g_test(imports)

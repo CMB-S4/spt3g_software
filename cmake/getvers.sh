@@ -1,21 +1,13 @@
 #!/bin/sh
 
-# Usage: getvers.sh <tree to get version info from> <build directory>
+# Usage: getvers.sh <tree to get version info from> <output version file>
 
 set -e
 cd $1
 
-# PEP440-compliant version number for pyproject.toml
-if [ -e .git ]; then
-	# replaces first - with .dev and second - with +, so e.g. 0.3-154-gd36baf4a becomes 0.3.dev154+gd36baf4a
-	fullversion_pep440=$(echo $(git describe --always --tags 2>/dev/null) | sed 's/-/.dev/' | sed 's/-/+/')
-fi
-fullversion_pep440="${fullversion_pep440:-0.1.0+unknown}" # fallback for SVN or error above
-sed "s/\\\$Version\\\$/$fullversion_pep440/" $1/cmake/pyproject.toml.in > $2/pyproject.toml
-
-
 # version.py version info
-exec 1>"$2/spt3g/version.py"
+rm -f $2
+exec 1>"$2"
 
 
 echo '# AUTO-GENERATED FILE: DO NOT EDIT'
@@ -129,18 +121,18 @@ elif [ -e .git ]; then
 		echo localdiffs=False
 	fi
 	echo versionname=\"$(git tag -l --points-at HEAD 2>/dev/null)\"
-	echo fullversion=\"$fullversion_pep440\"
+	echo fullversion=\"$(git describe --always --tags 2>/dev/null)\"
 else
 	echo upstream_url=\"UNKNOWN VCS\"
 	echo upstream_branch=\"UNKNOWN VCS\"
 	echo revision=\"UNKNOWN VCS\"
 	echo gitrevision=\"UNKNOWN\"
 	echo versionname=\"UNKNOWN\"
-	if [ "$(cat VERSION)" = '$Version$' ]; then
+	if (grep -q '$Format:' .git_archival.txt); then
 		echo localdiffs=True
 		echo fullversion=\"UNKNOWN\"
 	else
 		echo localdiffs=False
-		echo fullversion=\"$(cat VERSION | sed -E 's/\$Version: (.*)\$/\1/g')\"
+		echo fullversion=\"$(grep describe .git_archival.txt | sed -E 's/describe-name: (.*)/\1/g')\"
 	fi
 fi

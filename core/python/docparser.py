@@ -1,5 +1,5 @@
 import sys, inspect, re, textwrap
-from spt3g.core import G3Module, G3FrameObject
+from . import G3Module, G3FrameObject
 
 def format_doc(x, simple=False):
     """
@@ -44,7 +44,6 @@ def get_doc_for_module(module_path, include_link_list = True):
         print('Could not import module %s:' % module_path)
         print(e)
         sys.exit(1)
-    
 
     def format_object(modname, x):
         name = '%s.%s' % (modname, x)
@@ -56,6 +55,30 @@ def get_doc_for_module(module_path, include_link_list = True):
     def format_definition(name, obj):
         argdef = '%s%s' % (name, format_signature(obj))
         return '\n\n*Definition:*\n        ``%s``\n' % argdef.strip()
+    def format_init(x, obj):
+        try:
+            sig = format_signature(obj.__init__).replace("(self, ", "(")
+            out_str = '\n*Constructor:*\n\t``%s%s``\n' % (x, sig)
+            if format_doc(obj.__init__):
+                con_str = '\n*Constructor:*\n\t%s\n' % format_doc(obj.__init__).replace('\n', '\n\t')
+                con_str = con_str.replace(' -> None', ' -> None``')
+                con_str = con_str.replace('__init__', '``__init__')
+                out_str += con_str
+            return out_str
+        except:
+            pass
+        try:
+            if format_doc(obj.__init__):
+                con_str = '\n\n*Constructors:*\n\t%s\n' % format_doc(obj.__init__).replace('\n', '\n\t')
+                con_str = con_str.replace(' -> None', '``')
+                con_str = con_str.replace(' -> object', '``')
+                con_str = con_str.replace('__init__( (object)arg1,', '``{}('.format(x))
+                con_str = con_str.replace('__init__( (object)arg1)', '``{}()'.format(x))
+                con_str = con_str.replace('__init__( (object)arg1 [,', '``{}( ['.format(x))
+                return con_str
+        except:
+            pass
+        return ""
     def add_str(s0, s1):
         return s0 + s1 + '\n'
     
@@ -101,13 +124,7 @@ def get_doc_for_module(module_path, include_link_list = True):
                     if inspect.isfunction(obj):
                         out_str = add_str(out_str, format_definition(x, obj))
                     else:
-                        out_str = add_str(out_str, '\n*Constructor:*\n\t``%s%s``\n' %
-                                          ((x, format_signature(obj.__init__)) ) )
-                        if format_doc(obj.__init__):
-                            con_str = '\n*Constructor:*\n\t%s\n' % format_doc(obj.__init__).replace('\n', '\n\t')
-                            con_str = con_str.replace(' -> None', ' -> None``')
-                            con_str = con_str.replace('__init__', '``__init__')
-                            out_str += con_str + '\n'
+                        out_str = add_str(out_str, format_init(x, obj))
                 except:
                     pass
                 out_str = add_str(out_str, '')
@@ -115,7 +132,7 @@ def get_doc_for_module(module_path, include_link_list = True):
             elif hasattr(obj, '__pipesegment__'):
                 out_str = add_str(out_str, format_name(modname, x))
                 if format_doc(obj) is not None:
-                    if hasattr(obj, '__rstdoc__'):
+                    if getattr(obj, '__rstdoc__', None):
                         out_str = add_str(out_str, obj.__rstdoc__)
                     else:
                         baredoc = format_doc(obj)
@@ -204,14 +221,7 @@ def get_doc_for_module(module_path, include_link_list = True):
                 if format_doc(obj) is not None:
                     tmp_str = format_doc(obj).strip()
                     out_str = out_str + tmp_str
-                    if format_doc(obj.__init__):
-                        con_str = '\n\n*Constructors:*\n\t%s\n' % format_doc(obj.__init__).replace('\n', '\n\t')
-                        con_str = con_str.replace(' -> None', '``')
-                        con_str = con_str.replace(' -> object', '``')
-                        con_str = con_str.replace('__init__( (object)arg1,', '``{}('.format(obj.__name__))
-                        con_str = con_str.replace('__init__( (object)arg1)', '``{}()'.format(obj.__name__))
-                        con_str = con_str.replace('__init__( (object)arg1 [,', '``{}( ['.format(obj.__name__))
-                        out_str += con_str + '\n'
+                    out_str = add_str(out_str, format_init(x, obj))
                     #after we have gotten the documention, find the properties and load their documentation
                     prop_str = ''
                     for p_name, p_obj in obj.__dict__.items():

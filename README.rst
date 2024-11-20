@@ -1,3 +1,12 @@
+.. image:: https://badge.fury.io/py/spt3g.svg
+    :target: https://badge.fury.io/py/spt3g
+
+.. image:: https://github.com/CMB-S4/spt3g_software/actions/workflows/cmake.yml/badge.svg
+    :target: https://github.com/CMB-S4/spt3g_software/actions/workflows/cmake.yml
+
+.. image:: https://github.com/CMB-S4/spt3g_software/actions/workflows/wheels.yml/badge.svg
+    :target: https://github.com/CMB-S4/spt3g_software/actions/workflows/wheels.yml
+
 About
 -----
 
@@ -19,10 +28,10 @@ This depends on Boost and cmake, as well as the usual Python packages. Some addi
 
 Minimum versions:
 
-	- GCC >= 4.7 or clang >= 3.3
-	- Boost >= 1.48
-	- cmake >= 3.1
-	- Python >= 2.7 (although pre-Python-3 support is best-effort)
+- GCC >= 5.0 or clang >= 3.4
+- Boost >= 1.48
+- cmake >= 3.12
+- Python >= 2.7 (although pre-Python-3 support is best-effort)
 
 On Ubuntu/Debian, you can install the non-Python dependencies, including the optional ones, by doing:
 
@@ -38,10 +47,10 @@ On RHEL-type systems (SL, CentOS, etc.), do this:
 	
 If your system defaults to Python 2, but you wish to use Python 3, please do the following:
 
-	1. Install Python 3 *from the system package manager*
-	2. Make sure the python-3 version of the Boost library is installed (on Ubuntu, this is part of the standard boost-python package referenced above)
-	3. When you run cmake below, pass ``-DPython_EXECUTABLE=`which python3```
-	
+1. Install Python 3 *from the system package manager*
+2. Make sure the python-3 version of the Boost library is installed (on Ubuntu, this is part of the standard boost-python package referenced above)
+3. When you run cmake below, pass ``-DPython_EXECUTABLE=`which python3```
+
 On any system, this software requires numpy and scipy (hard requirements), plus astropy and healpy (optional).
 
 Setup on RHEL6
@@ -67,12 +76,27 @@ To build:
 	cmake ..
 	make
 
+This will collect all of the necessary python tools into the ``build/spt3g`` directory, which can then be imported in python.  To set the appropriate python environment *without* installing the python package, use the shell script in ``build/env_shell.sh`` to run commands that know where to find the ``spt3g`` package and libraries:
+
+.. code-block:: shell
+
+	./env-shell.sh python my_script.py  # to run a python script
+	./env-shell.sh ipython  # to start an ipython session
+
+Alternatively, for users that only use a single build environment, set the following environment variables (e.g. in your ``.bash_profile`` file):
+
+.. code-block:: shell
+
+	export SPT3G_SOFTWARE_BUILD_PATH=path/to/spt3g_software/build
+	export PYTHONPATH=$SPT3G_SOFTWARE_BUILD_PATH:$PYTHONPATH
+	export LD_LIBRARY_PATH=$SPT3G_SOFTWARE_BUILD_PATH/lib:$LD_LIBRARY_PATH
+	export PATH=$SPT3G_SOFTWARE_BUILD_PATH/bin:$PATH
 
 To build the documentation in the build directory type:
 
 .. code-block:: shell
 
-	./env-shell.sh make docs
+	make docs
 
 This will construct an html version of the documentation.  This builds the documentation in the build/docs folder.  Open build/docs/index.html in your favorite web browser.  You should at least read the quick start portion of the documentation before getting started.
 
@@ -81,22 +105,57 @@ Installation
 
 For various reasons it may be useful to install the software after building, instead of continuing to use it out of the build directory. Several CMake variables control how the software is installed:
 
- * ``WITH_BZIP2``, which defaults to ``TRUE``, is used to control whether the core library is built with support for bzip2 compression of G3 files.  Use ``-DWITH_BZIP2=FALSE`` when calling ``cmake`` to disable.
- * ``CMAKE_INSTALL_PREFIX``, which defaults to ``/usr/local`` is used as the root directory for installing all non-python components (header files, cmake export scripts, etc.)
- * ``PYTHON_MODULE_DIR``, which if not explicitly set defaults to the result of running `distutils.sysconfig.get_python_lib <https://docs.python.org/3/distutils/apiref.html#distutils.sysconfig.get_python_lib>` with the selected python interpreter, is where the python module will be installed.
+* ``WITH_BZIP2``, which defaults to ``TRUE``, is used to control whether the core library is built with support for bzip2 compression of G3 files.  Use ``-DWITH_BZIP2=FALSE`` when calling ``cmake`` to disable.
+* ``CMAKE_INSTALL_PREFIX``, which defaults to ``/usr/local`` is used as the root directory for installing all non-python components (header files, cmake export scripts, etc.).  This variable is frequently useful when installing into a python virtual environment.
+* ``CMAKE_BUILD_PARALLEL_LEVEL`` is an environment variable (*not* a cmake option) used to control how many parallel processes are used to compile the shared libraries.  This option provides the same behavior as running ``make`` with the ``-j`` flag (e.g. ``make -j4``).
 
-It is rarely necessary to set ``PYTHON_MODULE_DIR`` if ``python`` has been detected correctly, but setting ``CMAKE_INSTALL_PREFIX`` is frequently useful when installing into a python virtual environment. In such a case, one may want build as follows:
+An uninstall target is also provided, so running ``make uninstall`` from the build directory should remove all files created by a previous ``make install``. 
+
+Installation with Pip
+---------------------
+
+Use ``pip`` to install the python package.  Ensure that you use the appropriate options as necessary for your installation, e.g. ``--user`` or ``--prefix``.
+
+For pre-built wheels hosted on `PyPI`_, available for most Linux x86_64, macOS x86_64 and macOS arm64 platforms, simply install the package without any additional options:
+
+.. code-block:: shell
+
+	pip install spt3g
+
+The hosted wheels will include the necessary libraries (Boost, etc) bundled with the package.  Otherwise, ensure that the dependency libraries are installed as explained above, and processed to one of the following steps.
+
+To install the package from the github repo, run ``pip`` as usual (this may take a while, so consider setting the ``CMAKE_BUILD_PARALLEL_LEVEL`` environment variable):
 
 .. code-block:: shell
 
 	cd spt3g_software
-	mkdir build
-	cd build
-	cmake .. -DCMAKE_INSTALL_PREFIX="${VIRTUAL_ENV}"
-	make
-	make install
+	CMAKE_BUILD_PARALLEL_LEVEL=4 pip install -v .
 
-After this completes, it should be possible when using the virtual environment to ``import spt3g`` in python without needing to make use of ``env-shell.sh``.
+By default this will create a directory called ``build`` in the repo and run the ``cmake`` build from there.  The build directory location can be changed by setting the ``BUILD_DIR`` environment variable, but keep in mind that ``pip`` requires that the build directory must be a path inside the repo file tree.
+For development builds, use the ``--editable`` option to assemble the python package from the appropriate compiled extensions and python directories:
+
+.. code-block:: shell
+
+	cd spt3g_software
+	CMAKE_BUILD_PARALLEL_LEVEL=4 BUILD_DIR=build pip install -v --editable .
+
+An editable build adds references to the python directories to your python path, so that edits to library python files are immediately reflected in a fresh python session.
+
+To pass arguments to the cmake build system, use the ``CMAKE_ARGS`` environment variable with arguments separated by spaces.  For example:
+
+.. code-block:: shell
+
+	cd spt3g_software
+	CMAKE_ARGS="-DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_MODULE_PATH=/usr/local/share/cmake" pip install -v --prefix=/usr/local .
+
+To run the test suite on the compiled package, you must have ``cmake``, and in particular the ``ctest`` utility, available on your path.  You must also know the location of the build directory where the cmake build was assembled (e.g. the value of ``$BUILD_DIR`` above).
+
+.. code-block:: shell
+
+	ctest --test-dir path/to/spt3g_software/build --output-on-failure
+
+.. _PyPI: https://pypi.org/p/spt3g
+
 
 Release Version Tracking
 ------------------------
@@ -104,17 +163,11 @@ Release Version Tracking
 Use git tags to keep track of release versions.  Tags should be of the form "v0.1.2" for release with major version 0, minor version 1 and patch version 2.
 If such a tag is defined, cmake will populate the following outputs:
 
- * A `cmake/Spt3gConfigVersion.cmake` file that contains the version number to be checked when including the Spt3g libraries in another cmake project
- * A `spt3g/version.py` file containing VCS parameters for access in python and stored in PipelineInfo frames
- * Add a `SPT3G_VERSION` compiler definition for accessing the version string in C++ code
+* A ``cmake/Spt3gConfigVersion.cmake`` file that contains the version number to be checked when including the Spt3g libraries in another cmake project
+* A ``spt3g/version.py`` file containing VCS parameters for access in python and stored in PipelineInfo frames
+* Add a ``SPT3G_VERSION`` compiler definition for accessing the version string in C++ code
 
-When exporting the source tree to a standalone archive, run the following command in the source directory to ensure that the source version is correctly exported:
-
-.. code-block:: shell
-
-	cmake/config_export.sh
-
-Then archive the source tree using  `git archive` as usual.
+Use the ``git archive`` command or the Python ``build`` package to export the source tree to a standalone archive.
 
 Version Control Hygiene
 -----------------------

@@ -462,7 +462,7 @@ return incref(tuple.attr("__iter__")().ptr());
         extension_def(Class& cl)
         {
             //  Wrap the map's element (value_type)
-            std::string elem_name = "std_map_indexing_suite_";
+            std::string elem_name = "_std_map_indexing_suite_";
             std::string cl_name;
             object class_name(cl.attr("__name__"));
             extract<std::string> class_name_extractor(class_name);

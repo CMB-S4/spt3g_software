@@ -1,4 +1,4 @@
-from spt3g import core
+from .. import core
 import os, time
 import numpy as np
 

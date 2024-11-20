@@ -131,15 +131,16 @@ GCPLogger::Log(G3LogLevel level, const std::string &unit,
 	    log_description, unit.c_str(), message.c_str(),
 	    trimmed_filename.c_str(), line, func.c_str());
 
-	char log_message[messagesize + 1];
+	char *log_message = new char[messagesize + 1];
 
-	sprintf(log_message,
+	snprintf(log_message, messagesize + 1,
 	    "%s (%s): %s (%s:%d in %s)",
 	    log_description, unit.c_str(), message.c_str(),
 	    trimmed_filename.c_str(), line, func.c_str());
 
 	log_deque_lock_.lock();
 	log_deque_.push_back(log_message);
+	delete [] log_message;
 
 	// These are for human viewing. No one will look at > 100 messages.
 	if (log_deque_.size() > 100)
@@ -191,8 +192,12 @@ void GCPLogger::ListenThread(GCPLogger *logger)
 		lock.unlock();
 
 		loglen = htonl(curlog.size());
-		(void)write(logger->fd_, &loglen, sizeof(loglen));
-		(void)write(logger->fd_, curlog.c_str(), curlog.size());
+		if (write(logger->fd_, &loglen, sizeof(loglen)) < 0 ||
+		    write(logger->fd_, curlog.c_str(), curlog.size()) < 0) {
+			fprintf(stderr, "GCPLogger write() failure: %s\n",
+			    strerror(errno));
+			return;
+		}
 
 		lock.lock();
 	} while (nready >= 0 && !logger->dead_);

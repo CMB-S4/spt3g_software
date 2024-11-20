@@ -1,5 +1,5 @@
-from spt3g import core
-from spt3g.dfmux import DfMuxWiringMap, DfMuxChannelMapping
+from .. import core
+from . import DfMuxWiringMap, DfMuxChannelMapping
 import struct, socket
 
 '''
@@ -121,7 +121,7 @@ def PyDfMuxBolometerPropertiesInjector(frame, pydfmux_hwm=None, angle_per_mm = 4
     if frame.type != core.G3FrameType.Wiring:
         return
 
-    from spt3g import calibration
+    from .. import calibration
     from pydfmux.core import dfmux as pydfmux
 
     cal = core.G3Frame(core.G3FrameType.Calibration)

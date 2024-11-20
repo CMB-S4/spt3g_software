@@ -1,9 +1,9 @@
 import numpy
-from spt3g import core
-from spt3g.dfmux import HousekeepingForBolo
+from .. import core
+from .Housekeeping import HousekeepingForBolo
 
 # Transfer functions for 3G and SPTpol boards
-from spt3g.dfmux import IceboardConversions
+from .IceboardConversions import convert_TF, convert_adc_samples
 from .wtl_ConvertUtils import convert_squid, convert_demod, convert_mb
 
 def counts_to_rms_amps(wiringmap, hkmap, bolo, system, tf=None):
@@ -11,9 +11,9 @@ def counts_to_rms_amps(wiringmap, hkmap, bolo, system, tf=None):
 
     if system == 'ICE':
         if chanhk.dan_streaming_enable:
-            tf_I = IceboardConversions.convert_TF(modhk.nuller_gain, target='nuller', custom_TF=tf, unit='RAW', frequency=chanhk.carrier_frequency/core.G3Units.Hz)
+            tf_I = convert_TF(modhk.nuller_gain, target='nuller', custom_TF=tf, unit='RAW', frequency=chanhk.carrier_frequency/core.G3Units.Hz)
         else:
-            tf_V = IceboardConversions.convert_adc_samples('Streamer')
+            tf_V = convert_adc_samples('Streamer')
             tf_I = tf_V/modhk.squid_transimpedance
         if chanhk.carrier_frequency != 0:
             tf_I /= numpy.sqrt(2) # Use RMS amps
@@ -41,7 +41,7 @@ def bolo_bias_voltage_rms(wiringmap, hkmap, bolo, system, tf=None):
     boardhk, mezzhk, modhk, chanhk = HousekeepingForBolo(hkmap, wiringmap, bolo, True)
 
     if system == 'ICE':
-        tf_V = IceboardConversions.convert_TF(modhk.carrier_gain, target='carrier', custom_TF=tf, unit='NORMALIZED', frequency=chanhk.carrier_frequency/core.G3Units.Hz)
+        tf_V = convert_TF(modhk.carrier_gain, target='carrier', custom_TF=tf, unit='NORMALIZED', frequency=chanhk.carrier_frequency/core.G3Units.Hz)
         volts = tf_V * chanhk.carrier_amplitude * core.G3Units.V
         if chanhk.carrier_frequency != 0:
             volts /= numpy.sqrt(2) # Use RMS amps
@@ -75,6 +75,9 @@ def get_timestream_unit_conversion(from_units, to_units, bolo, wiringmap=None, h
 
     if from_units == to_units:
         return 1.
+
+    if system not in ["ICE", "DfMux"]:
+        core.log_fatal(f"Cannot convert data for {system} readout system", unit="dfmux.unittransforms")
 
     I = counts_to_rms_amps(wiringmap, hkmap, bolo, system, tf)
     V = bolo_bias_voltage_rms(wiringmap, hkmap, bolo, system, tf)

@@ -1,17 +1,8 @@
 #include <pybindings.h>
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/iostreams/device/file.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
-#ifdef BZIP2_FOUND
-#include <boost/iostreams/filter/bzip2.hpp>
-#endif
-#include <boost/filesystem.hpp>
-#include <boost/format.hpp>
 #include <string>
 #include <G3Module.h>
 
-#include "counter64.hpp"
+#include <dataio.h>
 
 class G3MultiFileWriter : public G3Module {
 public:
@@ -20,17 +11,19 @@ public:
 	    boost::python::object divide_on = boost::python::object());
 	virtual ~G3MultiFileWriter();
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
+	std::string CurrentFile() { return current_filename_; }
 private:
 	bool CheckNewFile(G3FramePtr frame);
 
 	std::string filename_;
 	boost::python::object filename_callback_;
+	std::string current_filename_;
 	size_t size_limit_;
 
 	std::vector<G3Frame::FrameType> always_break_on_;
 	boost::python::object newfile_callback_;
 
-	boost::iostreams::filtering_ostream stream_;
+	g3_ostream stream_;
 	std::vector<G3FramePtr> metadata_cache_;
 	int seqno;
 
@@ -45,19 +38,11 @@ G3MultiFileWriter::G3MultiFileWriter(boost::python::object filename,
 
 	if (fstr.check()) {
 		filename_ = fstr();
-		boost::filesystem::path fpath(filename_);
-		if (fpath.empty() || (fpath.has_parent_path() &&
-		    !boost::filesystem::exists(fpath.parent_path())))
-			log_fatal("Parent path does not exist: %s",
-			    fpath.parent_path().string().c_str());
+		g3_check_output_path(filename_);
 
-		boost::format f(filename_);
-		try {
-			f % 0;
-		} catch (const std::exception &e) {
+		if (snprintf(NULL, 0, filename_.c_str(), 0) < 0)
 			log_fatal("Cannot format filename. Should be "
 			    "outfile-%%03u.g3");
-		}
 	} else if (PyCallable_Check(filename.ptr())) {
 		filename_ = "";
 		filename_callback_ = filename;
@@ -96,13 +81,7 @@ G3MultiFileWriter::CheckNewFile(G3FramePtr frame)
 	if (!stream_.empty()) {
 		bool start_new_ = false;
 
-		boost::iostreams::counter64 *counter =
-		    stream_.component<boost::iostreams::counter64>(
-		    stream_.size() - 2);
-		if (!counter)
-			log_fatal("Could not get stream counter");
-
-		if (counter->characters() > size_limit_)
+		if (g3_ostream_count(stream_) > size_limit_)
 			start_new_ = true;
 
 		if (newfile_callback_.ptr() != Py_None &&
@@ -121,37 +100,24 @@ G3MultiFileWriter::CheckNewFile(G3FramePtr frame)
 
 	std::string filename;
 	if (filename_ != "") {
-		boost::format f(filename_);
-		try {
-			f % seqno++;
-		} catch (const std::exception &e) {
+		int sz = snprintf(NULL, 0, filename_.c_str(), seqno);
+		if (sz < 0)
 			log_fatal("Cannot format filename. Should be "
 			    "outfile-%%03u.g3");
-		}
-		filename = f.str();
+		char *msg = new char[sz + 1];
+		snprintf(msg, sz + 1, filename_.c_str(), seqno);
+		filename = std::string(msg);
+		delete [] msg;
+		seqno++;
 	} else {
 		filename = boost::python::extract<std::string>(
 		    filename_callback_(frame, seqno++))();
 
-		boost::filesystem::path fpath(filename);
-		if (fpath.empty() || (fpath.has_parent_path() &&
-		    !boost::filesystem::exists(fpath.parent_path())))
-			log_fatal("Parent path does not exist: %s",
-			    fpath.parent_path().string().c_str());
-
+		g3_check_output_path(filename);
 	}
 
-	if (boost::algorithm::ends_with(filename, ".gz"))
-		stream_.push(boost::iostreams::gzip_compressor());
-	if (boost::algorithm::ends_with(filename, ".bz2")) {
-#ifdef BZIP2_FOUND
-		stream_.push(boost::iostreams::bzip2_compressor());
-#else
-		log_fatal("Boost not compiled with bzip2 support.");
-#endif
-	}
-	stream_.push(boost::iostreams::counter64());
-	stream_.push(boost::iostreams::file_sink(filename, std::ios::binary));
+	current_filename_ = filename;
+	g3_ostream_to_path(stream_, filename, false, true);
 
 	for (auto i = metadata_cache_.begin(); i != metadata_cache_.end(); i++)
 		(*i)->save(stream_);
@@ -201,8 +167,34 @@ done:
 	out.push_back(frame);
 }
 
-EXPORT_G3MODULE("core", G3MultiFileWriter, (init<boost::python::object, size_t, optional<boost::python::object> >(args("filename", "size_limit", "divide_on"))),
-    "Writes frames to disk into a sequence of files. Once a file exceeds the number of bytes specified in size_limit, it will start a new file. Files are named based on filename. If passed a string for filename with a printf-style specifier, that specifier will be replaced by a zero-indexed sequence number. For example, outfile-%03u.g3.gz would produce a sequence of files named outfile-000.g3.gz, outfile-001.g3.gz, etc. Alternatively, you can pass a callable that is passed the first frame in the new file and the sequence number and returns a path to the new file. Any frames besides Timepoint and Scan frames have the most recent frame of each type prepended to all new files.\n\n"
-    "More complex behavior can be obtained with the optional divide_on argument. This can be an iterable of frame types (e.g. [core.G3FrameType.Observation]) or a callable. In the iterable case, the presence of any frame with a type in the list will cause the creation of a new file even if the file size threshold has not yet been met. This is useful to create files based on, for example, observation boundaries. For more flexibility, you can also pass a python callable as divide_on. This callable will be passed each frame in turn. If it returns True (or something with positive truth-value), a new file will be started at that frame."
-);
+PYBINDINGS("core") {
+	using namespace boost::python;
 
+	class_<G3MultiFileWriter, bases<G3Module>, boost::shared_ptr<G3MultiFileWriter>,
+	    boost::noncopyable>("G3MultiFileWriter",
+	      "Writes frames to disk into a sequence of files. Once a file exceeds "
+	      "the number of bytes specified in size_limit, it will start a new file. "
+	      "Files are named based on filename. If passed a string for filename "
+	      "with a printf-style specifier, that specifier will be replaced by a "
+	      "zero-indexed sequence number. For example, outfile-%03u.g3.gz would "
+	      "produce a sequence of files named outfile-000.g3.gz, outfile-001.g3.gz, "
+	      "etc. Alternatively, you can pass a callable that is passed the first "
+	      "frame in the new file and the sequence number and returns a path to "
+	      "the new file. Any frames besides Timepoint and Scan frames have the "
+	      "most recent frame of each type prepended to all new files.\n\n"
+	      "More complex behavior can be obtained with the optional divide_on "
+	      "argument. This can be an iterable of frame types (e.g. "
+	      "[core.G3FrameType.Observation]) or a callable. In the iterable case, "
+	      "the presence of any frame with a type in the list will cause the "
+	      "creation of a new file even if the file size threshold has not yet "
+	      "been met. This is useful to create files based on, for example, "
+	      "observation boundaries. For more flexibility, you can also pass a "
+	      "python callable as divide_on. This callable will be passed each "
+	      "frame in turn. If it returns True (or something with positive "
+	      "truth-value), a new file will be started at that frame.",
+	init<object, size_t, optional<object> >((arg("filename"),
+	    arg("size_limit"), arg("divide_on")=object())))
+	.def_readonly("current_file", &G3MultiFileWriter::CurrentFile)
+	.def_readonly("__g3module__", true)
+	;
+}

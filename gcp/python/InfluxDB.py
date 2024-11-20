@@ -1,8 +1,8 @@
 import numpy as np
 import re
 import datetime as dt
-from spt3g import core
-from spt3g.core import G3Units as U
+from .. import core
+from ..core import G3Units as U
 from . import ARCExtractor
 
 def build_field_list(fr):
@@ -392,6 +392,9 @@ def WriteDB(fr, client, fields=None):
             except Exception as e:
                 core.log_error("Error converting time: {}".format(str(e)), unit="InfluxDB")
                 continue
+        # Avoid out-of-range errors in parsing time
+        # time < 0 occurs when, e.g., the SCU loses the clock (e.g. during a brownout)
+        time[time < 0] = 0
         if dat is None:
             core.log_warn('{} dat is None'.format(f), unit='InfluxDB')
             continue

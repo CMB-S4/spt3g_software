@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include <boost/iostreams/filtering_stream.hpp>
+#include <dataio.h>
 
 #include <G3Module.h>
 
@@ -23,7 +23,7 @@ private:
 	bool prefix_file_;
 	std::string cur_file_;
 	std::deque<std::string> filename_;
-	boost::iostreams::filtering_istream stream_;
+	g3_istream stream_;
 	int n_frames_to_read_;
 	int n_frames_read_;
 	int n_frames_cur_;

@@ -2,19 +2,13 @@
 #include <dataio.h>
 #include <G3Reader.h>
 
-#include <boost/filesystem.hpp>
-
 G3Reader::G3Reader(std::string filename, int n_frames_to_read,
     float timeout, bool track_filename) :
     prefix_file_(false), n_frames_to_read_(n_frames_to_read),
     n_frames_read_(0), n_frames_cur_(0), timeout_(timeout),
     track_filename_(track_filename)
 {
-	boost::filesystem::path fpath(filename);
-	if (filename.find("://") == std::string::npos &&
-	   (!boost::filesystem::exists(fpath) ||
-	    !boost::filesystem::is_regular_file(fpath)))
-		log_fatal("Could not find file %s", filename.c_str());
+	g3_check_input_path(filename);
 	StartFile(filename);
 }
 
@@ -28,11 +22,7 @@ G3Reader::G3Reader(std::vector<std::string> filename, int n_frames_to_read,
 		log_fatal("Empty file list provided to G3Reader");
 
 	for (auto i = filename.begin(); i != filename.end(); i++){
-		boost::filesystem::path fpath(*i);
-		if (i->find("://") == std::string::npos &&
-		   (!boost::filesystem::exists(fpath) ||
-		    !boost::filesystem::is_regular_file(fpath)))
-			log_fatal("Could not find file %s", i->c_str());
+		g3_check_input_path(*i);
 		filename_.push_back(*i);
 	}
 	StartFile(filename_.front());
@@ -110,11 +100,15 @@ void G3Reader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 }
 
 off_t G3Reader::Seek(off_t offset) {
-	return boost::iostreams::seek(stream_, offset, std::ios_base::beg);
+	try {
+		return g3_istream_seek(stream_, offset);
+	} catch (...) {
+		log_fatal("Cannot seek %s; stream closed at EOF.", cur_file_.c_str());
+	}
 }
 
 off_t G3Reader::Tell() {
-	return boost::iostreams::seek(stream_, 0, std::ios_base::cur);
+	return g3_istream_tell(stream_);
 }
 
 PYBINDINGS("core") {
@@ -138,8 +132,11 @@ PYBINDINGS("core") {
 	    arg("n_frames_to_read")=0,arg("timeout")=-1.,arg("track_filename")=false)))
 	.def(init<std::vector<std::string>, int, float, bool>((arg("filename"),
 	    arg("n_frames_to_read")=0, arg("timeout")=-1.,arg("track_filename")=false)))
-	.def("tell", &G3Reader::Tell)
-	.def("seek", &G3Reader::Seek)
+	.def("tell", &G3Reader::Tell,
+	    "Return the current byte offset from start of stream.")
+	.def("seek", &G3Reader::Seek,
+	    "Position the stream read pointer at specific byte offset. "
+	    "Note that once EOF is reached, seek does not work anymore.")
 	.def_readonly("__g3module__", true)
 	;
 }

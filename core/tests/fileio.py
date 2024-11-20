@@ -50,8 +50,8 @@ pipe.Run()
 assert n == 10, 'Wrong number of frames read (%d should be %d)' % (n, 10)
 
 # Skip empty files
-wr = core.G3Writer("empty.g3")
-del wr
+with core.G3Writer("empty.g3") as wr:
+    pass
 n = 0
 pipe = core.G3Pipeline()
 pipe.Add(core.G3Reader, filename=["empty.g3", "test.g3", "empty.g3"], track_filename=True)
@@ -113,3 +113,19 @@ pipe.Add(core.Dump)
 pipe.Run()
 
 assert cached.pos is None, "Missing wiring frame"
+
+# check EOF handling
+while cached.reader(None):
+    pass
+
+# can seek to EOF if at EOF
+pos = cached.reader.tell()
+cached.reader.seek(pos)
+
+# can't seek backward once at EOF
+try:
+    cached.reader.seek(0)
+except:
+    pass
+else:
+    assert False, "Expected RuntimeError seeking back from EOF"

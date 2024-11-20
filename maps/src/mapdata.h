@@ -2,6 +2,7 @@
 
 #include <cereal/types/vector.hpp>
 #include <cereal/types/utility.hpp>
+#include <serialization.h>
 
 class DenseMapData;
 
@@ -37,8 +38,8 @@ public:
 		if (x < offset_ || x >= offset_ + data_.size())
 			return 0;
 		const data_element &column = data_[x-offset_];
-		if (y < column.first ||
-		    y >= column.first + column.second.size())
+		if (y < (size_t) column.first ||
+		    y >= (size_t) column.first + column.second.size())
 			return 0;
 		return column.second[y-column.first];
 	}
@@ -65,11 +66,11 @@ public:
 		if (column.second.size() == 0) {
 			column.first = y;
 			column.second.resize(1, T(0));
-		} else if (y < column.first) {
+		} else if (y < (size_t) column.first) {
 			column.second.insert(column.second.begin(),
 			    column.first-y, T(0));
 			column.first = y;
-		} else if (y >= column.first + column.second.size()) {
+		} else if (y >= (size_t) column.first + column.second.size()) {
 			column.second.resize(y - column.first + 1, T(0));
 		}
 		return column.second[y - column.first];
@@ -114,6 +115,7 @@ public:
 
 	template <class A> void serialize(A &ar, unsigned v) {
 		using namespace cereal;
+		G3_CHECK_VERSION(v);
 		ar & make_nvp("xlen", xlen_);
 		ar & make_nvp("ylen", ylen_);
 		ar & make_nvp("offset", offset_);
@@ -242,6 +244,7 @@ public:
 
 	template <class A> void serialize(A &ar, unsigned v) {
 		using namespace cereal;
+		G3_CHECK_VERSION(v);
 		ar & make_nvp("xlen", xlen_);
 		ar & make_nvp("ylen", ylen_);
 		ar & make_nvp("data", data_);

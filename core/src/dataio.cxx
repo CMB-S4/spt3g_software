@@ -1,15 +1,14 @@
 #include <G3Logging.h>
 #include <dataio.h>
 
-#include <boost/algorithm/string.hpp>
-#include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 #ifdef BZIP2_FOUND
 #include <boost/iostreams/filter/bzip2.hpp>
 #endif
 #include <boost/iostreams/device/file.hpp>
-#include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
+#include <boost/iostreams/device/array.hpp>
+#include <boost/iostreams/device/back_inserter.hpp>
 #include <boost/filesystem.hpp>
 
 #include <sys/types.h>
@@ -18,14 +17,15 @@
 #include <netdb.h>
 #include <stdlib.h>
 
+#include "counter64.hpp"
+
 int
-g3_istream_from_path(boost::iostreams::filtering_istream &stream,
-    const std::string &path, float timeout)
+g3_istream_from_path(g3_istream &stream, const std::string &path, float timeout)
 {
 	stream.reset();
-	if (boost::algorithm::ends_with(path, ".gz"))
+	if (path.size() > 3 && !path.compare(path.size() - 3, 3, ".gz"))
 		stream.push(boost::iostreams::gzip_decompressor());
-	if (boost::algorithm::ends_with(path, ".bz2")) {
+	if (path.size() > 4 && !path.compare(path.size() - 4, 4, ".bz2")) {
 #ifdef BZIP2_FOUND
 		stream.push(boost::iostreams::bzip2_decompressor());
 #else
@@ -44,7 +44,7 @@ g3_istream_from_path(boost::iostreams::filtering_istream &stream,
 		//   and read until EOF
 
 		std::string host = path.substr(path.find("://") + 3);
-		if (host.find(":") == -1)
+		if (host.find(":") == host.npos)
 			log_fatal("Could not open URL %s: unspecified port",
 			    path.c_str());
 		std::string port = host.substr(host.find(":") + 1);
@@ -151,4 +151,96 @@ g3_istream_from_path(boost::iostreams::filtering_istream &stream,
 	}
 
 	return fd;
+}
+
+off_t
+g3_istream_seek(g3_istream &stream, off_t offset)
+{
+	if (stream.peek() == EOF && offset != g3_istream_tell(stream))
+		log_fatal("Cannot seek stream, closed at EOF.");
+	return boost::iostreams::seek(stream, offset, std::ios_base::beg);
+}
+
+off_t
+g3_istream_tell(g3_istream &stream)
+{
+	return boost::iostreams::seek(stream, 0, std::ios_base::cur);
+}
+
+void
+g3_istream_from_buffer(g3_istream &stream, const char *buf, size_t len)
+{
+	stream.reset();
+	stream.push(boost::iostreams::array_source(buf, len));
+}
+
+void
+g3_ostream_to_path(g3_ostream &stream, const std::string &path,
+    bool append, bool counter)
+{
+	stream.reset();
+	if (path.size() > 3 && !path.compare(path.size() - 3, 3, ".gz") && !append)
+		stream.push(boost::iostreams::gzip_compressor());
+	if (path.size() > 4 && !path.compare(path.size() - 4, 4, ".bz2") && !append) {
+#ifdef BZIP2_FOUND
+		stream.push(boost::iostreams::bzip2_compressor());
+#else
+		log_fatal("Boost not compiled with bzip2 support.");
+#endif
+	}
+
+	if (counter)
+		stream.push(boost::iostreams::counter64());
+	std::ios_base::openmode mode = std::ios::binary;
+	if (append)
+		mode |= std::ios::app;
+	stream.push(boost::iostreams::file_sink(path, mode));
+}
+
+size_t
+g3_ostream_count(g3_ostream &stream)
+{
+	boost::iostreams::counter64 *counter =
+	    stream.component<boost::iostreams::counter64>(
+	    stream.size() - 2);
+	if (!counter)
+		log_fatal("Could not get stream counter");
+
+	return counter->characters();
+}
+
+void
+g3_ostream_to_buffer(g3_ostream &stream,
+    std::vector<char> &buf)
+{
+	stream.reset();
+	stream.push(boost::iostreams::back_inserter(buf));
+}
+
+void
+g3_check_input_path(const std::string &path)
+{
+	if (path.find("://") != path.npos)
+		return;
+
+	boost::filesystem::path fpath(path);
+	if (!boost::filesystem::exists(fpath) ||
+	    !boost::filesystem::is_regular_file(fpath))
+		log_fatal("Could not find file %s", path.c_str());
+}
+
+void
+g3_check_output_path(const std::string &path)
+{
+	boost::filesystem::path fpath(path);
+
+	if (fpath.empty())
+		log_fatal("Empty file path");
+
+	if (!fpath.has_parent_path())
+		return;
+
+	if (!boost::filesystem::exists(fpath.parent_path()))
+		log_fatal("Parent path does not exist: %s",
+		    fpath.parent_path().string().c_str());
 }

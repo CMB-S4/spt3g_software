@@ -1,5 +1,5 @@
 import struct, socket, errno, numpy, time, threading
-from spt3g import core, dfmux
+from .. import core, dfmux
 
 
 class PagerWatchdog(object):
@@ -105,7 +105,10 @@ class DAQWatchdog(PagerWatchdog):
         super(DAQWatchdog, self).__init__('DAQ', interval=interval, sim=sim)
 
         self.last_missing = None
+        self.boards_missing = 0
+        self.last_log_boards = None
         self.calibrator = calibrator
+        self.last_log_cal = None
 
     def data_valid(self, frame):
         """
@@ -124,33 +127,52 @@ class DAQWatchdog(PagerWatchdog):
             return False
 
         now = time.time()
+        retval = True
 
         # only ping if all expected modules are present
         data = frame['DfMux']
-        nmods_expected = 8 * len(data.keys())
-        nmods = sum([v.nmodules for v in data.values()])
-        if nmods < nmods_expected:
-            core.log_error(
-                "Missing {} modules in DAQ data stream".format(nmods_expected - nmods),
-                unit=self.unit,
-            )
+        boards_expected = len(data.keys())
+        boards_complete = sum([v.nmodules > 0 and v.Complete() for v in data.values()])
+        boards_missing = boards_expected - boards_complete
+        if boards_missing:
+            if not self.last_log_boards or boards_missing != self.boards_missing:
+                # log loss or change in missing count
+                core.log_error(
+                    "Missing data from {} boards in DAQ data stream".format(boards_missing),
+                    unit=self.unit,
+                )
+                self.last_log_boards = now
+                self.boards_missing = boards_missing
             self.last_missing = now
-            return False
+            retval = False
+        elif self.last_log_boards and now - self.last_missing > 10:
+            # log recovery
+            core.log_notice("All boards recovered in DAQ data stream", unit=self.unit)
+            self.last_log_boards = None
 
         # only ping if the calibrator sync signal is present
         if self.calibrator and 'CalibratorOn' not in frame:
-            core.log_error(
-                "Missing calibrator signal in DAQ data stream",
-                unit=self.unit,
-            )
+            if not self.last_log_cal:
+                # log loss
+                core.log_error(
+                    "Missing calibrator signal in DAQ data stream",
+                    unit=self.unit,
+                )
+                self.last_log_cal = now
             self.last_missing = now
-            return False
+            retval = False
+        elif self.calibrator and self.last_log_cal and now - self.last_missing > 10:
+            # log recovery
+            core.log_notice(
+                "Calibrator signal recovered in DAQ data stream", unit=self.unit
+            )
+            self.last_log_cal = None
 
         # only ping if normal data acquisition has been going for a bit
         if self.last_missing and now - self.last_missing < 10:
-            return False
+            retval = False
 
-        return True
+        return retval
 
     def __call__(self, frame):
         self.run(frame)
@@ -381,8 +403,15 @@ class GCPBoloDataTee(object):
             d = self.data[sec]
             for b in self.bololist:
                 w = self.wmap[b]
+                board = frame['DfMux'][w.board_serial]
+                if board.nblocks > 1:
+                    mod_idx = w.module * board.nblocks + w.channel // board.nchannels
+                    chan_idx = w.channel % board.nchannels
+                else:
+                    mod_idx = w.module
+                    chan_idx = w.channel
                 try:
-                    d[b].append(frame['DfMux'][w.board_serial][w.module][w.channel])
+                    d[b].append(board[mod_idx][chan_idx])
                 except KeyError:
                     d[b].append(-1)
             if 'DataOK' in frame:

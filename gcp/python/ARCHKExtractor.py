@@ -1,5 +1,5 @@
 import numpy
-from spt3g import core, dfmux
+from .. import core, dfmux
 
 @core.indexmod
 class UnpackSPTpolHKData(object):

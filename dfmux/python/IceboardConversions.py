@@ -17,7 +17,6 @@ import numpy as np
 import json
 import functools
 import os
-from scipy import interpolate
 
 # Figure out pydfmux directory and names and fine the json file containing
 # the frequency dependent transfer function
@@ -54,7 +53,6 @@ def frequency_correction(frequency, gain, target='nuller', custom_TF=None):
     float
         fractional correction to the transfer function at the provided frequency"""
 
-
     try: ## Assume frequency is an iterable
         warn = max(frequency)>9e6
     except TypeError: ## Only given one number
@@ -72,6 +70,8 @@ def frequency_correction(frequency, gain, target='nuller', custom_TF=None):
         TFDicts[custom_TF] = tf_model
 
     if 'type' in tf_model and tf_model['type'] == 'spline_interpolation':
+        from scipy import interpolate
+
         tf_funct = lambda x: interpolate.splev(x, tf_model[target][str(gain)])
     else:
         tf_funct = functools.partial(np.polyval, tf_model['Gain_{0}'.format(int(gain))][target])

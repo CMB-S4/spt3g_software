@@ -216,9 +216,7 @@ namespace scitbx { namespace boost_python { namespace container_conversions {
         }
         if (!py_elem_hdl.get()) break; // end of iteration
         boost::python::object py_elem_obj(py_elem_hdl);
-        boost::python::extract<container_element_type>
-          elem_proxy(py_elem_obj);
-        if (!elem_proxy.check()) return false;
+        if (!boost::python::extract<container_element_type>(py_elem_obj).check()) return false;
         if (is_range) break; // in a range all elements are of the same type
       }
       return true;
@@ -243,6 +241,10 @@ namespace scitbx { namespace boost_python { namespace container_conversions {
         if (!py_elem_hdl.get()) break; // end of iteration
         boost::python::object py_elem_obj(py_elem_hdl);
         boost::python::extract<container_element_type> elem_proxy(py_elem_obj);
+        if (!elem_proxy.check()) {
+          PyErr_SetString(PyExc_RuntimeError, "Invalid element");
+          boost::python::throw_error_already_set();
+        }
         ConversionPolicy::set_value(result, i, elem_proxy());
       }
       ConversionPolicy::assert_size(boost::type<ContainerType>(), i);
