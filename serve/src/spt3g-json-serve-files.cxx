@@ -42,8 +42,7 @@ static bool verbose = false;
 //mutex for cout synchronization on worker threads
 static std::mutex cout_mutex;
 
-static const char * VALID_G3_EXTENSIONS[] = { ".g3", ".g3.gz", ".g3.bz2" };
-const int N_VALID_G3_EXTENSIONS = sizeof(VALID_G3_EXTENSIONS)/sizeof(*VALID_G3_EXTENSIONS); 
+static const std::vector<std::string> VALID_G3_EXTENSIONS = { ".g3", ".g3.gz", ".g3.bz2" };
 
 static void
 usage()
@@ -321,7 +320,7 @@ static bool
 valid_g3_ext(const std::string & filename)
 {
 	bool valid = false;
-	for (const char * ext : VALID_G3_EXTENSIONS) {
+	for (const auto &ext : VALID_G3_EXTENSIONS) {
 		if (boost::algorithm::ends_with(filename, ext))
 			valid = true;
 	}
@@ -536,7 +535,7 @@ int main(int nargs, char **argv)
 
 
 	//handler for something ending with .g3
-	for (const char * ext : VALID_G3_EXTENSIONS) {
+	for (const auto &ext : VALID_G3_EXTENSIONS) {
 		// regex escape the extension
 		std::string escaped_ext = ext;
 		boost::replace_all(escaped_ext,".", "\\.");
