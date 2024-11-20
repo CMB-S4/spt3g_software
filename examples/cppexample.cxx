@@ -43,6 +43,7 @@ main(int argc, const char **argv)
 		pipe.Add(G3ModulePtr(new G3Writer(argv[2])));
 
 	pipe.Run();
-
+	
 	return 0;
 }
+
