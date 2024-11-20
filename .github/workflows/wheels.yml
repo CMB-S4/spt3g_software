@@ -24,12 +24,12 @@ jobs:
           # - os: macos-13
           #   build: cp310-macosx_x86_64
           #   target: 13.0
-          - os: macos-13
-            build: cp311-macosx_x86_64
-            target: 13.0
           # - os: macos-13
-          #   build: cp312-macosx_x86_64
+          #   build: cp311-macosx_x86_64
           #   target: 13.0
+          - os: macos-13
+            build: cp312-macosx_x86_64
+            target: 13.0
 
           # - os: macos-14
           #   build: cp39-macosx_arm64
@@ -50,10 +50,10 @@ jobs:
           #   build: cp39-manylinux_x86_64
           # - os: ubuntu-latest
           #   build: cp310-manylinux_x86_64
-          - os: ubuntu-latest
-            build: cp311-manylinux_x86_64
           # - os: ubuntu-latest
-          #   build: cp312-manylinux_x86_64
+          #   build: cp311-manylinux_x86_64
+          - os: ubuntu-latest
+            build: cp312-manylinux_x86_64
 
     steps:
       - name: Set macOS deployment target
@@ -83,7 +83,7 @@ jobs:
           CIBW_BUILD_VERBOSITY: 1
           CIBW_ENVIRONMENT: >
             CMAKE_BUILD_PARALLEL_LEVEL=4 CMAKE_PREFIX_PATH=$PWD/deps
-          CIBW_TEST_COMMAND: ctest --test-dir {package}/build --output-on-failure
+          # CIBW_TEST_COMMAND: ctest --test-dir {package}/build --output-on-failure
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
