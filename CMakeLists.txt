@@ -7,9 +7,10 @@ endif()
 project(spt3g)
 enable_testing()
 
-if(NOT CMAKE_BUILD_TYPE)
+if(DEFINED ENV{CIBUILDWHEEL} OR NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel" FORCE)
-endif(NOT CMAKE_BUILD_TYPE)
+endif()
+message(STATUS "Configuring build type: ${CMAKE_BUILD_TYPE}")
 
 # Use cmake directory for packages
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} $ENV{SITE_CMAKE_DIR} "${CMAKE_SOURCE_DIR}/cmake")
