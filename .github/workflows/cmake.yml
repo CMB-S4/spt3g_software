@@ -43,7 +43,7 @@ jobs:
     - name: Install macOS Dependencies
       if: runner.environment == 'github-hosted' && runner.os == 'macOS'
       run: |
-        brew install bzip2 boost boost-python3 flac netcdf
+        brew install --overwrite bzip2 boost boost-python3 flac netcdf
         python3.12 -m pip install numpy scipy matplotlib astropy healpy sphinx --break-system-packages
 
     - name: Create Build Environment
