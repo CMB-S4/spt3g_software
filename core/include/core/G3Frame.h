@@ -77,7 +77,7 @@ public:
 	//   log_fatal(), printing an informative error and throwing an
 	//   exception.
 	G3FrameObjectConstPtr operator [](const std::string &) const;
-	template<typename T> boost::shared_ptr<const T> Get(
+	template<typename T> std::shared_ptr<const T> Get(
 	    const std::string &, bool exception_on_error = true) const;
 	void Put(const std::string &name, G3FrameObjectConstPtr);
 	void Delete(const std::string &);
@@ -127,7 +127,7 @@ public:
 private:
 	struct blob_container {
 		G3FrameObjectConstPtr frameobject;
-		boost::shared_ptr<std::vector<char> > blob;
+		std::shared_ptr<std::vector<char> > blob;
 	};
 	static void blob_decode(struct blob_container &blob);
 	static void blob_encode(struct blob_container &blob);
@@ -141,11 +141,11 @@ private:
 G3_POINTERS(G3Frame);
 
 template <typename T>
-boost::shared_ptr<const T> G3Frame::Get(const std::string &name,
+std::shared_ptr<const T> G3Frame::Get(const std::string &name,
   bool exception_on_error) const
 {
-	boost::shared_ptr<const T> ret =
-	    boost::dynamic_pointer_cast<const T>((*this)[name]);
+	std::shared_ptr<const T> ret =
+	    std::dynamic_pointer_cast<const T>((*this)[name]);
 
 	if (exception_on_error && !ret)
 		log_fatal("Requesting key %s %s", name.c_str(),
@@ -157,7 +157,7 @@ boost::shared_ptr<const T> G3Frame::Get(const std::string &name,
 template <typename T>
 bool G3Frame::Has(const std::string &name) const
 {
-	return !!boost::dynamic_pointer_cast<const T>((*this)[name]);
+	return !!std::dynamic_pointer_cast<const T>((*this)[name]);
 }
 
 std::ostream& operator<<(std::ostream& os, const G3FrameObject &);

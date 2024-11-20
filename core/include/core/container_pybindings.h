@@ -21,7 +21,7 @@ register_g3map(std::string name, const char *docstring)
 
 	class_<T, bases<G3FrameObject,
 	  std::map<typename T::key_type, typename T::mapped_type> >,
-	  boost::shared_ptr<T> >(name.c_str(), docstring)
+	  std::shared_ptr<T> >(name.c_str(), docstring)
 	    .def(init<const T &>())
 	    .def(std_map_indexing_suite<T, proxy>())
 	    .def_pickle(g3frameobject_picklesuite<T>())
@@ -30,11 +30,11 @@ register_g3map(std::string name, const char *docstring)
 }
 
 template <typename T>
-boost::python::class_<G3Vector<T>, boost::python::bases<G3FrameObject, std::vector<T> >, boost::shared_ptr<G3Vector<T> > >
+boost::python::class_<G3Vector<T>, boost::python::bases<G3FrameObject, std::vector<T> >, std::shared_ptr<G3Vector<T> > >
 register_g3vector(std::string name, const char *docstring)
 {
 	using namespace boost::python;
-	auto cls = class_<G3Vector<T> , bases<G3FrameObject, std::vector<T> >, boost::shared_ptr<G3Vector<T> > >(name.c_str(), docstring) 
+	auto cls = class_<G3Vector<T> , bases<G3FrameObject, std::vector<T> >, std::shared_ptr<G3Vector<T> > >(name.c_str(), docstring) 
 	    .def("__init__", make_constructor(container_from_object<G3Vector<T> >))
 	    .def(vector_indexing_suite<G3Vector<T> , true>())
 	    .def_pickle(g3frameobject_picklesuite<G3Vector<T> >())

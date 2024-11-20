@@ -306,7 +306,7 @@ PYBINDINGS("dfmux")
 {
 	namespace bp = boost::python;
 
-	bp::class_<LegacyDfMuxCollector, boost::shared_ptr<LegacyDfMuxCollector>, boost::noncopyable>("LegacyDfMuxCollector", "Listener object that collects legacy network packets and decodes and forwards them to a DfMuxBuilder object for insertion into the data stream. Takes a builder object to which the data should be sent. If boards running in multicast code, also takes the address of the interface on which to listen and the multicast group address. Only works with DAN streamers.", bp::init<int, G3EventBuilderPtr, const char *, const char *>((bp::arg("port"), bp::arg("builder"), bp::arg("mcastlistenaddr")="", bp::arg("mcastgroupaddr")="")))
+	bp::class_<LegacyDfMuxCollector, std::shared_ptr<LegacyDfMuxCollector>, boost::noncopyable>("LegacyDfMuxCollector", "Listener object that collects legacy network packets and decodes and forwards them to a DfMuxBuilder object for insertion into the data stream. Takes a builder object to which the data should be sent. If boards running in multicast code, also takes the address of the interface on which to listen and the multicast group address. Only works with DAN streamers.", bp::init<int, G3EventBuilderPtr, const char *, const char *>((bp::arg("port"), bp::arg("builder"), bp::arg("mcastlistenaddr")="", bp::arg("mcastgroupaddr")="")))
 	    .def("Start", &LegacyDfMuxCollector::Start)
 	    .def("Stop", &LegacyDfMuxCollector::Stop)
 	;

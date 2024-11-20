@@ -196,14 +196,14 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		G3FramePtr out_frame(new G3Frame(G3Frame::Map));
 		out_frame->Put("Id", G3StringPtr(new G3String(output_id_)));
 		out_frame->Put("T",
-		    boost::dynamic_pointer_cast<G3FrameObject>(T_));
+		    std::dynamic_pointer_cast<G3FrameObject>(T_));
 		T_ = T_->Clone(false);
 
 		if (Q_) {
 			out_frame->Put("Q",
-			    boost::dynamic_pointer_cast<G3FrameObject>(Q_));
+			    std::dynamic_pointer_cast<G3FrameObject>(Q_));
 			out_frame->Put("U",
-			    boost::dynamic_pointer_cast<G3FrameObject>(U_));
+			    std::dynamic_pointer_cast<G3FrameObject>(U_));
 			Q_ = Q_->Clone(false);
 			U_ = U_->Clone(false);
 		}

@@ -72,18 +72,18 @@ GCPMuxDataDecoder::EmitWiringMap(G3FramePtr input)
 		    "SPT3G data?");
 
 	recv = input->Get<G3MapFrameObject>("receiver");
-	bolos = boost::dynamic_pointer_cast<G3MapFrameObject>(
+	bolos = std::dynamic_pointer_cast<G3MapFrameObject>(
 	    recv->at("bolometers"));
-	phys_id_reg = boost::dynamic_pointer_cast<G3VectorFrameObject>(
+	phys_id_reg = std::dynamic_pointer_cast<G3VectorFrameObject>(
 	    bolos->at("id"));
 	max_channel_count_ = 0;
 
 	// Get board indices in the boardValid array for later.
 	G3VectorFrameObjectConstPtr board_id;
-	board_id = boost::dynamic_pointer_cast<G3VectorFrameObject>(
+	board_id = std::dynamic_pointer_cast<G3VectorFrameObject>(
 	    bolos->at("board_id"));
 	for (size_t i = 0; i < board_id->size(); i++) {
-		int board_num = atoi(boost::dynamic_pointer_cast<G3String>
+		int board_num = atoi(std::dynamic_pointer_cast<G3String>
                     ((*board_id)[i])->value.c_str());
 		board_id_map_[board_num] = i;
 	}
@@ -100,7 +100,7 @@ GCPMuxDataDecoder::EmitWiringMap(G3FramePtr input)
 
 		for (auto i : *phys_id_reg) {
 			std::string id =
-			    boost::dynamic_pointer_cast<G3String>(i)->value;
+			    std::dynamic_pointer_cast<G3String>(i)->value;
 			if (cached_wiring_map_->find(id) ==
 			    cached_wiring_map_->end()) {
 				// Add a bogus channel as a sentinel for
@@ -126,9 +126,9 @@ GCPMuxDataDecoder::EmitWiringMap(G3FramePtr input)
 			    "information.");
 	}
 
-	dfml_addr = boost::dynamic_pointer_cast<G3VectorFrameObject>(
+	dfml_addr = std::dynamic_pointer_cast<G3VectorFrameObject>(
 	    bolos->at("dfml_addr"));
-	mbi_addr = boost::dynamic_pointer_cast<G3VectorFrameObject>(
+	mbi_addr = std::dynamic_pointer_cast<G3VectorFrameObject>(
 	    bolos->at("mbi_addr"));
 
 	g3_assert(dfml_addr->size() == mbi_addr->size());
@@ -145,7 +145,7 @@ GCPMuxDataDecoder::EmitWiringMap(G3FramePtr input)
 		channel_info.board_slot = -1;
 
 		// Parse channel ID (board_module_channel)
-		channel_path = boost::dynamic_pointer_cast<G3String>
+		channel_path = std::dynamic_pointer_cast<G3String>
                     ((*mbi_addr)[i])->value;
 
 		// Special-case the calibrator board
@@ -178,9 +178,9 @@ GCPMuxDataDecoder::EmitWiringMap(G3FramePtr input)
 		channel_info.board_ip = FAKE_BOARD_IP(channel_parts[0]);
 
 		// Get channel ID strings
-		phys_id = boost::dynamic_pointer_cast<G3String>
+		phys_id = std::dynamic_pointer_cast<G3String>
                     ((*phys_id_reg)[i])->value;
-		logical_id = boost::dynamic_pointer_cast<G3String>
+		logical_id = std::dynamic_pointer_cast<G3String>
                     ((*dfml_addr)[i])->value;
 		(*wiring)[logical_id] = channel_info;
 		(*phys_ids)[logical_id] = phys_id;
@@ -236,22 +236,22 @@ GCPMuxDataDecoder::Process(G3FramePtr frame, std::deque<G3FramePtr> &out_queue)
 	std::vector<G3VectorIntConstPtr> Icounts, Qcounts, valid_flag;
 
 	recv = frame->Get<G3MapFrameObject>("receiver");
-	bolos = boost::dynamic_pointer_cast<G3MapFrameObject>(
+	bolos = std::dynamic_pointer_cast<G3MapFrameObject>(
 	    recv->at("bolometers"));
 
-	times = boost::dynamic_pointer_cast<G3VectorFrameObject>(
+	times = std::dynamic_pointer_cast<G3VectorFrameObject>(
 	    bolos->at("utc"));
-	times = boost::dynamic_pointer_cast<G3VectorFrameObject>(
+	times = std::dynamic_pointer_cast<G3VectorFrameObject>(
 	    times->at(0));
-	samplesValid_wrap = boost::dynamic_pointer_cast<G3VectorFrameObject>(
+	samplesValid_wrap = std::dynamic_pointer_cast<G3VectorFrameObject>(
 	    bolos->at("samplesValid"));
-	samplesValid = boost::dynamic_pointer_cast<G3VectorInt>(
+	samplesValid = std::dynamic_pointer_cast<G3VectorInt>(
 	    samplesValid_wrap->at(0));
-	boardValid = boost::dynamic_pointer_cast<G3VectorFrameObject>(
+	boardValid = std::dynamic_pointer_cast<G3VectorFrameObject>(
 	    bolos->at("boardValid"));
-	adcI = boost::dynamic_pointer_cast<G3VectorFrameObject>(
+	adcI = std::dynamic_pointer_cast<G3VectorFrameObject>(
 	    bolos->at("adcCountsI"));
-	adcQ = boost::dynamic_pointer_cast<G3VectorFrameObject>(
+	adcQ = std::dynamic_pointer_cast<G3VectorFrameObject>(
 	    bolos->at("adcCountsQ"));
 
 	g3_assert(adcI->size() == adcQ->size());
@@ -259,9 +259,9 @@ GCPMuxDataDecoder::Process(G3FramePtr frame, std::deque<G3FramePtr> &out_queue)
 
 	// Reorganize data and do casts to make this easier to access
 	for (size_t i = 0; i < adcI->size(); i++) {
-		G3VectorIntConstPtr I = boost::dynamic_pointer_cast<G3VectorInt>
+		G3VectorIntConstPtr I = std::dynamic_pointer_cast<G3VectorInt>
 		    (adcI->at(i));
-		G3VectorIntConstPtr Q = boost::dynamic_pointer_cast<G3VectorInt>
+		G3VectorIntConstPtr Q = std::dynamic_pointer_cast<G3VectorInt>
 		    (adcQ->at(i));
 		Icounts.push_back(I);
 		Qcounts.push_back(Q);
@@ -270,7 +270,7 @@ GCPMuxDataDecoder::Process(G3FramePtr frame, std::deque<G3FramePtr> &out_queue)
 	g3_assert(boardValid->size() == board_id_map_.size());
 
 	for (size_t i = 0; i < boardValid->size(); i++) {
-		G3VectorIntConstPtr V = boost::dynamic_pointer_cast<G3VectorInt>
+		G3VectorIntConstPtr V = std::dynamic_pointer_cast<G3VectorInt>
 		    (boardValid->at(i));
 		valid_flag.push_back(V);
 	}
@@ -286,7 +286,7 @@ GCPMuxDataDecoder::Process(G3FramePtr frame, std::deque<G3FramePtr> &out_queue)
 
 		DfMuxMetaSamplePtr metasample(new DfMuxMetaSample);
 		G3DoublePtr calibrator(new G3Double(NAN));
-		G3TimeStamp timestamp = boost::dynamic_pointer_cast<G3Time>(
+		G3TimeStamp timestamp = std::dynamic_pointer_cast<G3Time>(
 		    times->at(i))->time;
 
 		for (size_t j = 0; j < channels_.size(); j++) {

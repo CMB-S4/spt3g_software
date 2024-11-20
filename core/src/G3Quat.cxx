@@ -808,13 +808,13 @@ quat_repr(const Quat &q)
 }
 }
 
-boost::shared_ptr<Quat>
+std::shared_ptr<Quat>
 quat_container_from_object(boost::python::object v)
 {
 	// There's a chance this is actually a copy operation, so try that first
 	bp::extract<Quat &> extv(v);
 	if (extv.check())
-		return boost::make_shared<Quat>(extv());
+		return std::make_shared<Quat>(extv());
 
 	Quat q;
 
@@ -842,7 +842,7 @@ quat_container_from_object(boost::python::object v)
 		goto slowpython;
 	}
 	PyBuffer_Release(&view);
-	return boost::make_shared<Quat>(q);
+	return std::make_shared<Quat>(q);
 
 #undef QELEM
 #undef QUATI
@@ -854,19 +854,19 @@ slowpython:
 	if (xv.size() != 4)
 		throw std::runtime_error("Invalid quat");
 
-	return boost::make_shared<Quat>(xv[0], xv[1], xv[2], xv[3]);
+	return std::make_shared<Quat>(xv[0], xv[1], xv[2], xv[3]);
 }
 
 template <typename T>
-boost::shared_ptr<T>
+std::shared_ptr<T>
 quat_vec_container_from_object(boost::python::object v)
 {
 	// There's a chance this is actually a copy operation, so try that first
 	bp::extract<T &> extv(v);
 	if (extv.check())
-		return boost::make_shared<T>(extv());
+		return std::make_shared<T>(extv());
 
-        boost::shared_ptr<T> x(new (T));
+        std::shared_ptr<T> x(new (T));
 	Py_buffer view;
 	if (PyObject_GetBuffer(v.ptr(), &view,
 	    PyBUF_FORMAT | PyBUF_STRIDES) == -1)
@@ -938,7 +938,7 @@ PYBINDINGS("core")
 	using namespace boost::python;
 
 	object q =
-	    class_<Quat, boost::shared_ptr<Quat> >("Quat",
+	    class_<Quat, std::shared_ptr<Quat> >("Quat",
 	      "Representation of a quaternion. Data in a,b,c,d.", init<>())
 	     .def(init<const Quat &>())
 	     .def(init<double, double, double, double>(

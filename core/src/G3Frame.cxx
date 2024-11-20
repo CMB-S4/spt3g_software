@@ -135,7 +135,7 @@ static std::string FrameObjectClassName(G3FrameObjectConstPtr obj)
 
 		try {
 			boost::python::object pyobj(
-			    boost::const_pointer_cast<G3FrameObject>(obj));
+			    std::const_pointer_cast<G3FrameObject>(obj));
 
 			return
 			    boost::python::extract<std::string>(
@@ -331,7 +331,7 @@ void G3Frame::load(T &is)
 
 		ar >> make_nvp("name", name);
 		crc = crc32c(crc, (const uint8_t *)name.c_str(), name.size());
-		blob.blob = boost::make_shared<std::vector<char> >();
+		blob.blob = std::make_shared<std::vector<char> >();
 		ar >> make_nvp("blob", *blob.blob);
 		crc = crc32c(crc, (const uint8_t *)&(*blob.blob)[0],
 		    blob.blob->size());
@@ -421,7 +421,7 @@ void G3Frame::blob_encode(struct blob_container &blob)
 		return;
 
 	// If no encoded frameobject, serialize it
-	blob.blob = boost::make_shared<std::vector<char> >();
+	blob.blob = std::make_shared<std::vector<char> >();
 	g3_ostream item_os;
 	g3_ostream_to_buffer(item_os, *blob.blob);
 	cereal::PortableBinaryOutputArchive item_ar(item_os);
@@ -513,31 +513,31 @@ static void g3frame_python_put(G3Frame &f, std::string name, bp::object obj)
 
 	bp::extract<bool> extbool(obj);
 	if (PyBool_Check(obj.ptr()) && extbool.check()) {
-		f.Put(name, boost::make_shared<G3Bool>(extbool()));
+		f.Put(name, std::make_shared<G3Bool>(extbool()));
 		return;
 	}
 
 	bp::extract<int64_t> extint(obj);
 	if (extint.check()) {
-		f.Put(name, boost::make_shared<G3Int>(extint()));
+		f.Put(name, std::make_shared<G3Int>(extint()));
 		return;
 	}
 
 	bp::extract<double> extdouble(obj);
 	if (extdouble.check()) {
-		f.Put(name, boost::make_shared<G3Double>(extdouble()));
+		f.Put(name, std::make_shared<G3Double>(extdouble()));
 		return;
 	}
 
 	bp::extract<Quat> extquat(obj);
 	if (extquat.check()) {
-		f.Put(name, boost::make_shared<G3Quat>(extquat()));
+		f.Put(name, std::make_shared<G3Quat>(extquat()));
 		return;
 	}
 
 	bp::extract<std::string> extstr(obj);
 	if (extstr.check())
-		f.Put(name, boost::make_shared<G3String>(extstr()));
+		f.Put(name, std::make_shared<G3String>(extstr()));
 	else {
 		PyErr_SetString(PyExc_TypeError, "Object is not a G3FrameObject derivative or a plain-old-data type");
 		bp::throw_error_already_set();
@@ -554,18 +554,18 @@ static bp::object g3frame_python_get(G3Frame &f, std::string name)
 		bp::throw_error_already_set();
 	}
 
-	if (!!boost::dynamic_pointer_cast<const G3Int>(element))
-		return bp::object(boost::dynamic_pointer_cast<const G3Int>(element)->value);
-	else if (!!boost::dynamic_pointer_cast<const G3Double>(element))
-		return bp::object(boost::dynamic_pointer_cast<const G3Double>(element)->value);
-	else if (!!boost::dynamic_pointer_cast<const G3String>(element))
-		return bp::object(boost::dynamic_pointer_cast<const G3String>(element)->value);
-	else if (!!boost::dynamic_pointer_cast<const G3Bool>(element))
-		return bp::object(boost::dynamic_pointer_cast<const G3Bool>(element)->value);
-	else if (!!boost::dynamic_pointer_cast<const G3Quat>(element))
-		return bp::object(boost::dynamic_pointer_cast<const G3Quat>(element)->value);
+	if (!!std::dynamic_pointer_cast<const G3Int>(element))
+		return bp::object(std::dynamic_pointer_cast<const G3Int>(element)->value);
+	else if (!!std::dynamic_pointer_cast<const G3Double>(element))
+		return bp::object(std::dynamic_pointer_cast<const G3Double>(element)->value);
+	else if (!!std::dynamic_pointer_cast<const G3String>(element))
+		return bp::object(std::dynamic_pointer_cast<const G3String>(element)->value);
+	else if (!!std::dynamic_pointer_cast<const G3Bool>(element))
+		return bp::object(std::dynamic_pointer_cast<const G3Bool>(element)->value);
+	else if (!!std::dynamic_pointer_cast<const G3Quat>(element))
+		return bp::object(std::dynamic_pointer_cast<const G3Quat>(element)->value);
 	else
-		return bp::object(boost::const_pointer_cast<G3FrameObject>(element));
+		return bp::object(std::const_pointer_cast<G3FrameObject>(element));
 }
 
 static std::string g3frame_str(const G3Frame &f)

@@ -316,7 +316,7 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 		// allow NaNs, unlike int32_ts, which we try to pull through
 		// the process to signal missing data.
 		float *data = new float[callback.outbuf->size()];
-		root_data_ref_ = boost::shared_ptr<float[]>(data);
+		root_data_ref_ = std::shared_ptr<float[]>(data);
 		data_type_ = TS_FLOAT;
 		len_ = callback.outbuf->size();
 		data_ = data;
@@ -358,7 +358,7 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 		case TS_FLOAT: {
 			std::vector<float> *data = new std::vector<float>();
 			ar & cereal::make_nvp("data", *data);
-			root_data_ref_ = boost::shared_ptr<std::vector<float> >(
+			root_data_ref_ = std::shared_ptr<std::vector<float> >(
 			    data);
 			len_ = data->size();
 			data_ = &(*data)[0];
@@ -367,7 +367,7 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 		case TS_INT32: {
 			std::vector<int32_t> *data = new std::vector<int32_t>();
 			ar & cereal::make_nvp("data", *data);
-			root_data_ref_ = boost::shared_ptr<
+			root_data_ref_ = std::shared_ptr<
 			    std::vector<int32_t> >(data);
 			len_ = data->size();
 			data_ = &(*data)[0];
@@ -376,7 +376,7 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 		case TS_INT64: {
 			std::vector<int64_t> *data = new std::vector<int64_t>();
 			ar & cereal::make_nvp("data", *data);
-			root_data_ref_ = boost::shared_ptr<
+			root_data_ref_ = std::shared_ptr<
 			    std::vector<int64_t> >(data);
 			len_ = data->size();
 			data_ = &(*data)[0];
@@ -410,7 +410,7 @@ G3Timestream::G3Timestream(const G3Timestream &r) :
 			__builtin_unreachable(); // Handled above
 		case TS_FLOAT: {
 			std::vector<float> *data = new std::vector<float>(len_);
-			root_data_ref_ = boost::shared_ptr<std::vector<float> >(
+			root_data_ref_ = std::shared_ptr<std::vector<float> >(
 			    data);
 			data_ = &(*data)[0];
 			element = 4;
@@ -419,7 +419,7 @@ G3Timestream::G3Timestream(const G3Timestream &r) :
 		case TS_INT32: {
 			std::vector<int32_t> *data =
 			    new std::vector<int32_t>(len_);
-			root_data_ref_ = boost::shared_ptr<
+			root_data_ref_ = std::shared_ptr<
 			    std::vector<int32_t> >(data);
 			data_ = &(*data)[0];
 			element = 4;
@@ -428,7 +428,7 @@ G3Timestream::G3Timestream(const G3Timestream &r) :
 		case TS_INT64: {
 			std::vector<int64_t> *data =
 			    new std::vector<int64_t>(len_);
-			root_data_ref_ = boost::shared_ptr<
+			root_data_ref_ = std::shared_ptr<
 			    std::vector<int64_t> >(data);
 			data_ = &(*data)[0];
 			element = 8;
@@ -791,7 +791,7 @@ void G3TimestreamMap::Compactify()
 {
 	// Check if already compacted
 	bool is_compact = true;
-	boost::shared_ptr<void> first_root;
+	std::shared_ptr<void> first_root;
 	void *expected_base = NULL;
 	for (auto & i : *this) {
 		// Not compact if any using internal storage
@@ -843,14 +843,14 @@ void G3TimestreamMap::Compactify()
 	}
 
 	// Now let's do the compactification.
-	boost::shared_ptr<void> root;
+	std::shared_ptr<void> root;
 	void *base_ptr;
 	size_t row_bytes;
 	switch (begin()->second->data_type_) {
 	case G3Timestream::TS_DOUBLE: {
 		std::vector<double> *data = new std::vector<double>(size() *
 		    begin()->second->size());
-		root = boost::shared_ptr<std::vector<double> >(data);
+		root = std::shared_ptr<std::vector<double> >(data);
 		base_ptr = &(*data)[0];
 		row_bytes = begin()->second->size() * sizeof((*data)[0]);
 		break;
@@ -858,7 +858,7 @@ void G3TimestreamMap::Compactify()
 	case G3Timestream::TS_FLOAT: {
 		std::vector<float> *data = new std::vector<float>(size() *
 		    begin()->second->size());
-		root = boost::shared_ptr<std::vector<float> >(data);
+		root = std::shared_ptr<std::vector<float> >(data);
 		base_ptr = &(*data)[0];
 		row_bytes = begin()->second->size() * sizeof((*data)[0]);
 		break;
@@ -866,7 +866,7 @@ void G3TimestreamMap::Compactify()
 	case G3Timestream::TS_INT32: {
 		std::vector<int32_t> *data = new std::vector<int32_t>(size() *
 		    begin()->second->size());
-		root = boost::shared_ptr<std::vector<int32_t> >(data);
+		root = std::shared_ptr<std::vector<int32_t> >(data);
 		base_ptr = &(*data)[0];
 		row_bytes = begin()->second->size() * sizeof((*data)[0]);
 		break;
@@ -874,7 +874,7 @@ void G3TimestreamMap::Compactify()
 	case G3Timestream::TS_INT64: {
 		std::vector<int64_t> *data = new std::vector<int64_t>(size() *
 		    begin()->second->size());
-		root = boost::shared_ptr<std::vector<int64_t> >(data);
+		root = std::shared_ptr<std::vector<int64_t> >(data);
 		base_ptr = &(*data)[0];
 		row_bytes = begin()->second->size() * sizeof((*data)[0]);
 		break;
@@ -1025,7 +1025,7 @@ timestream_from_iterable(boost::python::object v,
 			delete x->buffer_; x->buffer_ = NULL;
 			x->data_type_ = G3Timestream::TS_FLOAT;
 			float *data = new float[view.len/sizeof(float)];
-			x->root_data_ref_ = boost::shared_ptr<float[]>(data);
+			x->root_data_ref_ = std::shared_ptr<float[]>(data);
 			x->data_ = data;
 			x->len_ = view.len/sizeof(float);
 			memcpy(data, view.buf, view.len);
@@ -1038,7 +1038,7 @@ timestream_from_iterable(boost::python::object v,
 			delete x->buffer_; x->buffer_ = NULL;
 			x->data_type_ = G3Timestream::TS_INT32;
 			int32_t *data = new int32_t[view.len/sizeof(int32_t)];
-			x->root_data_ref_ = boost::shared_ptr<int32_t[]>(data);
+			x->root_data_ref_ = std::shared_ptr<int32_t[]>(data);
 			x->data_ = data;
 			x->len_ = view.len/sizeof(int32_t);
 			memcpy(data, view.buf, view.len);
@@ -1052,7 +1052,7 @@ timestream_from_iterable(boost::python::object v,
 			delete x->buffer_; x->buffer_ = NULL;
 			x->data_type_ = G3Timestream::TS_INT64;
 			int64_t *data = new int64_t[view.len/sizeof(int64_t)];
-			x->root_data_ref_ = boost::shared_ptr<int64_t[]>(data);
+			x->root_data_ref_ = std::shared_ptr<int64_t[]>(data);
 			x->data_ = data;
 			x->len_ = view.len/sizeof(int64_t);
 			memcpy(data, view.buf, view.len);
@@ -1090,7 +1090,7 @@ G3TimestreamMap_from_numpy(std::vector<std::string> keys,
 {
 	G3TimestreamMapPtr x(new G3TimestreamMap);
 
-	boost::shared_ptr<PyBufferOwner> v;
+	std::shared_ptr<PyBufferOwner> v;
 
 	{
 	Py_buffer view;
@@ -1113,7 +1113,7 @@ G3TimestreamMap_from_numpy(std::vector<std::string> keys,
 	// Set up an auto-deleter for view when the function exits now
 	// that it has been allocated successfully. This is a shared pointer
 	// so that it ownership can be moved to the timestreams if needed.
-	v = boost::make_shared<PyBufferOwner>(view);
+	v = std::make_shared<PyBufferOwner>(view);
 	}
 
 	if (keys.size() != (size_t)v->v.shape[0]) {
@@ -1155,12 +1155,12 @@ G3TimestreamMap_from_numpy(std::vector<std::string> keys,
 	}
 
 	uint8_t *buf;
-	boost::shared_ptr<void> data_ref;
+	std::shared_ptr<void> data_ref;
 	size_t len = v->v.shape[1];
 	ptrdiff_t step = v->v.strides[0];
 	if (copy_data) {
 		buf = new uint8_t[v->v.len];
-		data_ref = boost::shared_ptr<uint8_t[]>(buf);
+		data_ref = std::shared_ptr<uint8_t[]>(buf);
 		memcpy(buf, v->v.buf, v->v.len);
 		v.reset(); // Release Python Buffer view
 	} else {

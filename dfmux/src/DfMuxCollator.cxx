@@ -109,7 +109,7 @@ void DfMuxCollator::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 			// here.
 			if ((*stash_.begin())->Has<G3Double>(*key))
 				extra_data[*key] =
-				    boost::make_shared<G3Timestream>(
+				    std::make_shared<G3Timestream>(
 				    stash_.size(), NAN);
 		}
 	}

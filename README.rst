@@ -29,7 +29,7 @@ This depends on Boost and cmake, as well as the usual Python packages. Some addi
 Minimum versions:
 
 - GCC >= 5.0 or clang >= 3.4
-- Boost >= 1.48
+- Boost >= 1.63
 - cmake >= 3.12
 - Python >= 2.7 (although pre-Python-3 support is best-effort)
 

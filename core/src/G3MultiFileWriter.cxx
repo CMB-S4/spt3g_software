@@ -170,7 +170,7 @@ done:
 PYBINDINGS("core") {
 	using namespace boost::python;
 
-	class_<G3MultiFileWriter, bases<G3Module>, boost::shared_ptr<G3MultiFileWriter>,
+	class_<G3MultiFileWriter, bases<G3Module>, std::shared_ptr<G3MultiFileWriter>,
 	    boost::noncopyable>("G3MultiFileWriter",
 	      "Writes frames to disk into a sequence of files. Once a file exceeds "
 	      "the number of bytes specified in size_limit, it will start a new file. "

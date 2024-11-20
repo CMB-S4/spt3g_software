@@ -63,15 +63,15 @@ int pyvector_getbuffer(PyObject *obj, Py_buffer *view, int flags,
 //
 // XXX: Should be automatic via SFINAE, but that cleanup is for later.
 template <typename T>
-boost::shared_ptr<T>
+std::shared_ptr<T>
 numpy_container_from_object(boost::python::object v)
 {
 	// There's a chance this is actually a copy operation, so try that first
 	bp::extract<T &> extv(v);
 	if (extv.check())
-		return boost::make_shared<T>(extv());
+		return std::make_shared<T>(extv());
 
-	boost::shared_ptr<T> x(new T);
+	std::shared_ptr<T> x(new T);
 	size_t nelem;
 	Py_buffer view;
 
@@ -177,10 +177,10 @@ slowpython:
 // Some special handling is needed for complex vectors
 
 template <typename T>
-boost::shared_ptr<T>
+std::shared_ptr<T>
 complex_numpy_container_from_object(boost::python::object v)
 {
-	boost::shared_ptr<T> x(new T);
+	std::shared_ptr<T> x(new T);
 	Py_buffer view;
 	if (PyObject_GetBuffer(v.ptr(), &view,
 	    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) != -1) {
@@ -235,7 +235,7 @@ struct numpy_vector_from_python_##name { \
 		void* storage = ( \
 		    (boost::python::converter::rvalue_from_python_storage<std::vector<T> >*)data)->storage.bytes; \
 		new (storage) std::vector<T>; \
-		boost::shared_ptr<std::vector<T> > swap_storage = numpy_container_from_object<std::vector<T> >(boost::python::object(boost::python::handle<>(boost::python::borrowed(obj_ptr)))); \
+		std::shared_ptr<std::vector<T> > swap_storage = numpy_container_from_object<std::vector<T> >(boost::python::object(boost::python::handle<>(boost::python::borrowed(obj_ptr)))); \
 		((std::vector<T> *)(storage))->swap(*swap_storage); \
 		data->convertible = storage; \
 	} \
@@ -243,7 +243,7 @@ struct numpy_vector_from_python_##name { \
 
 #define numpy_vector_infrastructure(T, name, conv) \
 template <> \
-boost::shared_ptr<std::vector<T> > \
+std::shared_ptr<std::vector<T> > \
 container_from_object(boost::python::object v) \
 { \
 	return numpy_container_from_object<std::vector<T> >(v); \
@@ -310,12 +310,12 @@ struct apple_ssize
 };
 #endif
 
-template <> boost::shared_ptr<std::vector<std::complex<float> > >
+template <> std::shared_ptr<std::vector<std::complex<float> > >
 numpy_container_from_object(boost::python::object v)
 {
 	return complex_numpy_container_from_object<std::vector<std::complex<float> > >(v);
 }
-template <> boost::shared_ptr<std::vector<std::complex<double> > >
+template <> std::shared_ptr<std::vector<std::complex<double> > >
 numpy_container_from_object(boost::python::object v)
 {
 	return complex_numpy_container_from_object<std::vector<std::complex<double> > >(v);

@@ -155,7 +155,7 @@ HitsBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 
 		G3FramePtr out_frame(new G3Frame(G3Frame::Map));
 		out_frame->Put("Id", G3StringPtr(new G3String(output_id_)));
-		out_frame->Put("H", boost::dynamic_pointer_cast<G3FrameObject>(H_));
+		out_frame->Put("H", std::dynamic_pointer_cast<G3FrameObject>(H_));
 		H_ = H_->Clone(false);
 
 		out_frame->Put("StartTime", G3TimePtr(new G3Time(start_)));

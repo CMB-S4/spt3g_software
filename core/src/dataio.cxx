@@ -9,7 +9,7 @@
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/iostreams/device/array.hpp>
 #include <boost/iostreams/device/back_inserter.hpp>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -223,16 +223,16 @@ g3_check_input_path(const std::string &path)
 	if (path.find("://") != path.npos)
 		return;
 
-	boost::filesystem::path fpath(path);
-	if (!boost::filesystem::exists(fpath) ||
-	    !boost::filesystem::is_regular_file(fpath))
+	std::filesystem::path fpath(path);
+	if (!std::filesystem::exists(fpath) ||
+	    !std::filesystem::is_regular_file(fpath))
 		log_fatal("Could not find file %s", path.c_str());
 }
 
 void
 g3_check_output_path(const std::string &path)
 {
-	boost::filesystem::path fpath(path);
+	std::filesystem::path fpath(path);
 
 	if (fpath.empty())
 		log_fatal("Empty file path");
@@ -240,7 +240,7 @@ g3_check_output_path(const std::string &path)
 	if (!fpath.has_parent_path())
 		return;
 
-	if (!boost::filesystem::exists(fpath.parent_path()))
+	if (!std::filesystem::exists(fpath.parent_path()))
 		log_fatal("Parent path does not exist: %s",
 		    fpath.parent_path().string().c_str());
 }
