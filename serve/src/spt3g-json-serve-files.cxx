@@ -13,24 +13,20 @@
 #define CPPHTTPLIB_USE_POLL
 #define VERSION "0.0.1"
 
-#include <boost/filesystem.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/algorithm/string/replace.hpp>
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/python.hpp>
+#include <filesystem>
 #include <mutex>
 #include <vector>
 #include <streambuf>
 #include <csignal>
 
+#include "core/pybindings.h"
 #include "core/G3.h"
 #include "core/G3Frame.h"
 #include "core/dataio.h"
-#include "core/pybindings.h"
 
 #include "httplib/httplib.h"
 #include "serve/favicon.h"
-namespace fs = boost::filesystem; // from <boost/filesystem.hpp>
+namespace fs = std::filesystem;
 
 static unsigned short port = 2726;
 static std::string bind_address = "0.0.0.0";
@@ -255,7 +251,7 @@ static void handle_g3(const httplib::Request & req, httplib::Response & resp)
 				//set up the frame
 				G3Frame frame;
 				std::string fullpath = basedir + req.path;
-				boost::iostreams::filtering_istream ifs;
+				g3_istream ifs;
 				g3_istream_from_path(ifs, fullpath, 0.01);
 
 				bool first = true;
@@ -321,7 +317,9 @@ valid_g3_ext(const std::string & filename)
 {
 	bool valid = false;
 	for (const auto &ext : VALID_G3_EXTENSIONS) {
-		if (boost::algorithm::ends_with(filename, ext))
+		size_t ne = ext.size();
+		size_t nf = filename.size();
+		if (nf > ne && !filename.compare(nf - ne, ne, ext))
 			valid = true;
 	}
 	return valid;
@@ -538,8 +536,12 @@ int main(int nargs, char **argv)
 	for (const auto &ext : VALID_G3_EXTENSIONS) {
 		// regex escape the extension
 		std::string escaped_ext = ext;
-		boost::replace_all(escaped_ext,".", "\\.");
- 	  std::string target = "/.*" + escaped_ext;
+		auto pos = escaped_ext.find(".");
+		while (pos != escaped_ext.npos) {
+			escaped_ext.replace(pos, 1, "\\.");
+			pos = escaped_ext.find(".", pos + 3);
+		}
+		std::string target = "/.*" + escaped_ext;
 		server.Get(target, handle_g3);
 	}
 
