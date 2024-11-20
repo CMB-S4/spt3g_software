@@ -42,7 +42,7 @@ set(Boost_USE_STATIC_LIBS @Boost_USE_STATIC_LIBS@)
 set(Boost_USE_MULTITHREADED @Boost_USE_MULTITHREADED@)
 set(Boost_USE_STATIC_RUNTIME @Boost_USE_STATIC_RUNTIME@)
 set(Boost_PYTHON_VERSION @Boost_PYTHON_VERSION@)
-find_dependency(Boost COMPONENTS system iostreams filesystem python REQUIRED)
+find_dependency(Boost COMPONENTS iostreams python REQUIRED)
 
 if(@FLAC_FOUND@)
 	find_dependency(FLAC MODULE)
