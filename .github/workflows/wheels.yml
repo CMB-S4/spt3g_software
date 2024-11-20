@@ -83,7 +83,7 @@ jobs:
           CIBW_BUILD_VERBOSITY: 1
           CIBW_ENVIRONMENT: >
             CMAKE_BUILD_PARALLEL_LEVEL=4 CMAKE_PREFIX_PATH=$PWD/deps
-          # CIBW_TEST_COMMAND: ctest --test-dir {package}/build --output-on-failure
+          CIBW_TEST_COMMAND: ctest --test-dir {package}/build --output-on-failure
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
