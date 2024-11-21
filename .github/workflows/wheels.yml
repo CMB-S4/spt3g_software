@@ -27,9 +27,10 @@ jobs:
           # - os: macos-13
           #   build: cp311-macosx_x86_64
           #   target: 13.0
-          - os: macos-12
+          - os: macos-13
             build: cp312-macosx_x86_64
-            target: 12.0
+            python: '3.12'
+            target: 13.0
 
           # - os: macos-14
           #   build: cp39-macosx_arm64
@@ -40,9 +41,10 @@ jobs:
           # - os: macos-14
           #   build: cp311-macosx_arm64
           #   target: 14.0
-          # - os: macos-14
-          #   build: cp312-macosx_arm64
-          #   target: 14.0
+          - os: macos-14
+            build: cp312-macosx_arm64
+            python: '3.12'
+            target: 14.0
 
           # - os: ubuntu-latest
           #   build: cp38-manylinux_x86_64
@@ -63,7 +65,7 @@ jobs:
       # missing build tools on some macos runners
       - name: Install macOS build dependencies
         if: runner.os == 'macOS'
-        run: brew install automake libtool
+        run: brew install automake libtool cmake
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -76,13 +78,14 @@ jobs:
         env:
           CIBW_BUILD: ${{ matrix.build }}
           CIBW_BEFORE_ALL_LINUX: yum install -y bzip2-devel flac-devel netcdf-devel
-          CIBW_BEFORE_ALL_MACOS: brew install bzip2 flac netcdf cfitsio
+          CIBW_BEFORE_ALL_MACOS: brew install bzip2 flac netcdf
           CIBW_BEFORE_BUILD: ./deps/install_boost.sh
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
             DYLD_LIBRARY_PATH=$PWD/deps/lib delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}
           CIBW_BUILD_VERBOSITY: 1
           CIBW_ENVIRONMENT: >
             CMAKE_BUILD_PARALLEL_LEVEL=4 CMAKE_PREFIX_PATH=$PWD/deps
+          CIBW_TEST_SKIP: "*-macosx_*"
           CIBW_TEST_COMMAND: ctest --test-dir {package}/build --output-on-failure
 
       - name: Upload artifacts
@@ -90,6 +93,22 @@ jobs:
         with:
           name: cibw-wheel-${{ matrix.build }}
           path: ./wheelhouse/spt3g*.whl
+
+      - name: Setup python
+        if: runner.os == 'macOS'
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install package
+        if: runner.os == 'macOS'
+        run: |
+          pip install pytest healpy
+          pip install ./wheelhouse/spt3g*.whl
+
+      - name: Run tests
+        if: runner.os == 'macOS'
+        run: ctest --test-dir ./build --output-on-failure
 
   build_sdist:
     name: Build source distribution

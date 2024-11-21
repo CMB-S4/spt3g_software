@@ -126,7 +126,8 @@ if(APPLE)
 endif(APPLE)
 
 # Find all sub-projects
-file(GLOB cmake_projects RELATIVE ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}/*/CMakeLists.txt)
+# file(GLOB cmake_projects RELATIVE ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}/*/CMakeLists.txt)
+set(cmake_projects ${CMAKE_SOURCE_DIR}/core/CMakeLists.txt)
 foreach(d ${cmake_projects})
 	get_filename_component(proj ${d} PATH)
 	set(SUBDIRS ${SUBDIRS} ${proj})
