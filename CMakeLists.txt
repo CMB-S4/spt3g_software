@@ -49,6 +49,7 @@ if(DEFINED ENV{CIBUILDWHEEL} AND NOT APPLE)
 else()
 	find_package(Python COMPONENTS Interpreter Development REQUIRED)
 endif()
+message(STATUS "Found Python: ${Python_INCLUDE_DIRS} ${Python_LIBRARIES}")
 
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)

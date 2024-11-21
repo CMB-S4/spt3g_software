@@ -81,11 +81,11 @@ jobs:
           CIBW_BEFORE_ALL_MACOS: brew install bzip2 flac netcdf
           CIBW_BEFORE_BUILD: ./deps/install_boost.sh
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
-            DYLD_LIBRARY_PATH=$PWD/deps/lib delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel} -e Framework
+            DYLD_LIBRARY_PATH=$PWD/deps/lib delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel} -e Python.framework
           CIBW_BUILD_VERBOSITY: 1
           CIBW_ENVIRONMENT: >
             CMAKE_BUILD_PARALLEL_LEVEL=4 CMAKE_PREFIX_PATH=$PWD/deps
-          CIBW_TEST_SKIP: "*-macosx_*"
+          # CIBW_TEST_SKIP: "*-macosx_*"
           CIBW_TEST_COMMAND: ctest --test-dir {package}/build --output-on-failure
 
       - name: Upload artifacts
@@ -94,21 +94,21 @@ jobs:
           name: cibw-wheel-${{ matrix.build }}
           path: ./wheelhouse/spt3g*.whl
 
-      - name: Setup python
-        if: runner.os == 'macOS'
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python }}
-
-      - name: Install package
-        if: runner.os == 'macOS'
-        run: |
-          pip install pytest healpy
-          pip install ./wheelhouse/spt3g*.whl
-
-      - name: Run tests
-        if: runner.os == 'macOS'
-        run: ctest --test-dir ./build --output-on-failure
+      # - name: Setup python
+      #   if: runner.os == 'macOS'
+      #   uses: actions/setup-python@v5
+      #   with:
+      #     python-version: ${{ matrix.python }}
+      # 
+      # - name: Install package
+      #   if: runner.os == 'macOS'
+      #   run: |
+      #     pip install pytest healpy
+      #     pip install ./wheelhouse/spt3g*.whl
+      # 
+      # - name: Run tests
+      #   if: runner.os == 'macOS'
+      #   run: ctest --test-dir ./build --output-on-failure
 
   build_sdist:
     name: Build source distribution
