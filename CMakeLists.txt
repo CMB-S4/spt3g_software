@@ -44,7 +44,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-if(DEFINED ENV{CIBUILDWHEEL})
+if(DEFINED ENV{CIBUILDWHEEL} AND NOT APPLE)
 	# Can't compile binaries against libpython in CI
 	find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
 else()
