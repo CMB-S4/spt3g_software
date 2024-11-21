@@ -7,10 +7,9 @@ endif()
 project(spt3g)
 enable_testing()
 
-if(DEFINED ENV{CIBUILDWHEEL} OR NOT CMAKE_BUILD_TYPE)
+if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel" FORCE)
-endif()
-message(STATUS "Configuring build type: ${CMAKE_BUILD_TYPE}")
+endif(NOT CMAKE_BUILD_TYPE)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
@@ -73,16 +72,15 @@ target_link_libraries(spt3g INTERFACE Threads::Threads ${Boost_LIBRARIES})
 target_include_directories(spt3g INTERFACE $<INSTALL_INTERFACE:${SPT3G_INCLUDE_INSTALL_DIR}>)
 
 # Python bindings
-if(TARGET Python::Module)
+if(APPLE AND TARGET Python::Python)
+	target_link_libraries(spt3g INTERFACE Python::Python)
+elseif(TARGET Python::Module)
 	target_link_libraries(spt3g INTERFACE Python::Module)
 else()
 	target_include_directories(spt3g INTERFACE ${Python_INCLUDE_DIRS})
 	if(APPLE)
 		target_link_options(spt3g INTERFACE "LINKER:-undefined,dynamic_lookup")
 	endif()
-endif()
-if(APPLE)
-	target_link_options(spt3g INTERFACE "LINKER:-no_fixup_chains")
 endif()
 
 # Work around yet more bugs in GCC 4.4, this time with C++ 11 support
