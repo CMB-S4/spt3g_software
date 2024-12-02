@@ -873,7 +873,7 @@ class ReprojectMaps(object):
         reprojection.  Otherwise, reproject maps without checking the weights.
     partial :  bool=False
         If True, the reproj will be performed on a partial map (of the output map),
-        defined by the mask. If the mask is not provided, it will be detrmined from
+        defined by the mask. If the mask is not provided, it will be determined from
         the non-zero pixels of the first reprojected map.
     mask : G3SkyMapMask, G3SkyMap, or np.ndarray, Optional.
         Mask to be used for partial reproject. This should be of the same size as the output map.
