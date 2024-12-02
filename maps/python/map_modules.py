@@ -876,8 +876,8 @@ class ReprojectMaps(object):
         defined by the mask. If the mask is not provided, it will be determined from
         the non-zero pixels of the first reprojected map.
     mask : G3SkyMapMask, G3SkyMap, or np.ndarray, Optional.
-        Mask to be used for partial reproject. This should be of the same size as the output map.
-        For numpy array, all zeros/inf/nan/hp.UNSEEN pixels are skipped.
+        Mask to be used for partial reproject. This should be of the same size as the
+        output map. For numpy array, all zeros/inf/nan/hp.UNSEEN pixels are skipped.
     """
 
     def __init__(self, map_stub=None, rebin=1, interp=False, weighted=True,
