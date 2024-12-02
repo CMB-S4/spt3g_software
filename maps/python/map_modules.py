@@ -880,7 +880,8 @@ class ReprojectMaps(object):
         For numpy array, all zeros/inf/nan/hp.UNSEEN pixels are skipped.
     """
 
-    def __init__(self, map_stub=None, rebin=1, interp=False, weighted=True, partial=False, mask=None):
+    def __init__(self, map_stub=None, rebin=1, interp=False, weighted=True,
+                 partial=False, mask=None):
         assert map_stub is not None, "map_stub argument required"
         self.stub = map_stub.clone(False)
         self.stub.pol_type = None
@@ -916,13 +917,15 @@ class ReprojectMaps(object):
 
             if key in "TQUH":
                 mnew = self.stub.clone(False)
-                maps.reproj_map(m, mnew, rebin=self.rebin, interp=self.interp, mask=self.mask)
+                maps.reproj_map(m, mnew, rebin=self.rebin, interp=self.interp,
+                                mask=self.mask)
 
             elif key in ["Wpol", "Wunpol"]:
                 mnew = maps.G3SkyMapWeights(self.stub)
                 for wkey in mnew.keys():
                     maps.reproj_map(
-                        m[wkey], mnew[wkey], rebin=self.rebin, interp=self.interp, mask=self.mask
+                        m[wkey], mnew[wkey], rebin=self.rebin, interp=self.interp,
+                        mask=self.mask
                     )
 
             frame[key] = mnew
@@ -941,7 +944,8 @@ class ReprojectMaps(object):
             if isinstance(mask, maps.G3SkyMapMask):
                 self._mask = mask
             elif isinstance(mask, maps.G3SkyMap):
-                self._mask = maps.G3SkyMapMask(mask, use_data=True, zero_nans=True, zero_infs=True)
+                self._mask = maps.G3SkyMapMask(mask, use_data=True, zero_nans=True,
+                                               zero_infs=True)
             elif isinstance(mask, np.ndarray):
                 from healpy import UNSEEN
                 tmp = self.stub.clone(False)
@@ -956,4 +960,5 @@ class ReprojectMaps(object):
                 tmp[:] = mask_copy
                 self._mask = maps.G3SkyMapMask(tmp, use_data=True)
             else:
-                raise TypeError("Mask must be a G3SkyMapMask, G3SkyMap, or numpy array")
+                raise TypeError("Mask must be a G3SkyMapMask, G3SkyMap, "
+                                "or numpy array")
