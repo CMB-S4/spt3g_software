@@ -1758,9 +1758,16 @@ currently implemented.
 	weighted : bool
 	    If True (default), ensure that maps have had weights applied before
 	    reprojection.  Otherwise, reproject maps without checking the weights.
+	partial :  bool=False
+	    If True, the reproj will be performed on a partial map (of the output map),
+	    defined by the mask. If the mask is not provided, it will be determined from
+	    the non-zero pixels of the first reprojected map.
+	mask : G3SkyMapMask, G3SkyMap, or np.ndarray, Optional.
+	    Mask to be used for partial reproject. This should be of the same size as the
+	    output map. For numpy array, all zeros/inf/nan/hp.UNSEEN pixels are skipped.
 
 *Constructor:*
-	``ReprojectMaps(map_stub=None, rebin=1, interp=False, weighted=True)``
+	``ReprojectMaps(map_stub=None, rebin=1, interp=False, weighted=True, partial=False, mask=None)``
 
 
 
@@ -2393,7 +2400,7 @@ vector of them) specified as a (longitude, latitude) pair.
 
 **spt3g.maps.reproj_map**
 
-``reproj_map( (object)in_map, (G3SkyMap)out_map [, (int)rebin=1 [, (bool)interp=False]]) -> None :``
-    Reprojects the data from in_map onto out_map.  out_map can have a different projection, size, resolution, etc.  Optionally account for sub-pixel structure by setting rebin > 1 and/or enable bilinear interpolation of values from the input map by setting interp=True.  Use the maps' coord_ref attributes to rotate between Equatorial and Galactic coordinate systems.  Use the maps' pol_conv attributes to switch between COSMO and IAU polarization conventions.  If output attributes are not set, they will be copied from the input map.
+``reproj_map( (object)in_map, (G3SkyMap)out_map [, (int)rebin=1 [, (bool)interp=False [, (G3SkyMapMask)mask=None]]]) -> None :``
+    Reprojects the data from in_map onto out_map.  out_map can have a different projection, size, resolution, etc.  Optionally account for sub-pixel structure by setting rebin > 1 and/or enable bilinear interpolation of values from the input map by setting interp=True.  Use the maps' coord_ref attributes to rotate between Equatorial and Galactic coordinate systems.  Use the maps' pol_conv attributes to switch between COSMO and IAU polarization conventions.  If output attributes are not set, they will be copied from the input map. out_map_mask, if given, skip the unused pixelsand set these pixels to 0.
 
 
