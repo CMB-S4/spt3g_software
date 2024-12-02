@@ -279,7 +279,8 @@ void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, G3SkyMapWeightsPtr W, double h
 }
 
 
-void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool interp)
+void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool interp,
+				G3SkyMapMaskConstPtr out_map_mask)
 {
 	bool rotate = false; // no transform
 	Quat q_rot; // quaternion for rotating from output to input coordinate system
@@ -310,8 +311,13 @@ void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool int
 		out_map->pol_conv = in_map->pol_conv;
 	}
 
+	size_t stop = out_map->size();
 	if (rebin > 1) {
-		for (size_t i = 0; i < out_map->size(); i++) {
+		for (size_t i = 0; i < stop; i++) {
+			if (!!out_map_mask && !out_map_mask->at(i)) {
+				(*out_map)[i] = 0;
+				continue;
+			}
 			double val = 0;
 			auto quats = out_map->GetRebinQuats(i, rebin);
 			if (rotate)
@@ -328,7 +334,11 @@ void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool int
 			}
 		}
 	} else {
-		for (size_t i = 0; i < out_map->size(); i++) {
+		for (size_t i = 0; i < stop; i++) {
+			if (!!out_map_mask && !out_map_mask->at(i)) {
+				(*out_map)[i] = 0;
+				continue;
+			}
 			double val = 0;
 			auto q = out_map->PixelToQuat(i);
 			if (rotate)

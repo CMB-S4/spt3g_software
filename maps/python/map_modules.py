@@ -871,15 +871,26 @@ class ReprojectMaps(object):
     weighted : bool
         If True (default), ensure that maps have had weights applied before
         reprojection.  Otherwise, reproject maps without checking the weights.
+    partial :  bool=False
+        If True, the reproj will be performed on a partial map (of the output map),
+        defined by the mask. If the mask is not provided, it will be detrmined from
+        the non-zero pixels of the first reprojected map.
+    mask : G3SkyMapMask, G3SkyMap, or np.ndarray, Optional.
+        Mask to be used for partial reproject. This should be of the same size as the output map.
+        For numpy array, all zeros/inf/nan/hp.UNSEEN pixels are skipped.
     """
 
-    def __init__(self, map_stub=None, rebin=1, interp=False, weighted=True):
+    def __init__(self, map_stub=None, rebin=1, interp=False, weighted=True, partial=False, mask=None):
         assert map_stub is not None, "map_stub argument required"
         self.stub = map_stub.clone(False)
         self.stub.pol_type = None
         self.rebin = rebin
         self.interp = interp
         self.weighted = weighted
+        self._mask = None
+        self.partial = partial
+        
+        self.mask = mask
 
     def __call__(self, frame):
         if isinstance(frame, core.G3Frame) and frame.type != core.G3FrameType.Map:
@@ -905,15 +916,44 @@ class ReprojectMaps(object):
 
             if key in "TQUH":
                 mnew = self.stub.clone(False)
-                maps.reproj_map(m, mnew, rebin=self.rebin, interp=self.interp)
+                maps.reproj_map(m, mnew, rebin=self.rebin, interp=self.interp, mask=self.mask)
 
             elif key in ["Wpol", "Wunpol"]:
                 mnew = maps.G3SkyMapWeights(self.stub)
                 for wkey in mnew.keys():
                     maps.reproj_map(
-                        m[wkey], mnew[wkey], rebin=self.rebin, interp=self.interp
+                        m[wkey], mnew[wkey], rebin=self.rebin, interp=self.interp, mask=self.mask
                     )
 
             frame[key] = mnew
-
+            self.mask = mnew
         return frame
+    
+    @property
+    def mask(self):
+        return self._mask
+    
+    @mask.setter
+    def mask(self, mask):
+        if mask is None:
+            return
+        if self._mask is None and self.partial:
+            if isinstance(mask, maps.G3SkyMapMask):
+                self._mask = mask
+            elif isinstance(mask, maps.G3SkyMap):
+                self._mask = maps.G3SkyMapMask(mask, use_data=True, zero_nans=True, zero_infs=True)
+            elif isinstance(mask, np.ndarray):
+                from healpy import UNSEEN
+                tmp = self.stub.clone(False)
+                mask_copy = np.ones(mask.shape, dtype=int)
+                bad = np.logical_or.reduce([
+                    np.isnan(mask),
+                    np.isinf(mask),
+                    mask==0,
+                    mask==UNSEEN
+                ])
+                mask_copy[bad] = 0
+                tmp[:] = mask_copy
+                self._mask = maps.G3SkyMapMask(tmp, use_data=True)
+            else:
+                raise TypeError("Mask must be a G3SkyMapMask, G3SkyMap, or numpy array")
