@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 # Don't warn about removal of FindBoost in cmake 3.30+
-if(POLICY CMP0167)
+if(CMAKE_VERSION VERSION_LESS "3.31" AND POLICY CMP0167)
 	cmake_policy(SET CMP0167 NEW)
 endif()
 
