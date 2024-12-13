@@ -20,7 +20,8 @@
 #include "counter64.hpp"
 
 int
-g3_istream_from_path(g3_istream &stream, const std::string &path, float timeout)
+g3_istream_from_path(g3_istream &stream, const std::string &path,
+    float timeout, size_t buffersize)
 {
 	stream.reset();
 	if (path.size() > 3 && !path.compare(path.size() - 3, 3, ".gz"))
@@ -143,11 +144,11 @@ g3_istream_from_path(g3_istream &stream, const std::string &path, float timeout)
 
 		boost::iostreams::file_descriptor_source fs(fd,
 		    boost::iostreams::close_handle);
-		stream.push(fs);
+		stream.push(fs, buffersize);
 	} else {
 		// Simple file case
 		stream.push(boost::iostreams::file_source(path,
-		    std::ios::binary));
+		    std::ios::binary), buffersize);
 	}
 
 	return fd;
