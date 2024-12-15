@@ -280,7 +280,7 @@ void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, G3SkyMapWeightsPtr W, double h
 
 
 void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool interp,
-				G3SkyMapMaskConstPtr out_map_mask)
+    G3SkyMapMaskConstPtr out_map_mask)
 {
 	bool rotate = false; // no transform
 	Quat q_rot; // quaternion for rotating from output to input coordinate system
@@ -310,6 +310,9 @@ void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool int
 	} else if (!(out_map->IsPolarized())) {
 		out_map->pol_conv = in_map->pol_conv;
 	}
+
+	if (!!out_map_mask && !out_map_mask->IsCompatible(*out_map))
+		log_fatal("Mask is not compatible with output map");
 
 	size_t stop = out_map->size();
 	if (rebin > 1) {
