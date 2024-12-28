@@ -610,6 +610,12 @@ FlatSkyMap::Description() const
 	case G3Timestream::FluxDensity:
 		os << "FluxDensity";
 		break;
+	case G3Timestream::Trj:
+		os << "Trj";
+		break;
+	case G3Timestream::Frequency:
+		os << "Frequency";
+		break;
 	default:
 		break;
 	}

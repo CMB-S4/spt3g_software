@@ -623,6 +623,12 @@ std::string G3Timestream::Description() const
 	case FluxDensity:
 		desc << " (FluxDensity)";
 		break;
+	case Trj:
+		desc << " (Trj)";
+		break;
+	case Frequency:
+		desc << " (Frequency)";
+		break;
 	default:
 		break;
 	}
@@ -1316,6 +1322,8 @@ PYBINDINGS("core") {
 	    .value("Voltage",  G3Timestream::Voltage)
 	    .value("Pressure",  G3Timestream::Pressure)
 	    .value("FluxDensity",  G3Timestream::FluxDensity)
+	    .value("Trj",  G3Timestream::Trj)
+	    .value("Frequency",  G3Timestream::Frequency)
 	;
 	enum_none_converter::from_python<G3Timestream::TimestreamUnits>();
 
