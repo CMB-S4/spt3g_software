@@ -94,6 +94,8 @@ PYBINDINGS("calibration") {
 	    .value("DarkTermination", BolometerProperties::DarkTermination)
 	    .value("DarkCrossover", BolometerProperties::DarkCrossover)
 	    .value("Resistor", BolometerProperties::Resistor)
+	    .value("Loopback", BolometerProperties::Loopback)
+	    .value("OffResonance", BolometerProperties::OffResonance)
 	;
 
 	register_g3map<BolometerPropertiesMap>("BolometerPropertiesMap",
