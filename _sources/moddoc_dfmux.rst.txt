@@ -672,6 +672,14 @@ Mux channel status (configuration and sensors). Usually a part of an HkModuleInf
 
 * **demod_phase**: Demodulator phase in standard angle units (mkid only)
 
+* **i_slope**: Calibration coefficient in units of counts per frequency (mkid only)
+
+* **q_slope**: Calibration coefficient in units of counts per frequency (mkid only)
+
+* **internal_phase**: Phase angle associated with delays internal to the readout board (mkid only)
+
+* **external_phase**: Phase angle associated with delays external to the readout board (mkid only)
+
 
 
 .. _spt3g.dfmux.HkMezzanineInfo:
