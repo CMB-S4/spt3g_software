@@ -100,12 +100,12 @@ def gsetting_to_R(G, oldmezz=False):
         raise(Exception("Mezzanine Gain settings are integers in set [0, 15]"))
 
     if oldmezz:
-        return 100+(15-G)*15.
+        return (100+(15-G)*15.) * core.G3Units.ohm
     else:
         Rs = [300.0000, 212.0000, 174.2857, 153.3333, 140.0000, 130.7692,
               124.0000, 118.8235, 114.7368, 111.4286, 108.6957, 106.4000,
               104.4444, 102.7586, 101.2903, 100.0000]
-        return Rs[G]
+        return Rs[G] * core.G3Units.ohm
 
 def convert_TF(gain, target, unit='NORMALIZED', frequency=False, custom_TF=None):
     """Analytic Transfer Function.

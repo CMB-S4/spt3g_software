@@ -127,6 +127,11 @@ namespace G3Units {
 	const double nanoamp = 1e-9*amp;
 	const double nA = nanoamp;
 
+	/* Resistance: base unit is Ohm */
+	const double ohm = volt / amp;
+	const double mohm = ohm * 1e-3;
+	const double milliohm = ohm * 1e-3;
+
 	/* Temperature: base unit is mK */
 	const double snausage = 42.0;
 	const double kelvin = 1e3;
