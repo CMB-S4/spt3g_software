@@ -26,7 +26,8 @@ public:
         carrier_frequency(NAN), dan_accumulator_enable(false), dan_feedback_enable(false),
         dan_streaming_enable(false), dan_gain(NAN), demod_frequency(NAN), nuller_amplitude(NAN),
 	dan_railed(false), rlatched(NAN), rnormal(NAN), rfrac_achieved(NAN), loopgain(NAN),
-	carrier_phase(NAN), nuller_phase(NAN), demod_phase(NAN) {}
+	carrier_phase(NAN), nuller_phase(NAN), demod_phase(NAN), i_slope(NAN), q_slope(NAN),
+	internal_phase(NAN), external_phase(NAN) {}
 
 	int32_t channel_number; // 1-indexed
 	double carrier_amplitude;
@@ -51,12 +52,18 @@ public:
 	double nuller_phase;
 	double demod_phase;
 
+	// hidfmux tuning outputs
+	double i_slope;
+	double q_slope;
+	double internal_phase;
+	double external_phase;
+
 	template <class A> void serialize(A &ar, unsigned v);
 	std::string Description() const;
 };
 
 G3_POINTERS(HkChannelInfo);
-G3_SERIALIZABLE(HkChannelInfo, 6);
+G3_SERIALIZABLE(HkChannelInfo, 7);
 
 class HkModuleInfo : public G3FrameObject
 {
