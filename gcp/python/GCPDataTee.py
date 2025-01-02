@@ -25,6 +25,32 @@ class PagerWatchdog(object):
         self.thread = threading.Thread(target=self.ping)
         self.thread.start()
 
+    def send(self, cmd):
+        """
+        Send a command to the GCP pager process, and return the response.
+        """
+        if self.sim:
+            return
+
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(self.timeout)
+            sock.connect((self.host, self.port))
+            sock.send(cmd.encode())
+            resp = sock.recv(4096)
+            if resp:
+                core.log_debug(
+                    "Sent command, got response {}".format(resp), unit=self.unit,
+                )
+            sock.close()
+        except Exception as e:
+            core.log_error("Error sending command: {}".format(e), unit=self.unit)
+            raise
+        else:
+            core.log_info("Sent command {}".format(cmd), unit=self.unit)
+
+        return resp.decode()
+
     def ping(self):
         """
         Send a watchdog ping message to the GCP pager process.  This method is
@@ -32,25 +58,22 @@ class PagerWatchdog(object):
         `data_valid` method returns True.
         """
         try:
-            if not self.sim:
-                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                sock.settimeout(self.timeout)
-                sock.connect((self.host, self.port))
-                sock.send('watchdog {}'.format(self.name).encode())
-                resp = sock.recv(4096)
-                if resp:
-                    core.log_debug(
-                        'Sent watchdog ping, got response {}'.format(resp.decode()),
-                        unit=self.unit,
-                    )
-                sock.close()
-        except Exception as e:
-            core.log_error('Error sending watchdog ping: {}'.format(e), unit=self.unit)
+            self.send("watchdog {}".format(self.name))
+        except Exception:
             # try again in ten seconds
             self.last_ping = time.time() - self.interval + 10
         else:
-            core.log_info('Sent watchdog ping', unit=self.unit)
             self.last_ping = time.time()
+
+    def page(self, msg):
+        """
+        Issue a page to the GCP pager process.  Called by the user for immediate
+        notification of errors.
+        """
+        try:
+            self.send("page '{}'".format(self.name, msg))
+        except Exception as e:
+            pass
 
     def data_valid(self, *args, **kwargs):
         """
