@@ -61,6 +61,10 @@ template <class A> void HkChannelInfo::serialize(A &ar, unsigned v)
 		ar & make_nvp("internal_phase", internal_phase);
 		ar & make_nvp("external_phase", external_phase);
 	}
+
+	if (v > 7) {
+		ar & make_nvp("bias_frequency", bias_frequency);
+	}
 }
 
 std::string HkModuleInfo::Description() const
@@ -233,6 +237,8 @@ PYBINDINGS("dfmux") {
 	       "Phase angle associated with delays internal to the readout board (mkid only)")
 	    .def_readwrite("external_phase", &HkChannelInfo::external_phase,
 	       "Phase angle associated with delays external to the readout board (mkid only)")
+	    .def_readwrite("bias_frequency", &HkChannelInfo::bias_frequency,
+	       "NCO-adjusted bias frequency (mkid only)")
 	;
 	register_map<std::map<int, HkChannelInfo> >("HkChannelInfoMap",
 	    "Mapping of channel number (1-indexed) to channel status "

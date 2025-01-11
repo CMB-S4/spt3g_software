@@ -57,13 +57,14 @@ public:
 	double q_slope;
 	double internal_phase;
 	double external_phase;
+	double bias_frequency;
 
 	template <class A> void serialize(A &ar, unsigned v);
 	std::string Description() const;
 };
 
 G3_POINTERS(HkChannelInfo);
-G3_SERIALIZABLE(HkChannelInfo, 7);
+G3_SERIALIZABLE(HkChannelInfo, 8);
 
 class HkModuleInfo : public G3FrameObject
 {

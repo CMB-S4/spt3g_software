@@ -337,6 +337,7 @@ class HousekeepingConsumer(object):
                             "q_slope": ("dQr", 1. / core.G3Units.Hz),
                             "internal_phase": ("internal_phase", core.G3Units.rad),
                             "external_phase": ("external_phase", core.G3Units.rad),
+                            "bias_frequency": ("bias_freq", core.G3Units.Hz),
                         }
                         for attr, (na, ua) in attrs.items():
                             if chan["tuning"].get(na, None) is not None:
