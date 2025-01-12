@@ -680,6 +680,8 @@ Mux channel status (configuration and sensors). Usually a part of an HkModuleInf
 
 * **external_phase**: Phase angle associated with delays external to the readout board (mkid only)
 
+* **bias_frequency**: NCO-adjusted bias frequency (mkid only)
+
 
 
 .. _spt3g.dfmux.HkMezzanineInfo:
