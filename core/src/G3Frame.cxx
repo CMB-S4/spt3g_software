@@ -19,7 +19,7 @@ class fast_streambuf : public std::basic_streambuf<char>
 {
 public:
 	fast_streambuf(std::vector<char> &vec) : basic_streambuf() {
-		setg(&vec[0], &vec[0], &vec[vec.size()]);
+		setg(&vec[0], &vec[0], &vec[0] + vec.size());
 	}
 protected:
 	std::streamsize xsgetn(char_type *buf, std::streamsize n) {
