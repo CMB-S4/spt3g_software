@@ -27,7 +27,7 @@ public:
         dan_streaming_enable(false), dan_gain(NAN), demod_frequency(NAN), nuller_amplitude(NAN),
 	dan_railed(false), rlatched(NAN), rnormal(NAN), rfrac_achieved(NAN), loopgain(NAN),
 	carrier_phase(NAN), nuller_phase(NAN), demod_phase(NAN), i_slope(NAN), q_slope(NAN),
-	internal_phase(NAN), external_phase(NAN) {}
+	internal_phase(NAN), external_phase(NAN), bias_frequency(NAN) {}
 
 	int32_t channel_number; // 1-indexed
 	double carrier_amplitude;
