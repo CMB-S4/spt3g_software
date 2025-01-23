@@ -63,7 +63,7 @@ assert n == 10, 'Wrong number of frames read (%d should be %d)' % (n, 10)
 # Indexing
 class CachingReader:
     def __init__(self, filename='test.g3'):
-        self.reader = core.G3Reader(filename='test.g3')
+        self.reader = core.G3Reader(filename='test.g3', counter=True)
         self.w_pos = None
 
     def __call__(self, frame):
@@ -88,7 +88,7 @@ assert cacher.w_pos is not None, 'Missing wiring frame'
 # Using cached index
 class CachedReader:
     def __init__(self, filename='test.g3', start=None):
-        self.reader = core.G3Reader(filename=filename)
+        self.reader = core.G3Reader(filename=filename, counter=True)
         self.pos = start
 
     def __call__(self, frame):

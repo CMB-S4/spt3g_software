@@ -21,7 +21,7 @@
 
 int
 g3_istream_from_path(g3_istream &stream, const std::string &path,
-    float timeout, size_t buffersize)
+    float timeout, size_t buffersize, bool counter)
 {
 	stream.reset();
 	if (path.size() > 3 && !path.compare(path.size() - 3, 3, ".gz"))
@@ -33,6 +33,9 @@ g3_istream_from_path(g3_istream &stream, const std::string &path,
 		log_fatal("Boost not compiled with bzip2 support.");
 #endif
 	}
+
+	if (counter)
+		stream.push(boost::iostreams::counter64());
 
 	int fd = -1;
 
@@ -165,7 +168,13 @@ g3_istream_seek(g3_istream &stream, off_t offset)
 off_t
 g3_istream_tell(g3_istream &stream)
 {
-	return boost::iostreams::seek(stream, 0, std::ios_base::cur);
+	boost::iostreams::counter64 *counter =
+	    stream.component<boost::iostreams::counter64>(
+	    stream.size() - 2);
+	if (!counter)
+		log_fatal("Could not get stream counter");
+
+	return counter->characters();
 }
 
 void
