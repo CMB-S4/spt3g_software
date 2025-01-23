@@ -25,10 +25,12 @@ typedef boost::iostreams::filtering_ostream g3_ostream;
  *                  read until EOF.
  * @param  timeout  Timeout in seconds for socket connections.
  * @param  buffersize Advisory buffer size in bytes for aggregating reads
+ * @param  counter  If true, add a counter to the stream configuration,
+ *                  for use by the g3_istream_tell function.
  * @return File descriptor for socket connections, or -1 for file input.
  */
 int g3_istream_from_path(g3_istream &stream, const std::string &path,
-    float timeout=-1.0, size_t buffersize=1024*1024);
+    float timeout=-1.0, size_t buffersize=1024*1024, bool counter=false);
 
 /**
  * Seek to a byte offset in an open input file stream.
