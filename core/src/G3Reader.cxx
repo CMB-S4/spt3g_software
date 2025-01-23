@@ -102,12 +102,9 @@ void G3Reader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 }
 
 off_t G3Reader::Seek(off_t offset) {
+	if (!counter_)
+		log_fatal("Cannot seek %s; stream opened without counter.", cur_file_.c_str());
 	return g3_istream_seek(stream_, offset);
-	// try {
-	// 	return g3_istream_seek(stream_, offset);
-	// } catch (...) {
-	// 	log_fatal("Cannot seek %s; stream closed at EOF.", cur_file_.c_str());
-	// }
 }
 
 off_t G3Reader::Tell() {
