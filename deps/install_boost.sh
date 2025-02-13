@@ -15,13 +15,13 @@ else
     cd ${PREFIX}
 fi
 
-boost_version=1_86_0
+boost_version=1_87_0
 boost_dir=boost_${boost_version}
 boost_pkg=${boost_dir}.tar.bz2
 
 if [ ! -e ${boost_pkg} ]; then
     echo "Fetching boost..."
-    curl -SL "https://archives.boost.io/release/1.86.0/source/${boost_pkg}" -o "${boost_pkg}"
+    curl -SL "https://archives.boost.io/release/1.87.0/source/${boost_pkg}" -o "${boost_pkg}"
 fi
 
 if [ ! -e ${boost_dir} ]; then
