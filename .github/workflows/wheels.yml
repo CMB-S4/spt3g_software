@@ -77,8 +77,7 @@ jobs:
           CIBW_BEFORE_ALL_LINUX: yum install -y bzip2-devel netcdf-devel
           CIBW_BEFORE_ALL_MACOS: brew install bzip2
           CIBW_BEFORE_BUILD: >
-            ./deps/install_flac.sh
-            ./deps/install_boost.sh
+            ./deps/install_flac.sh && ./deps/install_boost.sh
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
             LD_LIBRARY_PATH=$PWD/deps/lib auditwheel repair -w ${dest_dir} ${wheel}
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
