@@ -55,13 +55,19 @@ macro(add_spt3g_module lib_name)
 	set(mod_name "_lib${lib_name}")
 	if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.17)
 		Python_add_library(${mod_name} MODULE WITH_SOABI ${ARGN})
-		if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+		if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+			target_link_options(${mod_name} PUBLIC "LINKER:-no_dead_strip_dylibs")
+		else()
+			# Assume Linux-style ld linker
 			target_link_options(${mod_name} PUBLIC "LINKER:--no-as-needed")
 		endif()
 	else()
 		add_library(${mod_name} SHARED ${ARGN})
 		set_target_properties(${mod_name} PROPERTIES PREFIX "" SUFFIX ".so")
-		if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+		if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+			set_target_properties(${mod_name} PROPERTIES LINK_FLAGS "-Wl,-no_dead_strip_dylibs")
+		else()
+			# Assume Linux-style ld linker
 			set_target_properties(${mod_name} PROPERTIES LINK_FLAGS "-Wl,--no-as-needed")
 		endif()
 		target_include_directories(${mod_name} PRIVATE ${Python_INCLUDE_DIRS})
@@ -109,26 +115,26 @@ macro(add_spt3g_test_program test_name)
 	                      "SOURCE_FILES;TEST_LABELS;USE_PROJECTS" # multi-value arguments
 	                      ${ARGN}
 	                      )
-	
+
 	add_test(NAME ${PROJECT}/${test_name}
 	         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
 	         COMMAND ${PROJECT}-${test_name}
 	         )
-	
+
 	if(ADD_TEST_PROGRAM_TEST_LABELS)
 		set_tests_properties(${PROJECT}/${test_name} PROPERTIES LABELS ${ADD_TEST_PROGRAM_TEST_LABELS})
 	endif(ADD_TEST_PROGRAM_TEST_LABELS)
-	
+
 	if(NOT EXISTS ${PROJECT_BINARY_DIR}/Spt3gTestMain.cxx)
 		file(WRITE ${PROJECT_BINARY_DIR}/Spt3gTestMain.cxx "#include <G3Test.h>\nG3TEST_MAIN_IMPL\n")
 	endif(NOT EXISTS ${PROJECT_BINARY_DIR}/Spt3gTestMain.cxx)
-	
+
 	add_spt3g_executable(${PROJECT}-${test_name}
 	                     ${PROJECT_BINARY_DIR}/Spt3gTestMain.cxx
 	                     ${ADD_TEST_PROGRAM_SOURCE_FILES}
 	                     )
 	target_include_directories(${PROJECT}-${test_name} PRIVATE ${CMAKE_SOURCE_DIR}/cmake)
-	
+
 	foreach(USED_PROJECT ${ADD_TEST_PROGRAM_USE_PROJECTS})
 		target_link_libraries(${PROJECT}-${test_name} ${USED_PROJECT})
 	endforeach(USED_PROJECT ${ADD_TEST_PROGRAM_USE_PROJECTS})
