@@ -2,3 +2,4 @@
 *
 # ...except these files
 !install_boost.sh
+!install_flac.sh
