@@ -38,10 +38,18 @@ if [ ! -e b2 ]; then
         --with-libraries="iostreams,python,regex"
 fi
 
+extra_include=""
+extra_link=""
+if [ $(uname) = "Darwin" ]; then
+    # We are building with clang++ on MacOS
+    extra_include="cxxflags=-stdlib=libc++"
+    extra_link="linkflags=-stdlib=libc++"
+fi
+
 echo "Building boost..."
 pyincl=$(for d in $(python3-config --includes | sed -e 's/-I//g'); do echo "include=${d}"; done | xargs)
 ./b2 \
     -j4 -d0 \
-    ${pyincl} \
+    ${pyincl} ${extra_include} ${extra_link} \
     variant=release threading=multi link=shared runtime-link=shared \
     install
