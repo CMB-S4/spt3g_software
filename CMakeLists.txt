@@ -247,3 +247,10 @@ configure_file(
 	"${CMAKE_BINARY_DIR}/cmake/cmake_uninstall_cmake"
 	IMMEDIATE @ONLY)
 add_custom_target(uninstall "${CMAKE_COMMAND}" -P "${CMAKE_BINARY_DIR}/cmake/cmake_uninstall_cmake")
+
+# Dump out all variables for debugging
+get_cmake_property(variable_names VARIABLES)
+list(SORT variable_names)
+foreach (variable_name ${variable_names})
+    message(STATUS "${variable_name}=${${variable_name}}")
+endforeach ()
