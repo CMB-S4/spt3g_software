@@ -43,10 +43,9 @@ find_package(Threads REQUIRED)
 
 if(DEFINED ENV{CIBUILDWHEEL})
 	# Can't compile binaries against libpython in CI
-	find_package(Python COMPONENTS Interpreter NumPy Development.Module REQUIRED)
-    find_package(Python COMPONENTS Interpreter NumPy Development REQUIRED)
+	find_package(Python COMPONENTS Interpreter Development.Module REQUIRED)
 else()
-	find_package(Python COMPONENTS Interpreter NumPy Development REQUIRED)
+	find_package(Python COMPONENTS Interpreter Development REQUIRED)
 endif()
 
 set(Boost_USE_STATIC_LIBS OFF)
