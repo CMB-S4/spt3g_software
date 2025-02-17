@@ -83,7 +83,7 @@ jobs:
             for f in `brew list`; do brew uninstall --ignore-dependencies --force $f; done &&
             for f in `brew list --cask`; do brew uninstall --ignore-dependencies --force $f; done
           CIBW_BEFORE_BUILD: >
-            ./deps/install_flac.sh && ./deps/install_boost.sh
+            pip install cmake && ./deps/install_flac.sh && ./deps/install_boost.sh
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
             LD_LIBRARY_PATH=$PWD/deps/lib auditwheel repair -w {dest_dir} {wheel}
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
