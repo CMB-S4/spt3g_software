@@ -5,6 +5,10 @@ on:
   release:
     types: [ published ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build_wheels:
     name: Build wheels for ${{ matrix.build }}
@@ -76,8 +80,8 @@ jobs:
           CIBW_BUILD: ${{ matrix.build }}
           CIBW_BEFORE_ALL_LINUX: yum install -y bzip2-devel netcdf-devel
           CIBW_BEFORE_ALL_MACOS: >
-            for f in `brew list`; do brew uninstall --ignore-dependencies --force $f done &&
-            for f in `brew list --cask`; do brew uninstall --ignore-dependencies --force $f done
+            for f in `brew list`; do brew uninstall --ignore-dependencies --force $f; done &&
+            for f in `brew list --cask`; do brew uninstall --ignore-dependencies --force $f; done
           CIBW_BEFORE_BUILD: >
             ./deps/install_flac.sh && ./deps/install_boost.sh
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
