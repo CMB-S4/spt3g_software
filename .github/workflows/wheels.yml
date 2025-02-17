@@ -92,6 +92,7 @@ jobs:
           CIBW_ENVIRONMENT_MACOS: >
             CMAKE_BUILD_PARALLEL_LEVEL=4
             CMAKE_PREFIX_PATH=$PWD/deps
+            CMAKE_ARGS='-DCMAKE_VERBOSE_MAKEFILE=ON'
             CC=clang
             CXX=clang++
             CFLAGS="-O3 -fPIC"
