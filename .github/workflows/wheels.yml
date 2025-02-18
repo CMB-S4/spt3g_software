@@ -85,7 +85,7 @@ jobs:
           CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
             LD_LIBRARY_PATH=$PWD/deps/lib auditwheel repair -w {dest_dir} {wheel}
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
-            DYLD_LIBRARY_PATH=$PWD/deps/lib delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel} && otool -L $PWD/deps/lib/* && dyld_info -dependents $PWD/deps/lib/*
+            DYLD_LIBRARY_PATH=$PWD/deps/lib delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}
           CIBW_BUILD_VERBOSITY: 1
           CIBW_ENVIRONMENT_LINUX: >
             CMAKE_BUILD_PARALLEL_LEVEL=4
