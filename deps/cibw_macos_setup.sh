@@ -2,6 +2,8 @@
 # runners to move homebrew out of the way:
 # https://github.com/macports/macports-ports/blob/master/.github/workflows/bootstrap.sh
 
+echo "===> START DEBUG:  python3:  $(which python3)"
+
 # Move directories to /opt/*-off
 echo "Moving directories..."
 sudo mkdir /opt/local-off /opt/homebrew-off
@@ -15,3 +17,5 @@ test ! -d /opt/homebrew || /usr/bin/sudo /usr/bin/find /opt/homebrew -mindepth 1
 
 # Rehash to forget about the deleted files
 hash -r
+
+echo "===> END DEBUG:  python3:  $(which python3)"
