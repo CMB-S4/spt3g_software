@@ -87,7 +87,7 @@ jobs:
         env:
           CIBW_BUILD: ${{ matrix.build }}
           CIBW_BEFORE_ALL_LINUX: yum install -y bzip2-devel netcdf-devel
-          CIBW_BEFORE_ALL_MACOS: echo "" > /dev/null
+          CIBW_BEFORE_ALL_MACOS: brew install netcdf
           CIBW_BEFORE_BUILD_MACOS: >
             ln -s $(dirname $(readlink -f $(which python3)))/python3-config $(dirname $(which python3))/python3-config &&
             pip install cmake && ./deps/install_flac.sh && ./deps/install_boost.sh
