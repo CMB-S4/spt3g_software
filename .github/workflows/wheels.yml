@@ -33,6 +33,9 @@ jobs:
           - os: macos-13
             build: cp312-macosx_x86_64
             target: 13.0
+          - os: macos-13
+            build: cp313-macosx_x86_64
+            target: 13.0
 
           - os: macos-14
             build: cp39-macosx_arm64
@@ -46,6 +49,9 @@ jobs:
           - os: macos-14
             build: cp312-macosx_arm64
             target: 14.0
+          - os: macos-14
+            build: cp313-macosx_arm64
+            target: 14.0
 
           - os: ubuntu-latest
             build: cp38-manylinux_x86_64
@@ -57,6 +63,8 @@ jobs:
             build: cp311-manylinux_x86_64
           - os: ubuntu-latest
             build: cp312-manylinux_x86_64
+          - os: ubuntu-latest
+            build: cp313-manylinux_x86_64
 
     steps:
       - name: Set macOS deployment target
