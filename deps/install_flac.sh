@@ -15,7 +15,7 @@ else
     cd ${PREFIX}
 fi
 
-flac_version=1.4.3
+flac_version=1.5.0
 flac_dir=flac-${flac_version}
 flac_pkg=${flac_dir}.tar.gz
 
