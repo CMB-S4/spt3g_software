@@ -15,13 +15,13 @@ else
     cd ${PREFIX}
 fi
 
-boost_version=1_86_0
+boost_version=1_87_0
 boost_dir=boost_${boost_version}
 boost_pkg=${boost_dir}.tar.bz2
 
 if [ ! -e ${boost_pkg} ]; then
     echo "Fetching boost..."
-    curl -SL "https://archives.boost.io/release/1.86.0/source/${boost_pkg}" -o "${boost_pkg}"
+    curl -SL "https://archives.boost.io/release/1.87.0/source/${boost_pkg}" -o "${boost_pkg}"
 fi
 
 if [ ! -e ${boost_dir} ]; then
@@ -38,10 +38,18 @@ if [ ! -e b2 ]; then
         --with-libraries="iostreams,python,regex"
 fi
 
+extra_include=""
+extra_link=""
+if [ $(uname) = "Darwin" ]; then
+    # We are building with clang++ on MacOS
+    extra_include="cxxflags=-stdlib=libc++"
+    extra_link="linkflags=-stdlib=libc++"
+fi
+
 echo "Building boost..."
 pyincl=$(for d in $(python3-config --includes | sed -e 's/-I//g'); do echo "include=${d}"; done | xargs)
 ./b2 \
     -j4 -d0 \
-    ${pyincl} \
+    ${pyincl} ${extra_include} ${extra_link} \
     variant=release threading=multi link=shared runtime-link=shared \
     install
