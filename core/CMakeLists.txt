@@ -21,11 +21,8 @@ add_spt3g_library(core SHARED
 # Link dependencies
 target_link_libraries(core PUBLIC spt3g)
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-	target_link_libraries(core PUBLIC stdc++fs)
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-	target_link_libraries(core PUBLIC c++fs)
-endif()
+find_package(Filesystem REQUIRED)
+target_link_libraries(core PUBLIC std::filesystem)
 
 # add python bindings
 add_spt3g_module(core src/python.cxx)
