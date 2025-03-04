@@ -21,6 +21,9 @@ add_spt3g_library(core SHARED
 # Link dependencies
 target_link_libraries(core PUBLIC spt3g)
 
+find_package(Filesystem REQUIRED)
+target_link_libraries(core PUBLIC std::filesystem)
+
 # add python bindings
 add_spt3g_module(core src/python.cxx)
 
