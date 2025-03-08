@@ -37,7 +37,7 @@ public:
     typedef Ch char_type;
     struct category
         : dual_use,
-          filter_tag,
+          seekable_filter_tag,
           multichar_tag,
           optimally_buffered_tag
         { };
@@ -57,6 +57,21 @@ public:
         lines_ += std::count(s, s + result, char_traits<Ch>::newline());
         chars_ += result;
         return result;
+    }
+
+    template<typename Device>
+    std::streampos seek(Device &dev, stream_offset off, BOOST_IOS::seekdir way)
+    {
+        chars_ = iostreams::seek(dev, off, way);
+        return chars_;
+    }
+
+    template<typename Device>
+    std::streampos seek(Device &dev, stream_offset off, BOOST_IOS::seekdir way,
+        BOOST_IOS::openmode which)
+    {
+        chars_ = iostreams::seek(dev, off, way, which);
+        return chars_;
     }
 
     template<typename Sink>
