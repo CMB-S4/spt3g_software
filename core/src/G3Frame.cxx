@@ -5,7 +5,6 @@
 #include <pybindings.h>
 #include <dataio.h>
 
-#include <sstream>
 #include <stdlib.h>
 #include <cxxabi.h>
 #include <algorithm>
@@ -13,24 +12,6 @@
 namespace bp = boost::python;
 
 extern "C" unsigned long crc32c(unsigned long crc, const uint8_t *buf, unsigned int len);
-
-// Work around crummy slow implementation of xsgetn() in libc++
-class fast_streambuf : public std::basic_streambuf<char>
-{
-public:
-	fast_streambuf(std::vector<char> &vec) : basic_streambuf() {
-		setg(&vec[0], &vec[0], &vec[0] + vec.size());
-	}
-protected:
-	std::streamsize xsgetn(char_type *buf, std::streamsize n) {
-		std::streamsize to_read = egptr() - gptr();
-		if (to_read > n)
-			to_read = n;
-		memcpy(buf, gptr(), to_read);
-		gbump(to_read);
-		return to_read;
-	}
-};
 
 template <typename T>
 static std::string cxx_demangle(const T& v)
@@ -316,8 +297,7 @@ void G3Frame::load(T &is)
 template <>
 void G3Frame::load(std::vector<char> &data)
 {
-	fast_streambuf sb(data);
-	std::istream is(&sb);
+	G3BufferInputStream is(data);
 
 	load(is);
 }
@@ -370,8 +350,7 @@ void G3Frame::blob_decode(struct blob_container &blob)
 	if (blob.frameobject)
 		return;
 
-	fast_streambuf sb(*blob.blob);
-	std::istream is(&sb);
+	G3BufferInputStream is(*blob.blob);
 	cereal::PortableBinaryInputArchive item_ar(is);
 	item_ar >> make_nvp("val", ptr);
 	blob.frameobject = ptr;
@@ -391,8 +370,7 @@ void G3Frame::blob_encode(struct blob_container &blob)
 
 	// If no encoded frameobject, serialize it
 	blob.blob = std::make_shared<std::vector<char> >();
-	g3_ostream item_os;
-	g3_ostream_to_buffer(item_os, *blob.blob);
+	G3BufferOutputStream item_os(*blob.blob);
 	cereal::PortableBinaryOutputArchive item_ar(item_os);
 	item_ar << make_nvp("val", blob.frameobject);
 	item_os.flush();
@@ -432,8 +410,7 @@ struct g3frame_picklesuite : boost::python::pickle_suite
 	{
 		namespace bp = boost::python;
 		std::vector<char> buffer;
-		g3_ostream os;
-		g3_ostream_to_buffer(os, buffer);
+		G3BufferOutputStream os(buffer);
 		(bp::extract<const G3Frame &>(obj))().save(os);
 		os.flush();
 
