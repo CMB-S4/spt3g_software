@@ -42,17 +42,7 @@ set(Boost_USE_STATIC_LIBS @Boost_USE_STATIC_LIBS@)
 set(Boost_USE_MULTITHREADED @Boost_USE_MULTITHREADED@)
 set(Boost_USE_STATIC_RUNTIME @Boost_USE_STATIC_RUNTIME@)
 set(Boost_PYTHON_VERSION @Boost_PYTHON_VERSION@)
-find_dependency(Boost COMPONENTS iostreams python REQUIRED)
-
-if(@FLAC_FOUND@)
-	find_dependency(FLAC MODULE)
-endif()
-if(@NetCDF_FOUND@)
-	find_dependency(NetCDF MODULE)
-endif()
-if(@OpenMP_FOUND@)
-	find_dependency(OpenMP)
-endif()
+find_dependency(Boost COMPONENTS python REQUIRED)
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Spt3g
