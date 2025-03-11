@@ -22,7 +22,7 @@ add_spt3g_library(core SHARED
 target_link_libraries(core PUBLIC spt3g)
 
 find_package(Filesystem REQUIRED)
-target_link_libraries(core PUBLIC std::filesystem)
+target_link_libraries(core PRIVATE std::filesystem)
 
 # add python bindings
 add_spt3g_module(core src/python.cxx)
@@ -37,9 +37,11 @@ target_include_directories(core PUBLIC
 find_package(FLAC MODULE)
 if(FLAC_FOUND)
 	target_compile_definitions(core PRIVATE -DG3_HAS_FLAC)
-	target_link_libraries(core PUBLIC FLAC::FLAC)
-	set(FLAC_FOUND ${FLAC_FOUND} PARENT_SCOPE)
+	target_link_libraries(core PRIVATE FLAC::FLAC)
 endif()
+
+# Link Boost IOStreams
+target_link_libraries(core PRIVATE Boost::iostreams)
 
 # Link against BZIP2 library
 if(NOT DEFINED WITH_BZIP2)
