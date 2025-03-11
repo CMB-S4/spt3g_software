@@ -5,6 +5,9 @@
 #ifdef BZIP2_FOUND
 #include <boost/iostreams/filter/bzip2.hpp>
 #endif
+#ifdef LZMA_FOUND
+#include <boost/iostreams/filter/lzma.hpp>
+#endif
 #include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <filesystem>
@@ -29,6 +32,13 @@ g3_istream_from_path(g3_istream &stream, const std::string &path,
 		stream.push(boost::iostreams::bzip2_decompressor());
 #else
 		log_fatal("Boost not compiled with bzip2 support.");
+#endif
+	}
+	if (path.size() > 3 && !path.compare(path.size() - 3, 3, ".xz")) {
+#ifdef LZMA_FOUND
+		stream.push(boost::iostreams::lzma_decompressor());
+#else
+		log_fatal("Boost not compiled with LZMA support.");
 #endif
 	}
 
@@ -178,6 +188,13 @@ g3_ostream_to_path(g3_ostream &stream, const std::string &path,
 		stream.push(boost::iostreams::bzip2_compressor());
 #else
 		log_fatal("Boost not compiled with bzip2 support.");
+#endif
+	}
+	if (path.size() > 3 && !path.compare(path.size() - 3, 3, ".xz") && !append) {
+#ifdef LZMA_FOUND
+		stream.push(boost::iostreams::lzma_compressor());
+#else
+		log_fatal("Boost not compiled with LZMA support.");
 #endif
 	}
 
