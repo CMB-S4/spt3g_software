@@ -294,14 +294,6 @@ void G3Frame::load(T &is)
 		    testcrc, crc);
 }
 
-template <>
-void G3Frame::load(std::vector<char> &data)
-{
-	G3BufferInputStream is(data);
-
-	load(is);
-}
-
 void G3Frame::DropBlobs(bool decode_all) const
 {
 	for (auto i = map_.begin(); i != map_.end(); i++) {
@@ -427,9 +419,9 @@ struct g3frame_picklesuite : boost::python::pickle_suite
 		PyObject_GetBuffer(bp::object(state[1]).ptr(), &view,
 		    PyBUF_SIMPLE);
 
-		std::vector<char> buf((char *)view.buf, (char *)view.buf + view.len);
 		bp::extract<bp::dict>(obj.attr("__dict__"))().update(state[0]);
-		(bp::extract<G3Frame &>(obj))().load(buf);
+		G3BufferInputStream is((char *)view.buf, view.len);
+		(bp::extract<G3Frame &>(obj))().load(is);
 		PyBuffer_Release(&view);
 	}
 };
