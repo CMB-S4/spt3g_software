@@ -10,8 +10,6 @@
 #endif
 #include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/iostreams/device/array.hpp>
-#include <boost/iostreams/device/back_inserter.hpp>
 #include <filesystem>
 
 #include <sys/types.h>
@@ -179,13 +177,6 @@ g3_istream_tell(g3_istream &stream)
 }
 
 void
-g3_istream_from_buffer(g3_istream &stream, const char *buf, size_t len)
-{
-	stream.reset();
-	stream.push(boost::iostreams::array_source(buf, len));
-}
-
-void
 g3_ostream_to_path(g3_ostream &stream, const std::string &path,
     bool append, bool counter)
 {
@@ -225,14 +216,6 @@ g3_ostream_count(g3_ostream &stream)
 		log_fatal("Could not get stream counter");
 
 	return counter->characters();
-}
-
-void
-g3_ostream_to_buffer(g3_ostream &stream,
-    std::vector<char> &buf)
-{
-	stream.reset();
-	stream.push(boost::iostreams::back_inserter(buf));
 }
 
 void

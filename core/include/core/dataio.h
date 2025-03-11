@@ -51,17 +51,6 @@ off_t g3_istream_seek(g3_istream &stream, off_t offset);
 off_t g3_istream_tell(g3_istream &stream);
 
 /**
- * Configure a filtering stream for G3Frame decompression from a memory buffer.
- *
- * @param  stream   A reference to the filtering istream that will be configured
- *                  by this function.  Must be instantiated prior to this
- *                  function.
- * @param  buffer   A pointer to a char buffer in memory.
- * @param  len      Size of the buffer in bytes.
- */
-void g3_istream_from_buffer(g3_istream &stream, const char *buf, size_t len);
-
-/**
  * Configure a filtering stream for G3Frame compression to a local file.
  *
  * @param  stream   A reference to the filtering ostream that will be configured
@@ -86,16 +75,6 @@ void g3_ostream_to_path(g3_ostream &stream, const std::string &path,
  * @return Number of bytes written to disk.
  */
 size_t g3_ostream_count(g3_ostream &stream);
-
-/**
- * Configure a filtering stream for G3Frame compression to a memory buffer.
- *
- * @param  stream   A reference to the filtering ostream that will be configured
- *                  by this function.  Must be instantiated prior to this
- *                  function.
- * @param  buffer   A reference a char buffer in memory.
- */
-void g3_ostream_to_buffer(g3_ostream &stream, std::vector<char> &buf);
 
 /**
  * Check that the input filename is a valid filename on disk.
