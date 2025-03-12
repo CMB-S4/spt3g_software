@@ -84,7 +84,7 @@ void G3Reader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	}
 	frame = G3FramePtr(new G3Frame);
 	try {
-		frame->load(stream_);
+		frame->loads(stream_);
 	} catch (...) {
 		log_error("Exception raised while reading file %s",
 		    cur_file_.c_str());
