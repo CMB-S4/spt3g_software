@@ -162,20 +162,6 @@ g3_istream_from_path(g3_istream &stream, const std::string &path,
 	return fd;
 }
 
-off_t
-g3_istream_seek(g3_istream &stream, off_t offset)
-{
-	if (stream.peek() == EOF && offset != g3_istream_tell(stream))
-		log_fatal("Cannot seek stream, closed at EOF.");
-	return boost::iostreams::seek(stream, offset, std::ios_base::beg);
-}
-
-off_t
-g3_istream_tell(g3_istream &stream)
-{
-	return boost::iostreams::seek(stream, 0, std::ios_base::cur);
-}
-
 void
 g3_ostream_to_path(g3_ostream &stream, const std::string &path,
     bool append, bool counter)
