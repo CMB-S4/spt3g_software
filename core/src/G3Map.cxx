@@ -3,7 +3,6 @@
 #include <pybindings.h>
 #include <container_pybindings.h>
 #include <serialization.h>
-#include <dataio.h>
 #include "int_storage.h"
 
 /* Special load/save for int64_t, using the same encoding at G3VectorInt */
@@ -159,12 +158,11 @@ template <class A> void G3MapFrameObject::save(A &ar, const unsigned v) const
 	uint32_t len = size();
 	ar << cereal::make_nvp("len", len);
 
-	g3_ostream os;
 	for (auto i = begin(); i != end(); i++) {
 		ar << cereal::make_nvp("key", i->first);
 
 		std::vector<char> buffer;
-		g3_ostream_to_buffer(os, buffer);
+		G3BufferOutputStream os(buffer);
 		{
 			A subar(os);
 			subar << cereal::make_nvp("item",
@@ -184,7 +182,6 @@ template <class A> void G3MapFrameObject::load(A &ar, const unsigned v)
 
 	uint32_t len;
 	ar >> cereal::make_nvp("len", len);
-	g3_istream fis;
 	for (uint32_t i = 0; i < len; i++) {
 		std::pair<std::string, G3FrameObjectPtr> item;
 		std::vector<char> buffer;
@@ -192,8 +189,7 @@ template <class A> void G3MapFrameObject::load(A &ar, const unsigned v)
 		ar >> cereal::make_nvp("key", item.first);
 		ar >> cereal::make_nvp("value", buffer);
 
-		g3_istream_from_buffer(fis, (char *)&buffer[0], buffer.size());
-
+		G3BufferInputStream fis(buffer);
 		A subar(fis);
 		subar >> cereal::make_nvp("item", item.second);
 		this->insert(item);

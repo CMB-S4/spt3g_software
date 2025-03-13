@@ -54,6 +54,17 @@ template <class A> void HkChannelInfo::serialize(A &ar, unsigned v)
 		ar & make_nvp("nuller_phase", nuller_phase);
 		ar & make_nvp("demod_phase", demod_phase);
 	}
+
+	if (v > 6) {
+		ar & make_nvp("i_slope", i_slope);
+		ar & make_nvp("q_slope", q_slope);
+		ar & make_nvp("internal_phase", internal_phase);
+		ar & make_nvp("external_phase", external_phase);
+	}
+
+	if (v > 7) {
+		ar & make_nvp("bias_frequency", bias_frequency);
+	}
 }
 
 std::string HkModuleInfo::Description() const
@@ -218,6 +229,16 @@ PYBINDINGS("dfmux") {
 	       "Nuller phase in standard angle units (mkid only)")
 	    .def_readwrite("demod_phase", &HkChannelInfo::demod_phase,
 	       "Demodulator phase in standard angle units (mkid only)")
+	    .def_readwrite("i_slope", &HkChannelInfo::i_slope,
+	       "Calibration coefficient in units of counts per frequency (mkid only)")
+	    .def_readwrite("q_slope", &HkChannelInfo::q_slope,
+	       "Calibration coefficient in units of counts per frequency (mkid only)")
+	    .def_readwrite("internal_phase", &HkChannelInfo::internal_phase,
+	       "Phase angle associated with delays internal to the readout board (mkid only)")
+	    .def_readwrite("external_phase", &HkChannelInfo::external_phase,
+	       "Phase angle associated with delays external to the readout board (mkid only)")
+	    .def_readwrite("bias_frequency", &HkChannelInfo::bias_frequency,
+	       "NCO-adjusted bias frequency (mkid only)")
 	;
 	register_map<std::map<int, HkChannelInfo> >("HkChannelInfoMap",
 	    "Mapping of channel number (1-indexed) to channel status "

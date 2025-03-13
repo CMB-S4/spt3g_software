@@ -120,7 +120,7 @@ G3MultiFileWriter::CheckNewFile(G3FramePtr frame)
 	g3_ostream_to_path(stream_, filename, false, true);
 
 	for (auto i = metadata_cache_.begin(); i != metadata_cache_.end(); i++)
-		(*i)->save(stream_);
+		(*i)->saves(stream_);
 
 	return true;
 }
@@ -161,7 +161,7 @@ void G3MultiFileWriter::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	// And out to disk, making sure not to write again if it just went into
 	// the metadata cache and onto disk in CheckNewFile()
 	if (!new_file || !meta_cached)
-		frame->save(stream_);
+		frame->saves(stream_);
 
 done:
 	out.push_back(frame);

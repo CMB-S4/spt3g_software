@@ -1,7 +1,7 @@
 #include <pybindings.h>
 #include <G3NetworkSender.h>
 
-#include <dataio.h>
+#include <serialization.h>
 
 #include <chrono>
 
@@ -173,9 +173,8 @@ void G3NetworkSender::SerializeFrame(serialization_task& task)
 {
 	try{
 		netbuf_type buf(new std::vector<char>);
-		g3_ostream os;
-		g3_ostream_to_buffer(os, *buf);
-		task.input->save(os);
+		G3BufferOutputStream os(*buf);
+		task.input->saves(os);
 		os.flush();
 		task.output.set_value(buf);
 	}

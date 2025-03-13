@@ -13,3 +13,4 @@ doc/module-autodocs.rst
 doc/moddoc_*
 *.g3
 .DS_Store
+.idea/

@@ -30,6 +30,9 @@ endif()
 # Link dependencies
 target_link_libraries(core PUBLIC spt3g)
 
+find_package(Filesystem REQUIRED)
+target_link_libraries(core PRIVATE std::filesystem)
+
 # add python bindings
 add_spt3g_module(core src/python.cxx)
 
@@ -43,9 +46,11 @@ target_include_directories(core PUBLIC
 find_package(FLAC MODULE)
 if(FLAC_FOUND)
 	target_compile_definitions(core PRIVATE -DG3_HAS_FLAC)
-	target_link_libraries(core PUBLIC FLAC::FLAC)
-	set(FLAC_FOUND ${FLAC_FOUND} PARENT_SCOPE)
+	target_link_libraries(core PRIVATE FLAC::FLAC)
 endif()
+
+# Link Boost IOStreams
+target_link_libraries(core PRIVATE Boost::iostreams)
 
 # Link against BZIP2 library
 if(NOT DEFINED WITH_BZIP2)
@@ -56,6 +61,16 @@ if(WITH_BZIP2)
 endif()
 if(BZIP2_FOUND)
 	target_compile_definitions(core PRIVATE -DBZIP2_FOUND)
+endif()
+
+if(NOT DEFINED WITH_LZMA)
+	set(WITH_LZMA TRUE CACHE BOOL "Enable LZMA file compression")
+endif()
+if(WITH_LZMA)
+	find_package(LibLZMA)
+endif()
+if(LIBLZMA_FOUND)
+	target_compile_definitions(core PRIVATE -DLZMA_FOUND)
 endif()
 
 link_python_dir()
@@ -86,6 +101,9 @@ add_spt3g_test(splitfileio)
 add_spt3g_test(compressedfileio)
 if(BZIP2_FOUND)
 	add_spt3g_test(bz2fileio)
+endif()
+if(LIBLZMA_FOUND)
+	add_spt3g_test(xzfileio)
 endif()
 add_spt3g_test(portability)
 add_spt3g_test(vecint)

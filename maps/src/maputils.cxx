@@ -279,7 +279,8 @@ void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, G3SkyMapWeightsPtr W, double h
 }
 
 
-void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool interp)
+void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool interp,
+    G3SkyMapMaskConstPtr out_map_mask)
 {
 	bool rotate = false; // no transform
 	Quat q_rot; // quaternion for rotating from output to input coordinate system
@@ -310,8 +311,16 @@ void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool int
 		out_map->pol_conv = in_map->pol_conv;
 	}
 
+	if (!!out_map_mask && !out_map_mask->IsCompatible(*out_map))
+		log_fatal("Mask is not compatible with output map");
+
+	size_t stop = out_map->size();
 	if (rebin > 1) {
-		for (size_t i = 0; i < out_map->size(); i++) {
+		for (size_t i = 0; i < stop; i++) {
+			if (!!out_map_mask && !out_map_mask->at(i)) {
+				(*out_map)[i] = 0;
+				continue;
+			}
 			double val = 0;
 			auto quats = out_map->GetRebinQuats(i, rebin);
 			if (rotate)
@@ -328,7 +337,11 @@ void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool int
 			}
 		}
 	} else {
-		for (size_t i = 0; i < out_map->size(); i++) {
+		for (size_t i = 0; i < stop; i++) {
+			if (!!out_map_mask && !out_map_mask->at(i)) {
+				(*out_map)[i] = 0;
+				continue;
+			}
 			double val = 0;
 			auto q = out_map->PixelToQuat(i);
 			if (rotate)
@@ -572,7 +585,8 @@ PYBINDINGS("maps")
 		"the appropriate rotation to the Q and u elements of the associated weights.");
 
 	bp::def("reproj_map", ReprojMap,
-		(bp::arg("in_map"), bp::arg("out_map"), bp::arg("rebin")=1, bp::arg("interp")=false),
+		(bp::arg("in_map"), bp::arg("out_map"), bp::arg("rebin")=1, bp::arg("interp")=false,
+		bp::arg("mask")=bp::object()),
 		"Reprojects the data from in_map onto out_map.  out_map can have a different "
 		"projection, size, resolution, etc.  Optionally account for sub-pixel "
 		"structure by setting rebin > 1 and/or enable bilinear interpolation of "
@@ -580,7 +594,8 @@ PYBINDINGS("maps")
 		"attributes to rotate between Equatorial and Galactic coordinate systems.  "
 		"Use the maps' pol_conv attributes to switch between COSMO and IAU "
 		"polarization conventions.  If output attributes are not set, they will be "
-		"copied from the input map.");
+		"copied from the input map. out_map_mask, if given, skip the unused pixels"
+		"and set these pixels to 0.");
 
 	bp::def("get_map_moments", GetMapMoments,
 		(bp::arg("map"), bp::arg("mask")=G3SkyMapMaskConstPtr(), bp::arg("order")=2,

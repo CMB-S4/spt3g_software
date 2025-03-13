@@ -35,6 +35,8 @@ public:
 		DarkTermination = 'T',
 		DarkCrossover = 'X',
 		Resistor = 'R',
+		Loopback = 'L',
+		OffResonance = 'F',
 	};
 
 	CouplingType coupling;  /* Optical coupling type */

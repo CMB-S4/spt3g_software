@@ -130,6 +130,11 @@ PYBINDINGS("core") {
 	G3_UNITS_DEF(nanoamp);
 	G3_UNITS_DEF(nA);
 
+	/* Resistance */
+	G3_UNITS_DEF(ohm);
+	G3_UNITS_DEF(mohm);
+	G3_UNITS_DEF(milliohm);
+
 	/* Temperature */
 	G3_UNITS_DEF(snausage);
 	G3_UNITS_DEF(kelvin);

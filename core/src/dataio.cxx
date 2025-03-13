@@ -5,10 +5,11 @@
 #ifdef BZIP2_FOUND
 #include <boost/iostreams/filter/bzip2.hpp>
 #endif
+#ifdef LZMA_FOUND
+#include <boost/iostreams/filter/lzma.hpp>
+#endif
 #include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/iostreams/device/array.hpp>
-#include <boost/iostreams/device/back_inserter.hpp>
 #include <filesystem>
 
 #include <sys/types.h>
@@ -20,7 +21,8 @@
 #include "counter64.hpp"
 
 int
-g3_istream_from_path(g3_istream &stream, const std::string &path, float timeout)
+g3_istream_from_path(g3_istream &stream, const std::string &path,
+    float timeout, size_t buffersize)
 {
 	stream.reset();
 	if (path.size() > 3 && !path.compare(path.size() - 3, 3, ".gz"))
@@ -30,6 +32,13 @@ g3_istream_from_path(g3_istream &stream, const std::string &path, float timeout)
 		stream.push(boost::iostreams::bzip2_decompressor());
 #else
 		log_fatal("Boost not compiled with bzip2 support.");
+#endif
+	}
+	if (path.size() > 3 && !path.compare(path.size() - 3, 3, ".xz")) {
+#ifdef LZMA_FOUND
+		stream.push(boost::iostreams::lzma_decompressor());
+#else
+		log_fatal("Boost not compiled with LZMA support.");
 #endif
 	}
 
@@ -143,11 +152,11 @@ g3_istream_from_path(g3_istream &stream, const std::string &path, float timeout)
 
 		boost::iostreams::file_descriptor_source fs(fd,
 		    boost::iostreams::close_handle);
-		stream.push(fs);
+		stream.push(fs, buffersize);
 	} else {
 		// Simple file case
 		stream.push(boost::iostreams::file_source(path,
-		    std::ios::binary));
+		    std::ios::binary), buffersize);
 	}
 
 	return fd;
@@ -168,13 +177,6 @@ g3_istream_tell(g3_istream &stream)
 }
 
 void
-g3_istream_from_buffer(g3_istream &stream, const char *buf, size_t len)
-{
-	stream.reset();
-	stream.push(boost::iostreams::array_source(buf, len));
-}
-
-void
 g3_ostream_to_path(g3_ostream &stream, const std::string &path,
     bool append, bool counter)
 {
@@ -186,6 +188,13 @@ g3_ostream_to_path(g3_ostream &stream, const std::string &path,
 		stream.push(boost::iostreams::bzip2_compressor());
 #else
 		log_fatal("Boost not compiled with bzip2 support.");
+#endif
+	}
+	if (path.size() > 3 && !path.compare(path.size() - 3, 3, ".xz") && !append) {
+#ifdef LZMA_FOUND
+		stream.push(boost::iostreams::lzma_compressor());
+#else
+		log_fatal("Boost not compiled with LZMA support.");
 #endif
 	}
 
@@ -207,14 +216,6 @@ g3_ostream_count(g3_ostream &stream)
 		log_fatal("Could not get stream counter");
 
 	return counter->characters();
-}
-
-void
-g3_ostream_to_buffer(g3_ostream &stream,
-    std::vector<char> &buf)
-{
-	stream.reset();
-	stream.push(boost::iostreams::back_inserter(buf));
 }
 
 void

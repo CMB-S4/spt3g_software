@@ -10,9 +10,11 @@
 class G3Reader : public G3Module {
 public:
 	G3Reader(std::string filename, int n_frames_to_read = -1,
-                 float timeout = -1., bool track_filename = false);
+                 float timeout = -1., bool track_filename = false,
+	         size_t buffersize = 1024*1024);
 	G3Reader(std::vector<std::string> filenames, int n_frames_to_read = -1,
-                 float timeout = -1., bool track_filename = false);
+                 float timeout = -1., bool track_filename = false,
+	         size_t buffersize = 1024*1024);
 
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
 	off_t Seek(off_t offset);
@@ -29,6 +31,7 @@ private:
 	int n_frames_cur_;
 	float timeout_;
 	bool track_filename_;
+	size_t buffersize_;
 
 	SET_LOGGER("G3Reader");
 };

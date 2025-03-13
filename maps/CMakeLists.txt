@@ -22,8 +22,7 @@ target_link_libraries(maps PUBLIC core calibration)
 
 find_package(OpenMP)
 if(OpenMP_FOUND)
-  target_link_libraries(maps PUBLIC OpenMP::OpenMP_CXX)
-  set(OpenMP_FOUND ${OpenMP_FOUND} PARENT_SCOPE)
+  target_link_libraries(maps PRIVATE OpenMP::OpenMP_CXX)
 endif()
 
 add_spt3g_module(maps src/python.cxx)

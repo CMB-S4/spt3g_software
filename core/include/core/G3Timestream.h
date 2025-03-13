@@ -21,6 +21,8 @@ public:
 		Voltage = 8,
 		Pressure = 9,
 		FluxDensity = 10,
+		Trj = 11,
+		Frequency = 12,
 	};
 
 	G3Timestream(const G3Timestream &r);

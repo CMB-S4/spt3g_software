@@ -64,9 +64,9 @@ if (SPT3G_VERSION)
 	target_compile_definitions(spt3g INTERFACE -DSPT3G_VERSION="${SPT3G_VERSION}")
 endif()
 
-target_compile_features(spt3g INTERFACE cxx_std_11)
+target_compile_features(spt3g INTERFACE cxx_std_17)
 target_include_directories(spt3g INTERFACE ${Boost_INCLUDE_DIR})
-target_link_libraries(spt3g INTERFACE Threads::Threads ${Boost_LIBRARIES})
+target_link_libraries(spt3g INTERFACE Threads::Threads Boost::python)
 target_include_directories(spt3g INTERFACE $<INSTALL_INTERFACE:${SPT3G_INCLUDE_INSTALL_DIR}>)
 
 # Python bindings

@@ -323,19 +323,25 @@ class HousekeepingConsumer(object):
                     if 'dan_railed' in chan:
                         chanhk.dan_railed = chan['dan_railed']
                     if 'tuning' in chan and chan['tuning'] is not None:
-                        chanhk.state = str(chan['tuning']['state'])
-                        if ('rlatched' in chan['tuning'] and 
-                            chan['tuning']['rlatched'] is not None):
-                            chanhk.rlatched = chan['tuning']['rlatched']
-                        if ('rnormal' in chan['tuning'] and 
-                            chan['tuning']['rnormal'] is not None):
-                            chanhk.rnormal = chan['tuning']['rnormal']
-                        if ('rfrac_achieved' in chan['tuning'] and 
-                            chan['tuning']['rfrac_achieved'] is not None):
-                            chanhk.rfrac_achieved = chan['tuning']['rfrac_achieved']
-                        if ('loopgain' in chan['tuning'] and
-                            chan['tuning']['loopgain'] is not None):
-                            chanhk.loopgain = chan['tuning']['loopgain']
+                        if "tune" in chan["tuning"] and "state" not in chan["tuning"]:
+                            # KIDs
+                            chanhk.state = "tuned" if chan["tuning"]["tune"] else "unknown"
+                        else:
+                            chanhk.state = str(chan["tuning"]["state"])
+                        attrs = {
+                            "rlatched": ("rlatched", core.G3Units.ohm),
+                            "rnormal": ("rnormal", core.G3Units.ohm),
+                            "rfrac_achieved": ("rfrac_achieved", 1),
+                            "loopgain": ("loopgain", 1),
+                            "i_slope": ("dIr", 1. / core.G3Units.Hz),
+                            "q_slope": ("dQr", 1. / core.G3Units.Hz),
+                            "internal_phase": ("internal_phase", core.G3Units.rad),
+                            "external_phase": ("external_phase", core.G3Units.rad),
+                            "bias_frequency": ("bias_freq", core.G3Units.Hz),
+                        }
+                        for attr, (na, ua) in attrs.items():
+                            if chan["tuning"].get(na, None) is not None:
+                                setattr(chanhk, attr, float(chan["tuning"][na]) * ua)
 
                     modhk.channels[k+1] = chanhk
                 mezzhk.modules[m+1] = modhk

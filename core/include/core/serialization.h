@@ -1,7 +1,7 @@
 #ifndef _G3_SERIALIZATION_H
 #define _G3_SERIALIZATION_H
 
-#include <dataio.h>
+#include <sstream>
 
 #include <cereal/archives/portable_binary.hpp>
 #ifdef SPT3G_ENABLE_JSON_OUTPUT
@@ -43,6 +43,68 @@ template void x::load(cereal::PortableBinaryInputArchive &, unsigned); \
 
 #endif
 
+// Work around crummy slow implementation of xsgetn() in libc++
+class G3InputStreamBuffer : public std::basic_streambuf<char>
+{
+public:
+	G3InputStreamBuffer(std::vector<char> &vec) : basic_streambuf() {
+		setg(&vec[0], &vec[0], &vec[0] + vec.size());
+	}
+	G3InputStreamBuffer(char *buf, size_t len) : basic_streambuf() {
+		setg(buf, buf, buf + len);
+	}
+protected:
+	std::streamsize xsgetn(char_type *buf, std::streamsize n) {
+		std::streamsize to_read = egptr() - gptr();
+		if (to_read > n)
+			to_read = n;
+		memcpy(buf, gptr(), to_read);
+		gbump(to_read);
+		return to_read;
+	}
+};
+
+class G3BufferInputStream : public std::istream
+{
+public:
+	G3BufferInputStream(std::vector<char> &vec) : std::istream(&sbuf_), sbuf_(vec) {}
+	G3BufferInputStream(char *buf, size_t len) : std::istream(&sbuf_), sbuf_(buf, len) {}
+private:
+	G3InputStreamBuffer sbuf_;
+};
+
+class G3OutputStreamBuffer : public std::basic_streambuf<char>
+{
+public:
+	G3OutputStreamBuffer(std::vector<char> &buffer) : buffer_(buffer) {
+		setp(&buffer_[0], &buffer_[0] + buffer_.size());
+	}
+protected:
+	std::streamsize xsputn(const char* s, std::streamsize n) {
+		buffer_.insert(buffer_.end(), s, s + n);
+		pbump(n);
+		return n;
+	}
+
+	int overflow(int c = std::char_traits<char>::eof()) {
+		if (c != std::char_traits<char>::eof()) {
+			buffer_.push_back(static_cast<char>(c));
+			pbump(1);
+		}
+		return c;
+	}
+private:
+	std::vector<char>& buffer_;
+};
+
+class G3BufferOutputStream : public std::ostream
+{
+public:
+	G3BufferOutputStream(std::vector<char> &vec) : std::ostream(&sbuf_), sbuf_(vec) {}
+private:
+	G3OutputStreamBuffer sbuf_;
+};
+
 template <class T>
 struct g3frameobject_picklesuite : boost::python::pickle_suite
 {
@@ -50,8 +112,7 @@ struct g3frameobject_picklesuite : boost::python::pickle_suite
 	{
 		namespace bp = boost::python;
 		std::vector<char> buffer;
-		g3_ostream os;
-		g3_ostream_to_buffer(os, buffer);
+		G3BufferOutputStream os(buffer);
 		{
 			cereal::PortableBinaryOutputArchive ar(os);
 			ar << bp::extract<const T &>(obj)();
@@ -71,8 +132,7 @@ struct g3frameobject_picklesuite : boost::python::pickle_suite
 		PyObject_GetBuffer(bp::object(state[1]).ptr(), &view,
 		    PyBUF_SIMPLE);
 
-		g3_istream fis;
-		g3_istream_from_buffer(fis, (char *)view.buf, view.len);
+		G3BufferInputStream fis((char *)view.buf, view.len);
 		cereal::PortableBinaryInputArchive ar(fis);
 
 		bp::extract<bp::dict>(obj.attr("__dict__"))().update(state[0]);

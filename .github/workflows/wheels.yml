@@ -5,6 +5,10 @@ on:
   release:
     types: [ published ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build_wheels:
     name: Build wheels for ${{ matrix.build }}
@@ -29,6 +33,9 @@ jobs:
           - os: macos-13
             build: cp312-macosx_x86_64
             target: 13.0
+          - os: macos-13
+            build: cp313-macosx_x86_64
+            target: 13.0
 
           - os: macos-14
             build: cp39-macosx_arm64
@@ -42,6 +49,9 @@ jobs:
           - os: macos-14
             build: cp312-macosx_arm64
             target: 14.0
+          - os: macos-14
+            build: cp313-macosx_arm64
+            target: 14.0
 
           - os: ubuntu-latest
             build: cp38-manylinux_x86_64
@@ -53,6 +63,8 @@ jobs:
             build: cp311-manylinux_x86_64
           - os: ubuntu-latest
             build: cp312-manylinux_x86_64
+          - os: ubuntu-latest
+            build: cp313-manylinux_x86_64
 
     steps:
       - name: Set macOS deployment target
@@ -71,17 +83,33 @@ jobs:
           fetch-tags: true
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.20.0
+        uses: pypa/cibuildwheel@v2.23.0
         env:
           CIBW_BUILD: ${{ matrix.build }}
-          CIBW_BEFORE_ALL_LINUX: yum install -y bzip2-devel flac-devel netcdf-devel
-          CIBW_BEFORE_ALL_MACOS: brew install bzip2 flac netcdf
-          CIBW_BEFORE_BUILD: ./deps/install_boost.sh
+          CIBW_BEFORE_ALL_LINUX: yum install -y bzip2-devel netcdf-devel
+          CIBW_BEFORE_ALL_MACOS: brew install netcdf
+          CIBW_BEFORE_BUILD_MACOS: >
+            ln -s $(dirname $(readlink -f $(which python3)))/python3-config $(dirname $(which python3))/python3-config &&
+            pip install cmake && ./deps/install_flac.sh && ./deps/install_boost.sh
+          CIBW_BEFORE_BUILD_LINUX: >
+            pip install cmake && ./deps/install_flac.sh && ./deps/install_boost.sh
+          CIBW_REPAIR_WHEEL_COMMAND_LINUX: >
+            LD_LIBRARY_PATH=$PWD/deps/lib auditwheel repair -w {dest_dir} {wheel}
           CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
             DYLD_LIBRARY_PATH=$PWD/deps/lib delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}
           CIBW_BUILD_VERBOSITY: 1
-          CIBW_ENVIRONMENT: >
-            CMAKE_BUILD_PARALLEL_LEVEL=4 CMAKE_PREFIX_PATH=$PWD/deps
+          CIBW_ENVIRONMENT_LINUX: >
+            CMAKE_BUILD_PARALLEL_LEVEL=4
+            CMAKE_PREFIX_PATH=$PWD/deps
+            CC=gcc
+            CXX=g++
+            CFLAGS="-O3 -fPIC"
+          CIBW_ENVIRONMENT_MACOS: >
+            CMAKE_BUILD_PARALLEL_LEVEL=4
+            CMAKE_PREFIX_PATH=$PWD/deps
+            CC=clang
+            CXX=clang++
+            CFLAGS="-O3 -fPIC"
           CIBW_TEST_COMMAND: ctest --test-dir {package}/build --output-on-failure
 
       - name: Upload artifacts

@@ -56,7 +56,7 @@ def timestreammapastype(a, dtype):
     '''
     if a.dtype == numpy.dtype(dtype):
         return a
-    return G3TimestreamMap(a.keys(), numpy.asarray(a).astype(dtype), a.start, a.stop, a.units, False)
+    return G3TimestreamMap(a.keys(), numpy.asarray(a).astype(dtype), a.start, a.stop, a.units, 0, False)
 G3TimestreamMap.astype = timestreammapastype
 
 # XXX consider replacing all of this with the numpy __array_ufunc__ machinery

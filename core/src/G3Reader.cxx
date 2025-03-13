@@ -3,20 +3,20 @@
 #include <G3Reader.h>
 
 G3Reader::G3Reader(std::string filename, int n_frames_to_read,
-    float timeout, bool track_filename) :
+    float timeout, bool track_filename, size_t buffersize) :
     prefix_file_(false), n_frames_to_read_(n_frames_to_read),
     n_frames_read_(0), n_frames_cur_(0), timeout_(timeout),
-    track_filename_(track_filename)
+    track_filename_(track_filename), buffersize_(buffersize)
 {
 	g3_check_input_path(filename);
 	StartFile(filename);
 }
 
 G3Reader::G3Reader(std::vector<std::string> filename, int n_frames_to_read,
-    float timeout, bool track_filename) :
+    float timeout, bool track_filename, size_t buffersize) :
     prefix_file_(false), n_frames_to_read_(n_frames_to_read),
     n_frames_read_(0), n_frames_cur_(0), timeout_(timeout),
-    track_filename_(track_filename)
+    track_filename_(track_filename), buffersize_(buffersize)
 {
 	if (filename.size() == 0)
 		log_fatal("Empty file list provided to G3Reader");
@@ -34,7 +34,7 @@ void G3Reader::StartFile(std::string path)
 	log_info("Starting file %s\n", path.c_str());
 	cur_file_ = path;
 	n_frames_cur_ = 0;
-	(void) g3_istream_from_path(stream_, path, timeout_);
+	(void) g3_istream_from_path(stream_, path, timeout_, buffersize_);
 }
 
 void G3Reader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
@@ -84,7 +84,7 @@ void G3Reader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	}
 	frame = G3FramePtr(new G3Frame);
 	try {
-		frame->load(stream_);
+		frame->loads(stream_);
 	} catch (...) {
 		log_error("Exception raised while reading file %s",
 		    cur_file_.c_str());
@@ -128,10 +128,12 @@ PYBINDINGS("core") {
 	      "seek to the beginning of a particular frame in the file.  Set "
 	      "track_filename to True to record the filename for each frame in "
 	      "the ._filename attribute (fragile).",
-	init<std::string, int, float, bool>((arg("filename"),
-	    arg("n_frames_to_read")=0,arg("timeout")=-1.,arg("track_filename")=false)))
-	.def(init<std::vector<std::string>, int, float, bool>((arg("filename"),
-	    arg("n_frames_to_read")=0, arg("timeout")=-1.,arg("track_filename")=false)))
+	init<std::string, int, float, bool, size_t>((arg("filename"),
+	    arg("n_frames_to_read")=0,arg("timeout")=-1.,
+	    arg("track_filename")=false,arg("buffersize")=1024*1024)))
+	.def(init<std::vector<std::string>, int, float, bool, size_t>((
+	    arg("filename"), arg("n_frames_to_read")=0, arg("timeout")=-1.,
+	    arg("track_filename")=false,arg("buffersize")=1024*1024)))
 	.def("tell", &G3Reader::Tell,
 	    "Return the current byte offset from start of stream.")
 	.def("seek", &G3Reader::Seek,
