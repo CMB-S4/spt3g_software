@@ -174,7 +174,7 @@ void G3NetworkSender::SerializeFrame(serialization_task& task)
 	try{
 		netbuf_type buf(new std::vector<char>);
 		G3BufferOutputStream os(*buf);
-		task.input->save(os);
+		task.input->saves(os);
 		os.flush();
 		task.output.set_value(buf);
 	}

@@ -31,7 +31,7 @@ void G3Writer::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	else if (streams_.size() == 0 ||
 	    std::find(streams_.begin(), streams_.end(), frame->type) !=
 	    streams_.end())
-		frame->save(stream_);
+		frame->saves(stream_);
 
 	out.push_back(frame);
 }

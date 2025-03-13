@@ -234,14 +234,20 @@ std::ostream& operator<<(std::ostream& os, const G3Frame::FrameType &frame_type)
 }
 
 template <typename T>
-void G3Frame::save(T &os) const
+void G3Frame::saves(T &os) const
 {
 	using cereal::make_nvp;
-	uint32_t crc = 0;
-	uint32_t version(1), size(map_.size());
 
 	cereal::PortableBinaryOutputArchive ar(os);
-	ar << make_nvp("version", version);
+	ar << make_nvp("frame", *this);
+}
+
+template <class A>
+void G3Frame::save(A &ar, unsigned v) const
+{
+	using cereal::make_nvp;
+	uint32_t crc(0), size(map_.size());
+
 	ar << make_nvp("size", size);
 	ar << make_nvp("type", (uint32_t)type);
 	for (auto i = map_.begin(); i != map_.end(); i++) {
@@ -259,16 +265,24 @@ void G3Frame::save(T &os) const
 }
 
 template <typename T>
-void G3Frame::load(T &is)
+void G3Frame::loads(T &is)
 {
 	using cereal::make_nvp;
 
 	cereal::PortableBinaryInputArchive ar(is);
-	int version, size;
-	uint32_t xtype;
-	uint32_t crc(0), testcrc;
+	ar >> make_nvp("frame", *this);
+}
 
-	ar >> make_nvp("version", version);
+template <class A>
+void G3Frame::load(A &ar, unsigned v)
+{
+	using cereal::make_nvp;
+	G3_CHECK_VERSION(v);
+
+	int size;
+	uint32_t xtype, testcrc;
+	uint32_t crc(0);
+
 	ar >> make_nvp("size", size);
 	ar >> make_nvp("type", xtype);
 	type = FrameType(xtype);
@@ -368,13 +382,17 @@ void G3Frame::blob_encode(struct blob_container &blob)
 	item_os.flush();
 }
 
-template void G3Frame::load(g3_istream &);
-template void G3Frame::load(std::istream &);
-template void G3Frame::load(std::istringstream &);
+template void G3Frame::loads(g3_istream &);
+template void G3Frame::loads(G3BufferInputStream &);
+template void G3Frame::loads(std::istream &);
+template void G3Frame::loads(std::istringstream &);
 
-template void G3Frame::save(g3_ostream &) const;
-template void G3Frame::save(std::ostream &) const;
-template void G3Frame::save(std::ostringstream &) const;
+template void G3Frame::saves(g3_ostream &) const;
+template void G3Frame::saves(G3BufferOutputStream &) const;
+template void G3Frame::saves(std::ostream &) const;
+template void G3Frame::saves(std::ostringstream &) const;
+
+G3_SPLIT_SERIALIZABLE_CODE(G3Frame);
 
 G3FramePtr
 g3frame_char_constructor(std::string max_4_chars)
@@ -394,37 +412,6 @@ g3frame_char_constructor(std::string max_4_chars)
 
 	return G3FramePtr(new G3Frame(G3Frame::FrameType(code)));
 }
-
-// Use G3Frame::save()/G3Frame::load() to provide a pickle interface for frames
-struct g3frame_picklesuite : boost::python::pickle_suite
-{
-	static boost::python::tuple getstate(boost::python::object obj)
-	{
-		namespace bp = boost::python;
-		std::vector<char> buffer;
-		G3BufferOutputStream os(buffer);
-		(bp::extract<const G3Frame &>(obj))().save(os);
-		os.flush();
-
-		return boost::python::make_tuple(obj.attr("__dict__"),
-		    bp::object(bp::handle<>(
-		    PyBytes_FromStringAndSize(&buffer[0], buffer.size()))));
-	}
-
-	static void setstate(boost::python::object obj,
-	    boost::python::tuple state)
-	{
-		namespace bp = boost::python;
-		Py_buffer view;
-		PyObject_GetBuffer(bp::object(state[1]).ptr(), &view,
-		    PyBUF_SIMPLE);
-
-		bp::extract<bp::dict>(obj.attr("__dict__"))().update(state[0]);
-		G3BufferInputStream is((char *)view.buf, view.len);
-		(bp::extract<G3Frame &>(obj))().load(is);
-		PyBuffer_Release(&view);
-	}
-};
 
 static boost::python::list g3frame_keys(const G3Frame &map)
 {
@@ -599,7 +586,7 @@ PYBINDINGS("core") {
 	      "where those serialized copies already exist. Saves memory for "
 	      "frames about to be written at the expense of CPU time to "
 	      "re-decode them if they are accessed again later.")
-	    .def_pickle(g3frame_picklesuite())
+	    .def_pickle(g3frameobject_picklesuite<G3Frame>())
 	;
 	register_vector_of<G3FramePtr>("Frame");
 	register_vector_of<G3FrameObjectPtr>("FrameObject");

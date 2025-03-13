@@ -96,8 +96,12 @@ public:
 	G3Frame &operator = (const G3Frame &);
 
 	// Serialize (or deserialize) from an IO stream.
-	template <typename T> void save(T &os) const;
-	template <typename T> void load(T &is);
+	template <typename T> void saves(T &os) const;
+	template <typename T> void loads(T &is);
+
+	// Serialize (or deserialize) from a cereal archive.
+	template <class A> void save(A &ar, unsigned) const;
+	template <class A> void load(A &ar, unsigned);
 
 	// Routines for handling the stored serialized copies of data.
 	// These are all const because they only manipulate caches and
@@ -134,6 +138,8 @@ private:
 };
 
 G3_POINTERS(G3Frame);
+CEREAL_CLASS_VERSION(G3Frame, 1);
+CEREAL_SPECIALIZE_FOR_ALL_ARCHIVES(G3Frame, cereal::specialization::member_load_save);
 
 template <typename T>
 std::shared_ptr<const T> G3Frame::Get(const std::string &name,
