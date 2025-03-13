@@ -31,26 +31,6 @@ int g3_istream_from_path(g3_istream &stream, const std::string &path,
     float timeout=-1.0, size_t buffersize=1024*1024);
 
 /**
- * Seek to a byte offset in an open input file stream.
- *
- * @param  stream   A reference to the filtering istream, e.g. as configured by
- *                  g3_istream_from_path.
- * @param  offset   File offset to seek to, in bytes, relative to the beginning
- *                  of the file.
- * @return New read head position, or -1 on error.
- */
-off_t g3_istream_seek(g3_istream &stream, off_t offset);
-
-/**
- * Return the current read head position in an open input file stream.
- *
- * @param  stream   A reference to the filtering istream, e.g. as configured by
- *                  g3_istream_from_path.
- * @return Current read head position, or -1 on error.
- */
-off_t g3_istream_tell(g3_istream &stream);
-
-/**
  * Configure a filtering stream for G3Frame compression to a local file.
  *
  * @param  stream   A reference to the filtering ostream that will be configured
