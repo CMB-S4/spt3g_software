@@ -264,6 +264,38 @@ void G3Frame::save(A &ar, unsigned v) const
 	ar << make_nvp("crc", crc);
 }
 
+#ifdef SPT3G_ENABLE_JSON_OUTPUT
+template<>
+void G3Frame::save(cereal::JSONOutputArchive &ar, unsigned v) const
+{
+	using cereal::make_nvp;
+	uint32_t size(map_.size());
+
+	ar << make_nvp("size", size);
+	std::string typestr(1,(char) type);
+	ar << make_nvp("type", typestr);
+	for (auto i = map_.begin(); i != map_.end(); i++) {
+		//make sure it's deserialized so we don't just write a blob
+		blob_decode(i->second);
+		ar << make_nvp("name", i->first);
+		ar << make_nvp("val", i->second.frameobject);
+	}
+}
+#endif
+
+std::string
+G3Frame::asJSON() const
+{
+	std::stringstream str;
+#ifdef SPT3G_ENABLE_JSON_OUTPUT
+	cereal::JSONOutputArchive ar(str);
+	ar << cereal::make_nvp("frame", *this);
+#else
+	str << "{error: \"spt3g_software compiled without JSON support\"}" << std::endl;
+#endif
+	return str.str();
+}
+
 template <typename T>
 void G3Frame::loads(T &is)
 {
@@ -586,6 +618,7 @@ PYBINDINGS("core") {
 	      "where those serialized copies already exist. Saves memory for "
 	      "frames about to be written at the expense of CPU time to "
 	      "re-decode them if they are accessed again later.")
+	    .def("as_json", &G3Frame::asJSON, "JSON representation of frame")
 	    .def_pickle(g3frameobject_picklesuite<G3Frame>())
 	;
 	register_vector_of<G3FramePtr>("Frame");

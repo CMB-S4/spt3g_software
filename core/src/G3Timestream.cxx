@@ -36,6 +36,34 @@ static FLAC__StreamEncoderWriteStatus flac_encoder_write_cb(
 	return FLAC__STREAM_ENCODER_WRITE_STATUS_OK;
 }
 
+
+// Generic version of loadBinary for all archive types
+template <typename A>
+static void load_binary_fn(A * inbuf, void * buffer, size_t size)
+{
+	inbuf->template loadBinary<1>(buffer,size);
+}
+
+#ifdef SPT3G_ENABLE_JSON_OUTPUT
+
+// SpecializedloadBinary  version for JSONInputArchive
+//
+// This is only needed because cereal will generate code for loading json due
+// to the nature of serialize, even though this will never actually be called.
+//
+// I don't know if it works or not, but since it's never called, who cares?  (I
+// guess in the future we can have a fromJSON method in G3Frame as well if we
+// wanted to support round-tripping through JSON for some reason).
+
+template <>
+void load_binary_fn<cereal::JSONInputArchive>(cereal::JSONInputArchive * inbuf, void * buffer, size_t size)
+{
+	inbuf->loadBinaryValue(buffer,size);
+}
+#endif
+
+
+
 template<typename A>
 static FLAC__StreamDecoderReadStatus flac_decoder_read_cb(
     const FLAC__StreamDecoder *decoder, FLAC__byte buffer[], size_t *bytes,
@@ -51,16 +79,16 @@ static FLAC__StreamDecoderReadStatus flac_decoder_read_cb(
 		return FLAC__STREAM_DECODER_READ_STATUS_END_OF_STREAM;
 	} else if (*bytes >= size_t(bytes_left)) {
 		*bytes = bytes_left;
-		args->inbuf->template loadBinary<1>(buffer, bytes_left);
+ 		load_binary_fn(args->inbuf, buffer, bytes_left);
 		args->pos += bytes_left;
 		return FLAC__STREAM_DECODER_READ_STATUS_CONTINUE;
 	} else {
-		args->inbuf->template loadBinary<1>(buffer, *bytes);
+		load_binary_fn(args->inbuf, buffer, *bytes);
 		args->pos += *bytes;
 		return FLAC__STREAM_DECODER_READ_STATUS_CONTINUE;
 	}
 }
-  
+
 template<typename A>
 static FLAC__StreamDecoderWriteStatus flac_decoder_write_cb(
     const FLAC__StreamDecoder *decoder, const FLAC__Frame *frame,
@@ -75,7 +103,7 @@ static FLAC__StreamDecoderWriteStatus flac_decoder_write_cb(
 		(*args->outbuf)[oldsize + i] = buffer[0][i];
 	return FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE;
 }
-  
+
 static void flac_decoder_error_cb(const FLAC__StreamDecoder *decoder,
     FLAC__StreamDecoderErrorStatus status, void *client_data)
 {
@@ -112,7 +140,8 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 	ar & cereal::make_nvp("flac", use_flac_);
 
 #ifdef G3_HAS_FLAC
-	if (use_flac_) {
+	//Don't try to use FLAC when outputing to JSON, even if flac is enabled.
+	if (use_flac_ && typeid(A) == typeid(cereal::PortableBinaryOutputArchive)) {
 		std::vector<int32_t> inbuf;
 		std::vector<uint8_t> outbuf;
 		const int32_t *chanmap[1];
@@ -1340,7 +1369,7 @@ PYBINDINGS("core") {
 	    .def("SetFLACCompression", &G3Timestream::SetFLACCompression,
 	      "Pass True to turn on FLAC compression when serialized. "
 	      "FLAC compression only works if the timestream is in units of "
-	      "counts.")
+	      "counts. FLAC compression is ignored when outputing to JSON.")
 	    .def_readwrite("units", &G3Timestream::units,
 	      "Units of the data in the timestream, stored as one of the "
 	      "members of core.G3TimestreamUnits.")
