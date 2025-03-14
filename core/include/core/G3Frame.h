@@ -103,10 +103,9 @@ public:
 	template <class A> void save(A &ar, unsigned) const;
 	template <class A> void load(A &ar, unsigned);
 
-  // JSON representation of a frame (if JSON output is enabled, otherwise
-  // outputs valid JSON telling you that JSON output isn't enabled)
-  template <typename T> void saveJSON(T &os) const;
-  std::string asJSON() const;
+	// JSON representation of a frame (if JSON output is enabled, otherwise
+	// outputs valid JSON telling you that JSON output isn't enabled)
+	std::string asJSON() const;
 
 	// Routines for handling the stored serialized copies of data.
 	// These are all const because they only manipulate caches and

@@ -264,15 +264,13 @@ void G3Frame::save(A &ar, unsigned v) const
 	ar << make_nvp("crc", crc);
 }
 
-template<typename T>
-void G3Frame::saveJSON(T & os) const
-{
 #ifdef SPT3G_ENABLE_JSON_OUTPUT
+template<>
+void G3Frame::save(cereal::JSONOutputArchive &ar, unsigned v) const
+{
 	using cereal::make_nvp;
-	uint32_t version(1), size(map_.size());
+	uint32_t size(map_.size());
 
-	cereal::JSONOutputArchive ar(os);
-	ar << make_nvp("version", version);
 	ar << make_nvp("size", size);
 	std::string typestr(1,(char) type);
 	ar << make_nvp("type", typestr);
@@ -282,16 +280,19 @@ void G3Frame::saveJSON(T & os) const
 		ar << make_nvp("name", i->first);
 		ar << make_nvp("val", i->second.frameobject);
 	}
-#else
-	os << " {error: \"spt3g-software compiled without JSON support\"}" << std::endl;
-#endif
 }
+#endif
 
 std::string
 G3Frame::asJSON() const
 {
 	std::stringstream str;
-	saveJSON(str);
+#ifdef SPT3G_ENABLE_JSON_OUTPUT
+	cereal::JSONOutputArchive ar(str);
+	ar << cereal::make_nvp("frame", *this);
+#else
+	str << "{error: \"spt3g_software compiled without JSON support\"}" << std::endl;
+#endif
 	return str.str();
 }
 
@@ -424,10 +425,6 @@ template void G3Frame::saves(std::ostream &) const;
 template void G3Frame::saves(std::ostringstream &) const;
 
 G3_SPLIT_SERIALIZABLE_CODE(G3Frame);
-
-template void G3Frame::saveJSON(std::ostream &) const;
-template void G3Frame::saveJSON(std::ostringstream &) const;
-template void G3Frame::saveJSON(boost::iostreams::filtering_ostream &) const;
 
 G3FramePtr
 g3frame_char_constructor(std::string max_4_chars)

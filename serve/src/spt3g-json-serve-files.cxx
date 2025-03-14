@@ -262,7 +262,7 @@ static void handle_g3(const httplib::Request & req, httplib::Response & resp)
 
 					frame.loads(ifs);
 					if (i++ >= n_skip) {
-						frame.saveJSON(os);
+						os << frame.asJSON();
 						first = false;
 					}
 					if (n_frames_to_read > 0 && i >= n_frames_to_read + n_skip)
