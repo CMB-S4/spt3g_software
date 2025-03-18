@@ -900,6 +900,8 @@ Modules in spt3g.maps
 
 * spt3g.maps.map_modules.MakeMapsUnpolarized_
 
+* spt3g.maps.map_modules.RebinMaps_
+
 * spt3g.maps.map_modules.RemoveWeights_
 
 * spt3g.maps.map_modules.ReplicateMaps_
@@ -1679,6 +1681,33 @@ Converts individual polarized maps to temperature-only versions of the same map.
 
 *Definition:*
         ``MakeMapsUnpolarized(frame)``
+
+
+
+
+.. _spt3g.maps.map_modules.RebinMaps:
+
+**spt3g.maps.map_modules.RebinMaps**
+
+Rebin any maps in the input frame into larger pixels by summing scale-x-scale
+blocks of pixels together.  Map dimensions must be a multiple of the rebinning
+scale.
+
+*Arguments:*
+	scale : int
+	    Rebinning scale factor, such that scale-x-scale blocks of pixels are summed
+	    into larger pixels.  Must divide evenly into all map pixel dimensions.
+	weighted : bool
+	    If True (default), ensure that maps have had weights applied before
+	    rebinning.  Otherwise, rebin maps without checking the weights.
+	norm : bool
+	    If False (default), sum all of the sub-pixels into each larger output pixel.
+	    If True, normalize the output pixel by the number of sub-pixels each
+	    encloses.  Only applies to Stokes parameters T/Q/U, not weights or hits.
+
+
+*Definition:*
+        ``RebinMaps(frame, scale=1, weighted=True, norm=False)``
 
 
 

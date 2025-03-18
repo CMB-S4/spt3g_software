@@ -618,6 +618,7 @@ This class cannot be instantiated from Python</p>
 <li><p><a class="reference internal" href="#spt3g-maps-map-modules-injectmaps">spt3g.maps.map_modules.InjectMaps</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-map-modules-makemapspolarized">spt3g.maps.map_modules.MakeMapsPolarized</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-map-modules-makemapsunpolarized">spt3g.maps.map_modules.MakeMapsUnpolarized</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-maps-map-modules-rebinmaps">spt3g.maps.map_modules.RebinMaps</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-map-modules-removeweights">spt3g.maps.map_modules.RemoveWeights</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-map-modules-replicatemaps">spt3g.maps.map_modules.ReplicateMaps</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-maps-map-modules-reprojectmaps">spt3g.maps.map_modules.ReprojectMaps</a></p></li>
@@ -1236,6 +1237,27 @@ a properly invertible Wpol array from the TT Wunpol weights.</p>
 <p>Converts individual polarized maps to temperature-only versions of the same map.</p>
 <dl class="simple">
 <dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">MakeMapsUnpolarized(frame)</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-maps-map-modules-rebinmaps"><strong>spt3g.maps.map_modules.RebinMaps</strong></p>
+<p>Rebin any maps in the input frame into larger pixels by summing scale-x-scale
+blocks of pixels together.  Map dimensions must be a multiple of the rebinning
+scale.</p>
+<dl class="simple">
+<dt><em>Arguments:</em></dt><dd><dl class="simple">
+<dt>scale<span class="classifier">int</span></dt><dd><p>Rebinning scale factor, such that scale-x-scale blocks of pixels are summed
+into larger pixels.  Must divide evenly into all map pixel dimensions.</p>
+</dd>
+<dt>weighted<span class="classifier">bool</span></dt><dd><p>If True (default), ensure that maps have had weights applied before
+rebinning.  Otherwise, rebin maps without checking the weights.</p>
+</dd>
+<dt>norm<span class="classifier">bool</span></dt><dd><p>If False (default), sum all of the sub-pixels into each larger output pixel.
+If True, normalize the output pixel by the number of sub-pixels each
+encloses.  Only applies to Stokes parameters T/Q/U, not weights or hits.</p>
+</dd>
+</dl>
+</dd>
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">RebinMaps(frame,</span> <span class="pre">scale=1,</span> <span class="pre">weighted=True,</span> <span class="pre">norm=False)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-maps-map-modules-removeweights"><strong>spt3g.maps.map_modules.RemoveWeights</strong></p>
