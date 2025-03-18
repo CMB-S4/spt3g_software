@@ -2,7 +2,7 @@
 #define _G3_ARCWRITER_H
 
 #include <string>
-#include <dataio.h>
+#include <iostream>
 
 #include <G3Module.h>
 
@@ -13,12 +13,11 @@ public:
 	// Writes to file <filename> all frames with types in <streams>.
 	// If <streams> is empty (default), writes all frames.
 
-	virtual ~G3Writer();
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
 	void Flush();
 private:
 	std::string filename_;
-	g3_ostream stream_;
+	std::shared_ptr<std::ostream> stream_;
 	std::vector<G3Frame::FrameType> streams_;
 
 	SET_LOGGER("G3Writer");

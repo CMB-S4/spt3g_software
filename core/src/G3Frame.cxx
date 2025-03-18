@@ -3,7 +3,6 @@
 #include <G3Quat.h>
 #include <serialization.h>
 #include <pybindings.h>
-#include <dataio.h>
 
 #include <stdlib.h>
 #include <cxxabi.h>
@@ -382,12 +381,12 @@ void G3Frame::blob_encode(struct blob_container &blob)
 	item_os.flush();
 }
 
-template void G3Frame::loads(g3_istream &);
+template <> void G3Frame::loads(std::shared_ptr<std::istream> &is) { loads(*is); }
 template void G3Frame::loads(G3BufferInputStream &);
 template void G3Frame::loads(std::istream &);
 template void G3Frame::loads(std::istringstream &);
 
-template void G3Frame::saves(g3_ostream &) const;
+template <> void G3Frame::saves(std::shared_ptr<std::ostream> &os) const { saves(*os); }
 template void G3Frame::saves(G3BufferOutputStream &) const;
 template void G3Frame::saves(std::ostream &) const;
 template void G3Frame::saves(std::ostringstream &) const;
