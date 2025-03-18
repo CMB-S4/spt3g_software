@@ -15,6 +15,7 @@ __all__ = [
     "InjectMaps",
     "ReplicateMaps",
     "CoaddMaps",
+    "RebinMaps",
     "ReprojectMaps",
     "coadd_map_files",
 ]
@@ -833,6 +834,49 @@ def coadd_map_files(
     if hasattr(coadder, 'coadd_frames'):
         return coadder.coadd_frames
     return coadder.coadd_frame
+
+
+@core.indexmod
+def RebinMaps(frame, scale=1, weighted=True, norm=False):
+    """
+    Rebin any maps in the input frame into larger pixels by summing scale-x-scale
+    blocks of pixels together.  Map dimensions must be a multiple of the rebinning
+    scale.
+
+    Arguments
+    ---------
+    scale : int
+        Rebinning scale factor, such that scale-x-scale blocks of pixels are summed
+        into larger pixels.  Must divide evenly into all map pixel dimensions.
+    weighted : bool
+        If True (default), ensure that maps have had weights applied before
+        rebinning.  Otherwise, rebin maps without checking the weights.
+    norm : bool
+        If False (default), sum all of the sub-pixels into each larger output pixel.
+        If True, normalize the output pixel by the number of sub-pixels each
+        encloses.  Only applies to Stokes parameters T/Q/U, not weights or hits.
+    """
+    if scale <= 1:
+        return
+
+    if weighted:
+        ApplyWeights(frame)
+
+    for k in ["T", "Q", "U", "Wunpol", "Wpol", "H"]:
+        if k in frame:
+            m = frame.pop(k)
+            if k in "TQU":
+                frame[k] = m.rebin(scale, norm=norm)
+            elif k == "H":
+                frame[k] = m.rebin(scale, norm=False)
+            else:
+                if weighted and norm:
+                    core.log_warn(
+                        "Rebinning weighted frames with norm=True may result "
+                        "in inconsistent maps and weights",
+                        unit="RebinMaps",
+                    )
+                frame[k] = m.rebin(scale)
 
 
 @core.indexmod
