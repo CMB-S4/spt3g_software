@@ -251,8 +251,7 @@ static void handle_g3(const httplib::Request & req, httplib::Response & resp)
 				//set up the frame
 				G3Frame frame;
 				std::string fullpath = basedir + req.path;
-				g3_istream ifs;
-				g3_istream_from_path(ifs, fullpath, 0.01);
+				std::shared_ptr<std::istream> ifs = g3_istream_from_path(fullpath, 0.01);
 
 				bool first = true;
 				int i = 0;
