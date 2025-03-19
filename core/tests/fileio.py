@@ -3,9 +3,13 @@
 from spt3g import core
 import time
 
+nframes = 1000
+verbose = False
+
 # File to disk
+core.log_notice("Writing %d frames to disk" % nframes)
 pipe = core.G3Pipeline()
-pipe.Add(core.G3InfiniteSource, type=core.G3FrameType.Timepoint, n=10)
+pipe.Add(core.G3InfiniteSource, type=core.G3FrameType.Timepoint, n=nframes)
 # Drop a wiring frame in the middle
 count = 0
 def addwiring(fr):
@@ -25,16 +29,18 @@ def addinfo(fr):
     fr['count'] = n
     n += 1
 pipe.Add(addinfo)
-pipe.Add(core.Dump)
+if verbose:
+    pipe.Add(core.Dump)
 pipe.Add(core.G3Writer, filename='test.g3')
-pipe.Run()
-assert n == 10, 'Wrong number of frames written (%d should be %d)' % (n, 10)
+pipe.Run(profile=True)
+assert n == nframes, 'Wrong number of frames written (%d should be %d)' % (n, nframes)
 
 # And back from disk
-print('Reading')
+core.log_notice("Reading %d frames from disk" % nframes)
 pipe = core.G3Pipeline()
 pipe.Add(core.G3Reader, filename='test.g3', track_filename=True)
-pipe.Add(core.Dump)
+if verbose:
+    pipe.Add(core.Dump)
 n = 0
 def checkinfo(fr):
     global n
@@ -45,20 +51,21 @@ def checkinfo(fr):
     assert fr._filename == 'test.g3', 'Wrong filename'
     n += 1
 pipe.Add(checkinfo)
-pipe.Run()
+pipe.Run(profile=True)
 
-assert n == 10, 'Wrong number of frames read (%d should be %d)' % (n, 10)
+assert n == nframes, 'Wrong number of frames read (%d should be %d)' % (n, nframes)
 
 # Skip empty files
+core.log_notice("Reading %d frames from disk with empty files" % nframes)
 with core.G3Writer("empty.g3") as wr:
     pass
 n = 0
 pipe = core.G3Pipeline()
 pipe.Add(core.G3Reader, filename=["empty.g3", "test.g3", "empty.g3"], track_filename=True)
 pipe.Add(checkinfo)
-pipe.Run()
+pipe.Run(profile=True)
 
-assert n == 10, 'Wrong number of frames read (%d should be %d)' % (n, 10)
+assert n == nframes, 'Wrong number of frames read (%d should be %d)' % (n, nframes)
 
 # Indexing
 class CachingReader:
@@ -78,10 +85,12 @@ class CachingReader:
 
 cacher = CachingReader()
 
+core.log_notice("Reading %d frames from disk with frame indexing" % nframes)
 pipe = core.G3Pipeline()
 pipe.Add(cacher)
-pipe.Add(core.Dump)
-pipe.Run()
+if verbose:
+    pipe.Add(core.Dump)
+pipe.Run(profile=True)
 
 assert cacher.w_pos is not None, 'Missing wiring frame'
 
@@ -107,10 +116,12 @@ class CachedReader:
 
 cached = CachedReader(start=cacher.w_pos)
 
+core.log_notice("Reading %d frames from disk with seek" % nframes)
 pipe = core.G3Pipeline()
 pipe.Add(cached)
-pipe.Add(core.Dump)
-pipe.Run()
+if verbose:
+    pipe.Add(core.Dump)
+pipe.Run(profile=True)
 
 assert cached.pos is None, "Missing wiring frame"
 
