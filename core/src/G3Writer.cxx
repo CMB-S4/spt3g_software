@@ -8,12 +8,7 @@ G3Writer::G3Writer(std::string filename,
     filename_(filename), streams_(streams)
 {
 	g3_check_output_path(filename);
-	g3_ostream_to_path(stream_, filename, append);
-}
-
-G3Writer::~G3Writer()
-{
-	stream_.reset();
+	stream_ = g3_ostream_to_path(filename, append);
 }
 
 void G3Writer::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
@@ -38,9 +33,10 @@ void G3Writer::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 
 void G3Writer::Flush()
 {
-    if (!stream_.strict_sync()){
-        printf("There was a problem flushing the stream...\n");
-    }
+	try {
+		g3_ostream_flush(stream_);
+	} catch (...) {
+	}
 }
 
 PYBINDINGS("core") {
