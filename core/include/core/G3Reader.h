@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include <dataio.h>
+#include <iostream>
 
 #include <G3Module.h>
 
@@ -25,7 +25,7 @@ private:
 	bool prefix_file_;
 	std::string cur_file_;
 	std::deque<std::string> filename_;
-	g3_istream stream_;
+	std::shared_ptr<std::istream> stream_;
 	int n_frames_to_read_;
 	int n_frames_read_;
 	int n_frames_cur_;

@@ -9,7 +9,6 @@ public:
 	G3MultiFileWriter(boost::python::object filename,
 	    size_t size_limit,
 	    boost::python::object divide_on = boost::python::object());
-	virtual ~G3MultiFileWriter();
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
 	std::string CurrentFile() { return current_filename_; }
 private:
@@ -23,7 +22,7 @@ private:
 	std::vector<G3Frame::FrameType> always_break_on_;
 	boost::python::object newfile_callback_;
 
-	g3_ostream stream_;
+	std::shared_ptr<std::ostream> stream_;
 	std::vector<G3FramePtr> metadata_cache_;
 	int seqno;
 
@@ -78,7 +77,7 @@ G3MultiFileWriter::CheckNewFile(G3FramePtr frame)
 {
 	// If we are already saving data, check file size. Otherwise, open
 	// a new file unconditionally.
-	if (!stream_.empty()) {
+	if (stream_ != nullptr) {
 		bool start_new_ = false;
 
 		if (g3_ostream_count(stream_) > size_limit_)
@@ -117,17 +116,12 @@ G3MultiFileWriter::CheckNewFile(G3FramePtr frame)
 	}
 
 	current_filename_ = filename;
-	g3_ostream_to_path(stream_, filename, false, true);
+	stream_ = g3_ostream_to_path(filename, false, true);
 
 	for (auto i = metadata_cache_.begin(); i != metadata_cache_.end(); i++)
 		(*i)->saves(stream_);
 
 	return true;
-}
-
-G3MultiFileWriter::~G3MultiFileWriter()
-{
-	stream_.reset();
 }
 
 void G3MultiFileWriter::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)

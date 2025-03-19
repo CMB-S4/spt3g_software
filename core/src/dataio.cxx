@@ -1,6 +1,7 @@
 #include <G3Logging.h>
 #include <dataio.h>
 
+#include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 #ifdef BZIP2_FOUND
 #include <boost/iostreams/filter/bzip2.hpp>
@@ -20,29 +21,10 @@
 
 #include "counter64.hpp"
 
-int
-g3_istream_from_path(g3_istream &stream, const std::string &path,
-    float timeout, size_t buffersize)
+std::shared_ptr<std::istream>
+g3_istream_from_path(const std::string &path, float timeout, size_t buffersize)
 {
-	stream.reset();
-	if (path.size() > 3 && !path.compare(path.size() - 3, 3, ".gz"))
-		stream.push(boost::iostreams::gzip_decompressor());
-	if (path.size() > 4 && !path.compare(path.size() - 4, 4, ".bz2")) {
-#ifdef BZIP2_FOUND
-		stream.push(boost::iostreams::bzip2_decompressor());
-#else
-		log_fatal("Boost not compiled with bzip2 support.");
-#endif
-	}
-	if (path.size() > 3 && !path.compare(path.size() - 3, 3, ".xz")) {
-#ifdef LZMA_FOUND
-		stream.push(boost::iostreams::lzma_decompressor());
-#else
-		log_fatal("Boost not compiled with LZMA support.");
-#endif
-	}
-
-	int fd = -1;
+	auto stream = std::make_shared<boost::iostreams::filtering_istream>();
 
 	// Figure out what kind of ultimate data source this is
 	if (path.find("tcp://") == 0) {
@@ -61,6 +43,8 @@ g3_istream_from_path(g3_istream &stream, const std::string &path,
 
 		log_debug("Opening connection to %s, port %s", host.c_str(),
 		    port.c_str());
+
+		int fd = -1;
 
 		if (strcmp(host.c_str(), "*") == 0) {
 			// Listen for incoming connections
@@ -152,56 +136,102 @@ g3_istream_from_path(g3_istream &stream, const std::string &path,
 
 		boost::iostreams::file_descriptor_source fs(fd,
 		    boost::iostreams::close_handle);
-		stream.push(fs, buffersize);
+		stream->push(fs, buffersize);
 	} else {
 		// Simple file case
-		stream.push(boost::iostreams::file_source(path,
+		if (path.size() > 3 && !path.compare(path.size() - 3, 3, ".gz"))
+			stream->push(boost::iostreams::gzip_decompressor());
+		if (path.size() > 4 && !path.compare(path.size() - 4, 4, ".bz2")) {
+#ifdef BZIP2_FOUND
+			stream->push(boost::iostreams::bzip2_decompressor());
+#else
+			log_fatal("Boost not compiled with bzip2 support.");
+#endif
+		}
+		if (path.size() > 3 && !path.compare(path.size() - 3, 3, ".xz")) {
+#ifdef LZMA_FOUND
+			stream->push(boost::iostreams::lzma_decompressor());
+#else
+			log_fatal("Boost not compiled with LZMA support.");
+#endif
+		}
+
+		stream->push(boost::iostreams::file_source(path,
 		    std::ios::binary), buffersize);
 	}
 
-	return fd;
+	return stream;
 }
 
-void
-g3_ostream_to_path(g3_ostream &stream, const std::string &path,
-    bool append, bool counter)
+int
+g3_istream_handle(std::shared_ptr<std::istream> &stream)
 {
-	stream.reset();
+	auto is = std::dynamic_pointer_cast<boost::iostreams::filtering_istream>(stream);
+	if (!is)
+		log_fatal("Could not get stream");
+	boost::iostreams::file_descriptor_source *fs =
+	    is->component<boost::iostreams::file_descriptor_source>(
+	    is->size() - 1);
+	if (!fs)
+		log_fatal("Could not get file descriptor source");
+
+	return fs->handle();
+}
+
+std::shared_ptr<std::ostream>
+g3_ostream_to_path(const std::string &path, bool append, bool counter)
+{
+	auto stream = std::make_shared<boost::iostreams::filtering_ostream>();
 	if (path.size() > 3 && !path.compare(path.size() - 3, 3, ".gz") && !append)
-		stream.push(boost::iostreams::gzip_compressor());
+		stream->push(boost::iostreams::gzip_compressor());
 	if (path.size() > 4 && !path.compare(path.size() - 4, 4, ".bz2") && !append) {
 #ifdef BZIP2_FOUND
-		stream.push(boost::iostreams::bzip2_compressor());
+		stream->push(boost::iostreams::bzip2_compressor());
 #else
 		log_fatal("Boost not compiled with bzip2 support.");
 #endif
 	}
 	if (path.size() > 3 && !path.compare(path.size() - 3, 3, ".xz") && !append) {
 #ifdef LZMA_FOUND
-		stream.push(boost::iostreams::lzma_compressor());
+		stream->push(boost::iostreams::lzma_compressor());
 #else
 		log_fatal("Boost not compiled with LZMA support.");
 #endif
 	}
 
 	if (counter)
-		stream.push(boost::iostreams::counter64());
+		stream->push(boost::iostreams::counter64());
 	std::ios_base::openmode mode = std::ios::binary;
 	if (append)
 		mode |= std::ios::app;
-	stream.push(boost::iostreams::file_sink(path, mode));
+	stream->push(boost::iostreams::file_sink(path, mode));
+
+	return stream;
 }
 
 size_t
-g3_ostream_count(g3_ostream &stream)
+g3_ostream_count(std::shared_ptr<std::ostream> &stream)
 {
+	auto os = std::dynamic_pointer_cast<boost::iostreams::filtering_ostream>(stream);
+	if (!os)
+		log_fatal("Could not get stream");
 	boost::iostreams::counter64 *counter =
-	    stream.component<boost::iostreams::counter64>(
-	    stream.size() - 2);
+	    os->component<boost::iostreams::counter64>(
+	    os->size() - 2);
 	if (!counter)
 		log_fatal("Could not get stream counter");
 
 	return counter->characters();
+}
+
+void
+g3_ostream_flush(std::shared_ptr<std::ostream> &stream)
+{
+	auto os = std::dynamic_pointer_cast<boost::iostreams::filtering_ostream>(stream);
+	if (!os)
+		log_fatal("Could not get stream");
+	if (!os->strict_sync())
+		log_fatal("Error flushing stream");
 }
 
 void

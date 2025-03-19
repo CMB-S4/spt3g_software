@@ -2,19 +2,13 @@
 #define _G3_DATAIO_H
 
 #include <string>
-#include <vector>
-#include <boost/iostreams/filtering_stream.hpp>
-
-typedef boost::iostreams::filtering_istream g3_istream;
-typedef boost::iostreams::filtering_ostream g3_ostream;
+#include <memory>
+#include <iostream>
 
 /**
  * Configure a filtering stream for G3Frame decompression from a local or remote
  * file source.
  *
- * @param  stream   A reference to the filtering istream that will be configured
- *                  by this function.  Must be instantiated prior to this
- *                  function.
  * @param  path     A valid filename on disk, or a TCP socket address.  If a
  *                  filename, the compression scheme is determined from the file
  *                  extension.  Supported compression schemes are gzip or bzip2.
@@ -25,17 +19,24 @@ typedef boost::iostreams::filtering_ostream g3_ostream;
  *                  read until EOF.
  * @param  timeout  Timeout in seconds for socket connections.
  * @param  buffersize Advisory buffer size in bytes for aggregating reads
- * @return File descriptor for socket connections, or -1 for file input.
+ * @return stream   The input stream configured by this function.
  */
-int g3_istream_from_path(g3_istream &stream, const std::string &path,
-    float timeout=-1.0, size_t buffersize=1024*1024);
+std::shared_ptr<std::istream>
+g3_istream_from_path(const std::string &path, float timeout=-1.0,
+    size_t buffersize=1024*1024);
+
+/**
+ * Return the file descriptor handle for socket connections.
+ *
+ * @param  stream   A reference to the input stream, as configured by
+ *                  g3_istream_from_path.
+ * @return fd       The socket file descriptor.
+ */
+int g3_istream_handle(std::shared_ptr<std::istream> &stream);
 
 /**
  * Configure a filtering stream for G3Frame compression to a local file.
  *
- * @param  stream   A reference to the filtering ostream that will be configured
- *                  by this function.  Must be instantiated prior to this
- *                  function.
  * @param  path     A valid filename on disk.  If a filename, the compression
  *                  scheme is determined from the file extension.  Supported
  *                  compression schemes are gzip or bzip2.
@@ -43,18 +44,27 @@ int g3_istream_from_path(g3_istream &stream, const std::string &path,
  *                  Create a new file or overwrite an existing file.
  * @param  counter  If true, add a counter filter to the stream configuration,
  *                  for use by the g3_ostream_count function.
+ * @return stream   The output stream configured by this function.
  */
-void g3_ostream_to_path(g3_ostream &stream, const std::string &path,
-    bool append=false, bool counter=false);
+std::shared_ptr<std::ostream>
+g3_ostream_to_path(const std::string &path, bool append=false, bool counter=false);
 
 /**
  * Count the number of bytes written to the output file stream.
  *
- * @param  stream   A reference to the filtering ostream, as configured by
+ * @param  stream   A reference to the output stream, as configured by
  *                  g3_ostream_to_path with the counter argument set to true.
  * @return Number of bytes written to disk.
  */
-size_t g3_ostream_count(g3_ostream &stream);
+size_t g3_ostream_count(std::shared_ptr<std::ostream> &stream);
+
+/**
+ * Flush the output file stream.
+ *
+ * @param  stream   A reference to the output stream, as configured by
+ *                  g3_ostream_to_path.
+ */
+void g3_ostream_flush(std::shared_ptr<std::ostream> &stream);
 
 /**
  * Check that the input filename is a valid filename on disk.
