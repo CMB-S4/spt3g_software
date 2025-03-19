@@ -255,7 +255,7 @@ static void handle_g3(const httplib::Request & req, httplib::Response & resp)
 
 				bool first = true;
 				int i = 0;
-				while(ifs.peek() != EOF) {
+				while(ifs->peek() != EOF) {
 					if (!first)
 						os << ","  << std::endl;
 
