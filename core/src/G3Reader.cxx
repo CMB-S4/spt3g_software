@@ -1,10 +1,10 @@
 #include <pybindings.h>
-#include <dataio.h>
+#include "dataio.h"
 #include <G3Reader.h>
 
 G3Reader::G3Reader(std::string filename, int n_frames_to_read,
     float timeout, bool track_filename, size_t buffersize) :
-    prefix_file_(false), n_frames_to_read_(n_frames_to_read),
+    prefix_file_(false), fd_(-1), n_frames_to_read_(n_frames_to_read),
     n_frames_read_(0), n_frames_cur_(0), timeout_(timeout),
     track_filename_(track_filename), buffersize_(buffersize)
 {
@@ -14,7 +14,7 @@ G3Reader::G3Reader(std::string filename, int n_frames_to_read,
 
 G3Reader::G3Reader(std::vector<std::string> filename, int n_frames_to_read,
     float timeout, bool track_filename, size_t buffersize) :
-    prefix_file_(false), n_frames_to_read_(n_frames_to_read),
+    prefix_file_(false), fd_(-1), n_frames_to_read_(n_frames_to_read),
     n_frames_read_(0), n_frames_cur_(0), timeout_(timeout),
     track_filename_(track_filename), buffersize_(buffersize)
 {
@@ -35,6 +35,14 @@ void G3Reader::StartFile(std::string path)
 	cur_file_ = path;
 	n_frames_cur_ = 0;
 	stream_ = g3_istream_from_path(path, timeout_, buffersize_);
+	fd_ = g3_istream_handle(stream_);
+}
+
+G3FramePtr G3Reader::FillFrame()
+{
+	G3FramePtr frame(new G3Frame);
+	frame->loads(stream_);
+	return frame;
 }
 
 void G3Reader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
@@ -82,9 +90,8 @@ void G3Reader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 			return;
 		}
 	}
-	frame = G3FramePtr(new G3Frame);
 	try {
-		frame->loads(stream_);
+		frame = FillFrame();
 	} catch (...) {
 		log_error("Exception raised while reading file %s",
 		    cur_file_.c_str());
