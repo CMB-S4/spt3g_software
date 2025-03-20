@@ -172,10 +172,8 @@ g3_istream_handle(std::shared_ptr<std::istream> &stream)
 	boost::iostreams::file_descriptor_source *fs =
 	    is->component<boost::iostreams::file_descriptor_source>(
 	    is->size() - 1);
-	if (!fs)
-		log_fatal("Could not get file descriptor source");
 
-	return fs->handle();
+	return !fs ? -1 : fs->handle();
 }
 
 std::shared_ptr<std::ostream>
