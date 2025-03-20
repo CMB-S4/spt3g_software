@@ -60,6 +60,15 @@ void load_binary_fn<cereal::JSONInputArchive>(cereal::JSONInputArchive * inbuf, 
 {
 	inbuf->loadBinaryValue(buffer,size);
 }
+
+// Need a specialized FLAC variable too
+template <>
+struct FlacDecoderCallbackArgs<cereal::JSONInputArchive> {
+	cereal::JSONInputArchive *inbuf;
+	std::vector<int32_t> *outbuf;
+	size_t pos;
+	CEREAL_SIZE_TYPE nbytes;
+};
 #endif
 
 
