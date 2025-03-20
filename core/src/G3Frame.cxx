@@ -280,6 +280,29 @@ void G3Frame::save(cereal::JSONOutputArchive &ar, unsigned v) const
 		ar << make_nvp("val", i->second.frameobject);
 	}
 }
+
+template<>
+void G3Frame::load(cereal::JSONInputArchive &ar, unsigned v)
+{
+	using cereal::make_nvp;
+	G3_CHECK_VERSION(v);
+
+	int size;
+	std::string typestr;
+
+	ar >> make_nvp("size", size);
+	ar >> make_nvp("type", typestr);
+	type = FrameType((uint32_t)typestr[0]);
+
+	map_.clear();
+	for (int i = 0; i < size; i++) {
+		std::string name;
+		struct blob_container blob;
+		ar >> make_nvp("name", name);
+		ar >> make_nvp("val", blob.frameobject);
+		map_.insert(G3MapType::value_type(name, blob));
+	}
+}
 #endif
 
 std::string
@@ -423,7 +446,7 @@ template void G3Frame::saves(G3BufferOutputStream &) const;
 template void G3Frame::saves(std::ostream &) const;
 template void G3Frame::saves(std::ostringstream &) const;
 
-G3_SPLIT_SERIALIZABLE_CODE(G3Frame);
+G3_SPLIT_SERIALIZABLE_CODE_BINARY(G3Frame);
 
 G3FramePtr
 g3frame_char_constructor(std::string max_4_chars)
