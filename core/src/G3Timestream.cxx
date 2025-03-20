@@ -36,43 +36,6 @@ static FLAC__StreamEncoderWriteStatus flac_encoder_write_cb(
 	return FLAC__STREAM_ENCODER_WRITE_STATUS_OK;
 }
 
-
-// Generic version of loadBinary for all archive types
-template <typename A>
-static void load_binary_fn(A * inbuf, void * buffer, size_t size)
-{
-	inbuf->template loadBinary<1>(buffer,size);
-}
-
-#ifdef SPT3G_ENABLE_JSON_OUTPUT
-
-// SpecializedloadBinary  version for JSONInputArchive
-//
-// This is only needed because cereal will generate code for loading json due
-// to the nature of serialize, even though this will never actually be called.
-//
-// I don't know if it works or not, but since it's never called, who cares?  (I
-// guess in the future we can have a fromJSON method in G3Frame as well if we
-// wanted to support round-tripping through JSON for some reason).
-
-template <>
-void load_binary_fn<cereal::JSONInputArchive>(cereal::JSONInputArchive * inbuf, void * buffer, size_t size)
-{
-	inbuf->loadBinaryValue(buffer,size);
-}
-
-// Need a specialized FLAC variable too
-template <>
-struct FlacDecoderCallbackArgs<cereal::JSONInputArchive> {
-	cereal::JSONInputArchive *inbuf;
-	std::vector<int32_t> *outbuf;
-	size_t pos;
-	CEREAL_SIZE_TYPE nbytes;
-};
-#endif
-
-
-
 template<typename A>
 static FLAC__StreamDecoderReadStatus flac_decoder_read_cb(
     const FLAC__StreamDecoder *decoder, FLAC__byte buffer[], size_t *bytes,
@@ -88,16 +51,16 @@ static FLAC__StreamDecoderReadStatus flac_decoder_read_cb(
 		return FLAC__STREAM_DECODER_READ_STATUS_END_OF_STREAM;
 	} else if (*bytes >= size_t(bytes_left)) {
 		*bytes = bytes_left;
- 		load_binary_fn(args->inbuf, buffer, bytes_left);
+		args->inbuf->template loadBinary<1>(buffer, bytes_left);
 		args->pos += bytes_left;
 		return FLAC__STREAM_DECODER_READ_STATUS_CONTINUE;
 	} else {
-		load_binary_fn(args->inbuf, buffer, *bytes);
+		args->inbuf->template loadBinary<1>(buffer, *bytes);
 		args->pos += *bytes;
 		return FLAC__STREAM_DECODER_READ_STATUS_CONTINUE;
 	}
 }
-
+  
 template<typename A>
 static FLAC__StreamDecoderWriteStatus flac_decoder_write_cb(
     const FLAC__StreamDecoder *decoder, const FLAC__Frame *frame,
@@ -112,7 +75,7 @@ static FLAC__StreamDecoderWriteStatus flac_decoder_write_cb(
 		(*args->outbuf)[oldsize + i] = buffer[0][i];
 	return FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE;
 }
-
+  
 static void flac_decoder_error_cb(const FLAC__StreamDecoder *decoder,
     FLAC__StreamDecoderErrorStatus status, void *client_data)
 {
@@ -149,8 +112,7 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 	ar & cereal::make_nvp("flac", use_flac_);
 
 #ifdef G3_HAS_FLAC
-	//Don't try to use FLAC when outputing to JSON, even if flac is enabled.
-	if (use_flac_ && typeid(A) == typeid(cereal::PortableBinaryOutputArchive)) {
+	if (use_flac_) {
 		std::vector<int32_t> inbuf;
 		std::vector<uint8_t> outbuf;
 		const int32_t *chanmap[1];
@@ -396,6 +358,111 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 		}
 	}
 }
+
+#ifdef SPT3G_ENABLE_JSON_OUTPUT
+template <> void G3Timestream::save(cereal::JSONOutputArchive &ar, unsigned v) const
+{
+	ar & cereal::make_nvp("G3FrameObject",
+	    cereal::base_class<G3FrameObject>(this));
+	ar & cereal::make_nvp("units", units);
+	ar & cereal::make_nvp("start", start);
+	ar & cereal::make_nvp("stop", stop);
+
+	ar & cereal::make_nvp("data_type", data_type_);
+	if (buffer_) {
+		ar & cereal::make_nvp("data", *buffer_);
+	} else {
+		switch (data_type_) {
+		case TS_DOUBLE: {
+			std::vector<double> data((double *)data_,
+			    (double *)data_ + len_);
+			ar & cereal::make_nvp("data", data);
+			break;
+		}
+		case TS_FLOAT: {
+			std::vector<float> data((float *)data_,
+			    (float *)data_ + len_);
+			ar & cereal::make_nvp("data", data);
+			break;
+		}
+		case TS_INT32: {
+			std::vector<int32_t> data((int32_t *)data_,
+			    (int32_t *)data_ + len_);
+			ar & cereal::make_nvp("data", data);
+			break;
+		}
+		case TS_INT64: {
+			std::vector<int64_t> data((int64_t *)data_,
+			    (int64_t *)data_ + len_);
+			ar & cereal::make_nvp("data", data);
+			break;
+		}
+		default:
+			log_fatal("Unknown timestream datatype %d", data_type_);
+		}
+	}
+}
+
+template <> void G3Timestream::load(cereal::JSONInputArchive &ar, unsigned v)
+{
+	G3_CHECK_VERSION(v);
+
+	ar & cereal::make_nvp("G3FrameObject",
+	    cereal::base_class<G3FrameObject>(this));
+	ar & cereal::make_nvp("units", units);
+	if (v >= 2) {
+		ar & cereal::make_nvp("start", start);
+		ar & cereal::make_nvp("stop", stop);
+	}
+
+	if (buffer_)
+		delete buffer_;
+	buffer_ = NULL;
+	root_data_ref_.reset();
+
+	if (v >= 3)
+		ar & cereal::make_nvp("data_type", data_type_);
+	else
+		data_type_ = TS_DOUBLE;
+	switch (data_type_) {
+	case TS_DOUBLE:
+		buffer_ = new std::vector<double>();
+		ar & cereal::make_nvp("data", *buffer_);
+		len_ = buffer_->size();
+		data_ = &(*buffer_)[0];
+		break;
+	case TS_FLOAT: {
+		std::vector<float> *data = new std::vector<float>();
+		ar & cereal::make_nvp("data", *data);
+		root_data_ref_ = std::shared_ptr<std::vector<float> >(
+		    data);
+		len_ = data->size();
+		data_ = &(*data)[0];
+		break;
+		}
+	case TS_INT32: {
+		std::vector<int32_t> *data = new std::vector<int32_t>();
+		ar & cereal::make_nvp("data", *data);
+		root_data_ref_ = std::shared_ptr<
+		    std::vector<int32_t> >(data);
+		len_ = data->size();
+		data_ = &(*data)[0];
+		break;
+	}
+	case TS_INT64: {
+		std::vector<int64_t> *data = new std::vector<int64_t>();
+		ar & cereal::make_nvp("data", *data);
+		root_data_ref_ = std::shared_ptr<
+		    std::vector<int64_t> >(data);
+		len_ = data->size();
+		data_ = &(*data)[0];
+		break;
+	}
+	default:
+		log_fatal("Unknown timestream datatype %d", data_type_);
+	}
+}
+#endif
 
 G3Timestream::G3Timestream(const G3Timestream &r) :
     units(r.units), start(r.start), stop(r.stop), use_flac_(r.use_flac_),
@@ -911,7 +978,7 @@ void G3TimestreamMap::Compactify()
 	}
 }
 
-G3_SPLIT_SERIALIZABLE_CODE(G3Timestream);
+G3_SPLIT_SERIALIZABLE_CODE_BINARY(G3Timestream);
 G3_SERIALIZABLE_CODE(G3TimestreamMap);
 
 class G3Timestream::G3TimestreamPythonHelpers
