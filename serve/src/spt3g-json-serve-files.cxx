@@ -19,10 +19,9 @@
 #include <streambuf>
 #include <csignal>
 
-#include "core/pybindings.h"
-#include "core/G3.h"
-#include "core/G3Frame.h"
-#include "core/dataio.h"
+#include <core/pybindings.h>
+#include <core/G3Reader.h>
+#include <core/G3Pipeline.h>
 
 #include "httplib/httplib.h"
 #include "serve/favicon.h"
@@ -183,6 +182,39 @@ class SinkStream : public std::streambuf
 };
 
 
+/* Pipeline module for writing frames to JSON output
+ */
+class JSONWriter : public G3Module
+{
+	public:
+		JSONWriter(std::ostream &os, int n_skip=0)
+		: os_(os), n_skip_(n_skip), counter_(0)
+		{
+		}
+
+		void Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
+		{
+			if (frame->type == G3Frame::EndProcessing) {
+				out.push_back(frame);
+				return;
+			}
+
+			if (counter_++ >= n_skip_) {
+				if (counter_ > n_skip_ + 1)
+					os_ << "," << std::endl;
+				os_ << frame->asJSON();
+			}
+
+			out.push_back(frame);
+		}
+
+	private:
+		std::ostream &os_;
+		int n_skip_;
+		int counter_;
+};
+
+
 // handle a g3 file, producing json
 // two ways to modify behavior
 // ?N=nframes  to limit number of frames prinited (default is all, equivalent to negative)
@@ -248,25 +280,13 @@ static void handle_g3(const httplib::Request & req, httplib::Response & resp)
 				preamble += "\",\n\"frames\": [";
 				os << preamble;
 
-				//set up the frame
-				G3Frame frame;
+				// Read in frames and write to JSON output
+				G3Pipeline pipe;
 				std::string fullpath = basedir + req.path;
-				std::shared_ptr<std::istream> ifs = g3_istream_from_path(fullpath, 0.01);
+				pipe.Add(G3ModulePtr(new G3Reader(fullpath, n_frames_to_read + n_skip)));
+				pipe.Add(G3ModulePtr(new JSONWriter(os, n_skip)));
+				pipe.Run();
 
-				bool first = true;
-				int i = 0;
-				while(ifs->peek() != EOF) {
-					if (!first)
-						os << ","  << std::endl;
-
-					frame.loads(ifs);
-					if (i++ >= n_skip) {
-						os << frame.asJSON();
-						first = false;
-					}
-					if (n_frames_to_read > 0 && i >= n_frames_to_read + n_skip)
-						break;
-				}
 				std::string end = "]\n}\n" ;
 				os << end;
 				sinkstr.flush();
