@@ -6,12 +6,12 @@
 #include <G3Logging.h>
 
 #include <boost/python.hpp>
-#include <boost/python/suite/indexing/container_utils.hpp>
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #endif
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include <boost/python/suite/indexing/container_utils.hpp>
 #include <container_conversions.h>
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic pop
