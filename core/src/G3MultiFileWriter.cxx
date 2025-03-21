@@ -2,7 +2,7 @@
 #include <string>
 #include <G3Module.h>
 
-#include <dataio.h>
+#include "dataio.h"
 
 class G3MultiFileWriter : public G3Module {
 public:

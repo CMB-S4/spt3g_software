@@ -20,12 +20,14 @@ public:
 	off_t Seek(off_t offset);
 	off_t Tell();
 
-private:
-	void StartFile(std::string path);
+protected:
+	virtual void StartFile(std::string path);
+	virtual G3FramePtr FillFrame();
 	bool prefix_file_;
 	std::string cur_file_;
 	std::deque<std::string> filename_;
 	std::shared_ptr<std::istream> stream_;
+	int fd_;
 	int n_frames_to_read_;
 	int n_frames_read_;
 	int n_frames_cur_;
