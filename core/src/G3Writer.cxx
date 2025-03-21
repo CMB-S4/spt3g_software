@@ -5,10 +5,15 @@
 G3Writer::G3Writer(std::string filename,
     std::vector<G3Frame::FrameType> streams,
     bool append) :
-    filename_(filename), streams_(streams)
+    filename_(filename), stream_(nullptr), streams_(streams)
 {
 	g3_check_output_path(filename);
-	stream_ = g3_ostream_to_path(filename, append);
+	g3_ostream_to_path(stream_, filename, append);
+}
+
+G3Writer::~G3Writer()
+{
+	g3_ostream_close(stream_);
 }
 
 void G3Writer::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
@@ -22,7 +27,7 @@ void G3Writer::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	G3PythonContext ctx("G3Writer", false);
 
 	if (frame->type == G3Frame::EndProcessing)
-		stream_.reset();
+		g3_ostream_close(stream_);
 	else if (streams_.size() == 0 ||
 	    std::find(streams_.begin(), streams_.end(), frame->type) !=
 	    streams_.end())

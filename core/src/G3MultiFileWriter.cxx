@@ -9,6 +9,7 @@ public:
 	G3MultiFileWriter(boost::python::object filename,
 	    size_t size_limit,
 	    boost::python::object divide_on = boost::python::object());
+	~G3MultiFileWriter();
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
 	std::string CurrentFile() { return current_filename_; }
 private:
@@ -22,7 +23,7 @@ private:
 	std::vector<G3Frame::FrameType> always_break_on_;
 	boost::python::object newfile_callback_;
 
-	std::shared_ptr<std::ostream> stream_;
+	std::ostream stream_;
 	std::vector<G3FramePtr> metadata_cache_;
 	int seqno;
 
@@ -31,7 +32,7 @@ private:
 
 G3MultiFileWriter::G3MultiFileWriter(boost::python::object filename,
     size_t size_limit, boost::python::object divide_on)
-    : size_limit_(size_limit), seqno(0)
+    : size_limit_(size_limit), stream_(nullptr), seqno(0)
 {
 	boost::python::extract<std::string> fstr(filename);
 
@@ -72,12 +73,17 @@ G3MultiFileWriter::G3MultiFileWriter(boost::python::object filename,
 	}
 }
 
+G3MultiFileWriter::~G3MultiFileWriter()
+{
+	g3_ostream_close(stream_);
+}
+
 bool
 G3MultiFileWriter::CheckNewFile(G3FramePtr frame)
 {
 	// If we are already saving data, check file size. Otherwise, open
 	// a new file unconditionally.
-	if (stream_ != nullptr) {
+	if (stream_) {
 		bool start_new_ = false;
 
 		if (g3_ostream_count(stream_) > size_limit_)
@@ -95,7 +101,7 @@ G3MultiFileWriter::CheckNewFile(G3FramePtr frame)
 			return false;
 	}
 
-	stream_.reset();
+	g3_ostream_close(stream_);
 
 	std::string filename;
 	if (filename_ != "") {
@@ -116,7 +122,7 @@ G3MultiFileWriter::CheckNewFile(G3FramePtr frame)
 	}
 
 	current_filename_ = filename;
-	stream_ = g3_ostream_to_path(filename, false, true);
+	g3_ostream_to_path(stream_, filename, false, true);
 
 	for (auto i = metadata_cache_.begin(); i != metadata_cache_.end(); i++)
 		(*i)->saves(stream_);
@@ -129,7 +135,7 @@ void G3MultiFileWriter::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	bool new_file(false), meta_cached(false);
 
 	if (frame->type == G3Frame::EndProcessing) {
-		stream_.reset();
+		g3_ostream_close(stream_);
 		goto done;
 	}
 

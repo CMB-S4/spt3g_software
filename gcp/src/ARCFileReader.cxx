@@ -82,14 +82,14 @@ public:
 	    Experiment experiment=Experiment::SPT, bool track_filename=false);
 	ARCFileReader(const std::vector<std::string> & filename,
 	    Experiment experiment=Experiment::SPT, bool track_filename=false);
-	virtual ~ARCFileReader() {}
+	virtual ~ARCFileReader();
 
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
 
 private:
 	void StartFile(const std::string & path);
 	
-	std::shared_ptr<std::istream> stream_;
+	std::istream stream_;
 
 	struct block_stats {
 		int flags;
@@ -129,7 +129,7 @@ private:
 
 ARCFileReader::ARCFileReader(const std::string &path,
     Experiment experiment, bool track_filename) :
-    experiment(experiment), track_filename_(track_filename)
+    stream_(nullptr), experiment(experiment), track_filename_(track_filename)
 {
 	if (experiment == Experiment::SPT || experiment == Experiment::BK) {
 		ms_jiffie_base_ = G3Units::ms;
@@ -147,7 +147,7 @@ ARCFileReader::ARCFileReader(const std::string &path,
 
 ARCFileReader::ARCFileReader(const std::vector<std::string> &filename,
     Experiment experiment, bool track_filename) :
-    experiment(experiment), track_filename_(track_filename)
+    stream_(nullptr), experiment(experiment), track_filename_(track_filename)
 {
 	if (experiment == Experiment::SPT || experiment == Experiment::BK) {
 		ms_jiffie_base_ = G3Units::ms;
@@ -172,6 +172,12 @@ ARCFileReader::ARCFileReader(const std::vector<std::string> &filename,
 }
 
 
+ARCFileReader::~ARCFileReader()
+{
+	g3_istream_close(stream_);
+}
+
+
 void ARCFileReader::StartFile(const std::string & path)
 {
 	int32_t size, opcode;
@@ -179,7 +185,7 @@ void ARCFileReader::StartFile(const std::string & path)
 
 	// Open file, including whatever decompression/network access/etc.
 	// may be required
-	stream_ = g3_istream_from_path(path);
+	g3_istream_from_path(stream_, path);
 	fd_ = g3_istream_handle(stream_);
 	cur_file_ = path;
 	revision_ = 0;
@@ -193,9 +199,9 @@ void ARCFileReader::StartFile(const std::string & path)
 	 */
 
 	// First size record
-	stream_->read((char *)&size, sizeof(size));
+	stream_.read((char *)&size, sizeof(size));
 	size = ntohl(size) - 8;
-	stream_->read((char *)&opcode, sizeof(opcode));
+	stream_.read((char *)&opcode, sizeof(opcode));
 	opcode = ntohl(opcode);
 
 	if (opcode != ARC_SIZE_RECORD)
@@ -203,27 +209,27 @@ void ARCFileReader::StartFile(const std::string & path)
 		    path.c_str());
 	if ((fd_ < 0 && size != 4) || (fd_ >= 0 && size != 8))
 		log_fatal("Incorrectly sized ARC_SIZE_RECORD (%d)", size);
-	stream_->read((char *)&size, sizeof(size)); /* Skip size field */
+	stream_.read((char *)&size, sizeof(size)); /* Skip size field */
 	if (fd_ >= 0)
-		stream_->read((char *)&size, sizeof(size)); /* Skip size field (net stream) */
+		stream_.read((char *)&size, sizeof(size)); /* Skip size field (net stream) */
 
 	// Get array map
-	stream_->read((char *)&size, sizeof(size));
+	stream_.read((char *)&size, sizeof(size));
 	size = ntohl(size) - 8;
-	stream_->read((char *)&opcode, sizeof(opcode));
+	stream_.read((char *)&opcode, sizeof(opcode));
 	opcode = ntohl(opcode);
 	if (opcode != ARC_ARRAYMAP_RECORD)
 		log_fatal("No ARC_ARRAYMAP_RECORD at beginning of %s",
 		    path.c_str());
 
 	buffer = new uint8_t[size];
-	stream_->read((char *)buffer, size);
-	if (stream_->eof()) {
+	stream_.read((char *)buffer, size);
+	if (stream_.eof()) {
 		delete [] buffer;
 		log_fatal("%s truncated; unable to read register map",
 		    path.c_str());
 	}
-	if (!stream_->good()) {
+	if (!stream_.good()) {
 		delete [] buffer;
 		log_fatal("Read error on %s while reading register map",
 		    path.c_str());
@@ -793,7 +799,7 @@ void ARCFileReader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	G3PythonContext ctx("ARCFileReader", false);
 
 	try {
-		while (stream_->peek() == EOF) {
+		while (stream_.peek() == EOF) {
 			if (filename_.size() > 0) {
 				const std::string path = filename_.front();
 				filename_.pop_front();
@@ -803,28 +809,28 @@ void ARCFileReader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 			}
 		}
 
-		stream_->read((char *)&size, sizeof(size));
+		stream_.read((char *)&size, sizeof(size));
 		size = ntohl(size) - 8;
-		stream_->read((char *)&opcode, sizeof(opcode));
+		stream_.read((char *)&opcode, sizeof(opcode));
 		opcode = ntohl(opcode);
 		if (opcode != ARC_FRAME_RECORD)
 			log_fatal("Message not an ARC_FRAME_RECORD mid-file");
 		if (fd_ >= 0) {
 			// network source (e.g. GCP) can support changing register selection on the fly
 			int32_t rev;
-			stream_->read((char *)&rev, sizeof(rev));
+			stream_.read((char *)&rev, sizeof(rev));
 			rev = ntohl(rev);
 			if (rev != revision_)
 				log_fatal("Frame regset revision %d does not match expected revision (%d)",
 				    rev, revision_);
-			stream_->read((char *)&size, sizeof(size));
+			stream_.read((char *)&size, sizeof(size));
 			size = ntohl(size);
 		}
 		if (size != frame_length_)
 			log_fatal("%zd-byte frame does not match expected length (%zd)",
 			    (size_t)size, (size_t)frame_length_);
 		buffer = new uint8_t[size];
-		stream_->read((char *)buffer, size);
+		stream_.read((char *)buffer, size);
 
 	} catch (...) {
 		log_error("Exception raised while reading file %s", cur_file_.c_str());

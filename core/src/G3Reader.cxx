@@ -4,7 +4,7 @@
 
 G3Reader::G3Reader(std::string filename, int n_frames_to_read,
     float timeout, bool track_filename, size_t buffersize) :
-    prefix_file_(false), n_frames_to_read_(n_frames_to_read),
+    prefix_file_(false), stream_(nullptr), n_frames_to_read_(n_frames_to_read),
     n_frames_read_(0), n_frames_cur_(0), timeout_(timeout),
     track_filename_(track_filename), buffersize_(buffersize)
 {
@@ -14,7 +14,7 @@ G3Reader::G3Reader(std::string filename, int n_frames_to_read,
 
 G3Reader::G3Reader(std::vector<std::string> filename, int n_frames_to_read,
     float timeout, bool track_filename, size_t buffersize) :
-    prefix_file_(false), n_frames_to_read_(n_frames_to_read),
+    prefix_file_(false), stream_(nullptr), n_frames_to_read_(n_frames_to_read),
     n_frames_read_(0), n_frames_cur_(0), timeout_(timeout),
     track_filename_(track_filename), buffersize_(buffersize)
 {
@@ -29,12 +29,17 @@ G3Reader::G3Reader(std::vector<std::string> filename, int n_frames_to_read,
 	filename_.pop_front();
 }
 
+G3Reader::~G3Reader()
+{
+	g3_istream_close(stream_);
+}
+
 void G3Reader::StartFile(std::string path)
 {
 	log_info("Starting file %s\n", path.c_str());
 	cur_file_ = path;
 	n_frames_cur_ = 0;
-	stream_ = g3_istream_from_path(path, timeout_, buffersize_);
+	g3_istream_from_path(stream_, path, timeout_, buffersize_);
 }
 
 void G3Reader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
@@ -71,7 +76,7 @@ void G3Reader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	// function reacquire the lock, if it was released.
 	G3PythonContext ctx("G3Reader", false);
 
-	while (stream_->peek() == EOF) {
+	while (stream_.peek() == EOF) {
 		if (n_frames_cur_ == 0)
 			log_error("Empty file %s", cur_file_.c_str());
 		if (filename_.size() > 0) {
@@ -100,14 +105,14 @@ void G3Reader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 }
 
 off_t G3Reader::Seek(off_t offset) {
-	if (stream_->peek() == EOF && offset != Tell())
+	if (stream_.peek() == EOF && offset != Tell())
 		log_fatal("Cannot seek %s; stream closed at EOF.", cur_file_.c_str());
-	stream_->seekg(offset, std::ios_base::beg);
+	stream_.seekg(offset, std::ios_base::beg);
 	return offset;
 }
 
 off_t G3Reader::Tell() {
-	return stream_->tellg();
+	return stream_.tellg();
 }
 
 PYBINDINGS("core") {

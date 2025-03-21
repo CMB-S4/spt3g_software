@@ -12,12 +12,13 @@ public:
 	    std::vector<G3Frame::FrameType> streams={}, bool append=false);
 	// Writes to file <filename> all frames with types in <streams>.
 	// If <streams> is empty (default), writes all frames.
+	virtual ~G3Writer();
 
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
 	void Flush();
 private:
 	std::string filename_;
-	std::shared_ptr<std::ostream> stream_;
+	std::ostream stream_;
 	std::vector<G3Frame::FrameType> streams_;
 
 	SET_LOGGER("G3Writer");

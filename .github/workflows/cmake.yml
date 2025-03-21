@@ -35,7 +35,7 @@ jobs:
         sudo apt update
         sudo apt install gcc-14 g++-14 -y
         sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 14 --slave /usr/bin/g++ g++ /usr/bin/g++-14
-        sudo apt-get install libbz2-dev libboost-all-dev libflac-dev libnetcdf-dev libpython3-dev
+        sudo apt-get install libz-dev libbz2-dev liblzma-dev libboost-python-dev libflac-dev libnetcdf-dev libpython3-dev
         sudo pip install numpy scipy matplotlib astropy healpy sphinx --break-system-packages
 
     - name: Setup python on macOS
@@ -47,7 +47,7 @@ jobs:
     - name: Install macOS Dependencies
       if: runner.environment == 'github-hosted' && runner.os == 'macOS'
       run: |
-        brew install --overwrite bzip2 boost boost-python3 flac netcdf
+        brew install --overwrite bzip2 xz boost-python3 flac netcdf
         python3.13 -m pip install numpy scipy matplotlib astropy healpy sphinx --break-system-packages
 
     - name: Create Build Environment
