@@ -144,11 +144,33 @@ public:
 
 protected:
 	int_type underflow() {
+		if (gptr() < egptr())
+			return traits_type::to_int_type(*gptr());
+
 		ssize_t n = read(fd_, buffer_.data(), buffer_.size());
 		if (n <= 0)
 			return traits_type::eof();
 		setg(buffer_.data(), buffer_.data(), buffer_.data() + n);
-		return traits_type::to_int_type(buffer_[0]);
+		return traits_type::to_int_type(*gptr());
+	}
+
+	std::streamsize xsgetn(char* s, std::streamsize n) {
+		std::streamsize n_read = 0;
+		while (n_read < n) {
+			if (gptr() == egptr()) {
+				if (underflow() == traits_type::eof())
+					break;
+			}
+
+			std::streamsize remaining = n - n_read;
+			std::streamsize available = egptr() - gptr();
+			std::streamsize to_read = std::min(remaining, available);
+
+			std::memcpy(s + n_read, gptr(), to_read);
+			gbump(to_read);
+			n_read += to_read;
+		}
+		return n_read;
 	}
 
 private:
