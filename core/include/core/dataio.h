@@ -57,7 +57,7 @@ void g3_istream_close(std::istream &stream);
  */
 void
 g3_ostream_to_path(std::ostream &stream, const std::string &path, bool append=false,
-    bool counter=false);
+    bool counter=false, size_t buffersize=1024*1024);
 
 /**
  * Count the number of bytes written to the output file stream.
