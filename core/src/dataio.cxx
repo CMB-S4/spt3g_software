@@ -178,14 +178,57 @@ private:
 	std::vector<char> buffer_;
 };
 
-class Decompressor : public std::streambuf {
+class UnsupportedCodec : public std::streambuf {
 public:
-	Decompressor(std::istream& file, size_t size)
+	UnsupportedCodec(const char *lib) {
+		log_fatal("Library not compiled with %s support.", lib);
+	}
+};
+
+#ifndef ZLIB_FOUND
+#define GZipDecoder(f, s) UnsupportedCodec("gzip")
+#define GZipEncoder(f, s) UnsupportedCodec("gzip")
+#endif
+
+#ifndef BZIP2_FOUND
+#define BZip2Decoder(f, s) UnsupportedCodec("bzip2")
+#define BZip2Encoder(f, s) UnsupportedCodec("bzip2")
+#endif
+
+#ifndef LZMA_FOUND
+#define LZMADecoder(f, s) UnsupportedCodec("LZMA")
+#define LZMAEncoder(f, s) UnsupportedCodec("LZMA")
+#endif
+
+template<typename T, typename C>
+class Decoder : public std::streambuf {
+public:
+	Decoder(std::istream& file, size_t size)
 	  : file_(file), inbuf_(size), outbuf_(size) {
 		setg(outbuf_.data(), outbuf_.data(), outbuf_.data());
 	}
 
 protected:
+	int_type underflow() {
+		if (gptr() < egptr())
+			return traits_type::to_int_type(*gptr());
+
+		stream_.avail_in = file_.read(inbuf_.data(), inbuf_.size()).gcount();
+		if (stream_.avail_in <= 0)
+			return traits_type::eof();
+		stream_.next_in = reinterpret_cast<C*>(inbuf_.data());
+
+		stream_.avail_out = outbuf_.size();
+		stream_.next_out = reinterpret_cast<C*>(outbuf_.data());
+
+		if (decode())
+			return traits_type::eof();
+
+		setg(outbuf_.data(), outbuf_.data(),
+		    outbuf_.data() + outbuf_.size() - stream_.avail_out);
+		return traits_type::to_int_type(*gptr());
+	}
+
 	std::streamsize xsgetn(char* s, std::streamsize n) {
 		std::streamsize n_read = 0;
 		while (n_read < n) {
@@ -205,16 +248,18 @@ protected:
 		return n_read;
 	}
 
+	virtual int decode() = 0;
+
 	std::istream& file_;
 	std::vector<char> inbuf_;
 	std::vector<char> outbuf_;
+	T stream_;
 };
 
-class GZipDecompressor : public Decompressor {
-public:
-	GZipDecompressor(std::istream& file, size_t size)
-	  : Decompressor(file, size)
 #ifdef ZLIB_FOUND
+class GZipDecoder : public Decoder<z_stream, unsigned char> {
+public:
+	GZipDecoder(std::istream& file, size_t size) : Decoder(file, size)
 	{
 		stream_.zalloc = Z_NULL;
 		stream_.zfree = Z_NULL;
@@ -225,46 +270,22 @@ public:
 			log_fatal("Error initializing gzip decoder.");
 	}
 
-	~GZipDecompressor() {
+	~GZipDecoder() {
 		inflateEnd(&stream_);
 	}
 
 protected:
-	int_type underflow() {
-		if (gptr() < egptr())
-			return traits_type::to_int_type(*gptr());
-
-		stream_.avail_in = file_.read(inbuf_.data(), inbuf_.size()).gcount();
-		if (stream_.avail_in <= 0)
-			return traits_type::eof();
-		stream_.next_in = reinterpret_cast<unsigned char*>(inbuf_.data());
-
-		stream_.avail_out = outbuf_.size();
-		stream_.next_out = reinterpret_cast<unsigned char*>(outbuf_.data());
-
+	int decode() {
 		int ret = inflate(&stream_, Z_NO_FLUSH);
-		if (ret != Z_OK && ret != Z_STREAM_END)
-			return traits_type::eof();
-
-		setg(outbuf_.data(), outbuf_.data(),
-		    outbuf_.data() + outbuf_.size() - stream_.avail_out);
-		return traits_type::to_int_type(*gptr());
+		return (ret != Z_OK && ret != Z_STREAM_END);
 	}
-
-private:
-	z_stream stream_;
-#else
-	{
-		log_fatal("Library not compiled with gzip support.");
-	}
-#endif
 };
+#endif
 
-class BZip2Decompressor : public Decompressor {
-public:
-	BZip2Decompressor(std::istream& file, size_t size)
-	  : Decompressor(file, size)
 #ifdef BZIP2_FOUND
+class BZip2Decoder : public Decoder<bz_stream, char> {
+public:
+	BZip2Decoder(std::istream& file, size_t size) : Decoder(file, size)
 	{
 		stream_.bzalloc = nullptr;
 		stream_.bzfree = nullptr;
@@ -275,87 +296,41 @@ public:
 			log_fatal("Error initializing bzip2 decoder.");
 	}
 
-	~BZip2Decompressor() {
+	~BZip2Decoder() {
 		BZ2_bzDecompressEnd(&stream_);
 	}
 
 protected:
-	int underflow() {
-		if (gptr() < egptr())
-			return traits_type::to_int_type(*gptr());
-
-		stream_.avail_in = file_.read(inbuf_.data(), inbuf_.size()).gcount();
-		if (stream_.avail_in <= 0)
-			return traits_type::eof();
-		stream_.next_in = inbuf_.data();
-
-		stream_.avail_out = outbuf_.size();
-		stream_.next_out = outbuf_.data();
-
+	int decode() {
 		int ret = BZ2_bzDecompress(&stream_);
-		if (ret != BZ_OK && ret != BZ_STREAM_END)
-			return traits_type::eof();
-
-		setg(outbuf_.data(), outbuf_.data(),
-		    outbuf_.data() + outbuf_.size() - stream_.avail_out);
-		return traits_type::to_int_type(*gptr());
+		return (ret != BZ_OK && ret != BZ_STREAM_END);
 	}
-
-private:
-	bz_stream stream_;
-#else
-	{
-		log_fatal("Library not compiled with bzip2 support.");
-	}
-#endif
 };
+#endif
 
-class LZMADecompressor : public Decompressor {
-public:
-	LZMADecompressor(std::istream& file, size_t size)
-	  : Decompressor(file, size)
 #ifdef LZMA_FOUND
+class LZMADecoder : public Decoder<lzma_stream, uint8_t> {
+public:
+	LZMADecoder(std::istream& file, size_t size) : Decoder(file, size)
         {
 		stream_ = LZMA_STREAM_INIT;
-		lzma_ret ret = lzma_stream_decoder(&stream_, UINT64_MAX, LZMA_CONCATENATED);
+		lzma_ret ret = lzma_stream_decoder(&stream_, UINT64_MAX,
+		     LZMA_CONCATENATED);
 		if (ret != LZMA_OK)
 			log_fatal("Error initializing LZMA decoder.");
 	}
 
-	~LZMADecompressor() {
+	~LZMADecoder() {
 		lzma_end(&stream_);
 	}
 
 protected:
-	int underflow() {
-		if (gptr() < egptr())
-			return traits_type::to_int_type(*gptr());
-
-		stream_.avail_in = file_.read(inbuf_.data(), inbuf_.size()).gcount();
-		if (stream_.avail_in <= 0)
-			return traits_type::eof();
-		stream_.next_in = reinterpret_cast<uint8_t*>(inbuf_.data());
-
-		stream_.avail_out = outbuf_.size();
-		stream_.next_out = reinterpret_cast<uint8_t*>(outbuf_.data());
-
+	int decode() {
 		lzma_ret ret = lzma_code(&stream_, LZMA_RUN);
-		if (ret != LZMA_OK && ret != LZMA_STREAM_END)
-			return traits_type::eof();
-
-		setg(outbuf_.data(), outbuf_.data(),
-		    outbuf_.data() + outbuf_.size() - stream_.avail_out);
-		return traits_type::to_int_type(*gptr());
+		return (ret != LZMA_OK && ret != LZMA_STREAM_END);
 	}
-
-private:
-	lzma_stream stream_;
-#else
-	{
-		log_fatal("Library not compiled with LZMA support.");
-	}
-#endif
 };
+#endif
 
 void
 g3_istream_from_path(std::istream &stream, const std::string &path, float timeout,
@@ -379,11 +354,11 @@ g3_istream_from_path(std::istream &stream, const std::string &path, float timeou
 		}
 
 		if (path.size() > 3 && !path.compare(path.size() - 3, 3, ".gz")) {
-			sbuf = new GZipDecompressor(*file, buffersize);
+			sbuf = new GZipDecoder(*file, buffersize);
 		} else if (path.size() > 4 && !path.compare(path.size() - 4, 4, ".bz2")) {
-			sbuf = new BZip2Decompressor(*file, buffersize);
+			sbuf = new BZip2Decoder(*file, buffersize);
 		} else if (path.size() > 3 && !path.compare(path.size() - 3, 3, ".xz")) {
-			sbuf = new LZMADecompressor(*file, buffersize);
+			sbuf = new LZMADecoder(*file, buffersize);
 		} else {
 			// Read buffer
 			fbuf = new std::vector<char>(buffersize);
@@ -432,22 +407,66 @@ g3_istream_close(std::istream &stream)
 	stream.rdbuf(nullptr);
 }
 
-class Compressor : public std::streambuf {
+template <typename T, typename C>
+class Encoder : public std::streambuf {
 public:
-	Compressor(std::ostream &file, size_t size)
+	Encoder(std::ostream &file, size_t size)
 	  : file_(file), inbuf_(size), outbuf_(size) {}
 
 protected:
+	int_type overflow(int_type c) {
+		if (pptr() && pbase()) {
+			std::streamsize len = pptr() - pbase();
+			stream_.avail_in = len;
+			stream_.next_in = reinterpret_cast<C*>(pbase());
+			encode_all();
+		}
+		if (c != traits_type::eof()) {
+			inbuf_[0] = traits_type::to_char_type(c);
+			stream_.avail_in = 1;
+			stream_.next_in = reinterpret_cast<C*>(inbuf_.data());
+			encode_all();
+		}
+		setp(inbuf_.data(), inbuf_.data() + inbuf_.size());
+		return traits_type::not_eof(c);
+	}
+
+	std::streamsize xsputn(const char* s, std::streamsize n) {
+		stream_.avail_in = n;
+		stream_.next_in = reinterpret_cast<C*>(const_cast<char*>(s));
+		encode_all();
+		return n;
+	}
+
+	int sync() {
+		stream_.avail_in = 0;
+		encode_all(true);
+		file_.flush();
+		return 0;
+	}
+
+	void encode_all(bool flush=false) {
+		do {
+			stream_.avail_out = outbuf_.size();
+			stream_.next_out = reinterpret_cast<C*>(outbuf_.data());
+			if (encode(flush))
+				return;
+			file_.write(outbuf_.data(), outbuf_.size() - stream_.avail_out);
+		} while (stream_.avail_out == 0);
+	}
+
+	virtual int encode(bool flush) = 0;
+
 	std::ostream &file_;
 	std::vector<char> inbuf_;
 	std::vector<char> outbuf_;
+	T stream_;
 };
 
-class GZipCompressor : public Compressor {
-public:
-	GZipCompressor(std::ostream &file, size_t size)
-	  : Compressor(file, size)
 #ifdef ZLIB_FOUND
+class GZipEncoder : public Encoder<z_stream, unsigned char> {
+public:
+	GZipEncoder(std::ostream &file, size_t size) : Encoder(file, size)
 	{
 		stream_.zalloc = Z_NULL;
 		stream_.zfree = Z_NULL;
@@ -457,65 +476,22 @@ public:
 			log_fatal("Error initializing gzip encoder.");
 	}
 
-	~GZipCompressor() {
+	~GZipEncoder() {
 		deflateEnd(&stream_);
 	}
 
 protected:
-	int_type overflow(int_type c) {
-		if (pptr() && pbase()) {
-			std::streamsize len = pptr() - pbase();
-			stream_.avail_in = len;
-			stream_.next_in = reinterpret_cast<unsigned char*>(pbase());
-			compress();
-		}
-		if (c != traits_type::eof()) {
-			inbuf_[0] = traits_type::to_char_type(c);
-			stream_.avail_in = 1;
-			stream_.next_in = reinterpret_cast<unsigned char*>(inbuf_.data());
-			compress();
-		}
-		setp(inbuf_.data(), inbuf_.data() + inbuf_.size());
-		return traits_type::not_eof(c);
+	int encode(bool flush) {
+		return (deflate(&stream_, flush ? Z_FINISH : Z_NO_FLUSH)
+		    == Z_STREAM_ERROR);
 	}
-
-	std::streamsize xsputn(const char* s, std::streamsize n) {
-		stream_.avail_in = n;
-		stream_.next_in = reinterpret_cast<unsigned char*>(const_cast<char*>(s));
-		compress();
-		return n;
-	}
-
-	int sync() {
-		stream_.avail_in = 0;
-		compress(Z_FINISH);
-		file_.flush();
-		return 0;
-	}
-
-private:
-	void compress(int flush=Z_NO_FLUSH) {
-		do {
-			stream_.avail_out = outbuf_.size();
-			stream_.next_out = reinterpret_cast<unsigned char*>(outbuf_.data());
-			deflate(&stream_, flush);
-			file_.write(outbuf_.data(), outbuf_.size() - stream_.avail_out);
-		} while (stream_.avail_out == 0);
-	}
-
-	z_stream stream_;
-#else
-	{
-		log_fatal("Library not implemented with gzip support.");
-	}
-#endif
 };
+#endif
 
-class BZip2Compressor : public Compressor {
-public:
-	BZip2Compressor(std::ostream &file, size_t size)
-	  : Compressor(file, size)
 #ifdef BZIP2_FOUND
+class BZip2Encoder : public Encoder<bz_stream, char> {
+public:
+	BZip2Encoder(std::ostream &file, size_t size) : Encoder(file, size)
 	{
 		stream_.bzalloc = nullptr;
 		stream_.bzfree = nullptr;
@@ -524,65 +500,22 @@ public:
 			log_fatal("Error initializing bzip2 encoder.");
 	}
 
-	~BZip2Compressor() {
+	~BZip2Encoder() {
 		BZ2_bzCompressEnd(&stream_);
 	}
 
 protected:
-	int_type overflow(int_type c) {
-		if (pptr() && pbase()) {
-			std::streamsize len = pptr() - pbase();
-			stream_.avail_in = len;
-			stream_.next_in = pbase();
-			compress();
-		}
-		if (c != traits_type::eof()) {
-			inbuf_[0] = traits_type::to_char_type(c);
-			stream_.avail_in = 1;
-			stream_.next_in = inbuf_.data();
-			compress();
-		}
-		setp(inbuf_.data(), inbuf_.data() + inbuf_.size());
-		return traits_type::not_eof(c);
+	int encode(bool flush) {
+		return (BZ2_bzCompress(&stream_, flush ? BZ_FINISH : BZ_RUN)
+		    == BZ_SEQUENCE_ERROR);
 	}
-
-	std::streamsize xsputn(const char* s, std::streamsize n) {
-		stream_.avail_in = n;
-		stream_.next_in = const_cast<char*>(s);
-		compress();
-		return n;
-	}
-
-	int sync() {
-		stream_.avail_in = 0;
-		compress(BZ_FINISH);
-		file_.flush();
-		return 0;
-	}
-
-private:
-	void compress(int flush=BZ_RUN) {
-		do {
-			stream_.avail_out = outbuf_.size();
-			stream_.next_out = outbuf_.data();
-			BZ2_bzCompress(&stream_, flush);
-			file_.write(outbuf_.data(), outbuf_.size() - stream_.avail_out);
-		} while (stream_.avail_out == 0);
-	}
-
-	bz_stream stream_;
-#else
-	{
-		log_fatal("Library not implemented with bzip2 support.");
-	}
-#endif
 };
+#endif
 
-class LZMACompressor : public Compressor {
-public:
-	LZMACompressor(std::ostream &file, size_t size)
-	  : Compressor(file, size)
 #ifdef LZMA_FOUND
+class LZMAEncoder : public Encoder<lzma_stream, uint8_t> {
+public:
+	LZMAEncoder(std::ostream &file, size_t size) : Encoder(file, size)
 	{
 		stream_ = LZMA_STREAM_INIT;
 		lzma_ret ret = lzma_easy_encoder(&stream_, LZMA_PRESET_DEFAULT,
@@ -591,62 +524,18 @@ public:
 			log_fatal("Error initializing LZMA encoder.");
 	}
 
-	~LZMACompressor() {
+	~LZMAEncoder() {
 		lzma_end(&stream_);
 	}
 
 protected:
-	int_type overflow(int_type c) {
-		if (pptr() && pbase()) {
-			std::streamsize len = pptr() - pbase();
-			stream_.avail_in = len;
-			stream_.next_in = reinterpret_cast<uint8_t*>(pbase());
-			compress();
-		}
-		if (c != traits_type::eof()) {
-			inbuf_[0] = traits_type::to_char_type(c);
-			stream_.avail_in = 1;
-			stream_.next_in = reinterpret_cast<uint8_t*>(inbuf_.data());
-			compress();
-		}
-		setp(inbuf_.data(), inbuf_.data() + inbuf_.size());
-		return traits_type::not_eof(c);
+	int encode(bool flush) {
+		lzma_action action = flush ? LZMA_FINISH : LZMA_RUN;
+		lzma_ret ret = lzma_code(&stream_, action);
+		return (ret != LZMA_OK && ret != LZMA_STREAM_END);
 	}
-
-	std::streamsize xsputn(const char* s, std::streamsize n) {
-		stream_.avail_in = n;
-		stream_.next_in = reinterpret_cast<uint8_t*>(const_cast<char*>(s));
-		compress();
-		return n;
-	}
-
-	int sync() {
-		stream_.avail_in = 0;
-		compress(LZMA_FINISH);
-		file_.flush();
-		return 0;
-	}
-
-private:
-	void compress(lzma_action action=LZMA_RUN) {
-		do {
-			stream_.avail_out = outbuf_.size();
-			stream_.next_out = reinterpret_cast<uint8_t*>(outbuf_.data());
-			lzma_ret ret = lzma_code(&stream_, action);
-			if (ret != LZMA_OK && ret != LZMA_STREAM_END)
-				return;
-			file_.write(reinterpret_cast<const char*>(outbuf_.data()),
-			    outbuf_.size() - stream_.avail_out);
-		} while (stream_.avail_out == 0);
-	}
-
-	lzma_stream stream_;
-#else
-	{
-		log_fatal("Library not implemented with LZMA support.");
-	}
-#endif
 };
+#endif
 
 class OutputStreamCounter : public std::streambuf {
 public:
@@ -697,15 +586,15 @@ g3_ostream_to_path(std::ostream &stream, const std::string &path, bool append,
 	if (path.size() > 3 && !path.compare(path.size() - 3, 3, ".gz")) {
 		if (append)
 			log_fatal("Cannot append to compressed file.");
-		sbuf = new GZipCompressor(*file, buffersize);
+		sbuf = new GZipEncoder(*file, buffersize);
 	} else if (path.size() > 4 && !path.compare(path.size() - 4, 4, ".bz2")) {
 		if (append)
 			log_fatal("Cannot append to compressed file.");
-		sbuf = new BZip2Compressor(*file, buffersize);
+		sbuf = new BZip2Encoder(*file, buffersize);
 	} else if (path.size() > 3 && !path.compare(path.size() - 3, 3, ".xz")) {
 		if (append)
 			log_fatal("Cannot append to compressed file.");
-		sbuf = new LZMACompressor(*file, buffersize);
+		sbuf = new LZMAEncoder(*file, buffersize);
 	} else {
 		sbuf = file->rdbuf();
 	}
