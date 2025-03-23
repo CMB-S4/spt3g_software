@@ -216,16 +216,16 @@ public:
 	  : Decompressor(file, size)
 #ifdef ZLIB_FOUND
 	{
-		zstream_.zalloc = Z_NULL;
-		zstream_.zfree = Z_NULL;
-		zstream_.opaque = Z_NULL;
-		zstream_.avail_in = 0;
-		zstream_.next_in = Z_NULL;
-		inflateInit2(&zstream_, 16 + MAX_WBITS);
+		stream_.zalloc = Z_NULL;
+		stream_.zfree = Z_NULL;
+		stream_.opaque = Z_NULL;
+		stream_.avail_in = 0;
+		stream_.next_in = Z_NULL;
+		inflateInit2(&stream_, 16 + MAX_WBITS);
 	}
 
 	~GZipDecompressor() {
-		inflateEnd(&zstream_);
+		inflateEnd(&stream_);
 	}
 
 protected:
@@ -233,25 +233,25 @@ protected:
 		if (gptr() < egptr())
 			return traits_type::to_int_type(*gptr());
 
-		zstream_.avail_in = file_.read(inbuf_.data(), inbuf_.size()).gcount();
-		if (zstream_.avail_in <= 0)
+		stream_.avail_in = file_.read(inbuf_.data(), inbuf_.size()).gcount();
+		if (stream_.avail_in <= 0)
 			return traits_type::eof();
-		zstream_.next_in = reinterpret_cast<unsigned char*>(inbuf_.data());
+		stream_.next_in = reinterpret_cast<unsigned char*>(inbuf_.data());
 
-		zstream_.avail_out = outbuf_.size();
-		zstream_.next_out = reinterpret_cast<unsigned char*>(outbuf_.data());
+		stream_.avail_out = outbuf_.size();
+		stream_.next_out = reinterpret_cast<unsigned char*>(outbuf_.data());
 
-		int ret = inflate(&zstream_, Z_NO_FLUSH);
+		int ret = inflate(&stream_, Z_NO_FLUSH);
 		if (ret != Z_OK && ret != Z_STREAM_END)
 			return traits_type::eof();
 
 		setg(outbuf_.data(), outbuf_.data(),
-		    outbuf_.data() + outbuf_.size() - zstream_.avail_out);
+		    outbuf_.data() + outbuf_.size() - stream_.avail_out);
 		return traits_type::to_int_type(*gptr());
 	}
 
 private:
-	z_stream zstream_;
+	z_stream stream_;
 #else
 	{
 		log_fatal("Library not compiled with gzip support.");
@@ -265,9 +265,42 @@ public:
 	  : Decompressor(file, size)
 #ifdef BZIP2_FOUND
 	{
-		(void) file_;
-		log_fatal("Not implmented");
+		stream_.bzalloc = nullptr;
+		stream_.bzfree = nullptr;
+		stream_.opaque = nullptr;
+		stream_.avail_in = 0;
+		stream_.next_in = nullptr;
+		BZ2_bzDecompressInit(&stream_, 0, 0);
 	}
+
+	~BZip2Decompressor() {
+		BZ2_bzDecompressEnd(&stream_);
+	}
+
+protected:
+	int underflow() override {
+		if (gptr() < egptr())
+			return traits_type::to_int_type(*gptr());
+
+		stream_.avail_in = file_.read(inbuf_.data(), inbuf_.size()).gcount();
+		if (stream_.avail_in <= 0)
+			return traits_type::eof();
+		stream_.next_in = inbuf_.data();
+
+		stream_.avail_out = outbuf_.size();
+		stream_.next_out = outbuf_.data();
+
+		int ret = BZ2_bzDecompress(&stream_);
+		if (ret != BZ_OK && ret != BZ_STREAM_END)
+			return traits_type::eof();
+
+		setg(outbuf_.data(), outbuf_.data(),
+		    outbuf_.data() + outbuf_.size() - stream_.avail_out);
+		return traits_type::to_int_type(*gptr());
+	}
+
+private:
+	bz_stream stream_;
 #else
 	{
 		log_fatal("Library not compiled with bzip2 support.");
@@ -383,29 +416,29 @@ public:
 	  : Compressor(file, size)
 #ifdef ZLIB_FOUND
 	{
-		zstream_.zalloc = Z_NULL;
-		zstream_.zfree = Z_NULL;
-		zstream_.opaque = Z_NULL;
-		deflateInit2(&zstream_, Z_DEFAULT_COMPRESSION, Z_DEFLATED,
+		stream_.zalloc = Z_NULL;
+		stream_.zfree = Z_NULL;
+		stream_.opaque = Z_NULL;
+		deflateInit2(&stream_, Z_DEFAULT_COMPRESSION, Z_DEFLATED,
 		    16 + MAX_WBITS, 8, Z_DEFAULT_STRATEGY);
 	}
 
 	~GZipCompressor() {
-		deflateEnd(&zstream_);
+		deflateEnd(&stream_);
 	}
 
 protected:
 	int_type overflow(int_type c) {
 		if (pptr() && pbase()) {
 			std::streamsize len = pptr() - pbase();
-			zstream_.avail_in = len;
-			zstream_.next_in = reinterpret_cast<unsigned char*>(pbase());
+			stream_.avail_in = len;
+			stream_.next_in = reinterpret_cast<unsigned char*>(pbase());
 			compress();
 		}
 		if (c != traits_type::eof()) {
 			inbuf_[0] = traits_type::to_char_type(c);
-			zstream_.avail_in = 1;
-			zstream_.next_in = reinterpret_cast<unsigned char*>(inbuf_.data());
+			stream_.avail_in = 1;
+			stream_.next_in = reinterpret_cast<unsigned char*>(inbuf_.data());
 			compress();
 		}
 		setp(inbuf_.data(), inbuf_.data() + inbuf_.size());
@@ -413,14 +446,14 @@ protected:
 	}
 
 	std::streamsize xsputn(const char* s, std::streamsize n) {
-		zstream_.avail_in = n;
-		zstream_.next_in = reinterpret_cast<unsigned char*>(const_cast<char*>(s));
+		stream_.avail_in = n;
+		stream_.next_in = reinterpret_cast<unsigned char*>(const_cast<char*>(s));
 		compress();
 		return n;
 	}
 
 	int sync() {
-		zstream_.avail_in = 0;
+		stream_.avail_in = 0;
 		compress(Z_FINISH);
 		file_.flush();
 		return 0;
@@ -429,14 +462,14 @@ protected:
 private:
 	void compress(int flush=Z_NO_FLUSH) {
 		do {
-			zstream_.avail_out = outbuf_.size();
-			zstream_.next_out = reinterpret_cast<unsigned char*>(outbuf_.data());
-			deflate(&zstream_, flush);
-			file_.write(outbuf_.data(), outbuf_.size() - zstream_.avail_out);
-		} while (zstream_.avail_out == 0);
+			stream_.avail_out = outbuf_.size();
+			stream_.next_out = reinterpret_cast<unsigned char*>(outbuf_.data());
+			deflate(&stream_, flush);
+			file_.write(outbuf_.data(), outbuf_.size() - stream_.avail_out);
+		} while (stream_.avail_out == 0);
 	}
 
-	z_stream zstream_;
+	z_stream stream_;
 #else
 	{
 		log_fatal("Library not implemented with gzip support.");
@@ -450,9 +483,59 @@ public:
 	  : Compressor(file, size)
 #ifdef BZIP2_FOUND
 	{
-		(void) file_;
-		log_fatal("Not implemented");
+		stream_.bzalloc = nullptr;
+		stream_.bzfree = nullptr;
+		stream_.opaque = nullptr;
+		BZ2_bzCompressInit(&stream_, 9, 0, 0);
 	}
+
+	~BZip2Compressor() {
+		BZ2_bzCompressEnd(&stream_);
+	}
+
+protected:
+	int_type overflow(int_type c) {
+		if (pptr() && pbase()) {
+			std::streamsize len = pptr() - pbase();
+			stream_.avail_in = len;
+			stream_.next_in = pbase();
+			compress();
+		}
+		if (c != traits_type::eof()) {
+			inbuf_[0] = traits_type::to_char_type(c);
+			stream_.avail_in = 1;
+			stream_.next_in = inbuf_.data();
+			compress();
+		}
+		setp(inbuf_.data(), inbuf_.data() + inbuf_.size());
+		return traits_type::not_eof(c);
+	}
+
+	std::streamsize xsputn(const char* s, std::streamsize n) {
+		stream_.avail_in = n;
+		stream_.next_in = const_cast<char*>(s);
+		compress();
+		return n;
+	}
+
+	int sync() {
+		stream_.avail_in = 0;
+		compress(BZ_FINISH);
+		file_.flush();
+		return 0;
+	}
+
+private:
+	void compress(int flush=BZ_RUN) {
+		do {
+			stream_.avail_out = outbuf_.size();
+			stream_.next_out = outbuf_.data();
+			BZ2_bzCompress(&stream_, flush);
+			file_.write(outbuf_.data(), outbuf_.size() - stream_.avail_out);
+		} while (stream_.avail_out == 0);
+	}
+
+	bz_stream stream_;
 #else
 	{
 		log_fatal("Library not implemented with bzip2 support.");
