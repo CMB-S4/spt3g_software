@@ -221,7 +221,8 @@ public:
 		stream_.opaque = Z_NULL;
 		stream_.avail_in = 0;
 		stream_.next_in = Z_NULL;
-		inflateInit2(&stream_, 16 + MAX_WBITS);
+		if (inflateInit2(&stream_, 16 + MAX_WBITS) != Z_OK)
+			log_fatal("Error initializing gzip decoder.");
 	}
 
 	~GZipDecompressor() {
@@ -270,7 +271,8 @@ public:
 		stream_.opaque = nullptr;
 		stream_.avail_in = 0;
 		stream_.next_in = nullptr;
-		BZ2_bzDecompressInit(&stream_, 0, 0);
+		if (BZ2_bzDecompressInit(&stream_, 0, 0) != BZ_OK)
+			log_fatal("Error initializing bzip2 decoder.");
 	}
 
 	~BZip2Decompressor() {
@@ -278,7 +280,7 @@ public:
 	}
 
 protected:
-	int underflow() override {
+	int underflow() {
 		if (gptr() < egptr())
 			return traits_type::to_int_type(*gptr());
 
@@ -314,9 +316,40 @@ public:
 	  : Decompressor(file, size)
 #ifdef LZMA_FOUND
         {
-		(void) file_;
-		log_fatal("Not implmented");
+		stream_ = LZMA_STREAM_INIT;
+		lzma_ret ret = lzma_stream_decoder(&stream_, UINT64_MAX, LZMA_CONCATENATED);
+		if (ret != LZMA_OK)
+			log_fatal("Error initializing LZMA decoder.");
 	}
+
+	~LZMADecompressor() {
+		lzma_end(&stream_);
+	}
+
+protected:
+	int underflow() {
+		if (gptr() < egptr())
+			return traits_type::to_int_type(*gptr());
+
+		stream_.avail_in = file_.read(inbuf_.data(), inbuf_.size()).gcount();
+		if (stream_.avail_in <= 0)
+			return traits_type::eof();
+		stream_.next_in = reinterpret_cast<uint8_t*>(inbuf_.data());
+
+		stream_.avail_out = outbuf_.size();
+		stream_.next_out = reinterpret_cast<uint8_t*>(outbuf_.data());
+
+		lzma_ret ret = lzma_code(&stream_, LZMA_RUN);
+		if (ret != LZMA_OK && ret != LZMA_STREAM_END)
+			return traits_type::eof();
+
+		setg(outbuf_.data(), outbuf_.data(),
+		    outbuf_.data() + outbuf_.size() - stream_.avail_out);
+		return traits_type::to_int_type(*gptr());
+	}
+
+private:
+	lzma_stream stream_;
 #else
 	{
 		log_fatal("Library not compiled with LZMA support.");
@@ -419,8 +452,9 @@ public:
 		stream_.zalloc = Z_NULL;
 		stream_.zfree = Z_NULL;
 		stream_.opaque = Z_NULL;
-		deflateInit2(&stream_, Z_DEFAULT_COMPRESSION, Z_DEFLATED,
-		    16 + MAX_WBITS, 8, Z_DEFAULT_STRATEGY);
+		if (deflateInit2(&stream_, Z_DEFAULT_COMPRESSION, Z_DEFLATED,
+		    16 + MAX_WBITS, 8, Z_DEFAULT_STRATEGY) != Z_OK)
+			log_fatal("Error initializing gzip encoder.");
 	}
 
 	~GZipCompressor() {
@@ -486,7 +520,8 @@ public:
 		stream_.bzalloc = nullptr;
 		stream_.bzfree = nullptr;
 		stream_.opaque = nullptr;
-		BZ2_bzCompressInit(&stream_, 9, 0, 0);
+		if (BZ2_bzCompressInit(&stream_, 9, 0, 0) != BZ_OK)
+			log_fatal("Error initializing bzip2 encoder.");
 	}
 
 	~BZip2Compressor() {
@@ -549,9 +584,63 @@ public:
 	  : Compressor(file, size)
 #ifdef LZMA_FOUND
 	{
-		(void) file_;
-		log_fatal("Not implemented");
+		stream_ = LZMA_STREAM_INIT;
+		lzma_ret ret = lzma_easy_encoder(&stream_, LZMA_PRESET_DEFAULT,
+		    LZMA_CHECK_CRC64);
+		if (ret != LZMA_OK)
+			log_fatal("Error initializing LZMA encoder.");
 	}
+
+	~LZMACompressor() {
+		lzma_end(&stream_);
+	}
+
+protected:
+	int_type overflow(int_type c) {
+		if (pptr() && pbase()) {
+			std::streamsize len = pptr() - pbase();
+			stream_.avail_in = len;
+			stream_.next_in = reinterpret_cast<uint8_t*>(pbase());
+			compress();
+		}
+		if (c != traits_type::eof()) {
+			inbuf_[0] = traits_type::to_char_type(c);
+			stream_.avail_in = 1;
+			stream_.next_in = reinterpret_cast<uint8_t*>(inbuf_.data());
+			compress();
+		}
+		setp(inbuf_.data(), inbuf_.data() + inbuf_.size());
+		return traits_type::not_eof(c);
+	}
+
+	std::streamsize xsputn(const char* s, std::streamsize n) {
+		stream_.avail_in = n;
+		stream_.next_in = reinterpret_cast<uint8_t*>(const_cast<char*>(s));
+		compress();
+		return n;
+	}
+
+	int sync() {
+		stream_.avail_in = 0;
+		compress(LZMA_FINISH);
+		file_.flush();
+		return 0;
+	}
+
+private:
+	void compress(lzma_action action=LZMA_RUN) {
+		do {
+			stream_.avail_out = outbuf_.size();
+			stream_.next_out = reinterpret_cast<uint8_t*>(outbuf_.data());
+			lzma_ret ret = lzma_code(&stream_, action);
+			if (ret != LZMA_OK && ret != LZMA_STREAM_END)
+				return;
+			file_.write(reinterpret_cast<const char*>(outbuf_.data()),
+			    outbuf_.size() - stream_.avail_out);
+		} while (stream_.avail_out == 0);
+	}
+
+	lzma_stream stream_;
 #else
 	{
 		log_fatal("Library not implemented with LZMA support.");
