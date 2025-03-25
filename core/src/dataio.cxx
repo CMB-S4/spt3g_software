@@ -473,8 +473,42 @@ g3_istream_close(std::istream &stream)
 	stream.rdbuf(nullptr);
 }
 
+class OutputStreamCounter : public std::streambuf {
+public:
+	OutputStreamCounter(std::streambuf* buffer)
+	  : bytes_(0), buffer_(buffer) {
+		if (!buffer_)
+			log_fatal("Input file stream buffer required");
+	}
+
+	OutputStreamCounter() : bytes_(0), buffer_(nullptr) {}
+
+	std::streampos bytes() const { return bytes_; }
+
+protected:
+	virtual int_type overflow(int_type c) {
+		if (buffer_->sputc(c) != traits_type::eof()) {
+			bytes_++;
+			return c;
+		}
+		return traits_type::eof();
+	}
+
+	virtual std::streamsize xsputn(const char* s, std::streamsize n) {
+		std::streamsize nput = buffer_->sputn(s, n);
+		if (nput > 0)
+			bytes_ += nput;
+		return nput;
+	}
+
+	size_t bytes_;
+
+private:
+	std::streambuf* buffer_;
+};
+
 template <typename T, typename C>
-class Encoder : public std::streambuf {
+class Encoder : public OutputStreamCounter {
 public:
 	Encoder(std::ostream &file, size_t size)
 	  : file_(file), inbuf_(size), outbuf_(size) {}
@@ -517,7 +551,9 @@ protected:
 			stream_.next_out = reinterpret_cast<C*>(outbuf_.data());
 			if (encode(flush))
 				return;
-			file_.write(outbuf_.data(), outbuf_.size() - stream_.avail_out);
+			size_t n =  outbuf_.size() - stream_.avail_out;
+			bytes_ += n;
+			file_.write(outbuf_.data(), n);
 		} while (stream_.avail_out == 0);
 	}
 
@@ -603,40 +639,9 @@ protected:
 };
 #endif
 
-class OutputStreamCounter : public std::streambuf {
-public:
-	OutputStreamCounter(std::streambuf* buffer)
-	  : buffer_(buffer), bytes_(0) {}
-
-	std::streampos bytes() const { return bytes_; }
-
-protected:
-	int_type overflow(int_type c) {
-		if (buffer_ && buffer_->sputc(c) != traits_type::eof()) {
-			bytes_++;
-			return c;
-		}
-		return traits_type::eof();
-	}
-
-	std::streamsize xsputn(const char* s, std::streamsize n) {
-		if (!buffer_)
-			return 0;
-
-		std::streamsize nput = buffer_->sputn(s, n);
-		if (nput > 0)
-			bytes_ += nput;
-		return nput;
-	}
-
-private:
-	std::streambuf* buffer_;
-	size_t bytes_;
-};
-
 void
 g3_ostream_to_path(std::ostream &stream, const std::string &path, bool append,
-    bool counter, size_t buffersize)
+    size_t buffersize)
 {
 	std::ios_base::openmode mode = std::ios::binary;
 	if (append)
@@ -662,26 +667,18 @@ g3_ostream_to_path(std::ostream &stream, const std::string &path, bool append,
 			log_fatal("Cannot append to compressed file.");
 		sbuf = new LZMAEncoder(*file, buffersize);
 	} else {
-		sbuf = file->rdbuf();
+		sbuf = new OutputStreamCounter(file->rdbuf());
 	}
 
-	std::streambuf *cbuf = nullptr;
-	if (counter) {
-		cbuf = new OutputStreamCounter(sbuf);
-		stream.rdbuf(cbuf);
-	} else {
-		stream.rdbuf(sbuf);
-	}
-
+	stream.rdbuf(sbuf);
 	stream.pword(0) = file;
 	stream.pword(1) = sbuf;
-	stream.pword(2) = cbuf;
 }
 
 size_t
 g3_ostream_count(std::ostream &stream)
 {
-	OutputStreamCounter* cbuf = static_cast<OutputStreamCounter*>(stream.pword(2));
+	OutputStreamCounter* cbuf = static_cast<OutputStreamCounter*>(stream.rdbuf());
 	if (!cbuf)
 		log_fatal("Could not get stream counter");
 
@@ -708,21 +705,14 @@ g3_ostream_close(std::ostream &stream)
 	g3_ostream_flush(stream);
 
 	std::ofstream* file = static_cast<std::ofstream*>(stream.pword(0));
-	std::streambuf* sbuf = static_cast<std::streambuf*>(stream.pword(1));
-	if (sbuf) {
-		if (!file || (sbuf != file->rdbuf()))
-			delete sbuf;
-	}
-	stream.pword(1) = nullptr;
-
 	if (file)
 		delete file;
 	stream.pword(0) = nullptr;
 
-	OutputStreamCounter* cbuf = static_cast<OutputStreamCounter*>(stream.pword(2));
-	if (cbuf)
-		delete cbuf;
-	stream.pword(2) = nullptr;
+	std::streambuf* sbuf = static_cast<std::streambuf*>(stream.pword(1));
+	if (sbuf)
+		delete sbuf;
+	stream.pword(1) = nullptr;
 
 	stream.rdbuf(nullptr);
 }

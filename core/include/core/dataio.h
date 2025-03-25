@@ -52,12 +52,10 @@ void g3_istream_close(std::istream &stream);
  *                  compression schemes are gzip or bzip2.
  * @param  append   If true, append to an existing file on disk.  Otherwise,
  *                  Create a new file or overwrite an existing file.
- * @param  counter  If true, add a counter filter to the stream configuration,
- *                  for use by the g3_ostream_count function.
  */
 void
 g3_ostream_to_path(std::ostream &stream, const std::string &path, bool append=false,
-    bool counter=false, size_t buffersize=1024*1024);
+    size_t buffersize=1024*1024);
 
 /**
  * Count the number of bytes written to the output file stream.

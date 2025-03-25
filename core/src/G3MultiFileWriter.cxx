@@ -122,7 +122,7 @@ G3MultiFileWriter::CheckNewFile(G3FramePtr frame)
 	}
 
 	current_filename_ = filename;
-	g3_ostream_to_path(stream_, filename, false, true);
+	g3_ostream_to_path(stream_, filename, false);
 
 	for (auto i = metadata_cache_.begin(); i != metadata_cache_.end(); i++)
 		(*i)->saves(stream_);
