@@ -185,7 +185,7 @@ void ARCFileReader::StartFile(const std::string & path)
 
 	// Open file, including whatever decompression/network access/etc.
 	// may be required
-	g3_istream_from_path(stream_, path);
+	g3_istream_from_path(stream_, path, -1, 1024*1024, "");
 	fd_ = g3_istream_handle(stream_);
 	cur_file_ = path;
 	revision_ = 0;

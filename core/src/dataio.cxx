@@ -23,6 +23,54 @@
 #include <streambuf>
 
 
+enum Codec {
+  NONE = 0,
+  GZ = 1,
+  BZIP2 = 2,
+  LZMA = 3,
+};
+
+static bool
+has_ext(const std::string &path, const std::string &ext)
+{
+	size_t n = ext.size();
+	if (path.size() <= n)
+		return false;
+	return !path.compare(path.size() - n, n, ext);
+}
+
+static Codec
+get_codec(const std::string &path, const std::string &ext=".g3")
+{
+	if (has_ext(path, ext + ".gz")) {
+#ifdef ZLIB_FOUND
+		return GZ;
+#else
+		log_fatal("Library not compiled with gzip support");
+#endif
+	}
+	if (has_ext(path, ext + ".bz2")) {
+#ifdef BZIP2_FOUND
+		return BZIP2;
+#else
+		log_fatal("Library not compiled with bzip2 support");
+#endif
+	}
+	if (has_ext(path, ext + ".xz")) {
+#ifdef LZMA_FOUND
+		return LZMA;
+#else
+		log_fatal("Library not compiled with LZMA support");
+#endif
+	}
+
+	if (!ext.size() || has_ext(path, ext))
+		return NONE;
+
+	log_fatal("Invalid filename %s", path.c_str());
+}
+
+
 static int
 connect_remote(const std::string &path, int timeout)
 {
@@ -191,28 +239,6 @@ private:
 	std::vector<char> buffer_;
 	size_t bytes_;
 };
-
-class UnsupportedCodec : public std::streambuf {
-public:
-	UnsupportedCodec(const char *lib) {
-		log_fatal("Library not compiled with %s support.", lib);
-	}
-};
-
-#ifndef ZLIB_FOUND
-#define GZipDecoder(f, s) UnsupportedCodec("gzip")
-#define GZipEncoder(f, s) UnsupportedCodec("gzip")
-#endif
-
-#ifndef BZIP2_FOUND
-#define BZip2Decoder(f, s) UnsupportedCodec("bzip2")
-#define BZip2Encoder(f, s) UnsupportedCodec("bzip2")
-#endif
-
-#ifndef LZMA_FOUND
-#define LZMADecoder(f, s) UnsupportedCodec("LZMA")
-#define LZMAEncoder(f, s) UnsupportedCodec("LZMA")
-#endif
 
 template<typename T, typename C>
 class Decoder : public std::streambuf {
@@ -400,7 +426,7 @@ private:
 
 void
 g3_istream_from_path(std::istream &stream, const std::string &path, float timeout,
-    size_t buffersize)
+    size_t buffersize, const std::string &ext)
 {
 	g3_istream_close(stream);
 
@@ -419,17 +445,28 @@ g3_istream_from_path(std::istream &stream, const std::string &path, float timeou
 			log_fatal("Could not open file %s", path.c_str());
 		}
 
-		if (path.size() > 3 && !path.compare(path.size() - 3, 3, ".gz")) {
+		switch(get_codec(path, ext)) {
+#ifdef ZLIB_FOUND
+		case GZ:
 			sbuf = new GZipDecoder(*file, buffersize);
-		} else if (path.size() > 4 && !path.compare(path.size() - 4, 4, ".bz2")) {
+			break;
+#endif
+#ifdef BZIP2_FOUND
+		case BZIP2:
 			sbuf = new BZip2Decoder(*file, buffersize);
-		} else if (path.size() > 3 && !path.compare(path.size() - 3, 3, ".xz")) {
+			break;
+#endif
+#ifdef LZMA_FOUND
+		case LZMA:
 			sbuf = new LZMADecoder(*file, buffersize);
-		} else {
+			break;
+#endif
+		default:
 			// Read buffer
 			fbuf = new std::vector<char>(buffersize);
 			file->rdbuf()->pubsetbuf(fbuf->data(), buffersize);
 			sbuf = new InputStreamCounter(file->rdbuf());
+			break;
 		}
 	}
 
@@ -641,11 +678,15 @@ protected:
 
 void
 g3_ostream_to_path(std::ostream &stream, const std::string &path, bool append,
-    size_t buffersize)
+    size_t buffersize, const std::string &ext)
 {
+	Codec codec = get_codec(path, ext);
 	std::ios_base::openmode mode = std::ios::binary;
-	if (append)
+	if (append) {
+		if (codec != NONE)
+			log_fatal("Cannot append to compressed file.");
 		mode |= std::ios::app;
+	}
 	std::ofstream *file = new std::ofstream(path, mode);
 	if (!file->is_open()) {
 		delete file;
@@ -654,20 +695,25 @@ g3_ostream_to_path(std::ostream &stream, const std::string &path, bool append,
 
 	std::streambuf *sbuf = nullptr;
 
-	if (path.size() > 3 && !path.compare(path.size() - 3, 3, ".gz")) {
-		if (append)
-			log_fatal("Cannot append to compressed file.");
+	switch(codec) {
+#ifdef ZLIB_FOUND
+	case GZ:
 		sbuf = new GZipEncoder(*file, buffersize);
-	} else if (path.size() > 4 && !path.compare(path.size() - 4, 4, ".bz2")) {
-		if (append)
-			log_fatal("Cannot append to compressed file.");
+		break;
+#endif
+#ifdef BZIP2_FOUND
+	case BZIP2:
 		sbuf = new BZip2Encoder(*file, buffersize);
-	} else if (path.size() > 3 && !path.compare(path.size() - 3, 3, ".xz")) {
-		if (append)
-			log_fatal("Cannot append to compressed file.");
+		break;
+#endif
+#ifdef LZMA_FOUND
+	case LZMA:
 		sbuf = new LZMAEncoder(*file, buffersize);
-	} else {
+		break;
+#endif
+	default:
 		sbuf = new OutputStreamCounter(file->rdbuf());
+		break;
 	}
 
 	stream.rdbuf(sbuf);

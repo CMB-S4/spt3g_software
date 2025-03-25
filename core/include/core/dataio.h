@@ -20,10 +20,11 @@
  *                  read until EOF.
  * @param  timeout  Timeout in seconds for socket connections.
  * @param  buffersize Advisory buffer size in bytes for aggregating reads
+ * @param  ext      Required file extension (excluding compression suffixes)
  */
 void
 g3_istream_from_path(std::istream &stream, const std::string &path,
-    float timeout=-1.0, size_t buffersize=1024*1024);
+    float timeout=-1.0, size_t buffersize=1024*1024, const std::string &ext=".g3");
 
 /**
  * Return the file descriptor handle for socket connections.
@@ -52,10 +53,11 @@ void g3_istream_close(std::istream &stream);
  *                  compression schemes are gzip or bzip2.
  * @param  append   If true, append to an existing file on disk.  Otherwise,
  *                  Create a new file or overwrite an existing file.
+ * @param  ext      Required file extension (excluding compression suffixes)
  */
 void
 g3_ostream_to_path(std::ostream &stream, const std::string &path, bool append=false,
-    size_t buffersize=1024*1024);
+    size_t buffersize=1024*1024, const std::string &ext=".g3");
 
 /**
  * Count the number of bytes written to the output file stream.
