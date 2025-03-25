@@ -79,9 +79,11 @@ enum {
 class ARCFileReader : public G3Module {
 public:
 	ARCFileReader(const std::string &path,
-	    Experiment experiment=Experiment::SPT, bool track_filename=false);
+	    Experiment experiment=Experiment::SPT, float timeout=-1.,
+	    bool track_filename=false, size_t buffersize=1024*1024);
 	ARCFileReader(const std::vector<std::string> & filename,
-	    Experiment experiment=Experiment::SPT, bool track_filename=false);
+	    Experiment experiment=Experiment::SPT, float timeout=-1.,
+	    bool track_filename=false, size_t buffersize=1024*1024);
 	virtual ~ARCFileReader();
 
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
@@ -119,43 +121,33 @@ private:
 	std::string cur_file_;
 
 	Experiment experiment;
+	void SetExperiment(Experiment exp);
 	G3TimePtr GCPToTime(uint8_t *buffer, off_t offset);
 
+	float timeout_;
 	bool track_filename_;
+	size_t buffersize_;
 
 	SET_LOGGER("ARCFileReader");
 };
 
 
 ARCFileReader::ARCFileReader(const std::string &path,
-    Experiment experiment, bool track_filename) :
-    stream_(nullptr), experiment(experiment), track_filename_(track_filename)
+    Experiment experiment, float timeout, bool track_filename, size_t buffersize) :
+    stream_(nullptr), timeout_(timeout), track_filename_(track_filename),
+    buffersize_(buffersize)
 {
-	if (experiment == Experiment::SPT || experiment == Experiment::BK) {
-		ms_jiffie_base_ = G3Units::ms;
-	} else if (experiment == Experiment::PB) {
-		ms_jiffie_base_ = 86400/INT_MAX;
-	} else {
-		log_fatal("Unrecognized Experiment");
-	}
-
+	SetExperiment(experiment);
 	g3_check_input_path(path);
 	StartFile(path);
 }
 
-
-
 ARCFileReader::ARCFileReader(const std::vector<std::string> &filename,
-    Experiment experiment, bool track_filename) :
-    stream_(nullptr), experiment(experiment), track_filename_(track_filename)
+    Experiment experiment, float timeout, bool track_filename, size_t buffersize) :
+    stream_(nullptr), timeout_(timeout), track_filename_(track_filename),
+    buffersize_(buffersize)
 {
-	if (experiment == Experiment::SPT || experiment == Experiment::BK) {
-		ms_jiffie_base_ = G3Units::ms;
-	} else if (experiment == Experiment::PB) {
-		ms_jiffie_base_ = 86400/INT_MAX;
-	} else {
-		log_fatal("Unrecognized Experiment");
-	}
+	SetExperiment(experiment);
 
 	if (filename.size() == 0)
 		log_fatal("Empty file list provided to G3Reader");
@@ -171,12 +163,24 @@ ARCFileReader::ARCFileReader(const std::vector<std::string> &filename,
 
 }
 
-
 ARCFileReader::~ARCFileReader()
 {
 	g3_istream_close(stream_);
 }
 
+
+void ARCFileReader::SetExperiment(Experiment exp)
+{
+	experiment = exp;
+
+	if (experiment == Experiment::SPT || experiment == Experiment::BK) {
+		ms_jiffie_base_ = G3Units::ms;
+	} else if (experiment == Experiment::PB) {
+		ms_jiffie_base_ = 86400/INT_MAX;
+	} else {
+		log_fatal("Unrecognized Experiment");
+	}
+}
 
 void ARCFileReader::StartFile(const std::string & path)
 {
@@ -185,7 +189,7 @@ void ARCFileReader::StartFile(const std::string & path)
 
 	// Open file, including whatever decompression/network access/etc.
 	// may be required
-	g3_istream_from_path(stream_, path, -1, 1024*1024, "");
+	g3_istream_from_path(stream_, path, timeout_, buffersize_, "");
 	fd_ = g3_istream_handle(stream_);
 	cur_file_ = path;
 	revision_ = 0;
@@ -206,7 +210,7 @@ void ARCFileReader::StartFile(const std::string & path)
 
 	if (opcode != ARC_SIZE_RECORD)
 		log_fatal("No ARC_SIZE_RECORD at beginning of %s",
-		    path.c_str());
+		    cur_file_.c_str());
 	if ((fd_ < 0 && size != 4) || (fd_ >= 0 && size != 8))
 		log_fatal("Incorrectly sized ARC_SIZE_RECORD (%d)", size);
 	stream_.read((char *)&size, sizeof(size)); /* Skip size field */
@@ -220,19 +224,19 @@ void ARCFileReader::StartFile(const std::string & path)
 	opcode = ntohl(opcode);
 	if (opcode != ARC_ARRAYMAP_RECORD)
 		log_fatal("No ARC_ARRAYMAP_RECORD at beginning of %s",
-		    path.c_str());
+		    cur_file_.c_str());
 
 	buffer = new uint8_t[size];
 	stream_.read((char *)buffer, size);
 	if (stream_.eof()) {
 		delete [] buffer;
 		log_fatal("%s truncated; unable to read register map",
-		    path.c_str());
+		    cur_file_.c_str());
 	}
 	if (!stream_.good()) {
 		delete [] buffer;
 		log_fatal("Read error on %s while reading register map",
-		    path.c_str());
+		    cur_file_.c_str());
 	}
 
 	ParseArrayMap(buffer, size);
@@ -869,10 +873,13 @@ PYBINDINGS("gcp") {
 	    "For non-SPT ARC file formats, please set Experiment to the "
 	    "appropriate value.  Set track_filename to True to record the "
 	    "filename for each frame in the ._filename attribute (fragile).",
-		init<std::string, Experiment, bool>((arg("filename"),
-			arg("experiment")=Experiment::SPT, arg("track_filename")=false)))
-		.def(init<std::vector<std::string>, Experiment, bool>((arg("filename"),
-			arg("experiment")=Experiment::SPT, arg("track_filename")=false)))
+		init<std::string, Experiment, float, bool, size_t>((arg("filename"),
+			arg("experiment")=Experiment::SPT, arg("timeout")=-1.,
+			arg("track_filename")=false, arg("buffersize")=1024*1024)))
+		.def(init<std::vector<std::string>, Experiment, float, bool, size_t>(
+			(arg("filename"), arg("experiment")=Experiment::SPT,
+			arg("timeout")=-1., arg("track_filename")=false,
+			arg("buffersize")=1024*1024)))
 		.def_readonly("__g3module__", true)
 	;
 }
