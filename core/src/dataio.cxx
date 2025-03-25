@@ -131,7 +131,7 @@ connect_remote(const std::string &path, int timeout)
 class RemoteInputStreamBuffer : public std::streambuf {
 public:
 	RemoteInputStreamBuffer(const std::string &path, int timeout, size_t size)
-	  : buffer_(size) {
+	  : buffer_(size), bytes_(0) {
 		fd_ = connect_remote(path, timeout);
 		setg(buffer_.data(), buffer_.data(), buffer_.data());
 	}
@@ -170,12 +170,26 @@ protected:
 			gbump(to_read);
 			n_read += to_read;
 		}
+		bytes_ += n_read;
 		return n_read;
+	}
+
+	std::streampos seekoff(std::streamoff off, std::ios_base::seekdir way,
+	    std::ios_base::openmode mode) {
+		// short-circuit for tellg
+		if (off == 0 && way == std::ios_base::cur)
+			return bytes_;
+		log_fatal("Seek not implemented for remote stream");
+	}
+
+	std::streampos seekpos(std::streampos pos, std::ios_base::openmode mode) {
+		log_fatal("Seek not implemented for remote stream");
 	}
 
 private:
 	int fd_;
 	std::vector<char> buffer_;
+	size_t bytes_;
 };
 
 class UnsupportedCodec : public std::streambuf {
@@ -246,6 +260,15 @@ protected:
 			n_read += to_read;
 		}
 		return n_read;
+	}
+
+	std::streampos seekoff(std::streamoff off, std::ios_base::seekdir way,
+	    std::ios_base::openmode mode) {
+		log_fatal("Seek not implemented for compressed stream");
+	}
+
+	std::streampos seekpos(std::streampos pos, std::ios_base::openmode mode) {
+		log_fatal("Seek not implemented for compressed stream");
 	}
 
 	virtual int decode() = 0;
@@ -340,8 +363,6 @@ public:
 			log_fatal("Input file stream buffer required");
 	}
 
-	std::streampos bytes() const { return bytes_; }
-
 protected:
 	int_type underflow() {
 		return buffer_->sgetc();
@@ -355,7 +376,7 @@ protected:
 	}
 
 	std::streampos seekoff(std::streamoff off, std::ios_base::seekdir way,
-			 std::ios_base::openmode mode) {
+	    std::ios_base::openmode mode) {
 		// short-circuit for tellg
 		if (off == 0 && way == std::ios_base::cur)
 			return bytes_;
