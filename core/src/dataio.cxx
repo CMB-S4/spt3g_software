@@ -332,6 +332,51 @@ protected:
 };
 #endif
 
+class InputStreamCounter : public std::streambuf {
+public:
+	InputStreamCounter(std::streambuf* buffer)
+		: buffer_(buffer), bytes_(0) {
+		if (!buffer_)
+			log_fatal("Input file stream buffer required");
+	}
+
+	std::streampos bytes() const { return bytes_; }
+
+protected:
+	int_type underflow() {
+		return buffer_->sgetc();
+	}
+
+	std::streamsize xsgetn(char* s, std::streamsize n) {
+		std::streamsize nget = buffer_->sgetn(s, n);
+		if (nget > 0)
+			bytes_ += nget;
+		return nget;
+	}
+
+	std::streampos seekoff(std::streamoff off, std::ios_base::seekdir way,
+			 std::ios_base::openmode mode) {
+		// short-circuit for tellg
+		if (off == 0 && way == std::ios_base::cur)
+			return bytes_;
+		std::streampos n = buffer_->pubseekoff(off, way, mode);
+		if (n != std::streampos(std::streamoff(-1)))
+			bytes_ = n;
+		return n;
+	}
+
+	std::streampos seekpos(std::streampos pos, std::ios_base::openmode mode) {
+		std::streampos n = buffer_->pubseekpos(pos, mode);
+		if (n != std::streampos(std::streamoff(-1)))
+			bytes_ = n;
+		return n;
+	}
+
+private:
+	std::streambuf* buffer_;
+	size_t bytes_;
+};
+
 void
 g3_istream_from_path(std::istream &stream, const std::string &path, float timeout,
     size_t buffersize)
@@ -363,7 +408,7 @@ g3_istream_from_path(std::istream &stream, const std::string &path, float timeou
 			// Read buffer
 			fbuf = new std::vector<char>(buffersize);
 			file->rdbuf()->pubsetbuf(fbuf->data(), buffersize);
-			sbuf = file->rdbuf();
+			sbuf = new InputStreamCounter(file->rdbuf());
 		}
 	}
 
@@ -396,7 +441,7 @@ g3_istream_close(std::istream &stream)
 		delete fbuf;
 	stream.pword(2) = nullptr;
 
-	if (sbuf && (!file || sbuf != file->rdbuf()))
+	if (sbuf)
 		delete sbuf;
 	stream.pword(1) = nullptr;
 
