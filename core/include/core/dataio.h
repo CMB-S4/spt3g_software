@@ -60,15 +60,6 @@ g3_ostream_to_path(std::ostream &stream, const std::string &path, bool append=fa
     size_t buffersize=1024*1024, const std::string &ext=".g3");
 
 /**
- * Count the number of bytes written to the output file stream.
- *
- * @param  stream   A reference to the output stream, as configured by
- *                  g3_ostream_to_path with the counter argument set to true.
- * @return Number of bytes written to disk.
- */
-size_t g3_ostream_count(std::ostream &stream);
-
-/**
  * Flush the output file stream.
  *
  * @param  stream   A reference to the output stream, as configured by

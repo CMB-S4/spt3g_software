@@ -86,7 +86,7 @@ G3MultiFileWriter::CheckNewFile(G3FramePtr frame)
 	if (stream_) {
 		bool start_new_ = false;
 
-		if (g3_ostream_count(stream_) > size_limit_)
+		if (stream_.tellp() > size_limit_)
 			start_new_ = true;
 
 		if (newfile_callback_.ptr() != Py_None &&

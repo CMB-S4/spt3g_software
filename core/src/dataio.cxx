@@ -225,7 +225,7 @@ protected:
 	std::streampos seekoff(std::streamoff off, std::ios_base::seekdir way,
 	    std::ios_base::openmode mode) {
 		// short-circuit for tellg
-		if (off == 0 && way == std::ios_base::cur)
+		if ((mode & std::ios_base::in) && off == 0 && way == std::ios_base::cur)
 			return bytes_;
 		log_fatal("Seek not implemented for remote stream");
 	}
@@ -403,6 +403,8 @@ protected:
 
 	std::streampos seekoff(std::streamoff off, std::ios_base::seekdir way,
 	    std::ios_base::openmode mode) {
+		if (!(mode & std::ios_base::in))
+			log_fatal("Seek not implemented for output stream");
 		// short-circuit for tellg
 		if (off == 0 && way == std::ios_base::cur)
 			return bytes_;
@@ -413,6 +415,8 @@ protected:
 	}
 
 	std::streampos seekpos(std::streampos pos, std::ios_base::openmode mode) {
+		if (!(mode & std::ios_base::in))
+			log_fatal("Seek not implemented for output stream");
 		std::streampos n = buffer_->pubseekpos(pos, mode);
 		if (n != std::streampos(std::streamoff(-1)))
 			bytes_ = n;
@@ -524,7 +528,7 @@ public:
 
 protected:
 	virtual int_type overflow(int_type c) {
-		if (buffer_->sputc(c) != traits_type::eof()) {
+		if (buffer_ && buffer_->sputc(c) != traits_type::eof()) {
 			bytes_++;
 			return c;
 		}
@@ -532,10 +536,24 @@ protected:
 	}
 
 	virtual std::streamsize xsputn(const char* s, std::streamsize n) {
+		if (!buffer_)
+			return 0;
 		std::streamsize nput = buffer_->sputn(s, n);
 		if (nput > 0)
 			bytes_ += nput;
 		return nput;
+	}
+
+	std::streampos seekoff(std::streamoff off, std::ios_base::seekdir way,
+	    std::ios_base::openmode mode) {
+		// short-circuit for tellp
+		if ((mode & std::ios_base::out) && off == 0 && way == std::ios_base::cur)
+			return bytes_;
+		log_fatal("Seek not implemented for output stream");
+	}
+
+	std::streampos seekpos(std::streampos pos, std::ios_base::openmode mode) {
+		log_fatal("Seek not implemented for output stream");
 	}
 
 	size_t bytes_;
@@ -719,16 +737,6 @@ g3_ostream_to_path(std::ostream &stream, const std::string &path, bool append,
 	stream.rdbuf(sbuf);
 	stream.pword(0) = file;
 	stream.pword(1) = sbuf;
-}
-
-size_t
-g3_ostream_count(std::ostream &stream)
-{
-	OutputStreamCounter* cbuf = static_cast<OutputStreamCounter*>(stream.rdbuf());
-	if (!cbuf)
-		log_fatal("Could not get stream counter");
-
-	return cbuf->bytes();
 }
 
 void
