@@ -476,14 +476,13 @@ g3_istream_from_path(std::istream &stream, const std::string &path, float timeou
 
 	stream.rdbuf(sbuf);
 	stream.pword(0) = file;
-	stream.pword(1) = sbuf;
-	stream.pword(2) = fbuf;
+	stream.pword(1) = fbuf;
 }
 
 int
 g3_istream_handle(std::istream &stream)
 {
-	std::streambuf* sbuf = static_cast<std::streambuf*>(stream.pword(1));
+	std::streambuf* sbuf = stream.rdbuf();
 	if (!sbuf)
 		return -1;
 	RemoteInputStreamBuffer* rbuf = dynamic_cast<RemoteInputStreamBuffer*>(sbuf);
@@ -495,22 +494,19 @@ g3_istream_handle(std::istream &stream)
 void
 g3_istream_close(std::istream &stream)
 {
-	std::ifstream* file = static_cast<std::ifstream*>(stream.pword(0));
-	std::streambuf* sbuf = static_cast<std::streambuf*>(stream.pword(1));
-	std::vector<char>* fbuf = static_cast<std::vector<char>*>(stream.pword(2));
-
+	std::vector<char>* fbuf = static_cast<std::vector<char>*>(stream.pword(1));
 	if (fbuf)
 		delete fbuf;
-	stream.pword(2) = nullptr;
-
-	if (sbuf)
-		delete sbuf;
 	stream.pword(1) = nullptr;
 
+	std::ifstream* file = static_cast<std::ifstream*>(stream.pword(0));
 	if (file)
 		delete file;
 	stream.pword(0) = nullptr;
 
+	std::streambuf* sbuf = stream.rdbuf();
+	if (sbuf)
+		delete sbuf;
 	stream.rdbuf(nullptr);
 }
 
@@ -736,7 +732,6 @@ g3_ostream_to_path(std::ostream &stream, const std::string &path, bool append,
 
 	stream.rdbuf(sbuf);
 	stream.pword(0) = file;
-	stream.pword(1) = sbuf;
 }
 
 void
@@ -763,11 +758,9 @@ g3_ostream_close(std::ostream &stream)
 		delete file;
 	stream.pword(0) = nullptr;
 
-	std::streambuf* sbuf = static_cast<std::streambuf*>(stream.pword(1));
+	std::streambuf* sbuf = stream.rdbuf();
 	if (sbuf)
 		delete sbuf;
-	stream.pword(1) = nullptr;
-
 	stream.rdbuf(nullptr);
 }
 
