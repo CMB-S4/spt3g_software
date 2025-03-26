@@ -23,54 +23,6 @@
 #include <streambuf>
 
 
-enum Codec {
-  NONE = 0,
-  GZ = 1,
-  BZIP2 = 2,
-  LZMA = 3,
-};
-
-static bool
-has_ext(const std::string &path, const std::string &ext)
-{
-	size_t n = ext.size();
-	if (path.size() <= n)
-		return false;
-	return !path.compare(path.size() - n, n, ext);
-}
-
-static Codec
-get_codec(const std::string &path, const std::string &ext=".g3")
-{
-	if (has_ext(path, ext + ".gz")) {
-#ifdef ZLIB_FOUND
-		return GZ;
-#else
-		log_fatal("Library not compiled with gzip support");
-#endif
-	}
-	if (has_ext(path, ext + ".bz2")) {
-#ifdef BZIP2_FOUND
-		return BZIP2;
-#else
-		log_fatal("Library not compiled with bzip2 support");
-#endif
-	}
-	if (has_ext(path, ext + ".xz")) {
-#ifdef LZMA_FOUND
-		return LZMA;
-#else
-		log_fatal("Library not compiled with LZMA support");
-#endif
-	}
-
-	if (!ext.size() || has_ext(path, ext))
-		return NONE;
-
-	log_fatal("Invalid filename %s", path.c_str());
-}
-
-
 static int
 connect_remote(const std::string &path, int timeout)
 {
@@ -239,6 +191,54 @@ private:
 	std::vector<char> buffer_;
 	size_t bytes_;
 };
+
+
+enum Codec {
+  NONE = 0,
+  GZ = 1,
+  BZIP2 = 2,
+  LZMA = 3,
+};
+
+static bool
+has_ext(const std::string &path, const std::string &ext)
+{
+	size_t n = ext.size();
+	if (path.size() <= n)
+		return false;
+	return !path.compare(path.size() - n, n, ext);
+}
+
+static Codec
+get_codec(const std::string &path, const std::string &ext=".g3")
+{
+	if (has_ext(path, ext + ".gz")) {
+#ifdef ZLIB_FOUND
+		return GZ;
+#else
+		log_fatal("Library not compiled with gzip support");
+#endif
+	}
+	if (has_ext(path, ext + ".bz2")) {
+#ifdef BZIP2_FOUND
+		return BZIP2;
+#else
+		log_fatal("Library not compiled with bzip2 support");
+#endif
+	}
+	if (has_ext(path, ext + ".xz")) {
+#ifdef LZMA_FOUND
+		return LZMA;
+#else
+		log_fatal("Library not compiled with LZMA support");
+#endif
+	}
+
+	if (!ext.size() || has_ext(path, ext))
+		return NONE;
+
+	log_fatal("Invalid filename %s", path.c_str());
+}
 
 template<typename T, typename C>
 class Decoder : public std::streambuf {
