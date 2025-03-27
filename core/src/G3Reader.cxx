@@ -2,7 +2,7 @@
 #include <dataio.h>
 #include <G3Reader.h>
 
-G3Reader::G3Reader(std::string filename, int n_frames_to_read,
+G3Reader::G3Reader(const std::string &filename, int n_frames_to_read,
     float timeout, bool track_filename, size_t buffersize) :
     prefix_file_(false), stream_(nullptr), n_frames_to_read_(n_frames_to_read),
     n_frames_read_(0), n_frames_cur_(0), timeout_(timeout),
@@ -12,7 +12,7 @@ G3Reader::G3Reader(std::string filename, int n_frames_to_read,
 	StartFile(filename);
 }
 
-G3Reader::G3Reader(std::vector<std::string> filename, int n_frames_to_read,
+G3Reader::G3Reader(const std::vector<std::string> &filename, int n_frames_to_read,
     float timeout, bool track_filename, size_t buffersize) :
     prefix_file_(false), stream_(nullptr), n_frames_to_read_(n_frames_to_read),
     n_frames_read_(0), n_frames_cur_(0), timeout_(timeout),
@@ -34,7 +34,7 @@ G3Reader::~G3Reader()
 	g3_istream_close(stream_);
 }
 
-void G3Reader::StartFile(std::string path)
+void G3Reader::StartFile(const std::string &path)
 {
 	log_info("Starting file %s\n", path.c_str());
 	cur_file_ = path;

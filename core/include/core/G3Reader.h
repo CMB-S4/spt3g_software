@@ -9,10 +9,10 @@
 
 class G3Reader : public G3Module {
 public:
-	G3Reader(std::string filename, int n_frames_to_read = -1,
+	G3Reader(const std::string &filename, int n_frames_to_read = -1,
                  float timeout = -1., bool track_filename = false,
 	         size_t buffersize = 1024*1024);
-	G3Reader(std::vector<std::string> filenames, int n_frames_to_read = -1,
+	G3Reader(const std::vector<std::string> &filenames, int n_frames_to_read = -1,
                  float timeout = -1., bool track_filename = false,
 	         size_t buffersize = 1024*1024);
 	virtual ~G3Reader();
@@ -22,7 +22,7 @@ public:
 	off_t Tell();
 
 private:
-	void StartFile(std::string path);
+	void StartFile(const std::string &path);
 	bool prefix_file_;
 	std::string cur_file_;
 	std::deque<std::string> filename_;
