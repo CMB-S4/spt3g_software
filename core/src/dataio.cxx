@@ -316,7 +316,7 @@ public:
 		stream_.avail_in = 0;
 		stream_.next_in = Z_NULL;
 		if (inflateInit2(&stream_, 16 + MAX_WBITS) != Z_OK)
-			log_fatal("Error initializing gzip decoder.");
+			log_fatal("Error initializing gzip decoder: %s", stream_.msg);
 	}
 
 	~GZipDecoder() {
@@ -326,7 +326,11 @@ public:
 protected:
 	int decode() {
 		int ret = inflate(&stream_, Z_NO_FLUSH);
-		return (ret != Z_OK && ret != Z_STREAM_END);
+		if (ret != Z_OK && ret != Z_STREAM_END) {
+			log_error("Error running gzip decoder: %s", stream_.msg);
+			return ret;
+		}
+		return 0;
 	}
 };
 #endif
@@ -342,7 +346,7 @@ public:
 		stream_.avail_in = 0;
 		stream_.next_in = nullptr;
 		if (BZ2_bzDecompressInit(&stream_, 0, 0) != BZ_OK)
-			log_fatal("Error initializing bzip2 decoder.");
+			log_fatal("Error initializing bzip2 decoder");
 	}
 
 	~BZip2Decoder() {
@@ -352,7 +356,11 @@ public:
 protected:
 	int decode() {
 		int ret = BZ2_bzDecompress(&stream_);
-		return (ret != BZ_OK && ret != BZ_STREAM_END);
+		if (ret != BZ_OK && ret != BZ_STREAM_END) {
+			log_error("Error running bzip2 decoder");
+			return ret;
+		}
+		return 0;
 	}
 };
 #endif
@@ -376,7 +384,11 @@ public:
 protected:
 	int decode() {
 		lzma_ret ret = lzma_code(&stream_, LZMA_RUN);
-		return (ret != LZMA_OK && ret != LZMA_STREAM_END);
+		if (ret != LZMA_OK && ret != LZMA_STREAM_END) {
+			log_error("Error running LZMA decoder");
+			return ret;
+		}
+		return 0;
 	}
 };
 #endif
@@ -626,7 +638,7 @@ public:
 		stream_.opaque = Z_NULL;
 		if (deflateInit2(&stream_, Z_DEFAULT_COMPRESSION, Z_DEFLATED,
 		    16 + MAX_WBITS, 8, Z_DEFAULT_STRATEGY) != Z_OK)
-			log_fatal("Error initializing gzip encoder.");
+			log_fatal("Error initializing gzip encoder: %s", stream_.msg);
 	}
 
 	~GZipEncoder() {
@@ -635,8 +647,12 @@ public:
 
 protected:
 	int encode(bool flush) {
-		return (deflate(&stream_, flush ? Z_FINISH : Z_NO_FLUSH)
-		    == Z_STREAM_ERROR);
+		int ret = deflate(&stream_, flush ? Z_FINISH : Z_NO_FLUSH);
+		if (ret == Z_STREAM_ERROR) {
+			log_error("Error running gzip encoder: %s", stream_.msg);
+			return ret;
+		}
+		return 0;
 	}
 };
 #endif
@@ -650,7 +666,7 @@ public:
 		stream_.bzfree = nullptr;
 		stream_.opaque = nullptr;
 		if (BZ2_bzCompressInit(&stream_, 9, 0, 0) != BZ_OK)
-			log_fatal("Error initializing bzip2 encoder.");
+			log_fatal("Error initializing bzip2 encoder");
 	}
 
 	~BZip2Encoder() {
@@ -659,8 +675,12 @@ public:
 
 protected:
 	int encode(bool flush) {
-		return (BZ2_bzCompress(&stream_, flush ? BZ_FINISH : BZ_RUN)
-		    == BZ_SEQUENCE_ERROR);
+		int ret = BZ2_bzCompress(&stream_, flush ? BZ_FINISH : BZ_RUN);
+		if (ret == BZ_SEQUENCE_ERROR) {
+			log_error("Error running bzip2 encoder");
+			return ret;
+		}
+		return 0;
 	}
 };
 #endif
@@ -685,7 +705,11 @@ protected:
 	int encode(bool flush) {
 		lzma_action action = flush ? LZMA_FINISH : LZMA_RUN;
 		lzma_ret ret = lzma_code(&stream_, action);
-		return (ret != LZMA_OK && ret != LZMA_STREAM_END);
+		if (ret != LZMA_OK && ret != LZMA_STREAM_END) {
+			log_error("Error running LZMA encoder");
+			return ret;
+		}
+		return 0;
 	}
 };
 #endif
