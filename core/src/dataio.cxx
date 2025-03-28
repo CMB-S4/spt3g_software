@@ -121,7 +121,7 @@ connect_remote(const std::string &path, float timeout)
 
 class RemoteInputStreamBuffer : public std::streambuf {
 public:
-	RemoteInputStreamBuffer(const std::string &path, int timeout, size_t size)
+	RemoteInputStreamBuffer(const std::string &path, float timeout, size_t size)
 	  : buffer_(size), bytes_(0) {
 		fd_ = connect_remote(path, timeout);
 		setg(buffer_.data(), buffer_.data(), buffer_.data());
