@@ -32,13 +32,11 @@ connect_remote(const std::string &path, float timeout)
 
 	std::string host = path.substr(path.find("://") + 3);
 	if (host.find(":") == host.npos)
-		log_fatal("Could not open URL %s: unspecified port",
-		    path.c_str());
+		log_fatal("Could not open URL %s: unspecified port", path.c_str());
 	std::string port = host.substr(host.find(":") + 1);
 	host = host.substr(0, host.find(":"));
 
-	log_debug("Opening connection to %s, port %s", host.c_str(),
-	    port.c_str());
+	log_debug("Opening connection to %s, port %s", host.c_str(), port.c_str());
 
 	int fd = -1;
 
@@ -59,10 +57,8 @@ connect_remote(const std::string &path, float timeout)
 		if (lfd <= 0)
 			log_fatal("Could not listen on %s (%s)",
 			    path.c_str(), strerror(errno));
-		setsockopt(lfd, IPPROTO_IPV6, IPV6_V6ONLY, &no,
-		    sizeof(no));
-		setsockopt(lfd, SOL_SOCKET, SO_REUSEADDR, &yes,
-		    sizeof(yes));
+		setsockopt(lfd, IPPROTO_IPV6, IPV6_V6ONLY, &no, sizeof(no));
+		setsockopt(lfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
 
 		if (bind(lfd, (struct sockaddr *)&sin, sizeof(sin)) < 0)
 			log_fatal("Could not bind on port %s (%s)",
@@ -71,11 +67,9 @@ connect_remote(const std::string &path, float timeout)
 			log_fatal("Could not listen on port %s (%s)",
 			    port.c_str(), strerror(errno));
 
-		log_debug("Waiting for connection on port %s",
-		    port.c_str());
+		log_debug("Waiting for connection on port %s", port.c_str());
 		fd = accept(lfd, NULL, NULL);
-		log_debug("Accepted connection on port %s",
-		    port.c_str());
+		log_debug("Accepted connection on port %s", port.c_str());
 		close(lfd);
 
 		return fd;
@@ -100,13 +94,11 @@ connect_remote(const std::string &path, float timeout)
 	// that works.
 	fd = -1;
 	for (r = info; r != NULL; r = r->ai_next) {
-		fd = socket(r->ai_family, r->ai_socktype,
-		    r->ai_protocol);
+		fd = socket(r->ai_family, r->ai_socktype, r->ai_protocol);
 		if (fd == -1)
 			continue;
 
-		if (connect(fd, r->ai_addr, r->ai_addrlen) ==
-		    -1) {
+		if (connect(fd, r->ai_addr, r->ai_addrlen) == -1) {
 			close(fd);
 			fd = -1;
 			continue;
