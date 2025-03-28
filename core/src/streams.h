@@ -1,5 +1,5 @@
-#ifndef _G3_COMPRESSION_H
-#define _G3_COMPRESSION_H
+#ifndef _G3_STREAMS_H
+#define _G3_STREAMS_H
 
 #include <G3Logging.h>
 
@@ -13,8 +13,173 @@
 #include <lzma.h>
 #endif
 
+#include <unistd.h>
 #include <fstream>
 #include <streambuf>
+
+class RemoteInputStreamBuffer : public std::streambuf {
+public:
+	RemoteInputStreamBuffer(int fd, size_t size)
+	  : fd_(fd), buffer_(size), bytes_(0) {
+		setg(buffer_.data(), buffer_.data(), buffer_.data());
+	}
+
+	~RemoteInputStreamBuffer() {
+		close(fd_);
+	}
+
+	int fd() { return fd_; }
+
+protected:
+	int_type underflow() {
+		if (gptr() < egptr())
+			return traits_type::to_int_type(*gptr());
+
+		ssize_t n = read(fd_, buffer_.data(), buffer_.size());
+		if (n <= 0)
+			return traits_type::eof();
+		setg(buffer_.data(), buffer_.data(), buffer_.data() + n);
+		return traits_type::to_int_type(*gptr());
+	}
+
+	std::streamsize xsgetn(char* s, std::streamsize n) {
+		std::streamsize n_read = 0;
+		while (n_read < n) {
+			if (gptr() == egptr()) {
+				if (underflow() == traits_type::eof())
+					break;
+			}
+
+			std::streamsize remaining = n - n_read;
+			std::streamsize available = egptr() - gptr();
+			std::streamsize to_read = std::min(remaining, available);
+
+			std::memcpy(s + n_read, gptr(), to_read);
+			gbump(to_read);
+			n_read += to_read;
+		}
+		bytes_ += n_read;
+		return n_read;
+	}
+
+	std::streampos seekoff(std::streamoff off, std::ios_base::seekdir way,
+	    std::ios_base::openmode mode) {
+		// short-circuit for tellg
+		if ((mode & std::ios_base::in) && off == 0 && way == std::ios_base::cur)
+			return bytes_;
+		log_fatal("Seek not implemented for remote stream");
+	}
+
+	std::streampos seekpos(std::streampos pos, std::ios_base::openmode mode) {
+		log_fatal("Seek not implemented for remote stream");
+	}
+
+private:
+	int fd_;
+	std::vector<char> buffer_;
+	size_t bytes_;
+};
+
+class InputFileStreamCounter : public std::streambuf {
+public:
+	InputFileStreamCounter(const std::string& path, size_t size)
+	  : buffer_(size), bytes_(0) {
+		file_.open(path, std::ios::binary);
+		if (!file_.is_open())
+			log_fatal("Error opening file %s", path.c_str());
+		file_.rdbuf()->pubsetbuf(buffer_.data(), buffer_.size());
+	}
+
+protected:
+	int_type underflow() {
+		return file_.rdbuf()->sgetc();
+	}
+
+	std::streamsize xsgetn(char* s, std::streamsize n) {
+		std::streamsize nget = file_.rdbuf()->sgetn(s, n);
+		if (nget > 0)
+			bytes_ += nget;
+		return nget;
+	}
+
+	std::streampos seekoff(std::streamoff off, std::ios_base::seekdir way,
+	    std::ios_base::openmode mode) {
+		if (!(mode & std::ios_base::in))
+			log_fatal("Seek not implemented for output stream");
+		// short-circuit for tellg
+		if (off == 0 && way == std::ios_base::cur)
+			return bytes_;
+		std::streampos n = file_.rdbuf()->pubseekoff(off, way, mode);;
+		if (n != std::streampos(std::streamoff(-1)))
+			bytes_ = n;
+		return n;
+	}
+
+	std::streampos seekpos(std::streampos pos, std::ios_base::openmode mode) {
+		if (!(mode & std::ios_base::in))
+			log_fatal("Seek not implemented for output stream");
+		std::streampos n = file_.rdbuf()->pubseekpos(pos, mode);;
+		if (n != std::streampos(std::streamoff(-1)))
+			bytes_ = n;
+		return n;
+	}
+
+private:
+	std::ifstream file_;
+	std::vector<char> buffer_;
+	size_t bytes_;
+};
+
+class OutputFileStreamCounter : public std::streambuf {
+public:
+	OutputFileStreamCounter(const std::string& path, size_t size, bool append)
+	  : buffer_(size), bytes_(0) {
+		std::ios_base::openmode mode = std::ios::binary;
+		if (append)
+			mode |= std::ios::app;
+		file_.open(path, mode);
+		if (!file_.is_open())
+			log_fatal("Error opening file %s", path.c_str());
+		file_.rdbuf()->pubsetbuf(buffer_.data(), buffer_.size());
+	}
+
+protected:
+	int_type overflow(int_type c) {
+		if (file_.rdbuf()->sputc(c) != traits_type::eof()) {
+			bytes_++;
+			return c;
+		}
+		return traits_type::eof();
+	}
+
+	std::streamsize xsputn(const char* s, std::streamsize n) {
+		std::streamsize nput = file_.rdbuf()->sputn(s, n);
+		if (nput > 0)
+			bytes_ += nput;
+		return nput;
+	}
+
+	int sync() {
+		return file_.rdbuf()->pubsync();
+	}
+
+	std::streampos seekoff(std::streamoff off, std::ios_base::seekdir way,
+	    std::ios_base::openmode mode) {
+		// short-circuit for tellp
+		if ((mode & std::ios_base::out) && off == 0 && way == std::ios_base::cur)
+			return bytes_;
+		log_fatal("Seek not implemented for output stream");
+	}
+
+	std::streampos seekpos(std::streampos pos, std::ios_base::openmode mode) {
+		log_fatal("Seek not implemented for output stream");
+	}
+
+private:
+	std::ofstream file_;
+	std::vector<char> buffer_;
+	size_t bytes_;
+};
 
 template<typename T, typename C>
 class Decoder : public std::streambuf {

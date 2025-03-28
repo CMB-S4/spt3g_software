@@ -1,6 +1,6 @@
 #include <G3Logging.h>
 #include <dataio.h>
-#include "compression.h"
+#include "streams.h"
 
 #include <filesystem>
 
@@ -8,10 +8,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#include <unistd.h>
 #include <stdlib.h>
-#include <fstream>
-#include <streambuf>
 
 
 static int
@@ -119,76 +116,13 @@ connect_remote(const std::string &path, float timeout)
 	return fd;
 }
 
-class RemoteInputStreamBuffer : public std::streambuf {
-public:
-	RemoteInputStreamBuffer(const std::string &path, float timeout, size_t size)
-	  : buffer_(size), bytes_(0) {
-		fd_ = connect_remote(path, timeout);
-		setg(buffer_.data(), buffer_.data(), buffer_.data());
-	}
-
-	~RemoteInputStreamBuffer() {
-		close(fd_);
-	}
-
-	int fd() { return fd_; }
-
-protected:
-	int_type underflow() {
-		if (gptr() < egptr())
-			return traits_type::to_int_type(*gptr());
-
-		ssize_t n = read(fd_, buffer_.data(), buffer_.size());
-		if (n <= 0)
-			return traits_type::eof();
-		setg(buffer_.data(), buffer_.data(), buffer_.data() + n);
-		return traits_type::to_int_type(*gptr());
-	}
-
-	std::streamsize xsgetn(char* s, std::streamsize n) {
-		std::streamsize n_read = 0;
-		while (n_read < n) {
-			if (gptr() == egptr()) {
-				if (underflow() == traits_type::eof())
-					break;
-			}
-
-			std::streamsize remaining = n - n_read;
-			std::streamsize available = egptr() - gptr();
-			std::streamsize to_read = std::min(remaining, available);
-
-			std::memcpy(s + n_read, gptr(), to_read);
-			gbump(to_read);
-			n_read += to_read;
-		}
-		bytes_ += n_read;
-		return n_read;
-	}
-
-	std::streampos seekoff(std::streamoff off, std::ios_base::seekdir way,
-	    std::ios_base::openmode mode) {
-		// short-circuit for tellg
-		if ((mode & std::ios_base::in) && off == 0 && way == std::ios_base::cur)
-			return bytes_;
-		log_fatal("Seek not implemented for remote stream");
-	}
-
-	std::streampos seekpos(std::streampos pos, std::ios_base::openmode mode) {
-		log_fatal("Seek not implemented for remote stream");
-	}
-
-private:
-	int fd_;
-	std::vector<char> buffer_;
-	size_t bytes_;
-};
-
 
 enum Codec {
   NONE = 0,
   GZ = 1,
   BZIP2 = 2,
   LZMA = 3,
+  REMOTE = 4,
 };
 
 static bool
@@ -234,6 +168,9 @@ get_codec(const std::string &path, const std::string &ext=".g3")
 static Codec
 check_input_path(const std::string &path, const std::string &ext)
 {
+	if (path.find("tcp://") == 0)
+		return REMOTE;
+
 	std::filesystem::path fpath(path);
 	if (!std::filesystem::exists(fpath) ||
 	    !std::filesystem::is_regular_file(fpath))
@@ -259,107 +196,6 @@ check_output_path(const std::string &path, const std::string &ext)
 
 	return get_codec(path, ext);
 }
-
-class InputFileStreamCounter : public std::streambuf {
-public:
-	InputFileStreamCounter(const std::string& path, size_t size)
-	  : buffer_(size), bytes_(0) {
-		file_.open(path, std::ios::binary);
-		if (!file_.is_open())
-			log_fatal("Error opening file %s", path.c_str());
-		file_.rdbuf()->pubsetbuf(buffer_.data(), buffer_.size());
-	}
-
-protected:
-	int_type underflow() {
-		return file_.rdbuf()->sgetc();
-	}
-
-	std::streamsize xsgetn(char* s, std::streamsize n) {
-		std::streamsize nget = file_.rdbuf()->sgetn(s, n);
-		if (nget > 0)
-			bytes_ += nget;
-		return nget;
-	}
-
-	std::streampos seekoff(std::streamoff off, std::ios_base::seekdir way,
-	    std::ios_base::openmode mode) {
-		if (!(mode & std::ios_base::in))
-			log_fatal("Seek not implemented for output stream");
-		// short-circuit for tellg
-		if (off == 0 && way == std::ios_base::cur)
-			return bytes_;
-		std::streampos n = file_.rdbuf()->pubseekoff(off, way, mode);;
-		if (n != std::streampos(std::streamoff(-1)))
-			bytes_ = n;
-		return n;
-	}
-
-	std::streampos seekpos(std::streampos pos, std::ios_base::openmode mode) {
-		if (!(mode & std::ios_base::in))
-			log_fatal("Seek not implemented for output stream");
-		std::streampos n = file_.rdbuf()->pubseekpos(pos, mode);;
-		if (n != std::streampos(std::streamoff(-1)))
-			bytes_ = n;
-		return n;
-	}
-
-private:
-	std::ifstream file_;
-	std::vector<char> buffer_;
-	size_t bytes_;
-};
-
-class OutputFileStreamCounter : public std::streambuf {
-public:
-	OutputFileStreamCounter(const std::string& path, size_t size, bool append)
-	  : buffer_(size), bytes_(0) {
-		std::ios_base::openmode mode = std::ios::binary;
-		if (append)
-			mode |= std::ios::app;
-		file_.open(path, mode);
-		if (!file_.is_open())
-			log_fatal("Error opening file %s", path.c_str());
-		file_.rdbuf()->pubsetbuf(buffer_.data(), buffer_.size());
-	}
-
-protected:
-	int_type overflow(int_type c) {
-		if (file_.rdbuf()->sputc(c) != traits_type::eof()) {
-			bytes_++;
-			return c;
-		}
-		return traits_type::eof();
-	}
-
-	std::streamsize xsputn(const char* s, std::streamsize n) {
-		std::streamsize nput = file_.rdbuf()->sputn(s, n);
-		if (nput > 0)
-			bytes_ += nput;
-		return nput;
-	}
-
-	int sync() {
-		return file_.rdbuf()->pubsync();
-	}
-
-	std::streampos seekoff(std::streamoff off, std::ios_base::seekdir way,
-	    std::ios_base::openmode mode) {
-		// short-circuit for tellp
-		if ((mode & std::ios_base::out) && off == 0 && way == std::ios_base::cur)
-			return bytes_;
-		log_fatal("Seek not implemented for output stream");
-	}
-
-	std::streampos seekpos(std::streampos pos, std::ios_base::openmode mode) {
-		log_fatal("Seek not implemented for output stream");
-	}
-
-private:
-	std::ofstream file_;
-	std::vector<char> buffer_;
-	size_t bytes_;
-};
 
 
 static void
@@ -395,14 +231,14 @@ g3_istream_from_path(std::istream &stream, const std::string &path, float timeou
 {
 	reset_stream(stream);
 
-	// Figure out what kind of ultimate data source this is
-	if (path.find("tcp://") == 0) {
-		stream.rdbuf(new RemoteInputStreamBuffer(path, timeout, buffersize));
-		return;
-	}
+	int fd = -1;
 
-	// Simple file case
+	// Figure out what kind of ultimate data source this is
 	switch(check_input_path(path, ext)) {
+	case REMOTE:
+		fd = connect_remote(path, timeout);
+		stream.rdbuf(new RemoteInputStreamBuffer(fd, buffersize));
+		break;
 #ifdef ZLIB_FOUND
 	case GZ:
 		stream.rdbuf(new GZipDecoder(path, buffersize));

@@ -1,4 +1,4 @@
-#include "compression.h"
+#include "streams.h"
 
 #ifdef ZLIB_FOUND
 GZipDecoder::GZipDecoder(const std::string& path, size_t size) : Decoder(path, size)
