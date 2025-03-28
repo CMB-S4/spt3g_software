@@ -84,7 +84,6 @@ public:
 	ARCFileReader(const std::vector<std::string> & filename,
 	    Experiment experiment=Experiment::SPT, float timeout=-1.,
 	    bool track_filename=false, size_t buffersize=1024*1024);
-	virtual ~ARCFileReader();
 
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
 
@@ -156,11 +155,6 @@ ARCFileReader::ARCFileReader(const std::vector<std::string> &filename,
 
 	StartFile(filename_.front());
 	filename_.pop_front();
-}
-
-ARCFileReader::~ARCFileReader()
-{
-	g3_stream_close(stream_);
 }
 
 

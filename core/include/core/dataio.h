@@ -51,13 +51,5 @@ void
 g3_ostream_to_path(std::ostream &stream, const std::string &path, bool append=false,
     size_t buffersize=1024*1024, const std::string &ext=".g3");
 
-/**
- * Clean up the IO stream.
- *
- * @param  stream   A reference to the IO stream, as configured by
- *                  g3_istream_from_path or g3_ostream_to_path.
- */
-void g3_stream_close(std::ios &stream);
-
 #endif
 

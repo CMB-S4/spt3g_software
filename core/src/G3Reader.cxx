@@ -27,11 +27,6 @@ G3Reader::G3Reader(const std::vector<std::string> &filename, int n_frames_to_rea
 	filename_.pop_front();
 }
 
-G3Reader::~G3Reader()
-{
-	g3_stream_close(stream_);
-}
-
 void G3Reader::StartFile(const std::string &path)
 {
 	log_info("Starting file %s\n", path.c_str());

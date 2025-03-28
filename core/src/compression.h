@@ -27,11 +27,6 @@ public:
 		setg(outbuf_.data(), outbuf_.data(), outbuf_.data());
 	}
 
-	virtual ~Decoder() {
-		if (file_.is_open())
-			file_.close();
-	}
-
 protected:
 	int_type underflow() {
 		if (gptr() < egptr())
@@ -97,13 +92,6 @@ public:
 		file_.open(path, std::ios::binary);
 		if (!file_.is_open())
 			log_fatal("Could not open file %s", path.c_str());
-	}
-
-	virtual ~Encoder() {
-		if (file_.is_open()) {
-			file_.flush();
-			file_.close();
-		}
 	}
 
 protected:

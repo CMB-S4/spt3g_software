@@ -12,7 +12,7 @@ G3Writer::G3Writer(std::string filename,
 
 G3Writer::~G3Writer()
 {
-	g3_stream_close(stream_);
+	stream_.flush();
 }
 
 void G3Writer::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
@@ -26,7 +26,7 @@ void G3Writer::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	G3PythonContext ctx("G3Writer", false);
 
 	if (frame->type == G3Frame::EndProcessing)
-		g3_stream_close(stream_);
+		stream_.flush();
 	else if (streams_.size() == 0 ||
 	    std::find(streams_.begin(), streams_.end(), frame->type) !=
 	    streams_.end())
@@ -37,10 +37,7 @@ void G3Writer::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 
 void G3Writer::Flush()
 {
-	try {
-		stream_.flush();
-	} catch (...) {
-	}
+	stream_.flush();
 }
 
 PYBINDINGS("core") {

@@ -15,7 +15,6 @@ public:
 	G3Reader(const std::vector<std::string> &filenames, int n_frames_to_read = -1,
                  float timeout = -1., bool track_filename = false,
 	         size_t buffersize = 1024*1024);
-	virtual ~G3Reader();
 
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
 	off_t Seek(off_t offset);

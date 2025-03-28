@@ -270,11 +270,6 @@ public:
 		file_.rdbuf()->pubsetbuf(buffer_.data(), buffer_.size());
 	}
 
-	~InputFileStreamCounter() {
-		if (file_.is_open())
-			file_.close();
-	}
-
 protected:
 	int_type underflow() {
 		return file_.rdbuf()->sgetc();
@@ -328,13 +323,6 @@ public:
 		file_.rdbuf()->pubsetbuf(buffer_.data(), buffer_.size());
 	}
 
-	~OutputFileStreamCounter() {
-		if (file_.is_open()) {
-			file_.flush();
-			file_.close();
-		}
-	}
-
 protected:
 	int_type overflow(int_type c) {
 		if (file_.rdbuf()->sputc(c) != traits_type::eof()) {
@@ -374,11 +362,38 @@ private:
 };
 
 
+static void
+reset_stream(std::ios &stream)
+{
+	std::streambuf* sbuf = stream.rdbuf();
+	if (sbuf) {
+		sbuf->pubsync();
+		delete sbuf;
+	}
+	stream.rdbuf(nullptr);
+}
+
+static void
+stream_cb(std::ios::event ev, std::ios_base& stream, int index)
+{
+	std::ios* str = nullptr;
+
+	switch (ev) {
+	case std::ios::event::erase_event:
+		str = dynamic_cast<std::ios*>(&stream);
+		if (str)
+			reset_stream(*str);
+		break;
+	default:
+		break;
+	}
+}
+
 void
 g3_istream_from_path(std::istream &stream, const std::string &path, float timeout,
     size_t buffersize, const std::string &ext)
 {
-	g3_stream_close(stream);
+	reset_stream(stream);
 
 	// Figure out what kind of ultimate data source this is
 	if (path.find("tcp://") == 0) {
@@ -408,6 +423,8 @@ g3_istream_from_path(std::istream &stream, const std::string &path, float timeou
 		stream.rdbuf(new InputFileStreamCounter(path, buffersize));
 		break;
 	}
+
+	stream.register_callback(stream_cb, 0);
 }
 
 int
@@ -426,7 +443,7 @@ void
 g3_ostream_to_path(std::ostream &stream, const std::string &path, bool append,
     size_t buffersize, const std::string &ext)
 {
-	g3_stream_close(stream);
+	reset_stream(stream);
 
 	Codec codec = check_output_path(path, ext);
 	if (append && codec != NONE)
@@ -452,13 +469,6 @@ g3_ostream_to_path(std::ostream &stream, const std::string &path, bool append,
 		stream.rdbuf(new OutputFileStreamCounter(path, buffersize, append));
 		break;
 	}
-}
 
-void
-g3_stream_close(std::ios &stream)
-{
-	std::streambuf* sbuf = stream.rdbuf();
-	if (sbuf)
-		delete sbuf;
-	stream.rdbuf(nullptr);
+	stream.register_callback(stream_cb, 1);
 }
