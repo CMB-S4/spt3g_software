@@ -380,39 +380,34 @@ g3_istream_from_path(std::istream &stream, const std::string &path, float timeou
 {
 	g3_stream_close(stream);
 
-	std::streambuf *sbuf = nullptr;
-
 	// Figure out what kind of ultimate data source this is
 	if (path.find("tcp://") == 0) {
-		sbuf = new RemoteInputStreamBuffer(path, timeout, buffersize);
-		goto done;
+		stream.rdbuf(new RemoteInputStreamBuffer(path, timeout, buffersize));
+		return;
 	}
 
 	// Simple file case
 	switch(check_input_path(path, ext)) {
 #ifdef ZLIB_FOUND
 	case GZ:
-		sbuf = new GZipDecoder(path, buffersize);
+		stream.rdbuf(new GZipDecoder(path, buffersize));
 		break;
 #endif
 #ifdef BZIP2_FOUND
 	case BZIP2:
-		sbuf = new BZip2Decoder(path, buffersize);
+		stream.rdbuf(new BZip2Decoder(path, buffersize));
 		break;
 #endif
 #ifdef LZMA_FOUND
 	case LZMA:
-		sbuf = new LZMADecoder(path, buffersize);
+		stream.rdbuf(new LZMADecoder(path, buffersize));
 		break;
 #endif
 	default:
 		// Read buffer
-		sbuf = new InputFileStreamCounter(path, buffersize);
+		stream.rdbuf(new InputFileStreamCounter(path, buffersize));
 		break;
 	}
-
-done:
-	stream.rdbuf(sbuf);
 }
 
 int
@@ -433,8 +428,6 @@ g3_ostream_to_path(std::ostream &stream, const std::string &path, bool append,
 {
 	g3_stream_close(stream);
 
-	std::streambuf *sbuf = nullptr;
-
 	Codec codec = check_output_path(path, ext);
 	if (append && codec != NONE)
 		log_fatal("Cannot append to compressed file.");
@@ -442,25 +435,23 @@ g3_ostream_to_path(std::ostream &stream, const std::string &path, bool append,
 	switch(codec) {
 #ifdef ZLIB_FOUND
 	case GZ:
-		sbuf = new GZipEncoder(path, buffersize);
+		stream.rdbuf(new GZipEncoder(path, buffersize));
 		break;
 #endif
 #ifdef BZIP2_FOUND
 	case BZIP2:
-		sbuf = new BZip2Encoder(path, buffersize);
+		stream.rdbuf(new BZip2Encoder(path, buffersize));
 		break;
 #endif
 #ifdef LZMA_FOUND
 	case LZMA:
-		sbuf = new LZMAEncoder(path, buffersize);
+		stream.rdbuf(new LZMAEncoder(path, buffersize));
 		break;
 #endif
 	default:
-		sbuf = new OutputFileStreamCounter(path, buffersize, append);
+		stream.rdbuf(new OutputFileStreamCounter(path, buffersize, append));
 		break;
 	}
-
-	stream.rdbuf(sbuf);
 }
 
 void
