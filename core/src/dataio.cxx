@@ -290,7 +290,7 @@ void
 g3_istream_from_path(std::istream &stream, const std::string &path, float timeout,
     size_t buffersize, const std::string &ext)
 {
-	g3_istream_close(stream);
+	g3_stream_close(stream);
 
 	std::streambuf *sbuf = nullptr;
 
@@ -335,15 +335,6 @@ g3_istream_handle(std::istream &stream)
 	if (!rbuf)
 		return -1;
 	return rbuf->fd();
-}
-
-void
-g3_istream_close(std::istream &stream)
-{
-	std::streambuf* sbuf = stream.rdbuf();
-	if (sbuf)
-		delete sbuf;
-	stream.rdbuf(nullptr);
 }
 
 class OutputFileStreamCounter : public std::streambuf {
@@ -408,6 +399,8 @@ void
 g3_ostream_to_path(std::ostream &stream, const std::string &path, bool append,
     size_t buffersize, const std::string &ext)
 {
+	g3_stream_close(stream);
+
 	std::streambuf *sbuf = nullptr;
 
 	Codec codec = get_codec(path, ext);
@@ -439,7 +432,7 @@ g3_ostream_to_path(std::ostream &stream, const std::string &path, bool append,
 }
 
 void
-g3_ostream_close(std::ostream &stream)
+g3_stream_close(std::ios &stream)
 {
 	std::streambuf* sbuf = stream.rdbuf();
 	if (sbuf)

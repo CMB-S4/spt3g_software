@@ -36,14 +36,6 @@ g3_istream_from_path(std::istream &stream, const std::string &path,
 int g3_istream_handle(std::istream &stream);
 
 /**
- * Clean up the input stream.
- *
- * @param  stream   A reference to the input stream, as configured by
- *                  g3_istream_from_path.
- */
-void g3_istream_close(std::istream &stream);
-
-/**
  * Configure a filtering stream for G3Frame compression to a local file.
  *
  * @param  stream   A reference to the output stream to be configured by this
@@ -60,12 +52,12 @@ g3_ostream_to_path(std::ostream &stream, const std::string &path, bool append=fa
     size_t buffersize=1024*1024, const std::string &ext=".g3");
 
 /**
- * Clean up the output stream.
+ * Clean up the IO stream.
  *
- * @param  stream   A reference to the output stream, as configured by
- *                  g3_istream_from_path.
+ * @param  stream   A reference to the IO stream, as configured by
+ *                  g3_istream_from_path or g3_ostream_to_path.
  */
-void g3_ostream_close(std::ostream &stream);
+void g3_stream_close(std::ios &stream);
 
 /**
  * Check that the input filename is a valid filename on disk.

@@ -165,7 +165,7 @@ ARCFileReader::ARCFileReader(const std::vector<std::string> &filename,
 
 ARCFileReader::~ARCFileReader()
 {
-	g3_istream_close(stream_);
+	g3_stream_close(stream_);
 }
 
 

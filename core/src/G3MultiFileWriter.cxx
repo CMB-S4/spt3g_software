@@ -77,7 +77,7 @@ G3MultiFileWriter::G3MultiFileWriter(boost::python::object filename,
 
 G3MultiFileWriter::~G3MultiFileWriter()
 {
-	g3_ostream_close(stream_);
+	g3_stream_close(stream_);
 }
 
 bool
@@ -103,7 +103,7 @@ G3MultiFileWriter::CheckNewFile(G3FramePtr frame)
 			return false;
 	}
 
-	g3_ostream_close(stream_);
+	g3_stream_close(stream_);
 
 	std::string filename;
 	if (filename_ != "") {
@@ -137,7 +137,7 @@ void G3MultiFileWriter::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	bool new_file(false), meta_cached(false);
 
 	if (frame->type == G3Frame::EndProcessing) {
-		g3_ostream_close(stream_);
+		g3_stream_close(stream_);
 		goto done;
 	}
 
