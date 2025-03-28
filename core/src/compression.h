@@ -89,39 +89,6 @@ protected:
 	T stream_;
 };
 
-#ifdef ZLIB_FOUND
-class GZipDecoder : public Decoder<z_stream, unsigned char> {
-public:
-	GZipDecoder(const std::string& path, size_t size);
-	~GZipDecoder();
-
-protected:
-	int decode();
-};
-#endif
-
-#ifdef BZIP2_FOUND
-class BZip2Decoder : public Decoder<bz_stream, char> {
-public:
-	BZip2Decoder(const std::string& path, size_t size);
-	~BZip2Decoder();
-
-protected:
-	int decode();
-};
-#endif
-
-#ifdef LZMA_FOUND
-class LZMADecoder : public Decoder<lzma_stream, uint8_t> {
-public:
-	LZMADecoder(const std::string& path, size_t size);
-	~LZMADecoder();
-
-protected:
-	int decode();
-};
-#endif
-
 template <typename T, typename C>
 class Encoder : public std::streambuf {
 public:
@@ -203,37 +170,30 @@ protected:
 	T stream_;
 };
 
+#define CODEC(name, stype, ctype) \
+class name##Decoder : public Decoder<stype, ctype> { \
+public: \
+	name##Decoder(const std::string& path, size_t size); \
+	~name##Decoder(); \
+protected: \
+	int decode(); \
+}; \
+class name##Encoder : public Encoder<stype, ctype> { \
+public: \
+	name##Encoder(const std::string& path, size_t size); \
+	~name##Encoder(); \
+protected: \
+	int encode(bool flush); \
+}
+
 #ifdef ZLIB_FOUND
-class GZipEncoder : public Encoder<z_stream, unsigned char> {
-public:
-	GZipEncoder(const std::string& path, size_t size);
-	~GZipEncoder();
-
-protected:
-	int encode(bool flush);
-};
+CODEC(GZip, z_stream, unsigned char);
 #endif
-
 #ifdef BZIP2_FOUND
-class BZip2Encoder : public Encoder<bz_stream, char> {
-public:
-	BZip2Encoder(const std::string& path, size_t size);
-	~BZip2Encoder();
-
-protected:
-	int encode(bool flush);
-};
+CODEC(BZip2, bz_stream, char);
 #endif
-
 #ifdef LZMA_FOUND
-class LZMAEncoder : public Encoder<lzma_stream, uint8_t> {
-public:
-	LZMAEncoder(const std::string& path, size_t size);
-	~LZMAEncoder();
-
-protected:
-	int encode(bool flush);
-};
+CODEC(LZMA, lzma_stream, uint8_t);
 #endif
 
 #endif
