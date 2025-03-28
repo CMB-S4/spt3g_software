@@ -525,27 +525,21 @@ g3_istream_close(std::istream &stream)
 class OutputStreamCounter : public std::streambuf {
 public:
 	OutputStreamCounter(std::streambuf* buffer)
-	  : bytes_(0), buffer_(buffer) {
+	  : buffer_(buffer), bytes_(0) {
 		if (!buffer_)
 			log_fatal("Input file stream buffer required");
 	}
 
-	OutputStreamCounter() : bytes_(0), buffer_(nullptr) {}
-
-	std::streampos bytes() const { return bytes_; }
-
 protected:
-	virtual int_type overflow(int_type c) {
-		if (buffer_ && buffer_->sputc(c) != traits_type::eof()) {
+	int_type overflow(int_type c) {
+		if (buffer_->sputc(c) != traits_type::eof()) {
 			bytes_++;
 			return c;
 		}
 		return traits_type::eof();
 	}
 
-	virtual std::streamsize xsputn(const char* s, std::streamsize n) {
-		if (!buffer_)
-			return 0;
+	std::streamsize xsputn(const char* s, std::streamsize n) {
 		std::streamsize nput = buffer_->sputn(s, n);
 		if (nput > 0)
 			bytes_ += nput;
@@ -564,17 +558,16 @@ protected:
 		log_fatal("Seek not implemented for output stream");
 	}
 
-	size_t bytes_;
-
 private:
 	std::streambuf* buffer_;
+	size_t bytes_;
 };
 
 template <typename T, typename C>
-class Encoder : public OutputStreamCounter {
+class Encoder : public std::streambuf {
 public:
 	Encoder(std::ostream &file, size_t size)
-	  : file_(file), inbuf_(size), outbuf_(size) {}
+	  : file_(file), inbuf_(size), outbuf_(size), bytes_(0) {}
 
 protected:
 	int_type overflow(int_type c) {
@@ -622,9 +615,22 @@ protected:
 
 	virtual int encode(bool flush) = 0;
 
+	std::streampos seekoff(std::streamoff off, std::ios_base::seekdir way,
+	    std::ios_base::openmode mode) {
+		// short-circuit for tellp
+		if ((mode & std::ios_base::out) && off == 0 && way == std::ios_base::cur)
+			return bytes_;
+		log_fatal("Seek not implemented for compressed stream");
+	}
+
+	std::streampos seekpos(std::streampos pos, std::ios_base::openmode mode) {
+		log_fatal("Seek not implemented for compressed stream");
+	}
+
 	std::ostream &file_;
 	std::vector<char> inbuf_;
 	std::vector<char> outbuf_;
+	size_t bytes_;
 	T stream_;
 };
 
