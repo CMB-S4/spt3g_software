@@ -40,7 +40,6 @@ G3MultiFileWriter::G3MultiFileWriter(boost::python::object filename,
 
 	if (fstr.check()) {
 		filename_ = fstr();
-		g3_check_output_path(filename_);
 
 		if (snprintf(NULL, 0, filename_.c_str(), 0) < 0)
 			log_fatal("Cannot format filename. Should be "
@@ -119,8 +118,6 @@ G3MultiFileWriter::CheckNewFile(G3FramePtr frame)
 	} else {
 		filename = boost::python::extract<std::string>(
 		    filename_callback_(frame, seqno++))();
-
-		g3_check_output_path(filename);
 	}
 
 	current_filename_ = filename;

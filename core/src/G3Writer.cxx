@@ -7,7 +7,6 @@ G3Writer::G3Writer(std::string filename,
     bool append, size_t buffersize) :
     filename_(filename), stream_(nullptr), streams_(streams)
 {
-	g3_check_output_path(filename);
 	g3_ostream_to_path(stream_, filename, append, buffersize);
 }
 

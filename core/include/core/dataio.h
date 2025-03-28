@@ -59,20 +59,5 @@ g3_ostream_to_path(std::ostream &stream, const std::string &path, bool append=fa
  */
 void g3_stream_close(std::ios &stream);
 
-/**
- * Check that the input filename is a valid filename on disk.
- *
- * @throws runtime_error  If filename is invalid or missing.
- */
-void g3_check_input_path(const std::string &path);
-
-/**
- * Check that the output filename is a valid filename on disk.
- *
- * @throws runtime_error  If filename is empty, or its parent directory is
- *                        missing.
- */
-void g3_check_output_path(const std::string &path);
-
 #endif
 

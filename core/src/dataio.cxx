@@ -231,6 +231,35 @@ get_codec(const std::string &path, const std::string &ext=".g3")
 	log_fatal("Invalid filename %s", path.c_str());
 }
 
+static Codec
+check_input_path(const std::string &path, const std::string &ext)
+{
+	std::filesystem::path fpath(path);
+	if (!std::filesystem::exists(fpath) ||
+	    !std::filesystem::is_regular_file(fpath))
+		log_fatal("Could not find file %s", path.c_str());
+
+	return get_codec(path, ext);
+}
+
+static Codec
+check_output_path(const std::string &path, const std::string &ext)
+{
+	std::filesystem::path fpath(path);
+
+	if (fpath.empty())
+		log_fatal("Empty file path");
+
+	if (fpath.has_parent_path()) {
+		auto ppath = fpath.parent_path();
+		if (!std::filesystem::exists(ppath))
+			log_fatal("Parent path does not exist: %s",
+			    ppath.string().c_str());
+	}
+
+	return get_codec(path, ext);
+}
+
 class InputFileStreamCounter : public std::streambuf {
 public:
 	InputFileStreamCounter(const std::string& path, size_t size)
@@ -285,57 +314,6 @@ private:
 	std::vector<char> buffer_;
 	size_t bytes_;
 };
-
-void
-g3_istream_from_path(std::istream &stream, const std::string &path, float timeout,
-    size_t buffersize, const std::string &ext)
-{
-	g3_stream_close(stream);
-
-	std::streambuf *sbuf = nullptr;
-
-	// Figure out what kind of ultimate data source this is
-	if (path.find("tcp://") == 0) {
-		sbuf = new RemoteInputStreamBuffer(path, timeout, buffersize);
-	} else {
-		// Simple file case
-		switch(get_codec(path, ext)) {
-#ifdef ZLIB_FOUND
-		case GZ:
-			sbuf = new GZipDecoder(path, buffersize);
-			break;
-#endif
-#ifdef BZIP2_FOUND
-		case BZIP2:
-			sbuf = new BZip2Decoder(path, buffersize);
-			break;
-#endif
-#ifdef LZMA_FOUND
-		case LZMA:
-			sbuf = new LZMADecoder(path, buffersize);
-			break;
-#endif
-		default:
-			// Read buffer
-			sbuf = new InputFileStreamCounter(path, buffersize);
-			break;
-		}
-	}
-
-	stream.rdbuf(sbuf);
-}
-
-int
-g3_istream_handle(std::istream &stream)
-{
-	std::streambuf* sbuf = stream.rdbuf();
-	if (!sbuf)
-		return -1;
-	RemoteInputStreamBuffer* rbuf = dynamic_cast<RemoteInputStreamBuffer*>(sbuf);
-	if (!rbuf)
-		return -1;
-	return rbuf->fd();
-}
 
 class OutputFileStreamCounter : public std::streambuf {
 public:
@@ -395,6 +373,60 @@ private:
 	size_t bytes_;
 };
 
+
+void
+g3_istream_from_path(std::istream &stream, const std::string &path, float timeout,
+    size_t buffersize, const std::string &ext)
+{
+	g3_stream_close(stream);
+
+	std::streambuf *sbuf = nullptr;
+
+	// Figure out what kind of ultimate data source this is
+	if (path.find("tcp://") == 0) {
+		sbuf = new RemoteInputStreamBuffer(path, timeout, buffersize);
+		goto done;
+	}
+
+	// Simple file case
+	switch(check_input_path(path, ext)) {
+#ifdef ZLIB_FOUND
+	case GZ:
+		sbuf = new GZipDecoder(path, buffersize);
+		break;
+#endif
+#ifdef BZIP2_FOUND
+	case BZIP2:
+		sbuf = new BZip2Decoder(path, buffersize);
+		break;
+#endif
+#ifdef LZMA_FOUND
+	case LZMA:
+		sbuf = new LZMADecoder(path, buffersize);
+		break;
+#endif
+	default:
+		// Read buffer
+		sbuf = new InputFileStreamCounter(path, buffersize);
+		break;
+	}
+
+done:
+	stream.rdbuf(sbuf);
+}
+
+int
+g3_istream_handle(std::istream &stream)
+{
+	std::streambuf* sbuf = stream.rdbuf();
+	if (!sbuf)
+		return -1;
+	RemoteInputStreamBuffer* rbuf = dynamic_cast<RemoteInputStreamBuffer*>(sbuf);
+	if (!rbuf)
+		return -1;
+	return rbuf->fd();
+}
+
 void
 g3_ostream_to_path(std::ostream &stream, const std::string &path, bool append,
     size_t buffersize, const std::string &ext)
@@ -403,7 +435,7 @@ g3_ostream_to_path(std::ostream &stream, const std::string &path, bool append,
 
 	std::streambuf *sbuf = nullptr;
 
-	Codec codec = get_codec(path, ext);
+	Codec codec = check_output_path(path, ext);
 	if (append && codec != NONE)
 		log_fatal("Cannot append to compressed file.");
 
@@ -438,32 +470,4 @@ g3_stream_close(std::ios &stream)
 	if (sbuf)
 		delete sbuf;
 	stream.rdbuf(nullptr);
-}
-
-void
-g3_check_input_path(const std::string &path)
-{
-	if (path.find("://") != path.npos)
-		return;
-
-	std::filesystem::path fpath(path);
-	if (!std::filesystem::exists(fpath) ||
-	    !std::filesystem::is_regular_file(fpath))
-		log_fatal("Could not find file %s", path.c_str());
-}
-
-void
-g3_check_output_path(const std::string &path)
-{
-	std::filesystem::path fpath(path);
-
-	if (fpath.empty())
-		log_fatal("Empty file path");
-
-	if (!fpath.has_parent_path())
-		return;
-
-	if (!std::filesystem::exists(fpath.parent_path()))
-		log_fatal("Parent path does not exist: %s",
-		    fpath.parent_path().string().c_str());
 }

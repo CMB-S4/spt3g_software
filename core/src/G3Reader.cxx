@@ -8,7 +8,6 @@ G3Reader::G3Reader(const std::string &filename, int n_frames_to_read,
     n_frames_read_(0), n_frames_cur_(0), timeout_(timeout),
     track_filename_(track_filename), buffersize_(buffersize)
 {
-	g3_check_input_path(filename);
 	StartFile(filename);
 }
 
@@ -21,10 +20,9 @@ G3Reader::G3Reader(const std::vector<std::string> &filename, int n_frames_to_rea
 	if (filename.size() == 0)
 		log_fatal("Empty file list provided to G3Reader");
 
-	for (auto i = filename.begin(); i != filename.end(); i++){
-		g3_check_input_path(*i);
+	for (auto i = filename.begin(); i != filename.end(); i++)
 		filename_.push_back(*i);
-	}
+
 	StartFile(filename_.front());
 	filename_.pop_front();
 }

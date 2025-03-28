@@ -138,7 +138,6 @@ ARCFileReader::ARCFileReader(const std::string &path,
     buffersize_(buffersize)
 {
 	SetExperiment(experiment);
-	g3_check_input_path(path);
 	StartFile(path);
 }
 
@@ -152,15 +151,11 @@ ARCFileReader::ARCFileReader(const std::vector<std::string> &filename,
 	if (filename.size() == 0)
 		log_fatal("Empty file list provided to G3Reader");
 
-	for (auto i = filename.begin(); i != filename.end(); i++){
-		g3_check_input_path(*i);
+	for (auto i = filename.begin(); i != filename.end(); i++)
 		filename_.push_back(*i);
-	}
 
-	const std::string path = filename_.front();
+	StartFile(filename_.front());
 	filename_.pop_front();
-	StartFile(path);
-
 }
 
 ARCFileReader::~ARCFileReader()
