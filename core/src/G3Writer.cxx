@@ -10,11 +10,6 @@ G3Writer::G3Writer(std::string filename,
 	g3_ostream_to_path(stream_, filename, append, buffersize);
 }
 
-G3Writer::~G3Writer()
-{
-	stream_.flush();
-}
-
 void G3Writer::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 {
 	// If in Python context, release the GIL while writing out.

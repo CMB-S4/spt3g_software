@@ -207,18 +207,22 @@ reset_stream(std::ios &stream)
 		delete sbuf;
 	}
 	stream.rdbuf(nullptr);
+	stream.pword(0) = nullptr;
 }
 
 static void
 stream_cb(std::ios::event ev, std::ios_base& stream, int index)
 {
-	std::ios* str = nullptr;
+	std::streambuf* buf = nullptr;
 
 	switch (ev) {
 	case std::ios::event::erase_event:
-		str = dynamic_cast<std::ios*>(&stream);
-		if (str)
-			reset_stream(*str);
+		buf = static_cast<std::streambuf*>(stream.pword(0));
+		if (buf) {
+			buf->pubsync();
+			delete buf;
+			stream.pword(0) = nullptr;
+		}
 		break;
 	default:
 		break;
@@ -260,6 +264,7 @@ g3_istream_from_path(std::istream &stream, const std::string &path, float timeou
 		break;
 	}
 
+	stream.pword(0) = stream.rdbuf();
 	stream.register_callback(stream_cb, 0);
 }
 
@@ -306,5 +311,6 @@ g3_ostream_to_path(std::ostream &stream, const std::string &path, bool append,
 		break;
 	}
 
+	stream.pword(0) = stream.rdbuf();
 	stream.register_callback(stream_cb, 1);
 }

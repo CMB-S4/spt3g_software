@@ -10,7 +10,7 @@ public:
 	    size_t size_limit,
 	    boost::python::object divide_on = boost::python::object(),
 	    size_t buffersize=1024*1024);
-	~G3MultiFileWriter();
+
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
 	std::string CurrentFile() { return current_filename_; }
 private:
@@ -72,11 +72,6 @@ G3MultiFileWriter::G3MultiFileWriter(boost::python::object filename,
 			    "True if a new file should be started and False "
 			    "otherwise.");
 	}
-}
-
-G3MultiFileWriter::~G3MultiFileWriter()
-{
-	stream_.flush();
 }
 
 bool

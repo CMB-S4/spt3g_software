@@ -13,7 +13,6 @@ public:
 	    size_t buffersize=1024*1024);
 	// Writes to file <filename> all frames with types in <streams>.
 	// If <streams> is empty (default), writes all frames.
-	virtual ~G3Writer();
 
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
 	void Flush();
