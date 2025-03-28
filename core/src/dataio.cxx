@@ -15,7 +15,7 @@
 
 
 static int
-connect_remote(const std::string &path, int timeout)
+connect_remote(const std::string &path, float timeout)
 {
 	// TCP Socket. Two syntaxes:
 	// - tcp://host:port -> connect to "host" on "port" and read
@@ -25,13 +25,11 @@ connect_remote(const std::string &path, int timeout)
 
 	std::string host = path.substr(path.find("://") + 3);
 	if (host.find(":") == host.npos)
-		log_fatal("Could not open URL %s: unspecified port",
-		    path.c_str());
+		log_fatal("Could not open URL %s: unspecified port", path.c_str());
 	std::string port = host.substr(host.find(":") + 1);
 	host = host.substr(0, host.find(":"));
 
-	log_debug("Opening connection to %s, port %s", host.c_str(),
-	    port.c_str());
+	log_debug("Opening connection to %s, port %s", host.c_str(), port.c_str());
 
 	int fd = -1;
 
@@ -66,55 +64,57 @@ connect_remote(const std::string &path, int timeout)
 		fd = accept(lfd, NULL, NULL);
 		log_debug("Accepted connection on port %s", port.c_str());
 		close(lfd);
-	} else {
-		// Connect to a listening host elsewhere
 
-		struct addrinfo hints, *info, *r;
-		int err;
-
-		bzero(&hints, sizeof(hints));
-		hints.ai_family = AF_UNSPEC;
-		hints.ai_socktype = SOCK_STREAM;
-
-		err = getaddrinfo(host.c_str(), port.c_str(), &hints, &info);
-		if (err != 0)
-			log_fatal("Could not find host %s (%s)",
-			    host.c_str(), gai_strerror(err));
-
-		// Loop through possible addresses until we find one
-		// that works.
-		fd = -1;
-		for (r = info; r != NULL; r = r->ai_next) {
-			fd = socket(r->ai_family, r->ai_socktype, r->ai_protocol);
-			if (fd == -1)
-				continue;
-
-			if (connect(fd, r->ai_addr, r->ai_addrlen) == -1) {
-				close(fd);
-				fd = -1;
-				continue;
-			}
-
-			break;
-		}
-
-		if (fd == -1)
-			log_fatal("Could not connect to %s (%s)",
-			    path.c_str(), strerror(errno));
-
-		if (timeout >= 0) {
-			struct timeval tv;
-			tv.tv_sec = (int)timeout;
-			tv.tv_usec = (int)(1e6 * (timeout - tv.tv_sec));
-			if (setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO,
-			    (char *)&tv, sizeof(tv)) < 0)
-				log_fatal("Failed to set timeout on socket; errno=%i",
-				    errno);
-		}
-
-		if (info != NULL)
-			freeaddrinfo(info);
+		return fd;
 	}
+
+	// Connect to a listening host elsewhere
+
+	struct addrinfo hints, *info, *r;
+	int err;
+
+	bzero(&hints, sizeof(hints));
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+
+	err = getaddrinfo(host.c_str(), port.c_str(), &hints, &info);
+	if (err != 0)
+		log_fatal("Could not find host %s (%s)",
+		    host.c_str(), gai_strerror(err));
+
+	// Loop through possible addresses until we find one
+	// that works.
+	fd = -1;
+	for (r = info; r != NULL; r = r->ai_next) {
+		fd = socket(r->ai_family, r->ai_socktype, r->ai_protocol);
+		if (fd == -1)
+			continue;
+
+		if (connect(fd, r->ai_addr, r->ai_addrlen) == -1) {
+			close(fd);
+			fd = -1;
+			continue;
+		}
+
+		break;
+	}
+
+	if (fd == -1)
+		log_fatal("Could not connect to %s (%s)",
+		    path.c_str(), strerror(errno));
+
+        if (timeout >= 0) {
+                struct timeval tv;
+                tv.tv_sec = (int)timeout;
+                tv.tv_usec = (int)(1e6 * (timeout - tv.tv_sec));
+                if (setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO,
+                               (char *)&tv, sizeof(tv)) < 0)
+                        log_fatal("Failed to set timeout on socket; errno=%i",
+                                  errno);
+        }
+
+	if (info != NULL)
+		freeaddrinfo(info);
 
 	return fd;
 }
