@@ -8,7 +8,8 @@ class G3MultiFileWriter : public G3Module {
 public:
 	G3MultiFileWriter(boost::python::object filename,
 	    size_t size_limit,
-	    boost::python::object divide_on = boost::python::object());
+	    boost::python::object divide_on = boost::python::object(),
+	    size_t buffersize=1024*1024);
 	~G3MultiFileWriter();
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
 	std::string CurrentFile() { return current_filename_; }
@@ -19,6 +20,7 @@ private:
 	boost::python::object filename_callback_;
 	std::string current_filename_;
 	size_t size_limit_;
+	size_t buffersize_;
 
 	std::vector<G3Frame::FrameType> always_break_on_;
 	boost::python::object newfile_callback_;
@@ -31,8 +33,8 @@ private:
 };
 
 G3MultiFileWriter::G3MultiFileWriter(boost::python::object filename,
-    size_t size_limit, boost::python::object divide_on)
-    : size_limit_(size_limit), stream_(nullptr), seqno(0)
+    size_t size_limit, boost::python::object divide_on, size_t buffersize)
+    : size_limit_(size_limit), buffersize_(buffersize), stream_(nullptr), seqno(0)
 {
 	boost::python::extract<std::string> fstr(filename);
 
@@ -122,7 +124,7 @@ G3MultiFileWriter::CheckNewFile(G3FramePtr frame)
 	}
 
 	current_filename_ = filename;
-	g3_ostream_to_path(stream_, filename, false);
+	g3_ostream_to_path(stream_, filename, false, buffersize_);
 
 	for (auto i = metadata_cache_.begin(); i != metadata_cache_.end(); i++)
 		(*i)->saves(stream_);
@@ -192,8 +194,8 @@ PYBINDINGS("core") {
 	      "python callable as divide_on. This callable will be passed each "
 	      "frame in turn. If it returns True (or something with positive "
 	      "truth-value), a new file will be started at that frame.",
-	init<object, size_t, optional<object> >((arg("filename"),
-	    arg("size_limit"), arg("divide_on")=object())))
+	init<object, size_t, optional<object, size_t> >((arg("filename"),
+	    arg("size_limit"), arg("divide_on")=object(), arg("buffersize")=1024*1024)))
 	.def_readonly("current_file", &G3MultiFileWriter::CurrentFile)
 	.def_readonly("__g3module__", true)
 	;

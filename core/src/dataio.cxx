@@ -1,15 +1,6 @@
 #include <G3Logging.h>
 #include <dataio.h>
-
-#ifdef ZLIB_FOUND
-#include <zlib.h>
-#endif
-#ifdef BZIP2_FOUND
-#include <bzlib.h>
-#endif
-#ifdef LZMA_FOUND
-#include <lzma.h>
-#endif
+#include "compression.h"
 
 #include <filesystem>
 
@@ -240,174 +231,28 @@ get_codec(const std::string &path, const std::string &ext=".g3")
 	log_fatal("Invalid filename %s", path.c_str());
 }
 
-template<typename T, typename C>
-class Decoder : public std::streambuf {
+class InputFileStreamCounter : public std::streambuf {
 public:
-	Decoder(std::istream& file, size_t size)
-	  : file_(file), inbuf_(size), outbuf_(size) {
-		setg(outbuf_.data(), outbuf_.data(), outbuf_.data());
+	InputFileStreamCounter(const std::string& path, size_t size)
+	  : buffer_(size), bytes_(0) {
+		file_.open(path, std::ios::binary);
+		if (!file_.is_open())
+			log_fatal("Error opening file %s", path.c_str());
+		file_.rdbuf()->pubsetbuf(buffer_.data(), buffer_.size());
+	}
+
+	~InputFileStreamCounter() {
+		if (file_.is_open())
+			file_.close();
 	}
 
 protected:
 	int_type underflow() {
-		if (gptr() < egptr())
-			return traits_type::to_int_type(*gptr());
-
-		stream_.avail_in = file_.read(inbuf_.data(), inbuf_.size()).gcount();
-		if (stream_.avail_in <= 0)
-			return traits_type::eof();
-		stream_.next_in = reinterpret_cast<C*>(inbuf_.data());
-
-		stream_.avail_out = outbuf_.size();
-		stream_.next_out = reinterpret_cast<C*>(outbuf_.data());
-
-		if (decode())
-			return traits_type::eof();
-
-		setg(outbuf_.data(), outbuf_.data(),
-		    outbuf_.data() + outbuf_.size() - stream_.avail_out);
-		return traits_type::to_int_type(*gptr());
+		return file_.rdbuf()->sgetc();
 	}
 
 	std::streamsize xsgetn(char* s, std::streamsize n) {
-		std::streamsize n_read = 0;
-		while (n_read < n) {
-			if (gptr() == egptr()) {
-				if (underflow() == traits_type::eof())
-					break;
-			}
-
-			std::streamsize remaining = n - n_read;
-			std::streamsize available = egptr() - gptr();
-			std::streamsize to_read = std::min(remaining, available);
-
-			std::memcpy(s + n_read, gptr(), to_read);
-			gbump(to_read);
-			n_read += to_read;
-		}
-		return n_read;
-	}
-
-	std::streampos seekoff(std::streamoff off, std::ios_base::seekdir way,
-	    std::ios_base::openmode mode) {
-		log_fatal("Seek not implemented for compressed stream");
-	}
-
-	std::streampos seekpos(std::streampos pos, std::ios_base::openmode mode) {
-		log_fatal("Seek not implemented for compressed stream");
-	}
-
-	virtual int decode() = 0;
-
-	std::istream& file_;
-	std::vector<char> inbuf_;
-	std::vector<char> outbuf_;
-	T stream_;
-};
-
-#ifdef ZLIB_FOUND
-class GZipDecoder : public Decoder<z_stream, unsigned char> {
-public:
-	GZipDecoder(std::istream& file, size_t size) : Decoder(file, size)
-	{
-		stream_.zalloc = Z_NULL;
-		stream_.zfree = Z_NULL;
-		stream_.opaque = Z_NULL;
-		stream_.avail_in = 0;
-		stream_.next_in = Z_NULL;
-		if (inflateInit2(&stream_, 16 + MAX_WBITS) != Z_OK)
-			log_fatal("Error initializing gzip decoder: %s", stream_.msg);
-	}
-
-	~GZipDecoder() {
-		inflateEnd(&stream_);
-	}
-
-protected:
-	int decode() {
-		int ret = inflate(&stream_, Z_NO_FLUSH);
-		if (ret != Z_OK && ret != Z_STREAM_END) {
-			log_error("Error running gzip decoder: %s", stream_.msg);
-			return ret;
-		}
-		return 0;
-	}
-};
-#endif
-
-#ifdef BZIP2_FOUND
-class BZip2Decoder : public Decoder<bz_stream, char> {
-public:
-	BZip2Decoder(std::istream& file, size_t size) : Decoder(file, size)
-	{
-		stream_.bzalloc = nullptr;
-		stream_.bzfree = nullptr;
-		stream_.opaque = nullptr;
-		stream_.avail_in = 0;
-		stream_.next_in = nullptr;
-		if (BZ2_bzDecompressInit(&stream_, 0, 0) != BZ_OK)
-			log_fatal("Error initializing bzip2 decoder");
-	}
-
-	~BZip2Decoder() {
-		BZ2_bzDecompressEnd(&stream_);
-	}
-
-protected:
-	int decode() {
-		int ret = BZ2_bzDecompress(&stream_);
-		if (ret != BZ_OK && ret != BZ_STREAM_END) {
-			log_error("Error running bzip2 decoder");
-			return ret;
-		}
-		return 0;
-	}
-};
-#endif
-
-#ifdef LZMA_FOUND
-class LZMADecoder : public Decoder<lzma_stream, uint8_t> {
-public:
-	LZMADecoder(std::istream& file, size_t size) : Decoder(file, size)
-        {
-		stream_ = LZMA_STREAM_INIT;
-		lzma_ret ret = lzma_stream_decoder(&stream_, UINT64_MAX,
-		     LZMA_CONCATENATED);
-		if (ret != LZMA_OK)
-			log_fatal("Error initializing LZMA decoder.");
-	}
-
-	~LZMADecoder() {
-		lzma_end(&stream_);
-	}
-
-protected:
-	int decode() {
-		lzma_ret ret = lzma_code(&stream_, LZMA_RUN);
-		if (ret != LZMA_OK && ret != LZMA_STREAM_END) {
-			log_error("Error running LZMA decoder");
-			return ret;
-		}
-		return 0;
-	}
-};
-#endif
-
-class InputStreamCounter : public std::streambuf {
-public:
-	InputStreamCounter(std::streambuf* buffer)
-		: buffer_(buffer), bytes_(0) {
-		if (!buffer_)
-			log_fatal("Input file stream buffer required");
-	}
-
-protected:
-	int_type underflow() {
-		return buffer_->sgetc();
-	}
-
-	std::streamsize xsgetn(char* s, std::streamsize n) {
-		std::streamsize nget = buffer_->sgetn(s, n);
+		std::streamsize nget = file_.rdbuf()->sgetn(s, n);
 		if (nget > 0)
 			bytes_ += nget;
 		return nget;
@@ -420,7 +265,7 @@ protected:
 		// short-circuit for tellg
 		if (off == 0 && way == std::ios_base::cur)
 			return bytes_;
-		std::streampos n = buffer_->pubseekoff(off, way, mode);
+		std::streampos n = file_.rdbuf()->pubseekoff(off, way, mode);;
 		if (n != std::streampos(std::streamoff(-1)))
 			bytes_ = n;
 		return n;
@@ -429,14 +274,15 @@ protected:
 	std::streampos seekpos(std::streampos pos, std::ios_base::openmode mode) {
 		if (!(mode & std::ios_base::in))
 			log_fatal("Seek not implemented for output stream");
-		std::streampos n = buffer_->pubseekpos(pos, mode);
+		std::streampos n = file_.rdbuf()->pubseekpos(pos, mode);;
 		if (n != std::streampos(std::streamoff(-1)))
 			bytes_ = n;
 		return n;
 	}
 
 private:
-	std::streambuf* buffer_;
+	std::ifstream file_;
+	std::vector<char> buffer_;
 	size_t bytes_;
 };
 
@@ -447,48 +293,36 @@ g3_istream_from_path(std::istream &stream, const std::string &path, float timeou
 	g3_istream_close(stream);
 
 	std::streambuf *sbuf = nullptr;
-	std::ifstream *file = nullptr;
-	std::vector<char> *fbuf = nullptr;
 
 	// Figure out what kind of ultimate data source this is
 	if (path.find("tcp://") == 0) {
 		sbuf = new RemoteInputStreamBuffer(path, timeout, buffersize);
 	} else {
 		// Simple file case
-		file = new std::ifstream(path, std::ios::binary);
-		if (!file->is_open()) {
-			delete file;
-			log_fatal("Could not open file %s", path.c_str());
-		}
-
 		switch(get_codec(path, ext)) {
 #ifdef ZLIB_FOUND
 		case GZ:
-			sbuf = new GZipDecoder(*file, buffersize);
+			sbuf = new GZipDecoder(path, buffersize);
 			break;
 #endif
 #ifdef BZIP2_FOUND
 		case BZIP2:
-			sbuf = new BZip2Decoder(*file, buffersize);
+			sbuf = new BZip2Decoder(path, buffersize);
 			break;
 #endif
 #ifdef LZMA_FOUND
 		case LZMA:
-			sbuf = new LZMADecoder(*file, buffersize);
+			sbuf = new LZMADecoder(path, buffersize);
 			break;
 #endif
 		default:
 			// Read buffer
-			fbuf = new std::vector<char>(buffersize);
-			file->rdbuf()->pubsetbuf(fbuf->data(), buffersize);
-			sbuf = new InputStreamCounter(file->rdbuf());
+			sbuf = new InputFileStreamCounter(path, buffersize);
 			break;
 		}
 	}
 
 	stream.rdbuf(sbuf);
-	stream.pword(0) = file;
-	stream.pword(1) = fbuf;
 }
 
 int
@@ -506,33 +340,35 @@ g3_istream_handle(std::istream &stream)
 void
 g3_istream_close(std::istream &stream)
 {
-	std::vector<char>* fbuf = static_cast<std::vector<char>*>(stream.pword(1));
-	if (fbuf)
-		delete fbuf;
-	stream.pword(1) = nullptr;
-
-	std::ifstream* file = static_cast<std::ifstream*>(stream.pword(0));
-	if (file)
-		delete file;
-	stream.pword(0) = nullptr;
-
 	std::streambuf* sbuf = stream.rdbuf();
 	if (sbuf)
 		delete sbuf;
 	stream.rdbuf(nullptr);
 }
 
-class OutputStreamCounter : public std::streambuf {
+class OutputFileStreamCounter : public std::streambuf {
 public:
-	OutputStreamCounter(std::streambuf* buffer)
-	  : buffer_(buffer), bytes_(0) {
-		if (!buffer_)
-			log_fatal("Input file stream buffer required");
+	OutputFileStreamCounter(const std::string& path, size_t size, bool append)
+	  : buffer_(size), bytes_(0) {
+		std::ios_base::openmode mode = std::ios::binary;
+		if (append)
+			mode |= std::ios::app;
+		file_.open(path, mode);
+		if (!file_.is_open())
+			log_fatal("Error opening file %s", path.c_str());
+		file_.rdbuf()->pubsetbuf(buffer_.data(), buffer_.size());
+	}
+
+	~OutputFileStreamCounter() {
+		if (file_.is_open()) {
+			file_.flush();
+			file_.close();
+		}
 	}
 
 protected:
 	int_type overflow(int_type c) {
-		if (buffer_->sputc(c) != traits_type::eof()) {
+		if (file_.rdbuf()->sputc(c) != traits_type::eof()) {
 			bytes_++;
 			return c;
 		}
@@ -540,10 +376,14 @@ protected:
 	}
 
 	std::streamsize xsputn(const char* s, std::streamsize n) {
-		std::streamsize nput = buffer_->sputn(s, n);
+		std::streamsize nput = file_.rdbuf()->sputn(s, n);
 		if (nput > 0)
 			bytes_ += nput;
 		return nput;
+	}
+
+	int sync() {
+		return file_.rdbuf()->pubsync();
 	}
 
 	std::streampos seekoff(std::streamoff off, std::ios_base::seekdir way,
@@ -559,235 +399,48 @@ protected:
 	}
 
 private:
-	std::streambuf* buffer_;
+	std::ofstream file_;
+	std::vector<char> buffer_;
 	size_t bytes_;
 };
-
-template <typename T, typename C>
-class Encoder : public std::streambuf {
-public:
-	Encoder(std::ostream &file, size_t size)
-	  : file_(file), inbuf_(size), outbuf_(size), bytes_(0) {}
-
-protected:
-	int_type overflow(int_type c) {
-		if (pptr() && pbase()) {
-			std::streamsize len = pptr() - pbase();
-			stream_.avail_in = len;
-			stream_.next_in = reinterpret_cast<C*>(pbase());
-			encode_all();
-		}
-		if (c != traits_type::eof()) {
-			inbuf_[0] = traits_type::to_char_type(c);
-			stream_.avail_in = 1;
-			stream_.next_in = reinterpret_cast<C*>(inbuf_.data());
-			encode_all();
-		}
-		setp(inbuf_.data(), inbuf_.data() + inbuf_.size());
-		return traits_type::not_eof(c);
-	}
-
-	std::streamsize xsputn(const char* s, std::streamsize n) {
-		stream_.avail_in = n;
-		stream_.next_in = reinterpret_cast<C*>(const_cast<char*>(s));
-		encode_all();
-		return n;
-	}
-
-	int sync() {
-		stream_.avail_in = 0;
-		encode_all(true);
-		file_.flush();
-		return 0;
-	}
-
-	void encode_all(bool flush=false) {
-		do {
-			stream_.avail_out = outbuf_.size();
-			stream_.next_out = reinterpret_cast<C*>(outbuf_.data());
-			if (encode(flush))
-				return;
-			size_t n =  outbuf_.size() - stream_.avail_out;
-			bytes_ += n;
-			file_.write(outbuf_.data(), n);
-		} while (stream_.avail_out == 0);
-	}
-
-	virtual int encode(bool flush) = 0;
-
-	std::streampos seekoff(std::streamoff off, std::ios_base::seekdir way,
-	    std::ios_base::openmode mode) {
-		// short-circuit for tellp
-		if ((mode & std::ios_base::out) && off == 0 && way == std::ios_base::cur)
-			return bytes_;
-		log_fatal("Seek not implemented for compressed stream");
-	}
-
-	std::streampos seekpos(std::streampos pos, std::ios_base::openmode mode) {
-		log_fatal("Seek not implemented for compressed stream");
-	}
-
-	std::ostream &file_;
-	std::vector<char> inbuf_;
-	std::vector<char> outbuf_;
-	size_t bytes_;
-	T stream_;
-};
-
-#ifdef ZLIB_FOUND
-class GZipEncoder : public Encoder<z_stream, unsigned char> {
-public:
-	GZipEncoder(std::ostream &file, size_t size) : Encoder(file, size)
-	{
-		stream_.zalloc = Z_NULL;
-		stream_.zfree = Z_NULL;
-		stream_.opaque = Z_NULL;
-		if (deflateInit2(&stream_, Z_DEFAULT_COMPRESSION, Z_DEFLATED,
-		    16 + MAX_WBITS, 8, Z_DEFAULT_STRATEGY) != Z_OK)
-			log_fatal("Error initializing gzip encoder: %s", stream_.msg);
-	}
-
-	~GZipEncoder() {
-		deflateEnd(&stream_);
-	}
-
-protected:
-	int encode(bool flush) {
-		int ret = deflate(&stream_, flush ? Z_FINISH : Z_NO_FLUSH);
-		if (ret == Z_STREAM_ERROR) {
-			log_error("Error running gzip encoder: %s", stream_.msg);
-			return ret;
-		}
-		return 0;
-	}
-};
-#endif
-
-#ifdef BZIP2_FOUND
-class BZip2Encoder : public Encoder<bz_stream, char> {
-public:
-	BZip2Encoder(std::ostream &file, size_t size) : Encoder(file, size)
-	{
-		stream_.bzalloc = nullptr;
-		stream_.bzfree = nullptr;
-		stream_.opaque = nullptr;
-		if (BZ2_bzCompressInit(&stream_, 9, 0, 0) != BZ_OK)
-			log_fatal("Error initializing bzip2 encoder");
-	}
-
-	~BZip2Encoder() {
-		BZ2_bzCompressEnd(&stream_);
-	}
-
-protected:
-	int encode(bool flush) {
-		int ret = BZ2_bzCompress(&stream_, flush ? BZ_FINISH : BZ_RUN);
-		if (ret == BZ_SEQUENCE_ERROR) {
-			log_error("Error running bzip2 encoder");
-			return ret;
-		}
-		return 0;
-	}
-};
-#endif
-
-#ifdef LZMA_FOUND
-class LZMAEncoder : public Encoder<lzma_stream, uint8_t> {
-public:
-	LZMAEncoder(std::ostream &file, size_t size) : Encoder(file, size)
-	{
-		stream_ = LZMA_STREAM_INIT;
-		lzma_ret ret = lzma_easy_encoder(&stream_, LZMA_PRESET_DEFAULT,
-		    LZMA_CHECK_CRC64);
-		if (ret != LZMA_OK)
-			log_fatal("Error initializing LZMA encoder.");
-	}
-
-	~LZMAEncoder() {
-		lzma_end(&stream_);
-	}
-
-protected:
-	int encode(bool flush) {
-		lzma_action action = flush ? LZMA_FINISH : LZMA_RUN;
-		lzma_ret ret = lzma_code(&stream_, action);
-		if (ret != LZMA_OK && ret != LZMA_STREAM_END) {
-			log_error("Error running LZMA encoder");
-			return ret;
-		}
-		return 0;
-	}
-};
-#endif
 
 void
 g3_ostream_to_path(std::ostream &stream, const std::string &path, bool append,
     size_t buffersize, const std::string &ext)
 {
-	Codec codec = get_codec(path, ext);
-	std::ios_base::openmode mode = std::ios::binary;
-	if (append) {
-		if (codec != NONE)
-			log_fatal("Cannot append to compressed file.");
-		mode |= std::ios::app;
-	}
-	std::ofstream *file = new std::ofstream(path, mode);
-	if (!file->is_open()) {
-		delete file;
-		log_fatal("Could not open file %s", path.c_str());
-	}
-
 	std::streambuf *sbuf = nullptr;
+
+	Codec codec = get_codec(path, ext);
+	if (append && codec != NONE)
+		log_fatal("Cannot append to compressed file.");
 
 	switch(codec) {
 #ifdef ZLIB_FOUND
 	case GZ:
-		sbuf = new GZipEncoder(*file, buffersize);
+		sbuf = new GZipEncoder(path, buffersize);
 		break;
 #endif
 #ifdef BZIP2_FOUND
 	case BZIP2:
-		sbuf = new BZip2Encoder(*file, buffersize);
+		sbuf = new BZip2Encoder(path, buffersize);
 		break;
 #endif
 #ifdef LZMA_FOUND
 	case LZMA:
-		sbuf = new LZMAEncoder(*file, buffersize);
+		sbuf = new LZMAEncoder(path, buffersize);
 		break;
 #endif
 	default:
-		sbuf = new OutputStreamCounter(file->rdbuf());
+		sbuf = new OutputFileStreamCounter(path, buffersize, append);
 		break;
 	}
 
 	stream.rdbuf(sbuf);
-	stream.pword(0) = file;
-}
-
-void
-g3_ostream_flush(std::ostream &stream)
-{
-	stream.flush();
-
-	std::streambuf* sbuf = stream.rdbuf();
-	if (sbuf)
-		sbuf->pubsync();
-
-	std::ofstream* file = static_cast<std::ofstream*>(stream.pword(0));
-	if (file)
-		file->flush();
 }
 
 void
 g3_ostream_close(std::ostream &stream)
 {
-	g3_ostream_flush(stream);
-
-	std::ofstream* file = static_cast<std::ofstream*>(stream.pword(0));
-	if (file)
-		delete file;
-	stream.pword(0) = nullptr;
-
 	std::streambuf* sbuf = stream.rdbuf();
 	if (sbuf)
 		delete sbuf;

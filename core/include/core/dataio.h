@@ -60,14 +60,6 @@ g3_ostream_to_path(std::ostream &stream, const std::string &path, bool append=fa
     size_t buffersize=1024*1024, const std::string &ext=".g3");
 
 /**
- * Flush the output file stream.
- *
- * @param  stream   A reference to the output stream, as configured by
- *                  g3_ostream_to_path.
- */
-void g3_ostream_flush(std::ostream &stream);
-
-/**
  * Clean up the output stream.
  *
  * @param  stream   A reference to the output stream, as configured by
