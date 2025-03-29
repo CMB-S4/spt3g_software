@@ -158,13 +158,9 @@ void ARCFileReader::SetExperiment(Experiment exp)
 
 void ARCFileReader::StartFile(const std::string &path)
 {
-	// Open file, including whatever decompression/network access/etc.
-	// may be required
 	G3Reader::StartFile(path);
-
 	ReadHeader();
 }
-
 
 void ARCFileReader::ReadHeader()
 {
