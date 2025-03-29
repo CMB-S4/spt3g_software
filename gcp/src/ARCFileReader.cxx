@@ -114,7 +114,7 @@ private:
 
 	void ParseArrayMap(uint8_t *buffer, size_t size);
 	G3FrameObjectPtr GCPToFrameObject(uint8_t *buffer,
-	    const struct block_stats &block, bool has_string_flag,
+	    const struct block_stats &block,
 	    int depth = 0, int base_offset = 0);
 	std::deque<std::string> filename_;
 	std::string cur_file_;
@@ -629,8 +629,7 @@ static double GCP64ToFloat(uint8_t *buffer, off_t offset)
 }
 
 G3FrameObjectPtr ARCFileReader::GCPToFrameObject(uint8_t *buffer,
-    const struct ARCFileReader::block_stats &block, bool has_string_flag,
-    int depth, int base_offset)
+    const struct ARCFileReader::block_stats &block, int depth, int base_offset)
 {
 	if (base_offset == 0)
 		base_offset = block.offset;
@@ -650,7 +649,7 @@ G3FrameObjectPtr ARCFileReader::GCPToFrameObject(uint8_t *buffer,
 
 		for (int i = 0; i < block.dim[depth]; i++) {
 			root->push_back(GCPToFrameObject(buffer, block,
-			    has_string_flag, depth+1, base_offset));
+			    depth+1, base_offset));
 			base_offset += block.width*stride;
 		}
 
@@ -675,7 +674,7 @@ G3FrameObjectPtr ARCFileReader::GCPToFrameObject(uint8_t *buffer,
 			 * best we can.
 			 */
 			bool is_a_string = false;
-			if (has_string_flag) {
+			if (has_string_flag_) {
 				// Are we lucky enough that GCP tells us?
 				is_a_string = (block.flags & REG_STRING);
 			} else if (block.flags & REG_FAST) {
@@ -838,7 +837,7 @@ void ARCFileReader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 			for (auto reg = board->second.begin();
 			    reg != board->second.end(); reg++) {
 				(*boarddat)[reg->first] = GCPToFrameObject(
-				    buffer, reg->second, has_string_flag_);
+				    buffer, reg->second);
 			}
 			(*templ)[board->first] = boarddat;
 		}
