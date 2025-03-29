@@ -127,7 +127,7 @@ private:
 
 ARCFileReader::ARCFileReader(const std::string &path, Experiment experiment,
     int n_frames_to_read, float timeout, bool track_filename, size_t buffersize) :
-    G3Reader(path, n_frames_to_read, timeout, track_filename, buffersize)
+    G3Reader(path, n_frames_to_read, timeout, track_filename, buffersize, ".dat")
 {
 	SetExperiment(experiment);
 	ReadHeader();
@@ -136,7 +136,7 @@ ARCFileReader::ARCFileReader(const std::string &path, Experiment experiment,
 ARCFileReader::ARCFileReader(const std::vector<std::string> &filename,
     Experiment experiment, int n_frames_to_read, float timeout, bool track_filename,
     size_t buffersize) :
-    G3Reader(filename, n_frames_to_read, timeout, track_filename, buffersize)
+    G3Reader(filename, n_frames_to_read, timeout, track_filename, buffersize, ".dat")
 {
 	SetExperiment(experiment);
 	ReadHeader();
@@ -156,7 +156,7 @@ void ARCFileReader::SetExperiment(Experiment exp)
 	}
 }
 
-void ARCFileReader::StartFile(const std::string & path)
+void ARCFileReader::StartFile(const std::string &path)
 {
 	// Open file, including whatever decompression/network access/etc.
 	// may be required
