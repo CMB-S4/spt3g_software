@@ -4,11 +4,10 @@
 
 G3Writer::G3Writer(std::string filename,
     std::vector<G3Frame::FrameType> streams,
-    bool append) :
-    filename_(filename), streams_(streams)
+    bool append, size_t buffersize) :
+    filename_(filename), stream_(nullptr), streams_(streams)
 {
-	g3_check_output_path(filename);
-	stream_ = g3_ostream_to_path(filename, append);
+	g3_ostream_to_path(stream_, filename, append, buffersize);
 }
 
 void G3Writer::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
@@ -22,7 +21,7 @@ void G3Writer::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	G3PythonContext ctx("G3Writer", false);
 
 	if (frame->type == G3Frame::EndProcessing)
-		stream_.reset();
+		stream_.flush();
 	else if (streams_.size() == 0 ||
 	    std::find(streams_.begin(), streams_.end(), frame->type) !=
 	    streams_.end())
@@ -33,10 +32,7 @@ void G3Writer::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 
 void G3Writer::Flush()
 {
-	try {
-		g3_ostream_flush(stream_);
-	} catch (...) {
-	}
+	stream_.flush();
 }
 
 PYBINDINGS("core") {
@@ -51,9 +47,10 @@ PYBINDINGS("core") {
 	      "types to the second optional argument (streams). If no streams argument "
 	      "is given, writes all types of frames. If append is set to True, will "
 	      "append frames to its output file rather than overwriting it.",
-        init<std::string, std::vector<G3Frame::FrameType>, bool>((arg("filename"),
-	    arg("streams")=std::vector<G3Frame::FrameType>(), arg("append")=false)))
-        .def("Flush", &G3Writer::Flush)
-        .def_readonly("__g3module__", true)
+	init<std::string, std::vector<G3Frame::FrameType>, bool, size_t>((arg("filename"),
+	    arg("streams")=std::vector<G3Frame::FrameType>(), arg("append")=false,
+	    arg("buffersize")=1024*1024)))
+	.def("Flush", &G3Writer::Flush)
+	.def_readonly("__g3module__", true)
 	;
 }

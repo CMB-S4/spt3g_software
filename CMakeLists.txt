@@ -52,7 +52,7 @@ set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 set(Boost_PYTHON_VERSION ${Python_VERSION})
-find_package(Boost COMPONENTS iostreams python REQUIRED)
+find_package(Boost COMPONENTS python REQUIRED)
 
 # Interface library for flags and library dependencies
 add_library(spt3g INTERFACE)
