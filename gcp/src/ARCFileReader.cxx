@@ -87,7 +87,7 @@ public:
 	    size_t buffersize=1024*1024);
 
 private:
-	void StartFile(std::string path) override;
+	void StartFile(const std::string &path) override;
 	G3FramePtr FillFrame() override;
 	void ReadHeader();
 	
@@ -131,8 +131,6 @@ ARCFileReader::ARCFileReader(const std::string &path, Experiment experiment,
 	ReadHeader();
 }
 
-
-
 ARCFileReader::ARCFileReader(const std::vector<std::string> &filename,
     Experiment experiment, int n_frames_to_read, float timeout, bool track_filename,
     size_t buffersize) :
@@ -156,8 +154,7 @@ void ARCFileReader::SetExperiment(Experiment exp)
 	}
 }
 
-
-void ARCFileReader::StartFile(std::string path)
+void ARCFileReader::StartFile(const std::string & path)
 {
 	// Open file, including whatever decompression/network access/etc.
 	// may be required
@@ -183,9 +180,9 @@ void ARCFileReader::ReadHeader()
 	 */
 
 	// First size record
-	stream_->read((char *)&size, sizeof(size));
+	stream_.read((char *)&size, sizeof(size));
 	size = ntohl(size) - 8;
-	stream_->read((char *)&opcode, sizeof(opcode));
+	stream_.read((char *)&opcode, sizeof(opcode));
 	opcode = ntohl(opcode);
 
 	if (opcode != ARC_SIZE_RECORD)
@@ -193,27 +190,27 @@ void ARCFileReader::ReadHeader()
 		    cur_file_.c_str());
 	if ((fd_ < 0 && size != 4) || (fd_ >= 0 && size != 8))
 		log_fatal("Incorrectly sized ARC_SIZE_RECORD (%d)", size);
-	stream_->read((char *)&size, sizeof(size)); /* Skip size field */
+	stream_.read((char *)&size, sizeof(size)); /* Skip size field */
 	if (fd_ >= 0)
-		stream_->read((char *)&size, sizeof(size)); /* Skip size field (net stream) */
+		stream_.read((char *)&size, sizeof(size)); /* Skip size field (net stream) */
 
 	// Get array map
-	stream_->read((char *)&size, sizeof(size));
+	stream_.read((char *)&size, sizeof(size));
 	size = ntohl(size) - 8;
-	stream_->read((char *)&opcode, sizeof(opcode));
+	stream_.read((char *)&opcode, sizeof(opcode));
 	opcode = ntohl(opcode);
 	if (opcode != ARC_ARRAYMAP_RECORD)
 		log_fatal("No ARC_ARRAYMAP_RECORD at beginning of %s",
 		    cur_file_.c_str());
 
 	buffer = new uint8_t[size];
-	stream_->read((char *)buffer, size);
-	if (stream_->eof()) {
+	stream_.read((char *)buffer, size);
+	if (stream_.eof()) {
 		delete [] buffer;
 		log_fatal("%s truncated; unable to read register map",
 		    cur_file_.c_str());
 	}
-	if (!stream_->good()) {
+	if (!stream_.good()) {
 		delete [] buffer;
 		log_fatal("Read error on %s while reading register map",
 		    cur_file_.c_str());
@@ -780,28 +777,28 @@ G3FramePtr ARCFileReader::FillFrame()
 	int32_t size, opcode;
 	uint8_t *buffer;
 
-	stream_->read((char *)&size, sizeof(size));
+	stream_.read((char *)&size, sizeof(size));
 	size = ntohl(size) - 8;
-	stream_->read((char *)&opcode, sizeof(opcode));
+	stream_.read((char *)&opcode, sizeof(opcode));
 	opcode = ntohl(opcode);
 	if (opcode != ARC_FRAME_RECORD)
 		log_fatal("Message not an ARC_FRAME_RECORD mid-file");
 	if (fd_ >= 0) {
 		// network source (e.g. GCP) can support changing register selection on the fly
 		int32_t rev;
-		stream_->read((char *)&rev, sizeof(rev));
+		stream_.read((char *)&rev, sizeof(rev));
 		rev = ntohl(rev);
 		if (rev != revision_)
 			log_fatal("Frame regset revision %d does not match expected revision (%d)",
 			    rev, revision_);
-		stream_->read((char *)&size, sizeof(size));
+		stream_.read((char *)&size, sizeof(size));
 		size = ntohl(size);
 	}
 	if (size != frame_length_)
 		log_fatal("%zd-byte frame does not match expected length (%zd)",
 		    (size_t)size, (size_t)frame_length_);
 	buffer = new uint8_t[size];
-	stream_->read((char *)buffer, size);
+	stream_.read((char *)buffer, size);
 
 	for (auto temp = array_map_.begin(); temp != array_map_.end(); temp++) {
 		G3MapFrameObjectPtr templ(new G3MapFrameObject);
