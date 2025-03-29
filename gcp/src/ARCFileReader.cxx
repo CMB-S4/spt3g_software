@@ -88,7 +88,7 @@ public:
 	    size_t buffersize=1024*1024);
 
 private:
-	void StartFile(const std::string &path) override;
+	void StartFile(const std::string &path, const std::string &ext=".dat") override;
 	G3FramePtr FillFrame() override;
 	void ReadHeader();
 	
@@ -156,11 +156,11 @@ void ARCFileReader::SetExperiment(Experiment exp)
 	}
 }
 
-void ARCFileReader::StartFile(const std::string & path)
+void ARCFileReader::StartFile(const std::string &path, const std::string &ext)
 {
 	// Open file, including whatever decompression/network access/etc.
 	// may be required
-	G3Reader::StartFile(path);
+	G3Reader::StartFile(path, ext);
 
 	ReadHeader();
 }

@@ -27,12 +27,12 @@ G3Reader::G3Reader(const std::vector<std::string> &filename, int n_frames_to_rea
 	filename_.pop_front();
 }
 
-void G3Reader::StartFile(const std::string &path)
+void G3Reader::StartFile(const std::string &path, const std::string &ext)
 {
 	log_info("Starting file %s\n", path.c_str());
 	cur_file_ = path;
 	n_frames_cur_ = 0;
-	g3_istream_from_path(stream_, path, timeout_, buffersize_);
+	g3_istream_from_path(stream_, path, timeout_, buffersize_, ext);
 }
 
 G3FramePtr G3Reader::FillFrame()

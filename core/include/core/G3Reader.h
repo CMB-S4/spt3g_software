@@ -21,7 +21,7 @@ public:
 	off_t Tell();
 
 protected:
-	virtual void StartFile(const std::string &path);
+	virtual void StartFile(const std::string &path, const std::string &ext=".g3");
 	virtual G3FramePtr FillFrame();
 	bool prefix_file_;
 	std::string cur_file_;
