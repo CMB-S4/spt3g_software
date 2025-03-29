@@ -20,8 +20,8 @@
 class RemoteInputStreamBuffer : public std::streambuf {
 public:
 	RemoteInputStreamBuffer(int fd, size_t size)
-	  : fd_(fd), buffer_(size), bytes_(0) {
-		setg(buffer_.data(), buffer_.data(), buffer_.data());
+	  : fd_(fd), buffer_(new char[size]), bsize_(size), bytes_(0) {
+		setg(&buffer_[0], &buffer_[0], &buffer_[0]);
 	}
 
 	~RemoteInputStreamBuffer() {
@@ -35,10 +35,10 @@ protected:
 		if (gptr() < egptr())
 			return traits_type::to_int_type(*gptr());
 
-		ssize_t n = read(fd_, buffer_.data(), buffer_.size());
+		ssize_t n = read(fd_, &buffer_[0], bsize_);
 		if (n <= 0)
 			return traits_type::eof();
-		setg(buffer_.data(), buffer_.data(), buffer_.data() + n);
+		setg(&buffer_[0], &buffer_[0], &buffer_[0] + n);
 		return traits_type::to_int_type(*gptr());
 	}
 
@@ -76,29 +76,25 @@ protected:
 
 private:
 	int fd_;
-	std::vector<char> buffer_;
+	std::unique_ptr<char[]> buffer_;
+	size_t bsize_;
 	size_t bytes_;
 };
 
-class InputFileStreamCounter : public std::streambuf {
+class InputFileStreamCounter : public std::filebuf {
 public:
 	InputFileStreamCounter(const std::string& path, size_t size)
-	  : buffer_(size), bytes_(0) {
-		file_.open(path, std::ios::binary);
-		if (!file_.is_open())
+	  : buffer_(new char[size]), bytes_(0) {
+		open(path, std::ios::in | std::ios::binary);
+		if (!is_open())
 			log_fatal("Error opening file %s", path.c_str());
-		file_.rdbuf()->pubsetbuf(buffer_.data(), buffer_.size());
+		pubsetbuf(&buffer_[0], size);
 	}
 
 protected:
-	int_type underflow() {
-		return file_.rdbuf()->sgetc();
-	}
-
 	std::streamsize xsgetn(char* s, std::streamsize n) {
-		std::streamsize nget = file_.rdbuf()->sgetn(s, n);
-		if (nget > 0)
-			bytes_ += nget;
+		std::streamsize nget = std::filebuf::xsgetn(s, n);
+		bytes_ += nget;
 		return nget;
 	}
 
@@ -109,58 +105,46 @@ protected:
 		// short-circuit for tellg
 		if (off == 0 && way == std::ios_base::cur)
 			return bytes_;
-		std::streampos n = file_.rdbuf()->pubseekoff(off, way, mode);;
-		if (n != std::streampos(std::streamoff(-1)))
-			bytes_ = n;
-		return n;
+		bytes_ = std::filebuf::seekoff(off, way, mode);
+		return bytes_;
 	}
 
 	std::streampos seekpos(std::streampos pos, std::ios_base::openmode mode) {
-		if (!(mode & std::ios_base::in))
-			log_fatal("Seek not implemented for output stream");
-		std::streampos n = file_.rdbuf()->pubseekpos(pos, mode);;
-		if (n != std::streampos(std::streamoff(-1)))
-			bytes_ = n;
-		return n;
+		bytes_ = std::filebuf::seekpos(pos, mode);
+		return bytes_;
 	}
 
 private:
-	std::ifstream file_;
-	std::vector<char> buffer_;
+	std::unique_ptr<char []> buffer_;
 	size_t bytes_;
 };
 
-class OutputFileStreamCounter : public std::streambuf {
+class OutputFileStreamCounter : public std::filebuf {
 public:
 	OutputFileStreamCounter(const std::string& path, size_t size, bool append)
-	  : buffer_(size), bytes_(0) {
-		std::ios_base::openmode mode = std::ios::binary;
+	  : buffer_(new char[size]), bytes_(0) {
+		std::ios_base::openmode mode = std::ios::out | std::ios::binary;
 		if (append)
 			mode |= std::ios::app;
-		file_.open(path, mode);
-		if (!file_.is_open())
+		open(path, mode);
+		if (!is_open())
 			log_fatal("Error opening file %s", path.c_str());
-		file_.rdbuf()->pubsetbuf(buffer_.data(), buffer_.size());
+		pubsetbuf(&buffer_[0], size);
 	}
 
 protected:
 	int_type overflow(int_type c) {
-		if (file_.rdbuf()->sputc(c) != traits_type::eof()) {
+		int_type r = std::filebuf::overflow(c);
+		if (r != traits_type::eof())
 			bytes_++;
-			return c;
-		}
-		return traits_type::eof();
+		return r;
 	}
 
 	std::streamsize xsputn(const char* s, std::streamsize n) {
-		std::streamsize nput = file_.rdbuf()->sputn(s, n);
+		std::streamsize nput = std::filebuf::xsputn(s, n);
 		if (nput > 0)
 			bytes_ += nput;
 		return nput;
-	}
-
-	int sync() {
-		return file_.rdbuf()->pubsync();
 	}
 
 	std::streampos seekoff(std::streamoff off, std::ios_base::seekdir way,
@@ -176,8 +160,7 @@ protected:
 	}
 
 private:
-	std::ofstream file_;
-	std::vector<char> buffer_;
+	std::unique_ptr<char []> buffer_;
 	size_t bytes_;
 };
 
@@ -185,11 +168,11 @@ template<typename T, typename C>
 class Decoder : public std::streambuf {
 public:
 	Decoder(const std::string& path, size_t size)
-	  : inbuf_(size), outbuf_(size) {
+	  : inbuf_(new char[size]), outbuf_(new char[size]), bsize_(size) {
 		file_.open(path, std::ios::binary);
 		if (!file_.is_open())
 			log_fatal("Could not open file %s", path.c_str());
-		setg(outbuf_.data(), outbuf_.data(), outbuf_.data());
+		setg(&outbuf_[0], &outbuf_[0], &outbuf_[0]);
 	}
 
 protected:
@@ -197,19 +180,19 @@ protected:
 		if (gptr() < egptr())
 			return traits_type::to_int_type(*gptr());
 
-		stream_.avail_in = file_.read(inbuf_.data(), inbuf_.size()).gcount();
+		stream_.avail_in = file_.read(&inbuf_[0], bsize_).gcount();
 		if (stream_.avail_in <= 0)
 			return traits_type::eof();
-		stream_.next_in = reinterpret_cast<C*>(inbuf_.data());
+		stream_.next_in = reinterpret_cast<C*>(&inbuf_[0]);
 
-		stream_.avail_out = outbuf_.size();
-		stream_.next_out = reinterpret_cast<C*>(outbuf_.data());
+		stream_.avail_out = bsize_;
+		stream_.next_out = reinterpret_cast<C*>(&outbuf_[0]);
 
 		if (decode())
 			return traits_type::eof();
 
-		setg(outbuf_.data(), outbuf_.data(),
-		    outbuf_.data() + outbuf_.size() - stream_.avail_out);
+		setg(&outbuf_[0], &outbuf_[0],
+		    &outbuf_[0] + bsize_ - stream_.avail_out);
 		return traits_type::to_int_type(*gptr());
 	}
 
@@ -244,8 +227,9 @@ protected:
 	virtual int decode() = 0;
 
 	std::ifstream file_;
-	std::vector<char> inbuf_;
-	std::vector<char> outbuf_;
+	std::unique_ptr<char []> inbuf_;
+	std::unique_ptr<char []> outbuf_;
+	size_t bsize_;
 	T stream_;
 };
 
@@ -253,7 +237,7 @@ template <typename T, typename C>
 class Encoder : public std::streambuf {
 public:
 	Encoder(const std::string& path, size_t size)
-	  : inbuf_(size), outbuf_(size), bytes_(0) {
+	  : inbuf_(new char[size]), outbuf_(new char[size]), bsize_(size), bytes_(0) {
 		file_.open(path, std::ios::binary);
 		if (!file_.is_open())
 			log_fatal("Could not open file %s", path.c_str());
@@ -270,10 +254,10 @@ protected:
 		if (c != traits_type::eof()) {
 			inbuf_[0] = traits_type::to_char_type(c);
 			stream_.avail_in = 1;
-			stream_.next_in = reinterpret_cast<C*>(inbuf_.data());
+			stream_.next_in = reinterpret_cast<C*>(&inbuf_[0]);
 			encode_all();
 		}
-		setp(inbuf_.data(), inbuf_.data() + inbuf_.size());
+		setp(&inbuf_[0], &inbuf_[0] + bsize_);
 		return traits_type::not_eof(c);
 	}
 
@@ -292,13 +276,13 @@ protected:
 
 	void encode_all(bool flush=false) {
 		do {
-			stream_.avail_out = outbuf_.size();
-			stream_.next_out = reinterpret_cast<C*>(outbuf_.data());
+			stream_.avail_out = bsize_;
+			stream_.next_out = reinterpret_cast<C*>(&outbuf_[0]);
 			if (encode(flush))
 				return;
-			size_t n =  outbuf_.size() - stream_.avail_out;
+			size_t n =  bsize_ - stream_.avail_out;
 			bytes_ += n;
-			file_.write(outbuf_.data(), n);
+			file_.write(&outbuf_[0], n);
 		} while (stream_.avail_out == 0);
 	}
 
@@ -317,8 +301,9 @@ protected:
 	}
 
 	std::ofstream file_;
-	std::vector<char> inbuf_;
-	std::vector<char> outbuf_;
+	std::unique_ptr<char []> inbuf_;
+	std::unique_ptr<char []> outbuf_;
+	size_t bsize_;
 	size_t bytes_;
 	T stream_;
 };
