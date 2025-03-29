@@ -201,6 +201,24 @@ check_output_path(const std::string &path, const std::string &ext)
 	return get_codec(path, ext);
 }
 
+// Claim a pword index to use throughout
+std::atomic<bool> pidx_init_{false};
+std::atomic<int> pidx_;
+std::mutex pidx_lock_;
+
+int pword_index() {
+	if (!pidx_init_) {
+		std::lock_guard<std::mutex> lockHolder(pidx_lock_);
+		// at this point we've obtained the lock, but we might
+		// have waited for another thread which already did
+		// the initialization
+		if(pidx_init_)
+			return pidx_;
+		pidx_ = std::ios::xalloc();
+		pidx_init_ = true;
+	}
+	return pidx_;
+}
 
 static void
 reset_stream(std::ios &stream)
@@ -211,7 +229,7 @@ reset_stream(std::ios &stream)
 		delete sbuf;
 	}
 	stream.rdbuf(nullptr);
-	stream.pword(0) = nullptr;
+	stream.pword(pword_index()) = nullptr;
 }
 
 static void
@@ -221,11 +239,11 @@ stream_cb(std::ios::event ev, std::ios_base& stream, int index)
 
 	switch (ev) {
 	case std::ios::event::erase_event:
-		buf = static_cast<std::streambuf*>(stream.pword(0));
+		buf = static_cast<std::streambuf*>(stream.pword(pword_index()));
 		if (buf) {
 			buf->pubsync();
 			delete buf;
-			stream.pword(0) = nullptr;
+			stream.pword(pword_index()) = nullptr;
 		}
 		break;
 	default:
@@ -268,7 +286,7 @@ g3_istream_from_path(std::istream &stream, const std::string &path, float timeou
 		break;
 	}
 
-	stream.pword(0) = stream.rdbuf();
+	stream.pword(pword_index()) = stream.rdbuf();
 	stream.register_callback(stream_cb, 0);
 }
 
@@ -315,6 +333,6 @@ g3_ostream_to_path(std::ostream &stream, const std::string &path, bool append,
 		break;
 	}
 
-	stream.pword(0) = stream.rdbuf();
+	stream.pword(pword_index()) = stream.rdbuf();
 	stream.register_callback(stream_cb, 1);
 }
