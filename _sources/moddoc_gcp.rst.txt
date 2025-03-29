@@ -471,9 +471,9 @@ Read GCP archive file (or files if you pass an iterable of paths). For non-SPT A
 
 
 *Constructors:*
-	``ARCFileReader( (str)filename [, (Experiment)experiment=spt3g.gcp.Experiment.SPT [, (bool)track_filename=False]])``
+	``ARCFileReader( (str)filename [, (Experiment)experiment=spt3g.gcp.Experiment.SPT [, (float)timeout=-1.0 [, (bool)track_filename=False [, (int)buffersize=1048576]]]])``
 	
-	``ARCFileReader( (StringVector)filename [, (Experiment)experiment=spt3g.gcp.Experiment.SPT [, (bool)track_filename=False]])``
+	``ARCFileReader( (StringVector)filename [, (Experiment)experiment=spt3g.gcp.Experiment.SPT [, (float)timeout=-1.0 [, (bool)track_filename=False [, (int)buffersize=1048576]]]])``
 
 
 
