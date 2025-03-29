@@ -27,7 +27,6 @@ protected:
 	std::string cur_file_;
 	std::deque<std::string> filename_;
 	std::istream stream_;
-	int fd_;
 	int n_frames_to_read_;
 	int n_frames_read_;
 	int n_frames_cur_;

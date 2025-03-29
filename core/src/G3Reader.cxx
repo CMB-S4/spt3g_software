@@ -1,11 +1,10 @@
 #include <pybindings.h>
-#include "dataio.h"
+#include <dataio.h>
 #include <G3Reader.h>
 
 G3Reader::G3Reader(const std::string &filename, int n_frames_to_read,
     float timeout, bool track_filename, size_t buffersize) :
-    prefix_file_(false), stream_(nullptr), fd_(-1),
-    n_frames_to_read_(n_frames_to_read),
+    prefix_file_(false), stream_(nullptr), n_frames_to_read_(n_frames_to_read),
     n_frames_read_(0), n_frames_cur_(0), timeout_(timeout),
     track_filename_(track_filename), buffersize_(buffersize)
 {
@@ -14,8 +13,7 @@ G3Reader::G3Reader(const std::string &filename, int n_frames_to_read,
 
 G3Reader::G3Reader(const std::vector<std::string> &filename, int n_frames_to_read,
     float timeout, bool track_filename, size_t buffersize) :
-    prefix_file_(false), stream_(nullptr), fd_(-1),
-    n_frames_to_read_(n_frames_to_read),
+    prefix_file_(false), stream_(nullptr), n_frames_to_read_(n_frames_to_read),
     n_frames_read_(0), n_frames_cur_(0), timeout_(timeout),
     track_filename_(track_filename), buffersize_(buffersize)
 {
@@ -35,7 +33,6 @@ void G3Reader::StartFile(const std::string &path)
 	cur_file_ = path;
 	n_frames_cur_ = 0;
 	g3_istream_from_path(stream_, path, timeout_, buffersize_);
-	fd_ = g3_istream_handle(stream_);
 }
 
 G3FramePtr G3Reader::FillFrame()

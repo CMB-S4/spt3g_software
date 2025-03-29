@@ -1,6 +1,6 @@
 #include <pybindings.h>
 #include <G3Writer.h>
-#include "dataio.h"
+#include <dataio.h>
 
 G3Writer::G3Writer(std::string filename,
     std::vector<G3Frame::FrameType> streams,

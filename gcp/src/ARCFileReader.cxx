@@ -6,6 +6,7 @@
 #include <G3Vector.h>
 #include <G3Data.h>
 #include <G3Units.h>
+#include <dataio.h>
 #include <gcp/Experiments.h>
 
 #include <string.h>
@@ -108,6 +109,7 @@ private:
 	bool has_string_flag_;
 	off_t frame_length_;
 	uint64_t ms_jiffie_base_;
+	int fd_;
 	int32_t revision_;
 
 	void ParseArrayMap(uint8_t *buffer, size_t size);
@@ -169,6 +171,7 @@ void ARCFileReader::ReadHeader()
 	int32_t size, opcode;
 	uint8_t *buffer;
 
+	fd_ = g3_istream_handle(stream_);
 	revision_ = 0;
 	has_string_flag_ = false;
 
