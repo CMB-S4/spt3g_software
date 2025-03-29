@@ -37,7 +37,7 @@ On Ubuntu/Debian, you can install the non-Python dependencies, including the opt
 
 .. code-block:: shell
 
-	apt-get install cmake libboost-all-dev libflac-dev libnetcdf-dev
+	apt-get install cmake libboost-python-dev libflac-dev libnetcdf-dev
 
 On RHEL-type systems (SL, CentOS, etc.), do this:
 
@@ -105,7 +105,9 @@ Installation
 
 For various reasons it may be useful to install the software after building, instead of continuing to use it out of the build directory. Several CMake variables control how the software is installed:
 
+* ``WITH_GZIP``, which defaults to ``TRUE``, is used to control whether the core library is built with support for gzip compression of G3 files.  Use ``-DWITH_GZIP=FALSE`` when calling ``cmake`` to disable.
 * ``WITH_BZIP2``, which defaults to ``TRUE``, is used to control whether the core library is built with support for bzip2 compression of G3 files.  Use ``-DWITH_BZIP2=FALSE`` when calling ``cmake`` to disable.
+* ``WITH_LZMA``, which defaults to ``TRUE``, is used to control whether the core library is built with support for lzma compression of G3 files.  Use ``-DWITH_LZMA=FALSE`` when calling ``cmake`` to disable.
 * ``CMAKE_INSTALL_PREFIX``, which defaults to ``/usr/local`` is used as the root directory for installing all non-python components (header files, cmake export scripts, etc.).  This variable is frequently useful when installing into a python virtual environment.
 * ``CMAKE_BUILD_PARALLEL_LEVEL`` is an environment variable (*not* a cmake option) used to control how many parallel processes are used to compile the shared libraries.  This option provides the same behavior as running ``make`` with the ``-j`` flag (e.g. ``make -j4``).
 
