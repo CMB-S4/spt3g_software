@@ -162,7 +162,8 @@ get_codec(const std::string &path, const std::string &ext=".g3")
 	if (!ext.size() || has_ext(path, ext))
 		return NONE;
 
-	log_fatal("Invalid filename %s", path.c_str());
+	log_fatal("Filename %s does not have extension %s",
+	    path.c_str(), ext.c_str());
 }
 
 static Codec
@@ -191,6 +192,9 @@ check_output_path(const std::string &path, const std::string &ext)
 		auto ppath = fpath.parent_path();
 		if (!std::filesystem::exists(ppath))
 			log_fatal("Parent path does not exist: %s",
+			    ppath.string().c_str());
+		if (!std::filesystem::is_directory(ppath))
+			log_fatal("Parent path is not a directory: %s",
 			    ppath.string().c_str());
 	}
 
