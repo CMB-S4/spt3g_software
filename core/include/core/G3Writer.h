@@ -16,6 +16,7 @@ public:
 
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
 	void Flush();
+	off_t Tell();
 private:
 	std::string filename_;
 	std::ostream stream_;

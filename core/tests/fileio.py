@@ -140,3 +140,17 @@ except:
     pass
 else:
     assert False, "Expected RuntimeError seeking back from EOF"
+
+# check append mode
+core.log_notice("Testing writer in append mode")
+with core.G3Writer("appended.g3") as wr:
+    fr = core.G3Frame(core.G3FrameType.Wiring)
+    wr(fr)
+
+with core.G3Writer("appended.g3", append=True) as wr:
+    assert wr.tell() > 0, "File pointer not moved to the end"
+    fr = core.G3Frame(core.G3FrameType.Timepoint)
+    wr(fr)
+
+frs = list(core.G3File("appended.g3"))
+assert len(frs) == 2, "Missing frames in append mode"

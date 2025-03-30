@@ -129,6 +129,10 @@ public:
 		open(path, mode);
 		if (!is_open())
 			log_fatal("Error opening file %s", path.c_str());
+		// Update bytes counter so that tellp works correctly
+		if (append)
+			bytes_ = std::filebuf::seekoff(0, std::ios_base::cur,
+			    std::ios::out);
 		pubsetbuf(&buffer_[0], size);
 	}
 

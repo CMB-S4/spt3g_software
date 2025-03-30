@@ -35,6 +35,10 @@ void G3Writer::Flush()
 	stream_.flush();
 }
 
+off_t G3Writer::Tell() {
+	return stream_.tellp();
+}
+
 PYBINDINGS("core") {
 	using namespace boost::python;
 
@@ -50,7 +54,8 @@ PYBINDINGS("core") {
 	init<std::string, std::vector<G3Frame::FrameType>, bool, size_t>((arg("filename"),
 	    arg("streams")=std::vector<G3Frame::FrameType>(), arg("append")=false,
 	    arg("buffersize")=1024*1024)))
-	.def("Flush", &G3Writer::Flush)
+	.def("flush", &G3Writer::Flush)
+	.def("tell", &G3Writer::Tell)
 	.def_readonly("__g3module__", true)
 	;
 }
