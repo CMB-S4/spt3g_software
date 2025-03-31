@@ -4,8 +4,8 @@
 
 G3Reader::G3Reader(const std::string &filename, int n_frames_to_read,
     float timeout, bool track_filename, size_t buffersize, const std::string &ext) :
-    prefix_file_(false), stream_(nullptr), n_frames_to_read_(n_frames_to_read),
-    n_frames_read_(0), n_frames_cur_(0), timeout_(timeout),
+    stream_(nullptr), n_frames_to_read_(n_frames_to_read), n_frames_read_(0),
+    n_frames_cur_(0), prefix_file_(false), timeout_(timeout),
     track_filename_(track_filename), buffersize_(buffersize), ext_(ext)
 {
 	StartFile(filename);
@@ -13,8 +13,8 @@ G3Reader::G3Reader(const std::string &filename, int n_frames_to_read,
 
 G3Reader::G3Reader(const std::vector<std::string> &filename, int n_frames_to_read,
     float timeout, bool track_filename, size_t buffersize, const std::string &ext) :
-    prefix_file_(false), stream_(nullptr), n_frames_to_read_(n_frames_to_read),
-    n_frames_read_(0), n_frames_cur_(0), timeout_(timeout),
+    stream_(nullptr), n_frames_to_read_(n_frames_to_read), n_frames_read_(0),
+    n_frames_cur_(0), prefix_file_(false), timeout_(timeout),
     track_filename_(track_filename), buffersize_(buffersize), ext_(ext)
 {
 	if (filename.size() == 0)

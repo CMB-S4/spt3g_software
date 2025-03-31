@@ -23,13 +23,15 @@ public:
 protected:
 	virtual void StartFile(const std::string &path);
 	virtual G3FramePtr FillFrame();
-	bool prefix_file_;
 	std::string cur_file_;
-	std::deque<std::string> filename_;
 	std::istream stream_;
 	int n_frames_to_read_;
 	int n_frames_read_;
 	int n_frames_cur_;
+
+private:
+	bool prefix_file_;
+	std::deque<std::string> filename_;
 	float timeout_;
 	bool track_filename_;
 	size_t buffersize_;
