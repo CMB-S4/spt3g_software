@@ -88,7 +88,6 @@ public:
 	    size_t buffersize=1024*1024);
 
 private:
-	void StartFile(const std::string &path) override;
 	G3FramePtr FillFrame() override;
 	void ReadHeader();
 	
@@ -130,7 +129,6 @@ ARCFileReader::ARCFileReader(const std::string &path, Experiment experiment,
     G3Reader(path, n_frames_to_read, timeout, track_filename, buffersize, ".dat")
 {
 	SetExperiment(experiment);
-	ReadHeader();
 }
 
 ARCFileReader::ARCFileReader(const std::vector<std::string> &filename,
@@ -139,7 +137,6 @@ ARCFileReader::ARCFileReader(const std::vector<std::string> &filename,
     G3Reader(filename, n_frames_to_read, timeout, track_filename, buffersize, ".dat")
 {
 	SetExperiment(experiment);
-	ReadHeader();
 }
 
 
@@ -154,12 +151,6 @@ void ARCFileReader::SetExperiment(Experiment exp)
 	} else {
 		log_fatal("Unrecognized Experiment");
 	}
-}
-
-void ARCFileReader::StartFile(const std::string &path)
-{
-	G3Reader::StartFile(path);
-	ReadHeader();
 }
 
 void ARCFileReader::ReadHeader()
@@ -774,6 +765,9 @@ G3FramePtr ARCFileReader::FillFrame()
 	G3FramePtr outframe(new G3Frame(G3Frame::GcpSlow));
 	int32_t size, opcode;
 	uint8_t *buffer;
+
+	if (n_frames_cur_ == 0)
+		ReadHeader();
 
 	stream_.read((char *)&size, sizeof(size));
 	size = ntohl(size) - 8;

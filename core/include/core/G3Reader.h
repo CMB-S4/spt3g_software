@@ -21,7 +21,6 @@ public:
 	off_t Tell();
 
 protected:
-	virtual void StartFile(const std::string &path);
 	virtual G3FramePtr FillFrame();
 	std::string cur_file_;
 	std::istream stream_;
@@ -30,6 +29,7 @@ protected:
 	int n_frames_cur_;
 
 private:
+	void StartFile(const std::string &path);
 	bool prefix_file_;
 	std::deque<std::string> filename_;
 	float timeout_;
