@@ -119,7 +119,7 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 		uint8_t nanflag;
 		size_t nans = 0;
 
-		if (units != Counts)
+		if (units != Counts && units != None)
 			log_fatal("Cannot use FLAC on non-counts timestreams");
 
 		// Copy to 24-bit integers
@@ -259,7 +259,7 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 		callback.outbuf = new std::vector<int32_t>();
 		callback.pos = 0;
 
-		if (units != Counts)
+		if (units != Counts && units != None)
 			log_fatal("Cannot use FLAC on non-counts timestreams");
 
 		ar & cereal::make_nvp("nanflag", nanflag);
@@ -421,7 +421,7 @@ void G3Timestream::SetFLACCompression(int use_flac)
 {
 
 #ifdef G3_HAS_FLAC
-	if (use_flac != 0 && units != Counts)
+	if (use_flac != 0 && units != Counts && units != None)
 		log_fatal("Cannot use FLAC on non-counts timestreams");
 
 	use_flac_ = use_flac;
