@@ -493,7 +493,8 @@ G3Timestream G3Timestream::operator *(const G3Timestream &r) const
 		log_fatal("Multiplying timestreams of unequal units");
 	for (size_t i = 0; i < size(); i++)
 		ret[i] = (*this)[i] * r[i];
-	ret.units = None;
+	if (r.units != units)
+		ret.units = r.units == None ? units : r.units;
 
 	return ret;
 }
@@ -508,7 +509,8 @@ G3Timestream G3Timestream::operator /(const G3Timestream &r) const
 		log_fatal("Dividing timestreams of unequal units");
 	for (size_t i = 0; i < size(); i++)
 		ret[i] = (*this)[i] / r[i];
-	ret.units = None;
+	if (r.units == units)
+		ret.units = None;
 
 	return ret;
 }
