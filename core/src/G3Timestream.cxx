@@ -650,10 +650,14 @@ template <class A> void G3TimestreamMap::serialize(A &ar, unsigned v)
 			this->insert(std::pair<std::string, G3TimestreamPtr>(
 			    i->first, G3TimestreamPtr(new G3Timestream(
 			    i->second))));
+	} else if (v < 4) {
+		std::map<std::string, G3TimestreamPtr> oldmap;
+		ar & cereal::make_nvp("map", oldmap);
+		for (auto &it: oldmap)
+			this->insert(it);
 	} else {
-		ar & cereal::make_nvp("map",
-		    cereal::base_class<std::map<std::string,
-		    G3TimestreamPtr> >(this));
+		ar & cereal::make_nvp("map", map_);
+		ar & cereal::make_nvp("keys", keys_);
 	}
 	if (v < 2) {
 		// Load old timestreams with start/stop in the map instead of
