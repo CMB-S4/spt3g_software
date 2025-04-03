@@ -27,12 +27,13 @@ public:
 
 	G3Timestream(const G3Timestream &r);
 	G3Timestream(std::vector<double>::size_type s = 0, double val = 0) :
-	    units(None), use_flac_(0),
+	    units(None), use_flac_(0), flac_depth_(24),
 	    buffer_((s == 0) ? NULL : new std::vector<double>(s, val)),
 	    data_((s == 0) ? NULL : &(*buffer_)[0]), len_(s),
 	    data_type_(TS_DOUBLE) {}
 	template <typename Iterator> G3Timestream(Iterator l, Iterator r) :
-	    units(None), use_flac_(0), buffer_(new std::vector<double>(l, r)),
+	    units(None), use_flac_(0), flac_depth_(24),
+	    buffer_(new std::vector<double>(l, r)),
 	    data_(&(*buffer_)[0]), len_(buffer_->size()), data_type_(TS_DOUBLE) {}
 	virtual ~G3Timestream() {
 		if (buffer_) delete buffer_;
@@ -40,6 +41,7 @@ public:
 
 	// FLAC compression levels range from 0-9. 0 means do not use FLAC.
 	void SetFLACCompression(int compression_level);
+	void SetFLACDepth(int bit_depth);
 
 	TimestreamUnits units;
 	G3Time start, stop;
@@ -105,6 +107,7 @@ public:
 
 	double GetSampleRate() const;
 	uint8_t GetCompressionLevel() const{ return use_flac_; }
+	uint8_t GetBitDepth() const { return flac_depth_; }
 	
 	template <class A> void load(A &ar, unsigned v);
 	template <class A> void save(A &ar, unsigned v) const;
@@ -135,17 +138,19 @@ private:
 	friend class G3TimestreamPythonHelpers;
 
 	uint8_t use_flac_;
+	uint8_t flac_depth_;
 
 	std::vector<double> *buffer_;
 	std::shared_ptr<void> root_data_ref_;
 	void *data_;
 	size_t len_;
-	enum {
+	enum DataType {
 		TS_DOUBLE,
 		TS_FLOAT,
 		TS_INT32,
 		TS_INT64
-	} data_type_;
+	};
+	DataType data_type_;
 	
 	template<typename T>
 	struct TimeStreamTypeResolver{
@@ -206,7 +211,9 @@ public:
 	void SetUnits(G3Timestream::TimestreamUnits units);
 	/// FLAC compression levels range from 0-9. 0 means do not use FLAC.
 	uint8_t GetCompressionLevel() const;
+	uint8_t GetBitDepth() const;
 	void SetFLACCompression(int compression_level);
+	void SetFLACDepth(int bit_depth);
 
 	// Compact underlying data storage into a contiguous 2D block.
 	// This invalidates any references to data inside any member
@@ -225,9 +232,10 @@ public:
 	static G3TimestreamMap
 	MakeCompact(const std::vector<std::string>& keys, std::size_t n_samples,
 	    G3Time start, G3Time stop, G3Timestream::TimestreamUnits units=G3Timestream::None,
-	    int compression_level=0) {
+	    int compression_level=0, int bit_depth=24) {
 		std::shared_ptr<SampleType[]> data(new SampleType[n_samples*keys.size()]);
-		return MakeCompact(keys, n_samples, data, start, stop, units, compression_level);
+		return MakeCompact(keys, n_samples, data, start, stop, units,
+		    compression_level, bit_depth);
 	}
 
 	/// Construct a map using an existing contiguous 2D block of data as the underlying storage.
@@ -243,16 +251,19 @@ public:
 	static G3TimestreamMap
 	MakeCompact(const std::vector<std::string>& keys, std::size_t n_samples,
 	    std::shared_ptr<SampleType[]> data, G3Time start, G3Time stop,
-	    G3Timestream::TimestreamUnits units=G3Timestream::None, int compression_level=0) {
+	    G3Timestream::TimestreamUnits units=G3Timestream::None,
+	    int compression_level=0, int bit_depth=24) {
 		G3TimestreamMap map;
-		map.FromBuffer(keys, n_samples, data, start, stop, units, compression_level);
+		map.FromBuffer(keys, n_samples, data, start, stop, units,
+		    compression_level, bit_depth);
 		return map;
 	}
 
 	template<typename SampleType>
 	void FromBuffer(const std::vector<std::string>& keys, std::size_t n_samples,
 	    std::shared_ptr<SampleType[]> data, G3Time start, G3Time stop,
-	    G3Timestream::TimestreamUnits units=G3Timestream::None, int compression_level=0) {
+	    G3Timestream::TimestreamUnits units=G3Timestream::None,
+	    int compression_level=0, int bit_depth=24) {
 		if(!std::is_sorted(keys.begin(), keys.end()))
 			throw std::runtime_error("G3TimestreamMap::MakeCompact: keys must be sorted");
 		const auto data_type=G3Timestream::TimeStreamTypeResolver<SampleType>::type_tag;
@@ -263,6 +274,7 @@ public:
 			ts->stop = stop;
 			ts->units = units;
 			ts->use_flac_ = compression_level;
+			ts->flac_depth_ = bit_depth;
 			ts->root_data_ref_ = data;
 			ts->data_ = data.get() + offset;
 			ts->data_type_ = data_type;
@@ -283,7 +295,7 @@ namespace cereal {
 	template <class A> struct specialize<A, G3TimestreamMap, cereal::specialization::member_serialize> {};
 }
 
-G3_SERIALIZABLE(G3Timestream, 3);
+G3_SERIALIZABLE(G3Timestream, 4);
 G3_SERIALIZABLE(G3TimestreamMap, 3);
 
 #endif

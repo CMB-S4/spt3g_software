@@ -64,9 +64,10 @@ assert(numpy.asarray(tsm2)[2,6] == 16.0)
 # Test setting secondary properties at the time of direct construction
 tsm2 = core.G3TimestreamMap(tsm.keys(), buffer1d, start=start, stop=stop,
                             units=core.G3TimestreamUnits.Counts,
-                            compression_level=3)
+                            compression_level=3, bit_depth=32)
 for ts in tsm2.values():
 	assert ts.start == start
 	assert ts.stop == stop
 	assert ts.units == core.G3TimestreamUnits.Counts
 	assert ts.compression_level == 3
+	assert ts.bit_depth == 32
