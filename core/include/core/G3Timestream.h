@@ -222,17 +222,17 @@ public:
 	/// \param n_samples the number of samples each timestream will have
 	/// \pre keys must be in sorted order
 	template<typename SampleType>
-	static G3TimestreamMap MakeCompact(const std::vector<std::string>& keys, std::size_t n_samples,
-	                                   G3Time start, G3Time stop,
-	                                   G3Timestream::TimestreamUnits units=G3Timestream::None,
-	                                   int compression_level=0){
+	static G3TimestreamMap
+	MakeCompact(const std::vector<std::string>& keys, std::size_t n_samples,
+	    G3Time start, G3Time stop, G3Timestream::TimestreamUnits units=G3Timestream::None,
+	    int compression_level=0) {
 		std::shared_ptr<SampleType[]> data(new SampleType[n_samples*keys.size()]);
 		return MakeCompact(keys, n_samples, data, start, stop, units, compression_level);
 	}
 
 	/// Construct a map using an existing contiguous 2D block of data as the underlying storage.
-	/// Within the data block, the samples for each timestream must be laid out in the same order as
-	/// the (sorted) keys, without gaps.
+	/// Within the data block, the samples for each timestream must be laid out in the same order
+	/// as the (sorted) keys, without gaps.
 	/// \param keys the timestream keys for which the map should be constructed
 	/// \param start the start time which will be shared by all time streams
 	/// \param stop the stop time which will be shared by all time streams
@@ -240,30 +240,34 @@ public:
 	/// \param data existing data into which the new timestreams should be views
 	/// \pre keys must be in sorted order
 	template<typename SampleType>
-	static G3TimestreamMap MakeCompact(const std::vector<std::string>& keys, std::size_t n_samples,
-	                                   std::shared_ptr<SampleType[]> data,
-	                                   G3Time start, G3Time stop,
-	                                   G3Timestream::TimestreamUnits units=G3Timestream::None,
-	                                   int compression_level=0){
-		if(!std::is_sorted(keys.begin(), keys.end()))
-			throw std::runtime_error("G3TimestreamMap::MakeCompact: keys must be sorted");
-		const auto data_type=G3Timestream::TimeStreamTypeResolver<SampleType>::type_tag;
+	static G3TimestreamMap
+	MakeCompact(const std::vector<std::string>& keys, std::size_t n_samples,
+	    std::shared_ptr<SampleType[]> data, G3Time start, G3Time stop,
+	    G3Timestream::TimestreamUnits units=G3Timestream::None, int compression_level=0) {
 		G3TimestreamMap map;
-		std::size_t offset=0;
-		for(const auto& key : keys){
-			auto ts=std::make_shared<G3Timestream>(0);
-			ts->start=start;
-			ts->stop=stop;
-			ts->units=units;
-			ts->use_flac_=compression_level;
-			ts->root_data_ref_=data;
-			ts->data_=data.get()+offset;
-			ts->data_type_=data_type;
-			ts->len_=n_samples;
-			map.emplace(key, std::move(ts));
-			offset+=n_samples;
-		}
+		map.FromBuffer(keys, n_samples, data, start, stop, units, compression_level);
 		return map;
+	}
+
+	template<typename SampleType>
+	void FromBuffer(const std::vector<std::string>& keys, std::size_t n_samples,
+	    std::shared_ptr<SampleType[]> data, G3Time start, G3Time stop,
+	    G3Timestream::TimestreamUnits units=G3Timestream::None, int compression_level=0) {
+		const auto data_type=G3Timestream::TimeStreamTypeResolver<SampleType>::type_tag;
+		std::size_t offset = 0;
+		for (const auto& key : keys) {
+			auto ts = std::make_shared<G3Timestream>(0);
+			ts->start = start;
+			ts->stop = stop;
+			ts->units = units;
+			ts->use_flac_ = compression_level;
+			ts->root_data_ref_ = data;
+			ts->data_ = data.get() + offset;
+			ts->data_type_ = data_type;
+			ts->len_ = n_samples;
+			emplace(key, std::move(ts));
+			offset += n_samples;
+		}
 	}
 
 	template <class A> void serialize(A &ar, unsigned v);
