@@ -253,6 +253,8 @@ public:
 	void FromBuffer(const std::vector<std::string>& keys, std::size_t n_samples,
 	    std::shared_ptr<SampleType[]> data, G3Time start, G3Time stop,
 	    G3Timestream::TimestreamUnits units=G3Timestream::None, int compression_level=0) {
+		if(!std::is_sorted(keys.begin(), keys.end()))
+			throw std::runtime_error("G3TimestreamMap::MakeCompact: keys must be sorted");
 		const auto data_type=G3Timestream::TimeStreamTypeResolver<SampleType>::type_tag;
 		std::size_t offset = 0;
 		for (const auto& key : keys) {
