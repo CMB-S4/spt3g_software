@@ -147,6 +147,46 @@ void rescale(struct flac_helper *fh, double scale)
 		dest[j] = (Tout)src[j] * scale;
 }
 
+std::vector<bool> find_time_gaps(const G3VectorTime &times)
+{
+	std::vector<double> dts;
+	dts.reserve(times.size() - 1);
+	for (size_t i = 1; i < times.size(); i++)
+		dts.push_back(times[i].time - times[i - 1].time);
+
+	double dt;
+	{
+		int mid = dts.size() / 2;
+		std::vector<double> sorted = dts;
+		std::nth_element(sorted.begin(), sorted.begin() + mid, sorted.end());
+		dt = sorted[mid];
+	}
+
+	std::vector<bool> gaps;
+	gaps.reserve(times.size());
+	gaps.push_back(false);
+
+	for (size_t i = 0; i < dts.size(); i++) {
+		int missing = (int)(std::round(dts[i] / dt - 1));
+		for (int j = 0; j < missing; j++)
+			gaps.push_back(true);
+		gaps.push_back(false);
+	}
+
+	return gaps;
+}
+
+template <typename T>
+void fill_gaps(struct flac_helper *fh, const std::vector<bool> &gaps, double fillval)
+{
+	std::vector<T> src((T*)fh->dest, (T*)fh->dest + fh->count);
+	T *dest = (T*)fh->dest;
+
+	int sidx = 0;
+	for (size_t didx = 0; didx < gaps.size(); didx++)
+		dest[didx] = (!gaps[didx] && sidx < fh->count) ? src[sidx++] : fillval;
+}
+
 template <class A> void G3SuperTimestream::load(A &ar, unsigned v)
 {
 	G3_CHECK_VERSION(v);
@@ -184,9 +224,10 @@ template <class A> void G3SuperTimestream::load(A &ar, unsigned v)
 	} else
 		log_fatal("No support for compression algorithm times_algo=%d", (int)times_algo);
 
+	// Create a mask of missing samples
 	G3Time start = times[0];
 	G3Time stop = times[times.size() - 1];
-	// XXX check times for missing samples
+	std::vector<bool> time_gaps = find_time_gaps(times);
 
 	ar & make_nvp("names", names);
 
@@ -201,36 +242,51 @@ template <class A> void G3SuperTimestream::load(A &ar, unsigned v)
 	size_t elsize = is_64bit ? sizeof(int64_t) : sizeof(int32_t);
 	int ndet = shape[0];
 	int nsamp = shape[1];
-	size_t size = ndet * nsamp;
+	int nsamp_filled = time_gaps.size();
+	size_t size = ndet * nsamp_filled;
 
+	// Add bad sample mask to map as an extra detector channel at the end
 	bool is_floaty = (type_num == TYPE_NUM_FLOAT32 || type_num == TYPE_NUM_FLOAT64);
+	bool found_gaps = (nsamp_filled != nsamp);
+	size_t t0 = size;
+	if (found_gaps && !is_floaty) {
+		names.push_back("_nanmask");
+		size += nsamp_filled;
+	}
 
 	ar & make_nvp("data_algo", data_algo);
 	char *buf;
 
-	// XXX handle nans and missing samples
 	switch (type_num) {
 	case TYPE_NUM_INT32: {
 		std::shared_ptr<int32_t[]> data(new int32_t[size]);
-		FromBuffer(names, nsamp, data, start, stop);
+		FromBuffer(names, nsamp_filled, data, start, stop);
 		buf = (char *)data.get();
+
+		if (found_gaps)
+			for (size_t j = 0, i = t0; i < size; i++, j++)
+				data[i] = (int32_t)time_gaps[j];
 		break;
 	}
 	case TYPE_NUM_FLOAT32: {
 		std::shared_ptr<float[]> data(new float[size]);
-		FromBuffer(names, nsamp, data, start, stop);
+		FromBuffer(names, nsamp_filled, data, start, stop);
 		buf = (char *)data.get();
 		break;
 	}
 	case TYPE_NUM_INT64: {
 		std::shared_ptr<int64_t[]> data(new int64_t[size]);
-		FromBuffer(names, nsamp, data, start, stop);
+		FromBuffer(names, nsamp_filled, data, start, stop);
 		buf = (char *)data.get();
+
+		if (found_gaps)
+			for (size_t j = 0, i = t0; i < size; i++, j++)
+				data[i] = (int64_t)time_gaps[j];
 		break;
 	}
 	case TYPE_NUM_FLOAT64: {
 		std::shared_ptr<double[]> data(new double[size]);
-		FromBuffer(names, nsamp, data, start, stop);
+		FromBuffer(names, nsamp_filled, data, start, stop);
 		buf = (char *)data.get();
 		break;
 	}
@@ -240,19 +296,26 @@ template <class A> void G3SuperTimestream::load(A &ar, unsigned v)
 
 	SetFLACCompression((type_num == TYPE_NUM_INT32) ? flac_level : 0);
 
-	if (data_algo == ALGO_NONE) {
+	if (data_algo == ALGO_NONE && !found_gaps) {
 		ar & make_nvp("data_raw", binary_data(buf, nbytes));
 		return;
 	}
 
-	int count;
+	int count = nbytes;
 	std::vector<int> offsets;
 	std::vector<double> quanta;
 
-	// Read the flacblock
-	ar & make_nvp("quanta", quanta);
-	ar & make_nvp("offsets", offsets);
-	ar & make_nvp("payload_bytes", count);
+	if (data_algo == ALGO_NONE) {
+		// fill gaps in timestreams in parallel
+		for (int i=0; i<ndet; i++)
+			offsets.push_back(elsize * nsamp * i);
+	} else {
+		// Read the flac block
+		ar & make_nvp("quanta", quanta);
+		ar & make_nvp("offsets", offsets);
+		ar & make_nvp("payload_bytes", count);
+	}
+
 	std::unique_ptr<char []> cbuf(new char[count]);
 	ar & make_nvp("payload", binary_data(&cbuf[0], count));
 
@@ -261,6 +324,7 @@ template <class A> void G3SuperTimestream::load(A &ar, unsigned v)
 	void (*expand_func)(struct flac_helper *, char*) = nullptr;
 	void (*broadcast_func)(struct flac_helper *) = nullptr;
 	void (*rescale_func)(struct flac_helper *, double) = nullptr;
+	void (*gapfill_func)(struct flac_helper *, const std::vector<bool> &, double) = nullptr;
 
 	if (!is_64bit) {
 		this_write_callback = &write_callback_int<int32_t>;
@@ -268,12 +332,14 @@ template <class A> void G3SuperTimestream::load(A &ar, unsigned v)
 		broadcast_func = broadcast_val<int32_t>;
 		if (is_floaty)
 			rescale_func = rescale<int32_t, float>;
+		gapfill_func = is_floaty ? fill_gaps<float> : fill_gaps<int32_t>;
 	} else {
 		this_write_callback = &write_callback_int<int64_t>;
 		expand_func = expand_branch<int64_t>;
 		broadcast_func = broadcast_val<int64_t>;
 		if (is_floaty)
 			rescale_func = rescale<int64_t, double>;
+		gapfill_func = is_floaty ? fill_gaps<double> : fill_gaps<int64_t>;
 	}
 
 #pragma omp parallel
@@ -285,7 +351,7 @@ template <class A> void G3SuperTimestream::load(A &ar, unsigned v)
 
 #pragma omp for
 		for (int i=0; i<ndet; i++) {
-			char* this_data = buf + elsize * nsamp * i;
+			char* this_data = buf + elsize * nsamp_filled * i;
 
 			// Cue up this detector's data and read the algo code.
 			helper.src = &cbuf[0] + offsets[i];
@@ -328,6 +394,10 @@ template <class A> void G3SuperTimestream::load(A &ar, unsigned v)
 			// Now convert for precision.
 			if (data_algo != ALGO_NONE && is_floaty)
 				rescale_func(&helper, quanta[i]);
+
+			// Fill missing samples with zeros or nans
+			if (found_gaps)
+				gapfill_func(&helper, time_gaps, is_floaty ? NAN : 0.0);
 		}
 
 		if (decoder != nullptr)
