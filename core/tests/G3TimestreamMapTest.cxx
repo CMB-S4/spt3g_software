@@ -148,9 +148,9 @@ TEST(SetCompression){
 	unsigned int compressionLevel=5;
 	unsigned int bitDepth=24;
 	tsm.SetFLACCompression(5);
-	tsm.SetFLACDepth(bitDepth);
+	tsm.SetBitDepth(bitDepth);
 	for(const auto& key : keys){
 		ENSURE_EQUAL(tsm[key]->GetCompressionLevel(), compressionLevel, "SetFLACCompression should set the compression level for each timestream");
-		ENSURE_EQUAL(tsm[key]->GetBitDepth(), bitDepth, "SetFLACDepth should set the bit depth for each timestream");
+		ENSURE_EQUAL(tsm[key]->GetBitDepth(), bitDepth, "SetBitDepth should set the bit depth for each timestream");
 	}
 }

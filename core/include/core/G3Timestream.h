@@ -41,7 +41,7 @@ public:
 
 	// FLAC compression levels range from 0-9. 0 means do not use FLAC.
 	void SetFLACCompression(int compression_level);
-	void SetFLACDepth(int bit_depth);
+	void SetBitDepth(int bit_depth);
 
 	TimestreamUnits units;
 	G3Time start, stop;
@@ -213,7 +213,7 @@ public:
 	uint8_t GetCompressionLevel() const;
 	uint8_t GetBitDepth() const;
 	void SetFLACCompression(int compression_level);
-	void SetFLACDepth(int bit_depth);
+	void SetBitDepth(int bit_depth);
 
 	// Compact underlying data storage into a contiguous 2D block.
 	// This invalidates any references to data inside any member

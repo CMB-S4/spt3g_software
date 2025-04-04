@@ -131,7 +131,7 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 
 		// Copy to 24-bit integers
 		inbuf.resize(size());
-	        switch (flac_depth_) {
+		switch (flac_depth_) {
 		case 24:
 			switch (data_type_) {
 			case TS_DOUBLE:
@@ -484,7 +484,7 @@ void G3Timestream::SetFLACCompression(int use_flac)
 #endif
 }
 
-void G3Timestream::SetFLACDepth(int bit_depth)
+void G3Timestream::SetBitDepth(int bit_depth)
 {
 	if (bit_depth != 24 && bit_depth != 32)
 		log_fatal("Invalid flac bit depth %d", bit_depth);
@@ -844,10 +844,10 @@ void G3TimestreamMap::SetFLACCompression(int compression_level)
 		ts.second->use_flac_ = compression_level;
 }
 
-void G3TimestreamMap::SetFLACDepth(int bit_depth)
+void G3TimestreamMap::SetBitDepth(int bit_depth)
 {
 	// Check for errors
-	begin()->second->SetFLACDepth(bit_depth);
+	begin()->second->SetBitDepth(bit_depth);
 
 	for (auto& ts : *this)
 		ts.second->flac_depth_ = bit_depth;
@@ -1200,7 +1200,7 @@ G3TimestreamMap_from_numpy(std::vector<std::string> keys,
 	templ.start = start;
 	templ.stop = stop;
 	templ.SetFLACCompression(compression_level);
-	templ.SetFLACDepth(bit_depth);
+	templ.SetBitDepth(bit_depth);
 	if (strcmp(v->v.format, "d") == 0) {
 		templ.data_type_ = G3Timestream::TS_DOUBLE;
 	} else if (strcmp(v->v.format, "f") == 0) {
@@ -1432,7 +1432,7 @@ PYBINDINGS("core") {
 	      "Pass True to turn on FLAC compression when serialized. "
 	      "FLAC compression only works if the timestream is in units of "
 	      "counts.")
-	    .def("SetFLACDepth", &G3Timestream::SetFLACDepth,
+	    .def("SetBitDepth", &G3Timestream::SetBitDepth,
 	      "Change the bit depth for FLAC compression, may be 24 (default) or 32 "
 	      "(requires version 1.4+).")
 	    .def_readwrite("units", &G3Timestream::units,
@@ -1450,7 +1450,7 @@ PYBINDINGS("core") {
 	      &G3Timestream::SetFLACCompression, "Level of FLAC compression used for this timestream. "
 	      "This can only be non-zero if the timestream is in units of counts.")
 	    .add_property("bit_depth", &G3Timestream::GetBitDepth,
-	      &G3Timestream::SetFLACDepth, "Bit depth of FLAC compression used for this timestream.")
+	      &G3Timestream::SetBitDepth, "Bit depth of FLAC compression used for this timestream.")
 	    .def("_assert_congruence", &G3Timestream::G3TimestreamPythonHelpers::G3Timestream_assert_congruence,
 	      "log_fatal() if units, length, start, or stop times do not match")
 	    .def("_cxxslice", &G3Timestream::G3TimestreamPythonHelpers::G3Timestream_getslice, "Slice-only __getitem__")
@@ -1488,7 +1488,7 @@ PYBINDINGS("core") {
 	      "Pass True to turn on FLAC compression when serialized. "
 	      "FLAC compression only works if the timestreams are in units of "
 	      "counts.")
-	    .def("SetFLACDepth", &G3TimestreamMap::SetFLACDepth,
+	    .def("SetBitDepth", &G3TimestreamMap::SetBitDepth,
 	      "Change the bit depth for FLAC compression, may be 24 (default) or 32 "
 	      "(requires version 1.4+).")
 	    .add_property("start", &G3TimestreamMap::GetStartTime,
@@ -1511,7 +1511,7 @@ PYBINDINGS("core") {
 	      "Level of FLAC compression used for this timestream map. "
 	      "This can only be non-zero if the timestream is in units of counts.")
 	    .add_property("bit_depth", &G3TimestreamMap::GetBitDepth,
-	      &G3TimestreamMap::SetFLACDepth,
+	      &G3TimestreamMap::SetBitDepth,
 	      "Bit depth of FLAC compression used for this timestream map.")
 	;
 	register_pointer_conversions<G3TimestreamMap>();
