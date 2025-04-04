@@ -55,11 +55,11 @@ TEST(MakeCompactCompressed){
 	std::vector<std::string> keys={"a","b","c","d"};
 	G3Time t1(0), t2(3);
 	const std::size_t nSamples=4;
-	G3TimestreamMap tsm=G3TimestreamMap::MakeCompact<int32_t>(keys, nSamples, t1, t2, G3Timestream::Counts, 6, 32);
+	G3TimestreamMap tsm=G3TimestreamMap::MakeCompact<int32_t>(keys, nSamples, t1, t2, G3Timestream::Counts, 6, 24);
 	
 	for(const auto& item : tsm) {
 		ENSURE_EQUAL(item.second->GetCompressionLevel(), 6, "All timestreams should be set to use compression");
-		ENSURE_EQUAL(item.second->GetBitDepth(), 32, "All timestreams should be set to use 32-bit depth");
+		ENSURE_EQUAL(item.second->GetBitDepth(), 24, "All timestreams should be set to use 24-bit depth");
 	}
 }
 
@@ -146,7 +146,7 @@ TEST(SetCompression){
 	G3TimestreamMap tsm=G3TimestreamMap::MakeCompact<double>(keys, nSamples, t1, t2);
 	
 	unsigned int compressionLevel=5;
-	unsigned int bitDepth=32;
+	unsigned int bitDepth=24;
 	tsm.SetFLACCompression(5);
 	tsm.SetFLACDepth(bitDepth);
 	for(const auto& key : keys){

@@ -298,8 +298,12 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 
 		if (v >= 4) {
 			ar & cereal::make_nvp("flac_depth", flac_depth_);
+			if (flac_depth_ > 24 && FLAC_API_VERSION_CURRENT < 13)
+				log_fatal("32-bit decompression is not supported, "
+				    "please upgrade FLAC to version 1.4 or newer");
 			ar & cereal::make_nvp("data_type", data_type_);
 		} else {
+			flac_depth_ = 24;
 			data_type_ = TS_FLOAT;
 		}
 
@@ -484,6 +488,12 @@ void G3Timestream::SetFLACDepth(int bit_depth)
 {
 	if (bit_depth != 24 && bit_depth != 32)
 		log_fatal("Invalid flac bit depth %d", bit_depth);
+
+#ifdef G3_HAS_FLAC
+	if (bit_depth > 24 && FLAC_API_VERSION_CURRENT < 13)
+		log_fatal("32-bit compression is not supported, "
+		    "please upgrade FLAC to version 1.4 or newer");
+#endif
 
 	flac_depth_ = bit_depth;
 }
@@ -1423,9 +1433,8 @@ PYBINDINGS("core") {
 	      "FLAC compression only works if the timestream is in units of "
 	      "counts.")
 	    .def("SetFLACDepth", &G3Timestream::SetFLACDepth,
-	      "Change the bit depth for FLAC compression. "
-	      "FLAC compression only works if the timestream is in units of "
-	      "counts.")
+	      "Change the bit depth for FLAC compression, may be 24 (default) or 32 "
+	      "(requires version 1.4+).")
 	    .def_readwrite("units", &G3Timestream::units,
 	      "Units of the data in the timestream, stored as one of the "
 	      "members of core.G3TimestreamUnits.")
@@ -1480,9 +1489,8 @@ PYBINDINGS("core") {
 	      "FLAC compression only works if the timestreams are in units of "
 	      "counts.")
 	    .def("SetFLACDepth", &G3TimestreamMap::SetFLACDepth,
-	      "Change the bit depth for FLAC compression. "
-	      "FLAC compression only works if the timestreams are in units of "
-	      "counts.")
+	      "Change the bit depth for FLAC compression, may be 24 (default) or 32 "
+	      "(requires version 1.4+).")
 	    .add_property("start", &G3TimestreamMap::GetStartTime,
 	      &G3TimestreamMap::SetStartTime,
 	      "Time of the first sample in the time stream")

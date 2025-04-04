@@ -14,9 +14,14 @@ for bit_depth in [24, 32]:
     for dtype in dtypes:
         print("bit depth", bit_depth, "dtype", dtype)
         dat = np.random.normal(size=(ndet, nsamp), scale=2**28, loc=0).astype(dtype)
-        tsm = core.G3TimestreamMap(
-            keys, dat, start=start, stop=stop, compression_level=5, bit_depth=bit_depth
-        )
+        try:
+            tsm = core.G3TimestreamMap(
+                keys, dat, start=start, stop=stop, compression_level=5, bit_depth=bit_depth
+            )
+        except Exception as e:
+            if "32-bit compression is not supported" in str(e):
+                continue
+            raise
 
         with core.G3Writer("test.g3") as w:
             fr = core.G3Frame()
