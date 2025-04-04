@@ -1,7 +1,9 @@
 #include <G3Frame.h>
 #include <G3Data.h>
 #include <G3Quat.h>
+#ifdef HAS_SUPERTIMESTREAM
 #include "G3SuperTimestream.h"
+#endif
 #include <serialization.h>
 #include <pybindings.h>
 
@@ -360,10 +362,12 @@ void G3Frame::blob_decode(struct blob_container &blob)
 	cereal::PortableBinaryInputArchive item_ar(is);
 	item_ar >> make_nvp("val", ptr);
 
+#ifdef HAS_SUPERTIMESTREAM
 	// Convert to public type
 	auto v = std::dynamic_pointer_cast<G3SuperTimestream>(ptr);
 	if (!!v)
 		ptr = std::make_shared<G3TimestreamMap>(*v);
+#endif
 
 	blob.frameobject = ptr;
 

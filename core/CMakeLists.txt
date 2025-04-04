@@ -5,12 +5,19 @@ else(APPLE)
 	set(CORE_EXTRA_SRCS "")
 endif(APPLE)
 
+if(NOT DEFINED WITHOUT_SUPERTIMESTREAM)
+	set(WITHOUT_SUPERTIMESTREAM FALSE CACHE BOOL "Build G3SuperTimestream class")
+endif()
+if(NOT WITHOUT_SUPERTIMESTREAM)
+	set(CORE_EXTRA_SRCS ${CORE_EXTRA_SRCS} src/G3SuperTimestream.cxx)
+endif()
+
 add_spt3g_library(core SHARED
 	src/G3EventBuilder.cxx src/G3Frame.cxx src/G3TimeStamp.cxx
 	src/G3Pipeline.cxx src/G3Writer.cxx src/G3Reader.cxx
 	src/G3InfiniteSource.cxx src/G3Logging.cxx src/G3PrintfLogger.cxx
 	src/G3Data.cxx src/G3Vector.cxx src/G3Map.cxx src/G3Timestream.cxx
-        src/G3Timesample.cxx src/G3SuperTimestream.cxx
+        src/G3Timesample.cxx
 	src/G3TriggeredBuilder.cxx src/G3MultiFileWriter.cxx src/dataio.cxx
 	src/compression.cxx src/crc32.c ${CORE_EXTRA_SRCS}
 	src/G3NetworkSender.cxx src/G3SyslogLogger.cxx
@@ -40,9 +47,13 @@ if(FLAC_FOUND)
 	target_link_libraries(core PRIVATE FLAC::FLAC)
 endif()
 
-find_package(OpenMP)
-if(OpenMP_FOUND)
-	target_link_libraries(core PRIVATE OpenMP::OpenMP_CXX)
+if(NOT WITHOUT_SUPERTIMESTREAM)
+	find_package(OpenMP QUIET)
+	if(OpenMP_FOUND)
+		target_link_libraries(core PRIVATE OpenMP::OpenMP_CXX)
+	endif()
+
+	target_compile_definitions(core PRIVATE -DHAS_SUPERTIMESTREAM)
 endif()
 
 # Link against Z library
