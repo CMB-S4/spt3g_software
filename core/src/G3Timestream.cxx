@@ -5,6 +5,7 @@
 #include <std_map_indexing_suite.hpp>
 #include <boost/python/slice.hpp>
 
+#include <cereal/types/list.hpp>
 #include <cereal/types/map.hpp>
 #include <cereal/types/vector.hpp>
 
@@ -637,7 +638,29 @@ std::string G3Timestream::Description() const
 	return desc.str();
 }
 
-template <class A> void G3TimestreamMap::serialize(A &ar, unsigned v)
+template <class A> void G3TimestreamMap::save(A &ar, unsigned v) const
+{
+	ar & cereal::make_nvp("G3FrameObject",
+	    cereal::base_class<G3FrameObject>(this));
+	if (v < 3) {
+		std::map<std::string, G3Timestream> oldmap;
+		ar & cereal::make_nvp("map", oldmap);
+	} else if (v < 4) {
+		std::map<std::string, G3TimestreamPtr> oldmap;
+		ar & cereal::make_nvp("map", oldmap);
+	} else {
+		ar & cereal::make_nvp("map", cereal::base_class<OrderedMap<std::string, G3TimestreamPtr>>(this));
+	}
+	if (v < 2) {
+		// Load old timestreams with start/stop in the map instead of
+		// the individual timestreams.
+		G3Time start, stop;
+		ar & cereal::make_nvp("start", start);
+		ar & cereal::make_nvp("stop", stop);
+	}
+}
+
+template <class A> void G3TimestreamMap::load(A &ar, unsigned v)
 {
 	G3_CHECK_VERSION(v);
 
@@ -656,8 +679,7 @@ template <class A> void G3TimestreamMap::serialize(A &ar, unsigned v)
 		for (auto &it: oldmap)
 			this->insert(it);
 	} else {
-		ar & cereal::make_nvp("map", map_);
-		ar & cereal::make_nvp("keys", keys_);
+		ar & cereal::make_nvp("map", cereal::base_class<OrderedMap<std::string, G3TimestreamPtr>>(this));
 	}
 	if (v < 2) {
 		// Load old timestreams with start/stop in the map instead of
@@ -880,7 +902,7 @@ void G3TimestreamMap::Compactify()
 }
 
 G3_SPLIT_SERIALIZABLE_CODE(G3Timestream);
-G3_SERIALIZABLE_CODE(G3TimestreamMap);
+G3_SPLIT_SERIALIZABLE_CODE(G3TimestreamMap);
 
 class G3Timestream::G3TimestreamPythonHelpers
 {
