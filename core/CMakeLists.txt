@@ -52,8 +52,6 @@ if(NOT WITHOUT_SUPERTIMESTREAM)
 	if(OpenMP_FOUND)
 		target_link_libraries(core PRIVATE OpenMP::OpenMP_CXX)
 	endif()
-
-	target_compile_definitions(core PRIVATE -DHAS_SUPERTIMESTREAM)
 endif()
 
 # Link against Z library

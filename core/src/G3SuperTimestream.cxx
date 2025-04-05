@@ -1,5 +1,50 @@
+#include <G3Logging.h>
+#include <G3Timestream.h>
 #include <serialization.h>
-#include "G3SuperTimestream.h"
+
+/*
+  This is a minimal implementation of the Simons Observatory timestream storage
+  class, to enable reading legacy data from disk and convert directly to
+  G3TimestreamMap.  This class is only visible to the serialization library.
+*/
+
+class G3SuperTimestream : public G3TimestreamMap {
+private:
+	G3SuperTimestream() {};
+
+	friend class cereal::access;
+
+	template <class A> void load(A &ar, unsigned v) {
+		log_fatal("Library missing FLAC or BZip2 compression");
+	}
+
+	template <class A> void save(A &ar, unsigned v) const {
+		log_fatal("Convert to G3TimestreamMap to serialize");
+	}
+
+	SET_LOGGER("G3SuperTimestream");
+};
+
+namespace cereal {
+	template <class A> struct specialize<A, G3SuperTimestream,
+	    cereal::specialization::member_load_save> {};
+
+	// Convert to G3TimestreamMap before handing off to the user
+	namespace detail {
+		template <> inline std::shared_ptr<void>
+		PolymorphicCasters::upcast(std::shared_ptr<G3SuperTimestream> const & dptr,
+		    std::type_info const & baseInfo) {
+			return PolymorphicCasters::upcast(
+			    std::make_shared<G3TimestreamMap>(*dptr), baseInfo);
+		}
+	}
+}
+
+G3_SERIALIZABLE(G3SuperTimestream, 0);
+
+// Everything below is just the deserialization implementation, largely copied
+// wholesale from the simonsobs/so3g library, and rearranged to handle decompression
+// immediately on load.
 
 #if defined(G3_HAS_FLAC) && defined(BZIP2_FOUND)
 
@@ -187,7 +232,8 @@ void fill_gaps(struct flac_helper *fh, const std::vector<bool> &gaps, double fil
 		dest[didx] = (!gaps[didx] && sidx < fh->count) ? src[sidx++] : fillval;
 }
 
-template <class A> void G3SuperTimestream::load(A &ar, unsigned v)
+template <>
+void G3SuperTimestream::load(cereal::PortableBinaryInputArchive &ar, unsigned v)
 {
 	G3_CHECK_VERSION(v);
 	using namespace cereal;
@@ -406,19 +452,5 @@ template <class A> void G3SuperTimestream::load(A &ar, unsigned v)
 	} // omp parallel
 }
 
-#else
-
-template <class A> void G3SuperTimestream::load(A &ar, unsigned v)
-{
-	log_fatal("Library missing FLAC or BZip2 compression");
-}
-
 #endif
 
-// Save directly to a G3TimestreamMap object
-template <class A> void G3SuperTimestream::save(A &ar, unsigned v) const
-{
-	log_fatal("Convert to G3Timestream map to serialize");
-}
-
-G3_SPLIT_SERIALIZABLE_CODE(G3SuperTimestream);
