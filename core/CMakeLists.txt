@@ -5,6 +5,13 @@ else(APPLE)
 	set(CORE_EXTRA_SRCS "")
 endif(APPLE)
 
+if(NOT DEFINED WITH_SUPERTIMESTREAM)
+	set(WITH_SUPERTIMESTREAM TRUE CACHE BOOL "Build G3SuperTimestream class")
+endif()
+if(WITH_SUPERTIMESTREAM)
+	set(CORE_EXTRA_SRCS ${CORE_EXTRA_SRCS} src/G3SuperTimestream.cxx)
+endif()
+
 add_spt3g_library(core SHARED
 	src/G3EventBuilder.cxx src/G3Frame.cxx src/G3TimeStamp.cxx
 	src/G3Pipeline.cxx src/G3Writer.cxx src/G3Reader.cxx
@@ -38,6 +45,15 @@ find_package(FLAC MODULE)
 if(FLAC_FOUND)
 	target_compile_definitions(core PRIVATE -DG3_HAS_FLAC)
 	target_link_libraries(core PRIVATE FLAC::FLAC)
+endif()
+
+if(WITH_SUPERTIMESTREAM)
+	find_package(OpenMP)
+	if(OpenMP_FOUND)
+		target_link_libraries(core PRIVATE OpenMP::OpenMP_CXX)
+	endif()
+
+	target_compile_definitions(core PRIVATE -DHAS_SUPERTIMESTREAM)
 endif()
 
 # Link against Z library
