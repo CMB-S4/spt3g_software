@@ -272,8 +272,7 @@ public:
 		}
 	}
 
-	template <class A> void load(A &ar, unsigned v);
-	template <class A> void save(A &ar, unsigned v) const;
+	template <class A> void serialize(A &ar, unsigned v);
 	std::string Description() const;
 };
 
@@ -281,7 +280,7 @@ G3_POINTERS(G3TimestreamMap);
 
 namespace cereal {
 	template <class A> struct specialize<A, G3Timestream, cereal::specialization::member_load_save> {};
-	template <class A> struct specialize<A, G3TimestreamMap, cereal::specialization::member_load_save> {};
+	template <class A> struct specialize<A, G3TimestreamMap, cereal::specialization::member_serialize> {};
 }
 
 G3_SERIALIZABLE(G3Timestream, 3);
