@@ -282,7 +282,7 @@ namespace cereal {
 }
 
 G3_SERIALIZABLE(G3Timestream, 3);
-G3_SERIALIZABLE(G3TimestreamMap, 4);
+G3_SERIALIZABLE(G3TimestreamMap, 3);
 
 #endif
 
