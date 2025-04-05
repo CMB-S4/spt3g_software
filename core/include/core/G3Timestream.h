@@ -267,7 +267,7 @@ public:
 			ts->data_ = data.get() + offset;
 			ts->data_type_ = data_type;
 			ts->len_ = n_samples;
-			insert({key, std::move(ts)});
+			emplace(key, std::move(ts));
 			offset += n_samples;
 		}
 	}
