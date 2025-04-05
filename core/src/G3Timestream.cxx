@@ -652,7 +652,7 @@ template <class A> void G3TimestreamMap::serialize(A &ar, unsigned v)
 			    i->second))));
 	} else {
 		ar & cereal::make_nvp("map",
-		    cereal::base_class<std::map<std::string,
+		    cereal::base_class<OrderedMap<std::string,
 		    G3TimestreamPtr> >(this));
 	}
 	if (v < 2) {

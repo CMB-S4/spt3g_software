@@ -9,7 +9,8 @@ from spt3g import core
 tsm = core.G3TimestreamMap()
 start = core.G3Time.Now()
 stop = start + 5*core.G3Units.s
-for ts in ['A', 'B', 'C', 'D']:
+keys = ['D', 'A', 'B', 'C']
+for ts in keys:
 	i = core.G3Timestream(numpy.random.normal(size=600))
 	i.start = start
 	i.stop = stop
@@ -20,6 +21,7 @@ buffer1d = numpy.asarray(list(tsm.values()))
 
 buffer2d = numpy.asarray(tsm)
 
+assert((numpy.asarray(keys) == numpy.asarray(tsm.keys())).all())
 assert(buffer1d.shape == buffer2d.shape)
 assert(buffer2d.shape == (4,600))
 assert((buffer1d == buffer2d).all())
@@ -45,7 +47,7 @@ assert(numpy.asarray(tsm2)[1,5] == 16)
 
 # And that writes propagate back to the underlying G3Timestream
 buffer2d[1] = numpy.random.normal(size=600)
-assert((numpy.asarray(tsm['B']) == buffer2d[1]).all())
+assert((numpy.asarray(tsm['B']) == buffer2d[keys.index('B')]).all())
 
 # Test initialization from numpy and data copying/sharing
 buffer1d[2,6] = -3.0
