@@ -184,10 +184,8 @@ class G3TimestreamMap : public G3FrameObject,
     public OrderedMap<std::string, G3TimestreamPtr>{
 public:
 	G3TimestreamMap(){}
-	G3TimestreamMap(const G3TimestreamMap& other) :
-	    OrderedMap<std::string, G3TimestreamPtr>(other) {}
-	G3TimestreamMap(G3TimestreamMap&& other) :
-	    OrderedMap<std::string, G3TimestreamPtr>(std::move(other)) {}
+	G3TimestreamMap(const G3TimestreamMap& other):OrderedMap<std::string, G3TimestreamPtr>(other){}
+	G3TimestreamMap(G3TimestreamMap&& other):OrderedMap<std::string, G3TimestreamPtr>(std::move(other)){}
 
 	G3TimestreamMap& operator=(const G3TimestreamMap&)=default;
 	G3TimestreamMap& operator=(G3TimestreamMap&&)=default;

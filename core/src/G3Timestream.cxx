@@ -5,7 +5,6 @@
 #include <std_map_indexing_suite.hpp>
 #include <boost/python/slice.hpp>
 
-#include <cereal/types/list.hpp>
 #include <cereal/types/map.hpp>
 #include <cereal/types/vector.hpp>
 
