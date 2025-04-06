@@ -56,20 +56,19 @@ public:
 	           const key_equal& eql = key_equal(),
 	           const allocator_type& da = allocator_type(),
 	           const index_allocator_type& ia = index_allocator_type()):
-	data_(n,hf,eql,da),index_(ia){
+	data_(da),index_(n,hf,eql,ia){
 		while(f!=l)
 			insert(*f++);
 	}
 	
-	template<class InputIterator>
 	OrderedMap(std::initializer_list<value_type> il, size_type n = 0,
 	           const hasher& hf = hasher(),
 	           const key_equal& eql = key_equal(),
 	           const allocator_type& da = allocator_type(),
 	           const index_allocator_type& ia = index_allocator_type()):
-	data_(n,hf,eql,da),index_(ia){
-		for(value_type&& val : il)
-			insert(std::move(val));
+	data_(da),index_(n,hf,eql,ia){
+		for(const value_type& val : il)
+			insert(val);
 	}
 	
 	explicit OrderedMap(const allocator_type& da,
@@ -121,8 +120,8 @@ public:
 	OrderedMap& operator=(OrderedMap&&) = default;
 	OrderedMap& operator=(std::initializer_list<value_type> il){
 		clear();
-		for(value_type&& val : il)
-			insert(std::move(val));
+		for(const value_type& val : il)
+			insert(val);
 		return *this;
 	}
 	
@@ -152,9 +151,7 @@ public:
 		auto iit=index_.find(val.first);
 		if(iit!=index_.end())
 			return std::make_pair(iit->second, false);
-		data_.emplace_back(std::move(val));
-		auto it=data_.end();
-		it--;
+		auto it=data_.insert(data_.end(), std::move(val));
 		index_.insert(make_pair(val.first, it));
 		return std::make_pair(it, true);
 	}
@@ -168,9 +165,7 @@ public:
 		auto iit=index_.find(val.first);
 		if(iit!=index_.end())
 			return std::make_pair(iit->second, false);
-		data_.push_back(val);
-		auto it=data_.end();
-		it--;
+		auto it=data_.insert(data_.end(), val);
 		index_.insert(make_pair(val.first, it));
 		return std::make_pair(it, true);
 	}
@@ -179,9 +174,7 @@ public:
 		auto iit=index_.find(val.first);
 		if(iit!=index_.end())
 			return std::make_pair(iit->second, false);
-		data_.emplace_back(std::move(val));
-		auto it=data_.end();
-		it--;
+		auto it=data_.insert(data_.end(), std::move(val));
 		index_.insert(make_pair(val.first, it));
 		return std::make_pair(it, true);
 	}
@@ -232,9 +225,9 @@ public:
 	
 	iterator erase(const_iterator position){
 		const key_type& key=position->first;
-		iterator result=position;
-		result++;
 		auto iit=index_.find(key);
+		iterator result=iit->second;
+		result++;
 		data_.erase(position);
 		index_.erase(iit);
 		return result;
@@ -260,7 +253,7 @@ public:
 		return data_.erase(first, last);
 	}
 	
-	void swap(const OrderedMap& other){
+	void swap(OrderedMap& other){
 		data_.swap(other.data_);
 		index_.swap(other.index_);
 	}
@@ -363,9 +356,7 @@ public:
 	mapped_type& operator[](const key_type& key){
 		auto it=index_.find(key);
 		if(it==index_.end()){
-			data_.push_back(std::make_pair(key,mapped_type{}));
-			auto dit=data_.end();
-			dit--;
+			auto dit=data_.insert(data_.end(), std::make_pair(key,mapped_type{}));
 			index_[key]=dit;
 			return dit->second;
 		}
@@ -375,9 +366,7 @@ public:
 	mapped_type& operator[](key_type&& key){
 		auto it=index_.find(key);
 		if(it==index_.end()){
-			data_.push_back(std::make_pair(key,mapped_type{}));
-			auto dit=data_.end();
-			dit--;
+			auto dit=data_.insert(data_.end(), std::make_pair(key,mapped_type{}));
 			index_[key]=dit;
 			return dit->second;
 		}
