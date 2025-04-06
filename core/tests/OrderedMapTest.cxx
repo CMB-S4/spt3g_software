@@ -663,22 +663,22 @@ TEST(EraseKey){
 	             {"xen",std::make_shared<std::string>("hom")}});
 	auto res=map.erase("baz");
 	ENSURE_EQUAL(map.size(), 2U);
-	ENSURE_EQUAL(res, 1);
+	ENSURE_EQUAL(res, 1U);
 	check_contents(map, {{"foo","bar"},{"xen","hom"}});
 	
 	res=map.erase("drel");
 	ENSURE_EQUAL(map.size(), 2U);
-	ENSURE_EQUAL(res, 0);
+	ENSURE_EQUAL(res, 0U);
 	check_contents(map, {{"foo","bar"},{"xen","hom"}});
 	
 	res=map.erase("xen");
 	ENSURE_EQUAL(map.size(), 1U);
-	ENSURE_EQUAL(res, 1);
+	ENSURE_EQUAL(res, 1U);
 	check_contents(map, {{"foo","bar"}});
 	
 	res=map.erase("foo");
 	ENSURE_EQUAL(map.size(), 0U);
-	ENSURE_EQUAL(res, 1);
+	ENSURE_EQUAL(res, 1U);
 }
 
 TEST(EraseIteratorRange){
