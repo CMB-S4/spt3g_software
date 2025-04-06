@@ -410,8 +410,8 @@ template<typename Key, typename T, typename Hash, typename Pred,
          typename DataAlloc, typename IndexAlloc>
 bool operator==(const OrderedMap<Key, T, Hash, Pred, DataAlloc, IndexAlloc>& a,
                 const OrderedMap<Key, T, Hash, Pred, DataAlloc, IndexAlloc>& b){
-    if(a.size()!=b.size())
-    	return false;
+	if(a.size()!=b.size())
+		return false;
 	return std::equal(a.cbegin(), a.cend(), b.cbegin());
 }
 
@@ -420,7 +420,7 @@ template<typename Key, typename T, typename Hash, typename Pred,
 bool operator!=(const OrderedMap<Key, T, Hash, Pred, DataAlloc, IndexAlloc>& a,
                 const OrderedMap<Key, T, Hash, Pred, DataAlloc, IndexAlloc>& b){
 	if(a.size()==b.size())
-    	return false;
+		return false;
 	return !std::equal(a.cbegin(), a.cend(), b.cbegin());
 }
 

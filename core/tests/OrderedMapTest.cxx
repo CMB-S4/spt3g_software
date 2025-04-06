@@ -622,18 +622,18 @@ TEST(EraseIterator){
 	             {"baz",std::make_shared<std::string>("quux")},
 	             {"xen",std::make_shared<std::string>("hom")}});
 	auto res=map.erase(map.find("baz"));
-	ENSURE_EQUAL(map.size(), 2);
+	ENSURE_EQUAL(map.size(), 2U);
 	ENSURE_EQUAL(res->first, "xen");
 	ENSURE_EQUAL(*res->second, "hom");
 	check_contents(map, {{"foo","bar"},{"xen","hom"}});
 	
 	res=map.erase(map.find("xen"));
-	ENSURE_EQUAL(map.size(), 1);
+	ENSURE_EQUAL(map.size(), 1U);
 	ENSURE(res==map.end());
 	check_contents(map, {{"foo","bar"}});
 	
 	res=map.erase(map.find("foo"));
-	ENSURE_EQUAL(map.size(), 0);
+	ENSURE_EQUAL(map.size(), 0U);
 	ENSURE(res==map.end());
 }
 
@@ -642,18 +642,18 @@ TEST(EraseConstIterator){
 	             {"baz",std::make_shared<std::string>("quux")},
 	             {"xen",std::make_shared<std::string>("hom")}});
 	auto res=map.erase((TestMap::const_iterator)map.find("baz"));
-	ENSURE_EQUAL(map.size(), 2);
+	ENSURE_EQUAL(map.size(), 2U);
 	ENSURE_EQUAL(res->first, "xen");
 	ENSURE_EQUAL(*res->second, "hom");
 	check_contents(map, {{"foo","bar"},{"xen","hom"}});
 	
 	res=map.erase((TestMap::const_iterator)map.find("xen"));
-	ENSURE_EQUAL(map.size(), 1);
+	ENSURE_EQUAL(map.size(), 1U);
 	ENSURE(res==map.end());
 	check_contents(map, {{"foo","bar"}});
 	
 	res=map.erase((TestMap::const_iterator)map.find("foo"));
-	ENSURE_EQUAL(map.size(), 0);
+	ENSURE_EQUAL(map.size(), 0U);
 	ENSURE(res==map.end());
 }
 
@@ -662,22 +662,22 @@ TEST(EraseKey){
 	             {"baz",std::make_shared<std::string>("quux")},
 	             {"xen",std::make_shared<std::string>("hom")}});
 	auto res=map.erase("baz");
-	ENSURE_EQUAL(map.size(), 2);
+	ENSURE_EQUAL(map.size(), 2U);
 	ENSURE_EQUAL(res, 1);
 	check_contents(map, {{"foo","bar"},{"xen","hom"}});
 	
 	res=map.erase("drel");
-	ENSURE_EQUAL(map.size(), 2);
+	ENSURE_EQUAL(map.size(), 2U);
 	ENSURE_EQUAL(res, 0);
 	check_contents(map, {{"foo","bar"},{"xen","hom"}});
 	
 	res=map.erase("xen");
-	ENSURE_EQUAL(map.size(), 1);
+	ENSURE_EQUAL(map.size(), 1U);
 	ENSURE_EQUAL(res, 1);
 	check_contents(map, {{"foo","bar"}});
 	
 	res=map.erase("foo");
-	ENSURE_EQUAL(map.size(), 0);
+	ENSURE_EQUAL(map.size(), 0U);
 	ENSURE_EQUAL(res, 1);
 }
 
