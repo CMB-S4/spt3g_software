@@ -351,6 +351,18 @@ TEST(InitializerListAssignement){
 	check_contents(map, {{"foo","bar"},{"baz","quux"},{"xen","hom"}});
 }
 
+TEST(PointerCopyConstruction){
+	std::shared_ptr<TestMap> ptr;
+	{
+		std::list<TestPairType> raw={{"foo",std::make_shared<std::string>("bar")},
+		                             {"baz",std::make_shared<std::string>("quux")},
+		                             {"xen",std::make_shared<std::string>("hom")}};
+		TestMap map(raw.begin(), raw.end());
+		ptr = std::make_shared<TestMap>(map);
+	}
+	check_contents(*ptr, {{"foo","bar"},{"baz","quux"},{"xen","hom"}});
+}
+
 TEST(Emplace){
 	TestMap map;
 	
