@@ -40,6 +40,11 @@ public:
 	using difference_type = typename data_store_type::difference_type;
 protected:
 	using index_type = std::unordered_map<K, iterator, Hash, Pred, IndexAlloc>;
+private:
+	void build_index(){
+		for(auto it=data_.begin(), end=data_.end(); it!=end; it++)
+			index_.insert(std::make_pair(it->first, it));
+	}
 public:
 	
 	OrderedMap(){};
@@ -76,15 +81,24 @@ public:
 	data_(da),index_(ia){}
 	
 	OrderedMap(const OrderedMap& other):
-	data_(other.data_),index_(other.index_){}
+	data_(other.data_){
+		build_index();
+	}
 	
-	OrderedMap(OrderedMap&& other) :
-	    data_(std::move(other.data_)),index_(std::move(other.index_)){}
+	OrderedMap(OrderedMap&& other){
+		//If https://cplusplus.github.io/LWG/issue2321 is ever resolved in the obvious way
+		//this becomes unnecessary and the members can simply be move-constructed
+		data_.swap(other.data_);
+		index_.swap(other.index_);
+	}
+	
 	virtual ~OrderedMap(){};
 	
 	OrderedMap(const OrderedMap& other, const allocator_type& da,
 	           const index_allocator_type& ia = index_allocator_type()):
-	data_(other.data_, da),index_(other.index_, ia){}
+	data_(other.data_, da),index_(ia){
+		build_index();
+	}
 	
 	OrderedMap(size_type n, const allocator_type& da,
 	           const index_allocator_type& ia = index_allocator_type()):
@@ -116,8 +130,26 @@ public:
 	           const index_allocator_type& ia = index_allocator_type()):
 	OrderedMap(il, n, hf, key_equal(), da, ia){}
 
-	OrderedMap& operator=(const OrderedMap&) = default;
-	OrderedMap& operator=(OrderedMap&&) = default;
+	OrderedMap& operator=(const OrderedMap& other){
+		if(&other!=this){
+			clear();
+			for(const value_type& val : other.data_){
+				auto it=data_.insert(data_.end(), val);
+				index_.insert(std::make_pair(val.first, it));
+			}
+		}
+		return *this;
+	}
+	OrderedMap& operator=(OrderedMap&& other){
+		if(&other!=this){
+			//If https://cplusplus.github.io/LWG/issue2321 is ever resolved in the obvious way
+			//plain move assignments could be used. Until then, swap is required to invalidate
+			//no iterators, so this works instead.
+			data_.swap(other.data_);
+			index_.swap(other.index_);
+		}
+		return *this;
+	}
 	OrderedMap& operator=(std::initializer_list<value_type> il){
 		clear();
 		for(const value_type& val : il)

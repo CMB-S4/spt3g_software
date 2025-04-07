@@ -342,13 +342,53 @@ TEST(InitializerListConstruction){
 	check_contents(map, {{"foo","bar"},{"baz","quux"},{"xen","hom"}});
 }
 
-TEST(InitializerListAssignement){
+TEST(InitializerListAssignment){
 	std::initializer_list<TestValueType> il{{"foo",std::make_shared<std::string>("bar")},
 	                                        {"baz",std::make_shared<std::string>("quux")},
 	                                        {"xen",std::make_shared<std::string>("hom")}};
 	TestMap map({{"drel",std::make_shared<std::string>("plugh")}});
 	map = il;
 	check_contents(map, {{"foo","bar"},{"baz","quux"},{"xen","hom"}});
+}
+
+TEST(CopyConstruction){
+	TestMap m1({{"foo",std::make_shared<std::string>("bar")},
+	             {"baz",std::make_shared<std::string>("quux")},
+	             {"xen",std::make_shared<std::string>("hom")}});
+	TestMap m2(m1);
+	ENSURE(m1==m2);
+	m1.clear(); //m2 must in no way depend on m1 continuing to exist/have the same state
+	check_contents(m2, {{"foo","bar"},{"baz","quux"},{"xen","hom"}});
+}
+
+TEST(MoveConstruction){
+	TestMap m1({{"foo",std::make_shared<std::string>("bar")},
+	             {"baz",std::make_shared<std::string>("quux")},
+	             {"xen",std::make_shared<std::string>("hom")}});
+	TestMap m2(std::move(m1));
+	m1.clear(); //m2 must in no way depend on m1 continuing to exist/have the same state
+	check_contents(m2, {{"foo","bar"},{"baz","quux"},{"xen","hom"}});
+}
+
+TEST(CopyAssignment){
+	TestMap m1({{"foo",std::make_shared<std::string>("bar")},
+	             {"baz",std::make_shared<std::string>("quux")},
+	             {"xen",std::make_shared<std::string>("hom")}});
+	TestMap m2;
+	m2=m1;
+	ENSURE(m1==m2);
+	m1.clear(); //m2 must in no way depend on m1 continuing to exist/have the same state
+	check_contents(m2, {{"foo","bar"},{"baz","quux"},{"xen","hom"}});
+}
+
+TEST(MoveAssignment){
+	TestMap m1({{"foo",std::make_shared<std::string>("bar")},
+	             {"baz",std::make_shared<std::string>("quux")},
+	             {"xen",std::make_shared<std::string>("hom")}});
+	TestMap m2;
+	m2=std::move(m1);
+	m1.clear(); //m2 must in no way depend on m1 continuing to exist/have the same state
+	check_contents(m2, {{"foo","bar"},{"baz","quux"},{"xen","hom"}});
 }
 
 TEST(PointerCopyConstruction){
