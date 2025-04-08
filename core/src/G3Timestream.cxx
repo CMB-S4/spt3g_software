@@ -671,7 +671,10 @@ template <class A> void G3TimestreamMap::serialize(A &ar, unsigned v)
 std::string G3TimestreamMap::Description() const
 {
 	std::ostringstream desc;
-	desc << "Timestreams from " << size() << " detectors";
+	desc << "Timestreams";
+	if (begin() != end())
+		desc << " of " << *(begin()->second);
+	desc << " from " << size() << " detectors";
 	return desc.str();
 }
 
