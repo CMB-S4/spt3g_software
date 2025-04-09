@@ -16,19 +16,18 @@ for bit_depth in [24, 32]:
         dat = np.random.normal(size=(ndet, nsamp), scale=2**28, loc=0).astype(dtype)
         if dtype in [np.float32, np.float64]:
             dat[:, 5] = np.nan
+        tsm = core.G3TimestreamMap(
+            keys, dat, start=start, stop=stop, compression_level=5, bit_depth=bit_depth
+        )
         try:
-            tsm = core.G3TimestreamMap(
-                keys, dat, start=start, stop=stop, compression_level=5, bit_depth=bit_depth
-            )
+            with core.G3Writer("test.g3") as w:
+                fr = core.G3Frame()
+                fr["tsm"] = tsm
+                w(fr)
         except Exception as e:
             if "32-bit compression is not supported" in str(e):
                 continue
             raise
-
-        with core.G3Writer("test.g3") as w:
-            fr = core.G3Frame()
-            fr["tsm"] = tsm
-            w(fr)
 
         tsm2 = list(core.G3File("test.g3"))[0]["tsm"]
 

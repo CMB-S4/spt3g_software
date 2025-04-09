@@ -7,6 +7,7 @@ dat = numpy.floor(numpy.random.normal(size=1200, scale=20, loc=0))
 ts = core.G3Timestream(dat)
 ts.units = core.G3TimestreamUnits.Counts
 ts.SetFLACCompression(5)
+ts.SetFLACBitDepth(24)
 ts[5] = numpy.nan
 dat[5] = numpy.nan
 
