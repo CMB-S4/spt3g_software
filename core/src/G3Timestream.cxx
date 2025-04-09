@@ -223,7 +223,6 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 		// Now do FLAC encoding
 		FLAC__StreamEncoder *encoder = FLAC__stream_encoder_new();
 		FLAC__stream_encoder_set_channels(encoder, 1);
-		// XXX: should assert if high-order 8 bits are not clear
 		FLAC__stream_encoder_set_bits_per_sample(encoder, flac_depth_);
 		FLAC__stream_encoder_set_compression_level(encoder, use_flac_);
 		FLAC__stream_encoder_set_do_md5(encoder, false);
@@ -278,11 +277,8 @@ template <typename T>
 std::vector<T> *
 unpack_flac(const std::vector<int32_t> &buf, uint8_t nanflag, const std::vector<bool> &nanbuf)
 {
-	// Represent data as floats internally if possible. These have the
-	// same significand depth (24 bits) as the max. bit depth of the
-	// reference FLAC encoder we use, so no data are lost, and allow
-	// NaNs, unlike int32_ts, which we try to pull through the process
-	// to signal missing data.
+	// Represent data as floats internally if possible, to allow NaNs,
+	// which we try to pull through the process to signal missing data.
 
 	// Convert data format
 	auto data = new std::vector<T>(buf.size());
