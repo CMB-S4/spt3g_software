@@ -1462,8 +1462,8 @@ PYBINDINGS("core") {
 	      "FLAC compression only works if the timestream is in units of "
 	      "counts.")
 	    .def("SetFLACBitDepth", &G3Timestream::SetFLACBitDepth,
-	      "Change the bit depth for FLAC compression, may be 24 (default) or 32 "
-	      "(requires version 1.4+).")
+	      "Change the bit depth for FLAC compression, may be 24 or 32 "
+	      "(default, requires version 1.4+).")
 	    .def_readwrite("units", &G3Timestream::units,
 	      "Units of the data in the timestream, stored as one of the "
 	      "members of core.G3TimestreamUnits.")
@@ -1518,8 +1518,8 @@ PYBINDINGS("core") {
 	      "FLAC compression only works if the timestreams are in units of "
 	      "counts.")
 	    .def("SetFLACBitDepth", &G3TimestreamMap::SetFLACBitDepth,
-	      "Change the bit depth for FLAC compression, may be 24 (default) or 32 "
-	      "(requires version 1.4+).")
+	      "Change the bit depth for FLAC compression, may be 24 or 32 "
+	      "(default, requires version 1.4+).")
 	    .add_property("start", &G3TimestreamMap::GetStartTime,
 	      &G3TimestreamMap::SetStartTime,
 	      "Time of the first sample in the time stream")
