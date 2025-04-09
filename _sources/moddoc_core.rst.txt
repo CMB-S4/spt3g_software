@@ -2221,6 +2221,8 @@ Detector timestream. Includes a units field and start and stop times. Can otherw
 
 * **compression_level**: Level of FLAC compression used for this timestream. This can only be non-zero if the timestream is in units of counts.
 
+* **bit_depth**: Bit depth of FLAC compression used for this timestream.
+
 * **shape**: No Doc (Shame!)
 
 * **ndim**: No Doc (Shame!)
@@ -2241,6 +2243,13 @@ Detector timestream. Includes a units field and start and stop times. Can otherw
 ``SetFLACCompression( (G3Timestream)arg1, (int)arg2) -> None :``
     Pass True to turn on FLAC compression when serialized. FLAC compression only works if the timestream is in units of counts.
 
+.. _spt3g.core.G3Timestream.SetFLACBitDepth:
+
+**spt3g.core.G3Timestream.SetFLACBitDepth**
+
+``SetFLACBitDepth( (G3Timestream)arg1, (int)arg2) -> None :``
+    Change the bit depth for FLAC compression, may be 24 or 32 (default, requires version 1.4+).
+
 
 
 .. _spt3g.core.G3TimestreamMap:
@@ -2255,7 +2264,7 @@ Collection of timestreams indexed by logical detector ID
 	
 	``G3TimestreamMap( (G3TimestreamMap)arg2)``
 	
-	``G3TimestreamMap( (StringVector)keys, (object)data [, (G3Time)start=<spt3g.core.G3Time object at 0x7fe42e095150> [, (G3Time)stop=<spt3g.core.G3Time object at 0x7fe42e0951c0> [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None [, (int)compression_level=0 [, (bool)copy_data=True]]]]])`` :
+	``G3TimestreamMap( (StringVector)keys, (object)data [, (G3Time)start=<spt3g.core.G3Time object at 0x7ff67bb05150> [, (G3Time)stop=<spt3g.core.G3Time object at 0x7ff67bb051c0> [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None [, (int)compression_level=0 [, (bool)copy_data=True [, (int)bit_depth=32]]]]]])`` :
 	    Create a timestream map from a numpy array or other numeric python iterable. Each row of the 2D input array will correspond to a single timestream, with the key set to the correspondingly-indexed entry of <keys>. If <copy_data> is True (default), the data will be copied into the output data structure. If False, the timestream map will provide a view into the given numpy array.
 	
 	``G3TimestreamMap( (list)arg2)`` :
@@ -2283,6 +2292,8 @@ Collection of timestreams indexed by logical detector ID
 * **units**: Units of the data in the timestream, stored as one of the members of core.G3TimestreamUnits.
 
 * **compression_level**: Level of FLAC compression used for this timestream map. This can only be non-zero if the timestream is in units of counts.
+
+* **bit_depth**: Bit depth of FLAC compression used for this timestream map.
 
 * **dtype**: No Doc (Shame!)
 
@@ -2411,6 +2422,13 @@ Collection of timestreams indexed by logical detector ID
 
 ``SetFLACCompression( (G3TimestreamMap)arg1, (int)arg2) -> None :``
     Pass True to turn on FLAC compression when serialized. FLAC compression only works if the timestreams are in units of counts.
+
+.. _spt3g.core.G3TimestreamMap.SetFLACBitDepth:
+
+**spt3g.core.G3TimestreamMap.SetFLACBitDepth**
+
+``SetFLACBitDepth( (G3TimestreamMap)arg1, (int)arg2) -> None :``
+    Change the bit depth for FLAC compression, may be 24 or 32 (default, requires version 1.4+).
 
 
 
