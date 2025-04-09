@@ -134,4 +134,5 @@ add_spt3g_test_program(test
                        SOURCE_FILES
                          ${CMAKE_CURRENT_SOURCE_DIR}/tests/G3TimestreamTest.cxx
                          ${CMAKE_CURRENT_SOURCE_DIR}/tests/G3TimestreamMapTest.cxx
+                         ${CMAKE_CURRENT_SOURCE_DIR}/tests/OrderedMapTest.cxx
                        USE_PROJECTS core)

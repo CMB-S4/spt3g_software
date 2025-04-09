@@ -24,12 +24,15 @@ static_assert(std::is_move_assignable<G3TimestreamMap>::value,
 
 template<typename SampleType>
 void testMakeCompact(){
-	std::vector<std::string> keys={"a","b","c","d"};
+	std::vector<std::string> keys={"d","a","b","c"};
 	G3Time t1(0), t2(3);
 	const std::size_t nSamples=4;
 	G3TimestreamMap tsm=G3TimestreamMap::MakeCompact<SampleType>(keys, nSamples, t1, t2);
 	
 	ENSURE_EQUAL(tsm.size(),keys.size(), "MakeCompact should produce the correct number of timestreams");
+	size_t idx = 0;
+	for (const auto & item : tsm)
+		ENSURE_EQUAL(item.first, keys[idx++], "MakeCompact should preserve the key ordering");
 	ENSURE_EQUAL(tsm.GetStartTime(),t1, "MakeCompact should produce a map with the given start time");
 	ENSURE_EQUAL(tsm.GetStopTime(),t2, "MakeCompact should produce a map with the given stop time");
 	ENSURE_EQUAL(tsm.NSamples(),nSamples, "MakeCompact should produce a map with the given number of samples");
