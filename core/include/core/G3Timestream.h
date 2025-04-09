@@ -5,7 +5,7 @@
 #include <G3TimeStamp.h>
 #include <G3Vector.h>
 #include <vector>
-#include <map>
+#include <containers.h>
 
 class G3Timestream : public G3FrameObject {
 public:
@@ -181,11 +181,11 @@ struct G3Timestream::TimeStreamTypeResolver<int64_t>{
 };
 
 class G3TimestreamMap : public G3FrameObject,
-    public std::map<std::string, G3TimestreamPtr> {
+    public OrderedMap<std::string, G3TimestreamPtr>{
 public:
 	G3TimestreamMap(){}
-	G3TimestreamMap(const G3TimestreamMap& other):std::map<std::string, G3TimestreamPtr>(other){}
-	G3TimestreamMap(G3TimestreamMap&& other):std::map<std::string, G3TimestreamPtr>(std::move(other)){}
+	G3TimestreamMap(const G3TimestreamMap& other):OrderedMap<std::string, G3TimestreamPtr>(other){}
+	G3TimestreamMap(G3TimestreamMap&& other):OrderedMap<std::string, G3TimestreamPtr>(std::move(other)){}
 
 	G3TimestreamMap& operator=(const G3TimestreamMap&)=default;
 	G3TimestreamMap& operator=(G3TimestreamMap&&)=default;
@@ -253,8 +253,6 @@ public:
 	void FromBuffer(const std::vector<std::string>& keys, std::size_t n_samples,
 	    std::shared_ptr<SampleType[]> data, G3Time start, G3Time stop,
 	    G3Timestream::TimestreamUnits units=G3Timestream::None, int compression_level=0) {
-		if(!std::is_sorted(keys.begin(), keys.end()))
-			throw std::runtime_error("G3TimestreamMap::MakeCompact: keys must be sorted");
 		const auto data_type=G3Timestream::TimeStreamTypeResolver<SampleType>::type_tag;
 		std::size_t offset = 0;
 		for (const auto& key : keys) {
