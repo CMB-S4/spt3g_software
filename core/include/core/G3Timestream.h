@@ -27,12 +27,12 @@ public:
 
 	G3Timestream(const G3Timestream &r);
 	G3Timestream(std::vector<double>::size_type s = 0, double val = 0) :
-	    units(None), use_flac_(0), flac_depth_(24),
+	    units(None), use_flac_(0), flac_depth_(32),
 	    buffer_((s == 0) ? NULL : new std::vector<double>(s, val)),
 	    data_((s == 0) ? NULL : &(*buffer_)[0]), len_(s),
 	    data_type_(TS_DOUBLE) {}
 	template <typename Iterator> G3Timestream(Iterator l, Iterator r) :
-	    units(None), use_flac_(0), flac_depth_(24),
+	    units(None), use_flac_(0), flac_depth_(32),
 	    buffer_(new std::vector<double>(l, r)),
 	    data_(&(*buffer_)[0]), len_(buffer_->size()), data_type_(TS_DOUBLE) {}
 	virtual ~G3Timestream() {
@@ -41,7 +41,7 @@ public:
 
 	// FLAC compression levels range from 0-9. 0 means do not use FLAC.
 	void SetFLACCompression(int compression_level);
-	void SetBitDepth(int bit_depth);
+	void SetFLACBitDepth(int bit_depth);
 
 	TimestreamUnits units;
 	G3Time start, stop;
@@ -106,8 +106,8 @@ public:
 	}
 
 	double GetSampleRate() const;
-	uint8_t GetCompressionLevel() const{ return use_flac_; }
-	uint8_t GetBitDepth() const { return flac_depth_; }
+	uint8_t GetFLACCompression() const{ return use_flac_; }
+	uint8_t GetFLACBitDepth() const { return flac_depth_; }
 	
 	template <class A> void load(A &ar, unsigned v);
 	template <class A> void save(A &ar, unsigned v) const;
@@ -210,10 +210,10 @@ public:
 	G3Timestream::TimestreamUnits GetUnits() const;
 	void SetUnits(G3Timestream::TimestreamUnits units);
 	/// FLAC compression levels range from 0-9. 0 means do not use FLAC.
-	uint8_t GetCompressionLevel() const;
-	uint8_t GetBitDepth() const;
+	uint8_t GetFLACCompression() const;
+	uint8_t GetFLACBitDepth() const;
 	void SetFLACCompression(int compression_level);
-	void SetBitDepth(int bit_depth);
+	void SetFLACBitDepth(int bit_depth);
 
 	// Compact underlying data storage into a contiguous 2D block.
 	// This invalidates any references to data inside any member
@@ -232,7 +232,7 @@ public:
 	static G3TimestreamMap
 	MakeCompact(const std::vector<std::string>& keys, std::size_t n_samples,
 	    G3Time start, G3Time stop, G3Timestream::TimestreamUnits units=G3Timestream::None,
-	    int compression_level=0, int bit_depth=24) {
+	    int compression_level=0, int bit_depth=32) {
 		std::shared_ptr<SampleType[]> data(new SampleType[n_samples*keys.size()]);
 		return MakeCompact(keys, n_samples, data, start, stop, units,
 		    compression_level, bit_depth);
@@ -252,7 +252,7 @@ public:
 	MakeCompact(const std::vector<std::string>& keys, std::size_t n_samples,
 	    std::shared_ptr<SampleType[]> data, G3Time start, G3Time stop,
 	    G3Timestream::TimestreamUnits units=G3Timestream::None,
-	    int compression_level=0, int bit_depth=24) {
+	    int compression_level=0, int bit_depth=32) {
 		G3TimestreamMap map;
 		map.FromBuffer(keys, n_samples, data, start, stop, units,
 		    compression_level, bit_depth);
@@ -263,7 +263,7 @@ public:
 	void FromBuffer(const std::vector<std::string>& keys, std::size_t n_samples,
 	    std::shared_ptr<SampleType[]> data, G3Time start, G3Time stop,
 	    G3Timestream::TimestreamUnits units=G3Timestream::None,
-	    int compression_level=0, int bit_depth=24) {
+	    int compression_level=0, int bit_depth=32) {
 		if(!std::is_sorted(keys.begin(), keys.end()))
 			throw std::runtime_error("G3TimestreamMap::MakeCompact: keys must be sorted");
 		const auto data_type=G3Timestream::TimeStreamTypeResolver<SampleType>::type_tag;
