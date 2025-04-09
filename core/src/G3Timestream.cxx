@@ -122,9 +122,13 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 		if (units != Counts && units != None)
 			log_fatal("Cannot use FLAC on non-counts timestreams");
 
-		DataType data_type_out = TS_FLOAT;
-		if (data_type_ == TS_INT64 || data_type_ == TS_INT32)
+		DataType data_type_out;
+		if (flac_depth_ == 32)
+			data_type_out = data_type_;
+		else if (data_type_ == TS_INT64 || data_type_ == TS_INT32)
 			data_type_out = TS_INT32;
+		else
+			data_type_out = TS_FLOAT;
 
 		ar & cereal::make_nvp("flac_depth", flac_depth_);
 		ar & cereal::make_nvp("data_type", data_type_out);
@@ -164,7 +168,7 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 			switch (data_type_) {
 			case TS_DOUBLE:
 				for (size_t i = 0; i < size(); i++)
-					inbuf[i] = int32_t(float(((double *)data_)[i]));
+					inbuf[i] = int32_t(((double *)data_)[i]);
 				break;
 			case TS_FLOAT:
 				for (size_t i = 0; i < size(); i++)
@@ -266,6 +270,34 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 #endif
 }
 
+template <typename T>
+std::vector<T> *
+unpack_flac(const std::vector<int32_t> &buf, uint8_t nanflag, const std::vector<bool> &nanbuf)
+{
+	// Represent data as floats internally if possible. These have the
+	// same significand depth (24 bits) as the max. bit depth of the
+	// reference FLAC encoder we use, so no data are lost, and allow
+	// NaNs, unlike int32_ts, which we try to pull through the process
+	// to signal missing data.
+
+	// Convert data format
+	auto data = new std::vector<T>(buf.size());
+	for (size_t i = 0; i < buf.size(); i++)
+		(*data)[i] = buf[i];
+
+	// Apply NaN mask
+	if (nanflag == AllNan) {
+		for (size_t i = 0; i < buf.size(); i++)
+			(*data)[i] = NAN;
+	} else if (nanflag == SomeNan) {
+		for (size_t i = 0; i < buf.size(); i++)
+			if (nanbuf[i])
+				(*data)[i] = NAN;
+	}
+
+	return data;
+}
+
 template <class A> void G3Timestream::load(A &ar, unsigned v)
 {
 	G3_CHECK_VERSION(v);
@@ -326,39 +358,38 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 		FLAC__stream_decoder_finish(decoder);
 		FLAC__stream_decoder_delete(decoder);
 
-		// Short-circuit for int32
-		if (data_type_ == TS_INT32) {
+		len_ = callback.outbuf->size();
+
+		switch (data_type_) {
+		case TS_INT32:
+			// Short-circuit for int32
 			root_data_ref_ = std::shared_ptr<std::vector<int32_t> >(
 			    callback.outbuf);
-			len_ = callback.outbuf->size();
 			data_ = &(*callback.outbuf)[0];
 			return;
+		case TS_INT64: {
+			auto data = new std::vector<int64_t>(size());
+			for (size_t i = 0; i < size(); i++)
+				(*data)[i] = (*callback.outbuf)[i];
+			root_data_ref_ = std::shared_ptr<std::vector<int64_t> >(data);
+			data_ = &(*data)[0];
+			break;
+		}
+		case TS_FLOAT: {
+			auto data = unpack_flac<float>(*callback.outbuf, nanflag, nanbuf);
+			root_data_ref_ = std::shared_ptr<std::vector<float> >(data);
+			data_ = &(*data)[0];
+			break;
+		}
+		case TS_DOUBLE:
+			buffer_ = unpack_flac<double>(*callback.outbuf, nanflag, nanbuf);
+			data_ = &(*buffer_)[0];
+			break;
+		default:
+			log_fatal("Unknown timestream datatype %d", data_type_);
 		}
 
-		// Represent data as floats internally. These have the same
-		// significand depth (24 bits) as the max. bit depth of the
-		// reference FLAC encoder we use, so no data are lost, and
-		// allow NaNs, unlike int32_ts, which we try to pull through
-		// the process to signal missing data.
-		float *data = new float[callback.outbuf->size()];
-		root_data_ref_ = std::shared_ptr<float[]>(data);
-		len_ = callback.outbuf->size();
-		data_ = data;
-
-		// Convert data format
-		for (size_t i = 0; i < size(); i++)
-			data[i] = (*callback.outbuf)[i];
 		delete callback.outbuf;
-
-		// Apply NaN mask
-		if (nanflag == AllNan) {
-			for (size_t i = 0; i < size(); i++)
-				data[i] = NAN;
-		} else if (nanflag == SomeNan) {
-			for (size_t i = 0; i < size(); i++)
-				if (nanbuf[i])
-					data[i] = NAN;
-		}
 #else
 		log_fatal("Trying to read FLAC-compressed timestreams but built without FLAC support");
 #endif

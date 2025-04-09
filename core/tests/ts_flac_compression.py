@@ -14,6 +14,8 @@ for bit_depth in [24, 32]:
     for dtype in dtypes:
         print("bit depth", bit_depth, "dtype", dtype)
         dat = np.random.normal(size=(ndet, nsamp), scale=2**28, loc=0).astype(dtype)
+        if dtype in [np.float32, np.float64]:
+            dat[:, 5] = np.nan
         try:
             tsm = core.G3TimestreamMap(
                 keys, dat, start=start, stop=stop, compression_level=5, bit_depth=bit_depth
@@ -35,17 +37,20 @@ for bit_depth in [24, 32]:
         assert tsm.compression_level == tsm2.compression_level
         assert tsm.bit_depth == tsm2.bit_depth
 
-        if tsm.dtype == np.float64:
+        if bit_depth == 24 and tsm.dtype == np.float64:
             assert tsm2.dtype == np.float32
-        elif tsm.dtype == np.int64:
+        elif bit_depth == 24 and tsm.dtype == np.int64:
             assert tsm2.dtype == np.int32
         else:
             assert tsm.dtype == tsm2.dtype
 
-        if bit_depth == 32:
-            if tsm.dtype == np.float64:
-                tsm = tsm.astype(np.float32)
-            np.testing.assert_array_equal(tsm.astype(np.int32), tsm2.astype(np.int32))
-        else:
-            tsm_trunc = ((np.asarray(tsm).astype(np.int32) & 0x00FFFFFF) << 8) >> 8
-            np.testing.assert_array_equal(tsm_trunc, tsm2.astype(np.int32))
+        if dtype in [np.float32, np.float64]:
+            assert np.isnan(np.asarray(tsm2)[:, 5]).all()
+
+        def mask32(v):
+            return (np.asarray(v)[:, 6:]).astype(np.int32)
+
+        tsm_trunc = mask32(tsm)
+        if bit_depth == 24:
+            tsm_trunc = ((tsm_trunc & 0x00FFFFFF) << 8) >> 8
+        np.testing.assert_array_equal(tsm_trunc, mask32(tsm2))
