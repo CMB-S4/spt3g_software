@@ -122,19 +122,15 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 		if (units != Counts && units != None)
 			log_fatal("Cannot use FLAC on non-counts timestreams");
 
-		DataType data_type_out;
+		DataType data_type_out = data_type_;
 
 		// Copy to 24-bit integers
 		inbuf.resize(size());
 		switch (flac_depth_) {
 		case 24:
-			if (data_type_ == TS_INT64 || data_type_ == TS_INT32)
-				data_type_out = TS_INT32;
-			else
-				data_type_out = TS_FLOAT;
-
 			switch (data_type_) {
 			case TS_DOUBLE:
+				data_type_out = TS_FLOAT;
 				for (size_t i = 0; i < size(); i++)
 					inbuf[i] = ((int32_t(((double *)data_)[i]) & 0x00ffffff) << 8) >> 8;
 				break;
@@ -153,6 +149,7 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 				}
 				break;
 			case TS_INT64:
+				data_type_out = TS_INT32;
 				for (size_t i = 0; i < size(); i++)
 					inbuf[i] = ((int32_t(((int64_t *)data_)[i]) & 0x00ffffff) << 8) >> 8;
 				break;
@@ -164,7 +161,6 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 			if (FLAC_API_VERSION_CURRENT < 13)
 				log_fatal("32-bit compression is not supported, "
 				    "please upgrade FLAC to version 1.4 or newer");
-			data_type_out = data_type_;
 
 			switch (data_type_) {
 			case TS_DOUBLE:
