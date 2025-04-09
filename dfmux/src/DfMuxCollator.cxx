@@ -82,8 +82,10 @@ void DfMuxCollator::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	// number of find() calls below.
 	G3Timestream ts_base(stash_.size(), NAN);
 	ts_base.units = G3Timestream::Counts;
-	if (flac_compress_)
+	if (flac_compress_) {
 		ts_base.SetFLACCompression(5);
+		ts_base.SetFLACBitDepth(24); // backwards-compatible with FLAC API < 13
+	}
 	std::vector<bolots_cache_item> hwmts_cache;
 	hwmts_cache.reserve(hwm_->size());
 	for (auto chan = hwm_->begin(); chan != hwm_->end(); chan++) {

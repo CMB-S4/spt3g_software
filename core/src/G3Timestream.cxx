@@ -122,10 +122,15 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 		if (units != Counts && units != None)
 			log_fatal("Cannot use FLAC on non-counts timestreams");
 
+		DataType data_type_out = data_type_;
+
 		// Copy to 24-bit integers
 		inbuf.resize(size());
-		switch (data_type_) {
+		switch (flac_depth_) {
+		case 24:
+			switch (data_type_) {
 			case TS_DOUBLE:
+				data_type_out = TS_FLOAT;
 				for (size_t i = 0; i < size(); i++)
 					inbuf[i] = ((int32_t(((double *)data_)[i]) & 0x00ffffff) << 8) >> 8;
 				break;
@@ -144,13 +149,46 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 				}
 				break;
 			case TS_INT64:
+				data_type_out = TS_INT32;
 				for (size_t i = 0; i < size(); i++)
 					inbuf[i] = ((int32_t(((int64_t *)data_)[i]) & 0x00ffffff) << 8) >> 8;
 				break;
 			default:
 				log_fatal("Unknown timestream datatype %d", data_type_);
+			}
+			break;
+		case 32:
+			if (FLAC_API_VERSION_CURRENT < 13)
+				log_fatal("32-bit compression is not supported, "
+				    "please upgrade FLAC to version 1.4 or newer");
+
+			switch (data_type_) {
+			case TS_DOUBLE:
+				for (size_t i = 0; i < size(); i++)
+					inbuf[i] = int32_t(((double *)data_)[i]);
+				break;
+			case TS_FLOAT:
+				for (size_t i = 0; i < size(); i++)
+					inbuf[i] = int32_t(((float *)data_)[i]);
+				break;
+			case TS_INT32:
+				memcpy(inbuf.data(), data_, size() * sizeof(int32_t));
+				break;
+			case TS_INT64:
+				for (size_t i = 0; i < size(); i++)
+					inbuf[i] = int32_t(((int64_t *)data_)[i]);
+				break;
+			default:
+				log_fatal("Unknown timestream datatype %d", data_type_);
+			}
+			break;
+		default:
+			log_fatal("Invalid FLAC bit depth %d", flac_depth_);
 		}
 		chanmap[0] = &inbuf[0];
+
+		ar & cereal::make_nvp("flac_depth", flac_depth_);
+		ar & cereal::make_nvp("data_type", data_type_out);
 
 		// Mark bad samples using an out-of-band signal. Since we
 		// convert to 24-bit integers going into FLAC, which have no
@@ -181,8 +219,7 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 		// Now do FLAC encoding
 		FLAC__StreamEncoder *encoder = FLAC__stream_encoder_new();
 		FLAC__stream_encoder_set_channels(encoder, 1);
-		// XXX: should assert if high-order 8 bits are not clear
-		FLAC__stream_encoder_set_bits_per_sample(encoder, 24);
+		FLAC__stream_encoder_set_bits_per_sample(encoder, flac_depth_);
 		FLAC__stream_encoder_set_compression_level(encoder, use_flac_);
 		FLAC__stream_encoder_set_do_md5(encoder, false);
 		FLAC__stream_encoder_init_stream(encoder,
@@ -232,6 +269,31 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 #endif
 }
 
+template <typename T>
+std::vector<T> *
+unpack_flac(const std::vector<int32_t> &buf, uint8_t nanflag, const std::vector<bool> &nanbuf)
+{
+	// Represent data as floats internally if possible, to allow NaNs,
+	// which we try to pull through the process to signal missing data.
+
+	// Convert data format
+	auto data = new std::vector<T>(buf.size());
+	for (size_t i = 0; i < buf.size(); i++)
+		(*data)[i] = buf[i];
+
+	// Apply NaN mask
+	if (nanflag == AllNan) {
+		for (size_t i = 0; i < buf.size(); i++)
+			(*data)[i] = NAN;
+	} else if (nanflag == SomeNan) {
+		for (size_t i = 0; i < buf.size(); i++)
+			if (nanbuf[i])
+				(*data)[i] = NAN;
+	}
+
+	return data;
+}
+
 template <class A> void G3Timestream::load(A &ar, unsigned v)
 {
 	G3_CHECK_VERSION(v);
@@ -262,6 +324,17 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 		if (units != Counts && units != None)
 			log_fatal("Cannot use FLAC on non-counts timestreams");
 
+		if (v >= 4) {
+			ar & cereal::make_nvp("flac_depth", flac_depth_);
+			if (flac_depth_ > 24 && FLAC_API_VERSION_CURRENT < 13)
+				log_fatal("32-bit decompression is not supported, "
+				    "please upgrade FLAC to version 1.4 or newer");
+			ar & cereal::make_nvp("data_type", data_type_);
+		} else {
+			flac_depth_ = 24;
+			data_type_ = TS_FLOAT;
+		}
+
 		ar & cereal::make_nvp("nanflag", nanflag);
 		if (nanflag == SomeNan)
 			ar & cereal::make_nvp("nanmask", nanbuf);
@@ -281,31 +354,38 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 		FLAC__stream_decoder_finish(decoder);
 		FLAC__stream_decoder_delete(decoder);
 
-		// Represent data as floats internally. These have the same
-		// significand depth (24 bits) as the max. bit depth of the
-		// reference FLAC encoder we use, so no data are lost, and
-		// allow NaNs, unlike int32_ts, which we try to pull through
-		// the process to signal missing data.
-		float *data = new float[callback.outbuf->size()];
-		root_data_ref_ = std::shared_ptr<float[]>(data);
-		data_type_ = TS_FLOAT;
 		len_ = callback.outbuf->size();
-		data_ = data;
 
-		// Convert data format
-		for (size_t i = 0; i < size(); i++)
-			data[i] = (*callback.outbuf)[i];
-		delete callback.outbuf;
-
-		// Apply NaN mask
-		if (nanflag == AllNan) {
+		switch (data_type_) {
+		case TS_INT32:
+			// Short-circuit for int32
+			root_data_ref_ = std::shared_ptr<std::vector<int32_t> >(
+			    callback.outbuf);
+			data_ = &(*callback.outbuf)[0];
+			return;
+		case TS_INT64: {
+			auto data = new std::vector<int64_t>(size());
 			for (size_t i = 0; i < size(); i++)
-				data[i] = NAN;
-		} else if (nanflag == SomeNan) {
-			for (size_t i = 0; i < size(); i++)
-				if (nanbuf[i])
-					data[i] = NAN;
+				(*data)[i] = (*callback.outbuf)[i];
+			root_data_ref_ = std::shared_ptr<std::vector<int64_t> >(data);
+			data_ = &(*data)[0];
+			break;
 		}
+		case TS_FLOAT: {
+			auto data = unpack_flac<float>(*callback.outbuf, nanflag, nanbuf);
+			root_data_ref_ = std::shared_ptr<std::vector<float> >(data);
+			data_ = &(*data)[0];
+			break;
+		}
+		case TS_DOUBLE:
+			buffer_ = unpack_flac<double>(*callback.outbuf, nanflag, nanbuf);
+			data_ = &(*buffer_)[0];
+			break;
+		default:
+			log_fatal("Unknown timestream datatype %d", data_type_);
+		}
+
+		delete callback.outbuf;
 #else
 		log_fatal("Trying to read FLAC-compressed timestreams but built without FLAC support");
 #endif
@@ -361,7 +441,7 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 
 G3Timestream::G3Timestream(const G3Timestream &r) :
     units(r.units), start(r.start), stop(r.stop), use_flac_(r.use_flac_),
-    len_(r.len_), data_type_(r.data_type_)
+    flac_depth_(r.flac_depth_), len_(r.len_), data_type_(r.data_type_)
 {
 	// Copy constructor needs to copy data, which always involves
 	// allocating the internal buffer.
@@ -429,6 +509,14 @@ void G3Timestream::SetFLACCompression(int use_flac)
 	if (use_flac != 0)
 		log_fatal("Built without FLAC support");
 #endif
+}
+
+void G3Timestream::SetFLACBitDepth(int bit_depth)
+{
+	if (bit_depth != 24 && bit_depth != 32)
+		log_fatal("Invalid flac bit depth %d", bit_depth);
+
+	flac_depth_ = bit_depth;
 }
 
 G3Timestream G3Timestream::operator +(const G3Timestream &r) const
@@ -755,7 +843,7 @@ void G3TimestreamMap::SetUnits(G3Timestream::TimestreamUnits units)
 		ts.second->units = units;
 }
 
-uint8_t G3TimestreamMap::GetCompressionLevel() const
+uint8_t G3TimestreamMap::GetFLACCompression() const
 {
 	if (begin() == end())
 		return 0;
@@ -763,10 +851,30 @@ uint8_t G3TimestreamMap::GetCompressionLevel() const
 	return begin()->second->use_flac_;
 }
 
+uint8_t G3TimestreamMap::GetFLACBitDepth() const
+{
+	if (begin() == end())
+		return 0;
+
+	return begin()->second->flac_depth_;
+}
+
 void G3TimestreamMap::SetFLACCompression(int compression_level)
 {
+	// Check for errors
+	begin()->second->SetFLACCompression(compression_level);
+
 	for (auto& ts : *this)
 		ts.second->use_flac_ = compression_level;
+}
+
+void G3TimestreamMap::SetFLACBitDepth(int bit_depth)
+{
+	// Check for errors
+	begin()->second->SetFLACBitDepth(bit_depth);
+
+	for (auto& ts : *this)
+		ts.second->flac_depth_ = bit_depth;
 }
 
 void G3TimestreamMap::Compactify()
@@ -1068,7 +1176,8 @@ struct PyBufferOwner {
 static G3TimestreamMapPtr
 G3TimestreamMap_from_numpy(std::vector<std::string> keys,
     boost::python::object data, G3Time start, G3Time stop,
-    G3Timestream::TimestreamUnits units, int compression_level, bool copy_data)
+    G3Timestream::TimestreamUnits units, int compression_level,
+    bool copy_data, int bit_depth)
 {
 	G3TimestreamMapPtr x(new G3TimestreamMap);
 
@@ -1115,6 +1224,7 @@ G3TimestreamMap_from_numpy(std::vector<std::string> keys,
 	templ.start = start;
 	templ.stop = stop;
 	templ.SetFLACCompression(compression_level);
+	templ.SetFLACBitDepth(bit_depth);
 	if (strcmp(v->v.format, "d") == 0) {
 		templ.data_type_ = G3Timestream::TS_DOUBLE;
 	} else if (strcmp(v->v.format, "f") == 0) {
@@ -1346,6 +1456,9 @@ PYBINDINGS("core") {
 	      "Pass True to turn on FLAC compression when serialized. "
 	      "FLAC compression only works if the timestream is in units of "
 	      "counts.")
+	    .def("SetFLACBitDepth", &G3Timestream::SetFLACBitDepth,
+	      "Change the bit depth for FLAC compression, may be 24 or 32 "
+	      "(default, requires version 1.4+).")
 	    .def_readwrite("units", &G3Timestream::units,
 	      "Units of the data in the timestream, stored as one of the "
 	      "members of core.G3TimestreamUnits.")
@@ -1357,9 +1470,11 @@ PYBINDINGS("core") {
 	      "Computed sample rate of the timestream.")
 	    .add_property("n_samples", &G3Timestream::G3TimestreamPythonHelpers::G3Timestream_nsamples,
 	      "Number of samples in the timestream. Equivalent to len(ts)")
-	    .add_property("compression_level", &G3Timestream::GetCompressionLevel,
+	    .add_property("compression_level", &G3Timestream::GetFLACCompression,
 	      &G3Timestream::SetFLACCompression, "Level of FLAC compression used for this timestream. "
 	      "This can only be non-zero if the timestream is in units of counts.")
+	    .add_property("bit_depth", &G3Timestream::GetFLACBitDepth,
+	      &G3Timestream::SetFLACBitDepth, "Bit depth of FLAC compression used for this timestream.")
 	    .def("_assert_congruence", &G3Timestream::G3TimestreamPythonHelpers::G3Timestream_assert_congruence,
 	      "log_fatal() if units, length, start, or stop times do not match")
 	    .def("_cxxslice", &G3Timestream::G3TimestreamPythonHelpers::G3Timestream_getslice, "Slice-only __getitem__")
@@ -1381,7 +1496,7 @@ PYBINDINGS("core") {
 	         bp::default_call_policies(),
 	         (bp::arg("keys"), bp::arg("data"), bp::arg("start")=G3Time(0),
 	          bp::arg("stop")=G3Time(0), bp::arg("units") = G3Timestream::TimestreamUnits::None,
-	          bp::arg("compression_level") = 0, bp::arg("copy_data") = true)),
+	          bp::arg("compression_level") = 0, bp::arg("copy_data") = true, bp::arg("bit_depth") = 32)),
 	         "Create a timestream map from a numpy array or other numeric python iterable. "
 	         "Each row of the 2D input array will correspond to a single timestream, with "
 	         "the key set to the correspondingly-indexed entry of <keys>. If <copy_data> "
@@ -1397,6 +1512,9 @@ PYBINDINGS("core") {
 	      "Pass True to turn on FLAC compression when serialized. "
 	      "FLAC compression only works if the timestreams are in units of "
 	      "counts.")
+	    .def("SetFLACBitDepth", &G3TimestreamMap::SetFLACBitDepth,
+	      "Change the bit depth for FLAC compression, may be 24 or 32 "
+	      "(default, requires version 1.4+).")
 	    .add_property("start", &G3TimestreamMap::GetStartTime,
 	      &G3TimestreamMap::SetStartTime,
 	      "Time of the first sample in the time stream")
@@ -1412,10 +1530,13 @@ PYBINDINGS("core") {
 	      &G3TimestreamMap::SetUnits,
 	      "Units of the data in the timestream, stored as one of the "
 	      "members of core.G3TimestreamUnits.")
-	    .add_property("compression_level", &G3TimestreamMap::GetCompressionLevel,
+	    .add_property("compression_level", &G3TimestreamMap::GetFLACCompression,
 	      &G3TimestreamMap::SetFLACCompression,
 	      "Level of FLAC compression used for this timestream map. "
 	      "This can only be non-zero if the timestream is in units of counts.")
+	    .add_property("bit_depth", &G3TimestreamMap::GetFLACBitDepth,
+	      &G3TimestreamMap::SetFLACBitDepth,
+	      "Bit depth of FLAC compression used for this timestream map.")
 	;
 	register_pointer_conversions<G3TimestreamMap>();
 
