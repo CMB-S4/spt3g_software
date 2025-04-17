@@ -1,7 +1,6 @@
 #include <pybindings.h>
 #include <G3Pipeline.h>
 
-#include <G3EventBuilder.h>
 #include <G3Data.h>
 
 #include <sys/time.h>
@@ -428,10 +427,6 @@ PYBINDINGS("core") {
 	    .def("Process", boost::python::pure_virtual(&G3Module_Process))
 	;
 	bp::implicitly_convertible<std::shared_ptr<G3ModuleWrap>, G3ModulePtr>();
-
-	bp::class_<G3EventBuilder, bp::bases<G3Module>, G3EventBuilderPtr,
-	  boost::noncopyable>("G3EventBuilder", bp::no_init)
-	;
 
 	bp::class_<G3Pipeline, std::shared_ptr<G3Pipeline> >("G3Pipeline",
 	  "A collection of core.G3Modules and Python callables. Added "
