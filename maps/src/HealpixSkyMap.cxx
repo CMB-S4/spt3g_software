@@ -21,73 +21,13 @@ HealpixSkyMap::HealpixSkyMap(size_t nside, bool weighted, bool nested,
 {
 }
 
-HealpixSkyMap::HealpixSkyMap(boost::python::object v, bool weighted,
-    bool nested, MapCoordReference coord_ref,
-    G3Timestream::TimestreamUnits u, G3SkyMap::MapPolType pol_type,
-    bool shift_ra, G3SkyMap::MapPolConv pol_conv) :
+HealpixSkyMap::HealpixSkyMap(const HealpixSkyMapInfo & info, bool weighted,
+    MapCoordReference coord_ref, G3Timestream::TimestreamUnits u,
+    G3SkyMap::MapPolType pol_type, G3SkyMap::MapPolConv pol_conv) :
       G3SkyMap(coord_ref, weighted, u, pol_type, pol_conv),
+      info_(info),
       dense_(NULL), ring_sparse_(NULL), indexed_sparse_(NULL)
 {
-	Py_buffer view;
-	size_t nside;
-
-	if (boost::python::extract<size_t>(v).check()) {
-		// size_t from Python is also a bp::object,
-		// so a Python caller intending to call the above
-		// constructor can get here by accident since
-		// the signatures are degenerate. Handle the
-		// confusion gracefully.
-		nside = boost::python::extract<size_t>(v)();
-		info_.initialize(nside, nested, shift_ra);
-		return;
-	}
-
-	if (PyTuple_Check(v.ptr()) && PyTuple_Size(v.ptr()) == 3) {
-		// One option is that we got passed a tuple of numpy
-		// arrays: first indices, next data, next nside.
-#if PY_MAJOR_VERSION < 3
-		if (PyInt_Check(PyTuple_GetItem(v.ptr(), 2))) {
-			nside = PyInt_AsSsize_t(PyTuple_GetItem(v.ptr(), 2));
-		} else 
-#endif
-		if (PyLong_Check(PyTuple_GetItem(v.ptr(), 2))) {
-#if PY_MAJOR_VERSION < 3
-			nside = PyLong_AsUnsignedLong(PyTuple_GetItem(v.ptr(), 2));
-#else
-			nside = PyLong_AsSize_t(PyTuple_GetItem(v.ptr(), 2));
-#endif
-		} else {
-			PyErr_SetString(PyExc_TypeError,
-			    "Third tuple element for sparse maps needs to be "
-			    "nside");
-			throw bp::error_already_set();
-		}
-
-		info_.initialize(nside, nested, shift_ra);
-
-		FillFromArray(v);
-
-		return;
-	}
-
-	if (PyObject_GetBuffer(v.ptr(), &view,
-	    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) != -1) {
-		// Fall back to just 1-D
-		if (view.ndim != 1) {
-			PyBuffer_Release(&view);
-			log_fatal("Only 1-D maps supported");
-		}
-		ssize_t npix = view.shape[0];
-		PyBuffer_Release(&view);
-
-		info_.initialize(npix, nested, shift_ra, true);
-
-		FillFromArray(v);
-
-		return;
-	}
-
-	throw bp::error_already_set();
 }
 
 HealpixSkyMap::HealpixSkyMap() :
@@ -384,188 +324,6 @@ void HealpixSkyMap::Compact(bool zero_nans)
 	} else if (ring_sparse_) {
 		ring_sparse_->compact();
 	}
-}
-
-void
-HealpixSkyMap::FillFromArray(boost::python::object v)
-{
-	if (PyTuple_Check(v.ptr())) {
-		// One option is that we got passed a tuple of numpy
-		// arrays: first indices, next data, next (optionally) nside.
-		Py_buffer indexview, dataview;
-
-		if (PyTuple_Size(v.ptr()) == 3) {
-			size_t nside;
-
-#if PY_MAJOR_VERSION < 3
-			if (PyInt_Check(PyTuple_GetItem(v.ptr(), 2))) {
-				nside = PyInt_AsSsize_t(PyTuple_GetItem(v.ptr(), 2));
-			} else
-#endif
-			if (PyLong_Check(PyTuple_GetItem(v.ptr(), 2))) {
-#if PY_MAJOR_VERSION < 3
-				nside = PyLong_AsUnsignedLong(PyTuple_GetItem(v.ptr(), 2));
-#else
-				nside = PyLong_AsSize_t(PyTuple_GetItem(v.ptr(), 2));
-#endif
-			} else {
-				PyErr_SetString(PyExc_TypeError,
-				    "Third tuple element for sparse maps needs to be "
-				    "nside");
-				throw bp::error_already_set();
-			}
-
-			if (nside != info_.nside())
-				log_fatal("Got nside %zu, expected %zu", nside, info_.nside());
-		} else if (PyTuple_Size(v.ptr()) != 2) {
-			PyErr_SetString(PyExc_TypeError,
-			    "Tuple argument for sparse maps should have two or "
-			    "three elements");
-			throw bp::error_already_set();
-		}
-
-		if (PyObject_GetBuffer(PyTuple_GetItem(v.ptr(), 0), &indexview,
-		    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) == -1)
-			throw bp::error_already_set();
-
-		if (PyObject_GetBuffer(PyTuple_GetItem(v.ptr(), 1), &dataview,
-		    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) == -1) {
-			PyBuffer_Release(&indexview);
-			throw bp::error_already_set();
-		}
-
-		if (indexview.ndim != 1 || dataview.ndim != 1) {
-			PyBuffer_Release(&indexview);
-			PyBuffer_Release(&dataview);
-			log_fatal("Only 1-D maps supported");
-		}
-
-		if (indexview.len/indexview.itemsize !=
-		    dataview.len/dataview.itemsize) {
-			PyBuffer_Release(&indexview);
-			PyBuffer_Release(&dataview);
-			log_fatal("Index and data must have matching shapes.");
-		}
-
-		if (strcmp(indexview.format, "l") != 0 &&
-		    strcmp(indexview.format, "L") != 0) {
-			PyBuffer_Release(&indexview);
-			PyBuffer_Release(&dataview);
-			log_fatal("Indices must be (long) integers.");
-		}
-
-		if (strcmp(dataview.format, "d") != 0) {
-			PyBuffer_Release(&indexview);
-			PyBuffer_Release(&dataview);
-			log_fatal("Data must be double-precision (float64).");
-		}
-
-		size_t sz = indexview.len / indexview.itemsize;
-		double phi_min = 2 * M_PI;
-		double phi_max = 0;
-		double phi_min_shift = 2 * M_PI;
-		double phi_max_shift = 0;
-		for (size_t i = 0; i < sz; i++) {
-			unsigned long pix = ((unsigned long *)indexview.buf)[i];
-			if (pix < 0 || pix >= info_.npix()) {
-				PyBuffer_Release(&indexview);
-				PyBuffer_Release(&dataview);
-				log_fatal("Index %zu out of range", pix);
-			}
-			double ang = PixelToAngle(pix)[0];
-			if (ang < 0)
-				ang += 2 * M_PI * G3Units::rad;
-			ang = fmod(ang, 2 * M_PI * G3Units::rad);
-			if (ang < phi_min)
-				phi_min = ang;
-			if (ang > phi_max)
-				phi_max = ang;
-			ang = fmod(ang + M_PI * G3Units::rad, 2 * M_PI * G3Units::rad);
-			if (ang < phi_min_shift)
-				phi_min_shift = ang;
-			if (ang > phi_max_shift)
-				phi_max_shift = ang;
-		}
-		bool shift_ra = (phi_max - phi_min) > (phi_max_shift - phi_min_shift);
-
-		SetShiftRa(shift_ra);
-		ConvertToRingSparse();
-
-		for (size_t i = 0; i < sz; i++)
-			(*this)[((unsigned long *)indexview.buf)[i]]=
-			    ((double *)dataview.buf)[i];
-		PyBuffer_Release(&indexview);
-		PyBuffer_Release(&dataview);
-
-		return;
-	}
-
-	Py_buffer view;
-	if (PyObject_GetBuffer(v.ptr(), &view,
-	    PyBUF_FORMAT | PyBUF_C_CONTIGUOUS) != -1) {
-		// Fall back to just 1-D
-		if (view.ndim != 1) {
-			PyBuffer_Release(&view);
-			log_fatal("Only 1-D maps supported");
-		}
-
-		size_t npix = view.shape[0];
-		if (npix != info_.npix()) {
-			PyBuffer_Release(&view);
-			log_fatal("Got array of shape (%zu,), expected (%zu,)", npix, info_.npix());
-		}
-
-		ConvertToDense();
-
-		double *d = &(*dense_)[0];
-
-		// Consume endian definition
-		const char *format = view.format;
-		if (format[0] == '@' || format[0] == '=')
-			format++;
-#if BYTE_ORDER == LITTLE_ENDIAN
-		else if (format[0] == '<')
-			format++;
-		else if (format[0] == '>' || format[0] == '!') {
-			PyBuffer_Release(&view);
-			log_fatal("Does not support big-endian numpy arrays");
-		}
-#else
-		else if (format[0] == '<') {
-			PyBuffer_Release(&view);
-			log_fatal("Does not support little-endian numpy arrays");
-		}
-		else if (format[0] == '>' || format[0] == '!')
-			format++;
-#endif
-
-		if (strcmp(format, "d") == 0) {
-			memcpy(d, view.buf, view.len);
-		} else if (strcmp(format, "f") == 0) {
-			for (size_t i = 0; i < view.len/sizeof(float); i++)
-				d[i] = ((float *)view.buf)[i];
-		} else if (strcmp(format, "i") == 0) {
-			for (size_t i = 0; i < view.len/sizeof(int); i++)
-				d[i] = ((int *)view.buf)[i];
-		} else if (strcmp(format, "I") == 0) {
-			for (size_t i = 0; i < view.len/sizeof(int); i++)
-				d[i] = ((unsigned int *)view.buf)[i];
-		} else if (strcmp(format, "l") == 0) {
-			for (size_t i = 0; i < view.len/sizeof(long); i++)
-				d[i] = ((long *)view.buf)[i];
-		} else if (strcmp(format, "L") == 0) {
-			for (size_t i = 0; i < view.len/sizeof(long); i++)
-				d[i] = ((unsigned long *)view.buf)[i];
-		} else {
-			PyBuffer_Release(&view);
-			log_fatal("Unknown type code %s", view.format);
-		}
-		PyBuffer_Release(&view);
-
-		return;
-	}
-
-	throw bp::error_already_set();
 }
 
 G3SkyMapPtr
@@ -1114,6 +872,267 @@ void HealpixSkyMap::SetShiftRa(bool shift)
 }
 
 static void
+HealpixSkyMap_fill(HealpixSkyMap &skymap, boost::python::object v)
+{
+	if (PyTuple_Check(v.ptr())) {
+		// One option is that we got passed a tuple of numpy
+		// arrays: first indices, next data, next (optionally) nside.
+		Py_buffer indexview, dataview;
+
+		if (PyTuple_Size(v.ptr()) == 3) {
+			size_t nside;
+
+#if PY_MAJOR_VERSION < 3
+			if (PyInt_Check(PyTuple_GetItem(v.ptr(), 2))) {
+				nside = PyInt_AsSsize_t(PyTuple_GetItem(v.ptr(), 2));
+			} else
+#endif
+			if (PyLong_Check(PyTuple_GetItem(v.ptr(), 2))) {
+#if PY_MAJOR_VERSION < 3
+				nside = PyLong_AsUnsignedLong(PyTuple_GetItem(v.ptr(), 2));
+#else
+				nside = PyLong_AsSize_t(PyTuple_GetItem(v.ptr(), 2));
+#endif
+			} else {
+				PyErr_SetString(PyExc_TypeError,
+				    "Third tuple element for sparse maps needs to be "
+				    "nside");
+				throw bp::error_already_set();
+			}
+
+			if (nside != skymap.nside())
+				log_fatal("Got nside %zu, expected %zu", nside, skymap.nside());
+		} else if (PyTuple_Size(v.ptr()) != 2) {
+			PyErr_SetString(PyExc_TypeError,
+			    "Tuple argument for sparse maps should have two or "
+			    "three elements");
+			throw bp::error_already_set();
+		}
+
+		if (PyObject_GetBuffer(PyTuple_GetItem(v.ptr(), 0), &indexview,
+		    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) == -1)
+			throw bp::error_already_set();
+
+		if (PyObject_GetBuffer(PyTuple_GetItem(v.ptr(), 1), &dataview,
+		    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) == -1) {
+			PyBuffer_Release(&indexview);
+			throw bp::error_already_set();
+		}
+
+		if (indexview.ndim != 1 || dataview.ndim != 1) {
+			PyBuffer_Release(&indexview);
+			PyBuffer_Release(&dataview);
+			log_fatal("Only 1-D maps supported");
+		}
+
+		if (indexview.len/indexview.itemsize !=
+		    dataview.len/dataview.itemsize) {
+			PyBuffer_Release(&indexview);
+			PyBuffer_Release(&dataview);
+			log_fatal("Index and data must have matching shapes.");
+		}
+
+		if (strcmp(indexview.format, "l") != 0 &&
+		    strcmp(indexview.format, "L") != 0) {
+			PyBuffer_Release(&indexview);
+			PyBuffer_Release(&dataview);
+			log_fatal("Indices must be (long) integers.");
+		}
+
+		if (strcmp(dataview.format, "d") != 0) {
+			PyBuffer_Release(&indexview);
+			PyBuffer_Release(&dataview);
+			log_fatal("Data must be double-precision (float64).");
+		}
+
+		size_t sz = indexview.len / indexview.itemsize;
+		double phi_min = 2 * M_PI;
+		double phi_max = 0;
+		double phi_min_shift = 2 * M_PI;
+		double phi_max_shift = 0;
+		for (size_t i = 0; i < sz; i++) {
+			unsigned long pix = ((unsigned long *)indexview.buf)[i];
+			if (pix < 0 || pix >= skymap.size()) {
+				PyBuffer_Release(&indexview);
+				PyBuffer_Release(&dataview);
+				log_fatal("Index %zu out of range", pix);
+			}
+			double ang = skymap.PixelToAngle(pix)[0];
+			if (ang < 0)
+				ang += 2 * M_PI * G3Units::rad;
+			ang = fmod(ang, 2 * M_PI * G3Units::rad);
+			if (ang < phi_min)
+				phi_min = ang;
+			if (ang > phi_max)
+				phi_max = ang;
+			ang = fmod(ang + M_PI * G3Units::rad, 2 * M_PI * G3Units::rad);
+			if (ang < phi_min_shift)
+				phi_min_shift = ang;
+			if (ang > phi_max_shift)
+				phi_max_shift = ang;
+		}
+		bool shift_ra = (phi_max - phi_min) > (phi_max_shift - phi_min_shift);
+
+		skymap.SetShiftRa(shift_ra);
+		skymap.ConvertToRingSparse();
+
+		for (size_t i = 0; i < sz; i++)
+			skymap[((unsigned long *)indexview.buf)[i]]=
+			    ((double *)dataview.buf)[i];
+		PyBuffer_Release(&indexview);
+		PyBuffer_Release(&dataview);
+
+		return;
+	}
+
+	Py_buffer view;
+	if (PyObject_GetBuffer(v.ptr(), &view,
+	    PyBUF_FORMAT | PyBUF_C_CONTIGUOUS) != -1) {
+		// Fall back to just 1-D
+		if (view.ndim != 1) {
+			PyBuffer_Release(&view);
+			log_fatal("Only 1-D maps supported");
+		}
+
+		size_t npix = view.shape[0];
+		if (npix != skymap.size()) {
+			PyBuffer_Release(&view);
+			log_fatal("Got array of shape (%zu,), expected (%zu,)", npix, skymap.size());
+		}
+
+		skymap.ConvertToDense();
+
+		double *d = &skymap[0];
+
+		// Consume endian definition
+		const char *format = view.format;
+		if (format[0] == '@' || format[0] == '=')
+			format++;
+#if BYTE_ORDER == LITTLE_ENDIAN
+		else if (format[0] == '<')
+			format++;
+		else if (format[0] == '>' || format[0] == '!') {
+			PyBuffer_Release(&view);
+			log_fatal("Does not support big-endian numpy arrays");
+		}
+#else
+		else if (format[0] == '<') {
+			PyBuffer_Release(&view);
+			log_fatal("Does not support little-endian numpy arrays");
+		}
+		else if (format[0] == '>' || format[0] == '!')
+			format++;
+#endif
+
+		if (strcmp(format, "d") == 0) {
+			memcpy(d, view.buf, view.len);
+		} else if (strcmp(format, "f") == 0) {
+			for (size_t i = 0; i < view.len/sizeof(float); i++)
+				d[i] = ((float *)view.buf)[i];
+		} else if (strcmp(format, "i") == 0) {
+			for (size_t i = 0; i < view.len/sizeof(int); i++)
+				d[i] = ((int *)view.buf)[i];
+		} else if (strcmp(format, "I") == 0) {
+			for (size_t i = 0; i < view.len/sizeof(int); i++)
+				d[i] = ((unsigned int *)view.buf)[i];
+		} else if (strcmp(format, "l") == 0) {
+			for (size_t i = 0; i < view.len/sizeof(long); i++)
+				d[i] = ((long *)view.buf)[i];
+		} else if (strcmp(format, "L") == 0) {
+			for (size_t i = 0; i < view.len/sizeof(long); i++)
+				d[i] = ((unsigned long *)view.buf)[i];
+		} else {
+			PyBuffer_Release(&view);
+			log_fatal("Unknown type code %s", view.format);
+		}
+		PyBuffer_Release(&view);
+
+		return;
+	}
+
+	throw bp::error_already_set();
+}
+
+static HealpixSkyMapPtr
+HealpixSkyMap_from_numpy(boost::python::object v, bool weighted,
+    bool nested, MapCoordReference coord_ref,
+    G3Timestream::TimestreamUnits u, G3SkyMap::MapPolType pol_type,
+    bool shift_ra, G3SkyMap::MapPolConv pol_conv)
+{
+	Py_buffer view;
+	size_t nside;
+
+	boost::python::extract<size_t> ext1(v);
+	if (ext1.check()) {
+		// size_t from Python is also a bp::object,
+		// so a Python caller intending to call the above
+		// constructor can get here by accident since
+		// the signatures are degenerate. Handle the
+		// confusion gracefully.
+		return HealpixSkyMapPtr(new HealpixSkyMap(ext1(), weighted,
+		    nested, coord_ref, u, pol_type, shift_ra, pol_conv));
+	}
+
+	if (PyTuple_Check(v.ptr()) && PyTuple_Size(v.ptr()) == 3) {
+		// One option is that we got passed a tuple of numpy
+		// arrays: first indices, next data, next nside.
+#if PY_MAJOR_VERSION < 3
+		if (PyInt_Check(PyTuple_GetItem(v.ptr(), 2))) {
+			nside = PyInt_AsSsize_t(PyTuple_GetItem(v.ptr(), 2));
+		} else
+#endif
+		if (PyLong_Check(PyTuple_GetItem(v.ptr(), 2))) {
+#if PY_MAJOR_VERSION < 3
+			nside = PyLong_AsUnsignedLong(PyTuple_GetItem(v.ptr(), 2));
+#else
+			nside = PyLong_AsSize_t(PyTuple_GetItem(v.ptr(), 2));
+#endif
+		} else {
+			PyErr_SetString(PyExc_TypeError,
+			    "Third tuple element for sparse maps needs to be "
+			    "nside");
+			throw bp::error_already_set();
+		}
+
+		HealpixSkyMapPtr skymap(new HealpixSkyMap(nside, weighted,
+		    nested, coord_ref, u, pol_type, shift_ra, pol_conv));
+
+	        HealpixSkyMap_fill(*skymap, v);
+
+		return skymap;
+	}
+
+	if (PyObject_GetBuffer(v.ptr(), &view,
+	    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) != -1) {
+		// Fall back to just 1-D
+		if (view.ndim != 1) {
+			PyBuffer_Release(&view);
+			log_fatal("Only 1-D maps supported");
+		}
+		ssize_t npix = view.shape[0];
+		PyBuffer_Release(&view);
+
+		HealpixSkyMapInfo info(npix, nested, shift_ra, true);
+		HealpixSkyMapPtr skymap(new HealpixSkyMap(info, weighted,
+		    coord_ref, u, pol_type, pol_conv));
+
+		HealpixSkyMap_fill(*skymap, v);
+
+		return skymap;
+	}
+
+	throw bp::error_already_set();
+}
+
+static HealpixSkyMapPtr
+HealpixSkyMap_array_clone(const HealpixSkyMap &m, boost::python::object v)
+{
+	auto skymap = std::dynamic_pointer_cast<HealpixSkyMap>(m.Clone(false));
+	HealpixSkyMap_fill(*skymap, v);
+	return skymap;
+}
+
+static void
 HealpixSkyMap_setshiftra(HealpixSkyMap &m, bool v)
 {
 	m.SetShiftRa(v);
@@ -1303,12 +1322,12 @@ HealpixSkyMap_setitem_1d(G3SkyMap &skymap, ssize_t i, double val)
 }
 
 static void
-HealpixSkyMap_setslice_1d(G3SkyMap &skymap, bp::slice coords, bp::object val)
+HealpixSkyMap_setslice_1d(HealpixSkyMap &skymap, bp::slice coords, bp::object val)
 {
 	if (coords.start().ptr() != Py_None || coords.stop().ptr() != Py_None)
 		log_fatal("1D slicing not supported");
 
-	skymap.FillFromArray(val);
+	HealpixSkyMap_fill(skymap, val);
 }
 
 
@@ -1343,9 +1362,8 @@ PYBINDINGS("maps")
 		  bp::arg("shift_ra") = false,
 		  bp::arg("pol_conv") = G3SkyMap::ConvNone),
 	       "Instantiate a HealpixSkyMap with given nside"))
-	    .def(bp::init<boost::python::object, bool, bool,
-	       MapCoordReference, G3Timestream::TimestreamUnits,
-	       G3SkyMap::MapPolType, bool, G3SkyMap::MapPolConv>(
+	  .def("__init__", bp::make_constructor(HealpixSkyMap_from_numpy,
+		  bp::default_call_policies(),
 		  (bp::arg("data"),
 		   bp::arg("weighted") = true,
 		   bp::arg("nested") = false,
@@ -1353,13 +1371,17 @@ PYBINDINGS("maps")
 		   bp::arg("units") = G3Timestream::Tcmb,
 		   bp::arg("pol_type") = G3SkyMap::None,
 		   bp::arg("shift_ra") = false,
-		   bp::arg("pol_conv") = G3SkyMap::ConvNone),
+		   bp::arg("pol_conv") = G3SkyMap::ConvNone)),
 	       "Instantiate a Healpix map from existing data. If the data are "
 	       "a single numpy array, assumes this is a dense map. Otherwise, "
-	       "pass an (indices, data, nside) tuple."))
+	       "pass an (indices, data, nside) tuple.")
 
 	    .def(bp::init<const HealpixSkyMap&>(bp::arg("healpix_map")))
 	    .def(bp::init<>())
+	    .def("array_clone", &HealpixSkyMap_array_clone,
+	      (bp::arg("array")),
+	       "Return a map of the same type, populated with a copy of the input "
+	       "numpy array")
 	    .add_property("nside", &HealpixSkyMap::nside, "Healpix resolution parameter")
 	    .add_property("res", &HealpixSkyMap::res, "Map resolution in angular units")
 	    .add_property("nested", &HealpixSkyMap::nested,

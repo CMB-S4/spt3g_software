@@ -25,14 +25,11 @@ public:
 	    bool shift_ra = false,
 	    G3SkyMap::MapPolConv pol_conv = G3SkyMap::ConvNone);
 
-	// Constructor from a numpy array
-	HealpixSkyMap(boost::python::object v,
+	HealpixSkyMap(const HealpixSkyMapInfo &info,
 	    bool weighted = true,
-	    bool nested = false,
 	    MapCoordReference coord_ref = MapCoordReference::Equatorial,
 	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
 	    G3SkyMap::MapPolType pol_type = G3SkyMap::None,
-	    bool shift_ra = false,
 	    G3SkyMap::MapPolConv pol_conv = G3SkyMap::ConvNone);
 
 	HealpixSkyMap();
@@ -62,7 +59,6 @@ public:
 
 	template <class A> void load(A &ar, unsigned v);
 	template <class A> void save(A &ar, unsigned v) const;
-	virtual void FillFromArray(boost::python::object v) override;
 	virtual G3SkyMapPtr Clone(bool copy_data = true) const override;
 	std::string Description() const override;
 

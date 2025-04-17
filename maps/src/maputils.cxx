@@ -518,12 +518,17 @@ static FlatSkyMapPtr
 pyconvolve_map(const FlatSkyMap &map, bp::object val)
 {
 
-	bp::extract<const FlatSkyMap &> ext(val);
-	if (ext.check())
-		return ConvolveMap(map, ext());
+	bp::extract<const FlatSkyMap &> mext(val);
+	if (mext.check())
+		return ConvolveMap(map, mext());
 
-	FlatSkyMap kernel(val, map.yres());
-	return ConvolveMap(map, kernel);
+	// reach into python
+	bp::object pykernel = bp::import("spt3g.maps.FlatSkyMap")(val, map.yres());
+	bp::extract<const FlatSkyMap &> pext(pykernel);
+	if (pext.check())
+		return ConvolveMap(map, pext());
+
+	log_fatal("Invalid kernel object");
 }
 
 

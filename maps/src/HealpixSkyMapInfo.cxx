@@ -11,9 +11,10 @@
 static const double twothird = 2.0 / 3.0;
 static const double twopi = 2 * M_PI;
 
-HealpixSkyMapInfo::HealpixSkyMapInfo(size_t nside, bool nested, bool shifted)
+HealpixSkyMapInfo::HealpixSkyMapInfo(size_t nside_or_npix, bool nested,
+    bool shifted, bool is_npix)
 {
-	initialize(nside, nested, shifted);
+	initialize(nside_or_npix, nested, shifted, is_npix);
 }
 
 HealpixSkyMapInfo::HealpixSkyMapInfo()

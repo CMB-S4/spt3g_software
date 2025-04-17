@@ -31,18 +31,6 @@ public:
 	    bool flat_pol = false,
 	    G3SkyMap::MapPolConv pol_conv = G3SkyMap::ConvNone);
 
-	// Constructor from a numpy array
-	FlatSkyMap(boost::python::object v, double res, 
-	    bool weighted = true,
-	    MapProjection proj = MapProjection::ProjNone, 
-	    double alpha_center = 0, double delta_center = 0, 
-	    MapCoordReference coord_ref = MapCoordReference::Equatorial,
-	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
-	    G3SkyMap::MapPolType pol_type = G3SkyMap::None,
-	    double x_res = 0, double x_center = 0.0 / 0.0,
-	    double y_center = 0.0 / 0.0, bool flat_pol = false,
-	    G3SkyMap::MapPolConv pol_conv = G3SkyMap::ConvNone);
-
 	FlatSkyMap(const FlatSkyProjection & fp,
 	    MapCoordReference coord_ref = MapCoordReference::Equatorial,
 	    bool weighted = true,
@@ -82,7 +70,6 @@ public:
 
 	template <class A> void load(A &ar, unsigned v);
 	template <class A> void save(A &ar, unsigned v) const;
-	virtual void FillFromArray(boost::python::object v) override;
 	virtual G3SkyMapPtr Clone(bool copy_data = true) const override;
 	std::string Description() const override;
 

@@ -20,30 +20,20 @@ G3SkyMapMask::G3SkyMapMask(const G3SkyMap &parent, bool use_data,
 	parent_ = tmp;
 	data_ = std::vector<bool>(parent.size());
 
-	if (use_data)
-		FillFromMap(parent, zero_nans, zero_infs);
-}
+	if (use_data) {
+		g3_assert(IsCompatible(parent));
 
-G3SkyMapMask::G3SkyMapMask(const G3SkyMap &parent, boost::python::object v,
-  bool zero_nans, bool zero_infs) : G3FrameObject()
-{
-	// masks have no units
-	G3SkyMapPtr tmp = parent.Clone(false);
-	tmp->units = G3Timestream::None;
-	tmp->pol_type = G3SkyMap::None;
-	tmp->pol_conv = G3SkyMap::ConvNone;
-	tmp->weighted = false;
-	parent_ = tmp;
-	data_ = std::vector<bool>(parent.size());
-
-	// fall back to simple constructor
-	if (boost::python::extract<bool>(v).check()) {
-		if (boost::python::extract<bool>(v)())
-			FillFromMap(parent, zero_nans, zero_infs);
-		return;
+		for (size_t i = 0; i < parent.size(); i++) {
+			double v = parent.at(i);
+			if (v == 0)
+				continue;
+			if (zero_nans && std::isnan(v))
+				continue;
+			if (zero_infs && std::isinf(v))
+				continue;
+			data_[i] = true;
+		}
 	}
-
-	FillFromArray(v, zero_nans, zero_infs);
 }
 
 G3SkyMapMask::G3SkyMapMask(const G3SkyMapMask &m) : G3FrameObject()
@@ -59,112 +49,6 @@ G3SkyMapMask::Clone(bool copy_data) const
 		return std::make_shared<G3SkyMapMask>(*this);
 	else
 		return std::make_shared<G3SkyMapMask>(*Parent());
-}
-
-void
-G3SkyMapMask::FillFromMap(const G3SkyMap &m, bool zero_nans, bool zero_infs)
-{
-	g3_assert(IsCompatible(m));
-
-	for (size_t i = 0; i < m.size(); i++) {
-		double v = m.at(i);
-		if (v == 0)
-			continue;
-		if (zero_nans && std::isnan(v))
-			continue;
-		if (zero_infs && std::isinf(v))
-			continue;
-		data_[i] = true;
-	}
-}
-
-#define FILL_BUFFER(type) \
-	for (size_t i = 0; i < view.len / sizeof(type); i++) { \
-		double v = ((type *)view.buf)[i]; \
-		if (v == 0) \
-			continue; \
-		if (zero_nans && std::isnan(v)) \
-			continue; \
-		if (zero_infs && std::isinf(v)) \
-			continue; \
-		data_[i] = true; \
-	}
-
-void
-G3SkyMapMask::FillFromArray(boost::python::object v, bool zero_nans, bool zero_infs)
-{
-
-	Py_buffer view;
-
-	if (PyObject_GetBuffer(v.ptr(), &view,
-	    PyBUF_FORMAT | PyBUF_C_CONTIGUOUS) != -1) {
-		if (view.ndim != 1) {
-			PyBuffer_Release(&view);
-			log_fatal("Only 1-D masks supported");
-		}
-
-		size_t npix = view.shape[0];
-		if (npix != size()) {
-			PyBuffer_Release(&view);
-			log_fatal("Got array of shape (%zu,), expected (%zu,)",
-			    npix, size());
-		}
-
-		const char *format = view.format;
-
-		if (format[0] == '@' || format[0] == '=')
-			format++;
-#if BYTE_ORDER == LITTLE_ENDIAN
-		else if (format[0] == '<')
-			format++;
-		else if (format[0] == '>' || format[0] == '!') {
-			PyBuffer_Release(&view);
-			log_fatal("Does not support big-endian numpy arrays");
-		}
-#else
-		else if (format[0] == '<') {
-			PyBuffer_Release(&view);
-			log_fatal("Does not support little-endian numpy arrays");
-		} else if (format[0] == '>' || format[0] == '!')
-			format++;
-#endif
-
-		if (strcmp(format, "d") == 0) {
-			FILL_BUFFER(double);
-		} else if (strcmp(format, "f") == 0) {
-			FILL_BUFFER(float);
-		} else if (strcmp(format, "i") == 0) {
-			FILL_BUFFER(int);
-		} else if (strcmp(format, "I") == 0) {
-			FILL_BUFFER(unsigned int);
-		} else if (strcmp(format, "l") == 0) {
-			FILL_BUFFER(long);
-		} else if (strcmp(format, "L") == 0) {
-			FILL_BUFFER(unsigned long);
-		} else if (strcmp(format, "b") == 0) {
-			FILL_BUFFER(char);
-		} else if (strcmp(format, "B") == 0) {
-			FILL_BUFFER(unsigned char);
-		} else if (strcmp(format, "?") == 0) {
-			FILL_BUFFER(bool);
-		} else {
-			PyBuffer_Release(&view);
-			log_fatal("Unknown type code %s", view.format);
-		}
-		PyBuffer_Release(&view);
-
-		return;
-	}
-
-	throw boost::python::error_already_set();
-}
-
-G3SkyMapMaskPtr
-G3SkyMapMask::ArrayClone(boost::python::object v, bool zero_nans, bool zero_infs) const
-{
-	G3SkyMapMaskPtr m = Clone(false);
-	m->FillFromArray(v, zero_nans, zero_infs);
-	return m;
 }
 
 G3SkyMapMask::const_iterator::const_iterator(const G3SkyMapMask &mask, bool begin) :
@@ -451,6 +335,100 @@ void G3SkyMapMask::save(A &ar, unsigned v) const
 
 G3_SPLIT_SERIALIZABLE_CODE(G3SkyMapMask);
 
+#define FILL_BUFFER(type) \
+	for (size_t i = 0; i < view.len / sizeof(type); i++) { \
+		double v = ((type *)view.buf)[i]; \
+		if (v == 0) \
+			continue; \
+		if (zero_nans && std::isnan(v)) \
+			continue; \
+		if (zero_infs && std::isinf(v)) \
+			continue; \
+		(*mask)[i] = true; \
+	}
+
+static G3SkyMapMaskPtr
+skymapmask_from_numpy(const G3SkyMap &parent, boost::python::object v,
+  bool zero_nans, bool zero_infs)
+{
+	// fall back to simple constructor
+	auto ext  = boost::python::extract<bool>(v);
+	if (ext.check())
+		return std::make_shared<G3SkyMapMask>(parent, ext(), zero_nans, zero_infs);
+
+	G3SkyMapMaskPtr mask(new G3SkyMapMask(parent));
+
+	Py_buffer view;
+
+	if (PyObject_GetBuffer(v.ptr(), &view,
+	    PyBUF_FORMAT | PyBUF_C_CONTIGUOUS) == -1)
+		throw boost::python::error_already_set();
+
+	if (view.ndim != 1) {
+		PyBuffer_Release(&view);
+		log_fatal("Only 1-D masks supported");
+	}
+
+	size_t npix = view.shape[0];
+	if (npix != mask->size()) {
+		PyBuffer_Release(&view);
+		log_fatal("Got array of shape (%zu,), expected (%zu,)",
+		    npix, mask->size());
+	}
+
+	const char *format = view.format;
+
+	if (format[0] == '@' || format[0] == '=')
+		format++;
+#if BYTE_ORDER == LITTLE_ENDIAN
+	else if (format[0] == '<')
+		format++;
+	else if (format[0] == '>' || format[0] == '!') {
+		PyBuffer_Release(&view);
+		log_fatal("Does not support big-endian numpy arrays");
+	}
+#else
+	else if (format[0] == '<') {
+		PyBuffer_Release(&view);
+		log_fatal("Does not support little-endian numpy arrays");
+	} else if (format[0] == '>' || format[0] == '!')
+		format++;
+#endif
+
+	if (strcmp(format, "d") == 0) {
+		FILL_BUFFER(double);
+	} else if (strcmp(format, "f") == 0) {
+		FILL_BUFFER(float);
+	} else if (strcmp(format, "i") == 0) {
+		FILL_BUFFER(int);
+	} else if (strcmp(format, "I") == 0) {
+		FILL_BUFFER(unsigned int);
+	} else if (strcmp(format, "l") == 0) {
+		FILL_BUFFER(long);
+	} else if (strcmp(format, "L") == 0) {
+		FILL_BUFFER(unsigned long);
+	} else if (strcmp(format, "b") == 0) {
+		FILL_BUFFER(char);
+	} else if (strcmp(format, "B") == 0) {
+		FILL_BUFFER(unsigned char);
+	} else if (strcmp(format, "?") == 0) {
+		FILL_BUFFER(bool);
+	} else {
+		PyBuffer_Release(&view);
+		log_fatal("Unknown type code %s", view.format);
+	}
+	PyBuffer_Release(&view);
+
+	return mask;
+}
+
+static G3SkyMapMaskPtr
+skymapmask_array_clone(const G3SkyMapMask &m, boost::python::object v,
+    bool zero_nans, bool zero_infs)
+{
+	return skymapmask_from_numpy(*m.Parent(), v, zero_nans, zero_infs);
+}
+
 static bool
 skymapmask_getitem(const G3SkyMapMask &m, boost::python::object index)
 {
@@ -607,16 +585,16 @@ PYBINDINGS("maps")
 		bp::arg("zero_nans")=false,
 		bp::arg("zero_infs")=false),
 	    "Instantiate a G3SkyMapMask from a parent G3SkyMap"))
-	  .def(bp::init<const G3SkyMap &, bp::object, bool, bool>(
+	  .def("__init__", bp::make_constructor(skymapmask_from_numpy, bp::default_call_policies(),
 	       (bp::arg("parent"),
 		bp::arg("data"),
 		bp::arg("zero_nans")=false,
-		bp::arg("zero_infs")=false),
-	    "Instantiate a G3SkyMapMask from a 1D numpy array"))
+		bp::arg("zero_infs")=false)),
+	    "Instantiate a G3SkyMapMask from a 1D numpy array")
 	  .def("clone", &G3SkyMapMask::Clone, (bp::arg("copy_data")=true),
 	    "Return a mask of the same type, populated with a copy of the data "
 	    "if the argument is true (default), empty otherwise.")
-	  .def("array_clone", &G3SkyMapMask::ArrayClone,
+	  .def("array_clone", &skymapmask_array_clone,
 	    (bp::arg("data"), bp::arg("zero_nans")=false, bp::arg("zero_infs")=false),
 	    "Return a mask of the same type, populated from the input numpy array")
 	  .add_property("parent", &skymapmask_pyparent, "\"Parent\" map which "

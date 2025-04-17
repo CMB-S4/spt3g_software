@@ -26,39 +26,6 @@ FlatSkyMap::FlatSkyMap(size_t x_len, size_t y_len, double res, bool weighted,
 {
 }
 
-FlatSkyMap::FlatSkyMap(boost::python::object v, double res,
-    bool weighted, MapProjection proj,
-    double alpha_center, double delta_center,
-    MapCoordReference coord_ref, G3Timestream::TimestreamUnits u,
-    G3SkyMap::MapPolType pol_type, double x_res,
-    double x_center, double y_center,
-    bool flat_pol, G3SkyMap::MapPolConv pol_conv) :
-      G3SkyMap(coord_ref, weighted, u, pol_type, pol_conv),
-      dense_(NULL), sparse_(NULL), flat_pol_(flat_pol)
-{
-	Py_buffer view;
-	if (PyObject_GetBuffer(v.ptr(), &view,
-	    PyBUF_FORMAT | PyBUF_C_CONTIGUOUS) != -1) {
-		if (view.ndim == 2) {
-			ypix_ = view.shape[0];
-			xpix_ = view.shape[1];
-		} else {
-			PyBuffer_Release(&view);
-			log_fatal("Only 2-D maps supported");
-		}
-		PyBuffer_Release(&view);
-
-		proj_info = FlatSkyProjection(xpix_, ypix_, res, alpha_center,
-		    delta_center, x_res, proj, x_center, y_center);
-
-		FillFromArray(v);
-
-		return;
-	}
-
-	throw bp::error_already_set();
-}
-
 FlatSkyMap::FlatSkyMap(const FlatSkyProjection & fp,
     MapCoordReference coord_ref, bool weighted,
     G3Timestream::TimestreamUnits u, G3SkyMap::MapPolType pol_type,
@@ -185,77 +152,6 @@ FlatSkyMap::InitFromV1Data(std::vector<size_t> dims, const std::vector<double> &
 		dense_ = new DenseMapData(dims[0], dims[1]);
 		(*dense_) = data;
 	}
-}
-
-void
-FlatSkyMap::FillFromArray(boost::python::object v)
-{
-	Py_buffer view;
-	if (PyObject_GetBuffer(v.ptr(), &view,
-	    PyBUF_FORMAT | PyBUF_C_CONTIGUOUS) != -1) {
-		if (view.ndim == 2) {
-			size_t ypix = view.shape[0];
-			size_t xpix = view.shape[1];
-			if (xpix != xpix_ || ypix != ypix_) {
-				PyBuffer_Release(&view);
-				log_fatal("Got array of shape (%zu, %zu), expected (%zu, %zu)",
-				    ypix, xpix, (size_t) ypix_, (size_t) xpix_);
-			}
-		} else {
-			PyBuffer_Release(&view);
-			log_fatal("Only 2-D maps supported");
-		}
-		ConvertToDense();
-
-		double *d = &(*dense_)(0,0);
-
-		// Consume endian definition
-		const char *format = view.format;
-		if (format[0] == '@' || format[0] == '=')
-			format++;
-#if BYTE_ORDER == LITTLE_ENDIAN
-		else if (format[0] == '<')
-			format++;
-		else if (format[0] == '>' || format[0] == '!') {
-			PyBuffer_Release(&view);
-			log_fatal("Does not support big-endian numpy arrays");
-		}
-#else
-		else if (format[0] == '<') {
-			PyBuffer_Release(&view);
-			log_fatal("Does not support little-endian numpy arrays");
-		}
-		else if (format[0] == '>' || format[0] == '!')
-			format++;
-#endif
-
-		if (strcmp(format, "d") == 0) {
-			memcpy(d, view.buf, view.len);
-		} else if (strcmp(format, "f") == 0) {
-			for (size_t i = 0; i < view.len/sizeof(float); i++)
-				d[i] = ((float *)view.buf)[i];
-		} else if (strcmp(format, "i") == 0) {
-			for (size_t i = 0; i < view.len/sizeof(int); i++)
-				d[i] = ((int *)view.buf)[i];
-		} else if (strcmp(format, "I") == 0) {
-			for (size_t i = 0; i < view.len/sizeof(int); i++)
-				d[i] = ((unsigned int *)view.buf)[i];
-		} else if (strcmp(format, "l") == 0) {
-			for (size_t i = 0; i < view.len/sizeof(long); i++)
-				d[i] = ((long *)view.buf)[i];
-		} else if (strcmp(format, "L") == 0) {
-			for (size_t i = 0; i < view.len/sizeof(long); i++)
-				d[i] = ((unsigned long *)view.buf)[i];
-		} else {
-			PyBuffer_Release(&view);
-			log_fatal("Unknown type code %s", view.format);
-		}
-		PyBuffer_Release(&view);
-
-		return;
-	}
-
-	throw bp::error_already_set();
 }
 
 FlatSkyMap::const_iterator::const_iterator(const FlatSkyMap &map, bool begin) :
@@ -873,6 +769,118 @@ G3SkyMapPtr FlatSkyMap::Reshape(size_t width, size_t height, double fill) const
 	return ExtractPatch(xpix_ / 2, ypix_ / 2, width, height, fill);
 }
 
+static void
+flatskymap_fill(FlatSkyMap &skymap, boost::python::object v)
+{
+	Py_buffer view;
+
+	if (PyObject_GetBuffer(v.ptr(), &view,
+	    PyBUF_FORMAT | PyBUF_C_CONTIGUOUS) == -1)
+		throw bp::error_already_set();
+
+	if (view.ndim != 2) {
+		PyBuffer_Release(&view);
+		log_fatal("Only 2-D maps supported");
+	}
+
+	size_t ypix = view.shape[0];
+	size_t xpix = view.shape[1];
+	if (xpix != skymap.shape()[0] || ypix != skymap.shape()[1]) {
+		PyBuffer_Release(&view);
+		log_fatal("Got array of shape (%zu, %zu), expected (%zu, %zu)",
+		    ypix, xpix, (size_t) skymap.shape()[1], (size_t) skymap.shape()[0]);
+	}
+
+	skymap.ConvertToDense();
+	double *d = &(skymap(0, 0));
+
+	// Consume endian definition
+	const char *format = view.format;
+	if (format[0] == '@' || format[0] == '=')
+		format++;
+#if BYTE_ORDER == LITTLE_ENDIAN
+	else if (format[0] == '<')
+		format++;
+	else if (format[0] == '>' || format[0] == '!') {
+		PyBuffer_Release(&view);
+		log_fatal("Does not support big-endian numpy arrays");
+	}
+#else
+	else if (format[0] == '<') {
+		PyBuffer_Release(&view);
+		log_fatal("Does not support little-endian numpy arrays");
+	}
+	else if (format[0] == '>' || format[0] == '!')
+		format++;
+#endif
+
+	if (strcmp(format, "d") == 0) {
+		memcpy(d, view.buf, view.len);
+	} else if (strcmp(format, "f") == 0) {
+		for (size_t i = 0; i < view.len/sizeof(float); i++)
+			d[i] = ((float *)view.buf)[i];
+	} else if (strcmp(format, "i") == 0) {
+		for (size_t i = 0; i < view.len/sizeof(int); i++)
+			d[i] = ((int *)view.buf)[i];
+	} else if (strcmp(format, "I") == 0) {
+		for (size_t i = 0; i < view.len/sizeof(int); i++)
+			d[i] = ((unsigned int *)view.buf)[i];
+	} else if (strcmp(format, "l") == 0) {
+		for (size_t i = 0; i < view.len/sizeof(long); i++)
+			d[i] = ((long *)view.buf)[i];
+	} else if (strcmp(format, "L") == 0) {
+		for (size_t i = 0; i < view.len/sizeof(long); i++)
+			d[i] = ((unsigned long *)view.buf)[i];
+	} else {
+		PyBuffer_Release(&view);
+		log_fatal("Unknown type code %s", view.format);
+	}
+	PyBuffer_Release(&view);
+}
+
+static FlatSkyMapPtr
+flatskymap_from_numpy(boost::python::object v, double res,
+    bool weighted, MapProjection proj,
+    double alpha_center, double delta_center,
+    MapCoordReference coord_ref, G3Timestream::TimestreamUnits u,
+    G3SkyMap::MapPolType pol_type, double x_res,
+    double x_center, double y_center,
+    bool flat_pol, G3SkyMap::MapPolConv pol_conv)
+{
+	Py_buffer view;
+
+	if (PyObject_GetBuffer(v.ptr(), &view,
+	    PyBUF_FORMAT | PyBUF_C_CONTIGUOUS) == -1)
+		throw bp::error_already_set();
+
+	if (view.ndim != 2) {
+		PyBuffer_Release(&view);
+		log_fatal("Only 2-D maps supported");
+	}
+
+	size_t ypix = view.shape[0];
+	size_t xpix = view.shape[1];
+	PyBuffer_Release(&view);
+
+	FlatSkyProjection proj_info(xpix, ypix, res, alpha_center,
+	    delta_center, x_res, proj, x_center, y_center);
+
+	FlatSkyMapPtr skymap(new FlatSkyMap(proj_info, coord_ref, weighted,
+	    u, pol_type, flat_pol, pol_conv));
+
+	flatskymap_fill(*skymap, v);
+
+	return skymap;
+}
+
+static FlatSkyMapPtr
+flatskymap_array_clone(const FlatSkyMap &m, boost::python::object v)
+{
+	auto skymap = std::dynamic_pointer_cast<FlatSkyMap>(m.Clone(false));
+	flatskymap_fill(*skymap, v);
+	return skymap;
+}
+
 static boost::python::tuple
 flatskymap_pixel_to_angle(const G3SkyMap & skymap, size_t pixel)
 {
@@ -1007,7 +1015,7 @@ flatskymap_setslice_1d(FlatSkyMap &skymap, bp::slice coords,
 	if (coords.start().ptr() != Py_None || coords.stop().ptr() != Py_None)
 		log_fatal("1D slicing not supported");
 
-	skymap.FillFromArray(val);
+	flatskymap_fill(skymap, val);
 }
 
 static void
@@ -1063,7 +1071,7 @@ flatskymap_setitem_2d(FlatSkyMap &skymap, bp::tuple coords,
 
 		skymap.InsertPatch(patch);
 	} else {
-		dummy_subpatch->FillFromArray(val);
+		flatskymap_fill(*dummy_subpatch, val);
 		skymap.InsertPatch(*dummy_subpatch);
 	}
 }
@@ -1283,11 +1291,11 @@ PYBINDINGS("maps")
 		  bp::arg("pol_type") = G3SkyMap::None, bp::arg("x_res") = 0.0 / 0.0,
 		  bp::arg("x_center") = 0.0 / 0.0, bp::arg("y_center") = 0.0 / 0.0,
 		  bp::arg("flat_pol") = false,
-		  bp::arg("pol_conv") = G3SkyMap::ConvNone)))
-	    .def(bp::init<boost::python::object, double, bool, MapProjection,
-	       double, double, MapCoordReference, G3Timestream::TimestreamUnits,
-	       G3SkyMap::MapPolType, double, double, double, bool,
-	       G3SkyMap::MapPolConv>(
+		  bp::arg("pol_conv") = G3SkyMap::ConvNone),
+		 "Instantiate an empty flat sky map object"
+		 ))
+	    .def("__init__", bp::make_constructor(flatskymap_from_numpy,
+		  bp::default_call_policies(),
 		  (bp::arg("obj"), bp::arg("res"),
 		   bp::arg("weighted") = true,
 		   bp::arg("proj") = MapProjection::ProjNone,
@@ -1298,11 +1306,12 @@ PYBINDINGS("maps")
 		   bp::arg("x_res") = 0.0 / 0.0,
 		   bp::arg("x_center") = 0.0 / 0.0, bp::arg("y_center") = 0.0 / 0.0,
 		   bp::arg("flat_pol") = false,
-		   bp::arg("pol_conv") = G3SkyMap::ConvNone)))
+		   bp::arg("pol_conv") = G3SkyMap::ConvNone)),
+		 "Instantiate a flat sky map object from a numpy array")
 
 	    .def(bp::init<const FlatSkyMap&>(bp::arg("flat_map")))
 	    .def(bp::init<>())
-	    .def("array_clone", &FlatSkyMap::ArrayClone,
+	    .def("array_clone", &flatskymap_array_clone,
 	      (bp::arg("array")),
 	       "Return a map of the same type, populated with a copy of the input "
 	       "numpy array")

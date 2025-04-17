@@ -10,7 +10,8 @@
 
 class HealpixSkyMapInfo : public G3FrameObject {
 public:
-	HealpixSkyMapInfo(size_t nside, bool nested=false, bool shifted=false);
+	HealpixSkyMapInfo(size_t nside_or_npix, bool nested=false, bool shifted=false,
+	    bool is_npix=false);
 
 	HealpixSkyMapInfo();
 	HealpixSkyMapInfo(const HealpixSkyMapInfo& info);
