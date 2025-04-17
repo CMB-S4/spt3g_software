@@ -573,13 +573,13 @@ FlatSkyProjection::PixelToAngleGrad(size_t pixel, double h) const
 }
 
 void FlatSkyProjection::GetInterpPixelsWeights(const Quat &q,
-    std::vector<size_t> & pixels, std::vector<double> & weights) const
+    std::vector<uint64_t> & pixels, std::vector<double> & weights) const
 {
 	std::vector<double> xy = QuatToXY(q);
 	double x = xy[0];
 	double y = xy[1];
 
-	pixels = std::vector<size_t>(4, (size_t) -1);
+	pixels = std::vector<uint64_t>(4, (uint64_t) -1);
 	weights = std::vector<double>(4, 0);
 
 	ssize_t x_1 = (ssize_t)floorf(x);
@@ -597,7 +597,7 @@ void FlatSkyProjection::GetInterpPixelsWeights(const Quat &q,
 	pixels[3] = x_2 + y_2 * xpix_;  weights[3] = (x - x_1) * (y - y_1);
 }
 
-std::vector<size_t>
+std::vector<uint64_t>
 FlatSkyProjection::QueryDisc(const Quat &q, double radius) const
 {
 	static const size_t npts = 72;
@@ -638,7 +638,7 @@ FlatSkyProjection::QueryDisc(const Quat &q, double radius) const
 
 	double crad = cos(radius / rad);
 
-	std::vector<size_t> pixels;
+	std::vector<uint64_t> pixels;
 	for (ssize_t x = xmin; x < xmax; x++) {
 		for (ssize_t y = ymin; y < ymax; y++) {
 			size_t pixel = y * xpix_ + x;

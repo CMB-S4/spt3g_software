@@ -143,11 +143,11 @@ G3SkyMapWeights::G3SkyMapWeights(const G3SkyMapWeights &r, bool copy_data) :
 {
 }
 
-std::vector<size_t>
+std::vector<uint64_t>
 G3SkyMap::AnglesToPixels(const std::vector<double> & alphas,
     const std::vector<double> & deltas) const
 {
-	std::vector<size_t> pixels(alphas.size());
+	std::vector<uint64_t> pixels(alphas.size());
 
 	for (size_t i = 0; i < alphas.size(); i++) {
 		pixels[i] = AngleToPixel(alphas[i], deltas[i]);
@@ -157,7 +157,7 @@ G3SkyMap::AnglesToPixels(const std::vector<double> & alphas,
 }
 
 void
-G3SkyMap::PixelsToAngles(const std::vector<size_t> & pixels,
+G3SkyMap::PixelsToAngles(const std::vector<uint64_t> & pixels,
     std::vector<double> & alphas, std::vector<double> & deltas) const
 {
 	if (alphas.size() != pixels.size()) {
@@ -193,10 +193,10 @@ G3SkyMap::PixelToAngle(size_t pixel) const
 	return {alpha, delta};
 }
 
-std::vector<size_t>
+std::vector<uint64_t>
 G3SkyMap::QuatsToPixels(const G3VectorQuat &quats) const
 {
-	std::vector<size_t> pixels(quats.size());
+	std::vector<uint64_t> pixels(quats.size());
 	for (size_t i = 0; i < quats.size(); i++)
 		pixels[i] = QuatToPixel(quats[i]);
 
@@ -204,7 +204,7 @@ G3SkyMap::QuatsToPixels(const G3VectorQuat &quats) const
 }
 
 G3VectorQuat
-G3SkyMap::PixelsToQuats(const std::vector<size_t> &pixels) const
+G3SkyMap::PixelsToQuats(const std::vector<uint64_t> &pixels) const
 {
 	G3VectorQuat quats(pixels.size());
 	for (size_t i = 0; i < pixels.size(); i++)
@@ -216,7 +216,7 @@ G3SkyMap::PixelsToQuats(const std::vector<size_t> &pixels) const
 
 static boost::python::tuple
 skymap_pixels_to_angles(const G3SkyMap & skymap,
-    const std::vector<size_t> & pixels)
+    const std::vector<uint64_t> & pixels)
 {
 	std::vector<double> alphas, deltas;
 	skymap.PixelsToAngles(pixels, alphas, deltas);
@@ -338,7 +338,7 @@ G3SkyMap &G3SkyMap::operator/=(double rhs)
 
 void
 G3SkyMap::GetInterpPixelsWeights(double alpha, double delta,
-    std::vector<size_t> & pixels, std::vector<double> & weights) const
+    std::vector<uint64_t> & pixels, std::vector<double> & weights) const
 {
 	auto q = ang_to_quat(alpha, delta);
 	GetInterpPixelsWeights(q, pixels, weights);
@@ -361,7 +361,7 @@ G3SkyMap::GetRebinAngles(size_t pixel, size_t scale,
 }
 
 double
-G3SkyMap::GetInterpPrecalc(const std::vector<size_t> & pix,
+G3SkyMap::GetInterpPrecalc(const std::vector<uint64_t> & pix,
     const std::vector<double> & weight) const
 {
 	double outval = 0;
@@ -394,7 +394,7 @@ G3SkyMap::GetInterpValues(const std::vector<double> & alphas,
 double
 G3SkyMap::GetInterpValue(const Quat &q) const
 {
-	std::vector<size_t> pix;
+	std::vector<uint64_t> pix;
 	std::vector<double> weight;
 	GetInterpPixelsWeights(q, pix, weight);
 	return GetInterpPrecalc(pix, weight);
@@ -411,21 +411,21 @@ G3SkyMap::GetInterpValues(const G3VectorQuat & quats) const
 	return outvals;
 }
 
-std::vector<size_t>
+std::vector<uint64_t>
 G3SkyMap::QueryDisc(double alpha, double delta, double radius) const
 {
 	auto q = ang_to_quat(alpha, delta);
 	return QueryDisc(q, radius);
 }
 
-std::vector<size_t>
+std::vector<uint64_t>
 G3SkyMap::QueryAlphaEllipse(double alpha ,double delta, double a, double b) const
 {
 	auto q = ang_to_quat(alpha, delta);
 	return QueryAlphaEllipse(q, a, b);
 }
 
-std::vector<size_t>
+std::vector<uint64_t>
 G3SkyMap::QueryAlphaEllipse(const Quat &q, double a, double b) const
 {
 	double rmaj = a > b ? a : b;
@@ -445,7 +445,7 @@ G3SkyMap::QueryAlphaEllipse(const Quat &q, double a, double b) const
 	auto disc = QueryDisc(q, rmaj);
 
 	// narrow further to locus of points within ellipse
-	std::vector<size_t> pixels;
+	std::vector<uint64_t> pixels;
 	for (auto i: disc) {
 		auto qp = PixelToQuat(i);
 		double d = quat_ang_sep(qp, ql) + quat_ang_sep(qp, qr);
@@ -488,7 +488,7 @@ static bp::tuple
 skymap_shape(const G3SkyMap &skymap)
 {
 	// Swap to match numpy's convention for shape()
-	std::vector<size_t> shape = skymap.shape();
+	auto shape = skymap.shape();
 	std::vector<uint64_t> pyshape;
 	for (ssize_t i = shape.size() - 1; i >= 0; i--)
 		pyshape.push_back(shape[i]);
@@ -1516,21 +1516,21 @@ PYBINDINGS("maps") {
 	       "from the pole, for each of the given 1-D pixel coordinates.")
 
 	    .def("query_disc",
-	      (std::vector<size_t> (G3SkyMap::*)(double, double, double) const)
+	      (std::vector<uint64_t> (G3SkyMap::*)(double, double, double) const)
 		&G3SkyMap::QueryDisc,
 	       (bp::arg("alpha"), bp::arg("delta"), bp::arg("radius")),
 	       "Return a list of pixel indices whose centers are located within "
 	       "a disc of the given radius at the given sky coordinates.")
 
 	    .def("query_disc",
-	      (std::vector<size_t> (G3SkyMap::*)(const Quat &, double) const)
+	      (std::vector<uint64_t> (G3SkyMap::*)(const Quat &, double) const)
 		&G3SkyMap::QueryDisc,
 	       (bp::arg("quat"), bp::arg("radius")),
 	       "Return a list of pixel indices whose centers are located within "
 	       "a disc of the given radius at the given sky coordinates.")
 
 	    .def("query_alpha_ellipse",
-	      (std::vector<size_t> (G3SkyMap::*)(double, double, double, double) const)
+	      (std::vector<uint64_t> (G3SkyMap::*)(double, double, double, double) const)
 		&G3SkyMap::QueryAlphaEllipse,
 	       (bp::arg("alpha"), bp::arg("delta"), bp::arg("a"), bp::arg("b")),
 	       "Return a list of pixel indices whose centers are located within an "
@@ -1538,7 +1538,7 @@ PYBINDINGS("maps") {
 	       "delta sky coordinates, with semimajor and semiminor axes a and b.")
 
 	    .def("query_alpha_ellipse",
-	      (std::vector<size_t> (G3SkyMap::*)(const Quat &, double, double) const)
+	      (std::vector<uint64_t> (G3SkyMap::*)(const Quat &, double, double) const)
 		&G3SkyMap::QueryAlphaEllipse,
 	       (bp::arg("quat"), bp::arg("a"), bp::arg("b")),
 	       "Return a list of pixel indices whose centers are located within an "

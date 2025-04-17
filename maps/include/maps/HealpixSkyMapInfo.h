@@ -48,10 +48,10 @@ public:
 
 	G3VectorQuat GetRebinQuats(size_t pixel, size_t scale) const;
 
-	void GetInterpPixelsWeights(const Quat &q, std::vector<size_t> & pixels,
+	void GetInterpPixelsWeights(const Quat &q, std::vector<uint64_t> & pixels,
 	    std::vector<double> & weights) const;
 
-	std::vector<size_t> QueryDisc(const Quat &q, double radius) const;
+	std::vector<uint64_t> QueryDisc(const Quat &q, double radius) const;
 
 private:
 	// scheme

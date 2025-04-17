@@ -773,9 +773,7 @@ HealpixSkyMap::ApplyMask(const G3SkyMapMask &mask, bool inverse)
 std::vector<size_t>
 HealpixSkyMap::shape() const
 {
-	std::vector<size_t> shape(1);
-	shape[0] = info_.npix();
-	return shape;
+	return {info_.npix()};
 }
 
 double
@@ -843,13 +841,13 @@ HealpixSkyMap::GetRebinQuats(size_t pixel, size_t scale) const
 }
 
 void
-HealpixSkyMap::GetInterpPixelsWeights(const Quat &q, std::vector<size_t> & pixels,
+HealpixSkyMap::GetInterpPixelsWeights(const Quat &q, std::vector<uint64_t> & pixels,
     std::vector<double> & weights) const
 {
 	info_.GetInterpPixelsWeights(q, pixels, weights);
 }
 
-std::vector<size_t>
+std::vector<uint64_t>
 HealpixSkyMap::QueryDisc(const Quat &q, double radius) const
 {
 	return info_.QueryDisc(q, radius);

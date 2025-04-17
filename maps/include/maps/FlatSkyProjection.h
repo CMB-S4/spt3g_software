@@ -102,10 +102,10 @@ public:
 	size_t RebinPixel(size_t pixel, size_t scale) const;
 
 	G3VectorQuat GetRebinQuats(size_t pixel, size_t scale) const;
-	void GetInterpPixelsWeights(const Quat &q, std::vector<size_t> & pixels,
+	void GetInterpPixelsWeights(const Quat &q, std::vector<uint64_t> & pixels,
 	    std::vector<double> & weights) const;
 
-	std::vector<size_t> QueryDisc(const Quat &q, double radius) const;
+	std::vector<uint64_t> QueryDisc(const Quat &q, double radius) const;
 
 	FlatSkyProjection Rebin(size_t scale, double x_center = 0.0 / 0.0,
 	    double y_center = 0.0 / 0.0) const;

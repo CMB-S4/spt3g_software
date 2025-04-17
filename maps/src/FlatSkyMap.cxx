@@ -671,13 +671,13 @@ FlatSkyMap::GetRebinQuats(size_t pixel, size_t scale) const
 }
 
 void
-FlatSkyMap::GetInterpPixelsWeights(const Quat &q, std::vector<size_t> & pixels,
+FlatSkyMap::GetInterpPixelsWeights(const Quat &q, std::vector<uint64_t> & pixels,
     std::vector<double> & weights) const
 {
 	proj_info.GetInterpPixelsWeights(q, pixels, weights);
 }
 
-std::vector<size_t>
+std::vector<uint64_t>
 FlatSkyMap::QueryDisc(const Quat &q, double radius) const
 {
 	return proj_info.QueryDisc(q, radius);
@@ -1202,7 +1202,7 @@ flatskymap_xy_to_angles(const FlatSkyMap & skymap, const std::vector<double> &x,
 }
 
 static boost::python::tuple
-flatskymap_pixels_to_xy(const FlatSkyMap & skymap, const std::vector<size_t> &pixel)
+flatskymap_pixels_to_xy(const FlatSkyMap & skymap, const std::vector<uint64_t> &pixel)
 {
 	std::vector<double> x(pixel.size()), y(pixel.size());
 	for (size_t i = 0; i < pixel.size(); i++) {
@@ -1214,13 +1214,13 @@ flatskymap_pixels_to_xy(const FlatSkyMap & skymap, const std::vector<size_t> &pi
 	return boost::python::make_tuple(x, y);
 }
 
-static std::vector<size_t>
+static std::vector<uint64_t>
 flatskymap_xy_to_pixels(const FlatSkyMap & skymap, const std::vector<double> &x,
     const std::vector<double> &y)
 {
 	g3_assert(x.size() == y.size());
 
-	std::vector<size_t> pixel(x.size());
+	std::vector<uint64_t> pixel(x.size());
 	for (size_t i = 0; i < x.size(); i++) {
 		pixel[i] = skymap.XYToPixel(x[i], y[i]);
 	}

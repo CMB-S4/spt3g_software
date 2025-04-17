@@ -191,7 +191,7 @@ MapMockObserver::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		// Get per-detector pointing timestream
 		auto detquats = get_detector_pointing_quats(bp.x_offset, bp.y_offset,
 		    *pointing, T_->coord_ref);
-		std::vector<size_t> detpointing;
+		std::vector<uint64_t> detpointing;
 		if (!interp_)
 			detpointing = T_->QuatsToPixels(detquats);
 
@@ -200,7 +200,7 @@ MapMockObserver::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 			StokesVector pcoupling(bp.pol_angle * pol_sign_, bp.pol_efficiency);
 			for (size_t i = 0; i < det.size(); i++) {
 				if (interp_) {
-					std::vector<size_t> pixels;
+					std::vector<uint64_t> pixels;
 					std::vector<double> weights;
 					T_->GetInterpPixelsWeights(detquats[i], pixels, weights);
 					det[i] =

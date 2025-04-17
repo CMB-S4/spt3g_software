@@ -114,10 +114,10 @@ public:
 	std::vector<double> PixelToAngleGrad(size_t pixel, double h=0.001) const;
 
 	G3VectorQuat GetRebinQuats(size_t pixel, size_t scale) const override;
-	void GetInterpPixelsWeights(const Quat &q, std::vector<size_t> & pixels,
+	void GetInterpPixelsWeights(const Quat &q, std::vector<uint64_t> & pixels,
 	    std::vector<double> & weights) const override;
 
-	std::vector<size_t> QueryDisc(const Quat &q, double radius) const override;
+	std::vector<uint64_t> QueryDisc(const Quat &q, double radius) const override;
 
 	G3SkyMapPtr Rebin(size_t scale, bool norm = true) const override;
 	G3SkyMapPtr ExtractPatch(size_t x0, size_t y0, size_t width, size_t height,

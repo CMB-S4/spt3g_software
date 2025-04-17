@@ -277,13 +277,13 @@ get_detector_pointing_quats(double x_offset, double y_offset,
 	return det_quats;
 }
 
-std::vector<size_t>
+std::vector<uint64_t>
 get_detector_pointing_pixels(double x_offset, double y_offset,
     const G3VectorQuat &trans_quat, G3SkyMapConstPtr skymap)
 {
 	auto q_off = offsets_to_quat(x_offset, y_offset);
 	size_t nsamp = trans_quat.size();
-	std::vector<size_t> pixels(nsamp, (size_t) -1);
+	std::vector<uint64_t> pixels(nsamp, (uint64_t) -1);
 	Quat q;
 
 	if (skymap->coord_ref == Local) {
