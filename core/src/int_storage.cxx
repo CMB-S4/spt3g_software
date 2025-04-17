@@ -39,17 +39,3 @@ int bit_count(const std::map<std::string, int64_t> &d) {
 	}
 	return 64;
 }
-
-#define INT_SERIALIZABLE_CODE(inttype) \
-template <typename inttype> \
-void load_as(cereal::PortableBinaryInputArchive &, std::vector<int64_t> &dest); \
-template <typename inttype> \
-void load_as(cereal::PortableBinaryInputArchive &, std::map<std::string, int64_t> &dest); \
-template <typename inttype> \
-void save_as(cereal::PortableBinaryOutputArchive &, const std::vector<int64_t> &src); \
-template <typename inttype> \
-void save_as(cereal::PortableBinaryOutputArchive &, const std::map<std::string, int64_t> &src)
-
-INT_SERIALIZABLE_CODE(int8_t);
-INT_SERIALIZABLE_CODE(int16_t);
-INT_SERIALIZABLE_CODE(int32_t);
