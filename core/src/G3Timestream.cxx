@@ -1196,6 +1196,8 @@ G3TimestreamMap_from_numpy(std::vector<std::string> keys,
 			    timestream_from_iterable(data[i], units);
 			next->start = start;
 			next->stop = stop;
+			next->SetFLACCompression(compression_level);
+			next->SetFLACBitDepth(bit_depth);
 			(*x)[keys[i]] = next;
 		}
 		return x;
