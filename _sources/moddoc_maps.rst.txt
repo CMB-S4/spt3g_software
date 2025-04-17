@@ -195,9 +195,11 @@ FlatSkyMap is a G3SkyMap with the extra meta information about the particular fl
 *Constructors:*
 	``FlatSkyMap( (FlatSkyMap)arg2)``
 	
-	``FlatSkyMap( (int)x_len, (int)y_len, (float)res [, (bool)weighted=True [, (MapProjection)proj=spt3g.maps.MapProjection.ProjNone [, (float)alpha_center=0 [, (float)delta_center=0 [, (MapCoordReference)coord_ref=spt3g.maps.MapCoordReference.Equatorial [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.Tcmb [, (MapPolType)pol_type=spt3g.maps.MapPolType.none [, (float)x_res=nan [, (float)x_center=nan [, (float)y_center=nan [, (bool)flat_pol=False [, (MapPolConv)pol_conv=spt3g.maps.MapPolConv.none]]]]]]]]]]]])``
+	``FlatSkyMap( (int)x_len, (int)y_len, (float)res [, (bool)weighted=True [, (MapProjection)proj=spt3g.maps.MapProjection.ProjNone [, (float)alpha_center=0 [, (float)delta_center=0 [, (MapCoordReference)coord_ref=spt3g.maps.MapCoordReference.Equatorial [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.Tcmb [, (MapPolType)pol_type=spt3g.maps.MapPolType.none [, (float)x_res=nan [, (float)x_center=nan [, (float)y_center=nan [, (bool)flat_pol=False [, (MapPolConv)pol_conv=spt3g.maps.MapPolConv.none]]]]]]]]]]]])`` :
+	    Instantiate an empty flat sky map object
 	
-	``FlatSkyMap( (object)obj, (float)res [, (bool)weighted=True [, (MapProjection)proj=spt3g.maps.MapProjection.ProjNone [, (float)alpha_center=0 [, (float)delta_center=0 [, (MapCoordReference)coord_ref=spt3g.maps.MapCoordReference.Equatorial [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.Tcmb [, (MapPolType)pol_type=spt3g.maps.MapPolType.none [, (float)x_res=nan [, (float)x_center=nan [, (float)y_center=nan [, (bool)flat_pol=False [, (MapPolConv)pol_conv=spt3g.maps.MapPolConv.none]]]]]]]]]]]])``
+	``FlatSkyMap( (object)obj, (float)res [, (bool)weighted=True [, (MapProjection)proj=spt3g.maps.MapProjection.ProjNone [, (float)alpha_center=0 [, (float)delta_center=0 [, (MapCoordReference)coord_ref=spt3g.maps.MapCoordReference.Equatorial [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.Tcmb [, (MapPolType)pol_type=spt3g.maps.MapPolType.none [, (float)x_res=nan [, (float)x_center=nan [, (float)y_center=nan [, (bool)flat_pol=False [, (MapPolConv)pol_conv=spt3g.maps.MapPolConv.none]]]]]]]]]]]])`` :
+	    Instantiate a flat sky map object from a numpy array
 	
 	``FlatSkyMap( [ (FlatSkyMap)flat_map])``
 
@@ -234,7 +236,7 @@ FlatSkyMap is a G3SkyMap with the extra meta information about the particular fl
 
 **spt3g.maps.FlatSkyMap.array_clone**
 
-``array_clone( (FlatSkyMap)arg1, (object)array) -> G3SkyMap :``
+``array_clone( (FlatSkyMap)arg1, (object)array) -> FlatSkyMap :``
     Return a map of the same type, populated with a copy of the input numpy array
 
 .. _spt3g.maps.FlatSkyMap.pixel_to_angle:
@@ -390,13 +392,6 @@ Base class for 1- and 2-D skymaps of various projections. Usually you want a sub
 
 ``clone( (G3SkyMap)arg1 [, (bool)copy_data=True]) -> G3SkyMap :``
     Return a map of the same type, populated with a copy of the data if the argument is true (default), empty otherwise.
-
-.. _spt3g.maps.G3SkyMap.array_clone:
-
-**spt3g.maps.G3SkyMap.array_clone**
-
-``array_clone( (G3SkyMap)arg1, (object)array) -> G3SkyMap :``
-    Return a map of the same type, populated with a copy of the input numpy array
 
 .. _spt3g.maps.G3SkyMap.compatible:
 
@@ -845,6 +840,13 @@ HealpixSkyMap is a G3SkyMap with the extra meta information about the particular
 
 
 *Methods:*
+
+.. _spt3g.maps.HealpixSkyMap.array_clone:
+
+**spt3g.maps.HealpixSkyMap.array_clone**
+
+``array_clone( (HealpixSkyMap)arg1, (object)array) -> HealpixSkyMap :``
+    Return a map of the same type, populated with a copy of the input numpy array
 
 .. _spt3g.maps.HealpixSkyMap.nonzero_pixels:
 
