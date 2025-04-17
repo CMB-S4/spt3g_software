@@ -1,5 +1,6 @@
 #include <pybindings.h>
 #include <serialization.h>
+#include <container_pybindings.h>
 #include <G3PipelineInfo.h>
 
 namespace bp = boost::python;

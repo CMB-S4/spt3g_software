@@ -1,4 +1,5 @@
 #include <pybindings.h>
+#include <container_pybindings.h>
 #include <G3Logging.h>
 #include <G3SimpleLoggers.h>
 

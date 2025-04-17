@@ -3,6 +3,7 @@
 #include <G3Quat.h>
 #include <serialization.h>
 #include <pybindings.h>
+#include <container_pybindings.h>
 
 #include <stdlib.h>
 #include <cxxabi.h>

@@ -20,6 +20,8 @@ class G3Map : public G3FrameObject, public std::map<Key, Value> {
 public:
 	template <class A> void serialize(A &ar, unsigned v)
 	{
+		G3_CHECK_VERSION(v);
+
 		ar & cereal::make_nvp("G3FrameObject",
 		    cereal::base_class<G3FrameObject>(this));
 		ar & cereal::make_nvp("map",

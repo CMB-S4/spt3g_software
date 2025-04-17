@@ -1,5 +1,6 @@
 #include <pybindings.h>
 #include <serialization.h>
+#include <container_pybindings.h>
 #include <gcp/TrackerStatus.h>
 
 template <class A> void TrackerStatus::serialize(A &ar, unsigned v)

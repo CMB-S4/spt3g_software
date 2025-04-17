@@ -120,6 +120,16 @@ struct g3frameobject_picklesuite : boost::python::pickle_suite
 	}
 };
 
+#define EXPORT_FRAMEOBJECT(T, initf, docstring) \
+	boost::python::class_<T, boost::python::bases<G3FrameObject>, std::shared_ptr<T> >(#T, docstring, boost::python::initf) \
+	    .def(boost::python::init<const T &>()) \
+	    .def_pickle(g3frameobject_picklesuite<T>())
+
+#define EXPORT_FRAMEOBJECT_NOINITNAMESPACE(T, initf, docstring) \
+	boost::python::class_<T, boost::python::bases<G3FrameObject>, std::shared_ptr<T> >(#T, docstring, initf) \
+	    .def(boost::python::init<const T &>()) \
+	    .def_pickle(g3frameobject_picklesuite<T>())
+
 template <class T>
 inline uint32_t
 _g3_class_version(T *)

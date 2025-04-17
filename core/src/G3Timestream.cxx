@@ -1,9 +1,8 @@
 #include <pybindings.h>
 #include <serialization.h>
+#include <container_pybindings.h>
 #include <G3Timestream.h>
 #include <G3Units.h>
-#include <std_map_indexing_suite.hpp>
-#include <boost/python/slice.hpp>
 
 #include <cereal/types/map.hpp>
 #include <cereal/types/vector.hpp>
