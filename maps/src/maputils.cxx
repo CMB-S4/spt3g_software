@@ -20,138 +20,142 @@
 
 using namespace G3Units;
 
-void RemoveWeights(G3SkyMapPtr T, G3SkyMapPtr Q, G3SkyMapPtr U, G3SkyMapWeightsConstPtr W,
+void RemoveWeights(G3SkyMap &T, G3SkyMap &Q, G3SkyMap &U, const G3SkyMapWeights &W,
     bool zero_nans)
 {
-	bool pol = W->IsPolarized();
+	g3_assert(W.IsPolarized());
+	g3_assert(T.weighted);
+	g3_assert(W.IsCongruent());
+	g3_assert(T.IsCompatible(*(W.TT)));
 
-	g3_assert(T->weighted);
-	g3_assert(W->IsCongruent());
-	g3_assert(T->IsCompatible(*(W->TT)));
-
-	if (pol) {
-		g3_assert(!!Q && !!U);
-		g3_assert(T->IsCompatible(*Q));
-		g3_assert(T->IsCompatible(*U));
-		g3_assert(Q->weighted);
-		g3_assert(U->weighted);
-	}
+	g3_assert(T.IsCompatible(Q));
+	g3_assert(T.IsCompatible(U));
+	g3_assert(Q.weighted);
+	g3_assert(U.weighted);
 
 	if (!zero_nans) {
-		T->ConvertToDense();
-		if (pol) {
-			Q->ConvertToDense();
-			U->ConvertToDense();
-			for (size_t pix = 0; pix < T->size(); pix++) {
-				StokesVector v((*T)[pix], (*Q)[pix], (*U)[pix]);
-				v /= W->at(pix);
-			}
-		} else {
-			(*T) /= *(W->TT);
+		T.ConvertToDense();
+		Q.ConvertToDense();
+		U.ConvertToDense();
+		for (size_t pix = 0; pix < T.size(); pix++) {
+			StokesVector v(T[pix], Q[pix], U[pix]);
+			v /= W.at(pix);
 		}
 	} else {
-		for (size_t pix = 0; pix < W->size(); pix++) {
-			double v = T->at(pix);
-			MuellerMatrix m = W->at(pix);
+		for (size_t pix = 0; pix < W.size(); pix++) {
+			double t = T.at(pix);
+			MuellerMatrix m = W.at(pix);
 			bool empty;
 
 			// skip empty pixels
-			if (!pol) {
-				empty = (m.tt == 0);
-				if (empty && v == 0)
-					continue;
-			} else {
-				double c = m.cond();
-				empty = (c != c) || (c > 1e12);
-				if (empty && v == 0 && Q->at(pix) == 0 && U->at(pix) == 0)
-					continue;
-				if (!empty)
-					empty |= (m.det() == 0);
-			}
+			double c = m.cond();
+			empty = (c != c) || (c > 1e12);
+			if (empty && t == 0 && Q.at(pix) == 0 && U.at(pix) == 0)
+				continue;
+			if (!empty)
+				empty |= (m.det() == 0);
 
 			// set bad pixels to 0
 			if (empty) {
-				(*T)[pix] = 0;
-				if (pol) {
-					(*Q)[pix] = 0;
-					(*U)[pix] = 0;
-				}
+				T[pix] = 0;
+				Q[pix] = 0;
+				U[pix] = 0;
 				continue;
 			}
 
 			// remove weights
-			if (pol) {
-				StokesVector v((*T)[pix], (*Q)[pix], (*U)[pix]);
-				v /= m;
-			} else {
-				(*T)[pix] /= (*(W->TT))[pix];
-			}
+			StokesVector v(T[pix], Q[pix], U[pix]);
+			v /= m;
 		}
 	}
 
-	T->weighted = false;
-	if (pol) {
-		Q->weighted = false;
-		U->weighted = false;
-	}
+	T.weighted = false;
+	Q.weighted = false;
+	U.weighted = false;
 }
 
-void RemoveWeightsT(G3SkyMapPtr T, G3SkyMapWeightsConstPtr W, bool zero_nans)
+void RemoveWeightsT(G3SkyMap &T, const G3SkyMapWeights &W, bool zero_nans)
 {
-	RemoveWeights(T, NULL, NULL, W, zero_nans);
-}
+	g3_assert(!W.IsPolarized());
+	g3_assert(T.weighted);
+	g3_assert(W.IsCongruent());
+	g3_assert(T.IsCompatible(*(W.TT)));
 
-void ApplyWeights(G3SkyMapPtr T, G3SkyMapPtr Q, G3SkyMapPtr U, G3SkyMapWeightsConstPtr W)
-{
-	bool pol = W->IsPolarized();
-
-	g3_assert(!T->weighted);
-	g3_assert(W->IsCongruent());
-	g3_assert(T->IsCompatible(*(W->TT)));
-
-	if (pol) {
-		g3_assert(!!Q && !!U);
-		g3_assert(T->IsCompatible(*Q));
-		g3_assert(T->IsCompatible(*U));
-		g3_assert(!Q->weighted);
-		g3_assert(!U->weighted);
-	}
-
-	if (pol) {
-		for (size_t pix = 0; pix < T->size(); pix++) {
-			if (T->at(pix) == 0 && Q->at(pix) == 0 && U->at(pix) == 0)
-				continue;
-			StokesVector v((*T)[pix], (*Q)[pix], (*U)[pix]);
-			v = W->at(pix) * v;
-		}
+	if (!zero_nans) {
+		T.ConvertToDense();
+		T /= *(W.TT);
 	} else {
-		(*T) *= *(W->TT);
+		for (size_t pix = 0; pix < W.size(); pix++) {
+			double t = T.at(pix);
+			MuellerMatrix m = W.at(pix);
+			bool empty;
+
+			// skip empty pixels
+			empty = (m.tt == 0);
+			if (empty && t == 0)
+				continue;
+
+			// set bad pixels to 0
+			if (empty) {
+				T[pix] = 0;
+				continue;
+			}
+
+			// remove weights
+			T[pix] /= (*(W.TT))[pix];
+		}
 	}
 
-	T->weighted = true;
-	if (pol) {
-		Q->weighted = true;
-		U->weighted = true;
+	T.weighted = false;
+}
+
+void ApplyWeights(G3SkyMap &T, G3SkyMap &Q, G3SkyMap &U, const G3SkyMapWeights &W)
+{
+	g3_assert(W.IsPolarized());
+	g3_assert(!T.weighted);
+	g3_assert(W.IsCongruent());
+	g3_assert(T.IsCompatible(*(W.TT)));
+
+	g3_assert(T.IsCompatible(Q));
+	g3_assert(T.IsCompatible(U));
+	g3_assert(!Q.weighted);
+	g3_assert(!U.weighted);
+
+	for (size_t pix = 0; pix < T.size(); pix++) {
+		if (T.at(pix) == 0 && Q.at(pix) == 0 && U.at(pix) == 0)
+			continue;
+		StokesVector v(T[pix], Q[pix], U[pix]);
+		v = W.at(pix) * v;
 	}
+
+	T.weighted = true;
+	Q.weighted = true;
+	U.weighted = true;
 }
 
-void ApplyWeightsT(G3SkyMapPtr T, G3SkyMapWeightsConstPtr W)
+void ApplyWeightsT(G3SkyMap &T, const G3SkyMapWeights &W)
 {
-	ApplyWeights(T, NULL, NULL, W);
+	g3_assert(!W.IsPolarized());
+	g3_assert(!T.weighted);
+	g3_assert(W.IsCongruent());
+	g3_assert(T.IsCompatible(*(W.TT)));
+
+	T *= *(W.TT);
+	T.weighted = true;
 }
 
-boost::python::tuple GetRaDecMap(G3SkyMapConstPtr m)
+boost::python::tuple GetRaDecMap(const G3SkyMap &m)
 {
 
-	G3SkyMapPtr ra = m->Clone(false);
-	G3SkyMapPtr dec = m->Clone(false);
+	G3SkyMapPtr ra = m.Clone(false);
+	G3SkyMapPtr dec = m.Clone(false);
 
 	// These are going to be dense maps, so just start that way
 	ra->ConvertToDense();
 	dec->ConvertToDense();
 
-	for (size_t i = 0; i < m->size(); i++) {
-		std::vector<double> radec = m->PixelToAngle(i);
+	for (size_t i = 0; i < m.size(); i++) {
+		std::vector<double> radec = m.PixelToAngle(i);
 		(*ra)[i] = radec[0];
 		(*dec)[i] = radec[1];
 	}
@@ -176,16 +180,16 @@ static double wrap_ra(double ra)
 }
 
 
-G3SkyMapMaskPtr GetRaDecMask(G3SkyMapConstPtr m, double ra_left, double ra_right,
+G3SkyMapMaskPtr GetRaDecMask(const G3SkyMap &m, double ra_left, double ra_right,
     double dec_bottom, double dec_top)
 {
-	G3SkyMapMaskPtr mask(new G3SkyMapMask(*m));
+	G3SkyMapMaskPtr mask(new G3SkyMapMask(m));
 
 	ra_left = wrap_ra(ra_left);
 	ra_right = wrap_ra(ra_right);
 
-	for (size_t i = 0; i < m->size(); i++) {
-		std::vector<double> radec = m->PixelToAngle(i);
+	for (size_t i = 0; i < m.size(); i++) {
+		std::vector<double> radec = m.PixelToAngle(i);
 		double ra = wrap_ra(radec[0]);
 		if (ra_left < ra_right && (ra <= ra_left || ra >= ra_right))
 			continue;
@@ -201,44 +205,44 @@ G3SkyMapMaskPtr GetRaDecMask(G3SkyMapConstPtr m, double ra_left, double ra_right
 }
 
 
-void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, G3SkyMapWeightsPtr W, double h, bool invert)
+void FlattenPol(FlatSkyMap &Q, FlatSkyMap &U, G3SkyMapWeightsPtr W, double h, bool invert)
 {
-	if (!(U->IsPolarized()))
+	if (!(U.IsPolarized()))
 		log_warn("Missing pol_conv attribute for flatten_pol, assuming "
 			 "U.pol_conv is set to IAU. This will raise an error "
 			 "in the future.");
 
-	g3_assert(Q->IsCompatible(*U));
-	g3_assert(Q->IsPolFlat() == U->IsPolFlat());
+	g3_assert(Q.IsCompatible(U));
+	g3_assert(Q.IsPolFlat() == U.IsPolFlat());
 	FlatSkyMapPtr flatptr;
 	if (!!W) {
-		g3_assert(W->IsCompatible(*Q));
+		g3_assert(W->IsCompatible(Q));
 		flatptr = std::dynamic_pointer_cast<FlatSkyMap>(W->TQ);
-		g3_assert(flatptr->IsPolFlat() == Q->IsPolFlat());
+		g3_assert(flatptr->IsPolFlat() == Q.IsPolFlat());
 	}
 
-	if (Q->IsPolFlat() && !invert)
+	if (Q.IsPolFlat() && !invert)
 		return;
-	if (!Q->IsPolFlat() && invert)
+	if (!Q.IsPolFlat() && invert)
 		return;
 
-	for (auto i : *Q) {
+	for (auto i : Q) {
 		double q = i.second;
-		double u = U->at(i.first);
+		double u = U.at(i.first);
 		if (q == 0 && u == 0)
 			continue;
 
-		std::vector<double> grad = Q->PixelToAngleGrad(i.first, h);
+		std::vector<double> grad = Q.PixelToAngleGrad(i.first, h);
 		double rot = ATAN2(-grad[0], grad[1]) + ATAN2(-grad[3], -grad[2]);
 		if (invert)
 			rot *= -1.0;
-		if (U->pol_conv == G3SkyMap::COSMO)
+		if (U.pol_conv == G3SkyMap::COSMO)
 			rot *= -1.0;
 		double cr = COS(rot);
 		double sr = SIN(rot);
 
-		(*Q)[i.first] = cr * q - sr * u;
-		(*U)[i.first] = sr * q + cr * u;
+		Q[i.first] = cr * q - sr * u;
+		U[i.first] = sr * q + cr * u;
 
 		if (!W)
 			continue;
@@ -259,8 +263,8 @@ void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, G3SkyMapWeightsPtr W, double h
 		w.qu = wd * sr2 + w.qu * cr2;
 	}
 
-	Q->SetFlatPol(!invert);
-	U->SetFlatPol(!invert);
+	Q.SetFlatPol(!invert);
+	U.SetFlatPol(!invert);
 
 	if (!!W) {
 		flatptr = std::dynamic_pointer_cast<FlatSkyMap>(W->TT);
@@ -279,88 +283,88 @@ void FlattenPol(FlatSkyMapPtr Q, FlatSkyMapPtr U, G3SkyMapWeightsPtr W, double h
 }
 
 
-void ReprojMap(G3SkyMapConstPtr in_map, G3SkyMapPtr out_map, int rebin, bool interp,
+void ReprojMap(const G3SkyMap &in_map, G3SkyMap &out_map, int rebin, bool interp,
     G3SkyMapMaskConstPtr out_map_mask)
 {
 	bool rotate = false; // no transform
 	Quat q_rot; // quaternion for rotating from output to input coordinate system
-	if (in_map->coord_ref != out_map->coord_ref &&
-	    in_map->coord_ref != MapCoordReference::Local &&
-	    out_map->coord_ref != MapCoordReference::Local) {
+	if (in_map.coord_ref != out_map.coord_ref &&
+	    in_map.coord_ref != MapCoordReference::Local &&
+	    out_map.coord_ref != MapCoordReference::Local) {
 		rotate = true;
 		q_rot = get_fk5_j2000_to_gal_quat();
-		if (in_map->coord_ref == MapCoordReference::Equatorial)
+		if (in_map.coord_ref == MapCoordReference::Equatorial)
 			q_rot = ~q_rot;
-	} else if (in_map->coord_ref != out_map->coord_ref) {
+	} else if (in_map.coord_ref != out_map.coord_ref) {
 		log_fatal("Cannot convert input coord_ref %d to output coord_ref %d",
-		    in_map->coord_ref, out_map->coord_ref);
+		    in_map.coord_ref, out_map.coord_ref);
 	}
 
-	if (out_map->pol_type != G3SkyMap::None && out_map->pol_type != in_map->pol_type) {
+	if (out_map.pol_type != G3SkyMap::None && out_map.pol_type != in_map.pol_type) {
 		log_fatal("Cannot convert input pol_type %d to output pol_type %d",
-		    in_map->pol_type, out_map->pol_type);
+		    in_map.pol_type, out_map.pol_type);
 	} else {
-		out_map->pol_type = in_map->pol_type;
+		out_map.pol_type = in_map.pol_type;
 	}
 
 	double s = 1.;
-	if (out_map->IsPolarized() && in_map->IsPolarized()) {
-		if (out_map->pol_type == G3SkyMap::U && out_map->pol_conv != in_map->pol_conv)
+	if (out_map.IsPolarized() && in_map.IsPolarized()) {
+		if (out_map.pol_type == G3SkyMap::U && out_map.pol_conv != in_map.pol_conv)
 			s = -1.;
-	} else if (!(out_map->IsPolarized())) {
-		out_map->pol_conv = in_map->pol_conv;
+	} else if (!(out_map.IsPolarized())) {
+		out_map.pol_conv = in_map.pol_conv;
 	}
 
-	if (!!out_map_mask && !out_map_mask->IsCompatible(*out_map))
+	if (!!out_map_mask && !out_map_mask->IsCompatible(out_map))
 		log_fatal("Mask is not compatible with output map");
 
-	size_t stop = out_map->size();
+	size_t stop = out_map.size();
 	if (rebin > 1) {
 		for (size_t i = 0; i < stop; i++) {
 			if (!!out_map_mask && !out_map_mask->at(i)) {
-				(*out_map)[i] = 0;
+				out_map[i] = 0;
 				continue;
 			}
 			double val = 0;
-			auto quats = out_map->GetRebinQuats(i, rebin);
+			auto quats = out_map.GetRebinQuats(i, rebin);
 			if (rotate)
 				quats = q_rot * quats * ~q_rot;
 			if (interp)
 				for (size_t j = 0; j < quats.size(); j++)
-					val += in_map->GetInterpValue(quats[j]);
+					val += in_map.GetInterpValue(quats[j]);
 			else
 				for (size_t j = 0; j < quats.size(); j++)
-					val += in_map->at(in_map->QuatToPixel(quats[j]));
+					val += in_map.at(in_map.QuatToPixel(quats[j]));
 			if (val != 0) {
 				val /= quats.size();
-				(*out_map)[i] = s * val;
+				out_map[i] = s * val;
 			}
 		}
 	} else {
 		for (size_t i = 0; i < stop; i++) {
 			if (!!out_map_mask && !out_map_mask->at(i)) {
-				(*out_map)[i] = 0;
+				out_map[i] = 0;
 				continue;
 			}
 			double val = 0;
-			auto q = out_map->PixelToQuat(i);
+			auto q = out_map.PixelToQuat(i);
 			if (rotate)
 				q = q_rot * q * ~q_rot;
 			if (interp)
-				val = in_map->GetInterpValue(q);
+				val = in_map.GetInterpValue(q);
 			else
-				val = in_map->at(in_map->QuatToPixel(q));
+				val = in_map.at(in_map.QuatToPixel(q));
 			if (val != 0)
-				(*out_map)[i] = s * val;
+				out_map[i] = s * val;
 		}
 	}
 
-	out_map->weighted = in_map->weighted;
-	out_map->units = in_map->units;
+	out_map.weighted = in_map.weighted;
+	out_map.units = in_map.units;
 }
 
 // algorithm from https://www.johndcook.com/blog/skewness_kurtosis/
-std::vector<double> GetMapMoments(G3SkyMapConstPtr m, G3SkyMapMaskConstPtr mask,
+std::vector<double> GetMapMoments(const G3SkyMap &m, G3SkyMapMaskConstPtr mask,
     int order, bool ignore_zeros, bool ignore_nans, bool ignore_infs)
 {
 	size_t n = 0;
@@ -370,10 +374,10 @@ std::vector<double> GetMapMoments(G3SkyMapConstPtr m, G3SkyMapMaskConstPtr mask,
 	double m4 = 0;
 	double a, b, c;
 
-	for (size_t i = 0; i < m->size(); i++) {
+	for (size_t i = 0; i < m.size(); i++) {
 		if (!!mask && !mask->at(i))
 			continue;
-		double v = m->at(i);
+		double v = m.at(i);
 		if (ignore_zeros && v == 0)
 			continue;
 		if (ignore_nans && v != v)
@@ -411,7 +415,7 @@ std::vector<double> GetMapMoments(G3SkyMapConstPtr m, G3SkyMapMaskConstPtr mask,
 
 
 std::vector<double>
-GetMapHist(G3SkyMapConstPtr m, const std::vector<double> &bin_edges, G3SkyMapMaskConstPtr mask,
+GetMapHist(const G3SkyMap &m, const std::vector<double> &bin_edges, G3SkyMapMaskConstPtr mask,
     bool ignore_zeros, bool ignore_nans, bool ignore_infs)
 {
 
@@ -434,10 +438,10 @@ GetMapHist(G3SkyMapConstPtr m, const std::vector<double> &bin_edges, G3SkyMapMas
 
 	std::vector<double> hist(nbins);
 
-	for (size_t i = 0; i < m->size(); i++) {
+	for (size_t i = 0; i < m.size(); i++) {
 		if (!!mask && !mask->at(i))
 			continue;
-		double v = m->at(i);
+		double v = m.at(i);
 		if (ignore_zeros && v == 0)
 			continue;
 		if (ignore_nans && v != v)
@@ -468,23 +472,23 @@ GetMapHist(G3SkyMapConstPtr m, const std::vector<double> &bin_edges, G3SkyMapMas
 
 
 FlatSkyMapPtr
-ConvolveMap(FlatSkyMapConstPtr map, FlatSkyMapConstPtr kernel)
+ConvolveMap(const FlatSkyMap &map, const FlatSkyMap &kernel)
 {
-	size_t xdim = map->shape()[0];
-	size_t ydim = map->shape()[1];
-	size_t nx = kernel->shape()[0];
-	size_t ny = kernel->shape()[1];
+	size_t xdim = map.shape()[0];
+	size_t ydim = map.shape()[1];
+	size_t nx = kernel.shape()[0];
+	size_t ny = kernel.shape()[1];
 	if ((nx % 2 == 0) || (ny % 2 == 0))
 		log_fatal("Kernel must have odd map dimensions");
 
-	FlatSkyMapPtr outmap = std::dynamic_pointer_cast<FlatSkyMap>(map->Clone(false));
-	if (map->IsDense())
+	FlatSkyMapPtr outmap = std::dynamic_pointer_cast<FlatSkyMap>(map.Clone(false));
+	if (map.IsDense())
 		outmap->ConvertToDense();
 
 	// loop over only non-zero kernel values
 	std::vector<ssize_t> xk, yk;
 	std::vector<double> vk;
-	for (auto i: *kernel) {
+	for (auto i: kernel) {
 		if (i.second == 0)
 			continue;
 		vk.push_back(i.second);
@@ -497,7 +501,7 @@ ConvolveMap(FlatSkyMapConstPtr map, FlatSkyMapConstPtr kernel)
 		for (size_t x = 0; x < xdim; x++) {
 			double v = 0;
 			for (size_t j = 0; j < nk; j++) {
-				double m = map->at(x + xk[j], y + yk[j]);
+				double m = map.at(x + xk[j], y + yk[j]);
 				if (m != 0)
 					v += vk[j] * m;
 			}
@@ -511,29 +515,28 @@ ConvolveMap(FlatSkyMapConstPtr map, FlatSkyMapConstPtr kernel)
 
 
 static FlatSkyMapPtr
-pyconvolve_map(FlatSkyMapConstPtr map, bp::object val)
+pyconvolve_map(const FlatSkyMap &map, bp::object val)
 {
 
-	FlatSkyMapConstPtr kernel;
-	bp::extract<FlatSkyMapConstPtr> ext(val);
+	bp::extract<const FlatSkyMap &> ext(val);
 	if (ext.check())
-		kernel = ext();
-	else
-		kernel = FlatSkyMapConstPtr(new FlatSkyMap(val, map->yres()));
+		return ConvolveMap(map, ext());
+
+	FlatSkyMap kernel(val, map.yres());
 	return ConvolveMap(map, kernel);
 }
 
 
 G3SkyMapMaskPtr
-MakePointSourceMask(G3SkyMapConstPtr map, const std::vector<double> & ra,
+MakePointSourceMask(const G3SkyMap &map, const std::vector<double> & ra,
     const std::vector<double> & dec, const std::vector<double> & radius)
 {
-	G3SkyMapMaskPtr mask(new G3SkyMapMask(*map));
+	G3SkyMapMaskPtr mask(new G3SkyMapMask(map));
 	g3_assert(ra.size() == dec.size());
 	g3_assert(ra.size() == radius.size());
 
 	for (size_t i = 0; i < ra.size(); i++) {
-		auto pixels = map->QueryDisc(ra[i], dec[i], radius[i]);
+		auto pixels = map.QueryDisc(ra[i], dec[i], radius[i]);
 		for (auto p: pixels)
 			(*mask)[p] = true;
 	}

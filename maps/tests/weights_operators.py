@@ -76,8 +76,10 @@ for pol in [True, False]:
     assert(mw.npix_allocated == 1)
 
     # weights handling
-
-    remove_weights(mt, mq, mu, mw)
+    if pol:
+        remove_weights(mt, mq, mu, mw)
+    else:
+        remove_weights_t(mt, mw)
     assert(not mt.weighted)
     assert(np.allclose(mw[15], mat * 5))
     ivec = np.linalg.solve(mat * 5, vec * 10) if pol else vec * 2 / mat
@@ -106,7 +108,10 @@ for pol in [True, False]:
     assert(not mt.sparse)
     assert(mt.npix_allocated == mt.size)
 
-    apply_weights(mt, mq, mu, mw)
+    if pol:
+        apply_weights(mt, mq, mu, mw)
+    else:
+        apply_weights_t(mt, mw)
     assert(mt.weighted)
     if pol:
         assert(np.allclose([mt[15], mq[15], mu[15]], vec * 10))
@@ -151,6 +156,7 @@ for pol in [True, False]:
         mu2 = mu.copy()
         mw2 = mw.copy()
         assert(not mq2.flat_pol)
+        assert(not mu2.flat_pol)
         flatten_pol(mq2, mu2, mw2)
         assert(mq2.flat_pol)
         assert(not np.allclose(mq2, mq))
