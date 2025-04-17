@@ -815,8 +815,11 @@ HealpixSkyMap is a G3SkyMap with the extra meta information about the particular
 	``HealpixSkyMap( (int)nside [, (bool)weighted=True [, (bool)nested=False [, (MapCoordReference)coord_ref=spt3g.maps.MapCoordReference.Equatorial [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.Tcmb [, (MapPolType)pol_type=spt3g.maps.MapPolType.none [, (bool)shift_ra=False [, (MapPolConv)pol_conv=spt3g.maps.MapPolConv.none]]]]]]])`` :
 	    Instantiate a HealpixSkyMap with given nside
 	
+	``HealpixSkyMap( (UInt64Vector)nside, (DoubleVector)index, (int)data [, (bool)weighted=True [, (bool)nested=False [, (MapCoordReference)coord_ref=spt3g.maps.MapCoordReference.Equatorial [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.Tcmb [, (MapPolType)pol_type=spt3g.maps.MapPolType.none [, (MapPolConv)pol_conv=spt3g.maps.MapPolConv.none]]]]]])`` :
+	    Instantiate a sparse HealpixSkyMap from existing index and data arrays corresponding to the given nside
+	
 	``HealpixSkyMap( (object)data [, (bool)weighted=True [, (bool)nested=False [, (MapCoordReference)coord_ref=spt3g.maps.MapCoordReference.Equatorial [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.Tcmb [, (MapPolType)pol_type=spt3g.maps.MapPolType.none [, (bool)shift_ra=False [, (MapPolConv)pol_conv=spt3g.maps.MapPolConv.none]]]]]]])`` :
-	    Instantiate a Healpix map from existing data. If the data are a single numpy array, assumes this is a dense map. Otherwise, pass an (indices, data, nside) tuple.
+	    Instantiate a dense Healpix map from existing data.
 	
 	``HealpixSkyMap( [ (HealpixSkyMap)healpix_map])``
 
