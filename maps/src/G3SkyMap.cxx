@@ -1,5 +1,6 @@
 #include <pybindings.h>
 #include <serialization.h>
+#include <container_pybindings.h>
 #include <G3Units.h>
 #include <maps/G3SkyMap.h>
 #include <maps/G3SkyMapMask.h>
