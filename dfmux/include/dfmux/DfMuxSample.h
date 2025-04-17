@@ -29,10 +29,6 @@ public:
 	template <class A> void serialize(A &ar, unsigned v);
 };
 
-namespace cereal {
-	template <class A> struct specialize<A, DfMuxSample, cereal::specialization::member_serialize> {};
-}
-
 G3_POINTERS(DfMuxSample);
 G3_SERIALIZABLE(DfMuxSample, 1);
 

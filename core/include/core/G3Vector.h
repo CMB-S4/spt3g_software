@@ -69,9 +69,6 @@ public:
 
 #define G3VECTOR_OF(x, y) \
 typedef G3Vector< x > y; \
-namespace cereal { \
-	template <class A> struct specialize<A, y, cereal::specialization::member_serialize> {}; \
-} \
 G3_POINTERS(y); \
 G3_SERIALIZABLE(y, 1);
 
@@ -92,11 +89,8 @@ G3VECTOR_OF(G3Time, G3VectorTime);
 
 #define G3VECTOR_SPLIT(x, y, v) \
 typedef G3Vector< x > y; \
-namespace cereal { \
-	template <class A> struct specialize<A, y, cereal::specialization::member_load_save> {}; \
-} \
 G3_POINTERS(y); \
-G3_SERIALIZABLE(y, v);
+G3_SPLIT_SERIALIZABLE(y, v);
 
 G3VECTOR_SPLIT(int64_t, G3VectorInt, 2);
 

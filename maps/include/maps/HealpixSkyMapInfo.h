@@ -80,11 +80,6 @@ private:
 };
 
 G3_POINTERS(HealpixSkyMapInfo);
-
-namespace cereal {
-	template <class A> struct specialize<A, HealpixSkyMapInfo, cereal::specialization::member_load_save> {};
-}
-
-G3_SERIALIZABLE(HealpixSkyMapInfo, 1);
+G3_SPLIT_SERIALIZABLE(HealpixSkyMapInfo, 1);
 
 #endif //#ifndef _MAPS_HEALPIXSKYMAPINFO_H

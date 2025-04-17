@@ -26,13 +26,6 @@ public:
 	template <class A> void serialize(A &ar, unsigned v);
 };
 
-// This specialization tells cereal to use G3TimesampleMap::serialize
-// and not the base class' load/save.
-namespace cereal {
-	template <class A> struct specialize<
-	    A, G3TimesampleMap, cereal::specialization::member_serialize> {};
-}
-
 G3_POINTERS(G3TimesampleMap);
 G3_SERIALIZABLE(G3TimesampleMap, 0);
 

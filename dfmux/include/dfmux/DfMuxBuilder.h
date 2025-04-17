@@ -38,11 +38,6 @@ struct DfMuxMetaSample : public G3FrameObject, public std::map<int32_t, DfMuxBoa
 G3_POINTERS(DfMuxMetaSample);
 G3_SERIALIZABLE(DfMuxMetaSample, 1);
 
-namespace cereal {
-	template <class A> struct specialize<A, DfMuxBoardSamples, cereal::specialization::member_serialize> {};
-	template <class A> struct specialize<A, DfMuxMetaSample, cereal::specialization::member_serialize> {};
-}
-
 /*
  * G3EventBuilder subclass for processing DfMux data. Collects data from
  * DfMuxCollector (or LegacyDfMuxCollector) and organizes it into Timepoint

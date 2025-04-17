@@ -135,11 +135,6 @@ private:
 };
 
 G3_POINTERS(FlatSkyProjection);
-
-namespace cereal {
-  template <class A> struct specialize<A, FlatSkyProjection, cereal::specialization::member_load_save> {};
-}
-
-G3_SERIALIZABLE(FlatSkyProjection, 4);
+G3_SPLIT_SERIALIZABLE(FlatSkyProjection, 4);
 
 #endif //#ifndef _MAPS_FLATSKYPROJECTION_H

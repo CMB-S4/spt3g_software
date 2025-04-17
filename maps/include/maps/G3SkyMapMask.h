@@ -115,12 +115,8 @@ private:
 	SET_LOGGER("G3SkyMapMask");
 };
 
-namespace cereal {
-  template <class A> struct specialize<A, G3SkyMapMask, cereal::specialization::member_load_save> {};
-}
-
 G3_POINTERS(G3SkyMapMask);
-G3_SERIALIZABLE(G3SkyMapMask, 2);
+G3_SPLIT_SERIALIZABLE(G3SkyMapMask, 2);
 
 #endif
 

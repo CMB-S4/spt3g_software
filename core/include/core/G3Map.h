@@ -64,9 +64,6 @@ public:
 
 #define G3MAP_OF(key, value, name) \
 typedef G3Map< key, value > name; \
-namespace cereal { \
-        template <class A> struct specialize<A, name, cereal::specialization::member_serialize> {}; \
-} \
 G3_POINTERS(name); \
 G3_SERIALIZABLE(name, 1);
 
@@ -82,19 +79,13 @@ G3MAP_OF(std::string, std::string, G3MapString);
 
 #define G3MAP_SPLIT(key, value, name, version) \
 typedef G3Map< key, value > name; \
-namespace cereal { \
-	template <class A> struct specialize<A, name, cereal::specialization::member_load_save> {}; \
-} \
 G3_POINTERS(name); \
-G3_SERIALIZABLE(name, version);
+G3_SPLIT_SERIALIZABLE(name, version);
 
 G3MAP_SPLIT(std::string, std::vector<int64_t>, G3MapVectorInt, 2);
 G3MAP_SPLIT(std::string, int64_t, G3MapInt, 2);
 
-namespace cereal {
-        template <class A> struct specialize<A, G3MapFrameObject, cereal::specialization::member_load_save> {};
-}
 G3_POINTERS(G3MapFrameObject);
-G3_SERIALIZABLE(G3MapFrameObject, 1);
+G3_SPLIT_SERIALIZABLE(G3MapFrameObject, 1);
 #endif
 

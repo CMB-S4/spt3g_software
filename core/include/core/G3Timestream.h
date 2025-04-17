@@ -288,12 +288,7 @@ public:
 
 G3_POINTERS(G3TimestreamMap);
 
-namespace cereal {
-	template <class A> struct specialize<A, G3Timestream, cereal::specialization::member_load_save> {};
-	template <class A> struct specialize<A, G3TimestreamMap, cereal::specialization::member_serialize> {};
-}
-
-G3_SERIALIZABLE(G3Timestream, 4);
+G3_SPLIT_SERIALIZABLE(G3Timestream, 4);
 G3_SERIALIZABLE(G3TimestreamMap, 3);
 
 #endif
