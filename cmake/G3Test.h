@@ -142,7 +142,7 @@ G3Test::testEquivalence(__FILE__, __LINE__, left, right, STRINGIZE(left), STRING
 /// other catch block.
 #ifdef USE_PYTHON
 #define G3TEST_CATCH_PYTHON_ERROR \
-catch(const boost::python::error_already_set& ex){ \
+catch(const pybind11::error_already_set& ex){ \
 	PyErr_Print(); \
 }
 #else

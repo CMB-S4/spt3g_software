@@ -4,6 +4,8 @@
 #include <core/G3Reader.h>
 #include <core/G3Writer.h>
 
+#include <pybind11/embed.h>
+
 /*
  * Example of a small C++ program that is the equivalent of the
  * spt3g-dump command.
@@ -30,9 +32,11 @@ main(int argc, const char **argv)
 	}
 
 	// Initialize the python interpreter, and release the GIL.
-	// Set the argument to true to instead hold the GIL.
 	// Comment this out to disable the interpreter.
-	G3PythonInterpreter interp(false);
+	pybind11::scoped_interpreter interp;
+	pybind11::gil_scoped_release gil;
+	// Comment this line to keep the GIL instead
+	// pybind11::gil_scoped_acquire gil;
 
 	G3Pipeline pipe;
 

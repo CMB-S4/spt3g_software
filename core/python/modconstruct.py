@@ -1,10 +1,4 @@
 from . import G3Module, G3Pipeline, G3PipelineInfo, G3Frame, G3FrameType, G3Time, G3ModuleConfig, log_fatal
-try:
-    from . import multiprocess
-    multiproc_avail = True
-except ImportError:
-    multiproc_avail = False
-    pass
 import types
 import re
 
@@ -120,7 +114,9 @@ def indexmod(func):
 def build_pymodule(pycallable, *args, **kwargs):
     '''Convert a python callable and arguments into a core.G3Module by hook or by crook'''
 
-    if isinstance(pycallable, G3Module):
+    from .._libcore import G3ModuleBase
+
+    if isinstance(pycallable, G3ModuleBase):
         return pycallable
 
     if not callable(pycallable):
@@ -151,7 +147,7 @@ def build_pymodule(pycallable, *args, **kwargs):
             log_fatal('Cannot pass through arguments when passed instantiated class', unit = 'G3Pipeline')
 
     # See if it was a Python G3Module subclass
-    if isinstance(pycallable, G3Module):
+    if isinstance(pycallable, G3ModuleBase):
         return pycallable
 
     # This is a python callable that is not a module, so wrap it
@@ -268,13 +264,14 @@ def PipelineAddCallable(self, callable, name=None, subprocess=False, **kwargs):
 
         self.nameprefix = oldnameprefix
 
-    # Otherwise it's a module
-    elif subprocess:
-        if not multiproc_avail:
-            raise ImportError('Multiprocess not available')
-        rv = self._Add_(build_pymodule(multiprocess.Subproc(build_pymodule(callable, **kwargs), name=name)), name=name)
     else:
-        rv = self._Add_(build_pymodule(callable, **kwargs), name=name)
+        # Otherwise it's a module
+        pymod = build_pymodule(callable, **kwargs)
+        if subprocess:
+            from .multiprocess import Subproc
+            pymod = build_pymodule(Subproc(pymod, name=name))
+
+        rv = self._Add_(pymod, name=name)
 
     if addpipelineinfo:
         self._Add_(self._pipelineinfo, name='_pipelineinfo')

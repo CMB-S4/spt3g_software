@@ -18,22 +18,11 @@ def G3Timestream_getitem(x, y):
     return it
 
 @property
-def timestream_shape(ts):
-    return numpy.asarray(ts).shape
-
-@property
-def timestream_ndim(ts):
-    return len(numpy.asarray(ts).shape)
-
-@property
 def timestream_dtype(ts):
     return numpy.asarray(ts).dtype
 
 G3Timestream.__getitem__ = G3Timestream_getitem
 G3Timestream.__setitem__ = lambda x, y, z: numpy.asarray(x).__setitem__(y, z)
-G3Timestream.__len__ = lambda x: numpy.asarray(x).__len__()
-G3Timestream.shape = timestream_shape
-G3Timestream.ndim = timestream_ndim
 G3Timestream.dtype = timestream_dtype
 G3TimestreamMap.dtype = timestream_dtype
 
@@ -225,7 +214,7 @@ def _concatenate_timestream_maps(cls, ts_map_lst, ts_rounding_error=0.6, ts_inte
     tsm : G3TimestreamMap instance
         The concatenation of the input list of G3TimestreamMap objects
     """
-    keys = ts_map_lst[0].keys()
+    keys = list(ts_map_lst[0].keys())
     skeys = set(keys)
     for tsm in ts_map_lst[1:]:
         if skip_missing:
@@ -273,29 +262,6 @@ def concatenate_timestreams(ts_lst, ts_rounding_error=0.6, ts_interp_threshold=0
     """
     return ts_lst[0].concatenate(ts_lst, ts_rounding_error, ts_interp_threshold)
 
-
-@property
-def timestream_elapsed(self):
-    '''
-    Compute elapsed time array for samples.
-    '''
-    if self.n_samples == 1:
-        return numpy.array([0]).astype(int)
-    return (numpy.arange(self.n_samples) / self.sample_rate).astype(int)
-
-G3Timestream.elapsed = timestream_elapsed
-G3TimestreamMap.elapsed = timestream_elapsed
-
-@property
-def timestream_t(self):
-    '''
-    Compute time vector for samples.
-    '''
-    times = self.elapsed + self.start.time
-    return G3VectorTime(times)
-
-G3Timestream.times = timestream_t
-G3TimestreamMap.times = timestream_t
 
 @property
 def tsm_names(self):

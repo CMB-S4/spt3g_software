@@ -68,16 +68,17 @@ static bool operator == (const ACUStatus &a, const ACUStatus &b) {
 	return false;
 }
 
-PYBINDINGS("gcp") {
-	boost::python::enum_<enum ACUStatus::ACUState>("ACUState")
+PYBINDINGS("gcp", scope) {
+	register_enum<ACUStatus::ACUState>(scope, "ACUState")
 	    .value("IDLE", ACUStatus::IDLE)
 	    .value("TRACKING", ACUStatus::TRACKING)
 	    .value("WAIT_RESTART", ACUStatus::WAIT_RESTART)
 	    .value("RESYNC", ACUStatus::RESYNC)
 	;
 
-	EXPORT_FRAMEOBJECT(ACUStatus, init<>(), "ACU Status information, as "
+	register_frameobject<ACUStatus>(scope, "ACUStatus", "ACU Status information, as "
 	  "reported by the ACU")
+	    .def(py::init<>())
 	    .def_readwrite("time", &ACUStatus::time)
 	    .def_readwrite("az_pos", &ACUStatus::az_pos)
 	    .def_readwrite("el_pos", &ACUStatus::el_pos)
@@ -93,8 +94,8 @@ PYBINDINGS("gcp") {
 	    .def_readwrite("acu_status", &ACUStatus::acu_status)
 	;
 
-	register_vector_of<ACUStatus>("_ACUStatusVectorBase");
-	register_g3vector<ACUStatus>("ACUStatusVector", "Array of ACUStatus "
+	register_vector_of<ACUStatus>(scope, "_ACUStatusBase");
+	register_g3vector<ACUStatusVector>(scope, "ACUStatusVector", "Array of ACUStatus "
 	   "objects, usually time-ordered");
 }
 

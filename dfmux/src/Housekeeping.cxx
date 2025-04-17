@@ -180,9 +180,10 @@ G3_SERIALIZABLE_CODE(HkMezzanineInfo);
 G3_SERIALIZABLE_CODE(HkBoardInfo);
 G3_SERIALIZABLE_CODE(DfMuxHousekeepingMap);
 
-PYBINDINGS("dfmux") {
-	EXPORT_FRAMEOBJECT(HkChannelInfo, init<>(), "Mux channel status "
+PYBINDINGS("dfmux", scope) {
+	register_frameobject<HkChannelInfo>(scope, "HkChannelInfo", "Mux channel status "
 	  "(configuration and sensors). Usually a part of an HkModuleInfo.")
+	    .def(py::init<>())
 	    .def_readwrite("channel_number", &HkChannelInfo::channel_number,
                "1-indexed channel number.")
 	    .def_readwrite("carrier_amplitude",
@@ -240,11 +241,12 @@ PYBINDINGS("dfmux") {
 	    .def_readwrite("bias_frequency", &HkChannelInfo::bias_frequency,
 	       "NCO-adjusted bias frequency (mkid only)")
 	;
-	register_map<std::map<int, HkChannelInfo> >("HkChannelInfoMap",
+	register_map<std::map<int, HkChannelInfo> >(scope, "HkChannelInfoMap",
 	    "Mapping of channel number (1-indexed) to channel status "
 	    "information");
 
-	EXPORT_FRAMEOBJECT(HkModuleInfo, init<>(), "Mux module status")
+        register_frameobject<HkModuleInfo>(scope, "HkModuleInfo", "Mux module status")
+	    .def(py::init<>())
 	    .def_readwrite("module_number", &HkModuleInfo::module_number,
 	       "1-indexed module number on this mezzanine")
 	    .def_readwrite("carrier_gain", &HkModuleInfo::carrier_gain,
@@ -283,11 +285,12 @@ PYBINDINGS("dfmux") {
 	       "Mapping from 1-indexed channel numbers to channel housekeeping "
 	       "data")
 	;
-	register_map<std::map<int, HkModuleInfo> >("HkModuleInfoMap",
+	register_map<std::map<int, HkModuleInfo> >(scope, "HkModuleInfoMap",
 	    "Mapping from 1-indexed module numbers to module-specific "
 	    "housekeeping data");
 
-	EXPORT_FRAMEOBJECT(HkMezzanineInfo, init<>(), "Mux mezzanine status")
+	register_frameobject<HkMezzanineInfo>(scope, "HkMezzanineInfo", "Mux mezzanine status")
+	    .def(py::init<>())
 	    .def_readwrite("power", &HkMezzanineInfo::power, "True if on")
 	    .def_readwrite("present", &HkMezzanineInfo::present, "True if exists")
 	    .def_readwrite("serial", &HkMezzanineInfo::serial,
@@ -314,13 +317,14 @@ PYBINDINGS("dfmux") {
 	    .def_readwrite("squid_heater", &HkMezzanineInfo::squid_heater,
 	        "Power level of SQUID header control")
 	;
-	register_map<std::map<int, HkMezzanineInfo> >("HkMezzanineInfoMap",
+	register_map<std::map<int, HkMezzanineInfo> >(scope, "HkMezzanineInfoMap",
 	    "1-indexed mapping of mezzanine ID to mezzanine-specific "
 	    "housekeeping data");
 
-	EXPORT_FRAMEOBJECT(HkBoardInfo, init<>(), "Mux board status. Includes "
+	register_frameobject<HkBoardInfo>(scope, "HkBoardInfo", "Mux board status. Includes "
 	  "both configuration and sensor readings for board generic quantities "
 	  "and a list of quantities for the mezzanines.")
+	    .def(py::init<>())
 	    .def_readwrite("timestamp", &HkBoardInfo::timestamp,
 	       "Time at which housekeeping data collected")
 	    .def_readwrite("timestamp_port", &HkBoardInfo::timestamp_port,
@@ -346,7 +350,7 @@ PYBINDINGS("dfmux") {
 	       "1-indexed mapping from mezzanine ID to mezzanine-specific data")
 	;
 
-	register_g3map<DfMuxHousekeepingMap>("DfMuxHousekeepingMap",
+	register_g3map<DfMuxHousekeepingMap>(scope, "DfMuxHousekeepingMap",
 	   "Container structure for housekeeping data from all DfMux boards, "
 	   "indexed by board serial number.");
 }

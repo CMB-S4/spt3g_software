@@ -1,5 +1,6 @@
 #include <pybindings.h>
 #include <serialization.h>
+#include <container_pybindings.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,8 +8,6 @@
 #include <sstream>
 
 #include <dfmux/DfMuxBuilder.h>
-#include <std_map_indexing_suite.hpp>
-#include <cereal/types/map.hpp>
 
 template <class A> void DfMuxBoardSamples::serialize(A &ar, const unsigned v)
 {
@@ -212,15 +211,11 @@ void DfMuxBuilder::ProcessNewData()
 	}
 }
 
-PYBINDINGS("dfmux")
+PYBINDINGS("dfmux", scope)
 {
-	using namespace boost::python;
-
-	class_<DfMuxBoardSamples, bases<G3FrameObject>,
-	  DfMuxBoardSamplesPtr>("DfMuxBoardSamples",
+	register_g3map<DfMuxBoardSamples>(scope, "DfMuxBoardSamples",
 	  "Container structure for samples from modules on one board, mapping "
 	  "0-indexed module and block IDs to a dfmux.DfMuxSample.")
-	    .def(std_map_indexing_suite<DfMuxBoardSamples, true>())
 	    .def_readwrite("nmodules", &DfMuxBoardSamples::nmodules,
 	      "Number of modules expected to report from this board")
 	    .def_readwrite("nblocks", &DfMuxBoardSamples::nblocks,
@@ -229,33 +224,26 @@ PYBINDINGS("dfmux")
 	      "Number of channels per block expected to report from this board")
 	    .def("Complete", &DfMuxBoardSamples::Complete,
 	      "True if this structure contains data from all expected modules and blocks")
-	    .def_pickle(g3frameobject_picklesuite<DfMuxBoardSamples>())
 	;
-	register_pointer_conversions<DfMuxBoardSamples>();
 
-	class_<DfMuxMetaSample, bases<G3FrameObject>,
-	  DfMuxMetaSamplePtr>("DfMuxMetaSample",
+	register_g3map<DfMuxMetaSample>(scope, "DfMuxMetaSample",
 	  "Container structure for coincident samples from all boards. "
 	  "Individual board data, stored in dfmux.DfMuxBoardSamples classes, "
 	  "is contained indexed by board serial number.")
-	    .def(std_map_indexing_suite<DfMuxMetaSample, false>())
-	    .def_pickle(g3frameobject_picklesuite<DfMuxMetaSample>())
 	;
-	register_pointer_conversions<DfMuxMetaSample>();
 
-	class_<DfMuxBuilder, bases<G3EventBuilder>, DfMuxBuilderPtr,
-	  boost::noncopyable>("DfMuxBuilder",
+	register_g3module<DfMuxBuilder, G3EventBuilder>(scope, "DfMuxBuilder",
 	  "Processing module for data from DfMux boards. Reads data from "
 	  "boards data acquisition boards, requiring that data from all "
 	  "be timestamped to within collation_tolerance (default 10 "
 	  "microseconds) to be considered part of a single sample. If boards "
 	  "is an integer, listens for that number. If a list of integers, "
 	  "DfMuxBuilder will filter for only boards with serial numbers "
-	  "in the list.",
-	  init<int, boost::python::optional<int64_t> >(
-	   args("boards", "collation_tolerance")))
-	    .def(init<std::vector<int>, boost::python::optional<int64_t> >(args("boards", "collation_tolerance")))
+	  "in the list.")
+	    .def(py::init<int, int64_t>(), py::arg("boards"),
+	        py::arg("collation_tolerance")=10*G3Units::ms)
+	    .def(py::init<std::vector<int>, int64_t>(), py::arg("boards"),
+	        py::arg("collation_tolerance")=10*G3Units::ms)
 	;
-	implicitly_convertible<DfMuxBuilderPtr, G3ModulePtr>();
 }
 

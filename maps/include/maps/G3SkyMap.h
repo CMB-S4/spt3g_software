@@ -116,22 +116,22 @@ public:
 	// Comparison operations
 
 	// <
-	virtual G3SkyMapMask operator<(const G3SkyMap &rhs);
-	virtual G3SkyMapMask operator<=(const G3SkyMap &rhs);
-	virtual G3SkyMapMask operator<(double rhs);
-	virtual G3SkyMapMask operator<=(double rhs);
+	virtual G3SkyMapMask operator<(const G3SkyMap &rhs) const;
+	virtual G3SkyMapMask operator<=(const G3SkyMap &rhs) const;
+	virtual G3SkyMapMask operator<(double rhs) const;
+	virtual G3SkyMapMask operator<=(double rhs) const;
 
 	// ==
-	virtual G3SkyMapMask operator==(const G3SkyMap &rhs);
-	virtual G3SkyMapMask operator!=(const G3SkyMap &rhs);
-	virtual G3SkyMapMask operator==(double rhs);
-	virtual G3SkyMapMask operator!=(double rhs);
+	virtual G3SkyMapMask operator==(const G3SkyMap &rhs) const;
+	virtual G3SkyMapMask operator!=(const G3SkyMap &rhs) const;
+	virtual G3SkyMapMask operator==(double rhs) const;
+	virtual G3SkyMapMask operator!=(double rhs) const;
 
 	// <
-	virtual G3SkyMapMask operator>(const G3SkyMap &rhs);
-	virtual G3SkyMapMask operator>=(const G3SkyMap &rhs);
-	virtual G3SkyMapMask operator>(double rhs);
-	virtual G3SkyMapMask operator>=(double rhs);
+	virtual G3SkyMapMask operator>(const G3SkyMap &rhs) const;
+	virtual G3SkyMapMask operator>=(const G3SkyMap &rhs) const;
+	virtual G3SkyMapMask operator>(double rhs) const;
+	virtual G3SkyMapMask operator>=(double rhs) const;
 
 	virtual bool all(G3SkyMapMaskConstPtr where=NULL) const;
 	virtual bool any(G3SkyMapMaskConstPtr where=NULL) const;

@@ -7,7 +7,6 @@
 
 #include <G3Frame.h>
 #include <G3TimeStamp.h>
-#include <serialization.h>
 
 #include <cereal/types/complex.hpp>
 #include <cereal/types/vector.hpp>

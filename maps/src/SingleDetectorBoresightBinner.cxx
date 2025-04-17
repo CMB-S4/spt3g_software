@@ -34,9 +34,8 @@ private:
 	SET_LOGGER("SingleDetectorBoresightBinner");
 };
 
-EXPORT_G3MODULE("maps", SingleDetectorBoresightBinner,
-    (init<const G3SkyMap &, std::string, std::string>
-     ((arg("stub_map"), arg("pointing"), arg("timestreams")))),
+PYBINDINGS("maps", scope) {
+register_g3module<SingleDetectorBoresightBinner>(scope, "SingleDetectorBoresightBinner",
 "SingleDetectorBoresightBinner(stub_map, pointing, timestreams)\n"
 "\n"
 "Makes simple binned maps of the sky, in boresight coordinates, for every \n"
@@ -101,7 +100,12 @@ EXPORT_G3MODULE("maps", SingleDetectorBoresightBinner,
 "        timestreams='PolyFilteredTimestreams',\n"
 "        pointing='OffsetRotation',\n"
 "    )\n"
-);
+)
+  .def(py::init<const G3SkyMap &, std::string, std::string>(),
+     py::arg("stub_map"), py::arg("pointing"), py::arg("timestreams"))
+;
+};
+
 
 SingleDetectorBoresightBinner::SingleDetectorBoresightBinner(
     const G3SkyMap &stub_map, std::string pointing, std::string timestreams) :

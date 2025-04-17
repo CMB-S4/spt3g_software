@@ -84,64 +84,75 @@ private:
 	G3OutputStreamBuffer sbuf_;
 };
 
-template <class T>
-struct g3frameobject_picklesuite : boost::python::pickle_suite
+// Pickling interface
+// For classes with private default constructors, privately add this as a friend class.
+class G3Pickler
 {
-	static boost::python::tuple getstate(boost::python::object obj)
-	{
-		namespace bp = boost::python;
+public:
+	template <class T> static
+	auto getstate(const py::object &self) {
 		std::vector<char> buffer;
 		G3BufferOutputStream os(buffer);
 		{
 			cereal::PortableBinaryOutputArchive ar(os);
-			ar << bp::extract<const T &>(obj)();
+			ar << self.cast<const T &>();
 		}
 		os.flush();
 
-		return boost::python::make_tuple(obj.attr("__dict__"),
-		    bp::object(bp::handle<>(
-		    PyBytes_FromStringAndSize(&buffer[0], buffer.size()))));
+		py::bytes data(buffer.data(), buffer.size());
+
+		py::dict py_state;
+		if (py::hasattr(self, "__dict__"))
+			py_state = self.attr("__dict__");
+
+		return py::make_tuple(py_state, data);
 	}
 
-	static void setstate(boost::python::object obj,	
-	    boost::python::tuple state)
-	{
-		namespace bp = boost::python;
-		Py_buffer view;
-		PyObject_GetBuffer(bp::object(state[1]).ptr(), &view,
-		    PyBUF_SIMPLE);
+	template <class T> static
+	auto setstate(const py::tuple &state) {
+		auto py_state = state[0].cast<py::dict>();
 
-		G3BufferInputStream fis((char *)view.buf, view.len);
+		auto buffer = state[1].cast<std::string_view>();
+		G3BufferInputStream fis((char *)&buffer[0], buffer.size());
 		cereal::PortableBinaryInputArchive ar(fis);
 
-		bp::extract<bp::dict>(obj.attr("__dict__"))().update(state[0]);
-		ar >> bp::extract<T &>(obj)();
-		PyBuffer_Release(&view);
+		T obj;
+		ar >> obj;
+
+		return std::make_pair(std::move(obj), py_state);
 	}
 };
 
-#define EXPORT_FRAMEOBJECT(T, initf, docstring) \
-	boost::python::class_<T, boost::python::bases<G3FrameObject>, std::shared_ptr<T> >(#T, docstring, boost::python::initf) \
-	    .def(boost::python::init<const T &>()) \
-	    .def_pickle(g3frameobject_picklesuite<T>())
-
-#define EXPORT_FRAMEOBJECT_NOINITNAMESPACE(T, initf, docstring) \
-	boost::python::class_<T, boost::python::bases<G3FrameObject>, std::shared_ptr<T> >(#T, docstring, initf) \
-	    .def(boost::python::init<const T &>()) \
-	    .def_pickle(g3frameobject_picklesuite<T>())
-
+// Call this function in a class .def method to enable pickling
 template <class T>
-inline uint32_t
-_g3_class_version(T *)
+auto
+g3frameobject_picklesuite()
 {
-	return cereal::detail::Version<T>::version;
-}
+	return py::pickle(&G3Pickler::getstate<T>, &G3Pickler::setstate<T>);
+};
 
-#define G3_CHECK_VERSION(v) \
-	if ((uint32_t)v > _g3_class_version(this)) \
-		log_fatal("Trying to read newer class version (%d) than " \
-		    "supported (%d). Please upgrade your software.", v, \
-		    _g3_class_version(this));
-	
+// Register a G3FrameObject-derived class.  Includes a copy constructor,
+// pickling interface, and string representation.
+template <typename T, typename... Bases, typename... Args>
+auto
+register_frameobject(py::module_ &scope, const std::string &name, Args&&...args)
+{
+	auto cls = register_class<T, Bases..., G3FrameObject>(scope, name.c_str(),
+	    std::forward<Args>(args)...);
+
+	// copy constructor
+	cls.def(py::init<const T &>(), "Copy constructor");
+
+	// pickling infrastructure
+	cls.def(g3frameobject_picklesuite<T>());
+
+	// string representation
+	cls.def("__str__", &T::Summary)
+	    .def("Summary", &T::Summary, "Short (one-line) description of the object")
+	    .def("Description", &T::Description,
+	        "Long-form human-readable description of the object");
+
+	return cls;
+}
 
 #endif

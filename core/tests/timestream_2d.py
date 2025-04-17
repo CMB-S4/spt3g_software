@@ -21,7 +21,7 @@ buffer1d = numpy.asarray(list(tsm.values()))
 
 buffer2d = numpy.asarray(tsm)
 
-assert((numpy.asarray(keys) == numpy.asarray(tsm.keys())).all())
+numpy.testing.assert_array_equal(keys, list(tsm.keys()))
 assert(buffer1d.shape == buffer2d.shape)
 assert(buffer2d.shape == (4,600))
 assert((buffer1d == buffer2d).all())

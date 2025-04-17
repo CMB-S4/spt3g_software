@@ -73,22 +73,26 @@ G3_SERIALIZABLE_CODE(G3Int);
 G3_SERIALIZABLE_CODE(G3Double);
 G3_SERIALIZABLE_CODE(G3String);
 
-PYBINDINGS("core") {
-	EXPORT_FRAMEOBJECT(G3Bool, init<bool>(), "Serializable boolean type")
+PYBINDINGS("core", scope) {
+	register_frameobject<G3Bool>(scope, "G3Bool", "Serializable boolean type")
+	    .def(py::init<bool>())
 	    .def_readwrite("value", &G3Bool::value)
 	    .def("__nonzero__", &G3Bool::truth)
 	    .def("__bool__", &G3Bool::truth)
 	;
 
-	EXPORT_FRAMEOBJECT(G3Int, init<int64_t>(), "Serializable integer type")
+	register_frameobject<G3Int>(scope, "G3Int", "Serializable integer type")
+	    .def(py::init<int64_t>())
 	    .def_readwrite("value", &G3Int::value)
 	;
 
-	EXPORT_FRAMEOBJECT(G3Double, init<double>(), "Serializable double")
+	register_frameobject<G3Double>(scope, "G3Double", "Serializable double")
+	    .def(py::init<double>())
 	    .def_readwrite("value", &G3Double::value)
 	;
 
-	EXPORT_FRAMEOBJECT(G3String, init<std::string>(), "Serializable string")
+	register_frameobject<G3String>(scope, "G3String", "Serializable string")
+	    .def(py::init<std::string>())
 	    .def_readwrite("value", &G3String::value)
 	;
 }
