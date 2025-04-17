@@ -717,36 +717,37 @@ PYBINDINGS("maps")
 {
 	using namespace boost::python;
 
-	bp::enum_<MapProjection>("MapProjection")
-	    .value("Proj0", Proj0)
-	    .value("Proj1", Proj1)
-	    .value("Proj2", Proj2)
-	    .value("Proj3", Proj3)
-	    .value("Proj4", Proj4)
-	    .value("Proj5", Proj5)
-	    .value("Proj6", Proj6)
-	    .value("Proj7", Proj7)
+	auto cls = bp::enum_<MapProjection>("MapProjection")
 	    .value("Proj8", Proj8)
-	    .value("Proj9", Proj9)
-
-	    .value("ProjSansonFlamsteed", ProjSansonFlamsteed)
 	    .value("ProjSFL", ProjSFL)
-	    .value("ProjPlateCarree", ProjPlateCarree)
 	    .value("ProjCAR", ProjCAR)
-	    .value("ProjOrthographic", ProjOrthographic)
 	    .value("ProjSIN", ProjSIN)
-	    .value("ProjStereographic", ProjStereographic)
+	    .value("ProjARC", ProjARC)
 	    .value("ProjSTG", ProjSTG)
-	    .value("ProjLambertAzimuthalEqualArea",
-	      ProjLambertAzimuthalEqualArea)
 	    .value("ProjZEA", ProjZEA)
-	    .value("ProjGnomonic", ProjGnomonic)
 	    .value("ProjTAN", ProjTAN)
-	    .value("ProjCylindricalEqualArea",
-	      ProjCylindricalEqualArea)
 	    .value("ProjCEA", ProjCEA)
 	    .value("ProjBICEP", ProjBICEP)
 	    .value("ProjNone", ProjNone)
 	;
+
+	cls.attr("Proj0") = cls.attr("ProjSFL");
+	cls.attr("ProjSansonFlamsteed") = cls.attr("ProjSFL");
+	cls.attr("Proj1") = cls.attr("ProjCAR");
+	cls.attr("ProjPlateCarree") = cls.attr("ProjCAR");
+	cls.attr("Proj2") = cls.attr("ProjSIN");
+	cls.attr("ProjOrthographic") = cls.attr("ProjSIN");
+	cls.attr("Proj3") = cls.attr("ProjARC");
+	cls.attr("ProjZenithalEquidistant") = cls.attr("ProjARC");
+	cls.attr("Proj4") = cls.attr("ProjSTG");
+	cls.attr("ProjStereographic") = cls.attr("ProjSTG");
+	cls.attr("Proj5") = cls.attr("ProjZEA");
+	cls.attr("ProjLambertZenithalEqualArea") = cls.attr("ProjZEA");
+	cls.attr("Proj6") = cls.attr("ProjTAN");
+	cls.attr("ProjGnomonic") = cls.attr("ProjTAN");
+	cls.attr("Proj7") = cls.attr("ProjCEA");
+	cls.attr("ProjCylindricalEqualArea") = cls.attr("ProjCEA");
+	cls.attr("Proj9") = cls.attr("ProjBICEP");
+
 	enum_none_converter::from_python<MapProjection, ProjNone>();
 }

@@ -52,7 +52,7 @@ def load_skymap_fits(filename, hdu=None, keys=None, memmap=False, apply_units=Fa
     pol_conv = None
     units = 'Tcmb'
     coord_ref = 'Equatorial'
-    proj = 'Proj5'
+    proj = 'ProjZEA'
     weighted = False
     alpha_center = None
     delta_center = None
@@ -281,31 +281,14 @@ def load_proj_dict(inverse=False):
     """
 
     projdict = {
-        'Proj0': 'SFL',
-        'Proj1': 'CAR',
-        'Proj2': 'SIN',
-        'Proj3': 'ARC',
-        'Proj4': 'STG',
-        'Proj5': 'ZEA',
-        'Proj6': 'TAN',
-        'Proj7': 'CEA',
         'Proj8': '!!!',
-        'Proj9': 'CAR',
-        'ProjSansonFlamsteed': 'SFL',
         'ProjSFL': 'SFL',
-        'ProjPlateCarree': 'CAR',
         'ProjCAR': 'CAR',
-        'ProjOrthographic': 'SIN',
         'ProjSIN': 'SIN',
-        'ProjZenithalEquidistant': 'ARC',
         'ProjARC': 'ARC',
-        'ProjStereographic': 'STG',
         'ProjSTG': 'STG',
-        'ProjLambertAzimuthalEqualArea': 'ZEA',
         'ProjZEA': 'ZEA',
-        'ProjGnomonic': 'TAN',
         'ProjTAN': 'TAN',
-        'ProjCylindricalEqualArea': 'CEA',
         'ProjCEA': 'CEA',
         'ProjBICEP': 'CAR',
         'ProjHealpix': 'HPX',
