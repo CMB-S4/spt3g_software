@@ -5,6 +5,10 @@
 #include <serialization.h>
 #include <pybind11/stl_bind.h>
 
+#ifdef __clang__
+#pragma GCC diagnostic ignored "-Wself-assign-overloaded"
+#endif
+
 // Bindings for vector and mapping containers
 
 // Vector string representation
@@ -54,7 +58,7 @@ struct vector_buffer {
 
 // A subclass of the pybind buffer class that ensures contiguity.
 namespace pybind11 {
-class cbuffer : public buffer {
+class __attribute__ ((visibility("hidden"))) cbuffer : public buffer {
 public:
     PYBIND11_OBJECT_DEFAULT(cbuffer, buffer, PyObject_CheckBuffer)
 
