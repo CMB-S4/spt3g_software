@@ -79,7 +79,7 @@ template <typename T, typename V>
 auto fill_vector(py::buffer_info &info) {
 	std::shared_ptr<V> vec(new V);
 	vec->reserve((size_t) info.shape[0]);
-	for (size_t i = 0; i < info.shape[0]; i++) \
+	for (size_t i = 0; i < (size_t) info.shape[0]; i++) \
 		vec->push_back(*(T *)((char *)info.ptr + i * info.strides[0]));
 	return vec;
 }
@@ -88,7 +88,7 @@ template <typename T, typename V>
 auto fill_complex_vector(py::buffer_info &info) {
 	std::shared_ptr<V> vec(new V);
 	vec->resize((size_t) info.shape[0]);
-	for (size_t i = 0; i < info.shape[0]; i++) \
+	for (size_t i = 0; i < (size_t) info.shape[0]; i++) \
 		(*vec)[i] = ((T *)info.ptr)[i];
 	return vec;
 }
