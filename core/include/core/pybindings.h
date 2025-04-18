@@ -128,7 +128,7 @@ register_g3module(py::module_ &scope, const std::string &name, Args&&...args)
 // Registration functions take a single scope object as an input argument.
 typedef void (*module_reg_func_t)(py::module_ &);
 
-class G3ModuleRegistrator {
+class PYBIND11_EXPORT G3ModuleRegistrator {
 public:
 	G3ModuleRegistrator(const char *mod, module_reg_func_t def);
 	static void CallRegistrarsFor(const char *mod, py::module_ &scope);
