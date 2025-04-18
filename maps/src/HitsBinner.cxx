@@ -12,7 +12,7 @@
 #include <maps/pointing.h>
 #include <calibration/BoloProperties.h>
 
-class HitsBinner : public G3Module {
+class __attribute__((visibility("hidden"))) HitsBinner : public G3Module {
 public:
 	HitsBinner(std::string output_map_id, const G3SkyMap &stub_map,
 	    std::string pointing, std::string timestreams,

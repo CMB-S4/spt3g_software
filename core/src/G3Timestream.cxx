@@ -1020,7 +1020,7 @@ G3Timestream_getslice(const G3Timestream &a, const py::slice &slice)
 	out->stop.time = a.start.time +
 	    G3TimeStamp((stop - step)*sample_spacing);
 
-	for (int i = start, j = 0; j < slicelength; i += step, j++)
+	for (size_t i = start, j = 0; j < slicelength; i += step, j++)
 		(*out)[j] = a[i];
 
 	return out;
