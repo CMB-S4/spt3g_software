@@ -4,7 +4,7 @@
 
 #include <dataio.h>
 
-class G3MultiFileWriter : public G3Module {
+class __attribute__((visibility("hidden"))) G3MultiFileWriter : public G3Module {
 public:
 	G3MultiFileWriter(py::object filename,
 	    size_t size_limit,

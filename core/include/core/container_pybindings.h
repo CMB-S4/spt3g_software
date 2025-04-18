@@ -57,8 +57,8 @@ struct vector_buffer {
 };
 
 // A subclass of the pybind buffer class that ensures contiguity.
-namespace pybind11 {
-class __attribute__ ((visibility("hidden"))) cbuffer : public buffer {
+namespace PYBIND11_NAMESPACE {
+class cbuffer : public buffer {
 public:
     PYBIND11_OBJECT_DEFAULT(cbuffer, buffer, PyObject_CheckBuffer)
 
