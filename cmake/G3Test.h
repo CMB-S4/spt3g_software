@@ -9,6 +9,9 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#ifdef USE_PYTHON
+#include <pybindings.h>
+#endif
 
 #define STRINGIZE(s) STRINGIZE_DIRECT(s)
 #define STRINGIZE_DIRECT(s) #s
