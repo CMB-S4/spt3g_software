@@ -9,7 +9,7 @@ frames = []
 for i in range(0, 20):
 	f = core.G3Frame()
 	f['Sequence'] = i
-	f['Data'] = core.G3VectorDouble(numpy.zeros(100000))
+	f['Data'] = core.G3Timestream(numpy.zeros(100000))
 	frames.append(f)
 
 print('Port: ', port)

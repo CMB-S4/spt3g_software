@@ -1384,7 +1384,7 @@ PYBINDINGS("core", scope) {
 	      "log_fatal() if units, length, start, or stop times do not match")
 	    .def("_cxxslice", &G3Timestream_getslice, "Slice-only __getitem__")
 	    .def_property_readonly("elapsed", &G3Timestream_elapsed,
-	      "Compute elased time array for samples")
+	      "Compute elapsed time array for samples")
 	    .def_property_readonly("times", &G3Timestream_times,
 	      "Compute time vector for samples")
 	    .def("__len__", &G3Timestream::size)
@@ -1448,7 +1448,7 @@ PYBINDINGS("core", scope) {
 	      &G3TimestreamMap::SetFLACBitDepth,
 	      "Bit depth of FLAC compression used for this timestream map.")
 	    .def_property_readonly("elapsed", &G3TimestreamMap_elapsed,
-	      "Compute elased time array for samples")
+	      "Compute elapsed time array for samples")
 	    .def_property_readonly("times", &G3TimestreamMap_times,
 	      "Compute time vector for samples")
 	;
