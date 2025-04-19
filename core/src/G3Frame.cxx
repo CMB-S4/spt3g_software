@@ -505,6 +505,11 @@ static bp::list g3frame_python_values(G3Frame &f)
 	return values;
 }
 
+static bp::object g3frame_hash(bp::object obj)
+{
+	return bp::extract<bp::tuple>(obj.attr("__getstate__")())()[1];
+}
+
 PYBINDINGS("core") {
 	// Internal stuff
 	bp::class_<G3FrameObject, G3FrameObjectPtr>("G3FrameObject",
@@ -517,6 +522,8 @@ PYBINDINGS("core") {
 	      "Short (one-line) description of the object")
 	    .def("__str__", &G3FrameObject::Summary)
 	    .def_pickle(g3frameobject_picklesuite<G3FrameObject>())
+	    .add_property("hash", &g3frame_hash,
+	      "Return the serialized representation of the object")
 	;
 	register_pointer_conversions<G3FrameObject>();
 
@@ -585,6 +592,8 @@ PYBINDINGS("core") {
 	      "frames about to be written at the expense of CPU time to "
 	      "re-decode them if they are accessed again later.")
 	    .def_pickle(g3frameobject_picklesuite<G3Frame>())
+	    .add_property("hash", &g3frame_hash,
+	      "Return the serialized representation of the frame")
 	;
 	register_vector_of<G3FramePtr>("Frame");
 	register_vector_of<G3FrameObjectPtr>("FrameObject");
