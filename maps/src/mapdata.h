@@ -1,8 +1,9 @@
 #include <vector>
+#include <cassert>
 
+#include <G3Logging.h>
 #include <cereal/types/vector.hpp>
 #include <cereal/types/utility.hpp>
-#include <serialization.h>
 
 class DenseMapData;
 
