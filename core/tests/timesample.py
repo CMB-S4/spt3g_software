@@ -27,17 +27,17 @@ class TestTimesampleVector(unittest.TestCase):
         t0 = core.G3Time('2019-01-01T12:30:00')
         timestamps = np.linspace(t0.time, t0.time + 1e7*SEC, 3000, dtype='int64')
         vectime = core.G3VectorTime(timestamps)
-        assert((np.asarray(vectime) == timestamps).all())
+        np.testing.assert_array_equal(vectime, timestamps)
     def test_reinit_from_numpy_array(self):
         t0 = core.G3Time('2019-01-01T12:30:00')
         timestamps = np.linspace(t0.time, t0.time + 1e7*SEC, 3000, dtype='int64')
         vectime = core.G3VectorTime(timestamps)
         revectime = core.G3VectorTime(np.asarray(vectime))
-        assert((np.asarray(revectime) == timestamps).all())
+        np.testing.assert_array_equal(revectime, timestamps)
     def test_copy_constructor(self):
         t0 = core.G3VectorTime(np.array([100000000, 200000000]))
         t1 = core.G3VectorTime(t0)
-        assert((np.asarray(t0) == np.asarray(t1)).all())
+        np.testing.assert_array_equal(t0, t1)
 
 
 def get_test_block(length, keys=['a', 'b', 'c', 'd'],
@@ -95,7 +95,7 @@ class TestTimesampleMap(unittest.TestCase):
                 get_test_block(200, key_list + ['extra'], 100),
                 get_test_block(200, key_list[:-1], 100),
                 ]:
-            with self.assertRaises(ValueError):
+            with self.assertRaises(RuntimeError):
                 m0.concatenate(fail_vec)
 
     def test_30_serialization(self):

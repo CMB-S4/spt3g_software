@@ -3,11 +3,25 @@
 #include <numeric>
 #include <algorithm>
 #include <iostream>
-#include <boost/python.hpp>
+#include <exception>
 
 #include <container_pybindings.h>
 #include <G3Timesample.h>
 
+
+class g3timesample_exception : std::exception
+{
+	// Exception raised when internal validity checks fail.  This will
+	// also be mapped to some particular Python exception type.
+public:
+	std::string text;
+	g3timesample_exception(std::string text) :
+	    text{text} {}
+
+	std::string msg_for_python() const throw() {
+		return text;
+	}
+};
 
 // Templates for vector operations.  These work on any std::vector,
 // and thus on any G3Vector.
@@ -118,6 +132,8 @@ template <class A> void G3TimesampleMap::serialize(A &ar, unsigned v)
 	ar & make_nvp("times", times);
 }
 
+G3_SERIALIZABLE_CODE(G3TimesampleMap);
+
 bool G3TimesampleMap::Check() const
 {
 	ssize_t n = times.size();
@@ -127,17 +143,11 @@ bool G3TimesampleMap::Check() const
 		auto el = item->second;
 
 		ssize_t check_len;
-		if ((check_len = g3_vect_test_and_size(el)) < 0) {
-			std::ostringstream s;
-			s << "Vector type not supported for key: " << name << "\n";
-			throw g3timesample_exception(s.str());
-		}
+		if ((check_len = g3_vect_test_and_size(el)) < 0)
+			log_fatal("Vector type not supported for key: %s", name.c_str());
 
-		if (check_len != n) {
-			std::ostringstream s;
-			s << "Vector not same length as .times: " << name << "\n";
-			throw g3timesample_exception(s.str());
-		}
+		if (check_len != n)
+			log_fatal("Vector not same length as .times: %s", name.c_str());
 	}
 	return true;
 }
@@ -146,11 +156,8 @@ G3TimesampleMap G3TimesampleMap::Concatenate(const G3TimesampleMap &other) const
 {
 	// Check that all keys in other are in this.
 	for (auto item = other.begin(); item != other.end(); ++item) {
-		if (find(item->first) == end()) {
-			std::ostringstream s;
-			s << "Inconsistent keys; " << item->first << " on right only.";
-			throw g3timesample_exception(s.str());
-		}
+		if (find(item->first) == end())
+			log_fatal("Inconsistent keys; %s on right only", item->first.c_str());
 	}
 
 	G3TimesampleMap output;
@@ -158,11 +165,8 @@ G3TimesampleMap G3TimesampleMap::Concatenate(const G3TimesampleMap &other) const
 
 	for (auto item = begin(); item != end(); ++item) {
 		auto oitem = other.find(item->first);
-		if (oitem == other.end()) {
-			std::ostringstream s;
-			s << "Inconsistent keys; " << item->first << " on left only.";
-			throw g3timesample_exception(s.str());
-		}
+		if (oitem == other.end())
+			log_fatal("Inconsistent keys; %s on left only", item->first.c_str());
 
 		G3FrameObjectPtr catted;
 		if (
@@ -177,9 +181,7 @@ G3TimesampleMap G3TimesampleMap::Concatenate(const G3TimesampleMap &other) const
 			) {
 			output.insert(std::make_pair(item->first, catted));
 		} else {
-			std::ostringstream s;
-			s << "Vector type not supported for key: " << item->first << "\n";
-			throw g3timesample_exception(s.str());
+			log_fatal("Vector type not support for key: %s", item->first.c_str());
 		}
 	}
 
@@ -211,9 +213,7 @@ void G3TimesampleMap::Sort()
 			!test_and_reorder<G3VectorBool>(item->second, idx) &&
 			!test_and_reorder<G3VectorString>(item->second, idx)
 			) {
-			std::ostringstream s;
-			s << "Vector type not supported for key: " << item->first << "\n";
-			throw g3timesample_exception(s.str());
+			log_fatal("Vector type not support for key: %s", item->first.c_str());
 		}
 	}
 }
@@ -256,8 +256,6 @@ void safe_set_times(G3TimesampleMap &self, G3VectorTime _times)
 	self.times = _times;
 }
 
-
-G3_SERIALIZABLE_CODE(G3TimesampleMap);
 
 static void translate_ValueError(g3timesample_exception const& e)
 {
