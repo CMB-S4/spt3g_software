@@ -698,99 +698,6 @@ G3_SERIALIZABLE_CODE(G3TimestreamQuat);
 G3_SERIALIZABLE_CODE(G3MapQuat);
 G3_SERIALIZABLE_CODE(G3MapVectorQuat);
 
-namespace {
-static int
-Quat_getbuffer(PyObject *obj, Py_buffer *view, int flags)
-{
-	if (view == NULL) {
-		PyErr_SetString(PyExc_ValueError, "NULL view");
-		return -1;
-	}
-
-	view->shape = NULL;
-
-	bp::handle<> self(bp::borrowed(obj));
-	bp::object selfobj(self);
-	bp::extract<Quat &> ext(selfobj);
-	if (!ext.check()) {
-		PyErr_SetString(PyExc_ValueError, "Invalid quat");
-		view->obj = NULL;
-		return -1;
-	}
-	Quat &q = ext();
-
-	view->obj = obj;
-	view->buf = (void*)&q;
-	view->len = 4 * sizeof(double);
-	view->readonly = 0;
-	view->itemsize = sizeof(double);
-	if (flags & PyBUF_FORMAT)
-		view->format = (char *)"d";
-	else
-		view->format = NULL;
-
-	view->ndim = 1;
-	view->internal = NULL;
-	view->shape = NULL;
-	view->strides = NULL;
-	view->suboffsets = NULL;
-
-	Py_INCREF(obj);
-
-	return 0;
-}
-
-static int
-G3VectorQuat_getbuffer(PyObject *obj, Py_buffer *view, int flags)
-{
-	if (view == NULL) {
-		PyErr_SetString(PyExc_ValueError, "NULL view");
-		return -1;
-	}
-
-	view->shape = NULL;
-
-	bp::handle<> self(bp::borrowed(obj));
-	bp::object selfobj(self);
-	bp::extract<G3VectorQuatPtr> ext(selfobj);
-	if (!ext.check()) {
-		PyErr_SetString(PyExc_ValueError, "Invalid vector");
-		view->obj = NULL;
-		return -1;
-	}
-	G3VectorQuatPtr q = ext();
-
-	view->obj = obj;
-	view->buf = (void*)&(*q)[0];
-	view->len = q->size() * sizeof(double) * 4;
-	view->readonly = 0;
-	view->itemsize = sizeof(double);
-	if (flags & PyBUF_FORMAT)
-		view->format = (char *)"d";
-	else
-		view->format = NULL;
-
-	// XXX: following leaks small amounts of memory!
-	view->shape = new Py_ssize_t[2];
-	view->strides = new Py_ssize_t[2];
-
-	view->ndim = 2;
-	view->shape[0] = q->size();
-	view->shape[1] = 4;
-	view->strides[0] = view->shape[1]*view->itemsize;
-	view->strides[1] = view->itemsize;
-
-	view->suboffsets = NULL;
-
-	Py_INCREF(obj);
-
-	return 0;
-}
-
-static PyBufferProcs quat_bufferprocs;
-static PyBufferProcs vectorquat_bufferprocs;
-static PyBufferProcs timestreamquat_bufferprocs;
-
 static std::string
 quat_str(const Quat &q)
 {
@@ -806,282 +713,254 @@ quat_repr(const Quat &q)
 	oss << "spt3g.core.Quat" << q;
 	return oss.str();
 }
+
+auto quat_buffer_info(Quat &q)
+{
+	return py::buffer_info(&q, sizeof(double),
+	    py::format_descriptor<double>::format(), 1, {4}, {sizeof(double)});
+}
+
+template <typename T>
+auto vector_quat_buffer_info(T &q)
+{
+	std::vector<size_t> shape{q.size(), 4};
+	std::vector<size_t> strides{4 * sizeof(double), sizeof(double)};
+
+	return py::buffer_info(&(q[0]), sizeof(double),
+	    py::format_descriptor<double>::format(), 2, shape, strides);
+}
+
+namespace pybind11 {
+	template <>
+	struct format_descriptor<Quat> : public format_descriptor<double> {};
 }
 
 std::shared_ptr<Quat>
-quat_container_from_object(boost::python::object v)
+quat_from_python(py::buffer buf)
 {
-	// There's a chance this is actually a copy operation, so try that first
-	bp::extract<Quat &> extv(v);
-	if (extv.check())
-		return std::make_shared<Quat>(extv());
+	auto info = buf.request();
+	if (info.ndim != 1 || info.shape[0] != 4)
+		throw py::type_error("Only valid 1D buffers can be copied to a Quat");
 
-	Quat q;
+	std::string format = check_buffer_format(info.format);
 
-	Py_buffer view;
-	if (PyObject_GetBuffer(v.ptr(), &view,
-	    PyBUF_FORMAT | PyBUF_STRIDES) == -1)
-		goto slowpython;
+#define QELEM(t, i) *((t *)((char *)info.ptr + i*info.strides[0]))
+#define QUATI(t) std::make_shared<Quat>(QELEM(t, 0), QELEM(t, 1), QELEM(t, 2), QELEM(t, 3))
 
-#define QELEM(t, i) *((t *)((char *)view.buf + i*view.strides[0]))
-#define QUATI(t) Quat(QELEM(t, 0), QELEM(t, 1), QELEM(t, 2), QELEM(t, 3))
-
-	if (view.ndim != 1 || view.shape[0] != 4) {
-		PyBuffer_Release(&view);
-		goto slowpython;
-	} else if (strcmp(view.format, "d") == 0) {
-		q = QUATI(double);
-	} else if (strcmp(view.format, "f") == 0) {
-		q = QUATI(float);
-	} else if (strcmp(view.format, "i") == 0) {
-		q = QUATI(int);
-	} else if (strcmp(view.format, "l") == 0) {
-		q = QUATI(long);
-	} else {
-		PyBuffer_Release(&view);
-		goto slowpython;
-	}
-	PyBuffer_Release(&view);
-	return std::make_shared<Quat>(q);
+	if (format == "d")
+		return QUATI(double);
+	if (format == "f")
+		return QUATI(float);
+	if (format == "i")
+		return QUATI(int);
+	if (format == "l")
+		return QUATI(long);
 
 #undef QELEM
 #undef QUATI
 
-slowpython:
-	PyErr_Clear();
-	std::vector<double> xv;
-	boost::python::container_utils::extend_container(xv, v);
-	if (xv.size() != 4)
-		throw std::runtime_error("Invalid quat");
+	throw py::value_error(std::string("Invalid buffer format ") + info.format);
+}
 
-	return std::make_shared<Quat>(xv[0], xv[1], xv[2], xv[3]);
+std::shared_ptr<Quat>
+quat_from_python_iter(py::iterable obj)
+{
+	if (py::len(obj) != 4)
+		throw py::value_error("Invalid quat");
+
+	auto v = obj.cast<std::vector<double> >();
+	return std::make_shared<Quat>(v[0], v[1], v[2], v[3]);
 }
 
 template <typename T>
 std::shared_ptr<T>
-quat_vec_container_from_object(boost::python::object v)
+vector_quat_from_python(py::buffer &buf)
 {
-	// There's a chance this is actually a copy operation, so try that first
-	bp::extract<T &> extv(v);
-	if (extv.check())
-		return std::make_shared<T>(extv());
+	auto info = buf.request();
+	if (info.ndim != 2 || info.shape[1] != 4)
+		throw py::type_error("Only valid 2D buffers can be copied to a Quat vector");
 
-        std::shared_ptr<T> x(new (T));
-	Py_buffer view;
-	if (PyObject_GetBuffer(v.ptr(), &view,
-	    PyBUF_FORMAT | PyBUF_STRIDES) == -1)
-		goto slowpython;
+	std::shared_ptr<T> q(new T);
+	q->resize(info.shape[0]);
 
-#define QELEM(t, i, j) *((t *)((char *)view.buf + i*view.strides[0] + j*view.strides[1]))
-#define QUATI(t, i) Quat(QELEM(t, i, 0), QELEM(t, i, 1), QELEM(t, i, 2), QELEM(t, i, 3))
-
-	x->resize(view.shape[0]);
-	if (view.ndim != 2 || view.shape[1] != 4) {
-		PyBuffer_Release(&view);
-		goto slowpython;
-	} else if (PyBuffer_IsContiguous(&view, 'C') &&
-	    strcmp(view.format, "d") == 0 &&
-	    view.strides[0] == 4*sizeof(double) &&
-	    view.strides[1] == sizeof(double)) {
-		// Packed and simple, use memcpy()
-		memcpy((void *)&(*x)[0], view.buf, view.len);
-	} else if (strcmp(view.format, "d") == 0) {
-		for (size_t i = 0; i < (size_t)view.shape[0]; i++)
-			(*x)[i] = QUATI(double, i);
-	} else if (strcmp(view.format, "f") == 0) {
-		for (size_t i = 0; i < (size_t)view.shape[0]; i++)
-			(*x)[i] = QUATI(float, i);
-	} else if (strcmp(view.format, "i") == 0) {
-		for (size_t i = 0; i < (size_t)view.shape[0]; i++)
-			(*x)[i] = QUATI(int, i);
-	} else if (strcmp(view.format, "l") == 0) {
-		for (size_t i = 0; i < (size_t)view.shape[0]; i++)
-			(*x)[i] = QUATI(long, i);
-	} else {
-		PyBuffer_Release(&view);
-		goto slowpython;
+	// handle contiguous case
+	if (py::detail::compare_buffer_info<double>::compare(info)
+	    && info.strides[0] == 4 * sizeof(double)
+	    && info.strides[1] == sizeof(double)
+	    && info.itemsize == sizeof(double)) {
+		size_t nbytes = info.shape[0] * info.shape[1] * sizeof(double);
+		memcpy((void *)&(*q)[0], info.ptr, nbytes);
+		return q;
 	}
-	PyBuffer_Release(&view);
-	return x;
 
-#undef QUATI
+	std::string format = check_buffer_format(info.format);
+
+#define QELEM(t, i, j) *((t *)((char *)info.ptr + i*info.strides[0] + j*info.strides[1]))
+#define QUATI(t, i) Quat(QELEM(t, i, 0), QELEM(t, i, 1), QELEM(t, i, 2), QELEM(t, i, 3))
+#define QUATV(t) \
+	for (size_t i = 0; i < (size_t) info.shape[0]; i++) \
+		(*q)[i] = QUATI(t, i);
+
+	if (format == "d") {
+		QUATV(double);
+	} else if (format == "f") {
+		QUATV(float);
+	} else if (format == "i") {
+		QUATV(int);
+	} else if (format == "l") {
+		QUATV(long);
+	} else
+		throw py::value_error(std::string("Invalid buffer format :") + info.format);
+
 #undef QELEM
+#undef QUATI
+#undef QUATV
 
-slowpython:
-	x->resize(0);
-	PyErr_Clear();
-	boost::python::container_utils::extend_container(*x, v);
-
-	return x;
+	return q;
 }
 
-template <>
-G3VectorQuatPtr container_from_object(boost::python::object v)
-{
-	return quat_vec_container_from_object<G3VectorQuat>(v);
-}
+template <typename V, typename C, typename... Args>
+struct vector_buffer<Quat, V, C, Args...> {
+	static void impl(C &cls) {
+		cls.def_buffer(&vector_quat_buffer_info<V>);
+		cls.def(py::init(&vector_quat_from_python<V>));
+		py::implicitly_convertible<py::buffer, V>();
+	}
+};
 
-template <>
-G3TimestreamQuatPtr container_from_object(boost::python::object v)
-{
-	return quat_vec_container_from_object<G3TimestreamQuat>(v);
-}
 
-static int
-G3TimestreamQuat_nsamples(const G3TimestreamQuat &r)
+PYBINDINGS("core", scope)
 {
-        return r.size();
-}
-
-PYBINDINGS("core")
-{
-	using namespace boost::python;
-
-	object q =
-	    class_<Quat, std::shared_ptr<Quat> >("Quat",
-	      "Representation of a quaternion. Data in a,b,c,d.", init<>())
-	     .def(init<const Quat &>())
-	     .def(init<double, double, double, double>(
-	         "Create a quaternion from its four elements.", args("a", "b", "c", "d")))
-	     .def_pickle(g3frameobject_picklesuite<Quat>())
-	     .def("__init__", make_constructor(quat_container_from_object, default_call_policies(),
-	         (arg("data"))), "Create a quaternion from a numpy array")
-	     .add_property("a", &Quat::a, "Scalar component")
-	     .add_property("b", &Quat::b, "First vector component")
-	     .add_property("c", &Quat::c, "Second vector component")
-	     .add_property("d", &Quat::d, "Third vector component")
-	     .add_property("real", &Quat::real, "The real (scalar) part of the quaternion")
-	     .add_property("unreal", &Quat::unreal, "The unreal (vector) part of the quaternion")
-	     .def(~self)
-	     .def(-self)
-	     .def(self == self)
-	     .def(self != self)
-	     .def(self + self)
-	     .def(self += self)
-	     .def(self - self)
-	     .def(self -= self)
-	     .def(self * self)
-	     .def(self * double())
-	     .def(double() * self)
-	     .def(self *= self)
-	     .def(self *= double())
-	     .def(pow(self, int()))
-	     .def(self / self)
-	     .def(self / double())
-	     .def(double() / self)
-	     .def(self /= self)
-	     .def(self /= double())
-	     .def("__abs__", &Quat::abs)
-	     .def("__str__", quat_str)
-	     .def("__repr__", quat_repr)
-	     .def("norm", &Quat::norm, "Return the Cayley norm of the quaternion")
-	     .def("vnorm", &Quat::norm, "Return the Cayley norm of the unreal (vector) part of the quaternion")
-	     .def("abs", &Quat::abs, "Return the Euclidean norm of the quaternion")
-	     .def("dot3", &Quat::dot3, "Dot product of last three entries")
-	     .def("cross3", &Quat::cross3, "Cross product of last three entries")
+	register_class<Quat>(scope, "Quat", py::buffer_protocol(),
+	    "Representation of a quaternion. Data in a,b,c,d.")
+	    .def(py::init<>())
+	    .def(py::init<const Quat &>())
+	    .def(py::init<double, double, double, double>(),
+	        py::arg("a"), py::arg("b"), py::arg("c"), py::arg("d"),
+	        "Create a quaternion from its four elements.")
+	    .def(init(&quat_from_python), py::arg("data"),
+	        "Create a quaternion from a numpy array")
+	    .def(init(&quat_from_python_iter), py::arg("data"),
+	        "Create a quaternion from a python iterable")
+	    .def_buffer(&quat_buffer_info)
+	    .def(g3frameobject_picklesuite<Quat>())
+	    .def_property_readonly("a", &Quat::a, "Scalar component")
+	    .def_property_readonly("b", &Quat::b, "First vector component")
+	    .def_property_readonly("c", &Quat::c, "Second vector component")
+	    .def_property_readonly("d", &Quat::d, "Third vector component")
+	    .def_property_readonly("real", &Quat::real,
+	        "The real (scalar) part of the quaternion")
+	    .def_property_readonly("unreal", &Quat::unreal,
+	        "The unreal (vector) part of the quaternion")
+	    .def(~py::self)
+	    .def(-py::self)
+	    .def(py::self == py::self)
+	    .def(py::self != py::self)
+	    .def(py::self + py::self)
+	    .def(py::self += py::self)
+	    .def(py::self - py::self)
+	    .def(py::self -= py::self)
+	    .def(py::self * py::self)
+	    .def(py::self * double())
+	    .def(double() * py::self)
+	    .def(py::self *= py::self)
+	    .def(py::self *= double())
+	    .def("__pow__", [](Quat &q, int v) { return pow(q, v); },
+	        py::is_operator())
+	    .def(py::self / py::self)
+	    .def(py::self / double())
+	    .def(double() / py::self)
+	    .def(py::self /= py::self)
+	    .def(py::self /= double())
+	    .def("__abs__", &Quat::abs)
+	    .def("__str__", quat_str)
+	    .def("__repr__", quat_repr)
+	    .def("norm", &Quat::norm, "Return the Cayley norm of the quaternion")
+	    .def("vnorm", &Quat::norm, "Return the Cayley norm of the "
+	        "unreal (vector) part of the quaternion")
+	    .def("abs", &Quat::abs, "Return the Euclidean norm of the quaternion")
+	    .def("dot3", &Quat::dot3, "Dot product of last three entries")
+	    .def("cross3", &Quat::cross3, "Cross product of last three entries")
 	;
-	PyTypeObject *qclass = (PyTypeObject *)q.ptr();
-	quat_bufferprocs.bf_getbuffer = Quat_getbuffer;
-	qclass->tp_as_buffer = &quat_bufferprocs;
-#if PY_MAJOR_VERSION < 3
-	qclass->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
-#endif
 
-	EXPORT_FRAMEOBJECT(G3Quat, init<Quat>(), "Serializable quaternion")
+        register_frameobject<G3Quat>(scope, "G3Quat", "Serializable quaternion")
+	    .def(py::init<Quat>())
 	    .def_readwrite("value", &G3Quat::value)
 	;
 
-	register_vector_of<Quat>("Quat");
-	object vq =
-	    register_g3vector<Quat>("G3VectorQuat",
-	     "List of quaternions. Convertible to a 4xN numpy array. "
-	     "Arithmetic operations on this object are fast and provide "
-	     "results given proper quaternion math rather than "
-	     "element-by-element numpy-ish results.")
-	     .def(~self)
-	     .def(self * double())
-	     .def(double() * self)
-	     .def(self * self)
-	     .def(self * Quat())
-	     .def(Quat() * self)
-	     .def(self *= double())
-	     .def(self *= Quat())
-	     .def(self *= self)
-	     .def(self / double())
-	     .def(double() / self)
-	     .def(self /= double())
-	     .def(self / self)
-	     .def(self /= self)
-	     .def(self / Quat())
-	     .def(self /= Quat())
-	     .def(Quat() / self)
-	     .def(pow(self, int()))
-	     .def("__abs__", vec_abs)
-	     .def("__neg__", vec_neg)
-	     .def("abs", vec_abs, "Return the Euclidean norm of each quaternion")
-	     .add_property("real", vec_real, "Return the real (scalar) part of each quaternion");
-	PyTypeObject *vqclass = (PyTypeObject *)vq.ptr();
-	vectorquat_bufferprocs.bf_getbuffer = G3VectorQuat_getbuffer;
-	vqclass->tp_as_buffer = &vectorquat_bufferprocs;
-#if PY_MAJOR_VERSION < 3
-	vqclass->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
-#endif
-
-	object tq =
-	    class_<G3TimestreamQuat, bases<G3VectorQuat>, G3TimestreamQuatPtr>(
-	      "G3TimestreamQuat",
-	      "Timestream of quaternions. Identical to a G3VectorQuat except "
-	      "for the addition of start and stop times.",
-	      init<>()
-             )
-	     .def("__init__", make_constructor(container_from_object<G3TimestreamQuat>))
-	     .def(boost::python::init<const G3TimestreamQuat &>())
-	     .def_pickle(g3frameobject_picklesuite<G3TimestreamQuat>())
-	     .def(~self)
-	     .def(self * double())
-	     .def(double() * self)
-	     .def(self * G3VectorQuat())
-	     .def(self * Quat())
-	     .def(Quat() * self)
-	     .def(self *= double())
-	     .def(self *= Quat())
-	     .def(self *= G3VectorQuat())
-	     .def(self / double())
-	     .def(double() / self)
-	     .def(self /= double())
-	     .def(self / G3VectorQuat())
-	     .def(self /= G3VectorQuat())
-	     .def(self / Quat())
-	     .def(self /= Quat())
-	     .def(Quat() / self)
-	     .def(pow(self, int()))
-	     .def("__abs__", ts_abs)
-	     .def("__neg__", ts_neg)
-	     .def("abs", ts_abs, "Return the Euclidean norm of each quaternion")
-	     .add_property("real", ts_real, "Return the real (scalar) part of each quaternion")
-	    .def_readwrite("start", &G3TimestreamQuat::start,
-	      "Time of the first sample in the time stream")
-	    .def_readwrite("stop", &G3TimestreamQuat::stop,
-	      "Time of the final sample in the timestream")
-	    .add_property("sample_rate", &G3TimestreamQuat::GetSampleRate,
-	       "Computed sample rate of the timestream.")
-	    .add_property("n_samples", &G3TimestreamQuat_nsamples,
-	      "Number of samples in the timestream. Equivalent to len(ts)")
+	register_vector_of<Quat>(scope, "Quat", py::buffer_protocol());
+	register_g3vector<G3VectorQuat>(scope, "G3VectorQuat", py::buffer_protocol(),
+	    "List of quaternions. Convertible to a 4xN numpy array. "
+	    "Arithmetic operations on this object are fast and provide "
+	    "results given proper quaternion math rather than "
+	    "element-by-element numpy-ish results.")
+	    .def(~py::self)
+	    .def(py::self * double())
+	    .def(double() * py::self)
+	    .def(py::self * py::self)
+	    .def(py::self * Quat())
+	    .def(Quat() * py::self)
+	    .def(py::self *= double())
+	    .def(py::self *= Quat())
+	    .def(py::self *= py::self)
+	    .def(py::self / double())
+	    .def(double() / py::self)
+	    .def(py::self /= double())
+	    .def(py::self / py::self)
+	    .def(py::self /= py::self)
+	    .def(py::self / Quat())
+	    .def(py::self /= Quat())
+	    .def(Quat() / py::self)
+	    .def("__pow__", [](G3VectorQuat &q, int v) { return pow(q, v); },
+	        py::is_operator())
+	    .def("__abs__", vec_abs)
+	    .def("__neg__", vec_neg)
+	    .def("abs", vec_abs, "Return the Euclidean norm of each quaternion")
+	    .def_property_readonly("real", vec_real,
+	        "Return the real (scalar) part of each quaternion")
 	;
-	PyTypeObject *tqclass = (PyTypeObject *)tq.ptr();
-	timestreamquat_bufferprocs.bf_getbuffer = G3VectorQuat_getbuffer;
-	tqclass->tp_as_buffer = &timestreamquat_bufferprocs;
-#if PY_MAJOR_VERSION < 3
-	tqclass->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
-#endif
 
-	scitbx::boost_python::container_conversions::from_python_sequence<G3TimestreamQuat, scitbx::boost_python::container_conversions::variable_capacity_policy>();
-	register_pointer_conversions<G3TimestreamQuat>();
-	implicitly_convertible<G3TimestreamQuatPtr, G3VectorQuatPtr>();
-	implicitly_convertible<G3TimestreamQuatPtr, G3VectorQuatConstPtr>();
+	register_g3vector<G3TimestreamQuat, G3VectorQuat>(scope, "G3TimestreamQuat",
+	    py::buffer_protocol(), "Timestream of quaternions. Identical to a "
+	    "G3VectorQuat except for the addition of start and stop times.")
+	    .def(~py::self)
+	    .def(py::self * double())
+	    .def(double() * py::self)
+	    .def(py::self * G3VectorQuat())
+	    .def(py::self * Quat())
+	    .def(Quat() * py::self)
+	    .def(py::self *= double())
+	    .def(py::self *= Quat())
+	    .def(py::self *= G3VectorQuat())
+	    .def(py::self / double())
+	    .def(double() / py::self)
+	    .def(py::self /= double())
+	    .def(py::self / G3VectorQuat())
+	    .def(py::self /= G3VectorQuat())
+	    .def(py::self / Quat())
+	    .def(py::self /= Quat())
+	    .def(Quat() / py::self)
+	    .def("__pow__", [](G3TimestreamQuat &q, int v) { return pow(q, v); },
+	        py::is_operator())
+	    .def("__abs__", ts_abs)
+	    .def("__neg__", ts_neg)
+	    .def("abs", ts_abs, "Return the Euclidean norm of each quaternion")
+	    .def_property_readonly("real", ts_real,
+	        "Return the real (scalar) part of each quaternion")
+	    .def_readwrite("start", &G3TimestreamQuat::start,
+	        "Time of the first sample in the time stream")
+	    .def_readwrite("stop", &G3TimestreamQuat::stop,
+	        "Time of the final sample in the timestream")
+	    .def_property_readonly("sample_rate", &G3TimestreamQuat::GetSampleRate,
+	        "Computed sample rate of the timestream.")
+	    .def_property_readonly("n_samples", &G3TimestreamQuat::size,
+	        "Number of samples in the timestream. Equivalent to len(ts)")
+	;
 
-	register_g3map<G3MapQuat>("G3MapQuat", "Mapping from strings to "
+	py::implicitly_convertible<G3TimestreamQuat, G3VectorQuat>();
+
+	register_g3map<G3MapQuat>(scope, "G3MapQuat", "Mapping from strings to "
 	    "quaternions.");
-	register_g3map<G3MapVectorQuat>("G3MapVectorQuat", "Mapping from "
+	register_g3map<G3MapVectorQuat>(scope, "G3MapVectorQuat", "Mapping from "
 	    "strings to lists of quaternions.");
 }

@@ -35,15 +35,19 @@ private:
 	SET_LOGGER("GCPMuxDataDecoder");
 };
 
-EXPORT_G3MODULE("gcp", GCPMuxDataDecoder, init<>(),
-    "Extracts contents of receiver registers in SPTpol-style ARC files into a "
-    "wiring map and timepoint frames. This is designed to convert SPTpol-style "
-    "data in which GCP records bolometer data into the ARC files into a format "
-    "equivalent to that for SPT-3G. \n\n"
-    "For old (100d SPTpol) data not containing wiring information, insert a "
-    "wiring map into the pipeline ahead of this module. The board_serial "
-    "should be set to a real (positive) value for all bolometer channels and "
-    "-1 for the calibrator sync readout.");
+PYBINDINGS("gcp", scope) {
+	register_g3module<GCPMuxDataDecoder>(scope, "GCPMuxDataDecoder",
+	    "Extracts contents of receiver registers in SPTpol-style ARC files into a "
+	    "wiring map and timepoint frames. This is designed to convert SPTpol-style "
+	    "data in which GCP records bolometer data into the ARC files into a format "
+	    "equivalent to that for SPT-3G. \n\n"
+	    "For old (100d SPTpol) data not containing wiring information, insert a "
+	    "wiring map into the pipeline ahead of this module. The board_serial "
+	    "should be set to a real (positive) value for all bolometer channels and "
+	    "-1 for the calibrator sync readout.")
+	    .def(py::init<>())
+	;
+}
 
 G3FramePtr
 GCPMuxDataDecoder::EmitWiringMap(G3FramePtr input)

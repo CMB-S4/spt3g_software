@@ -788,7 +788,7 @@ void ARCFileReader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	int32_t size, opcode;
 	uint8_t *buffer;
 
-	G3PythonContext ctx("ARCFileReader", false);
+	py::gil_scoped_release gil;
 
 	try {
 		while (stream_.peek() == EOF) {
@@ -851,24 +851,27 @@ void ARCFileReader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	delete [] buffer;
 }
 
-PYBINDINGS("gcp") {
-	using namespace boost::python;
+PYBINDINGS("gcp", scope) {
+	// Supported Experiments
+	register_enum<Experiment>(scope, "Experiment")
+		.value("SPT",   Experiment::SPT)
+		.value("BK",    Experiment::BK)
+		.value("PB",    Experiment::PB)
+	;
 
-	// Instead of EXPORT_G3MODULE since there are two constructors
-	class_<ARCFileReader, bases<G3Module>, std::shared_ptr<ARCFileReader>,
-	    boost::noncopyable>("ARCFileReader",
+	register_g3module<ARCFileReader>(scope, "ARCFileReader",
 	    "Read GCP archive file (or files if you pass an iterable of paths). "
 	    "For non-SPT ARC file formats, please set Experiment to the "
 	    "appropriate value.  Set track_filename to True to record the "
-	    "filename for each frame in the ._filename attribute (fragile).",
-		init<std::string, Experiment, float, bool, size_t>((arg("filename"),
-			arg("experiment")=Experiment::SPT, arg("timeout")=-1.,
-			arg("track_filename")=false, arg("buffersize")=1024*1024)))
-		.def(init<std::vector<std::string>, Experiment, float, bool, size_t>(
-			(arg("filename"), arg("experiment")=Experiment::SPT,
-			arg("timeout")=-1., arg("track_filename")=false,
-			arg("buffersize")=1024*1024)))
-		.def_readonly("__g3module__", true)
+	    "filename for each frame in the ._filename attribute (fragile).")
+		.def(py::init<std::string, Experiment, float, bool, size_t>(),
+			py::arg("filename"), py::arg("experiment")=Experiment::SPT,
+			py::arg("timeout")=-1., py::arg("track_filename")=false,
+			py::arg("buffersize")=1024*1024)
+		.def(py::init<std::vector<std::string>, Experiment, float, bool, size_t>(),
+			py::arg("filename"), py::arg("experiment")=Experiment::SPT,
+			py::arg("timeout")=-1., py::arg("track_filename")=false,
+			py::arg("buffersize")=1024*1024)
 	;
 }
 

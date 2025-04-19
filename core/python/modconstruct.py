@@ -114,7 +114,9 @@ def indexmod(func):
 def build_pymodule(pycallable, *args, **kwargs):
     '''Convert a python callable and arguments into a core.G3Module by hook or by crook'''
 
-    if isinstance(pycallable, G3Module):
+    from .._libcore import G3ModuleBase
+
+    if isinstance(pycallable, G3ModuleBase):
         return pycallable
 
     if not callable(pycallable):
@@ -145,7 +147,7 @@ def build_pymodule(pycallable, *args, **kwargs):
             log_fatal('Cannot pass through arguments when passed instantiated class', unit = 'G3Pipeline')
 
     # See if it was a Python G3Module subclass
-    if isinstance(pycallable, G3Module):
+    if isinstance(pycallable, G3ModuleBase):
         return pycallable
 
     # This is a python callable that is not a module, so wrap it

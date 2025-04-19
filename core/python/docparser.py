@@ -30,7 +30,7 @@ def format_doc(x, simple=False):
                 doclines[-1] = '*{}*'.format(hdr)
         else:
             if simple and '->' in line and not line.startswith('    '):
-                line = '``{}``'.format(line)
+                line = '``{}``'.format(line).replace(" -> None", "")
             doclines.append('\t' * head + line)
     return '\n'.join(doclines)
 
@@ -51,30 +51,37 @@ def get_doc_for_module(module_path, include_link_list = True):
     def format_name(modname, x):
         return '\n.. _%s.%s:\n\n**%s.%s**\n' % (modname, x, modname, x)
     def format_signature(obj):
-        return re.sub('<(.*) at (.*)>', '<\\1>', str(inspect.signature(obj)))
+        sig = re.sub('<(.*) at (.*)>', '<\\1>', str(inspect.signature(obj)))
+        return sig.replace(" -> None", "")
     def format_definition(name, obj):
         argdef = '%s%s' % (name, format_signature(obj))
         return '\n\n*Definition:*\n        ``%s``\n' % argdef.strip()
-    def format_init(x, obj):
+    def format_init(modname, x, obj):
         try:
             sig = format_signature(obj.__init__).replace("(self, ", "(")
-            out_str = '\n*Constructor:*\n\t``%s%s``\n' % (x, sig)
+            out_str = '\n\n*Constructor:*\n\t``%s%s``\n' % (x, sig)
             if format_doc(obj.__init__):
                 con_str = '\n*Constructor:*\n\t%s\n' % format_doc(obj.__init__).replace('\n', '\n\t')
-                con_str = con_str.replace(' -> None', ' -> None``')
-                con_str = con_str.replace('__init__', '``__init__')
                 out_str += con_str
+            out_str = out_str.replace(' -> None', ' -> None``')
+            out_str = out_str.replace('__init__', '``__init__')
+            out_str = out_str.replace("(self, ", "(")
+            out_str = out_str.replace("(self)", "()")
             return out_str
         except:
             pass
         try:
             if format_doc(obj.__init__):
-                con_str = '\n\n*Constructors:*\n\t%s\n' % format_doc(obj.__init__).replace('\n', '\n\t')
+                overloaded = "__init__(*args, **kwargs)\nOverloaded function.\n"
+                init_doc = format_doc(obj.__init__)
+                if init_doc.startswith(overloaded):
+                    init_doc = init_doc[len(overloaded):]
+                con_str = '\n\n*Constructors:*\n\t%s\n' % init_doc.replace('\n', '\n\t')
+                con_str = con_str.replace("__init__(", "``{}(".format(x))
                 con_str = con_str.replace(' -> None', '``')
                 con_str = con_str.replace(' -> object', '``')
-                con_str = con_str.replace('__init__( (object)arg1,', '``{}('.format(x))
-                con_str = con_str.replace('__init__( (object)arg1)', '``{}()'.format(x))
-                con_str = con_str.replace('__init__( (object)arg1 [,', '``{}( ['.format(x))
+                con_str = con_str.replace("(self: {}.{}, ".format(modname, x), "(")
+                con_str = con_str.replace("(self: {}.{})".format(modname, x), "()")
                 return con_str
         except:
             pass
@@ -124,7 +131,7 @@ def get_doc_for_module(module_path, include_link_list = True):
                     if inspect.isfunction(obj):
                         out_str = add_str(out_str, format_definition(x, obj))
                     else:
-                        out_str = add_str(out_str, format_init(x, obj))
+                        out_str = add_str(out_str, format_init(modname, x, obj))
                 except:
                     pass
                 out_str = add_str(out_str, '')
@@ -168,7 +175,7 @@ def get_doc_for_module(module_path, include_link_list = True):
                 continue
             subclasstest = False
             try:
-                subclasstest = 'Boost.Python.function' in str(type(obj))
+                subclasstest = 'builtin_function_or_method' in str(type(obj))
             except TypeError:
                 pass
             if hasattr(obj, '__g3usefulfunc__') or subclasstest:
@@ -221,7 +228,7 @@ def get_doc_for_module(module_path, include_link_list = True):
                 if format_doc(obj) is not None:
                     tmp_str = format_doc(obj).strip()
                     out_str = out_str + tmp_str
-                    out_str = add_str(out_str, format_init(x, obj))
+                    out_str = add_str(out_str, format_init(modname, x, obj))
                     #after we have gotten the documention, find the properties and load their documentation
                     prop_str = ''
                     for p_name, p_obj in obj.__dict__.items():
@@ -240,7 +247,7 @@ def get_doc_for_module(module_path, include_link_list = True):
                     for p_name, p_obj in obj.__dict__.items():
                         if p_name.startswith('_') or p_name.endswith('_'):
                             continue
-                        if 'Boost.Python.function' in str(type(p_obj)):
+                        if 'builtin_function_or_method' in str(type(p_obj)):
                             meth_str = add_str(meth_str, format_name('%s.%s' % (modname, x), p_name))
                             tmp_doc = format_doc(p_obj, simple=True)
                             meth_str += tmp_doc.strip()

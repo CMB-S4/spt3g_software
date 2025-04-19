@@ -40,7 +40,7 @@ for test in ['test-be.g3', 'test-le.g3', 'test-le-v2.g3']:
 	for i in range(len(testdata['VecInt'])):
 		assert(testdata['VecInt'][i] == f['VecInt'][i])
 	assert(len(testdata['Map']) == len(f['Map']))
-	assert(testdata['Map'].keys() == f['Map'].keys())
+	assert(list(testdata['Map'].keys()) == list(f['Map'].keys()))
 	for i in testdata['Map'].keys():
 		assert(testdata['Map'][i] == f['Map'][i])
 	

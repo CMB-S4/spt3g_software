@@ -1,6 +1,5 @@
 #include <cmath>
 
-#include <pybindings.h>
 #include <serialization.h>
 
 #include <G3Units.h>

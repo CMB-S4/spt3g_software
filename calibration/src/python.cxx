@@ -1,16 +1,8 @@
 #include <pybindings.h>
 
-namespace bp = boost::python;
-
-SPT3G_PYTHON_MODULE(calibration)
+SPT3G_PYTHON_MODULE(calibration, scope)
 {
 	// Python bindings dependencies
-	bp::import("spt3g.core");
-
-	// Disable noise in doc strings
-	bp::docstring_options docopts(true, true, false);
-
-	// Python bindings for this module
-	G3ModuleRegistrator::CallRegistrarsFor("calibration");
+	py::module_::import("spt3g.core");
 }
 

@@ -99,10 +99,9 @@ std::string TrackerPointing::Description() const
 
 G3_SERIALIZABLE_CODE(TrackerPointing);
 
-PYBINDINGS("gcp") {
-	using namespace boost::python;
-
-	EXPORT_FRAMEOBJECT(TrackerPointing, init<>(), "GCP Tracker Pointing")
+PYBINDINGS("gcp", scope) {
+	register_frameobject<TrackerPointing>(scope, "TrackerPointing", "GCP Tracker Pointing")
+	    .def(py::init<>())
 	    .def_readwrite("time", &TrackerPointing::time)
 	    .def_readwrite("scu_temp", &TrackerPointing::scu_temp)
 	    .def_readwrite("features", &TrackerPointing::features)
@@ -121,8 +120,8 @@ PYBINDINGS("gcp") {
 	    .def_readwrite("telescope_temp", &TrackerPointing::telescope_temp)
 	    .def_readwrite("telescope_pressure", &TrackerPointing::telescope_pressure)
 	    .def_readwrite("refraction", &TrackerPointing::refraction)
-	    .def(self + self)
-	    .def(self += self)
+	    .def(py::self + py::self)
+	    .def(py::self += py::self)
 	;
 }
 
