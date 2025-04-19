@@ -28,6 +28,10 @@ endmacro(add_spt3g_program prog_name)
 
 macro(add_spt3g_executable prog_name)
 	add_executable(${prog_name} ${ARGN})
+	if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+		# Assume Linux-style ld linker
+		set_target_properties(${mod_name} PROPERTIES LINK_FLAGS "-Wl,--no-as-needed")
+	endif()
 	if(TARGET Python::Python)
 		target_link_libraries(${prog_name} Python::Python)
 	else()
