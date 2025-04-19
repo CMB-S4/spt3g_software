@@ -431,7 +431,7 @@ skymapmask_array_clone(const G3SkyMapMask &m, boost::python::object v,
 }
 
 static int
-skymapmask_index(const G3SkyMapMask &m, boost::python::object index)
+skymapmask_index(const G3SkyMapMask &m, const bp::object &index)
 {
 	using namespace boost::python;
 
@@ -476,7 +476,7 @@ skymapmask_index(const G3SkyMapMask &m, boost::python::object index)
 		boost::python::throw_error_already_set();
 	}
 
-	return i
+	return i;
 }
 
 static bool
@@ -488,7 +488,7 @@ skymapmask_getitem(const G3SkyMapMask &m, boost::python::object index)
 static void
 skymapmask_setitem(G3SkyMapMask &m, boost::python::object index, bool val)
 {
-	m[skymapmask_index(m, indx)] = val;
+	m[skymapmask_index(m, index)] = val;
 }
 
 static G3SkyMapMaskPtr
@@ -528,7 +528,8 @@ G3SkyMapMask_array_interface(const G3SkyMapMask &self)
 	out["data"] = bp::object(self.MakeBinaryMap());
 	auto shape = self.Parent()->shape();
 	std::reverse(shape.begin(), shape.end());
-	out["shape"] = bp::tuple(shape);
+	std::vector<uint64_t> ushape(shape.begin(), shape.end());
+	out["shape"] = bp::tuple(ushape);
 
 	return out;
 }
