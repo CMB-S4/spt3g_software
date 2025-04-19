@@ -20,3 +20,8 @@ assert(np.allclose(maps.ang_to_quat(alpha, delta), core.G3VectorQuat([maps.c_ang
 
 assert(np.allclose(maps.quat_to_ang(maps.c_ang_to_quat_(angle[0], angle[1])), angle))
 
+start = core.G3Time(0)
+stop = core.G3Time(10)
+q_timestream = maps.ang_to_quat(alpha, delta, start, stop)
+assert q_timestream.start == start
+assert q_timestream.stop == stop
