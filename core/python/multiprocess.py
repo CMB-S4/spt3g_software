@@ -109,7 +109,6 @@ class Subproc(ctx.Process):
             framebuf = b''
             while len(framebuf) < framelen:
                 framebuf += self.queue[1].recv(framelen - len(framebuf))
-            frame = G3Frame()
             frame = pickle.loads(framebuf)
 
             outframes = self.targetmod(frame)
