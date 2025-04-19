@@ -141,6 +141,15 @@ register_g3vector(py::module_ &scope, std::string name, Args &&...args)
 {
 	using U = std::vector<typename V::value_type>;
 
+	// Register both regular std::vector version and G3Vector version,
+	// with inheritance, so we can use both. Hide the std::vector version
+	// with _ in the Python namespace to discourage accidental use.
+	try {
+		// base class may have been registered separately
+		std::string base_name = std::string("_") + name + "BaseVector";
+		register_vector<U>(scope, base_name);
+	} catch (...) {}
+
 	auto cls = register_vector<V, Bases..., U, G3FrameObject>(scope,
 	    name, std::forward<Args>(args)...);
 
