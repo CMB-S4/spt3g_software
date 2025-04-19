@@ -9,6 +9,9 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#ifdef USE_PYTHON
+#include <pybindings.h>
+#endif
 
 #define STRINGIZE(s) STRINGIZE_DIRECT(s)
 #define STRINGIZE_DIRECT(s) #s
@@ -142,7 +145,7 @@ G3Test::testEquivalence(__FILE__, __LINE__, left, right, STRINGIZE(left), STRING
 /// other catch block.
 #ifdef USE_PYTHON
 #define G3TEST_CATCH_PYTHON_ERROR \
-catch(const pybind11::error_already_set& ex){ \
+catch(const py::error_already_set& ex){ \
 	PyErr_Print(); \
 }
 #else

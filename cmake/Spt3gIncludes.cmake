@@ -28,6 +28,14 @@ endmacro(add_spt3g_program prog_name)
 
 macro(add_spt3g_executable prog_name)
 	add_executable(${prog_name} ${ARGN})
+	if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+		# Assume Linux-style ld linker
+		if(${CMAKE_VERSION} VERSION_GREATER_EQUAL 3.17)
+			target_link_options(${prog_name} PUBLIC "LINKER:--no-as-needed")
+		else()
+			set_target_properties(${prog_name} PROPERTIES LINK_FLAGS "-Wl,--no-as-needed")
+		endif()
+	endif()
 	target_link_libraries(${prog_name} pybind11::embed)
 endmacro(add_spt3g_executable prog_name)
 
