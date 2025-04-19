@@ -130,18 +130,4 @@ struct g3frameobject_picklesuite : boost::python::pickle_suite
 	    .def(boost::python::init<const T &>()) \
 	    .def_pickle(g3frameobject_picklesuite<T>())
 
-template <class T>
-inline uint32_t
-_g3_class_version(T *)
-{
-	return cereal::detail::Version<T>::version;
-}
-
-#define G3_CHECK_VERSION(v) \
-	if ((uint32_t)v > _g3_class_version(this)) \
-		log_fatal("Trying to read newer class version (%d) than " \
-		    "supported (%d). Please upgrade your software.", v, \
-		    _g3_class_version(this));
-	
-
 #endif
