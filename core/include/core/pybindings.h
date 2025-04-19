@@ -74,16 +74,6 @@ public:
 	static G3ModuleRegistrator ___pybindings_register(mod, ___pybindings_registerfunc); \
 	static void ___pybindings_registerfunc() 
 
-#define EXPORT_FRAMEOBJECT(T, initf, docstring) \
-	boost::python::class_<T, boost::python::bases<G3FrameObject>, std::shared_ptr<T> >(#T, docstring, boost::python::initf) \
-	    .def(boost::python::init<const T &>()) \
-	    .def_pickle(g3frameobject_picklesuite<T>())
-
-#define EXPORT_FRAMEOBJECT_NOINITNAMESPACE(T, initf, docstring) \
-	boost::python::class_<T, boost::python::bases<G3FrameObject>, std::shared_ptr<T> >(#T, docstring, initf) \
-	    .def(boost::python::init<const T &>()) \
-	    .def_pickle(g3frameobject_picklesuite<T>())
-
 // Declare a python module with a name that is a bare token:
 //     SPT3G_PYTHON_SUBMODULE(foo, "pkg")
 // for a package whose fully qualified name will be pkg.foo
