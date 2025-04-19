@@ -430,8 +430,8 @@ skymapmask_array_clone(const G3SkyMapMask &m, boost::python::object v,
 	return skymapmask_from_numpy(*m.Parent(), v, zero_nans, zero_infs);
 }
 
-static bool
-skymapmask_getitem(const G3SkyMapMask &m, boost::python::object index)
+static int
+skymapmask_index(const G3SkyMapMask &m, boost::python::object index)
 {
 	using namespace boost::python;
 
@@ -476,56 +476,19 @@ skymapmask_getitem(const G3SkyMapMask &m, boost::python::object index)
 		boost::python::throw_error_already_set();
 	}
 
-	return m.at(i);
+	return i
+}
+
+static bool
+skymapmask_getitem(const G3SkyMapMask &m, boost::python::object index)
+{
+	return m.at(skymapmask_index(m, index));
 }
 
 static void
 skymapmask_setitem(G3SkyMapMask &m, boost::python::object index, bool val)
 {
-	using namespace boost::python;
-
-	int i = 0;
-	if (extract<int>(index).check()) {
-		i = extract<int>(index)();
-
-		if (i < 0)
-			i = m.size() + i;
-	} else if (extract<tuple>(index).check()) {
-		int x, y;
-
-		tuple t = extract<tuple>(index)();
-		FlatSkyMapConstPtr fsm = std::dynamic_pointer_cast<const FlatSkyMap>(m.Parent());
-		if (!fsm) {
-			PyErr_SetString(PyExc_TypeError,
-			    "N-D pixels, but underlying map is not a flat sky map");
-			boost::python::throw_error_already_set();
-		}
-
-		x = extract<int>(t[1])();
-		y = extract<int>(t[0])();
-		if (x < 0)
-			x += fsm->shape()[0];
-		if (y < 0)
-			y += fsm->shape()[0];
-		if (size_t(x) >= fsm->shape()[0] ||
-		    size_t(y) >= fsm->shape()[1]) { 
-			PyErr_SetString(PyExc_IndexError, "Index out of range");
-			boost::python::throw_error_already_set();
-		}
-
-		i = y * fsm->shape()[0] + x;
-	} else {
-		PyErr_SetString(PyExc_TypeError,
-		    "Need to pass an integer pixel ID or (optionally) for 2D maps a tuple of coordinates");
-		boost::python::throw_error_already_set();
-	}
-
-	if (i < 0 || size_t(i) >= m.size()) {
-		PyErr_SetString(PyExc_IndexError, "Index out of range");
-		boost::python::throw_error_already_set();
-	}
-
-	m[i] = val;
+	m[skymapmask_index(m, indx)] = val;
 }
 
 static G3SkyMapMaskPtr
