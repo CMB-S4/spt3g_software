@@ -37,7 +37,7 @@ FlatSkyMap::FlatSkyMap(const FlatSkyProjection & fp,
 }
 
 FlatSkyMap::FlatSkyMap() :
-    G3SkyMap(MapCoordReference::Local, 0), proj_info(0, 0, 0),
+    G3SkyMap(MapCoordReference::Local, false), proj_info(0, 0, 0),
     dense_(NULL), sparse_(NULL), xpix_(0), ypix_(0), flat_pol_(false)
 {
 }

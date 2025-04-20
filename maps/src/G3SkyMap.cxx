@@ -632,7 +632,7 @@ pyskymap_pow(const G3SkyMap &a, const G3SkyMap &b)
 
 #define skymap_comp(oper) \
 G3SkyMapMask \
-G3SkyMap::operator oper(const G3SkyMap &rhs) \
+G3SkyMap::operator oper(const G3SkyMap &rhs) const \
 { \
 	g3_assert(IsCompatible(rhs)); \
 	g3_assert(units == rhs.units); \
@@ -653,7 +653,7 @@ skymap_comp(>)
 
 #define skymap_compd(oper) \
 G3SkyMapMask \
-G3SkyMap::operator oper(double rhs) \
+G3SkyMap::operator oper(double rhs) const \
 { \
 	G3SkyMapMask rv(*this);	\
 	for (size_t i = 0; i < size(); i++) { \
