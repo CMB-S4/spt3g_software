@@ -827,7 +827,7 @@ Collects DfMux timepoints into scan frames using a provided wiring map. Scan fra
 
 
 *Constructors:*
-	``DfMuxCollator( [ (bool)flac_compress [, (bool)drop_timepoints [, (bool)record_sampletimes]]])``
+	``DfMuxCollator( [ (bool)flac_compress=True [, (bool)drop_timepoints=True [, (bool)record_sampletimes=True]]])``
 
 
 

@@ -572,7 +572,7 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <p id="spt3g-dfmux-dfmuxcollator"><strong>spt3g.dfmux.DfMuxCollator</strong></p>
 <p>Collects DfMux timepoints into scan frames using a provided wiring map. Scan frames are created when an empty Scan frame appears in the data stream. This frame will contain all subsequent timepoints until either the next Scan frame is detected or the stream ends. In addition to dfmux timestreams, any scalar floating numbers that recur in every input Timepoint frame will be combined into a G3Timestream of the same name stored in the output scan frame.</p>
 <dl class="simple">
-<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">DfMuxCollator(</span> <span class="pre">[</span> <span class="pre">(bool)flac_compress</span> <span class="pre">[,</span> <span class="pre">(bool)drop_timepoints</span> <span class="pre">[,</span> <span class="pre">(bool)record_sampletimes]]])</span></code></p>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">DfMuxCollator(</span> <span class="pre">[</span> <span class="pre">(bool)flac_compress=True</span> <span class="pre">[,</span> <span class="pre">(bool)drop_timepoints=True</span> <span class="pre">[,</span> <span class="pre">(bool)record_sampletimes=True]]])</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-dfmux-hardwaremaptools-dfmlhardwaremapinjector"><strong>spt3g.dfmux.HardwareMapTools.DfmlHardwareMapInjector</strong></p>
