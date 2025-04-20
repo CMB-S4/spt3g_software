@@ -122,10 +122,8 @@ static py::object
 G3ModuleConfig_get(const G3ModuleConfig &mc, std::string key)
 {
 	auto item = mc.config.find(key);
-	if (item == mc.config.end()) {
-		PyErr_SetString(PyExc_KeyError, key.c_str());
-		py::throw_error_already_set();
-	}
+	if (item == mc.config.end())
+		throw py::key_error(key);
 
 	auto arg = item->second;
 	if (!!arg.object)
