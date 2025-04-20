@@ -854,6 +854,13 @@ void ARCFileReader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 PYBINDINGS("gcp") {
 	using namespace boost::python;
 
+	// Supported Experiments
+	bp::enum_<Experiment>("Experiment")
+		.value("SPT",   Experiment::SPT)
+		.value("BK",    Experiment::BK)
+		.value("PB",    Experiment::PB)
+	;
+
 	// Instead of EXPORT_G3MODULE since there are two constructors
 	class_<ARCFileReader, bases<G3Module>, std::shared_ptr<ARCFileReader>,
 	    boost::noncopyable>("ARCFileReader",
