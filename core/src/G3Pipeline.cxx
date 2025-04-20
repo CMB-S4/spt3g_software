@@ -443,7 +443,7 @@ PYBINDINGS("core", scope) {
 	        py::keep_alive<1, 2>())
 	    .def("Run", &G3Pipeline::Run,
 	      py::arg("profile")=false, py::arg("graph")=false,
-	       py::arg("signal_halt")=true,
+	      py::arg("signal_halt")=true,
 	      "Run pipeline. If profile is True, print execution time "
 	      "statistics for each module when complete. If graph is True, "
 	      "stores control flow data that can be processed with GraphViz "

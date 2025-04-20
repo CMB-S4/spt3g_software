@@ -12,7 +12,7 @@ public:
 	G3Module() {}
 	virtual ~G3Module() {}
 
-	// modules objects are non-copyable
+	// module objects are non-copyable
 	G3Module(const G3Module &) = delete;
 	G3Module& operator=(const G3Module &) = delete;
 

@@ -491,9 +491,9 @@ static py::bytes g3frame_hash(const py::object &obj)
 PYBINDINGS("core", scope) {
 	// Internal stuff
 	register_class<G3FrameObject>(scope, "G3FrameObject",
-	      "Base class for objects that can be added to a frame. All such "
-	      "must inherit from G3FrameObject in C++. Pickle hooks are overridden "
-	      "to use the fast internal serialization.")
+	  "Base class for objects that can be added to a frame. All such "
+	  "must inherit from G3FrameObject in C++. Pickle hooks are overridden "
+	  "to use the fast internal serialization.")
 	    .def("Description", &G3FrameObject::Description,
 	      "Long-form human-readable description of the object")
 	    .def("Summary", &G3FrameObject::Summary,
@@ -524,16 +524,16 @@ PYBINDINGS("core", scope) {
 	register_vector_of<G3Frame::FrameType>(scope, "FrameType");
 
 	register_class<G3Frame>(scope, "G3Frame",
-	      "Frames are the core datatype of the analysis software. They behave "
-	      "like Python dictionaries except that they can only store subclasses "
-	      "of core.G3FrameObject and the dictionary keys must be strings. "
-	      "Pickling and unpickling them uses internal serialization and is "
-	      "extremely fast."
-	      "\n\n"
-	      "In addition to dictionary-like contents, frames have a type code "
-	      "(G3Frame.Type) that designates what kind of data are contained in "
-	      "it. These types usually indicates information that changes at "
-	      "different rates.")
+	  "Frames are the core datatype of the analysis software. They behave "
+	  "like Python dictionaries except that they can only store subclasses "
+	  "of core.G3FrameObject and the dictionary keys must be strings. "
+	  "Pickling and unpickling them uses internal serialization and is "
+	  "extremely fast."
+	  "\n\n"
+	  "In addition to dictionary-like contents, frames have a type code "
+	  "(G3Frame.Type) that designates what kind of data are contained in "
+	  "it. These types usually indicates information that changes at "
+	  "different rates.")
 	    .def(py::init<>())
 	    .def(py::init<G3Frame::FrameType>())
 	    .def(py::init<G3Frame>())
