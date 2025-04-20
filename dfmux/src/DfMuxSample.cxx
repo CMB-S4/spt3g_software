@@ -2,8 +2,6 @@
 #include <serialization.h>
 
 #include <dfmux/DfMuxSample.h>
-#include <cereal/types/map.hpp>
-#include <cereal/types/vector.hpp>
 
 template <class A> void DfMuxSample::serialize(A &ar, unsigned v)
 {

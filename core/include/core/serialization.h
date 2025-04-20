@@ -117,9 +117,39 @@ struct g3frameobject_picklesuite : py::pickle_suite
 	}
 };
 
-#define EXPORT_FRAMEOBJECT(T, initf, docstring) \
-	py::class_<T, py::bases<G3FrameObject>, std::shared_ptr<T> >(#T, docstring, initf) \
-	    .def(py::init<const T &>()) \
-	    .def_pickle(g3frameobject_picklesuite<T>())
+template <typename T>
+void
+register_pointer_conversions()
+{
+	py::implicitly_convertible<std::shared_ptr<T>, G3FrameObjectPtr>();
+	py::implicitly_convertible<std::shared_ptr<T>, std::shared_ptr<const T> >();
+	py::implicitly_convertible<std::shared_ptr<T>, G3FrameObjectConstPtr>();
+}
+
+// Register a G3FrameObject-derived class.  Includes a copy constructor,
+// pickling interface, and string representation.
+template <typename T, typename... Bases, typename... Args>
+auto
+register_frameobject(py::module_ &scope, const std::string &name, Args&&...args)
+{
+	auto cls = register_class<T, Bases..., G3FrameObject>(scope, name.c_str(),
+	    std::forward<Args>(args)...);
+
+	// copy constructor
+	cls.def(py::init<const T &>("Copy constructor"));
+
+	// pickling infrastructure
+	cls.def_pickle(g3frameobject_picklesuite<T>());
+
+	// string representation
+	cls.def("__str__", &T::Summary)
+	    .def("Summary", &T::Summary, "Short (one-line) description of the object")
+	    .def("Description", &T::Description,
+	        "Long-form human-readable description of the object");
+
+	register_pointer_conversions<T>();
+
+	return cls;
+}
 
 #endif

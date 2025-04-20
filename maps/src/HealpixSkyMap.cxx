@@ -1216,19 +1216,15 @@ G3_SPLIT_SERIALIZABLE_CODE(HealpixSkyMap);
 
 PYBINDINGS("maps", scope)
 {
-	// Can't use the normal FRAMEOBJECT code since this inherits
-	// from an intermediate class. Expanded by hand here.
-	py::object hsm = py::class_<HealpixSkyMap, py::bases<G3SkyMap, G3FrameObject>,
-	  HealpixSkyMapPtr>("HealpixSkyMap",
+	py::object hsm = register_frameobject<HealpixSkyMap, G3SkyMap>(scope, "HealpixSkyMap",
 	  "HealpixSkyMap is a G3SkyMap with the extra meta information about the "
 	  "particular Healpix pixelization used.  In practice it behaves "
 	  "(mostly) like a 1d numpy array.  If you find that you need numpy "
 	  "functionality from a HealpixSkyMap, e.g. for slicing across the array, "
 	  "you can access a numpy representation of the map using `np.asarray(m)`. "
 	  "This does not copy the data, so any changes to the resulting array will "
-	  "affect the data stored in the map.", py::no_init)
-	    .def(py::init<const HealpixSkyMap &>())
-	    .def_pickle(g3frameobject_picklesuite<HealpixSkyMap>())
+	  "affect the data stored in the map.")
+	    .def(py::init<>())
 	    .def(py::init<size_t, bool, bool, MapCoordReference,
 	        G3Timestream::TimestreamUnits, G3SkyMap::MapPolType, bool,
 	        G3SkyMap::MapPolConv>(
@@ -1267,10 +1263,7 @@ PYBINDINGS("maps", scope)
 	        py::arg("pol_conv") = G3SkyMap::ConvNone)),
 	        "Instantiate a dense Healpix map from existing data.")
 
-	    .def(py::init<const HealpixSkyMap&>(py::arg("healpix_map")))
-	    .def(py::init<>())
-	    .def("array_clone", &HealpixSkyMap_array_clone,
-	      (py::arg("array")),
+	    .def("array_clone", &HealpixSkyMap_array_clone, (py::arg("array")),
 	       "Return a map of the same type, populated with a copy of the input "
 	       "numpy array")
 	    .add_property("nside", &HealpixSkyMap::nside, "Healpix resolution parameter")
@@ -1309,7 +1302,6 @@ PYBINDINGS("maps", scope)
 	    .def("__setitem__", HealpixSkyMap_setitem_1d)
 	    .def("__setitem__", HealpixSkyMap_setslice_1d)
 	;
-	register_pointer_conversions<HealpixSkyMap>();
 
 	// Add buffer protocol interface
 	PyTypeObject *hsmclass = (PyTypeObject *)hsm.ptr();

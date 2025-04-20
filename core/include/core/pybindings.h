@@ -10,15 +10,6 @@
 
 namespace py = boost::python;
 
-template <typename T>
-void
-register_pointer_conversions()
-{
-	py::implicitly_convertible<std::shared_ptr<T>, G3FrameObjectPtr>();
-	py::implicitly_convertible<std::shared_ptr<T>, std::shared_ptr<const T> >();
-	py::implicitly_convertible<std::shared_ptr<T>, G3FrameObjectConstPtr>();
-}
-
 // Tool for exporting enum elements called 'None', reserved in Python
 // Invoke by doing enum_none_converter::from_python<T>()
 struct enum_none_converter {

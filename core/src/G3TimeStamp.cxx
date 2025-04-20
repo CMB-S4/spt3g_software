@@ -282,10 +282,17 @@ g3time_from_timestamp(py::object obj)
 }
 
 PYBINDINGS("core", scope) {
-	EXPORT_FRAMEOBJECT(G3Time, py::init<>(), "UTC Time")
-	    .def(py::init<int, int , int , int, int, int>("Create a timestamp object from IRIG B code", py::args("y", "d", "h", "m", "s", "ss")))
-	    .def(py::init<std::string>("Create a time object from a string representation. Supported formats are: YYYYMMDD_HHMMSS, YYMMDD_HHMMSS, YYMMDD HH:MM:SS, DD-Mon-YYYY:HH:MM:SS, YYYY-MM-DDTHH:MM:SS[+TZ] (ISO 8601). All can have a fraction of second field after a dot."))
-	    .def("__init__", py::make_constructor(g3time_from_timestamp, py::default_call_policies(), (py::arg("timestamp"))), "Create a G3Time from a numeric timestamp")
+	register_frameobject<G3Time>(scope, "G3Time", "UTC Time")
+	    .def(py::init<>())
+	    .def(py::init<int, int , int , int, int, int>((
+	        py::arg("y"), py::arg("d"), py::arg("h"), py::arg("m"), py::arg("s"), py::arg("ss")),
+	        "Create a timestamp object from IRIG B code"))
+	    .def(py::init<std::string>("Create a time object from a string representation. "
+	        "Supported formats are: YYYYMMDD_HHMMSS, YYMMDD_HHMMSS, YYMMDD HH:MM:SS, "
+	        "DD-Mon-YYYY:HH:MM:SS, YYYY-MM-DDTHH:MM:SS[+TZ] (ISO 8601). All can have a "
+	        "fraction of second field after a dot."))
+	    .def("__init__", py::make_constructor(g3time_from_timestamp, py::default_call_policies(), (py::arg("timestamp"))),
+	        "Create a G3Time from a numeric timestamp")
 	    .def("GetFileFormatString", &G3Time::GetFileFormatString, "Get a string corresponding to how SPTpol and GCP name files for this time")
 	    .def("isoformat", &G3Time::isoformat, "Return the ISO 8601 formatted timestamp string")
 	    .def("Now", &G3Time::Now, "Return a G3Time object corresponding to the current system time")
@@ -305,6 +312,5 @@ PYBINDINGS("core", scope) {
 	    .def("__float__", &G3Time::operator double)
 	    .def("__int__", &G3Time::operator long)
 	;
-	register_pointer_conversions<G3Time>();
 }
 

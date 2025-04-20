@@ -4,9 +4,6 @@
 #include <G3Timestream.h>
 #include <G3Units.h>
 
-#include <cereal/types/map.hpp>
-#include <cereal/types/vector.hpp>
-
 #ifdef G3_HAS_FLAC
 #include <FLAC/stream_encoder.h>
 #include <cmath>
@@ -1495,7 +1492,8 @@ PYBINDINGS("core", scope) {
 	;
 
 	py::object ts =
-	  EXPORT_FRAMEOBJECT(G3Timestream, py::init<>(), "Detector timestream. "
+	register_frameobject<G3Timestream>(scope, "G3Timestream",
+	   "Detector timestream. "
 	   "Includes a units field and start and stop times. Can otherwise be "
 	   "treated as a numpy array with a float64 dtype. Conversions to and "
            "from such arrays (e.g. with numpy.asarray) are fast. Note that a "
@@ -1503,6 +1501,7 @@ PYBINDINGS("core", scope) {
            "buffer: changes to the array affect the timestream and vice versa. "
 	   "Most binary timestream arithmetic operations (+, -) check that the "
 	   "units and start/stop times are congruent.")
+	    .def(py::init<>())
 	    .def("__init__", py::make_constructor(G3Timestream::G3TimestreamPythonHelpers::timestream_from_iterable, py::default_call_policies(), (py::arg("data"), py::arg("units") = G3Timestream::TimestreamUnits::None)), "Create a timestream from a numpy array or other numeric python iterable")
 	    .def("SetFLACCompression", &G3Timestream::SetFLACCompression,
 	      "Pass True to turn on FLAC compression when serialized. "
@@ -1539,7 +1538,6 @@ PYBINDINGS("core", scope) {
 	    .add_property("ndim", &G3Timestream_ndim)
 	    // Operators bound in python through numpy
 	;
-	register_pointer_conversions<G3Timestream>();
 
 	// Add buffer protocol interface
 	PyTypeObject *tsclass = (PyTypeObject *)ts.ptr();
@@ -1550,7 +1548,9 @@ PYBINDINGS("core", scope) {
 #endif
 
 	py::object tsm =
-	  EXPORT_FRAMEOBJECT(G3TimestreamMap, py::init<>(), "Collection of timestreams indexed by logical detector ID")
+	register_frameobject<G3TimestreamMap>(scope, "G3TimestreamMap",
+	    "Collection of timestreams indexed by logical detector ID")
+	    .def(py::init<>())
 	    .def("__init__", py::make_constructor(G3Timestream::G3TimestreamPythonHelpers::G3TimestreamMap_from_numpy, 
 	         py::default_call_policies(),
 	         (py::arg("keys"), py::arg("data"), py::arg("start")=G3Time(0),
@@ -1601,7 +1601,6 @@ PYBINDINGS("core", scope) {
 	    .add_property("times", &G3TimestreamMap_times,
 	      "Compute time vector for samples")
 	;
-	register_pointer_conversions<G3TimestreamMap>();
 
 	// Add buffer protocol interface
 	PyTypeObject *tsmclass = (PyTypeObject *)tsm.ptr();

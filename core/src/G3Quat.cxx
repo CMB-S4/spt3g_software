@@ -989,7 +989,8 @@ PYBINDINGS("core", scope)
 	qclass->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
 #endif
 
-	EXPORT_FRAMEOBJECT(G3Quat, py::init<Quat>(), "Serializable quaternion")
+	register_frameobject<G3Quat>(scope, "G3Quat", "Serializable quaternion")
+	    .def(py::init<Quat>())
 	    .def_readwrite("value", &G3Quat::value)
 	;
 
@@ -1032,14 +1033,12 @@ PYBINDINGS("core", scope)
 #endif
 
 	py::object tq =
-	py::class_<G3TimestreamQuat, py::bases<G3VectorQuat>, G3TimestreamQuatPtr>(
-	    "G3TimestreamQuat",
+	register_frameobject<G3TimestreamQuat, G3VectorQuat>(scope, "G3TimestreamQuat",
 	    "Timestream of quaternions. Identical to a G3VectorQuat except "
 	    "for the addition of start and stop times.")
 	    .def(py::init<>())
 	    .def("__init__", py::make_constructor(container_from_object<G3TimestreamQuat>))
 	    .def(py::init<const G3TimestreamQuat &>())
-	    .def_pickle(g3frameobject_picklesuite<G3TimestreamQuat>())
 	    .def(~py::self)
 	    .def(py::self * double())
 	    .def(double() * py::self)
@@ -1080,7 +1079,6 @@ PYBINDINGS("core", scope)
 #endif
 
 	scitbx::boost_python::container_conversions::from_python_sequence<G3TimestreamQuat, scitbx::boost_python::container_conversions::variable_capacity_policy>();
-	register_pointer_conversions<G3TimestreamQuat>();
 	py::implicitly_convertible<G3TimestreamQuatPtr, G3VectorQuatPtr>();
 	py::implicitly_convertible<G3TimestreamQuatPtr, G3VectorQuatConstPtr>();
 

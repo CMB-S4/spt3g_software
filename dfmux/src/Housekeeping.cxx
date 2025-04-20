@@ -181,8 +181,9 @@ G3_SERIALIZABLE_CODE(HkBoardInfo);
 G3_SERIALIZABLE_CODE(DfMuxHousekeepingMap);
 
 PYBINDINGS("dfmux", scope) {
-	EXPORT_FRAMEOBJECT(HkChannelInfo, py::init<>(), "Mux channel status "
+	register_frameobject<HkChannelInfo>(scope, "HkChannelInfo", "Mux channel status "
 	  "(configuration and sensors). Usually a part of an HkModuleInfo.")
+	    .def(py::init<>())
 	    .def_readwrite("channel_number", &HkChannelInfo::channel_number,
                "1-indexed channel number.")
 	    .def_readwrite("carrier_amplitude",
@@ -244,7 +245,8 @@ PYBINDINGS("dfmux", scope) {
 	    "Mapping of channel number (1-indexed) to channel status "
 	    "information");
 
-	EXPORT_FRAMEOBJECT(HkModuleInfo, py::init<>(), "Mux module status")
+	register_frameobject<HkModuleInfo>(scope, "HkModuleInfo", "Mux module status")
+	    .def(py::init<>())
 	    .def_readwrite("module_number", &HkModuleInfo::module_number,
 	       "1-indexed module number on this mezzanine")
 	    .def_readwrite("carrier_gain", &HkModuleInfo::carrier_gain,
@@ -287,7 +289,8 @@ PYBINDINGS("dfmux", scope) {
 	    "Mapping from 1-indexed module numbers to module-specific "
 	    "housekeeping data");
 
-	EXPORT_FRAMEOBJECT(HkMezzanineInfo, py::init<>(), "Mux mezzanine status")
+	register_frameobject<HkMezzanineInfo>(scope, "HkMezzanineInfo", "Mux mezzanine status")
+	    .def(py::init<>())
 	    .def_readwrite("power", &HkMezzanineInfo::power, "True if on")
 	    .def_readwrite("present", &HkMezzanineInfo::present, "True if exists")
 	    .def_readwrite("serial", &HkMezzanineInfo::serial,
@@ -318,9 +321,10 @@ PYBINDINGS("dfmux", scope) {
 	    "1-indexed mapping of mezzanine ID to mezzanine-specific "
 	    "housekeeping data");
 
-	EXPORT_FRAMEOBJECT(HkBoardInfo, py::init<>(), "Mux board status. Includes "
+	register_frameobject<HkBoardInfo>(scope, "HkBoardInfo", "Mux board status. Includes "
 	  "both configuration and sensor readings for board generic quantities "
 	  "and a list of quantities for the mezzanines.")
+	    .def(py::init<>())
 	    .def_readwrite("timestamp", &HkBoardInfo::timestamp,
 	       "Time at which housekeeping data collected")
 	    .def_readwrite("timestamp_port", &HkBoardInfo::timestamp_port,

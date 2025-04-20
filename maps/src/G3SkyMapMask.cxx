@@ -523,7 +523,7 @@ G3SkyMapMask_array_interface(const G3SkyMapMask &self)
 
 PYBINDINGS("maps", scope)
 {
-	EXPORT_FRAMEOBJECT(G3SkyMapMask, py::no_init,
+	register_frameobject<G3SkyMapMask>(scope, "G3SkyMapMask",
 	    "Boolean mask of a sky map. Set pixels to use to true, pixels to "
 	    "ignore to false. If use_data set in contrast, mask initialized to "
 	    "true where input map is non-zero; otherwise, all elements are "
@@ -585,6 +585,5 @@ PYBINDINGS("maps", scope)
 	    "Create a skymap with data set to the contents of this mask "
 	    "(1.0 where True, 0.0 where False), which can be useful for plotting.")
 	;
-	register_pointer_conversions<G3SkyMapMask>();
 }
 

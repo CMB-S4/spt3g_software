@@ -214,10 +214,10 @@ void DfMuxBuilder::ProcessNewData()
 
 PYBINDINGS("dfmux", scope)
 {
-	py::class_<DfMuxBoardSamples, py::bases<G3FrameObject>,
-	  DfMuxBoardSamplesPtr>("DfMuxBoardSamples",
+	register_frameobject<DfMuxBoardSamples>(scope, "DfMuxBoardSamples",
 	  "Container structure for samples from modules on one board, mapping "
 	  "0-indexed module and block IDs to a dfmux.DfMuxSample.")
+	    .def(py::init<>())
 	    .def(py::std_map_indexing_suite<DfMuxBoardSamples, true>())
 	    .def_readwrite("nmodules", &DfMuxBoardSamples::nmodules,
 	      "Number of modules expected to report from this board")
@@ -227,19 +227,15 @@ PYBINDINGS("dfmux", scope)
 	      "Number of channels per block expected to report from this board")
 	    .def("Complete", &DfMuxBoardSamples::Complete,
 	      "True if this structure contains data from all expected modules and blocks")
-	    .def_pickle(g3frameobject_picklesuite<DfMuxBoardSamples>())
 	;
-	register_pointer_conversions<DfMuxBoardSamples>();
 
-	py::class_<DfMuxMetaSample, py::bases<G3FrameObject>,
-	  DfMuxMetaSamplePtr>("DfMuxMetaSample",
+	register_frameobject<DfMuxMetaSample>(scope, "DfMuxMetaSample",
 	  "Container structure for coincident samples from all boards. "
 	  "Individual board data, stored in dfmux.DfMuxBoardSamples classes, "
 	  "is contained indexed by board serial number.")
+	    .def(py::init<>())
 	    .def(py::std_map_indexing_suite<DfMuxMetaSample, false>())
-	    .def_pickle(g3frameobject_picklesuite<DfMuxMetaSample>())
 	;
-	register_pointer_conversions<DfMuxMetaSample>();
 
 	register_g3module<DfMuxBuilder, G3EventBuilder>(scope, "DfMuxBuilder",
 	  "Processing module for data from DfMux boards. Reads data from "

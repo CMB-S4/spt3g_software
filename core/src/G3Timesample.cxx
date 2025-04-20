@@ -246,17 +246,15 @@ void safe_set_times(G3TimesampleMap &self, G3VectorTime _times)
 PYBINDINGS("core", scope)
 {
 	// This is based on register_g3map macro.
-	py::class_<G3TimesampleMap, py::bases<G3FrameObject,
+	register_frameobject<G3TimesampleMap,
 	    std::map<typename G3TimesampleMap::key_type,
-                     typename G3TimesampleMap::mapped_type> >,
-	    std::shared_ptr<G3TimesampleMap> >("G3TimesampleMap",
-              "Mapping from string to vectors of data, with an associated "
-              "vector of timestamps.  This object is for storing multiple "
-              "co-sampled vectors with a single set of (irregular) timestamps.")
-	.def(py::init<const G3TimesampleMap &>())
+                     typename G3TimesampleMap::mapped_type> >(scope, "G3TimesampleMap",
+	    "Mapping from string to vectors of data, with an associated "
+	    "vector of timestamps.  This object is for storing multiple "
+	    "co-sampled vectors with a single set of (irregular) timestamps.")
+	.def(py::init<>())
 	.def(py::std_map_indexing_suite<G3TimesampleMap, true>())
 	.def("__setitem__", &safe_set_item)
-	.def_pickle(g3frameobject_picklesuite<G3TimesampleMap>())
 	// Extensions for G3TimesampleMap are here:
 	.add_property("times", &G3TimesampleMap::times, &safe_set_times,
 	  "Times vector.  Setting this stores a copy, but getting returns a reference.")
@@ -267,5 +265,4 @@ PYBINDINGS("core", scope)
 	.def("sort", &G3TimesampleMap::Sort,
           "Sort all element vectors by time, in-place.")
 	;
-	register_pointer_conversions<G3TimesampleMap>();
 }

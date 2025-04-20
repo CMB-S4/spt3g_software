@@ -1246,8 +1246,7 @@ PYBINDINGS("maps", scope)
 {
 	// Can't use the normal FRAMEOBJECT code since this inherits
 	// from an intermediate class. Expanded by hand here.
-	py::object fsm = py::class_<FlatSkyMap, py::bases<G3SkyMap, G3FrameObject>,
-	  FlatSkyMapPtr>("FlatSkyMap",
+	py::object fsm = register_frameobject<FlatSkyMap, G3SkyMap>(scope, "FlatSkyMap",
 	  "FlatSkyMap is a G3SkyMap with the extra meta information about the "
 	  "particular flat sky projection included.  In practice it behaves "
 	  "(mostly) like a 2d numpy array.  The pixels are normally indexed with "
@@ -1258,9 +1257,8 @@ PYBINDINGS("maps", scope)
 	  "affect the data stored in the map.  Alternatively, you can use 2d "
 	  "slice indexing directly on the map to access a copy of the data with "
 	  "the coordinate representation intact.  The latter method is most efficient "
-	  "for extracting small patches from sparse maps.", py::no_init)
-	    .def(py::init<const FlatSkyMap &>())
-	    .def_pickle(g3frameobject_picklesuite<FlatSkyMap>())
+	  "for extracting small patches from sparse maps.")
+	    .def(py::init<>())
 	    .def(py::init<size_t, size_t, double, bool, MapProjection, double,
 	       double, MapCoordReference, G3Timestream::TimestreamUnits,
 	       G3SkyMap::MapPolType, double, double, double, bool,
@@ -1292,8 +1290,6 @@ PYBINDINGS("maps", scope)
 		  py::arg("pol_conv") = G3SkyMap::ConvNone)),
 		"Instantiate a flat sky map object from a numpy array")
 
-	    .def(py::init<const FlatSkyMap&>(py::arg("flat_map")))
-	    .def(py::init<>())
 	    .def("array_clone", &flatskymap_array_clone, (py::arg("array")),
 	       "Return a map of the same type, populated with a copy of the input "
 	       "numpy array")
@@ -1393,7 +1389,6 @@ PYBINDINGS("maps", scope)
 	    .def("__getitem__", flatskymap_getitem_masked)
 	    .def("__setitem__", flatskymap_setitem_masked)
 	;
-	register_pointer_conversions<FlatSkyMap>();
 
 	// Add buffer protocol interface
 	PyTypeObject *fsmclass = (PyTypeObject *)fsm.ptr();

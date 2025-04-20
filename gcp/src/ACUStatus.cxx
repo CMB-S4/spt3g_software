@@ -76,8 +76,9 @@ PYBINDINGS("gcp", scope) {
 	    .value("RESYNC", ACUStatus::RESYNC)
 	;
 
-	EXPORT_FRAMEOBJECT(ACUStatus, py::init<>(), "ACU Status information, as "
+	register_frameobject<ACUStatus>(scope, "ACUStatus", "ACU Status information, as "
 	  "reported by the ACU")
+	    .def(py::init<>())
 	    .def_readwrite("time", &ACUStatus::time)
 	    .def_readwrite("az_pos", &ACUStatus::az_pos)
 	    .def_readwrite("el_pos", &ACUStatus::el_pos)

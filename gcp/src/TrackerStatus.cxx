@@ -84,7 +84,8 @@ PYBINDINGS("gcp", scope) {
 	;
 	register_vector_of<TrackerStatus::TrackerState>("TrackerState");
 
-	EXPORT_FRAMEOBJECT(TrackerStatus, py::init<>(), "GCP Tracker Status")
+	register_frameobject<TrackerStatus>(scope, "TrackerStatus", "GCP Tracker Status")
+	    .def(py::init<>())
 	    .def_readwrite("time", &TrackerStatus::time)
 	    .def_readwrite("az_pos", &TrackerStatus::az_pos)
 	    .def_readwrite("el_pos", &TrackerStatus::el_pos)

@@ -1650,9 +1650,10 @@ PYBINDINGS("maps", scope) {
 	;
 	py::implicitly_convertible<G3SkyMapPtr, G3SkyMapConstPtr>();
 
-	EXPORT_FRAMEOBJECT(G3SkyMapWeights, py::init<>(),
+	register_frameobject<G3SkyMapWeights>(scope, "G3SkyMapWeights",
 	    "Polarized (Mueller matrix) or unpolarized (scalar) map pixel weights."
 	    "Weights are polarized if the pol_conv attribute of the reference map is set.")
+	    .def(py::init<>())
 	    .def(py::init<G3SkyMapConstPtr>((py::arg("skymap"))))
 	    .def_readwrite("TT",&G3SkyMapWeights::TT, "Mueller matrix component map")
 	    .def_readwrite("TQ",&G3SkyMapWeights::TQ, "Mueller matrix component map")
@@ -1715,7 +1716,6 @@ PYBINDINGS("maps", scope) {
 	    .def("__div__", &pyskymapweights_divd)
 	    .def("__truediv__", &pyskymapweights_divd)
 	;
-	register_pointer_conversions<G3SkyMapWeights>();
 
 }
 

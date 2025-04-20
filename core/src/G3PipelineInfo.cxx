@@ -257,7 +257,9 @@ G3_SPLIT_SERIALIZABLE_CODE(G3ModuleConfig);
 G3_SERIALIZABLE_CODE(G3PipelineInfo);
 
 PYBINDINGS("core", scope) {
-	EXPORT_FRAMEOBJECT(G3ModuleConfig, py::init<>(), "Stored configuration of a pipeline module or segment")
+	register_frameobject<G3ModuleConfig>(scope, "G3ModuleConfig",
+	    "Stored configuration of a pipeline module or segment")
+	    .def(py::init<>())
 	    .def_readwrite("modname", &G3ModuleConfig::modname)
 	    .def_readwrite("instancename", &G3ModuleConfig::instancename)
 	    .def("__repr__", &G3ModuleConfig_repr)
@@ -266,10 +268,11 @@ PYBINDINGS("core", scope) {
 	    .def("keys", &G3ModuleConfig_keys)
 	    .def("values", &G3ModuleConfig_values)
 	;
-	register_pointer_conversions<G3ModuleConfig>();
 	register_vector_of<G3ModuleConfig>("ModuleConfig");
 
-	EXPORT_FRAMEOBJECT(G3PipelineInfo, py::init<>(), "Stored configuration of a pipeline, including software version information")
+	register_frameobject<G3PipelineInfo>(scope, "G3PipelineInfo",
+	    "Stored configuration of a pipeline, including software version information")
+	    .def(py::init<>())
 	    .def_readwrite("vcs_url", &G3PipelineInfo::vcs_url)
 	    .def_readwrite("vcs_branch", &G3PipelineInfo::vcs_branch)
 	    .def_readwrite("vcs_revision", &G3PipelineInfo::vcs_revision)
@@ -283,6 +286,5 @@ PYBINDINGS("core", scope) {
 	    .def("__repr__", &G3PipelineInfo_repr)
 	    .def("Run", &G3PipelineInfo_run)
 	;
-	register_pointer_conversions<G3PipelineInfo>();
 }
 

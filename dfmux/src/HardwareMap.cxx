@@ -51,10 +51,11 @@ G3_SERIALIZABLE_CODE(DfMuxChannelMapping);
 G3_SERIALIZABLE_CODE(DfMuxWiringMap);
 
 PYBINDINGS("dfmux", scope) {
-	EXPORT_FRAMEOBJECT(DfMuxChannelMapping, py::init<>(),
+	register_frameobject<DfMuxChannelMapping>(scope, "DfMuxChannelMapping",
 	  "Bolometer wiring information. Module and channel IDs are stored "
 	  "zero-indexed, but be aware that they often printed one-indexed "
 	  "for compatibility with pydfmux.")
+	    .def(py::init<>())
 	    .def_readwrite("board_ip", &DfMuxChannelMapping::board_ip,
 	     "IP Address of the board, encoded as an int using struct")
 	    .def_readwrite("board_serial", &DfMuxChannelMapping::board_serial,
