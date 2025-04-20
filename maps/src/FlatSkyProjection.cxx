@@ -715,9 +715,7 @@ G3_SPLIT_SERIALIZABLE_CODE(FlatSkyProjection);
 
 PYBINDINGS("maps")
 {
-	using namespace boost::python;
-
-	auto cls = bp::enum_<MapProjection>("MapProjection")
+	auto cls = py::enum_<MapProjection>("MapProjection")
 	    .value("Proj8", Proj8)
 	    .value("ProjSFL", ProjSFL)
 	    .value("ProjCAR", ProjCAR)

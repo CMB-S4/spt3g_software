@@ -17,6 +17,6 @@ private:
 };
 
 EXPORT_G3MODULE("core", G3InfiniteSource,
-    (init<optional<G3Frame::FrameType, int> >((arg("type")=G3Frame::None, arg("n")=-1))),
+    (py::init<G3Frame::FrameType, int>((py::arg("type")=G3Frame::None, py::arg("n")=-1))),
     "Emits infinite frames, up to an optional maximum number n");
 

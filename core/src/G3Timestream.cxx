@@ -1004,19 +1004,18 @@ G3Timestream_assert_congruence(const G3Timestream &a, const G3Timestream &b)
 }
 
 static G3TimestreamPtr
-G3Timestream_getslice(const G3Timestream &a, boost::python::slice slice)
+G3Timestream_getslice(const G3Timestream &a, py::slice slice)
 {
-	using namespace boost::python;
 	int start(0), stop(a.size()), step(1);
 	double sample_spacing = 1./a.GetSampleRate();
 
 	// Normalize and check slice boundaries
 	if (slice.start().ptr() != Py_None)
-		start = extract<int>(slice.start())();
+		start = py::extract<int>(slice.start())();
 	if (slice.stop().ptr() != Py_None)
-		stop = extract<int>(slice.stop())();
+		stop = py::extract<int>(slice.stop())();
 	if (slice.step().ptr() != Py_None)
-		step = extract<int>(slice.step())();
+		step = py::extract<int>(slice.step())();
 
 	if (start < 0)
 		start = a.size() + start;
@@ -1124,9 +1123,9 @@ G3TimestreamMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 	view->suboffsets = NULL;
 	view->buf = NULL;
 
-	boost::python::handle<> self(boost::python::borrowed(obj));
-	boost::python::object selfobj(self);
-	boost::python::extract<G3TimestreamMapPtr> ext(selfobj);
+	py::handle<> self(py::borrowed(obj));
+	py::object selfobj(self);
+	py::extract<G3TimestreamMapPtr> ext(selfobj);
 	if (!ext.check()) {
 		PyErr_SetString(PyExc_ValueError, "Invalid timestream");
 		view->obj = NULL;
@@ -1210,12 +1209,12 @@ G3TimestreamMap_relbuffer(PyObject *obj, Py_buffer *view)
 }
 
 static G3TimestreamPtr
-timestream_from_iterable(boost::python::object v,
+timestream_from_iterable(py::object v,
     G3Timestream::TimestreamUnits units = G3Timestream::None)
 {
 	// Sometimes the explicit copy constructor does not get
 	// priority from python, so do what that should have done.
-	boost::python::extract<G3TimestreamConstPtr> was_ts_already(v);
+	py::extract<G3TimestreamConstPtr> was_ts_already(v);
 	if (was_ts_already.check())
 		return G3TimestreamPtr(new G3Timestream(*was_ts_already()));
 
@@ -1268,14 +1267,14 @@ timestream_from_iterable(boost::python::object v,
 			// We could add more types, but why do that?
 			// Let Python do the work for obscure cases
 			std::vector<double> data;
-			boost::python::container_utils::extend_container(data, v);
+			py::container_utils::extend_container(data, v);
 			x = G3TimestreamPtr(new G3Timestream(data.begin(), data.end()));
 		}
 		PyBuffer_Release(&view);
 	} else {
 		PyErr_Clear();
 		std::vector<double> data;
-		boost::python::container_utils::extend_container(data, v);
+		py::container_utils::extend_container(data, v);
 		x = G3TimestreamPtr(new G3Timestream(data.begin(), data.end()));
 	}
 
@@ -1292,7 +1291,7 @@ struct PyBufferOwner {
 
 static G3TimestreamMapPtr
 G3TimestreamMap_from_numpy(std::vector<std::string> keys,
-    boost::python::object data, G3Time start, G3Time stop,
+    py::object data, G3Time start, G3Time stop,
     G3Timestream::TimestreamUnits units, int compression_level,
     bool copy_data, int bit_depth)
 {
@@ -1329,13 +1328,13 @@ G3TimestreamMap_from_numpy(std::vector<std::string> keys,
 	if (keys.size() != (size_t)v->v.shape[0]) {
 		PyErr_SetString(PyExc_IndexError, "Number of keys does not "
 		    "match number of rows in data structure.");
-		boost::python::throw_error_already_set();
+		py::throw_error_already_set();
 	}
 
 	if (v->v.ndim != 2) {
 		PyErr_SetString(PyExc_ValueError,
 		    "Array must be two-dimensional.");
-		boost::python::throw_error_already_set();
+		py::throw_error_already_set();
 	}
 
 	G3Timestream templ;
@@ -1362,7 +1361,7 @@ G3TimestreamMap_from_numpy(std::vector<std::string> keys,
 		templ.data_type_ = G3Timestream::TS_INT64;
 	} else {
 		PyErr_SetString(PyExc_ValueError, "Unsupported data type.");
-		boost::python::throw_error_already_set();
+		py::throw_error_already_set();
 	}
 
 	uint8_t *buf;
@@ -1404,9 +1403,9 @@ G3Timestream_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 
 	view->shape = NULL;
 
-	boost::python::handle<> self(boost::python::borrowed(obj));
-	boost::python::object selfobj(self);
-	boost::python::extract<G3TimestreamPtr> ext(selfobj);
+	py::handle<> self(py::borrowed(obj));
+	py::object selfobj(self);
+	py::extract<G3TimestreamPtr> ext(selfobj);
 	if (!ext.check()) {
 		PyErr_SetString(PyExc_ValueError, "Invalid timestream");
 		view->obj = NULL;
@@ -1464,10 +1463,10 @@ G3Timestream_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 
 };
 
-static bp::tuple
+static py::tuple
 G3Timestream_shape(const G3Timestream &r)
 {
-	return bp::make_tuple(r.size());
+	return py::make_tuple(r.size());
 }
 
 static int
@@ -1480,9 +1479,7 @@ static PyBufferProcs timestream_bufferprocs;
 static PyBufferProcs timestreammap_bufferprocs;
 
 PYBINDINGS("core") {
-	namespace bp = boost::python;
-
-	bp::enum_<G3Timestream::TimestreamUnits>("G3TimestreamUnits",
+	py::enum_<G3Timestream::TimestreamUnits>("G3TimestreamUnits",
 	  "Unit scheme for timestreams and maps. Designates different classes "
 	  "of units (power, current, on-sky temperature) rather than choices "
 	  "of unit within a class (watts vs. horsepower, or K vs. uK), "
@@ -1503,8 +1500,8 @@ PYBINDINGS("core") {
 	;
 	enum_none_converter::from_python<G3Timestream::TimestreamUnits>();
 
-	bp::object ts =
-	  EXPORT_FRAMEOBJECT(G3Timestream, init<>(), "Detector timestream. "
+	py::object ts =
+	  EXPORT_FRAMEOBJECT(G3Timestream, py::init<>(), "Detector timestream. "
 	   "Includes a units field and start and stop times. Can otherwise be "
 	   "treated as a numpy array with a float64 dtype. Conversions to and "
            "from such arrays (e.g. with numpy.asarray) are fast. Note that a "
@@ -1512,7 +1509,7 @@ PYBINDINGS("core") {
            "buffer: changes to the array affect the timestream and vice versa. "
 	   "Most binary timestream arithmetic operations (+, -) check that the "
 	   "units and start/stop times are congruent.")
-	    .def("__init__", bp::make_constructor(G3Timestream::G3TimestreamPythonHelpers::timestream_from_iterable, bp::default_call_policies(), (bp::arg("data"), bp::arg("units") = G3Timestream::TimestreamUnits::None)), "Create a timestream from a numpy array or other numeric python iterable")
+	    .def("__init__", py::make_constructor(G3Timestream::G3TimestreamPythonHelpers::timestream_from_iterable, py::default_call_policies(), (py::arg("data"), py::arg("units") = G3Timestream::TimestreamUnits::None)), "Create a timestream from a numpy array or other numeric python iterable")
 	    .def("SetFLACCompression", &G3Timestream::SetFLACCompression,
 	      "Pass True to turn on FLAC compression when serialized. "
 	      "FLAC compression only works if the timestream is in units of "
@@ -1558,19 +1555,19 @@ PYBINDINGS("core") {
 	tsclass->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
 #endif
 
-	bp::object tsm =
-	  EXPORT_FRAMEOBJECT(G3TimestreamMap, init<>(), "Collection of timestreams indexed by logical detector ID")
-	    .def("__init__", bp::make_constructor(G3Timestream::G3TimestreamPythonHelpers::G3TimestreamMap_from_numpy, 
-	         bp::default_call_policies(),
-	         (bp::arg("keys"), bp::arg("data"), bp::arg("start")=G3Time(0),
-	          bp::arg("stop")=G3Time(0), bp::arg("units") = G3Timestream::TimestreamUnits::None,
-	          bp::arg("compression_level") = 0, bp::arg("copy_data") = true, bp::arg("bit_depth") = 32)),
+	py::object tsm =
+	  EXPORT_FRAMEOBJECT(G3TimestreamMap, py::init<>(), "Collection of timestreams indexed by logical detector ID")
+	    .def("__init__", py::make_constructor(G3Timestream::G3TimestreamPythonHelpers::G3TimestreamMap_from_numpy, 
+	         py::default_call_policies(),
+	         (py::arg("keys"), py::arg("data"), py::arg("start")=G3Time(0),
+	          py::arg("stop")=G3Time(0), py::arg("units") = G3Timestream::TimestreamUnits::None,
+	          py::arg("compression_level") = 0, py::arg("copy_data") = true, py::arg("bit_depth") = 32)),
 	         "Create a timestream map from a numpy array or other numeric python iterable. "
 	         "Each row of the 2D input array will correspond to a single timestream, with "
 	         "the key set to the correspondingly-indexed entry of <keys>. If <copy_data> "
 	         "is True (default), the data will be copied into the output data structure. "
 	         "If False, the timestream map will provide a view into the given numpy array.")
-	    .def(bp::std_map_indexing_suite<G3TimestreamMap, true>())
+	    .def(py::std_map_indexing_suite<G3TimestreamMap, true>())
 	    .def("CheckAlignment", &G3TimestreamMap::CheckAlignment)
 	    .def("Compactify", &G3TimestreamMap::Compactify,
 	       "If member timestreams are stored non-contiguously, repack all "

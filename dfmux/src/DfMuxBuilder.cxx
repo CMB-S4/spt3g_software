@@ -214,13 +214,11 @@ void DfMuxBuilder::ProcessNewData()
 
 PYBINDINGS("dfmux")
 {
-	using namespace boost::python;
-
-	class_<DfMuxBoardSamples, bases<G3FrameObject>,
+	py::class_<DfMuxBoardSamples, py::bases<G3FrameObject>,
 	  DfMuxBoardSamplesPtr>("DfMuxBoardSamples",
 	  "Container structure for samples from modules on one board, mapping "
 	  "0-indexed module and block IDs to a dfmux.DfMuxSample.")
-	    .def(std_map_indexing_suite<DfMuxBoardSamples, true>())
+	    .def(py::std_map_indexing_suite<DfMuxBoardSamples, true>())
 	    .def_readwrite("nmodules", &DfMuxBoardSamples::nmodules,
 	      "Number of modules expected to report from this board")
 	    .def_readwrite("nblocks", &DfMuxBoardSamples::nblocks,
@@ -233,17 +231,17 @@ PYBINDINGS("dfmux")
 	;
 	register_pointer_conversions<DfMuxBoardSamples>();
 
-	class_<DfMuxMetaSample, bases<G3FrameObject>,
+	py::class_<DfMuxMetaSample, py::bases<G3FrameObject>,
 	  DfMuxMetaSamplePtr>("DfMuxMetaSample",
 	  "Container structure for coincident samples from all boards. "
 	  "Individual board data, stored in dfmux.DfMuxBoardSamples classes, "
 	  "is contained indexed by board serial number.")
-	    .def(std_map_indexing_suite<DfMuxMetaSample, false>())
+	    .def(py::std_map_indexing_suite<DfMuxMetaSample, false>())
 	    .def_pickle(g3frameobject_picklesuite<DfMuxMetaSample>())
 	;
 	register_pointer_conversions<DfMuxMetaSample>();
 
-	class_<DfMuxBuilder, bases<G3EventBuilder>, DfMuxBuilderPtr,
+	py::class_<DfMuxBuilder, py::bases<G3EventBuilder>, DfMuxBuilderPtr,
 	  boost::noncopyable>("DfMuxBuilder",
 	  "Processing module for data from DfMux boards. Reads data from "
 	  "boards data acquisition boards, requiring that data from all "
@@ -252,10 +250,10 @@ PYBINDINGS("dfmux")
 	  "is an integer, listens for that number. If a list of integers, "
 	  "DfMuxBuilder will filter for only boards with serial numbers "
 	  "in the list.",
-	  init<int, boost::python::optional<int64_t> >(
-	   args("boards", "collation_tolerance")))
-	    .def(init<std::vector<int>, boost::python::optional<int64_t> >(args("boards", "collation_tolerance")))
+	  py::init<int, py::optional<int64_t> >(
+	   py::args("boards", "collation_tolerance")))
+	    .def(py::init<std::vector<int>, py::optional<int64_t> >(py::args("boards", "collation_tolerance")))
 	;
-	implicitly_convertible<DfMuxBuilderPtr, G3ModulePtr>();
+	py::implicitly_convertible<DfMuxBuilderPtr, G3ModulePtr>();
 }
 

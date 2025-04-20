@@ -266,15 +266,15 @@ static void translate_ValueError(g3timesample_exception const& e)
 PYBINDINGS("core")
 {
 	// This is based on register_g3map macro.
-	bp::class_<G3TimesampleMap, bp::bases<G3FrameObject,
+	py::class_<G3TimesampleMap, py::bases<G3FrameObject,
 	    std::map<typename G3TimesampleMap::key_type,
                      typename G3TimesampleMap::mapped_type> >,
 	    std::shared_ptr<G3TimesampleMap> >("G3TimesampleMap",
               "Mapping from string to vectors of data, with an associated "
               "vector of timestamps.  This object is for storing multiple "
               "co-sampled vectors with a single set of (irregular) timestamps.")
-	.def(bp::init<const G3TimesampleMap &>())
-	.def(bp::std_map_indexing_suite<G3TimesampleMap, true>())
+	.def(py::init<const G3TimesampleMap &>())
+	.def(py::std_map_indexing_suite<G3TimesampleMap, true>())
 	.def("__setitem__", &safe_set_item)
 	.def_pickle(g3frameobject_picklesuite<G3TimesampleMap>())
 	// Extensions for G3TimesampleMap are here:
@@ -289,5 +289,5 @@ PYBINDINGS("core")
 	;
 	register_pointer_conversions<G3TimesampleMap>();
 
-	bp::register_exception_translator<g3timesample_exception>(&translate_ValueError);
+	py::register_exception_translator<g3timesample_exception>(&translate_ValueError);
 }

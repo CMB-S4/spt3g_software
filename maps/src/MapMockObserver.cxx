@@ -40,12 +40,12 @@ private:
 };
 
 EXPORT_G3MODULE("maps", MapMockObserver,
-    (init<std::string, std::string, double,
+    (py::init<std::string, std::string, double,
      G3SkyMapConstPtr, G3SkyMapConstPtr, G3SkyMapConstPtr,
-     std::string, bool, bool>((arg("pointing"), arg("timestreams"), arg("band"),
-     arg("T"), arg("Q")=G3SkyMapConstPtr(), arg("U")=G3SkyMapConstPtr(),
-     arg("bolo_properties_name")="BolometerProperties", arg("interp")=false,
-     arg("error_on_zero")=true))),
+     std::string, bool, bool>((py::arg("pointing"), py::arg("timestreams"), py::arg("band"),
+     py::arg("T"), py::arg("Q")=G3SkyMapConstPtr(), py::arg("U")=G3SkyMapConstPtr(),
+     py::arg("bolo_properties_name")="BolometerProperties", py::arg("interp")=false,
+     py::arg("error_on_zero")=true))),
 "MapMockObserver(pointing, timestreams, band, T, Q=None, U=None, bolo_properties_name=\"BolometerProperties\", interp=False)\n"
 "\n"
 "Creates a new set of timestreams by sampling from an input map.\n\n"

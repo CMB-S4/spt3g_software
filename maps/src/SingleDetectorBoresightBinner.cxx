@@ -35,8 +35,8 @@ private:
 };
 
 EXPORT_G3MODULE("maps", SingleDetectorBoresightBinner,
-    (init<const G3SkyMap &, std::string, std::string>
-     ((arg("stub_map"), arg("pointing"), arg("timestreams")))),
+    (py::init<const G3SkyMap &, std::string, std::string>
+     ((py::arg("stub_map"), py::arg("pointing"), py::arg("timestreams")))),
 "SingleDetectorBoresightBinner(stub_map, pointing, timestreams)\n"
 "\n"
 "Makes simple binned maps of the sky, in boresight coordinates, for every \n"

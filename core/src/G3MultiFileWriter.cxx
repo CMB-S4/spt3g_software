@@ -6,9 +6,9 @@
 
 class G3MultiFileWriter : public G3Module {
 public:
-	G3MultiFileWriter(boost::python::object filename,
+	G3MultiFileWriter(py::object filename,
 	    size_t size_limit,
-	    boost::python::object divide_on = boost::python::object(),
+	    py::object divide_on = py::object(),
 	    size_t buffersize=1024*1024);
 
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
@@ -17,13 +17,13 @@ private:
 	bool CheckNewFile(G3FramePtr frame);
 
 	std::string filename_;
-	boost::python::object filename_callback_;
+	py::object filename_callback_;
 	std::string current_filename_;
 	size_t size_limit_;
 	size_t buffersize_;
 
 	std::vector<G3Frame::FrameType> always_break_on_;
-	boost::python::object newfile_callback_;
+	py::object newfile_callback_;
 
 	std::ostream stream_;
 	std::vector<G3FramePtr> metadata_cache_;
@@ -32,11 +32,11 @@ private:
 	SET_LOGGER("G3MultiFileWriter");
 };
 
-G3MultiFileWriter::G3MultiFileWriter(boost::python::object filename,
-    size_t size_limit, boost::python::object divide_on, size_t buffersize)
+G3MultiFileWriter::G3MultiFileWriter(py::object filename,
+    size_t size_limit, py::object divide_on, size_t buffersize)
     : size_limit_(size_limit), buffersize_(buffersize), stream_(nullptr), seqno(0)
 {
-	boost::python::extract<std::string> fstr(filename);
+	py::extract<std::string> fstr(filename);
 
 	if (fstr.check()) {
 		filename_ = fstr();
@@ -57,7 +57,7 @@ G3MultiFileWriter::G3MultiFileWriter(boost::python::object filename,
 		log_fatal("File size limit must be greater than zero");
 
 	if (divide_on.ptr() != Py_None) {
-		boost::python::extract<std::vector<G3Frame::FrameType> >
+		py::extract<std::vector<G3Frame::FrameType> >
 		    type_list_ext(divide_on);
 
 		if (type_list_ext.check())
@@ -86,7 +86,7 @@ G3MultiFileWriter::CheckNewFile(G3FramePtr frame)
 			start_new_ = true;
 
 		if (newfile_callback_.ptr() != Py_None &&
-		    boost::python::extract<bool>(newfile_callback_(frame))())
+		    py::extract<bool>(newfile_callback_(frame))())
 			start_new_ = true;
 
 		if (std::find(always_break_on_.begin(), always_break_on_.end(),
@@ -111,7 +111,7 @@ G3MultiFileWriter::CheckNewFile(G3FramePtr frame)
 		delete [] msg;
 		seqno++;
 	} else {
-		filename = boost::python::extract<std::string>(
+		filename = py::extract<std::string>(
 		    filename_callback_(frame, seqno++))();
 	}
 
@@ -162,9 +162,7 @@ done:
 }
 
 PYBINDINGS("core") {
-	using namespace boost::python;
-
-	class_<G3MultiFileWriter, bases<G3Module>, std::shared_ptr<G3MultiFileWriter>,
+	py::class_<G3MultiFileWriter, py::bases<G3Module>, std::shared_ptr<G3MultiFileWriter>,
 	    boost::noncopyable>("G3MultiFileWriter",
 	      "Writes frames to disk into a sequence of files. Once a file exceeds "
 	      "the number of bytes specified in size_limit, it will start a new file. "
@@ -186,8 +184,8 @@ PYBINDINGS("core") {
 	      "python callable as divide_on. This callable will be passed each "
 	      "frame in turn. If it returns True (or something with positive "
 	      "truth-value), a new file will be started at that frame.",
-	init<object, size_t, optional<object, size_t> >((arg("filename"),
-	    arg("size_limit"), arg("divide_on")=object(), arg("buffersize")=1024*1024)))
+	py::init<py::object, size_t, py::optional<py::object, size_t> >((py::arg("filename"),
+	    py::arg("size_limit"), py::arg("divide_on")=py::object(), py::arg("buffersize")=1024*1024)))
 	.def_readonly("current_file", &G3MultiFileWriter::CurrentFile)
 	.def_readonly("__g3module__", true)
 	;

@@ -7,17 +7,31 @@
 
 #include <boost/python.hpp>
 
-namespace bp = boost::python;
+namespace py = boost::python;
+
+namespace boost { namespace python {
+
+template <typename T>
+T cast(const py::object &obj)
+{
+	return py::extract<T>(obj)();
+}
+
+template <typename T>
+bool isinstance(const py::object &obj)
+{
+	return py::extract<T>(obj).check();
+}
+
+}}
 
 template <typename T>
 void
 register_pointer_conversions()
 {
-	using boost::python::implicitly_convertible;
-
-	implicitly_convertible<std::shared_ptr<T>, G3FrameObjectPtr>();
-	implicitly_convertible<std::shared_ptr<T>, std::shared_ptr<const T> >();
-	implicitly_convertible<std::shared_ptr<T>, G3FrameObjectConstPtr>();
+	py::implicitly_convertible<std::shared_ptr<T>, G3FrameObjectPtr>();
+	py::implicitly_convertible<std::shared_ptr<T>, std::shared_ptr<const T> >();
+	py::implicitly_convertible<std::shared_ptr<T>, G3FrameObjectConstPtr>();
 }
 
 // Tool for exporting enum elements called 'None', reserved in Python
@@ -26,10 +40,10 @@ struct enum_none_converter {
 	template <typename Enum, Enum NoneValue = Enum::None>
 	static void from_python()
 	{
-		boost::python::converter::registry::push_back(
+		py::converter::registry::push_back(
 		    &enum_none_converter::convertible,
 		    &enum_none_converter::construct<Enum, NoneValue>,
-		    boost::python::type_id<Enum>());
+		    py::type_id<Enum>());
 	}
 
 	static void* convertible(PyObject* object)
@@ -40,7 +54,7 @@ struct enum_none_converter {
 	template <typename Enum, Enum NoneValue = Enum::None>
 	static void construct(
 	    PyObject* object,
-	    boost::python::converter::rvalue_from_python_stage1_data* data)
+	    py::converter::rvalue_from_python_stage1_data* data)
 	{
 		data->convertible = new Enum(NoneValue);
 	}
@@ -56,8 +70,7 @@ public:
 
 #define EXPORT_G3MODULE_AND(mod, T, init, docstring, other_defs)   \
 	static void registerfunc##T() { \
-		using namespace boost::python; \
-		class_<T, bases<G3Module>, std::shared_ptr<T>, \
+		py::class_<T, py::bases<G3Module>, std::shared_ptr<T>, \
 		  boost::noncopyable>(#T, docstring, init) \
 		    .def_readonly("__g3module__", true) \
                 other_defs \
@@ -79,7 +92,7 @@ public:
 // for a package whose fully qualified name will be pkg.foo
 #define SPT3G_PYTHON_SUBMODULE(name, pkg) \
 BOOST_PYTHON_MODULE(_lib ## name) { \
-	auto mod = boost::python::scope(); \
+	auto mod = py::scope(); \
 	mod.attr("__name__") = std::string(pkg) + "." + #name; \
 	void (spt3g_init_module_ ## name)(); \
 	(spt3g_init_module_ ## name)(); \
@@ -93,7 +106,7 @@ void (spt3g_init_module_ ## name)()
 SPT3G_PYTHON_SUBMODULE(name, "spt3g")
 
 // Create a namespace (importable sub-module) within some parent scope
-bp::object export_namespace(bp::object scope, std::string name);
+py::object export_namespace(py::object scope, std::string name);
 
 // Python runtime context to simplify acquiring or releasing the GIL as necessary.
 // To use, simply construct the context object where necessary, e.g.

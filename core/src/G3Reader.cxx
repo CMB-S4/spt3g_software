@@ -109,10 +109,8 @@ off_t G3Reader::Tell() {
 }
 
 PYBINDINGS("core") {
-	using namespace boost::python;
-
 	// Instead of EXPORT_G3MODULE since there are two constructors
-	class_<G3Reader, bases<G3Module>, std::shared_ptr<G3Reader>,
+	py::class_<G3Reader, py::bases<G3Module>, std::shared_ptr<G3Reader>,
 	    boost::noncopyable>("G3Reader",
 	      "Read frames from disk. Takes either the path to a file to read "
 	      "or an iterable of files to be read in sequence. If "
@@ -125,12 +123,12 @@ PYBINDINGS("core") {
 	      "seek to the beginning of a particular frame in the file.  Set "
 	      "track_filename to True to record the filename for each frame in "
 	      "the ._filename attribute (fragile).",
-	init<std::string, int, float, bool, size_t>((arg("filename"),
-	    arg("n_frames_to_read")=0,arg("timeout")=-1.,
-	    arg("track_filename")=false,arg("buffersize")=1024*1024)))
-	.def(init<std::vector<std::string>, int, float, bool, size_t>((
-	    arg("filename"), arg("n_frames_to_read")=0, arg("timeout")=-1.,
-	    arg("track_filename")=false,arg("buffersize")=1024*1024)))
+	py::init<std::string, int, float, bool, size_t>((py::arg("filename"),
+	    py::arg("n_frames_to_read")=0, py::arg("timeout")=-1.,
+	    py::arg("track_filename")=false, py::arg("buffersize")=1024*1024)))
+	.def(py::init<std::vector<std::string>, int, float, bool, size_t>((
+	    py::arg("filename"), py::arg("n_frames_to_read")=0, py::arg("timeout")=-1.,
+	    py::arg("track_filename")=false, py::arg("buffersize")=1024*1024)))
 	.def("tell", &G3Reader::Tell,
 	    "Return the current byte offset from start of stream.")
 	.def("seek", &G3Reader::Seek,

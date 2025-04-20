@@ -141,6 +141,6 @@ void NetCDFDump::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	}
 }
 
-EXPORT_G3MODULE("dfmux", NetCDFDump, init<std::string>(args("filename")),
+EXPORT_G3MODULE("dfmux", NetCDFDump, py::init<std::string>(py::args("filename")),
     "Writes DfMux streamer data to a NetCDF file");
 

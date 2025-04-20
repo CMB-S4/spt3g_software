@@ -74,21 +74,21 @@ G3_SERIALIZABLE_CODE(G3Double);
 G3_SERIALIZABLE_CODE(G3String);
 
 PYBINDINGS("core") {
-	EXPORT_FRAMEOBJECT(G3Bool, init<bool>(), "Serializable boolean type")
+	EXPORT_FRAMEOBJECT(G3Bool, py::init<bool>(), "Serializable boolean type")
 	    .def_readwrite("value", &G3Bool::value)
 	    .def("__nonzero__", &G3Bool::truth)
 	    .def("__bool__", &G3Bool::truth)
 	;
 
-	EXPORT_FRAMEOBJECT(G3Int, init<int64_t>(), "Serializable integer type")
+	EXPORT_FRAMEOBJECT(G3Int, py::init<int64_t>(), "Serializable integer type")
 	    .def_readwrite("value", &G3Int::value)
 	;
 
-	EXPORT_FRAMEOBJECT(G3Double, init<double>(), "Serializable double")
+	EXPORT_FRAMEOBJECT(G3Double, py::init<double>(), "Serializable double")
 	    .def_readwrite("value", &G3Double::value)
 	;
 
-	EXPORT_FRAMEOBJECT(G3String, init<std::string>(), "Serializable string")
+	EXPORT_FRAMEOBJECT(G3String, py::init<std::string>(), "Serializable string")
 	    .def_readwrite("value", &G3String::value)
 	;
 }

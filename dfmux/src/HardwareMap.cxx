@@ -51,7 +51,7 @@ G3_SERIALIZABLE_CODE(DfMuxChannelMapping);
 G3_SERIALIZABLE_CODE(DfMuxWiringMap);
 
 PYBINDINGS("dfmux") {
-	EXPORT_FRAMEOBJECT(DfMuxChannelMapping, init<>(),
+	EXPORT_FRAMEOBJECT(DfMuxChannelMapping, py::init<>(),
 	  "Bolometer wiring information. Module and channel IDs are stored "
 	  "zero-indexed, but be aware that they often printed one-indexed "
 	  "for compatibility with pydfmux.")

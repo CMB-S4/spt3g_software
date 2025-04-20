@@ -34,10 +34,10 @@ private:
 };
 
 EXPORT_G3MODULE("maps", MapTODMasker,
-    (init<std::string, std::string, G3SkyMapMaskConstPtr, std::string,
-     std::string>((arg("pointing"), arg("timestreams"), arg("mask"),
-     arg("tod_mask")="FilterMask",
-     arg("bolo_properties_name")="BolometerProperties"))),
+    (py::init<std::string, std::string, G3SkyMapMaskConstPtr, std::string,
+     std::string>((py::arg("pointing"), py::arg("timestreams"), py::arg("mask"),
+     py::arg("tod_mask")="FilterMask",
+     py::arg("bolo_properties_name")="BolometerProperties"))),
 "Creates a filter mask <tod_mask> to indicate to later TOD filtering that "
 "a detector has passed over a \"bad\" part of the sky. This is used, for "
 "example, to avoid fitting a polynomial to a timestream while the detector is "

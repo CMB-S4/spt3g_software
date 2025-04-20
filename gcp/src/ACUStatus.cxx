@@ -69,14 +69,14 @@ static bool operator == (const ACUStatus &a, const ACUStatus &b) {
 }
 
 PYBINDINGS("gcp") {
-	boost::python::enum_<enum ACUStatus::ACUState>("ACUState")
+	py::enum_<enum ACUStatus::ACUState>("ACUState")
 	    .value("IDLE", ACUStatus::IDLE)
 	    .value("TRACKING", ACUStatus::TRACKING)
 	    .value("WAIT_RESTART", ACUStatus::WAIT_RESTART)
 	    .value("RESYNC", ACUStatus::RESYNC)
 	;
 
-	EXPORT_FRAMEOBJECT(ACUStatus, init<>(), "ACU Status information, as "
+	EXPORT_FRAMEOBJECT(ACUStatus, py::init<>(), "ACU Status information, as "
 	  "reported by the ACU")
 	    .def_readwrite("time", &ACUStatus::time)
 	    .def_readwrite("az_pos", &ACUStatus::az_pos)

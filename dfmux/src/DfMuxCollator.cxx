@@ -221,8 +221,8 @@ out:
 		out.push_back(frame);
 }
 
-EXPORT_G3MODULE("dfmux", DfMuxCollator, (init<optional<bool, bool, bool> >(
-    args("flac_compress", "drop_timepoints", "record_sampletimes"))),
+EXPORT_G3MODULE("dfmux", DfMuxCollator, (py::init<py::optional<bool, bool, bool> >(
+    py::args("flac_compress", "drop_timepoints", "record_sampletimes"))),
     "Collects DfMux timepoints into scan frames using a provided wiring map. "
     "Scan frames are created when an empty Scan frame appears in the data "
     "stream. This frame will contain all subsequent timepoints until either "

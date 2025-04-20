@@ -58,7 +58,9 @@ G3_SERIALIZABLE_CODE(BolometerProperties);
 G3_SERIALIZABLE_CODE(BolometerPropertiesMap);
 
 PYBINDINGS("calibration") {
-	EXPORT_FRAMEOBJECT(BolometerProperties, init<>(), "Physical bolometer properties, such as detector angular offsets. Does not include tuning-dependent properties of the detectors.")
+	EXPORT_FRAMEOBJECT(BolometerProperties, py::init<>(),
+	    "Physical bolometer properties, such as detector angular offsets. "
+	    "Does not include tuning-dependent properties of the detectors.")
 	    .def_readwrite("physical_name", &BolometerProperties::physical_name,
 	       "Physical name of the detector (e.g. some polarization at some "
 	       "particular pixel on the wafer)")
@@ -87,7 +89,7 @@ PYBINDINGS("calibration") {
 	       "Name of the pixel type of which this detector is a part")
 	;
 
-	bp::enum_<BolometerProperties::CouplingType>("BolometerCouplingType",
+	py::enum_<BolometerProperties::CouplingType>("BolometerCouplingType",
 	  "Coupling type for BolometerProperties objects.")
 	    .value("Unknown", BolometerProperties::Unknown)
 	    .value("Optical", BolometerProperties::Optical)

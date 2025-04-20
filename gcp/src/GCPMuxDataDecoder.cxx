@@ -35,7 +35,7 @@ private:
 	SET_LOGGER("GCPMuxDataDecoder");
 };
 
-EXPORT_G3MODULE("gcp", GCPMuxDataDecoder, init<>(),
+EXPORT_G3MODULE("gcp", GCPMuxDataDecoder, py::init<>(),
     "Extracts contents of receiver registers in SPTpol-style ARC files into a "
     "wiring map and timepoint frames. This is designed to convert SPTpol-style "
     "data in which GCP records bolometer data into the ARC files into a format "

@@ -1,6 +1,5 @@
 #include <pybindings.h>
 #include <G3Pipeline.h>
-
 #include <G3Data.h>
 
 #include <sys/time.h>
@@ -355,12 +354,10 @@ G3Pipeline::Run(bool profile, bool graph, bool signal_halt)
 	}
 }
 
-namespace bp = boost::python;
-
-static bp::list G3Module_Process(G3Module &mod, G3FramePtr ptr)
+static py::list G3Module_Process(G3Module &mod, G3FramePtr ptr)
 {
 	std::deque<G3FramePtr> queue;
-	bp::list vec;
+	py::list vec;
 
 	mod.Process(ptr, queue);
 
@@ -380,23 +377,23 @@ static bp::list G3Module_Process(G3Module &mod, G3FramePtr ptr)
 // - If it returns an iterable of frames, that iterable is pushed instead of
 //   the input
 
-class G3ModuleWrap : public G3Module, public boost::python::wrapper<G3Module>
+class G3ModuleWrap : public G3Module, public py::wrapper<G3Module>
 {
 public:
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out) {
-		bp::object ret = this->get_override("Process")(frame);
+		py::object ret = this->get_override("Process")(frame);
 		if (ret.ptr() == Py_None) {
 			out.push_back(frame);
 			return;
 		}
 
-		bp::extract<G3FramePtr> extframe(ret);
+		py::extract<G3FramePtr> extframe(ret);
 		if (extframe.check()) {
 			out.push_back(extframe());
 			return;
 		}
 
-		bp::extract<std::vector<G3FramePtr> > extvec(ret);
+		py::extract<std::vector<G3FramePtr> > extvec(ret);
 		if (extvec.check()) {
 			std::vector<G3FramePtr> outlist = extvec();
 			for (auto i = outlist.begin(); i != outlist.end(); i++)
@@ -420,15 +417,15 @@ G3Pipeline_halt_processing()
 }
 
 PYBINDINGS("core") {
-	bp::class_<G3ModuleWrap, std::shared_ptr<G3ModuleWrap>,
+	py::class_<G3ModuleWrap, std::shared_ptr<G3ModuleWrap>,
 	  boost::noncopyable>("G3Module", "Base class for functors that can be "
 	  "added to a G3Pipeline.")
 	    .def("__call__", &G3Module_Process)
-	    .def("Process", boost::python::pure_virtual(&G3Module_Process))
+	    .def("Process", py::pure_virtual(&G3Module_Process))
 	;
-	bp::implicitly_convertible<std::shared_ptr<G3ModuleWrap>, G3ModulePtr>();
+	py::implicitly_convertible<std::shared_ptr<G3ModuleWrap>, G3ModulePtr>();
 
-	bp::class_<G3Pipeline, std::shared_ptr<G3Pipeline> >("G3Pipeline",
+	py::class_<G3Pipeline, std::shared_ptr<G3Pipeline> >("G3Pipeline",
 	  "A collection of core.G3Modules and Python callables. Added "
 	  "callables are called sequentially and are passed a frame as their "
 	  "only positional argument. If the added callable is a python "
@@ -453,10 +450,10 @@ PYBINDINGS("core") {
 	  "\t- True: pass input frame to next module\n"
 	  "\t- False: discard input frame and return to first module, or end "
 	  "\t  processing if returned by first module. Equivalent to [].\n")
-	    .def("_Add_", &G3Pipeline::Add, bp::arg("name")="")
+	    .def("_Add_", &G3Pipeline::Add, py::arg("name")="")
 	    .def("Run", &G3Pipeline::Run,
-	      (bp::arg("profile")=false, bp::arg("graph")=false,
-	       bp::arg("signal_halt")=true),
+	      (py::arg("profile")=false, py::arg("graph")=false,
+	       py::arg("signal_halt")=true),
 	      "Run pipeline. If profile is True, print execution time "
 	      "statistics for each module when complete. If graph is True, "
 	      "stores control flow data that can be processed with GraphViz "

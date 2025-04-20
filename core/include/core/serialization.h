@@ -85,49 +85,41 @@ private:
 };
 
 template <class T>
-struct g3frameobject_picklesuite : boost::python::pickle_suite
+struct g3frameobject_picklesuite : py::pickle_suite
 {
-	static boost::python::tuple getstate(boost::python::object obj)
+	static py::tuple getstate(const py::object &obj)
 	{
-		namespace bp = boost::python;
 		std::vector<char> buffer;
 		G3BufferOutputStream os(buffer);
 		{
 			cereal::PortableBinaryOutputArchive ar(os);
-			ar << bp::extract<const T &>(obj)();
+			ar << py::extract<const T &>(obj)();
 		}
 		os.flush();
 
-		return boost::python::make_tuple(obj.attr("__dict__"),
-		    bp::object(bp::handle<>(
+		return py::make_tuple(obj.attr("__dict__"),
+		    py::object(py::handle<>(
 		    PyBytes_FromStringAndSize(&buffer[0], buffer.size()))));
 	}
 
-	static void setstate(boost::python::object obj,	
-	    boost::python::tuple state)
+	static void setstate(py::object &obj, py::tuple state)
 	{
-		namespace bp = boost::python;
 		Py_buffer view;
-		PyObject_GetBuffer(bp::object(state[1]).ptr(), &view,
+		PyObject_GetBuffer(py::object(state[1]).ptr(), &view,
 		    PyBUF_SIMPLE);
 
 		G3BufferInputStream fis((char *)view.buf, view.len);
 		cereal::PortableBinaryInputArchive ar(fis);
 
-		bp::extract<bp::dict>(obj.attr("__dict__"))().update(state[0]);
-		ar >> bp::extract<T &>(obj)();
+		py::extract<py::dict>(obj.attr("__dict__"))().update(state[0]);
+		ar >> py::extract<T &>(obj)();
 		PyBuffer_Release(&view);
 	}
 };
 
 #define EXPORT_FRAMEOBJECT(T, initf, docstring) \
-	boost::python::class_<T, boost::python::bases<G3FrameObject>, std::shared_ptr<T> >(#T, docstring, boost::python::initf) \
-	    .def(boost::python::init<const T &>()) \
-	    .def_pickle(g3frameobject_picklesuite<T>())
-
-#define EXPORT_FRAMEOBJECT_NOINITNAMESPACE(T, initf, docstring) \
-	boost::python::class_<T, boost::python::bases<G3FrameObject>, std::shared_ptr<T> >(#T, docstring, initf) \
-	    .def(boost::python::init<const T &>()) \
+	py::class_<T, py::bases<G3FrameObject>, std::shared_ptr<T> >(#T, docstring, initf) \
+	    .def(py::init<const T &>()) \
 	    .def_pickle(g3frameobject_picklesuite<T>())
 
 #endif

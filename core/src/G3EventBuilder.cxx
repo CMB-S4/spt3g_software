@@ -106,8 +106,8 @@ void G3EventBuilder::ProcessThread(G3EventBuilder *builder)
 
 
 PYBINDINGS("core") {
-	bp::class_<G3EventBuilder, bp::bases<G3Module>, G3EventBuilderPtr,
-	  boost::noncopyable>("G3EventBuilder", bp::no_init)
+	py::class_<G3EventBuilder, py::bases<G3Module>, G3EventBuilderPtr,
+	  boost::noncopyable>("G3EventBuilder", py::no_init)
 	;
 }
 

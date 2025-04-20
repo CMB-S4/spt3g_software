@@ -1,13 +1,11 @@
 #include <pybindings.h>
 
-namespace bp = boost::python;
-
 // Create a namespace (importable sub-module) within some parent scope
-bp::object
-export_namespace(bp::object scope, std::string name)
+py::object
+export_namespace(py::object scope, std::string name)
 {
-	std::string modname = bp::extract<std::string>(scope.attr("__name__") + "." + name);
-	bp::object mod(bp::handle<>(bp::borrowed(PyImport_AddModule(modname.c_str()))));
+	std::string modname = py::extract<std::string>(scope.attr("__name__") + "." + name);
+	py::object mod(py::handle<>(py::borrowed(PyImport_AddModule(modname.c_str()))));
 	mod.attr("__package__") = scope.attr("__name__");
 	scope.attr(name.c_str()) = mod;
 	return mod;

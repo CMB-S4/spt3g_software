@@ -137,7 +137,7 @@ g3_clogger(G3LogLevel level, const char *unit, const char *file, int line,
 }
 
 PYBINDINGS("core") {
-	bp::enum_<G3LogLevel>("G3LogLevel")
+	py::enum_<G3LogLevel>("G3LogLevel")
 	    .value("LOG_TRACE",  G3LOG_TRACE)
 	    .value("LOG_DEBUG",  G3LOG_DEBUG)
 	    .value("LOG_INFO",   G3LOG_INFO)
@@ -147,8 +147,8 @@ PYBINDINGS("core") {
 	    .value("LOG_FATAL",  G3LOG_FATAL)
 	;
 
-	bp::class_<G3Logger, G3LoggerPtr, boost::noncopyable>("G3Logger",
-	  "C++ logging abstract base class", bp::no_init)
+	py::class_<G3Logger, G3LoggerPtr, boost::noncopyable>("G3Logger",
+	  "C++ logging abstract base class", py::no_init)
 	    .add_static_property("global_logger", &GetRootLogger, &SetRootLogger)
 	    .def("log", &G3Logger::Log)
 	    .def("get_level_for_unit", &G3Logger::LogLevelForUnit)
@@ -157,24 +157,24 @@ PYBINDINGS("core") {
         ;
 	register_vector_of<G3LoggerPtr>("G3Logger");
 
-	bp::class_<G3NullLogger, bp::bases<G3Logger>,
+	py::class_<G3NullLogger, py::bases<G3Logger>,
 	  std::shared_ptr<G3NullLogger>, boost::noncopyable>(
 	  "G3NullLogger", "Logger that does not log. Useful if you don't want log messages");
-	bp::class_<G3PrintfLogger, bp::bases<G3Logger>,
+	py::class_<G3PrintfLogger, py::bases<G3Logger>,
 	  std::shared_ptr<G3PrintfLogger>, boost::noncopyable>(
 	  "G3PrintfLogger", "Logger that prints error messages to stderr (in color, if stderr is a tty).",
-	  bp::init<bp::optional<G3LogLevel> >())
+	  py::init<py::optional<G3LogLevel> >())
 	    .def_readwrite("trim_file_names", &G3PrintfLogger::TrimFileNames)
 	    .def_readwrite("timestamps", &G3PrintfLogger::Timestamps)
 	;
-	bp::class_<G3MultiLogger, bp::bases<G3Logger>,
+	py::class_<G3MultiLogger, py::bases<G3Logger>,
 	  std::shared_ptr<G3MultiLogger>, boost::noncopyable>(
 	  "G3MultiLogger", "Log to multiple loggers at once",
-	  bp::init<std::vector<G3LoggerPtr> >());
-	bp::class_<G3SyslogLogger, bp::bases<G3Logger>,
+	  py::init<std::vector<G3LoggerPtr> >());
+	py::class_<G3SyslogLogger, py::bases<G3Logger>,
 	  std::shared_ptr<G3SyslogLogger>, boost::noncopyable>(
 	  "G3SyslogLogger", "Pass log messages to the syslog service. Initialize with "
 	  "a string identifier and a logging facility. See syslog(3) for details. Example:\n"
 	  "\timport syslog\n\tlogger = core.G3SyslogLogger('myprogram', syslog.LOG_USER)",
-	  bp::init<std::string, int, bp::optional<G3LogLevel> >());
+	  py::init<std::string, int, py::optional<G3LogLevel> >());
 }

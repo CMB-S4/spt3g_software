@@ -27,7 +27,8 @@ G3_SERIALIZABLE_CODE(PointingProperties);
 G3_SERIALIZABLE_CODE(PointingPropertiesMap);
 
 PYBINDINGS("calibration") {
-	EXPORT_FRAMEOBJECT(PointingProperties, init<>(), "Pointing model parameters to be used for offline pointing corrections.")
+	EXPORT_FRAMEOBJECT(PointingProperties, py::init<>(),
+	    "Pointing model parameters to be used for offline pointing corrections.")
 	    .def_readwrite("tiltLat", &PointingProperties::tiltLat,
 	       "Azimuth lateral tilt parameter.")
 	    .def_readwrite("tiltHA", &PointingProperties::tiltHA,

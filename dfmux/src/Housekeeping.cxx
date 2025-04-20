@@ -181,7 +181,7 @@ G3_SERIALIZABLE_CODE(HkBoardInfo);
 G3_SERIALIZABLE_CODE(DfMuxHousekeepingMap);
 
 PYBINDINGS("dfmux") {
-	EXPORT_FRAMEOBJECT(HkChannelInfo, init<>(), "Mux channel status "
+	EXPORT_FRAMEOBJECT(HkChannelInfo, py::init<>(), "Mux channel status "
 	  "(configuration and sensors). Usually a part of an HkModuleInfo.")
 	    .def_readwrite("channel_number", &HkChannelInfo::channel_number,
                "1-indexed channel number.")
@@ -244,7 +244,7 @@ PYBINDINGS("dfmux") {
 	    "Mapping of channel number (1-indexed) to channel status "
 	    "information");
 
-	EXPORT_FRAMEOBJECT(HkModuleInfo, init<>(), "Mux module status")
+	EXPORT_FRAMEOBJECT(HkModuleInfo, py::init<>(), "Mux module status")
 	    .def_readwrite("module_number", &HkModuleInfo::module_number,
 	       "1-indexed module number on this mezzanine")
 	    .def_readwrite("carrier_gain", &HkModuleInfo::carrier_gain,
@@ -287,7 +287,7 @@ PYBINDINGS("dfmux") {
 	    "Mapping from 1-indexed module numbers to module-specific "
 	    "housekeeping data");
 
-	EXPORT_FRAMEOBJECT(HkMezzanineInfo, init<>(), "Mux mezzanine status")
+	EXPORT_FRAMEOBJECT(HkMezzanineInfo, py::init<>(), "Mux mezzanine status")
 	    .def_readwrite("power", &HkMezzanineInfo::power, "True if on")
 	    .def_readwrite("present", &HkMezzanineInfo::present, "True if exists")
 	    .def_readwrite("serial", &HkMezzanineInfo::serial,
@@ -318,7 +318,7 @@ PYBINDINGS("dfmux") {
 	    "1-indexed mapping of mezzanine ID to mezzanine-specific "
 	    "housekeeping data");
 
-	EXPORT_FRAMEOBJECT(HkBoardInfo, init<>(), "Mux board status. Includes "
+	EXPORT_FRAMEOBJECT(HkBoardInfo, py::init<>(), "Mux board status. Includes "
 	  "both configuration and sensor readings for board generic quantities "
 	  "and a list of quantities for the mezzanines.")
 	    .def_readwrite("timestamp", &HkBoardInfo::timestamp,

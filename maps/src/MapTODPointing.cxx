@@ -37,9 +37,9 @@ private:
 };
 
 EXPORT_G3MODULE("maps", MapTODPointing,
-    (init<std::string, std::string, G3SkyMapConstPtr, std::string, std::string>
-     ((arg("pointing"), arg("timestreams"), arg("stub_map"), arg("tod_pointing"),
-     arg("bolo_properties_name")="BolometerProperties"))),
+    (py::init<std::string, std::string, G3SkyMapConstPtr, std::string, std::string>
+     ((py::arg("pointing"), py::arg("timestreams"), py::arg("stub_map"), py::arg("tod_pointing"),
+     py::arg("bolo_properties_name")="BolometerProperties"))),
 "MapTODPointing(pointing, timestreams, stub_map, tod_pointing, bolo_properties_name=\"BolometerProperties\")\n"
 "\n"
 "Compute pixel pointing for timestreams for a map with properties (projection, etc.) specified\n"

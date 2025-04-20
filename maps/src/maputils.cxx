@@ -144,7 +144,7 @@ void ApplyWeightsT(G3SkyMap &T, const G3SkyMapWeights &W)
 	T.weighted = true;
 }
 
-boost::python::tuple GetRaDecMap(const G3SkyMap &m)
+py::tuple GetRaDecMap(const G3SkyMap &m)
 {
 
 	G3SkyMapPtr ra = m.Clone(false);
@@ -169,7 +169,7 @@ boost::python::tuple GetRaDecMap(const G3SkyMap &m)
 	dec->pol_type = G3SkyMap::None;
 	dec->pol_conv = G3SkyMap::ConvNone;
 
-	return boost::python::make_tuple(ra, dec);
+	return py::make_tuple(ra, dec);
 }
 
 
@@ -515,16 +515,16 @@ ConvolveMap(const FlatSkyMap &map, const FlatSkyMap &kernel)
 
 
 static FlatSkyMapPtr
-pyconvolve_map(const FlatSkyMap &map, bp::object val)
+pyconvolve_map(const FlatSkyMap &map, py::object val)
 {
 
-	bp::extract<const FlatSkyMap &> mext(val);
+	py::extract<const FlatSkyMap &> mext(val);
 	if (mext.check())
 		return ConvolveMap(map, mext());
 
 	// reach into python
-	bp::object pykernel = bp::import("spt3g.maps.FlatSkyMap")(val, map.yres());
-	bp::extract<const FlatSkyMap &> pext(pykernel);
+	py::object pykernel = py::import("spt3g.maps.FlatSkyMap")(val, map.yres());
+	py::extract<const FlatSkyMap &> pext(pykernel);
 	if (pext.check())
 		return ConvolveMap(map, pext());
 
@@ -552,36 +552,35 @@ MakePointSourceMask(const G3SkyMap &map, const std::vector<double> & ra,
 
 PYBINDINGS("maps")
 {
-	namespace bp = boost::python;
-	bp::def("remove_weights_t", RemoveWeightsT,
-		(bp::arg("T"), bp::arg("W"), bp::arg("zero_nans")=false),
+	py::def("remove_weights_t", RemoveWeightsT,
+		(py::arg("T"), py::arg("W"), py::arg("zero_nans")=false),
 		"Remove weights from unpolarized maps.	If zero_nans is true, empty pixels "
 		"are skipped, and pixels with zero weight are set to 0 instead of nan.");
 
-	bp::def("remove_weights", RemoveWeights,
-		(bp::arg("T"), bp::arg("Q"), bp::arg("U"), bp::arg("W"), bp::arg("zero_nans")=false),
+	py::def("remove_weights", RemoveWeights,
+		(py::arg("T"), py::arg("Q"), py::arg("U"), py::arg("W"), py::arg("zero_nans")=false),
 		"Remove weights from polarized maps.  If zero_nans is true, empty pixels "
 		"are skipped, and pixels with zero weight are set to 0 instead of nan.");
 
-	bp::def("apply_weights_t", ApplyWeightsT,
-		(bp::arg("T"), bp::arg("W")),
+	py::def("apply_weights_t", ApplyWeightsT,
+		(py::arg("T"), py::arg("W")),
 		"Apply weights to unpolarized maps.");
 
-	bp::def("apply_weights", ApplyWeights,
-		(bp::arg("T"), bp::arg("Q"), bp::arg("U"), bp::arg("W")),
+	py::def("apply_weights", ApplyWeights,
+		(py::arg("T"), py::arg("Q"), py::arg("U"), py::arg("W")),
 		"Apply weights to polarized maps.");
 
-	bp::def("get_ra_dec_map", GetRaDecMap, (bp::arg("map_in")),
+	py::def("get_ra_dec_map", GetRaDecMap, (py::arg("map_in")),
 		"Returns maps of the ra and dec angles for each pixel in the input map");
 
-	bp::def("get_ra_dec_mask", GetRaDecMask,
-		(bp::arg("map_in"), bp::arg("ra_left"), bp::arg("ra_right"),
-		 bp::arg("dec_bottom"), bp::arg("dec_top")),
+	py::def("get_ra_dec_mask", GetRaDecMask,
+		(py::arg("map_in"), py::arg("ra_left"), py::arg("ra_right"),
+		 py::arg("dec_bottom"), py::arg("dec_top")),
 		"Returns a mask that is nonzero for any pixels within the given ra and dec ranges");
 
-	bp::def("flatten_pol", FlattenPol,
-		(bp::arg("Q"), bp::arg("U"), bp::arg("W")=G3SkyMapWeightsPtr(),
-		 bp::arg("h")=0.001, bp::arg("invert")=false),
+	py::def("flatten_pol", FlattenPol,
+		(py::arg("Q"), py::arg("U"), py::arg("W")=G3SkyMapWeightsPtr(),
+		 py::arg("h")=0.001, py::arg("invert")=false),
 		"For maps defined on the sphere the direction of the polarization angle is "
 		"is defined relative to the direction of North.  When making maps we follow "
 		"this definition.\n\nFor any flat sky estimators, the polarization angle is "
@@ -592,9 +591,9 @@ PYBINDINGS("maps")
 		"want to reverse the process set the invert argument to True. Also applies "
 		"the appropriate rotation to the Q and u elements of the associated weights.");
 
-	bp::def("reproj_map", ReprojMap,
-		(bp::arg("in_map"), bp::arg("out_map"), bp::arg("rebin")=1, bp::arg("interp")=false,
-		bp::arg("mask")=bp::object()),
+	py::def("reproj_map", ReprojMap,
+		(py::arg("in_map"), py::arg("out_map"), py::arg("rebin")=1, py::arg("interp")=false,
+		py::arg("mask")=py::object()),
 		"Reprojects the data from in_map onto out_map.  out_map can have a different "
 		"projection, size, resolution, etc.  Optionally account for sub-pixel "
 		"structure by setting rebin > 1 and/or enable bilinear interpolation of "
@@ -605,28 +604,28 @@ PYBINDINGS("maps")
 		"copied from the input map. out_map_mask, if given, skip the unused pixels"
 		"and set these pixels to 0.");
 
-	bp::def("get_map_moments", GetMapMoments,
-		(bp::arg("map"), bp::arg("mask")=G3SkyMapMaskConstPtr(), bp::arg("order")=2,
-		 bp::arg("ignore_zeros")=false, bp::arg("ignore_nans")=false, bp::arg("ignore_infs")=false),
+	py::def("get_map_moments", GetMapMoments,
+		(py::arg("map"), py::arg("mask")=G3SkyMapMaskConstPtr(), py::arg("order")=2,
+		 py::arg("ignore_zeros")=false, py::arg("ignore_nans")=false, py::arg("ignore_infs")=false),
 		"Computes moment statistics of the input map, optionally ignoring "
 		"zero, nan and/or inf values in the map.  If order = 1, only the mean is "
 		"returned.  If order = 2, 3 or 4 then the variance, skew and kurtosis "
 		"are also included, respectively.  If a mask is supplied, then only "
 		"the non-zero pixels in the mask are included.");
 
-	bp::def("get_map_hist", GetMapHist,
-		(bp::arg("map"), bp::arg("bin_edges"), bp::arg("mask")=G3SkyMapMaskConstPtr(),
-		 bp::arg("ignore_zeros")=false, bp::arg("ignore_nans")=false, bp::arg("ignore_infs")=false),
+	py::def("get_map_hist", GetMapHist,
+		(py::arg("map"), py::arg("bin_edges"), py::arg("mask")=G3SkyMapMaskConstPtr(),
+		 py::arg("ignore_zeros")=false, py::arg("ignore_nans")=false, py::arg("ignore_infs")=false),
 		"Computes the histogram of the input map into bins defined by the array of "
 		"bin edges, optionally ignoring zero, nan and/or inf values in the map.  "
 		"If a mask is supplied, then only the non-zero pixels in the mask are included.");
 
-	bp::def("convolve_map", pyconvolve_map, (bp::arg("map"), bp::arg("kernel")),
+	py::def("convolve_map", pyconvolve_map, (py::arg("map"), py::arg("kernel")),
 		"Convolve the input flat sky map with the given map-space kernel. The "
 		"kernel must have odd dimensions and the same resolution as the map.");
 
-	bp::def("make_point_source_mask", MakePointSourceMask,
-		(bp::arg("map"), bp::arg("ra"), bp::arg("dec"), bp::arg("radius")),
+	py::def("make_point_source_mask", MakePointSourceMask,
+		(py::arg("map"), py::arg("ra"), py::arg("dec"), py::arg("radius")),
 		"Construct a mask from the input stub map with pixels within the given "
 		"radius around each point source position set to 1.");
 }

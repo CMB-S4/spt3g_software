@@ -1,10 +1,8 @@
 #include <pybindings.h>
 #include <G3Constants.h>
 
-namespace bp = boost::python;
-
 PYBINDINGS("core") {
-	bp::object umod = export_namespace(bp::scope(), "G3Units");
+	py::object umod = export_namespace(py::scope(), "G3Units");
 #define G3_UNITS_DEF(T) \
 	umod.attr(#T) = G3Units::T
 
@@ -177,7 +175,7 @@ PYBINDINGS("core") {
 	G3_UNITS_DEF(milligram);
 	G3_UNITS_DEF(mg);
 
-	bp::object cmod = export_namespace(bp::scope(), "G3Constants");
+	py::object cmod = export_namespace(py::scope(), "G3Constants");
 #define G3_CONSTANTS_DEF(T) \
 	cmod.attr(#T) = G3Constants::T
 

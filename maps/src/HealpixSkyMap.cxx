@@ -912,13 +912,13 @@ void HealpixSkyMap::SetShiftRa(bool shift)
 }
 
 static void
-HealpixSkyMap_fill(HealpixSkyMap &skymap, boost::python::object v)
+HealpixSkyMap_fill(HealpixSkyMap &skymap, py::object v)
 {
 	Py_buffer view;
 
 	if (PyObject_GetBuffer(v.ptr(), &view,
 	    PyBUF_FORMAT | PyBUF_C_CONTIGUOUS) == -1)
-		throw bp::error_already_set();
+		throw py::error_already_set();
 
 	if (view.ndim != 1) {
 		PyBuffer_Release(&view);
@@ -980,14 +980,14 @@ HealpixSkyMap_fill(HealpixSkyMap &skymap, boost::python::object v)
 }
 
 static HealpixSkyMapPtr
-HealpixSkyMap_from_numpy(boost::python::object v, bool weighted,
+HealpixSkyMap_from_numpy(py::object v, bool weighted,
     bool nested, MapCoordReference coord_ref,
     G3Timestream::TimestreamUnits u, G3SkyMap::MapPolType pol_type,
     bool shift_ra, G3SkyMap::MapPolConv pol_conv)
 {
-	boost::python::extract<size_t> ext1(v);
+	py::extract<size_t> ext1(v);
 	if (ext1.check()) {
-		// size_t from Python is also a bp::object,
+		// size_t from Python is also a py::object,
 		// so a Python caller intending to call the above
 		// constructor can get here by accident since
 		// the signatures are degenerate. Handle the
@@ -1000,7 +1000,7 @@ HealpixSkyMap_from_numpy(boost::python::object v, bool weighted,
 
 	if (PyObject_GetBuffer(v.ptr(), &view,
 	    PyBUF_FORMAT | PyBUF_ANY_CONTIGUOUS) == -1)
-		throw bp::error_already_set();
+		throw py::error_already_set();
 
 	// Fall back to just 1-D
 	if (view.ndim != 1) {
@@ -1020,7 +1020,7 @@ HealpixSkyMap_from_numpy(boost::python::object v, bool weighted,
 }
 
 static HealpixSkyMapPtr
-HealpixSkyMap_array_clone(const HealpixSkyMap &m, boost::python::object v)
+HealpixSkyMap_array_clone(const HealpixSkyMap &m, py::object v)
 {
 	auto skymap = std::dynamic_pointer_cast<HealpixSkyMap>(m.Clone(false));
 	HealpixSkyMap_fill(*skymap, v);
@@ -1042,7 +1042,7 @@ HealpixSkyMap_setdense(HealpixSkyMap &m, bool v)
 		PyErr_SetString(PyExc_ValueError,
 		    "Cannot set dense to False. Set ringsparse or "
 		    "indexedsparse to True to convert from dense.");
-		throw boost::python::error_already_set();
+		throw py::error_already_set();
 	}
 }
 
@@ -1055,7 +1055,7 @@ HealpixSkyMap_setringsparse(HealpixSkyMap &m, bool v)
 		PyErr_SetString(PyExc_ValueError,
 		    "Cannot set ringsparse to False. Set indexedsparse or "
 		    "dense to True to convert from ringsparse.");
-		throw boost::python::error_already_set();
+		throw py::error_already_set();
 	}
 }
 
@@ -1068,11 +1068,11 @@ HealpixSkyMap_setindexedsparse(HealpixSkyMap &m, bool v)
 		PyErr_SetString(PyExc_ValueError,
 		    "Cannot set indexedsparse to False. Set ringsparse or "
 		    "dense to True to convert from indexedsparse.");
-		throw boost::python::error_already_set();
+		throw py::error_already_set();
 	}
 }
 
-static boost::python::tuple
+static py::tuple
 HealpixSkyMap_nonzeropixels(const HealpixSkyMap &m)
 {
 	auto i = std::vector<uint64_t>(); // XXX pointers?
@@ -1080,7 +1080,7 @@ HealpixSkyMap_nonzeropixels(const HealpixSkyMap &m)
 
 	m.NonZeroPixels(i, d);
 
-	return boost::python::make_tuple(i, d);
+	return py::make_tuple(i, d);
 }
 
 static double
@@ -1091,7 +1091,7 @@ skymap_getitem(const G3SkyMap &skymap, ssize_t i)
 		i = skymap.size() + i;
 	if (size_t(i) >= skymap.size()) {
 		PyErr_SetString(PyExc_IndexError, "Index out of range");
-		bp::throw_error_already_set();
+		py::throw_error_already_set();
 	}
 
 	return skymap.at(i);
@@ -1105,7 +1105,7 @@ skymap_setitem(G3SkyMap &skymap, ssize_t i, double val)
 		i = skymap.size() + i;
 	if (size_t(i) >= skymap.size()) {
 		PyErr_SetString(PyExc_IndexError, "Index out of range");
-		bp::throw_error_already_set();
+		py::throw_error_already_set();
 	}
 
 	skymap[i] = val;
@@ -1127,12 +1127,12 @@ HealpixSkyMap_getitem_masked(const HealpixSkyMap &skymap, const G3SkyMapMask &m)
 
 static void
 HealpixSkyMap_setitem_masked(HealpixSkyMap &skymap, const G3SkyMapMask &m,
-    bp::object val)
+    py::object val)
 {
 	g3_assert(m.IsCompatible(skymap));
 
-	if (bp::extract<double>(val).check()) {
-		double dval = bp::extract<double>(val)();
+	if (py::extract<double>(val).check()) {
+		double dval = py::extract<double>(val)();
 		for (auto i : skymap) {
 			if (m.at(i.first))
 				skymap[i.first] = dval;
@@ -1143,7 +1143,7 @@ HealpixSkyMap_setitem_masked(HealpixSkyMap &skymap, const G3SkyMapMask &m,
 		size_t j = 0;
 		for (auto i : skymap) {
 			if (m.at(i.first)) {
-				skymap[i.first] = bp::extract<double>(val[j])();
+				skymap[i.first] = py::extract<double>(val[j])();
 				j++;
 			}
 		}
@@ -1153,8 +1153,6 @@ HealpixSkyMap_setitem_masked(HealpixSkyMap &skymap, const G3SkyMapMask &m,
 static int
 HealpixSkyMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 {
-	namespace bp = boost::python;
-
 	if (view == NULL) {
 		PyErr_SetString(PyExc_ValueError, "NULL view");
 		return -1;
@@ -1162,9 +1160,9 @@ HealpixSkyMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 
 	view->shape = NULL;
 
-	bp::handle<> self(bp::borrowed(obj));
-	bp::object selfobj(self);
-	bp::extract<HealpixSkyMapPtr> ext(selfobj);
+	py::handle<> self(py::borrowed(obj));
+	py::object selfobj(self);
+	py::extract<HealpixSkyMapPtr> ext(selfobj);
 	if (!ext.check()) {
 		PyErr_SetString(PyExc_ValueError, "Invalid healpix map");
 		view->obj = NULL;
@@ -1210,14 +1208,14 @@ HealpixSkyMap_setitem_1d(G3SkyMap &skymap, ssize_t i, double val)
 		i = skymap.size() + i;
 	if (size_t(i) >= skymap.size()) {
 		PyErr_SetString(PyExc_IndexError, "Index out of range");
-		bp::throw_error_already_set();
+		py::throw_error_already_set();
 	}
 
 	skymap[i] = val;
 }
 
 static void
-HealpixSkyMap_setslice_1d(HealpixSkyMap &skymap, bp::slice coords, bp::object val)
+HealpixSkyMap_setslice_1d(HealpixSkyMap &skymap, py::slice coords, py::object val)
 {
 	if (coords.start().ptr() != Py_None || coords.stop().ptr() != Py_None)
 		log_fatal("1D slicing not supported");
@@ -1230,11 +1228,9 @@ G3_SPLIT_SERIALIZABLE_CODE(HealpixSkyMap);
 
 PYBINDINGS("maps")
 {
-	using namespace boost::python;
-
 	// Can't use the normal FRAMEOBJECT code since this inherits
 	// from an intermediate class. Expanded by hand here.
-	object hsm = class_<HealpixSkyMap, bases<G3SkyMap, G3FrameObject>,
+	py::object hsm = py::class_<HealpixSkyMap, py::bases<G3SkyMap, G3FrameObject>,
 	  HealpixSkyMapPtr>("HealpixSkyMap",
 	  "HealpixSkyMap is a G3SkyMap with the extra meta information about the "
 	  "particular Healpix pixelization used.  In practice it behaves "
@@ -1242,51 +1238,51 @@ PYBINDINGS("maps")
 	  "functionality from a HealpixSkyMap, e.g. for slicing across the array, "
 	  "you can access a numpy representation of the map using `np.asarray(m)`. "
 	  "This does not copy the data, so any changes to the resulting array will "
-	  "affect the data stored in the map.", boost::python::no_init)
-	    .def(boost::python::init<const HealpixSkyMap &>())
+	  "affect the data stored in the map.", py::no_init)
+	    .def(py::init<const HealpixSkyMap &>())
 	    .def_pickle(g3frameobject_picklesuite<HealpixSkyMap>())
-	    .def(bp::init<size_t, bool, bool, MapCoordReference,
-	       G3Timestream::TimestreamUnits, G3SkyMap::MapPolType, bool,
-	       G3SkyMap::MapPolConv>(
-		 (bp::arg("nside"),
-		  bp::arg("weighted") = true,
-		  bp::arg("nested") = false,
-		  bp::arg("coord_ref") = MapCoordReference::Equatorial,
-		  bp::arg("units") = G3Timestream::Tcmb,
-		  bp::arg("pol_type") = G3SkyMap::None,
-		  bp::arg("shift_ra") = false,
-		  bp::arg("pol_conv") = G3SkyMap::ConvNone),
-	       "Instantiate a HealpixSkyMap with given nside"))
-	  .def(bp::init<const std::vector<uint64_t> &, const std::vector<double> &,
-	       size_t, bool, bool, MapCoordReference, G3Timestream::TimestreamUnits,
-	       G3SkyMap::MapPolType, G3SkyMap::MapPolConv>(
-		 (bp::arg("nside"),
-		  bp::arg("index"),
-		  bp::arg("data"),
-		  bp::arg("weighted") = true,
-		  bp::arg("nested") = false,
-		  bp::arg("coord_ref") = MapCoordReference::Equatorial,
-		  bp::arg("units") = G3Timestream::Tcmb,
-		  bp::arg("pol_type") = G3SkyMap::None,
-		  bp::arg("pol_conv") = G3SkyMap::ConvNone),
-	       "Instantiate a sparse HealpixSkyMap from existing index and data "
-	       "arrays corresponding to the given nside"))
-	  .def("__init__", bp::make_constructor(HealpixSkyMap_from_numpy,
-		  bp::default_call_policies(),
-		  (bp::arg("data"),
-		   bp::arg("weighted") = true,
-		   bp::arg("nested") = false,
-		   bp::arg("coord_ref") = MapCoordReference::Equatorial,
-		   bp::arg("units") = G3Timestream::Tcmb,
-		   bp::arg("pol_type") = G3SkyMap::None,
-		   bp::arg("shift_ra") = false,
-		   bp::arg("pol_conv") = G3SkyMap::ConvNone)),
-	       "Instantiate a dense Healpix map from existing data.")
+	    .def(py::init<size_t, bool, bool, MapCoordReference,
+	        G3Timestream::TimestreamUnits, G3SkyMap::MapPolType, bool,
+	        G3SkyMap::MapPolConv>(
+	        (py::arg("nside"),
+	        py::arg("weighted") = true,
+	        py::arg("nested") = false,
+	        py::arg("coord_ref") = MapCoordReference::Equatorial,
+	        py::arg("units") = G3Timestream::Tcmb,
+	        py::arg("pol_type") = G3SkyMap::None,
+	        py::arg("shift_ra") = false,
+	        py::arg("pol_conv") = G3SkyMap::ConvNone),
+	        "Instantiate a HealpixSkyMap with given nside"))
+	    .def(py::init<const std::vector<uint64_t> &, const std::vector<double> &,
+	        size_t, bool, bool, MapCoordReference, G3Timestream::TimestreamUnits,
+	        G3SkyMap::MapPolType, G3SkyMap::MapPolConv>(
+	        (py::arg("nside"),
+	        py::arg("index"),
+	        py::arg("data"),
+	        py::arg("weighted") = true,
+	        py::arg("nested") = false,
+	        py::arg("coord_ref") = MapCoordReference::Equatorial,
+	        py::arg("units") = G3Timestream::Tcmb,
+	        py::arg("pol_type") = G3SkyMap::None,
+	        py::arg("pol_conv") = G3SkyMap::ConvNone),
+	        "Instantiate a sparse HealpixSkyMap from existing index and data "
+	        "arrays corresponding to the given nside"))
+	    .def("__init__", py::make_constructor(HealpixSkyMap_from_numpy,
+	        py::default_call_policies(),
+	        (py::arg("data"),
+	        py::arg("weighted") = true,
+	        py::arg("nested") = false,
+	        py::arg("coord_ref") = MapCoordReference::Equatorial,
+	        py::arg("units") = G3Timestream::Tcmb,
+	        py::arg("pol_type") = G3SkyMap::None,
+	        py::arg("shift_ra") = false,
+	        py::arg("pol_conv") = G3SkyMap::ConvNone)),
+	        "Instantiate a dense Healpix map from existing data.")
 
-	    .def(bp::init<const HealpixSkyMap&>(bp::arg("healpix_map")))
-	    .def(bp::init<>())
+	    .def(py::init<const HealpixSkyMap&>(py::arg("healpix_map")))
+	    .def(py::init<>())
 	    .def("array_clone", &HealpixSkyMap_array_clone,
-	      (bp::arg("array")),
+	      (py::arg("array")),
 	       "Return a map of the same type, populated with a copy of the input "
 	       "numpy array")
 	    .add_property("nside", &HealpixSkyMap::nside, "Healpix resolution parameter")
@@ -1335,7 +1331,7 @@ PYBINDINGS("maps")
 	hsmclass->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
 #endif
 
-	implicitly_convertible<HealpixSkyMapPtr, G3SkyMapPtr>();
-	implicitly_convertible<HealpixSkyMapPtr, G3SkyMapConstPtr>();
+	py::implicitly_convertible<HealpixSkyMapPtr, G3SkyMapPtr>();
+	py::implicitly_convertible<HealpixSkyMapPtr, G3SkyMapConstPtr>();
 }
 

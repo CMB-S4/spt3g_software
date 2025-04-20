@@ -5,6 +5,76 @@
 #include <complex>
 #include "int_storage.h"
 
+G3_SPLIT_SERIALIZABLE_CODE(G3VectorInt);
+G3_SERIALIZABLE_CODE(G3VectorBool);
+G3_SERIALIZABLE_CODE(G3VectorDouble);
+G3_SERIALIZABLE_CODE(G3VectorComplexDouble);
+G3_SERIALIZABLE_CODE(G3VectorString);
+G3_SERIALIZABLE_CODE(G3VectorVectorString);
+G3_SERIALIZABLE_CODE(G3VectorFrameObject);
+G3_SERIALIZABLE_CODE(G3VectorUnsignedChar);
+G3_SERIALIZABLE_CODE(G3VectorTime);
+
+/* Special load/save for int64_t. */
+
+template <>
+template <class A>
+void G3Vector<int64_t>::load(A &ar, const unsigned v)
+{
+	G3_CHECK_VERSION(v);
+
+	ar & cereal::make_nvp("G3FrameObject",
+	    cereal::base_class<G3FrameObject>(this));
+	int store_bits = 32;
+	if (v >= 2)
+		ar & cereal::make_nvp("store_bits", store_bits);
+
+	switch(store_bits) {
+	case 64:
+		ar & cereal::make_nvp("vector",
+		    cereal::base_class<std::vector<int64_t> >(this));
+		break;
+	case 32:
+		load_as<A, int32_t>(ar, *this);
+		break;
+	case 16:
+		load_as<A, int16_t>(ar, *this);
+		break;
+	case 8:
+		load_as<A, int8_t>(ar, *this);
+		break;
+	}
+}
+
+template <>
+template <class A>
+void G3Vector<int64_t>::save(A &ar, const unsigned v) const
+{
+	// v == 2
+	ar & cereal::make_nvp("G3FrameObject",
+	    cereal::base_class<G3FrameObject>(this));
+	// Count the interesting bits, and convert to nearest power of 2.
+	int sig_bits = bit_count(*this);
+	int store_bits = 8;
+	while (store_bits < sig_bits)
+		store_bits *= 2;
+	ar & cereal::make_nvp("store_bits", store_bits);
+	switch(store_bits) {
+	case 8:
+		save_as<A, int8_t>(ar, *this);
+		break;
+	case 16:
+		save_as<A, int16_t>(ar, *this);
+		break;
+	case 32:
+		save_as<A, int32_t>(ar, *this);
+		break;
+	default:
+		ar & cereal::make_nvp("vector",
+		    cereal::base_class<std::vector<int64_t> >(this));
+	}
+}
+
 // Nonsense boilerplate for POD vector numpy bindings
 // Code to get a python buffer (for numpy) from one of our classes. "pyformat"
 // is the python type code for the type T.
@@ -19,9 +89,9 @@ int pyvector_getbuffer(PyObject *obj, Py_buffer *view, int flags,
 
 	view->shape = NULL;
 
-	boost::python::handle<> self(boost::python::borrowed(obj));
-	boost::python::object selfobj(self);
-	boost::python::extract<const std::vector<T> &> ext(selfobj);
+	py::handle<> self(py::borrowed(obj));
+	py::object selfobj(self);
+	py::extract<const std::vector<T> &> ext(selfobj);
 	if (!ext.check()) {
 		PyErr_SetString(PyExc_ValueError, "Invalid vector");
 		view->obj = NULL;
@@ -64,10 +134,10 @@ int pyvector_getbuffer(PyObject *obj, Py_buffer *view, int flags,
 // XXX: Should be automatic via SFINAE, but that cleanup is for later.
 template <typename T>
 std::shared_ptr<T>
-numpy_container_from_object(boost::python::object v)
+numpy_container_from_object(py::object v)
 {
 	// There's a chance this is actually a copy operation, so try that first
-	bp::extract<T &> extv(v);
+	py::extract<T &> extv(v);
 	if (extv.check())
 		return std::make_shared<T>(extv());
 
@@ -169,7 +239,7 @@ slowpython:
 	// go home (TypeError will be set inside extend_container()).
 	PyErr_Clear();
 	x->resize(0);
-	boost::python::container_utils::extend_container(*x, v);
+	py::container_utils::extend_container(*x, v);
 
         return x;
 }
@@ -178,7 +248,7 @@ slowpython:
 
 template <typename T>
 std::shared_ptr<T>
-complex_numpy_container_from_object(boost::python::object v)
+complex_numpy_container_from_object(py::object v)
 {
 	std::shared_ptr<T> x(new T);
 	Py_buffer view;
@@ -203,7 +273,7 @@ complex_numpy_container_from_object(boost::python::object v)
 		PyBuffer_Release(&view);
 	} else {
 		PyErr_Clear();
-		boost::python::container_utils::extend_container(*x, v);
+		py::container_utils::extend_container(*x, v);
 	}
 
 	return x;
@@ -212,9 +282,9 @@ complex_numpy_container_from_object(boost::python::object v)
 #define numpy_vector_struct(T, name)	 \
 struct numpy_vector_from_python_##name { \
 	numpy_vector_from_python_##name() { \
-		boost::python::converter::registry::push_back( \
+		py::converter::registry::push_back( \
 		    &convertible, &construct, \
-		    boost::python::type_id<std::vector<T> >()); \
+		    py::type_id<std::vector<T> >()); \
 	} \
 	static void *convertible(PyObject* obj_ptr) { \
 		Py_buffer view; \
@@ -231,11 +301,11 @@ struct numpy_vector_from_python_##name { \
 		return obj_ptr; \
 	} \
 	static void construct(PyObject* obj_ptr, \
-	    boost::python::converter::rvalue_from_python_stage1_data* data) { \
+	    py::converter::rvalue_from_python_stage1_data* data) { \
 		void* storage = ( \
-		    (boost::python::converter::rvalue_from_python_storage<std::vector<T> >*)data)->storage.bytes; \
+		    (py::converter::rvalue_from_python_storage<std::vector<T> >*)data)->storage.bytes; \
 		new (storage) std::vector<T>; \
-		std::shared_ptr<std::vector<T> > swap_storage = numpy_container_from_object<std::vector<T> >(boost::python::object(boost::python::handle<>(boost::python::borrowed(obj_ptr)))); \
+		std::shared_ptr<std::vector<T> > swap_storage = numpy_container_from_object<std::vector<T> >(py::object(py::handle<>(py::borrowed(obj_ptr)))); \
 		((std::vector<T> *)(storage))->swap(*swap_storage); \
 		data->convertible = storage; \
 	} \
@@ -244,7 +314,7 @@ struct numpy_vector_from_python_##name { \
 #define numpy_vector_infrastructure(T, name, conv) \
 template <> \
 std::shared_ptr<std::vector<T> > \
-container_from_object(boost::python::object v) \
+container_from_object(py::object v) \
 { \
 	return numpy_container_from_object<std::vector<T> >(v); \
 } \
@@ -260,7 +330,7 @@ numpy_vector_struct(T, name)
 #define numpy_vector_of(T, name, desc) \
 { \
 	numpy_vector_from_python_##name(); \
-	boost::python::object cls = register_vector_of<T>(desc); \
+	py::object cls = register_vector_of<T>(desc); \
 	PyTypeObject *vdclass = (PyTypeObject *)cls.ptr(); \
 	vec_bufferprocs_##name.bf_getbuffer = vector_getbuffer_##name; \
 	vdclass->tp_as_buffer = &vec_bufferprocs_##name; \
@@ -270,7 +340,7 @@ numpy_vector_struct(T, name)
 #define numpy_vector_of(T, name, desc) \
 { \
 	numpy_vector_from_python_##name(); \
-	boost::python::object cls = register_vector_of<T>(desc); \
+	py::object cls = register_vector_of<T>(desc); \
 	PyTypeObject *vdclass = (PyTypeObject *)cls.ptr(); \
 	vec_bufferprocs_##name.bf_getbuffer = vector_getbuffer_##name; \
 	vdclass->tp_as_buffer = &vec_bufferprocs_##name; \
@@ -298,25 +368,25 @@ numpy_vector_struct(ssize_t, ssize_t)
 struct apple_size
 {
 	static PyObject* convert(const std::vector<size_t> &arg) {
-		return boost::python::to_python_value<std::vector<uint64_t> >()(*(std::vector<uint64_t> *)(uintptr_t)(&arg));
+		return py::to_python_value<std::vector<uint64_t> >()(*(std::vector<uint64_t> *)(uintptr_t)(&arg));
 	}
 };
 
 struct apple_ssize
 {
 	static PyObject* convert(const std::vector<ssize_t> &arg) {
-		return boost::python::to_python_value<std::vector<int64_t> >()(*(std::vector<int64_t> *)(intptr_t)(&arg));
+		return py::to_python_value<std::vector<int64_t> >()(*(std::vector<int64_t> *)(intptr_t)(&arg));
 	}
 };
 #endif
 
 template <> std::shared_ptr<std::vector<std::complex<float> > >
-numpy_container_from_object(boost::python::object v)
+numpy_container_from_object(py::object v)
 {
 	return complex_numpy_container_from_object<std::vector<std::complex<float> > >(v);
 }
 template <> std::shared_ptr<std::vector<std::complex<double> > >
-numpy_container_from_object(boost::python::object v)
+numpy_container_from_object(py::object v)
 {
 	return complex_numpy_container_from_object<std::vector<std::complex<double> > >(v);
 }
@@ -324,107 +394,37 @@ numpy_container_from_object(boost::python::object v)
 numpy_vector_infrastructure(std::complex<double>, cxdouble, "Zd");
 numpy_vector_infrastructure(std::complex<float>, cxfloat, "Zf");
 
-G3_SPLIT_SERIALIZABLE_CODE(G3VectorInt);
-G3_SERIALIZABLE_CODE(G3VectorBool);
-G3_SERIALIZABLE_CODE(G3VectorDouble);
-G3_SERIALIZABLE_CODE(G3VectorComplexDouble);
-G3_SERIALIZABLE_CODE(G3VectorString);
-G3_SERIALIZABLE_CODE(G3VectorVectorString);
-G3_SERIALIZABLE_CODE(G3VectorFrameObject);
-G3_SERIALIZABLE_CODE(G3VectorUnsignedChar);
-G3_SERIALIZABLE_CODE(G3VectorTime);
-
-/* Special load/save for int64_t. */
-
-template <>
-template <class A>
-void G3Vector<int64_t>::load(A &ar, const unsigned v)
-{
-	G3_CHECK_VERSION(v);
-
-	ar & cereal::make_nvp("G3FrameObject",
-			      cereal::base_class<G3FrameObject>(this));
-	int store_bits = 32;
-	if (v >= 2)
-		ar & cereal::make_nvp("store_bits", store_bits);
-
-	switch(store_bits) {
-	case 64:
-		ar & cereal::make_nvp("vector",
-				      cereal::base_class<std::vector<int64_t> >(this));
-		break;
-	case 32:
-		load_as<A, int32_t>(ar, *this);
-		break;
-	case 16:
-		load_as<A, int16_t>(ar, *this);
-		break;
-	case 8:
-		load_as<A, int8_t>(ar, *this);
-		break;
-	}
-}
-
-template <>
-template <class A>
-void G3Vector<int64_t>::save(A &ar, const unsigned v) const
-{
-	// v == 2
-	ar & cereal::make_nvp("G3FrameObject",
-			      cereal::base_class<G3FrameObject>(this));
-	// Count the interesting bits, and convert to nearest power of 2.
-	int sig_bits = bit_count(*this);
-	int store_bits = 8;
-	while (store_bits < sig_bits)
-		store_bits *= 2;
-	ar & cereal::make_nvp("store_bits", store_bits);
-	switch(store_bits) {
-	case 8:
-		save_as<A, int8_t>(ar, *this);
-		break;
-	case 16:
-		save_as<A, int16_t>(ar, *this);
-		break;
-	case 32:
-		save_as<A, int32_t>(ar, *this);
-		break;
-	default:
-		ar & cereal::make_nvp("vector",
-				      cereal::base_class<std::vector<int64_t> >(this));
-	}		
-}
-
 template <>
 G3VectorBoolPtr
-container_from_object(boost::python::object v)
+container_from_object(py::object v)
 {
 	return numpy_container_from_object<G3VectorBool>(v);
 }
 
 template <>
 G3VectorDoublePtr
-container_from_object(boost::python::object v)
+container_from_object(py::object v)
 {
 	return numpy_container_from_object<G3VectorDouble>(v);
 }
 
 template <>
 G3VectorIntPtr
-container_from_object(boost::python::object v)
+container_from_object(py::object v)
 {
 	return numpy_container_from_object<G3VectorInt>(v);
 }
 
 template <>
 G3VectorComplexDoublePtr
-container_from_object(boost::python::object v)
+container_from_object(py::object v)
 {
 	return complex_numpy_container_from_object<G3VectorComplexDouble>(v);
 }
 
 template <>
 G3VectorTimePtr
-container_from_object(boost::python::object v)
+container_from_object(py::object v)
 {
         return numpy_container_from_object<G3VectorTime>(v);
 }
@@ -489,7 +489,7 @@ static PyBufferProcs vectime_bufferprocs;
 PYBINDINGS("core") {
 	numpy_vector_of(float, float, "Float");
 	numpy_vector_of(double, double, "Double");
-	boost::python::object vecdouble = register_g3vector<double>(
+	py::object vecdouble = register_g3vector<double>(
 	    "G3VectorDouble", "Array of floats. Treat as a serializable "
 	    "version of numpy.array(dtype=float64). Can be efficiently cast "
 	    "to and from numpy arrays.");
@@ -503,7 +503,7 @@ PYBINDINGS("core") {
 
 	numpy_vector_of(std::complex<float>, cxfloat, "ComplexFloat");
 	numpy_vector_of(std::complex<double>, cxdouble, "ComplexDouble");
-	boost::python::object veccomplexdouble =
+	py::object veccomplexdouble =
 	   register_g3vector<std::complex<double> >(
 	    "G3VectorComplexDouble", "Array of complex floats. Treat as a serializable "
 	    "version of numpy.array(dtype=complex128). Can be efficiently cast "
@@ -521,7 +521,7 @@ PYBINDINGS("core") {
 	numpy_vector_of(uint64_t, uint64_t, "UInt64");
 	numpy_vector_of(int32_t, int32_t, "Int");
 	numpy_vector_of(uint32_t, uint32_t, "UInt");
-	boost::python::object vecint = register_g3vector<int64_t>("G3VectorInt",
+	py::object vecint = register_g3vector<int64_t>("G3VectorInt",
 	    "Array of integers. Treat as a serializable version of "
 	    "numpy.array(dtype=int64). Can be efficiently cast to and from "
 	    "numpy arrays.");
@@ -536,8 +536,8 @@ PYBINDINGS("core") {
 #if defined(__APPLE__) && defined(__LP64__)
 	numpy_vector_from_python_size_t();
 	numpy_vector_from_python_ssize_t();
-	bp::to_python_converter<std::vector<size_t>, apple_size, false>();
-	bp::to_python_converter<std::vector<ssize_t>, apple_ssize, false>();
+	py::to_python_converter<std::vector<size_t>, apple_size, false>();
+	py::to_python_converter<std::vector<ssize_t>, apple_ssize, false>();
 #endif
 
 	register_vector_of<bool>("Bool");
@@ -558,7 +558,7 @@ PYBINDINGS("core") {
 	    "integers");
 
 	register_vector_of<G3Time>("G3Time");
-	boost::python::object vectime =
+	py::object vectime =
 	    register_g3vector<G3Time>("G3VectorTime", "List of times.");
 	// Add buffer protocol interface
 	PyTypeObject *vtclass = (PyTypeObject *)vectime.ptr();

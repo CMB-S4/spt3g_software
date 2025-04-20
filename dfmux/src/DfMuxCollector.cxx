@@ -10,7 +10,6 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#include <boost/python.hpp>
 
 #ifdef __FreeBSD__
 #include <sys/endian.h>
@@ -397,23 +396,22 @@ int DfMuxCollector::BookPacket(struct DfmuxPacket *packet, struct in_addr src)
 
 static DfMuxCollectorPtr
 make_dfmux_collector_v2_from_dict(const char *listenaddr,
-    G3EventBuilderPtr builder, boost::python::dict board_serial_map)
+    G3EventBuilderPtr builder, py::dict board_serial_map)
 {
-	namespace bp = boost::python;
 	std::map<in_addr_t, int32_t> serial_map;
 	
-	bp::list items = board_serial_map.items();
-	for (ssize_t i = 0; i < bp::len(items); i++) {
-		int32_t serial = bp::extract<int>(items[i][1])();
+	py::list items = board_serial_map.items();
+	for (ssize_t i = 0; i < py::len(items); i++) {
+		int32_t serial = py::extract<int>(items[i][1])();
 		in_addr_t ip;
 		bool found = false;
 
-		auto int_item = bp::extract<int>(items[i][0]);
+		auto int_item = py::extract<int>(items[i][0]);
 		if (int_item.check()) {
 			ip = int_item();
 			found = true;
 		} else {
-			auto str_item = bp::extract<std::string>(items[i][0]);
+			auto str_item = py::extract<std::string>(items[i][0]);
 			if (str_item.check()) {
 				std::string host = str_item();
 				struct addrinfo hints, *info;
@@ -448,16 +446,36 @@ make_dfmux_collector_v2_from_dict(const char *listenaddr,
 
 PYBINDINGS("dfmux")
 {
-	namespace bp = boost::python;
-
-	bp::class_<DfMuxCollector, DfMuxCollectorPtr, boost::noncopyable>("DfMuxCollector", "Listener object that collects IceBoard packets from a single network interface and decodes and forwards them to a DfMuxBuilder object for insertion into the data stream. Takes the builder object to which the data should be sent. Uses either multicast UDP or SCTP depending on which constructor is used.", bp::no_init)
-	    .def(bp::init<G3EventBuilderPtr, std::vector<std::string> >((bp::arg("builder"), bp::arg("hostnames")), "Create a DfMuxCollector listening for SCTP packets from the listed hosts (e.g. [\"iceboard0062.local\", ...]) and forwards it to DfMuxBuilder \"builder\"."))
-	    .def(bp::init<const char *, G3EventBuilderPtr, std::vector<int32_t> >((bp::arg("interface"), bp::arg("builder"), bp::arg("boardlist")=std::vector<int32_t>()), "Create a DfMuxCollector listening on \"interface\" for multicasted UDP packets and forwards it to DfMuxBuilder \"builder\". Filters to only the boards specified in \"boardlist\" (by default empty, implying all boards)."))
-	    .def("__init__", bp::make_constructor(make_dfmux_collector_v2_from_dict, bp::default_call_policies(), (bp::arg("interface"), bp::arg("builder"), bp::arg("board_serial_map"))), "Crate a DfMuxCollector that can parse V2 (64x) data. Pass a mapping from board IP address (strings or integers) to serial numbers as the last argument")
+	py::class_<DfMuxCollector, DfMuxCollectorPtr, boost::noncopyable>("DfMuxCollector",
+	    "Listener object that collects IceBoard packets from a single network "
+	    "interface and decodes and forwards them to a DfMuxBuilder object for "
+	    "insertion into the data stream. Takes the builder object to which the "
+	    "data should be sent. Uses either multicast UDP or SCTP depending on "
+	    "which constructor is used.", py::no_init)
+	    .def(py::init<G3EventBuilderPtr, std::vector<std::string> >(
+	        (py::arg("builder"), py::arg("hostnames")),
+	        "Create a DfMuxCollector listening for SCTP packets from the "
+	        "listed hosts (e.g. [\"iceboard0062.local\", ...]) and forwards "
+	        "it to DfMuxBuilder \"builder\"."))
+	    .def(py::init<const char *, G3EventBuilderPtr, std::vector<int32_t> >(
+	        (py::arg("interface"), py::arg("builder"),
+	        py::arg("boardlist")=std::vector<int32_t>()),
+	        "Create a DfMuxCollector listening on \"interface\" for multicasted "
+	        "UDP packets and forwards it to DfMuxBuilder \"builder\". Filters to "
+	        "only the boards specified in \"boardlist\" (by default empty, "
+	        "implying all boards)."))
+	    .def("__init__", py::make_constructor(make_dfmux_collector_v2_from_dict,
+	        py::default_call_policies(),
+	        (py::arg("interface"), py::arg("builder"), py::arg("board_serial_map"))),
+	        "Crate a DfMuxCollector that can parse V2 (64x) data. Pass a mapping "
+	        "from board IP address (strings or integers) to serial numbers as "
+	        "the last argument")
 	    .def("Start", &DfMuxCollector::Start)
 	    .def("Stop", &DfMuxCollector::Stop)
-	    .add_property("clock_rate", &DfMuxCollector::GetClockRate, &DfMuxCollector::SetClockRate,
-	      "Set the clock rate for the iceboard subseconds counter, e.g. for hidfmux.  Values should be in G3Units of frequency.  Defaults to 100*core.G3Units.MHz.")
+	    .add_property("clock_rate", &DfMuxCollector::GetClockRate,
+	        &DfMuxCollector::SetClockRate, "Set the clock rate for the "
+	        "iceboard subseconds counter, e.g. for hidfmux.  Values should be "
+	        "in G3Units of frequency.  Defaults to 100*core.G3Units.MHz.")
 	;
 }
 

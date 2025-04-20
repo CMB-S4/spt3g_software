@@ -40,8 +40,8 @@
 
 
 EXPORT_G3MODULE_AND("core", G3NetworkSender,
-    (init<std::string, int, int, int>((arg("hostname"), arg("port"),
-      arg("max_queue_size")=0, arg("n_serializers")=0))),
+    (py::init<std::string, int, int, int>((py::arg("hostname"), py::arg("port"),
+      py::arg("max_queue_size")=0, py::arg("n_serializers")=0))),
     "Writes frames to a network socket. If hostname is set to '*', will listen "
     "on the given port, on all interfaces, instead of connecting to the given "
     "port on a remote host. In listen mode, metadata frames (Calibration, "

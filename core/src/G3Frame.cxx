@@ -9,8 +9,6 @@
 #include <cxxabi.h>
 #include <algorithm>
 
-namespace bp = boost::python;
-
 extern "C" unsigned long crc32c(unsigned long crc, const uint8_t *buf, unsigned int len);
 
 template <typename T>
@@ -115,16 +113,16 @@ static std::string FrameObjectClassName(G3FrameObjectConstPtr obj)
 		G3PythonContext ctx("G3FrameObjectClassName", true);
 
 		try {
-			boost::python::object pyobj(
+			py::object pyobj(
 			    std::const_pointer_cast<G3FrameObject>(obj));
 
 			return
-			    boost::python::extract<std::string>(
+			    py::extract<std::string>(
 			     pyobj.attr("__class__").attr("__module__"))() +
 			     "." +
-			     boost::python::extract<std::string>(
+			     py::extract<std::string>(
 			      pyobj.attr("__class__").attr("__name__"))();
-		} catch (const boost::python::error_already_set& e) {
+		} catch (const py::error_already_set& e) {
 			PyErr_Clear();
 		} catch (...) {
 			// Fall through to C++ name
@@ -398,7 +396,7 @@ g3frame_char_constructor(std::string max_4_chars)
 	if (max_4_chars.size() > 4) {
 		PyErr_SetString(PyExc_ValueError, "Ad-hoc frame type must be 4 "
 		    "or fewer characters.");
-		bp::throw_error_already_set();
+		py::throw_error_already_set();
 	}
 
 	// Right-justify the character string in the constant in native
@@ -411,9 +409,9 @@ g3frame_char_constructor(std::string max_4_chars)
 	return G3FramePtr(new G3Frame(G3Frame::FrameType(code)));
 }
 
-static boost::python::list g3frame_keys(const G3Frame &map)
+static py::list g3frame_keys(const G3Frame &map)
 {
-        boost::python::list keys;
+        py::list keys;
 	std::vector<std::string> keyvec = map.Keys();
 
         for (auto i = keyvec.begin(); i != keyvec.end(); i++)
@@ -422,69 +420,69 @@ static boost::python::list g3frame_keys(const G3Frame &map)
         return keys;
 }
 
-static void g3frame_python_put(G3Frame &f, std::string name, bp::object obj)
+static void g3frame_python_put(G3Frame &f, std::string name, py::object obj)
 {
-	bp::extract<G3FrameObjectPtr> extframe(obj);
+	py::extract<G3FrameObjectPtr> extframe(obj);
 	if (extframe.check()) {
 		f.Put(name, extframe());
 		return;
 	}
 
-	bp::extract<bool> extbool(obj);
+	py::extract<bool> extbool(obj);
 	if (PyBool_Check(obj.ptr()) && extbool.check()) {
 		f.Put(name, std::make_shared<G3Bool>(extbool()));
 		return;
 	}
 
-	bp::extract<int64_t> extint(obj);
+	py::extract<int64_t> extint(obj);
 	if (extint.check()) {
 		f.Put(name, std::make_shared<G3Int>(extint()));
 		return;
 	}
 
-	bp::extract<double> extdouble(obj);
+	py::extract<double> extdouble(obj);
 	if (extdouble.check()) {
 		f.Put(name, std::make_shared<G3Double>(extdouble()));
 		return;
 	}
 
-	bp::extract<Quat> extquat(obj);
+	py::extract<Quat> extquat(obj);
 	if (extquat.check()) {
 		f.Put(name, std::make_shared<G3Quat>(extquat()));
 		return;
 	}
 
-	bp::extract<std::string> extstr(obj);
+	py::extract<std::string> extstr(obj);
 	if (extstr.check())
 		f.Put(name, std::make_shared<G3String>(extstr()));
 	else {
 		PyErr_SetString(PyExc_TypeError, "Object is not a G3FrameObject derivative or a plain-old-data type");
-		bp::throw_error_already_set();
+		py::throw_error_already_set();
 	}
 }
 
-static bp::object g3frame_python_get(G3Frame &f, std::string name)
+static py::object g3frame_python_get(G3Frame &f, std::string name)
 {
 	// Python doesn't have a concept of const. Add subterfuge.
 	G3FrameObjectConstPtr element = f[name];
 	if (!element) {
 		std::string err = "Key \'" + name + "\' not found";
 		PyErr_SetString(PyExc_KeyError, err.c_str());
-		bp::throw_error_already_set();
+		py::throw_error_already_set();
 	}
 
 	if (!!std::dynamic_pointer_cast<const G3Int>(element))
-		return bp::object(std::dynamic_pointer_cast<const G3Int>(element)->value);
+		return py::object(std::dynamic_pointer_cast<const G3Int>(element)->value);
 	else if (!!std::dynamic_pointer_cast<const G3Double>(element))
-		return bp::object(std::dynamic_pointer_cast<const G3Double>(element)->value);
+		return py::object(std::dynamic_pointer_cast<const G3Double>(element)->value);
 	else if (!!std::dynamic_pointer_cast<const G3String>(element))
-		return bp::object(std::dynamic_pointer_cast<const G3String>(element)->value);
+		return py::object(std::dynamic_pointer_cast<const G3String>(element)->value);
 	else if (!!std::dynamic_pointer_cast<const G3Bool>(element))
-		return bp::object(std::dynamic_pointer_cast<const G3Bool>(element)->value);
+		return py::object(std::dynamic_pointer_cast<const G3Bool>(element)->value);
 	else if (!!std::dynamic_pointer_cast<const G3Quat>(element))
-		return bp::object(std::dynamic_pointer_cast<const G3Quat>(element)->value);
+		return py::object(std::dynamic_pointer_cast<const G3Quat>(element)->value);
 	else
-		return bp::object(std::const_pointer_cast<G3FrameObject>(element));
+		return py::object(std::const_pointer_cast<G3FrameObject>(element));
 }
 
 static std::string g3frame_str(const G3Frame &f)
@@ -494,9 +492,9 @@ static std::string g3frame_str(const G3Frame &f)
 	return oss.str();
 }
 
-static bp::list g3frame_python_values(G3Frame &f)
+static py::list g3frame_python_values(G3Frame &f)
 {
-	bp::list values;
+	py::list values;
 	std::vector<std::string> keyvec = f.Keys();
 
 	for (auto i = keyvec.begin(); i != keyvec.end(); i++)
@@ -505,14 +503,14 @@ static bp::list g3frame_python_values(G3Frame &f)
 	return values;
 }
 
-static bp::object g3frame_hash(bp::object obj)
+static py::object g3frame_hash(py::object obj)
 {
-	return bp::extract<bp::tuple>(obj.attr("__getstate__")())()[1];
+	return py::extract<py::tuple>(obj.attr("__getstate__")())()[1];
 }
 
 PYBINDINGS("core") {
 	// Internal stuff
-	bp::class_<G3FrameObject, G3FrameObjectPtr>("G3FrameObject",
+	py::class_<G3FrameObject, G3FrameObjectPtr>("G3FrameObject",
 	  "Base class for objects that can be added to a frame. All such "
 	  "must inherit from G3FrameObject in C++. Pickle hooks are overridden "
 	  "to use the fast internal serialization")
@@ -527,7 +525,7 @@ PYBINDINGS("core") {
 	;
 	register_pointer_conversions<G3FrameObject>();
 
-	bp::enum_<G3Frame::FrameType>("G3FrameType")
+	py::enum_<G3Frame::FrameType>("G3FrameType")
 	    .value("Timepoint",       G3Frame::Timepoint)
 	    .value("Housekeeping",    G3Frame::Housekeeping)
 	    .value("Observation",     G3Frame::Observation)
@@ -547,7 +545,7 @@ PYBINDINGS("core") {
 	enum_none_converter::from_python<G3Frame::FrameType>();
 	register_vector_of<G3Frame::FrameType>("FrameType");
 
-	bp::class_<G3Frame, G3FramePtr>("G3Frame",
+	py::class_<G3Frame, G3FramePtr>("G3Frame",
 	  "Frames are the core datatype of the analysis software. They behave "
 	  "like Python dictionaries except that they can only store subclasses "
 	  "of core.G3FrameObject and the dictionary keys must be strings. "
@@ -558,10 +556,10 @@ PYBINDINGS("core") {
 	  "(G3Frame.Type) that designates what kind of data are contained in "
 	  "it. These types usually indicates information that changes at "
 	  "different rates.")
-	    .def(bp::init<G3Frame::FrameType>())
-	    .def(bp::init<G3Frame>())
-	    .def("__init__", bp::make_constructor(g3frame_char_constructor,
-	      bp::default_call_policies(), bp::args("adhoctypecode")),
+	    .def(py::init<G3Frame::FrameType>())
+	    .def(py::init<G3Frame>())
+	    .def("__init__", py::make_constructor(g3frame_char_constructor,
+	      py::default_call_policies(), py::args("adhoctypecode")),
 	      "Create a frame with an ad-hoc (non-standard) type code. "
 	      "Use sparingly and with care.")
 	    .def_readwrite("type", &G3Frame::type, "Type code for frame. "
@@ -578,11 +576,11 @@ PYBINDINGS("core") {
 	       &G3Frame::Has)
 	    .def("__str__", &g3frame_str)
 	    .def("__len__", &G3Frame::size)
-	    .def("drop_blobs", &G3Frame::DropBlobs, bp::arg("decode_all")=false,
+	    .def("drop_blobs", &G3Frame::DropBlobs, py::arg("decode_all")=false,
 	      "Drop all serialized data either for already-decoded objects (default) "
 	      "or all objects after decoding them (if decode_all is true). "
 	      "Saves memory at the expense of CPU time if reserialized.")
-	    .def("generate_blobs", &G3Frame::GenerateBlobs, bp::arg("drop_objects")=false,
+	    .def("generate_blobs", &G3Frame::GenerateBlobs, py::arg("drop_objects")=false,
 	      "Force immediate serialization of all objects. Will save some "
 	      "CPU time later during serialization of the frame in exchange "
 	      "for spending the exact same amount of CPU time right now.")
