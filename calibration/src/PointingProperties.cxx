@@ -40,7 +40,7 @@ PYBINDINGS("calibration", scope) {
 	       "Orientation of azimuth tilt.")
 	;
 
-	register_g3map<PointingPropertiesMap>("PointingPropertiesMap",
+	register_g3map<PointingPropertiesMap>(scope, "PointingPropertiesMap",
 	    "Container for pointing model parameters for offline pointing.");
 }
 

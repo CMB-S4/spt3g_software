@@ -241,7 +241,7 @@ PYBINDINGS("dfmux", scope) {
 	    .def_readwrite("bias_frequency", &HkChannelInfo::bias_frequency,
 	       "NCO-adjusted bias frequency (mkid only)")
 	;
-	register_map<std::map<int, HkChannelInfo> >("HkChannelInfoMap",
+	register_map<std::map<int, HkChannelInfo> >(scope, "HkChannelInfoMap",
 	    "Mapping of channel number (1-indexed) to channel status "
 	    "information");
 
@@ -285,7 +285,7 @@ PYBINDINGS("dfmux", scope) {
 	       "Mapping from 1-indexed channel numbers to channel housekeeping "
 	       "data")
 	;
-	register_map<std::map<int, HkModuleInfo> >("HkModuleInfoMap",
+	register_map<std::map<int, HkModuleInfo> >(scope, "HkModuleInfoMap",
 	    "Mapping from 1-indexed module numbers to module-specific "
 	    "housekeeping data");
 
@@ -317,7 +317,7 @@ PYBINDINGS("dfmux", scope) {
 	    .def_readwrite("squid_heater", &HkMezzanineInfo::squid_heater,
 	        "Power level of SQUID header control")
 	;
-	register_map<std::map<int, HkMezzanineInfo> >("HkMezzanineInfoMap",
+	register_map<std::map<int, HkMezzanineInfo> >(scope, "HkMezzanineInfoMap",
 	    "1-indexed mapping of mezzanine ID to mezzanine-specific "
 	    "housekeeping data");
 
@@ -350,7 +350,7 @@ PYBINDINGS("dfmux", scope) {
 	       "1-indexed mapping from mezzanine ID to mezzanine-specific data")
 	;
 
-	register_g3map<DfMuxHousekeepingMap>("DfMuxHousekeepingMap",
+	register_g3map<DfMuxHousekeepingMap>(scope, "DfMuxHousekeepingMap",
 	   "Container structure for housekeeping data from all DfMux boards, "
 	   "indexed by board serial number.");
 }

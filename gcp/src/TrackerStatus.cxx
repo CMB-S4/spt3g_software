@@ -82,7 +82,7 @@ PYBINDINGS("gcp", scope) {
 	    .value("TOO_LOW", TrackerStatus::TOO_LOW)
 	    .value("TOO_HIGH", TrackerStatus::TOO_HIGH)
 	;
-	register_vector_of<TrackerStatus::TrackerState>("TrackerState");
+	register_vector_of<TrackerStatus::TrackerState>(scope, "TrackerState");
 
 	register_frameobject<TrackerStatus>(scope, "TrackerStatus", "GCP Tracker Status")
 	    .def(py::init<>())

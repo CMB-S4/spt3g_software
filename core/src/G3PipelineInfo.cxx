@@ -268,7 +268,7 @@ PYBINDINGS("core", scope) {
 	    .def("keys", &G3ModuleConfig_keys)
 	    .def("values", &G3ModuleConfig_values)
 	;
-	register_vector_of<G3ModuleConfig>("ModuleConfig");
+	register_vector_of<G3ModuleConfig>(scope, "ModuleConfig");
 
 	register_frameobject<G3PipelineInfo>(scope, "G3PipelineInfo",
 	    "Stored configuration of a pipeline, including software version information")

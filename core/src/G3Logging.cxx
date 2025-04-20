@@ -154,7 +154,7 @@ PYBINDINGS("core", scope) {
 	    .def("set_level_for_unit", &G3Logger::SetLogLevelForUnit)
 	    .def("set_level", &G3Logger::SetLogLevel)
         ;
-	register_vector_of<G3LoggerPtr>("G3Logger");
+	register_vector_of<G3LoggerPtr>(scope, "G3Logger");
 
 	register_class_noncopyable<G3NullLogger, G3Logger>(scope, "G3NullLogger",
 	    "Logger that does not log. Useful if you don't want log messages");

@@ -994,9 +994,9 @@ PYBINDINGS("core", scope)
 	    .def_readwrite("value", &G3Quat::value)
 	;
 
-	register_vector_of<Quat>("Quat");
+	register_vector_of<Quat>(scope, "Quat");
 	py::object vq =
-	register_g3vector<Quat>("G3VectorQuat",
+	register_g3vector<G3VectorQuat>(scope, "G3VectorQuat",
 	    "List of quaternions. Convertible to a 4xN numpy array. "
 	    "Arithmetic operations on this object are fast and provide "
 	    "results given proper quaternion math rather than "
@@ -1082,8 +1082,8 @@ PYBINDINGS("core", scope)
 	py::implicitly_convertible<G3TimestreamQuatPtr, G3VectorQuatPtr>();
 	py::implicitly_convertible<G3TimestreamQuatPtr, G3VectorQuatConstPtr>();
 
-	register_g3map<G3MapQuat>("G3MapQuat", "Mapping from strings to "
+	register_g3map<G3MapQuat>(scope, "G3MapQuat", "Mapping from strings to "
 	    "quaternions.");
-	register_g3map<G3MapVectorQuat>("G3MapVectorQuat", "Mapping from "
+	register_g3map<G3MapVectorQuat>(scope, "G3MapVectorQuat", "Mapping from "
 	    "strings to lists of quaternions.");
 }

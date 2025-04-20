@@ -73,7 +73,7 @@ PYBINDINGS("dfmux", scope) {
 	     "0-indexed channel number on the parent module/SQUID")
 	;
 
-	register_g3map<DfMuxWiringMap>("DfMuxWiringMap", "Mapping from "
+	register_g3map<DfMuxWiringMap>(scope, "DfMuxWiringMap", "Mapping from "
 	   "logical detector ID string (same as used in timestreams) to wiring "
 	   "information (the board, module, and channel to which a given "
 	   "detector is connected)");

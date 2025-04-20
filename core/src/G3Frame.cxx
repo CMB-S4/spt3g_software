@@ -537,7 +537,7 @@ PYBINDINGS("core", scope) {
 	    .value("Statistics",      G3Frame::Statistics)
 	    .value("none",            G3Frame::None)
 	;
-	register_vector_of<G3Frame::FrameType>("FrameType");
+	register_vector_of<G3Frame::FrameType>(scope, "FrameType");
 
 	register_class<G3Frame>(scope, "G3Frame",
 	  "Frames are the core datatype of the analysis software. They behave "
@@ -588,6 +588,6 @@ PYBINDINGS("core", scope) {
 	    .add_property("hash", &g3frame_hash,
 	      "Return the serialized representation of the frame")
 	;
-	register_vector_of<G3FramePtr>("Frame");
-	register_vector_of<G3FrameObjectPtr>("FrameObject");
+	register_vector_of<G3FramePtr>(scope, "Frame");
+	register_vector_of<G3FrameObjectPtr>(scope, "FrameObject");
 }

@@ -101,7 +101,7 @@ PYBINDINGS("calibration", scope) {
 	    .value("OffResonance", BolometerProperties::OffResonance)
 	;
 
-	register_g3map<BolometerPropertiesMap>("BolometerPropertiesMap",
+	register_g3map<BolometerPropertiesMap>(scope, "BolometerPropertiesMap",
 	    "Container for bolometer properties for focal plane, mapping "
 	    "logical bolometer IDs to their physical properties.");
 }
