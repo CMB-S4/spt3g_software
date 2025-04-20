@@ -1158,8 +1158,6 @@ G3_SPLIT_SERIALIZABLE_CODE(FlatSkyMap);
 
 PYBINDINGS("maps", scope)
 {
-	// Can't use the normal FRAMEOBJECT code since this inherits
-	// from an intermediate class. Expanded by hand here.
 	register_frameobject<FlatSkyMap, G3SkyMap>(scope, "FlatSkyMap", py::buffer_protocol(),
 	  "FlatSkyMap is a G3SkyMap with the extra meta information about the "
 	  "particular flat sky projection included.  In practice it behaves "

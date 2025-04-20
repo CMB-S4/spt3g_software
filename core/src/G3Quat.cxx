@@ -883,7 +883,7 @@ PYBINDINGS("core", scope)
 	    .def("cross3", &Quat::cross3, "Cross product of last three entries")
 	;
 
-        register_frameobject<G3Quat>(scope, "G3Quat", "Serializable quaternion")
+	register_frameobject<G3Quat>(scope, "G3Quat", "Serializable quaternion")
 	    .def(py::init<Quat>())
 	    .def_readwrite("value", &G3Quat::value)
 	;

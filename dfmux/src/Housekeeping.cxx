@@ -245,7 +245,7 @@ PYBINDINGS("dfmux", scope) {
 	    "Mapping of channel number (1-indexed) to channel status "
 	    "information");
 
-        register_frameobject<HkModuleInfo>(scope, "HkModuleInfo", "Mux module status")
+	register_frameobject<HkModuleInfo>(scope, "HkModuleInfo", "Mux module status")
 	    .def(py::init<>())
 	    .def_readwrite("module_number", &HkModuleInfo::module_number,
 	       "1-indexed module number on this mezzanine")

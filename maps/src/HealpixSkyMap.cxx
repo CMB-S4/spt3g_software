@@ -1136,8 +1136,6 @@ G3_SPLIT_SERIALIZABLE_CODE(HealpixSkyMap);
 
 PYBINDINGS("maps", scope)
 {
-	// Can't use the normal FRAMEOBJECT code since this inherits
-	// from an intermediate class. Expanded by hand here.
 	register_frameobject<HealpixSkyMap, G3SkyMap>(scope, "HealpixSkyMap",
 	  py::buffer_protocol(),
 	  "HealpixSkyMap is a G3SkyMap with the extra meta information about the "
