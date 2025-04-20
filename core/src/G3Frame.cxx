@@ -110,7 +110,7 @@ static std::string FrameObjectClassName(G3FrameObjectConstPtr obj)
 {
 	// Try to give python name if possible
 	if (Py_IsInitialized()) {
-		G3PythonContext ctx("G3FrameObjectClassName", true);
+		py::gil_scoped_acquire gil;
 
 		try {
 			py::object pyobj(

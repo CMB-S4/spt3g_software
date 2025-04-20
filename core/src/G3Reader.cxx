@@ -67,7 +67,7 @@ void G3Reader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	// Python interpreter (pure C++ applications will fail the
 	// Py_IsInitialized test).  Make sure all paths out of this
 	// function reacquire the lock, if it was released.
-	G3PythonContext ctx("G3Reader", false);
+	py::gil_scoped_release gil;
 
 	while (stream_.peek() == EOF) {
 		if (n_frames_cur_ == 0)

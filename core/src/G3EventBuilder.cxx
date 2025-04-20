@@ -34,8 +34,7 @@ void G3EventBuilder::AddPolledDataModule(G3ModulePtr mod)
 
 void G3EventBuilder::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 {
-	G3PythonContext ctx("G3EventBuilder", false);
-
+	py::gil_scoped_release gil;
 	std::unique_lock<std::mutex> lock(out_queue_lock_);
 
 	while (out_queue_.empty() && !dead_)
