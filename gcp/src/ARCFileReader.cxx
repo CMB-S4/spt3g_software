@@ -860,20 +860,19 @@ PYBINDINGS("gcp", scope) {
 	;
 
 	// Instead of EXPORT_G3MODULE since there are two constructors
-	py::class_<ARCFileReader, py::bases<G3Module>, std::shared_ptr<ARCFileReader>,
-	    boost::noncopyable>("ARCFileReader",
+	register_g3module<ARCFileReader>(scope, "ARCFileReader",
 	    "Read GCP archive file (or files if you pass an iterable of paths). "
 	    "For non-SPT ARC file formats, please set Experiment to the "
 	    "appropriate value.  Set track_filename to True to record the "
-	    "filename for each frame in the ._filename attribute (fragile).",
-		py::init<std::string, Experiment, float, bool, size_t>((py::arg("filename"),
-			py::arg("experiment")=Experiment::SPT, py::arg("timeout")=-1.,
-			py::arg("track_filename")=false, py::arg("buffersize")=1024*1024)))
-		.def(py::init<std::vector<std::string>, Experiment, float, bool, size_t>(
-			(py::arg("filename"), py::arg("experiment")=Experiment::SPT,
+	    "filename for each frame in the ._filename attribute (fragile).")
+		.def(py::init<std::string, Experiment, float, bool, size_t>((
+			py::arg("filename"), py::arg("experiment")=Experiment::SPT,
 			py::arg("timeout")=-1., py::arg("track_filename")=false,
 			py::arg("buffersize")=1024*1024)))
-		.def_readonly("__g3module__", true)
+		.def(py::init<std::vector<std::string>, Experiment, float, bool, size_t>((
+			py::arg("filename"), py::arg("experiment")=Experiment::SPT,
+			py::arg("timeout")=-1., py::arg("track_filename")=false,
+			py::arg("buffersize")=1024*1024)))
 	;
 }
 

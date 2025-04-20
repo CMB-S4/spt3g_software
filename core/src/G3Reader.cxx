@@ -109,21 +109,19 @@ off_t G3Reader::Tell() {
 }
 
 PYBINDINGS("core", scope) {
-	// Instead of EXPORT_G3MODULE since there are two constructors
-	py::class_<G3Reader, py::bases<G3Module>, std::shared_ptr<G3Reader>,
-	    boost::noncopyable>("G3Reader",
-	      "Read frames from disk. Takes either the path to a file to read "
-	      "or an iterable of files to be read in sequence. If "
-	      "n_frames_to_read is greater than zero, will stop after "
-	      "n_frames_to_read frames rather than at the end of the file[s]. "
-	      "The timeout parameter can used to enable socket timeout for tcp "
-	      "streams, resulting in EOF behavior on expiry; unfortunately this "
-	      "cannot be used for polling, you have to close the connection. "
-	      "Use the `tell` and `seek` methods to record the position of and "
-	      "seek to the beginning of a particular frame in the file.  Set "
-	      "track_filename to True to record the filename for each frame in "
-	      "the ._filename attribute (fragile).",
-	py::init<std::string, int, float, bool, size_t>((py::arg("filename"),
+	register_g3module<G3Reader>(scope, "G3Reader",
+	    "Read frames from disk. Takes either the path to a file to read "
+	    "or an iterable of files to be read in sequence. If "
+	    "n_frames_to_read is greater than zero, will stop after "
+	    "n_frames_to_read frames rather than at the end of the file[s]. "
+	    "The timeout parameter can used to enable socket timeout for tcp "
+	    "streams, resulting in EOF behavior on expiry; unfortunately this "
+	    "cannot be used for polling, you have to close the connection. "
+	    "Use the `tell` and `seek` methods to record the position of and "
+	    "seek to the beginning of a particular frame in the file.  Set "
+	    "track_filename to True to record the filename for each frame in "
+	    "the ._filename attribute (fragile).")
+	.def(py::init<std::string, int, float, bool, size_t>((py::arg("filename"),
 	    py::arg("n_frames_to_read")=0, py::arg("timeout")=-1.,
 	    py::arg("track_filename")=false, py::arg("buffersize")=1024*1024)))
 	.def(py::init<std::vector<std::string>, int, float, bool, size_t>((
@@ -133,8 +131,6 @@ PYBINDINGS("core", scope) {
 	    "Return the current byte offset from start of stream.")
 	.def("seek", &G3Reader::Seek,
 	    "Position the stream read pointer at specific byte offset. "
-	    "Note that once EOF is reached, seek does not work anymore.")
-	.def_readonly("__g3module__", true)
-	;
+	    "Note that once EOF is reached, seek does not work anymore.");
 }
 

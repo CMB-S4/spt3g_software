@@ -40,20 +40,17 @@ off_t G3Writer::Tell() {
 }
 
 PYBINDINGS("core", scope) {
-	// Instead of EXPORT_G3MODULE since there is an extra Flush function
-	py::class_<G3Writer, py::bases<G3Module>, std::shared_ptr<G3Writer>,
-	    boost::noncopyable>("G3Writer",
-	      "Writes frames to disk. Frames will be written to the file specified by "
-	      "filename. If filename ends in .gz, output will be compressed using gzip. "
-	      "To write only some types of frames, pass a list of the desired frame "
-	      "types to the second optional argument (streams). If no streams argument "
-	      "is given, writes all types of frames. If append is set to True, will "
-	      "append frames to its output file rather than overwriting it.",
-	py::init<std::string, std::vector<G3Frame::FrameType>, bool, size_t>((py::arg("filename"),
-	    py::arg("streams")=std::vector<G3Frame::FrameType>(), py::arg("append")=false,
-	    py::arg("buffersize")=1024*1024)))
-	.def("flush", &G3Writer::Flush)
-	.def("tell", &G3Writer::Tell)
-	.def_readonly("__g3module__", true)
+	register_g3module<G3Writer>(scope, "G3Writer",
+	    "Writes frames to disk. Frames will be written to the file specified by "
+	    "filename. If filename ends in .gz, output will be compressed using gzip. "
+	    "To write only some types of frames, pass a list of the desired frame "
+	    "types to the second optional argument (streams). If no streams argument "
+	    "is given, writes all types of frames. If append is set to True, will "
+	    "append frames to its output file rather than overwriting it.")
+	    .def(py::init<std::string, std::vector<G3Frame::FrameType>, bool, size_t>((
+	        py::arg("filename"), py::arg("streams")=std::vector<G3Frame::FrameType>(),
+	        py::arg("append")=false, py::arg("buffersize")=1024*1024)))
+	    .def("flush", &G3Writer::Flush)
+	    .def("tell", &G3Writer::Tell)
 	;
 }
