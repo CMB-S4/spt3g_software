@@ -160,7 +160,7 @@ PYBIND11_MODULE(_lib ## name, scope) { \
 void (spt3g_init_module_ ## name)([[maybe_unused]] py::module_ &scope)
 
 // Declare a python module with a name that is a bare token:
-//     SPT3G_PYTHON_MODULE(foo)
+//     SPT3G_PYTHON_MODULE(foo, scope)
 // for a package whose fully qualified name will be spt3g.foo
 //
 // Use this macro once per module, as a function whose body is
