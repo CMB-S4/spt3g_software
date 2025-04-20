@@ -95,8 +95,6 @@ spt3g.calibration.BolometerPropertiesMap
 Container for bolometer properties for focal plane, mapping logical bolometer IDs to their physical properties.
 
 *Constructors:*
-	``BolometerPropertiesMap()``
-	
 	``BolometerPropertiesMap( (BolometerPropertiesMap)arg2)``
 	
 	``BolometerPropertiesMap( (list)arg2)`` :
@@ -262,8 +260,6 @@ spt3g.calibration.PointingPropertiesMap
 Container for pointing model parameters for offline pointing.
 
 *Constructors:*
-	``PointingPropertiesMap()``
-	
 	``PointingPropertiesMap( (PointingPropertiesMap)arg2)``
 	
 	``PointingPropertiesMap( (list)arg2)`` :

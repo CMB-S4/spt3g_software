@@ -238,8 +238,6 @@ spt3g.dfmux.DfMuxHousekeepingMap
 Container structure for housekeeping data from all DfMux boards, indexed by board serial number.
 
 *Constructors:*
-	``DfMuxHousekeepingMap()``
-	
 	``DfMuxHousekeepingMap( (DfMuxHousekeepingMap)arg2)``
 	
 	``DfMuxHousekeepingMap( (list)arg2)`` :
@@ -499,6 +497,9 @@ spt3g.dfmux.DfMuxSample
 Samples from all channels on one readout module, stored with I and Q interleaved, such that the first element is channel 1 I, followed by channel 1 Q, followed by channel 2 I, etc.
 
 *Constructors:*
+	``DfMuxSample( (DfMuxSample)arg2)`` :
+	    Copy constructor
+	
 	``DfMuxSample( (int)time, (int)nsamples)``
 
 
@@ -506,6 +507,23 @@ Samples from all channels on one readout module, stored with I and Q interleaved
 *Members:*
 
 * **Timestamp**: No Doc (Shame!)
+
+
+*Methods:*
+
+.. _spt3g.dfmux.DfMuxSample.Summary:
+
+**spt3g.dfmux.DfMuxSample.Summary**
+
+``Summary( (DfMuxSample)arg1) -> str :``
+    Short (one-line) description of the object
+
+.. _spt3g.dfmux.DfMuxSample.Description:
+
+**spt3g.dfmux.DfMuxSample.Description**
+
+``Description( (DfMuxSample)arg1) -> str :``
+    Long-form human-readable description of the object
 
 
 
@@ -517,8 +535,6 @@ spt3g.dfmux.DfMuxWiringMap
 Mapping from logical detector ID string (same as used in timestreams) to wiring information (the board, module, and channel to which a given detector is connected)
 
 *Constructors:*
-	``DfMuxWiringMap()``
-	
 	``DfMuxWiringMap( (DfMuxWiringMap)arg2)``
 	
 	``DfMuxWiringMap( (list)arg2)`` :

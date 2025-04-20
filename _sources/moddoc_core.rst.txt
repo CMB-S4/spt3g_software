@@ -225,8 +225,6 @@ spt3g.core.G3MapDouble
 Mapping from strings to floats
 
 *Constructors:*
-	``G3MapDouble()``
-	
 	``G3MapDouble( (G3MapDouble)arg2)``
 	
 	``G3MapDouble( (list)arg2)`` :
@@ -348,8 +346,6 @@ spt3g.core.G3MapFrameObject
 Mapping strings to generic frame objects. Can lead to a variety of paradoxes; please avoid general use of this class.
 
 *Constructors:*
-	``G3MapFrameObject()``
-	
 	``G3MapFrameObject( (G3MapFrameObject)arg2)``
 	
 	``G3MapFrameObject( (list)arg2)`` :
@@ -471,8 +467,6 @@ spt3g.core.G3MapInt
 Mapping from strings to ints.
 
 *Constructors:*
-	``G3MapInt()``
-	
 	``G3MapInt( (G3MapInt)arg2)``
 	
 	``G3MapInt( (list)arg2)`` :
@@ -594,8 +588,6 @@ spt3g.core.G3MapMapDouble
 Mapping from strings to maps of strings to floats. For example, m['Det1']['Det2'] = 5.3
 
 *Constructors:*
-	``G3MapMapDouble()``
-	
 	``G3MapMapDouble( (G3MapMapDouble)arg2)``
 	
 	``G3MapMapDouble( (list)arg2)`` :
@@ -717,8 +709,6 @@ spt3g.core.G3MapQuat
 Mapping from strings to quaternions.
 
 *Constructors:*
-	``G3MapQuat()``
-	
 	``G3MapQuat( (G3MapQuat)arg2)``
 	
 	``G3MapQuat( (list)arg2)`` :
@@ -840,8 +830,6 @@ spt3g.core.G3MapString
 Mapping from strings to strings.
 
 *Constructors:*
-	``G3MapString()``
-	
 	``G3MapString( (G3MapString)arg2)``
 	
 	``G3MapString( (list)arg2)`` :
@@ -963,8 +951,6 @@ spt3g.core.G3MapVectorBool
 Mapping from strings to arrays of booleans.
 
 *Constructors:*
-	``G3MapVectorBool()``
-	
 	``G3MapVectorBool( (G3MapVectorBool)arg2)``
 	
 	``G3MapVectorBool( (list)arg2)`` :
@@ -1086,8 +1072,6 @@ spt3g.core.G3MapVectorComplexDouble
 Mapping from strings to arrays of complex numbers.
 
 *Constructors:*
-	``G3MapVectorComplexDouble()``
-	
 	``G3MapVectorComplexDouble( (G3MapVectorComplexDouble)arg2)``
 	
 	``G3MapVectorComplexDouble( (list)arg2)`` :
@@ -1209,8 +1193,6 @@ spt3g.core.G3MapVectorDouble
 Mapping from strings to arrays of floats.
 
 *Constructors:*
-	``G3MapVectorDouble()``
-	
 	``G3MapVectorDouble( (G3MapVectorDouble)arg2)``
 	
 	``G3MapVectorDouble( (list)arg2)`` :
@@ -1332,8 +1314,6 @@ spt3g.core.G3MapVectorInt
 Mapping from strings to arrays of integers.
 
 *Constructors:*
-	``G3MapVectorInt()``
-	
 	``G3MapVectorInt( (G3MapVectorInt)arg2)``
 	
 	``G3MapVectorInt( (list)arg2)`` :
@@ -1455,8 +1435,6 @@ spt3g.core.G3MapVectorQuat
 Mapping from strings to lists of quaternions.
 
 *Constructors:*
-	``G3MapVectorQuat()``
-	
 	``G3MapVectorQuat( (G3MapVectorQuat)arg2)``
 	
 	``G3MapVectorQuat( (list)arg2)`` :
@@ -1578,8 +1556,6 @@ spt3g.core.G3MapVectorString
 Mapping from strings to lists of strings.
 
 *Constructors:*
-	``G3MapVectorString()``
-	
 	``G3MapVectorString( (G3MapVectorString)arg2)``
 	
 	``G3MapVectorString( (list)arg2)`` :
@@ -1701,8 +1677,6 @@ spt3g.core.G3MapVectorTime
 Mapping from strings to lists of G3 time objects.
 
 *Constructors:*
-	``G3MapVectorTime()``
-	
 	``G3MapVectorTime( (G3MapVectorTime)arg2)``
 	
 	``G3MapVectorTime( (list)arg2)`` :
@@ -1824,8 +1798,6 @@ spt3g.core.G3MapVectorVectorString
 Mapping from strings to lists of lists of strings.
 
 *Constructors:*
-	``G3MapVectorVectorString()``
-	
 	``G3MapVectorVectorString( (G3MapVectorVectorString)arg2)``
 	
 	``G3MapVectorVectorString( (list)arg2)`` :
@@ -2436,7 +2408,7 @@ Collection of timestreams indexed by logical detector ID
 	
 	``G3TimestreamMap()``
 	
-	``G3TimestreamMap( (StringVector)keys, (object)data [, (G3Time)start=<spt3g.core.G3Time object at 0x7f1aea701770> [, (G3Time)stop=<spt3g.core.G3Time object at 0x7f1aea7017e0> [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None [, (int)compression_level=0 [, (bool)copy_data=True [, (int)bit_depth=32]]]]]])`` :
+	``G3TimestreamMap( (StringVector)keys, (object)data [, (G3Time)start=<spt3g.core.G3Time object at 0x7ffa432fd7e0> [, (G3Time)stop=<spt3g.core.G3Time object at 0x7ffa432fd850> [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None [, (int)compression_level=0 [, (bool)copy_data=True [, (int)bit_depth=32]]]]]])`` :
 	    Create a timestream map from a numpy array or other numeric python iterable. Each row of the 2D input array will correspond to a single timestream, with the key set to the correspondingly-indexed entry of <keys>. If <copy_data> is True (default), the data will be copied into the output data structure. If False, the timestream map will provide a view into the given numpy array.
 	
 	``G3TimestreamMap( (list)arg2)`` :
@@ -2683,8 +2655,6 @@ spt3g.core.G3VectorBool
 List of booleans.
 
 *Constructors:*
-	``G3VectorBool()``
-	
 	``G3VectorBool( (object)arg2)``
 
 
@@ -2713,8 +2683,6 @@ spt3g.core.G3VectorComplexDouble
 Array of complex floats. Treat as a serializable version of numpy.array(dtype=complex128). Can be efficiently cast to and from numpy arrays.
 
 *Constructors:*
-	``G3VectorComplexDouble()``
-	
 	``G3VectorComplexDouble( (object)arg2)``
 
 
@@ -2743,8 +2711,6 @@ spt3g.core.G3VectorDouble
 Array of floats. Treat as a serializable version of numpy.array(dtype=float64). Can be efficiently cast to and from numpy arrays.
 
 *Constructors:*
-	``G3VectorDouble()``
-	
 	``G3VectorDouble( (object)arg2)``
 
 
@@ -2773,8 +2739,6 @@ spt3g.core.G3VectorFrameObject
 List of generic frame objects. Can lead to paradoxes; avoid use of this class unless you are sure you need it.
 
 *Constructors:*
-	``G3VectorFrameObject()``
-	
 	``G3VectorFrameObject( (object)arg2)``
 
 
@@ -2803,8 +2767,6 @@ spt3g.core.G3VectorInt
 Array of integers. Treat as a serializable version of numpy.array(dtype=int64). Can be efficiently cast to and from numpy arrays.
 
 *Constructors:*
-	``G3VectorInt()``
-	
 	``G3VectorInt( (object)arg2)``
 
 
@@ -2833,8 +2795,6 @@ spt3g.core.G3VectorQuat
 List of quaternions. Convertible to a 4xN numpy array. Arithmetic operations on this object are fast and provide results given proper quaternion math rather than element-by-element numpy-ish results.
 
 *Constructors:*
-	``G3VectorQuat()``
-	
 	``G3VectorQuat( (object)arg2)``
 
 
@@ -2875,8 +2835,6 @@ spt3g.core.G3VectorString
 List of strings.
 
 *Constructors:*
-	``G3VectorString()``
-	
 	``G3VectorString( (object)arg2)``
 
 
@@ -2905,8 +2863,6 @@ spt3g.core.G3VectorTime
 List of times.
 
 *Constructors:*
-	``G3VectorTime()``
-	
 	``G3VectorTime( (object)arg2)``
 
 
@@ -2935,8 +2891,6 @@ spt3g.core.G3VectorUnsignedChar
 List of 8-bit integers
 
 *Constructors:*
-	``G3VectorUnsignedChar()``
-	
 	``G3VectorUnsignedChar( (object)arg2)``
 
 
@@ -2965,8 +2919,6 @@ spt3g.core.G3VectorVectorString
 List of lists of strings.
 
 *Constructors:*
-	``G3VectorVectorString()``
-	
 	``G3VectorVectorString( (object)arg2)``
 
 

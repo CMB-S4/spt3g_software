@@ -86,8 +86,6 @@ spt3g.gcp.ACUStatusVector
 Array of ACUStatus objects, usually time-ordered
 
 *Constructors:*
-	``ACUStatusVector()``
-	
 	``ACUStatusVector( (object)arg2)``
 
 

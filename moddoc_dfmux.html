@@ -200,8 +200,7 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <span id="id3"></span><h3>spt3g.dfmux.DfMuxHousekeepingMap<a class="headerlink" href="#spt3g-dfmux-dfmuxhousekeepingmap" title="Link to this heading">¶</a></h3>
 <p>Container structure for housekeeping data from all DfMux boards, indexed by board serial number.</p>
 <dl>
-<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">DfMuxHousekeepingMap()</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">DfMuxHousekeepingMap(</span> <span class="pre">(DfMuxHousekeepingMap)arg2)</span></code></p>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">DfMuxHousekeepingMap(</span> <span class="pre">(DfMuxHousekeepingMap)arg2)</span></code></p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">DfMuxHousekeepingMap(</span> <span class="pre">(list)arg2)</span></code> :</dt><dd><p>Initialize with keys and values from a Python dictionary: {‘key’:’value’}</p>
 </dd>
@@ -382,21 +381,35 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <section id="spt3g-dfmux-dfmuxsample">
 <span id="id5"></span><h3>spt3g.dfmux.DfMuxSample<a class="headerlink" href="#spt3g-dfmux-dfmuxsample" title="Link to this heading">¶</a></h3>
 <p>Samples from all channels on one readout module, stored with I and Q interleaved, such that the first element is channel 1 I, followed by channel 1 Q, followed by channel 2 I, etc.</p>
-<dl class="simple">
-<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">DfMuxSample(</span> <span class="pre">(int)time,</span> <span class="pre">(int)nsamples)</span></code></p>
+<dl>
+<dt><em>Constructors:</em></dt><dd><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">DfMuxSample(</span> <span class="pre">(DfMuxSample)arg2)</span></code> :</dt><dd><p>Copy constructor</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">DfMuxSample(</span> <span class="pre">(int)time,</span> <span class="pre">(int)nsamples)</span></code></p>
 </dd>
 </dl>
 <p><em>Members:</em></p>
 <ul class="simple">
 <li><p><strong>Timestamp</strong>: No Doc (Shame!)</p></li>
 </ul>
+<p><em>Methods:</em></p>
+<p id="spt3g-dfmux-dfmuxsample-summary"><strong>spt3g.dfmux.DfMuxSample.Summary</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">Summary(</span> <span class="pre">(DfMuxSample)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Short (one-line) description of the object</p>
+</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxsample-description"><strong>spt3g.dfmux.DfMuxSample.Description</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">Description(</span> <span class="pre">(DfMuxSample)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Long-form human-readable description of the object</p>
+</dd>
+</dl>
 </section>
 <section id="spt3g-dfmux-dfmuxwiringmap">
 <span id="id6"></span><h3>spt3g.dfmux.DfMuxWiringMap<a class="headerlink" href="#spt3g-dfmux-dfmuxwiringmap" title="Link to this heading">¶</a></h3>
 <p>Mapping from logical detector ID string (same as used in timestreams) to wiring information (the board, module, and channel to which a given detector is connected)</p>
 <dl>
-<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">DfMuxWiringMap()</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">DfMuxWiringMap(</span> <span class="pre">(DfMuxWiringMap)arg2)</span></code></p>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">DfMuxWiringMap(</span> <span class="pre">(DfMuxWiringMap)arg2)</span></code></p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">DfMuxWiringMap(</span> <span class="pre">(list)arg2)</span></code> :</dt><dd><p>Initialize with keys and values from a Python dictionary: {‘key’:’value’}</p>
 </dd>
