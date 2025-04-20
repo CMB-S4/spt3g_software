@@ -933,7 +933,7 @@ G3TimestreamQuat_nsamples(const G3TimestreamQuat &r)
         return r.size();
 }
 
-PYBINDINGS("core")
+PYBINDINGS("core", scope)
 {
 	py::object q =
 	    py::class_<Quat, std::shared_ptr<Quat> >("Quat",

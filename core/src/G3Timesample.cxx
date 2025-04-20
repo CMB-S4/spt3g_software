@@ -243,7 +243,7 @@ void safe_set_times(G3TimesampleMap &self, G3VectorTime _times)
 }
 
 
-PYBINDINGS("core")
+PYBINDINGS("core", scope)
 {
 	// This is based on register_g3map macro.
 	py::class_<G3TimesampleMap, py::bases<G3FrameObject,

@@ -1472,8 +1472,9 @@ G3Timestream_ndim(const G3Timestream &r)
 static PyBufferProcs timestream_bufferprocs;
 static PyBufferProcs timestreammap_bufferprocs;
 
-PYBINDINGS("core") {
-	py::enum_<G3Timestream::TimestreamUnits>("G3TimestreamUnits",
+PYBINDINGS("core", scope) {
+	register_enum<G3Timestream::TimestreamUnits, G3Timestream::None>(scope,
+	  "G3TimestreamUnits",
 	  "Unit scheme for timestreams and maps. Designates different classes "
 	  "of units (power, current, on-sky temperature) rather than choices "
 	  "of unit within a class (watts vs. horsepower, or K vs. uK), "
@@ -1492,7 +1493,6 @@ PYBINDINGS("core") {
 	    .value("Trj",  G3Timestream::Trj)
 	    .value("Frequency",  G3Timestream::Frequency)
 	;
-	enum_none_converter::from_python<G3Timestream::TimestreamUnits>();
 
 	py::object ts =
 	  EXPORT_FRAMEOBJECT(G3Timestream, py::init<>(), "Detector timestream. "

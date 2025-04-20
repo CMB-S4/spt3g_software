@@ -136,8 +136,8 @@ g3_clogger(G3LogLevel level, const char *unit, const char *file, int line,
 	delete [] log_message;
 }
 
-PYBINDINGS("core") {
-	py::enum_<G3LogLevel>("G3LogLevel")
+PYBINDINGS("core", scope) {
+	register_enum<G3LogLevel>(scope, "G3LogLevel")
 	    .value("LOG_TRACE",  G3LOG_TRACE)
 	    .value("LOG_DEBUG",  G3LOG_DEBUG)
 	    .value("LOG_INFO",   G3LOG_INFO)

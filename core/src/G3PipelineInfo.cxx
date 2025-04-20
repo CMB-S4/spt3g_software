@@ -256,7 +256,7 @@ G3_SERIALIZABLE_CODE(G3ModuleArg);
 G3_SPLIT_SERIALIZABLE_CODE(G3ModuleConfig);
 G3_SERIALIZABLE_CODE(G3PipelineInfo);
 
-PYBINDINGS("core") {
+PYBINDINGS("core", scope) {
 	EXPORT_FRAMEOBJECT(G3ModuleConfig, py::init<>(), "Stored configuration of a pipeline module or segment")
 	    .def_readwrite("modname", &G3ModuleConfig::modname)
 	    .def_readwrite("instancename", &G3ModuleConfig::instancename)

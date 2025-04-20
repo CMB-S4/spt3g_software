@@ -416,7 +416,7 @@ G3Pipeline_halt_processing()
 	G3Pipeline::halt_processing = true;
 }
 
-PYBINDINGS("core") {
+PYBINDINGS("core", scope) {
 	py::class_<G3ModuleWrap, std::shared_ptr<G3ModuleWrap>,
 	  boost::noncopyable>("G3Module", "Base class for functors that can be "
 	  "added to a G3Pipeline.")

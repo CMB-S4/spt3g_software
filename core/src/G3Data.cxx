@@ -73,7 +73,7 @@ G3_SERIALIZABLE_CODE(G3Int);
 G3_SERIALIZABLE_CODE(G3Double);
 G3_SERIALIZABLE_CODE(G3String);
 
-PYBINDINGS("core") {
+PYBINDINGS("core", scope) {
 	EXPORT_FRAMEOBJECT(G3Bool, py::init<bool>(), "Serializable boolean type")
 	    .def_readwrite("value", &G3Bool::value)
 	    .def("__nonzero__", &G3Bool::truth)

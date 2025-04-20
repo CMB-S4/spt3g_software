@@ -486,7 +486,7 @@ static PyBufferProcs veccomplexdouble_bufferprocs;
 static PyBufferProcs vecint_bufferprocs;
 static PyBufferProcs vectime_bufferprocs;
 
-PYBINDINGS("core") {
+PYBINDINGS("core", scope) {
 	numpy_vector_of(float, float, "Float");
 	numpy_vector_of(double, double, "Double");
 	py::object vecdouble = register_g3vector<double>(

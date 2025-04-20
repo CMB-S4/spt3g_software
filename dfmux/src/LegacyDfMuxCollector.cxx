@@ -301,7 +301,7 @@ int LegacyDfMuxCollector::BookPacket(struct DfmuxPacket *packet,
 	return 0;
 }
 
-PYBINDINGS("dfmux")
+PYBINDINGS("dfmux", scope)
 {
 	py::class_<LegacyDfMuxCollector, std::shared_ptr<LegacyDfMuxCollector>, boost::noncopyable>("LegacyDfMuxCollector",
 	    "Listener object that collects legacy network packets and decodes and "

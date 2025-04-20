@@ -57,7 +57,7 @@ std::string BolometerProperties::Description() const
 G3_SERIALIZABLE_CODE(BolometerProperties);
 G3_SERIALIZABLE_CODE(BolometerPropertiesMap);
 
-PYBINDINGS("calibration") {
+PYBINDINGS("calibration", scope) {
 	EXPORT_FRAMEOBJECT(BolometerProperties, py::init<>(),
 	    "Physical bolometer properties, such as detector angular offsets. "
 	    "Does not include tuning-dependent properties of the detectors.")
@@ -89,7 +89,7 @@ PYBINDINGS("calibration") {
 	       "Name of the pixel type of which this detector is a part")
 	;
 
-	py::enum_<BolometerProperties::CouplingType>("BolometerCouplingType",
+	register_enum<BolometerProperties::CouplingType>(scope, "BolometerCouplingType",
 	  "Coupling type for BolometerProperties objects.")
 	    .value("Unknown", BolometerProperties::Unknown)
 	    .value("Optical", BolometerProperties::Optical)

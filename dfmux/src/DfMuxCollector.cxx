@@ -444,7 +444,7 @@ make_dfmux_collector_v2_from_dict(const char *listenaddr,
 	    serial_map));
 }
 
-PYBINDINGS("dfmux")
+PYBINDINGS("dfmux", scope)
 {
 	py::class_<DfMuxCollector, DfMuxCollectorPtr, boost::noncopyable>("DfMuxCollector",
 	    "Listener object that collects IceBoard packets from a single network "

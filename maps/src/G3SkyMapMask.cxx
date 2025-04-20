@@ -521,7 +521,7 @@ G3SkyMapMask_array_interface(const G3SkyMapMask &self)
 	return out;
 }
 
-PYBINDINGS("maps")
+PYBINDINGS("maps", scope)
 {
 	EXPORT_FRAMEOBJECT(G3SkyMapMask, py::no_init,
 	    "Boolean mask of a sky map. Set pixels to use to true, pixels to "

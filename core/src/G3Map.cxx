@@ -228,7 +228,7 @@ G3_SPLIT_SERIALIZABLE_CODE(G3MapVectorInt);
 
 G3_SPLIT_SERIALIZABLE_CODE(G3MapFrameObject);
 
-PYBINDINGS("core") {
+PYBINDINGS("core", scope) {
 	register_g3map<G3MapDouble>("G3MapDouble", "Mapping from strings to "
 	    "floats");
 	register_g3map<G3MapMapDouble>("G3MapMapDouble", "Mapping from strings "

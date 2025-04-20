@@ -1,34 +1,37 @@
 #include <pybindings.h>
 
-// Create a namespace (importable sub-module) within some parent scope
-py::object
-export_namespace(py::object scope, std::string name)
-{
-	std::string modname = py::extract<std::string>(scope.attr("__name__") + "." + name);
-	py::object mod(py::handle<>(py::borrowed(PyImport_AddModule(modname.c_str()))));
-	mod.attr("__package__") = scope.attr("__name__");
-	scope.attr(name.c_str()) = mod;
-	return mod;
-}
-
 // The following implements the headerless module registration code
-typedef std::map<std::string, std::vector<void (*)()> > module_reg_t;
-static module_reg_t *modregs = NULL;
+typedef std::map<std::string, std::deque<module_reg_func_t> > module_reg_t;
+static std::unique_ptr<module_reg_t> modregs;
 
-G3ModuleRegistrator::G3ModuleRegistrator(const char *mod, void (*def)())
+G3ModuleRegistrator::G3ModuleRegistrator(const char *mod, module_reg_func_t reg)
 {
-	if (modregs == NULL)
-		modregs = new module_reg_t;
+	if (!modregs)
+		modregs = std::unique_ptr<module_reg_t>(new module_reg_t);
 	log_debug("Adding registrar for module %s", mod);
-	(*modregs)[mod].push_back(def);
+	(*modregs)[mod].push_back(reg);
 }
 
-void G3ModuleRegistrator::CallRegistrarsFor(const char *mod)
+void G3ModuleRegistrator::CallRegistrarsFor(const char *mod, py::module_ &scope)
 {
-	for (auto i = (*modregs)[mod].begin(); i != (*modregs)[mod].end(); i++) {
-		log_debug("Calling registrar for module %s", mod);
-		(*i)();
+	auto &regs = (*modregs)[mod];
+
+	// Call registered functions only once
+	while (!regs.empty()) {
+		auto reg = regs.front();
+		regs.pop_front();
+		reg(scope);
 	}
+}
+
+py::object py::module_::def_submodule(const std::string &name) {
+	std::string modname = py::extract<std::string>(
+	    this->attr("__name__") + "." + name);
+	py::object mod(py::handle<>(py::borrowed(
+	    PyImport_AddModule(modname.c_str()))));
+	mod.attr("__package__") = this->attr("__name__");
+	this->attr(name.c_str()) = mod;
+	return mod;
 }
 
 G3PythonContext::G3PythonContext(std::string name, bool hold_gil) :
@@ -62,7 +65,7 @@ G3PythonContext::~G3PythonContext()
 	}
 }
 
-G3PythonInterpreter::G3PythonInterpreter(bool hold_gil) :
+G3PythonInterpreter::G3PythonInterpreter() :
     init_(false)
 {
 	if (!Py_IsInitialized()) {
@@ -73,17 +76,10 @@ G3PythonInterpreter::G3PythonInterpreter(bool hold_gil) :
 #endif
 		init_ = true;
 	}
-
-	ctx_ = new G3PythonContext("G3PythonInterpreter", hold_gil);
 }
 
 G3PythonInterpreter::~G3PythonInterpreter()
 {
-	if (!!ctx_) {
-		delete ctx_;
-		ctx_ = nullptr;
-	}
-
 	if (init_) {
 		log_debug("Finalizing");
 		Py_Finalize();
@@ -116,7 +112,7 @@ static void translate_BufferError(py::buffer_error const &e)
 	PyErr_SetString(PyExc_BufferError, e.what());
 }
 
-PYBINDINGS("core")
+PYBINDINGS("core", scope)
 {
 	py::register_exception_translator<py::value_error>(&translate_ValueError);
 	py::register_exception_translator<py::index_error>(&translate_IndexError);

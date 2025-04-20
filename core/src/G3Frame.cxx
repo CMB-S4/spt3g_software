@@ -503,7 +503,7 @@ static py::object g3frame_hash(py::object obj)
 	return py::extract<py::tuple>(obj.attr("__getstate__")())()[1];
 }
 
-PYBINDINGS("core") {
+PYBINDINGS("core", scope) {
 	// Internal stuff
 	py::class_<G3FrameObject, G3FrameObjectPtr>("G3FrameObject",
 	  "Base class for objects that can be added to a frame. All such "
@@ -520,7 +520,7 @@ PYBINDINGS("core") {
 	;
 	register_pointer_conversions<G3FrameObject>();
 
-	py::enum_<G3Frame::FrameType>("G3FrameType")
+	register_enum<G3Frame::FrameType, G3Frame::None>(scope, "G3FrameType")
 	    .value("Timepoint",       G3Frame::Timepoint)
 	    .value("Housekeeping",    G3Frame::Housekeeping)
 	    .value("Observation",     G3Frame::Observation)
@@ -537,7 +537,6 @@ PYBINDINGS("core") {
 	    .value("Statistics",      G3Frame::Statistics)
 	    .value("none",            G3Frame::None)
 	;
-	enum_none_converter::from_python<G3Frame::FrameType>();
 	register_vector_of<G3Frame::FrameType>("FrameType");
 
 	py::class_<G3Frame, G3FramePtr>("G3Frame",

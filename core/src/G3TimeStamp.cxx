@@ -281,7 +281,7 @@ g3time_from_timestamp(py::object obj)
 	return G3TimePtr(new G3Time(t));
 }
 
-PYBINDINGS("core") {
+PYBINDINGS("core", scope) {
 	EXPORT_FRAMEOBJECT(G3Time, py::init<>(), "UTC Time")
 	    .def(py::init<int, int , int , int, int, int>("Create a timestamp object from IRIG B code", py::args("y", "d", "h", "m", "s", "ss")))
 	    .def(py::init<std::string>("Create a time object from a string representation. Supported formats are: YYYYMMDD_HHMMSS, YYMMDD_HHMMSS, YYMMDD HH:MM:SS, DD-Mon-YYYY:HH:MM:SS, YYYY-MM-DDTHH:MM:SS[+TZ] (ISO 8601). All can have a fraction of second field after a dot."))

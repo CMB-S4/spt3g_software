@@ -180,7 +180,7 @@ G3_SERIALIZABLE_CODE(HkMezzanineInfo);
 G3_SERIALIZABLE_CODE(HkBoardInfo);
 G3_SERIALIZABLE_CODE(DfMuxHousekeepingMap);
 
-PYBINDINGS("dfmux") {
+PYBINDINGS("dfmux", scope) {
 	EXPORT_FRAMEOBJECT(HkChannelInfo, py::init<>(), "Mux channel status "
 	  "(configuration and sensors). Usually a part of an HkModuleInfo.")
 	    .def_readwrite("channel_number", &HkChannelInfo::channel_number,

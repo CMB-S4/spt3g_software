@@ -1,8 +1,8 @@
 #include <pybindings.h>
 #include <G3Constants.h>
 
-PYBINDINGS("core") {
-	py::object umod = export_namespace(py::scope(), "G3Units");
+PYBINDINGS("core", scope) {
+	auto umod = scope.def_submodule("G3Units");
 #define G3_UNITS_DEF(T) \
 	umod.attr(#T) = G3Units::T
 
@@ -175,7 +175,7 @@ PYBINDINGS("core") {
 	G3_UNITS_DEF(milligram);
 	G3_UNITS_DEF(mg);
 
-	py::object cmod = export_namespace(py::scope(), "G3Constants");
+	auto cmod = scope.def_submodule("G3Constants");
 #define G3_CONSTANTS_DEF(T) \
 	cmod.attr(#T) = G3Constants::T
 

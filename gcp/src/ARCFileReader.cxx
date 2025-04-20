@@ -851,9 +851,9 @@ void ARCFileReader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	delete [] buffer;
 }
 
-PYBINDINGS("gcp") {
+PYBINDINGS("gcp", scope) {
 	// Supported Experiments
-	py::enum_<Experiment>("Experiment")
+	register_enum<Experiment>(scope, "Experiment")
 		.value("SPT",   Experiment::SPT)
 		.value("BK",    Experiment::BK)
 		.value("PB",    Experiment::PB)

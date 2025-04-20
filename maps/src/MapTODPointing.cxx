@@ -36,10 +36,8 @@ private:
 	SET_LOGGER("MapTODPointing");
 };
 
-EXPORT_G3MODULE("maps", MapTODPointing,
-    (py::init<std::string, std::string, G3SkyMapConstPtr, std::string, std::string>
-     ((py::arg("pointing"), py::arg("timestreams"), py::arg("stub_map"), py::arg("tod_pointing"),
-     py::arg("bolo_properties_name")="BolometerProperties"))),
+PYBINDINGS("maps", scope) {
+register_g3module<MapTODPointing>(scope, "MapTODPointing",
 "MapTODPointing(pointing, timestreams, stub_map, tod_pointing, bolo_properties_name=\"BolometerProperties\")\n"
 "\n"
 "Compute pixel pointing for timestreams for a map with properties (projection, etc.) specified\n"
@@ -100,7 +98,13 @@ EXPORT_G3MODULE("maps", MapTODPointing,
 "        stub_map=map_params,\n"
 "        tod_pointing=\"TodPointing\",\n"
 "    )\n"
-);
+)
+  .def(py::init<std::string, std::string, G3SkyMapConstPtr, std::string, std::string>((
+     py::arg("pointing"), py::arg("timestreams"), py::arg("stub_map"), py::arg("tod_pointing"),
+     py::arg("bolo_properties_name")="BolometerProperties")
+     ))
+;
+};
 
 
 MapTODPointing::MapTODPointing(std::string pointing, std::string timestreams,

@@ -47,12 +47,8 @@ private:
 	SET_LOGGER("MapBinner");
 };
 
-EXPORT_G3MODULE("maps", MapBinner,
-    (py::init<std::string, const G3SkyMap &, std::string, std::string, std::string,
-     std::string, bool, py::object>((py::arg("map_id"), py::arg("stub_map"),
-     py::arg("pointing"), py::arg("timestreams"), py::arg("detector_weights")="",
-     py::arg("bolo_properties_name")="BolometerProperties",
-     py::arg("store_weight_map")=true,py::arg("map_per_scan")=false))),
+PYBINDINGS("maps", scope) {
+register_g3module<MapBinner>(scope, "MapBinner",
 "MapBinner(map_id, stub_map, pointing, timestreams, detector_weights, bolo_properties_name=\"BolometerProperties\", store_weight_map=True, map_per_scan=False)\n"
 "\n"
 "Bins up timestreams into a map with properties (projection, etc.) specified\n"
@@ -138,7 +134,15 @@ EXPORT_G3MODULE("maps", MapBinner,
 "        pointing=\"OfflineRaDecRotation\",\n"
 "        detector_weights=\"TodWeights\",\n"
 "    )\n"
-);
+)
+  .def(py::init<std::string, const G3SkyMap &, std::string, std::string, std::string,
+     std::string, bool, py::object>((py::arg("map_id"), py::arg("stub_map"),
+     py::arg("pointing"), py::arg("timestreams"), py::arg("detector_weights")="",
+     py::arg("bolo_properties_name")="BolometerProperties",
+     py::arg("store_weight_map")=true, py::arg("map_per_scan")=false)
+     ))
+;
+};
 
 
 MapBinner::MapBinner(std::string output_map_id, const G3SkyMap &stub_map,

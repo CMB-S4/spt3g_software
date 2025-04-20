@@ -205,7 +205,7 @@ void GCPLogger::ListenThread(GCPLogger *logger)
 	lock.unlock();
 }
 
-PYBINDINGS("gcp") {
+PYBINDINGS("gcp", scope) {
 	py::class_<GCPLogger, py::bases<G3Logger>, std::shared_ptr<GCPLogger>,
 	  boost::noncopyable>("GCPLogger",
 	  "Logger that relays error messages to the GCP mediator over TCP",

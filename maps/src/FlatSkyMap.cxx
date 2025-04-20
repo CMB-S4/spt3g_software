@@ -1242,7 +1242,7 @@ flatskymap_xy_to_quats(const FlatSkyMap & skymap, const std::vector<double> &x,
 
 G3_SPLIT_SERIALIZABLE_CODE(FlatSkyMap);
 
-PYBINDINGS("maps")
+PYBINDINGS("maps", scope)
 {
 	// Can't use the normal FRAMEOBJECT code since this inherits
 	// from an intermediate class. Expanded by hand here.

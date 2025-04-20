@@ -30,9 +30,11 @@ main(int argc, const char **argv)
 	}
 
 	// Initialize the python interpreter, and release the GIL.
-	// Set the argument to true to instead hold the GIL.
 	// Comment this out to disable the interpreter.
-	G3PythonInterpreter interp(false);
+	py::scoped_interpreter interp;
+	py::gil_scoped_release gil;
+	// Comment this line to keep the GIL instead
+	// py::gil_scoped_acquire gil;
 
 	G3Pipeline pipe;
 

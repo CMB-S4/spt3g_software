@@ -68,7 +68,7 @@ static bool operator == (const ACUStatus &a, const ACUStatus &b) {
 	return false;
 }
 
-PYBINDINGS("gcp") {
+PYBINDINGS("gcp", scope) {
 	py::enum_<enum ACUStatus::ACUState>("ACUState")
 	    .value("IDLE", ACUStatus::IDLE)
 	    .value("TRACKING", ACUStatus::TRACKING)

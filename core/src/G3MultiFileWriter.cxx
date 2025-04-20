@@ -161,7 +161,7 @@ done:
 	out.push_back(frame);
 }
 
-PYBINDINGS("core") {
+PYBINDINGS("core", scope) {
 	py::class_<G3MultiFileWriter, py::bases<G3Module>, std::shared_ptr<G3MultiFileWriter>,
 	    boost::noncopyable>("G3MultiFileWriter",
 	      "Writes frames to disk into a sequence of files. Once a file exceeds "

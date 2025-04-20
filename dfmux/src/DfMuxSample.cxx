@@ -16,7 +16,7 @@ template <class A> void DfMuxSample::serialize(A &ar, unsigned v)
 	ar & make_nvp("time", Timestamp);
 }
 
-PYBINDINGS("dfmux")
+PYBINDINGS("dfmux", scope)
 {
 	py::class_<DfMuxSample, py::bases<G3FrameObject, std::vector<int32_t> >,
 	  DfMuxSamplePtr, boost::noncopyable>("DfMuxSample",

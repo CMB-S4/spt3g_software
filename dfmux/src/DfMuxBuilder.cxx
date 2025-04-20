@@ -212,7 +212,7 @@ void DfMuxBuilder::ProcessNewData()
 	}
 }
 
-PYBINDINGS("dfmux")
+PYBINDINGS("dfmux", scope)
 {
 	py::class_<DfMuxBoardSamples, py::bases<G3FrameObject>,
 	  DfMuxBoardSamplesPtr>("DfMuxBoardSamples",

@@ -39,7 +39,7 @@ off_t G3Writer::Tell() {
 	return stream_.tellp();
 }
 
-PYBINDINGS("core") {
+PYBINDINGS("core", scope) {
 	// Instead of EXPORT_G3MODULE since there is an extra Flush function
 	py::class_<G3Writer, py::bases<G3Module>, std::shared_ptr<G3Writer>,
 	    boost::noncopyable>("G3Writer",

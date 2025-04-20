@@ -1214,7 +1214,7 @@ HealpixSkyMap_setslice_1d(HealpixSkyMap &skymap, py::slice coords, py::object va
 
 G3_SPLIT_SERIALIZABLE_CODE(HealpixSkyMap);
 
-PYBINDINGS("maps")
+PYBINDINGS("maps", scope)
 {
 	// Can't use the normal FRAMEOBJECT code since this inherits
 	// from an intermediate class. Expanded by hand here.

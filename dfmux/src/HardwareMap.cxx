@@ -50,7 +50,7 @@ template <class A> void DfMuxChannelMapping::serialize(A &ar, unsigned v)
 G3_SERIALIZABLE_CODE(DfMuxChannelMapping);
 G3_SERIALIZABLE_CODE(DfMuxWiringMap);
 
-PYBINDINGS("dfmux") {
+PYBINDINGS("dfmux", scope) {
 	EXPORT_FRAMEOBJECT(DfMuxChannelMapping, py::init<>(),
 	  "Bolometer wiring information. Module and channel IDs are stored "
 	  "zero-indexed, but be aware that they often printed one-indexed "

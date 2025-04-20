@@ -99,7 +99,7 @@ std::string TrackerPointing::Description() const
 
 G3_SERIALIZABLE_CODE(TrackerPointing);
 
-PYBINDINGS("gcp") {
+PYBINDINGS("gcp", scope) {
 	EXPORT_FRAMEOBJECT(TrackerPointing, py::init<>(), "GCP Tracker Pointing")
 	    .def_readwrite("time", &TrackerPointing::time)
 	    .def_readwrite("scu_temp", &TrackerPointing::scu_temp)

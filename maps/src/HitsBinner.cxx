@@ -40,11 +40,8 @@ private:
 	SET_LOGGER("HitsBinner");
 };
 
-EXPORT_G3MODULE("maps", HitsBinner,
-    (py::init<std::string, const G3SkyMap &, std::string, std::string, std::string,
-     py::object>((py::arg("map_id"), py::arg("stub_map"), py::arg("pointing"),
-     py::arg("timestreams"), py::arg("bolo_properties_name")="BolometerProperties",
-     py::arg("map_per_scan")=false))),
+PYBINDINGS("maps", scope) {
+register_g3module<HitsBinner>(scope, "HitsBinner",
 "HitsBinner(map_id, stub_map, pointing, timestreams, bolo_properties_name=\"BolometerProperties\", map_per_scan=False)\n"
 "\n"
 "Bins up pointing for a set of channels into a hits map with properties (projection, etc.) \n"
@@ -106,7 +103,14 @@ EXPORT_G3MODULE("maps", HitsBinner,
 "        timestreams=\"DeflaggedTimestreams150GHz\",\n"
 "        pointing=\"OfflineRaDecRotation\",\n"
 "    )\n"
-);
+)
+  .def(py::init<std::string, const G3SkyMap &, std::string, std::string, std::string,
+     py::object>((py::arg("map_id"), py::arg("stub_map"), py::arg("pointing"),
+     py::arg("timestreams"), py::arg("bolo_properties_name")="BolometerProperties",
+     py::arg("map_per_scan")=false)
+     ))
+;
+};
 
 
 HitsBinner::HitsBinner(std::string output_map_id, const G3SkyMap &stub_map,

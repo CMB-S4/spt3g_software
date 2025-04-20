@@ -550,35 +550,35 @@ MakePointSourceMask(const G3SkyMap &map, const std::vector<double> & ra,
 }
 
 
-PYBINDINGS("maps")
+PYBINDINGS("maps", scope)
 {
-	py::def("remove_weights_t", RemoveWeightsT,
+	scope.def("remove_weights_t", RemoveWeightsT,
 		(py::arg("T"), py::arg("W"), py::arg("zero_nans")=false),
 		"Remove weights from unpolarized maps.	If zero_nans is true, empty pixels "
 		"are skipped, and pixels with zero weight are set to 0 instead of nan.");
 
-	py::def("remove_weights", RemoveWeights,
+	scope.def("remove_weights", RemoveWeights,
 		(py::arg("T"), py::arg("Q"), py::arg("U"), py::arg("W"), py::arg("zero_nans")=false),
 		"Remove weights from polarized maps.  If zero_nans is true, empty pixels "
 		"are skipped, and pixels with zero weight are set to 0 instead of nan.");
 
-	py::def("apply_weights_t", ApplyWeightsT,
+	scope.def("apply_weights_t", ApplyWeightsT,
 		(py::arg("T"), py::arg("W")),
 		"Apply weights to unpolarized maps.");
 
-	py::def("apply_weights", ApplyWeights,
+	scope.def("apply_weights", ApplyWeights,
 		(py::arg("T"), py::arg("Q"), py::arg("U"), py::arg("W")),
 		"Apply weights to polarized maps.");
 
-	py::def("get_ra_dec_map", GetRaDecMap, (py::arg("map_in")),
+	scope.def("get_ra_dec_map", GetRaDecMap, (py::arg("map_in")),
 		"Returns maps of the ra and dec angles for each pixel in the input map");
 
-	py::def("get_ra_dec_mask", GetRaDecMask,
+	scope.def("get_ra_dec_mask", GetRaDecMask,
 		(py::arg("map_in"), py::arg("ra_left"), py::arg("ra_right"),
 		 py::arg("dec_bottom"), py::arg("dec_top")),
 		"Returns a mask that is nonzero for any pixels within the given ra and dec ranges");
 
-	py::def("flatten_pol", FlattenPol,
+	scope.def("flatten_pol", FlattenPol,
 		(py::arg("Q"), py::arg("U"), py::arg("W")=G3SkyMapWeightsPtr(),
 		 py::arg("h")=0.001, py::arg("invert")=false),
 		"For maps defined on the sphere the direction of the polarization angle is "
@@ -591,7 +591,7 @@ PYBINDINGS("maps")
 		"want to reverse the process set the invert argument to True. Also applies "
 		"the appropriate rotation to the Q and u elements of the associated weights.");
 
-	py::def("reproj_map", ReprojMap,
+	scope.def("reproj_map", ReprojMap,
 		(py::arg("in_map"), py::arg("out_map"), py::arg("rebin")=1, py::arg("interp")=false,
 		py::arg("mask")=py::object()),
 		"Reprojects the data from in_map onto out_map.  out_map can have a different "
@@ -604,7 +604,7 @@ PYBINDINGS("maps")
 		"copied from the input map. out_map_mask, if given, skip the unused pixels"
 		"and set these pixels to 0.");
 
-	py::def("get_map_moments", GetMapMoments,
+	scope.def("get_map_moments", GetMapMoments,
 		(py::arg("map"), py::arg("mask")=G3SkyMapMaskConstPtr(), py::arg("order")=2,
 		 py::arg("ignore_zeros")=false, py::arg("ignore_nans")=false, py::arg("ignore_infs")=false),
 		"Computes moment statistics of the input map, optionally ignoring "
@@ -613,18 +613,18 @@ PYBINDINGS("maps")
 		"are also included, respectively.  If a mask is supplied, then only "
 		"the non-zero pixels in the mask are included.");
 
-	py::def("get_map_hist", GetMapHist,
+	scope.def("get_map_hist", GetMapHist,
 		(py::arg("map"), py::arg("bin_edges"), py::arg("mask")=G3SkyMapMaskConstPtr(),
 		 py::arg("ignore_zeros")=false, py::arg("ignore_nans")=false, py::arg("ignore_infs")=false),
 		"Computes the histogram of the input map into bins defined by the array of "
 		"bin edges, optionally ignoring zero, nan and/or inf values in the map.  "
 		"If a mask is supplied, then only the non-zero pixels in the mask are included.");
 
-	py::def("convolve_map", pyconvolve_map, (py::arg("map"), py::arg("kernel")),
+	scope.def("convolve_map", pyconvolve_map, (py::arg("map"), py::arg("kernel")),
 		"Convolve the input flat sky map with the given map-space kernel. The "
 		"kernel must have odd dimensions and the same resolution as the map.");
 
-	py::def("make_point_source_mask", MakePointSourceMask,
+	scope.def("make_point_source_mask", MakePointSourceMask,
 		(py::arg("map"), py::arg("ra"), py::arg("dec"), py::arg("radius")),
 		"Construct a mask from the input stub map with pixels within the given "
 		"radius around each point source position set to 1.");

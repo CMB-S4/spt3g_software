@@ -108,7 +108,7 @@ off_t G3Reader::Tell() {
 	return stream_.tellg();
 }
 
-PYBINDINGS("core") {
+PYBINDINGS("core", scope) {
 	// Instead of EXPORT_G3MODULE since there are two constructors
 	py::class_<G3Reader, py::bases<G3Module>, std::shared_ptr<G3Reader>,
 	    boost::noncopyable>("G3Reader",

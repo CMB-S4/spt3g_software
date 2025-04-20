@@ -221,14 +221,16 @@ out:
 		out.push_back(frame);
 }
 
-EXPORT_G3MODULE("dfmux", DfMuxCollator, (py::init<py::optional<bool, bool, bool> >(
-    py::args("flac_compress", "drop_timepoints", "record_sampletimes"))),
-    "Collects DfMux timepoints into scan frames using a provided wiring map. "
-    "Scan frames are created when an empty Scan frame appears in the data "
-    "stream. This frame will contain all subsequent timepoints until either "
-    "the next Scan frame is detected or the stream ends. In addition to dfmux "
-    "timestreams, any scalar floating numbers that recur in every input "
-    "Timepoint frame will be combined into a G3Timestream of the same name "
-    "stored in the output scan frame."
-);
-
+PYBINDINGS("dfmux", scope) {
+	register_g3module<DfMuxCollator>(scope, "DfMuxCollator",
+	    "Collects DfMux timepoints into scan frames using a provided wiring map. "
+	    "Scan frames are created when an empty Scan frame appears in the data "
+	    "stream. This frame will contain all subsequent timepoints until either "
+	    "the next Scan frame is detected or the stream ends. In addition to dfmux "
+	    "timestreams, any scalar floating numbers that recur in every input "
+	    "Timepoint frame will be combined into a G3Timestream of the same name "
+            "stored in the output scan frame.")
+	    .def(py::init<bool, bool, bool>((py::arg("flac_compress")=true,
+	        py::arg("drop_timepoints")=true, py::arg("record_sampletimes")=true)))
+	;
+};

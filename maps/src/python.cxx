@@ -1,12 +1,9 @@
 #include <pybindings.h>
 
-SPT3G_PYTHON_MODULE(maps)
+SPT3G_PYTHON_MODULE(maps, scope)
 {
 	// Python bindings dependencies
-	py::import("spt3g.core");
-	py::import("spt3g.calibration");
-
-	py::docstring_options docopts(true, true, false);
-	G3ModuleRegistrator::CallRegistrarsFor("maps");
+	scope.import("spt3g.core");
+	scope.import("spt3g.calibration");
 }
 

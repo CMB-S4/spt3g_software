@@ -713,9 +713,9 @@ std::vector<double> FlatSkyProjection::GetPatchCenter(const FlatSkyProjection &p
 
 G3_SPLIT_SERIALIZABLE_CODE(FlatSkyProjection);
 
-PYBINDINGS("maps")
+PYBINDINGS("maps", scope)
 {
-	auto cls = py::enum_<MapProjection>("MapProjection")
+	auto cls = register_enum<MapProjection, ProjNone>(scope, "MapProjection")
 	    .value("Proj8", Proj8)
 	    .value("ProjSFL", ProjSFL)
 	    .value("ProjCAR", ProjCAR)
@@ -746,6 +746,4 @@ PYBINDINGS("maps")
 	cls.attr("Proj7") = cls.attr("ProjCEA");
 	cls.attr("ProjCylindricalEqualArea") = cls.attr("ProjCEA");
 	cls.attr("Proj9") = cls.attr("ProjBICEP");
-
-	enum_none_converter::from_python<MapProjection, ProjNone>();
 }

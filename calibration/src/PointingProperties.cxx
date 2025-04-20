@@ -26,7 +26,7 @@ std::string PointingProperties::Description() const
 G3_SERIALIZABLE_CODE(PointingProperties);
 G3_SERIALIZABLE_CODE(PointingPropertiesMap);
 
-PYBINDINGS("calibration") {
+PYBINDINGS("calibration", scope) {
 	EXPORT_FRAMEOBJECT(PointingProperties, py::init<>(),
 	    "Pointing model parameters to be used for offline pointing corrections.")
 	    .def_readwrite("tiltLat", &PointingProperties::tiltLat,
