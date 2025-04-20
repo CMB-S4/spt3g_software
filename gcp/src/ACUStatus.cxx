@@ -94,6 +94,7 @@ PYBINDINGS("gcp", scope) {
 	    .def_readwrite("acu_status", &ACUStatus::acu_status)
 	;
 
+	register_vector_of<ACUStatus>(scope, "_ACUStatusBase");
 	register_g3vector<ACUStatusVector>(scope, "ACUStatusVector", "Array of ACUStatus "
 	   "objects, usually time-ordered");
 }
