@@ -1007,7 +1007,7 @@ G3SkyMap::nanstd(size_t ddof, G3SkyMapMaskConstPtr where) const
 static bool
 pyskymap_bool(G3SkyMap &skymap)
 {
-	throw py::value_error("ValueError: The truth value of a G3SkyMap "
+	throw py::value_error("The truth value of a G3SkyMap "
 	    "is ambiguous. Use m.any() or m.all()");
 
 	return false;

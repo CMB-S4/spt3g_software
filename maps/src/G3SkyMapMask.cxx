@@ -460,7 +460,7 @@ skymapmask_pyinvert(G3SkyMapMaskPtr m)
 static bool
 skymapmask_pybool(G3SkyMapMaskPtr m)
 {
-	throw py::value_error("ValueError: The truth value of a G3SkyMapMask "
+	throw py::value_error("The truth value of a G3SkyMapMask "
 	    "is ambiguous. Use m.any() or m.all()");
 
 	return false;
