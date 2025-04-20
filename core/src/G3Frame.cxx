@@ -449,7 +449,7 @@ static py::object g3frame_python_get(G3Frame &f, std::string name)
 	// Python doesn't have a concept of const. Add subterfuge.
 	G3FrameObjectConstPtr element = f[name];
 	if (!element)
-		throw py::key_error(name.c_str());
+		throw py::key_error(name);
 
 	if (!!std::dynamic_pointer_cast<const G3Int>(element))
 		return py::int_(std::dynamic_pointer_cast<const G3Int>(element)->value);
