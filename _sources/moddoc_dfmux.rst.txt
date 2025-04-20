@@ -36,6 +36,9 @@ spt3g.dfmux.DfMuxBoardSamples
 Container structure for samples from modules on one board, mapping 0-indexed module and block IDs to a dfmux.DfMuxSample.
 
 *Constructors:*
+	``DfMuxBoardSamples( (DfMuxBoardSamples)arg2)`` :
+	    Copy constructor
+	
 	``DfMuxBoardSamples()``
 	
 	``DfMuxBoardSamples( (list)arg2)`` :
@@ -60,6 +63,20 @@ Container structure for samples from modules on one board, mapping 0-indexed mod
 
 
 *Methods:*
+
+.. _spt3g.dfmux.DfMuxBoardSamples.Summary:
+
+**spt3g.dfmux.DfMuxBoardSamples.Summary**
+
+``Summary( (DfMuxBoardSamples)arg1) -> str :``
+    Short (one-line) description of the object
+
+.. _spt3g.dfmux.DfMuxBoardSamples.Description:
+
+**spt3g.dfmux.DfMuxBoardSamples.Description**
+
+``Description( (DfMuxBoardSamples)arg1) -> str :``
+    Long-form human-readable description of the object
 
 .. _spt3g.dfmux.DfMuxBoardSamples.keys:
 
@@ -173,9 +190,10 @@ spt3g.dfmux.DfMuxChannelMapping
 Bolometer wiring information. Module and channel IDs are stored zero-indexed, but be aware that they often printed one-indexed for compatibility with pydfmux.
 
 *Constructors:*
-	``DfMuxChannelMapping()``
+	``DfMuxChannelMapping( (DfMuxChannelMapping)arg2)`` :
+	    Copy constructor
 	
-	``DfMuxChannelMapping( (DfMuxChannelMapping)arg2)``
+	``DfMuxChannelMapping()``
 
 
 
@@ -192,6 +210,23 @@ Bolometer wiring information. Module and channel IDs are stored zero-indexed, bu
 * **module**: 0-indexed module/SQUID ID of the channel
 
 * **channel**: 0-indexed channel number on the parent module/SQUID
+
+
+*Methods:*
+
+.. _spt3g.dfmux.DfMuxChannelMapping.Summary:
+
+**spt3g.dfmux.DfMuxChannelMapping.Summary**
+
+``Summary( (DfMuxChannelMapping)arg1) -> str :``
+    Short (one-line) description of the object
+
+.. _spt3g.dfmux.DfMuxChannelMapping.Description:
+
+**spt3g.dfmux.DfMuxChannelMapping.Description**
+
+``Description( (DfMuxChannelMapping)arg1) -> str :``
+    Long-form human-readable description of the object
 
 
 
@@ -326,6 +361,9 @@ spt3g.dfmux.DfMuxMetaSample
 Container structure for coincident samples from all boards. Individual board data, stored in dfmux.DfMuxBoardSamples classes, is contained indexed by board serial number.
 
 *Constructors:*
+	``DfMuxMetaSample( (DfMuxMetaSample)arg2)`` :
+	    Copy constructor
+	
 	``DfMuxMetaSample()``
 	
 	``DfMuxMetaSample( (list)arg2)`` :
@@ -341,6 +379,20 @@ Container structure for coincident samples from all boards. Individual board dat
 
 
 *Methods:*
+
+.. _spt3g.dfmux.DfMuxMetaSample.Summary:
+
+**spt3g.dfmux.DfMuxMetaSample.Summary**
+
+``Summary( (DfMuxMetaSample)arg1) -> str :``
+    Short (one-line) description of the object
+
+.. _spt3g.dfmux.DfMuxMetaSample.Description:
+
+**spt3g.dfmux.DfMuxMetaSample.Description**
+
+``Description( (DfMuxMetaSample)arg1) -> str :``
+    Long-form human-readable description of the object
 
 .. _spt3g.dfmux.DfMuxMetaSample.keys:
 
@@ -588,9 +640,10 @@ spt3g.dfmux.HkBoardInfo
 Mux board status. Includes both configuration and sensor readings for board generic quantities and a list of quantities for the mezzanines.
 
 *Constructors:*
-	``HkBoardInfo()``
+	``HkBoardInfo( (HkBoardInfo)arg2)`` :
+	    Copy constructor
 	
-	``HkBoardInfo( (HkBoardInfo)arg2)``
+	``HkBoardInfo()``
 
 
 
@@ -619,6 +672,23 @@ Mux board status. Includes both configuration and sensor readings for board gene
 * **mezz**: 1-indexed mapping from mezzanine ID to mezzanine-specific data
 
 
+*Methods:*
+
+.. _spt3g.dfmux.HkBoardInfo.Summary:
+
+**spt3g.dfmux.HkBoardInfo.Summary**
+
+``Summary( (HkBoardInfo)arg1) -> str :``
+    Short (one-line) description of the object
+
+.. _spt3g.dfmux.HkBoardInfo.Description:
+
+**spt3g.dfmux.HkBoardInfo.Description**
+
+``Description( (HkBoardInfo)arg1) -> str :``
+    Long-form human-readable description of the object
+
+
 
 .. _spt3g.dfmux.HkChannelInfo:
 
@@ -628,9 +698,10 @@ spt3g.dfmux.HkChannelInfo
 Mux channel status (configuration and sensors). Usually a part of an HkModuleInfo.
 
 *Constructors:*
-	``HkChannelInfo()``
+	``HkChannelInfo( (HkChannelInfo)arg2)`` :
+	    Copy constructor
 	
-	``HkChannelInfo( (HkChannelInfo)arg2)``
+	``HkChannelInfo()``
 
 
 
@@ -683,6 +754,23 @@ Mux channel status (configuration and sensors). Usually a part of an HkModuleInf
 * **bias_frequency**: NCO-adjusted bias frequency (mkid only)
 
 
+*Methods:*
+
+.. _spt3g.dfmux.HkChannelInfo.Summary:
+
+**spt3g.dfmux.HkChannelInfo.Summary**
+
+``Summary( (HkChannelInfo)arg1) -> str :``
+    Short (one-line) description of the object
+
+.. _spt3g.dfmux.HkChannelInfo.Description:
+
+**spt3g.dfmux.HkChannelInfo.Description**
+
+``Description( (HkChannelInfo)arg1) -> str :``
+    Long-form human-readable description of the object
+
+
 
 .. _spt3g.dfmux.HkMezzanineInfo:
 
@@ -692,9 +780,10 @@ spt3g.dfmux.HkMezzanineInfo
 Mux mezzanine status
 
 *Constructors:*
-	``HkMezzanineInfo()``
+	``HkMezzanineInfo( (HkMezzanineInfo)arg2)`` :
+	    Copy constructor
 	
-	``HkMezzanineInfo( (HkMezzanineInfo)arg2)``
+	``HkMezzanineInfo()``
 
 
 
@@ -725,6 +814,23 @@ Mux mezzanine status
 * **squid_heater**: Power level of SQUID header control
 
 
+*Methods:*
+
+.. _spt3g.dfmux.HkMezzanineInfo.Summary:
+
+**spt3g.dfmux.HkMezzanineInfo.Summary**
+
+``Summary( (HkMezzanineInfo)arg1) -> str :``
+    Short (one-line) description of the object
+
+.. _spt3g.dfmux.HkMezzanineInfo.Description:
+
+**spt3g.dfmux.HkMezzanineInfo.Description**
+
+``Description( (HkMezzanineInfo)arg1) -> str :``
+    Long-form human-readable description of the object
+
+
 
 .. _spt3g.dfmux.HkModuleInfo:
 
@@ -734,9 +840,10 @@ spt3g.dfmux.HkModuleInfo
 Mux module status
 
 *Constructors:*
-	``HkModuleInfo()``
+	``HkModuleInfo( (HkModuleInfo)arg2)`` :
+	    Copy constructor
 	
-	``HkModuleInfo( (HkModuleInfo)arg2)``
+	``HkModuleInfo()``
 
 
 
@@ -775,6 +882,23 @@ Mux module status
 * **routing_type**: Whether DAC are routed directly to ADCs or to the cryostat
 
 * **channels**: Mapping from 1-indexed channel numbers to channel housekeeping data
+
+
+*Methods:*
+
+.. _spt3g.dfmux.HkModuleInfo.Summary:
+
+**spt3g.dfmux.HkModuleInfo.Summary**
+
+``Summary( (HkModuleInfo)arg1) -> str :``
+    Short (one-line) description of the object
+
+.. _spt3g.dfmux.HkModuleInfo.Description:
+
+**spt3g.dfmux.HkModuleInfo.Description**
+
+``Description( (HkModuleInfo)arg1) -> str :``
+    Long-form human-readable description of the object
 
 
 Modules in spt3g.dfmux

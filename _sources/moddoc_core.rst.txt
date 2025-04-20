@@ -90,10 +90,28 @@ spt3g.core.G3Bool
 Serializable boolean type
 
 *Constructors:*
-	``G3Bool( (bool)arg2)``
+	``G3Bool( (G3Bool)arg2)`` :
+	    Copy constructor
 	
-	``G3Bool( (G3Bool)arg2)``
+	``G3Bool( (bool)arg2)``
 
+
+
+*Methods:*
+
+.. _spt3g.core.G3Bool.Summary:
+
+**spt3g.core.G3Bool.Summary**
+
+``Summary( (G3Bool)arg1) -> str :``
+    Short (one-line) description of the object
+
+.. _spt3g.core.G3Bool.Description:
+
+**spt3g.core.G3Bool.Description**
+
+``Description( (G3Bool)arg1) -> str :``
+    Long-form human-readable description of the object
 
 
 
@@ -105,10 +123,28 @@ spt3g.core.G3Double
 Serializable double
 
 *Constructors:*
-	``G3Double( (float)arg2)``
+	``G3Double( (G3Double)arg2)`` :
+	    Copy constructor
 	
-	``G3Double( (G3Double)arg2)``
+	``G3Double( (float)arg2)``
 
+
+
+*Methods:*
+
+.. _spt3g.core.G3Double.Summary:
+
+**spt3g.core.G3Double.Summary**
+
+``Summary( (G3Double)arg1) -> str :``
+    Short (one-line) description of the object
+
+.. _spt3g.core.G3Double.Description:
+
+**spt3g.core.G3Double.Description**
+
+``Description( (G3Double)arg1) -> str :``
+    Long-form human-readable description of the object
 
 
 
@@ -156,10 +192,28 @@ spt3g.core.G3Int
 Serializable integer type
 
 *Constructors:*
-	``G3Int( (int)arg2)``
+	``G3Int( (G3Int)arg2)`` :
+	    Copy constructor
 	
-	``G3Int( (G3Int)arg2)``
+	``G3Int( (int)arg2)``
 
+
+
+*Methods:*
+
+.. _spt3g.core.G3Int.Summary:
+
+**spt3g.core.G3Int.Summary**
+
+``Summary( (G3Int)arg1) -> str :``
+    Short (one-line) description of the object
+
+.. _spt3g.core.G3Int.Description:
+
+**spt3g.core.G3Int.Description**
+
+``Description( (G3Int)arg1) -> str :``
+    Long-form human-readable description of the object
 
 
 
@@ -1893,9 +1947,10 @@ spt3g.core.G3ModuleConfig
 Stored configuration of a pipeline module or segment
 
 *Constructors:*
-	``G3ModuleConfig()``
+	``G3ModuleConfig( (G3ModuleConfig)arg2)`` :
+	    Copy constructor
 	
-	``G3ModuleConfig( (G3ModuleConfig)arg2)``
+	``G3ModuleConfig()``
 
 
 
@@ -1907,6 +1962,20 @@ Stored configuration of a pipeline module or segment
 
 
 *Methods:*
+
+.. _spt3g.core.G3ModuleConfig.Summary:
+
+**spt3g.core.G3ModuleConfig.Summary**
+
+``Summary( (G3ModuleConfig)arg1) -> str :``
+    Short (one-line) description of the object
+
+.. _spt3g.core.G3ModuleConfig.Description:
+
+**spt3g.core.G3ModuleConfig.Description**
+
+``Description( (G3ModuleConfig)arg1) -> str :``
+    Long-form human-readable description of the object
 
 .. _spt3g.core.G3ModuleConfig.keys:
 
@@ -1930,9 +1999,10 @@ spt3g.core.G3PipelineInfo
 Stored configuration of a pipeline, including software version information
 
 *Constructors:*
-	``G3PipelineInfo()``
+	``G3PipelineInfo( (G3PipelineInfo)arg2)`` :
+	    Copy constructor
 	
-	``G3PipelineInfo( (G3PipelineInfo)arg2)``
+	``G3PipelineInfo()``
 
 
 
@@ -1961,6 +2031,20 @@ Stored configuration of a pipeline, including software version information
 
 *Methods:*
 
+.. _spt3g.core.G3PipelineInfo.Summary:
+
+**spt3g.core.G3PipelineInfo.Summary**
+
+``Summary( (G3PipelineInfo)arg1) -> str :``
+    Short (one-line) description of the object
+
+.. _spt3g.core.G3PipelineInfo.Description:
+
+**spt3g.core.G3PipelineInfo.Description**
+
+``Description( (G3PipelineInfo)arg1) -> str :``
+    Long-form human-readable description of the object
+
 .. _spt3g.core.G3PipelineInfo.Run:
 
 **spt3g.core.G3PipelineInfo.Run**
@@ -1977,10 +2061,28 @@ spt3g.core.G3Quat
 Serializable quaternion
 
 *Constructors:*
-	``G3Quat( (Quat)arg2)``
+	``G3Quat( (G3Quat)arg2)`` :
+	    Copy constructor
 	
-	``G3Quat( (G3Quat)arg2)``
+	``G3Quat( (Quat)arg2)``
 
+
+
+*Methods:*
+
+.. _spt3g.core.G3Quat.Summary:
+
+**spt3g.core.G3Quat.Summary**
+
+``Summary( (G3Quat)arg1) -> str :``
+    Short (one-line) description of the object
+
+.. _spt3g.core.G3Quat.Description:
+
+**spt3g.core.G3Quat.Description**
+
+``Description( (G3Quat)arg1) -> str :``
+    Long-form human-readable description of the object
 
 
 
@@ -1992,10 +2094,28 @@ spt3g.core.G3String
 Serializable string
 
 *Constructors:*
-	``G3String( (str)arg2)``
+	``G3String( (G3String)arg2)`` :
+	    Copy constructor
 	
-	``G3String( (G3String)arg2)``
+	``G3String( (str)arg2)``
 
+
+
+*Methods:*
+
+.. _spt3g.core.G3String.Summary:
+
+**spt3g.core.G3String.Summary**
+
+``Summary( (G3String)arg1) -> str :``
+    Short (one-line) description of the object
+
+.. _spt3g.core.G3String.Description:
+
+**spt3g.core.G3String.Description**
+
+``Description( (G3String)arg1) -> str :``
+    Long-form human-readable description of the object
 
 
 
@@ -2007,9 +2127,10 @@ spt3g.core.G3Time
 UTC Time
 
 *Constructors:*
-	``G3Time()``
+	``G3Time( (G3Time)arg2)`` :
+	    Copy constructor
 	
-	``G3Time( (G3Time)arg2)``
+	``G3Time()``
 	
 	``G3Time( (int)y, (int)d, (int)h, (int)m, (int)s, (int)ss)`` :
 	    Create a timestamp object from IRIG B code
@@ -2030,6 +2151,20 @@ UTC Time
 
 
 *Methods:*
+
+.. _spt3g.core.G3Time.Summary:
+
+**spt3g.core.G3Time.Summary**
+
+``Summary( (G3Time)arg1) -> str :``
+    Short (one-line) description of the object
+
+.. _spt3g.core.G3Time.Description:
+
+**spt3g.core.G3Time.Description**
+
+``Description( (G3Time)arg1) -> str :``
+    Long-form human-readable description of the object
 
 .. _spt3g.core.G3Time.GetFileFormatString:
 
@@ -2055,9 +2190,10 @@ spt3g.core.G3TimesampleMap
 Mapping from string to vectors of data, with an associated vector of timestamps.  This object is for storing multiple co-sampled vectors with a single set of (irregular) timestamps.
 
 *Constructors:*
-	``G3TimesampleMap()``
+	``G3TimesampleMap( (G3TimesampleMap)arg2)`` :
+	    Copy constructor
 	
-	``G3TimesampleMap( (G3TimesampleMap)arg2)``
+	``G3TimesampleMap()``
 	
 	``G3TimesampleMap( (list)arg2)`` :
 	    Initialize with keys and values from a Python dictionary: {'key':'value'}
@@ -2077,6 +2213,20 @@ Mapping from string to vectors of data, with an associated vector of timestamps.
 
 
 *Methods:*
+
+.. _spt3g.core.G3TimesampleMap.Summary:
+
+**spt3g.core.G3TimesampleMap.Summary**
+
+``Summary( (G3TimesampleMap)arg1) -> str :``
+    Short (one-line) description of the object
+
+.. _spt3g.core.G3TimesampleMap.Description:
+
+**spt3g.core.G3TimesampleMap.Description**
+
+``Description( (G3TimesampleMap)arg1) -> str :``
+    Long-form human-readable description of the object
 
 .. _spt3g.core.G3TimesampleMap.keys:
 
@@ -2204,9 +2354,10 @@ spt3g.core.G3Timestream
 Detector timestream. Includes a units field and start and stop times. Can otherwise be treated as a numpy array with a float64 dtype. Conversions to and from such arrays (e.g. with numpy.asarray) are fast. Note that a numpy array constructed from a timestream will share a memory buffer: changes to the array affect the timestream and vice versa. Most binary timestream arithmetic operations (+, -) check that the units and start/stop times are congruent.
 
 *Constructors:*
-	``G3Timestream()``
+	``G3Timestream( (G3Timestream)arg2)`` :
+	    Copy constructor
 	
-	``G3Timestream( (G3Timestream)arg2)``
+	``G3Timestream()``
 	
 	``G3Timestream( (object)data [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None])`` :
 	    Create a timestream from a numpy array or other numeric python iterable
@@ -2242,6 +2393,20 @@ Detector timestream. Includes a units field and start and stop times. Can otherw
 
 *Methods:*
 
+.. _spt3g.core.G3Timestream.Summary:
+
+**spt3g.core.G3Timestream.Summary**
+
+``Summary( (G3Timestream)arg1) -> str :``
+    Short (one-line) description of the object
+
+.. _spt3g.core.G3Timestream.Description:
+
+**spt3g.core.G3Timestream.Description**
+
+``Description( (G3Timestream)arg1) -> str :``
+    Long-form human-readable description of the object
+
 .. _spt3g.core.G3Timestream.SetFLACCompression:
 
 **spt3g.core.G3Timestream.SetFLACCompression**
@@ -2266,11 +2431,12 @@ spt3g.core.G3TimestreamMap
 Collection of timestreams indexed by logical detector ID
 
 *Constructors:*
+	``G3TimestreamMap( (G3TimestreamMap)arg2)`` :
+	    Copy constructor
+	
 	``G3TimestreamMap()``
 	
-	``G3TimestreamMap( (G3TimestreamMap)arg2)``
-	
-	``G3TimestreamMap( (StringVector)keys, (object)data [, (G3Time)start=<spt3g.core.G3Time object at 0x7f9400f0d150> [, (G3Time)stop=<spt3g.core.G3Time object at 0x7f9400f0d1c0> [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None [, (int)compression_level=0 [, (bool)copy_data=True [, (int)bit_depth=32]]]]]])`` :
+	``G3TimestreamMap( (StringVector)keys, (object)data [, (G3Time)start=<spt3g.core.G3Time object at 0x7f1aea701770> [, (G3Time)stop=<spt3g.core.G3Time object at 0x7f1aea7017e0> [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None [, (int)compression_level=0 [, (bool)copy_data=True [, (int)bit_depth=32]]]]]])`` :
 	    Create a timestream map from a numpy array or other numeric python iterable. Each row of the 2D input array will correspond to a single timestream, with the key set to the correspondingly-indexed entry of <keys>. If <copy_data> is True (default), the data will be copied into the output data structure. If False, the timestream map will provide a view into the given numpy array.
 	
 	``G3TimestreamMap( (list)arg2)`` :
@@ -2313,6 +2479,20 @@ Collection of timestreams indexed by logical detector ID
 
 
 *Methods:*
+
+.. _spt3g.core.G3TimestreamMap.Summary:
+
+**spt3g.core.G3TimestreamMap.Summary**
+
+``Summary( (G3TimestreamMap)arg1) -> str :``
+    Short (one-line) description of the object
+
+.. _spt3g.core.G3TimestreamMap.Description:
+
+**spt3g.core.G3TimestreamMap.Description**
+
+``Description( (G3TimestreamMap)arg1) -> str :``
+    Long-form human-readable description of the object
 
 .. _spt3g.core.G3TimestreamMap.keys:
 
@@ -2446,7 +2626,8 @@ spt3g.core.G3TimestreamQuat
 Timestream of quaternions. Identical to a G3VectorQuat except for the addition of start and stop times.
 
 *Constructors:*
-	``G3TimestreamQuat()``
+	``G3TimestreamQuat( (G3TimestreamQuat)arg2)`` :
+	    Copy constructor
 	
 	``G3TimestreamQuat()``
 	
@@ -2470,6 +2651,20 @@ Timestream of quaternions. Identical to a G3VectorQuat except for the addition o
 
 
 *Methods:*
+
+.. _spt3g.core.G3TimestreamQuat.Summary:
+
+**spt3g.core.G3TimestreamQuat.Summary**
+
+``Summary( (G3TimestreamQuat)arg1) -> str :``
+    Short (one-line) description of the object
+
+.. _spt3g.core.G3TimestreamQuat.Description:
+
+**spt3g.core.G3TimestreamQuat.Description**
+
+``Description( (G3TimestreamQuat)arg1) -> str :``
+    Long-form human-readable description of the object
 
 .. _spt3g.core.G3TimestreamQuat.abs:
 

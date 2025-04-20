@@ -59,8 +59,11 @@
 <span id="id1"></span><h3>spt3g.calibration.BolometerProperties<a class="headerlink" href="#spt3g-calibration-bolometerproperties" title="Link to this heading">¶</a></h3>
 <p>Physical bolometer properties, such as detector angular offsets. Does not include tuning-dependent properties of the detectors.</p>
 <dl>
-<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">BolometerProperties()</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">BolometerProperties(</span> <span class="pre">(BolometerProperties)arg2)</span></code></p>
+<dt><em>Constructors:</em></dt><dd><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">BolometerProperties(</span> <span class="pre">(BolometerProperties)arg2)</span></code> :</dt><dd><p>Copy constructor</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">BolometerProperties()</span></code></p>
 </dd>
 </dl>
 <p><em>Members:</em></p>
@@ -80,6 +83,17 @@
 <li><p><strong>band_string</strong>: String representation of frequency band center</p></li>
 <li><p><strong>band_vstring</strong>: String representation of frequency band center, without units name</p></li>
 </ul>
+<p><em>Methods:</em></p>
+<p id="spt3g-calibration-bolometerproperties-summary"><strong>spt3g.calibration.BolometerProperties.Summary</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">Summary(</span> <span class="pre">(BolometerProperties)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Short (one-line) description of the object</p>
+</dd>
+</dl>
+<p id="spt3g-calibration-bolometerproperties-description"><strong>spt3g.calibration.BolometerProperties.Description</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">Description(</span> <span class="pre">(BolometerProperties)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Long-form human-readable description of the object</p>
+</dd>
+</dl>
 </section>
 <section id="spt3g-calibration-bolometerpropertiesmap">
 <span id="id2"></span><h3>spt3g.calibration.BolometerPropertiesMap<a class="headerlink" href="#spt3g-calibration-bolometerpropertiesmap" title="Link to this heading">¶</a></h3>
@@ -170,8 +184,11 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <span id="id3"></span><h3>spt3g.calibration.PointingProperties<a class="headerlink" href="#spt3g-calibration-pointingproperties" title="Link to this heading">¶</a></h3>
 <p>Pointing model parameters to be used for offline pointing corrections.</p>
 <dl>
-<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">PointingProperties()</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">PointingProperties(</span> <span class="pre">(PointingProperties)arg2)</span></code></p>
+<dt><em>Constructors:</em></dt><dd><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">PointingProperties(</span> <span class="pre">(PointingProperties)arg2)</span></code> :</dt><dd><p>Copy constructor</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">PointingProperties()</span></code></p>
 </dd>
 </dl>
 <p><em>Members:</em></p>
@@ -181,6 +198,17 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <li><p><strong>tiltMag</strong>: Magnitude of azimuth tilt.</p></li>
 <li><p><strong>tiltAngle</strong>: Orientation of azimuth tilt.</p></li>
 </ul>
+<p><em>Methods:</em></p>
+<p id="spt3g-calibration-pointingproperties-summary"><strong>spt3g.calibration.PointingProperties.Summary</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">Summary(</span> <span class="pre">(PointingProperties)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Short (one-line) description of the object</p>
+</dd>
+</dl>
+<p id="spt3g-calibration-pointingproperties-description"><strong>spt3g.calibration.PointingProperties.Description</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">Description(</span> <span class="pre">(PointingProperties)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Long-form human-readable description of the object</p>
+</dd>
+</dl>
 </section>
 <section id="spt3g-calibration-pointingpropertiesmap">
 <span id="id4"></span><h3>spt3g.calibration.PointingPropertiesMap<a class="headerlink" href="#spt3g-calibration-pointingpropertiesmap" title="Link to this heading">¶</a></h3>

@@ -24,9 +24,10 @@ spt3g.gcp.ACUStatus
 ACU Status information, as reported by the ACU
 
 *Constructors:*
-	``ACUStatus()``
+	``ACUStatus( (ACUStatus)arg2)`` :
+	    Copy constructor
 	
-	``ACUStatus( (ACUStatus)arg2)``
+	``ACUStatus()``
 
 
 
@@ -57,6 +58,23 @@ ACU Status information, as reported by the ACU
 * **state**: No Doc (Shame!)
 
 * **acu_status**: No Doc (Shame!)
+
+
+*Methods:*
+
+.. _spt3g.gcp.ACUStatus.Summary:
+
+**spt3g.gcp.ACUStatus.Summary**
+
+``Summary( (ACUStatus)arg1) -> str :``
+    Short (one-line) description of the object
+
+.. _spt3g.gcp.ACUStatus.Description:
+
+**spt3g.gcp.ACUStatus.Description**
+
+``Description( (ACUStatus)arg1) -> str :``
+    Long-form human-readable description of the object
 
 
 
@@ -98,9 +116,10 @@ spt3g.gcp.TrackerPointing
 GCP Tracker Pointing
 
 *Constructors:*
-	``TrackerPointing()``
+	``TrackerPointing( (TrackerPointing)arg2)`` :
+	    Copy constructor
 	
-	``TrackerPointing( (TrackerPointing)arg2)``
+	``TrackerPointing()``
 
 
 
@@ -143,6 +162,23 @@ GCP Tracker Pointing
 * **refraction**: No Doc (Shame!)
 
 
+*Methods:*
+
+.. _spt3g.gcp.TrackerPointing.Summary:
+
+**spt3g.gcp.TrackerPointing.Summary**
+
+``Summary( (TrackerPointing)arg1) -> str :``
+    Short (one-line) description of the object
+
+.. _spt3g.gcp.TrackerPointing.Description:
+
+**spt3g.gcp.TrackerPointing.Description**
+
+``Description( (TrackerPointing)arg1) -> str :``
+    Long-form human-readable description of the object
+
+
 
 .. _spt3g.gcp.TrackerStatus:
 
@@ -152,9 +188,10 @@ spt3g.gcp.TrackerStatus
 GCP Tracker Status
 
 *Constructors:*
-	``TrackerStatus()``
+	``TrackerStatus( (TrackerStatus)arg2)`` :
+	    Copy constructor
 	
-	``TrackerStatus( (TrackerStatus)arg2)``
+	``TrackerStatus()``
 
 
 
@@ -185,6 +222,23 @@ GCP Tracker Status
 * **in_control**: No Doc (Shame!)
 
 * **scan_flag**: No Doc (Shame!)
+
+
+*Methods:*
+
+.. _spt3g.gcp.TrackerStatus.Summary:
+
+**spt3g.gcp.TrackerStatus.Summary**
+
+``Summary( (TrackerStatus)arg1) -> str :``
+    Short (one-line) description of the object
+
+.. _spt3g.gcp.TrackerStatus.Description:
+
+**spt3g.gcp.TrackerStatus.Description**
+
+``Description( (TrackerStatus)arg1) -> str :``
+    Long-form human-readable description of the object
 
 
 Modules in spt3g.gcp

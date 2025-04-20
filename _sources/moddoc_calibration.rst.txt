@@ -31,9 +31,10 @@ spt3g.calibration.BolometerProperties
 Physical bolometer properties, such as detector angular offsets. Does not include tuning-dependent properties of the detectors.
 
 *Constructors:*
-	``BolometerProperties()``
+	``BolometerProperties( (BolometerProperties)arg2)`` :
+	    Copy constructor
 	
-	``BolometerProperties( (BolometerProperties)arg2)``
+	``BolometerProperties()``
 
 
 
@@ -66,6 +67,23 @@ Physical bolometer properties, such as detector angular offsets. Does not includ
 * **band_string**: String representation of frequency band center
 
 * **band_vstring**: String representation of frequency band center, without units name
+
+
+*Methods:*
+
+.. _spt3g.calibration.BolometerProperties.Summary:
+
+**spt3g.calibration.BolometerProperties.Summary**
+
+``Summary( (BolometerProperties)arg1) -> str :``
+    Short (one-line) description of the object
+
+.. _spt3g.calibration.BolometerProperties.Description:
+
+**spt3g.calibration.BolometerProperties.Description**
+
+``Description( (BolometerProperties)arg1) -> str :``
+    Long-form human-readable description of the object
 
 
 
@@ -200,9 +218,10 @@ spt3g.calibration.PointingProperties
 Pointing model parameters to be used for offline pointing corrections.
 
 *Constructors:*
-	``PointingProperties()``
+	``PointingProperties( (PointingProperties)arg2)`` :
+	    Copy constructor
 	
-	``PointingProperties( (PointingProperties)arg2)``
+	``PointingProperties()``
 
 
 
@@ -215,6 +234,23 @@ Pointing model parameters to be used for offline pointing corrections.
 * **tiltMag**: Magnitude of azimuth tilt.
 
 * **tiltAngle**: Orientation of azimuth tilt.
+
+
+*Methods:*
+
+.. _spt3g.calibration.PointingProperties.Summary:
+
+**spt3g.calibration.PointingProperties.Summary**
+
+``Summary( (PointingProperties)arg1) -> str :``
+    Short (one-line) description of the object
+
+.. _spt3g.calibration.PointingProperties.Description:
+
+**spt3g.calibration.PointingProperties.Description**
+
+``Description( (PointingProperties)arg1) -> str :``
+    Long-form human-readable description of the object
 
 
 

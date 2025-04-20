@@ -59,7 +59,11 @@
 <span id="id1"></span><h3>spt3g.dfmux.DfMuxBoardSamples<a class="headerlink" href="#spt3g-dfmux-dfmuxboardsamples" title="Link to this heading">¶</a></h3>
 <p>Container structure for samples from modules on one board, mapping 0-indexed module and block IDs to a dfmux.DfMuxSample.</p>
 <dl>
-<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">DfMuxBoardSamples()</span></code></p>
+<dt><em>Constructors:</em></dt><dd><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">DfMuxBoardSamples(</span> <span class="pre">(DfMuxBoardSamples)arg2)</span></code> :</dt><dd><p>Copy constructor</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">DfMuxBoardSamples()</span></code></p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">DfMuxBoardSamples(</span> <span class="pre">(list)arg2)</span></code> :</dt><dd><p>Initialize with keys and values from a Python dictionary: {‘key’:’value’}</p>
 </dd>
@@ -76,6 +80,16 @@
 <li><p><strong>nchannels</strong>: Number of channels per block expected to report from this board</p></li>
 </ul>
 <p><em>Methods:</em></p>
+<p id="spt3g-dfmux-dfmuxboardsamples-summary"><strong>spt3g.dfmux.DfMuxBoardSamples.Summary</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">Summary(</span> <span class="pre">(DfMuxBoardSamples)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Short (one-line) description of the object</p>
+</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxboardsamples-description"><strong>spt3g.dfmux.DfMuxBoardSamples.Description</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">Description(</span> <span class="pre">(DfMuxBoardSamples)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Long-form human-readable description of the object</p>
+</dd>
+</dl>
 <p id="spt3g-dfmux-dfmuxboardsamples-keys"><strong>spt3g.dfmux.DfMuxBoardSamples.keys</strong></p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">keys(</span> <span class="pre">(DfMuxBoardSamples)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.keys() -&gt; list of D’s keys</p>
@@ -154,8 +168,11 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <span id="id2"></span><h3>spt3g.dfmux.DfMuxChannelMapping<a class="headerlink" href="#spt3g-dfmux-dfmuxchannelmapping" title="Link to this heading">¶</a></h3>
 <p>Bolometer wiring information. Module and channel IDs are stored zero-indexed, but be aware that they often printed one-indexed for compatibility with pydfmux.</p>
 <dl>
-<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">DfMuxChannelMapping()</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">DfMuxChannelMapping(</span> <span class="pre">(DfMuxChannelMapping)arg2)</span></code></p>
+<dt><em>Constructors:</em></dt><dd><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">DfMuxChannelMapping(</span> <span class="pre">(DfMuxChannelMapping)arg2)</span></code> :</dt><dd><p>Copy constructor</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">DfMuxChannelMapping()</span></code></p>
 </dd>
 </dl>
 <p><em>Members:</em></p>
@@ -167,6 +184,17 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <li><p><strong>module</strong>: 0-indexed module/SQUID ID of the channel</p></li>
 <li><p><strong>channel</strong>: 0-indexed channel number on the parent module/SQUID</p></li>
 </ul>
+<p><em>Methods:</em></p>
+<p id="spt3g-dfmux-dfmuxchannelmapping-summary"><strong>spt3g.dfmux.DfMuxChannelMapping.Summary</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">Summary(</span> <span class="pre">(DfMuxChannelMapping)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Short (one-line) description of the object</p>
+</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxchannelmapping-description"><strong>spt3g.dfmux.DfMuxChannelMapping.Description</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">Description(</span> <span class="pre">(DfMuxChannelMapping)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Long-form human-readable description of the object</p>
+</dd>
+</dl>
 </section>
 <section id="spt3g-dfmux-dfmuxhousekeepingmap">
 <span id="id3"></span><h3>spt3g.dfmux.DfMuxHousekeepingMap<a class="headerlink" href="#spt3g-dfmux-dfmuxhousekeepingmap" title="Link to this heading">¶</a></h3>
@@ -257,7 +285,11 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <span id="id4"></span><h3>spt3g.dfmux.DfMuxMetaSample<a class="headerlink" href="#spt3g-dfmux-dfmuxmetasample" title="Link to this heading">¶</a></h3>
 <p>Container structure for coincident samples from all boards. Individual board data, stored in dfmux.DfMuxBoardSamples classes, is contained indexed by board serial number.</p>
 <dl>
-<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">DfMuxMetaSample()</span></code></p>
+<dt><em>Constructors:</em></dt><dd><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">DfMuxMetaSample(</span> <span class="pre">(DfMuxMetaSample)arg2)</span></code> :</dt><dd><p>Copy constructor</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">DfMuxMetaSample()</span></code></p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">DfMuxMetaSample(</span> <span class="pre">(list)arg2)</span></code> :</dt><dd><p>Initialize with keys and values from a Python dictionary: {‘key’:’value’}</p>
 </dd>
@@ -268,6 +300,16 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 </dd>
 </dl>
 <p><em>Methods:</em></p>
+<p id="spt3g-dfmux-dfmuxmetasample-summary"><strong>spt3g.dfmux.DfMuxMetaSample.Summary</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">Summary(</span> <span class="pre">(DfMuxMetaSample)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Short (one-line) description of the object</p>
+</dd>
+</dl>
+<p id="spt3g-dfmux-dfmuxmetasample-description"><strong>spt3g.dfmux.DfMuxMetaSample.Description</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">Description(</span> <span class="pre">(DfMuxMetaSample)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Long-form human-readable description of the object</p>
+</dd>
+</dl>
 <p id="spt3g-dfmux-dfmuxmetasample-keys"><strong>spt3g.dfmux.DfMuxMetaSample.keys</strong></p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">keys(</span> <span class="pre">(DfMuxMetaSample)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.keys() -&gt; list of D’s keys</p>
@@ -438,8 +480,11 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <span id="id7"></span><h3>spt3g.dfmux.HkBoardInfo<a class="headerlink" href="#spt3g-dfmux-hkboardinfo" title="Link to this heading">¶</a></h3>
 <p>Mux board status. Includes both configuration and sensor readings for board generic quantities and a list of quantities for the mezzanines.</p>
 <dl>
-<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">HkBoardInfo()</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">HkBoardInfo(</span> <span class="pre">(HkBoardInfo)arg2)</span></code></p>
+<dt><em>Constructors:</em></dt><dd><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">HkBoardInfo(</span> <span class="pre">(HkBoardInfo)arg2)</span></code> :</dt><dd><p>Copy constructor</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">HkBoardInfo()</span></code></p>
 </dd>
 </dl>
 <p><em>Members:</em></p>
@@ -456,13 +501,27 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <li><p><strong>temperatures</strong>: Dictionary of data from on-board temperature sensors (C)</p></li>
 <li><p><strong>mezz</strong>: 1-indexed mapping from mezzanine ID to mezzanine-specific data</p></li>
 </ul>
+<p><em>Methods:</em></p>
+<p id="spt3g-dfmux-hkboardinfo-summary"><strong>spt3g.dfmux.HkBoardInfo.Summary</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">Summary(</span> <span class="pre">(HkBoardInfo)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Short (one-line) description of the object</p>
+</dd>
+</dl>
+<p id="spt3g-dfmux-hkboardinfo-description"><strong>spt3g.dfmux.HkBoardInfo.Description</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">Description(</span> <span class="pre">(HkBoardInfo)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Long-form human-readable description of the object</p>
+</dd>
+</dl>
 </section>
 <section id="spt3g-dfmux-hkchannelinfo">
 <span id="id8"></span><h3>spt3g.dfmux.HkChannelInfo<a class="headerlink" href="#spt3g-dfmux-hkchannelinfo" title="Link to this heading">¶</a></h3>
 <p>Mux channel status (configuration and sensors). Usually a part of an HkModuleInfo.</p>
 <dl>
-<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">HkChannelInfo()</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">HkChannelInfo(</span> <span class="pre">(HkChannelInfo)arg2)</span></code></p>
+<dt><em>Constructors:</em></dt><dd><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">HkChannelInfo(</span> <span class="pre">(HkChannelInfo)arg2)</span></code> :</dt><dd><p>Copy constructor</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">HkChannelInfo()</span></code></p>
 </dd>
 </dl>
 <p><em>Members:</em></p>
@@ -491,13 +550,27 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <li><p><strong>external_phase</strong>: Phase angle associated with delays external to the readout board (mkid only)</p></li>
 <li><p><strong>bias_frequency</strong>: NCO-adjusted bias frequency (mkid only)</p></li>
 </ul>
+<p><em>Methods:</em></p>
+<p id="spt3g-dfmux-hkchannelinfo-summary"><strong>spt3g.dfmux.HkChannelInfo.Summary</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">Summary(</span> <span class="pre">(HkChannelInfo)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Short (one-line) description of the object</p>
+</dd>
+</dl>
+<p id="spt3g-dfmux-hkchannelinfo-description"><strong>spt3g.dfmux.HkChannelInfo.Description</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">Description(</span> <span class="pre">(HkChannelInfo)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Long-form human-readable description of the object</p>
+</dd>
+</dl>
 </section>
 <section id="spt3g-dfmux-hkmezzanineinfo">
 <span id="id9"></span><h3>spt3g.dfmux.HkMezzanineInfo<a class="headerlink" href="#spt3g-dfmux-hkmezzanineinfo" title="Link to this heading">¶</a></h3>
 <p>Mux mezzanine status</p>
 <dl>
-<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">HkMezzanineInfo()</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">HkMezzanineInfo(</span> <span class="pre">(HkMezzanineInfo)arg2)</span></code></p>
+<dt><em>Constructors:</em></dt><dd><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">HkMezzanineInfo(</span> <span class="pre">(HkMezzanineInfo)arg2)</span></code> :</dt><dd><p>Copy constructor</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">HkMezzanineInfo()</span></code></p>
 </dd>
 </dl>
 <p><em>Members:</em></p>
@@ -515,13 +588,27 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <li><p><strong>squid_controller_power</strong>: True if SQUID controller board powered up</p></li>
 <li><p><strong>squid_heater</strong>: Power level of SQUID header control</p></li>
 </ul>
+<p><em>Methods:</em></p>
+<p id="spt3g-dfmux-hkmezzanineinfo-summary"><strong>spt3g.dfmux.HkMezzanineInfo.Summary</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">Summary(</span> <span class="pre">(HkMezzanineInfo)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Short (one-line) description of the object</p>
+</dd>
+</dl>
+<p id="spt3g-dfmux-hkmezzanineinfo-description"><strong>spt3g.dfmux.HkMezzanineInfo.Description</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">Description(</span> <span class="pre">(HkMezzanineInfo)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Long-form human-readable description of the object</p>
+</dd>
+</dl>
 </section>
 <section id="spt3g-dfmux-hkmoduleinfo">
 <span id="id10"></span><h3>spt3g.dfmux.HkModuleInfo<a class="headerlink" href="#spt3g-dfmux-hkmoduleinfo" title="Link to this heading">¶</a></h3>
 <p>Mux module status</p>
 <dl>
-<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">HkModuleInfo()</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">HkModuleInfo(</span> <span class="pre">(HkModuleInfo)arg2)</span></code></p>
+<dt><em>Constructors:</em></dt><dd><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">HkModuleInfo(</span> <span class="pre">(HkModuleInfo)arg2)</span></code> :</dt><dd><p>Copy constructor</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">HkModuleInfo()</span></code></p>
 </dd>
 </dl>
 <p><em>Members:</em></p>
@@ -544,6 +631,17 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <li><p><strong>routing_type</strong>: Whether DAC are routed directly to ADCs or to the cryostat</p></li>
 <li><p><strong>channels</strong>: Mapping from 1-indexed channel numbers to channel housekeeping data</p></li>
 </ul>
+<p><em>Methods:</em></p>
+<p id="spt3g-dfmux-hkmoduleinfo-summary"><strong>spt3g.dfmux.HkModuleInfo.Summary</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">Summary(</span> <span class="pre">(HkModuleInfo)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Short (one-line) description of the object</p>
+</dd>
+</dl>
+<p id="spt3g-dfmux-hkmoduleinfo-description"><strong>spt3g.dfmux.HkModuleInfo.Description</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">Description(</span> <span class="pre">(HkModuleInfo)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Long-form human-readable description of the object</p>
+</dd>
+</dl>
 </section>
 </section>
 <section id="modules-in-spt3g-dfmux">

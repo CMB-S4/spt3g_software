@@ -193,15 +193,16 @@ spt3g.maps.FlatSkyMap
 FlatSkyMap is a G3SkyMap with the extra meta information about the particular flat sky projection included.  In practice it behaves (mostly) like a 2d numpy array.  The pixels are normally indexed with an 1d pixel index.  If you find that you need numpy functionality from a FlatSkyMap, e.g. for slicing across the two dimensions, you can access a numpy representation of the map using `np.asarray(m)`. This does not copy the data, so any changes to the resulting array will affect the data stored in the map.  Alternatively, you can use 2d slice indexing directly on the map to access a copy of the data with the coordinate representation intact.  The latter method is most efficient for extracting small patches from sparse maps.
 
 *Constructors:*
-	``FlatSkyMap( (FlatSkyMap)arg2)``
+	``FlatSkyMap( (FlatSkyMap)arg2)`` :
+	    Copy constructor
+	
+	``FlatSkyMap()``
 	
 	``FlatSkyMap( (int)x_len, (int)y_len, (float)res [, (bool)weighted=True [, (MapProjection)proj=spt3g.maps.MapProjection.ProjNone [, (float)alpha_center=0 [, (float)delta_center=0 [, (MapCoordReference)coord_ref=spt3g.maps.MapCoordReference.Equatorial [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.Tcmb [, (MapPolType)pol_type=spt3g.maps.MapPolType.none [, (float)x_res=nan [, (float)x_center=nan [, (float)y_center=nan [, (bool)flat_pol=False [, (MapPolConv)pol_conv=spt3g.maps.MapPolConv.none]]]]]]]]]]]])`` :
 	    Instantiate an empty flat sky map object
 	
 	``FlatSkyMap( (object)obj, (float)res [, (bool)weighted=True [, (MapProjection)proj=spt3g.maps.MapProjection.ProjNone [, (float)alpha_center=0 [, (float)delta_center=0 [, (MapCoordReference)coord_ref=spt3g.maps.MapCoordReference.Equatorial [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.Tcmb [, (MapPolType)pol_type=spt3g.maps.MapPolType.none [, (float)x_res=nan [, (float)x_center=nan [, (float)y_center=nan [, (bool)flat_pol=False [, (MapPolConv)pol_conv=spt3g.maps.MapPolConv.none]]]]]]]]]]]])`` :
 	    Instantiate a flat sky map object from a numpy array
-	
-	``FlatSkyMap( [ (FlatSkyMap)flat_map])``
 
 
 
@@ -231,6 +232,20 @@ FlatSkyMap is a G3SkyMap with the extra meta information about the particular fl
 
 
 *Methods:*
+
+.. _spt3g.maps.FlatSkyMap.Summary:
+
+**spt3g.maps.FlatSkyMap.Summary**
+
+``Summary( (FlatSkyMap)arg1) -> str :``
+    Short (one-line) description of the object
+
+.. _spt3g.maps.FlatSkyMap.Description:
+
+**spt3g.maps.FlatSkyMap.Description**
+
+``Description( (FlatSkyMap)arg1) -> str :``
+    Long-form human-readable description of the object
 
 .. _spt3g.maps.FlatSkyMap.array_clone:
 
@@ -621,7 +636,8 @@ spt3g.maps.G3SkyMapMask
 Boolean mask of a sky map. Set pixels to use to true, pixels to ignore to false. If use_data set in contrast, mask initialized to true where input map is non-zero; otherwise, all elements are initialized to zero.  Use zero_nans or zero_infs to exclude nan or inf elements from the mask.
 
 *Constructors:*
-	``G3SkyMapMask( (G3SkyMapMask)arg2)``
+	``G3SkyMapMask( (G3SkyMapMask)arg2)`` :
+	    Copy constructor
 	
 	``G3SkyMapMask( (G3SkyMap)parent [, (bool)use_data=False [, (bool)zero_nans=False [, (bool)zero_infs=False]]])`` :
 	    Instantiate a G3SkyMapMask from a parent G3SkyMap
@@ -641,6 +657,20 @@ Boolean mask of a sky map. Set pixels to use to true, pixels to ignore to false.
 
 
 *Methods:*
+
+.. _spt3g.maps.G3SkyMapMask.Summary:
+
+**spt3g.maps.G3SkyMapMask.Summary**
+
+``Summary( (G3SkyMapMask)arg1) -> str :``
+    Short (one-line) description of the object
+
+.. _spt3g.maps.G3SkyMapMask.Description:
+
+**spt3g.maps.G3SkyMapMask.Description**
+
+``Description( (G3SkyMapMask)arg1) -> str :``
+    Long-form human-readable description of the object
 
 .. _spt3g.maps.G3SkyMapMask.clone:
 
@@ -704,9 +734,10 @@ spt3g.maps.G3SkyMapWeights
 Polarized (Mueller matrix) or unpolarized (scalar) map pixel weights.Weights are polarized if the pol_conv attribute of the reference map is set.
 
 *Constructors:*
-	``G3SkyMapWeights()``
+	``G3SkyMapWeights( (G3SkyMapWeights)arg2)`` :
+	    Copy constructor
 	
-	``G3SkyMapWeights( (G3SkyMapWeights)arg2)``
+	``G3SkyMapWeights()``
 	
 	``G3SkyMapWeights( (object)skymap)``
 
@@ -736,6 +767,20 @@ Polarized (Mueller matrix) or unpolarized (scalar) map pixel weights.Weights are
 
 
 *Methods:*
+
+.. _spt3g.maps.G3SkyMapWeights.Summary:
+
+**spt3g.maps.G3SkyMapWeights.Summary**
+
+``Summary( (G3SkyMapWeights)arg1) -> str :``
+    Short (one-line) description of the object
+
+.. _spt3g.maps.G3SkyMapWeights.Description:
+
+**spt3g.maps.G3SkyMapWeights.Description**
+
+``Description( (G3SkyMapWeights)arg1) -> str :``
+    Long-form human-readable description of the object
 
 .. _spt3g.maps.G3SkyMapWeights.copy:
 
@@ -810,7 +855,10 @@ spt3g.maps.HealpixSkyMap
 HealpixSkyMap is a G3SkyMap with the extra meta information about the particular Healpix pixelization used.  In practice it behaves (mostly) like a 1d numpy array.  If you find that you need numpy functionality from a HealpixSkyMap, e.g. for slicing across the array, you can access a numpy representation of the map using `np.asarray(m)`. This does not copy the data, so any changes to the resulting array will affect the data stored in the map.
 
 *Constructors:*
-	``HealpixSkyMap( (HealpixSkyMap)arg2)``
+	``HealpixSkyMap( (HealpixSkyMap)arg2)`` :
+	    Copy constructor
+	
+	``HealpixSkyMap()``
 	
 	``HealpixSkyMap( (int)nside [, (bool)weighted=True [, (bool)nested=False [, (MapCoordReference)coord_ref=spt3g.maps.MapCoordReference.Equatorial [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.Tcmb [, (MapPolType)pol_type=spt3g.maps.MapPolType.none [, (bool)shift_ra=False [, (MapPolConv)pol_conv=spt3g.maps.MapPolConv.none]]]]]]])`` :
 	    Instantiate a HealpixSkyMap with given nside
@@ -820,8 +868,6 @@ HealpixSkyMap is a G3SkyMap with the extra meta information about the particular
 	
 	``HealpixSkyMap( (object)data [, (bool)weighted=True [, (bool)nested=False [, (MapCoordReference)coord_ref=spt3g.maps.MapCoordReference.Equatorial [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.Tcmb [, (MapPolType)pol_type=spt3g.maps.MapPolType.none [, (bool)shift_ra=False [, (MapPolConv)pol_conv=spt3g.maps.MapPolConv.none]]]]]]])`` :
 	    Instantiate a dense Healpix map from existing data.
-	
-	``HealpixSkyMap( [ (HealpixSkyMap)healpix_map])``
 
 
 
@@ -843,6 +889,20 @@ HealpixSkyMap is a G3SkyMap with the extra meta information about the particular
 
 
 *Methods:*
+
+.. _spt3g.maps.HealpixSkyMap.Summary:
+
+**spt3g.maps.HealpixSkyMap.Summary**
+
+``Summary( (HealpixSkyMap)arg1) -> str :``
+    Short (one-line) description of the object
+
+.. _spt3g.maps.HealpixSkyMap.Description:
+
+**spt3g.maps.HealpixSkyMap.Description**
+
+``Description( (HealpixSkyMap)arg1) -> str :``
+    Long-form human-readable description of the object
 
 .. _spt3g.maps.HealpixSkyMap.array_clone:
 

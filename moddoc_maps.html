@@ -174,14 +174,17 @@
 <span id="id1"></span><h3>spt3g.maps.FlatSkyMap<a class="headerlink" href="#spt3g-maps-flatskymap" title="Link to this heading">¶</a></h3>
 <p>FlatSkyMap is a G3SkyMap with the extra meta information about the particular flat sky projection included.  In practice it behaves (mostly) like a 2d numpy array.  The pixels are normally indexed with an 1d pixel index.  If you find that you need numpy functionality from a FlatSkyMap, e.g. for slicing across the two dimensions, you can access a numpy representation of the map using <cite>np.asarray(m)</cite>. This does not copy the data, so any changes to the resulting array will affect the data stored in the map.  Alternatively, you can use 2d slice indexing directly on the map to access a copy of the data with the coordinate representation intact.  The latter method is most efficient for extracting small patches from sparse maps.</p>
 <dl>
-<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">FlatSkyMap(</span> <span class="pre">(FlatSkyMap)arg2)</span></code></p>
+<dt><em>Constructors:</em></dt><dd><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">FlatSkyMap(</span> <span class="pre">(FlatSkyMap)arg2)</span></code> :</dt><dd><p>Copy constructor</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">FlatSkyMap()</span></code></p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">FlatSkyMap(</span> <span class="pre">(int)x_len,</span> <span class="pre">(int)y_len,</span> <span class="pre">(float)res</span> <span class="pre">[,</span> <span class="pre">(bool)weighted=True</span> <span class="pre">[,</span> <span class="pre">(MapProjection)proj=spt3g.maps.MapProjection.ProjNone</span> <span class="pre">[,</span> <span class="pre">(float)alpha_center=0</span> <span class="pre">[,</span> <span class="pre">(float)delta_center=0</span> <span class="pre">[,</span> <span class="pre">(MapCoordReference)coord_ref=spt3g.maps.MapCoordReference.Equatorial</span> <span class="pre">[,</span> <span class="pre">(G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.Tcmb</span> <span class="pre">[,</span> <span class="pre">(MapPolType)pol_type=spt3g.maps.MapPolType.none</span> <span class="pre">[,</span> <span class="pre">(float)x_res=nan</span> <span class="pre">[,</span> <span class="pre">(float)x_center=nan</span> <span class="pre">[,</span> <span class="pre">(float)y_center=nan</span> <span class="pre">[,</span> <span class="pre">(bool)flat_pol=False</span> <span class="pre">[,</span> <span class="pre">(MapPolConv)pol_conv=spt3g.maps.MapPolConv.none]]]]]]]]]]]])</span></code> :</dt><dd><p>Instantiate an empty flat sky map object</p>
 </dd>
 <dt><code class="docutils literal notranslate"><span class="pre">FlatSkyMap(</span> <span class="pre">(object)obj,</span> <span class="pre">(float)res</span> <span class="pre">[,</span> <span class="pre">(bool)weighted=True</span> <span class="pre">[,</span> <span class="pre">(MapProjection)proj=spt3g.maps.MapProjection.ProjNone</span> <span class="pre">[,</span> <span class="pre">(float)alpha_center=0</span> <span class="pre">[,</span> <span class="pre">(float)delta_center=0</span> <span class="pre">[,</span> <span class="pre">(MapCoordReference)coord_ref=spt3g.maps.MapCoordReference.Equatorial</span> <span class="pre">[,</span> <span class="pre">(G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.Tcmb</span> <span class="pre">[,</span> <span class="pre">(MapPolType)pol_type=spt3g.maps.MapPolType.none</span> <span class="pre">[,</span> <span class="pre">(float)x_res=nan</span> <span class="pre">[,</span> <span class="pre">(float)x_center=nan</span> <span class="pre">[,</span> <span class="pre">(float)y_center=nan</span> <span class="pre">[,</span> <span class="pre">(bool)flat_pol=False</span> <span class="pre">[,</span> <span class="pre">(MapPolConv)pol_conv=spt3g.maps.MapPolConv.none]]]]]]]]]]]])</span></code> :</dt><dd><p>Instantiate a flat sky map object from a numpy array</p>
 </dd>
 </dl>
-<p><code class="docutils literal notranslate"><span class="pre">FlatSkyMap(</span> <span class="pre">[</span> <span class="pre">(FlatSkyMap)flat_map])</span></code></p>
 </dd>
 </dl>
 <p><em>Members:</em></p>
@@ -199,6 +202,16 @@
 <li><p><strong>wcs</strong>: astropy.wcs.WCS instance containing projection information</p></li>
 </ul>
 <p><em>Methods:</em></p>
+<p id="spt3g-maps-flatskymap-summary"><strong>spt3g.maps.FlatSkyMap.Summary</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">Summary(</span> <span class="pre">(FlatSkyMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Short (one-line) description of the object</p>
+</dd>
+</dl>
+<p id="spt3g-maps-flatskymap-description"><strong>spt3g.maps.FlatSkyMap.Description</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">Description(</span> <span class="pre">(FlatSkyMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Long-form human-readable description of the object</p>
+</dd>
+</dl>
 <p id="spt3g-maps-flatskymap-array-clone"><strong>spt3g.maps.FlatSkyMap.array_clone</strong></p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">array_clone(</span> <span class="pre">(FlatSkyMap)arg1,</span> <span class="pre">(object)array)</span> <span class="pre">-&gt;</span> <span class="pre">FlatSkyMap</span> <span class="pre">:</span></code></dt><dd><p>Return a map of the same type, populated with a copy of the input numpy array</p>
@@ -436,9 +449,10 @@ This class cannot be instantiated from Python</p>
 <section id="spt3g-maps-g3skymapmask">
 <span id="id3"></span><h3>spt3g.maps.G3SkyMapMask<a class="headerlink" href="#spt3g-maps-g3skymapmask" title="Link to this heading">¶</a></h3>
 <p>Boolean mask of a sky map. Set pixels to use to true, pixels to ignore to false. If use_data set in contrast, mask initialized to true where input map is non-zero; otherwise, all elements are initialized to zero.  Use zero_nans or zero_infs to exclude nan or inf elements from the mask.</p>
-<dl>
-<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3SkyMapMask(</span> <span class="pre">(G3SkyMapMask)arg2)</span></code></p>
 <dl class="simple">
+<dt><em>Constructors:</em></dt><dd><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">G3SkyMapMask(</span> <span class="pre">(G3SkyMapMask)arg2)</span></code> :</dt><dd><p>Copy constructor</p>
+</dd>
 <dt><code class="docutils literal notranslate"><span class="pre">G3SkyMapMask(</span> <span class="pre">(G3SkyMap)parent</span> <span class="pre">[,</span> <span class="pre">(bool)use_data=False</span> <span class="pre">[,</span> <span class="pre">(bool)zero_nans=False</span> <span class="pre">[,</span> <span class="pre">(bool)zero_infs=False]]])</span></code> :</dt><dd><p>Instantiate a G3SkyMapMask from a parent G3SkyMap</p>
 </dd>
 <dt><code class="docutils literal notranslate"><span class="pre">G3SkyMapMask(</span> <span class="pre">(G3SkyMap)parent,</span> <span class="pre">(object)data</span> <span class="pre">[,</span> <span class="pre">(bool)zero_nans=False</span> <span class="pre">[,</span> <span class="pre">(bool)zero_infs=False]])</span></code> :</dt><dd><p>Instantiate a G3SkyMapMask from a 1D numpy array</p>
@@ -453,6 +467,16 @@ This class cannot be instantiated from Python</p>
 <li><p><strong>__array_interface__</strong>: No Doc (Shame!)</p></li>
 </ul>
 <p><em>Methods:</em></p>
+<p id="spt3g-maps-g3skymapmask-summary"><strong>spt3g.maps.G3SkyMapMask.Summary</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">Summary(</span> <span class="pre">(G3SkyMapMask)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Short (one-line) description of the object</p>
+</dd>
+</dl>
+<p id="spt3g-maps-g3skymapmask-description"><strong>spt3g.maps.G3SkyMapMask.Description</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">Description(</span> <span class="pre">(G3SkyMapMask)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Long-form human-readable description of the object</p>
+</dd>
+</dl>
 <p id="spt3g-maps-g3skymapmask-clone"><strong>spt3g.maps.G3SkyMapMask.clone</strong></p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">clone(</span> <span class="pre">(G3SkyMapMask)arg1</span> <span class="pre">[,</span> <span class="pre">(bool)copy_data=True])</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMapMask</span> <span class="pre">:</span></code></dt><dd><p>Return a mask of the same type, populated with a copy of the data if the argument is true (default), empty otherwise.</p>
@@ -495,8 +519,11 @@ This class cannot be instantiated from Python</p>
 <span id="id4"></span><h3>spt3g.maps.G3SkyMapWeights<a class="headerlink" href="#spt3g-maps-g3skymapweights" title="Link to this heading">¶</a></h3>
 <p>Polarized (Mueller matrix) or unpolarized (scalar) map pixel weights.Weights are polarized if the pol_conv attribute of the reference map is set.</p>
 <dl>
-<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3SkyMapWeights()</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">G3SkyMapWeights(</span> <span class="pre">(G3SkyMapWeights)arg2)</span></code></p>
+<dt><em>Constructors:</em></dt><dd><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">G3SkyMapWeights(</span> <span class="pre">(G3SkyMapWeights)arg2)</span></code> :</dt><dd><p>Copy constructor</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">G3SkyMapWeights()</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">G3SkyMapWeights(</span> <span class="pre">(object)skymap)</span></code></p>
 </dd>
 </dl>
@@ -514,6 +541,16 @@ This class cannot be instantiated from Python</p>
 <li><p><strong>congruent</strong>: True if all components are internally compatible with each other</p></li>
 </ul>
 <p><em>Methods:</em></p>
+<p id="spt3g-maps-g3skymapweights-summary"><strong>spt3g.maps.G3SkyMapWeights.Summary</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">Summary(</span> <span class="pre">(G3SkyMapWeights)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Short (one-line) description of the object</p>
+</dd>
+</dl>
+<p id="spt3g-maps-g3skymapweights-description"><strong>spt3g.maps.G3SkyMapWeights.Description</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">Description(</span> <span class="pre">(G3SkyMapWeights)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Long-form human-readable description of the object</p>
+</dd>
+</dl>
 <p id="spt3g-maps-g3skymapweights-copy"><strong>spt3g.maps.G3SkyMapWeights.copy</strong></p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">copy(</span> <span class="pre">(G3SkyMapWeights)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">G3SkyMapWeights</span> <span class="pre">:</span></code></dt><dd><p>Return a copy of the weights object</p>
@@ -564,7 +601,11 @@ This class cannot be instantiated from Python</p>
 <span id="id5"></span><h3>spt3g.maps.HealpixSkyMap<a class="headerlink" href="#spt3g-maps-healpixskymap" title="Link to this heading">¶</a></h3>
 <p>HealpixSkyMap is a G3SkyMap with the extra meta information about the particular Healpix pixelization used.  In practice it behaves (mostly) like a 1d numpy array.  If you find that you need numpy functionality from a HealpixSkyMap, e.g. for slicing across the array, you can access a numpy representation of the map using <cite>np.asarray(m)</cite>. This does not copy the data, so any changes to the resulting array will affect the data stored in the map.</p>
 <dl>
-<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">HealpixSkyMap(</span> <span class="pre">(HealpixSkyMap)arg2)</span></code></p>
+<dt><em>Constructors:</em></dt><dd><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">HealpixSkyMap(</span> <span class="pre">(HealpixSkyMap)arg2)</span></code> :</dt><dd><p>Copy constructor</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">HealpixSkyMap()</span></code></p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">HealpixSkyMap(</span> <span class="pre">(int)nside</span> <span class="pre">[,</span> <span class="pre">(bool)weighted=True</span> <span class="pre">[,</span> <span class="pre">(bool)nested=False</span> <span class="pre">[,</span> <span class="pre">(MapCoordReference)coord_ref=spt3g.maps.MapCoordReference.Equatorial</span> <span class="pre">[,</span> <span class="pre">(G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.Tcmb</span> <span class="pre">[,</span> <span class="pre">(MapPolType)pol_type=spt3g.maps.MapPolType.none</span> <span class="pre">[,</span> <span class="pre">(bool)shift_ra=False</span> <span class="pre">[,</span> <span class="pre">(MapPolConv)pol_conv=spt3g.maps.MapPolConv.none]]]]]]])</span></code> :</dt><dd><p>Instantiate a HealpixSkyMap with given nside</p>
 </dd>
@@ -573,7 +614,6 @@ This class cannot be instantiated from Python</p>
 <dt><code class="docutils literal notranslate"><span class="pre">HealpixSkyMap(</span> <span class="pre">(object)data</span> <span class="pre">[,</span> <span class="pre">(bool)weighted=True</span> <span class="pre">[,</span> <span class="pre">(bool)nested=False</span> <span class="pre">[,</span> <span class="pre">(MapCoordReference)coord_ref=spt3g.maps.MapCoordReference.Equatorial</span> <span class="pre">[,</span> <span class="pre">(G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.Tcmb</span> <span class="pre">[,</span> <span class="pre">(MapPolType)pol_type=spt3g.maps.MapPolType.none</span> <span class="pre">[,</span> <span class="pre">(bool)shift_ra=False</span> <span class="pre">[,</span> <span class="pre">(MapPolConv)pol_conv=spt3g.maps.MapPolConv.none]]]]]]])</span></code> :</dt><dd><p>Instantiate a dense Healpix map from existing data.</p>
 </dd>
 </dl>
-<p><code class="docutils literal notranslate"><span class="pre">HealpixSkyMap(</span> <span class="pre">[</span> <span class="pre">(HealpixSkyMap)healpix_map])</span></code></p>
 </dd>
 </dl>
 <p><em>Members:</em></p>
@@ -587,6 +627,16 @@ This class cannot be instantiated from Python</p>
 <li><p><strong>indexedsparse</strong>: True if the map is stored as a list of non-zero pixels and values. More efficient than ring-sparse for maps with holes or very small filling factors. If set to True, converts the map to this representation.</p></li>
 </ul>
 <p><em>Methods:</em></p>
+<p id="spt3g-maps-healpixskymap-summary"><strong>spt3g.maps.HealpixSkyMap.Summary</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">Summary(</span> <span class="pre">(HealpixSkyMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Short (one-line) description of the object</p>
+</dd>
+</dl>
+<p id="spt3g-maps-healpixskymap-description"><strong>spt3g.maps.HealpixSkyMap.Description</strong></p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">Description(</span> <span class="pre">(HealpixSkyMap)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Long-form human-readable description of the object</p>
+</dd>
+</dl>
 <p id="spt3g-maps-healpixskymap-array-clone"><strong>spt3g.maps.HealpixSkyMap.array_clone</strong></p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">array_clone(</span> <span class="pre">(HealpixSkyMap)arg1,</span> <span class="pre">(object)array)</span> <span class="pre">-&gt;</span> <span class="pre">HealpixSkyMap</span> <span class="pre">:</span></code></dt><dd><p>Return a map of the same type, populated with a copy of the input numpy array</p>
