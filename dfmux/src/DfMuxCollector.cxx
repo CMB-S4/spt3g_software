@@ -446,12 +446,12 @@ make_dfmux_collector_v2_from_dict(const char *listenaddr,
 
 PYBINDINGS("dfmux", scope)
 {
-	py::class_<DfMuxCollector, DfMuxCollectorPtr, boost::noncopyable>("DfMuxCollector",
+	register_class_noncopyable<DfMuxCollector>(scope, "DfMuxCollector",
 	    "Listener object that collects IceBoard packets from a single network "
 	    "interface and decodes and forwards them to a DfMuxBuilder object for "
 	    "insertion into the data stream. Takes the builder object to which the "
 	    "data should be sent. Uses either multicast UDP or SCTP depending on "
-	    "which constructor is used.", py::no_init)
+	    "which constructor is used.")
 	    .def(py::init<G3EventBuilderPtr, std::vector<std::string> >(
 	        (py::arg("builder"), py::arg("hostnames")),
 	        "Create a DfMuxCollector listening for SCTP packets from the "

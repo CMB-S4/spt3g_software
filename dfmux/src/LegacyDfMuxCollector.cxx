@@ -303,14 +303,14 @@ int LegacyDfMuxCollector::BookPacket(struct DfmuxPacket *packet,
 
 PYBINDINGS("dfmux", scope)
 {
-	py::class_<LegacyDfMuxCollector, std::shared_ptr<LegacyDfMuxCollector>, boost::noncopyable>("LegacyDfMuxCollector",
+	register_class_noncopyable<LegacyDfMuxCollector>(scope, "LegacyDfMuxCollector",
 	    "Listener object that collects legacy network packets and decodes and "
 	    "forwards them to a DfMuxBuilder object for insertion into the data "
 	    "stream. Takes a builder object to which the data should be sent. "
 	    "If boards running in multicast code, also takes the address of the "
 	    "interface on which to listen and the multicast group address. "
-	    "Only works with DAN streamers.",
-	    py::init<int, G3EventBuilderPtr, const char *, const char *>((
+	    "Only works with DAN streamers.")
+	    .def(py::init<int, G3EventBuilderPtr, const char *, const char *>((
 	        py::arg("port"), py::arg("builder"), py::arg("mcastlistenaddr")="",
 	        py::arg("mcastgroupaddr")="")))
 	    .def("Start", &LegacyDfMuxCollector::Start)

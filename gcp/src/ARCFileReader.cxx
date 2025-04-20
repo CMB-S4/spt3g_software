@@ -859,7 +859,6 @@ PYBINDINGS("gcp", scope) {
 		.value("PB",    Experiment::PB)
 	;
 
-	// Instead of EXPORT_G3MODULE since there are two constructors
 	register_g3module<ARCFileReader>(scope, "ARCFileReader",
 	    "Read GCP archive file (or files if you pass an iterable of paths). "
 	    "For non-SPT ARC file formats, please set Experiment to the "

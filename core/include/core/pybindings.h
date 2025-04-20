@@ -107,7 +107,13 @@ register_g3module(py::module_ &scope, const std::string &name, Args&&...args)
 	    std::forward<Args>(args)...);
 
 	// mark as a module
-	cls.def_readonly("__g3module__", true);
+	try {
+		cls.def_readonly("__g3module__", true);
+	} catch (py::error_already_set &e) {
+		PyErr_Clear();
+	}
+
+	py::implicitly_convertible<std::shared_ptr<T>, G3ModulePtr>();
 
 	return cls;
 }

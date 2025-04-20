@@ -241,19 +241,18 @@ PYBINDINGS("dfmux", scope)
 	;
 	register_pointer_conversions<DfMuxMetaSample>();
 
-	py::class_<DfMuxBuilder, py::bases<G3EventBuilder>, DfMuxBuilderPtr,
-	  boost::noncopyable>("DfMuxBuilder",
+	register_g3module<DfMuxBuilder, G3EventBuilder>(scope, "DfMuxBuilder",
 	  "Processing module for data from DfMux boards. Reads data from "
 	  "boards data acquisition boards, requiring that data from all "
 	  "be timestamped to within collation_tolerance (default 10 "
 	  "microseconds) to be considered part of a single sample. If boards "
 	  "is an integer, listens for that number. If a list of integers, "
 	  "DfMuxBuilder will filter for only boards with serial numbers "
-	  "in the list.",
-	  py::init<int, py::optional<int64_t> >(
-	   py::args("boards", "collation_tolerance")))
-	    .def(py::init<std::vector<int>, py::optional<int64_t> >(py::args("boards", "collation_tolerance")))
+	  "in the list.")
+	    .def(py::init<int, int64_t>((py::arg("boards"),
+	        py::arg("collation_tolerance")=10*G3Units::ms)))
+	    .def(py::init<std::vector<int>, int64_t>((py::arg("boards"),
+	        py::arg("collation_tolerance")=10*G3Units::ms)))
 	;
-	py::implicitly_convertible<DfMuxBuilderPtr, G3ModulePtr>();
 }
 

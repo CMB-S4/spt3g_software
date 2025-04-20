@@ -354,6 +354,12 @@ G3Pipeline::Run(bool profile, bool graph, bool signal_halt)
 	}
 }
 
+static void
+G3Pipeline_halt_processing()
+{
+	G3Pipeline::halt_processing = true;
+}
+
 static py::list G3Module_Process(G3Module &mod, G3FramePtr ptr)
 {
 	std::deque<G3FramePtr> queue;
@@ -410,22 +416,16 @@ public:
 	}
 };
 
-static void
-G3Pipeline_halt_processing()
-{
-	G3Pipeline::halt_processing = true;
-}
-
 PYBINDINGS("core", scope) {
-	py::class_<G3ModuleWrap, std::shared_ptr<G3ModuleWrap>,
-	  boost::noncopyable>("G3Module", "Base class for functors that can be "
-	  "added to a G3Pipeline.")
+	register_class_noncopyable<G3ModuleWrap>(scope, "G3Module",
+	  "Base class for functors that can be added to a G3Pipeline.")
+	    .def(py::init<>())
 	    .def("__call__", &G3Module_Process)
 	    .def("Process", py::pure_virtual(&G3Module_Process))
 	;
 	py::implicitly_convertible<std::shared_ptr<G3ModuleWrap>, G3ModulePtr>();
 
-	py::class_<G3Pipeline, std::shared_ptr<G3Pipeline> >("G3Pipeline",
+	register_class<G3Pipeline>(scope, "G3Pipeline",
 	  "A collection of core.G3Modules and Python callables. Added "
 	  "callables are called sequentially and are passed a frame as their "
 	  "only positional argument. If the added callable is a python "
@@ -450,6 +450,7 @@ PYBINDINGS("core", scope) {
 	  "\t- True: pass input frame to next module\n"
 	  "\t- False: discard input frame and return to first module, or end "
 	  "\t  processing if returned by first module. Equivalent to [].\n")
+	    .def(py::init<>())
 	    .def("_Add_", &G3Pipeline::Add, py::arg("name")="")
 	    .def("Run", &G3Pipeline::Run,
 	      (py::arg("profile")=false, py::arg("graph")=false,

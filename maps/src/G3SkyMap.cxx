@@ -1421,11 +1421,10 @@ PYBINDINGS("maps", scope) {
 	    .value("none", G3SkyMap::ConvNone) // "None" is reserved in python
 	;
 
-	py::class_<G3SkyMap, boost::noncopyable,
-	  G3SkyMapPtr>("G3SkyMap",
+	register_class_noncopyable<G3SkyMap>(scope, "G3SkyMap",
 	  "Base class for 1- and 2-D skymaps of various projections. Usually "
 	  "you want a subclass of this (e.g. FlatSkyMap) rather than using it "
-	  "directly.", py::no_init)
+	  "directly.")
 	    .def_readonly("__g3frameobject__", true)
 	    .def_readwrite("coord_ref", &G3SkyMap::coord_ref,
 	      "Coordinate system (maps.MapCoordReference) of the map (e.g. "

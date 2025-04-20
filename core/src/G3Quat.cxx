@@ -936,47 +936,51 @@ G3TimestreamQuat_nsamples(const G3TimestreamQuat &r)
 PYBINDINGS("core", scope)
 {
 	py::object q =
-	    py::class_<Quat, std::shared_ptr<Quat> >("Quat",
-	      "Representation of a quaternion. Data in a,b,c,d.", py::init<>())
-	     .def(py::init<const Quat &>())
-	     .def(py::init<double, double, double, double>(
-	         "Create a quaternion from its four elements.", py::args("a", "b", "c", "d")))
-	     .def_pickle(g3frameobject_picklesuite<Quat>())
-	     .def("__init__", py::make_constructor(quat_container_from_object, py::default_call_policies(),
-	         (py::arg("data"))), "Create a quaternion from a numpy array")
-	     .add_property("a", &Quat::a, "Scalar component")
-	     .add_property("b", &Quat::b, "First vector component")
-	     .add_property("c", &Quat::c, "Second vector component")
-	     .add_property("d", &Quat::d, "Third vector component")
-	     .add_property("real", &Quat::real, "The real (scalar) part of the quaternion")
-	     .add_property("unreal", &Quat::unreal, "The unreal (vector) part of the quaternion")
-	     .def(~py::self)
-	     .def(-py::self)
-	     .def(py::self == py::self)
-	     .def(py::self != py::self)
-	     .def(py::self + py::self)
-	     .def(py::self += py::self)
-	     .def(py::self - py::self)
-	     .def(py::self -= py::self)
-	     .def(py::self * py::self)
-	     .def(py::self * double())
-	     .def(double() * py::self)
-	     .def(py::self *= py::self)
-	     .def(py::self *= double())
-	     .def(pow(py::self, int()))
-	     .def(py::self / py::self)
-	     .def(py::self / double())
-	     .def(double() / py::self)
-	     .def(py::self /= py::self)
-	     .def(py::self /= double())
-	     .def("__abs__", &Quat::abs)
-	     .def("__str__", quat_str)
-	     .def("__repr__", quat_repr)
-	     .def("norm", &Quat::norm, "Return the Cayley norm of the quaternion")
-	     .def("vnorm", &Quat::norm, "Return the Cayley norm of the unreal (vector) part of the quaternion")
-	     .def("abs", &Quat::abs, "Return the Euclidean norm of the quaternion")
-	     .def("dot3", &Quat::dot3, "Dot product of last three entries")
-	     .def("cross3", &Quat::cross3, "Cross product of last three entries")
+	register_class<Quat>(scope, "Quat",
+	      "Representation of a quaternion. Data in a,b,c,d.")
+	    .def(py::init<>())
+	    .def(py::init<const Quat &>())
+	    .def(py::init<double, double, double, double>(
+	        "Create a quaternion from its four elements.", py::args("a", "b", "c", "d")))
+	    .def("__init__", py::make_constructor(quat_container_from_object, py::default_call_policies(),
+	        (py::arg("data"))), "Create a quaternion from a numpy array")
+	    .def_pickle(g3frameobject_picklesuite<Quat>())
+	    .add_property("a", &Quat::a, "Scalar component")
+	    .add_property("b", &Quat::b, "First vector component")
+	    .add_property("c", &Quat::c, "Second vector component")
+	    .add_property("d", &Quat::d, "Third vector component")
+	    .add_property("real", &Quat::real,
+	        "The real (scalar) part of the quaternion")
+	    .add_property("unreal", &Quat::unreal,
+	        "The unreal (vector) part of the quaternion")
+	    .def(~py::self)
+	    .def(-py::self)
+	    .def(py::self == py::self)
+	    .def(py::self != py::self)
+	    .def(py::self + py::self)
+	    .def(py::self += py::self)
+	    .def(py::self - py::self)
+	    .def(py::self -= py::self)
+	    .def(py::self * py::self)
+	    .def(py::self * double())
+	    .def(double() * py::self)
+	    .def(py::self *= py::self)
+	    .def(py::self *= double())
+	    .def(pow(py::self, int()))
+	    .def(py::self / py::self)
+	    .def(py::self / double())
+	    .def(double() / py::self)
+	    .def(py::self /= py::self)
+	    .def(py::self /= double())
+	    .def("__abs__", &Quat::abs)
+	    .def("__str__", quat_str)
+	    .def("__repr__", quat_repr)
+	    .def("norm", &Quat::norm, "Return the Cayley norm of the quaternion")
+	    .def("vnorm", &Quat::norm, "Return the Cayley norm of the "
+	        "unreal (vector) part of the quaternion")
+	    .def("abs", &Quat::abs, "Return the Euclidean norm of the quaternion")
+	    .def("dot3", &Quat::dot3, "Dot product of last three entries")
+	    .def("cross3", &Quat::cross3, "Cross product of last three entries")
 	;
 	PyTypeObject *qclass = (PyTypeObject *)q.ptr();
 	quat_bufferprocs.bf_getbuffer = Quat_getbuffer;
@@ -991,33 +995,35 @@ PYBINDINGS("core", scope)
 
 	register_vector_of<Quat>("Quat");
 	py::object vq =
-	    register_g3vector<Quat>("G3VectorQuat",
-	     "List of quaternions. Convertible to a 4xN numpy array. "
-	     "Arithmetic operations on this object are fast and provide "
-	     "results given proper quaternion math rather than "
-	     "element-by-element numpy-ish results.")
-	     .def(~py::self)
-	     .def(py::self * double())
-	     .def(double() * py::self)
-	     .def(py::self * py::self)
-	     .def(py::self * Quat())
-	     .def(Quat() * py::self)
-	     .def(py::self *= double())
-	     .def(py::self *= Quat())
-	     .def(py::self *= py::self)
-	     .def(py::self / double())
-	     .def(double() / py::self)
-	     .def(py::self /= double())
-	     .def(py::self / py::self)
-	     .def(py::self /= py::self)
-	     .def(py::self / Quat())
-	     .def(py::self /= Quat())
-	     .def(Quat() / py::self)
-	     .def(pow(py::self, int()))
-	     .def("__abs__", vec_abs)
-	     .def("__neg__", vec_neg)
-	     .def("abs", vec_abs, "Return the Euclidean norm of each quaternion")
-	     .add_property("real", vec_real, "Return the real (scalar) part of each quaternion");
+	register_g3vector<Quat>("G3VectorQuat",
+	    "List of quaternions. Convertible to a 4xN numpy array. "
+	    "Arithmetic operations on this object are fast and provide "
+	    "results given proper quaternion math rather than "
+	    "element-by-element numpy-ish results.")
+	    .def(~py::self)
+	    .def(py::self * double())
+	    .def(double() * py::self)
+	    .def(py::self * py::self)
+	    .def(py::self * Quat())
+	    .def(Quat() * py::self)
+	    .def(py::self *= double())
+	    .def(py::self *= Quat())
+	    .def(py::self *= py::self)
+	    .def(py::self / double())
+	    .def(double() / py::self)
+	    .def(py::self /= double())
+	    .def(py::self / py::self)
+	    .def(py::self /= py::self)
+	    .def(py::self / Quat())
+	    .def(py::self /= Quat())
+	    .def(Quat() / py::self)
+	    .def(pow(py::self, int()))
+	    .def("__abs__", vec_abs)
+	    .def("__neg__", vec_neg)
+	    .def("abs", vec_abs, "Return the Euclidean norm of each quaternion")
+	    .add_property("real", vec_real,
+	        "Return the real (scalar) part of each quaternion")
+	;
 	PyTypeObject *vqclass = (PyTypeObject *)vq.ptr();
 	vectorquat_bufferprocs.bf_getbuffer = G3VectorQuat_getbuffer;
 	vqclass->tp_as_buffer = &vectorquat_bufferprocs;
@@ -1026,45 +1032,45 @@ PYBINDINGS("core", scope)
 #endif
 
 	py::object tq =
-	    py::class_<G3TimestreamQuat, py::bases<G3VectorQuat>, G3TimestreamQuatPtr>(
-	      "G3TimestreamQuat",
-	      "Timestream of quaternions. Identical to a G3VectorQuat except "
-	      "for the addition of start and stop times.",
-	      py::init<>()
-             )
-	     .def("__init__", py::make_constructor(container_from_object<G3TimestreamQuat>))
-	     .def(py::init<const G3TimestreamQuat &>())
-	     .def_pickle(g3frameobject_picklesuite<G3TimestreamQuat>())
-	     .def(~py::self)
-	     .def(py::self * double())
-	     .def(double() * py::self)
-	     .def(py::self * G3VectorQuat())
-	     .def(py::self * Quat())
-	     .def(Quat() * py::self)
-	     .def(py::self *= double())
-	     .def(py::self *= Quat())
-	     .def(py::self *= G3VectorQuat())
-	     .def(py::self / double())
-	     .def(double() / py::self)
-	     .def(py::self /= double())
-	     .def(py::self / G3VectorQuat())
-	     .def(py::self /= G3VectorQuat())
-	     .def(py::self / Quat())
-	     .def(py::self /= Quat())
-	     .def(Quat() / py::self)
-	     .def(pow(py::self, int()))
-	     .def("__abs__", ts_abs)
-	     .def("__neg__", ts_neg)
-	     .def("abs", ts_abs, "Return the Euclidean norm of each quaternion")
-	     .add_property("real", ts_real, "Return the real (scalar) part of each quaternion")
+	py::class_<G3TimestreamQuat, py::bases<G3VectorQuat>, G3TimestreamQuatPtr>(
+	    "G3TimestreamQuat",
+	    "Timestream of quaternions. Identical to a G3VectorQuat except "
+	    "for the addition of start and stop times.")
+	    .def(py::init<>())
+	    .def("__init__", py::make_constructor(container_from_object<G3TimestreamQuat>))
+	    .def(py::init<const G3TimestreamQuat &>())
+	    .def_pickle(g3frameobject_picklesuite<G3TimestreamQuat>())
+	    .def(~py::self)
+	    .def(py::self * double())
+	    .def(double() * py::self)
+	    .def(py::self * G3VectorQuat())
+	    .def(py::self * Quat())
+	    .def(Quat() * py::self)
+	    .def(py::self *= double())
+	    .def(py::self *= Quat())
+	    .def(py::self *= G3VectorQuat())
+	    .def(py::self / double())
+	    .def(double() / py::self)
+	    .def(py::self /= double())
+	    .def(py::self / G3VectorQuat())
+	    .def(py::self /= G3VectorQuat())
+	    .def(py::self / Quat())
+	    .def(py::self /= Quat())
+	    .def(Quat() / py::self)
+	    .def(pow(py::self, int()))
+	    .def("__abs__", ts_abs)
+	    .def("__neg__", ts_neg)
+	    .def("abs", ts_abs, "Return the Euclidean norm of each quaternion")
+	    .add_property("real", ts_real,
+	        "Return the real (scalar) part of each quaternion")
 	    .def_readwrite("start", &G3TimestreamQuat::start,
-	      "Time of the first sample in the time stream")
+	        "Time of the first sample in the time stream")
 	    .def_readwrite("stop", &G3TimestreamQuat::stop,
-	      "Time of the final sample in the timestream")
+	        "Time of the final sample in the timestream")
 	    .add_property("sample_rate", &G3TimestreamQuat::GetSampleRate,
-	       "Computed sample rate of the timestream.")
+	        "Computed sample rate of the timestream.")
 	    .add_property("n_samples", &G3TimestreamQuat_nsamples,
-	      "Number of samples in the timestream. Equivalent to len(ts)")
+	        "Number of samples in the timestream. Equivalent to len(ts)")
 	;
 	PyTypeObject *tqclass = (PyTypeObject *)tq.ptr();
 	timestreamquat_bufferprocs.bf_getbuffer = G3VectorQuat_getbuffer;
