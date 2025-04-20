@@ -16,7 +16,7 @@ template <class A> void DfMuxSample::serialize(A &ar, unsigned v)
 
 PYBINDINGS("dfmux", scope)
 {
-	register_g3vector<DfMuxSample>(scope, "DfMuxSample",
+	register_frameobject<DfMuxSample, std::vector<int32_t> >(scope, "DfMuxSample",
 	  "Samples from all channels on one readout module, stored with I and "
 	  "Q interleaved, such that the first element is channel 1 I, followed "
 	  "by channel 1 Q, followed by channel 2 I, etc.")

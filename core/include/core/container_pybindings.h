@@ -300,7 +300,7 @@ register_map_of(py::module_ &scope, std::string name, Args &&...args)
 	return register_map<std::map<K, T> >(scope, name, std::forward<Args>(args)...);
 }
 
-// Register a serializable map, derived from G3FrameObject and inclues
+// Register a serializable map, derived from G3FrameObject and includes
 // pickling support.
 template <typename M, typename... Bases, typename... Args>
 auto
