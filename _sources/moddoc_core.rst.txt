@@ -120,7 +120,8 @@ spt3g.core.G3FrameObject
 Base class for objects that can be added to a frame. All such must inherit from G3FrameObject in C++. Pickle hooks are overridden to use the fast internal serialization
 
 *Constructors:*
-	``G3FrameObject()``
+	Raises an exception
+	This class cannot be instantiated from Python
 
 
 
@@ -2269,7 +2270,7 @@ Collection of timestreams indexed by logical detector ID
 	
 	``G3TimestreamMap( (G3TimestreamMap)arg2)``
 	
-	``G3TimestreamMap( (StringVector)keys, (object)data [, (G3Time)start=<spt3g.core.G3Time object at 0x7fe662709150> [, (G3Time)stop=<spt3g.core.G3Time object at 0x7fe6627091c0> [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None [, (int)compression_level=0 [, (bool)copy_data=True [, (int)bit_depth=32]]]]]])`` :
+	``G3TimestreamMap( (StringVector)keys, (object)data [, (G3Time)start=<spt3g.core.G3Time object at 0x7f9400f0d150> [, (G3Time)stop=<spt3g.core.G3Time object at 0x7f9400f0d1c0> [, (G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None [, (int)compression_level=0 [, (bool)copy_data=True [, (int)bit_depth=32]]]]]])`` :
 	    Create a timestream map from a numpy array or other numeric python iterable. Each row of the 2D input array will correspond to a single timestream, with the key set to the correspondingly-indexed entry of <keys>. If <copy_data> is True (default), the data will be copied into the output data structure. If False, the timestream map will provide a view into the given numpy array.
 	
 	``G3TimestreamMap( (list)arg2)`` :
@@ -2445,6 +2446,8 @@ spt3g.core.G3TimestreamQuat
 Timestream of quaternions. Identical to a G3VectorQuat except for the addition of start and stop times.
 
 *Constructors:*
+	``G3TimestreamQuat()``
+	
 	``G3TimestreamQuat()``
 	
 	``G3TimestreamQuat( (object)arg2)``
