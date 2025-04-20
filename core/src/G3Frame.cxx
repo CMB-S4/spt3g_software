@@ -394,9 +394,8 @@ G3FramePtr
 g3frame_char_constructor(std::string max_4_chars)
 {
 	if (max_4_chars.size() > 4) {
-		PyErr_SetString(PyExc_ValueError, "Ad-hoc frame type must be 4 "
+		throw py::value_error("Ad-hoc frame type must be 4 "
 		    "or fewer characters.");
-		py::throw_error_already_set();
 	}
 
 	// Right-justify the character string in the constant in native
@@ -455,21 +454,17 @@ static void g3frame_python_put(G3Frame &f, std::string name, py::object obj)
 	py::extract<std::string> extstr(obj);
 	if (extstr.check())
 		f.Put(name, std::make_shared<G3String>(extstr()));
-	else {
-		PyErr_SetString(PyExc_TypeError, "Object is not a G3FrameObject derivative or a plain-old-data type");
-		py::throw_error_already_set();
-	}
+	else
+		throw py::type_error(
+		    "Object is not a G3FrameObject derivative or a plain-old-data type");
 }
 
 static py::object g3frame_python_get(G3Frame &f, std::string name)
 {
 	// Python doesn't have a concept of const. Add subterfuge.
 	G3FrameObjectConstPtr element = f[name];
-	if (!element) {
-		std::string err = "Key \'" + name + "\' not found";
-		PyErr_SetString(PyExc_KeyError, err.c_str());
-		py::throw_error_already_set();
-	}
+	if (!element)
+		throw py::key_error(name);
 
 	if (!!std::dynamic_pointer_cast<const G3Int>(element))
 		return py::object(std::dynamic_pointer_cast<const G3Int>(element)->value);

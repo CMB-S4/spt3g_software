@@ -994,14 +994,10 @@ flatskymap_getitem_2d(const FlatSkyMap &skymap, py::tuple coords)
 		x = skymap.shape()[0] + x;
 	if (y < 0)
 		y = skymap.shape()[1] + y;
-	if (size_t(x) >= skymap.shape()[0]) {
-		PyErr_SetString(PyExc_IndexError, "X index out of range");
-		py::throw_error_already_set();
-	}
-	if (size_t(y) >= skymap.shape()[1]) {
-		PyErr_SetString(PyExc_IndexError, "Y index out of range");
-		py::throw_error_already_set();
-	}
+	if (size_t(x) >= skymap.shape()[0])
+		throw py::index_error("X index out of range");
+	if (size_t(y) >= skymap.shape()[1])
+		throw py::index_error("Y index out of range");
 
 	return py::object(skymap.at(x, y));
 }
@@ -1027,14 +1023,10 @@ flatskymap_setitem_2d(FlatSkyMap &skymap, py::tuple coords,
 			x = skymap.shape()[0] + x;
 		if (y < 0)
 			y = skymap.shape()[1] + y;
-		if (size_t(x) >= skymap.shape()[0]) {
-			PyErr_SetString(PyExc_IndexError, "X index out of range");
-			py::throw_error_already_set();
-		}
-		if (size_t(y) >= skymap.shape()[1]) {
-			PyErr_SetString(PyExc_IndexError, "Y index out of range");
-			py::throw_error_already_set();
-		}
+		if (size_t(x) >= skymap.shape()[0])
+			throw py::index_error("X index out of range");
+		if (size_t(y) >= skymap.shape()[1])
+			throw py::index_error("Y index out of range");
 
 		double dval = py::extract<double>(val);
 		skymap(x, y) = dval;
@@ -1060,11 +1052,10 @@ flatskymap_setitem_2d(FlatSkyMap &skymap, py::tuple coords,
 	if (mapext.check()) {
 		const FlatSkyMap &patch = mapext();
 		if (!dummy_subpatch->IsCompatible(patch)) {
-			PyErr_SetString(PyExc_ValueError, "Provided patch to insert is "
+			throw py::value_error("Provided patch to insert is "
 			    "not compatible with the given subregion of the map into "
 			    "which it is being inserted. Check that your coordinates "
 			    "are right.");
-			py::throw_error_already_set();
 		}
 
 		skymap.InsertPatch(patch);
@@ -1080,10 +1071,8 @@ flatskymap_getitem_1d(const G3SkyMap &skymap, size_t i)
 
 	if (i < 0)
 		i = skymap.size() + i;
-	if (size_t(i) >= skymap.size()) {
-		PyErr_SetString(PyExc_IndexError, "Index out of range");
-		py::throw_error_already_set();
-	}
+	if (size_t(i) >= skymap.size())
+		throw py::index_error("Index out of range");
 
 	return skymap.at(i);
 }
@@ -1094,10 +1083,8 @@ flatskymap_setitem_1d(G3SkyMap &skymap, size_t i, double val)
 
 	if (i < 0)
 		i = skymap.size() + i;
-	if (size_t(i) >= skymap.size()) {
-		PyErr_SetString(PyExc_IndexError, "Index out of range");
-		py::throw_error_already_set();
-	}
+	if (size_t(i) >= skymap.size())
+		throw py::index_error("Index out of range");
 
 	skymap[i] = val;
 }

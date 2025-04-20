@@ -9,20 +9,6 @@
 #include <G3Timesample.h>
 
 
-class g3timesample_exception : std::exception
-{
-	// Exception raised when internal validity checks fail.  This will
-	// also be mapped to some particular Python exception type.
-public:
-	std::string text;
-	g3timesample_exception(std::string text) :
-	    text{text} {}
-
-	std::string msg_for_python() const throw() {
-		return text;
-	}
-};
-
 // Templates for vector operations.  These work on any std::vector,
 // and thus on any G3Vector.
 
@@ -230,13 +216,13 @@ void safe_set_item(G3TimesampleMap &self, const std::string key,
 		std::ostringstream s;
 		s << "Cannot add member (" << key << "): "
 		  << "not a supported vector type.";
-		throw g3timesample_exception(s.str());
+		throw py::value_error(s.str());
 	}
 	if ((size_t)check_len != self.times.size()) {
 		std::ostringstream s;
 		s << "Cannot add member (" << key << "): "
 		  << "not the same length as .times.";
-		throw g3timesample_exception(s.str());
+		throw py::value_error(s.str());
 	}
 	self[key] = value;
 }
@@ -251,15 +237,9 @@ void safe_set_times(G3TimesampleMap &self, G3VectorTime _times)
 		s << "Cannot set .times because it conflicts with "
 		  << "the established number of samples (" << self.times.size()
 		  << ").";
-		throw g3timesample_exception(s.str());
+		throw py::value_error(s.str());
 	}
 	self.times = _times;
-}
-
-
-static void translate_ValueError(g3timesample_exception const& e)
-{
-    PyErr_SetString(PyExc_ValueError, e.msg_for_python().c_str());
 }
 
 
@@ -288,6 +268,4 @@ PYBINDINGS("core")
           "Sort all element vectors by time, in-place.")
 	;
 	register_pointer_conversions<G3TimesampleMap>();
-
-	py::register_exception_translator<g3timesample_exception>(&translate_ValueError);
 }

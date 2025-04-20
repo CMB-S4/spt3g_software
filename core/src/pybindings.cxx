@@ -90,3 +90,37 @@ G3PythonInterpreter::~G3PythonInterpreter()
 		init_ = false;
 	}
 }
+
+static void translate_ValueError(py::value_error const &e)
+{
+	PyErr_SetString(PyExc_ValueError, e.what());
+}
+
+static void translate_IndexError(py::index_error const &e)
+{
+	PyErr_SetString(PyExc_IndexError, e.what());
+}
+
+static void translate_TypeError(py::type_error const &e)
+{
+	PyErr_SetString(PyExc_TypeError, e.what());
+}
+
+static void translate_KeyError(py::key_error const &e)
+{
+	PyErr_SetString(PyExc_KeyError, e.what());
+}
+
+static void translate_BufferError(py::buffer_error const &e)
+{
+	PyErr_SetString(PyExc_BufferError, e.what());
+}
+
+PYBINDINGS("core")
+{
+	py::register_exception_translator<py::value_error>(&translate_ValueError);
+	py::register_exception_translator<py::index_error>(&translate_IndexError);
+	py::register_exception_translator<py::type_error>(&translate_TypeError);
+	py::register_exception_translator<py::key_error>(&translate_KeyError);
+	py::register_exception_translator<py::buffer_error>(&translate_BufferError);
+}

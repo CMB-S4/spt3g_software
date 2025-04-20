@@ -1039,10 +1039,8 @@ HealpixSkyMap_setdense(HealpixSkyMap &m, bool v)
 	if (v)
 		m.ConvertToDense();
 	else {
-		PyErr_SetString(PyExc_ValueError,
-		    "Cannot set dense to False. Set ringsparse or "
-		    "indexedsparse to True to convert from dense.");
-		throw py::error_already_set();
+		throw py::value_error("Cannot set dense to False. "
+		    "Set ringsparse or indexedsparse to True to convert from dense.");
 	}
 }
 
@@ -1052,10 +1050,8 @@ HealpixSkyMap_setringsparse(HealpixSkyMap &m, bool v)
 	if (v)
 		m.ConvertToRingSparse();
 	else {
-		PyErr_SetString(PyExc_ValueError,
-		    "Cannot set ringsparse to False. Set indexedsparse or "
-		    "dense to True to convert from ringsparse.");
-		throw py::error_already_set();
+		throw py::value_error("Cannot set ringsparse to False. "
+		    "Set indexedsparse or dense to True to convert from ringsparse.");
 	}
 }
 
@@ -1065,10 +1061,8 @@ HealpixSkyMap_setindexedsparse(HealpixSkyMap &m, bool v)
 	if (v)
 		m.ConvertToIndexedSparse();
 	else {
-		PyErr_SetString(PyExc_ValueError,
-		    "Cannot set indexedsparse to False. Set ringsparse or "
-		    "dense to True to convert from indexedsparse.");
-		throw py::error_already_set();
+		throw py::value_error("Cannot set indexedsparse to False. "
+		    "Set ringsparse or dense to True to convert from indexedsparse.");
 	}
 }
 
@@ -1089,10 +1083,8 @@ skymap_getitem(const G3SkyMap &skymap, ssize_t i)
 
 	if (i < 0)
 		i = skymap.size() + i;
-	if (size_t(i) >= skymap.size()) {
-		PyErr_SetString(PyExc_IndexError, "Index out of range");
-		py::throw_error_already_set();
-	}
+	if (size_t(i) >= skymap.size())
+		throw py::index_error("Index out of range");
 
 	return skymap.at(i);
 }
@@ -1103,10 +1095,8 @@ skymap_setitem(G3SkyMap &skymap, ssize_t i, double val)
 
 	if (i < 0)
 		i = skymap.size() + i;
-	if (size_t(i) >= skymap.size()) {
-		PyErr_SetString(PyExc_IndexError, "Index out of range");
-		py::throw_error_already_set();
-	}
+	if (size_t(i) >= skymap.size())
+		throw py::index_error("Index out of range");
 
 	skymap[i] = val;
 }
@@ -1206,10 +1196,8 @@ HealpixSkyMap_setitem_1d(G3SkyMap &skymap, ssize_t i, double val)
 
 	if (i < 0)
 		i = skymap.size() + i;
-	if (size_t(i) >= skymap.size()) {
-		PyErr_SetString(PyExc_IndexError, "Index out of range");
-		py::throw_error_already_set();
-	}
+	if (size_t(i) >= skymap.size())
+		throw py::index_error("Index out of range");
 
 	skymap[i] = val;
 }

@@ -1325,17 +1325,12 @@ G3TimestreamMap_from_numpy(std::vector<std::string> keys,
 	v = std::make_shared<PyBufferOwner>(view);
 	}
 
-	if (keys.size() != (size_t)v->v.shape[0]) {
-		PyErr_SetString(PyExc_IndexError, "Number of keys does not "
+	if (keys.size() != (size_t)v->v.shape[0])
+		throw py::index_error("Number of keys does not "
 		    "match number of rows in data structure.");
-		py::throw_error_already_set();
-	}
 
-	if (v->v.ndim != 2) {
-		PyErr_SetString(PyExc_ValueError,
-		    "Array must be two-dimensional.");
-		py::throw_error_already_set();
-	}
+	if (v->v.ndim != 2)
+		throw py::value_error("Array must be two-dimensional.");
 
 	G3Timestream templ;
 	templ.units = units;
@@ -1360,8 +1355,7 @@ G3TimestreamMap_from_numpy(std::vector<std::string> keys,
 #endif
 		templ.data_type_ = G3Timestream::TS_INT64;
 	} else {
-		PyErr_SetString(PyExc_ValueError, "Unsupported data type.");
-		py::throw_error_already_set();
+		throw py::type_error("Unsupported data type.");
 	}
 
 	uint8_t *buf;

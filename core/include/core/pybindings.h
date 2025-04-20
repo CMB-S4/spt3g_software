@@ -6,24 +6,9 @@
 #include <G3Logging.h>
 
 #include <boost/python.hpp>
+#include <exception>
 
 namespace py = boost::python;
-
-namespace boost { namespace python {
-
-template <typename T>
-T cast(const py::object &obj)
-{
-	return py::extract<T>(obj)();
-}
-
-template <typename T>
-bool isinstance(const py::object &obj)
-{
-	return py::extract<T>(obj).check();
-}
-
-}}
 
 template <typename T>
 void
@@ -146,5 +131,80 @@ private:
 
 	SET_LOGGER("G3PythonInterpreter");
 };
+
+// pybind11 compatibility functions
+namespace boost { namespace python {
+
+class gil_scoped_release : public G3PythonContext
+{
+public:
+	gil_scoped_release() : G3PythonContext("release", false) {};
+};
+
+class gil_scoped_acquire : public G3PythonContext
+{
+public:
+	gil_scoped_acquire() : G3PythonContext("acquire", true) {};
+};
+
+class scoped_interpreter : public G3PythonInterpreter
+{
+public:
+	scoped_interpreter() : G3PythonInterpreter(true) {};
+};
+
+template <typename T>
+T cast(const py::object &obj)
+{
+	return py::extract<T>(obj)();
+}
+
+template <typename T>
+bool isinstance(const py::object &obj)
+{
+	return py::extract<T>(obj).check();
+}
+
+class value_error : std::exception
+{
+public:
+	std::string msg;
+	value_error(std::string msg="") : msg(msg) {};
+	const char * what() const throw() { return msg.c_str(); }
+};
+
+class index_error : std::exception
+{
+public:
+	std::string msg;
+	index_error(std::string msg="") : msg(msg) {};
+	const char * what() const throw() { return msg.c_str(); }
+};
+
+class type_error : std::exception
+{
+public:
+	std::string msg;
+	type_error(std::string msg="") : msg(msg) {};
+	const char * what() const throw() { return msg.c_str(); }
+};
+
+class key_error : std::exception
+{
+public:
+	std::string msg;
+	key_error(std::string msg="") : msg(msg) {};
+	const char * what() const throw() { return msg.c_str(); }
+};
+
+class buffer_error : std::exception
+{
+public:
+	std::string msg;
+	buffer_error(std::string msg="") : msg(msg) {};
+	const char * what() const throw() { return msg.c_str(); }
+};
+
+}}
 
 #endif

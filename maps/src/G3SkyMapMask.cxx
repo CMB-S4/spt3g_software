@@ -444,11 +444,8 @@ skymapmask_index(const G3SkyMapMask &m, const py::object &index)
 
 		py::tuple t = py::extract<py::tuple>(index)();
 		FlatSkyMapConstPtr fsm = std::dynamic_pointer_cast<const FlatSkyMap>(m.Parent());
-		if (!fsm) {
-			PyErr_SetString(PyExc_TypeError,
-			    "N-D pixels, but underlying map is not a flat sky map");
-			py::throw_error_already_set();
-		}
+		if (!fsm)
+			throw py::type_error("N-D pixels, but underlying map is not a flat sky map");
 
 		x = py::extract<int>(t[1])();
 		y = py::extract<int>(t[0])();
@@ -457,22 +454,17 @@ skymapmask_index(const G3SkyMapMask &m, const py::object &index)
 		if (y < 0)
 			y += fsm->shape()[0];
 		if (size_t(x) >= fsm->shape()[0] ||
-		    size_t(y) >= fsm->shape()[1]) { 
-			PyErr_SetString(PyExc_IndexError, "Index out of range");
-			py::throw_error_already_set();
-		}
+		    size_t(y) >= fsm->shape()[1])
+			throw py::index_error("Index out of range");
 
 		i = y * fsm->shape()[0] + x;
 	} else {
-		PyErr_SetString(PyExc_TypeError,
-		    "Need to pass an integer pixel ID or (optionally) for 2D maps a tuple of coordinates");
-		py::throw_error_already_set();
+		throw py::type_error("Need to pass an integer pixel ID or "
+		    "(optionally) for 2D maps a tuple of coordinates");
 	}
 	
-	if (i < 0 || size_t(i) >= m.size()) {
-		PyErr_SetString(PyExc_IndexError, "Index out of range");
-		py::throw_error_already_set();
-	}
+	if (i < 0 || size_t(i) >= m.size())
+		throw py::index_error("Index out of range");
 
 	return i;
 }
@@ -509,9 +501,8 @@ skymapmask_pyparent(G3SkyMapMaskPtr m)
 static bool
 skymapmask_pybool(G3SkyMapMaskPtr m)
 {
-	PyErr_SetString(PyExc_ValueError,
-	    "ValueError: The truth value of a G3SkyMapMask is ambiguous. Use m.any() or m.all()");
-	py::throw_error_already_set();
+	throw py::value_error("The truth value of a G3SkyMapMask "
+	    "is ambiguous. Use m.any() or m.all()");
 
 	return false;
 }

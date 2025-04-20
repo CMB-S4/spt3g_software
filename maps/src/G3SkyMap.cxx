@@ -461,10 +461,8 @@ skymap_getitem(const G3SkyMap &skymap, ssize_t i)
 
 	if (i < 0)
 		i = skymap.size() + i;
-	if (size_t(i) >= skymap.size()) {
-		PyErr_SetString(PyExc_IndexError, "Index out of range");
-		py::throw_error_already_set();
-	}
+	if (size_t(i) >= skymap.size())
+		throw py::index_error("Index out of range");
 
 	return skymap.at(i);
 }
@@ -475,10 +473,8 @@ skymap_setitem(G3SkyMap &skymap, ssize_t i, double val)
 
 	if (i < 0)
 		i = skymap.size() + i;
-	if (size_t(i) >= skymap.size()) {
-		PyErr_SetString(PyExc_IndexError, "Index out of range");
-		py::throw_error_already_set();
-	}
+	if (size_t(i) >= skymap.size())
+		throw py::index_error("Index out of range");
 
 	skymap[i] = val;
 }
@@ -1011,9 +1007,8 @@ G3SkyMap::nanstd(size_t ddof, G3SkyMapMaskConstPtr where) const
 static bool
 pyskymap_bool(G3SkyMap &skymap)
 {
-	PyErr_SetString(PyExc_ValueError,
-	    "ValueError: The truth value of a G3SkyMap is ambiguous. Use m.any() or m.all()");
-	py::throw_error_already_set();
+	throw py::value_error("The truth value of a G3SkyMap "
+	    "is ambiguous. Use m.any() or m.all()");
 
 	return false;
 }
