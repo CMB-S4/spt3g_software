@@ -103,13 +103,10 @@ auto vector_from_python(const py::buffer &buf) {
 
 	// handle contiguous case
 	if (py::detail::compare_buffer_info<T>::compare(info)
-	    && info.strides[0] % (ssize_t) sizeof(T) == 0
-	    && (ssize_t) sizeof(T) == info.itemsize) {
+	    && info.strides[0] == sizeof(T)
+	    && info.itemsize == sizeof(T)) {
 		T *p = static_cast<T *>(info.ptr);
-		ssize_t step = info.strides[0] / (ssize_t) sizeof(T);
-		T *end = p + info.shape[0] * step;
-		if (step == 1)
-			return std::make_shared<V>(p, end);
+		return std::make_shared<V>(p, p + info.shape[0]);
 	}
 
 	std::string format = check_buffer_format(info.format);

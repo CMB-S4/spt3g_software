@@ -15,10 +15,10 @@ std::string check_buffer_format(std::string fmt) {
 	else if (format[0] == '<')
 		format++;
 	else if (format[0] == '>' || format[0] == '!')
-		throw std::runtime_error("Does not support big-endian numpy arrays");
+		throw py::buffer_error("Does not support big-endian numpy arrays");
 #else
 	else if (format[0] == '<')
-		throw std::runtime_error("Does not support little-endian numpy arrays");
+		throw py::buffer_error("Does not support little-endian numpy arrays");
 	else if (format[0] == '>' || format[0] == '!')
 		format++;
 #endif
