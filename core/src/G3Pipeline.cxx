@@ -360,6 +360,19 @@ G3Pipeline_halt_processing()
 	G3Pipeline::halt_processing = true;
 }
 
+static py::list G3Module_Process(G3Module &mod, G3FramePtr ptr)
+{
+	std::deque<G3FramePtr> queue;
+	py::list vec;
+
+	mod.Process(ptr, queue);
+
+	for (auto i = queue.begin(); i != queue.end(); i++)
+		vec.append(*i);
+
+	return vec;
+}
+
 // Python Process() has a different API from the C++ version, since we have
 // variable return types. It is passed the frame, but returns its output:
 // - If it returns None, the input frame is pushed to the output (usual case)
@@ -375,9 +388,6 @@ G3Pipeline_halt_processing()
 class G3PythonModule : public G3Module
 {
 public:
-	G3PythonModule() {};
-	virtual ~G3PythonModule() {};
-
 	py::object Process(G3FramePtr frame) {
 		PYBIND11_OVERRIDE_PURE(py::object, G3PythonModule, Process, frame);
 	}
@@ -411,17 +421,10 @@ PYBINDINGS("core", scope) {
 	register_class<G3Module, G3PythonModule>(scope, "G3Module",
 	  "Base class for functors that can be added to a G3Pipeline.")
 	    .def(py::init<>())
-	    .def("Process", [](G3Module &mod, G3FramePtr ptr) {
-		std::deque<G3FramePtr> queue;
-		py::list vec;
-		mod.Process(ptr, queue);
-		for (auto fr: queue)
-			vec.append(fr);
-		return vec;
-	    }, "Process the input frame. See documentation for valid return types.")
-	    .def("__call__", [](py::object &self, G3FramePtr ptr) {
-		return self.attr("Process")(ptr);
-	    }, "Process the input frame. See documentation for valid return types.")
+	    .def("Process", &G3Module_Process,
+	        "Process the input frame. See documentation for valid return types.")
+	    .def("__call__", &G3Module_Process,
+	        "Process the input frame. See documentation for valid return types.")
 	    .def_property_readonly_static("__g3module__",
 	        [](py::object){ return true; });
 	;
