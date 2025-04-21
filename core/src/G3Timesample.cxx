@@ -241,12 +241,6 @@ void safe_set_times(G3TimesampleMap &self, G3VectorTime _times)
 	self.times = _times;
 }
 
-static
-G3VectorTime & safe_get_times(G3TimesampleMap &self)
-{
-	return self.times;
-}
-
 
 PYBINDINGS("core", scope)
 {
@@ -255,7 +249,8 @@ PYBINDINGS("core", scope)
 	    "vector of timestamps.  This object is for storing multiple "
 	    "co-sampled vectors with a single set of (irregular) timestamps.")
 	// Extensions for G3TimesampleMap are here:
-	.def_property("times", &safe_get_times, &safe_set_times,
+	.def_property("times",
+	  [](G3TimesampleMap& self) -> G3VectorTime& { return self.times; }, &safe_set_times,
 	  "Times vector.  Setting this stores a copy, but getting returns a reference.")
 	.def("check", &G3TimesampleMap::Check, "Check for internal "
           "consistency.  Raises ValueError if there are problems.")

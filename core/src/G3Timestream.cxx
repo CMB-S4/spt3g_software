@@ -4,9 +4,6 @@
 #include <G3Timestream.h>
 #include <G3Units.h>
 
-#include <cereal/types/map.hpp>
-#include <cereal/types/vector.hpp>
-
 #ifdef G3_HAS_FLAC
 #include <FLAC/stream_encoder.h>
 #include <cmath>
