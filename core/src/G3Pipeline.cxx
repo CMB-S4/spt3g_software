@@ -369,6 +369,8 @@ G3Pipeline_halt_processing()
 //   input
 // - If it returns an iterable of frames, that iterable is pushed instead of
 //   the input
+// This trampoline class provides this Python API for C++-based classes and
+// Python classes derived from G3Module.
 
 class G3PythonModule : public G3Module
 {
@@ -406,11 +408,22 @@ public:
 };
 
 PYBINDINGS("core", scope) {
-	register_class<G3Module>(scope, "G3ModuleBase");
-
-	register_g3module<G3PythonModule>(scope, "G3Module",
+	register_class<G3Module, G3PythonModule>(scope, "G3Module",
 	  "Base class for functors that can be added to a G3Pipeline.")
 	    .def(py::init<>())
+	    .def("Process", [](G3Module &mod, G3FramePtr ptr) {
+		std::deque<G3FramePtr> queue;
+		py::list vec;
+		mod.Process(ptr, queue);
+		for (auto fr: queue)
+			vec.append(fr);
+		return vec;
+	    }, "Process the input frame. See documentation for valid return types.")
+	    .def("__call__", [](py::object &self, G3FramePtr ptr) {
+		return self.attr("Process")(ptr);
+	    }, "Process the input frame. See documentation for valid return types.")
+	    .def_property_readonly_static("__g3module__",
+	        [](py::object){ return true; });
 	;
 
 	register_class<G3Pipeline>(scope, "G3Pipeline",

@@ -99,24 +99,6 @@ register_g3module(py::module_ &scope, const std::string &name, Args&&...args)
 	auto cls = register_class<T, Bases..., G3Module>(scope, name.c_str(),
 	    std::forward<Args>(args)...);
 
-	// mark as a module
-	cls.def_property_readonly_static("__g3module__", [](py::object){ return true; });
-
-	// bind module's Process function
-	cls.def("Process", [](G3ModulePtr mod, G3FramePtr ptr) {
-		std::deque<G3FramePtr> queue;
-		py::list vec;
-		mod->Process(ptr, queue);
-		for (auto fr: queue)
-			vec.append(fr);
-		return vec;
-	});
-
-	// bind Process to __call__ so that module is callable when instantiated
-	cls.def("__call__", [](py::object &self, G3FramePtr ptr) {
-		return self.attr("Process")(ptr);
-	});
-
 	return cls;
 }
 
