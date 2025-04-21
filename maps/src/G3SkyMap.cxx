@@ -1421,7 +1421,7 @@ PYBINDINGS("maps", scope) {
 	    .value("none", G3SkyMap::ConvNone) // "None" is reserved in python
 	;
 
-	register_class_noncopyable<G3SkyMap>(scope, "G3SkyMap",
+	register_class<G3SkyMap>(scope, "G3SkyMap",
 	  "Base class for 1- and 2-D skymaps of various projections. Usually "
 	  "you want a subclass of this (e.g. FlatSkyMap) rather than using it "
 	  "directly.")

@@ -206,7 +206,7 @@ void GCPLogger::ListenThread(GCPLogger *logger)
 }
 
 PYBINDINGS("gcp", scope) {
-	register_class_noncopyable<GCPLogger, G3Logger>(scope, "GCPLogger",
+	register_class<GCPLogger, G3Logger>(scope, "GCPLogger",
 	    "Logger that relays error messages to the GCP mediator over TCP")
 	    .def(py::init<int, G3LogLevel>((py::arg("port")=50030,
 	       py::arg("default_loglevel")=G3DefaultLogLevel)))

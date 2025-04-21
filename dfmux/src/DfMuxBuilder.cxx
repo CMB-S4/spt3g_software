@@ -1,5 +1,6 @@
 #include <pybindings.h>
 #include <serialization.h>
+#include <container_pybindings.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,8 +8,6 @@
 #include <sstream>
 
 #include <dfmux/DfMuxBuilder.h>
-#include <std_map_indexing_suite.hpp>
-#include <cereal/types/map.hpp>
 
 template <class A> void DfMuxBoardSamples::serialize(A &ar, const unsigned v)
 {
@@ -214,11 +213,9 @@ void DfMuxBuilder::ProcessNewData()
 
 PYBINDINGS("dfmux", scope)
 {
-	register_frameobject<DfMuxBoardSamples>(scope, "DfMuxBoardSamples",
+	register_g3map<DfMuxBoardSamples>(scope, "DfMuxBoardSamples",
 	  "Container structure for samples from modules on one board, mapping "
 	  "0-indexed module and block IDs to a dfmux.DfMuxSample.")
-	    .def(py::init<>())
-	    .def(py::std_map_indexing_suite<DfMuxBoardSamples, true>())
 	    .def_readwrite("nmodules", &DfMuxBoardSamples::nmodules,
 	      "Number of modules expected to report from this board")
 	    .def_readwrite("nblocks", &DfMuxBoardSamples::nblocks,
@@ -229,12 +226,10 @@ PYBINDINGS("dfmux", scope)
 	      "True if this structure contains data from all expected modules and blocks")
 	;
 
-	register_frameobject<DfMuxMetaSample>(scope, "DfMuxMetaSample",
+	register_g3map<DfMuxMetaSample>(scope, "DfMuxMetaSample",
 	  "Container structure for coincident samples from all boards. "
 	  "Individual board data, stored in dfmux.DfMuxBoardSamples classes, "
 	  "is contained indexed by board serial number.")
-	    .def(py::init<>())
-	    .def(py::std_map_indexing_suite<DfMuxMetaSample, false>())
 	;
 
 	register_g3module<DfMuxBuilder, G3EventBuilder>(scope, "DfMuxBuilder",

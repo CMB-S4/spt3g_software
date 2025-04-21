@@ -505,7 +505,7 @@ static py::object g3frame_hash(py::object obj)
 
 PYBINDINGS("core", scope) {
 	// Internal stuff
-	register_class<G3FrameObject>(scope, "G3FrameObject",
+	register_class_copyable<G3FrameObject>(scope, "G3FrameObject",
 	  "Base class for objects that can be added to a frame. All such "
 	  "must inherit from G3FrameObject in C++. Pickle hooks are overridden "
 	  "to use the fast internal serialization")
@@ -539,7 +539,7 @@ PYBINDINGS("core", scope) {
 	;
 	register_vector_of<G3Frame::FrameType>(scope, "FrameType");
 
-	register_class<G3Frame>(scope, "G3Frame",
+	register_class_copyable<G3Frame>(scope, "G3Frame",
 	  "Frames are the core datatype of the analysis software. They behave "
 	  "like Python dictionaries except that they can only store subclasses "
 	  "of core.G3FrameObject and the dictionary keys must be strings. "

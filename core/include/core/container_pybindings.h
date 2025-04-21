@@ -78,7 +78,7 @@ register_vector(py::module_ &scope, std::string name, Args &&...args)
 {
 	using T = typename V::value_type;
 
-	auto cls = register_class<V, Bases...>(scope, name, std::forward<Args>(args)...);
+	auto cls = register_class_copyable<V, Bases...>(scope, name, std::forward<Args>(args)...);
 
 	cls.def("__init__", py::make_constructor(container_from_object<V>))
 	    .def("__repr__", vec_repr<T>)
@@ -124,7 +124,7 @@ template <typename M, bool proxy=true, typename... Bases, typename... Args>
 auto
 register_map(py::module_ &scope, std::string name, Args &&...args)
 {
-	auto cls = register_class<M, Bases...>(scope, name, std::forward<Args>(args)...);
+	auto cls = register_class_copyable<M, Bases...>(scope, name, std::forward<Args>(args)...);
 
 	cls.def(py::init<const M &>())
 	    .def(py::std_map_indexing_suite<M, proxy>())

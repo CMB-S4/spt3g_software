@@ -69,7 +69,7 @@ register_enum(py::module_ &scope, const std::string &name, Args &&... args)
 // Ensure that base classes are registered first to inherit their bound methods.
 template <typename T, typename... Bases, typename... Args>
 auto
-register_class(py::module_ &scope, const std::string &name, Args&&...args)
+register_class_copyable(py::module_ &scope, const std::string &name, Args&&...args)
 {
 	(void) scope;
 
@@ -81,7 +81,7 @@ register_class(py::module_ &scope, const std::string &name, Args&&...args)
 // Ensure that base classes are registered first to inherit their bound methods.
 template <typename T, typename... Bases, typename... Args>
 auto
-register_class_noncopyable(py::module_ &scope, const std::string &name, Args&&...args)
+register_class(py::module_ &scope, const std::string &name, Args&&...args)
 {
 	(void) scope;
 
@@ -94,7 +94,7 @@ template <typename T, typename... Bases, typename... Args>
 auto
 register_g3module(py::module_ &scope, const std::string &name, Args&&...args)
 {
-	auto cls = register_class_noncopyable<T, Bases..., G3Module>(scope, name.c_str(),
+	auto cls = register_class<T, Bases..., G3Module>(scope, name.c_str(),
 	    std::forward<Args>(args)...);
 
 	// mark as a module

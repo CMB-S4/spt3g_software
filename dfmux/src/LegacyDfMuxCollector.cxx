@@ -303,7 +303,7 @@ int LegacyDfMuxCollector::BookPacket(struct DfmuxPacket *packet,
 
 PYBINDINGS("dfmux", scope)
 {
-	register_class_noncopyable<LegacyDfMuxCollector>(scope, "LegacyDfMuxCollector",
+	register_class<LegacyDfMuxCollector>(scope, "LegacyDfMuxCollector",
 	    "Listener object that collects legacy network packets and decodes and "
 	    "forwards them to a DfMuxBuilder object for insertion into the data "
 	    "stream. Takes a builder object to which the data should be sent. "

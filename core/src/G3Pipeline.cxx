@@ -417,7 +417,7 @@ public:
 };
 
 PYBINDINGS("core", scope) {
-	register_class_noncopyable<G3ModuleWrap>(scope, "G3Module",
+	register_class<G3ModuleWrap>(scope, "G3Module",
 	  "Base class for functors that can be added to a G3Pipeline.")
 	    .def(py::init<>())
 	    .def("__call__", &G3Module_Process)

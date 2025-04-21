@@ -952,7 +952,7 @@ G3TimestreamQuat_nsamples(const G3TimestreamQuat &r)
 PYBINDINGS("core", scope)
 {
 	py::object q =
-	register_class<Quat>(scope, "Quat",
+	register_class_copyable<Quat>(scope, "Quat",
 	      "Representation of a quaternion. Data in a,b,c,d.")
 	    .def(py::init<>())
 	    .def(py::init<const Quat &>())

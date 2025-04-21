@@ -132,7 +132,7 @@ template <typename T, typename... Bases, typename... Args>
 auto
 register_frameobject(py::module_ &scope, const std::string &name, Args&&...args)
 {
-	auto cls = register_class<T, Bases..., G3FrameObject>(scope, name.c_str(),
+	auto cls = register_class_copyable<T, Bases..., G3FrameObject>(scope, name.c_str(),
 	    std::forward<Args>(args)...);
 
 	// copy constructor

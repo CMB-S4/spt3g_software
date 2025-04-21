@@ -446,7 +446,7 @@ make_dfmux_collector_v2_from_dict(const char *listenaddr,
 
 PYBINDINGS("dfmux", scope)
 {
-	register_class_noncopyable<DfMuxCollector>(scope, "DfMuxCollector",
+	register_class<DfMuxCollector>(scope, "DfMuxCollector",
 	    "Listener object that collects IceBoard packets from a single network "
 	    "interface and decodes and forwards them to a DfMuxBuilder object for "
 	    "insertion into the data stream. Takes the builder object to which the "

@@ -147,7 +147,7 @@ PYBINDINGS("core", scope) {
 	    .value("LOG_FATAL",  G3LOG_FATAL)
 	;
 
-	register_class_noncopyable<G3Logger>(scope, "G3Logger", "C++ logging abstract base class")
+	register_class<G3Logger>(scope, "G3Logger", "C++ logging abstract base class")
 	    .add_static_property("global_logger", &GetRootLogger, &SetRootLogger)
 	    .def("log", &G3Logger::Log)
 	    .def("get_level_for_unit", &G3Logger::LogLevelForUnit)
@@ -156,15 +156,15 @@ PYBINDINGS("core", scope) {
         ;
 	register_vector_of<G3LoggerPtr>(scope, "G3Logger");
 
-	register_class_noncopyable<G3NullLogger, G3Logger>(scope, "G3NullLogger",
+	register_class<G3NullLogger, G3Logger>(scope, "G3NullLogger",
 	    "Logger that does not log. Useful if you don't want log messages");
-	register_class_noncopyable<G3PrintfLogger, G3Logger>(scope, "G3PrintfLogger",
+	register_class<G3PrintfLogger, G3Logger>(scope, "G3PrintfLogger",
 	    "Logger that prints error messages to stderr (in color, if stderr is a tty).")
 	    .def(py::init<G3LogLevel>((py::arg("default_level")=G3DefaultLogLevel)))
 	    .def_readwrite("trim_file_names", &G3PrintfLogger::TrimFileNames)
 	    .def_readwrite("timestamps", &G3PrintfLogger::Timestamps)
 	;
-	register_class_noncopyable<G3MultiLogger, G3Logger>(scope, "G3MultiLogger",
+	register_class<G3MultiLogger, G3Logger>(scope, "G3MultiLogger",
 	    "Log to multiple loggers at once")
 	    .def(py::init<std::vector<G3LoggerPtr> >())
 	;
