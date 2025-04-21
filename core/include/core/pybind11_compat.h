@@ -75,7 +75,7 @@ auto reorder_keywords(Args&&... args) {
 		return detail::keywords<sizeof...(kw)>{kw...};
 	}, kwargs);
 
-	return std::tuple_cat(extra, std::forward_as_tuple(kwds));
+	return std::tuple_cat(extra, std::make_tuple(kwds));
 }
 
 class module_ : public scope
