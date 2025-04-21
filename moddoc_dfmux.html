@@ -59,11 +59,7 @@
 <span id="id1"></span><h3>spt3g.dfmux.DfMuxBoardSamples<a class="headerlink" href="#spt3g-dfmux-dfmuxboardsamples" title="Link to this heading">¶</a></h3>
 <p>Container structure for samples from modules on one board, mapping 0-indexed module and block IDs to a dfmux.DfMuxSample.</p>
 <dl>
-<dt><em>Constructors:</em></dt><dd><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">DfMuxBoardSamples(</span> <span class="pre">(DfMuxBoardSamples)arg2)</span></code> :</dt><dd><p>Copy constructor</p>
-</dd>
-</dl>
-<p><code class="docutils literal notranslate"><span class="pre">DfMuxBoardSamples()</span></code></p>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">DfMuxBoardSamples(</span> <span class="pre">(DfMuxBoardSamples)arg2)</span></code></p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">DfMuxBoardSamples(</span> <span class="pre">(list)arg2)</span></code> :</dt><dd><p>Initialize with keys and values from a Python dictionary: {‘key’:’value’}</p>
 </dd>
@@ -80,16 +76,6 @@
 <li><p><strong>nchannels</strong>: Number of channels per block expected to report from this board</p></li>
 </ul>
 <p><em>Methods:</em></p>
-<p id="spt3g-dfmux-dfmuxboardsamples-summary"><strong>spt3g.dfmux.DfMuxBoardSamples.Summary</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">Summary(</span> <span class="pre">(DfMuxBoardSamples)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Short (one-line) description of the object</p>
-</dd>
-</dl>
-<p id="spt3g-dfmux-dfmuxboardsamples-description"><strong>spt3g.dfmux.DfMuxBoardSamples.Description</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">Description(</span> <span class="pre">(DfMuxBoardSamples)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Long-form human-readable description of the object</p>
-</dd>
-</dl>
 <p id="spt3g-dfmux-dfmuxboardsamples-keys"><strong>spt3g.dfmux.DfMuxBoardSamples.keys</strong></p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">keys(</span> <span class="pre">(DfMuxBoardSamples)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.keys() -&gt; list of D’s keys</p>
@@ -284,11 +270,7 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <span id="id4"></span><h3>spt3g.dfmux.DfMuxMetaSample<a class="headerlink" href="#spt3g-dfmux-dfmuxmetasample" title="Link to this heading">¶</a></h3>
 <p>Container structure for coincident samples from all boards. Individual board data, stored in dfmux.DfMuxBoardSamples classes, is contained indexed by board serial number.</p>
 <dl>
-<dt><em>Constructors:</em></dt><dd><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">DfMuxMetaSample(</span> <span class="pre">(DfMuxMetaSample)arg2)</span></code> :</dt><dd><p>Copy constructor</p>
-</dd>
-</dl>
-<p><code class="docutils literal notranslate"><span class="pre">DfMuxMetaSample()</span></code></p>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">DfMuxMetaSample(</span> <span class="pre">(DfMuxMetaSample)arg2)</span></code></p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">DfMuxMetaSample(</span> <span class="pre">(list)arg2)</span></code> :</dt><dd><p>Initialize with keys and values from a Python dictionary: {‘key’:’value’}</p>
 </dd>
@@ -299,16 +281,6 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 </dd>
 </dl>
 <p><em>Methods:</em></p>
-<p id="spt3g-dfmux-dfmuxmetasample-summary"><strong>spt3g.dfmux.DfMuxMetaSample.Summary</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">Summary(</span> <span class="pre">(DfMuxMetaSample)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Short (one-line) description of the object</p>
-</dd>
-</dl>
-<p id="spt3g-dfmux-dfmuxmetasample-description"><strong>spt3g.dfmux.DfMuxMetaSample.Description</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">Description(</span> <span class="pre">(DfMuxMetaSample)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Long-form human-readable description of the object</p>
-</dd>
-</dl>
 <p id="spt3g-dfmux-dfmuxmetasample-keys"><strong>spt3g.dfmux.DfMuxMetaSample.keys</strong></p>
 <dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">keys(</span> <span class="pre">(DfMuxMetaSample)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">list</span> <span class="pre">:</span></code></dt><dd><p>D.keys() -&gt; list of D’s keys</p>

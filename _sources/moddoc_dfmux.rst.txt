@@ -36,10 +36,7 @@ spt3g.dfmux.DfMuxBoardSamples
 Container structure for samples from modules on one board, mapping 0-indexed module and block IDs to a dfmux.DfMuxSample.
 
 *Constructors:*
-	``DfMuxBoardSamples( (DfMuxBoardSamples)arg2)`` :
-	    Copy constructor
-	
-	``DfMuxBoardSamples()``
+	``DfMuxBoardSamples( (DfMuxBoardSamples)arg2)``
 	
 	``DfMuxBoardSamples( (list)arg2)`` :
 	    Initialize with keys and values from a Python dictionary: {'key':'value'}
@@ -63,20 +60,6 @@ Container structure for samples from modules on one board, mapping 0-indexed mod
 
 
 *Methods:*
-
-.. _spt3g.dfmux.DfMuxBoardSamples.Summary:
-
-**spt3g.dfmux.DfMuxBoardSamples.Summary**
-
-``Summary( (DfMuxBoardSamples)arg1) -> str :``
-    Short (one-line) description of the object
-
-.. _spt3g.dfmux.DfMuxBoardSamples.Description:
-
-**spt3g.dfmux.DfMuxBoardSamples.Description**
-
-``Description( (DfMuxBoardSamples)arg1) -> str :``
-    Long-form human-readable description of the object
 
 .. _spt3g.dfmux.DfMuxBoardSamples.keys:
 
@@ -359,10 +342,7 @@ spt3g.dfmux.DfMuxMetaSample
 Container structure for coincident samples from all boards. Individual board data, stored in dfmux.DfMuxBoardSamples classes, is contained indexed by board serial number.
 
 *Constructors:*
-	``DfMuxMetaSample( (DfMuxMetaSample)arg2)`` :
-	    Copy constructor
-	
-	``DfMuxMetaSample()``
+	``DfMuxMetaSample( (DfMuxMetaSample)arg2)``
 	
 	``DfMuxMetaSample( (list)arg2)`` :
 	    Initialize with keys and values from a Python dictionary: {'key':'value'}
@@ -377,20 +357,6 @@ Container structure for coincident samples from all boards. Individual board dat
 
 
 *Methods:*
-
-.. _spt3g.dfmux.DfMuxMetaSample.Summary:
-
-**spt3g.dfmux.DfMuxMetaSample.Summary**
-
-``Summary( (DfMuxMetaSample)arg1) -> str :``
-    Short (one-line) description of the object
-
-.. _spt3g.dfmux.DfMuxMetaSample.Description:
-
-**spt3g.dfmux.DfMuxMetaSample.Description**
-
-``Description( (DfMuxMetaSample)arg1) -> str :``
-    Long-form human-readable description of the object
 
 .. _spt3g.dfmux.DfMuxMetaSample.keys:
 
