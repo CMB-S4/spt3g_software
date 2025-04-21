@@ -48,6 +48,36 @@ private:
 // pybind11 compatibility functions
 namespace boost { namespace python {
 
+// template magic to collect all the py::arg()'s into one object for boost
+template <typename... Args>
+auto reorder_keywords(Args&&... args) {
+	using T = py::detail::keywords<1>;
+
+	auto extra = std::tuple_cat(
+		([&](auto&& arg) {
+			if constexpr (!std::is_same_v<std::decay_t<decltype(arg)>, T>)
+				return std::forward_as_tuple(arg);
+			else
+				return std::tuple<>();
+		}(args))...
+	);
+
+	auto kwargs = std::tuple_cat(
+		([&](auto&& arg) {
+			if constexpr (std::is_same_v<std::decay_t<decltype(arg)>, T>)
+				return std::forward_as_tuple(arg);
+			else
+				return std::tuple<>();
+		}(args))...
+	);
+
+	auto kwds = std::apply([](auto&&... kw) {
+		return detail::keywords<sizeof...(kw)>{kw...};
+	}, kwargs);
+
+	return std::tuple_cat(extra, std::forward_as_tuple(kwds));
+}
+
 class module_ : public scope
 {
 public:
@@ -57,9 +87,10 @@ public:
 
 	py::object def_submodule(const std::string &name);
 
-	template <typename...Args>
-	static auto def(Args&&... args) {
-		return py::def(std::forward<Args>(args)...);
+	template <typename... Args>
+	auto def(Args&&... args) {
+		std::apply([](auto&&... a) { py::def(a...); },
+		    reorder_keywords(args...));
 	}
 };
 

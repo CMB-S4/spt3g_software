@@ -359,21 +359,21 @@ PYBINDINGS("maps", scope)
 	scope.def("get_fk5_j2000_to_gal_quat", get_fk5_j2000_to_gal_quat,
 	    "Return the rotation quaternion to rotate from equatorial to "
 	    "galactic coordinates.");
-	scope.def("get_origin_rotator", get_origin_rotator, (py::arg("alpha"), py::arg("delta")),
+	scope.def("get_origin_rotator", get_origin_rotator, py::arg("alpha"), py::arg("delta"),
 	    "Compute the transformation quaternion that would rotate the "
 	    "vector (1, 0, 0) to point in the given direction.");
-	scope.def("offsets_to_quat", offsets_to_quat, (py::arg("x"), py::arg("y")),
+	scope.def("offsets_to_quat", offsets_to_quat, py::arg("x"), py::arg("y"),
 	    "Returns the vector quaternion (0,1,0,0) rotated by the given "
 	    "x and y offsets.  Equivalent to ``t * quat(0,1,0,0) / t``, where "
 	    "``t = get_origin_rotator(x, -y)``");
 	scope.def("get_transform_quat", get_transform_quat,
 	    "Computes a rotation that will take (as_0,ds_0) to (ae_0, de_0) and "
 	    "(as_1, ds_1) to (ae_1, de_1)");
-	scope.def("get_rot_ang", get_rot_ang, (py::arg("start_q"), py::arg("trans")),
+	scope.def("get_rot_ang", get_rot_ang, py::arg("start_q"), py::arg("trans"),
 	    "Computes the boresight rotation of the vector start_q when rotated "
 	    "by trans.");
 	scope.def("get_origin_rotator_timestream", get_origin_rotator_timestream,
-	    (py::arg("alpha"), py::arg("delta"), py::arg("coord_sys")),
+	    py::arg("alpha"), py::arg("delta"), py::arg("coord_sys"),
 	    "Construct a transform quaternion timestream from timestreams of sky "
 	    "coordinates. Equivalent to ``R_z(alpha) * R_y(delta)``.");
 	scope.def("get_boresight_rotator_timestream", get_boresight_rotator_timestream,
