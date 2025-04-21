@@ -377,42 +377,31 @@ skymapmask_from_numpy(const G3SkyMap &parent, py::object v,
 		    npix, mask->size());
 	}
 
-	const char *format = view.format;
-
-	if (format[0] == '@' || format[0] == '=')
-		format++;
-#if BYTE_ORDER == LITTLE_ENDIAN
-	else if (format[0] == '<')
-		format++;
-	else if (format[0] == '>' || format[0] == '!') {
+	std::string format;
+	try {
+		format = check_buffer_format(view.format);
+	} catch (py::buffer_error &e) {
 		PyBuffer_Release(&view);
-		log_fatal("Does not support big-endian numpy arrays");
+		log_fatal("%s", e.what());
 	}
-#else
-	else if (format[0] == '<') {
-		PyBuffer_Release(&view);
-		log_fatal("Does not support little-endian numpy arrays");
-	} else if (format[0] == '>' || format[0] == '!')
-		format++;
-#endif
 
-	if (strcmp(format, "d") == 0) {
+	if (format == "d") {
 		FILL_BUFFER(double);
-	} else if (strcmp(format, "f") == 0) {
+	} else if (format == "f") {
 		FILL_BUFFER(float);
-	} else if (strcmp(format, "i") == 0) {
+	} else if (format == "i") {
 		FILL_BUFFER(int);
-	} else if (strcmp(format, "I") == 0) {
+	} else if (format == "I") {
 		FILL_BUFFER(unsigned int);
-	} else if (strcmp(format, "l") == 0) {
+	} else if (format == "l") {
 		FILL_BUFFER(long);
-	} else if (strcmp(format, "L") == 0) {
+	} else if (format == "L") {
 		FILL_BUFFER(unsigned long);
-	} else if (strcmp(format, "b") == 0) {
+	} else if (format == "b") {
 		FILL_BUFFER(char);
-	} else if (strcmp(format, "B") == 0) {
+	} else if (format == "B") {
 		FILL_BUFFER(unsigned char);
-	} else if (strcmp(format, "?") == 0) {
+	} else if (format == "?") {
 		FILL_BUFFER(bool);
 	} else {
 		PyBuffer_Release(&view);

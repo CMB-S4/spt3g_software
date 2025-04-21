@@ -818,10 +818,18 @@ quat_container_from_object(py::object v)
 
 	Quat q;
 
+	std::string format;
 	Py_buffer view;
 	if (PyObject_GetBuffer(v.ptr(), &view,
 	    PyBUF_FORMAT | PyBUF_STRIDES) == -1)
 		goto slowpython;
+
+	try {
+		format = check_buffer_format(view.format);
+	} catch (py::buffer_error &e) {
+		PyBuffer_Release(&view);
+		log_fatal("%s", e.what());
+	}
 
 #define QELEM(t, i) *((t *)((char *)view.buf + i*view.strides[0]))
 #define QUATI(t) Quat(QELEM(t, 0), QELEM(t, 1), QELEM(t, 2), QELEM(t, 3))
@@ -829,13 +837,13 @@ quat_container_from_object(py::object v)
 	if (view.ndim != 1 || view.shape[0] != 4) {
 		PyBuffer_Release(&view);
 		goto slowpython;
-	} else if (strcmp(view.format, "d") == 0) {
+	} else if (format == "d") {
 		q = QUATI(double);
-	} else if (strcmp(view.format, "f") == 0) {
+	} else if (format == "f") {
 		q = QUATI(float);
-	} else if (strcmp(view.format, "i") == 0) {
+	} else if (format == "i") {
 		q = QUATI(int);
-	} else if (strcmp(view.format, "l") == 0) {
+	} else if (format == "l") {
 		q = QUATI(long);
 	} else {
 		PyBuffer_Release(&view);
@@ -866,14 +874,25 @@ quat_vec_container_from_object(py::object v)
 	if (extv.check())
 		return std::make_shared<T>(extv());
 
+	std::string format;
         std::shared_ptr<T> x(new (T));
 	Py_buffer view;
 	if (PyObject_GetBuffer(v.ptr(), &view,
 	    PyBUF_FORMAT | PyBUF_STRIDES) == -1)
 		goto slowpython;
 
+	try {
+		format = check_buffer_format(view.format);
+	} catch (py::buffer_error &e) {
+		PyBuffer_Release(&view);
+		log_fatal("%s", e.what());
+	}
+
 #define QELEM(t, i, j) *((t *)((char *)view.buf + i*view.strides[0] + j*view.strides[1]))
 #define QUATI(t, i) Quat(QELEM(t, i, 0), QELEM(t, i, 1), QELEM(t, i, 2), QELEM(t, i, 3))
+#define QUATV(t) \
+	for (size_t i = 0; i < (size_t) view.shape[0]; i++) \
+		(*x)[i] = QUATI(t, i);
 
 	x->resize(view.shape[0]);
 	if (view.ndim != 2 || view.shape[1] != 4) {
@@ -885,18 +904,14 @@ quat_vec_container_from_object(py::object v)
 	    view.strides[1] == sizeof(double)) {
 		// Packed and simple, use memcpy()
 		memcpy((void *)&(*x)[0], view.buf, view.len);
-	} else if (strcmp(view.format, "d") == 0) {
-		for (size_t i = 0; i < (size_t)view.shape[0]; i++)
-			(*x)[i] = QUATI(double, i);
-	} else if (strcmp(view.format, "f") == 0) {
-		for (size_t i = 0; i < (size_t)view.shape[0]; i++)
-			(*x)[i] = QUATI(float, i);
-	} else if (strcmp(view.format, "i") == 0) {
-		for (size_t i = 0; i < (size_t)view.shape[0]; i++)
-			(*x)[i] = QUATI(int, i);
-	} else if (strcmp(view.format, "l") == 0) {
-		for (size_t i = 0; i < (size_t)view.shape[0]; i++)
-			(*x)[i] = QUATI(long, i);
+	} else if (format == "d") {
+		QUATV(double);
+	} else if (format == "f") {
+		QUATV(float);
+	} else if (format == "i") {
+		QUATV(int);
+	} else if (format == "l") {
+		QUATV(long);
 	} else {
 		PyBuffer_Release(&view);
 		goto slowpython;
@@ -904,8 +919,9 @@ quat_vec_container_from_object(py::object v)
 	PyBuffer_Release(&view);
 	return x;
 
-#undef QUATI
 #undef QELEM
+#undef QUATI
+#undef QUATV
 
 slowpython:
 	x->resize(0);

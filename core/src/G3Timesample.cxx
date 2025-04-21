@@ -3,7 +3,6 @@
 #include <numeric>
 #include <algorithm>
 #include <iostream>
-#include <exception>
 
 #include <container_pybindings.h>
 #include <G3Timesample.h>

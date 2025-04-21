@@ -1,10 +1,8 @@
 #include <pybindings.h>
 #include <serialization.h>
+#include <container_pybindings.h>
 #include <typeinfo>
 #include <sys/types.h>
-#ifdef __FreeBSD__
-#include <sys/endian.h>
-#endif
 
 #include <G3Units.h>
 #include <maps/HealpixSkyMap.h>
@@ -935,42 +933,30 @@ HealpixSkyMap_fill(HealpixSkyMap &skymap, py::object v)
 
 	double *d = &skymap[0];
 
-	// Consume endian definition
-	const char *format = view.format;
-	if (format[0] == '@' || format[0] == '=')
-		format++;
-#if BYTE_ORDER == LITTLE_ENDIAN
-	else if (format[0] == '<')
-		format++;
-	else if (format[0] == '>' || format[0] == '!') {
+	std::string format;
+	try {
+		format = check_buffer_format(view.format);
+	} catch (py::buffer_error &e) {
 		PyBuffer_Release(&view);
-		log_fatal("Does not support big-endian numpy arrays");
+		log_fatal("%s", e.what());
 	}
-#else
-	else if (format[0] == '<') {
-		PyBuffer_Release(&view);
-		log_fatal("Does not support little-endian numpy arrays");
-	}
-	else if (format[0] == '>' || format[0] == '!')
-		format++;
-#endif
 
-	if (strcmp(format, "d") == 0) {
+	if (format == "d") {
 		memcpy(d, view.buf, view.len);
-	} else if (strcmp(format, "f") == 0) {
-		for (size_t i = 0; i < view.len/sizeof(float); i++)
+	} else if (format == "f") {
+		for (size_t i = 0; i < skymap.size(); i++)
 			d[i] = ((float *)view.buf)[i];
-	} else if (strcmp(format, "i") == 0) {
-		for (size_t i = 0; i < view.len/sizeof(int); i++)
+	} else if (format == "i") {
+		for (size_t i = 0; i < skymap.size(); i++)
 			d[i] = ((int *)view.buf)[i];
-	} else if (strcmp(format, "I") == 0) {
-		for (size_t i = 0; i < view.len/sizeof(int); i++)
+	} else if (format == "I") {
+		for (size_t i = 0; i < skymap.size(); i++)
 			d[i] = ((unsigned int *)view.buf)[i];
-	} else if (strcmp(format, "l") == 0) {
-		for (size_t i = 0; i < view.len/sizeof(long); i++)
+	} else if (format == "l") {
+		for (size_t i = 0; i < skymap.size(); i++)
 			d[i] = ((long *)view.buf)[i];
-	} else if (strcmp(format, "L") == 0) {
-		for (size_t i = 0; i < view.len/sizeof(long); i++)
+	} else if (format == "L") {
+		for (size_t i = 0; i < skymap.size(); i++)
 			d[i] = ((unsigned long *)view.buf)[i];
 	} else {
 		PyBuffer_Release(&view);

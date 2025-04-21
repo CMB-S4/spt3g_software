@@ -1107,6 +1107,34 @@ class G3Timestream::G3TimestreamPythonHelpers
 public:
 SET_LOGGER("G3Timestream");
 
+static DataType
+get_ts_dtype(const Py_buffer &info)
+{
+	std::string format = check_buffer_format(info.format);
+
+	if (format == "d") {
+		return TS_DOUBLE;
+	} else if (format == "f") {
+		return TS_FLOAT;
+#ifdef __LP64__
+	} else if (format == "i") {
+#else
+	} else if (format == "i" || format == "l") {
+#endif
+		assert(info.itemsize == sizeof(int32_t));
+		return TS_INT32;
+#ifdef __LP64__
+	} else if (format == "q" || format == "l") {
+#else
+	} else if (format == "q") {
+#endif
+		assert(info.itemsize == sizeof(int64_t));
+		return TS_INT64;
+	} else {
+		throw py::type_error(std::string("Unsupported data type: ") + info.format);
+	}
+}
+
 static int
 G3TimestreamMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 {
@@ -1335,25 +1363,7 @@ G3TimestreamMap_from_numpy(std::vector<std::string> keys,
 	templ.stop = stop;
 	templ.SetFLACCompression(compression_level);
 	templ.SetFLACBitDepth(bit_depth);
-	if (strcmp(v->v.format, "d") == 0) {
-		templ.data_type_ = G3Timestream::TS_DOUBLE;
-	} else if (strcmp(v->v.format, "f") == 0) {
-		templ.data_type_ = G3Timestream::TS_FLOAT;
-#ifdef __LP64__
-	} else if (strcmp(v->v.format, "i") == 0) {
-#else
-	} else if (strcmp(v->v.format, "i") == 0 || strcmp(v->v.format, "l") == 0) {
-#endif
-		templ.data_type_ = G3Timestream::TS_INT32;
-#ifdef __LP64__
-	} else if (strcmp(v->v.format, "q") == 0 || strcmp(v->v.format, "l") == 0) {
-#else
-	} else if (strcmp(v->v.format, "q") == 0) {
-#endif
-		templ.data_type_ = G3Timestream::TS_INT64;
-	} else {
-		throw py::type_error("Unsupported data type.");
-	}
+	templ.data_type_ = get_ts_dtype(v->v);
 
 	uint8_t *buf;
 	std::shared_ptr<void> data_ref;

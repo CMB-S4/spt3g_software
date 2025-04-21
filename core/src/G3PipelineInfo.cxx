@@ -129,7 +129,7 @@ G3ModuleConfig_get(const G3ModuleConfig &mc, std::string key)
 	if (!!arg.object)
 		return py::object(arg.object);
 
-	py::object main = py::import("__main__");
+	py::object main = py::module_::import("__main__");
 	py::dict global = py::dict(main.attr("__dict__"));
 	global["__main__"] = main;
 
@@ -242,7 +242,7 @@ G3PipelineInfo_repr(const G3PipelineInfo &pi)
 static void
 G3PipelineInfo_run(const G3PipelineInfo &pi)
 {
-	py::object main = py::import("__main__");
+	py::object main = py::module_::import("__main__");
 	py::dict global = py::dict(main.attr("__dict__"));
 	global["__main__"] = main;
 

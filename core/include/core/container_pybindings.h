@@ -66,6 +66,10 @@ container_from_object(py::object v)
 }
 
 
+// Check buffer format for valid types
+// Return format corrected for endianness
+std::string check_buffer_format(std::string fmt);
+
 // Register python conversions to and from vector types.
 // Includes indexing and vector manipulation bindings
 template <typename V, typename... Bases, typename... Args>
