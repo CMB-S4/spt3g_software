@@ -163,12 +163,6 @@ public:
 		return *this;
 	}
 
-	template <typename P>
-	self& def_pickle(P && p) {
-		cls_.def_pickle(p);
-		return *this;
-	}
-
 	self& staticmethod(const char *name) { cls_.staticmethod(name); return *this; }
 
 	template <typename Func>
@@ -180,12 +174,6 @@ public:
 	template <typename Func>
 	self& def(const char *name, Func && fn, const char *doc) {
 		cls_.def(name, std::forward<Func>(fn), doc);
-		return *this;
-	}
-
-	template <size_t N, typename Func>
-	self& def(const char *name, Func && fn, py::detail::keywords<N> args, const char *doc = 0) {
-		cls_.def(name, std::forward<Func>(fn), args, doc);
 		return *this;
 	}
 

@@ -957,7 +957,7 @@ PYBINDINGS("core", scope)
 	    .def("__init__", py::make_constructor(quat_container_from_object,
 	        py::default_call_policies(), (py::arg("data"))),
 	        "Create a quaternion from a numpy array")
-	    .def_pickle(g3frameobject_picklesuite<Quat>())
+	    .def(g3frameobject_picklesuite<Quat>())
 	    .def_property_readonly("a", &Quat::a, "Scalar component")
 	    .def_property_readonly("b", &Quat::b, "First vector component")
 	    .def_property_readonly("c", &Quat::c, "Second vector component")

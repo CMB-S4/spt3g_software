@@ -111,7 +111,7 @@ register_g3vector(py::module_ &scope, std::string name, Args &&...args)
 	auto cls = register_vector<V, Bases..., G3FrameObject, U>(scope,
 	    name, std::forward<Args>(args)...);
 
-	cls.def_pickle(g3frameobject_picklesuite<V>());
+	cls.def(g3frameobject_picklesuite<V>());
 
 	register_pointer_conversions<V>();
 
@@ -163,7 +163,7 @@ register_g3map(py::module_ &scope, std::string name, Args &&...args)
 	auto cls = register_map<M, proxy, Bases...,  G3FrameObject, N>(scope, name,
 	    std::forward<Args>(args)...);
 
-	cls.def_pickle(g3frameobject_picklesuite<M>());
+	cls.def(g3frameobject_picklesuite<M>());
 
 	register_pointer_conversions<M>();
 

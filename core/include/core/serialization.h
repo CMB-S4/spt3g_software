@@ -85,7 +85,7 @@ private:
 };
 
 template <class T>
-struct g3frameobject_picklesuite : py::pickle_suite
+struct g3frameobject_picklesuite : py::pickle_suite, py::def_visitor<g3frameobject_picklesuite<T> >
 {
 	static py::tuple getstate(const py::object &obj)
 	{
@@ -115,6 +115,14 @@ struct g3frameobject_picklesuite : py::pickle_suite
 		ar >> py::extract<T &>(obj)();
 		PyBuffer_Release(&view);
 	}
+
+private:
+	template <class C>
+	void visit(C& cls) const {
+		cls.def_pickle(*this);
+	}
+
+	friend class py::def_visitor_access;
 };
 
 template <typename T>
@@ -139,7 +147,7 @@ register_frameobject(py::module_ &scope, const std::string &name, Args&&...args)
 	cls.def(py::init<const T &>("Copy constructor"));
 
 	// pickling infrastructure
-	cls.def_pickle(g3frameobject_picklesuite<T>());
+	cls.def(g3frameobject_picklesuite<T>());
 
 	// string representation
 	cls.def("__str__", &T::Summary)

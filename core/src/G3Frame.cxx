@@ -514,8 +514,8 @@ PYBINDINGS("core", scope) {
 	    .def("Summary", &G3FrameObject::Summary,
 	      "Short (one-line) description of the object")
 	    .def("__str__", &G3FrameObject::Summary)
-	    .def_pickle(g3frameobject_picklesuite<G3FrameObject>())
-	    .add_property("hash", &g3frame_hash,
+	    .def(g3frameobject_picklesuite<G3FrameObject>())
+	    .def_property_readonly("hash", &g3frame_hash,
 	      "Return the serialized representation of the object")
 	;
 	register_pointer_conversions<G3FrameObject>();
@@ -557,10 +557,11 @@ PYBINDINGS("core", scope) {
 	      py::default_call_policies(), py::args("adhoctypecode")),
 	      "Create a frame with an ad-hoc (non-standard) type code. "
 	      "Use sparingly and with care.")
-	    .def_readwrite("type", &G3Frame::type, "Type code for frame. "
-	      "See general G3Frame docstring.")
-	    .def_readonly("_filename", &G3Frame::_filename, "Source filename for frame, "
-	      "if read in using G3Reader. This attribute is fragile, use at your own risk.")
+	    .def_readwrite("type", &G3Frame::type,
+	      "Type code for frame. See general G3Frame docstring.")
+	    .def_readonly("_filename", &G3Frame::_filename,
+	      "Source filename for frame, if read in using G3Reader. This attribute is "
+	      "fragile, use at your own risk.")
 	    .def("__setitem__", &g3frame_python_put)
 	    .def("__getitem__", &g3frame_python_get)
 	    .def("keys", &g3frame_keys, "Returns a list of keys in the frame.")
@@ -584,8 +585,8 @@ PYBINDINGS("core", scope) {
 	      "where those serialized copies already exist. Saves memory for "
 	      "frames about to be written at the expense of CPU time to "
 	      "re-decode them if they are accessed again later.")
-	    .def_pickle(g3frameobject_picklesuite<G3Frame>())
-	    .add_property("hash", &g3frame_hash,
+	    .def(g3frameobject_picklesuite<G3Frame>())
+	    .def_property_readonly("hash", &g3frame_hash,
 	      "Return the serialized representation of the frame")
 	;
 	register_vector_of<G3FramePtr>(scope, "Frame");
