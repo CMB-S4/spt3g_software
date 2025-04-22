@@ -1031,14 +1031,13 @@ flatskymap_setitem_masked(FlatSkyMap &skymap, const G3SkyMapMask &m,
 {
 	g3_assert(m.IsCompatible(skymap));
 
+	if (val.size() != m.sum())
+		throw py::value_error("Item dimensions do not match masked area");
+
 	size_t j = 0;
 	for (auto i : skymap) {
-		if (!m.at(i.first))
-			continue;
-		if (j >= val.size())
-			throw py::value_error("Item dimensions do not match masked area");
-		skymap[i.first] = val[j];
-		j++;
+		if (m.at(i.first))
+			skymap[i.first] = val[j++];
 	}
 }
 

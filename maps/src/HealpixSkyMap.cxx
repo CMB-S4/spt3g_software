@@ -1087,14 +1087,13 @@ HealpixSkyMap_setitem_masked(HealpixSkyMap &skymap, const G3SkyMapMask &m,
 {
 	g3_assert(m.IsCompatible(skymap));
 
+	if (val.size() != m.sum())
+		throw py::value_error("Item dimensions do not match masked area");
+
 	size_t j = 0;
 	for (auto i : skymap) {
-		if (!m.at(i.first))
-			continue;
-		if (j >= val.size())
-			throw py::value_error("Item dimensions do not match masked area");
-		skymap[i.first] = val[j];
-		j++;
+		if (m.at(i.first))
+			skymap[i.first] = val[j++];
 	}
 }
 
@@ -1160,10 +1159,10 @@ PYBINDINGS("maps", scope)
 	        "Instantiate a HealpixSkyMap with given nside")
 	    .def(py::init<const std::vector<uint64_t> &, const std::vector<double> &,
 	        size_t, bool, bool, MapCoordReference, G3Timestream::TimestreamUnits,
-	        G3SkyMap::MapPolType, G3SkyMap::MapPolConv>(),
-	        py::arg("nside"),
+		G3SkyMap::MapPolType, G3SkyMap::MapPolConv>(),
 	        py::arg("index"),
 	        py::arg("data"),
+	        py::arg("nside"),
 	        py::arg("weighted") = true,
 	        py::arg("nested") = false,
 	        py::arg("coord_ref") = MapCoordReference::Equatorial,
