@@ -73,6 +73,10 @@ register_class_copyable(py::module_ &scope, const std::string &name, Args&&...ar
 {
 	(void) scope;
 
+	py::handle<> obj(py::objects::registered_class_object(py::type_id<T>()));
+	if (obj.get() != 0)
+		throw std::runtime_error(name + " already registered");
+
 	return py::compat_class_<T, py::bases<Bases...>, std::shared_ptr<T> >(name.c_str(),
 	    std::forward<Args>(args)...);
 }
@@ -84,6 +88,10 @@ auto
 register_class(py::module_ &scope, const std::string &name, Args&&...args)
 {
 	(void) scope;
+
+	py::handle<> obj(py::objects::registered_class_object(py::type_id<T>()));
+	if (obj.get() != 0)
+		throw std::runtime_error(name + " already registered");
 
 	return py::compat_class_<T, py::bases<Bases...>, std::shared_ptr<T>,
 	    boost::noncopyable>(name.c_str(), std::forward<Args>(args)...);
