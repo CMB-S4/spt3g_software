@@ -106,7 +106,6 @@ register_g3module<SingleDetectorBoresightBinner>(scope, "SingleDetectorBoresight
 ;
 };
 
-
 SingleDetectorBoresightBinner::SingleDetectorBoresightBinner(
     const G3SkyMap &stub_map, std::string pointing, std::string timestreams) :
   pointing_(pointing), timestreams_(timestreams)
