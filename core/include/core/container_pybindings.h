@@ -47,7 +47,7 @@ vector_repr(C &cl, const std::string &name)
 }
 
 // Buffer protocol implementation
-// Specialize this for particular types T (i.e.g V::value_type)
+// Specialize this for particular types T (i.e. V::value_type)
 // to override the default behavior.
 template <typename T, typename V, typename C, typename... Args>
 struct vector_buffer {
