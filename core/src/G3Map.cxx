@@ -228,34 +228,32 @@ G3_SPLIT_SERIALIZABLE_CODE(G3MapVectorInt);
 
 G3_SPLIT_SERIALIZABLE_CODE(G3MapFrameObject);
 
-PYBINDINGS("core") {
-	using namespace boost::python;
-
-	register_g3map<G3MapDouble>("G3MapDouble", "Mapping from strings to "
+PYBINDINGS("core", scope) {
+	register_g3map<G3MapDouble>(scope, "G3MapDouble", "Mapping from strings to "
 	    "floats");
-	register_g3map<G3MapMapDouble>("G3MapMapDouble", "Mapping from strings "
+	register_g3map<G3MapMapDouble>(scope, "G3MapMapDouble", "Mapping from strings "
 	    "to maps of strings to floats. For example, "
 	    "m['Det1']['Det2'] = 5.3");
-	register_g3map<G3MapInt>("G3MapInt", "Mapping from strings to ints.");
-	register_g3map<G3MapString>("G3MapString", "Mapping from strings to "
+	register_g3map<G3MapInt>(scope, "G3MapInt", "Mapping from strings to ints.");
+	register_g3map<G3MapString>(scope, "G3MapString", "Mapping from strings to "
 	    "strings.");
-	register_g3map<G3MapVectorBool>("G3MapVectorBool", "Mapping from "
+	register_g3map<G3MapVectorBool>(scope, "G3MapVectorBool", "Mapping from "
 	    "strings to arrays of booleans.");
-	register_g3map<G3MapVectorDouble>("G3MapVectorDouble", "Mapping from "
+	register_g3map<G3MapVectorDouble>(scope, "G3MapVectorDouble", "Mapping from "
 	    "strings to arrays of floats.");
-	register_g3map<G3MapVectorComplexDouble>("G3MapVectorComplexDouble",
+	register_g3map<G3MapVectorComplexDouble>(scope, "G3MapVectorComplexDouble",
 	    "Mapping from strings to arrays of complex numbers.");
-	register_g3map<G3MapVectorInt>("G3MapVectorInt", "Mapping from "
+	register_g3map<G3MapVectorInt>(scope, "G3MapVectorInt", "Mapping from "
 	    "strings to arrays of integers.");
-	register_g3map<G3MapVectorString>("G3MapVectorString", "Mapping from "
+	register_g3map<G3MapVectorString>(scope, "G3MapVectorString", "Mapping from "
 	    "strings to lists of strings.");
-	register_g3map<G3MapVectorVectorString>("G3MapVectorVectorString",
+	register_g3map<G3MapVectorVectorString>(scope, "G3MapVectorVectorString",
 	    "Mapping from strings to lists of lists of strings.");
-	register_g3map<G3MapVectorTime>("G3MapVectorTime", "Mapping from "
+	register_g3map<G3MapVectorTime>(scope, "G3MapVectorTime", "Mapping from "
 	    "strings to lists of G3 time objects.");
 
 	// Special handling to get the object proxying right
-	register_g3map<G3MapFrameObject, true>("G3MapFrameObject", "Mapping "
+	register_g3map<G3MapFrameObject, true>(scope, "G3MapFrameObject", "Mapping "
 	    "strings to generic frame objects. Can lead to a variety of "
 	    "paradoxes; please avoid general use of this class.");
 }

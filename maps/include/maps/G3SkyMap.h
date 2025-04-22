@@ -9,8 +9,6 @@
 
 #include <maps/G3SkyMapMask.h>
 
-#include <boost/python.hpp>
-
 enum MapCoordReference {
 	Local = 0,
 	Equatorial = 1,
@@ -59,8 +57,6 @@ public:
 	virtual ~G3SkyMap() {};
 
 	// Reimplement the following in subclasses
-	virtual void FillFromArray(boost::python::object v) = 0;
-	std::shared_ptr<G3SkyMap> ArrayClone(boost::python::object v) const;
 	virtual std::shared_ptr<G3SkyMap> Clone(bool copy_data = true) const = 0;
 
 	MapCoordReference coord_ref;
@@ -120,22 +116,22 @@ public:
 	// Comparison operations
 
 	// <
-	virtual G3SkyMapMask operator<(const G3SkyMap &rhs);
-	virtual G3SkyMapMask operator<=(const G3SkyMap &rhs);
-	virtual G3SkyMapMask operator<(double rhs);
-	virtual G3SkyMapMask operator<=(double rhs);
+	virtual G3SkyMapMask operator<(const G3SkyMap &rhs) const;
+	virtual G3SkyMapMask operator<=(const G3SkyMap &rhs) const;
+	virtual G3SkyMapMask operator<(double rhs) const;
+	virtual G3SkyMapMask operator<=(double rhs) const;
 
 	// ==
-	virtual G3SkyMapMask operator==(const G3SkyMap &rhs);
-	virtual G3SkyMapMask operator!=(const G3SkyMap &rhs);
-	virtual G3SkyMapMask operator==(double rhs);
-	virtual G3SkyMapMask operator!=(double rhs);
+	virtual G3SkyMapMask operator==(const G3SkyMap &rhs) const;
+	virtual G3SkyMapMask operator!=(const G3SkyMap &rhs) const;
+	virtual G3SkyMapMask operator==(double rhs) const;
+	virtual G3SkyMapMask operator!=(double rhs) const;
 
 	// <
-	virtual G3SkyMapMask operator>(const G3SkyMap &rhs);
-	virtual G3SkyMapMask operator>=(const G3SkyMap &rhs);
-	virtual G3SkyMapMask operator>(double rhs);
-	virtual G3SkyMapMask operator>=(double rhs);
+	virtual G3SkyMapMask operator>(const G3SkyMap &rhs) const;
+	virtual G3SkyMapMask operator>=(const G3SkyMap &rhs) const;
+	virtual G3SkyMapMask operator>(double rhs) const;
+	virtual G3SkyMapMask operator>=(double rhs) const;
 
 	virtual bool all(G3SkyMapMaskConstPtr where=NULL) const;
 	virtual bool any(G3SkyMapMaskConstPtr where=NULL) const;
@@ -166,12 +162,12 @@ public:
 	virtual void ApplyMask(const G3SkyMapMask &mask, bool inverse=false);
 
 	// Pointing information
-	std::vector<size_t> AnglesToPixels(const std::vector<double> & alphas,
+	std::vector<uint64_t> AnglesToPixels(const std::vector<double> & alphas,
 	    const std::vector<double> & deltas) const;
-	void PixelsToAngles(const std::vector<size_t> & pixels,
+	void PixelsToAngles(const std::vector<uint64_t> & pixels,
 	    std::vector<double> & alphas, std::vector<double> & deltas) const;
-	std::vector<size_t> QuatsToPixels(const G3VectorQuat &quats) const;
-	G3VectorQuat PixelsToQuats(const std::vector<size_t> &pixels) const;
+	std::vector<uint64_t> QuatsToPixels(const G3VectorQuat &quats) const;
+	G3VectorQuat PixelsToQuats(const std::vector<uint64_t> &pixels) const;
 
 	virtual std::vector<double> PixelToAngle(size_t pixel) const;
 	virtual size_t AngleToPixel(double alpha, double delta) const;
@@ -183,10 +179,10 @@ public:
 	    std::vector<double> & alphas, std::vector<double> & deltas) const;
 	virtual G3VectorQuat GetRebinQuats(size_t pixel, size_t scale) const = 0;
 	virtual void GetInterpPixelsWeights(double alpha, double delta,
-	    std::vector<size_t> & pixels, std::vector<double> & weights) const;
-	virtual void GetInterpPixelsWeights(const Quat &q, std::vector<size_t> & pixels,
+	    std::vector<uint64_t> & pixels, std::vector<double> & weights) const;
+	virtual void GetInterpPixelsWeights(const Quat &q, std::vector<uint64_t> & pixels,
 	    std::vector<double> & weights) const = 0;
-	double GetInterpPrecalc(const std::vector<size_t> &pixels,
+	double GetInterpPrecalc(const std::vector<uint64_t> &pixels,
 	    const std::vector<double> &weights) const;
 	double GetInterpValue(double alpha, double delta) const;
 	double GetInterpValue(const Quat &q) const;
@@ -197,10 +193,10 @@ public:
 	virtual std::shared_ptr<G3SkyMap> Rebin(size_t scale, bool norm = true) const = 0;
 
 	/* Analogue to healpy.query_disc, returns list of pixels within a disc */
-	std::vector<size_t> QueryDisc(double alpha, double delta, double radius) const;
-	virtual std::vector<size_t> QueryDisc(const Quat &q, double radius) const = 0;
-	std::vector<size_t> QueryAlphaEllipse(double alpha, double delta, double a, double b) const;
-	std::vector<size_t> QueryAlphaEllipse(const Quat &q, double a, double b) const;
+	std::vector<uint64_t> QueryDisc(double alpha, double delta, double radius) const;
+	virtual std::vector<uint64_t> QueryDisc(const Quat &q, double radius) const = 0;
+	std::vector<uint64_t> QueryAlphaEllipse(double alpha, double delta, double a, double b) const;
+	std::vector<uint64_t> QueryAlphaEllipse(const Quat &q, double a, double b) const;
 
 	virtual bool IsDense() const {
 		throw std::runtime_error("Checking array density not implemented");

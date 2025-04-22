@@ -1,9 +1,7 @@
 #include <pybindings.h>
-#include <serialization.h>
+#include <container_pybindings.h>
 
 #include <dfmux/DfMuxSample.h>
-#include <cereal/types/map.hpp>
-#include <cereal/types/vector.hpp>
 
 template <class A> void DfMuxSample::serialize(A &ar, unsigned v)
 {
@@ -16,20 +14,15 @@ template <class A> void DfMuxSample::serialize(A &ar, unsigned v)
 	ar & make_nvp("time", Timestamp);
 }
 
-PYBINDINGS("dfmux")
+PYBINDINGS("dfmux", scope)
 {
-	namespace bp = boost::python;
-
-	bp::class_<DfMuxSample, bp::bases<G3FrameObject, std::vector<int32_t> >,
-	  DfMuxSamplePtr, boost::noncopyable>("DfMuxSample",
+	register_frameobject<DfMuxSample, std::vector<int32_t> >(scope, "DfMuxSample",
 	  "Samples from all channels on one readout module, stored with I and "
 	  "Q interleaved, such that the first element is channel 1 I, followed "
-	  "by channel 1 Q, followed by channel 2 I, etc.",
-	  bp::init<G3TimeStamp, int>(bp::args("time", "nsamples")))
+	  "by channel 1 Q, followed by channel 2 I, etc.")
+	    .def(py::init<G3TimeStamp, int>(), py::arg("time"), py::arg("nsamples"))
 	    .def_readwrite("Timestamp", &DfMuxSample::Timestamp)
-	    .def_pickle(g3frameobject_picklesuite<DfMuxSample>())
 	;
-	register_pointer_conversions<DfMuxSample>();
 }
 
 G3_SERIALIZABLE_CODE(DfMuxSample);

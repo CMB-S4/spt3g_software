@@ -3,107 +3,12 @@
 
 #include <G3.h>
 #include <G3Frame.h>
+#include <G3Module.h>
 #include <G3Logging.h>
 
-#include <boost/python.hpp>
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-#endif
-#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
-#include <boost/python/suite/indexing/container_utils.hpp>
-#include <container_conversions.h>
-#if defined(__GNUC__) && !defined(__clang__)
-#pragma GCC diagnostic pop
-#endif
+#include <pybind11_compat.h>
 
-#include <std_map_indexing_suite.hpp>
-
-#ifdef __clang__
-#pragma GCC diagnostic ignored "-Wself-assign-overloaded"
-#endif
-
-template <typename T>
-void
-register_pointer_conversions()
-{
-	using boost::python::implicitly_convertible;
-
-	implicitly_convertible<std::shared_ptr<T>, G3FrameObjectPtr>();
-	implicitly_convertible<std::shared_ptr<T>, std::shared_ptr<const T> >();
-	implicitly_convertible<std::shared_ptr<T>, G3FrameObjectConstPtr>();
-}
-
-template <typename T>
-static std::shared_ptr<T>
-container_from_object(boost::python::object v)
-{
-	std::shared_ptr<T> x(new T());
-
-	boost::python::container_utils::extend_container(*x, v);
-	return x;
-}
-
-template <typename T>
-std::string vec_repr(boost::python::object self)
-{
-	using namespace boost::python;
-	std::stringstream s;
-
-	s << extract<std::string>(self.attr("__class__").attr("__module__"))()
-	    << "." << extract<std::string>(self.attr("__class__").attr("__name__"))()
-	    << "([";
-
-	extract <std::vector<T> &> extself(self);
-	if (extself.check()) {
-		std::vector<T> &selfobject = extself();
-
-		int ellip_pos = -1; // Position at which to insert "..."
-		if (selfobject.size() > 100)
-			ellip_pos = 3;
-
-		if (selfobject.size() > 0)
-			s << selfobject[0];
-		for (size_t i=1; i<selfobject.size(); ++i) {
-			if ((int)i == ellip_pos) {
-				s << ", ...";
-				i = selfobject.size() - ellip_pos - 1;
-			} else
-				s << ", " << selfobject[i];
-		}
-	}
-	s << "])";
-
-	return s.str();
-}
-
-// Register naive python conversions to and from std::vector<T>.
-// See below if you also want efficient numpy conversions.
-template <typename T>
-boost::python::object
-register_vector_of(std::string name)
-{
-	name += "Vector";
-	using namespace boost::python;
-	object cls = class_<std::vector<T> >(name.c_str())
-	    .def("__init__", make_constructor(container_from_object<std::vector<T> >))
-	    .def("__repr__", vec_repr<T>)
-	    .def(vector_indexing_suite<std::vector<T>, true>())
-	;
-	scitbx::boost_python::container_conversions::from_python_sequence<std::vector<T>,  scitbx::boost_python::container_conversions::variable_capacity_policy>();
-        return cls;
-}
-
-template <typename T, bool proxy=true>
-void
-register_map(std::string name, const char *docstring)
-{
-	using namespace boost::python;
-	class_<T, std::shared_ptr<T> >(name.c_str())
-	    .def(init<const T &>())
-	    .def(std_map_indexing_suite<T, proxy>())
-	;
-}
+namespace py = boost::python;
 
 // Tool for exporting enum elements called 'None', reserved in Python
 // Invoke by doing enum_none_converter::from_python<T>()
@@ -111,10 +16,10 @@ struct enum_none_converter {
 	template <typename Enum, Enum NoneValue = Enum::None>
 	static void from_python()
 	{
-		boost::python::converter::registry::push_back(
+		py::converter::registry::push_back(
 		    &enum_none_converter::convertible,
 		    &enum_none_converter::construct<Enum, NoneValue>,
-		    boost::python::type_id<Enum>());
+		    py::type_id<Enum>());
 	}
 
 	static void* convertible(PyObject* object)
@@ -125,108 +30,142 @@ struct enum_none_converter {
 	template <typename Enum, Enum NoneValue = Enum::None>
 	static void construct(
 	    PyObject* object,
-	    boost::python::converter::rvalue_from_python_stage1_data* data)
+	    py::converter::rvalue_from_python_stage1_data* data)
 	{
 		data->convertible = new Enum(NoneValue);
 	}
 };
 
+// Register an enum.  Add enum values using the .value() method of this object.
+template <typename T, typename... Args>
+auto
+register_enum(py::module_ &scope, const std::string &name, Args &&... args)
+{
+	(void) scope;
+
+	auto cls = py::enum_<T>(name.c_str(), std::forward<Args>(args)...);
+
+	return cls;
+}
+
+// Register an enum with a particular value that corresponds to python `None`.
+// For example:
+//     register_enum<G3Frame::FrameType, G3Frame::None>(scope, "G3FrameType")
+// Creates a G3FrameType python object.  A None value passed to any function
+// in python that takes this type will be translated to G3Frame::None in C++.
+template <typename T, T NoneValue, typename... Args>
+auto
+register_enum(py::module_ &scope, const std::string &name, Args &&... args)
+{
+	auto cls = register_enum<T>(scope, name, std::forward<Args>(args)...);
+
+	// Convert python None to a specific value
+	enum_none_converter::from_python<T, NoneValue>();
+
+	return cls;
+}
+
+// Register a class, with optional base classes.
+// Ensure that base classes are registered first to inherit their bound methods.
+template <typename T, typename... Bases, typename... Args>
+auto
+register_class_copyable(py::module_ &scope, const std::string &name, Args&&...args)
+{
+	(void) scope;
+
+	auto reg = py::converter::registry::query(py::type_id<T>());
+	if (!!reg && !!reg->m_to_python)
+		throw std::runtime_error(name + " already registered");
+
+	return py::compat_class_<T, py::bases<Bases...>, std::shared_ptr<T> >(name.c_str(),
+	    std::forward<Args>(args)...);
+}
+
+// Register a class, with optional base classes.
+// Ensure that base classes are registered first to inherit their bound methods.
+template <typename T, typename... Bases, typename... Args>
+auto
+register_class(py::module_ &scope, const std::string &name, Args&&...args)
+{
+	(void) scope;
+
+	auto reg = py::converter::registry::query(py::type_id<T>());
+	if (!!reg && !!reg->m_to_python)
+		throw std::runtime_error(name + " already registered");
+
+	return py::compat_class_<T, py::bases<Bases...>, std::shared_ptr<T>,
+	    boost::noncopyable>(name.c_str(), std::forward<Args>(args)...);
+}
+
+// Register a G3Module derived class, for inclusion in a G3Pipeline.
+template <typename T, typename... Bases, typename... Args>
+auto
+register_g3module(py::module_ &scope, const std::string &name, Args&&...args)
+{
+	auto cls = register_class<T, Bases..., G3Module>(scope, name.c_str(),
+	    std::forward<Args>(args)...);
+
+	// mark as a module
+	try {
+		cls.def_readonly("__g3module__", true);
+	} catch (py::error_already_set &e) {
+		PyErr_Clear();
+	}
+
+	py::implicitly_convertible<std::shared_ptr<T>, G3ModulePtr>();
+
+	return cls;
+}
+
+
+// Module registration infrastructure.  Binding functions for
+// each module are cached by this class, to be called in order
+// when the module is created.
+
+// Registration functions take a single scope object as an input argument.
+typedef void (*module_reg_func_t)(py::module_ &);
+
 class G3ModuleRegistrator {
 public:
-	G3ModuleRegistrator(const char *mod, void (*def)());
-	static void CallRegistrarsFor(const char *mod);
+	G3ModuleRegistrator(const char *mod, module_reg_func_t def);
+	static void CallRegistrarsFor(const char *mod, py::module_ &scope);
 
 	SET_LOGGER("G3ModuleRegistrator");
 };
 
-#define EXPORT_G3MODULE_AND(mod, T, init, docstring, other_defs)   \
-	static void registerfunc##T() { \
-		using namespace boost::python; \
-		class_<T, bases<G3Module>, std::shared_ptr<T>, \
-		  boost::noncopyable>(#T, docstring, init) \
-		    .def_readonly("__g3module__", true) \
-                other_defs \
-		; \
-	} \
-	static G3ModuleRegistrator register##T(mod, registerfunc##T);
-
-#define EXPORT_G3MODULE(mod, T, init, docstring) \
-    EXPORT_G3MODULE_AND(mod, T, init, docstring, )
-
-
-#define PYBINDINGS(mod) \
-	static void ___pybindings_registerfunc(); \
+// Create and register a binding function for the given module,
+// to be called by the registrar when the python module is constructed.
+// This macro can be used at most once per translation unit.
+// mod : string name of the python module, e.g. "core"
+// scope : variable name of the pybind11::module_ object to be populated
+//    use this name as the first argument to the various registration functions
+#define PYBINDINGS(mod, scope) \
+	static void ___pybindings_registerfunc(py::module_ &); \
 	static G3ModuleRegistrator ___pybindings_register(mod, ___pybindings_registerfunc); \
-	static void ___pybindings_registerfunc() 
-
-#define EXPORT_FRAMEOBJECT(T, initf, docstring) \
-	boost::python::class_<T, boost::python::bases<G3FrameObject>, std::shared_ptr<T> >(#T, docstring, boost::python::initf) \
-	    .def(boost::python::init<const T &>()) \
-	    .def_pickle(g3frameobject_picklesuite<T>())
-
-#define EXPORT_FRAMEOBJECT_NOINITNAMESPACE(T, initf, docstring) \
-	boost::python::class_<T, boost::python::bases<G3FrameObject>, std::shared_ptr<T> >(#T, docstring, initf) \
-	    .def(boost::python::init<const T &>()) \
-	    .def_pickle(g3frameobject_picklesuite<T>())
+	static void ___pybindings_registerfunc(py::module_ &scope)
 
 // Declare a python module with a name that is a bare token:
-//     SPT3G_PYTHON_SUBMODULE(foo, "pkg")
+//     SPT3G_PYTHON_SUBMODULE(foo, "pkg", scope)
 // for a package whose fully qualified name will be pkg.foo
-#define SPT3G_PYTHON_SUBMODULE(name, pkg) \
+#define SPT3G_PYTHON_SUBMODULE(name, pkg, scope) \
 BOOST_PYTHON_MODULE(_lib ## name) { \
-	auto mod = boost::python::scope(); \
-	mod.attr("__name__") = std::string(pkg) + "." + #name; \
-	void (spt3g_init_module_ ## name)(); \
-	(spt3g_init_module_ ## name)(); \
+	auto scope = py::module_(); \
+	scope.attr("__name__") = std::string(pkg) + "." + #name; \
+	py::docstring_options docopts(true, true, false); \
+	void (spt3g_init_module_ ## name)(py::module_ &); \
+	(spt3g_init_module_ ## name)(scope); \
+	G3ModuleRegistrator::CallRegistrarsFor(#name, scope); \
 } \
-void (spt3g_init_module_ ## name)()
+void (spt3g_init_module_ ## name)([[maybe_unused]] py::module_ &scope)
 
 // Declare a python module with a name that is a bare token:
-//     SPT3G_PYTHON_MODULE(foo)
+//     SPT3G_PYTHON_MODULE(foo, scope)
 // for a package whose fully qualified name will be spt3g.foo
-#define SPT3G_PYTHON_MODULE(name) \
-SPT3G_PYTHON_SUBMODULE(name, "spt3g")
-
-// Create a namespace (importable sub-module) within some parent scope
-bp::object export_namespace(bp::object scope, std::string name);
-
-// Python runtime context to simplify acquiring or releasing the GIL as necessary.
-// To use, simply construct the context object where necessary, e.g.
-//    G3PythonContext ctx("mycontext", false);
-// The context destructor will clean up after itself (releasing the GIL if acquired, and
-// vice versa).  If hold_gil is true, the context will ensure the GIL is held at construction,
-// and released at destruction.  If hold_gil is false, the context will save the current thread
-// state and release the GIL at construction, and re-acquire it at destruction.
-class G3PythonContext {
-public:
-	G3PythonContext(std::string name, bool hold_gil=false);
-	~G3PythonContext();
-
-private:
-	std::string name_;
-	bool hold_;
-	PyGILState_STATE gil_;
-	PyThreadState *thread_;
-
-	SET_LOGGER("G3PythonContext");
-};
-
-// Convenience class for initializing and finalizing the Python interpreter.  This class
-// will initialize the python interpeter at construction (e.g. at the beginning of a C++
-// compiled program), and immediately initialize the appropriate G3PythonContext depending
-// on the value of hold_gil.  At destruction, it will exit the python context and finalize
-// the interpreter.  The python interpreter should be initialized only once, typically at
-// the beginning of the main program.
-class G3PythonInterpreter {
-public:
-	G3PythonInterpreter(bool hold_gil=false);
-	~G3PythonInterpreter();
-
-private:
-	bool init_;
-	G3PythonContext *ctx_;
-
-	SET_LOGGER("G3PythonInterpreter");
-};
+//
+// Use this macro once per module, as a function whose body is
+// populated with preliminaries, e.g. importing necessary dependencies.
+// All registered binding functions are called after this block.
+#define SPT3G_PYTHON_MODULE(name, scope) \
+SPT3G_PYTHON_SUBMODULE(name, "spt3g", scope)
 
 #endif

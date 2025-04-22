@@ -18,7 +18,7 @@ void G3Writer::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	// out to Python.
 	frame->GenerateBlobs();
 
-	G3PythonContext ctx("G3Writer", false);
+	py::gil_scoped_release gil;
 
 	if (frame->type == G3Frame::EndProcessing)
 		stream_.flush();
@@ -39,23 +39,18 @@ off_t G3Writer::Tell() {
 	return stream_.tellp();
 }
 
-PYBINDINGS("core") {
-	using namespace boost::python;
-
-	// Instead of EXPORT_G3MODULE since there is an extra Flush function
-	class_<G3Writer, bases<G3Module>, std::shared_ptr<G3Writer>,
-	    boost::noncopyable>("G3Writer",
-	      "Writes frames to disk. Frames will be written to the file specified by "
-	      "filename. If filename ends in .gz, output will be compressed using gzip. "
-	      "To write only some types of frames, pass a list of the desired frame "
-	      "types to the second optional argument (streams). If no streams argument "
-	      "is given, writes all types of frames. If append is set to True, will "
-	      "append frames to its output file rather than overwriting it.",
-	init<std::string, std::vector<G3Frame::FrameType>, bool, size_t>((arg("filename"),
-	    arg("streams")=std::vector<G3Frame::FrameType>(), arg("append")=false,
-	    arg("buffersize")=1024*1024)))
-	.def("flush", &G3Writer::Flush)
-	.def("tell", &G3Writer::Tell)
-	.def_readonly("__g3module__", true)
+PYBINDINGS("core", scope) {
+	register_g3module<G3Writer>(scope, "G3Writer",
+	    "Writes frames to disk. Frames will be written to the file specified by "
+	    "filename. If filename ends in .gz, output will be compressed using gzip. "
+	    "To write only some types of frames, pass a list of the desired frame "
+	    "types to the second optional argument (streams). If no streams argument "
+	    "is given, writes all types of frames. If append is set to True, will "
+	    "append frames to its output file rather than overwriting it.")
+	    .def(py::init<std::string, std::vector<G3Frame::FrameType>, bool, size_t>(),
+	        py::arg("filename"), py::arg("streams")=std::vector<G3Frame::FrameType>(),
+	        py::arg("append")=false, py::arg("buffersize")=1024*1024)
+	    .def("flush", &G3Writer::Flush)
+	    .def("tell", &G3Writer::Tell)
 	;
 }

@@ -39,13 +39,8 @@ private:
 	SET_LOGGER("MapMockObserver");
 };
 
-EXPORT_G3MODULE("maps", MapMockObserver,
-    (init<std::string, std::string, double,
-     G3SkyMapConstPtr, G3SkyMapConstPtr, G3SkyMapConstPtr,
-     std::string, bool, bool>((arg("pointing"), arg("timestreams"), arg("band"),
-     arg("T"), arg("Q")=G3SkyMapConstPtr(), arg("U")=G3SkyMapConstPtr(),
-     arg("bolo_properties_name")="BolometerProperties", arg("interp")=false,
-     arg("error_on_zero")=true))),
+PYBINDINGS("maps", scope) {
+register_g3module<MapMockObserver>(scope, "MapMockObserver",
 "MapMockObserver(pointing, timestreams, band, T, Q=None, U=None, bolo_properties_name=\"BolometerProperties\", interp=False)\n"
 "\n"
 "Creates a new set of timestreams by sampling from an input map.\n\n"
@@ -99,7 +94,16 @@ EXPORT_G3MODULE("maps", MapMockObserver,
 "        band=150 * core.G3Units.GHz,\n"
 "        T=map_frame[\"T\"],\n"
 "    )\n"
-);
+)
+  .def(py::init<std::string, std::string, double, G3SkyMapConstPtr,
+     G3SkyMapConstPtr, G3SkyMapConstPtr, std::string, bool, bool>(),
+     py::arg("pointing"), py::arg("timestreams"), py::arg("band"),
+     py::arg("T"), py::arg("Q")=G3SkyMapConstPtr(), py::arg("U")=G3SkyMapConstPtr(),
+     py::arg("bolo_properties_name")="BolometerProperties", py::arg("interp")=false,
+     py::arg("error_on_zero")=true)
+;
+};
+
 
 MapMockObserver::MapMockObserver(std::string pointing, std::string timestreams,
     double band, G3SkyMapConstPtr T, G3SkyMapConstPtr Q, G3SkyMapConstPtr U,
@@ -191,7 +195,7 @@ MapMockObserver::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		// Get per-detector pointing timestream
 		auto detquats = get_detector_pointing_quats(bp.x_offset, bp.y_offset,
 		    *pointing, T_->coord_ref);
-		std::vector<size_t> detpointing;
+		std::vector<uint64_t> detpointing;
 		if (!interp_)
 			detpointing = T_->QuatsToPixels(detquats);
 
@@ -200,7 +204,7 @@ MapMockObserver::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 			StokesVector pcoupling(bp.pol_angle * pol_sign_, bp.pol_efficiency);
 			for (size_t i = 0; i < det.size(); i++) {
 				if (interp_) {
-					std::vector<size_t> pixels;
+					std::vector<uint64_t> pixels;
 					std::vector<double> weights;
 					T_->GetInterpPixelsWeights(detquats[i], pixels, weights);
 					det[i] =

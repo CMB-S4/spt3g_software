@@ -8,7 +8,7 @@ from spt3g import core, maps
 a = np.arange(1500,dtype='float')
 a[0] = -1
 b = np.arange(1500,dtype='int')
-x = maps.HealpixSkyMap((b, a, 64), True, False, maps.MapCoordReference.Equatorial)
+x = maps.HealpixSkyMap(b, a, 64, True, False, maps.MapCoordReference.Equatorial)
 x.shift_ra = False
 assert(x.nside == 64)
 assert(x.npix_allocated == 1500)

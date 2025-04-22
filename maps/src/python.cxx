@@ -1,14 +1,9 @@
 #include <pybindings.h>
 
-namespace bp = boost::python;
-
-SPT3G_PYTHON_MODULE(maps)
+SPT3G_PYTHON_MODULE(maps, scope)
 {
 	// Python bindings dependencies
-	bp::import("spt3g.core");
-	bp::import("spt3g.calibration");
-
-	bp::docstring_options docopts(true, true, false);
-	G3ModuleRegistrator::CallRegistrarsFor("maps");
+	scope.import("spt3g.core");
+	scope.import("spt3g.calibration");
 }
 

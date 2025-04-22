@@ -1,5 +1,6 @@
 #include <pybindings.h>
 #include <serialization.h>
+#include <container_pybindings.h>
 #include <gcp/TrackerStatus.h>
 
 template <class A> void TrackerStatus::serialize(A &ar, unsigned v)
@@ -70,10 +71,8 @@ std::string TrackerStatus::Description() const
 
 G3_SERIALIZABLE_CODE(TrackerStatus);
 
-PYBINDINGS("gcp") {
-	using namespace boost::python;
-
-	enum_<enum TrackerStatus::TrackerState>("TrackerState")
+PYBINDINGS("gcp", scope) {
+	register_enum<TrackerStatus::TrackerState>(scope, "TrackerState")
 	    .value("LACKING", TrackerStatus::LACKING)
 	    .value("TIME_ERROR", TrackerStatus::TIME_ERROR)
 	    .value("UPDATING", TrackerStatus::UPDATING)
@@ -83,9 +82,10 @@ PYBINDINGS("gcp") {
 	    .value("TOO_LOW", TrackerStatus::TOO_LOW)
 	    .value("TOO_HIGH", TrackerStatus::TOO_HIGH)
 	;
-	register_vector_of<enum TrackerStatus::TrackerState>("TrackerState");
+	register_vector_of<TrackerStatus::TrackerState>(scope, "TrackerState");
 
-	EXPORT_FRAMEOBJECT(TrackerStatus, init<>(), "GCP Tracker Status")
+	register_frameobject<TrackerStatus>(scope, "TrackerStatus", "GCP Tracker Status")
+	    .def(py::init<>())
 	    .def_readwrite("time", &TrackerStatus::time)
 	    .def_readwrite("az_pos", &TrackerStatus::az_pos)
 	    .def_readwrite("el_pos", &TrackerStatus::el_pos)
@@ -99,8 +99,8 @@ PYBINDINGS("gcp") {
 	    .def_readwrite("acu_seq", &TrackerStatus::acu_seq)
 	    .def_readwrite("in_control", &TrackerStatus::in_control)
 	    .def_readwrite("scan_flag", &TrackerStatus::scan_flag)
-	    .def(self + self)
-	    .def(self += self)
+	    .def(py::self + py::self)
+	    .def(py::self += py::self)
 	;
 }
 

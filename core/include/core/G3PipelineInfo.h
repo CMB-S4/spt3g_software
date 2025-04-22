@@ -68,12 +68,8 @@ G3_POINTERS(G3ModuleArg);
 G3_POINTERS(G3ModuleConfig);
 G3_POINTERS(G3PipelineInfo);
 
-namespace cereal {
-        template <class A> struct specialize<A, G3ModuleConfig, cereal::specialization::member_load_save> {};
-}
-
 G3_SERIALIZABLE(G3ModuleArg, 1);
-G3_SERIALIZABLE(G3ModuleConfig, 2);
+G3_SPLIT_SERIALIZABLE(G3ModuleConfig, 2);
 G3_SERIALIZABLE(G3PipelineInfo, 2);
 
 #endif

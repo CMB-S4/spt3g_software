@@ -34,8 +34,7 @@ void G3EventBuilder::AddPolledDataModule(G3ModulePtr mod)
 
 void G3EventBuilder::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 {
-	G3PythonContext ctx("G3EventBuilder", false);
-
+	py::gil_scoped_release gil;
 	std::unique_lock<std::mutex> lock(out_queue_lock_);
 
 	while (out_queue_.empty() && !dead_)
@@ -104,3 +103,6 @@ void G3EventBuilder::ProcessThread(G3EventBuilder *builder)
 	}
 }
 
+PYBINDINGS("core", scope) {
+	register_g3module<G3EventBuilder>(scope, "G3EventBuilder");
+};

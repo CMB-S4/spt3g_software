@@ -13,16 +13,16 @@ if(NOT WITHOUT_SUPERTIMESTREAM)
 endif()
 
 add_spt3g_library(core SHARED
-	src/G3EventBuilder.cxx src/G3Frame.cxx src/G3TimeStamp.cxx
-	src/G3Pipeline.cxx src/G3Writer.cxx src/G3Reader.cxx
-	src/G3InfiniteSource.cxx src/G3Logging.cxx src/G3PrintfLogger.cxx
-	src/G3Data.cxx src/G3Vector.cxx src/G3Map.cxx src/G3Timestream.cxx
-        src/G3Timesample.cxx
-	src/G3TriggeredBuilder.cxx src/G3MultiFileWriter.cxx src/dataio.cxx
-	src/compression.cxx src/crc32.c ${CORE_EXTRA_SRCS}
-	src/G3NetworkSender.cxx src/G3SyslogLogger.cxx
-	src/G3PipelineInfo.cxx src/G3Quat.cxx src/G3Units.cxx
-	src/int_storage.cxx src/pybindings.cxx
+	src/G3Logging.cxx src/G3PrintfLogger.cxx src/G3SyslogLogger.cxx
+	src/crc32.c src/G3Frame.cxx src/G3Data.cxx src/G3TimeStamp.cxx
+	src/G3Pipeline.cxx src/G3PipelineInfo.cxx
+	src/int_storage.cxx src/G3Vector.cxx src/G3Map.cxx
+	src/dataio.cxx src/compression.cxx
+	src/G3Reader.cxx src/G3Writer.cxx src/G3MultiFileWriter.cxx
+	src/G3NetworkSender.cxx src/G3InfiniteSource.cxx
+	src/G3EventBuilder.cxx src/G3TriggeredBuilder.cxx
+	src/G3Timestream.cxx src/G3Timesample.cxx src/G3Quat.cxx
+	src/G3Units.cxx ${CORE_EXTRA_SRCS} src/pybindings.cxx
 )
 
 # Link dependencies

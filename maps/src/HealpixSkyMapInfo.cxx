@@ -1,6 +1,5 @@
 #include <cmath>
 
-#include <pybindings.h>
 #include <serialization.h>
 
 #include <G3Units.h>
@@ -11,9 +10,10 @@
 static const double twothird = 2.0 / 3.0;
 static const double twopi = 2 * M_PI;
 
-HealpixSkyMapInfo::HealpixSkyMapInfo(size_t nside, bool nested, bool shifted)
+HealpixSkyMapInfo::HealpixSkyMapInfo(size_t nside_or_npix, bool nested,
+    bool shifted, bool is_npix)
 {
-	initialize(nside, nested, shifted);
+	initialize(nside_or_npix, nested, shifted, is_npix);
 }
 
 HealpixSkyMapInfo::HealpixSkyMapInfo()
@@ -356,10 +356,10 @@ HealpixSkyMapInfo::RingAbove(double z) const
 }
 
 void
-HealpixSkyMapInfo::GetInterpPixelsWeights(const Quat &q, std::vector<size_t> & pixels,
+HealpixSkyMapInfo::GetInterpPixelsWeights(const Quat &q, std::vector<uint64_t> & pixels,
     std::vector<double> & weights) const
 {
-	pixels = std::vector<size_t>(4, (size_t) -1);
+	pixels = std::vector<uint64_t>(4, (uint64_t) -1);
 	weights = std::vector<double>(4, 0);
 
 	double z = q.d() / sqrt(dot3(q, q));
@@ -445,11 +445,11 @@ HealpixSkyMapInfo::GetInterpPixelsWeights(const Quat &q, std::vector<size_t> & p
 	}
 }
 
-std::vector<size_t>
+std::vector<uint64_t>
 HealpixSkyMapInfo::QueryDisc(const Quat &q, double radius) const
 {
 	size_t n = 0;
-	auto pixels = std::vector<size_t>(n);
+	auto pixels = std::vector<uint64_t>(n);
 
 	radius /= G3Units::rad;
 	if (radius >= M_PI) {

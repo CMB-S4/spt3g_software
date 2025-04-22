@@ -85,53 +85,79 @@ private:
 };
 
 template <class T>
-struct g3frameobject_picklesuite : boost::python::pickle_suite
+struct g3frameobject_picklesuite : py::pickle_suite, py::def_visitor<g3frameobject_picklesuite<T> >
 {
-	static boost::python::tuple getstate(boost::python::object obj)
+	static py::tuple getstate(const py::object &obj)
 	{
-		namespace bp = boost::python;
 		std::vector<char> buffer;
 		G3BufferOutputStream os(buffer);
 		{
 			cereal::PortableBinaryOutputArchive ar(os);
-			ar << bp::extract<const T &>(obj)();
+			ar << py::extract<const T &>(obj)();
 		}
 		os.flush();
 
-		return boost::python::make_tuple(obj.attr("__dict__"),
-		    bp::object(bp::handle<>(
+		return py::make_tuple(obj.attr("__dict__"),
+		    py::object(py::handle<>(
 		    PyBytes_FromStringAndSize(&buffer[0], buffer.size()))));
 	}
 
-	static void setstate(boost::python::object obj,	
-	    boost::python::tuple state)
+	static void setstate(py::object &obj, py::tuple state)
 	{
-		namespace bp = boost::python;
 		Py_buffer view;
-		PyObject_GetBuffer(bp::object(state[1]).ptr(), &view,
+		PyObject_GetBuffer(py::object(state[1]).ptr(), &view,
 		    PyBUF_SIMPLE);
 
 		G3BufferInputStream fis((char *)view.buf, view.len);
 		cereal::PortableBinaryInputArchive ar(fis);
 
-		bp::extract<bp::dict>(obj.attr("__dict__"))().update(state[0]);
-		ar >> bp::extract<T &>(obj)();
+		py::extract<py::dict>(obj.attr("__dict__"))().update(state[0]);
+		ar >> py::extract<T &>(obj)();
 		PyBuffer_Release(&view);
 	}
+
+private:
+	template <class C>
+	void visit(C& cls) const {
+		cls.def_pickle(*this);
+	}
+
+	friend class py::def_visitor_access;
 };
 
-template <class T>
-inline uint32_t
-_g3_class_version(T *)
+template <typename T>
+void
+register_pointer_conversions()
 {
-	return cereal::detail::Version<T>::version;
+	py::implicitly_convertible<std::shared_ptr<T>, G3FrameObjectPtr>();
+	py::implicitly_convertible<std::shared_ptr<T>, std::shared_ptr<const T> >();
+	py::implicitly_convertible<std::shared_ptr<T>, G3FrameObjectConstPtr>();
 }
 
-#define G3_CHECK_VERSION(v) \
-	if ((uint32_t)v > _g3_class_version(this)) \
-		log_fatal("Trying to read newer class version (%d) than " \
-		    "supported (%d). Please upgrade your software.", v, \
-		    _g3_class_version(this));
-	
+// Register a G3FrameObject-derived class.  Includes a copy constructor,
+// pickling interface, and string representation.
+template <typename T, typename... Bases, typename... Args>
+auto
+register_frameobject(py::module_ &scope, const std::string &name, Args&&...args)
+{
+	auto cls = register_class_copyable<T, Bases..., G3FrameObject>(scope, name.c_str(),
+	    std::forward<Args>(args)...);
+
+	// copy constructor
+	cls.def(py::init<const T &>("Copy constructor"));
+
+	// pickling infrastructure
+	cls.def(g3frameobject_picklesuite<T>());
+
+	// string representation
+	cls.def("__str__", &T::Summary)
+	    .def("Summary", &T::Summary, "Short (one-line) description of the object")
+	    .def("Description", &T::Description,
+	        "Long-form human-readable description of the object");
+
+	register_pointer_conversions<T>();
+
+	return cls;
+}
 
 #endif

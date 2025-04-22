@@ -3,11 +3,6 @@
 #include <G3Frame.h>
 #include <G3Map.h>
 
-#include <exception>
-#include <stdint.h>
-
-using namespace std;
-
 class G3TimesampleMap : public G3MapFrameObject {
 	// Storage for a set of co-sampled data vectors, and the single
 	// vector of associated timestamps.  The vectors can have
@@ -20,32 +15,14 @@ public:
 	bool Check() const;
 	void Sort();
 
-	string Description() const;
-	string Summary() const;
+	std::string Description() const;
+	std::string Summary() const;
 
 	template <class A> void serialize(A &ar, unsigned v);
-};
 
-// This specialization tells cereal to use G3TimesampleMap::serialize
-// and not the base class' load/save.
-namespace cereal {
-	template <class A> struct specialize<
-	    A, G3TimesampleMap, cereal::specialization::member_serialize> {};
-}
+private:
+	SET_LOGGER("G3TimesampleMap");
+};
 
 G3_POINTERS(G3TimesampleMap);
 G3_SERIALIZABLE(G3TimesampleMap, 0);
-
-class g3timesample_exception : std::exception
-{
-	// Exception raised when internal validity checks fail.  This will
-	// also be mapped to some particular Python exception type.
-public:
-	std::string text;
-	g3timesample_exception(std::string text) :
-	    text{text} {}
-
-	std::string msg_for_python() const throw() {
-		return text;
-	}
-};

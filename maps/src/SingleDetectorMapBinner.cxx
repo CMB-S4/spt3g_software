@@ -38,16 +38,19 @@ private:
 	SET_LOGGER("SingleDetectorMapBinner");
 };
 
-EXPORT_G3MODULE("maps", SingleDetectorMapBinner,
-    (init<const G3SkyMap &, std::string, std::string, std::string>
-     ((arg("stub_map"), arg("pointing"), arg("timestreams"),
-       arg("bolo_properties_name")="BolometerProperties"))),
-"Makes a simple binned map of the sky, in sky coordinates, for every "
-"detector present in the given <timestreams>. Boresight pointing is specified "
-"by the <pointing> argument, with per-detector offsets from boresight as "
-"stored in the given bolometer properties map. The map parameters are copied "
-"from <stub_map>. When processing ends, this module will emit one map frame "
-"per detector, including per-detector (unpolarized) weights.");
+PYBINDINGS("maps", scope) {
+	register_g3module<SingleDetectorMapBinner>(scope, "SingleDetectorMapBinner",
+	    "Makes a simple binned map of the sky, in sky coordinates, for every "
+	    "detector present in the given <timestreams>. Boresight pointing is specified "
+	    "by the <pointing> argument, with per-detector offsets from boresight as "
+	    "stored in the given bolometer properties map. The map parameters are copied "
+	    "from <stub_map>. When processing ends, this module will emit one map frame "
+	    "per detector, including per-detector (unpolarized) weights.")
+	    .def(py::init<const G3SkyMap &, std::string, std::string, std::string>(),
+	        py::arg("stub_map"), py::arg("pointing"), py::arg("timestreams"),
+	        py::arg("bolo_properties_name")="BolometerProperties")
+	;
+};
 
 SingleDetectorMapBinner::SingleDetectorMapBinner(
     const G3SkyMap &stub_map, std::string pointing, std::string timestreams,
