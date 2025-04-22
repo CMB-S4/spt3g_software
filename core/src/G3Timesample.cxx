@@ -244,7 +244,7 @@ void safe_set_times(G3TimesampleMap &self, G3VectorTime _times)
 
 PYBINDINGS("core", scope)
 {
-	register_g3map<G3TimesampleMap, true>(scope, "G3TimesampleMap",
+	register_map<G3TimesampleMap, true>(scope, "G3TimesampleMap",
 	    "Mapping from string to vectors of data, with an associated "
 	    "vector of timestamps.  This object is for storing multiple "
 	    "co-sampled vectors with a single set of (irregular) timestamps.")
@@ -258,5 +258,8 @@ PYBINDINGS("core", scope)
           "Concatenate two compatible G3TimesampleMap.")
 	.def("sort", &G3TimesampleMap::Sort,
           "Sort all element vectors by time, in-place.")
+	.def_pickle(g3frameobject_picklesuite<G3TimesampleMap>())
 	;
+
+	register_pointer_conversions<G3TimesampleMap>();
 }
