@@ -1090,27 +1090,30 @@ flatskymap_getitem_masked(const FlatSkyMap &skymap, const G3SkyMapMask &m)
 }
 
 static void
-flatskymap_setitem_masked(FlatSkyMap &skymap, const G3SkyMapMask &m,
-    py::object val)
+flatskymap_setitem_masked_scalar(FlatSkyMap &skymap, const G3SkyMapMask &m,
+    double dval)
 {
 	g3_assert(m.IsCompatible(skymap));
 
-	if (py::extract<double>(val).check()) {
-		double dval = py::extract<double>(val)();
-		for (auto i : skymap) {
-			if (m.at(i.first))
-				skymap[i.first] = dval;
-		}
-	} else {
-		// XXX: the iterable case probably be optimized for numpy arrays
-		// XXX: check for size congruence first?
-		size_t j = 0;
-		for (auto i : skymap) {
-			if (m.at(i.first)) {
-				skymap[i.first] = py::extract<double>(val[j])();
-				j++;
-			}
-		}
+	for (auto i : skymap) {
+		if (m.at(i.first))
+			skymap[i.first] = dval;
+	}
+}
+
+static void
+flatskymap_setitem_masked(FlatSkyMap &skymap, const G3SkyMapMask &m,
+    const std::vector<double> &val)
+{
+	g3_assert(m.IsCompatible(skymap));
+
+	if (val.size() != m.sum())
+		throw py::value_error("Item dimensions do not match masked area");
+
+	size_t j = 0;
+	for (auto i : skymap) {
+		if (m.at(i.first))
+			skymap[i.first] = val[j++];
 	}
 }
 
@@ -1373,6 +1376,7 @@ PYBINDINGS("maps", scope)
 	    .def("__setitem__", flatskymap_setslice_1d)
 	    .def("__getitem__", flatskymap_getitem_masked)
 	    .def("__setitem__", flatskymap_setitem_masked)
+	    .def("__setitem__", flatskymap_setitem_masked_scalar)
 	;
 
 	// Add buffer protocol interface

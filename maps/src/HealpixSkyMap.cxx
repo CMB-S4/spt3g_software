@@ -1102,27 +1102,30 @@ HealpixSkyMap_getitem_masked(const HealpixSkyMap &skymap, const G3SkyMapMask &m)
 }
 
 static void
-HealpixSkyMap_setitem_masked(HealpixSkyMap &skymap, const G3SkyMapMask &m,
-    py::object val)
+HealpixSkyMap_setitem_masked_scalar(HealpixSkyMap &skymap, const G3SkyMapMask &m,
+    double dval)
 {
 	g3_assert(m.IsCompatible(skymap));
 
-	if (py::extract<double>(val).check()) {
-		double dval = py::extract<double>(val)();
-		for (auto i : skymap) {
-			if (m.at(i.first))
-				skymap[i.first] = dval;
-		}
-	} else {
-		// XXX: the iterable case probably be optimized for numpy arrays
-		// XXX: check for size congruence first?
-		size_t j = 0;
-		for (auto i : skymap) {
-			if (m.at(i.first)) {
-				skymap[i.first] = py::extract<double>(val[j])();
-				j++;
-			}
-		}
+	for (auto i : skymap) {
+		if (m.at(i.first))
+			skymap[i.first] = dval;
+	}
+}
+
+static void
+HealpixSkyMap_setitem_masked(HealpixSkyMap &skymap, const G3SkyMapMask &m,
+    const std::vector<double> &val)
+{
+	g3_assert(m.IsCompatible(skymap));
+
+	if (val.size() != m.sum())
+		throw py::value_error("Item dimensions do not match masked area");
+
+	size_t j = 0;
+	for (auto i : skymap) {
+		if (m.at(i.first))
+			skymap[i.first] = val[j++];
 	}
 }
 
@@ -1226,9 +1229,9 @@ PYBINDINGS("maps", scope)
 	    .def(py::init<const std::vector<uint64_t> &, const std::vector<double> &,
 	        size_t, bool, bool, MapCoordReference, G3Timestream::TimestreamUnits,
 		G3SkyMap::MapPolType, G3SkyMap::MapPolConv>(),
-	        py::arg("nside"),
 	        py::arg("index"),
 	        py::arg("data"),
+	        py::arg("nside"),
 	        py::arg("weighted") = true,
 	        py::arg("nested") = false,
 	        py::arg("coord_ref") = MapCoordReference::Equatorial,
@@ -1280,6 +1283,7 @@ PYBINDINGS("maps", scope)
 	    .def("__setitem__", &skymap_setitem)
 	    .def("__getitem__", HealpixSkyMap_getitem_masked)
 	    .def("__setitem__", HealpixSkyMap_setitem_masked)
+	    .def("__setitem__", HealpixSkyMap_setitem_masked_scalar)
 
 	    .def("nonzero_pixels", &HealpixSkyMap_nonzeropixels,
 		"Returns a list of the indices of the non-zero pixels in the "
