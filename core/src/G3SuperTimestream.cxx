@@ -1,6 +1,9 @@
 #include <G3Logging.h>
 #include <G3Timestream.h>
-#include <serialization.h>
+
+#include <cereal/archives/portable_binary.hpp>
+#include <cereal/types/string.hpp>
+#include <cereal/types/vector.hpp>
 
 /*
   This is a minimal implementation of the Simons Observatory timestream storage
@@ -26,9 +29,6 @@ private:
 };
 
 namespace cereal {
-	template <class A> struct specialize<A, G3SuperTimestream,
-	    cereal::specialization::member_load_save> {};
-
 	// Convert to G3TimestreamMap before handing off to the user
 	namespace detail {
 		template <> inline std::shared_ptr<void>
@@ -40,7 +40,7 @@ namespace cereal {
 	}
 }
 
-G3_SERIALIZABLE(G3SuperTimestream, 0);
+G3_SPLIT_SERIALIZABLE(G3SuperTimestream, 0);
 
 // Everything below is just the deserialization implementation, largely copied
 // wholesale from the simonsobs/so3g library, and rearranged to handle decompression
