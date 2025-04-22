@@ -72,7 +72,7 @@ void G3Vector<int64_t>::save(A &ar, const unsigned v) const
 	default:
 		ar & cereal::make_nvp("vector",
 		    cereal::base_class<std::vector<int64_t> >(this));
-	}		
+	}
 }
 
 template <typename T, typename V>
@@ -252,7 +252,6 @@ PYBINDINGS("core", scope) {
 
 	register_vector_of<std::string>(scope, "String");
 	register_g3vector<G3VectorString>(scope, "G3VectorString", "List of strings.");
-
 	register_vector_of<G3VectorString>(scope, "G3VectorString");
 	register_g3vector<G3VectorVectorString>(scope, "G3VectorVectorString",
 	    "List of lists of strings.");
@@ -269,3 +268,4 @@ PYBINDINGS("core", scope) {
 	register_g3vector<G3VectorTime>(scope, "G3VectorTime", py::buffer_protocol(),
 	    "List of times.");
 }
+

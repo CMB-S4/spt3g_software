@@ -1469,8 +1469,7 @@ PYBINDINGS("maps", scope) {
 	      py::arg("alphas"), py::arg("deltas"),
 	       "Compute the 1D pixel location for each of the sky coordinates "
 	       "(vectorized)")
-	    .def("pixels_to_angles", &skymap_pixels_to_angles,
-	      py::arg("pixels"),
+	    .def("pixels_to_angles", &skymap_pixels_to_angles, py::arg("pixels"),
 	       "Compute the sky coordinates of each of the given 1D pixels "
 	       "(vectorized)")
 	    .def("angle_to_pixel", &G3SkyMap::AnglesToPixels,

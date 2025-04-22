@@ -132,5 +132,5 @@ PYBINDINGS("core", scope) {
 	    .def("seek", &G3Reader::Seek,
 	        "Position the stream read pointer at specific byte offset. "
 	        "Note that once EOF is reached, seek does not work anymore.");
-};
+}
 

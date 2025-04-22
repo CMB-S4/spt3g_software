@@ -53,4 +53,4 @@ PYBINDINGS("core", scope) {
 	    .def("flush", &G3Writer::Flush)
 	    .def("tell", &G3Writer::Tell)
 	;
-};
+}
