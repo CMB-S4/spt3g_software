@@ -101,9 +101,8 @@ register_g3module<SingleDetectorBoresightBinner>(scope, "SingleDetectorBoresight
 "        pointing='OffsetRotation',\n"
 "    )\n"
 )
-  .def(py::init<const G3SkyMap &, std::string, std::string>((
+  .def(py::init<const G3SkyMap &, std::string, std::string>(),
      py::arg("stub_map"), py::arg("pointing"), py::arg("timestreams"))
-     ))
 ;
 };
 

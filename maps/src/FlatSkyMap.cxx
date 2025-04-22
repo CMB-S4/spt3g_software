@@ -1232,7 +1232,7 @@ PYBINDINGS("maps", scope)
 {
 	// Can't use the normal FRAMEOBJECT code since this inherits
 	// from an intermediate class. Expanded by hand here.
-	py::object fsm = register_frameobject<FlatSkyMap, G3SkyMap>(scope, "FlatSkyMap",
+	auto fsm = register_frameobject<FlatSkyMap, G3SkyMap>(scope, "FlatSkyMap",
 	  "FlatSkyMap is a G3SkyMap with the extra meta information about the "
 	  "particular flat sky projection included.  In practice it behaves "
 	  "(mostly) like a 2d numpy array.  The pixels are normally indexed with "
@@ -1248,8 +1248,8 @@ PYBINDINGS("maps", scope)
 	    .def(py::init<size_t, size_t, double, bool, MapProjection, double,
 	       double, MapCoordReference, G3Timestream::TimestreamUnits,
 	       G3SkyMap::MapPolType, double, double, double, bool,
-	       G3SkyMap::MapPolConv>(
-		 (py::arg("x_len"), py::arg("y_len"), py::arg("res"),
+	       G3SkyMap::MapPolConv>(),
+		  py::arg("x_len"), py::arg("y_len"), py::arg("res"),
 		  py::arg("weighted") = true,
 		  py::arg("proj") = MapProjection::ProjNone,
 		  py::arg("alpha_center") = 0, py::arg("delta_center") = 0,
@@ -1258,9 +1258,8 @@ PYBINDINGS("maps", scope)
 		  py::arg("pol_type") = G3SkyMap::None, py::arg("x_res") = 0.0 / 0.0,
 		  py::arg("x_center") = 0.0 / 0.0, py::arg("y_center") = 0.0 / 0.0,
 		  py::arg("flat_pol") = false,
-		  py::arg("pol_conv") = G3SkyMap::ConvNone),
+		  py::arg("pol_conv") = G3SkyMap::ConvNone,
 		"Instantiate an empty flat sky map object")
-		)
 	    .def("__init__", py::make_constructor(flatskymap_from_numpy,
 		  py::default_call_policies(),
 		  (py::arg("obj"), py::arg("res"),
@@ -1276,24 +1275,24 @@ PYBINDINGS("maps", scope)
 		  py::arg("pol_conv") = G3SkyMap::ConvNone)),
 		"Instantiate a flat sky map object from a numpy array")
 
-	    .def("array_clone", &flatskymap_array_clone, (py::arg("array")),
+	    .def("array_clone", &flatskymap_array_clone, py::arg("array"),
 	       "Return a map of the same type, populated with a copy of the input "
 	       "numpy array")
-	    .add_property("proj", &FlatSkyMap::proj, &FlatSkyMap::SetProj,
+	    .def_property("proj", &FlatSkyMap::proj, &FlatSkyMap::SetProj,
 	      "Map projection (one of maps.MapProjection)")
-	    .add_property("alpha_center", &FlatSkyMap::alpha_center,
+	    .def_property("alpha_center", &FlatSkyMap::alpha_center,
 	      &FlatSkyMap::SetAlphaCenter, "Horizontal axis center position")
-	    .add_property("delta_center", &FlatSkyMap::delta_center,
+	    .def_property("delta_center", &FlatSkyMap::delta_center,
 	      &FlatSkyMap::SetDeltaCenter, "Vertical axis center position")
-	    .add_property("x_center", &FlatSkyMap::x_center,
+	    .def_property("x_center", &FlatSkyMap::x_center,
 	      &FlatSkyMap::SetXCenter, "Horizontal axis center pixel position")
-	    .add_property("y_center", &FlatSkyMap::y_center,
+	    .def_property("y_center", &FlatSkyMap::y_center,
 	      &FlatSkyMap::SetYCenter, "Vertical axis center pixel position")
-	    .add_property("res", &FlatSkyMap::res, &FlatSkyMap::SetRes,
+	    .def_property("res", &FlatSkyMap::res, &FlatSkyMap::SetRes,
 	      "Map resolution in angular units for maps with square pixels")
-	    .add_property("x_res", &FlatSkyMap::xres, &FlatSkyMap::SetXRes,
+	    .def_property("x_res", &FlatSkyMap::xres, &FlatSkyMap::SetXRes,
 	      "Resolution in X direction for maps with rectangular pixels")
-	    .add_property("y_res", &FlatSkyMap::yres, &FlatSkyMap::SetYRes,
+	    .def_property("y_res", &FlatSkyMap::yres, &FlatSkyMap::SetYRes,
 	      "Resolution in Y direction for maps with rectangular pixels")
 
 	    .def("pixel_to_angle",
@@ -1301,38 +1300,38 @@ PYBINDINGS("maps", scope)
 	      "Compute the sky coordinates of the given 1D pixel")
 	    .def("pixel_to_angle",
 	      (std::vector<double> (FlatSkyMap::*)(size_t, size_t) const)
-	      &FlatSkyMap::PixelToAngle, (py::arg("x"), py::arg("y")),
+	      &FlatSkyMap::PixelToAngle, py::arg("x"), py::arg("y"),
 	      "Compute the sky coordinates of the given 2D pixel (also see "
 	      "xy_to_angle()).")
 
-	    .def("xy_to_angle", &FlatSkyMap::XYToAngle, (py::arg("x"), py::arg("y")),
+	    .def("xy_to_angle", &FlatSkyMap::XYToAngle, py::arg("x"), py::arg("y"),
 	       "Compute the sky coordinates of the input flat 2D coordinates")
-	    .def("xy_to_angle", flatskymap_xy_to_angles, (py::arg("x"), py::arg("y")),
+	    .def("xy_to_angle", flatskymap_xy_to_angles, py::arg("x"), py::arg("y"),
 	       "Compute the sky coordinates of the input flat 2D coordinates (vectorized)")
-	    .def("angle_to_xy", &FlatSkyMap::AngleToXY, (py::arg("alpha"), py::arg("delta")),
+	    .def("angle_to_xy", &FlatSkyMap::AngleToXY, py::arg("alpha"), py::arg("delta"),
 	       "Compute the flat 2D coordinates of the input sky coordinates")
-	    .def("angle_to_xy", flatskymap_angles_to_xy, (py::arg("alpha"), py::arg("delta")),
+	    .def("angle_to_xy", flatskymap_angles_to_xy, py::arg("alpha"), py::arg("delta"),
 	       "Compute the flat 2D coordinates of the input sky coordinates (vectorized)")
 
-	    .def("xy_to_pixel", &FlatSkyMap::XYToPixel, (py::arg("x"), py::arg("y")),
+	    .def("xy_to_pixel", &FlatSkyMap::XYToPixel, py::arg("x"), py::arg("y"),
 	       "Compute the pixel index of the input flat 2D coordinates")
-	    .def("xy_to_pixel", flatskymap_xy_to_pixels, (py::arg("x"), py::arg("y")),
+	    .def("xy_to_pixel", flatskymap_xy_to_pixels, py::arg("x"), py::arg("y"),
 	       "Compute the pixel indices of the input flat 2D coordinates (vectorized)")
-	    .def("pixel_to_xy", &FlatSkyMap::PixelToXY, (py::arg("pixel")),
+	    .def("pixel_to_xy", &FlatSkyMap::PixelToXY, py::arg("pixel"),
 	       "Compute the flat 2D coordinates of the input pixel index")
-	    .def("pixel_to_xy", flatskymap_pixels_to_xy, (py::arg("pixel")),
+	    .def("pixel_to_xy", flatskymap_pixels_to_xy, py::arg("pixel"),
 	       "Compute the flat 2D coordinates of the input pixel indices (vectorized)")
 
-	    .def("xy_to_quat", &FlatSkyMap::XYToQuat, (py::arg("x"), py::arg("y")),
+	    .def("xy_to_quat", &FlatSkyMap::XYToQuat, py::arg("x"), py::arg("y"),
 	       "Compute the quaternion rotation of the input flat 2D coordinates")
-	    .def("xy_to_quat", flatskymap_xy_to_quats, (py::arg("x"), py::arg("y")),
+	    .def("xy_to_quat", flatskymap_xy_to_quats, py::arg("x"), py::arg("y"),
 	       "Compute the quaternion rotations of the input flat 2D coordinates (vectorized)")
-	    .def("quat_to_xy", &FlatSkyMap::QuatToXY, (py::arg("quat")),
+	    .def("quat_to_xy", &FlatSkyMap::QuatToXY, py::arg("quat"),
 	       "Compute the flat 2D coordinates of the input quaternion rotation")
-	    .def("quat_to_xy", flatskymap_quats_to_xy, (py::arg("quat")),
+	    .def("quat_to_xy", flatskymap_quats_to_xy, py::arg("quat"),
 	       "Compute the flat 2D coordinates of the input quaternion rotations (vectorized)")
 
-	    .add_property("sparse", flatskymap_pysparsity_get, flatskymap_pysparsity_set,
+	    .def_property("sparse", flatskymap_pysparsity_get, flatskymap_pysparsity_set,
 	       "True if the map is stored with column and row zero-suppression, False if "
 	       "every pixel is stored. Map sparsity can be changed by setting this to True "
 	       "(or False).")
@@ -1342,8 +1341,8 @@ PYBINDINGS("maps", scope)
 		"map and a list of the values of those non-zero pixels.")
 
 	    .def("extract_patch", &FlatSkyMap::ExtractPatch,
-		(py::arg("x0"), py::arg("y0"), py::arg("width"), py::arg("height"),
-		 py::arg("fill") = 0),
+		py::arg("x0"), py::arg("y0"), py::arg("width"), py::arg("height"),
+		py::arg("fill") = 0,
 		"Returns a map of shape (width, height) containing a rectangular patch "
 		"of the parent map.  Pixel (width // 2, height // 2) of the output map "
 		"corresponds to pixel (x0, y0) in the parent map, and the angular "
@@ -1351,7 +1350,7 @@ PYBINDINGS("maps", scope)
 		"pixels can be optionally filled.")
 
 	    .def("insert_patch", &FlatSkyMap::InsertPatch,
-		(py::arg("patch"), py::arg("ignore_zeros") = false),
+		py::arg("patch"), py::arg("ignore_zeros") = false,
 		"Inserts a patch (e.g. as extracted using extract_patch) into the "
 		"parent map.  The coordinate system and angular center of the patch "
 		"must match that of the parent map.  If ignore_zeros is True, "
@@ -1359,12 +1358,12 @@ PYBINDINGS("maps", scope)
 		"for preserving the sparsity of the parent map.")
 
 	    .def("reshape", &FlatSkyMap::Reshape,
-		(py::arg("width"), py::arg("height"), py::arg("fill") = 0),
+		py::arg("width"), py::arg("height"), py::arg("fill") = 0,
 		"Returns a map of shape (width, height) containing the parent map "
 		"centered within it.  The angular location of each pixel on the sky "
 		"is maintained.  Surrounding empty pixels can be optionally filled.")
 
-	    .add_property("flat_pol", &FlatSkyMap::IsPolFlat, &FlatSkyMap::SetFlatPol,
+	    .def_property("flat_pol", &FlatSkyMap::IsPolFlat, &FlatSkyMap::SetFlatPol,
 		"True if this map has been flattened using flatten_pol.")
 
 	    .def("__getitem__", flatskymap_getitem_1d)

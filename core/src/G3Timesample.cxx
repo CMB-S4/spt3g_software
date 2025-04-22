@@ -244,15 +244,10 @@ void safe_set_times(G3TimesampleMap &self, G3VectorTime _times)
 
 PYBINDINGS("core", scope)
 {
-	// This is based on register_g3map macro.
-	register_frameobject<G3TimesampleMap,
-	    std::map<typename G3TimesampleMap::key_type,
-                     typename G3TimesampleMap::mapped_type> >(scope, "G3TimesampleMap",
+	register_g3map<G3TimesampleMap, true>(scope, "G3TimesampleMap",
 	    "Mapping from string to vectors of data, with an associated "
 	    "vector of timestamps.  This object is for storing multiple "
 	    "co-sampled vectors with a single set of (irregular) timestamps.")
-	.def(py::init<>())
-	.def(py::std_map_indexing_suite<G3TimesampleMap, true>())
 	.def("__setitem__", &safe_set_item)
 	// Extensions for G3TimesampleMap are here:
 	.add_property("times", &G3TimesampleMap::times, &safe_set_times,

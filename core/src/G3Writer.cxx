@@ -47,9 +47,9 @@ PYBINDINGS("core", scope) {
 	    "types to the second optional argument (streams). If no streams argument "
 	    "is given, writes all types of frames. If append is set to True, will "
 	    "append frames to its output file rather than overwriting it.")
-	    .def(py::init<std::string, std::vector<G3Frame::FrameType>, bool, size_t>((
+	    .def(py::init<std::string, std::vector<G3Frame::FrameType>, bool, size_t>(),
 	        py::arg("filename"), py::arg("streams")=std::vector<G3Frame::FrameType>(),
-	        py::arg("append")=false, py::arg("buffersize")=1024*1024)))
+	        py::arg("append")=false, py::arg("buffersize")=1024*1024)
 	    .def("flush", &G3Writer::Flush)
 	    .def("tell", &G3Writer::Tell)
 	;

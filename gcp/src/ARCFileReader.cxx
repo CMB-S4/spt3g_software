@@ -864,14 +864,14 @@ PYBINDINGS("gcp", scope) {
 	    "For non-SPT ARC file formats, please set Experiment to the "
 	    "appropriate value.  Set track_filename to True to record the "
 	    "filename for each frame in the ._filename attribute (fragile).")
-		.def(py::init<std::string, Experiment, float, bool, size_t>((
+		.def(py::init<std::string, Experiment, float, bool, size_t>(),
 			py::arg("filename"), py::arg("experiment")=Experiment::SPT,
 			py::arg("timeout")=-1., py::arg("track_filename")=false,
-			py::arg("buffersize")=1024*1024)))
-		.def(py::init<std::vector<std::string>, Experiment, float, bool, size_t>((
+			py::arg("buffersize")=1024*1024)
+		.def(py::init<std::vector<std::string>, Experiment, float, bool, size_t>(),
 			py::arg("filename"), py::arg("experiment")=Experiment::SPT,
 			py::arg("timeout")=-1., py::arg("track_filename")=false,
-			py::arg("buffersize")=1024*1024)))
+			py::arg("buffersize")=1024*1024)
 	;
 }
 

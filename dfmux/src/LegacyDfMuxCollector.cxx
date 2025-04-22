@@ -310,9 +310,9 @@ PYBINDINGS("dfmux", scope)
 	    "If boards running in multicast code, also takes the address of the "
 	    "interface on which to listen and the multicast group address. "
 	    "Only works with DAN streamers.")
-	    .def(py::init<int, G3EventBuilderPtr, const char *, const char *>((
+	    .def(py::init<int, G3EventBuilderPtr, const char *, const char *>(),
 	        py::arg("port"), py::arg("builder"), py::arg("mcastlistenaddr")="",
-	        py::arg("mcastgroupaddr")="")))
+	        py::arg("mcastgroupaddr")="")
 	    .def("Start", &LegacyDfMuxCollector::Start)
 	    .def("Stop", &LegacyDfMuxCollector::Stop)
 	;

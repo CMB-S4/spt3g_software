@@ -230,7 +230,7 @@ PYBINDINGS("dfmux", scope) {
 	    "timestreams, any scalar floating numbers that recur in every input "
 	    "Timepoint frame will be combined into a G3Timestream of the same name "
             "stored in the output scan frame.")
-	    .def(py::init<bool, bool, bool>((py::arg("flac_compress")=true,
-	        py::arg("drop_timepoints")=true, py::arg("record_sampletimes")=true)))
+	    .def(py::init<bool, bool, bool>(), py::arg("flac_compress")=true,
+	        py::arg("drop_timepoints")=true, py::arg("record_sampletimes")=true)
 	;
 };

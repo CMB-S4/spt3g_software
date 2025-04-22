@@ -20,6 +20,6 @@ PYBINDINGS("core", scope) {
 	register_g3module<G3InfiniteSource>(scope, "G3InfiniteSource",
 	    "Emits infinite frames, up to an optional maximum number n")
 	    .def(py::init<>())
-	    .def(py::init<G3Frame::FrameType, int>(
-	        (py::arg("type")=G3Frame::None, py::arg("n")=-1)));
+	    .def(py::init<G3Frame::FrameType, int>(),
+	        py::arg("type")=G3Frame::None, py::arg("n")=-1);
 };

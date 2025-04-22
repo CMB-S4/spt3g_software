@@ -943,31 +943,28 @@ G3TimestreamQuatPtr container_from_object(py::object v)
 	return quat_vec_container_from_object<G3TimestreamQuat>(v);
 }
 
-static int
-G3TimestreamQuat_nsamples(const G3TimestreamQuat &r)
-{
-        return r.size();
-}
 
 PYBINDINGS("core", scope)
 {
-	py::object q =
+	auto q =
 	register_class_copyable<Quat>(scope, "Quat",
-	      "Representation of a quaternion. Data in a,b,c,d.")
+	    "Representation of a quaternion. Data in a,b,c,d.")
 	    .def(py::init<>())
 	    .def(py::init<const Quat &>())
-	    .def(py::init<double, double, double, double>(
-	        "Create a quaternion from its four elements.", py::args("a", "b", "c", "d")))
-	    .def("__init__", py::make_constructor(quat_container_from_object, py::default_call_policies(),
-	        (py::arg("data"))), "Create a quaternion from a numpy array")
+	    .def(py::init<double, double, double, double>(),
+	        py::arg("a"), py::arg("b"), py::arg("c"), py::arg("d"),
+	        "Create a quaternion from its four elements.")
+	    .def("__init__", py::make_constructor(quat_container_from_object,
+	        py::default_call_policies(), (py::arg("data"))),
+	        "Create a quaternion from a numpy array")
 	    .def_pickle(g3frameobject_picklesuite<Quat>())
-	    .add_property("a", &Quat::a, "Scalar component")
-	    .add_property("b", &Quat::b, "First vector component")
-	    .add_property("c", &Quat::c, "Second vector component")
-	    .add_property("d", &Quat::d, "Third vector component")
-	    .add_property("real", &Quat::real,
+	    .def_property_readonly("a", &Quat::a, "Scalar component")
+	    .def_property_readonly("b", &Quat::b, "First vector component")
+	    .def_property_readonly("c", &Quat::c, "Second vector component")
+	    .def_property_readonly("d", &Quat::d, "Third vector component")
+	    .def_property_readonly("real", &Quat::real,
 	        "The real (scalar) part of the quaternion")
-	    .add_property("unreal", &Quat::unreal,
+	    .def_property_readonly("unreal", &Quat::unreal,
 	        "The unreal (vector) part of the quaternion")
 	    .def(~py::self)
 	    .def(-py::self)
@@ -1011,7 +1008,7 @@ PYBINDINGS("core", scope)
 	;
 
 	register_vector_of<Quat>(scope, "Quat");
-	py::object vq =
+	auto vq =
 	register_g3vector<G3VectorQuat>(scope, "G3VectorQuat",
 	    "List of quaternions. Convertible to a 4xN numpy array. "
 	    "Arithmetic operations on this object are fast and provide "
@@ -1038,7 +1035,7 @@ PYBINDINGS("core", scope)
 	    .def("__abs__", vec_abs)
 	    .def("__neg__", vec_neg)
 	    .def("abs", vec_abs, "Return the Euclidean norm of each quaternion")
-	    .add_property("real", vec_real,
+	    .def_property_readonly("real", vec_real,
 	        "Return the real (scalar) part of each quaternion")
 	;
 	PyTypeObject *vqclass = (PyTypeObject *)vq.ptr();
@@ -1048,7 +1045,7 @@ PYBINDINGS("core", scope)
 	vqclass->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
 #endif
 
-	py::object tq =
+	auto tq =
 	register_frameobject<G3TimestreamQuat, G3VectorQuat>(scope, "G3TimestreamQuat",
 	    "Timestream of quaternions. Identical to a G3VectorQuat except "
 	    "for the addition of start and stop times.")
@@ -1076,15 +1073,15 @@ PYBINDINGS("core", scope)
 	    .def("__abs__", ts_abs)
 	    .def("__neg__", ts_neg)
 	    .def("abs", ts_abs, "Return the Euclidean norm of each quaternion")
-	    .add_property("real", ts_real,
+	    .def_property_readonly("real", ts_real,
 	        "Return the real (scalar) part of each quaternion")
 	    .def_readwrite("start", &G3TimestreamQuat::start,
 	        "Time of the first sample in the time stream")
 	    .def_readwrite("stop", &G3TimestreamQuat::stop,
 	        "Time of the final sample in the timestream")
-	    .add_property("sample_rate", &G3TimestreamQuat::GetSampleRate,
+	    .def_property_readonly("sample_rate", &G3TimestreamQuat::GetSampleRate,
 	        "Computed sample rate of the timestream.")
-	    .add_property("n_samples", &G3TimestreamQuat_nsamples,
+	    .def_property_readonly("n_samples", &G3TimestreamQuat::size,
 	        "Number of samples in the timestream. Equivalent to len(ts)")
 	;
 	PyTypeObject *tqclass = (PyTypeObject *)tq.ptr();

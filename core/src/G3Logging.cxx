@@ -160,7 +160,7 @@ PYBINDINGS("core", scope) {
 	    "Logger that does not log. Useful if you don't want log messages");
 	register_class<G3PrintfLogger, G3Logger>(scope, "G3PrintfLogger",
 	    "Logger that prints error messages to stderr (in color, if stderr is a tty).")
-	    .def(py::init<G3LogLevel>((py::arg("default_level")=G3DefaultLogLevel)))
+	    .def(py::init<G3LogLevel>(), py::arg("default_level")=G3DefaultLogLevel)
 	    .def_readwrite("trim_file_names", &G3PrintfLogger::TrimFileNames)
 	    .def_readwrite("timestamps", &G3PrintfLogger::Timestamps)
 	;
@@ -172,7 +172,7 @@ PYBINDINGS("core", scope) {
 	    "Pass log messages to the syslog service. Initialize with a string identifier "
 	    "and a logging facility. See syslog(3) for details. Example:\n"
 	    "\timport syslog\n\tlogger = core.G3SyslogLogger('myprogram', syslog.LOG_USER)")
-	    .def(py::init<std::string, int, G3LogLevel>((py::arg("ident"), py::arg("facility"),
-	        py::arg("default_level")=G3DefaultLogLevel)))
+	    .def(py::init<std::string, int, G3LogLevel>(), py::arg("ident"), py::arg("facility"),
+	        py::arg("default_level")=G3DefaultLogLevel)
 	;
 }

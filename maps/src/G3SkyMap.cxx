@@ -1435,7 +1435,7 @@ PYBINDINGS("maps", scope) {
 	    .def_readwrite("pol_conv", &G3SkyMap::pol_conv,
 	      "Polarization convention (maps.MapPolConv) of the map "
 	      "(e.g. maps.MapPolConv.IAU or maps.MapPolConv.COSMO).")
-	    .add_property("polarized", &G3SkyMap::IsPolarized,
+	    .def_property_readonly("polarized", &G3SkyMap::IsPolarized,
 	      "True if the pol_conv property is set to IAU or COSMO, False otherwise.")
 	    .def_readwrite("units", &G3SkyMap::units,
 	      "Unit class (core.G3TimestreamUnits) of the map (e.g. "
@@ -1443,12 +1443,12 @@ PYBINDINGS("maps", scope) {
 	      "conversions, for example from K to uK, should use core.G3Units.")
 	    .def_readwrite("weighted", &G3SkyMap::weighted,
 	      "True if map is multiplied by weights")
-	    .add_property("size", &G3SkyMap::size, "Number of pixels in map")
+	    .def_property_readonly("size", &G3SkyMap::size, "Number of pixels in map")
 	    .def("__len__", &G3SkyMap::size, "Number of pixels in map")
-	    .add_property("shape", &skymap_shape, "Shape of map")
-	    .add_property("npix_allocated", &G3SkyMap::NpixAllocated,
+	    .def_property_readonly("shape", &skymap_shape, "Shape of map")
+	    .def_property_readonly("npix_allocated", &G3SkyMap::NpixAllocated,
 	      "Number of pixels in map currently stored in memory")
-	    .add_property("npix_nonzero", &G3SkyMap::NpixNonZero,
+	    .def_property_readonly("npix_nonzero", &G3SkyMap::NpixNonZero,
 	      "Number of nonzero pixels in map currently stored in memory")
 	    .def_readwrite("overflow", &G3SkyMap::overflow,
 	      "Combined value of data processed by "
@@ -1457,7 +1457,7 @@ PYBINDINGS("maps", scope) {
 	    .def("__setitem__", &skymap_setitem)
 	    .def("__copy__", &skymap_copy)
 	    .def("copy", &skymap_copy, "Return a copy of the map object")
-	    .def("clone", &G3SkyMap::Clone, (py::arg("copy_data")=true),
+	    .def("clone", &G3SkyMap::Clone, py::arg("copy_data")=true,
 	       "Return a map of the same type, populated with a copy of the data "
 	       "if the argument is true (default), empty otherwise.")
 	    .def("compatible", &G3SkyMap::IsCompatible,
@@ -1466,17 +1466,17 @@ PYBINDINGS("maps", scope) {
 	    .def("nonzero", &pyskymap_nonzero, "Return indices of non-zero pixels in the map")
 
 	    .def("angles_to_pixels", &G3SkyMap::AnglesToPixels,
-	      (py::arg("alphas"), py::arg("deltas")),
+	      py::arg("alphas"), py::arg("deltas"),
 	       "Compute the 1D pixel location for each of the sky coordinates "
 	       "(vectorized)")
-	    .def("pixels_to_angles", &skymap_pixels_to_angles, (py::arg("pixels")),
+	    .def("pixels_to_angles", &skymap_pixels_to_angles, py::arg("pixels"),
 	       "Compute the sky coordinates of each of the given 1D pixels "
 	       "(vectorized)")
 	    .def("angle_to_pixel", &G3SkyMap::AnglesToPixels,
-	      (py::arg("alphas"), py::arg("deltas")),
+	      py::arg("alphas"), py::arg("deltas"),
 	       "Compute the 1D pixel location for each of the sky coordinates "
 	       "(vectorized)")
-	    .def("pixel_to_angle", &skymap_pixels_to_angles, (py::arg("pixels")),
+	    .def("pixel_to_angle", &skymap_pixels_to_angles, py::arg("pixels"),
 	       "Compute the sky coordinates of each of the given 1D pixels "
 	       "(vectorized)")
 	    .def("quats_to_pixels", &G3SkyMap::QuatsToPixels,
@@ -1486,9 +1486,9 @@ PYBINDINGS("maps", scope) {
 	       "Compute the sky coordinates, expressed as quaternion rotations "
 	       "from the pole, for each of the given 1-D pixel coordinates.")
 	    .def("angle_to_pixel", &G3SkyMap::AngleToPixel,
-	      (py::arg("alpha"), py::arg("delta")),
+	      py::arg("alpha"), py::arg("delta"),
 	       "Compute the 1D pixel location of the given sky position.")
-	    .def("pixel_to_angle", &skymap_pixel_to_angle, (py::arg("pixel")),
+	    .def("pixel_to_angle", &skymap_pixel_to_angle, py::arg("pixel"),
 	       "Compute the sky coordinates (alpha, delta) of the given 1D pixel")
 	    .def("quat_to_pixel", &G3SkyMap::QuatToPixel,
 	       "Compute the 1D pixel location of the given sky position, "
@@ -1506,21 +1506,21 @@ PYBINDINGS("maps", scope) {
 	    .def("query_disc",
 	      (std::vector<uint64_t> (G3SkyMap::*)(double, double, double) const)
 		&G3SkyMap::QueryDisc,
-	       (py::arg("alpha"), py::arg("delta"), py::arg("radius")),
+	       py::arg("alpha"), py::arg("delta"), py::arg("radius"),
 	       "Return a list of pixel indices whose centers are located within "
 	       "a disc of the given radius at the given sky coordinates.")
 
 	    .def("query_disc",
 	      (std::vector<uint64_t> (G3SkyMap::*)(const Quat &, double) const)
 		&G3SkyMap::QueryDisc,
-	       (py::arg("quat"), py::arg("radius")),
+	       py::arg("quat"), py::arg("radius"),
 	       "Return a list of pixel indices whose centers are located within "
 	       "a disc of the given radius at the given sky coordinates.")
 
 	    .def("query_alpha_ellipse",
 	      (std::vector<uint64_t> (G3SkyMap::*)(double, double, double, double) const)
 		&G3SkyMap::QueryAlphaEllipse,
-	       (py::arg("alpha"), py::arg("delta"), py::arg("a"), py::arg("b")),
+	       py::arg("alpha"), py::arg("delta"), py::arg("a"), py::arg("b"),
 	       "Return a list of pixel indices whose centers are located within an "
 	       "ellipse extended in the alpha direction, at the given alpha and "
 	       "delta sky coordinates, with semimajor and semiminor axes a and b.")
@@ -1528,7 +1528,7 @@ PYBINDINGS("maps", scope) {
 	    .def("query_alpha_ellipse",
 	      (std::vector<uint64_t> (G3SkyMap::*)(const Quat &, double, double) const)
 		&G3SkyMap::QueryAlphaEllipse,
-	       (py::arg("quat"), py::arg("a"), py::arg("b")),
+	       py::arg("quat"), py::arg("a"), py::arg("b"),
 	       "Return a list of pixel indices whose centers are located within an "
 	       "ellipse extended in the alpha direction, at the given alpha and "
 	       "delta sky coordinates, with semimajor and semiminor axes a and b.")
@@ -1536,38 +1536,38 @@ PYBINDINGS("maps", scope) {
 	    .def("get_interp_values",
 	      (std::vector<double> (G3SkyMap::*)(const std::vector<double> &,
 		const std::vector<double> &) const) &G3SkyMap::GetInterpValues,
-	      (py::arg("alphas"), py::arg("deltas")),
+	      py::arg("alphas"), py::arg("deltas"),
 	       "Return the values at each of the input coordinate locations. "
 	       "Computes each value using bilinear interpolation over the "
 	       "map pixels.")
 
 	    .def("get_interp_values",
 	      (std::vector<double> (G3SkyMap::*)(const G3VectorQuat &) const)
-	      &G3SkyMap::GetInterpValues, (py::arg("quats")),
+	      &G3SkyMap::GetInterpValues, py::arg("quats"),
 	       "Return the values at each of the input coordinate locations. "
 	       "Computes each value using bilinear interpolation over the "
 	       "map pixels.")
 
-	    .def("rebin", &G3SkyMap::Rebin, (py::arg("scale"), py::arg("norm")=true),
+	    .def("rebin", &G3SkyMap::Rebin, py::arg("scale"), py::arg("norm")=true,
 	      "Rebin the map into larger pixels by summing (if norm is false) "
 	      "or averaging (if norm is true) scale-x-scale blocks of pixels "
 	      "together.  Returns a new map object.  Map dimensions must be a "
 	      "multiple of the rebinning scale.")
 
-	    .def("compact", &G3SkyMap::Compact, (py::arg("zero_nans")=false),
+	    .def("compact", &G3SkyMap::Compact, py::arg("zero_nans")=false,
 	      "Convert the map to its default sparse representation, removing "
 	      "empty pixels, and optionally also removing NaN values. A map "
 	      "that is already sparse will be compactified in place in its "
 	      "current representation without additional memory overhead.")
 
 	    .def("to_mask", &G3SkyMap::MakeMask,
-	      (py::arg("zero_nans")=false, py::arg("zero_infs")=false),
+	      py::arg("zero_nans")=false, py::arg("zero_infs")=false,
 	      "Create a G3SkyMapMask object from the parent map, with pixels "
 	      "set to true where the map is non-zero (and optionally non-nan "
 	      "and/or finite).")
 
 	    .def("apply_mask", &G3SkyMap::ApplyMask,
-	      (py::arg("mask"), py::arg("inverse")=false),
+	      py::arg("mask"), py::arg("inverse")=false,
 	      "Apply a mask in-place to the map, optionally inverting which "
 	      "pixels are zeroed.  If inverse = False, this is equivalent to "
 	      "in-place multiplication by the mask.")
@@ -1618,35 +1618,35 @@ PYBINDINGS("maps", scope) {
 	    .def(py::self > double())
 
 	    .def("__bool__", &pyskymap_bool)
-	    .def("_cany", &G3SkyMap::any, (py::arg("where")=G3SkyMapMaskConstPtr()))
-	    .def("_call", &G3SkyMap::all, (py::arg("where")=G3SkyMapMaskConstPtr()))
-	    .def("_csum", &G3SkyMap::sum, (py::arg("where")=G3SkyMapMaskConstPtr()))
-	    .def("_cmean", &G3SkyMap::mean, (py::arg("where")=G3SkyMapMaskConstPtr()))
-	    .def("median", &G3SkyMap::median, (py::arg("where")=G3SkyMapMaskConstPtr()))
-	    .def("_cvar", &G3SkyMap::var, (py::arg("ddof")=0,
-	        py::arg("where")=G3SkyMapMaskConstPtr()))
-	    .def("_cstd", &G3SkyMap::std, (py::arg("ddof")=0,
-	        py::arg("where")=G3SkyMapMaskConstPtr()))
-	    .def("_cmin", &G3SkyMap::min, (py::arg("where")=G3SkyMapMaskConstPtr()))
-	    .def("_cmax", &G3SkyMap::max, (py::arg("where")=G3SkyMapMaskConstPtr()))
-	    .def("_cargmin", &G3SkyMap::argmin, (py::arg("where")=G3SkyMapMaskConstPtr()))
-	    .def("_cargmax", &G3SkyMap::argmax, (py::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("_cany", &G3SkyMap::any, py::arg("where")=G3SkyMapMaskConstPtr())
+	    .def("_call", &G3SkyMap::all, py::arg("where")=G3SkyMapMaskConstPtr())
+	    .def("_csum", &G3SkyMap::sum, py::arg("where")=G3SkyMapMaskConstPtr())
+	    .def("_cmean", &G3SkyMap::mean, py::arg("where")=G3SkyMapMaskConstPtr())
+	    .def("median", &G3SkyMap::median, py::arg("where")=G3SkyMapMaskConstPtr())
+	    .def("_cvar", &G3SkyMap::var, py::arg("ddof")=0,
+	        py::arg("where")=G3SkyMapMaskConstPtr())
+	    .def("_cstd", &G3SkyMap::std, py::arg("ddof")=0,
+	        py::arg("where")=G3SkyMapMaskConstPtr())
+	    .def("_cmin", &G3SkyMap::min, py::arg("where")=G3SkyMapMaskConstPtr())
+	    .def("_cmax", &G3SkyMap::max, py::arg("where")=G3SkyMapMaskConstPtr())
+	    .def("_cargmin", &G3SkyMap::argmin, py::arg("where")=G3SkyMapMaskConstPtr())
+	    .def("_cargmax", &G3SkyMap::argmax, py::arg("where")=G3SkyMapMaskConstPtr())
 
-	    .def("nansum", &G3SkyMap::nansum, (py::arg("where")=G3SkyMapMaskConstPtr()))
-	    .def("nanmean", &G3SkyMap::nanmean, (py::arg("where")=G3SkyMapMaskConstPtr()))
-	    .def("nanmedian", &G3SkyMap::nanmedian, (py::arg("where")=G3SkyMapMaskConstPtr()))
-	    .def("nanvar", &G3SkyMap::nanvar, (py::arg("ddof")=0,
-	        py::arg("where")=G3SkyMapMaskConstPtr()))
-	    .def("nanstd", &G3SkyMap::nanstd, (py::arg("ddof")=0,
-	        py::arg("where")=G3SkyMapMaskConstPtr()))
-	    .def("nanmin", &G3SkyMap::nanmin, (py::arg("where")=G3SkyMapMaskConstPtr()))
-	    .def("nanmax", &G3SkyMap::nanmax, (py::arg("where")=G3SkyMapMaskConstPtr()))
-	    .def("nanargmin", &G3SkyMap::nanargmin, (py::arg("where")=G3SkyMapMaskConstPtr()))
-	    .def("nanargmax", &G3SkyMap::nanargmax, (py::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("nansum", &G3SkyMap::nansum, py::arg("where")=G3SkyMapMaskConstPtr())
+	    .def("nanmean", &G3SkyMap::nanmean, py::arg("where")=G3SkyMapMaskConstPtr())
+	    .def("nanmedian", &G3SkyMap::nanmedian, py::arg("where")=G3SkyMapMaskConstPtr())
+	    .def("nanvar", &G3SkyMap::nanvar, py::arg("ddof")=0,
+	        py::arg("where")=G3SkyMapMaskConstPtr())
+	    .def("nanstd", &G3SkyMap::nanstd, py::arg("ddof")=0,
+	        py::arg("where")=G3SkyMapMaskConstPtr())
+	    .def("nanmin", &G3SkyMap::nanmin, py::arg("where")=G3SkyMapMaskConstPtr())
+	    .def("nanmax", &G3SkyMap::nanmax, py::arg("where")=G3SkyMapMaskConstPtr())
+	    .def("nanargmin", &G3SkyMap::nanargmin, py::arg("where")=G3SkyMapMaskConstPtr())
+	    .def("nanargmax", &G3SkyMap::nanargmax, py::arg("where")=G3SkyMapMaskConstPtr())
 
-	    .def("isinf", &G3SkyMap::isinf, (py::arg("where")=G3SkyMapMaskConstPtr()))
-	    .def("isnan", &G3SkyMap::isnan, (py::arg("where")=G3SkyMapMaskConstPtr()))
-	    .def("isfinite", &G3SkyMap::isfinite, (py::arg("where")=G3SkyMapMaskConstPtr()))
+	    .def("isinf", &G3SkyMap::isinf, py::arg("where")=G3SkyMapMaskConstPtr())
+	    .def("isnan", &G3SkyMap::isnan, py::arg("where")=G3SkyMapMaskConstPtr())
+	    .def("isfinite", &G3SkyMap::isfinite, py::arg("where")=G3SkyMapMaskConstPtr())
 	;
 	py::implicitly_convertible<G3SkyMapPtr, G3SkyMapConstPtr>();
 
@@ -1654,30 +1654,30 @@ PYBINDINGS("maps", scope) {
 	    "Polarized (Mueller matrix) or unpolarized (scalar) map pixel weights."
 	    "Weights are polarized if the pol_conv attribute of the reference map is set.")
 	    .def(py::init<>())
-	    .def(py::init<G3SkyMapConstPtr>((py::arg("skymap"))))
+	    .def(py::init<G3SkyMapConstPtr>(), py::arg("skymap"))
 	    .def_readwrite("TT",&G3SkyMapWeights::TT, "Mueller matrix component map")
 	    .def_readwrite("TQ",&G3SkyMapWeights::TQ, "Mueller matrix component map")
 	    .def_readwrite("TU",&G3SkyMapWeights::TU, "Mueller matrix component map")
 	    .def_readwrite("QQ",&G3SkyMapWeights::QQ, "Mueller matrix component map")
 	    .def_readwrite("QU",&G3SkyMapWeights::QU, "Mueller matrix component map")
 	    .def_readwrite("UU",&G3SkyMapWeights::UU, "Mueller matrix component map")
-	    .add_property("size", &G3SkyMapWeights::size, "Number of pixels in weights")
+	    .def_property_readonly("size", &G3SkyMapWeights::size, "Number of pixels in weights")
 	    .def("__len__", &G3SkyMapWeights::size, "Number of pixels in weights")
 	    .def("__copy__", &skymapweights_copy)
 	    .def("copy", &skymapweights_copy, "Return a copy of the weights object")
-	    .add_property("shape", &skymapweights_shape, "Shape of weights")
-	    .add_property("polarized", &G3SkyMapWeights::IsPolarized,
+	    .def_property_readonly("shape", &skymapweights_shape, "Shape of weights")
+	    .def_property_readonly("polarized", &G3SkyMapWeights::IsPolarized,
 	      "True if all components are set, False if only the TT component is set")
-	    .add_property("congruent", &G3SkyMapWeights::IsCongruent,
+	    .def_property_readonly("congruent", &G3SkyMapWeights::IsCongruent,
 	      "True if all components are internally compatible with each other")
 	    .def("compatible", &G3SkyMapWeights::IsCompatible,
 	      "Returns true if the input argument is a map with matching dimensions "
 	      "and boundaries on the sky.")
-	    .def("rebin", &G3SkyMapWeights::Rebin, (py::arg("scale")),
+	    .def("rebin", &G3SkyMapWeights::Rebin, py::arg("scale"),
 	      "Rebin the weights into larger pixels by summing scale-x-scale blocks "
 	      "of pixels together.  Returns a new weights object.  Map dimensions "
 	      "must be a multiple of the  rebinning scale.")
-	    .def("compact", &G3SkyMapWeights::Compact, (py::arg("zero_nans")=false),
+	    .def("compact", &G3SkyMapWeights::Compact, py::arg("zero_nans")=false,
 	      "Convert the map to its default sparse representation, excluding "
 	      "empty pixels, and optionally converting NaN values to zeroes.")
 	    .def("det", &G3SkyMapWeights::Det,
@@ -1688,12 +1688,12 @@ PYBINDINGS("maps", scope) {
 	      "Return the inverse of the Mueller matrix for each pixel")
 
 	    .def("apply_mask", &G3SkyMapWeights::ApplyMask,
-	      (py::arg("mask"), py::arg("inverse")=false),
+	      py::arg("mask"), py::arg("inverse")=false,
 	      "Apply a mask in-place to the weights, optionally inverting which "
 	      "pixels are zeroed.  If inverse = False, this is equivalent to "
 	      "in-place multiplication by the mask.")
 
-	    .def("clone", &G3SkyMapWeights::Clone, (py::arg("copy_data")=true),
+	    .def("clone", &G3SkyMapWeights::Clone, py::arg("copy_data")=true,
 	       "Return weights of the same type, populated with a copy of the data "
 	       "if the argument is true (default), empty otherwise.")
 

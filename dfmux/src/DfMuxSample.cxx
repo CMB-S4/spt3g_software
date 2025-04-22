@@ -20,7 +20,7 @@ PYBINDINGS("dfmux", scope)
 	  "Samples from all channels on one readout module, stored with I and "
 	  "Q interleaved, such that the first element is channel 1 I, followed "
 	  "by channel 1 Q, followed by channel 2 I, etc.")
-	    .def(py::init<G3TimeStamp, int>(py::args("time", "nsamples")))
+	    .def(py::init<G3TimeStamp, int>(), py::arg("time"), py::arg("nsamples"))
 	    .def_readwrite("Timestamp", &DfMuxSample::Timestamp)
 	;
 }

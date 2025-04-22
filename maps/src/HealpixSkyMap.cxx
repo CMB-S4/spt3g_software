@@ -1202,7 +1202,7 @@ G3_SPLIT_SERIALIZABLE_CODE(HealpixSkyMap);
 
 PYBINDINGS("maps", scope)
 {
-	py::object hsm = register_frameobject<HealpixSkyMap, G3SkyMap>(scope, "HealpixSkyMap",
+	auto hsm = register_frameobject<HealpixSkyMap, G3SkyMap>(scope, "HealpixSkyMap",
 	  "HealpixSkyMap is a G3SkyMap with the extra meta information about the "
 	  "particular Healpix pixelization used.  In practice it behaves "
 	  "(mostly) like a 1d numpy array.  If you find that you need numpy "
@@ -1213,20 +1213,20 @@ PYBINDINGS("maps", scope)
 	    .def(py::init<>())
 	    .def(py::init<size_t, bool, bool, MapCoordReference,
 	        G3Timestream::TimestreamUnits, G3SkyMap::MapPolType, bool,
-	        G3SkyMap::MapPolConv>(
-	        (py::arg("nside"),
+		G3SkyMap::MapPolConv>(),
+	        py::arg("nside"),
 	        py::arg("weighted") = true,
 	        py::arg("nested") = false,
 	        py::arg("coord_ref") = MapCoordReference::Equatorial,
 	        py::arg("units") = G3Timestream::Tcmb,
 	        py::arg("pol_type") = G3SkyMap::None,
 	        py::arg("shift_ra") = false,
-	        py::arg("pol_conv") = G3SkyMap::ConvNone),
-	        "Instantiate a HealpixSkyMap with given nside"))
+	        py::arg("pol_conv") = G3SkyMap::ConvNone,
+	        "Instantiate a HealpixSkyMap with given nside")
 	    .def(py::init<const std::vector<uint64_t> &, const std::vector<double> &,
 	        size_t, bool, bool, MapCoordReference, G3Timestream::TimestreamUnits,
-	        G3SkyMap::MapPolType, G3SkyMap::MapPolConv>(
-	        (py::arg("nside"),
+		G3SkyMap::MapPolType, G3SkyMap::MapPolConv>(),
+	        py::arg("nside"),
 	        py::arg("index"),
 	        py::arg("data"),
 	        py::arg("weighted") = true,
@@ -1234,9 +1234,9 @@ PYBINDINGS("maps", scope)
 	        py::arg("coord_ref") = MapCoordReference::Equatorial,
 	        py::arg("units") = G3Timestream::Tcmb,
 	        py::arg("pol_type") = G3SkyMap::None,
-	        py::arg("pol_conv") = G3SkyMap::ConvNone),
+	        py::arg("pol_conv") = G3SkyMap::ConvNone,
 	        "Instantiate a sparse HealpixSkyMap from existing index and data "
-	        "arrays corresponding to the given nside"))
+	        "arrays corresponding to the given nside")
 	    .def("__init__", py::make_constructor(HealpixSkyMap_from_numpy,
 	        py::default_call_policies(),
 	        (py::arg("data"),
@@ -1249,27 +1249,27 @@ PYBINDINGS("maps", scope)
 	        py::arg("pol_conv") = G3SkyMap::ConvNone)),
 	        "Instantiate a dense Healpix map from existing data.")
 
-	    .def("array_clone", &HealpixSkyMap_array_clone, (py::arg("array")),
+	    .def("array_clone", &HealpixSkyMap_array_clone, py::arg("array"),
 	       "Return a map of the same type, populated with a copy of the input "
 	       "numpy array")
-	    .add_property("nside", &HealpixSkyMap::nside, "Healpix resolution parameter")
-	    .add_property("res", &HealpixSkyMap::res, "Map resolution in angular units")
-	    .add_property("nested", &HealpixSkyMap::nested,
+	    .def_property_readonly("nside", &HealpixSkyMap::nside, "Healpix resolution parameter")
+	    .def_property_readonly("res", &HealpixSkyMap::res, "Map resolution in angular units")
+	    .def_property_readonly("nested", &HealpixSkyMap::nested,
 		"True if pixel ordering is nested, False if ring-ordered")
-	    .add_property("shift_ra", &HealpixSkyMap::IsRaShifted, HealpixSkyMap_setshiftra,
+	    .def_property("shift_ra", &HealpixSkyMap::IsRaShifted, HealpixSkyMap_setshiftra,
 		"True if the ringsparse representation of the map is stored "
 		"with the rings centered at ra = 0 deg, rather than ra = 180 deg.")
-	    .add_property("dense", &HealpixSkyMap::IsDense, HealpixSkyMap_setdense,
+	    .def_property("dense", &HealpixSkyMap::IsDense, HealpixSkyMap_setdense,
 		"True if the map is stored with all elements, False otherwise. "
 		"If set to True, converts the map to a dense representation." )
-	    .add_property("ringsparse", &HealpixSkyMap::IsRingSparse, HealpixSkyMap_setringsparse,
+	    .def_property("ringsparse", &HealpixSkyMap::IsRingSparse, HealpixSkyMap_setringsparse,
 		"True if the map is stored as a dense 2D region using ring "
 		"ordering (analogous to FlatSkyMap's sparse mode). "
 		"Ring-sparsity is efficient for dense blocks on a ring-ordered "
 		"map (e.g. a continuous sky region), but is inefficient "
 		"otherwise (e.g. nested pixel ordering or discontinous coverage). "
 		"If set to True, converts the map to this representation." )
-	    .add_property("indexedsparse", &HealpixSkyMap::IsIndexedSparse,
+	    .def_property("indexedsparse", &HealpixSkyMap::IsIndexedSparse,
 		HealpixSkyMap_setindexedsparse,
 		"True if the map is stored as a list of non-zero pixels "
 		"and values. More efficient than ring-sparse for maps with "

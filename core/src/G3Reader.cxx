@@ -121,12 +121,12 @@ PYBINDINGS("core", scope) {
 	    "seek to the beginning of a particular frame in the file.  Set "
 	    "track_filename to True to record the filename for each frame in "
 	    "the ._filename attribute (fragile).")
-	    .def(py::init<std::string, int, float, bool, size_t>((py::arg("filename"),
+	    .def(py::init<std::string, int, float, bool, size_t>(), py::arg("filename"),
 	        py::arg("n_frames_to_read")=0, py::arg("timeout")=-1.,
-	        py::arg("track_filename")=false, py::arg("buffersize")=1024*1024)))
-	    .def(py::init<std::vector<std::string>, int, float, bool, size_t>((
+	        py::arg("track_filename")=false, py::arg("buffersize")=1024*1024)
+	    .def(py::init<std::vector<std::string>, int, float, bool, size_t>(),
 	        py::arg("filename"), py::arg("n_frames_to_read")=0, py::arg("timeout")=-1.,
-	        py::arg("track_filename")=false, py::arg("buffersize")=1024*1024)))
+	        py::arg("track_filename")=false, py::arg("buffersize")=1024*1024)
 	    .def("tell", &G3Reader::Tell,
 	        "Return the current byte offset from start of stream.")
 	    .def("seek", &G3Reader::Seek,

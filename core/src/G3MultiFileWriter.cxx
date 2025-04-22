@@ -183,8 +183,8 @@ PYBINDINGS("core", scope) {
 	    "python callable as divide_on. This callable will be passed each "
 	    "frame in turn. If it returns True (or something with positive "
             "truth-value), a new file will be started at that frame.")
-	.def(py::init<py::object, size_t, py::object, size_t>((py::arg("filename"),
-	    py::arg("size_limit"), py::arg("divide_on")=py::object(),
-	    py::arg("buffersize")=1024*1024)))
-	.def_readonly("current_file", &G3MultiFileWriter::CurrentFile);
+	    .def(py::init<py::object, size_t, py::object, size_t>(), py::arg("filename"),
+	        py::arg("size_limit"), py::arg("divide_on")=py::object(),
+	        py::arg("buffersize")=1024*1024)
+	    .def_property_readonly("current_file", &G3MultiFileWriter::CurrentFile);
 }

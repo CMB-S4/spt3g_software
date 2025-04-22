@@ -1001,7 +1001,7 @@ G3Timestream_assert_congruence(const G3Timestream &a, const G3Timestream &b)
 }
 
 static G3TimestreamPtr
-G3Timestream_getslice(const G3Timestream &a, py::slice slice)
+G3Timestream_getslice(const G3Timestream &a, const py::slice &slice)
 {
 	int start(0), stop(a.size()), step(1);
 	double sample_spacing = 1./a.GetSampleRate();
@@ -1501,7 +1501,7 @@ PYBINDINGS("core", scope) {
 	    .value("Frequency",  G3Timestream::Frequency)
 	;
 
-	py::object ts =
+	auto ts =
 	register_frameobject<G3Timestream>(scope, "G3Timestream",
 	   "Detector timestream. "
 	   "Includes a units field and start and stop times. Can otherwise be "
@@ -1527,25 +1527,25 @@ PYBINDINGS("core", scope) {
 	      "Time of the first sample in the time stream")
 	    .def_readwrite("stop", &G3Timestream::stop,
 	      "Time of the final sample in the timestream")
-	    .add_property("sample_rate", &G3Timestream::GetSampleRate,
+	    .def_property_readonly("sample_rate", &G3Timestream::GetSampleRate,
 	      "Computed sample rate of the timestream.")
-	    .add_property("n_samples", &G3Timestream::size,
+	    .def_property_readonly("n_samples", &G3Timestream::size,
 	      "Number of samples in the timestream. Equivalent to len(ts)")
-	    .add_property("compression_level", &G3Timestream::GetFLACCompression,
+	    .def_property("compression_level", &G3Timestream::GetFLACCompression,
 	      &G3Timestream::SetFLACCompression, "Level of FLAC compression used for this timestream. "
 	      "This can only be non-zero if the timestream is in units of counts.")
-	    .add_property("bit_depth", &G3Timestream::GetFLACBitDepth,
+	    .def_property("bit_depth", &G3Timestream::GetFLACBitDepth,
 	      &G3Timestream::SetFLACBitDepth, "Bit depth of FLAC compression used for this timestream.")
 	    .def("_assert_congruence", &G3Timestream_assert_congruence,
 	      "log_fatal() if units, length, start, or stop times do not match")
 	    .def("_cxxslice", &G3Timestream_getslice, "Slice-only __getitem__")
-	    .add_property("elapsed", &G3Timestream_elapsed,
+	    .def_property_readonly("elapsed", &G3Timestream_elapsed,
 	      "Compute elapsed time array for samples")
-	    .add_property("times", &G3Timestream_times,
+	    .def_property_readonly("times", &G3Timestream_times,
 	      "Compute time vector for samples")
 	    .def("__len__", &G3Timestream::size)
-	    .add_property("shape", &G3Timestream_shape)
-	    .add_property("ndim", &G3Timestream_ndim)
+	    .def_property_readonly("shape", &G3Timestream_shape)
+	    .def_property_readonly("ndim", &G3Timestream_ndim)
 	    // Operators bound in python through numpy
 	;
 
@@ -1557,7 +1557,7 @@ PYBINDINGS("core", scope) {
 	tsclass->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
 #endif
 
-	py::object tsm =
+	auto tsm =
 	register_frameobject<G3TimestreamMap>(scope, "G3TimestreamMap",
 	    "Collection of timestreams indexed by logical detector ID")
 	    .def(py::init<>())
@@ -1584,31 +1584,31 @@ PYBINDINGS("core", scope) {
 	    .def("SetFLACBitDepth", &G3TimestreamMap::SetFLACBitDepth,
 	      "Change the bit depth for FLAC compression, may be 24 or 32 "
 	      "(default, requires version 1.4+).")
-	    .add_property("start", &G3TimestreamMap::GetStartTime,
+	    .def_property("start", &G3TimestreamMap::GetStartTime,
 	      &G3TimestreamMap::SetStartTime,
 	      "Time of the first sample in the time stream")
-	    .add_property("stop", &G3TimestreamMap::GetStopTime,
+	    .def_property("stop", &G3TimestreamMap::GetStopTime,
 	      &G3TimestreamMap::SetStopTime,
 	      "Time of the final sample in the time stream")
-	    .add_property("sample_rate", &G3TimestreamMap::GetSampleRate,
+	    .def_property_readonly("sample_rate", &G3TimestreamMap::GetSampleRate,
 	      "Computed sample rate of the timestream.")
-	    .add_property("n_samples", &G3TimestreamMap::NSamples,
+	    .def_property_readonly("n_samples", &G3TimestreamMap::NSamples,
 	      "Number of samples in the timestream. Equivalent to the length "
 	      "of one of the timestreams.")
-	    .add_property("units", &G3TimestreamMap::GetUnits,
+	    .def_property("units", &G3TimestreamMap::GetUnits,
 	      &G3TimestreamMap::SetUnits,
 	      "Units of the data in the timestream, stored as one of the "
 	      "members of core.G3TimestreamUnits.")
-	    .add_property("compression_level", &G3TimestreamMap::GetFLACCompression,
+	    .def_property("compression_level", &G3TimestreamMap::GetFLACCompression,
 	      &G3TimestreamMap::SetFLACCompression,
 	      "Level of FLAC compression used for this timestream map. "
 	      "This can only be non-zero if the timestream is in units of counts.")
-	    .add_property("bit_depth", &G3TimestreamMap::GetFLACBitDepth,
+	    .def_property("bit_depth", &G3TimestreamMap::GetFLACBitDepth,
 	      &G3TimestreamMap::SetFLACBitDepth,
 	      "Bit depth of FLAC compression used for this timestream map.")
-	    .add_property("elapsed", &G3TimestreamMap_elapsed,
+	    .def_property_readonly("elapsed", &G3TimestreamMap_elapsed,
 	      "Compute elapsed time array for samples")
-	    .add_property("times", &G3TimestreamMap_times,
+	    .def_property_readonly("times", &G3TimestreamMap_times,
 	      "Compute time vector for samples")
 	;
 

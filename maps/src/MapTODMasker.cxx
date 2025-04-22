@@ -45,10 +45,9 @@ register_g3module<MapTODMasker>(scope, "MapTODMasker",
 "<pointing>. Detector pointing offsets and polarization angles and "
 "efficiencies are obtained from the specified BolometerPropertiesMap, which "
 "can generally be left at its default value.")
-  .def(py::init<std::string, std::string, G3SkyMapMaskConstPtr, std::string, std::string>((
+  .def(py::init<std::string, std::string, G3SkyMapMaskConstPtr, std::string, std::string>(),
      py::arg("pointing"), py::arg("timestreams"), py::arg("mask"), py::arg("tod_mask")="FilterMask",
      py::arg("bolo_properties_name")="BolometerProperties")
-     ))
 ;
 };
 

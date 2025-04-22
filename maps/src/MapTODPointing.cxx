@@ -99,10 +99,9 @@ register_g3module<MapTODPointing>(scope, "MapTODPointing",
 "        tod_pointing=\"TodPointing\",\n"
 "    )\n"
 )
-  .def(py::init<std::string, std::string, G3SkyMapConstPtr, std::string, std::string>((
+  .def(py::init<std::string, std::string, G3SkyMapConstPtr, std::string, std::string>(),
      py::arg("pointing"), py::arg("timestreams"), py::arg("stub_map"), py::arg("tod_pointing"),
      py::arg("bolo_properties_name")="BolometerProperties")
-     ))
 ;
 };
 

@@ -410,7 +410,7 @@ g3frame_char_constructor(std::string max_4_chars)
 
 static py::list g3frame_keys(const G3Frame &map)
 {
-        py::list keys;
+	py::list keys;
 	std::vector<std::string> keyvec = map.Keys();
 
         for (auto i = keyvec.begin(); i != keyvec.end(); i++)

@@ -330,7 +330,7 @@ numpy_vector_struct(T, name)
 #define numpy_vector_of(T, name, desc) \
 { \
 	numpy_vector_from_python_##name(); \
-	py::object cls = register_vector_of<T>(scope, desc); \
+	auto cls = register_vector_of<T>(scope, desc); \
 	PyTypeObject *vdclass = (PyTypeObject *)cls.ptr(); \
 	vec_bufferprocs_##name.bf_getbuffer = vector_getbuffer_##name; \
 	vdclass->tp_as_buffer = &vec_bufferprocs_##name; \
@@ -340,7 +340,7 @@ numpy_vector_struct(T, name)
 #define numpy_vector_of(T, name, desc) \
 { \
 	numpy_vector_from_python_##name(); \
-	py::object cls = register_vector_of<T>(scope, desc); \
+	auto cls = register_vector_of<T>(scope, desc); \
 	PyTypeObject *vdclass = (PyTypeObject *)cls.ptr(); \
 	vec_bufferprocs_##name.bf_getbuffer = vector_getbuffer_##name; \
 	vdclass->tp_as_buffer = &vec_bufferprocs_##name; \
@@ -489,7 +489,7 @@ static PyBufferProcs vectime_bufferprocs;
 PYBINDINGS("core", scope) {
 	numpy_vector_of(float, float, "Float");
 	numpy_vector_of(double, double, "Double");
-	py::object vecdouble = register_g3vector<G3VectorDouble>(scope,
+	auto vecdouble = register_g3vector<G3VectorDouble>(scope,
 	    "G3VectorDouble", "Array of floats. Treat as a serializable "
 	    "version of numpy.array(dtype=float64). Can be efficiently cast "
 	    "to and from numpy arrays.");
@@ -503,7 +503,7 @@ PYBINDINGS("core", scope) {
 
 	numpy_vector_of(std::complex<float>, cxfloat, "ComplexFloat");
 	numpy_vector_of(std::complex<double>, cxdouble, "ComplexDouble");
-	py::object veccomplexdouble = register_g3vector<G3VectorComplexDouble>(scope,
+	auto veccomplexdouble = register_g3vector<G3VectorComplexDouble>(scope,
 	    "G3VectorComplexDouble", "Array of complex floats. Treat as a serializable "
 	    "version of numpy.array(dtype=complex128). Can be efficiently cast "
 	    "to and from numpy arrays.");
@@ -520,7 +520,7 @@ PYBINDINGS("core", scope) {
 	numpy_vector_of(uint64_t, uint64_t, "UInt64");
 	numpy_vector_of(int32_t, int32_t, "Int");
 	numpy_vector_of(uint32_t, uint32_t, "UInt");
-	py::object vecint = register_g3vector<G3VectorInt>(scope, "G3VectorInt",
+	auto vecint = register_g3vector<G3VectorInt>(scope, "G3VectorInt",
 	    "Array of integers. Treat as a serializable version of "
 	    "numpy.array(dtype=int64). Can be efficiently cast to and from "
 	    "numpy arrays.");
@@ -557,7 +557,7 @@ PYBINDINGS("core", scope) {
 	    "List of 8-bit integers");
 
 	register_vector_of<G3Time>(scope, "G3Time");
-	py::object vectime =
+	auto vectime =
 	  register_g3vector<G3VectorTime>(scope, "G3VectorTime", "List of times.");
 	// Add buffer protocol interface
 	PyTypeObject *vtclass = (PyTypeObject *)vectime.ptr();

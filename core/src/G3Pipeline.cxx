@@ -451,10 +451,10 @@ PYBINDINGS("core", scope) {
 	  "\t- False: discard input frame and return to first module, or end "
 	  "\t  processing if returned by first module. Equivalent to [].\n")
 	    .def(py::init<>())
-	    .def("_Add_", &G3Pipeline::Add, py::arg("name")="")
+	    .def("_Add_", &G3Pipeline::Add, py::arg("module"), py::arg("name")="")
 	    .def("Run", &G3Pipeline::Run,
-	      (py::arg("profile")=false, py::arg("graph")=false,
-	       py::arg("signal_halt")=true),
+	      py::arg("profile")=false, py::arg("graph")=false,
+	      py::arg("signal_halt")=true,
 	      "Run pipeline. If profile is True, print execution time "
 	      "statistics for each module when complete. If graph is True, "
 	      "stores control flow data that can be processed with GraphViz "
@@ -464,11 +464,10 @@ PYBINDINGS("core", scope) {
 	      "halt_processing() is called.")
 	    .def("GetGraphInfo", &G3Pipeline::GetGraphInfo,
 	      "Get stored control flow information from Run(graph=True)")
-	    .def("halt_processing", &G3Pipeline_halt_processing,
+	    .def_static("halt_processing", &G3Pipeline_halt_processing,
 	      "Halts all running pipelines after they flush all currently "
 	      "in-flight frames. Once set, the first module will not be "
 	      "called again.")
-	    .staticmethod("halt_processing")
 	    .def_readonly("last_frame",
 	        &G3Pipeline::last_frame)
 	;

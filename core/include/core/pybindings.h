@@ -73,8 +73,8 @@ register_class_copyable(py::module_ &scope, const std::string &name, Args&&...ar
 {
 	(void) scope;
 
-	return py::class_<T, py::bases<Bases...>, std::shared_ptr<T> >(name.c_str(),
-	    std::forward<Args>(args)..., py::no_init);
+	return py::compat_class_<T, py::bases<Bases...>, std::shared_ptr<T> >(name.c_str(),
+	    std::forward<Args>(args)...);
 }
 
 // Register a class, with optional base classes.
@@ -85,8 +85,8 @@ register_class(py::module_ &scope, const std::string &name, Args&&...args)
 {
 	(void) scope;
 
-	return py::class_<T, py::bases<Bases...>, std::shared_ptr<T>,
-	    boost::noncopyable>(name.c_str(), std::forward<Args>(args)..., py::no_init);
+	return py::compat_class_<T, py::bases<Bases...>, std::shared_ptr<T>,
+	    boost::noncopyable>(name.c_str(), std::forward<Args>(args)...);
 }
 
 // Register a G3Module derived class, for inclusion in a G3Pipeline.

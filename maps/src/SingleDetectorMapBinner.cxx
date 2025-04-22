@@ -46,10 +46,9 @@ PYBINDINGS("maps", scope) {
 	    "stored in the given bolometer properties map. The map parameters are copied "
 	    "from <stub_map>. When processing ends, this module will emit one map frame "
 	    "per detector, including per-detector (unpolarized) weights.")
-	    .def(py::init<const G3SkyMap &, std::string, std::string, std::string>((
+	    .def(py::init<const G3SkyMap &, std::string, std::string, std::string>(),
 	        py::arg("stub_map"), py::arg("pointing"), py::arg("timestreams"),
 	        py::arg("bolo_properties_name")="BolometerProperties")
-	        ))
 	;
 };
 

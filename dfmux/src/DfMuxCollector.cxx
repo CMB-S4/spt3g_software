@@ -452,18 +452,18 @@ PYBINDINGS("dfmux", scope)
 	    "insertion into the data stream. Takes the builder object to which the "
 	    "data should be sent. Uses either multicast UDP or SCTP depending on "
 	    "which constructor is used.")
-	    .def(py::init<G3EventBuilderPtr, std::vector<std::string> >(
-	        (py::arg("builder"), py::arg("hostnames")),
+	    .def(py::init<G3EventBuilderPtr, std::vector<std::string> >(),
+	        py::arg("builder"), py::arg("hostnames"),
 	        "Create a DfMuxCollector listening for SCTP packets from the "
 	        "listed hosts (e.g. [\"iceboard0062.local\", ...]) and forwards "
-	        "it to DfMuxBuilder \"builder\"."))
-	    .def(py::init<const char *, G3EventBuilderPtr, std::vector<int32_t> >(
-	        (py::arg("interface"), py::arg("builder"),
-	        py::arg("boardlist")=std::vector<int32_t>()),
+	        "it to DfMuxBuilder \"builder\".")
+	    .def(py::init<const char *, G3EventBuilderPtr, std::vector<int32_t> >(),
+	        py::arg("interface"), py::arg("builder"),
+	        py::arg("boardlist")=std::vector<int32_t>(),
 	        "Create a DfMuxCollector listening on \"interface\" for multicasted "
 	        "UDP packets and forwards it to DfMuxBuilder \"builder\". Filters to "
 	        "only the boards specified in \"boardlist\" (by default empty, "
-	        "implying all boards)."))
+	        "implying all boards).")
 	    .def("__init__", py::make_constructor(make_dfmux_collector_v2_from_dict,
 	        py::default_call_policies(),
 	        (py::arg("interface"), py::arg("builder"), py::arg("board_serial_map"))),
@@ -472,7 +472,7 @@ PYBINDINGS("dfmux", scope)
 	        "the last argument")
 	    .def("Start", &DfMuxCollector::Start)
 	    .def("Stop", &DfMuxCollector::Stop)
-	    .add_property("clock_rate", &DfMuxCollector::GetClockRate,
+	    .def_property("clock_rate", &DfMuxCollector::GetClockRate,
 	        &DfMuxCollector::SetClockRate, "Set the clock rate for the "
 	        "iceboard subseconds counter, e.g. for hidfmux.  Values should be "
 	        "in G3Units of frequency.  Defaults to 100*core.G3Units.MHz.")

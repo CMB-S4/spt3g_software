@@ -144,7 +144,7 @@ void NetCDFDump::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 PYBINDINGS("dfmux", scope) {
 	register_g3module<NetCDFDump>(scope, "NetCDFDump",
 	    "Writes DfMux streamer data to a NetCDF file")
-	    .def(py::init<std::string>((py::arg("filename"))))
+	    .def(py::init<std::string>(), py::arg("filename"))
 	;
 }
 

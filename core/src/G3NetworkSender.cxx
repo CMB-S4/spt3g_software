@@ -53,8 +53,8 @@ PYBINDINGS("core", scope) {
 	    "serializing frames to be sent will be distributed across that many "
 	    "background threads, which is useful when high throughput of large frames "
 	    "is required, but is otherwise typically not necessary.")
-	    .def(py::init<std::string, int, int, int>((py::arg("hostname"),
-	        py::arg("port"), py::arg("max_queue_size")=0, py::arg("n_serializers")=0)))
+	    .def(py::init<std::string, int, int, int>(), py::arg("hostname"),
+	      py::arg("port"), py::arg("max_queue_size")=0, py::arg("n_serializers")=0)
 	    .def("Close", &G3NetworkSender::Close);
 };
 

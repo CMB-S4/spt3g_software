@@ -240,10 +240,10 @@ PYBINDINGS("dfmux", scope)
 	  "is an integer, listens for that number. If a list of integers, "
 	  "DfMuxBuilder will filter for only boards with serial numbers "
 	  "in the list.")
-	    .def(py::init<int, int64_t>((py::arg("boards"),
-	        py::arg("collation_tolerance")=10*G3Units::ms)))
-	    .def(py::init<std::vector<int>, int64_t>((py::arg("boards"),
-	        py::arg("collation_tolerance")=10*G3Units::ms)))
+	    .def(py::init<int, int64_t>(), py::arg("boards"),
+	        py::arg("collation_tolerance")=10*G3Units::ms)
+	    .def(py::init<std::vector<int>, int64_t>(), py::arg("boards"),
+	        py::arg("collation_tolerance")=10*G3Units::ms)
 	;
 }
 

@@ -518,28 +518,28 @@ PYBINDINGS("maps", scope)
 	    "true where input map is non-zero; otherwise, all elements are "
 	    "initialized to zero.  Use zero_nans or zero_infs to exclude nan "
 	    "or inf elements from the mask.")
-	  .def(py::init<const G3SkyMap &, bool, bool, bool>(
-	       (py::arg("parent"),
+	  .def(py::init<const G3SkyMap &, bool, bool, bool>(),
+	       py::arg("parent"),
 	       py::arg("use_data")=false,
 	       py::arg("zero_nans")=false,
-	       py::arg("zero_infs")=false),
-	    "Instantiate a G3SkyMapMask from a parent G3SkyMap"))
+	       py::arg("zero_infs")=false,
+	    "Instantiate a G3SkyMapMask from a parent G3SkyMap")
 	  .def("__init__", py::make_constructor(skymapmask_from_numpy, py::default_call_policies(),
 	       (py::arg("parent"),
 	       py::arg("data"),
 	       py::arg("zero_nans")=false,
 	       py::arg("zero_infs")=false)),
 	    "Instantiate a G3SkyMapMask from a 1D numpy array")
-	  .def("clone", &G3SkyMapMask::Clone, (py::arg("copy_data")=true),
+	  .def("clone", &G3SkyMapMask::Clone, py::arg("copy_data")=true,
 	    "Return a mask of the same type, populated with a copy of the data "
 	    "if the argument is true (default), empty otherwise.")
 	  .def("array_clone", &skymapmask_array_clone,
-	    (py::arg("data"), py::arg("zero_nans")=false, py::arg("zero_infs")=false),
+	    py::arg("data"), py::arg("zero_nans")=false, py::arg("zero_infs")=false,
 	    "Return a mask of the same type, populated from the input numpy array")
-	  .add_property("parent", &skymapmask_pyparent, "\"Parent\" map which "
+	  .def_property_readonly("parent", &skymapmask_pyparent, "\"Parent\" map which "
 	    "contains no data, but can be used to retrieve the parameters of "
 	    "the map to which this mask corresponds.")
-	  .add_property("size", &G3SkyMapMask::size, "Number of pixels in mask")
+	  .def_property_readonly("size", &G3SkyMapMask::size, "Number of pixels in mask")
 	  .def("compatible", (bool (G3SkyMapMask::*)(const G3SkyMapMask &) const)
 	    &G3SkyMapMask::IsCompatible,
 	    "Returns true if the two masks can be applied to the same map.")
@@ -556,7 +556,7 @@ PYBINDINGS("maps", scope)
 	  .def("nonzero", &G3SkyMapMask::NonZeroPixels,
 	       "Return a list of indices of non-zero pixels in the mask")
 	  .def("apply_mask", &G3SkyMapMask::ApplyMask,
-	    (py::arg("mask"), py::arg("inverse")=false),
+	    py::arg("mask"), py::arg("inverse")=false,
 	    "Apply a mask in-place to the mask, optionally inverting which "
 	    "pixels are zeroed.  If inverse = False, this is equivalent to "
 	    "in-place element-wise logical-and with the mask.")
@@ -569,7 +569,7 @@ PYBINDINGS("maps", scope)
 	  .def(py::self ^ py::self)
 	  .def(py::self == py::self)
 	  .def(py::self != py::self)
-	  .add_property("__array_interface__", G3SkyMapMask_array_interface)
+	  .def_property_readonly("__array_interface__", G3SkyMapMask_array_interface)
 	  .def("to_map", &G3SkyMapMask::MakeBinaryMap,
 	    "Create a skymap with data set to the contents of this mask "
 	    "(1.0 where True, 0.0 where False), which can be useful for plotting.")
