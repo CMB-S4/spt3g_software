@@ -144,11 +144,11 @@ register_g3vector(py::module_ &scope, std::string name, Args &&...args)
 	// Register both regular std::vector version and G3Vector version,
 	// with inheritance, so we can use both. Hide the std::vector version
 	// with _ in the Python namespace to discourage accidental use.
-	try {
+	if (!py::detail::get_type_info(typeid(U))) {
 		// base class may have been registered separately
 		std::string base_name = std::string("_") + name + "BaseVector";
 		register_vector<U>(scope, base_name);
-	} catch (...) {}
+	}
 
 	auto cls = register_vector<V, Bases..., U, G3FrameObject>(scope,
 	    name, std::forward<Args>(args)...);
@@ -285,7 +285,6 @@ register_map(py::module_ &scope, std::string name, Args &&...args)
 	cls.def("__len__", [](const M &m) { return m.size(); });
 
 	py::implicitly_convertible<py::iterable, M>();
-	py::implicitly_convertible<py::dict, M>();
 
 	return cls;
 }
@@ -311,11 +310,11 @@ register_g3map(py::module_ &scope, std::string name, Args &&...args)
 	// Register both regular std::map version and G3Map version,
 	// with inheritance, so we can use both. Hide the std::map version
 	// with _ in the Python namespace to discourage accidental use.
-	try {
+	if (!py::detail::get_type_info(typeid(N))) {
 		// base class may have been registered separately
 		std::string base_name = std::string("_") + name + "BaseMap";
 		register_map<N>(scope, base_name);
-	} catch (...) {}
+	}
 
 	auto cls = register_map<M, Bases..., N, G3FrameObject>(scope, name,
 	    std::forward<Args>(args)...);
