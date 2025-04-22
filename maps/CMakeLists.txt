@@ -1,7 +1,8 @@
 add_spt3g_library(maps SHARED
   src/chealpix.c
-  src/G3SkyMap.cxx
+  src/mapdata.cxx
   src/G3SkyMapMask.cxx
+  src/G3SkyMap.cxx
   src/HealpixSkyMapInfo.cxx
   src/HealpixSkyMap.cxx
   src/FlatSkyProjection.cxx
@@ -13,7 +14,6 @@ add_spt3g_library(maps SHARED
   src/MapTODPointing.cxx
   src/SingleDetectorBoresightBinner.cxx
   src/SingleDetectorMapBinner.cxx
-  src/mapdata.cxx
   src/maputils.cxx
   src/pointing.cxx
 )
