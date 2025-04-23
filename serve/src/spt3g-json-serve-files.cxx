@@ -517,7 +517,7 @@ int main(int nargs, char **argv)
 	//This USED to be needed for "random python things" stored in frames to work
   // (though it was buggy and didn't play well with multiple threads). Since Sasha's changes in PR 147,
   // you shouldn't need the python interpreter anymore.
-	std::unique_ptr<py::scoped_interpeter> interp = use_python ?
+	std::unique_ptr<py::scoped_interpreter> interp = use_python ?
 		std::make_unique<py::scoped_interpreter>() : nullptr;
 
 	signal(SIGPIPE, SIG_IGN);
