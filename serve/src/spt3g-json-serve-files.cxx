@@ -273,25 +273,17 @@ static void handle_g3(const httplib::Request & req, httplib::Response & resp)
 		{
 			SinkStream sinkstr(sink);
 			std::ostream os (&sinkstr);
-			try {
-				//write a preamble:
-				std::string preamble = "{\n\"filename\" : \"";
-				preamble += req.path;
-				preamble += "\",\n\"frames\": [";
-				os << preamble;
+			//write a preamble:
+		        os << "{\n\"filename\" : \"" << req.path
+			   << "\",\n\"frames\": [";
 
+			try {
 				// Read in frames and write to JSON output
 				G3Pipeline pipe;
 				std::string fullpath = basedir + req.path;
 				pipe.Add(G3ModulePtr(new G3Reader(fullpath, n_frames_to_read + n_skip)));
 				pipe.Add(G3ModulePtr(new JSONWriter(os, n_skip)));
 				pipe.Run();
-
-				std::string end = "]\n}\n" ;
-				os << end;
-				sinkstr.flush();
-				sink.done();
-				return true;
 			}
 			catch(...) {
 				sinkstr.flush();
@@ -300,6 +292,11 @@ static void handle_g3(const httplib::Request & req, httplib::Response & resp)
 				sink.done();
 				return false;
 			}
+
+			os << "]\n}\n";
+			sinkstr.flush();
+			sink.done();
+			return true;
 		}
 		,
 		[t0,&req, n_frames_to_read, n_skip](bool success) // prints out request and how long it took
@@ -520,8 +517,8 @@ int main(int nargs, char **argv)
 	//This USED to be needed for "random python things" stored in frames to work
   // (though it was buggy and didn't play well with multiple threads). Since Sasha's changes in PR 147,
   // you shouldn't need the python interpreter anymore.
-	std::unique_ptr<G3PythonInterpreter> interp = use_python ?
-		std::make_unique<G3PythonInterpreter>(false) : nullptr;
+	std::unique_ptr<py::scoped_interpeter> interp = use_python ?
+		std::make_unique<py::scoped_interpreter>() : nullptr;
 
 	signal(SIGPIPE, SIG_IGN);
 	signal(SIGINT, sig_handler);
