@@ -19,6 +19,8 @@ public:
 	G3PythonContext(std::string name, bool hold_gil=false);
 	~G3PythonContext();
 
+	G3PythonContext(const G3PythonContext &) = delete;
+	G3PythonContext &operator=(const G3PythonContext &) = delete;
 private:
 	std::string name_;
 	bool hold_;
@@ -29,7 +31,7 @@ private:
 };
 
 // Convenience class for initializing and finalizing the Python interpreter.  This class
-// will initialize the python interpeter at construction (e.g. at the beginning of a C++
+// will initialize the python interpreter at construction (e.g. at the beginning of a C++
 // compiled program), and immediately initialize the appropriate G3PythonContext depending
 // on the value of hold_gil.  At destruction, it will exit the python context and finalize
 // the interpreter.  The python interpreter should be initialized only once, typically at
@@ -38,6 +40,11 @@ class G3PythonInterpreter {
 public:
 	G3PythonInterpreter();
 	~G3PythonInterpreter();
+
+	G3PythonInterpreter(G3PythonInterpreter &&other) noexcept { other.init_ = false; }
+	G3PythonInterpreter(G3PythonInterpreter &) = delete;
+	G3PythonInterpreter &operator=(const G3PythonInterpreter &) = delete;
+	G3PythonInterpreter &operator=(G3PythonInterpreter &) = delete;
 
 private:
 	bool init_;
