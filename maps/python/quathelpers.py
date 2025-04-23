@@ -60,6 +60,7 @@ def ang_to_quat(alpha, delta, start=None, stop=None):
             out = G3TimestreamQuat(q)
             out.start = start
             out.stop = stop
+            return out
         else:
             return G3VectorQuat(q)
 

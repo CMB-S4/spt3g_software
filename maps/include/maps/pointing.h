@@ -13,7 +13,7 @@ get_detector_pointing_quats(double x_offset, double y_offset,
 
 // Compute a vector of detector pointing pixels from a vector of
 // boresight transform quaternions
-std::vector<size_t>
+std::vector<uint64_t>
 get_detector_pointing_pixels(double x_offset, double y_offset,
     const G3VectorQuat &trans_quat, G3SkyMapConstPtr skymap);
 

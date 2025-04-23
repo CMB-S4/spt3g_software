@@ -1,12 +1,8 @@
 #include <pybindings.h>
 #include <serialization.h>
+#include <container_pybindings.h>
 #include <G3Timestream.h>
 #include <G3Units.h>
-#include <std_map_indexing_suite.hpp>
-#include <boost/python/slice.hpp>
-
-#include <cereal/types/map.hpp>
-#include <cereal/types/vector.hpp>
 
 #ifdef G3_HAS_FLAC
 #include <FLAC/stream_encoder.h>
@@ -119,13 +115,18 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 		uint8_t nanflag;
 		size_t nans = 0;
 
-		if (units != Counts)
+		if (units != Counts && units != None)
 			log_fatal("Cannot use FLAC on non-counts timestreams");
+
+		DataType data_type_out = data_type_;
 
 		// Copy to 24-bit integers
 		inbuf.resize(size());
-		switch (data_type_) {
+		switch (flac_depth_) {
+		case 24:
+			switch (data_type_) {
 			case TS_DOUBLE:
+				data_type_out = TS_FLOAT;
 				for (size_t i = 0; i < size(); i++)
 					inbuf[i] = ((int32_t(((double *)data_)[i]) & 0x00ffffff) << 8) >> 8;
 				break;
@@ -144,13 +145,46 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 				}
 				break;
 			case TS_INT64:
+				data_type_out = TS_INT32;
 				for (size_t i = 0; i < size(); i++)
 					inbuf[i] = ((int32_t(((int64_t *)data_)[i]) & 0x00ffffff) << 8) >> 8;
 				break;
 			default:
 				log_fatal("Unknown timestream datatype %d", data_type_);
+			}
+			break;
+		case 32:
+			if (FLAC_API_VERSION_CURRENT < 13)
+				log_fatal("32-bit compression is not supported, "
+				    "please upgrade FLAC to version 1.4 or newer");
+
+			switch (data_type_) {
+			case TS_DOUBLE:
+				for (size_t i = 0; i < size(); i++)
+					inbuf[i] = int32_t(((double *)data_)[i]);
+				break;
+			case TS_FLOAT:
+				for (size_t i = 0; i < size(); i++)
+					inbuf[i] = int32_t(((float *)data_)[i]);
+				break;
+			case TS_INT32:
+				memcpy(inbuf.data(), data_, size() * sizeof(int32_t));
+				break;
+			case TS_INT64:
+				for (size_t i = 0; i < size(); i++)
+					inbuf[i] = int32_t(((int64_t *)data_)[i]);
+				break;
+			default:
+				log_fatal("Unknown timestream datatype %d", data_type_);
+			}
+			break;
+		default:
+			log_fatal("Invalid FLAC bit depth %d", flac_depth_);
 		}
 		chanmap[0] = &inbuf[0];
+
+		ar & cereal::make_nvp("flac_depth", flac_depth_);
+		ar & cereal::make_nvp("data_type", data_type_out);
 
 		// Mark bad samples using an out-of-band signal. Since we
 		// convert to 24-bit integers going into FLAC, which have no
@@ -181,8 +215,7 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 		// Now do FLAC encoding
 		FLAC__StreamEncoder *encoder = FLAC__stream_encoder_new();
 		FLAC__stream_encoder_set_channels(encoder, 1);
-		// XXX: should assert if high-order 8 bits are not clear
-		FLAC__stream_encoder_set_bits_per_sample(encoder, 24);
+		FLAC__stream_encoder_set_bits_per_sample(encoder, flac_depth_);
 		FLAC__stream_encoder_set_compression_level(encoder, use_flac_);
 		FLAC__stream_encoder_set_do_md5(encoder, false);
 		FLAC__stream_encoder_init_stream(encoder,
@@ -232,6 +265,31 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 #endif
 }
 
+template <typename T>
+std::vector<T> *
+unpack_flac(const std::vector<int32_t> &buf, uint8_t nanflag, const std::vector<bool> &nanbuf)
+{
+	// Represent data as floats internally if possible, to allow NaNs,
+	// which we try to pull through the process to signal missing data.
+
+	// Convert data format
+	auto data = new std::vector<T>(buf.size());
+	for (size_t i = 0; i < buf.size(); i++)
+		(*data)[i] = buf[i];
+
+	// Apply NaN mask
+	if (nanflag == AllNan) {
+		for (size_t i = 0; i < buf.size(); i++)
+			(*data)[i] = NAN;
+	} else if (nanflag == SomeNan) {
+		for (size_t i = 0; i < buf.size(); i++)
+			if (nanbuf[i])
+				(*data)[i] = NAN;
+	}
+
+	return data;
+}
+
 template <class A> void G3Timestream::load(A &ar, unsigned v)
 {
 	G3_CHECK_VERSION(v);
@@ -259,8 +317,19 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 		callback.outbuf = new std::vector<int32_t>();
 		callback.pos = 0;
 
-		if (units != Counts)
+		if (units != Counts && units != None)
 			log_fatal("Cannot use FLAC on non-counts timestreams");
+
+		if (v >= 4) {
+			ar & cereal::make_nvp("flac_depth", flac_depth_);
+			if (flac_depth_ > 24 && FLAC_API_VERSION_CURRENT < 13)
+				log_fatal("32-bit decompression is not supported, "
+				    "please upgrade FLAC to version 1.4 or newer");
+			ar & cereal::make_nvp("data_type", data_type_);
+		} else {
+			flac_depth_ = 24;
+			data_type_ = TS_FLOAT;
+		}
 
 		ar & cereal::make_nvp("nanflag", nanflag);
 		if (nanflag == SomeNan)
@@ -281,31 +350,38 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 		FLAC__stream_decoder_finish(decoder);
 		FLAC__stream_decoder_delete(decoder);
 
-		// Represent data as floats internally. These have the same
-		// significand depth (24 bits) as the max. bit depth of the
-		// reference FLAC encoder we use, so no data are lost, and
-		// allow NaNs, unlike int32_ts, which we try to pull through
-		// the process to signal missing data.
-		float *data = new float[callback.outbuf->size()];
-		root_data_ref_ = std::shared_ptr<float[]>(data);
-		data_type_ = TS_FLOAT;
 		len_ = callback.outbuf->size();
-		data_ = data;
 
-		// Convert data format
-		for (size_t i = 0; i < size(); i++)
-			data[i] = (*callback.outbuf)[i];
-		delete callback.outbuf;
-
-		// Apply NaN mask
-		if (nanflag == AllNan) {
+		switch (data_type_) {
+		case TS_INT32:
+			// Short-circuit for int32
+			root_data_ref_ = std::shared_ptr<std::vector<int32_t> >(
+			    callback.outbuf);
+			data_ = &(*callback.outbuf)[0];
+			return;
+		case TS_INT64: {
+			auto data = new std::vector<int64_t>(size());
 			for (size_t i = 0; i < size(); i++)
-				data[i] = NAN;
-		} else if (nanflag == SomeNan) {
-			for (size_t i = 0; i < size(); i++)
-				if (nanbuf[i])
-					data[i] = NAN;
+				(*data)[i] = (*callback.outbuf)[i];
+			root_data_ref_ = std::shared_ptr<std::vector<int64_t> >(data);
+			data_ = &(*data)[0];
+			break;
 		}
+		case TS_FLOAT: {
+			auto data = unpack_flac<float>(*callback.outbuf, nanflag, nanbuf);
+			root_data_ref_ = std::shared_ptr<std::vector<float> >(data);
+			data_ = &(*data)[0];
+			break;
+		}
+		case TS_DOUBLE:
+			buffer_ = unpack_flac<double>(*callback.outbuf, nanflag, nanbuf);
+			data_ = &(*buffer_)[0];
+			break;
+		default:
+			log_fatal("Unknown timestream datatype %d", data_type_);
+		}
+
+		delete callback.outbuf;
 #else
 		log_fatal("Trying to read FLAC-compressed timestreams but built without FLAC support");
 #endif
@@ -466,7 +542,7 @@ template <> void G3Timestream::load(cereal::JSONInputArchive &ar, unsigned v)
 
 G3Timestream::G3Timestream(const G3Timestream &r) :
     units(r.units), start(r.start), stop(r.stop), use_flac_(r.use_flac_),
-    len_(r.len_), data_type_(r.data_type_)
+    flac_depth_(r.flac_depth_), len_(r.len_), data_type_(r.data_type_)
 {
 	// Copy constructor needs to copy data, which always involves
 	// allocating the internal buffer.
@@ -526,7 +602,7 @@ void G3Timestream::SetFLACCompression(int use_flac)
 {
 
 #ifdef G3_HAS_FLAC
-	if (use_flac != 0 && units != Counts)
+	if (use_flac != 0 && units != Counts && units != None)
 		log_fatal("Cannot use FLAC on non-counts timestreams");
 
 	use_flac_ = use_flac;
@@ -534,6 +610,14 @@ void G3Timestream::SetFLACCompression(int use_flac)
 	if (use_flac != 0)
 		log_fatal("Built without FLAC support");
 #endif
+}
+
+void G3Timestream::SetFLACBitDepth(int bit_depth)
+{
+	if (bit_depth != 24 && bit_depth != 32)
+		log_fatal("Invalid flac bit depth %d", bit_depth);
+
+	flac_depth_ = bit_depth;
 }
 
 G3Timestream G3Timestream::operator +(const G3Timestream &r) const
@@ -598,7 +682,8 @@ G3Timestream G3Timestream::operator *(const G3Timestream &r) const
 		log_fatal("Multiplying timestreams of unequal units");
 	for (size_t i = 0; i < size(); i++)
 		ret[i] = (*this)[i] * r[i];
-	ret.units = None;
+	if (r.units != units)
+		ret.units = r.units == None ? units : r.units;
 
 	return ret;
 }
@@ -613,7 +698,8 @@ G3Timestream G3Timestream::operator /(const G3Timestream &r) const
 		log_fatal("Dividing timestreams of unequal units");
 	for (size_t i = 0; i < size(); i++)
 		ret[i] = (*this)[i] / r[i];
-	ret.units = None;
+	if (r.units == units)
+		ret.units = None;
 
 	return ret;
 }
@@ -755,7 +841,7 @@ template <class A> void G3TimestreamMap::serialize(A &ar, unsigned v)
 			    i->second))));
 	} else {
 		ar & cereal::make_nvp("map",
-		    cereal::base_class<std::map<std::string,
+		    cereal::base_class<OrderedMap<std::string,
 		    G3TimestreamPtr> >(this));
 	}
 	if (v < 2) {
@@ -774,7 +860,10 @@ template <class A> void G3TimestreamMap::serialize(A &ar, unsigned v)
 std::string G3TimestreamMap::Description() const
 {
 	std::ostringstream desc;
-	desc << "Timestreams from " << size() << " detectors";
+	desc << "Timestreams";
+	if (begin() != end())
+		desc << " of " << *(begin()->second);
+	desc << " from " << size() << " detectors";
 	return desc.str();
 }
 
@@ -855,7 +944,7 @@ void G3TimestreamMap::SetUnits(G3Timestream::TimestreamUnits units)
 		ts.second->units = units;
 }
 
-uint8_t G3TimestreamMap::GetCompressionLevel() const
+uint8_t G3TimestreamMap::GetFLACCompression() const
 {
 	if (begin() == end())
 		return 0;
@@ -863,10 +952,30 @@ uint8_t G3TimestreamMap::GetCompressionLevel() const
 	return begin()->second->use_flac_;
 }
 
+uint8_t G3TimestreamMap::GetFLACBitDepth() const
+{
+	if (begin() == end())
+		return 0;
+
+	return begin()->second->flac_depth_;
+}
+
 void G3TimestreamMap::SetFLACCompression(int compression_level)
 {
+	// Check for errors
+	begin()->second->SetFLACCompression(compression_level);
+
 	for (auto& ts : *this)
 		ts.second->use_flac_ = compression_level;
+}
+
+void G3TimestreamMap::SetFLACBitDepth(int bit_depth)
+{
+	// Check for errors
+	begin()->second->SetFLACBitDepth(bit_depth);
+
+	for (auto& ts : *this)
+		ts.second->flac_depth_ = bit_depth;
 }
 
 void G3TimestreamMap::Compactify()
@@ -981,10 +1090,155 @@ void G3TimestreamMap::Compactify()
 G3_SPLIT_SERIALIZABLE_CODE_BINARY(G3Timestream);
 G3_SERIALIZABLE_CODE(G3TimestreamMap);
 
+static void
+G3Timestream_assert_congruence(const G3Timestream &a, const G3Timestream &b)
+{
+
+	if (b.size() != a.size())
+		log_fatal("Timestreams of unequal length");
+	if (a.units != b.units && a.units != G3Timestream::None &&
+	    b.units != G3Timestream::None)
+		log_fatal("Timestreams of unequal units");
+	if (a.start.time != b.start.time)
+		log_fatal("Timestreams start at different times");
+	if (a.stop.time != b.stop.time)
+		log_fatal("Timestreams stop at different times");
+}
+
+static G3TimestreamPtr
+G3Timestream_getslice(const G3Timestream &a, const py::slice &slice)
+{
+	int start(0), stop(a.size()), step(1);
+	double sample_spacing = 1./a.GetSampleRate();
+
+	// Normalize and check slice boundaries
+	if (slice.start().ptr() != Py_None)
+		start = py::extract<int>(slice.start())();
+	if (slice.stop().ptr() != Py_None)
+		stop = py::extract<int>(slice.stop())();
+	if (slice.step().ptr() != Py_None)
+		step = py::extract<int>(slice.step())();
+
+	if (start < 0)
+		start = a.size() + start;
+	if (stop < 0)
+		stop = a.size() + stop;
+
+	if (stop > (int)a.size())
+		stop = a.size();
+	if (step > (int)a.size())
+		step = a.size();
+
+	if (start >= (int)a.size() || start < 0)
+		log_fatal("Start index %d out of range", start);
+	if (stop < 0)
+		log_fatal("Stop index %d out of range", stop);
+	if (step <= 0)
+		log_fatal("Step index %d out of range", step);
+	if (start >= stop)
+		log_fatal("Start index %d >= stop index %d", start, stop);
+
+	// Get stop index corresponding to step parameter
+	stop = start + ((stop - start + (step - 1))/step)*step;
+
+	// Build new TS
+	G3TimestreamPtr out(new G3Timestream((stop - start)/step));
+	out->units = a.units;
+	out->start.time = a.start.time + G3TimeStamp(start*sample_spacing);
+	out->stop.time = a.start.time +
+	    G3TimeStamp((stop - step)*sample_spacing);
+
+	for (int i = start, j = 0; i < stop; i += step, j++)
+		(*out)[j] = a[i];
+
+	return out;
+}
+
+static auto
+G3Timestream_elapsed(const G3Timestream &a)
+{
+	if (!a.size())
+		return G3VectorIntPtr();
+
+	double sample_spacing = 1. / a.GetSampleRate();
+
+	G3VectorIntPtr v(new G3VectorInt);
+	v->reserve(a.size());
+
+	for (size_t i = 0; i < a.size(); i++)
+		v->push_back(i * sample_spacing);
+
+	return v;
+}
+
+static auto
+G3TimestreamMap_elapsed(const G3TimestreamMap &a)
+{
+	if (!a.size())
+		return G3VectorIntPtr();
+
+	return G3Timestream_elapsed(*a.begin()->second);
+}
+
+static auto
+G3Timestream_times(const G3Timestream &a)
+{
+	if (!a.size())
+		return G3VectorTimePtr();
+
+	double sample_spacing = 1. / a.GetSampleRate();
+
+	auto v = G3VectorTimePtr(new G3VectorTime);
+	v->reserve(a.size());
+
+	for (size_t i = 0; i < a.size(); i++)
+		v->push_back(G3Time(a.start.time + (uint64_t)(i * sample_spacing)));
+
+	return v;
+}
+
+static auto
+G3TimestreamMap_times(const G3TimestreamMap &a)
+{
+	if (!a.size())
+		return G3VectorTimePtr();
+
+	return G3Timestream_times(*a.begin()->second);
+}
+
+
 class G3Timestream::G3TimestreamPythonHelpers
 {
 public:
 SET_LOGGER("G3Timestream");
+
+static DataType
+get_ts_dtype(const Py_buffer &info)
+{
+	std::string format = check_buffer_format(info.format);
+
+	if (format == "d") {
+		return TS_DOUBLE;
+	} else if (format == "f") {
+		return TS_FLOAT;
+#ifdef __LP64__
+	} else if (format == "i") {
+#else
+	} else if (format == "i" || format == "l") {
+#endif
+		assert(info.itemsize == sizeof(int32_t));
+		return TS_INT32;
+#ifdef __LP64__
+	} else if (format == "q" || format == "l") {
+#else
+	} else if (format == "q") {
+#endif
+		assert(info.itemsize == sizeof(int64_t));
+		return TS_INT64;
+	} else {
+		throw py::type_error(std::string("Unsupported data type: ") + info.format);
+	}
+}
 
 static int
 G3TimestreamMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
@@ -999,9 +1253,9 @@ G3TimestreamMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 	view->suboffsets = NULL;
 	view->buf = NULL;
 
-	boost::python::handle<> self(boost::python::borrowed(obj));
-	boost::python::object selfobj(self);
-	boost::python::extract<G3TimestreamMapPtr> ext(selfobj);
+	py::handle<> self(py::borrowed(obj));
+	py::object selfobj(self);
+	py::extract<G3TimestreamMapPtr> ext(selfobj);
 	if (!ext.check()) {
 		PyErr_SetString(PyExc_ValueError, "Invalid timestream");
 		view->obj = NULL;
@@ -1085,12 +1339,12 @@ G3TimestreamMap_relbuffer(PyObject *obj, Py_buffer *view)
 }
 
 static G3TimestreamPtr
-timestream_from_iterable(boost::python::object v,
+timestream_from_iterable(py::object v,
     G3Timestream::TimestreamUnits units = G3Timestream::None)
 {
 	// Sometimes the explicit copy constructor does not get
 	// priority from python, so do what that should have done.
-	boost::python::extract<G3TimestreamConstPtr> was_ts_already(v);
+	py::extract<G3TimestreamConstPtr> was_ts_already(v);
 	if (was_ts_already.check())
 		return G3TimestreamPtr(new G3Timestream(*was_ts_already()));
 
@@ -1143,14 +1397,14 @@ timestream_from_iterable(boost::python::object v,
 			// We could add more types, but why do that?
 			// Let Python do the work for obscure cases
 			std::vector<double> data;
-			boost::python::container_utils::extend_container(data, v);
+			py::container_utils::extend_container(data, v);
 			x = G3TimestreamPtr(new G3Timestream(data.begin(), data.end()));
 		}
 		PyBuffer_Release(&view);
 	} else {
 		PyErr_Clear();
 		std::vector<double> data;
-		boost::python::container_utils::extend_container(data, v);
+		py::container_utils::extend_container(data, v);
 		x = G3TimestreamPtr(new G3Timestream(data.begin(), data.end()));
 	}
 
@@ -1167,8 +1421,9 @@ struct PyBufferOwner {
 
 static G3TimestreamMapPtr
 G3TimestreamMap_from_numpy(std::vector<std::string> keys,
-    boost::python::object data, G3Time start, G3Time stop,
-    G3Timestream::TimestreamUnits units, int compression_level, bool copy_data)
+    py::object data, G3Time start, G3Time stop,
+    G3Timestream::TimestreamUnits units, int compression_level,
+    bool copy_data, int bit_depth)
 {
 	G3TimestreamMapPtr x(new G3TimestreamMap);
 
@@ -1187,6 +1442,8 @@ G3TimestreamMap_from_numpy(std::vector<std::string> keys,
 			    timestream_from_iterable(data[i], units);
 			next->start = start;
 			next->stop = stop;
+			next->SetFLACCompression(compression_level);
+			next->SetFLACBitDepth(bit_depth);
 			(*x)[keys[i]] = next;
 		}
 		return x;
@@ -1198,43 +1455,20 @@ G3TimestreamMap_from_numpy(std::vector<std::string> keys,
 	v = std::make_shared<PyBufferOwner>(view);
 	}
 
-	if (keys.size() != (size_t)v->v.shape[0]) {
-		PyErr_SetString(PyExc_IndexError, "Number of keys does not "
+	if (keys.size() != (size_t)v->v.shape[0])
+		throw py::index_error("Number of keys does not "
 		    "match number of rows in data structure.");
-		boost::python::throw_error_already_set();
-	}
 
-	if (v->v.ndim != 2) {
-		PyErr_SetString(PyExc_ValueError,
-		    "Array must be two-dimensional.");
-		boost::python::throw_error_already_set();
-	}
+	if (v->v.ndim != 2)
+		throw py::value_error("Array must be two-dimensional.");
 
 	G3Timestream templ;
 	templ.units = units;
 	templ.start = start;
 	templ.stop = stop;
 	templ.SetFLACCompression(compression_level);
-	if (strcmp(v->v.format, "d") == 0) {
-		templ.data_type_ = G3Timestream::TS_DOUBLE;
-	} else if (strcmp(v->v.format, "f") == 0) {
-		templ.data_type_ = G3Timestream::TS_FLOAT;
-#ifdef __LP64__
-	} else if (strcmp(v->v.format, "i") == 0) {
-#else
-	} else if (strcmp(v->v.format, "i") == 0 || strcmp(v->v.format, "l") == 0) {
-#endif
-		templ.data_type_ = G3Timestream::TS_INT32;
-#ifdef __LP64__
-	} else if (strcmp(v->v.format, "q") == 0 || strcmp(v->v.format, "l") == 0) {
-#else
-	} else if (strcmp(v->v.format, "q") == 0) {
-#endif
-		templ.data_type_ = G3Timestream::TS_INT64;
-	} else {
-		PyErr_SetString(PyExc_ValueError, "Unsupported data type.");
-		boost::python::throw_error_already_set();
-	}
+	templ.SetFLACBitDepth(bit_depth);
+	templ.data_type_ = get_ts_dtype(v->v);
 
 	uint8_t *buf;
 	std::shared_ptr<void> data_ref;
@@ -1275,9 +1509,9 @@ G3Timestream_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 
 	view->shape = NULL;
 
-	boost::python::handle<> self(boost::python::borrowed(obj));
-	boost::python::object selfobj(self);
-	boost::python::extract<G3TimestreamPtr> ext(selfobj);
+	py::handle<> self(py::borrowed(obj));
+	py::object selfobj(self);
+	py::extract<G3TimestreamPtr> ext(selfobj);
 	if (!ext.check()) {
 		PyErr_SetString(PyExc_ValueError, "Invalid timestream");
 		view->obj = NULL;
@@ -1333,85 +1567,26 @@ G3Timestream_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 	return 0;
 }
 
-static int
-G3Timestream_nsamples(const G3Timestream &r)
-{
-	return r.size();
-}
-
-static void
-G3Timestream_assert_congruence(const G3Timestream &a, const G3Timestream &b)
-{
-
-	if (b.size() != a.size())
-		log_fatal("Timestreams of unequal length");
-	if (a.units != b.units && a.units != G3Timestream::None &&
-	    b.units != G3Timestream::None)
-		log_fatal("Timestreams of unequal units");
-	if (a.start.time != b.start.time)
-		log_fatal("Timestreams start at different times");
-	if (a.stop.time != b.stop.time)
-		log_fatal("Timestreams stop at different times");
-}
-
-static G3TimestreamPtr
-G3Timestream_getslice(const G3Timestream &a, boost::python::slice slice)
-{
-	using namespace boost::python;
-	int start(0), stop(a.size()), step(1);
-	double sample_spacing = 1./a.GetSampleRate();
-
-	// Normalize and check slice boundaries
-	if (slice.start().ptr() != Py_None)
-		start = extract<int>(slice.start())();
-	if (slice.stop().ptr() != Py_None)
-		stop = extract<int>(slice.stop())();
-	if (slice.step().ptr() != Py_None)
-		step = extract<int>(slice.step())();
-
-	if (start < 0)
-		start = a.size() + start;
-	if (stop < 0)
-		stop = a.size() + stop;
-
-	if (stop > (int)a.size())
-		stop = a.size();
-	if (step > (int)a.size())
-		step = a.size();
-
-	if (start >= (int)a.size() || start < 0)
-		log_fatal("Start index %d out of range", start);
-	if (stop < 0)
-		log_fatal("Stop index %d out of range", stop);
-	if (step <= 0)
-		log_fatal("Step index %d out of range", step);
-	if (start >= stop)
-		log_fatal("Start index %d >= stop index %d", start, stop);
-
-	// Get stop index corresponding to step parameter
-	stop = start + ((stop - start + (step - 1))/step)*step;
-
-	// Build new TS
-	G3TimestreamPtr out(new G3Timestream((stop - start)/step));
-	out->units = a.units;
-	out->start.time = a.start.time + G3TimeStamp(start*sample_spacing);
-	out->stop.time = a.start.time +
-	    G3TimeStamp((stop - step)*sample_spacing);
-
-	for (int i = start, j = 0; i < stop; i += step, j++)
-		(*out)[j] = a[i];
-	
-	return out;
-}
 };
+
+static py::tuple
+G3Timestream_shape(const G3Timestream &r)
+{
+	return py::make_tuple(r.size());
+}
+
+static int
+G3Timestream_ndim(const G3Timestream &r)
+{
+	return 1;
+}
 
 static PyBufferProcs timestream_bufferprocs;
 static PyBufferProcs timestreammap_bufferprocs;
 
-PYBINDINGS("core") {
-	namespace bp = boost::python;
-
-	bp::enum_<G3Timestream::TimestreamUnits>("G3TimestreamUnits",
+PYBINDINGS("core", scope) {
+	register_enum<G3Timestream::TimestreamUnits, G3Timestream::None>(scope,
+	  "G3TimestreamUnits",
 	  "Unit scheme for timestreams and maps. Designates different classes "
 	  "of units (power, current, on-sky temperature) rather than choices "
 	  "of unit within a class (watts vs. horsepower, or K vs. uK), "
@@ -1430,10 +1605,10 @@ PYBINDINGS("core") {
 	    .value("Trj",  G3Timestream::Trj)
 	    .value("Frequency",  G3Timestream::Frequency)
 	;
-	enum_none_converter::from_python<G3Timestream::TimestreamUnits>();
 
-	bp::object ts =
-	  EXPORT_FRAMEOBJECT(G3Timestream, init<>(), "Detector timestream. "
+	auto ts =
+	register_frameobject<G3Timestream>(scope, "G3Timestream",
+	   "Detector timestream. "
 	   "Includes a units field and start and stop times. Can otherwise be "
 	   "treated as a numpy array with a float64 dtype. Conversions to and "
            "from such arrays (e.g. with numpy.asarray) are fast. Note that a "
@@ -1441,11 +1616,15 @@ PYBINDINGS("core") {
            "buffer: changes to the array affect the timestream and vice versa. "
 	   "Most binary timestream arithmetic operations (+, -) check that the "
 	   "units and start/stop times are congruent.")
-	    .def("__init__", bp::make_constructor(G3Timestream::G3TimestreamPythonHelpers::timestream_from_iterable, bp::default_call_policies(), (bp::arg("data"), bp::arg("units") = G3Timestream::TimestreamUnits::None)), "Create a timestream from a numpy array or other numeric python iterable")
+	    .def(py::init<>())
+	    .def("__init__", py::make_constructor(G3Timestream::G3TimestreamPythonHelpers::timestream_from_iterable, py::default_call_policies(), (py::arg("data"), py::arg("units") = G3Timestream::TimestreamUnits::None)), "Create a timestream from a numpy array or other numeric python iterable")
 	    .def("SetFLACCompression", &G3Timestream::SetFLACCompression,
 	      "Pass True to turn on FLAC compression when serialized. "
 	      "FLAC compression only works if the timestream is in units of "
 	      "counts. FLAC compression is ignored when outputing to JSON.")
+	    .def("SetFLACBitDepth", &G3Timestream::SetFLACBitDepth,
+	      "Change the bit depth for FLAC compression, may be 24 or 32 "
+	      "(default, requires version 1.4+).")
 	    .def_readwrite("units", &G3Timestream::units,
 	      "Units of the data in the timestream, stored as one of the "
 	      "members of core.G3TimestreamUnits.")
@@ -1453,19 +1632,27 @@ PYBINDINGS("core") {
 	      "Time of the first sample in the time stream")
 	    .def_readwrite("stop", &G3Timestream::stop,
 	      "Time of the final sample in the timestream")
-	    .add_property("sample_rate", &G3Timestream::GetSampleRate,
+	    .def_property_readonly("sample_rate", &G3Timestream::GetSampleRate,
 	      "Computed sample rate of the timestream.")
-	    .add_property("n_samples", &G3Timestream::G3TimestreamPythonHelpers::G3Timestream_nsamples,
+	    .def_property_readonly("n_samples", &G3Timestream::size,
 	      "Number of samples in the timestream. Equivalent to len(ts)")
-	    .add_property("compression_level", &G3Timestream::GetCompressionLevel,
+	    .def_property("compression_level", &G3Timestream::GetFLACCompression,
 	      &G3Timestream::SetFLACCompression, "Level of FLAC compression used for this timestream. "
 	      "This can only be non-zero if the timestream is in units of counts.")
-	    .def("_assert_congruence", &G3Timestream::G3TimestreamPythonHelpers::G3Timestream_assert_congruence,
+	    .def_property("bit_depth", &G3Timestream::GetFLACBitDepth,
+	      &G3Timestream::SetFLACBitDepth, "Bit depth of FLAC compression used for this timestream.")
+	    .def("_assert_congruence", &G3Timestream_assert_congruence,
 	      "log_fatal() if units, length, start, or stop times do not match")
-	    .def("_cxxslice", &G3Timestream::G3TimestreamPythonHelpers::G3Timestream_getslice, "Slice-only __getitem__")
+	    .def("_cxxslice", &G3Timestream_getslice, "Slice-only __getitem__")
+	    .def_property_readonly("elapsed", &G3Timestream_elapsed,
+	      "Compute elapsed time array for samples")
+	    .def_property_readonly("times", &G3Timestream_times,
+	      "Compute time vector for samples")
+	    .def("__len__", &G3Timestream::size)
+	    .def_property_readonly("shape", &G3Timestream_shape)
+	    .def_property_readonly("ndim", &G3Timestream_ndim)
 	    // Operators bound in python through numpy
 	;
-	register_pointer_conversions<G3Timestream>();
 
 	// Add buffer protocol interface
 	PyTypeObject *tsclass = (PyTypeObject *)ts.ptr();
@@ -1475,19 +1662,21 @@ PYBINDINGS("core") {
 	tsclass->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
 #endif
 
-	bp::object tsm =
-	  EXPORT_FRAMEOBJECT(G3TimestreamMap, init<>(), "Collection of timestreams indexed by logical detector ID")
-	    .def("__init__", bp::make_constructor(G3Timestream::G3TimestreamPythonHelpers::G3TimestreamMap_from_numpy, 
-	         bp::default_call_policies(),
-	         (bp::arg("keys"), bp::arg("data"), bp::arg("start")=G3Time(0),
-	          bp::arg("stop")=G3Time(0), bp::arg("units") = G3Timestream::TimestreamUnits::None,
-	          bp::arg("compression_level") = 0, bp::arg("copy_data") = true)),
+	auto tsm =
+	register_frameobject<G3TimestreamMap>(scope, "G3TimestreamMap",
+	    "Collection of timestreams indexed by logical detector ID")
+	    .def(py::init<>())
+	    .def("__init__", py::make_constructor(G3Timestream::G3TimestreamPythonHelpers::G3TimestreamMap_from_numpy, 
+	         py::default_call_policies(),
+	         (py::arg("keys"), py::arg("data"), py::arg("start")=G3Time(0),
+	          py::arg("stop")=G3Time(0), py::arg("units") = G3Timestream::TimestreamUnits::None,
+	          py::arg("compression_level") = 0, py::arg("copy_data") = true, py::arg("bit_depth") = 32)),
 	         "Create a timestream map from a numpy array or other numeric python iterable. "
 	         "Each row of the 2D input array will correspond to a single timestream, with "
 	         "the key set to the correspondingly-indexed entry of <keys>. If <copy_data> "
 	         "is True (default), the data will be copied into the output data structure. "
 	         "If False, the timestream map will provide a view into the given numpy array.")
-	    .def(bp::std_map_indexing_suite<G3TimestreamMap, true>())
+	    .def(py::std_map_indexing_suite<G3TimestreamMap, true>())
 	    .def("CheckAlignment", &G3TimestreamMap::CheckAlignment)
 	    .def("Compactify", &G3TimestreamMap::Compactify,
 	       "If member timestreams are stored non-contiguously, repack all "
@@ -1497,27 +1686,36 @@ PYBINDINGS("core") {
 	      "Pass True to turn on FLAC compression when serialized. "
 	      "FLAC compression only works if the timestreams are in units of "
 	      "counts.")
-	    .add_property("start", &G3TimestreamMap::GetStartTime,
+	    .def("SetFLACBitDepth", &G3TimestreamMap::SetFLACBitDepth,
+	      "Change the bit depth for FLAC compression, may be 24 or 32 "
+	      "(default, requires version 1.4+).")
+	    .def_property("start", &G3TimestreamMap::GetStartTime,
 	      &G3TimestreamMap::SetStartTime,
 	      "Time of the first sample in the time stream")
-	    .add_property("stop", &G3TimestreamMap::GetStopTime,
+	    .def_property("stop", &G3TimestreamMap::GetStopTime,
 	      &G3TimestreamMap::SetStopTime,
 	      "Time of the final sample in the time stream")
-	    .add_property("sample_rate", &G3TimestreamMap::GetSampleRate,
+	    .def_property_readonly("sample_rate", &G3TimestreamMap::GetSampleRate,
 	      "Computed sample rate of the timestream.")
-	    .add_property("n_samples", &G3TimestreamMap::NSamples,
+	    .def_property_readonly("n_samples", &G3TimestreamMap::NSamples,
 	      "Number of samples in the timestream. Equivalent to the length "
 	      "of one of the timestreams.")
-	    .add_property("units", &G3TimestreamMap::GetUnits,
+	    .def_property("units", &G3TimestreamMap::GetUnits,
 	      &G3TimestreamMap::SetUnits,
 	      "Units of the data in the timestream, stored as one of the "
 	      "members of core.G3TimestreamUnits.")
-	    .add_property("compression_level", &G3TimestreamMap::GetCompressionLevel,
+	    .def_property("compression_level", &G3TimestreamMap::GetFLACCompression,
 	      &G3TimestreamMap::SetFLACCompression,
 	      "Level of FLAC compression used for this timestream map. "
 	      "This can only be non-zero if the timestream is in units of counts.")
+	    .def_property("bit_depth", &G3TimestreamMap::GetFLACBitDepth,
+	      &G3TimestreamMap::SetFLACBitDepth,
+	      "Bit depth of FLAC compression used for this timestream map.")
+	    .def_property_readonly("elapsed", &G3TimestreamMap_elapsed,
+	      "Compute elapsed time array for samples")
+	    .def_property_readonly("times", &G3TimestreamMap_times,
+	      "Compute time vector for samples")
 	;
-	register_pointer_conversions<G3TimestreamMap>();
 
 	// Add buffer protocol interface
 	PyTypeObject *tsmclass = (PyTypeObject *)tsm.ptr();

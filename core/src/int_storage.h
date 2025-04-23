@@ -1,11 +1,11 @@
 #ifndef _G3_INT_STORAGE_H
 #define _G3_INT_STORAGE_H
 
-#include <pybindings.h>
-#include <serialization.h>
 #include <vector>
 #include <string>
 #include <map>
+
+#include <cereal/cereal.hpp>
 
 int bit_count(const std::vector<int64_t> &d);
 int bit_count(const std::map<std::string, int64_t> &d);

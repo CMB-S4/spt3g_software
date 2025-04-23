@@ -1,16 +1,7 @@
 #include <G3Logging.h>
 #include <dataio.h>
+#include "streams.h"
 
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
-#ifdef BZIP2_FOUND
-#include <boost/iostreams/filter/bzip2.hpp>
-#endif
-#ifdef LZMA_FOUND
-#include <boost/iostreams/filter/lzma.hpp>
-#endif
-#include <boost/iostreams/device/file.hpp>
-#include <boost/iostreams/device/file_descriptor.hpp>
 #include <filesystem>
 
 #include <sys/types.h>
@@ -18,244 +9,332 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <stdlib.h>
+#include <atomic>
+#include <mutex>
 
-#include "counter64.hpp"
 
-std::shared_ptr<std::istream>
-g3_istream_from_path(const std::string &path, float timeout, size_t buffersize)
+static int
+connect_remote(const std::string &path, float timeout)
 {
-	auto stream = std::make_shared<boost::iostreams::filtering_istream>();
+	// TCP Socket. Two syntaxes:
+	// - tcp://host:port -> connect to "host" on "port" and read
+	//   until EOF
+	// - tcp://*:port -> listen on "port" for the first connection
+	//   and read until EOF
 
-	// Figure out what kind of ultimate data source this is
-	if (path.find("tcp://") == 0) {
-		// TCP Socket. Two syntaxes:
-		// - tcp://host:port -> connect to "host" on "port" and read
-		//   until EOF
-		// - tcp://*:port -> listen on "port" for the first connection
-		//   and read until EOF
+	std::string host = path.substr(path.find("://") + 3);
+	if (host.find(":") == host.npos)
+		log_fatal("Could not open URL %s: unspecified port", path.c_str());
+	std::string port = host.substr(host.find(":") + 1);
+	host = host.substr(0, host.find(":"));
 
-		std::string host = path.substr(path.find("://") + 3);
-		if (host.find(":") == host.npos)
-			log_fatal("Could not open URL %s: unspecified port",
-			    path.c_str());
-		std::string port = host.substr(host.find(":") + 1);
-		host = host.substr(0, host.find(":"));
+	log_debug("Opening connection to %s, port %s", host.c_str(), port.c_str());
 
-		log_debug("Opening connection to %s, port %s", host.c_str(),
-		    port.c_str());
+	int fd = -1;
 
-		int fd = -1;
+	if (strcmp(host.c_str(), "*") == 0) {
+		// Listen for incoming connections
+		struct sockaddr_in6 sin;
+		int no = 0, yes = 1;
+		int lfd;
 
-		if (strcmp(host.c_str(), "*") == 0) {
-			// Listen for incoming connections
-			struct sockaddr_in6 sin;
-			int no = 0, yes = 1;
-			int lfd;
+		bzero(&sin, sizeof(sin));
+		sin.sin6_family = AF_INET6;
+		sin.sin6_port = htons(strtol(port.c_str(), NULL, 10));
+	#ifdef SIN6_LEN
+		sin.sin6_len = sizeof(sin);
+	#endif
 
-			bzero(&sin, sizeof(sin));
-			sin.sin6_family = AF_INET6;
-			sin.sin6_port = htons(strtol(port.c_str(), NULL, 10));
-		#ifdef SIN6_LEN
-			sin.sin6_len = sizeof(sin);
-		#endif
-			
-			lfd = socket(PF_INET6, SOCK_STREAM, 0);
-			if (lfd <= 0)
-				log_fatal("Could not listen on %s (%s)",
-				    path.c_str(), strerror(errno));
-			setsockopt(lfd, IPPROTO_IPV6, IPV6_V6ONLY, &no,
-			    sizeof(no));
-			setsockopt(lfd, SOL_SOCKET, SO_REUSEADDR, &yes,
-			    sizeof(yes));
+		lfd = socket(PF_INET6, SOCK_STREAM, 0);
+		if (lfd <= 0)
+			log_fatal("Could not listen on %s (%s)",
+			    path.c_str(), strerror(errno));
+		setsockopt(lfd, IPPROTO_IPV6, IPV6_V6ONLY, &no, sizeof(no));
+		setsockopt(lfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
 
-			if (bind(lfd, (struct sockaddr *)&sin, sizeof(sin)) < 0)
-				log_fatal("Could not bind on port %s (%s)",
-				    port.c_str(), strerror(errno));
-			if (listen(lfd, 1) < 0)
-				log_fatal("Could not listen on port %s (%s)",
-				    port.c_str(), strerror(errno));
+		if (bind(lfd, (struct sockaddr *)&sin, sizeof(sin)) < 0)
+			log_fatal("Could not bind on port %s (%s)",
+			    port.c_str(), strerror(errno));
+		if (listen(lfd, 1) < 0)
+			log_fatal("Could not listen on port %s (%s)",
+			    port.c_str(), strerror(errno));
 
-			log_debug("Waiting for connection on port %s",
-			    port.c_str());
-			fd = accept(lfd, NULL, NULL);
-			log_debug("Accepted connection on port %s",
-			    port.c_str());
-			close(lfd);
-		} else {
-			// Connect to a listening host elsewhere
+		log_debug("Waiting for connection on port %s", port.c_str());
+		fd = accept(lfd, NULL, NULL);
+		log_debug("Accepted connection on port %s", port.c_str());
+		close(lfd);
 
-			struct addrinfo hints, *info, *r;
-			int err;
+		return fd;
+	}
 
-			bzero(&hints, sizeof(hints));
-			hints.ai_family = AF_UNSPEC;
-			hints.ai_socktype = SOCK_STREAM;
+	// Connect to a listening host elsewhere
 
-			err = getaddrinfo(host.c_str(), port.c_str(), &hints,
-			    &info);
-			if (err != 0)
-				log_fatal("Could not find host %s (%s)",
-				    host.c_str(), gai_strerror(err));
+	struct addrinfo hints, *info, *r;
+	int err;
 
-			// Loop through possible addresses until we find one
-			// that works.
+	bzero(&hints, sizeof(hints));
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+
+	err = getaddrinfo(host.c_str(), port.c_str(), &hints, &info);
+	if (err != 0)
+		log_fatal("Could not find host %s (%s)",
+		    host.c_str(), gai_strerror(err));
+
+	// Loop through possible addresses until we find one
+	// that works.
+	fd = -1;
+	for (r = info; r != NULL; r = r->ai_next) {
+		fd = socket(r->ai_family, r->ai_socktype, r->ai_protocol);
+		if (fd == -1)
+			continue;
+
+		if (connect(fd, r->ai_addr, r->ai_addrlen) == -1) {
+			close(fd);
 			fd = -1;
-			for (r = info; r != NULL; r = r->ai_next) {
-				fd = socket(r->ai_family, r->ai_socktype,
-				    r->ai_protocol);
-				if (fd == -1)
-					continue;
-
-				if (connect(fd, r->ai_addr, r->ai_addrlen) ==
-				    -1) {
-					close(fd);
-					fd = -1;
-					continue;
-				}
-
-				break;
-			}
-
-			if (fd == -1)
-				log_fatal("Could not connect to %s (%s)",
-				    path.c_str(), strerror(errno));
-
-                        if (timeout >= 0) {
-                                struct timeval tv;
-                                tv.tv_sec = (int)timeout;
-                                tv.tv_usec = (int)(1e6 * (timeout - tv.tv_sec));
-                                if (setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO,
-                                               (char *)&tv, sizeof(tv)) < 0)
-                                        log_fatal("Failed to set timeout on socket; errno=%i",
-                                                  errno);
-                        }
-
-			if (info != NULL)
-				freeaddrinfo(info);
+			continue;
 		}
 
-		boost::iostreams::file_descriptor_source fs(fd,
-		    boost::iostreams::close_handle);
-		stream->push(fs, buffersize);
-	} else {
-		// Simple file case
-		if (path.size() > 3 && !path.compare(path.size() - 3, 3, ".gz"))
-			stream->push(boost::iostreams::gzip_decompressor());
-		if (path.size() > 4 && !path.compare(path.size() - 4, 4, ".bz2")) {
+		break;
+	}
+
+	if (fd == -1)
+		log_fatal("Could not connect to %s (%s)",
+		    path.c_str(), strerror(errno));
+
+        if (timeout >= 0) {
+                struct timeval tv;
+                tv.tv_sec = (int)timeout;
+                tv.tv_usec = (int)(1e6 * (timeout - tv.tv_sec));
+                if (setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO,
+                               (char *)&tv, sizeof(tv)) < 0)
+                        log_fatal("Failed to set timeout on socket; errno=%i",
+                                  errno);
+        }
+
+	if (info != NULL)
+		freeaddrinfo(info);
+
+	return fd;
+}
+
+
+enum Codec {
+  NONE = 0,
+  GZ = 1,
+  BZIP2 = 2,
+  LZMA = 3,
+  REMOTE = 4,
+};
+
+static bool
+has_ext(const std::string &path, const std::string &ext)
+{
+	size_t n = ext.size();
+	if (path.size() <= n)
+		return false;
+	return !path.compare(path.size() - n, n, ext);
+}
+
+static Codec
+get_codec(const std::string &path, const std::string &ext=".g3")
+{
+	if (has_ext(path, ext + ".gz")) {
+#ifdef ZLIB_FOUND
+		return GZ;
+#else
+		log_fatal("Library not compiled with gzip support");
+#endif
+	}
+	if (has_ext(path, ext + ".bz2")) {
 #ifdef BZIP2_FOUND
-			stream->push(boost::iostreams::bzip2_decompressor());
+		return BZIP2;
 #else
-			log_fatal("Boost not compiled with bzip2 support.");
+		log_fatal("Library not compiled with bzip2 support");
 #endif
-		}
-		if (path.size() > 3 && !path.compare(path.size() - 3, 3, ".xz")) {
+	}
+	if (has_ext(path, ext + ".xz")) {
 #ifdef LZMA_FOUND
-			stream->push(boost::iostreams::lzma_decompressor());
+		return LZMA;
 #else
-			log_fatal("Boost not compiled with LZMA support.");
-#endif
-		}
-
-		stream->push(boost::iostreams::file_source(path,
-		    std::ios::binary), buffersize);
-	}
-
-	return stream;
-}
-
-int
-g3_istream_handle(std::shared_ptr<std::istream> &stream)
-{
-	auto is = std::dynamic_pointer_cast<boost::iostreams::filtering_istream>(stream);
-	if (!is)
-		log_fatal("Could not get stream");
-	boost::iostreams::file_descriptor_source *fs =
-	    is->component<boost::iostreams::file_descriptor_source>(
-	    is->size() - 1);
-
-	return !fs ? -1 : fs->handle();
-}
-
-std::shared_ptr<std::ostream>
-g3_ostream_to_path(const std::string &path, bool append, bool counter)
-{
-	auto stream = std::make_shared<boost::iostreams::filtering_ostream>();
-	if (path.size() > 3 && !path.compare(path.size() - 3, 3, ".gz") && !append)
-		stream->push(boost::iostreams::gzip_compressor());
-	if (path.size() > 4 && !path.compare(path.size() - 4, 4, ".bz2") && !append) {
-#ifdef BZIP2_FOUND
-		stream->push(boost::iostreams::bzip2_compressor());
-#else
-		log_fatal("Boost not compiled with bzip2 support.");
-#endif
-	}
-	if (path.size() > 3 && !path.compare(path.size() - 3, 3, ".xz") && !append) {
-#ifdef LZMA_FOUND
-		stream->push(boost::iostreams::lzma_compressor());
-#else
-		log_fatal("Boost not compiled with LZMA support.");
+		log_fatal("Library not compiled with LZMA support");
 #endif
 	}
 
-	if (counter)
-		stream->push(boost::iostreams::counter64());
-	std::ios_base::openmode mode = std::ios::binary;
-	if (append)
-		mode |= std::ios::app;
-	stream->push(boost::iostreams::file_sink(path, mode));
+	if (!ext.size() || has_ext(path, ext))
+		return NONE;
 
-	return stream;
+	log_fatal("Filename %s does not have extension %s",
+	    path.c_str(), ext.c_str());
 }
 
-size_t
-g3_ostream_count(std::shared_ptr<std::ostream> &stream)
+static Codec
+check_input_path(const std::string &path, const std::string &ext)
 {
-	auto os = std::dynamic_pointer_cast<boost::iostreams::filtering_ostream>(stream);
-	if (!os)
-		log_fatal("Could not get stream");
-	boost::iostreams::counter64 *counter =
-	    os->component<boost::iostreams::counter64>(
-	    os->size() - 2);
-	if (!counter)
-		log_fatal("Could not get stream counter");
-
-	return counter->characters();
-}
-
-void
-g3_ostream_flush(std::shared_ptr<std::ostream> &stream)
-{
-	auto os = std::dynamic_pointer_cast<boost::iostreams::filtering_ostream>(stream);
-	if (!os)
-		log_fatal("Could not get stream");
-	if (!os->strict_sync())
-		log_fatal("Error flushing stream");
-}
-
-void
-g3_check_input_path(const std::string &path)
-{
-	if (path.find("://") != path.npos)
-		return;
+	if (path.find("tcp://") == 0)
+		return REMOTE;
 
 	std::filesystem::path fpath(path);
 	if (!std::filesystem::exists(fpath) ||
 	    !std::filesystem::is_regular_file(fpath))
 		log_fatal("Could not find file %s", path.c_str());
+
+	return get_codec(path, ext);
 }
 
-void
-g3_check_output_path(const std::string &path)
+static Codec
+check_output_path(const std::string &path, const std::string &ext)
 {
 	std::filesystem::path fpath(path);
 
 	if (fpath.empty())
 		log_fatal("Empty file path");
 
-	if (!fpath.has_parent_path())
-		return;
+	if (fpath.has_parent_path()) {
+		auto ppath = fpath.parent_path();
+		if (!std::filesystem::exists(ppath))
+			log_fatal("Parent path does not exist: %s",
+			    ppath.string().c_str());
+		if (!std::filesystem::is_directory(ppath))
+			log_fatal("Parent path is not a directory: %s",
+			    ppath.string().c_str());
+	}
 
-	if (!std::filesystem::exists(fpath.parent_path()))
-		log_fatal("Parent path does not exist: %s",
-		    fpath.parent_path().string().c_str());
+	return get_codec(path, ext);
+}
+
+// Claim a pword index to use throughout
+std::atomic<bool> pidx_init_{false};
+std::atomic<int> pidx_;
+std::mutex pidx_lock_;
+
+int pword_index() {
+	if (!pidx_init_) {
+		std::lock_guard<std::mutex> lockHolder(pidx_lock_);
+		// at this point we've obtained the lock, but we might
+		// have waited for another thread which already did
+		// the initialization
+		if(pidx_init_)
+			return pidx_;
+		pidx_ = std::ios::xalloc();
+		pidx_init_ = true;
+	}
+	return pidx_;
+}
+
+static void
+reset_stream(std::ios &stream)
+{
+	std::streambuf* sbuf = stream.rdbuf();
+	if (sbuf) {
+		sbuf->pubsync();
+		delete sbuf;
+	}
+	stream.rdbuf(nullptr);
+	stream.pword(pword_index()) = nullptr;
+}
+
+static void
+stream_cb(std::ios::event ev, std::ios_base& stream, int index)
+{
+	std::streambuf* buf = nullptr;
+
+	switch (ev) {
+	case std::ios::event::erase_event:
+		buf = static_cast<std::streambuf*>(stream.pword(pword_index()));
+		if (buf) {
+			buf->pubsync();
+			delete buf;
+			stream.pword(pword_index()) = nullptr;
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+void
+g3_istream_from_path(std::istream &stream, const std::string &path, float timeout,
+    size_t buffersize, const std::string &ext)
+{
+	reset_stream(stream);
+
+	int fd = -1;
+
+	// Figure out what kind of ultimate data source this is
+	switch(check_input_path(path, ext)) {
+	case REMOTE:
+		fd = connect_remote(path, timeout);
+		stream.rdbuf(new RemoteInputStreamBuffer(fd, buffersize));
+		break;
+#ifdef ZLIB_FOUND
+	case GZ:
+		stream.rdbuf(new GZipDecoder(path, buffersize));
+		break;
+#endif
+#ifdef BZIP2_FOUND
+	case BZIP2:
+		stream.rdbuf(new BZip2Decoder(path, buffersize));
+		break;
+#endif
+#ifdef LZMA_FOUND
+	case LZMA:
+		stream.rdbuf(new LZMADecoder(path, buffersize));
+		break;
+#endif
+	default:
+		// Read buffer
+		stream.rdbuf(new InputFileStreamCounter(path, buffersize));
+		break;
+	}
+
+	stream.pword(pword_index()) = stream.rdbuf();
+	stream.register_callback(stream_cb, 0);
+}
+
+int
+g3_istream_handle(std::istream &stream)
+{
+	std::streambuf* sbuf = stream.rdbuf();
+	if (!sbuf)
+		return -1;
+	RemoteInputStreamBuffer* rbuf = dynamic_cast<RemoteInputStreamBuffer*>(sbuf);
+	if (!rbuf)
+		return -1;
+	return rbuf->fd();
+}
+
+void
+g3_ostream_to_path(std::ostream &stream, const std::string &path, bool append,
+    size_t buffersize, const std::string &ext)
+{
+	reset_stream(stream);
+
+	Codec codec = check_output_path(path, ext);
+	if (append && codec != NONE)
+		log_fatal("Cannot append to compressed file.");
+
+	switch(codec) {
+#ifdef ZLIB_FOUND
+	case GZ:
+		stream.rdbuf(new GZipEncoder(path, buffersize));
+		break;
+#endif
+#ifdef BZIP2_FOUND
+	case BZIP2:
+		stream.rdbuf(new BZip2Encoder(path, buffersize));
+		break;
+#endif
+#ifdef LZMA_FOUND
+	case LZMA:
+		stream.rdbuf(new LZMAEncoder(path, buffersize));
+		break;
+#endif
+	default:
+		stream.rdbuf(new OutputFileStreamCounter(path, buffersize, append));
+		break;
+	}
+
+	stream.pword(pword_index()) = stream.rdbuf();
+	stream.register_callback(stream_cb, 1);
 }

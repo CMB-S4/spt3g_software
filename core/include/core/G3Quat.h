@@ -53,11 +53,8 @@ private:
 
 std::ostream& operator<<(std::ostream& os, const Quat &);
 
-namespace cereal {
-	template <class A> struct specialize<A, Quat, cereal::specialization::member_serialize> {};
-}
-
 CEREAL_CLASS_VERSION(Quat, 1);
+CEREAL_SPECIALIZE_FOR_ALL_ARCHIVES(Quat, cereal::specialization::member_serialize);
 
 Quat operator *(double, const Quat &);
 Quat operator /(double, const Quat &);
@@ -114,10 +111,6 @@ public:
 	std::string Description() const;
 	std::string Summary() const { return Description(); };
 };
-
-namespace cereal {
-	template <class A> struct specialize<A, G3TimestreamQuat, cereal::specialization::member_serialize> {};
-}
 
 G3_POINTERS(G3TimestreamQuat);
 G3_SERIALIZABLE(G3TimestreamQuat, 1);

@@ -573,13 +573,13 @@ FlatSkyProjection::PixelToAngleGrad(size_t pixel, double h) const
 }
 
 void FlatSkyProjection::GetInterpPixelsWeights(const Quat &q,
-    std::vector<size_t> & pixels, std::vector<double> & weights) const
+    std::vector<uint64_t> & pixels, std::vector<double> & weights) const
 {
 	std::vector<double> xy = QuatToXY(q);
 	double x = xy[0];
 	double y = xy[1];
 
-	pixels = std::vector<size_t>(4, (size_t) -1);
+	pixels = std::vector<uint64_t>(4, (uint64_t) -1);
 	weights = std::vector<double>(4, 0);
 
 	ssize_t x_1 = (ssize_t)floorf(x);
@@ -597,7 +597,7 @@ void FlatSkyProjection::GetInterpPixelsWeights(const Quat &q,
 	pixels[3] = x_2 + y_2 * xpix_;  weights[3] = (x - x_1) * (y - y_1);
 }
 
-std::vector<size_t>
+std::vector<uint64_t>
 FlatSkyProjection::QueryDisc(const Quat &q, double radius) const
 {
 	static const size_t npts = 72;
@@ -638,7 +638,7 @@ FlatSkyProjection::QueryDisc(const Quat &q, double radius) const
 
 	double crad = cos(radius / rad);
 
-	std::vector<size_t> pixels;
+	std::vector<uint64_t> pixels;
 	for (ssize_t x = xmin; x < xmax; x++) {
 		for (ssize_t y = ymin; y < ymax; y++) {
 			size_t pixel = y * xpix_ + x;
@@ -713,40 +713,37 @@ std::vector<double> FlatSkyProjection::GetPatchCenter(const FlatSkyProjection &p
 
 G3_SPLIT_SERIALIZABLE_CODE(FlatSkyProjection);
 
-PYBINDINGS("maps")
+PYBINDINGS("maps", scope)
 {
-	using namespace boost::python;
-
-	bp::enum_<MapProjection>("MapProjection")
-	    .value("Proj0", Proj0)
-	    .value("Proj1", Proj1)
-	    .value("Proj2", Proj2)
-	    .value("Proj3", Proj3)
-	    .value("Proj4", Proj4)
-	    .value("Proj5", Proj5)
-	    .value("Proj6", Proj6)
-	    .value("Proj7", Proj7)
+	auto cls = register_enum<MapProjection, ProjNone>(scope, "MapProjection")
 	    .value("Proj8", Proj8)
-	    .value("Proj9", Proj9)
-
-	    .value("ProjSansonFlamsteed", ProjSansonFlamsteed)
 	    .value("ProjSFL", ProjSFL)
-	    .value("ProjPlateCarree", ProjPlateCarree)
 	    .value("ProjCAR", ProjCAR)
-	    .value("ProjOrthographic", ProjOrthographic)
 	    .value("ProjSIN", ProjSIN)
-	    .value("ProjStereographic", ProjStereographic)
+	    .value("ProjARC", ProjARC)
 	    .value("ProjSTG", ProjSTG)
-	    .value("ProjLambertAzimuthalEqualArea",
-	      ProjLambertAzimuthalEqualArea)
 	    .value("ProjZEA", ProjZEA)
-	    .value("ProjGnomonic", ProjGnomonic)
 	    .value("ProjTAN", ProjTAN)
-	    .value("ProjCylindricalEqualArea",
-	      ProjCylindricalEqualArea)
 	    .value("ProjCEA", ProjCEA)
 	    .value("ProjBICEP", ProjBICEP)
 	    .value("ProjNone", ProjNone)
 	;
-	enum_none_converter::from_python<MapProjection, ProjNone>();
+
+	cls.attr("Proj0") = cls.attr("ProjSFL");
+	cls.attr("ProjSansonFlamsteed") = cls.attr("ProjSFL");
+	cls.attr("Proj1") = cls.attr("ProjCAR");
+	cls.attr("ProjPlateCarree") = cls.attr("ProjCAR");
+	cls.attr("Proj2") = cls.attr("ProjSIN");
+	cls.attr("ProjOrthographic") = cls.attr("ProjSIN");
+	cls.attr("Proj3") = cls.attr("ProjARC");
+	cls.attr("ProjZenithalEquidistant") = cls.attr("ProjARC");
+	cls.attr("Proj4") = cls.attr("ProjSTG");
+	cls.attr("ProjStereographic") = cls.attr("ProjSTG");
+	cls.attr("Proj5") = cls.attr("ProjZEA");
+	cls.attr("ProjLambertZenithalEqualArea") = cls.attr("ProjZEA");
+	cls.attr("Proj6") = cls.attr("ProjTAN");
+	cls.attr("ProjGnomonic") = cls.attr("ProjTAN");
+	cls.attr("Proj7") = cls.attr("ProjCEA");
+	cls.attr("ProjCylindricalEqualArea") = cls.attr("ProjCEA");
+	cls.attr("Proj9") = cls.attr("ProjBICEP");
 }

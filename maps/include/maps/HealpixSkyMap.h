@@ -25,14 +25,16 @@ public:
 	    bool shift_ra = false,
 	    G3SkyMap::MapPolConv pol_conv = G3SkyMap::ConvNone);
 
-	// Constructor from a numpy array
-	HealpixSkyMap(boost::python::object v,
+	HealpixSkyMap(const std::vector<uint64_t> &index,
+	    const std::vector<double> &data, size_t nside, bool weighted, bool nested,
+	    MapCoordReference coord_ref, G3Timestream::TimestreamUnits u,
+	    G3SkyMap::MapPolType pol_type, G3SkyMap::MapPolConv pol_conv);
+
+	HealpixSkyMap(const HealpixSkyMapInfo &info,
 	    bool weighted = true,
-	    bool nested = false,
 	    MapCoordReference coord_ref = MapCoordReference::Equatorial,
 	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
 	    G3SkyMap::MapPolType pol_type = G3SkyMap::None,
-	    bool shift_ra = false,
 	    G3SkyMap::MapPolConv pol_conv = G3SkyMap::ConvNone);
 
 	HealpixSkyMap();
@@ -62,7 +64,6 @@ public:
 
 	template <class A> void load(A &ar, unsigned v);
 	template <class A> void save(A &ar, unsigned v) const;
-	virtual void FillFromArray(boost::python::object v) override;
 	virtual G3SkyMapPtr Clone(bool copy_data = true) const override;
 	std::string Description() const override;
 
@@ -84,10 +85,10 @@ public:
 	Quat PixelToQuat(size_t pixel) const override;
 
 	G3VectorQuat GetRebinQuats(size_t pixel, size_t scale) const override;
-	void GetInterpPixelsWeights(const Quat &q, std::vector<size_t> & pixels,
+	void GetInterpPixelsWeights(const Quat &q, std::vector<uint64_t> & pixels,
 	    std::vector<double> & weights) const override;
 
-	std::vector<size_t> QueryDisc(const Quat &q, double radius) const override;
+	std::vector<uint64_t> QueryDisc(const Quat &q, double radius) const override;
 
 	G3SkyMapPtr Rebin(size_t scale, bool norm = true) const override;
 
@@ -150,12 +151,7 @@ private:
 };
 
 G3_POINTERS(HealpixSkyMap);
-
-namespace cereal {
-	template <class A> struct specialize<A, HealpixSkyMap, cereal::specialization::member_load_save> {};
-}
-
-G3_SERIALIZABLE(HealpixSkyMap, 3);
+G3_SPLIT_SERIALIZABLE(HealpixSkyMap, 3);
 
 #endif //_MAPS_HEALPIXSKYMAP_H
 

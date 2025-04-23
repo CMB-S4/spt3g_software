@@ -50,11 +50,12 @@ template <class A> void DfMuxChannelMapping::serialize(A &ar, unsigned v)
 G3_SERIALIZABLE_CODE(DfMuxChannelMapping);
 G3_SERIALIZABLE_CODE(DfMuxWiringMap);
 
-PYBINDINGS("dfmux") {
-	EXPORT_FRAMEOBJECT(DfMuxChannelMapping, init<>(),
+PYBINDINGS("dfmux", scope) {
+	register_frameobject<DfMuxChannelMapping>(scope, "DfMuxChannelMapping",
 	  "Bolometer wiring information. Module and channel IDs are stored "
 	  "zero-indexed, but be aware that they often printed one-indexed "
 	  "for compatibility with pydfmux.")
+	    .def(py::init<>())
 	    .def_readwrite("board_ip", &DfMuxChannelMapping::board_ip,
 	     "IP Address of the board, encoded as an int using struct")
 	    .def_readwrite("board_serial", &DfMuxChannelMapping::board_serial,
@@ -72,7 +73,7 @@ PYBINDINGS("dfmux") {
 	     "0-indexed channel number on the parent module/SQUID")
 	;
 
-	register_g3map<DfMuxWiringMap>("DfMuxWiringMap", "Mapping from "
+	register_g3map<DfMuxWiringMap>(scope, "DfMuxWiringMap", "Mapping from "
 	   "logical detector ID string (same as used in timestreams) to wiring "
 	   "information (the board, module, and channel to which a given "
 	   "detector is connected)");

@@ -35,7 +35,7 @@ if [ ! -e b2 ]; then
         --prefix=${PREFIX} \
         --with-python=$(which python3) \
         --with-python-root=$(python3-config --prefix) \
-        --with-libraries="iostreams,python,regex"
+        --with-libraries="python"
 fi
 
 extra_include=""

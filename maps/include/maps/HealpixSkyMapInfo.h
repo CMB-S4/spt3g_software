@@ -10,7 +10,8 @@
 
 class HealpixSkyMapInfo : public G3FrameObject {
 public:
-	HealpixSkyMapInfo(size_t nside, bool nested=false, bool shifted=false);
+	HealpixSkyMapInfo(size_t nside_or_npix, bool nested=false, bool shifted=false,
+	    bool is_npix=false);
 
 	HealpixSkyMapInfo();
 	HealpixSkyMapInfo(const HealpixSkyMapInfo& info);
@@ -47,10 +48,10 @@ public:
 
 	G3VectorQuat GetRebinQuats(size_t pixel, size_t scale) const;
 
-	void GetInterpPixelsWeights(const Quat &q, std::vector<size_t> & pixels,
+	void GetInterpPixelsWeights(const Quat &q, std::vector<uint64_t> & pixels,
 	    std::vector<double> & weights) const;
 
-	std::vector<size_t> QueryDisc(const Quat &q, double radius) const;
+	std::vector<uint64_t> QueryDisc(const Quat &q, double radius) const;
 
 private:
 	// scheme
@@ -79,11 +80,6 @@ private:
 };
 
 G3_POINTERS(HealpixSkyMapInfo);
-
-namespace cereal {
-	template <class A> struct specialize<A, HealpixSkyMapInfo, cereal::specialization::member_load_save> {};
-}
-
-G3_SERIALIZABLE(HealpixSkyMapInfo, 1);
+G3_SPLIT_SERIALIZABLE(HealpixSkyMapInfo, 1);
 
 #endif //#ifndef _MAPS_HEALPIXSKYMAPINFO_H

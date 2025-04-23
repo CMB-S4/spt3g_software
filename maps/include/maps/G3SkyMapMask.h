@@ -6,8 +6,6 @@
 
 #include <vector>
 
-#include <boost/python.hpp>
-
 /*
  * The following implements a companion object to a G3SkyMap containing
  * booleans for whether to use (true) or ignore (false) certain pixels.
@@ -26,15 +24,11 @@ class G3SkyMapMask : public G3FrameObject {
 public:
 	G3SkyMapMask(const G3SkyMap &parent, bool use_data = false,
 	    bool zero_nans = false, bool zero_infs = false);
-	G3SkyMapMask(const G3SkyMap &parent, boost::python::object v,
-	    bool zero_nans = false, bool zero_infs = false);
 	G3SkyMapMask(const G3SkyMapMask &);
 	virtual ~G3SkyMapMask() {};
 
 	// Copy
 	std::shared_ptr<G3SkyMapMask> Clone(bool copy_data = true) const;
-	std::shared_ptr<G3SkyMapMask> ArrayClone(boost::python::object v,
-	    bool zero_nans = false, bool zero_infs = false) const;
 
 	// Return a (modifiable) pixel value
 	std::vector<bool>::reference operator [] (size_t i);
@@ -118,19 +112,11 @@ private:
 	std::vector<bool> data_;
 	std::shared_ptr<const G3SkyMap> parent_;
 
-	// Populate
-	void FillFromMap(const G3SkyMap &m, bool zero_nans = false, bool zero_infs = false);
-	void FillFromArray(boost::python::object v, bool zero_nans = false, bool zero_infs = false);
-
 	SET_LOGGER("G3SkyMapMask");
 };
 
-namespace cereal {
-  template <class A> struct specialize<A, G3SkyMapMask, cereal::specialization::member_load_save> {};
-}
-
 G3_POINTERS(G3SkyMapMask);
-G3_SERIALIZABLE(G3SkyMapMask, 2);
+G3_SPLIT_SERIALIZABLE(G3SkyMapMask, 2);
 
 #endif
 

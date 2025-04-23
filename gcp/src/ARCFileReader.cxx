@@ -79,17 +79,18 @@ enum {
 class ARCFileReader : public G3Module {
 public:
 	ARCFileReader(const std::string &path,
-	    Experiment experiment=Experiment::SPT, bool track_filename=false);
+	    Experiment experiment=Experiment::SPT, float timeout=-1.,
+	    bool track_filename=false, size_t buffersize=1024*1024);
 	ARCFileReader(const std::vector<std::string> & filename,
-	    Experiment experiment=Experiment::SPT, bool track_filename=false);
-	virtual ~ARCFileReader() {}
+	    Experiment experiment=Experiment::SPT, float timeout=-1.,
+	    bool track_filename=false, size_t buffersize=1024*1024);
 
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
 
 private:
 	void StartFile(const std::string & path);
 	
-	std::shared_ptr<std::istream> stream_;
+	std::istream stream_;
 
 	struct block_stats {
 		int flags;
@@ -113,64 +114,62 @@ private:
 
 	void ParseArrayMap(uint8_t *buffer, size_t size);
 	G3FrameObjectPtr GCPToFrameObject(uint8_t *buffer,
-	    const struct block_stats &block, bool has_string_flag,
+	    const struct block_stats &block,
 	    int depth = 0, int base_offset = 0);
 	std::deque<std::string> filename_;
 	std::string cur_file_;
 
 	Experiment experiment;
+	void SetExperiment(Experiment exp);
 	G3TimePtr GCPToTime(uint8_t *buffer, off_t offset);
 
+	float timeout_;
 	bool track_filename_;
+	size_t buffersize_;
 
 	SET_LOGGER("ARCFileReader");
 };
 
 
 ARCFileReader::ARCFileReader(const std::string &path,
-    Experiment experiment, bool track_filename) :
-    experiment(experiment), track_filename_(track_filename)
+    Experiment experiment, float timeout, bool track_filename, size_t buffersize) :
+    stream_(nullptr), timeout_(timeout), track_filename_(track_filename),
+    buffersize_(buffersize)
 {
-	if (experiment == Experiment::SPT || experiment == Experiment::BK) {
-		ms_jiffie_base_ = G3Units::ms;
-	} else if (experiment == Experiment::PB) {
-		ms_jiffie_base_ = 86400/INT_MAX;
-	} else {
-		log_fatal("Unrecognized Experiment");
-	}
-
-	g3_check_input_path(path);
+	SetExperiment(experiment);
 	StartFile(path);
 }
 
-
-
 ARCFileReader::ARCFileReader(const std::vector<std::string> &filename,
-    Experiment experiment, bool track_filename) :
-    experiment(experiment), track_filename_(track_filename)
+    Experiment experiment, float timeout, bool track_filename, size_t buffersize) :
+    stream_(nullptr), timeout_(timeout), track_filename_(track_filename),
+    buffersize_(buffersize)
 {
-	if (experiment == Experiment::SPT || experiment == Experiment::BK) {
-		ms_jiffie_base_ = G3Units::ms;
-	} else if (experiment == Experiment::PB) {
-		ms_jiffie_base_ = 86400/INT_MAX;
-	} else {
-		log_fatal("Unrecognized Experiment");
-	}
+	SetExperiment(experiment);
 
 	if (filename.size() == 0)
 		log_fatal("Empty file list provided to G3Reader");
 
-	for (auto i = filename.begin(); i != filename.end(); i++){
-		g3_check_input_path(*i);
+	for (auto i = filename.begin(); i != filename.end(); i++)
 		filename_.push_back(*i);
-	}
 
-	const std::string path = filename_.front();
+	StartFile(filename_.front());
 	filename_.pop_front();
-	StartFile(path);
-
 }
 
+
+void ARCFileReader::SetExperiment(Experiment exp)
+{
+	experiment = exp;
+
+	if (experiment == Experiment::SPT || experiment == Experiment::BK) {
+		ms_jiffie_base_ = G3Units::ms;
+	} else if (experiment == Experiment::PB) {
+		ms_jiffie_base_ = 86400/INT_MAX;
+	} else {
+		log_fatal("Unrecognized Experiment");
+	}
+}
 
 void ARCFileReader::StartFile(const std::string & path)
 {
@@ -179,7 +178,7 @@ void ARCFileReader::StartFile(const std::string & path)
 
 	// Open file, including whatever decompression/network access/etc.
 	// may be required
-	stream_ = g3_istream_from_path(path);
+	g3_istream_from_path(stream_, path, timeout_, buffersize_, ".dat");
 	fd_ = g3_istream_handle(stream_);
 	cur_file_ = path;
 	revision_ = 0;
@@ -193,40 +192,40 @@ void ARCFileReader::StartFile(const std::string & path)
 	 */
 
 	// First size record
-	stream_->read((char *)&size, sizeof(size));
+	stream_.read((char *)&size, sizeof(size));
 	size = ntohl(size) - 8;
-	stream_->read((char *)&opcode, sizeof(opcode));
+	stream_.read((char *)&opcode, sizeof(opcode));
 	opcode = ntohl(opcode);
 
 	if (opcode != ARC_SIZE_RECORD)
 		log_fatal("No ARC_SIZE_RECORD at beginning of %s",
-		    path.c_str());
+		    cur_file_.c_str());
 	if ((fd_ < 0 && size != 4) || (fd_ >= 0 && size != 8))
 		log_fatal("Incorrectly sized ARC_SIZE_RECORD (%d)", size);
-	stream_->read((char *)&size, sizeof(size)); /* Skip size field */
+	stream_.read((char *)&size, sizeof(size)); /* Skip size field */
 	if (fd_ >= 0)
-		stream_->read((char *)&size, sizeof(size)); /* Skip size field (net stream) */
+		stream_.read((char *)&size, sizeof(size)); /* Skip size field (net stream) */
 
 	// Get array map
-	stream_->read((char *)&size, sizeof(size));
+	stream_.read((char *)&size, sizeof(size));
 	size = ntohl(size) - 8;
-	stream_->read((char *)&opcode, sizeof(opcode));
+	stream_.read((char *)&opcode, sizeof(opcode));
 	opcode = ntohl(opcode);
 	if (opcode != ARC_ARRAYMAP_RECORD)
 		log_fatal("No ARC_ARRAYMAP_RECORD at beginning of %s",
-		    path.c_str());
+		    cur_file_.c_str());
 
 	buffer = new uint8_t[size];
-	stream_->read((char *)buffer, size);
-	if (stream_->eof()) {
+	stream_.read((char *)buffer, size);
+	if (stream_.eof()) {
 		delete [] buffer;
 		log_fatal("%s truncated; unable to read register map",
-		    path.c_str());
+		    cur_file_.c_str());
 	}
-	if (!stream_->good()) {
+	if (!stream_.good()) {
 		delete [] buffer;
 		log_fatal("Read error on %s while reading register map",
-		    path.c_str());
+		    cur_file_.c_str());
 	}
 
 	ParseArrayMap(buffer, size);
@@ -630,8 +629,7 @@ static double GCP64ToFloat(uint8_t *buffer, off_t offset)
 }
 
 G3FrameObjectPtr ARCFileReader::GCPToFrameObject(uint8_t *buffer,
-    const struct ARCFileReader::block_stats &block, bool has_string_flag,
-    int depth, int base_offset)
+    const struct ARCFileReader::block_stats &block, int depth, int base_offset)
 {
 	if (base_offset == 0)
 		base_offset = block.offset;
@@ -651,7 +649,7 @@ G3FrameObjectPtr ARCFileReader::GCPToFrameObject(uint8_t *buffer,
 
 		for (int i = 0; i < block.dim[depth]; i++) {
 			root->push_back(GCPToFrameObject(buffer, block,
-			    has_string_flag, depth+1, base_offset));
+			    depth+1, base_offset));
 			base_offset += block.width*stride;
 		}
 
@@ -676,7 +674,7 @@ G3FrameObjectPtr ARCFileReader::GCPToFrameObject(uint8_t *buffer,
 			 * best we can.
 			 */
 			bool is_a_string = false;
-			if (has_string_flag) {
+			if (has_string_flag_) {
 				// Are we lucky enough that GCP tells us?
 				is_a_string = (block.flags & REG_STRING);
 			} else if (block.flags & REG_FAST) {
@@ -790,10 +788,10 @@ void ARCFileReader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	int32_t size, opcode;
 	uint8_t *buffer;
 
-	G3PythonContext ctx("ARCFileReader", false);
+	py::gil_scoped_release gil;
 
 	try {
-		while (stream_->peek() == EOF) {
+		while (stream_.peek() == EOF) {
 			if (filename_.size() > 0) {
 				const std::string path = filename_.front();
 				filename_.pop_front();
@@ -803,28 +801,28 @@ void ARCFileReader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 			}
 		}
 
-		stream_->read((char *)&size, sizeof(size));
+		stream_.read((char *)&size, sizeof(size));
 		size = ntohl(size) - 8;
-		stream_->read((char *)&opcode, sizeof(opcode));
+		stream_.read((char *)&opcode, sizeof(opcode));
 		opcode = ntohl(opcode);
 		if (opcode != ARC_FRAME_RECORD)
 			log_fatal("Message not an ARC_FRAME_RECORD mid-file");
 		if (fd_ >= 0) {
 			// network source (e.g. GCP) can support changing register selection on the fly
 			int32_t rev;
-			stream_->read((char *)&rev, sizeof(rev));
+			stream_.read((char *)&rev, sizeof(rev));
 			rev = ntohl(rev);
 			if (rev != revision_)
 				log_fatal("Frame regset revision %d does not match expected revision (%d)",
 				    rev, revision_);
-			stream_->read((char *)&size, sizeof(size));
+			stream_.read((char *)&size, sizeof(size));
 			size = ntohl(size);
 		}
 		if (size != frame_length_)
 			log_fatal("%zd-byte frame does not match expected length (%zd)",
 			    (size_t)size, (size_t)frame_length_);
 		buffer = new uint8_t[size];
-		stream_->read((char *)buffer, size);
+		stream_.read((char *)buffer, size);
 
 	} catch (...) {
 		log_error("Exception raised while reading file %s", cur_file_.c_str());
@@ -839,7 +837,7 @@ void ARCFileReader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 			for (auto reg = board->second.begin();
 			    reg != board->second.end(); reg++) {
 				(*boarddat)[reg->first] = GCPToFrameObject(
-				    buffer, reg->second, has_string_flag_);
+				    buffer, reg->second);
 			}
 			(*templ)[board->first] = boarddat;
 		}
@@ -853,21 +851,27 @@ void ARCFileReader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	delete [] buffer;
 }
 
-PYBINDINGS("gcp") {
-	using namespace boost::python;
+PYBINDINGS("gcp", scope) {
+	// Supported Experiments
+	register_enum<Experiment>(scope, "Experiment")
+		.value("SPT",   Experiment::SPT)
+		.value("BK",    Experiment::BK)
+		.value("PB",    Experiment::PB)
+	;
 
-	// Instead of EXPORT_G3MODULE since there are two constructors
-	class_<ARCFileReader, bases<G3Module>, std::shared_ptr<ARCFileReader>,
-	    boost::noncopyable>("ARCFileReader",
+	register_g3module<ARCFileReader>(scope, "ARCFileReader",
 	    "Read GCP archive file (or files if you pass an iterable of paths). "
 	    "For non-SPT ARC file formats, please set Experiment to the "
 	    "appropriate value.  Set track_filename to True to record the "
-	    "filename for each frame in the ._filename attribute (fragile).",
-		init<std::string, Experiment, bool>((arg("filename"),
-			arg("experiment")=Experiment::SPT, arg("track_filename")=false)))
-		.def(init<std::vector<std::string>, Experiment, bool>((arg("filename"),
-			arg("experiment")=Experiment::SPT, arg("track_filename")=false)))
-		.def_readonly("__g3module__", true)
+	    "filename for each frame in the ._filename attribute (fragile).")
+		.def(py::init<std::string, Experiment, float, bool, size_t>(),
+			py::arg("filename"), py::arg("experiment")=Experiment::SPT,
+			py::arg("timeout")=-1., py::arg("track_filename")=false,
+			py::arg("buffersize")=1024*1024)
+		.def(py::init<std::vector<std::string>, Experiment, float, bool, size_t>(),
+			py::arg("filename"), py::arg("experiment")=Experiment::SPT,
+			py::arg("timeout")=-1., py::arg("track_filename")=false,
+			py::arg("buffersize")=1024*1024)
 	;
 }
 

@@ -6,16 +6,16 @@ else(APPLE)
 endif(APPLE)
 
 add_spt3g_library(core SHARED
-	src/G3EventBuilder.cxx src/G3Frame.cxx src/G3TimeStamp.cxx
-	src/G3Pipeline.cxx src/G3Writer.cxx src/G3Reader.cxx
-	src/G3InfiniteSource.cxx src/G3Logging.cxx src/G3PrintfLogger.cxx
-	src/G3Data.cxx src/G3Vector.cxx src/G3Map.cxx src/G3Timestream.cxx
-        src/G3Timesample.cxx
-	src/G3TriggeredBuilder.cxx src/G3MultiFileWriter.cxx src/dataio.cxx
-	src/crc32.c ${CORE_EXTRA_SRCS}
-	src/G3NetworkSender.cxx src/G3SyslogLogger.cxx
-	src/G3PipelineInfo.cxx src/G3Quat.cxx src/G3Units.cxx
-	src/int_storage.cxx src/pybindings.cxx
+	src/G3Logging.cxx src/G3PrintfLogger.cxx src/G3SyslogLogger.cxx
+	src/crc32.c src/G3Frame.cxx src/G3Data.cxx src/G3TimeStamp.cxx
+	src/G3Pipeline.cxx src/G3PipelineInfo.cxx
+	src/int_storage.cxx src/G3Vector.cxx src/G3Map.cxx
+	src/dataio.cxx src/compression.cxx
+	src/G3Reader.cxx src/G3Writer.cxx src/G3MultiFileWriter.cxx
+	src/G3NetworkSender.cxx src/G3InfiniteSource.cxx
+	src/G3EventBuilder.cxx src/G3TriggeredBuilder.cxx
+	src/G3Timestream.cxx src/G3Timesample.cxx src/G3Quat.cxx
+	src/G3Units.cxx ${CORE_EXTRA_SRCS} src/pybindings.cxx
 )
 
 
@@ -49,8 +49,17 @@ if(FLAC_FOUND)
 	target_link_libraries(core PRIVATE FLAC::FLAC)
 endif()
 
-# Link Boost IOStreams
-target_link_libraries(core PRIVATE Boost::iostreams)
+# Link against Z library
+if(NOT DEFINED WITH_ZLIB)
+	set(WITH_ZLIB TRUE CACHE BOOL "Enable gzip fie compression")
+endif()
+if(WITH_ZLIB)
+	find_package(ZLIB)
+endif()
+if(ZLIB_FOUND)
+	target_compile_definitions(core PRIVATE -DZLIB_FOUND)
+	target_link_libraries(core PRIVATE ZLIB::ZLIB)
+endif()
 
 # Link against BZIP2 library
 if(NOT DEFINED WITH_BZIP2)
@@ -61,6 +70,7 @@ if(WITH_BZIP2)
 endif()
 if(BZIP2_FOUND)
 	target_compile_definitions(core PRIVATE -DBZIP2_FOUND)
+	target_link_libraries(core PRIVATE BZip2::BZip2)
 endif()
 
 if(NOT DEFINED WITH_LZMA)
@@ -71,6 +81,7 @@ if(WITH_LZMA)
 endif()
 if(LIBLZMA_FOUND)
 	target_compile_definitions(core PRIVATE -DLZMA_FOUND)
+	target_link_libraries(core PRIVATE LibLZMA::LibLZMA)
 endif()
 
 link_python_dir()
@@ -93,12 +104,15 @@ add_spt3g_test(frame_types)
 add_spt3g_test(datatypes)
 if(FLAC_FOUND)
 	add_spt3g_test(ts_nanencoding)
+	add_spt3g_test(ts_flac_compression)
 endif()
 add_spt3g_test(cuts)
 add_spt3g_test(fileio)
 add_spt3g_test(multifileio)
 add_spt3g_test(splitfileio)
-add_spt3g_test(compressedfileio)
+if(ZLIB_FOUND)
+	add_spt3g_test(compressedfileio)
+endif()
 if(BZIP2_FOUND)
 	add_spt3g_test(bz2fileio)
 endif()
@@ -130,4 +144,5 @@ add_spt3g_test_program(test
                        SOURCE_FILES
                          ${CMAKE_CURRENT_SOURCE_DIR}/tests/G3TimestreamTest.cxx
                          ${CMAKE_CURRENT_SOURCE_DIR}/tests/G3TimestreamMapTest.cxx
+                         ${CMAKE_CURRENT_SOURCE_DIR}/tests/OrderedMapTest.cxx
                        USE_PROJECTS core)

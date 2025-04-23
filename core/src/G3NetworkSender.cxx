@@ -39,22 +39,24 @@
  */
 
 
-EXPORT_G3MODULE_AND("core", G3NetworkSender,
-    (init<std::string, int, int, int>((arg("hostname"), arg("port"),
-      arg("max_queue_size")=0, arg("n_serializers")=0))),
-    "Writes frames to a network socket. If hostname is set to '*', will listen "
-    "on the given port, on all interfaces, instead of connecting to the given "
-    "port on a remote host. In listen mode, metadata frames (Calibration, "
-    "Wiring, etc. -- everything but Scan and Timepoint) will be accumulated "
-    "and the most recent of each will be sent to new clients on connect. Scan "
-    "and Timepoint frames will be broadcast live to all connected clients. "
-    "If max_queue_size is set to a non-zero value, Scan and Timepoint frames "
-    "may be dropped if more than max_queue_size frames are queued for "
-    "transmission. If n_serializers is set to a non-zero value, the task of "
-    "serializing frames to be sent will be distributed across that many "
-    "background threads, which is useful when high throughput of large frames "
-    "is required, but is otherwise typically not necessary.",
-    .def("Close", &G3NetworkSender::Close));
+PYBINDINGS("core", scope) {
+	register_g3module<G3NetworkSender>(scope, "G3NetworkSender",
+	    "Writes frames to a network socket. If hostname is set to '*', will listen "
+	    "on the given port, on all interfaces, instead of connecting to the given "
+	    "port on a remote host. In listen mode, metadata frames (Calibration, "
+	    "Wiring, etc. -- everything but Scan and Timepoint) will be accumulated "
+	    "and the most recent of each will be sent to new clients on connect. Scan "
+	    "and Timepoint frames will be broadcast live to all connected clients. "
+	    "If max_queue_size is set to a non-zero value, Scan and Timepoint frames "
+	    "may be dropped if more than max_queue_size frames are queued for "
+	    "transmission. If n_serializers is set to a non-zero value, the task of "
+	    "serializing frames to be sent will be distributed across that many "
+	    "background threads, which is useful when high throughput of large frames "
+	    "is required, but is otherwise typically not necessary.")
+	    .def(py::init<std::string, int, int, int>(), py::arg("hostname"),
+	      py::arg("port"), py::arg("max_queue_size")=0, py::arg("n_serializers")=0)
+	    .def("Close", &G3NetworkSender::Close);
+};
 
 
 G3NetworkSender::G3NetworkSender(std::string hostname, int port, int max_queue,

@@ -38,7 +38,7 @@ class Subproc(ctx.Process):
             self.started = True
             self.start()
 
-        outbuf = frame.__getstate__()[1]
+        outbuf = pickle.dumps(frame)
         self.outbuf += struct.pack('i', len(outbuf)) + outbuf
         self.callsqueued += 1
 
@@ -109,8 +109,7 @@ class Subproc(ctx.Process):
             framebuf = b''
             while len(framebuf) < framelen:
                 framebuf += self.queue[1].recv(framelen - len(framebuf))
-            frame = G3Frame()
-            frame.__setstate__(({}, framebuf))
+            frame = pickle.loads(framebuf)
 
             outframes = self.targetmod(frame)
 

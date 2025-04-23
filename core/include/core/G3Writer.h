@@ -9,15 +9,17 @@
 class G3Writer : public G3Module {
 public:
 	G3Writer(std::string filename,
-	    std::vector<G3Frame::FrameType> streams={}, bool append=false);
+	    std::vector<G3Frame::FrameType> streams={}, bool append=false,
+	    size_t buffersize=1024*1024);
 	// Writes to file <filename> all frames with types in <streams>.
 	// If <streams> is empty (default), writes all frames.
 
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
 	void Flush();
+	off_t Tell();
 private:
 	std::string filename_;
-	std::shared_ptr<std::ostream> stream_;
+	std::ostream stream_;
 	std::vector<G3Frame::FrameType> streams_;
 
 	SET_LOGGER("G3Writer");

@@ -205,17 +205,13 @@ void GCPLogger::ListenThread(GCPLogger *logger)
 	lock.unlock();
 }
 
-PYBINDINGS("gcp") {
-        using namespace boost::python;
-
-	class_<GCPLogger, bp::bases<G3Logger>, std::shared_ptr<GCPLogger>,
-	  boost::noncopyable>("GCPLogger",
-	  "Logger that relays error messages to the GCP mediator over TCP",
-	  init<int, G3LogLevel>((arg("port")=50030,
-	       arg("default_loglevel")=G3DefaultLogLevel)))
+PYBINDINGS("gcp", scope) {
+	register_class<GCPLogger, G3Logger>(scope, "GCPLogger",
+	    "Logger that relays error messages to the GCP mediator over TCP")
+	    .def(py::init<int, G3LogLevel>(), py::arg("port")=50030,
+	       py::arg("default_loglevel")=G3DefaultLogLevel)
 	    .def_readwrite("trim_file_names", &GCPLogger::TrimFileNames,
 	      "Show only file leaves")
 	;
-
 }
 

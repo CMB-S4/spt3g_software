@@ -57,8 +57,11 @@ std::string BolometerProperties::Description() const
 G3_SERIALIZABLE_CODE(BolometerProperties);
 G3_SERIALIZABLE_CODE(BolometerPropertiesMap);
 
-PYBINDINGS("calibration") {
-	EXPORT_FRAMEOBJECT(BolometerProperties, init<>(), "Physical bolometer properties, such as detector angular offsets. Does not include tuning-dependent properties of the detectors.")
+PYBINDINGS("calibration", scope) {
+	register_frameobject<BolometerProperties>(scope, "BolometerProperties",
+            "Physical bolometer properties, such as detector angular offsets. "
+	    "Does not include tuning-dependent properties of the detectors.")
+	    .def(py::init<>())
 	    .def_readwrite("physical_name", &BolometerProperties::physical_name,
 	       "Physical name of the detector (e.g. some polarization at some "
 	       "particular pixel on the wafer)")
@@ -87,7 +90,7 @@ PYBINDINGS("calibration") {
 	       "Name of the pixel type of which this detector is a part")
 	;
 
-	bp::enum_<BolometerProperties::CouplingType>("BolometerCouplingType",
+	register_enum<BolometerProperties::CouplingType>(scope, "BolometerCouplingType",
 	  "Coupling type for BolometerProperties objects.")
 	    .value("Unknown", BolometerProperties::Unknown)
 	    .value("Optical", BolometerProperties::Optical)
@@ -98,7 +101,7 @@ PYBINDINGS("calibration") {
 	    .value("OffResonance", BolometerProperties::OffResonance)
 	;
 
-	register_g3map<BolometerPropertiesMap>("BolometerPropertiesMap",
+	register_g3map<BolometerPropertiesMap>(scope, "BolometerPropertiesMap",
 	    "Container for bolometer properties for focal plane, mapping "
 	    "logical bolometer IDs to their physical properties.");
 }

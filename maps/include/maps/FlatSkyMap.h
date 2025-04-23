@@ -31,18 +31,6 @@ public:
 	    bool flat_pol = false,
 	    G3SkyMap::MapPolConv pol_conv = G3SkyMap::ConvNone);
 
-	// Constructor from a numpy array
-	FlatSkyMap(boost::python::object v, double res, 
-	    bool weighted = true,
-	    MapProjection proj = MapProjection::ProjNone, 
-	    double alpha_center = 0, double delta_center = 0, 
-	    MapCoordReference coord_ref = MapCoordReference::Equatorial,
-	    G3Timestream::TimestreamUnits u = G3Timestream::Tcmb,
-	    G3SkyMap::MapPolType pol_type = G3SkyMap::None,
-	    double x_res = 0, double x_center = 0.0 / 0.0,
-	    double y_center = 0.0 / 0.0, bool flat_pol = false,
-	    G3SkyMap::MapPolConv pol_conv = G3SkyMap::ConvNone);
-
 	FlatSkyMap(const FlatSkyProjection & fp,
 	    MapCoordReference coord_ref = MapCoordReference::Equatorial,
 	    bool weighted = true,
@@ -82,7 +70,6 @@ public:
 
 	template <class A> void load(A &ar, unsigned v);
 	template <class A> void save(A &ar, unsigned v) const;
-	virtual void FillFromArray(boost::python::object v) override;
 	virtual G3SkyMapPtr Clone(bool copy_data = true) const override;
 	std::string Description() const override;
 
@@ -127,10 +114,10 @@ public:
 	std::vector<double> PixelToAngleGrad(size_t pixel, double h=0.001) const;
 
 	G3VectorQuat GetRebinQuats(size_t pixel, size_t scale) const override;
-	void GetInterpPixelsWeights(const Quat &q, std::vector<size_t> & pixels,
+	void GetInterpPixelsWeights(const Quat &q, std::vector<uint64_t> & pixels,
 	    std::vector<double> & weights) const override;
 
-	std::vector<size_t> QueryDisc(const Quat &q, double radius) const override;
+	std::vector<uint64_t> QueryDisc(const Quat &q, double radius) const override;
 
 	G3SkyMapPtr Rebin(size_t scale, bool norm = true) const override;
 	G3SkyMapPtr ExtractPatch(size_t x0, size_t y0, size_t width, size_t height,
@@ -196,12 +183,7 @@ private:
 };
 
 G3_POINTERS(FlatSkyMap);
-
-namespace cereal {
-	template <class A> struct specialize<A, FlatSkyMap, cereal::specialization::member_load_save> {};
-}
-
-G3_SERIALIZABLE(FlatSkyMap, 4);
+G3_SPLIT_SERIALIZABLE(FlatSkyMap, 4);
 
 #endif //_MAPS_FLATSKYMAP_H
 
