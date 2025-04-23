@@ -18,7 +18,8 @@ void G3Writer::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	// out to Python.
 	frame->GenerateBlobs();
 
-	py::gil_scoped_release gil;
+	auto gil = Py_IsInitialized() ?
+	    std::make_unique<py::gil_scoped_release>() : nullptr;
 
 	if (frame->type == G3Frame::EndProcessing)
 		stream_.flush();
