@@ -19,48 +19,6 @@ HealpixSkyMap::HealpixSkyMap(size_t nside, bool weighted, bool nested,
 {
 }
 
-HealpixSkyMap::HealpixSkyMap(const std::vector<uint64_t> &index,
-    const std::vector<double> &data, size_t nside, bool weighted, bool nested,
-    MapCoordReference coord_ref, G3Timestream::TimestreamUnits u,
-    G3SkyMap::MapPolType pol_type, G3SkyMap::MapPolConv pol_conv) :
-      G3SkyMap(coord_ref, weighted, u, pol_type, pol_conv),
-      info_(nside, nested, false),
-      dense_(NULL), ring_sparse_(NULL), indexed_sparse_(NULL)
-{
-	if (index.size() != data.size())
-		log_fatal("Index and data must have matching shapes.");
-
-	double phi_min = 2 * M_PI;
-	double phi_max = 0;
-	double phi_min_shift = 2 * M_PI;
-	double phi_max_shift = 0;
-	for (auto &pix: index) {
-		if (pix < 0 || pix >= size())
-			log_fatal("Index %zu out of range", (unsigned long) pix);
-
-		double ang = PixelToAngle(pix)[0];
-		if (ang < 0)
-			ang += 2 * M_PI * G3Units::rad;
-		ang = fmod(ang, 2 * M_PI * G3Units::rad);
-		if (ang < phi_min)
-			phi_min = ang;
-		if (ang > phi_max)
-			phi_max = ang;
-		ang = fmod(ang + M_PI * G3Units::rad, 2 * M_PI * G3Units::rad);
-		if (ang < phi_min_shift)
-			phi_min_shift = ang;
-		if (ang > phi_max_shift)
-			phi_max_shift = ang;
-	}
-	bool shift_ra = (phi_max - phi_min) > (phi_max_shift - phi_min_shift);
-
-	SetShiftRa(shift_ra);
-	ConvertToRingSparse();
-
-	for (size_t i = 0; i < index.size(); i++)
-		(*this)[index[i]] = data[i];
-}
-
 HealpixSkyMap::HealpixSkyMap(const HealpixSkyMapInfo & info, bool weighted,
     MapCoordReference coord_ref, G3Timestream::TimestreamUnits u,
     G3SkyMap::MapPolType pol_type, G3SkyMap::MapPolConv pol_conv) :
@@ -950,21 +908,15 @@ HealpixSkyMap_fill(HealpixSkyMap &skymap, const py::cbuffer &v)
 }
 
 static HealpixSkyMapPtr
-HealpixSkyMap_from_numpy(const py::cbuffer &v, bool weighted,
+HealpixSkyMap_from_numpy(const py::array &v, bool weighted,
     bool nested, MapCoordReference coord_ref,
     G3Timestream::TimestreamUnits u, G3SkyMap::MapPolType pol_type,
     bool shift_ra, G3SkyMap::MapPolConv pol_conv)
 {
-	size_t npix;
-
-	{
-		auto info = v.request_contiguous();
-		if (info.ndim != 1)
+	if (v.ndim() != 1)
 			throw py::value_error("Only 1-D maps supported");
-		npix = info.shape[0];
-	}
 
-	HealpixSkyMapInfo info(npix, nested, shift_ra, true);
+	HealpixSkyMapInfo info(v.shape(0), nested, shift_ra, true);
 	HealpixSkyMapPtr skymap(new HealpixSkyMap(info, weighted,
 	    coord_ref, u, pol_type, pol_conv));
 
@@ -974,10 +926,69 @@ HealpixSkyMap_from_numpy(const py::cbuffer &v, bool weighted,
 }
 
 static HealpixSkyMapPtr
-HealpixSkyMap_array_clone(const HealpixSkyMap &m, const py::cbuffer &v)
+HealpixSkyMap_array_clone(const HealpixSkyMap &m, const py::array &v)
 {
 	auto skymap = std::dynamic_pointer_cast<HealpixSkyMap>(m.Clone(false));
 	HealpixSkyMap_fill(*skymap, v);
+	return skymap;
+}
+
+static void
+HealpixSkyMap_fill_sparse(HealpixSkyMap &skymap, const py::array_t<int64_t> &index,
+    const py::array_t<double> &data)
+{
+	if (index.size() != data.size())
+		log_fatal("Index and data must have matching shapes.");
+
+	if (index.ndim() != 1 || data.ndim() != 1)
+		log_fatal("Index and data be 1D.");
+
+	auto rindex = index.unchecked<1>();
+	auto rdata = data.unchecked<1>();
+
+	double phi_min = 2 * M_PI;
+	double phi_max = 0;
+	double phi_min_shift = 2 * M_PI;
+	double phi_max_shift = 0;
+	for (size_t i = 0; i < index.size(); i++) {
+		int64_t pix = rindex(i);
+		if (pix < 0 || pix >= skymap.size())
+			log_fatal("Index %zu out of range", (unsigned long) pix);
+
+		double ang = skymap.PixelToAngle(pix)[0];
+		if (ang < 0)
+			ang += 2 * M_PI * G3Units::rad;
+		ang = fmod(ang, 2 * M_PI * G3Units::rad);
+		if (ang < phi_min)
+			phi_min = ang;
+		if (ang > phi_max)
+			phi_max = ang;
+		ang = fmod(ang + M_PI * G3Units::rad, 2 * M_PI * G3Units::rad);
+		if (ang < phi_min_shift)
+			phi_min_shift = ang;
+		if (ang > phi_max_shift)
+			phi_max_shift = ang;
+	}
+	bool shift_ra = (phi_max - phi_min) > (phi_max_shift - phi_min_shift);
+
+	skymap.SetShiftRa(shift_ra);
+	skymap.ConvertToRingSparse();
+
+	for (size_t i = 0; i < index.size(); i++)
+		skymap[rindex(i)] = rdata(i);
+}
+
+static HealpixSkyMapPtr
+HealpixSkyMap_from_numpy_sparse(const py::array_t<int64_t> &index,
+    const py::array_t<double> &data, size_t nside, bool weighted,
+    bool nested, MapCoordReference coord_ref, G3Timestream::TimestreamUnits u,
+    G3SkyMap::MapPolType pol_type, G3SkyMap::MapPolConv pol_conv)
+{
+	HealpixSkyMapPtr skymap(new HealpixSkyMap(nside, weighted,
+	    nested, coord_ref, u, pol_type, false, pol_conv));
+
+	HealpixSkyMap_fill_sparse(*skymap, index, data);
+
 	return skymap;
 }
 
@@ -1157,9 +1168,7 @@ PYBINDINGS("maps", scope)
 	        py::arg("shift_ra") = false,
 	        py::arg("pol_conv") = G3SkyMap::ConvNone,
 	        "Instantiate a HealpixSkyMap with given nside")
-	    .def(py::init<const std::vector<uint64_t> &, const std::vector<double> &,
-	        size_t, bool, bool, MapCoordReference, G3Timestream::TimestreamUnits,
-		G3SkyMap::MapPolType, G3SkyMap::MapPolConv>(),
+	    .def(py::init(&HealpixSkyMap_from_numpy_sparse),
 	        py::arg("index"),
 	        py::arg("data"),
 	        py::arg("nside"),

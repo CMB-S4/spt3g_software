@@ -4,6 +4,7 @@
 #include <pybindings.h>
 #include <serialization.h>
 #include <pybind11/stl_bind.h>
+#include <pybind11/numpy.h>
 
 #ifdef __clang__
 #pragma GCC diagnostic ignored "-Wself-assign-overloaded"
