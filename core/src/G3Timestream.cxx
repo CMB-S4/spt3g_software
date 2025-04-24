@@ -857,6 +857,9 @@ uint8_t G3TimestreamMap::GetFLACBitDepth() const
 
 void G3TimestreamMap::SetFLACCompression(int compression_level)
 {
+	if (begin() == end())
+		return;
+
 	// Check for errors
 	begin()->second->SetFLACCompression(compression_level);
 
@@ -866,6 +869,9 @@ void G3TimestreamMap::SetFLACCompression(int compression_level)
 
 void G3TimestreamMap::SetFLACBitDepth(int bit_depth)
 {
+	if (begin() == end())
+		return;
+
 	// Check for errors
 	begin()->second->SetFLACBitDepth(bit_depth);
 
