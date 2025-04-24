@@ -301,8 +301,8 @@ PYBINDINGS("core", scope) {
 	    .def("__add__", &g3time_fadd, py::is_operator())
 	    .def("__radd__", &g3time_fadd, py::is_operator())
 	    .def("__sub__", &g3time_fsub, py::is_operator())
-	    .def("__float__", &G3Time::operator double)
-	    .def("__int__", &G3Time::operator long)
+	    .def("__float__", &G3Time::operator double, py::is_operator())
+	    .def("__int__", &G3Time::operator long, py::is_operator())
 	    .def_buffer([](G3Time &v) {
 		return py::buffer_info(&v.time, sizeof(G3TimeStamp),
 		    py::format_descriptor<G3TimeStamp>::format(), 0, {}, {});
