@@ -473,7 +473,7 @@ PYBINDINGS("core", scope) {
 	      "Halts all running pipelines after they flush all currently "
 	      "in-flight frames. Once set, the first module will not be "
 	      "called again.")
-	    .def_property_readonly("last_frame",
-	        [](const G3Pipeline &p) { return p.last_frame; })
+	    .def_readonly("last_frame",
+	        &G3Pipeline::last_frame)
 	;
 }

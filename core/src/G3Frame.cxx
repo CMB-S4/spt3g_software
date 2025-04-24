@@ -493,7 +493,7 @@ PYBINDINGS("core", scope) {
 	register_class<G3FrameObject>(scope, "G3FrameObject",
 	  "Base class for objects that can be added to a frame. All such "
 	  "must inherit from G3FrameObject in C++. Pickle hooks are overridden "
-	  "to use the fast internal serialization.")
+	  "to use the fast internal serialization")
 	    .def("Description", &G3FrameObject::Description,
 	      "Long-form human-readable description of the object")
 	    .def("Summary", &G3FrameObject::Summary,
@@ -542,7 +542,7 @@ PYBINDINGS("core", scope) {
 	      "Use sparingly and with care.")
 	    .def_readwrite("type", &G3Frame::type,
 	      "Type code for frame. See general G3Frame docstring.")
-	    .def_property_readonly("_filename", [](const G3Frame &f) { return f._filename; },
+	    .def_readonly("_filename", &G3Frame::_filename,
 	      "Source filename for frame, if read in using G3Reader. This attribute is "
 	      "fragile, use at your own risk.")
 	    .def("__setitem__", &G3Frame::Put)
