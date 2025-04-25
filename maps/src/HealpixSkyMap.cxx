@@ -950,9 +950,9 @@ HealpixSkyMap_fill_sparse(HealpixSkyMap &skymap, const py::array_t<int64_t> &ind
 	double phi_max = 0;
 	double phi_min_shift = 2 * M_PI;
 	double phi_max_shift = 0;
-	for (size_t i = 0; i < index.size(); i++) {
+	for (size_t i = 0; i < (size_t) index.size(); i++) {
 		int64_t pix = rindex(i);
-		if (pix < 0 || pix >= skymap.size())
+		if (pix < 0 || pix >= (int64_t) skymap.size())
 			log_fatal("Index %zu out of range", (unsigned long) pix);
 
 		double ang = skymap.PixelToAngle(pix)[0];
@@ -974,7 +974,7 @@ HealpixSkyMap_fill_sparse(HealpixSkyMap &skymap, const py::array_t<int64_t> &ind
 	skymap.SetShiftRa(shift_ra);
 	skymap.ConvertToRingSparse();
 
-	for (size_t i = 0; i < index.size(); i++)
+	for (size_t i = 0; i < (size_t) index.size(); i++)
 		skymap[rindex(i)] = rdata(i);
 }
 
