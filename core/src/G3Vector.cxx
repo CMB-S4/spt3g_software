@@ -76,21 +76,24 @@ void G3Vector<int64_t>::save(A &ar, const unsigned v) const
 }
 
 template <typename V, typename T=typename V::value_type>
-auto vector_from_python(const py::array_t<T> &buf) {
+auto vector_from_python(const py::array_t<T> &buf, bool contiguous=true) {
 	if (buf.ndim() != 1)
 		throw py::type_error("Only valid 1D buffers can be copied to a vector");
+
+	if (contiguous)
+		return std::make_shared<V>(buf.data(), buf.data() + buf.size());
 
 	auto rbuf = buf.template unchecked<1>();
 	auto vec = std::make_shared<V>(rbuf.shape(0));
 
-	for (size_t i = 0; i < rbuf.shape(0); i++)
+	for (size_t i = 0; i < (size_t) rbuf.shape(0); i++)
 		(*vec)[i] = rbuf(i);
 	return vec;
 }
 
 template <typename V>
 auto time_vector_from_python(const py::array &buf) {
-	return vector_from_python<V, G3TimeStamp>(buf);
+	return vector_from_python<V, G3TimeStamp>(buf, false);
 }
 
 template <typename V>
