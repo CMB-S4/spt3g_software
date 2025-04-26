@@ -894,16 +894,9 @@ flatskymap_getitem_2d(const FlatSkyMap &skymap, const py::tuple &coords)
 		return py::cast(flatskymap_getslice_2d(skymap, yslice, xslice));
 	}
 
-	ssize_t y = coords[0].cast<ssize_t>(); // Swapped to match numpy
-	ssize_t x = coords[1].cast<ssize_t>();
-	if (x < 0)
-		x = skymap.shape()[0] + x;
-	if (y < 0)
-		y = skymap.shape()[1] + y;
-	if (size_t(x) >= skymap.shape()[0])
-		throw py::index_error("X index out of range");
-	if (size_t(y) >= skymap.shape()[1])
-		throw py::index_error("Y index out of range");
+	// Swapped to match numpy
+	ssize_t y = unwrap_index(coords[0].cast<ssize_t>(), skymap.shape()[1]);
+	ssize_t x = unwrap_index(coords[1].cast<ssize_t>(), skymap.shape()[0]);
 
 	return py::cast(skymap.at(x, y));
 }
@@ -926,16 +919,9 @@ flatskymap_setitem_2d(FlatSkyMap &skymap, const py::tuple &coords,
     const py::object &val)
 {
 	if (py::isinstance<py::int_>(coords[0])) {
-		ssize_t y = coords[0].cast<ssize_t>(); // Swapped to match numpy
-		ssize_t x = coords[1].cast<ssize_t>();
-		if (x < 0)
-			x = skymap.shape()[0] + x;
-		if (y < 0)
-			y = skymap.shape()[1] + y;
-		if (size_t(x) >= skymap.shape()[0])
-			throw py::index_error("X index out of range");
-		if (size_t(y) >= skymap.shape()[1])
-			throw py::index_error("Y index out of range");
+		// Swapped to match numpy
+		ssize_t y = unwrap_index(coords[0].cast<ssize_t>(), skymap.shape()[1]);
+		ssize_t x = unwrap_index(coords[1].cast<ssize_t>(), skymap.shape()[0]);
 
 		double dval = val.cast<double>();
 		skymap(x, y) = dval;
@@ -976,25 +962,13 @@ flatskymap_setitem_2d(FlatSkyMap &skymap, const py::tuple &coords,
 static double
 flatskymap_getitem_1d(const G3SkyMap &skymap, size_t i)
 {
-
-	if (i < 0)
-		i = skymap.size() + i;
-	if (size_t(i) >= skymap.size())
-		throw py::index_error("Index out of range");
-
-	return skymap.at(i);
+	return skymap.at(unwrap_index(i, skymap.size()));
 }
 
 static void
 flatskymap_setitem_1d(G3SkyMap &skymap, size_t i, double val)
 {
-
-	if (i < 0)
-		i = skymap.size() + i;
-	if (size_t(i) >= skymap.size())
-		throw py::index_error("Index out of range");
-
-	skymap[i] = val;
+	skymap[unwrap_index(i, skymap.size())] = val;
 }
 
 static std::vector<double>

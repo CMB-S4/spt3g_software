@@ -951,9 +951,7 @@ HealpixSkyMap_fill_sparse(HealpixSkyMap &skymap, const py::array_t<int64_t> &ind
 	double phi_min_shift = 2 * M_PI;
 	double phi_max_shift = 0;
 	for (size_t i = 0; i < (size_t) index.size(); i++) {
-		int64_t pix = rindex(i);
-		if (pix < 0 || pix >= (int64_t) skymap.size())
-			log_fatal("Index %zu out of range", (unsigned long) pix);
+		int64_t pix = unwrap_index(rindex(i), skymap.size());
 
 		double ang = skymap.PixelToAngle(pix)[0];
 		if (ang < 0)
@@ -1045,25 +1043,13 @@ HealpixSkyMap_nonzeropixels(const HealpixSkyMap &m)
 static double
 skymap_getitem(const G3SkyMap &skymap, ssize_t i)
 {
-
-	if (i < 0)
-		i = skymap.size() + i;
-	if (size_t(i) >= skymap.size())
-		throw py::index_error("Index out of range");
-
-	return skymap.at(i);
+	return skymap.at(unwrap_index(i, skymap.size()));
 }
 
 static void
 skymap_setitem(G3SkyMap &skymap, ssize_t i, double val)
 {
-
-	if (i < 0)
-		i = skymap.size() + i;
-	if (size_t(i) >= skymap.size())
-		throw py::index_error("Index out of range");
-
-	skymap[i] = val;
+	skymap[unwrap_index(i, skymap.size())] = val;
 }
 
 static std::vector<double>
@@ -1115,18 +1101,6 @@ HealpixSkyMap_buffer_info(HealpixSkyMap &m)
 
 	return py::buffer_info(&m[0], sizeof(double), "d", 1,
 	    {m.shape()[0]}, {sizeof(double)});
-}
-
-static void
-HealpixSkyMap_setitem_1d(G3SkyMap &skymap, ssize_t i, double val)
-{
-
-	if (i < 0)
-		i = skymap.size() + i;
-	if (size_t(i) >= skymap.size())
-		throw py::index_error("Index out of range");
-
-	skymap[i] = val;
 }
 
 static void
@@ -1221,6 +1195,7 @@ PYBINDINGS("maps", scope)
 
 	    .def("__getitem__", &skymap_getitem)
 	    .def("__setitem__", &skymap_setitem)
+	    .def("__setitem__", HealpixSkyMap_setslice_1d)
 	    .def("__getitem__", HealpixSkyMap_getitem_masked)
 	    .def("__setitem__", HealpixSkyMap_setitem_masked)
 	    .def("__setitem__", HealpixSkyMap_setitem_masked_scalar)
@@ -1228,9 +1203,6 @@ PYBINDINGS("maps", scope)
 	    .def("nonzero_pixels", &HealpixSkyMap_nonzeropixels,
 		"Returns a list of the indices of the non-zero pixels in the "
 		"map and a list of the values of those non-zero pixels.")
-
-	    .def("__setitem__", HealpixSkyMap_setitem_1d)
-	    .def("__setitem__", HealpixSkyMap_setslice_1d)
 	;
 }
 
