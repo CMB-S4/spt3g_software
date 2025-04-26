@@ -455,30 +455,6 @@ G3SkyMap::QueryAlphaEllipse(const Quat &q, double a, double b) const
 	return pixels;
 }
 
-static double
-skymap_getitem(const G3SkyMap &skymap, ssize_t i)
-{
-
-	if (i < 0)
-		i = skymap.size() + i;
-	if (size_t(i) >= skymap.size())
-		throw py::index_error("Index out of range");
-
-	return skymap.at(i);
-}
-
-static void
-skymap_setitem(G3SkyMap &skymap, ssize_t i, double val)
-{
-
-	if (i < 0)
-		i = skymap.size() + i;
-	if (size_t(i) >= skymap.size())
-		throw py::index_error("Index out of range");
-
-	skymap[i] = val;
-}
-
 static py::tuple
 skymap_shape(const G3SkyMap &skymap)
 {
@@ -1453,8 +1429,6 @@ PYBINDINGS("maps", scope) {
 	    .def_readwrite("overflow", &G3SkyMap::overflow,
 	      "Combined value of data processed by "
 	      "the map maker but outside of the map area")
-	    .def("__getitem__", &skymap_getitem)
-	    .def("__setitem__", &skymap_setitem)
 	    .def("__copy__", &skymap_copy)
 	    .def("copy", &skymap_copy, "Return a copy of the map object")
 	    .def("clone", &G3SkyMap::Clone, py::arg("copy_data")=true,

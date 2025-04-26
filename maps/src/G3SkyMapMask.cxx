@@ -8,6 +8,7 @@
 #include <maps/G3SkyMapMask.h>
 #include <maps/G3SkyMap.h>
 #include <maps/FlatSkyMap.h>
+#include "mapdata.h"
 
 G3SkyMapMask::G3SkyMapMask(const G3SkyMap &parent, bool use_data,
   bool zero_nans, bool zero_infs) : G3FrameObject()
@@ -425,9 +426,6 @@ skymapmask_index(const G3SkyMapMask &m, const py::object &index)
 	int i = 0;
 	if (py::extract<int>(index).check()) {
 		i = py::extract<int>(index)();
-
-		if (i < 0)
-			i = m.size() + i;
 	} else if (py::extract<py::tuple>(index).check()) {
 		int x, y;
 
@@ -436,15 +434,8 @@ skymapmask_index(const G3SkyMapMask &m, const py::object &index)
 		if (!fsm)
 			throw py::type_error("N-D pixels, but underlying map is not a flat sky map");
 
-		x = py::extract<int>(t[1])();
-		y = py::extract<int>(t[0])();
-		if (x < 0)
-			x += fsm->shape()[0];
-		if (y < 0)
-			y += fsm->shape()[0];
-		if (size_t(x) >= fsm->shape()[0] ||
-		    size_t(y) >= fsm->shape()[1])
-			throw py::index_error("Index out of range");
+		x = unwrap_index(py::extract<int>(t[1])(), fsm->shape()[0]);
+		y = unwrap_index(py::extract<int>(t[0])(), fsm->shape()[1]);
 
 		i = y * fsm->shape()[0] + x;
 	} else {
@@ -452,10 +443,7 @@ skymapmask_index(const G3SkyMapMask &m, const py::object &index)
 		    "(optionally) for 2D maps a tuple of coordinates");
 	}
 	
-	if (i < 0 || size_t(i) >= m.size())
-		throw py::index_error("Index out of range");
-
-	return i;
+	return unwrap_index(i, m.size());
 }
 
 static bool
