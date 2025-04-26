@@ -800,10 +800,12 @@ quat_str(const Quat &q)
 }
 
 static std::string
-quat_repr(const Quat &q)
+quat_repr(const py::object &q)
 {
 	std::ostringstream oss;
-	oss << "spt3g.core.Quat" << q;
+	oss << py::extract<std::string>(q.attr("__class__").attr("__module__"))() << ".";
+	oss << py::extract<std::string>(q.attr("__class__").attr("__name__"))();
+	oss << py::extract<const Quat &>(q)();
 	return oss.str();
 }
 }

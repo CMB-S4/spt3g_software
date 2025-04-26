@@ -229,18 +229,20 @@ G3PipelineInfo::Description() const
 }
 
 static std::string
-G3PipelineInfo_repr(const G3PipelineInfo &pi)
+G3PipelineInfo_repr(const py::object &pi)
 {
-	std::string rv;
-	rv = "pipe = spt3g.core.G3Pipeline()";
+	std::ostringstream rv;
+	rv << "pipe = ";
+	rv << py::extract<std::string>(pi.attr("__class__").attr("__module__"))();
+	rv << ".G3Pipeline()";
 
-	for (auto i : pi.modules)
-		rv += "\n" + G3ModuleConfig_repr(i);
-	return rv;
+	for (auto i : py::extract<const G3PipelineInfo &>(pi)().modules)
+		rv << "\n" << G3ModuleConfig_repr(i);
+	return rv.str();
 }
 
 static void
-G3PipelineInfo_run(const G3PipelineInfo &pi)
+G3PipelineInfo_run(const py::object &pi)
 {
 	py::object main = py::module_::import("__main__");
 	py::dict global = py::dict(main.attr("__dict__"));
