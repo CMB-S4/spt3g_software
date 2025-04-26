@@ -2,6 +2,8 @@ import numpy
 import warnings
 from . import G3SkyMapWeights, G3SkyMap, FlatSkyMap, G3SkyMapMask
 
+__all__ = []
+
 # This file adds extra functionality to the python interface to G3SkyMap and
 # G3SkyMapWeights. This is done in ways that exploit a large fraction of
 # the evil things you can do in Python (Nick referred to it as "devil magic"),
@@ -67,7 +69,6 @@ def skymapweights_keys(self):
     return ['TT']
 
 G3SkyMapWeights.keys = skymapweights_keys
-del skymapweights_keys
 
 def skymapweights_getitem(self, x):
     if isinstance(x, str) and x in self.keys():
@@ -99,7 +100,6 @@ def skymapweights_getitem(self, x):
     return mat
 
 G3SkyMapWeights.__getitem__ = skymapweights_getitem
-del skymapweights_getitem
 
 def skymapweights_setitem(self, x, mat):
     if isinstance(x, str) and x in self.keys():
@@ -126,7 +126,6 @@ def skymapweights_setitem(self, x, mat):
     self.UU[x] = mat[2,2]
 
 G3SkyMapWeights.__setitem__ = skymapweights_setitem
-del skymapweights_setitem
 
 # patch handling for flat sky maps
 def skymapweights_extract(self, x0, y0, width, height, fill=0):
@@ -141,7 +140,6 @@ def skymapweights_extract(self, x0, y0, width, height, fill=0):
 
 skymapweights_extract.__doc__ = FlatSkyMap.extract_patch.__doc__
 G3SkyMapWeights.extract_patch = skymapweights_extract
-del skymapweights_extract
 
 def skymapweights_insert(self, weights_patch, ignore_zeros=False):
     if not isinstance(self.TT, FlatSkyMap):
@@ -155,7 +153,6 @@ def skymapweights_insert(self, weights_patch, ignore_zeros=False):
 
 skymapweights_insert.__doc__ = FlatSkyMap.insert_patch.__doc__
 G3SkyMapWeights.insert_patch = skymapweights_insert
-del skymapweights_insert
 
 def skymapweights_reshape(self, width, height, fill=0):
     if not isinstance(self.TT, FlatSkyMap):
@@ -169,7 +166,6 @@ def skymapweights_reshape(self, width, height, fill=0):
 
 skymapweights_reshape.__doc__ = FlatSkyMap.reshape.__doc__
 G3SkyMapWeights.reshape = skymapweights_reshape
-del skymapweights_reshape
 
 # Pass through attributes to submaps. This is not ideal because the properties
 # are hidden and not visible by tab completion. A better solution would use
@@ -183,7 +179,6 @@ def skymapweights_getattr(self, x):
         return getattr(self.TT, x)
     raise AttributeError("'{}' object has no attribute '{}'".format(type(self), x))
 G3SkyMapWeights.__getattr__ = skymapweights_getattr
-del skymapweights_getattr
 oldsetattr = G3SkyMapWeights.__setattr__
 def skymapweights_setattr(self, x, val):
     try:
@@ -202,14 +197,12 @@ def skymapweights_setattr(self, x, val):
         if self.UU is not None:
             setattr(self.UU, x, val)
 G3SkyMapWeights.__setattr__ = skymapweights_setattr
-del skymapweights_setattr
 
 def skymapmask_getattr(self, x):
     if hasattr(self.parent, x):
         return getattr(self.parent, x)
     raise AttributeError("'{}' object has no attribute '{}'".format(type(self), x))
 G3SkyMapMask.__getattr__ = skymapmask_getattr
-del skymapmask_getattr
 
 def skymap_clone(self, copy_data=True):
     with warnings.catch_warnings():
@@ -223,7 +216,6 @@ def skymap_clone(self, copy_data=True):
     return self.clone(copy_data)
 G3SkyMap.Clone = skymap_clone
 G3SkyMapWeights.Clone = skymap_clone
-del skymap_clone
 
 def skymap_compat(self, other):
     with warnings.catch_warnings():
@@ -236,4 +228,3 @@ def skymap_compat(self, other):
         )
     return self.compatible(other)
 G3SkyMap.IsCompatible = skymap_compat
-del skymap_compat
