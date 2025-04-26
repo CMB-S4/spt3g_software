@@ -470,12 +470,18 @@ static py::dict
 G3SkyMapMask_array_interface(const G3SkyMapMask &self)
 {
 	py::dict out;
-	out["typestr"] = "f8";
-	out["data"] = py::cast(self.MakeBinaryMap());
+	out["typestr"] = "b";
+
 	auto shape = self.Parent()->shape();
 	std::reverse(shape.begin(), shape.end());
 	std::vector<uint64_t> ushape(shape.begin(), shape.end());
 	out["shape"] = py::tuple(py::cast(ushape));
+
+	py::array_t<bool> data(self.size());
+	bool *d = data.mutable_data();
+	for (auto i: self)
+		d[i.first] = i.second;
+	out["data"] = data.reshape(shape);
 
 	return out;
 }
