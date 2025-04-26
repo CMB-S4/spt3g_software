@@ -11,6 +11,12 @@ pipe.Add(core.G3InfiniteSource, type=core.G3FrameType.Timepoint, n=10)
 pipe.Add(lambda f: True)
 pipe.Run() # Will throw an exception if test fails
 
+# First, make sure the check doesn't trip when it isn't supposed to.
+pipe = core.G3Pipeline()
+pipe.Add(core.G3InfiniteSource, type=core.G3FrameType.Timepoint, n=10)
+pipe.Add(lambda f: False)
+pipe.Run() # Will throw an exception if test fails
+
 # Next, make sure it fails if EndProcessing frames are dropped
 pipe = core.G3Pipeline()
 pipe.Add(core.G3InfiniteSource, type=core.G3FrameType.Timepoint, n=10)
