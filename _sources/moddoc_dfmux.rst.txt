@@ -918,9 +918,9 @@ Processing module for data from DfMux boards. Reads data from boards data acquis
 
 
 *Constructors:*
-	``DfMuxBuilder( (int)boards [, (int)collation_tolerance=1000000.0])``
+	``DfMuxBuilder( (int)boards [, (int)collation_tolerance=1000000])``
 	
-	``DfMuxBuilder( (IntVector)boards [, (int)collation_tolerance=1000000.0])``
+	``DfMuxBuilder( (IntVector)boards [, (int)collation_tolerance=1000000])``
 
 
 

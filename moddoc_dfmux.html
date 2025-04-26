@@ -648,8 +648,8 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <p id="spt3g-dfmux-dfmuxbuilder"><strong>spt3g.dfmux.DfMuxBuilder</strong></p>
 <p>Processing module for data from DfMux boards. Reads data from boards data acquisition boards, requiring that data from all be timestamped to within collation_tolerance (default 10 microseconds) to be considered part of a single sample. If boards is an integer, listens for that number. If a list of integers, DfMuxBuilder will filter for only boards with serial numbers in the list.</p>
 <dl>
-<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">DfMuxBuilder(</span> <span class="pre">(int)boards</span> <span class="pre">[,</span> <span class="pre">(int)collation_tolerance=1000000.0])</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">DfMuxBuilder(</span> <span class="pre">(IntVector)boards</span> <span class="pre">[,</span> <span class="pre">(int)collation_tolerance=1000000.0])</span></code></p>
+<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">DfMuxBuilder(</span> <span class="pre">(int)boards</span> <span class="pre">[,</span> <span class="pre">(int)collation_tolerance=1000000])</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">DfMuxBuilder(</span> <span class="pre">(IntVector)boards</span> <span class="pre">[,</span> <span class="pre">(int)collation_tolerance=1000000])</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-dfmux-dfmuxcollator"><strong>spt3g.dfmux.DfMuxCollator</strong></p>
