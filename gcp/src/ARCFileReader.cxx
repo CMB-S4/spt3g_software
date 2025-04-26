@@ -788,7 +788,8 @@ void ARCFileReader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 	int32_t size, opcode;
 	uint8_t *buffer;
 
-	py::gil_scoped_release gil;
+	auto gil = Py_IsInitialized() ?
+	    std::make_unique<py::gil_scoped_release>() : nullptr;
 
 	try {
 		while (stream_.peek() == EOF) {
