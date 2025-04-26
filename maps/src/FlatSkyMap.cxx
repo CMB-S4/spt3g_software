@@ -810,7 +810,7 @@ flatskymap_fill(FlatSkyMap &skymap, const py::cbuffer &v)
 }
 
 static FlatSkyMapPtr
-flatskymap_from_numpy(const py::cbuffer &v, double res,
+flatskymap_from_numpy(const py::array &v, double res,
     bool weighted, MapProjection proj,
     double alpha_center, double delta_center,
     MapCoordReference coord_ref, G3Timestream::TimestreamUnits u,
@@ -818,13 +818,11 @@ flatskymap_from_numpy(const py::cbuffer &v, double res,
     double x_center, double y_center,
     bool flat_pol, G3SkyMap::MapPolConv pol_conv)
 {
-	auto info = v.request_contiguous();
-
-	if (info.ndim != 2)
+	if (v.ndim() != 2)
 		throw py::value_error("Only 2-D maps supported");
 
-	size_t ypix = info.shape[0];
-	size_t xpix = info.shape[1];
+	size_t ypix = v.shape(0);
+	size_t xpix = v.shape(1);
 
 	FlatSkyProjection proj_info(xpix, ypix, res, alpha_center,
 	    delta_center, x_res, proj, x_center, y_center);
@@ -838,7 +836,7 @@ flatskymap_from_numpy(const py::cbuffer &v, double res,
 }
 
 static FlatSkyMapPtr
-flatskymap_array_clone(const FlatSkyMap &m, const py::cbuffer &v)
+flatskymap_array_clone(const FlatSkyMap &m, const py::array &v)
 {
 	auto skymap = std::dynamic_pointer_cast<FlatSkyMap>(m.Clone(false));
 	flatskymap_fill(*skymap, v);
