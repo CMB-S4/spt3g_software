@@ -523,7 +523,7 @@ pyconvolve_map(const FlatSkyMap &map, py::object val)
 		return ConvolveMap(map, mext());
 
 	// reach into python
-	py::object pykernel = py::module_::import("spt3g.maps.FlatSkyMap")(val, map.yres());
+	auto pykernel = py::module_::import("spt3g.maps").attr("FlatSkyMap")(val, map.yres());
 	py::extract<const FlatSkyMap &> pext(pykernel);
 	if (pext.check())
 		return ConvolveMap(map, pext());
