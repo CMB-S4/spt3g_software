@@ -1,5 +1,7 @@
 from . import G3Frame, G3FrameType
 
+__all__ = []
+
 @staticmethod
 def str_to_frame_types(types):
     """
@@ -22,9 +24,9 @@ def type_enum_key(self):
     """
     return chr(self.real)
 
-def iteritems(self):
+def items(self):
     """
-    iteritems implementation for G3Frame
+    items implementation for G3Frame
     """
     keys = self.keys()
     for key in keys:
@@ -65,17 +67,8 @@ def pop(self, key, default=None):
 
 G3FrameType.from_string = str_to_frame_types
 G3FrameType.key = type_enum_key
-G3Frame.iteritems = iteritems
-G3Frame.items = iteritems
+G3Frame.items = items
 G3Frame.__iter__ = __iter__
 G3Frame.get = get
 G3Frame.setdefault = setdefault
 G3Frame.pop = pop
-
-del str_to_frame_types
-del type_enum_key
-del iteritems
-del __iter__
-del get
-del setdefault
-del pop

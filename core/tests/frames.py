@@ -26,7 +26,7 @@ class TestFrames(unittest.TestCase):
         self.assertTrue("key1" in keys)
         self.assertTrue("key2" in keys)
 
-    def test_iteritems(self):
+    def test_items(self):
         frame = G3Frame()
         self.assertEqual(frame.keys(), [])
         frame["key1"] = "val1"
@@ -34,7 +34,7 @@ class TestFrames(unittest.TestCase):
 
         keys = []
         vals = []
-        for k, v in frame.iteritems():
+        for k, v in frame.items():
             keys.append(k)
             vals.append(v)
         self.assertEqual(len(keys), 2)
