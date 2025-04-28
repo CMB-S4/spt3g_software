@@ -486,13 +486,14 @@ class GCPBoloDataTee(object):
         #
         # All fields are little-endian, unless otherwise noted
 
-        buf = struct.pack('<?II', numpy.all(data['DataOK']), len(data) - 1, len(data.values()[0]))
-        for i in range(len(data)):
-            if data.keys()[i] == 'DataOK':
+        data_len = len(data[list(data.keys())[0]])
+        buf = struct.pack('<?II', numpy.all(data['DataOK']), len(data) - 1, data_len)
+        for k, v in data.items():
+            if k == 'DataOK':
                 continue
-            buf += struct.pack('16s', data.keys()[i].encode())
-            assert(len(data.values()[i]) == len(data.values()[0]))
-            buf += struct.pack('<%di' % len(data.values()[i]), *data.values()[i])
+            buf += struct.pack('16s', k.encode())
+            assert(len(v) == data_len)
+            buf += struct.pack('<%di' % data_len, *v)
 
         buf = struct.pack('!q', len(buf)) + buf
 

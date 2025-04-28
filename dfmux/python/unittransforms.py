@@ -184,7 +184,7 @@ class ConvertTimestreamUnits(object):
 
         # Housekeeping data can also be in Scan frames
         if 'DfMuxHousekeeping' in frame:
-            if self.hkmap is None or (frame['DfMuxHousekeeping'].values()[0].timestamp != self.hkmap.values()[0].timestamp and not self.keepconversions):
+            if self.hkmap is None or (list(frame['DfMuxHousekeeping'].values())[0].timestamp != list(self.hkmap.values())[0].timestamp and not self.keepconversions):
                 # XXX: finer-grained check for same values?
                 self.hkmap = frame['DfMuxHousekeeping']
                 self.convfactors = {}
