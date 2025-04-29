@@ -264,10 +264,7 @@ register_map(py::module_ &scope, std::string name, Args &&...args)
 	}, py::return_value_policy::reference_internal);
 
 	cls.def("copy", [](const M &m) {
-		auto v = std::unique_ptr<M>(new M());
-		for (auto it: m)
-			v->emplace(it.first, it.second);
-		return v.release();
+		return std::unique_ptr<M>(new M(m)).release();
 	});
 
 	cls.def("get", [](const M &m, const K &k) {
