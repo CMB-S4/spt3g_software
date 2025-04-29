@@ -293,6 +293,18 @@ register_map(py::module_ &scope, std::string name, Args &&...args)
 	// Assignment provided only if the type is copyable
 	py::detail::map_assignment<M, C>(cls);
 
+	cls.def("update", [](py::object &m, const py::iterable &v, py::kwargs kw) {
+		for (auto it: py::dict(v))
+			m.attr("__setitem__")(it.first.cast<K>(), it.second.cast<V>());
+		for (auto it: kw)
+			m.attr("__setitem__")(it.first.cast<K>(), it.second.cast<V>());
+	});
+
+	cls.def("update", [](py::object &m, py::kwargs kw) {
+		for (auto it: kw)
+			m.attr("__setitem__")(it.first.cast<K>(), it.second.cast<V>());
+	});
+
 	cls.def("__delitem__", [](M &m, const K &k) {
 		auto it = m.find(k);
 		if (it == m.end())
@@ -319,18 +331,6 @@ register_map(py::module_ &scope, std::string name, Args &&...args)
 	});
 
 	cls.def("clear", [](M &m) { m.clear(); });
-
-	cls.def("update", [](M &m, const py::iterable &v, py::kwargs kw) {
-		for (auto it: py::dict(v))
-			m[it.first.cast<K>()] = it.second.cast<V>();
-		for (auto it: kw)
-			m[it.first.cast<K>()] = it.second.cast<V>();
-	});
-
-	cls.def("update", [](M &m, py::kwargs kw) {
-		for (auto it: kw)
-			m[it.first.cast<K>()] = it.second.cast<V>();
-	});
 
 	// Always use a lambda in case of `using` declaration
 	cls.def("__len__", [](const M &m) { return m.size(); });
