@@ -263,6 +263,27 @@ register_map(py::module_ &scope, std::string name, Args &&...args)
 		return it->second;
 	}, py::return_value_policy::reference_internal);
 
+	cls.def("copy", [](const M &m) {
+		auto v = std::unique_ptr<M>(new M());
+		for (auto it: m)
+			v->emplace(it.first, it.second);
+		return v.release();
+	});
+
+	cls.def("get", [](const M &m, const K &k) {
+		auto it = m.find(k);
+		if (it == m.end())
+			return py::object(py::none());
+		return py::cast(it->second);
+	});
+
+	cls.def("get", [](const M &m, const K &k, const py::object &d) {
+		auto it = m.find(k);
+		if (it == m.end())
+			return d;
+		return py::cast(it->second);
+	});
+
 	cls.def("__contains__", [](M &m, const K &k) -> bool {
 		auto it = m.find(k);
 		if (it == m.end())
@@ -280,6 +301,38 @@ register_map(py::module_ &scope, std::string name, Args &&...args)
 		if (it == m.end())
 			throw py::key_error();
 		m.erase(it);
+	});
+
+	cls.def("pop", [](M &m, const K &k) {
+		auto it = m.find(k);
+		if (it == m.end())
+			throw py::key_error();
+		auto v = it->second;
+		m.erase(it);
+		return v;
+	});
+
+	cls.def("pop", [](M &m, const K &k, const py::object &d) {
+		auto it = m.find(k);
+		if (it == m.end())
+			return d;
+		auto v = it->second;
+		m.erase(it);
+		return py::cast(v);
+	});
+
+	cls.def("clear", [](M &m) { m.clear(); });
+
+	cls.def("update", [](M &m, const py::iterable &v, py::kwargs kw) {
+		for (auto it: py::dict(v))
+			m[it.first.cast<K>()] = it.second.cast<V>();
+		for (auto it: kw)
+			m[it.first.cast<K>()] = it.second.cast<V>();
+	});
+
+	cls.def("update", [](M &m, py::kwargs kw) {
+		for (auto it: kw)
+			m[it.first.cast<K>()] = it.second.cast<V>();
 	});
 
 	// Always use a lambda in case of `using` declaration
