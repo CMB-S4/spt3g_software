@@ -86,7 +86,7 @@ class CalibrateFrame:
         if frame.type != core.G3FrameType.GcpSlow or 'Calibrated' in frame:
             return
 
-        for board in frame.keys():
+        for board in list(frame.keys()):
             cboard = frame.pop(board)
             if board not in self.cal:
                 continue
