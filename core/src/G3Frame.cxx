@@ -413,38 +413,24 @@ static py::list g3frame_keys(const G3Frame &map)
         return keys;
 }
 
-static void g3frame_python_put(G3Frame &f, std::string name, py::object obj)
+static void g3frame_python_put(G3Frame &f, const std::string &name, const py::object &obj)
 {
-	if (py::isinstance<py::bool_>(obj)) {
+	if (py::isinstance<py::bool_>(obj))
 		f.Put(name, std::make_shared<G3Bool>(obj.cast<bool>()));
-		return;
-	}
-
-	if (py::isinstance<py::int_>(obj)) {
+	else if (py::isinstance<py::int_>(obj))
 		f.Put(name, std::make_shared<G3Int>(obj.cast<int64_t>()));
-		return;
-	}
-
-	if (py::isinstance<py::float_>(obj)) {
+	else if (py::isinstance<py::float_>(obj))
 		f.Put(name, std::make_shared<G3Double>(obj.cast<double>()));
-		return;
-	}
-
-	if (py::isinstance<Quat>(obj)) {
+	else if (py::isinstance<Quat>(obj))
 		f.Put(name, std::make_shared<G3Quat>(obj.cast<Quat>()));
-		return;
-	}
-
-	if (py::isinstance<py::str>(obj)) {
+	else if (py::isinstance<py::str>(obj))
 		f.Put(name, std::make_shared<G3String>(obj.cast<std::string>()));
-		return;
-	}
-
-	throw py::type_error(
-	    "Object is not a G3FrameObject derivative or a plain-old-data type");
+	else
+		throw py::type_error(
+		    "Object is not a G3FrameObject derivative or a plain-old-data type");
 }
 
-static py::object g3frame_python_get(G3Frame &f, std::string name)
+static py::object g3frame_python_get(const G3Frame &f, const std::string &name)
 {
 	// Python doesn't have a concept of const. Add subterfuge.
 	G3FrameObjectConstPtr element = f[name];
@@ -463,6 +449,32 @@ static py::object g3frame_python_get(G3Frame &f, std::string name)
 		return py::cast(std::dynamic_pointer_cast<const G3Quat>(element)->value);
 	else
 		return py::cast(element);
+}
+
+static py::object
+g3frame_python_get_default(const G3Frame &f, const std::string &name, const py::object &d)
+{
+	try {
+		return g3frame_python_get(f, name);
+	} catch (py::key_error &) {
+		return d;
+	}
+}
+
+static py::object
+g3frame_python_pop(G3Frame &f, const std::string &name)
+{
+	auto v = g3frame_python_get(f, name);
+	f.Delete(name);
+	return v;
+}
+
+static py::object
+g3frame_python_pop_default(G3Frame &f, const std::string &name, const py::object &d)
+{
+	auto v = g3frame_python_get_default(f, name, d);
+	f.Delete(name);
+	return v;
 }
 
 static std::string g3frame_str(const G3Frame &f)
@@ -551,8 +563,12 @@ PYBINDINGS("core", scope) {
 	    .def("__setitem__", &G3Frame::Put)
 	    .def("__setitem__", &g3frame_python_put)
 	    .def("__getitem__", &g3frame_python_get)
+	    .def("get", &g3frame_python_get_default, py::arg("key"),
+	      py::arg("default")=py::none())
 	    .def("keys", &g3frame_keys, "Returns a list of keys in the frame.")
 	    .def("__delitem__", &G3Frame::Delete)
+	    .def("pop", &g3frame_python_pop)
+	    .def("pop", &g3frame_python_pop_default)
 	    .def("values", &g3frame_python_values, "Returns a list of the "
 	      "values of the items in the frame.")
 	    .def("__contains__", (bool (G3Frame::*)(const std::string &) const)

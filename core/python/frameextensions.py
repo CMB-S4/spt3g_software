@@ -33,34 +33,6 @@ def __iter__(self):
     for key in keys:
         yield key
 
-def get(self, key, default=None):
-    """
-    get implementation for G3Frame
-    """
-    if key in self.keys():
-        return self[key]
-    return default
-
-def setdefault(self, key, default=None):
-    """
-    setdefault implementation for G3Frame
-    """
-    if key not in self.keys():
-        self[key] = default
-
-def pop(self, key, default=None):
-    """
-    pop implementation for G3Frame
-    """
-    if key not in self.keys():
-        return default
-    value = self[key]
-    del self[key]
-    return value
-
 G3FrameType.from_string = str_to_frame_types
 G3Frame.items = items
 G3Frame.__iter__ = __iter__
-G3Frame.get = get
-G3Frame.setdefault = setdefault
-G3Frame.pop = pop
