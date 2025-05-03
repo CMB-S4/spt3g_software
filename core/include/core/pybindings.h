@@ -35,8 +35,6 @@ register_enum(py::module_ &scope, const std::string &name, Args &&... args)
 {
 	auto cls = py::enum_<T>(scope, name.c_str(), std::forward<Args>(args)...);
 
-	cls.def_property_readonly("real",
-	    [](py::object &obj) { return obj.attr("value"); });
 	cls.def_property_readonly_static("names",
 	    [](py::object &obj) { return obj.attr("__members__"); });
 	cls.def_property_readonly_static("values",

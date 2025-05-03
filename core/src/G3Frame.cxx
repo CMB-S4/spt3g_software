@@ -520,6 +520,9 @@ PYBINDINGS("core", scope) {
 	    .value("LightCurve",      G3Frame::LightCurve)
 	    .value("Statistics",      G3Frame::Statistics)
 	    .value("none",            G3Frame::None)
+	    .def_property_readonly("key",
+	        [](G3Frame::FrameType &v) { return static_cast<char>(v); },
+	        "Return G3FrameType's C++ enum character key")
 	;
 	register_vector_of<G3Frame::FrameType>(scope, "FrameType");
 

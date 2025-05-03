@@ -17,13 +17,6 @@ def str_to_frame_types(types):
                              chr(typenum)))
     return frame_types
 
-@property
-def type_enum_key(self):
-    """
-    Return G3FrameType's C++ enum character key.
-    """
-    return chr(self.real)
-
 def items(self):
     """
     items implementation for G3Frame
@@ -66,7 +59,6 @@ def pop(self, key, default=None):
     return value
 
 G3FrameType.from_string = str_to_frame_types
-G3FrameType.key = type_enum_key
 G3Frame.items = items
 G3Frame.__iter__ = __iter__
 G3Frame.get = get
