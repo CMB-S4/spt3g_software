@@ -267,19 +267,12 @@ register_map(py::module_ &scope, std::string name, Args &&...args)
 		return std::unique_ptr<M>(new M(m)).release();
 	});
 
-	cls.def("get", [](const M &m, const K &k) {
-		auto it = m.find(k);
-		if (it == m.end())
-			return py::object(py::none());
-		return py::cast(it->second);
-	});
-
 	cls.def("get", [](const M &m, const K &k, const py::object &d) {
 		auto it = m.find(k);
 		if (it == m.end())
 			return d;
 		return py::cast(it->second);
-	});
+	}, py::arg("key"), py::arg("default")=py::none());
 
 	cls.def("__contains__", [](M &m, const K &k) -> bool {
 		auto it = m.find(k);
