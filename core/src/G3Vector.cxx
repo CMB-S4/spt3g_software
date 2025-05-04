@@ -76,12 +76,17 @@ void G3Vector<int64_t>::save(A &ar, const unsigned v) const
 }
 
 template <typename T, typename V>
-auto vector_from_python(const py::array_t<T> &buf, bool contiguous=true) {
+auto vector_from_python(const py::array_t<T> &buf) {
 	if (buf.ndim() != 1)
 		throw py::type_error("Only valid 1D buffers can be copied to a vector");
 
-	if (contiguous)
-		return std::make_shared<V>(buf.data(), buf.data() + buf.size());
+	return std::make_shared<V>(buf.data(), buf.data() + buf.size());
+}
+
+template <typename V>
+auto time_vector_from_python(const py::array_t<G3TimeStamp> &buf) {
+	if (buf.ndim() != 1)
+		throw py::type_error("Only valid 1D buffers can be copied to a vector");
 
 	auto rbuf = buf.template unchecked<1>();
 	auto vec = std::make_shared<V>(rbuf.shape(0));
@@ -119,7 +124,7 @@ struct vector_buffer<G3Time, V, C, Args...> {
 	static void impl(C &cls) {
 		cls.def_buffer(&time_vector_buffer_info<V>);
 		cls.def(py::init([](const py::array &v) {
-			return vector_from_python<G3TimeStamp, V>(v, false);
+			return time_vector_from_python<V>(v);
 		}), "Copy constructor from numpy array");
 		py::implicitly_convertible<py::buffer, V>();
 	}
@@ -131,7 +136,7 @@ struct vector_buffer<T, V, C, Args...> { \
 	static void impl(C &cls) { \
 		cls.def_buffer(&vector_buffer_info<V>); \
 		cls.def(py::init([](const py::array &v) { \
-			return vector_from_python<T, V>(v, true); })); \
+			return vector_from_python<T, V>(v); })); \
 		py::implicitly_convertible<py::buffer, V>(); \
 	} \
 }
