@@ -187,33 +187,14 @@ map_repr(C &cls, std::string const &name)
 	}, "Return the canonical string representation of this map.");
 }
 
-// Register python conversions to and from map types
-// Includes indexing, key/value/items views, and map manipulation bindings.
-template <typename M, typename... Bases, typename... Args>
-auto
-register_map(py::module_ &scope, std::string name, Args &&...args)
+// Map key/value/item iterator views for the given class
+template <typename M, typename C>
+void
+register_map_iterators(py::module_ &scope, C &cls)
 {
-	using K = typename M::key_type;
-	using V = typename M::mapped_type;
 	using KeysView = py::detail::keys_view;
 	using ValuesView = py::detail::values_view;
 	using ItemsView = py::detail::items_view;
-	using C = py::class_<M, Bases..., std::shared_ptr<M> >;
-
-	std::string rname = scope.attr("__name__").cast<std::string>() + "." + name;
-
-	C cls(scope, name.c_str(), py::dynamic_attr(), std::forward<Args>(args)...);
-
-	cls
-	    .def(py::init<>())
-	    .def(py::init<const M&>(), "Copy constructor")
-	    .def(py::init([](const py::iterable &d) {
-		auto v = std::unique_ptr<M>(new M());
-		for (auto item: py::dict(d))
-			v->emplace(item.first.cast<K>(), item.second.cast<V>());
-		return v.release();
-	    }), "Iterable constructor")
-	;
 
 	// Wrap KeysView if it wasn't already wrapped
 	if (!py::detail::get_type_info(typeid(KeysView))) {
@@ -235,15 +216,6 @@ register_map(py::module_ &scope, std::string name, Args &&...args)
 		items_view.def("__iter__", &ItemsView::iter, py::keep_alive<0, 1>());
 	}
 
-	// Register stream insertion operator (if possible)
-	map_repr<M, C>(cls, rname);
-
-	cls.def("__bool__", [](const M &m) -> bool { return !m.empty(); },
-	    "Check whether the map is nonempty");
-
-	cls.def("__iter__", [](M &m) { return py::make_key_iterator(m.begin(), m.end()); },
-	    py::keep_alive<0, 1>());
-
 	cls.def("keys", [](M &m) {
 		return std::unique_ptr<KeysView>(new py::detail::KeysViewImpl<M>(m));
 	}, py::keep_alive<0, 1>());
@@ -255,6 +227,44 @@ register_map(py::module_ &scope, std::string name, Args &&...args)
 	cls.def("items", [](M &m) {
 		return std::unique_ptr<ItemsView>(new py::detail::ItemsViewImpl<M>(m));
 	}, py::keep_alive<0, 1>());
+}
+
+// Register python conversions to and from map types
+// Includes indexing, key/value/items views, and map manipulation bindings.
+template <typename M, typename... Bases, typename... Args>
+auto
+register_map(py::module_ &scope, std::string name, Args &&...args)
+{
+	using K = typename M::key_type;
+	using V = typename M::mapped_type;
+	using C = py::class_<M, Bases..., std::shared_ptr<M> >;
+
+	std::string rname = scope.attr("__name__").cast<std::string>() + "." + name;
+
+	C cls(scope, name.c_str(), py::dynamic_attr(), std::forward<Args>(args)...);
+
+	cls
+	    .def(py::init<>())
+	    .def(py::init<const M&>(), "Copy constructor")
+	    .def(py::init([](const py::iterable &d) {
+		auto v = std::unique_ptr<M>(new M());
+		for (auto item: py::dict(d))
+			v->emplace(item.first.cast<K>(), item.second.cast<V>());
+		return v.release();
+	    }), "Iterable constructor")
+	;
+
+	// Register stream insertion operator (if possible)
+	map_repr<M, C>(cls, rname);
+
+	// Register map iterators
+	register_map_iterators<M, C>(scope, cls);
+
+	cls.def("__iter__", [](M &m) { return py::make_key_iterator(m.begin(), m.end()); },
+	    py::keep_alive<0, 1>());
+
+	cls.def("__bool__", [](const M &m) -> bool { return !m.empty(); },
+	    "Check whether the map is nonempty");
 
 	cls.def("__getitem__", [](M &m, const K &k) -> V & {
 		auto it = m.find(k);
