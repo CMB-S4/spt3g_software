@@ -89,16 +89,6 @@ bool G3Frame::Has(const std::string &name) const
 	return map_.find(name) != map_.end();
 }
 
-std::vector<std::string> G3Frame::Keys() const
-{
-	std::vector<std::string> keys;
-
-	for (auto i = map_.begin(); i != map_.end(); i++)
-		keys.push_back(i->first);
-
-	return keys;
-}
-
 G3Frame &G3Frame::operator = (const G3Frame &copy)
 {
 	map_ = copy.map_;
@@ -402,17 +392,6 @@ g3frame_char_constructor(std::string max_4_chars)
 	return G3FramePtr(new G3Frame(G3Frame::FrameType(code)));
 }
 
-static py::list g3frame_keys(const G3Frame &map)
-{
-	py::list keys;
-	std::vector<std::string> keyvec = map.Keys();
-
-        for (auto i = keyvec.begin(); i != keyvec.end(); i++)
-                keys.append(*i);
-
-        return keys;
-}
-
 static void g3frame_python_put(G3Frame &f, const std::string &name, const py::object &obj)
 {
 	if (py::isinstance<py::bool_>(obj))
@@ -484,21 +463,72 @@ static std::string g3frame_str(const G3Frame &f)
 	return oss.str();
 }
 
-static py::list g3frame_python_values(G3Frame &f)
-{
-	py::list values;
-	std::vector<std::string> keyvec = f.Keys();
-
-	for (auto i = keyvec.begin(); i != keyvec.end(); i++)
-		values.append(g3frame_python_get(f, *i));
-
-	return values;
-}
-
 static py::bytes g3frame_hash(const py::object &obj)
 {
 	return obj.attr("__getstate__")().cast<py::tuple>()[1];
 }
+
+
+// Iterators for keys/views/items
+class PyFrameIterator {
+public:
+	using value_type = std::pair<const std::string, py::object>;
+
+	PyFrameIterator(const G3Frame &frame, const G3Frame::key_iterator &it) :
+	    frame(frame), it(it) {}
+
+	bool operator ==(const PyFrameIterator & other) const { return it == other.it; }
+	PyFrameIterator operator++() { ++it; return *this; }
+	value_type operator*() const { return {*it, g3frame_python_get(frame, *it)}; }
+
+private:
+	const G3Frame &frame;
+	G3Frame::key_iterator it;
+};
+
+PYBIND11_NAMESPACE_BEGIN(PYBIND11_NAMESPACE)
+PYBIND11_NAMESPACE_BEGIN(detail)
+
+template <>
+struct KeysViewImpl<G3Frame> : public py::detail::keys_view {
+	explicit KeysViewImpl(G3Frame &frame) : frame(frame) {}
+	size_t len() override { return frame.size(); }
+	iterator iter() override { return make_iterator(frame.begin(), frame.end()); }
+	bool contains(const py::handle &k) override {
+		try {
+			return frame.Has(k.cast<std::string>());
+		} catch (const py::cast_error &) {
+			return false;
+		}
+	}
+	G3Frame &frame;
+};
+
+template <>
+struct ValuesViewImpl<G3Frame> : public py::detail::values_view {
+	explicit ValuesViewImpl(G3Frame &frame) : frame(frame) {}
+	size_t len() override { return frame.size(); }
+	iterator iter() override {
+		return make_value_iterator(PyFrameIterator(frame, frame.begin()),
+		    PyFrameIterator(frame, frame.end()));
+	}
+	G3Frame &frame;
+};
+
+template <>
+struct ItemsViewImpl<G3Frame> : public py::detail::items_view {
+	explicit ItemsViewImpl(G3Frame &frame) : frame(frame) {}
+	size_t len() override { return frame.size(); }
+	iterator iter() override {
+		return make_iterator(PyFrameIterator(frame, frame.begin()),
+		    PyFrameIterator(frame, frame.end()));
+	}
+	G3Frame &frame;
+};
+
+PYBIND11_NAMESPACE_END(detail)
+PYBIND11_NAMESPACE_END(PYBIND11_NAMESPACE)
+
 
 PYBINDINGS("core", scope) {
 	// Internal stuff
@@ -538,7 +568,7 @@ PYBINDINGS("core", scope) {
 	;
 	register_vector_of<G3Frame::FrameType>(scope, "FrameType");
 
-	register_class<G3Frame>(scope, "G3Frame",
+	auto cls = register_class<G3Frame>(scope, "G3Frame",
 	  "Frames are the core datatype of the analysis software. They behave "
 	  "like Python dictionaries except that they can only store subclasses "
 	  "of core.G3FrameObject and the dictionary keys must be strings. "
@@ -565,16 +595,16 @@ PYBINDINGS("core", scope) {
 	    .def("__getitem__", &g3frame_python_get)
 	    .def("get", &g3frame_python_get_default, py::arg("key"),
 	      py::arg("default")=py::none())
-	    .def("keys", &g3frame_keys, "Returns a list of keys in the frame.")
 	    .def("__delitem__", &G3Frame::Delete)
 	    .def("pop", &g3frame_python_pop)
 	    .def("pop", &g3frame_python_pop_default)
-	    .def("values", &g3frame_python_values, "Returns a list of the "
-	      "values of the items in the frame.")
 	    .def("__contains__", (bool (G3Frame::*)(const std::string &) const)
 	       &G3Frame::Has)
 	    .def("__str__", &g3frame_str)
 	    .def("__len__", &G3Frame::size)
+	    .def("__iter__",
+	       [](G3Frame &f) { return py::make_iterator(f.begin(), f.end()); },
+	       py::keep_alive<0, 1>())
 	    .def("drop_blobs", &G3Frame::DropBlobs, py::arg("decode_all")=false,
 	      "Drop all serialized data either for already-decoded objects (default) "
 	      "or all objects after decoding them (if decode_all is true). "
@@ -592,6 +622,7 @@ PYBINDINGS("core", scope) {
 	    .def_property_readonly("hash", &g3frame_hash,
 	      "Return the serialized representation of the frame")
 	;
+	register_map_iterators<G3Frame>(scope, cls);
 	register_vector_of<G3FramePtr>(scope, "Frame");
 	register_vector_of<G3FrameObjectPtr>(scope, "FrameObject");
 }

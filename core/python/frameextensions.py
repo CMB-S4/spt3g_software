@@ -1,4 +1,4 @@
-from . import G3Frame, G3FrameType
+from . import G3FrameType
 
 __all__ = []
 
@@ -17,22 +17,4 @@ def str_to_frame_types(types):
                              chr(typenum)))
     return frame_types
 
-def items(self):
-    """
-    items implementation for G3Frame
-    """
-    keys = self.keys()
-    for key in keys:
-        yield (key, self[key])
-
-def __iter__(self):
-    """
-    __iter__ implementation for G3Frame
-    """
-    keys = self.keys()
-    for key in keys:
-        yield key
-
 G3FrameType.from_string = str_to_frame_types
-G3Frame.items = items
-G3Frame.__iter__ = __iter__
