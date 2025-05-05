@@ -301,12 +301,7 @@ register_map(py::module_ &scope, std::string name, Args &&...args)
 			m.attr("__setitem__")(it.first.cast<K>(), it.second.cast<V>());
 		for (auto it: kw)
 			m.attr("__setitem__")(it.first.cast<K>(), it.second.cast<V>());
-	});
-
-	cls.def("update", [](py::object &m, py::kwargs kw) {
-		for (auto it: kw)
-			m.attr("__setitem__")(it.first.cast<K>(), it.second.cast<V>());
-	});
+	}, py::arg("items")=py::list());
 
 	cls.def("__delitem__", [](M &m, const K &k) {
 		auto it = m.find(k);
