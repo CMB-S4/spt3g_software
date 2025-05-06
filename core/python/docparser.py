@@ -188,7 +188,8 @@ def get_doc_for_module(module_path, include_link_list = True):
                     pass
                 out_str = add_str(out_str, '')
                 mod_dict[itemname] = out_str
-            elif hasattr(obj, '__dict__'):
+            elif hasattr(obj, '__dict__') and not hasattr(obj, "mro"):
+                # recurse through submodules and not classes
                 mod_dict.update(iterate_through_func(obj, itemname))
         return mod_dict
 
