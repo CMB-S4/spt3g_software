@@ -1,6 +1,7 @@
 import numpy as np
 from spt3g.core import (
     G3Timestream,
+    G3TimestreamMap,
     G3VectorDouble,
     DoubleVector,
     G3VectorInt,
@@ -163,3 +164,15 @@ for a in all_arr:
         "std",
     ]:
         assert getattr(a, attr)() == getattr(np, attr)(v1)
+
+    if isinstance(a, G3Timestream):
+        tsm = G3TimestreamMap(["a", "b", "c"], np.tile(v1, (3, 1)))
+
+        for attr in ["std", "var"]:
+            np.testing.assert_allclose(
+                getattr(tsm, attr)(axis=-1),
+                getattr(np, attr)(np.asarray(tsm), axis=-1),
+                atol=1e-14,
+                rtol=1e-14,
+                verbose=True,
+            )

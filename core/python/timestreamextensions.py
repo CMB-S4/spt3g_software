@@ -135,6 +135,29 @@ for x in ["sum", "mean", "any", "all", "min", "max", "argmin", "argmax", "var", 
         setattr(cls, x,
                 lambda a, *args, op=numpy.ndarray.__dict__[x], **kwargs: op(numpy.asarray(a), *args, **kwargs))
 
+# Bind some memory-efficient methods for G3TimestreamMap
+for op in ["std", "var"]:
+    def ufunc_wrapper(op):
+        def ufunc(a, axis=None, dtype=None, out=None, **kwargs):
+            bound_args = {}
+            if op in ["std", "var"]:
+                bound_args["ddof"] = kwargs.pop("ddof", 0)
+            if not len(kwargs) and axis == -1 or axis == 1:
+                ret = numpy.asarray(getattr(a, "_c" + op)(**bound_args))
+                if out is not None:
+                    out[:] = ret
+                    return out
+                if dtype is not None:
+                    return ret.astype(dtype)
+                return ret
+            kwargs.update(**bound_args)
+            return numpy.ndarray.__dict__[op](numpy.asarray(a), axis, dtype, out, **kwargs)
+        ufunc.__doc__ = numpy.ndarray.__dict__[op].__doc__
+        return ufunc
+
+    setattr(G3TimestreamMap, op, ufunc_wrapper(op))
+
+
 #add concatenation routines to g3timestream objects
 def _concatenate_timestreams(cls, ts_lst, ts_rounding_error=0.6, ts_interp_threshold=0):
     """
