@@ -142,7 +142,7 @@ for op in ["std", "var"]:
             bound_args = {}
             if op in ["std", "var"]:
                 bound_args["ddof"] = kwargs.pop("ddof", 0)
-            if not len(kwargs) and axis == -1 or axis == 1:
+            if not len(kwargs) and (axis == -1 or axis == 1):
                 ret = numpy.asarray(getattr(a, "_c" + op)(**bound_args))
                 if out is not None:
                     out[:] = ret
