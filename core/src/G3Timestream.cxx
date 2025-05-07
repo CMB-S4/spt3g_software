@@ -1107,6 +1107,39 @@ G3TimestreamMap_times(const G3TimestreamMap &a)
 	return G3Timestream_times(*a.begin()->second);
 }
 
+double
+G3Timestream_var(const G3Timestream &ts, size_t ddof)
+{
+	double v1 = 0, v2 = 0;
+	for (size_t i = 0; i < ts.size(); i++) {
+		double v = ts[i];
+		v1 += v;
+		v2 += v * v;
+	}
+
+	return (v2 - v1 * v1 / (double) ts.size()) / (double)(ts.size() - ddof);
+}
+
+std::vector<double>
+G3TimestreamMap_var(const G3TimestreamMap &tsm, size_t ddof)
+{
+	std::vector<double> v;
+	v.reserve(tsm.size());
+	for (auto it: tsm)
+		v.push_back(G3Timestream_var(*it.second, ddof));
+	return v;
+}
+
+std::vector<double>
+G3TimestreamMap_std(const G3TimestreamMap &tsm, size_t ddof)
+{
+	std::vector<double> v;
+	v.reserve(tsm.size());
+	for (auto it: tsm)
+		v.push_back(sqrt(G3Timestream_var(*it.second, ddof)));
+	return v;
+}
+
 
 class G3Timestream::G3TimestreamPythonHelpers
 {
@@ -1615,6 +1648,8 @@ PYBINDINGS("core", scope) {
 	      "Compute elapsed time array for samples")
 	    .def_property_readonly("times", &G3TimestreamMap_times,
 	      "Compute time vector for samples")
+	    .def("_cvar", &G3TimestreamMap_var, py::arg("ddof")=0)
+	    .def("_cstd", &G3TimestreamMap_std, py::arg("ddof")=0)
 	;
 
 	// Add buffer protocol interface
