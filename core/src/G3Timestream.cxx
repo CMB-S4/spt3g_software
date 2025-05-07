@@ -1550,8 +1550,8 @@ PYBINDINGS("core", scope) {
 	    .def_property_readonly("times", &G3Timestream_times,
 	      "Compute time vector for samples")
 	    .def("__len__", &G3Timestream::size)
-	    .def_property_readonly("shape", &G3Timestream_shape)
-	    .def_property_readonly("ndim", &G3Timestream_ndim)
+	    .def_property_readonly("shape", &G3Timestream_shape, "Numpy-compatible shape of this timestream")
+	    .def_property_readonly("ndim", &G3Timestream_ndim, "Numpy-compatible number of dimensions")
 	    // Operators bound in python through numpy
 	;
 
@@ -1566,7 +1566,6 @@ PYBINDINGS("core", scope) {
 	auto tsm =
 	register_frameobject<G3TimestreamMap>(scope, "G3TimestreamMap",
 	    "Collection of timestreams indexed by logical detector ID")
-	    .def(py::init<>())
 	    .def("__init__", py::make_constructor(G3Timestream::G3TimestreamPythonHelpers::G3TimestreamMap_from_numpy, 
 	         py::default_call_policies(),
 	         (py::arg("keys"), py::arg("data"), py::arg("start")=G3Time(0),

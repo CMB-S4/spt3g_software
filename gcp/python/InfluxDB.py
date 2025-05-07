@@ -304,6 +304,7 @@ def WriteDB(fr, client, fields=None):
         Which gcp fields to add to database. See parse_field for options. If
         None, add all.
     '''
+    assert client is not None, "InfluxDB client required"
     from influxdb.exceptions import InfluxDBClientError
     from influxdb.exceptions import InfluxDBServerError
 
@@ -493,7 +494,7 @@ def WriteDB(fr, client, fields=None):
 
 
 @core.pipesegment
-def UpdateDB(pipe, client, fields=None):
+def UpdateDB(pipe, client=None, fields=None):
     '''
     Update InfluxDB with data in frame
 

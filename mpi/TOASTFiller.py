@@ -3,6 +3,7 @@ import numpy
 from .MPIAccumulator import MPIAccumulator
 import pickle
 
+@core.indexmod
 class TOASTFiller(object):
     '''
     Fill a TOAST TOD (stored in the toastobses member after completion) from

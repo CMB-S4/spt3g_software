@@ -51,7 +51,8 @@ PYBINDINGS("core", scope) {
 	    .def(py::init<std::string, std::vector<G3Frame::FrameType>, bool, size_t>(),
 	        py::arg("filename"), py::arg("streams")=std::vector<G3Frame::FrameType>(),
 	        py::arg("append")=false, py::arg("buffersize")=1024*1024)
-	    .def("flush", &G3Writer::Flush)
-	    .def("tell", &G3Writer::Tell)
+	    .def("flush", &G3Writer::Flush, "Flush all pending writes to file")
+	    .def("tell", &G3Writer::Tell, "Return the current byte offset from "
+	        "the start of the output stream")
 	;
 }

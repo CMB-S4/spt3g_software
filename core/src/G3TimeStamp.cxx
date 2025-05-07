@@ -251,6 +251,16 @@ g3time_fsub(G3Time &t, double delta)
 	return (t - G3TimeStamp(delta));
 }
 
+static std::string
+g3time_repr(const py::object &obj)
+{
+	std::stringstream s;
+	s << py::extract<std::string>(obj.attr("__class__").attr("__module__"))() << "."
+	  << py::extract<std::string>(obj.attr("__class__").attr("__name__"))()
+	  << "(" << py::extract<G3TimeStamp>(obj.attr("time"))() << ")";
+	return s.str();
+}
+
 static G3TimePtr
 g3time_from_timestamp(py::object obj)
 {
@@ -301,6 +311,7 @@ PYBINDINGS("core", scope) {
 	        "Return a G3Time object corresponding to the current system time")
 	    .def_readwrite("time", &G3Time::time, "Time relative to the UNIX epoch")
 	    .def_property("mjd", &G3Time::GetMJD, &G3Time::SetMJD, "Time in MJD")
+	    .def("__repr__", &g3time_repr)
 	    .def(py::self == py::self)
 	    .def(py::self != py::self)
 	    .def(py::self < py::self)
