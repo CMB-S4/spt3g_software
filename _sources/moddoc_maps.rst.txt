@@ -984,8 +984,6 @@ Modules in spt3g.maps
 
 **spt3g.maps.HitsBinner**
 
-HitsBinner(map_id, stub_map, pointing, timestreams, bolo_properties_name="BolometerProperties", map_per_scan=False)
-
 Bins up pointing for a set of channels into a hits map with properties (projection, etc.) 
 specified by the stub_map argument. 
 
@@ -1018,14 +1016,17 @@ specified by the stub_map argument.
 	    a map frame with the data since the last emitted map frame but *before* 
 	    the current Scan; if False, the binner will continue accumulating data.
 	
-*Emits:*
-	Emits a frame of type Map at the end of processing containing the output 
-	map:
+*Returns:*
+	frame: G3Frame
+	    A frame of type Map at the end of processing containing the output map:
 	
-	Frame (Map) [
-	"Id" (spt3g.core.G3String) => "ra0hdec-57.5-150GHz"
-	"H" (spt3g.maps.FlatSkyMap) => 2700 x 1500 (45 x 25 deg) ZEA centered at (1350, 749.5) = (0, -57.5 deg) in equatorial coordinates  (Tcmb)
-	]
+	    .. code-block::
+	
+	        Frame (Map) [
+	            "Id" (spt3g.core.G3String) => "ra0hdec-57.5-150GHz"
+	            "H" (spt3g.maps.FlatSkyMap) => 2700 x 1500 (45 x 25 deg) ZEA centered 
+	        at (1350, 749.5) = (0, -57.5 deg) in equatorial coordinates  (Tcmb)
+	        ]
 	
 *See Also:*
 	MapBinner, SingleDetectorMapBinner, SingleDetectorBoresightBinner :
@@ -1054,8 +1055,6 @@ specified by the stub_map argument.
 .. _spt3g.maps.MapBinner:
 
 **spt3g.maps.MapBinner**
-
-MapBinner(map_id, stub_map, pointing, timestreams, detector_weights, bolo_properties_name="BolometerProperties", store_weight_map=True, map_per_scan=False)
 
 Bins up timestreams into a map with properties (projection, etc.) specified
 by the stub_map argument. 
@@ -1105,26 +1104,31 @@ by the stub_map argument.
 	    a map frame with the data since the last emitted map frame but *before* 
 	    the current Scan; if False, the binner will continue accumulating data.
 	
-*Emits:*
-	Emits a frame of type Map at the end of processing containing the output 
-	map:
+*Returns:*
+	frame: G3Frame
+	    A frame of type Map at the end of processing containing the output map:
 	
-	Frame (Map) [
-	"Id" (spt3g.core.G3String) => "ra0hdec-57.5-150GHz"
-	"T" (spt3g.maps.FlatSkyMap) => 2700 x 1500 (45 x 25 deg) ZEA centered at (1350, 749.5) = (0, -57.5 deg) in equatorial coordinates  (Tcmb)
-	"Q" (spt3g.maps.FlatSkyMap) => 2700 x 1500 (45 x 25 deg) ZEA centered at (1350, 749.5) = (0, -57.5 deg) in equatorial coordinates  (Tcmb)
-	"U" (spt3g.maps.FlatSkyMap) => 2700 x 1500 (45 x 25 deg) ZEA centered at (1350, 749.5) = (0, -57.5 deg) in equatorial coordinates  (Tcmb)
-	"Wpol" (spt3g.maps.G3SkyMapWeights) => G3SkyMapWeights
-	]
+	    .. code-block::
 	
-	For unpolarized maps, the "Q" and "U" outputs will be absent and the 
-	"Wpol" frame object will be named "Wunpol".
+	        Frame (Map) [
+	            "Id" (spt3g.core.G3String) => "ra0hdec-57.5-150GHz"
+	            "T" (spt3g.maps.FlatSkyMap) => 2700 x 1500 (45 x 25 deg) ZEA centered 
+	        at (1350, 749.5) = (0, -57.5 deg) in equatorial coordinates  (Tcmb)
+	            "Q" (spt3g.maps.FlatSkyMap) => 2700 x 1500 (45 x 25 deg) ZEA centered 
+	        at (1350, 749.5) = (0, -57.5 deg) in equatorial coordinates  (Tcmb)
+	            "U" (spt3g.maps.FlatSkyMap) => 2700 x 1500 (45 x 25 deg) ZEA centered 
+	        at (1350, 749.5) = (0, -57.5 deg) in equatorial coordinates  (Tcmb)
+	            "Wpol" (spt3g.maps.G3SkyMapWeights) => G3SkyMapWeights
+	        ]
+	
+	    For unpolarized maps, the "Q" and "U" outputs will be absent and the 
+	    "Wpol" frame object will be named "Wunpol".
 	
 *See Also:*
 	SingleDetectorMapBinner, SingleDetectorBoresightBinner :
 	    Alternative map binners for making single-detector maps.
 	MapMockObserver :
-	    The inverse of this module. Produces timestreams from aninput map.
+	    The inverse of this module. Produces timestreams from an input map.
 	FlatSkyMap, HealpixSkyMap :
 	    Possible output types.
 	
@@ -1150,8 +1154,6 @@ by the stub_map argument.
 .. _spt3g.maps.MapMockObserver:
 
 **spt3g.maps.MapMockObserver**
-
-MapMockObserver(pointing, timestreams, band, T, Q=None, U=None, bolo_properties_name="BolometerProperties", interp=False)
 
 Creates a new set of timestreams by sampling from an input map.
 
@@ -1227,8 +1229,6 @@ Creates a filter mask <tod_mask> to indicate to later TOD filtering that a detec
 
 **spt3g.maps.MapTODPointing**
 
-MapTODPointing(pointing, timestreams, stub_map, tod_pointing, bolo_properties_name="BolometerProperties")
-
 Compute pixel pointing for timestreams for a map with properties (projection, etc.) specified
 by the stub_map argument. 
 
@@ -1255,16 +1255,21 @@ The outputs are not consumed by any stage of the map-making pipeline.
 	    default, and this parameter only need be set if you wish to use 
 	    alternative values.
 	
-*Emits:*
-	Adds a new key to every Scan frame containing the output pointing data:
+*Returns:*
+	frame: G3Frame
+	    Adds a new key to every Scan frame containing the output pointing data:
 	
-	Frame (Scan) [
-	...
-	"OnlineRaDecRotation" (spt3g.core.G3TimestreamQuat) => 15716 quaternions at 152.6 Hz
-	"RawTimestreams_I" (spt3g.core.G3TimestreamMap) => Timestreams from 14112 detectors
-	"TodPointing" (spt3g.core.G3MapVectorInt) => 14112 elements
-	...
-	]
+	    .. code-block::
+	
+	        Frame (Scan) [
+	            ...
+	            "OnlineRaDecRotation" (spt3g.core.G3TimestreamQuat) => 
+	        15716 quaternions at 152.6 Hz
+	            "RawTimestreams_I" (spt3g.core.G3TimestreamMap) => 
+	        Timestreams from 14112 detectors
+	            "TodPointing" (spt3g.core.G3MapVectorInt) => 14112 elements
+	            ...
+	        ]
 	
 *See Also:*
 	MapTODMasker :
@@ -1298,8 +1303,6 @@ The outputs are not consumed by any stage of the map-making pipeline.
 
 **spt3g.maps.SingleDetectorBoresightBinner**
 
-SingleDetectorBoresightBinner(stub_map, pointing, timestreams)
-
 Makes simple binned maps of the sky, in boresight coordinates, for every 
 detector present in the given timestreams. This module is intended for use 
 when making maps for detector-pointing calibration.
@@ -1307,8 +1310,8 @@ when making maps for detector-pointing calibration.
 *Parameters:*
 	stub_map : G3SkyMap
 	    Template of the map in which to accumulate timestream data. All 
-	     parameters of the output map (projection, boundaries, pixel size, etc.)
-	     are copied from this map, which is not modified.
+	    parameters of the output map (projection, boundaries, pixel size, etc.)
+	    are copied from this map, which is not modified.
 	pointing : string (frame object G3VectorQuat or G3TimestreamQuat)
 	    Name of a frame object containing the boresight pointing quaternion 
 	    timestream. Must have the same number of elements as the data in 
@@ -1320,23 +1323,28 @@ when making maps for detector-pointing calibration.
 	    units of the detector timestreams. Because of the single stored 
 	    weight/hit map, the set of detectors in every scan must be identical.
 	
-*Emits:*
-	At the end of processing, emits one frame of type Map for each detector 
-	containing the corresponding map. The "Id" property of the output frames 
-	gives the detector ID to which the map corresponds. Because the maps are 
-	unweighted (weights don't make sense for single-detector maps) and the 
-	effective pointing for all detectors is identical, the weight/hit map is 
-	identical for all detectors and is stored only in the first output frame.
+*Returns:*
+	frames: G3Frame
+	    At the end of processing, emits one frame of type Map for each detector 
+	    containing the corresponding map. The "Id" property of the output frames 
+	    gives the detector ID to which the map corresponds. Because the maps are 
+	    unweighted (weights don't make sense for single-detector maps) and the 
+	    effective pointing for all detectors is identical, the weight/hit map is 
+	    identical for all detectors and is stored only in the first output frame.
 	
-	Frame (Map) [
-	"Id" (spt3g.core.G3String) => "2019.000"
-	"T" (spt3g.maps.FlatSkyMap) => 360 x 360 (3 x 3 deg) ZEA centered at (179.5, 179.5) = (0, 0 deg) in local coordinates  (Power)
-	"Wunpol" (spt3g.maps.G3SkyMapWeights) => G3SkyMapWeights
-	]
-	Frame (Map) [
-	"Id" (spt3g.core.G3String) => "2019.005"
-	"T" (spt3g.maps.FlatSkyMap) => 360 x 360 (3 x 3 deg) ZEA centered at (179.5, 179.5) = (0, 0 deg) in local coordinates  (Power)
-	]
+	    .. code-block:: 
+	
+	        Frame (Map) [
+	            "Id" (spt3g.core.G3String) => "2019.000"
+	            "T" (spt3g.maps.FlatSkyMap) => 360 x 360 (3 x 3 deg) ZEA centered 
+	        at (179.5, 179.5) = (0, 0 deg) in local coordinates  (Power)
+	            "Wunpol" (spt3g.maps.G3SkyMapWeights) => G3SkyMapWeights
+	        ]
+	        Frame (Map) [
+	            "Id" (spt3g.core.G3String) => "2019.005"
+	            "T" (spt3g.maps.FlatSkyMap) => 360 x 360 (3 x 3 deg) ZEA centered 
+	        at (179.5, 179.5) = (0, 0 deg) in local coordinates  (Power)
+	        ]
 	
 *See Also:*
 	SingleDetectorMapBinner :
@@ -1562,52 +1570,36 @@ combining this module with a G3Reader whose ``track_filename`` option is set
 to True; however, this feature is fragile and may not work as expected with
 complex pipelines.
 
-*Attributes:*
-	coadd_frame : G3Frame
-	    Output coadd map frame, also injected into the pipeline on
-	    EndProcessing.  This attribute is only populated if the ``collate``
-	    option is set to False.
-	coadd_frames : dict of G3Frames
-	    Output coadd map frames, keyed by input map Id.  Each frame is also
-	    injected into the pipeline on EndProcessing.  This attribute is only
-	    populated if the ``collate`` option is set to True.
-	
-*Methods:*
-	get_map_id :
-	    Takes a map frame as an argument and returns an identifier string for
-	    the coadd to which it should be added, or None if the map should be
-	    ignored.  This method can be modified by subclassing the CoaddMaps
-	    module.
-	
-*Arguments:*
-	map_ids : list of str
-	    List of map Id's to include in the coadd(s).  If None, any maps in the
-	    pipeline are included.  Otherwise, the output of the ``get_map_ids``
-	    method is compared with this list, and the input frame is discarded if
-	    no match is found.
-	output_map_id : str
-	    Id to assign to the output frame.  If ``collate`` is True, this argument
-	    is required and treated as a prefix to which each input map Id is
-	    appended.
-	collate : bool
-	    If True, coadd unique map Id's into separate output map frames.
-	weighted : bool
-	    If True (default), ensure that maps have had weights applied before
-	    coadding.  Otherwise, coadd maps without checking the weights.
-	ignore_missing_weights : bool
-	    If False (default), a warning is issued when the frame contains weighted
-	    Stokes maps without a weights map.  Set this option to True when feeding
-	    single bolometer map frames with common weights through a pipeline.
-	drop_input_frames : bool
-	    If True, drop input map frames from the pipeline that are included in
-	    any coadds.
-	record_obs_id : bool
-	    If True, include source name and observation ID info in the output coadd
-	    frame ``InputMapIds`` key, along with the map ID for each input frame.
-	    If False, only the map frame ID is included.
-
 *Constructor:*
 	``CoaddMaps(map_ids=None, output_map_id='Coadd', collate=False, weighted=True, ignore_missing_weights=False, drop_input_frames=False, record_obs_id=False)``
+
+*Constructor:*
+	*Arguments:*
+		map_ids : list of str
+		    List of map Id's to include in the coadd(s).  If None, any maps in the
+		    pipeline are included.  Otherwise, the output of the ``get_map_ids``
+		    method is compared with this list, and the input frame is discarded if
+		    no match is found.
+		output_map_id : str
+		    Id to assign to the output frame.  If ``collate`` is True, this argument
+		    is required and treated as a prefix to which each input map Id is
+		    appended.
+		collate : bool
+		    If True, coadd unique map Id's into separate output map frames.
+		weighted : bool
+		    If True (default), ensure that maps have had weights applied before
+		    coadding.  Otherwise, coadd maps without checking the weights.
+		ignore_missing_weights : bool
+		    If False (default), a warning is issued when the frame contains weighted
+		    Stokes maps without a weights map.  Set this option to True when feeding
+		    single bolometer map frames with common weights through a pipeline.
+		drop_input_frames : bool
+		    If True, drop input map frames from the pipeline that are included in
+		    any coadds.
+		record_obs_id : bool
+		    If True, include source name and observation ID info in the output coadd
+		    frame ``InputMapIds`` key, along with the map ID for each input frame.
+		    If False, only the map frame ID is included.
 
 
 
@@ -2332,15 +2324,24 @@ Coadd map files, optionally collating map Id's into separate frames.
 
 Re-pixelize a map to Healpix from one of the flat projections.
 
+All additional keyword arguments are passed to HealpixSkyMap to construct
+the output map object.  Required if `map_stub` is not supplied,
+otherwise ignored.
+
+Maps can be rotated between Equatorial and Galactic coordinates, and/or
+change polarization convention between COSMO and IAU, by setting the
+appropriate attributes of the input and output maps.  Attributes not defined
+in the output map are assumed to be that of the input map.
+
 *Parameters:*
 	map_in: FlatSkyMap
 	    The input map you want to reproject
 	
-	map_stub[None]: HealpixSkyMap
+	map_stub: HealpixSkyMap
 	    Stub output map object to be used to construct the output map.  If not
 	    supplied, one will be constructed using the remaining keyword arguments.
 	
-	rebin[1]: int
+	rebin: int
 	    If supplied and >1, subdivide the output pixel by n x n with each 
 	    sub-pixel taking on the input map values at pixel center (with interp
 	    or nearest neighbor). The output pixel takes on the average of the sub-pixel
@@ -2352,23 +2353,14 @@ Re-pixelize a map to Healpix from one of the flat projections.
 	    aliased power from the input map from freq above the ouput map pixel's
 	    Nyquist. 
 	
-	interp[false]: bool
+	interp: bool
 	    If True, use bilinear interpolation to extract values from the input
 	    map.  Otherwise, the nearest-neighbor value is used.
 	
-	fullsky[false]: bool
+	fullsky: bool
 	    If True a full-sky numpy array representation of the map is returned.
 	    Otherwise, a HealpixSkyMap instance is returned, containing only the
 	    pixels that overlap with the input map.
-	
-	All additional keyword arguments are passed to HealpixSkyMap to construct
-	the output map object.  Required if `map_stub` is not supplied,
-	otherwise ignored.
-	
-	Maps can be rotated between Equatorial and Galactic coordinates, and/or
-	change polarization convention between COSMO and IAU, by setting the
-	appropriate attributes of the input and output maps.  Attributes not defined
-	in the output map are assumed to be that of the input map.
 	
 *Returns:*
 	output_map: numpy array or HealpixSkyMap
@@ -2387,19 +2379,31 @@ Re-pixelize a map to Healpix from one of the flat projections.
 
 Re-pixelize a map from Healpix to one of the flat sky projections.
 
+All additional keyword arguments are passed to FlatSkyMap to construct the
+output map object.  Required if `map_stub` is not supplied, otherwise
+ignored.
+
+Maps can be rotated between Equatorial and Galactic coordinates, and/or
+change polarization convention between COSMO and IAU, by setting the
+appropriate attributes of the input and output maps.  Note that if the input
+map is a numpy array representation of a healpix map, the coordinate system
+and polarization convention are assumed to be that of the output map.
+Conversely, attributes not defined in the output map are assumed to be
+that of the input map.
+
 *Parameters:*
 	map_in: numpy array or HealpixSkyMap
 	    The array containing the input healpix map to reproject.
 	
-	nest[False]: bool
+	nest: bool
 	    Ordering of the healpix map, if the input is a numpy array.  Ring
 	    ordering is assumed by default.
 	
-	map_stub[None]: FlatSkyMap
+	map_stub: FlatSkyMap
 	    Stub output map object to be used to construct the output map.  If not
 	    supplied, one will be constructed using the remaining keyword arguments.
 	
-	rebin[1]: int
+	rebin: int
 	    If supplied and >1, subdivide the output pixel by n x n with each 
 	    sub-pixel taking on the input map values at pixel center (with interp
 	    or nearest neighbor). The output pixel takes on the average of the sub-pixel
@@ -2411,22 +2415,10 @@ Re-pixelize a map from Healpix to one of the flat sky projections.
 	    aliased power from the input map from freq above the ouput map pixel's
 	    Nyquist. 
 	
-	interp[false]: bool
+	interp: bool
 	    If True, use bilinear interpolation to extract values from the 4 closest
 	    pixel centers of the healpix map. Otherwise, the nearest-neighbor value 
 	    is used.
-	
-	All additional keyword arguments are passed to FlatSkyMap to construct the
-	output map object.  Required if `map_stub` is not supplied, otherwise
-	ignored.
-	
-	Maps can be rotated between Equatorial and Galactic coordinates, and/or
-	change polarization convention between COSMO and IAU, by setting the
-	appropriate attributes of the input and output maps.  Note that if the input
-	map is a numpy array representation of a healpix map, the coordinate system
-	and polarization convention are assumed to be that of the output map.
-	Conversely, attributes not defined in the output map are assumed to be
-	that of the input map.
 	
 *Returns:*
 	output_map: FlatSkyMap

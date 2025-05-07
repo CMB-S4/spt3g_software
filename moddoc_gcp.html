@@ -412,11 +412,12 @@ None, add all.</p>
 </dd>
 </dl>
 <p><em>Equivalent to:</em></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="ne">Exception</span> <span class="n">evaluating</span> <span class="n">equivalence</span> <span class="p">(</span><span class="n">UpdateDB</span><span class="p">()</span> <span class="n">missing</span> <span class="mi">1</span> <span class="n">required</span> <span class="n">positional</span> <span class="n">argument</span><span class="p">:</span> <span class="s1">&#39;client&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">ARCExtract</span><span class="p">)</span>
+<span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">InfluxDB</span><span class="o">.</span><span class="n">WriteDB</span><span class="p">,</span> <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 </pre></div>
 </div>
 <dl class="simple">
-<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">UpdateDB(pipe,</span> <span class="pre">client,</span> <span class="pre">fields=None)</span></code></p>
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">UpdateDB(pipe,</span> <span class="pre">client=None,</span> <span class="pre">fields=None)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-gcp-influxdb-writedb"><strong>spt3g.gcp.InfluxDB.WriteDB</strong></p>

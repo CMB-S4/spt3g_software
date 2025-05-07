@@ -655,12 +655,13 @@ Update InfluxDB with data in frame
 
 .. code-block:: python
 
-    Exception evaluating equivalence (UpdateDB() missing 1 required positional argument: 'client')
+    pipe.Add(spt3g.gcp.ARCExtractor.ARCExtract)
+    pipe.Add(spt3g.gcp.InfluxDB.WriteDB, client=None, fields=None)
 
 
 
 *Definition:*
-        ``UpdateDB(pipe, client, fields=None)``
+        ``UpdateDB(pipe, client=None, fields=None)``
 
 
 

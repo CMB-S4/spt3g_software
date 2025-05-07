@@ -29,7 +29,133 @@ There is an experimental module (TOASTFiller) that uses MPIAccumulator to fill f
 
 Modules in spt3g.mpi
 ====================
+* spt3g.mpi.MPIAccumulator.MPIAccumulator_
+
+* spt3g.mpi.MPIFileIO.MPIFileReader_
+
+* spt3g.mpi.MPIFileIO.MPIFrameParallelizer_
+
 * spt3g.mpi.MPIFileIO.MPIIODistributor_
+
+
+.. _spt3g.mpi.MPIAccumulator.MPIAccumulator:
+
+**spt3g.mpi.MPIAccumulator.MPIAccumulator**
+
+Accumulate data from many frames in memory, sharing metadata for all the
+frames between nodes in an MPI communicator, potentially organized into
+groups (for example by observation ID).
+
+The result will be stored in the member variable 'fullobs' after
+pipeline termination. 'fullobs' is a dictionary containing entries
+for each data group (see the extractfunc parameter), which in turn
+are lists of 3-element tuples with the following content:
+
+- First element is the metadata for the frame (see extractfunc)
+- Second element is the node on which the full data exist
+- Third element is the data from the frame (see extractfunc)
+  or None if the data are on a remote process.
+
+*Constructor:*
+	``MPIAccumulator(mpicomm, extractfunc=None, sorter=None, dataframes=[spt3g.core.G3FrameType.Scan, spt3g.core.G3FrameType.Timepoint])``
+
+*Constructor:*
+	Data will be shared between nodes participating in the communicator
+	mpicomm. The data stored are based on frames of the types in the
+	dataframes argument and are organized based on the results of
+	``extractfunc`` and ``sorter``.
+	
+	``extractfunc`` is expected to return a three-element tuple:
+	
+	- First element is a group ID for the data (for example, an observation
+	  ID). This is used only for organization and can be anything that
+	  Python can compare. By default, this is SourceName-ObservationID.
+	- Second element is metadata. This information is shared between
+	  all processes participating in the communicator at completion and
+	  should include any information you need to assess whether the data
+	  are interesting for future calculations (for example, the start time
+	  of the frame). By default, frames are sorted by this value. None
+	  by default.
+	- Third element is the data. This stays node-local. It could be just
+	  a copy of the frame (the default) or just the information (in any
+	  format understandable to Python) from the frame you expect to use
+	  later.
+	
+	Note that ``extractfunc`` is called on all frame types (including
+	calibration data) but *only the results if it returns non-None values*
+	are stored. Thus, it is the responsibility of ``extractfunc`` to either
+	cache any applicable calibration, etc. information and store it in the
+	return value for data frames if needed or explicitly return a value
+	for calibration data, if needed. The default ``extractfunc`` saves only
+	the frames in the "dataframes" argument.
+	
+	``sorter`` is used, if defined, to sort the list of frame data in each
+	group. This is passed to the Python sorted() function as a 'key'
+	argument and receives the three-element tuple stored for each set of
+	frame data (metadata, node, data). By default, does no sorting
+	(frames will still appear in a common order across nodes related to
+	the data distribution if unsorted).
+
+
+
+
+.. _spt3g.mpi.MPIFileIO.MPIFileReader:
+
+**spt3g.mpi.MPIFileIO.MPIFileReader**
+
+Do parallel I/O and processing across an MPI communicator. The style of
+parallelism here is that each process in the communicator gets a file, reads
+the file, and processes the file. Supports shared files, which are read
+from the lead process and then broadcasted to the others before they read
+their own.
+
+The list of files is specified as a list of lists. For example,
+['offline_calibration.g3', ['0000.g3', '0002.g3', '0003.g3']]
+will cause all nodes to process 'offline_calibration.g3' and then the
+remaining files (in the parallel block denoted by the nested list)
+will be read and processed by the remaining nodes in a distributed way.
+
+*Constructor:*
+	``MPIFileReader(mpicomm, files)``
+
+
+
+
+.. _spt3g.mpi.MPIFileIO.MPIFrameParallelizer:
+
+**spt3g.mpi.MPIFileIO.MPIFrameParallelizer**
+
+Do parallel I/O and processing across an MPI communicator. The style of
+parallelism here is that a set of IO processes read files from disk
+and distribute frames round-robin-style across a worker communicator.
+Frames will arrive in order on each process, with gaps between time
+segments, but no guarantees are made about relative order between
+processes. All CPU nodes receive all metadata frames.
+
+Rules to make this work:
+- First module on IO nodes must be MPIFileReader
+- Second module on IO nodes must be DeduplicateMetadata
+- Third module on IO nodes, first on workers, must be MPIFrameParallelizer
+
+You may want to use the MPIIODistributor pipe segment to make sure these
+rules are followed.
+
+*Constructor:*
+	``MPIFrameParallelizer(iocomm, cpucomm, cpucomm_startrank, dataframetype=[spt3g.core.G3FrameType.Timepoint, spt3g.core.G3FrameType.Scan])``
+
+*Constructor:*
+	Parellizes a frame stream across a communicator, distributing frames
+	from M IO processes that are reading them to N CPU processes that
+	are analyzing them. iocomm is a communicator containing exactly the
+	set of IO nodes. cpucomm is a communicator containing (at least)
+	all the IO and all the CPU nodes that the IO and CPU nodes can use
+	to communicate with each other. The set of CPU nodes is the set of
+	processes in cpucomm with rank greater than or equal to
+	cpucomm_startrank. All frame types other than those in dataframetype
+	appear on all CPU nodes, while frames of types in dataframetype
+	are processed only by a single (random) CPU node.
+
+
 
 
 .. _spt3g.mpi.MPIFileIO.MPIIODistributor:

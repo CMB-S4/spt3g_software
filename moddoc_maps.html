@@ -683,7 +683,6 @@ This class cannot be instantiated from Python</p>
 <li><p><a class="reference internal" href="#spt3g-maps-quathelpers-addtimingtopointingquats">spt3g.maps.quathelpers.AddTimingToPointingQuats</a></p></li>
 </ul>
 <p id="spt3g-maps-hitsbinner"><strong>spt3g.maps.HitsBinner</strong></p>
-<p>HitsBinner(map_id, stub_map, pointing, timestreams, bolo_properties_name=”BolometerProperties”, map_per_scan=False)</p>
 <p>Bins up pointing for a set of channels into a hits map with properties (projection, etc.)
 specified by the stub_map argument.</p>
 <dl>
@@ -717,12 +716,17 @@ the current Scan; if False, the binner will continue accumulating data.</p>
 </dd>
 </dl>
 </dd>
-<dt><em>Emits:</em></dt><dd><p>Emits a frame of type Map at the end of processing containing the output
-map:</p>
-<p>Frame (Map) [
-“Id” (spt3g.core.G3String) =&gt; “ra0hdec-57.5-150GHz”
-“H” (spt3g.maps.FlatSkyMap) =&gt; 2700 x 1500 (45 x 25 deg) ZEA centered at (1350, 749.5) = (0, -57.5 deg) in equatorial coordinates  (Tcmb)
-]</p>
+<dt><em>Returns:</em></dt><dd><dl>
+<dt>frame: G3Frame</dt><dd><p>A frame of type Map at the end of processing containing the output map:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Frame</span> <span class="p">(</span><span class="n">Map</span><span class="p">)</span> <span class="p">[</span>
+    <span class="s2">&quot;Id&quot;</span> <span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">G3String</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="s2">&quot;ra0hdec-57.5-150GHz&quot;</span>
+    <span class="s2">&quot;H&quot;</span> <span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">maps</span><span class="o">.</span><span class="n">FlatSkyMap</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="mi">2700</span> <span class="n">x</span> <span class="mi">1500</span> <span class="p">(</span><span class="mi">45</span> <span class="n">x</span> <span class="mi">25</span> <span class="n">deg</span><span class="p">)</span> <span class="n">ZEA</span> <span class="n">centered</span>
+<span class="n">at</span> <span class="p">(</span><span class="mi">1350</span><span class="p">,</span> <span class="mf">749.5</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">57.5</span> <span class="n">deg</span><span class="p">)</span> <span class="ow">in</span> <span class="n">equatorial</span> <span class="n">coordinates</span>  <span class="p">(</span><span class="n">Tcmb</span><span class="p">)</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</dd>
+</dl>
 </dd>
 <dt><em>See Also:</em></dt><dd><dl class="simple">
 <dt>MapBinner, SingleDetectorMapBinner, SingleDetectorBoresightBinner :</dt><dd><p>Alternative map binners.</p>
@@ -745,7 +749,6 @@ map:</p>
 </dd>
 </dl>
 <p id="spt3g-maps-mapbinner"><strong>spt3g.maps.MapBinner</strong></p>
-<p>MapBinner(map_id, stub_map, pointing, timestreams, detector_weights, bolo_properties_name=”BolometerProperties”, store_weight_map=True, map_per_scan=False)</p>
 <p>Bins up timestreams into a map with properties (projection, etc.) specified
 by the stub_map argument.</p>
 <dl>
@@ -794,22 +797,29 @@ the current Scan; if False, the binner will continue accumulating data.</p>
 </dd>
 </dl>
 </dd>
-<dt><em>Emits:</em></dt><dd><p>Emits a frame of type Map at the end of processing containing the output
-map:</p>
-<p>Frame (Map) [
-“Id” (spt3g.core.G3String) =&gt; “ra0hdec-57.5-150GHz”
-“T” (spt3g.maps.FlatSkyMap) =&gt; 2700 x 1500 (45 x 25 deg) ZEA centered at (1350, 749.5) = (0, -57.5 deg) in equatorial coordinates  (Tcmb)
-“Q” (spt3g.maps.FlatSkyMap) =&gt; 2700 x 1500 (45 x 25 deg) ZEA centered at (1350, 749.5) = (0, -57.5 deg) in equatorial coordinates  (Tcmb)
-“U” (spt3g.maps.FlatSkyMap) =&gt; 2700 x 1500 (45 x 25 deg) ZEA centered at (1350, 749.5) = (0, -57.5 deg) in equatorial coordinates  (Tcmb)
-“Wpol” (spt3g.maps.G3SkyMapWeights) =&gt; G3SkyMapWeights
-]</p>
+<dt><em>Returns:</em></dt><dd><dl>
+<dt>frame: G3Frame</dt><dd><p>A frame of type Map at the end of processing containing the output map:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Frame</span> <span class="p">(</span><span class="n">Map</span><span class="p">)</span> <span class="p">[</span>
+    <span class="s2">&quot;Id&quot;</span> <span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">G3String</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="s2">&quot;ra0hdec-57.5-150GHz&quot;</span>
+    <span class="s2">&quot;T&quot;</span> <span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">maps</span><span class="o">.</span><span class="n">FlatSkyMap</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="mi">2700</span> <span class="n">x</span> <span class="mi">1500</span> <span class="p">(</span><span class="mi">45</span> <span class="n">x</span> <span class="mi">25</span> <span class="n">deg</span><span class="p">)</span> <span class="n">ZEA</span> <span class="n">centered</span>
+<span class="n">at</span> <span class="p">(</span><span class="mi">1350</span><span class="p">,</span> <span class="mf">749.5</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">57.5</span> <span class="n">deg</span><span class="p">)</span> <span class="ow">in</span> <span class="n">equatorial</span> <span class="n">coordinates</span>  <span class="p">(</span><span class="n">Tcmb</span><span class="p">)</span>
+    <span class="s2">&quot;Q&quot;</span> <span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">maps</span><span class="o">.</span><span class="n">FlatSkyMap</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="mi">2700</span> <span class="n">x</span> <span class="mi">1500</span> <span class="p">(</span><span class="mi">45</span> <span class="n">x</span> <span class="mi">25</span> <span class="n">deg</span><span class="p">)</span> <span class="n">ZEA</span> <span class="n">centered</span>
+<span class="n">at</span> <span class="p">(</span><span class="mi">1350</span><span class="p">,</span> <span class="mf">749.5</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">57.5</span> <span class="n">deg</span><span class="p">)</span> <span class="ow">in</span> <span class="n">equatorial</span> <span class="n">coordinates</span>  <span class="p">(</span><span class="n">Tcmb</span><span class="p">)</span>
+    <span class="s2">&quot;U&quot;</span> <span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">maps</span><span class="o">.</span><span class="n">FlatSkyMap</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="mi">2700</span> <span class="n">x</span> <span class="mi">1500</span> <span class="p">(</span><span class="mi">45</span> <span class="n">x</span> <span class="mi">25</span> <span class="n">deg</span><span class="p">)</span> <span class="n">ZEA</span> <span class="n">centered</span>
+<span class="n">at</span> <span class="p">(</span><span class="mi">1350</span><span class="p">,</span> <span class="mf">749.5</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">57.5</span> <span class="n">deg</span><span class="p">)</span> <span class="ow">in</span> <span class="n">equatorial</span> <span class="n">coordinates</span>  <span class="p">(</span><span class="n">Tcmb</span><span class="p">)</span>
+    <span class="s2">&quot;Wpol&quot;</span> <span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">maps</span><span class="o">.</span><span class="n">G3SkyMapWeights</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="n">G3SkyMapWeights</span>
+<span class="p">]</span>
+</pre></div>
+</div>
 <p>For unpolarized maps, the “Q” and “U” outputs will be absent and the
 “Wpol” frame object will be named “Wunpol”.</p>
+</dd>
+</dl>
 </dd>
 <dt><em>See Also:</em></dt><dd><dl class="simple">
 <dt>SingleDetectorMapBinner, SingleDetectorBoresightBinner :</dt><dd><p>Alternative map binners for making single-detector maps.</p>
 </dd>
-<dt>MapMockObserver :</dt><dd><p>The inverse of this module. Produces timestreams from aninput map.</p>
+<dt>MapMockObserver :</dt><dd><p>The inverse of this module. Produces timestreams from an input map.</p>
 </dd>
 <dt>FlatSkyMap, HealpixSkyMap :</dt><dd><p>Possible output types.</p>
 </dd>
@@ -830,7 +840,6 @@ map:</p>
 </dd>
 </dl>
 <p id="spt3g-maps-mapmockobserver"><strong>spt3g.maps.MapMockObserver</strong></p>
-<p>MapMockObserver(pointing, timestreams, band, T, Q=None, U=None, bolo_properties_name=”BolometerProperties”, interp=False)</p>
 <p>Creates a new set of timestreams by sampling from an input map.</p>
 <dl>
 <dt><em>Parameters:</em></dt><dd><dl class="simple">
@@ -892,7 +901,6 @@ this to happen without comment.</p>
 </dd>
 </dl>
 <p id="spt3g-maps-maptodpointing"><strong>spt3g.maps.MapTODPointing</strong></p>
-<p>MapTODPointing(pointing, timestreams, stub_map, tod_pointing, bolo_properties_name=”BolometerProperties”)</p>
 <p>Compute pixel pointing for timestreams for a map with properties (projection, etc.) specified
 by the stub_map argument.</p>
 <p>The outputs of this module are identical to internally-calculated quantities in the map maker
@@ -919,14 +927,21 @@ alternative values.</p>
 </dd>
 </dl>
 </dd>
-<dt><em>Emits:</em></dt><dd><p>Adds a new key to every Scan frame containing the output pointing data:</p>
-<p>Frame (Scan) [
-…
-“OnlineRaDecRotation” (spt3g.core.G3TimestreamQuat) =&gt; 15716 quaternions at 152.6 Hz
-“RawTimestreams_I” (spt3g.core.G3TimestreamMap) =&gt; Timestreams from 14112 detectors
-“TodPointing” (spt3g.core.G3MapVectorInt) =&gt; 14112 elements
-…
-]</p>
+<dt><em>Returns:</em></dt><dd><dl>
+<dt>frame: G3Frame</dt><dd><p>Adds a new key to every Scan frame containing the output pointing data:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Frame</span> <span class="p">(</span><span class="n">Scan</span><span class="p">)</span> <span class="p">[</span>
+    <span class="o">...</span>
+    <span class="s2">&quot;OnlineRaDecRotation&quot;</span> <span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">G3TimestreamQuat</span><span class="p">)</span> <span class="o">=&gt;</span>
+<span class="mi">15716</span> <span class="n">quaternions</span> <span class="n">at</span> <span class="mf">152.6</span> <span class="n">Hz</span>
+    <span class="s2">&quot;RawTimestreams_I&quot;</span> <span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">G3TimestreamMap</span><span class="p">)</span> <span class="o">=&gt;</span>
+<span class="n">Timestreams</span> <span class="kn">from</span> <span class="mi">14112</span> <span class="n">detectors</span>
+    <span class="s2">&quot;TodPointing&quot;</span> <span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">G3MapVectorInt</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="mi">14112</span> <span class="n">elements</span>
+    <span class="o">...</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</dd>
+</dl>
 </dd>
 <dt><em>See Also:</em></dt><dd><dl class="simple">
 <dt>MapTODMasker :</dt><dd><p>Projection of sky masks to detector timestreams.</p>
@@ -953,17 +968,14 @@ alternative values.</p>
 </dd>
 </dl>
 <p id="spt3g-maps-singledetectorboresightbinner"><strong>spt3g.maps.SingleDetectorBoresightBinner</strong></p>
-<p>SingleDetectorBoresightBinner(stub_map, pointing, timestreams)</p>
 <p>Makes simple binned maps of the sky, in boresight coordinates, for every
 detector present in the given timestreams. This module is intended for use
 when making maps for detector-pointing calibration.</p>
 <dl>
 <dt><em>Parameters:</em></dt><dd><dl class="simple">
-<dt>stub_map<span class="classifier">G3SkyMap</span></dt><dd><dl class="simple">
-<dt>Template of the map in which to accumulate timestream data. All</dt><dd><p>parameters of the output map (projection, boundaries, pixel size, etc.)
+<dt>stub_map<span class="classifier">G3SkyMap</span></dt><dd><p>Template of the map in which to accumulate timestream data. All
+parameters of the output map (projection, boundaries, pixel size, etc.)
 are copied from this map, which is not modified.</p>
-</dd>
-</dl>
 </dd>
 <dt>pointing<span class="classifier">string (frame object G3VectorQuat or G3TimestreamQuat)</span></dt><dd><p>Name of a frame object containing the boresight pointing quaternion
 timestream. Must have the same number of elements as the data in
@@ -977,21 +989,28 @@ weight/hit map, the set of detectors in every scan must be identical.</p>
 </dd>
 </dl>
 </dd>
-<dt><em>Emits:</em></dt><dd><p>At the end of processing, emits one frame of type Map for each detector
+<dt><em>Returns:</em></dt><dd><dl>
+<dt>frames: G3Frame</dt><dd><p>At the end of processing, emits one frame of type Map for each detector
 containing the corresponding map. The “Id” property of the output frames
 gives the detector ID to which the map corresponds. Because the maps are
 unweighted (weights don’t make sense for single-detector maps) and the
 effective pointing for all detectors is identical, the weight/hit map is
 identical for all detectors and is stored only in the first output frame.</p>
-<p>Frame (Map) [
-“Id” (spt3g.core.G3String) =&gt; “2019.000”
-“T” (spt3g.maps.FlatSkyMap) =&gt; 360 x 360 (3 x 3 deg) ZEA centered at (179.5, 179.5) = (0, 0 deg) in local coordinates  (Power)
-“Wunpol” (spt3g.maps.G3SkyMapWeights) =&gt; G3SkyMapWeights
-]
-Frame (Map) [
-“Id” (spt3g.core.G3String) =&gt; “2019.005”
-“T” (spt3g.maps.FlatSkyMap) =&gt; 360 x 360 (3 x 3 deg) ZEA centered at (179.5, 179.5) = (0, 0 deg) in local coordinates  (Power)
-]</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Frame</span> <span class="p">(</span><span class="n">Map</span><span class="p">)</span> <span class="p">[</span>
+    <span class="s2">&quot;Id&quot;</span> <span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">G3String</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="s2">&quot;2019.000&quot;</span>
+    <span class="s2">&quot;T&quot;</span> <span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">maps</span><span class="o">.</span><span class="n">FlatSkyMap</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="mi">360</span> <span class="n">x</span> <span class="mi">360</span> <span class="p">(</span><span class="mi">3</span> <span class="n">x</span> <span class="mi">3</span> <span class="n">deg</span><span class="p">)</span> <span class="n">ZEA</span> <span class="n">centered</span>
+<span class="n">at</span> <span class="p">(</span><span class="mf">179.5</span><span class="p">,</span> <span class="mf">179.5</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span> <span class="n">deg</span><span class="p">)</span> <span class="ow">in</span> <span class="n">local</span> <span class="n">coordinates</span>  <span class="p">(</span><span class="n">Power</span><span class="p">)</span>
+    <span class="s2">&quot;Wunpol&quot;</span> <span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">maps</span><span class="o">.</span><span class="n">G3SkyMapWeights</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="n">G3SkyMapWeights</span>
+<span class="p">]</span>
+<span class="n">Frame</span> <span class="p">(</span><span class="n">Map</span><span class="p">)</span> <span class="p">[</span>
+    <span class="s2">&quot;Id&quot;</span> <span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">G3String</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="s2">&quot;2019.005&quot;</span>
+    <span class="s2">&quot;T&quot;</span> <span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">maps</span><span class="o">.</span><span class="n">FlatSkyMap</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="mi">360</span> <span class="n">x</span> <span class="mi">360</span> <span class="p">(</span><span class="mi">3</span> <span class="n">x</span> <span class="mi">3</span> <span class="n">deg</span><span class="p">)</span> <span class="n">ZEA</span> <span class="n">centered</span>
+<span class="n">at</span> <span class="p">(</span><span class="mf">179.5</span><span class="p">,</span> <span class="mf">179.5</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span> <span class="n">deg</span><span class="p">)</span> <span class="ow">in</span> <span class="n">local</span> <span class="n">coordinates</span>  <span class="p">(</span><span class="n">Power</span><span class="p">)</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</dd>
+</dl>
 </dd>
 <dt><em>See Also:</em></dt><dd><dl class="simple">
 <dt>SingleDetectorMapBinner :</dt><dd><p>Produces single-detector maps, but in sky coordinates,
@@ -1153,25 +1172,9 @@ combining this module with a G3Reader whose <code class="docutils literal notran
 to True; however, this feature is fragile and may not work as expected with
 complex pipelines.</p>
 <dl class="simple">
-<dt><em>Attributes:</em></dt><dd><dl class="simple">
-<dt>coadd_frame<span class="classifier">G3Frame</span></dt><dd><p>Output coadd map frame, also injected into the pipeline on
-EndProcessing.  This attribute is only populated if the <code class="docutils literal notranslate"><span class="pre">collate</span></code>
-option is set to False.</p>
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">CoaddMaps(map_ids=None,</span> <span class="pre">output_map_id='Coadd',</span> <span class="pre">collate=False,</span> <span class="pre">weighted=True,</span> <span class="pre">ignore_missing_weights=False,</span> <span class="pre">drop_input_frames=False,</span> <span class="pre">record_obs_id=False)</span></code></p>
 </dd>
-<dt>coadd_frames<span class="classifier">dict of G3Frames</span></dt><dd><p>Output coadd map frames, keyed by input map Id.  Each frame is also
-injected into the pipeline on EndProcessing.  This attribute is only
-populated if the <code class="docutils literal notranslate"><span class="pre">collate</span></code> option is set to True.</p>
-</dd>
-</dl>
-</dd>
-<dt><em>Methods:</em></dt><dd><dl class="simple">
-<dt>get_map_id :</dt><dd><p>Takes a map frame as an argument and returns an identifier string for
-the coadd to which it should be added, or None if the map should be
-ignored.  This method can be modified by subclassing the CoaddMaps
-module.</p>
-</dd>
-</dl>
-</dd>
+<dt><em>Constructor:</em></dt><dd><dl class="simple">
 <dt><em>Arguments:</em></dt><dd><dl class="simple">
 <dt>map_ids<span class="classifier">list of str</span></dt><dd><p>List of map Id’s to include in the coadd(s).  If None, any maps in the
 pipeline are included.  Otherwise, the output of the <code class="docutils literal notranslate"><span class="pre">get_map_ids</span></code>
@@ -1200,7 +1203,7 @@ If False, only the map frame ID is included.</p>
 </dd>
 </dl>
 </dd>
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">CoaddMaps(map_ids=None,</span> <span class="pre">output_map_id='Coadd',</span> <span class="pre">collate=False,</span> <span class="pre">weighted=True,</span> <span class="pre">ignore_missing_weights=False,</span> <span class="pre">drop_input_frames=False,</span> <span class="pre">record_obs_id=False)</span></code></p>
+</dl>
 </dd>
 </dl>
 <p id="spt3g-maps-map-modules-compactmaps"><strong>spt3g.maps.map_modules.CompactMaps</strong></p>
@@ -1712,14 +1715,21 @@ keyed by Id.  Otherwise, returns a single map frame.</p>
 </dl>
 <p id="spt3g-maps-maputils-flatsky-to-healpix"><strong>spt3g.maps.maputils.flatsky_to_healpix</strong></p>
 <p>Re-pixelize a map to Healpix from one of the flat projections.</p>
-<dl>
+<p>All additional keyword arguments are passed to HealpixSkyMap to construct
+the output map object.  Required if <cite>map_stub</cite> is not supplied,
+otherwise ignored.</p>
+<p>Maps can be rotated between Equatorial and Galactic coordinates, and/or
+change polarization convention between COSMO and IAU, by setting the
+appropriate attributes of the input and output maps.  Attributes not defined
+in the output map are assumed to be that of the input map.</p>
+<dl class="simple">
 <dt><em>Parameters:</em></dt><dd><dl class="simple">
 <dt>map_in: FlatSkyMap</dt><dd><p>The input map you want to reproject</p>
 </dd>
-<dt>map_stub[None]: HealpixSkyMap</dt><dd><p>Stub output map object to be used to construct the output map.  If not
+<dt>map_stub: HealpixSkyMap</dt><dd><p>Stub output map object to be used to construct the output map.  If not
 supplied, one will be constructed using the remaining keyword arguments.</p>
 </dd>
-<dt>rebin[1]: int</dt><dd><p>If supplied and &gt;1, subdivide the output pixel by n x n with each
+<dt>rebin: int</dt><dd><p>If supplied and &gt;1, subdivide the output pixel by n x n with each
 sub-pixel taking on the input map values at pixel center (with interp
 or nearest neighbor). The output pixel takes on the average of the sub-pixel
 values.
@@ -1730,21 +1740,14 @@ reduces aliasing compared with direct sampling. But there would still be
 aliased power from the input map from freq above the ouput map pixel’s
 Nyquist.</p>
 </dd>
-<dt>interp[false]: bool</dt><dd><p>If True, use bilinear interpolation to extract values from the input
+<dt>interp: bool</dt><dd><p>If True, use bilinear interpolation to extract values from the input
 map.  Otherwise, the nearest-neighbor value is used.</p>
 </dd>
-<dt>fullsky[false]: bool</dt><dd><p>If True a full-sky numpy array representation of the map is returned.
+<dt>fullsky: bool</dt><dd><p>If True a full-sky numpy array representation of the map is returned.
 Otherwise, a HealpixSkyMap instance is returned, containing only the
 pixels that overlap with the input map.</p>
 </dd>
 </dl>
-<p>All additional keyword arguments are passed to HealpixSkyMap to construct
-the output map object.  Required if <cite>map_stub</cite> is not supplied,
-otherwise ignored.</p>
-<p>Maps can be rotated between Equatorial and Galactic coordinates, and/or
-change polarization convention between COSMO and IAU, by setting the
-appropriate attributes of the input and output maps.  Attributes not defined
-in the output map are assumed to be that of the input map.</p>
 </dd>
 <dt><em>Returns:</em></dt><dd><dl class="simple">
 <dt>output_map: numpy array or HealpixSkyMap</dt><dd><p>The array containing the healpix map.  If <cite>fullsky</cite> is True, this is a
@@ -1757,32 +1760,6 @@ numpy array, otherwise a HealpixSkyMap instance.</p>
 </dl>
 <p id="spt3g-maps-maputils-healpix-to-flatsky"><strong>spt3g.maps.maputils.healpix_to_flatsky</strong></p>
 <p>Re-pixelize a map from Healpix to one of the flat sky projections.</p>
-<dl>
-<dt><em>Parameters:</em></dt><dd><dl class="simple">
-<dt>map_in: numpy array or HealpixSkyMap</dt><dd><p>The array containing the input healpix map to reproject.</p>
-</dd>
-<dt>nest[False]: bool</dt><dd><p>Ordering of the healpix map, if the input is a numpy array.  Ring
-ordering is assumed by default.</p>
-</dd>
-<dt>map_stub[None]: FlatSkyMap</dt><dd><p>Stub output map object to be used to construct the output map.  If not
-supplied, one will be constructed using the remaining keyword arguments.</p>
-</dd>
-<dt>rebin[1]: int</dt><dd><p>If supplied and &gt;1, subdivide the output pixel by n x n with each
-sub-pixel taking on the input map values at pixel center (with interp
-or nearest neighbor). The output pixel takes on the average of the sub-pixel
-values.
-In the case that the input map has higher resolution than the output
-map (and that the input map is not low-pass filtered to remove
-information above the Nyquist freq. of the output map pixel), this
-reduces aliasing compared with direct sampling. But there would still be
-aliased power from the input map from freq above the ouput map pixel’s
-Nyquist.</p>
-</dd>
-<dt>interp[false]: bool</dt><dd><p>If True, use bilinear interpolation to extract values from the 4 closest
-pixel centers of the healpix map. Otherwise, the nearest-neighbor value
-is used.</p>
-</dd>
-</dl>
 <p>All additional keyword arguments are passed to FlatSkyMap to construct the
 output map object.  Required if <cite>map_stub</cite> is not supplied, otherwise
 ignored.</p>
@@ -1793,6 +1770,32 @@ map is a numpy array representation of a healpix map, the coordinate system
 and polarization convention are assumed to be that of the output map.
 Conversely, attributes not defined in the output map are assumed to be
 that of the input map.</p>
+<dl class="simple">
+<dt><em>Parameters:</em></dt><dd><dl class="simple">
+<dt>map_in: numpy array or HealpixSkyMap</dt><dd><p>The array containing the input healpix map to reproject.</p>
+</dd>
+<dt>nest: bool</dt><dd><p>Ordering of the healpix map, if the input is a numpy array.  Ring
+ordering is assumed by default.</p>
+</dd>
+<dt>map_stub: FlatSkyMap</dt><dd><p>Stub output map object to be used to construct the output map.  If not
+supplied, one will be constructed using the remaining keyword arguments.</p>
+</dd>
+<dt>rebin: int</dt><dd><p>If supplied and &gt;1, subdivide the output pixel by n x n with each
+sub-pixel taking on the input map values at pixel center (with interp
+or nearest neighbor). The output pixel takes on the average of the sub-pixel
+values.
+In the case that the input map has higher resolution than the output
+map (and that the input map is not low-pass filtered to remove
+information above the Nyquist freq. of the output map pixel), this
+reduces aliasing compared with direct sampling. But there would still be
+aliased power from the input map from freq above the ouput map pixel’s
+Nyquist.</p>
+</dd>
+<dt>interp: bool</dt><dd><p>If True, use bilinear interpolation to extract values from the 4 closest
+pixel centers of the healpix map. Otherwise, the nearest-neighbor value
+is used.</p>
+</dd>
+</dl>
 </dd>
 <dt><em>Returns:</em></dt><dd><dl class="simple">
 <dt>output_map: FlatSkyMap</dt><dd><p>The reprojected map</p>

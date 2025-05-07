@@ -1642,8 +1642,8 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <li><p><strong>bit_depth</strong>: Bit depth of FLAC compression used for this timestream.</p></li>
 <li><p><strong>elapsed</strong>: Compute elapsed time array for samples</p></li>
 <li><p><strong>times</strong>: Compute time vector for samples</p></li>
-<li><p><strong>shape</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>ndim</strong>: No Doc (Shame!)</p></li>
+<li><p><strong>shape</strong>: Numpy-compatible shape of this timestream</p></li>
+<li><p><strong>ndim</strong>: Numpy-compatible number of dimensions</p></li>
 <li><p><strong>dtype</strong>: No Doc (Shame!)</p></li>
 </ul>
 <p><em>Methods:</em></p>
@@ -1675,10 +1675,7 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <dt><em>Constructors:</em></dt><dd><dl class="simple">
 <dt><code class="docutils literal notranslate"><span class="pre">G3TimestreamMap(</span> <span class="pre">(G3TimestreamMap)arg2)</span></code> :</dt><dd><p>Copy constructor</p>
 </dd>
-</dl>
-<p><code class="docutils literal notranslate"><span class="pre">G3TimestreamMap()</span></code></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">G3TimestreamMap(</span> <span class="pre">(StringVector)keys,</span> <span class="pre">(object)data</span> <span class="pre">[,</span> <span class="pre">(G3Time)start=&lt;spt3g.core.G3Time</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7f833c8c19a0&gt;</span> <span class="pre">[,</span> <span class="pre">(G3Time)stop=&lt;spt3g.core.G3Time</span> <span class="pre">object</span> <span class="pre">at</span> <span class="pre">0x7f833c8c1a10&gt;</span> <span class="pre">[,</span> <span class="pre">(G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None</span> <span class="pre">[,</span> <span class="pre">(int)compression_level=0</span> <span class="pre">[,</span> <span class="pre">(bool)copy_data=True</span> <span class="pre">[,</span> <span class="pre">(int)bit_depth=32]]]]]])</span></code> :</dt><dd><p>Create a timestream map from a numpy array or other numeric python iterable. Each row of the 2D input array will correspond to a single timestream, with the key set to the correspondingly-indexed entry of &lt;keys&gt;. If &lt;copy_data&gt; is True (default), the data will be copied into the output data structure. If False, the timestream map will provide a view into the given numpy array.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">G3TimestreamMap(</span> <span class="pre">(StringVector)keys,</span> <span class="pre">(object)data</span> <span class="pre">[,</span> <span class="pre">(G3Time)start=spt3g.core.G3Time(0)</span> <span class="pre">[,</span> <span class="pre">(G3Time)stop=spt3g.core.G3Time(0)</span> <span class="pre">[,</span> <span class="pre">(G3TimestreamUnits)units=spt3g.core.G3TimestreamUnits.None</span> <span class="pre">[,</span> <span class="pre">(int)compression_level=0</span> <span class="pre">[,</span> <span class="pre">(bool)copy_data=True</span> <span class="pre">[,</span> <span class="pre">(int)bit_depth=32]]]]]])</span></code> :</dt><dd><p>Create a timestream map from a numpy array or other numeric python iterable. Each row of the 2D input array will correspond to a single timestream, with the key set to the correspondingly-indexed entry of &lt;keys&gt;. If &lt;copy_data&gt; is True (default), the data will be copied into the output data structure. If False, the timestream map will provide a view into the given numpy array.</p>
 </dd>
 <dt><code class="docutils literal notranslate"><span class="pre">G3TimestreamMap(</span> <span class="pre">(list)arg2)</span></code> :</dt><dd><p>Initialize with keys and values from a Python dictionary: {‘key’:’value’}</p>
 </dd>
@@ -1810,7 +1807,6 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 </dl>
 <p><code class="docutils literal notranslate"><span class="pre">G3TimestreamQuat()</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">G3TimestreamQuat(</span> <span class="pre">(object)arg2)</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">G3TimestreamQuat(</span> <span class="pre">(G3TimestreamQuat)arg2)</span></code></p>
 </dd>
 </dl>
 <p><em>Members:</em></p>
@@ -2104,11 +2100,11 @@ at their full rate.</p>
 </dd>
 </dl>
 <p id="spt3g-core-util-injectdebug"><strong>spt3g.core.util.InjectDebug</strong></p>
-<p>starts a pdb session when a frame of type shows up.</p>
-<p>The frame data is stored in the variable names “frame”.</p>
+<p>Starts a pdb session when a frame of type shows up.</p>
+<p>The frame data is stored in the variable named “frame”.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">debug_start_func</span></code> is not None, only starts a debug session when
+<code class="docutils literal notranslate"><span class="pre">debug_start_func(frame)</span> <span class="pre">==</span> <span class="pre">True</span></code>.</p>
 <dl class="simple">
-<dt>If debug_start_func is not None, only starts a debug session when</dt><dd><p>debug_start_func(frame) == True</p>
-</dd>
 <dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">InjectDebug(frame,</span> <span class="pre">type=None,</span> <span class="pre">debug_start_func=None)</span></code></p>
 </dd>
 </dl>
