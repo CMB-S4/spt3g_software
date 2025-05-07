@@ -376,7 +376,7 @@ def ValidateMaps(frame, ignore_missing_weights=False):
 class ExtractMaps(object):
     """
     Cache maps that come through the pipeline. Initialize an instance of this
-    module before adding to a pipeline..  Any maps that pass through the pipe
+    module before adding to a pipeline.  Any map frames that pass through the pipe
     are stored in the .maps attribute of the object after the pipeline is run.
 
     Arguments
@@ -395,7 +395,17 @@ class ExtractMaps(object):
         self.map_id = map_id
         self.copy_ = copy
         self.ignore_missing_weights = ignore_missing_weights
-        self.maps = {}
+
+    @property
+    def maps(self):
+        """
+        Dictionary of map frames, keyed by Id.  Map objects are extracted from each
+        frame in the pipeline, and stored as simple dictionaries.  Multiple frames
+        with the same Id will result in a list of dictionaries for that Id.
+        """
+        if not hasattr(self, "_maps"):
+            self._maps = {}
+        return self._maps
 
     def __call__(self, frame):
         if frame.type != core.G3FrameType.Map:

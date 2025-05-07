@@ -29,6 +29,7 @@ class AddMissingTimepoints(object):
         new_packets.append(frame)
         return new_packets
 
+@core.indexmod
 class FillMissingTimepointFrames(object):
     '''
     Search for Timepoint frames that come at larger-than-expected intervals.
