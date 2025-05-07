@@ -180,5 +180,6 @@ PYBINDINGS("core", scope) {
 	    .def(py::init<py::object, size_t, py::object, size_t>(), py::arg("filename"),
 	        py::arg("size_limit"), py::arg("divide_on")=py::none(),
 	        py::arg("buffersize")=1024*1024)
-	    .def_property_readonly("current_file", &G3MultiFileWriter::CurrentFile);
+	    .def_property_readonly("current_file", &G3MultiFileWriter::CurrentFile,
+		"Path to the output file to which the next input frame will be written");
 }

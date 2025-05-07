@@ -1392,8 +1392,10 @@ PYBINDINGS("core", scope) {
 	      "Compute time vector for samples")
 	    .def("__len__", &G3Timestream::size)
 	    .def_property_readonly("shape",
-	      [](G3Timestream &ts) { return py::make_tuple(ts.size()); })
-	    .def_property_readonly("ndim", [](G3Timestream &ts) { return 1; })
+	      [](G3Timestream &ts) { return py::make_tuple(ts.size()); },
+	      "Numpy-compatible shape of this timestream")
+	    .def_property_readonly("ndim", [](G3Timestream &ts) { return 1; },
+	      "Numpy-compatible number of dimensions")
 	;
 
 	register_map<G3TimestreamMap, G3FrameObject>(scope, "G3TimestreamMap",

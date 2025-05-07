@@ -61,13 +61,13 @@ class InjectFrame(object):
 
 @indexmod
 def InjectDebug(frame, type=None, debug_start_func = None):
-    '''starts a pdb session when a frame of type shows up.
+    '''Starts a pdb session when a frame of type shows up.
 
-    The frame data is stored in the variable names "frame".
+    The frame data is stored in the variable named "frame".
 
-    If debug_start_func is not None, only starts a debug session when 
-            debug_start_func(frame) == True
-        '''
+    If ``debug_start_func`` is not None, only starts a debug session when
+    ``debug_start_func(frame) == True``.
+    '''
     if type is None or frame.type == type:
         if ((debug_start_func is None) or debug_start_func(frame)):
             import pdb, rlcompleter

@@ -12,36 +12,6 @@ def healpix_to_flatsky(
     """
     Re-pixelize a map from Healpix to one of the flat sky projections.
 
-    Parameters:
-    -----------
-    map_in: numpy array or HealpixSkyMap
-        The array containing the input healpix map to reproject.
-
-    nest[False]: bool
-        Ordering of the healpix map, if the input is a numpy array.  Ring
-        ordering is assumed by default.
-
-    map_stub[None]: FlatSkyMap
-        Stub output map object to be used to construct the output map.  If not
-        supplied, one will be constructed using the remaining keyword arguments.
-
-    rebin[1]: int
-        If supplied and >1, subdivide the output pixel by n x n with each 
-        sub-pixel taking on the input map values at pixel center (with interp
-        or nearest neighbor). The output pixel takes on the average of the sub-pixel
-        values.
-        In the case that the input map has higher resolution than the output
-        map (and that the input map is not low-pass filtered to remove
-        information above the Nyquist freq. of the output map pixel), this
-        reduces aliasing compared with direct sampling. But there would still be
-        aliased power from the input map from freq above the ouput map pixel's
-        Nyquist. 
-
-    interp[false]: bool
-        If True, use bilinear interpolation to extract values from the 4 closest
-        pixel centers of the healpix map. Otherwise, the nearest-neighbor value 
-        is used.
-
     All additional keyword arguments are passed to FlatSkyMap to construct the
     output map object.  Required if `map_stub` is not supplied, otherwise
     ignored.
@@ -54,8 +24,38 @@ def healpix_to_flatsky(
     Conversely, attributes not defined in the output map are assumed to be
     that of the input map.
 
-    Returns:
-    --------
+    Parameters
+    ----------
+    map_in: numpy array or HealpixSkyMap
+        The array containing the input healpix map to reproject.
+
+    nest: bool
+        Ordering of the healpix map, if the input is a numpy array.  Ring
+        ordering is assumed by default.
+
+    map_stub: FlatSkyMap
+        Stub output map object to be used to construct the output map.  If not
+        supplied, one will be constructed using the remaining keyword arguments.
+
+    rebin: int
+        If supplied and >1, subdivide the output pixel by n x n with each 
+        sub-pixel taking on the input map values at pixel center (with interp
+        or nearest neighbor). The output pixel takes on the average of the sub-pixel
+        values.
+        In the case that the input map has higher resolution than the output
+        map (and that the input map is not low-pass filtered to remove
+        information above the Nyquist freq. of the output map pixel), this
+        reduces aliasing compared with direct sampling. But there would still be
+        aliased power from the input map from freq above the ouput map pixel's
+        Nyquist. 
+
+    interp: bool
+        If True, use bilinear interpolation to extract values from the 4 closest
+        pixel centers of the healpix map. Otherwise, the nearest-neighbor value 
+        is used.
+
+    Returns
+    -------
     output_map: FlatSkyMap
         The reprojected map
     """
@@ -97,16 +97,25 @@ def flatsky_to_healpix(
     """
     Re-pixelize a map to Healpix from one of the flat projections.
 
-    Parameters:
-    -----------
+    All additional keyword arguments are passed to HealpixSkyMap to construct
+    the output map object.  Required if `map_stub` is not supplied,
+    otherwise ignored.
+
+    Maps can be rotated between Equatorial and Galactic coordinates, and/or
+    change polarization convention between COSMO and IAU, by setting the
+    appropriate attributes of the input and output maps.  Attributes not defined
+    in the output map are assumed to be that of the input map.
+
+    Parameters
+    ----------
     map_in: FlatSkyMap
         The input map you want to reproject
 
-    map_stub[None]: HealpixSkyMap
+    map_stub: HealpixSkyMap
         Stub output map object to be used to construct the output map.  If not
         supplied, one will be constructed using the remaining keyword arguments.
 
-    rebin[1]: int
+    rebin: int
         If supplied and >1, subdivide the output pixel by n x n with each 
         sub-pixel taking on the input map values at pixel center (with interp
         or nearest neighbor). The output pixel takes on the average of the sub-pixel
@@ -118,26 +127,17 @@ def flatsky_to_healpix(
         aliased power from the input map from freq above the ouput map pixel's
         Nyquist. 
 
-    interp[false]: bool
+    interp: bool
         If True, use bilinear interpolation to extract values from the input
         map.  Otherwise, the nearest-neighbor value is used.
 
-    fullsky[false]: bool
+    fullsky: bool
         If True a full-sky numpy array representation of the map is returned.
         Otherwise, a HealpixSkyMap instance is returned, containing only the
         pixels that overlap with the input map.
 
-    All additional keyword arguments are passed to HealpixSkyMap to construct
-    the output map object.  Required if `map_stub` is not supplied,
-    otherwise ignored.
-
-    Maps can be rotated between Equatorial and Galactic coordinates, and/or
-    change polarization convention between COSMO and IAU, by setting the
-    appropriate attributes of the input and output maps.  Attributes not defined
-    in the output map are assumed to be that of the input map.
-
-    Returns:
-    --------
+    Returns
+    -------
     output_map: numpy array or HealpixSkyMap
         The array containing the healpix map.  If `fullsky` is True, this is a
         numpy array, otherwise a HealpixSkyMap instance.

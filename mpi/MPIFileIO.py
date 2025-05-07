@@ -1,6 +1,7 @@
 from .. import core
 import random
 
+@core.indexmod
 class MPIFileReader(object):
     '''
     Do parallel I/O and processing across an MPI communicator. The style of
@@ -48,6 +49,7 @@ class MPIFileReader(object):
                 self.cur_reader = None
         return out
 
+@core.indexmod
 class MPIFrameParallelizer(object):
     '''
     Do parallel I/O and processing across an MPI communicator. The style of

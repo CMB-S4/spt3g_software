@@ -589,53 +589,6 @@ class CoaddMaps(object):
     combining this module with a G3Reader whose ``track_filename`` option is set
     to True; however, this feature is fragile and may not work as expected with
     complex pipelines.
-
-    Attributes
-    ----------
-    coadd_frame : G3Frame
-        Output coadd map frame, also injected into the pipeline on
-        EndProcessing.  This attribute is only populated if the ``collate``
-        option is set to False.
-    coadd_frames : dict of G3Frames
-        Output coadd map frames, keyed by input map Id.  Each frame is also
-        injected into the pipeline on EndProcessing.  This attribute is only
-        populated if the ``collate`` option is set to True.
-
-    Methods
-    -------
-    get_map_id :
-        Takes a map frame as an argument and returns an identifier string for
-        the coadd to which it should be added, or None if the map should be
-        ignored.  This method can be modified by subclassing the CoaddMaps
-        module.
-
-    Arguments
-    ---------
-    map_ids : list of str
-        List of map Id's to include in the coadd(s).  If None, any maps in the
-        pipeline are included.  Otherwise, the output of the ``get_map_ids``
-        method is compared with this list, and the input frame is discarded if
-        no match is found.
-    output_map_id : str
-        Id to assign to the output frame.  If ``collate`` is True, this argument
-        is required and treated as a prefix to which each input map Id is
-        appended.
-    collate : bool
-        If True, coadd unique map Id's into separate output map frames.
-    weighted : bool
-        If True (default), ensure that maps have had weights applied before
-        coadding.  Otherwise, coadd maps without checking the weights.
-    ignore_missing_weights : bool
-        If False (default), a warning is issued when the frame contains weighted
-        Stokes maps without a weights map.  Set this option to True when feeding
-        single bolometer map frames with common weights through a pipeline.
-    drop_input_frames : bool
-        If True, drop input map frames from the pipeline that are included in
-        any coadds.
-    record_obs_id : bool
-        If True, include source name and observation ID info in the output coadd
-        frame ``InputMapIds`` key, along with the map ID for each input frame.
-        If False, only the map frame ID is included.
     """
 
     def __init__(
@@ -648,20 +601,73 @@ class CoaddMaps(object):
         drop_input_frames=False,
         record_obs_id=False,
     ):
+        """
+        Arguments
+        ---------
+        map_ids : list of str
+            List of map Id's to include in the coadd(s).  If None, any maps in the
+            pipeline are included.  Otherwise, the output of the ``get_map_ids``
+            method is compared with this list, and the input frame is discarded if
+            no match is found.
+        output_map_id : str
+            Id to assign to the output frame.  If ``collate`` is True, this argument
+            is required and treated as a prefix to which each input map Id is
+            appended.
+        collate : bool
+            If True, coadd unique map Id's into separate output map frames.
+        weighted : bool
+            If True (default), ensure that maps have had weights applied before
+            coadding.  Otherwise, coadd maps without checking the weights.
+        ignore_missing_weights : bool
+            If False (default), a warning is issued when the frame contains weighted
+            Stokes maps without a weights map.  Set this option to True when feeding
+            single bolometer map frames with common weights through a pipeline.
+        drop_input_frames : bool
+            If True, drop input map frames from the pipeline that are included in
+            any coadds.
+        record_obs_id : bool
+            If True, include source name and observation ID info in the output coadd
+            frame ``InputMapIds`` key, along with the map ID for each input frame.
+            If False, only the map frame ID is included.
+        """
         if isinstance(map_ids, str):
             map_ids = [map_ids]
         self.map_ids = map_ids
         self.collate = collate
         if self.collate:
-            self.coadd_frames = dict()
             self.output_map_id = output_map_id
         else:
-            self.coadd_frame = core.G3Frame(core.G3FrameType.Map)
             self.coadd_frame["Id"] = output_map_id
         self.weighted = weighted
         self.ignore_missing_weights = ignore_missing_weights
         self.drop_input_frames = drop_input_frames
         self.obs_id = None if record_obs_id else False
+
+    @property
+    def coadd_frame(self):
+        """
+        Output coadd map frame, also injected into the pipeline on
+        EndProcessing.  This attribute is only populated if the ``collate``
+        option is set to False.
+        """
+        if self.collate:
+            raise ValueError("Collation is enabled, use .coadd_frames instead.")
+        if not hasattr(self, "_coadd_frame"):
+            self._coadd_frame = core.G3Frame(core.G3FrameType.Map)
+        return self._coadd_frame
+
+    @property
+    def coadd_frames(self):
+        """
+        Dictionary of output coadd map frames, keyed by input map Id.  Each
+        frame is also injected into the pipeline on EndProcessing.  This
+        attribute is only populated if the ``collate`` option is set to True.
+        """
+        if not self.collate:
+            raise ValueError("Collation is disabled, use .coadd_frame instead.")
+        if not hasattr(self, "_coadd_frames"):
+            self._coadd_frames = dict()
+        return self._coadd_frames
 
     def get_map_id(self, frame):
         """
