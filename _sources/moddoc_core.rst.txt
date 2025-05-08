@@ -3232,6 +3232,8 @@ Functions in spt3g.core
 
 * spt3g.core.modconstruct.pipesegment_
 
+* spt3g.core.modconstruct.pipesegment_nodoc_
+
 * spt3g.core.modconstruct.usefulfunc_
 
 * spt3g.core.timestreamextensions.concatenate_timestreams_
@@ -3401,9 +3403,10 @@ Log a message for the given unit at level LOG_WARN.
 Set log level to the requested level. If unit is not None, set the
 log level for the given logging unit only.
 
-Example::
-
-    core.set_log_level(core.G3LogLevel.LOG_DEBUG, 'GCPMuxDataDecoder')
+*Example:*
+	::
+	
+	    core.set_log_level(core.G3LogLevel.LOG_DEBUG, 'GCPMuxDataDecoder')
 
 *Definition:*
         ``set_log_level(level, unit=None)``
@@ -3418,11 +3421,12 @@ Example::
 Mark argument as a processing module that can be found by automated
 documentation tools.
 
-For example::
-
-    @core.indexmod
-    def dostuff(frame):
-        dosomestuff()
+*Example:*
+	::
+	
+	    @core.indexmod
+	    def dostuff(frame):
+	        dosomestuff()
 
 *Definition:*
         ``indexmod(func)``
@@ -3435,32 +3439,69 @@ For example::
 **spt3g.core.modconstruct.pipesegment**
 
 Use as a decorator for a pre-assembled set of pipeline modules. Makes a
-pseudo-module consisting of several inputs. If autodoc is True (the
-default), will attempt to introspect the segment to find out what it
-does. Set this to False if your module does anything complicated.
+pseudo-module consisting of several inputs. Use this to introspect the
+segment to find out what it does, or use :func:`pipesegment_nodoc` if your
+module does anything complicated.
 
-For example::
-
-    @core.pipesegment
-    def standardfiltering(
-        pipe,
-        PolyOrder=4,
-        MaskedHighPassEll=6000,
-        Input='CalTimestreams',
-        Output='FilteredTimestreams',
-    ):
-        pipe.Add(analysis.PolyFilter, PolyOrder=PolyOrder, Input=Input,
-            Output='__Temp' + Output)
-        pipe.Add(analysis.MaskedHighPass, MaskedHighPassEll=MaskedHighPassEll,
-            Input='__Temp' + Output, Output=Output)
-        def cleanup(frame):
-            del frame['__Temp' + Output]
-        pipe.Add(cleanup)
-
-    pipe.Add(standardfiltering, PolyOrder=3)
+*Example:*
+	::
+	
+	    @core.pipesegment
+	    def standardfiltering(
+	        pipe,
+	        PolyOrder=4,
+	        MaskedHighPassEll=6000,
+	        Input='CalTimestreams',
+	        Output='FilteredTimestreams',
+	    ):
+	        pipe.Add(analysis.PolyFilter, PolyOrder=PolyOrder, Input=Input,
+	            Output='__Temp' + Output)
+	        pipe.Add(analysis.MaskedHighPass, MaskedHighPassEll=MaskedHighPassEll,
+	            Input='__Temp' + Output, Output=Output)
+	        def cleanup(frame):
+	            del frame['__Temp' + Output]
+	        pipe.Add(cleanup)
+	
+	    pipe.Add(standardfiltering, PolyOrder=3)
 
 *Definition:*
-        ``pipesegment(func, autodoc=True)``
+        ``pipesegment(func)``
+
+
+
+
+.. _spt3g.core.modconstruct.pipesegment_nodoc:
+
+**spt3g.core.modconstruct.pipesegment_nodoc**
+
+Use as a decorator for a pre-assembled set of pipeline modules. Makes a
+pseudo-module consisting of several inputs.  Use this variant instead of
+:class:`pipesegment` to avoid introspection if your pipeline does anything
+complicated.
+
+*Example:*
+	::
+	
+	    @core.pipesegment_nodoc
+	    def standardfiltering(
+	        pipe,
+	        PolyOrder=4,
+	        MaskedHighPassEll=6000,
+	        Input='CalTimestreams',
+	        Output='FilteredTimestreams',
+	    ):
+	        pipe.Add(analysis.PolyFilter, PolyOrder=PolyOrder, Input=Input,
+	            Output='__Temp' + Output)
+	        pipe.Add(analysis.MaskedHighPass, MaskedHighPassEll=MaskedHighPassEll,
+	            Input='__Temp' + Output, Output=Output)
+	        def cleanup(frame):
+	            del frame['__Temp' + Output]
+	        pipe.Add(cleanup)
+	
+	    pipe.Add(standardfiltering, PolyOrder=3)
+
+*Definition:*
+        ``pipesegment_nodoc(func)``
 
 
 
@@ -3472,11 +3513,12 @@ For example::
 Mark argument as a useful function that can be found by automated
 documentation tools.
 
-For example::
-
-    @core.usefulfunc
-    def do_some_science(data):
-        science(data)
+*Example:*
+	::
+	
+	    @core.usefulfunc
+	    def do_some_science(data):
+	        science(data)
 
 *Definition:*
         ``usefulfunc(func)``

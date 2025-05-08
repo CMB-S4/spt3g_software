@@ -2144,6 +2144,7 @@ at their full rate.</p>
 <li><p><a class="reference internal" href="#spt3g-core-g3logging-set-log-level">spt3g.core.g3logging.set_log_level</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-core-modconstruct-indexmod">spt3g.core.modconstruct.indexmod</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-core-modconstruct-pipesegment">spt3g.core.modconstruct.pipesegment</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-modconstruct-pipesegment-nodoc">spt3g.core.modconstruct.pipesegment_nodoc</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-core-modconstruct-usefulfunc">spt3g.core.modconstruct.usefulfunc</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-core-timestreamextensions-concatenate-timestreams">spt3g.core.timestreamextensions.concatenate_timestreams</a></p></li>
 </ul>
@@ -2243,34 +2244,34 @@ and raise a RuntimeError.</p>
 <p id="spt3g-core-g3logging-set-log-level"><strong>spt3g.core.g3logging.set_log_level</strong></p>
 <p>Set log level to the requested level. If unit is not None, set the
 log level for the given logging unit only.</p>
-<p>Example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">core</span><span class="o">.</span><span class="n">set_log_level</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">G3LogLevel</span><span class="o">.</span><span class="n">LOG_DEBUG</span><span class="p">,</span> <span class="s1">&#39;GCPMuxDataDecoder&#39;</span><span class="p">)</span>
+<dl>
+<dt><em>Example:</em></dt><dd><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">core</span><span class="o">.</span><span class="n">set_log_level</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">G3LogLevel</span><span class="o">.</span><span class="n">LOG_DEBUG</span><span class="p">,</span> <span class="s1">&#39;GCPMuxDataDecoder&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<dl class="simple">
+</dd>
 <dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">set_log_level(level,</span> <span class="pre">unit=None)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-core-modconstruct-indexmod"><strong>spt3g.core.modconstruct.indexmod</strong></p>
 <p>Mark argument as a processing module that can be found by automated
 documentation tools.</p>
-<p>For example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
+<dl>
+<dt><em>Example:</em></dt><dd><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
 <span class="k">def</span> <span class="nf">dostuff</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
     <span class="n">dosomestuff</span><span class="p">()</span>
 </pre></div>
 </div>
-<dl class="simple">
+</dd>
 <dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">indexmod(func)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-core-modconstruct-pipesegment"><strong>spt3g.core.modconstruct.pipesegment</strong></p>
 <p>Use as a decorator for a pre-assembled set of pipeline modules. Makes a
-pseudo-module consisting of several inputs. If autodoc is True (the
-default), will attempt to introspect the segment to find out what it
-does. Set this to False if your module does anything complicated.</p>
-<p>For example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@core</span><span class="o">.</span><span class="n">pipesegment</span>
+pseudo-module consisting of several inputs. Use this to introspect the
+segment to find out what it does, or use <code class="xref py py-func docutils literal notranslate"><span class="pre">pipesegment_nodoc()</span></code> if your
+module does anything complicated.</p>
+<dl>
+<dt><em>Example:</em></dt><dd><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@core</span><span class="o">.</span><span class="n">pipesegment</span>
 <span class="k">def</span> <span class="nf">standardfiltering</span><span class="p">(</span>
     <span class="n">pipe</span><span class="p">,</span>
     <span class="n">PolyOrder</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
@@ -2289,20 +2290,49 @@ does. Set this to False if your module does anything complicated.</p>
 <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">standardfiltering</span><span class="p">,</span> <span class="n">PolyOrder</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 </pre></div>
 </div>
-<dl class="simple">
-<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">pipesegment(func,</span> <span class="pre">autodoc=True)</span></code></p>
+</dd>
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">pipesegment(func)</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-core-modconstruct-pipesegment-nodoc"><strong>spt3g.core.modconstruct.pipesegment_nodoc</strong></p>
+<p>Use as a decorator for a pre-assembled set of pipeline modules. Makes a
+pseudo-module consisting of several inputs.  Use this variant instead of
+<code class="xref py py-class docutils literal notranslate"><span class="pre">pipesegment</span></code> to avoid introspection if your pipeline does anything
+complicated.</p>
+<dl>
+<dt><em>Example:</em></dt><dd><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@core</span><span class="o">.</span><span class="n">pipesegment_nodoc</span>
+<span class="k">def</span> <span class="nf">standardfiltering</span><span class="p">(</span>
+    <span class="n">pipe</span><span class="p">,</span>
+    <span class="n">PolyOrder</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">MaskedHighPassEll</span><span class="o">=</span><span class="mi">6000</span><span class="p">,</span>
+    <span class="n">Input</span><span class="o">=</span><span class="s1">&#39;CalTimestreams&#39;</span><span class="p">,</span>
+    <span class="n">Output</span><span class="o">=</span><span class="s1">&#39;FilteredTimestreams&#39;</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">analysis</span><span class="o">.</span><span class="n">PolyFilter</span><span class="p">,</span> <span class="n">PolyOrder</span><span class="o">=</span><span class="n">PolyOrder</span><span class="p">,</span> <span class="n">Input</span><span class="o">=</span><span class="n">Input</span><span class="p">,</span>
+        <span class="n">Output</span><span class="o">=</span><span class="s1">&#39;__Temp&#39;</span> <span class="o">+</span> <span class="n">Output</span><span class="p">)</span>
+    <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">analysis</span><span class="o">.</span><span class="n">MaskedHighPass</span><span class="p">,</span> <span class="n">MaskedHighPassEll</span><span class="o">=</span><span class="n">MaskedHighPassEll</span><span class="p">,</span>
+        <span class="n">Input</span><span class="o">=</span><span class="s1">&#39;__Temp&#39;</span> <span class="o">+</span> <span class="n">Output</span><span class="p">,</span> <span class="n">Output</span><span class="o">=</span><span class="n">Output</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
+        <span class="k">del</span> <span class="n">frame</span><span class="p">[</span><span class="s1">&#39;__Temp&#39;</span> <span class="o">+</span> <span class="n">Output</span><span class="p">]</span>
+    <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">cleanup</span><span class="p">)</span>
+
+<span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">standardfiltering</span><span class="p">,</span> <span class="n">PolyOrder</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">pipesegment_nodoc(func)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-core-modconstruct-usefulfunc"><strong>spt3g.core.modconstruct.usefulfunc</strong></p>
 <p>Mark argument as a useful function that can be found by automated
 documentation tools.</p>
-<p>For example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@core</span><span class="o">.</span><span class="n">usefulfunc</span>
+<dl>
+<dt><em>Example:</em></dt><dd><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@core</span><span class="o">.</span><span class="n">usefulfunc</span>
 <span class="k">def</span> <span class="nf">do_some_science</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
     <span class="n">science</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 </pre></div>
 </div>
-<dl class="simple">
+</dd>
 <dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">usefulfunc(func)</span></code></p>
 </dd>
 </dl>
