@@ -1,6 +1,7 @@
 from . import G3Module, G3Pipeline, G3PipelineInfo, G3Frame, G3FrameType, G3Time, G3ModuleConfig
 import types
 import re
+import textwrap
 
 
 def usefulfunc(func):
@@ -75,10 +76,10 @@ class pipesegment(metaclass=PipeSegmentDocstring):
         if hasattr(self, "_autodoc"):
             return self._autodoc
 
-        introdoc = getattr(self.func, "__doc__", None) or ""
+        introdoc = textwrap.dedent(getattr(self.func, "__doc__", "")) or ""
         if introdoc:
             introdoc += "\n\n"
-        introdoc += '\nEquivalent to::\n\n'
+        introdoc += '\nEquivalent to\n-------------\n\n::\n\n'
         doclines = []
         class PotemkinPipe(object):
             def Add(self, thing, *args, **kwargs):
