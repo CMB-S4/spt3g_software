@@ -216,8 +216,9 @@
 </ul>
 <p id="spt3g-gcp-arcextractor-arcextract"><strong>spt3g.gcp.ARCExtractor.ARCExtract</strong></p>
 <p>Extract GCP registers into native objects</p>
-<p>Equivalent to:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">CalibrateFrame</span><span class="p">)</span>
+<p><em>Equivalent to:</em></p>
+<blockquote>
+<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">CalibrateFrame</span><span class="p">)</span>
 <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UnpackACUData</span><span class="p">)</span>
 <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UnpackTrackerPointingData</span><span class="p">)</span>
 <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UpdateLinearSensorDeltas</span><span class="p">)</span>
@@ -230,21 +231,22 @@
 <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UnpackWeatherData</span><span class="p">)</span>
 </pre></div>
 </div>
+</div></blockquote>
 <dl class="simple">
 <dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">ARCExtract(pipe)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-gcp-arcextractor-arcextractminimal"><strong>spt3g.gcp.ARCExtractor.ARCExtractMinimal</strong></p>
-<blockquote>
-<div><p>Extract bare minimum GCP registers into native objects.</p>
+<p>Extract bare minimum GCP registers into native objects.</p>
 <p>Includes only GCPFeatureBits, SourceName and ObservationID keys.
 Use ARCExtract to calibrate and extract the complete frame.</p>
-</div></blockquote>
-<p>Equivalent to:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">DecryptFeatureBit</span><span class="p">)</span>
+<p><em>Equivalent to:</em></p>
+<blockquote>
+<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">DecryptFeatureBit</span><span class="p">)</span>
 <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UnpackTrackerMinimal</span><span class="p">)</span>
 </pre></div>
 </div>
+</div></blockquote>
 <dl class="simple">
 <dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">ARCExtractMinimal(pipe)</span></code></p>
 </dd>
@@ -412,25 +414,25 @@ application.</p>
 </dd>
 </dl>
 <p id="spt3g-gcp-influxdb-updatedb"><strong>spt3g.gcp.InfluxDB.UpdateDB</strong></p>
-<blockquote>
-<div><p>Update InfluxDB with data in frame</p>
-</div></blockquote>
-<dl>
-<dt><em>Arguments:</em></dt><dd><blockquote>
-<div><dl class="simple">
+<p>Update InfluxDB with data in frame</p>
+<dl class="simple">
+<dt><em>Arguments:</em></dt><dd><dl class="simple">
 <dt>client :</dt><dd><p>InfluxDB client</p>
 </dd>
 <dt>fields :</dt><dd><p>Which gcp fields to add to database. See parse_field for options. If
 None, add all.</p>
 </dd>
 </dl>
-</div></blockquote>
-<p>Equivalent to:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">ARCExtract</span><span class="p">)</span>
+</dd>
+</dl>
+<p><em>Equivalent to:</em></p>
+<blockquote>
+<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">ARCExtract</span><span class="p">)</span>
 <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">InfluxDB</span><span class="o">.</span><span class="n">WriteDB</span><span class="p">,</span> <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 </pre></div>
 </div>
-</dd>
+</div></blockquote>
+<dl class="simple">
 <dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">UpdateDB(pipe,</span> <span class="pre">client=None,</span> <span class="pre">fields=None)</span></code></p>
 </dd>
 </dl>

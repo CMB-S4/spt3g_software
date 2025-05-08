@@ -3127,14 +3127,16 @@ Prints frames to console. If optional type specified, only acts on frames of the
 
 **spt3g.core.util.G3NetworkReceiver**
 
-    Emulation of old G3NetworkReceiver class. Equivalent to pointing
-    G3Reader at a TCP URL.
+Emulation of old G3NetworkReceiver class. Equivalent to pointing
+G3Reader at a TCP URL.
 
 
 
-Equivalent to::
-
-    pipe.Add(spt3g.core.G3Reader, filename='tcp://localhost:5978')
+*Equivalent to:*
+	
+	::
+	
+	    pipe.Add(spt3g.core.G3Reader, filename='tcp://localhost:5978')
 
 
 *Definition:*
@@ -3415,14 +3417,16 @@ Example::
 
 **spt3g.core.modconstruct.G3NetworkReceiver**
 
-    Emulation of old G3NetworkReceiver class. Equivalent to pointing
-    G3Reader at a TCP URL.
+Emulation of old G3NetworkReceiver class. Equivalent to pointing
+G3Reader at a TCP URL.
 
 
 
-Equivalent to::
-
-    pipe.Add(spt3g.core.G3Reader, filename='tcp://localhost:5978')
+*Equivalent to:*
+	
+	::
+	
+	    pipe.Add(spt3g.core.G3Reader, filename='tcp://localhost:5978')
 
 *Definition:*
         ``G3NetworkReceiver(pipe, hostname='localhost', port=5978)``

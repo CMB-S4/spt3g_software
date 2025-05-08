@@ -299,19 +299,21 @@ Modules in spt3g.gcp
 Extract GCP registers into native objects
 
 
-Equivalent to::
-
-    pipe.Add(spt3g.gcp.ARCExtractor.CalibrateFrame)
-    pipe.Add(spt3g.gcp.ARCExtractor.UnpackACUData)
-    pipe.Add(spt3g.gcp.ARCExtractor.UnpackTrackerPointingData)
-    pipe.Add(spt3g.gcp.ARCExtractor.UpdateLinearSensorDeltas)
-    pipe.Add(spt3g.gcp.ARCExtractor.DecryptFeatureBit)
-    pipe.Add(spt3g.gcp.ARCExtractor.UnpackTrackerData)
-    pipe.Add(spt3g.gcp.ARCExtractor.AddBenchData)
-    pipe.Add(spt3g.gcp.ARCExtractor.UnpackCryoData)
-    pipe.Add(spt3g.gcp.ARCExtractor.UnpackPTData)
-    pipe.Add(spt3g.gcp.ARCExtractor.UnpackMuxData)
-    pipe.Add(spt3g.gcp.ARCExtractor.UnpackWeatherData)
+*Equivalent to:*
+	
+	::
+	
+	    pipe.Add(spt3g.gcp.ARCExtractor.CalibrateFrame)
+	    pipe.Add(spt3g.gcp.ARCExtractor.UnpackACUData)
+	    pipe.Add(spt3g.gcp.ARCExtractor.UnpackTrackerPointingData)
+	    pipe.Add(spt3g.gcp.ARCExtractor.UpdateLinearSensorDeltas)
+	    pipe.Add(spt3g.gcp.ARCExtractor.DecryptFeatureBit)
+	    pipe.Add(spt3g.gcp.ARCExtractor.UnpackTrackerData)
+	    pipe.Add(spt3g.gcp.ARCExtractor.AddBenchData)
+	    pipe.Add(spt3g.gcp.ARCExtractor.UnpackCryoData)
+	    pipe.Add(spt3g.gcp.ARCExtractor.UnpackPTData)
+	    pipe.Add(spt3g.gcp.ARCExtractor.UnpackMuxData)
+	    pipe.Add(spt3g.gcp.ARCExtractor.UnpackWeatherData)
 
 
 *Definition:*
@@ -323,17 +325,19 @@ Equivalent to::
 
 **spt3g.gcp.ARCExtractor.ARCExtractMinimal**
 
-    Extract bare minimum GCP registers into native objects.
+Extract bare minimum GCP registers into native objects.
 
-    Includes only GCPFeatureBits, SourceName and ObservationID keys.
-    Use ARCExtract to calibrate and extract the complete frame.
+Includes only GCPFeatureBits, SourceName and ObservationID keys.
+Use ARCExtract to calibrate and extract the complete frame.
 
 
 
-Equivalent to::
-
-    pipe.Add(spt3g.gcp.ARCExtractor.DecryptFeatureBit)
-    pipe.Add(spt3g.gcp.ARCExtractor.UnpackTrackerMinimal)
+*Equivalent to:*
+	
+	::
+	
+	    pipe.Add(spt3g.gcp.ARCExtractor.DecryptFeatureBit)
+	    pipe.Add(spt3g.gcp.ARCExtractor.UnpackTrackerMinimal)
 
 
 *Definition:*
@@ -649,18 +653,20 @@ For old (100d SPTpol) data not containing wiring information, insert a wiring ma
 
 **spt3g.gcp.InfluxDB.UpdateDB**
 
-    Update InfluxDB with data in frame
+Update InfluxDB with data in frame
 
 *Arguments:*
-	    client :
-	        InfluxDB client
-	    fields :
-	        Which gcp fields to add to database. See parse_field for options. If
-	        None, add all.
+	client :
+	    InfluxDB client
+	fields :
+	    Which gcp fields to add to database. See parse_field for options. If
+	    None, add all.
 	
 	
 	
-	Equivalent to::
+*Equivalent to:*
+	
+	::
 	
 	    pipe.Add(spt3g.gcp.ARCExtractor.ARCExtract)
 	    pipe.Add(spt3g.gcp.InfluxDB.WriteDB, client=None, fields=None)
