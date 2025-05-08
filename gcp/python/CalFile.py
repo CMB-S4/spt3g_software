@@ -2,7 +2,7 @@ from .. import core
 import os, time
 import numpy as np
 
-@core.indexmod
+@core.usefulfunc
 class CalFileReader(object):
     '''
     For now just reads a G3 calibration file and loads the contents into 
