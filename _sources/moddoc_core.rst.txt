@@ -3228,8 +3228,6 @@ Functions in spt3g.core
 
 * spt3g.core.g3logging.set_log_level_
 
-* spt3g.core.modconstruct.G3NetworkReceiver_
-
 * spt3g.core.modconstruct.indexmod_
 
 * spt3g.core.modconstruct.pipesegment_
@@ -3409,27 +3407,6 @@ Example::
 
 *Definition:*
         ``set_log_level(level, unit=None)``
-
-
-
-
-.. _spt3g.core.modconstruct.G3NetworkReceiver:
-
-**spt3g.core.modconstruct.G3NetworkReceiver**
-
-Emulation of old G3NetworkReceiver class. Equivalent to pointing
-G3Reader at a TCP URL.
-
-
-
-*Equivalent to:*
-	
-	::
-	
-	    pipe.Add(spt3g.core.G3Reader, filename='tcp://localhost:5978')
-
-*Definition:*
-        ``G3NetworkReceiver(pipe, hostname='localhost', port=5978)``
 
 
 
