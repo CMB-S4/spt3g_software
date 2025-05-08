@@ -78,7 +78,9 @@ def set_log_level(level, unit=None):
     Set log level to the requested level. If unit is not None, set the
     log level for the given logging unit only.
     
-    Example::
+    Example
+    -------
+    ::
 
         core.set_log_level(core.G3LogLevel.LOG_DEBUG, 'GCPMuxDataDecoder')
     '''

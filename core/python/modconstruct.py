@@ -9,7 +9,9 @@ def usefulfunc(func):
     Mark argument as a useful function that can be found by automated
     documentation tools.
 
-    For example::
+    Example
+    -------
+    ::
 
         @core.usefulfunc
         def do_some_science(data):
@@ -29,11 +31,13 @@ class PipeSegmentDocstring(type):
     def __doc__(cls):
         return '''
     Use as a decorator for a pre-assembled set of pipeline modules. Makes a
-    pseudo-module consisting of several inputs. If autodoc is True (the
-    default), will attempt to introspect the segment to find out what it
-    does. Set this to False if your module does anything complicated.
+    pseudo-module consisting of several inputs. Use this to introspect the
+    segment to find out what it does, or use :func:`pipesegment_nodoc` if your
+    module does anything complicated.
 
-    For example::
+    Example
+    -------
+    ::
 
         @core.pipesegment
         def standardfiltering(
@@ -57,22 +61,19 @@ class PipeSegmentDocstring(type):
 
 @usefulfunc
 class pipesegment(metaclass=PipeSegmentDocstring):
-    def __init__(self, func, autodoc=True):
+    def __init__(self, func):
         self.func = self.__wrapped__ = func
-        self._do_autodoc = autodoc
         self.__pipesegment__ = True
 
     def __call__(self, pipe, *args, **kwargs):
         return self.func(pipe, *args, **kwargs)
 
-    def autodoc(self):
+    @property
+    def __doc__(self):
         """
         Create a dummy pipeline for introspection.  Generates a docstring when
         the __doc__ attribute is accessed.
         """
-        if not self._do_autodoc:
-            self._autodoc = getattr(self.func, "__doc__", None)
-            return self._autodoc
         if hasattr(self, "_autodoc"):
             return self._autodoc
 
@@ -107,13 +108,42 @@ class pipesegment(metaclass=PipeSegmentDocstring):
         return self._autodoc
 
     @property
-    def __doc__(self):
-        self.autodoc()
-        return self._autodoc
-
-    @property
     def __name__(self):
         return self.func.__name__
+
+
+@usefulfunc
+def pipesegment_nodoc(func):
+    """
+    Use as a decorator for a pre-assembled set of pipeline modules. Makes a
+    pseudo-module consisting of several inputs.  Use this variant instead of
+    :class:`pipesegment` to avoid introspection if your pipeline does anything
+    complicated.
+
+    Example
+    -------
+    ::
+
+        @core.pipesegment_nodoc
+        def standardfiltering(
+            pipe,
+            PolyOrder=4,
+            MaskedHighPassEll=6000,
+            Input='CalTimestreams',
+            Output='FilteredTimestreams',
+        ):
+            pipe.Add(analysis.PolyFilter, PolyOrder=PolyOrder, Input=Input,
+                Output='__Temp' + Output)
+            pipe.Add(analysis.MaskedHighPass, MaskedHighPassEll=MaskedHighPassEll,
+                Input='__Temp' + Output, Output=Output)
+            def cleanup(frame):
+                del frame['__Temp' + Output]
+            pipe.Add(cleanup)
+
+        pipe.Add(standardfiltering, PolyOrder=3)
+    """
+    func.__pipesegment__ = True
+    return func
 
 
 @usefulfunc
@@ -122,7 +152,9 @@ def indexmod(func):
     Mark argument as a processing module that can be found by automated
     documentation tools.
 
-    For example::
+    Example
+    -------
+    ::
 
         @core.indexmod
         def dostuff(frame):
