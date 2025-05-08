@@ -167,6 +167,8 @@ def get_doc_for_module(module_path, include_link_list = True):
                 subclasstest = 'Boost.Python.function' in str(type(obj))
             except TypeError:
                 pass
+            if hasattr(obj, '__pipesegment__'):
+                continue
             if hasattr(obj, '__g3usefulfunc__') or subclasstest:
                 out_str = add_str(out_str, format_name(modname, x))
                 if format_doc(obj) is not None:
