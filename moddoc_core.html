@@ -2081,10 +2081,12 @@ original order.</p>
 </dd>
 </dl>
 <p id="spt3g-core-util-g3networkreceiver"><strong>spt3g.core.util.G3NetworkReceiver</strong></p>
-<p>Emulation of old G3NetworkReceiver class. Equivalent to pointing
+<blockquote>
+<div><p>Emulation of old G3NetworkReceiver class. Equivalent to pointing
 G3Reader at a TCP URL.</p>
-<p><em>Equivalent to:</em></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">G3Reader</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;tcp://localhost:5978&#39;</span><span class="p">)</span>
+</div></blockquote>
+<p>Equivalent to:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">G3Reader</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;tcp://localhost:5978&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <dl class="simple">
@@ -2129,8 +2131,195 @@ at their full rate.</p>
 <section id="functions-in-spt3g-core">
 <h2>Functions in spt3g.core<a class="headerlink" href="#functions-in-spt3g-core" title="Link to this heading">¶</a></h2>
 <ul class="simple">
+<li><p><a class="reference internal" href="#spt3g-core-fileio-g3file">spt3g.core.fileio.G3File</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3decorators-cache-frame-data">spt3g.core.g3decorators.cache_frame_data</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3decorators-scan-func-cache-data">spt3g.core.g3decorators.scan_func_cache_data</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3logging-log-debug">spt3g.core.g3logging.log_debug</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3logging-log-error">spt3g.core.g3logging.log_error</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3logging-log-fatal">spt3g.core.g3logging.log_fatal</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3logging-log-info">spt3g.core.g3logging.log_info</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3logging-log-notice">spt3g.core.g3logging.log_notice</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3logging-log-trace">spt3g.core.g3logging.log_trace</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3logging-log-warn">spt3g.core.g3logging.log_warn</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-g3logging-set-log-level">spt3g.core.g3logging.set_log_level</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-modconstruct-g3networkreceiver">spt3g.core.modconstruct.G3NetworkReceiver</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-modconstruct-indexmod">spt3g.core.modconstruct.indexmod</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-modconstruct-pipesegment">spt3g.core.modconstruct.pipesegment</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-core-modconstruct-usefulfunc">spt3g.core.modconstruct.usefulfunc</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-core-timestreamextensions-concatenate-timestreams">spt3g.core.timestreamextensions.concatenate_timestreams</a></p></li>
 </ul>
+<p id="spt3g-core-fileio-g3file"><strong>spt3g.core.fileio.G3File</strong></p>
+<p>Iterable class for G3 files, as created by G3Writer. Loop through frames by doing something like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">core</span><span class="o">.</span><span class="n">G3File</span><span class="p">(</span><span class="s2">&quot;/path/to/file.g3&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">frame</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>An entire file can also be read into an indexable list by doing:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">G3File</span><span class="p">(</span><span class="s2">&quot;/path/to/file.g3&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3File(path)</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-core-g3decorators-cache-frame-data"><strong>spt3g.core.g3decorators.cache_frame_data</strong></p>
+<p>This is a decorator for use with G3Modules written as functions.  It enables
+a function to use cached values from other types of frames in the processing
+of a frame.</p>
+<p>To make that confusing sentence clearer with an example, in a lot of cases
+we want to have a module that works on Scan frames, but have access to the
+BolometerProperties.  This decorator allows you to specify the information
+to cache.  This case looks like:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@core</span><span class="o">.</span><span class="n">cache_frame_data</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Scan</span><span class="p">,</span> <span class="n">bolo_props</span><span class="o">=</span><span class="s1">&#39;BolometerProperties&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">FlagSomeStuff</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">flag_key</span><span class="o">=</span><span class="s1">&#39;Flags&#39;</span><span class="p">,</span> <span class="n">bolo_props</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p>You specify the type of frame the function is operating on with the type
+argument.  Any additional keyword arguments specifies information to cache
+and send to the function.</p>
+<p>For the keyword args passed to the decorator having the format: Key = Value.
+Key specifies the name of the argument that we pass the infromation to in
+the decorated function.  If the decorated function is called with Key as an
+argument it will overwrite the value specified in the decorator.</p>
+<p>Value specifies the default path to look for the cached data.  It will
+search all of the frames that do not have the frame type ‘type’ for a key
+with that value.  This can be overridden when calling the decorated
+function.</p>
+<dl class="simple">
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">cache_frame_data(type,</span> <span class="pre">**kwargs)</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-core-g3decorators-scan-func-cache-data"><strong>spt3g.core.g3decorators.scan_func_cache_data</strong></p>
+<p>This is a simple wrapper around cache_frame_data where the type argument has been set to
+core.G3FrameType.Scan.</p>
+<dl class="simple">
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">scan_func_cache_data(**kwargs)</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-core-g3logging-log-debug"><strong>spt3g.core.g3logging.log_debug</strong></p>
+<p>Log a message for the given unit at level LOG_DEBUG.</p>
+<dl class="simple">
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">log_debug(*args,</span> <span class="pre">unit='Python')</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-core-g3logging-log-error"><strong>spt3g.core.g3logging.log_error</strong></p>
+<p>Log a message for the given unit at level LOG_ERROR.</p>
+<dl class="simple">
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">log_error(*args,</span> <span class="pre">unit='Python')</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-core-g3logging-log-fatal"><strong>spt3g.core.g3logging.log_fatal</strong></p>
+<p>Log a message for the given unit at level LOG_FATAL,
+and raise a RuntimeError.</p>
+<dl class="simple">
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">log_fatal(*args,</span> <span class="pre">unit='Python')</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-core-g3logging-log-info"><strong>spt3g.core.g3logging.log_info</strong></p>
+<p>Log a message for the given unit at level LOG_INFO.</p>
+<dl class="simple">
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">log_info(*args,</span> <span class="pre">unit='Python')</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-core-g3logging-log-notice"><strong>spt3g.core.g3logging.log_notice</strong></p>
+<p>Log a message for the given unit at level LOG_NOTICE.</p>
+<dl class="simple">
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">log_notice(*args,</span> <span class="pre">unit='Python')</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-core-g3logging-log-trace"><strong>spt3g.core.g3logging.log_trace</strong></p>
+<p>Log a message for the given unit at level LOG_TRACE.</p>
+<dl class="simple">
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">log_trace(*args,</span> <span class="pre">unit='Python')</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-core-g3logging-log-warn"><strong>spt3g.core.g3logging.log_warn</strong></p>
+<p>Log a message for the given unit at level LOG_WARN.</p>
+<dl class="simple">
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">log_warn(*args,</span> <span class="pre">unit='Python')</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-core-g3logging-set-log-level"><strong>spt3g.core.g3logging.set_log_level</strong></p>
+<p>Set log level to the requested level. If unit is not None, set the
+log level for the given logging unit only.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">core</span><span class="o">.</span><span class="n">set_log_level</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">G3LogLevel</span><span class="o">.</span><span class="n">LOG_DEBUG</span><span class="p">,</span> <span class="s1">&#39;GCPMuxDataDecoder&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">set_log_level(level,</span> <span class="pre">unit=None)</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-core-modconstruct-g3networkreceiver"><strong>spt3g.core.modconstruct.G3NetworkReceiver</strong></p>
+<blockquote>
+<div><p>Emulation of old G3NetworkReceiver class. Equivalent to pointing
+G3Reader at a TCP URL.</p>
+</div></blockquote>
+<p>Equivalent to:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">G3Reader</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;tcp://localhost:5978&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">G3NetworkReceiver(pipe,</span> <span class="pre">hostname='localhost',</span> <span class="pre">port=5978)</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-core-modconstruct-indexmod"><strong>spt3g.core.modconstruct.indexmod</strong></p>
+<p>Mark argument as a processing module that can be found by automated
+documentation tools.</p>
+<p>For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
+<span class="k">def</span> <span class="nf">dostuff</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
+    <span class="n">dosomestuff</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">indexmod(func)</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-core-modconstruct-pipesegment"><strong>spt3g.core.modconstruct.pipesegment</strong></p>
+<p>Use as a decorator for a pre-assembled set of pipeline modules. Makes a
+pseudo-module consisting of several inputs. If autodoc is True (the
+default), will attempt to introspect the segment to find out what it
+does. Set this to False if your module does anything complicated.</p>
+<p>For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@core</span><span class="o">.</span><span class="n">pipesegment</span>
+<span class="k">def</span> <span class="nf">standardfiltering</span><span class="p">(</span>
+    <span class="n">pipe</span><span class="p">,</span>
+    <span class="n">PolyOrder</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">MaskedHighPassEll</span><span class="o">=</span><span class="mi">6000</span><span class="p">,</span>
+    <span class="n">Input</span><span class="o">=</span><span class="s1">&#39;CalTimestreams&#39;</span><span class="p">,</span>
+    <span class="n">Output</span><span class="o">=</span><span class="s1">&#39;FilteredTimestreams&#39;</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">analysis</span><span class="o">.</span><span class="n">PolyFilter</span><span class="p">,</span> <span class="n">PolyOrder</span><span class="o">=</span><span class="n">PolyOrder</span><span class="p">,</span> <span class="n">Input</span><span class="o">=</span><span class="n">Input</span><span class="p">,</span>
+        <span class="n">Output</span><span class="o">=</span><span class="s1">&#39;__Temp&#39;</span> <span class="o">+</span> <span class="n">Output</span><span class="p">)</span>
+    <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">analysis</span><span class="o">.</span><span class="n">MaskedHighPass</span><span class="p">,</span> <span class="n">MaskedHighPassEll</span><span class="o">=</span><span class="n">MaskedHighPassEll</span><span class="p">,</span>
+        <span class="n">Input</span><span class="o">=</span><span class="s1">&#39;__Temp&#39;</span> <span class="o">+</span> <span class="n">Output</span><span class="p">,</span> <span class="n">Output</span><span class="o">=</span><span class="n">Output</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
+        <span class="k">del</span> <span class="n">frame</span><span class="p">[</span><span class="s1">&#39;__Temp&#39;</span> <span class="o">+</span> <span class="n">Output</span><span class="p">]</span>
+    <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">cleanup</span><span class="p">)</span>
+
+<span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">standardfiltering</span><span class="p">,</span> <span class="n">PolyOrder</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">pipesegment(func,</span> <span class="pre">autodoc=True)</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-core-modconstruct-usefulfunc"><strong>spt3g.core.modconstruct.usefulfunc</strong></p>
+<p>Mark argument as a useful function that can be found by automated
+documentation tools.</p>
+<p>For example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@core</span><span class="o">.</span><span class="n">usefulfunc</span>
+<span class="k">def</span> <span class="nf">do_some_science</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="n">science</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="simple">
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">usefulfunc(func)</span></code></p>
+</dd>
+</dl>
 <p id="spt3g-core-timestreamextensions-concatenate-timestreams"><strong>spt3g.core.timestreamextensions.concatenate_timestreams</strong></p>
 <p>Concatenate G3Timestream or G3TimestreamMap objects together.</p>
 <dl class="simple">

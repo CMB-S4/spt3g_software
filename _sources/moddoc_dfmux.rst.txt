@@ -885,6 +885,8 @@ Mux module status
 
 Modules in spt3g.dfmux
 ======================
+* spt3g.dfmux.DataQualityTools.FillMissingTimepointFrames_
+
 * spt3g.dfmux.DfMuxBuilder_
 
 * spt3g.dfmux.DfMuxCollator_
@@ -908,6 +910,20 @@ Modules in spt3g.dfmux
 * spt3g.dfmux.ScanTools.FixedLengthScans_
 
 * spt3g.dfmux.unittransforms.ConvertTimestreamUnits_
+
+
+.. _spt3g.dfmux.DataQualityTools.FillMissingTimepointFrames:
+
+**spt3g.dfmux.DataQualityTools.FillMissingTimepointFrames**
+
+Search for Timepoint frames that come at larger-than-expected intervals.
+Fill in the missin frames with garbage, and mark them as garbage for
+conversion to NaNs later.
+
+*Constructor:*
+	``FillMissingTimepointFrames(self)``
+
+
 
 
 .. _spt3g.dfmux.DfMuxBuilder:

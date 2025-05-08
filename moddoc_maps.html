@@ -716,7 +716,7 @@ the current Scan; if False, the binner will continue accumulating data.</p>
 </dd>
 </dl>
 </dd>
-<dt><em>Returns:</em></dt><dd><dl>
+<dt><em>Emits:</em></dt><dd><dl>
 <dt>frame: G3Frame</dt><dd><p>A frame of type Map at the end of processing containing the output map:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Frame</span> <span class="p">(</span><span class="n">Map</span><span class="p">)</span> <span class="p">[</span>
     <span class="s2">&quot;Id&quot;</span> <span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">G3String</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="s2">&quot;ra0hdec-57.5-150GHz&quot;</span>
@@ -797,7 +797,7 @@ the current Scan; if False, the binner will continue accumulating data.</p>
 </dd>
 </dl>
 </dd>
-<dt><em>Returns:</em></dt><dd><dl>
+<dt><em>Emits:</em></dt><dd><dl>
 <dt>frame: G3Frame</dt><dd><p>A frame of type Map at the end of processing containing the output map:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Frame</span> <span class="p">(</span><span class="n">Map</span><span class="p">)</span> <span class="p">[</span>
     <span class="s2">&quot;Id&quot;</span> <span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">G3String</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="s2">&quot;ra0hdec-57.5-150GHz&quot;</span>
@@ -927,7 +927,7 @@ alternative values.</p>
 </dd>
 </dl>
 </dd>
-<dt><em>Returns:</em></dt><dd><dl>
+<dt><em>Emits:</em></dt><dd><dl>
 <dt>frame: G3Frame</dt><dd><p>Adds a new key to every Scan frame containing the output pointing data:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Frame</span> <span class="p">(</span><span class="n">Scan</span><span class="p">)</span> <span class="p">[</span>
     <span class="o">...</span>
@@ -989,7 +989,7 @@ weight/hit map, the set of detectors in every scan must be identical.</p>
 </dd>
 </dl>
 </dd>
-<dt><em>Returns:</em></dt><dd><dl>
+<dt><em>Emits:</em></dt><dd><dl>
 <dt>frames: G3Frame</dt><dd><p>At the end of processing, emits one frame of type Map for each detector
 containing the corresponding map. The “Id” property of the output frames
 gives the detector ID to which the map corresponds. Because the maps are
@@ -1218,7 +1218,7 @@ temperature.</p>
 </dl>
 <p id="spt3g-maps-map-modules-extractmaps"><strong>spt3g.maps.map_modules.ExtractMaps</strong></p>
 <p>Cache maps that come through the pipeline. Initialize an instance of this
-module before adding to a pipeline..  Any maps that pass through the pipe
+module before adding to a pipeline.  Any map frames that pass through the pipe
 are stored in the .maps attribute of the object after the pipeline is run.</p>
 <dl class="simple">
 <dt><em>Arguments:</em></dt><dd><dl class="simple">

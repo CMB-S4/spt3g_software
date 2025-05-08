@@ -1016,7 +1016,7 @@ specified by the stub_map argument.
 	    a map frame with the data since the last emitted map frame but *before* 
 	    the current Scan; if False, the binner will continue accumulating data.
 	
-*Returns:*
+*Emits:*
 	frame: G3Frame
 	    A frame of type Map at the end of processing containing the output map:
 	
@@ -1104,7 +1104,7 @@ by the stub_map argument.
 	    a map frame with the data since the last emitted map frame but *before* 
 	    the current Scan; if False, the binner will continue accumulating data.
 	
-*Returns:*
+*Emits:*
 	frame: G3Frame
 	    A frame of type Map at the end of processing containing the output map:
 	
@@ -1255,7 +1255,7 @@ The outputs are not consumed by any stage of the map-making pipeline.
 	    default, and this parameter only need be set if you wish to use 
 	    alternative values.
 	
-*Returns:*
+*Emits:*
 	frame: G3Frame
 	    Adds a new key to every Scan frame containing the output pointing data:
 	
@@ -1323,7 +1323,7 @@ when making maps for detector-pointing calibration.
 	    units of the detector timestreams. Because of the single stored 
 	    weight/hit map, the set of detectors in every scan must be identical.
 	
-*Returns:*
+*Emits:*
 	frames: G3Frame
 	    At the end of processing, emits one frame of type Map for each detector 
 	    containing the corresponding map. The "Id" property of the output frames 
@@ -1626,7 +1626,7 @@ temperature.
 **spt3g.maps.map_modules.ExtractMaps**
 
 Cache maps that come through the pipeline. Initialize an instance of this
-module before adding to a pipeline..  Any maps that pass through the pipe
+module before adding to a pipeline.  Any map frames that pass through the pipe
 are stored in the .maps attribute of the object after the pipeline is run.
 
 *Arguments:*

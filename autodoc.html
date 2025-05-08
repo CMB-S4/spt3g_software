@@ -50,8 +50,8 @@ tell the document generator that you want it to parse them. In Python,
 inherited classes, you’ll need to decorate them with <code class="docutils literal notranslate"><span class="pre">&#64;core.indexmod</span></code>,
 <code class="docutils literal notranslate"><span class="pre">&#64;core.pipesegment</span></code> or <code class="docutils literal notranslate"><span class="pre">&#64;core.usefulfunc</span></code>, depending on the type of object to
 be documented.</p>
-<p>In C++, functions exported as <code class="docutils literal notranslate"><span class="pre">bp::def()</span></code> will automatically be documented.
-Additionally, any modules exported with the <code class="docutils literal notranslate"><span class="pre">EXPORT_G3MODULE</span></code> macro will
+<p>In C++, functions exported with <code class="docutils literal notranslate"><span class="pre">scope.def()</span></code> will automatically be documented.
+Additionally, any modules exported with the <code class="docutils literal notranslate"><span class="pre">register_g3module</span></code> function will
 automatically be documented as well.</p>
 <p>Documentation needs to be valid <a class="reference external" href="http://docutils.sourceforge.net/rst.html">RST</a>.  Improperly formatted RST may result in
 really weird html.  To be 100% sure that you are not generating RST warnings,

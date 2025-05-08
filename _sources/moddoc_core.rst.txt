@@ -3127,18 +3127,14 @@ Prints frames to console. If optional type specified, only acts on frames of the
 
 **spt3g.core.util.G3NetworkReceiver**
 
-
-Emulation of old G3NetworkReceiver class. Equivalent to pointing
-G3Reader at a TCP URL.
-
+    Emulation of old G3NetworkReceiver class. Equivalent to pointing
+    G3Reader at a TCP URL.
 
 
-*Equivalent to:*
 
-.. code-block:: python
+Equivalent to::
 
     pipe.Add(spt3g.core.G3Reader, filename='tcp://localhost:5978')
-
 
 
 *Definition:*
@@ -3208,7 +3204,303 @@ Renames specified keys in frame. If optional type specified, only acts on frames
 
 Functions in spt3g.core
 =======================
+* spt3g.core.fileio.G3File_
+
+* spt3g.core.g3decorators.cache_frame_data_
+
+* spt3g.core.g3decorators.scan_func_cache_data_
+
+* spt3g.core.g3logging.log_debug_
+
+* spt3g.core.g3logging.log_error_
+
+* spt3g.core.g3logging.log_fatal_
+
+* spt3g.core.g3logging.log_info_
+
+* spt3g.core.g3logging.log_notice_
+
+* spt3g.core.g3logging.log_trace_
+
+* spt3g.core.g3logging.log_warn_
+
+* spt3g.core.g3logging.set_log_level_
+
+* spt3g.core.modconstruct.G3NetworkReceiver_
+
+* spt3g.core.modconstruct.indexmod_
+
+* spt3g.core.modconstruct.pipesegment_
+
+* spt3g.core.modconstruct.usefulfunc_
+
 * spt3g.core.timestreamextensions.concatenate_timestreams_
+
+
+.. _spt3g.core.fileio.G3File:
+
+**spt3g.core.fileio.G3File**
+
+Iterable class for G3 files, as created by G3Writer. Loop through frames by doing something like::
+
+    with core.G3File("/path/to/file.g3") as f:
+        for frame in f:
+            print(frame)
+
+An entire file can also be read into an indexable list by doing::
+
+    f = list(core.G3File("/path/to/file.g3"))
+
+*Definition:*
+        ``G3File(path)``
+
+
+
+
+.. _spt3g.core.g3decorators.cache_frame_data:
+
+**spt3g.core.g3decorators.cache_frame_data**
+
+This is a decorator for use with G3Modules written as functions.  It enables
+a function to use cached values from other types of frames in the processing
+of a frame.
+
+To make that confusing sentence clearer with an example, in a lot of cases
+we want to have a module that works on Scan frames, but have access to the
+BolometerProperties.  This decorator allows you to specify the information
+to cache.  This case looks like:
+
+.. code-block:: python
+
+    @core.cache_frame_data(type=core.G3FrameType.Scan, bolo_props='BolometerProperties')
+    def FlagSomeStuff(frame, flag_key='Flags', bolo_props=None):
+        pass
+
+You specify the type of frame the function is operating on with the type
+argument.  Any additional keyword arguments specifies information to cache
+and send to the function.
+
+For the keyword args passed to the decorator having the format: Key = Value.
+Key specifies the name of the argument that we pass the infromation to in
+the decorated function.  If the decorated function is called with Key as an
+argument it will overwrite the value specified in the decorator.
+
+Value specifies the default path to look for the cached data.  It will
+search all of the frames that do not have the frame type 'type' for a key
+with that value.  This can be overridden when calling the decorated
+function.
+
+*Definition:*
+        ``cache_frame_data(type, **kwargs)``
+
+
+
+
+.. _spt3g.core.g3decorators.scan_func_cache_data:
+
+**spt3g.core.g3decorators.scan_func_cache_data**
+
+This is a simple wrapper around cache_frame_data where the type argument has been set to
+core.G3FrameType.Scan.
+
+*Definition:*
+        ``scan_func_cache_data(**kwargs)``
+
+
+
+
+.. _spt3g.core.g3logging.log_debug:
+
+**spt3g.core.g3logging.log_debug**
+
+Log a message for the given unit at level LOG_DEBUG.
+
+*Definition:*
+        ``log_debug(*args, unit='Python')``
+
+
+
+
+.. _spt3g.core.g3logging.log_error:
+
+**spt3g.core.g3logging.log_error**
+
+Log a message for the given unit at level LOG_ERROR.
+
+*Definition:*
+        ``log_error(*args, unit='Python')``
+
+
+
+
+.. _spt3g.core.g3logging.log_fatal:
+
+**spt3g.core.g3logging.log_fatal**
+
+Log a message for the given unit at level LOG_FATAL,
+and raise a RuntimeError.
+
+*Definition:*
+        ``log_fatal(*args, unit='Python')``
+
+
+
+
+.. _spt3g.core.g3logging.log_info:
+
+**spt3g.core.g3logging.log_info**
+
+Log a message for the given unit at level LOG_INFO.
+
+*Definition:*
+        ``log_info(*args, unit='Python')``
+
+
+
+
+.. _spt3g.core.g3logging.log_notice:
+
+**spt3g.core.g3logging.log_notice**
+
+Log a message for the given unit at level LOG_NOTICE.
+
+*Definition:*
+        ``log_notice(*args, unit='Python')``
+
+
+
+
+.. _spt3g.core.g3logging.log_trace:
+
+**spt3g.core.g3logging.log_trace**
+
+Log a message for the given unit at level LOG_TRACE.
+
+*Definition:*
+        ``log_trace(*args, unit='Python')``
+
+
+
+
+.. _spt3g.core.g3logging.log_warn:
+
+**spt3g.core.g3logging.log_warn**
+
+Log a message for the given unit at level LOG_WARN.
+
+*Definition:*
+        ``log_warn(*args, unit='Python')``
+
+
+
+
+.. _spt3g.core.g3logging.set_log_level:
+
+**spt3g.core.g3logging.set_log_level**
+
+Set log level to the requested level. If unit is not None, set the
+log level for the given logging unit only.
+
+Example::
+
+    core.set_log_level(core.G3LogLevel.LOG_DEBUG, 'GCPMuxDataDecoder')
+
+*Definition:*
+        ``set_log_level(level, unit=None)``
+
+
+
+
+.. _spt3g.core.modconstruct.G3NetworkReceiver:
+
+**spt3g.core.modconstruct.G3NetworkReceiver**
+
+    Emulation of old G3NetworkReceiver class. Equivalent to pointing
+    G3Reader at a TCP URL.
+
+
+
+Equivalent to::
+
+    pipe.Add(spt3g.core.G3Reader, filename='tcp://localhost:5978')
+
+*Definition:*
+        ``G3NetworkReceiver(pipe, hostname='localhost', port=5978)``
+
+
+
+
+.. _spt3g.core.modconstruct.indexmod:
+
+**spt3g.core.modconstruct.indexmod**
+
+Mark argument as a processing module that can be found by automated
+documentation tools.
+
+For example::
+
+    @core.indexmod
+    def dostuff(frame):
+        dosomestuff()
+
+*Definition:*
+        ``indexmod(func)``
+
+
+
+
+.. _spt3g.core.modconstruct.pipesegment:
+
+**spt3g.core.modconstruct.pipesegment**
+
+Use as a decorator for a pre-assembled set of pipeline modules. Makes a
+pseudo-module consisting of several inputs. If autodoc is True (the
+default), will attempt to introspect the segment to find out what it
+does. Set this to False if your module does anything complicated.
+
+For example::
+
+    @core.pipesegment
+    def standardfiltering(
+        pipe,
+        PolyOrder=4,
+        MaskedHighPassEll=6000,
+        Input='CalTimestreams',
+        Output='FilteredTimestreams',
+    ):
+        pipe.Add(analysis.PolyFilter, PolyOrder=PolyOrder, Input=Input,
+            Output='__Temp' + Output)
+        pipe.Add(analysis.MaskedHighPass, MaskedHighPassEll=MaskedHighPassEll,
+            Input='__Temp' + Output, Output=Output)
+        def cleanup(frame):
+            del frame['__Temp' + Output]
+        pipe.Add(cleanup)
+
+    pipe.Add(standardfiltering, PolyOrder=3)
+
+*Definition:*
+        ``pipesegment(func, autodoc=True)``
+
+
+
+
+.. _spt3g.core.modconstruct.usefulfunc:
+
+**spt3g.core.modconstruct.usefulfunc**
+
+Mark argument as a useful function that can be found by automated
+documentation tools.
+
+For example::
+
+    @core.usefulfunc
+    def do_some_science(data):
+        science(data)
+
+*Definition:*
+        ``usefulfunc(func)``
+
+
 
 
 .. _spt3g.core.timestreamextensions.concatenate_timestreams:

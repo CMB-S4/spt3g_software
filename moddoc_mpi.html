@@ -157,14 +157,16 @@ are processed only by a single (random) CPU node.</p>
 </dd>
 </dl>
 <p id="spt3g-mpi-mpifileio-mpiiodistributor"><strong>spt3g.mpi.MPIFileIO.MPIIODistributor</strong></p>
-<p>Read files from disk using the first n_io processes in mpicomm (COMM_WORLD
+<blockquote>
+<div><p>Read files from disk using the first n_io processes in mpicomm (COMM_WORLD
 by default), with processing of frames in those files occurring on the other
 processes in mpicomm. See documentation for MPIFileReader for the format of
 the files argument and MPIFrameParallelizer for information on the semantics
 of processing. Add this as the first module in your pipeline in place of
 core.G3Reader.</p>
-<p><em>Equivalent to:</em></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="ne">Exception</span> <span class="n">evaluating</span> <span class="n">equivalence</span> <span class="p">(</span><span class="n">No</span> <span class="n">module</span> <span class="n">named</span> <span class="s1">&#39;mpi4py&#39;</span><span class="p">)</span>
+</div></blockquote>
+<p>Equivalent to:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ne">Exception</span> <span class="n">evaluating</span> <span class="n">equivalence</span> <span class="p">(</span><span class="n">No</span> <span class="n">module</span> <span class="n">named</span> <span class="s1">&#39;mpi4py&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <dl class="simple">

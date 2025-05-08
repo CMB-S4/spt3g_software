@@ -14,8 +14,8 @@ inherited classes, you'll need to decorate them with ``@core.indexmod``,
 ``@core.pipesegment`` or ``@core.usefulfunc``, depending on the type of object to
 be documented.
 
-In C++, functions exported as ``bp::def()`` will automatically be documented.
-Additionally, any modules exported with the ``EXPORT_G3MODULE`` macro will
+In C++, functions exported with ``scope.def()`` will automatically be documented.
+Additionally, any modules exported with the ``register_g3module`` function will
 automatically be documented as well.
 
 Documentation needs to be valid RST_.  Improperly formatted RST may result in 

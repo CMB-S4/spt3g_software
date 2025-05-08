@@ -43,19 +43,19 @@
 <p>This software includes a logging framework similar to the standard python logging that can be used from both Python and C++. There are seven log <strong>levels</strong> (below) that can be set for each logging <strong>unit</strong>. The default log level is <code class="docutils literal notranslate"><span class="pre">log_notice</span></code>.</p>
 <blockquote>
 <div><dl class="simple">
-<dt>log_trace</dt><dd><p>Messages of the type “At line 75” that no one really ever wants to see except in the deepest throes of debugging. In C++ code, these messages are compiled out unless <code class="docutils literal notranslate"><span class="pre">CMAKE_BUILD_TYPE</span></code> is set to Debug.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">log_trace</span></code></dt><dd><p>Messages of the type “At line 75” that no one really ever wants to see except in the deepest throes of debugging. In C++ code, these messages are compiled out unless <code class="docutils literal notranslate"><span class="pre">CMAKE_BUILD_TYPE</span></code> is set to Debug.</p>
 </dd>
-<dt>log_debug</dt><dd><p>Messages of the type “Configuration parameters: Foo Bar” that almost no one really ever wants to see except while debugging. In C++ code, these messages are compiled out unless <code class="docutils literal notranslate"><span class="pre">CMAKE_BUILD_TYPE</span></code> is set to Debug.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">log_debug</span></code></dt><dd><p>Messages of the type “Configuration parameters: Foo Bar” that almost no one really ever wants to see except while debugging. In C++ code, these messages are compiled out unless <code class="docutils literal notranslate"><span class="pre">CMAKE_BUILD_TYPE</span></code> is set to Debug.</p>
 </dd>
-<dt>log_info</dt><dd><p>Messages slightly more interesting than <code class="docutils literal notranslate"><span class="pre">log_debug</span></code> (for example: “Opening file X.h5”). Always available, but not shown by default.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">log_info</span></code></dt><dd><p>Messages slightly more interesting than <code class="docutils literal notranslate"><span class="pre">log_debug</span></code> (for example: “Opening file X.h5”). Always available, but not shown by default.</p>
 </dd>
-<dt>log_notice</dt><dd><p>Messages that do not indicate a potential problem but that it is good for humans to see. For example, “Starting new output file X”. Shown by default, so please limit the use of messages this level and above.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">log_notice</span></code></dt><dd><p>Messages that do not indicate a potential problem but that it is good for humans to see. For example, “Starting new output file X”. Shown by default, so please limit the use of messages this level and above.</p>
 </dd>
-<dt>log_warn</dt><dd><p>Messages that indicate a potential problem such as “No data from boards in 30 seconds”.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">log_warn</span></code></dt><dd><p>Messages that indicate a potential problem such as “No data from boards in 30 seconds”.</p>
 </dd>
-<dt>log_error</dt><dd><p>Serious recoverable data problem. For example, “Scan does not have input key”. Printed in bold red so you know it is serious.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">log_error</span></code></dt><dd><p>Serious recoverable data problem. For example, “Scan does not have input key”. Printed in bold red so you know it is serious.</p>
 </dd>
-<dt>log_fatal</dt><dd><p>An unrecoverable problem such as a bad configuration. Throws an exception (RuntimeError) and stop all data processing.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">log_fatal</span></code></dt><dd><p>An unrecoverable problem such as a bad configuration. Throws an exception (RuntimeError) and stop all data processing.</p>
 </dd>
 </dl>
 </div></blockquote>
@@ -66,7 +66,7 @@
 </pre></div>
 </div>
 <p>The log level for an individual section of the code can be set as well, which is useful if you want to increase (or decrease) the verbosity of a specific module for debugging.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">core</span><span class="o">.</span><span class="n">set_log_level_for_unit</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">G3LogLevel</span><span class="o">.</span><span class="n">LOG_WARN</span><span class="p">,</span> <span class="s1">&#39;NoisyThing&#39;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">core</span><span class="o">.</span><span class="n">set_log_level</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">G3LogLevel</span><span class="o">.</span><span class="n">LOG_WARN</span><span class="p">,</span> <span class="s1">&#39;NoisyThing&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -76,8 +76,8 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">core</span><span class="o">.</span><span class="n">log_error</span><span class="p">(</span><span class="s1">&#39;Everything is on fire&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>By default, all log messages from Python are assigned to the log unit “Python”. If you pass a second argument, you can set the log unit to something else:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">core</span><span class="o">.</span><span class="n">log_error</span><span class="p">(</span><span class="s1">&#39;Everything is on fire&#39;</span><span class="p">,</span> <span class="s1">&#39;FireWarden&#39;</span><span class="p">)</span>
+<p>By default, all log messages from Python are assigned to the log unit “Python”. If you pass a <code class="docutils literal notranslate"><span class="pre">unit</span></code> keyword argument, you can set the log unit to something else:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">core</span><span class="o">.</span><span class="n">log_error</span><span class="p">(</span><span class="s1">&#39;Everything is on fire&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;FireWarden&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Then you could selectively disable “FireWarden” if you don’t want to see such messages by setting FireWarden’s log level to log_fatal (see <a class="reference internal" href="#setting-log-levels">Setting Log Levels</a>).</p>

@@ -82,15 +82,11 @@ make
 </div>
 <p>This builds a library called <code class="docutils literal notranslate"><span class="pre">newthing.so</span></code> from the two given source files and links it to the spt3g core library and the Boost and Python libraries (which are mandatory). Typically C++ source files are in a directory called <code class="docutils literal notranslate"><span class="pre">src</span></code>. Header files that you want visible from other projects must be placed in a directory called <code class="docutils literal notranslate"><span class="pre">include/newthing</span></code>.</p>
 <p>Every C++ library must contain a file declaring the library to Python. This file is usually named <code class="docutils literal notranslate"><span class="pre">python.cxx</span></code> and has contents like the following:</p>
-<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;G3Frame.h&gt;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;pybindings.h&gt;</span>
-<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;boost/python.hpp&gt;</span>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;pybindings.h&gt;</span>
 
 <span class="n">SPT3G_PYTHON_MODULE</span><span class="p">(</span><span class="n">newthing</span><span class="p">)</span>
 <span class="p">{</span>
-<span class="w">        </span><span class="n">boost</span><span class="o">::</span><span class="n">python</span><span class="o">::</span><span class="k">import</span><span class="p">(</span><span class="s">&quot;spt3g.core&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// Import core python bindings</span>
-
-<span class="w">        </span><span class="n">G3ModuleRegistrator</span><span class="o">::</span><span class="n">CallRegistrarsFor</span><span class="p">(</span><span class="s">&quot;newthing&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">py</span><span class="o">::</span><span class="k">import</span><span class="p">(</span><span class="s">&quot;spt3g.core&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// Import core python bindings</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -99,7 +95,7 @@ make
 <section id="adding-a-c-executable">
 <h3>Adding a C++ executable<a class="headerlink" href="#adding-a-c-executable" title="Link to this heading">¶</a></h3>
 <p>You can also add C++ executables. Usually, there is not much reason to do this since everything is designed to be interacted with by Python. A few projects contain small standalone executables nonetheless, typically as test programs.</p>
-<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">add_executable</span><span class="p">(</span><span class="s">newthingexec</span><span class="w"> </span><span class="s">MyNewThingExecutable.cxx</span><span class="p">)</span>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">add_spt3g_executable</span><span class="p">(</span><span class="s">newthingexec</span><span class="w"> </span><span class="s">MyNewThingExecutable.cxx</span><span class="p">)</span>
 <span class="nb">target_link_libraries</span><span class="p">(</span><span class="s">newthingexec</span><span class="w"> </span><span class="s">core</span><span class="w"> </span><span class="s">newthing</span><span class="p">)</span>
 <span class="nb">list</span><span class="p">(</span><span class="s">APPEND</span><span class="w"> </span><span class="s">SPT3G_PROGRAMS</span><span class="w"> </span><span class="s">newthingexec</span><span class="p">)</span>
 <span class="nb">set</span><span class="p">(</span><span class="s">SPT3G_PROGRAMS</span><span class="w"> </span><span class="o">${</span><span class="nv">SPT3G_PROGRAMS</span><span class="o">}</span><span class="w"> </span><span class="s">PARENT_SCOPE</span><span class="p">)</span>
@@ -185,12 +181,11 @@ FAIL
 </section>
 <section id="mixing-c-and-python">
 <h2>Mixing C++ and Python<a class="headerlink" href="#mixing-c-and-python" title="Link to this heading">¶</a></h2>
-<p>If your project has both a C++ and a Python component, place the following into your <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">spt3g.core.load_pybindings</span> <span class="kn">import</span> <span class="n">load_pybindings</span>
-<span class="n">load_pybindings</span><span class="p">(</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">__path__</span><span class="p">)</span>
+<p>If your project has both a C++ and a Python component, place the following into your <code class="docutils literal notranslate"><span class="pre">newthing/python/__init__.py</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">.._libnewthing</span> <span class="kn">import</span> <span class="o">*</span>
 </pre></div>
 </div>
-<p>This (with no modifications) will merge the C++ and Python parts of the module into a single Python namespace.</p>
+<p>This will merge the C++ and Python parts of the module into the <code class="docutils literal notranslate"><span class="pre">newthing</span></code> Python namespace.</p>
 </section>
 </section>
 

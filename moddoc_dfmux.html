@@ -632,6 +632,7 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <section id="modules-in-spt3g-dfmux">
 <h2>Modules in spt3g.dfmux<a class="headerlink" href="#modules-in-spt3g-dfmux" title="Link to this heading">¶</a></h2>
 <ul class="simple">
+<li><p><a class="reference internal" href="#spt3g-dfmux-dataqualitytools-fillmissingtimepointframes">spt3g.dfmux.DataQualityTools.FillMissingTimepointFrames</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-dfmux-dfmuxbuilder">spt3g.dfmux.DfMuxBuilder</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-dfmux-dfmuxcollator">spt3g.dfmux.DfMuxCollator</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-dfmux-hardwaremaptools-dfmlhardwaremapinjector">spt3g.dfmux.HardwareMapTools.DfmlHardwareMapInjector</a></p></li>
@@ -645,6 +646,14 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <li><p><a class="reference internal" href="#spt3g-dfmux-scantools-fixedlengthscans">spt3g.dfmux.ScanTools.FixedLengthScans</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-dfmux-unittransforms-converttimestreamunits">spt3g.dfmux.unittransforms.ConvertTimestreamUnits</a></p></li>
 </ul>
+<p id="spt3g-dfmux-dataqualitytools-fillmissingtimepointframes"><strong>spt3g.dfmux.DataQualityTools.FillMissingTimepointFrames</strong></p>
+<p>Search for Timepoint frames that come at larger-than-expected intervals.
+Fill in the missin frames with garbage, and mark them as garbage for
+conversion to NaNs later.</p>
+<dl class="simple">
+<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">FillMissingTimepointFrames(self)</span></code></p>
+</dd>
+</dl>
 <p id="spt3g-dfmux-dfmuxbuilder"><strong>spt3g.dfmux.DfMuxBuilder</strong></p>
 <p>Processing module for data from DfMux boards. Reads data from boards data acquisition boards, requiring that data from all be timestamped to within collation_tolerance (default 10 microseconds) to be considered part of a single sample. If boards is an integer, listens for that number. If a list of integers, DfMuxBuilder will filter for only boards with serial numbers in the list.</p>
 <dl>
