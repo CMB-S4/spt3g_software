@@ -137,7 +137,8 @@ g3_clogger(G3LogLevel level, const char *unit, const char *file, int line,
 }
 
 PYBINDINGS("core", scope) {
-	register_enum<G3LogLevel>(scope, "G3LogLevel")
+	register_enum<G3LogLevel>(scope, "G3LogLevel",
+	    "Logging level identifier for G3Logger objects")
 	    .value("LOG_TRACE",  G3LOG_TRACE)
 	    .value("LOG_DEBUG",  G3LOG_DEBUG)
 	    .value("LOG_INFO",   G3LOG_INFO)

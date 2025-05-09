@@ -520,7 +520,8 @@ PYBINDINGS("core", scope) {
 	;
 	register_pointer_conversions<G3FrameObject>();
 
-	register_enum<G3Frame::FrameType, G3Frame::None>(scope, "G3FrameType")
+	register_enum<G3Frame::FrameType, G3Frame::None>(scope, "G3FrameType",
+	    "Enumerated frame type for identifying G3Frame objects")
 	    .value("Timepoint",       G3Frame::Timepoint)
 	    .value("Housekeeping",    G3Frame::Housekeeping)
 	    .value("Observation",     G3Frame::Observation)
