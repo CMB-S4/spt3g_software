@@ -6,6 +6,7 @@ https://github.com/readthedocs/sphinx_rtd_theme/issues/1301
   display: block !important;
 }
 
+/* https://github.com/readthedocs/sphinx_rtd_theme/issues/1529 */
 /* Take out pointless vertical whitespace in the signatures. */
 .rst-content dl .sig dl,
 .rst-content dl .sig dd {
