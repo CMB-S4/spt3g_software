@@ -481,7 +481,7 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
     ---------
     filename : str
         Path to output file.  Must not exist, unless overwrite is True.
-    T[, Q, U] : FlatSkyMap or HealpixSkyMap
+    T, Q, U : FlatSkyMap or HealpixSkyMap
         Maps to save
     W : G3SkyMapWeights
         Weights to save with the maps

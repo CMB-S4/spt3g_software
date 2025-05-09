@@ -1,13 +1,17 @@
 from . import ARCFileReader, ARCExtract
+from spt3g import core
 
+@core.usefulfunc
 class ARCFile(object):
-    '''Iterable class for ARC files, as created by GCP. Loop through frames by doing something like:
-    f = gcp.ARCFile('/path/to/arc.dat')
-    for frame in f:
-        print( frame )
+    '''Iterable class for ARC files, as created by GCP. Loop through frames by doing something like::
 
-    An entire file can also be read into an indexable list by doing:
-    f = list(gcp.ARCFile('/path/to/arc.dat'))
+        f = gcp.ARCFile('/path/to/arc.dat')
+        for frame in f:
+            print( frame )
+
+    An entire file can also be read into an indexable list by doing::
+
+        f = list(gcp.ARCFile('/path/to/arc.dat'))
     '''
     def __init__(self, path, extract=False):
         self.reader = ARCFileReader(path)

@@ -3,7 +3,6 @@ import copy
 from .. import core
 from . import ACUStatus, ACUState, TrackerStatus, TrackerState, TrackerPointing, CalFile
 
-@core.usefulfunc
 def UnitValue(caldict_entry):
     '''Turn unit name into floating point unit value'''
 
@@ -36,7 +35,6 @@ def UnitValue(caldict_entry):
     return uvalue
 
 
-@core.usefulfunc
 def CalibrateValue(data, caldict_entry):
     '''Apply gain / offset units from G3 cal file to register'''
 

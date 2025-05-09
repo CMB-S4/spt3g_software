@@ -2,6 +2,7 @@ import struct, socket, errno, numpy, time, threading
 from .. import core, dfmux
 
 
+@core.indexmod
 class PagerWatchdog(object):
     '''
     Module that sends a watchdog (ping) message to the GCP pager when the parent

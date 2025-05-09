@@ -89,7 +89,7 @@ You can also add C++ executables. Usually, there is not much reason to do this s
 
 .. code-block:: cmake
 
-	add_executable(newthingexec MyNewThingExecutable.cxx)
+	add_spt3g_executable(newthingexec MyNewThingExecutable.cxx)
 	target_link_libraries(newthingexec core newthing pybind11::embed)
 	list(APPEND SPT3G_PROGRAMS newthingexec)
 	set(SPT3G_PROGRAMS ${SPT3G_PROGRAMS} PARENT_SCOPE)
@@ -198,11 +198,11 @@ which outputs:
 Mixing C++ and Python
 =====================
 
-If your project has both a C++ and a Python component, place the following into your ``__init__.py``:
+If your project has both a C++ and a Python component, place the following into your ``newthing/python/__init__.py``:
 
 .. code-block:: python
 
-	from ._libnewthing import *
+	from .._libnewthing import *
 
-This (with no modifications) will merge the C++ and Python parts of the module into a single Python namespace.
+This will merge the C++ and Python parts of the module into the ``newthing`` Python namespace.
 

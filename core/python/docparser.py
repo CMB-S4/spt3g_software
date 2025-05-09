@@ -139,11 +139,7 @@ def get_doc_for_module(module_path, include_link_list = True):
             elif hasattr(obj, '__pipesegment__'):
                 out_str = add_str(out_str, format_name(modname, x))
                 if format_doc(obj) is not None:
-                    if getattr(obj, '__rstdoc__', None):
-                        out_str = add_str(out_str, obj.__rstdoc__)
-                    else:
-                        baredoc = format_doc(obj)
-                        out_str = add_str(out_str, baredoc)
+                    out_str = add_str(out_str, format_doc(obj))
                 else:
                     out_str = add_str(out_str, '\nNo documentation\n')
                 out_str = add_str(out_str, format_definition(x, obj))
@@ -178,6 +174,8 @@ def get_doc_for_module(module_path, include_link_list = True):
                 subclasstest = 'builtin_function_or_method' in str(type(obj))
             except TypeError:
                 pass
+            if hasattr(obj, '__pipesegment__'):
+                continue
             if hasattr(obj, '__g3usefulfunc__') or subclasstest:
                 out_str = add_str(out_str, format_name(modname, x))
                 if format_doc(obj) is not None:
