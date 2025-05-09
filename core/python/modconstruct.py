@@ -63,7 +63,7 @@ class PipeSegmentDocstring(type):
 class pipesegment(metaclass=PipeSegmentDocstring):
     def __init__(self, func):
         self.func = self.__wrapped__ = func
-        self.__pipesegment__ = True
+        self.__pipesegment__ = func.__pipesegment__ = True
 
     def __call__(self, pipe, *args, **kwargs):
         return self.func(pipe, *args, **kwargs)

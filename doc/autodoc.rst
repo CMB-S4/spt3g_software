@@ -27,5 +27,5 @@ you can run ``make docs`` in your build directory and check the output.
 Viewing the docs
 ----------------
 
-``spt3g-inspect`` generates the documentation in an rst format. ``make docs``
+``spt3g-inspect`` generates the documentation in an RST format suitable for use with ``sphinx-autodoc``. ``make docs``
 will authomatically generate an HTML browseable doc. If a project includes a README.rst file at the root of its directory tree, the contents of this file will be prepended to the manual page for the project.
