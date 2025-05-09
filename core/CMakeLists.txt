@@ -99,6 +99,7 @@ add_spt3g_program(bin/gen-analysis-doc)
 #Tests
 add_spt3g_test(imports)
 add_spt3g_test(copycons)
+add_spt3g_test(maps)
 add_spt3g_test(framepickle)
 add_spt3g_test(pipeline)
 add_spt3g_test(pipeline_module)

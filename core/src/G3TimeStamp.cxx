@@ -255,9 +255,9 @@ static std::string
 g3time_repr(const py::object &obj)
 {
 	std::stringstream s;
-	s << py::extract<std::string>(obj.attr("__class__").attr("__module__"))() << "."
-	  << py::extract<std::string>(obj.attr("__class__").attr("__name__"))()
-	  << "(" << py::extract<G3TimeStamp>(obj.attr("time"))() << ")";
+	s << py::cast<std::string>(obj.attr("__class__").attr("__module__")) << "."
+	  << py::cast<std::string>(obj.attr("__class__").attr("__name__"))
+	  << "(" << py::cast<G3TimeStamp>(obj.attr("time")) << ")";
 	return s.str();
 }
 
@@ -266,33 +266,23 @@ g3time_from_timestamp(py::object obj)
 {
 	G3TimeStamp t;
 
-	py::extract<G3Time> is_a_time(obj);
-	if (is_a_time.check())
-		return G3TimePtr(new G3Time(is_a_time()));
+	if (py::isinstance<G3Time>(obj))
+		return G3TimePtr(new G3Time(obj.cast<G3Time>()));
 
 	// This ends up shadowing the string constructor, so add dispatch
-	py::extract<std::string> is_a_string(obj);
-	if (is_a_string.check())
-		return G3TimePtr(new G3Time(is_a_string()));
+	if (py::isinstance<py::str>(obj))
+		return G3TimePtr(new G3Time(obj.cast<std::string>()));
 
-	if (PyFloat_Check(obj.ptr()))
-		return G3TimePtr(new G3Time(
-		    PyFloat_AsDouble(obj.ptr())));
+	if (py::isinstance<py::float_>(obj))
+		return G3TimePtr(new G3Time(obj.cast<double>()));
 
-#if PY_MAJOR_VERSION < 3
-	t = PyInt_AsUnsignedLongLongMask(obj.ptr());
-#else
-	t = PyLong_AsLongLong(obj.ptr());
-#endif
-
-	if (PyErr_Occurred() != NULL)
-		py::throw_error_already_set();
+	t = obj.cast<int64_t>();
 
 	return G3TimePtr(new G3Time(t));
 }
 
 PYBINDINGS("core", scope) {
-	register_frameobject<G3Time>(scope, "G3Time", "UTC Time")
+	register_frameobject<G3Time>(scope, "G3Time", "UTC Time", py::buffer_protocol())
 	    .def(py::init<>())
 	    .def(py::init<int, int , int , int, int, int>(),
 	        py::arg("y"), py::arg("d"), py::arg("h"), py::arg("m"), py::arg("s"), py::arg("ss"),
@@ -301,8 +291,7 @@ PYBINDINGS("core", scope) {
 	        "Supported formats are: YYYYMMDD_HHMMSS, YYMMDD_HHMMSS, YYMMDD HH:MM:SS, "
 	        "DD-Mon-YYYY:HH:MM:SS, YYYY-MM-DDTHH:MM:SS[+TZ] (ISO 8601). All can have a "
 	        "fraction of second field after a dot.")
-	    .def("__init__", py::make_constructor(g3time_from_timestamp, py::default_call_policies(),
-						  (py::arg("timestamp"))),
+	    .def(py::init(&g3time_from_timestamp), py::arg("timestamp"),
 	        "Create a G3Time from a numeric timestamp")
 	    .def("GetFileFormatString", &G3Time::GetFileFormatString,
 	        "Get a string corresponding to how SPTpol and GCP name files for this time")
@@ -320,11 +309,15 @@ PYBINDINGS("core", scope) {
 	    .def(py::self >= py::self)
 	    .def(py::self + G3TimeStamp())
 	    .def(py::self - G3TimeStamp())
-	    .def("__add__", &g3time_fadd)
-	    .def("__radd__", &g3time_fadd)
-	    .def("__sub__", &g3time_fsub)
-	    .def("__float__", &G3Time::operator double)
-	    .def("__int__", &G3Time::operator long)
+	    .def("__add__", &g3time_fadd, py::is_operator())
+	    .def("__radd__", &g3time_fadd, py::is_operator())
+	    .def("__sub__", &g3time_fsub, py::is_operator())
+	    .def("__float__", &G3Time::operator double, py::is_operator())
+	    .def("__int__", &G3Time::operator long, py::is_operator())
+	    .def_buffer([](G3Time &v) {
+		return py::buffer_info(&v.time, sizeof(G3TimeStamp),
+		    py::format_descriptor<G3TimeStamp>::format(), 0, {}, {});
+	    })
 	;
 }
 

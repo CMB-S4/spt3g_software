@@ -382,48 +382,52 @@ static py::list G3Module_Process(G3Module &mod, G3FramePtr ptr)
 //   input
 // - If it returns an iterable of frames, that iterable is pushed instead of
 //   the input
+// This trampoline class provides this Python API for C++-based classes and
+// Python classes derived from G3Module.
 
-class G3ModuleWrap : public G3Module, public py::wrapper<G3Module>
+class G3PythonModule : public G3Module
 {
 public:
-	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out) {
-		py::object ret = this->get_override("Process")(frame);
-		if (ret.ptr() == Py_None) {
-			out.push_back(frame);
-			return;
-		}
+	py::object Process(G3FramePtr frame) {
+		PYBIND11_OVERRIDE_PURE(py::object, G3PythonModule, Process, frame);
+	}
 
-		py::extract<G3FramePtr> extframe(ret);
-		if (extframe.check()) {
-			out.push_back(extframe());
-			return;
-		}
+	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out) override {
+		py::object ret = Process(frame);
 
-		py::extract<std::vector<G3FramePtr> > extvec(ret);
-		if (extvec.check()) {
-			std::vector<G3FramePtr> outlist = extvec();
-			for (auto i = outlist.begin(); i != outlist.end(); i++)
-				out.push_back(*i);
-		} else if (!!ret) {
+		if (ret.is_none()) {
+			// module returns None
 			out.push_back(frame);
-		} else {
+		} else if (py::isinstance<G3Frame>(ret)) {
+			// module returns a single frame
+			out.push_back(ret.cast<G3FramePtr>());
+		} else if (py::isinstance<py::iterable>(ret)) {
+			// module returns a list of frames
+			for (auto &fr: ret)
+				out.push_back(fr.cast<G3FramePtr>());
+		} else if (ret.cast<py::bool_>()) {
+			// module returns a truthful value
+			out.push_back(frame);
+		} else if (frame->type == G3Frame::EndProcessing) {
 			// If module returns false on an EndProcessing frame,
 			// just let it run through. Doing this is always a bug,
 			// so overriding it is safe.
-			if (frame->type == G3Frame::EndProcessing)
-				out.push_back(frame);
+			out.push_back(frame);
 		}
 	}
 };
 
 PYBINDINGS("core", scope) {
-	register_class<G3ModuleWrap>(scope, "G3Module",
+	register_class<G3Module, G3PythonModule>(scope, "G3Module",
 	  "Base class for functors that can be added to a G3Pipeline.")
 	    .def(py::init<>())
-	    .def("__call__", &G3Module_Process)
-	    .def("Process", py::pure_virtual(&G3Module_Process))
+	    .def("Process", &G3Module_Process,
+	        "Process the input frame. See documentation for valid return types.")
+	    .def("__call__", &G3Module_Process,
+	        "Process the input frame. See documentation for valid return types.")
+	    .def_property_readonly_static("__g3module__",
+	        [](py::object){ return true; });
 	;
-	py::implicitly_convertible<std::shared_ptr<G3ModuleWrap>, G3ModulePtr>();
 
 	register_class<G3Pipeline>(scope, "G3Pipeline",
 	  "A collection of core.G3Modules and Python callables. Added "
@@ -451,7 +455,8 @@ PYBINDINGS("core", scope) {
 	  "\t- False: discard input frame and return to first module, or end "
 	  "\t  processing if returned by first module. Equivalent to [].\n")
 	    .def(py::init<>())
-	    .def("_Add_", &G3Pipeline::Add, py::arg("module"), py::arg("name")="")
+	    .def("_Add_", &G3Pipeline::Add, py::arg("module"), py::arg("name")="",
+	        py::keep_alive<1, 2>())
 	    .def("Run", &G3Pipeline::Run,
 	      py::arg("profile")=false, py::arg("graph")=false,
 	      py::arg("signal_halt")=true,

@@ -515,20 +515,15 @@ ConvolveMap(const FlatSkyMap &map, const FlatSkyMap &kernel)
 
 
 static FlatSkyMapPtr
-pyconvolve_map(const FlatSkyMap &map, py::object val)
+pyconvolve_map(const FlatSkyMap &map, const py::object &val)
 {
 
-	py::extract<const FlatSkyMap &> mext(val);
-	if (mext.check())
-		return ConvolveMap(map, mext());
+	if (py::isinstance<FlatSkyMap>(val))
+		return ConvolveMap(map, val.cast<const FlatSkyMap &>());
 
 	// reach into python
-	auto pykernel = py::module_::import("spt3g.maps").attr("FlatSkyMap")(val, map.yres());
-	py::extract<const FlatSkyMap &> pext(pykernel);
-	if (pext.check())
-		return ConvolveMap(map, pext());
-
-	log_fatal("Invalid kernel object");
+	auto pykernel = py::type::of<FlatSkyMap>()(val, map.yres());
+	return ConvolveMap(map, pykernel.cast<const FlatSkyMap &>());
 }
 
 

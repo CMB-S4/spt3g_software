@@ -39,6 +39,10 @@ public:
 	G3Logger(G3LogLevel default_level = G3DefaultLogLevel);
 	virtual ~G3Logger();
 
+	// logger objects are non-copyable
+	G3Logger(const G3Logger &) = delete;
+	G3Logger& operator=(const G3Logger &) = delete;
+
 	virtual void Log(G3LogLevel level, const std::string &unit,
 	    const std::string &file, int line, const std::string &func,
 	    const std::string &message) = 0;

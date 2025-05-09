@@ -19,8 +19,8 @@ Because sky maps, like timestreams, implement the Python buffer protocol, there 
 Error Message Decryption
 ------------------------
 
-Argument Errors
-~~~~~~~~~~~~~~~
+Argument Errors (prior to version 0.5)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you are adding a module to a pipeline in python, and if the module is written in C++, when you misspell a keyword argument, you may get an unhelpful message like the following:
 
