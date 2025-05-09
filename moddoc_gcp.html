@@ -204,7 +204,6 @@
 <li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-updatelinearsensordeltas">spt3g.gcp.ARCExtractor.UpdateLinearSensorDeltas</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-arcfilereader">spt3g.gcp.ARCFileReader</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-archkextractor-unpacksptpolhkdata">spt3g.gcp.ARCHKExtractor.UnpackSPTpolHKData</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-calfile-calfilereader">spt3g.gcp.CalFile.CalFileReader</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-gcpdatatee-daqwatchdog">spt3g.gcp.GCPDataTee.DAQWatchdog</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-gcpdatatee-gcpbolodatatee">spt3g.gcp.GCPDataTee.GCPBoloDataTee</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-gcpdatatee-gcphousekeepingtee">spt3g.gcp.GCPDataTee.GCPHousekeepingTee</a></p></li>
@@ -348,13 +347,6 @@ in frame</p>
 <dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">UnpackSPTpolHKData(self)</span></code></p>
 </dd>
 </dl>
-<p id="spt3g-gcp-calfile-calfilereader"><strong>spt3g.gcp.CalFile.CalFileReader</strong></p>
-<p>For now just reads a G3 calibration file and loads the contents into
-a dictionary</p>
-<dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">CalFileReader(calibration_file=None)</span></code></p>
-</dd>
-</dl>
 <p id="spt3g-gcp-gcpdatatee-daqwatchdog"><strong>spt3g.gcp.GCPDataTee.DAQWatchdog</strong></p>
 <p>Watchdog that issues a ping to the GCP pager when the DAQ is operational.</p>
 <dl class="simple">
@@ -455,6 +447,7 @@ None, add all.</p>
 <h2>Functions in spt3g.gcp<a class="headerlink" href="#functions-in-spt3g-gcp" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="#spt3g-gcp-arcfile-arcfile">spt3g.gcp.ARCFile.ARCFile</a></p></li>
+<li><p><a class="reference internal" href="#spt3g-gcp-calfile-calfilereader">spt3g.gcp.CalFile.CalFileReader</a></p></li>
 <li><p><a class="reference internal" href="#spt3g-gcp-calfile-create-g3-cal-file">spt3g.gcp.CalFile.create_g3_cal_file</a></p></li>
 </ul>
 <p id="spt3g-gcp-arcfile-arcfile"><strong>spt3g.gcp.ARCFile.ARCFile</strong></p>
@@ -470,6 +463,13 @@ None, add all.</p>
 </div>
 <dl class="simple">
 <dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">ARCFile(path,</span> <span class="pre">extract=False)</span></code></p>
+</dd>
+</dl>
+<p id="spt3g-gcp-calfile-calfilereader"><strong>spt3g.gcp.CalFile.CalFileReader</strong></p>
+<p>For now just reads a G3 calibration file and loads the contents into
+a dictionary</p>
+<dl class="simple">
+<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">CalFileReader(calibration_file=None)</span></code></p>
 </dd>
 </dl>
 <p id="spt3g-gcp-calfile-create-g3-cal-file"><strong>spt3g.gcp.CalFile.create_g3_cal_file</strong></p>

@@ -1703,7 +1703,7 @@ Inject a set of maps into a new map frame.
 	    Maps to add to the frame.  If a list, contains Stokes maps with valid
 	    pol_type and weights.  If a dict, contains Stokes and weights maps keyed
 	    by the standard map frame names.
-	ignore_missing_weights [False] : bool
+	ignore_missing_weights : bool
 	    Skip warning about missing weights.  Useful for masks.
 
 *Constructor:*
@@ -1844,11 +1844,11 @@ currently implemented.
 	weighted : bool
 	    If True (default), ensure that maps have had weights applied before
 	    reprojection.  Otherwise, reproject maps without checking the weights.
-	partial :  bool=False
+	partial :  bool
 	    If True, the reproj will be performed on a partial map (of the output map),
 	    defined by the mask. If the mask is not provided, it will be determined from
 	    the non-zero pixels of the first reprojected map.
-	mask : G3SkyMapMask, G3SkyMap, or np.ndarray, Optional.
+	mask : G3SkyMapMask, G3SkyMap, or np.ndarray, optional
 	    Mask to be used for partial reproject. This should be of the same size as the
 	    output map. For numpy array, all zeros/inf/nan/hp.UNSEEN pixels are skipped.
 

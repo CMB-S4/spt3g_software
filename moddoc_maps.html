@@ -1276,7 +1276,7 @@ output frame will include Q and U maps (and polarized weights).</p>
 pol_type and weights.  If a dict, contains Stokes and weights maps keyed
 by the standard map frame names.</p>
 </dd>
-<dt>ignore_missing_weights [False]<span class="classifier">bool</span></dt><dd><p>Skip warning about missing weights.  Useful for masks.</p>
+<dt>ignore_missing_weights<span class="classifier">bool</span></dt><dd><p>Skip warning about missing weights.  Useful for masks.</p>
 </dd>
 </dl>
 </dd>
@@ -1378,11 +1378,11 @@ map.  Otherwise, the nearest-neighbor value is used.</p>
 <dt>weighted<span class="classifier">bool</span></dt><dd><p>If True (default), ensure that maps have had weights applied before
 reprojection.  Otherwise, reproject maps without checking the weights.</p>
 </dd>
-<dt>partial<span class="classifier">bool=False</span></dt><dd><p>If True, the reproj will be performed on a partial map (of the output map),
+<dt>partial<span class="classifier">bool</span></dt><dd><p>If True, the reproj will be performed on a partial map (of the output map),
 defined by the mask. If the mask is not provided, it will be determined from
 the non-zero pixels of the first reprojected map.</p>
 </dd>
-<dt>mask<span class="classifier">G3SkyMapMask, G3SkyMap, or np.ndarray, Optional.</span></dt><dd><p>Mask to be used for partial reproject. This should be of the same size as the
+<dt>mask<span class="classifier">G3SkyMapMask, G3SkyMap, or np.ndarray, optional</span></dt><dd><p>Mask to be used for partial reproject. This should be of the same size as the
 output map. For numpy array, all zeros/inf/nan/hp.UNSEEN pixels are skipped.</p>
 </dd>
 </dl>

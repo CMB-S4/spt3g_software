@@ -273,8 +273,6 @@ Modules in spt3g.gcp
 
 * spt3g.gcp.ARCHKExtractor.UnpackSPTpolHKData_
 
-* spt3g.gcp.CalFile.CalFileReader_
-
 * spt3g.gcp.GCPDataTee.DAQWatchdog_
 
 * spt3g.gcp.GCPDataTee.GCPBoloDataTee_
@@ -541,19 +539,6 @@ Extracts SPTpol housekeeping information from ARC files
 
 
 
-.. _spt3g.gcp.CalFile.CalFileReader:
-
-**spt3g.gcp.CalFile.CalFileReader**
-
-For now just reads a G3 calibration file and loads the contents into 
-a dictionary
-
-*Constructor:*
-	``CalFileReader(calibration_file=None)``
-
-
-
-
 .. _spt3g.gcp.GCPDataTee.DAQWatchdog:
 
 **spt3g.gcp.GCPDataTee.DAQWatchdog**
@@ -700,6 +685,8 @@ Functions in spt3g.gcp
 ======================
 * spt3g.gcp.ARCFile.ARCFile_
 
+* spt3g.gcp.CalFile.CalFileReader_
+
 * spt3g.gcp.CalFile.create_g3_cal_file_
 
 
@@ -719,6 +706,19 @@ An entire file can also be read into an indexable list by doing::
 
 *Definition:*
         ``ARCFile(path, extract=False)``
+
+
+
+
+.. _spt3g.gcp.CalFile.CalFileReader:
+
+**spt3g.gcp.CalFile.CalFileReader**
+
+For now just reads a G3 calibration file and loads the contents into 
+a dictionary
+
+*Definition:*
+        ``CalFileReader(calibration_file=None)``
 
 
 
