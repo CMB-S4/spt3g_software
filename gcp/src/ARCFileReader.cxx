@@ -854,7 +854,9 @@ void ARCFileReader::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 
 PYBINDINGS("gcp", scope) {
 	// Supported Experiments
-	register_enum<Experiment>(scope, "Experiment")
+	register_enum<Experiment>(scope, "Experiment",
+	    "Experiment identifier, to choose the correct storage schema when "
+	    "parsing arcfile frames")
 		.value("SPT",   Experiment::SPT)
 		.value("BK",    Experiment::BK)
 		.value("PB",    Experiment::PB)

@@ -1365,13 +1365,15 @@ void G3SkyMapWeights::Compact(bool zero_nans)
 }
 
 PYBINDINGS("maps", scope) {
-	register_enum<MapCoordReference>(scope, "MapCoordReference")
+	register_enum<MapCoordReference>(scope, "MapCoordReference",
+	    "Coordinate system of the sky map")
 	    .value("Local", Local)
 	    .value("Equatorial", Equatorial)
 	    .value("Galactic", Galactic)
 	;
 
-	register_enum<G3SkyMap::MapPolType, G3SkyMap::None>(scope, "MapPolType")
+	register_enum<G3SkyMap::MapPolType, G3SkyMap::None>(scope, "MapPolType",
+	    "Polarization identifier for sky maps and and weights")
 	    .value("T", G3SkyMap::T)
 	    .value("Q", G3SkyMap::Q)
 	    .value("U", G3SkyMap::U)
@@ -1391,7 +1393,8 @@ PYBINDINGS("maps", scope) {
 	    .value("BB", G3SkyMap::BB)
 	;
 
-	register_enum<G3SkyMap::MapPolConv, G3SkyMap::ConvNone>(scope, "MapPolConv")
+	register_enum<G3SkyMap::MapPolConv, G3SkyMap::ConvNone>(scope, "MapPolConv",
+	    "Polarization coordinate convention for Stokes Q/U alignment")
 	    .value("IAU", G3SkyMap::IAU)
 	    .value("COSMO", G3SkyMap::COSMO)
 	    .value("none", G3SkyMap::ConvNone) // "None" is reserved in python
