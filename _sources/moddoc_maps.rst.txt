@@ -2144,7 +2144,7 @@ over all pixels.  The former produces output that is equivalent to using
 *Arguments:*
 	filename : str
 	    Path to output file.  Must not exist, unless overwrite is True.
-	T[, Q, U] : FlatSkyMap or HealpixSkyMap
+	T, Q, U : FlatSkyMap or HealpixSkyMap
 	    Maps to save
 	W : G3SkyMapWeights
 	    Weights to save with the maps
