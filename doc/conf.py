@@ -107,10 +107,10 @@ class BoostDocsMixin:
 
                 # Boost property type annotations don't work well
                 if isinstance(self, PropertyDocumenter):
-                    line = self._cxx_type_ann = line.replace("None() -> ", "").strip()
-                    doclines[j] = line
-                    docs1.append(line)
-                    continue
+                    if line.strip().startswith("None() ->"):
+                        self._cxx_type_ann = line.replace("None() -> ", "").strip()
+                        doclines[j] = ""
+                        continue
 
                 # mangle signatures to produce python-like type annotations
                 m = optarg2.search(line)
@@ -175,11 +175,10 @@ class MethodDocumenter(BoostDocsMixin, autodoc.MethodDocumenter):
 class PropertyDocumenter(BoostDocsMixin, autodoc.PropertyDocumenter):
     def add_directive_header(self, sig):
         # update property type annotation
-        # XXX this doesn't seem to work
         super().add_directive_header(sig)
         sourcename = self.get_sourcename()
         if hasattr(self, "_cxx_type_ann"):
-            self.add_line("    :type: " + self._cxx_type_ann, sourcename)
+            self.add_line("   :type: " + self._cxx_type_ann, sourcename)
 
 
 class ClassDocumenter(BoostDocsMixin, autodoc.ClassDocumenter):
