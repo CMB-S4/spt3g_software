@@ -68,6 +68,10 @@ class BoostDocsMixin:
         if not docstrings:
             return docstrings
 
+        if 'Boost.Python' not in str(type(self.object)):
+            if not (isinstance(self, PropertyDocumenter) and "->" in str(docstrings)):
+                return docstrings
+
         for i, doclines in enumerate(docstrings):
             # drop empty lines
             while not doclines[0].strip():
@@ -77,61 +81,68 @@ class BoostDocsMixin:
             sigs = []
             docs = []
             docs1 = []
-            cpp = False
             for j, line in enumerate(doclines):
                 # CXX bindings typically have return annotations
-                if "->" in line:
-                    cpp = True
-                    if line.strip().endswith(":"):
-                        line = line.rstrip().rstrip(":").rstrip()
-                    if line.startswith("__init__"):
-                        line = line.partition(" -> ")[0]
-                    if line.endswith("-> None"):
-                        line = line.replace(" -> None", "")
-                    if isinstance(
-                        self, (autodoc.ClassLevelDocumenter, autodoc.ClassDocumenter)
-                    ):
-                        # remove self from method argument list
-                        m = selfarg.search(line)
-                        if m:
-                            line = line.replace(m.group(0), "([")
-                        m = selfarg1.search(line)
-                        if m:
-                            line = line.replace(m.group(0), "(")
-                    if isinstance(self, PropertyDocumenter):
-                        line = self._boost_type = line.replace("None() -> ", "").strip()
-                    else:
-                        # mangle signatures to produce python-like type annotations
-                        m = optarg2.search(line)
-                        while m:
-                            line = line.replace(m.group(0), "," + m.group(1))
-                            m = optarg2.search(line)
-                        m = optarg1.search(line)
-                        if m:
-                            line = line.replace(m.group(0), "(" + m.group(1) + ")")
-                        m = typearg.search(line)
-                        while m:
-                            line = line.replace(m.group(0), m.group(2) + ": " + m.group(1) + m.group(3))
-                            m = typearg.search(line)
+                if not "->" in line:
+                    docs1.append(line)
+                    continue
+
+                # remove unnecessary return annotations
+                if line.strip().endswith(":"):
+                    line = line.rstrip().rstrip(":").rstrip()
+                if line.startswith("__init__"):
+                    line = line.partition(" -> ")[0]
+                if line.endswith("-> None"):
+                    line = line.replace(" -> None", "")
+                if isinstance(
+                    self, (autodoc.ClassLevelDocumenter, autodoc.ClassDocumenter)
+                ):
+                    # remove self from method argument list
+                    m = selfarg.search(line)
+                    if m:
+                        line = line.replace(m.group(0), "([")
+                    m = selfarg1.search(line)
+                    if m:
+                        line = line.replace(m.group(0), "(")
+
+                # Boost property type annotations don't work well
+                if isinstance(self, PropertyDocumenter):
+                    line = self._cxx_type_ann = line.replace("None() -> ", "").strip()
+                    doclines[j] = line
+                    docs1.append(line)
+                    continue
+
+                # mangle signatures to produce python-like type annotations
+                m = optarg2.search(line)
+                while m:
+                    line = line.replace(m.group(0), "," + m.group(1))
+                    m = optarg2.search(line)
+                m = optarg1.search(line)
+                if m:
+                    line = line.replace(m.group(0), "(" + m.group(1) + ")")
+                m = typearg.search(line)
+                while m:
+                    line = line.replace(
+                        m.group(0), m.group(2) + ": " + m.group(1) + m.group(3)
+                    )
+                    m = typearg.search(line)
                 line = line.replace("()", "(\u200b)")
+                line = re.sub('<(.*) at (.*)>', '<\\1>', str(line))
+
                 # collate overloaded signatures and corresponding docstrings
-                if line.strip() and autodoc.py_ext_sig_re.match(line):
+                if line.strip():
                     if "".join(docs1).strip():
                         if sigs:
                             n = len(docs1[0]) - len(docs1[0].lstrip())
                             docs1[0] = docs1[0][:n] + "Signature {}: {}".format(
                                 len(sigs), docs1[0].lstrip()
                             )
-                            docs1.extend([""])
-                        docs.extend(docs1)
-                    line = re.sub('<(.*) at (.*)>', '<\\1>', str(line))
+                        docs.extend(docs1 + [""])
                     sigs.append(line)
                     docs1.clear()
-                else:
-                    docs1.append(line)
                 doclines[j] = line
 
-            if cpp:
+            if len(sigs):
                 # finish collation
                 doclines.clear()
                 doclines.extend(sigs)
@@ -163,10 +174,12 @@ class MethodDocumenter(BoostDocsMixin, autodoc.MethodDocumenter):
 
 class PropertyDocumenter(BoostDocsMixin, autodoc.PropertyDocumenter):
     def add_directive_header(self, sig):
+        # update property type annotation
+        # XXX this doesn't seem to work
         super().add_directive_header(sig)
         sourcename = self.get_sourcename()
-        if hasattr(self, "_boost_type"):
-            self.add_line("    :type: " + self._boost_type, sourcename)
+        if hasattr(self, "_cxx_type_ann"):
+            self.add_line("    :type: " + self._cxx_type_ann, sourcename)
 
 
 class ClassDocumenter(BoostDocsMixin, autodoc.ClassDocumenter):

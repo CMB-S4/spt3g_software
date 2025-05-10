@@ -57,10 +57,7 @@ def find_objects(mod, cache, root):
         isclass = isinstance(obj, type)
         ismod = isclass and issubclass(obj, G3Module)
         isobj = isclass and issubclass(obj, G3FrameObject)
-        isfunc = 'Boost.Python.function' in str(type(obj))
-        iscls = isclass and 'Boost.Python.class' in str(type(obj))
-        # XXX enum documentation will be better with pybind11
-        isenum = isclass and hasattr(obj, "names") and hasattr(obj, "values")
+        iscxx = 'Boost.Python' in str(type(obj))
 
         # add to cache
         if ismod or hasattr(obj, "__g3module__"):
@@ -69,9 +66,7 @@ def find_objects(mod, cache, root):
             cache[itemname] = "object"
         elif hasattr(obj, "__pipesegment__"):
             cache[itemname] = "segment"
-        elif iscls or isenum:
-            cache[itemname] = "class"
-        elif isfunc or hasattr(obj, '__g3usefulfunc__'):
+        elif iscxx or hasattr(obj, '__g3usefulfunc__'):
             cache[itemname] = "class" if isclass else "function"
         else:
             cache[itemname] = "skip"
