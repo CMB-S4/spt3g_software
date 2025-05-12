@@ -16,6 +16,8 @@ html_theme_options = {
 }
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
+html_logo = "spt_outlines.png"
+html_favicon = "spt_outlines_white.png"
 exclude_patterns = ["intro_*"]
 extensions = [
     "sphinx.ext.napoleon",
@@ -36,6 +38,7 @@ autodoc_class_signature = "mixed"
 autoclass_content = "both"
 autodoc_member_order = "groupwise"
 autodoc_typehints = "description"
+autodoc_typehints_format = "short"
 autodoc_default_options = {
     "members": True,
     "show-inheritance": True,
