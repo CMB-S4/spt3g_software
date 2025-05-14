@@ -4,7 +4,7 @@ import spt3g
 
 # sphinx configuration options
 
-project = "SPT3G Software"
+project = "SPT-3G Software"
 version = spt3g.__version__
 copyright = "2017-, SPT-3G Collaboration"
 author = "SPT-3G Collaboration"

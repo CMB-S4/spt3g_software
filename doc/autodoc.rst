@@ -1,7 +1,7 @@
 Auto-documentation
 ==================
 
-The SPT3G software can automatically generate documentation on the modules and
+The SPT-3G software can automatically generate documentation on the modules and
 functions in all directories in the repository in a variety of formats. To generate documentation in the default format (HTML), run ``make docs`` in your build directory. Note that this must be run after the software has been built and with PYTHONPATH set appropriately (i.e. after running ``env-shell.sh``).
 
 Getting it documented
