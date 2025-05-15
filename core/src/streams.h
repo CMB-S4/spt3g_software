@@ -328,14 +328,169 @@ protected: \
 	int encode(bool flush); \
 }
 
-#ifdef ZLIB_FOUND
-CODEC(GZip, z_stream, unsigned char);
-#endif
 #ifdef BZIP2_FOUND
 CODEC(BZip2, bz_stream, char);
 #endif
 #ifdef LZMA_FOUND
 CODEC(LZMA, lzma_stream, uint8_t);
+#endif
+
+#ifdef ZLIB_FOUND
+
+class GZipDecoder : public std::streambuf {
+public:
+	GZipDecoder(const std::string& path, size_t size)
+	  : buffer_(new char[size]), bsize_(size) {
+		gzfile_ = gzopen(path.c_str(), "rb");
+		if (gzfile_ == Z_NULL)
+			log_fatal("Error initializing gzip decoder");
+		if (gzbuffer(gzfile_, size) != Z_OK)
+			log_fatal("Error allocating gzip decoder buffer");
+		setg(&buffer_[0], &buffer_[0], &buffer_[0]);
+	}
+
+	~GZipDecoder() {
+		gzclose(gzfile_);
+	}
+
+protected:
+	int_type underflow() {
+		if (gptr() < egptr())
+			return traits_type::to_int_type(*gptr());
+
+		ssize_t n = gzread(gzfile_, &buffer_[0], bsize_);
+		if (n <= 0) {
+			if (!gzeof(gzfile_)) {
+				int errnum = 0;
+				const char *err = gzerror(gzfile_, &errnum);
+				log_error("Error running gzip decoder: %s (%s)",
+				    err, strerror(errnum));
+			}
+			return traits_type::eof();
+		}
+		setg(&buffer_[0], &buffer_[0], &buffer_[0] + n);
+		return traits_type::to_int_type(*gptr());
+	}
+
+	std::streamsize xsgetn(char* s, std::streamsize n) {
+		std::streamsize n_read = 0;
+		while (n_read < n) {
+			if (gptr() == egptr()) {
+				if (underflow() == traits_type::eof())
+					break;
+			}
+
+			std::streamsize remaining = n - n_read;
+			std::streamsize available = egptr() - gptr();
+			std::streamsize to_read = std::min(remaining, available);
+
+			std::memcpy(s + n_read, gptr(), to_read);
+			gbump(to_read);
+			n_read += to_read;
+		}
+		return n_read;
+	}
+
+	std::streampos seekoff(std::streamoff off, std::ios_base::seekdir way,
+	    std::ios_base::openmode mode) {
+		log_fatal("Seek not implemented for compressed stream");
+	}
+
+	std::streampos seekpos(std::streampos pos, std::ios_base::openmode mode) {
+		log_fatal("Seek not implemented for compressed stream");
+	}
+
+private:
+	gzFile gzfile_;
+	std::unique_ptr<char[]> buffer_;
+	size_t bsize_;
+};
+
+class GZipEncoder : public std::streambuf {
+public:
+	GZipEncoder(const std::string& path, size_t size)
+	  : buffer_(new char[size]), bsize_(size), bytes_(0) {
+		gzfile_ = gzopen(path.c_str(), "wb");
+		if (gzfile_ == Z_NULL)
+			log_fatal("Error initializing gzip encoder");
+		if (gzbuffer(gzfile_, size) != Z_OK)
+			log_fatal("Error allocating gzip encoder buffer");
+		setp(&buffer_[0], &buffer_[0] + bsize_);
+	}
+
+	~GZipEncoder() {
+		sync();
+		gzclose(gzfile_);
+	}
+
+protected:
+	int_type overflow(int_type c) {
+		if (c == traits_type::eof())
+			return sync();
+		if (pptr() == epptr()) {
+			if (sync() < 0)
+				return traits_type::eof();
+		}
+		*pptr() = traits_type::to_char_type(c);
+		pbump(1);
+		return traits_type::not_eof(c);
+	}
+
+	std::streamsize xsputn(const char* s, std::streamsize n) {
+		std::streamsize n_written = 0;
+		while (n_written < n) {
+			if (pptr() == epptr()) {
+				if (sync() < 0)
+					break;
+			}
+
+			std::streamsize remaining = n - n_written;
+			std::streamsize available = epptr() - pptr();
+			std::streamsize to_write = std::min(remaining, available);
+
+			std::memcpy(pptr(), s + n_written, to_write);
+			pbump(to_write);
+			n_written += to_write;
+		}
+		return n_written;
+	}
+
+	int sync() {
+		if (pbase() != pptr()) {
+			int n = gzwrite(gzfile_, pbase(), pptr() - pbase());
+			if (n > 0)
+				bytes_ += n;
+			setp(pbase(), epptr());
+			if (n != (pptr() - pbase())) {
+				int errnum = 0;
+				const char *err = gzerror(gzfile_, &errnum);
+				log_error("Error running gzip encoder: %s (%s)",
+				    err, strerror(errnum));
+				return -1;
+			}
+		}
+		return 0;
+	}
+
+	std::streampos seekoff(std::streamoff off, std::ios_base::seekdir way,
+	    std::ios_base::openmode mode) {
+		// short-circuit for tellp
+		if ((mode & std::ios_base::out) && off == 0 && way == std::ios_base::cur)
+			return bytes_;
+		log_fatal("Seek not implemented for compressed stream");
+	}
+
+	std::streampos seekpos(std::streampos pos, std::ios_base::openmode mode) {
+		log_fatal("Seek not implemented for compressed stream");
+	}
+
+private:
+	gzFile gzfile_;
+	std::unique_ptr<char[]> buffer_;
+	size_t bsize_;
+	size_t bytes_;
+};
+
 #endif
 
 #endif

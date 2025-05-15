@@ -1,59 +1,5 @@
 #include "streams.h"
 
-#ifdef ZLIB_FOUND
-GZipDecoder::GZipDecoder(const std::string& path, size_t size) : Decoder(path, size)
-{
-	stream_.zalloc = Z_NULL;
-	stream_.zfree = Z_NULL;
-	stream_.opaque = Z_NULL;
-	stream_.avail_in = 0;
-	stream_.next_in = Z_NULL;
-	if (inflateInit2(&stream_, 16 + MAX_WBITS) != Z_OK)
-		log_fatal("Error initializing gzip decoder: %s", stream_.msg);
-}
-
-GZipDecoder::~GZipDecoder()
-{
-	inflateEnd(&stream_);
-}
-
-int GZipDecoder::decode()
-{
-	int ret = inflate(&stream_, Z_NO_FLUSH);
-	if (ret != Z_OK && ret != Z_STREAM_END) {
-		log_error("Error running gzip decoder: %s", stream_.msg);
-		return ret;
-	}
-	return 0;
-}
-
-GZipEncoder::GZipEncoder(const std::string& path, size_t size) : Encoder(path, size)
-{
-	stream_.zalloc = Z_NULL;
-	stream_.zfree = Z_NULL;
-	stream_.opaque = Z_NULL;
-	if (deflateInit2(&stream_, Z_DEFAULT_COMPRESSION, Z_DEFLATED,
-	    16 + MAX_WBITS, 8, Z_DEFAULT_STRATEGY) != Z_OK)
-		log_fatal("Error initializing gzip encoder: %s", stream_.msg);
-}
-
-GZipEncoder::~GZipEncoder()
-{
-	sync();
-	deflateEnd(&stream_);
-}
-
-int GZipEncoder::encode(bool flush)
-{
-	int ret = deflate(&stream_, flush ? Z_FINISH : Z_NO_FLUSH);
-	if (ret == Z_STREAM_ERROR) {
-		log_error("Error running gzip encoder: %s", stream_.msg);
-		return ret;
-	}
-	return 0;
-}
-#endif
-
 #ifdef BZIP2_FOUND
 BZip2Decoder::BZip2Decoder(const std::string& path, size_t size) : Decoder(path, size)
 {
