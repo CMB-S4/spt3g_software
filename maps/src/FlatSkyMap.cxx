@@ -712,12 +712,12 @@ G3SkyMapPtr FlatSkyMap::Rebin(size_t scale, bool norm) const
 	return out;
 }
 
-G3SkyMapPtr FlatSkyMap::ExtractPatch(size_t x0, size_t y0, size_t width, size_t height,
+FlatSkyMapPtr FlatSkyMap::ExtractPatch(size_t x0, size_t y0, size_t width, size_t height,
     double fill) const
 {
 	// short circuit copy
 	if (x0 == width / 2 && y0 == height / 2 && width == xpix_ && height == ypix_)
-		return Clone(true);
+		return std::dynamic_pointer_cast<FlatSkyMap>(Clone(true));
 
 	FlatSkyProjection p(proj_info.OverlayPatch(x0, y0, width, height));
 	FlatSkyMapPtr out(new FlatSkyMap(p, coord_ref, weighted, units, pol_type,
@@ -762,7 +762,7 @@ void FlatSkyMap::InsertPatch(const FlatSkyMap &patch, bool ignore_zeros)
 	}
 }
 
-G3SkyMapPtr FlatSkyMap::Reshape(size_t width, size_t height, double fill) const
+FlatSkyMapPtr FlatSkyMap::Reshape(size_t width, size_t height, double fill) const
 {
 	return ExtractPatch(xpix_ / 2, ypix_ / 2, width, height, fill);
 }
@@ -862,7 +862,7 @@ flatskymap_buffer_info(FlatSkyMap &m)
 	return py::buffer_info(&m[0], sizeof(double), "d", 2, shape, strides);
 }
 
-static G3SkyMapPtr
+static FlatSkyMapPtr
 flatskymap_getslice_2d(const FlatSkyMap &skymap, const py::slice &yslice, const py::slice &xslice)
 {
 	size_t ystart(0), ystop(skymap.shape()[1]), ystep(1), ylen(0);
@@ -915,19 +915,20 @@ flatskymap_setslice_1d(FlatSkyMap &skymap, const py::slice &coords,
 }
 
 static void
-flatskymap_setitem_2d(FlatSkyMap &skymap, const py::tuple &coords,
-    const py::object &val)
+flatskymap_setitem_2d(FlatSkyMap &skymap, const py::tuple &coords, const py::float_ &val)
 {
-	if (py::isinstance<py::int_>(coords[0])) {
-		// Swapped to match numpy
-		ssize_t y = unwrap_index(coords[0].cast<ssize_t>(), skymap.shape()[1]);
-		ssize_t x = unwrap_index(coords[1].cast<ssize_t>(), skymap.shape()[0]);
+	// Swapped to match numpy
+	ssize_t y = unwrap_index(coords[0].cast<ssize_t>(), skymap.shape()[1]);
+	ssize_t x = unwrap_index(coords[1].cast<ssize_t>(), skymap.shape()[0]);
 
-		double dval = val.cast<double>();
-		skymap(x, y) = dval;
-		return;
-	}
+	double dval = val.cast<double>();
+	skymap(x, y) = dval;
+}
 
+static void
+flatskymap_setitem_2d_patch(FlatSkyMap &skymap, const py::tuple &coords,
+    const py::buffer &val)
+{
 	// This one is kind of weird in that there is precisely one set of
 	// valid coords. Check that they work in a sneaky way: extract
 	// the given part of a null-data copy of the big map, then check with
@@ -940,8 +941,7 @@ flatskymap_setitem_2d(FlatSkyMap &skymap, const py::tuple &coords,
 	FlatSkyMapPtr shallowclone =
 	    std::dynamic_pointer_cast<FlatSkyMap>(skymap.Clone(false));
 	FlatSkyMapPtr dummy_subpatch =
-	    std::dynamic_pointer_cast<FlatSkyMap>(
-	        flatskymap_getslice_2d(*shallowclone, yslice, xslice));
+	    flatskymap_getslice_2d(*shallowclone, yslice, xslice);
 
 	if (py::isinstance<FlatSkyMap>(val)) {
 		const FlatSkyMap &patch = val.cast<const FlatSkyMap &>();
@@ -1267,6 +1267,7 @@ PYBINDINGS("maps", scope)
 	    .def("__setitem__", flatskymap_setitem_1d)
 	    .def("__getitem__", flatskymap_getitem_2d)
 	    .def("__setitem__", flatskymap_setitem_2d)
+	    .def("__setitem__", flatskymap_setitem_2d_patch)
 	    .def("__setitem__", flatskymap_setslice_1d)
 	    .def("__getitem__", flatskymap_getitem_masked)
 	    .def("__setitem__", flatskymap_setitem_masked)

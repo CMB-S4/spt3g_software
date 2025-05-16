@@ -399,39 +399,28 @@ skymapmask_array_clone(const G3SkyMapMask &m, const py::cbuffer &v,
 }
 
 static int
-skymapmask_index(const G3SkyMapMask &m, const py::object &index)
+skymapmask_index(const G3SkyMapMask &m, const py::tuple &index)
 {
-	int i = 0;
-	if (py::isinstance<py::int_>(index)) {
-		i = index.cast<int>();
-	} else if (py::isinstance<py::tuple>(index)) {
-		int x, y;
+	py::tuple t = index.cast<py::tuple>();
+	FlatSkyMapConstPtr fsm = std::dynamic_pointer_cast<const FlatSkyMap>(m.Parent());
+	if (!fsm)
+		throw py::type_error("N-D pixels, but underlying map is not a flat sky map");
 
-		py::tuple t = index.cast<py::tuple>();
-		FlatSkyMapConstPtr fsm = std::dynamic_pointer_cast<const FlatSkyMap>(m.Parent());
-		if (!fsm)
-			throw py::type_error("N-D pixels, but underlying map is not a flat sky map");
-
-		x = unwrap_index(t[1].cast<int>(), fsm->shape()[0]);
-		y = unwrap_index(t[0].cast<int>(), fsm->shape()[1]);
-
-		i = y * fsm->shape()[0] + x;
-	} else {
-		throw py::type_error("Need to pass an integer pixel ID or "
-		    "(optionally) for 2D maps a tuple of coordinates");
-	}
+	int x = unwrap_index(t[1].cast<int>(), fsm->shape()[0]);
+	int y = unwrap_index(t[0].cast<int>(), fsm->shape()[1]);
+	int i = y * fsm->shape()[0] + x;
 
 	return unwrap_index(i, m.size());
 }
 
 static bool
-skymapmask_getitem(const G3SkyMapMask &m, const py::object &index)
+skymapmask_getitem(const G3SkyMapMask &m, const py::tuple &index)
 {
 	return m.at(skymapmask_index(m, index));
 }
 
 static void
-skymapmask_setitem(G3SkyMapMask &m, const py::object &index, bool val)
+skymapmask_setitem(G3SkyMapMask &m, const py::tuple &index, bool val)
 {
 	m[skymapmask_index(m, index)] = val;
 }
@@ -510,7 +499,11 @@ PYBINDINGS("maps", scope)
 	  .def("compatible", (bool (G3SkyMapMask::*)(const G3SkyMap &) const)
 	    &G3SkyMapMask::IsCompatible,
 	    "Returns true if this mask can be applied to the given map.")
+	  .def("__getitem__",
+	    [](const G3SkyMapMask &m, int i) { return m.at(unwrap_index(i, m.size())); })
 	  .def("__getitem__", &skymapmask_getitem)
+	  .def("__setitem__",
+	    [](G3SkyMapMask &m, int i, bool val) { m[unwrap_index(i, m.size())] = val; })
 	  .def("__setitem__", &skymapmask_setitem)
 	  .def("__bool__", &skymapmask_pybool)
 	  .def("invert", &skymapmask_pyinvert, "Invert all elements in mask")
