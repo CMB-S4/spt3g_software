@@ -1571,7 +1571,7 @@ to True; however, this feature is fragile and may not work as expected with
 complex pipelines.
 
 *Constructor:*
-	``CoaddMaps(map_ids=None, output_map_id='Coadd', collate=False, weighted=True, ignore_missing_weights=False, drop_input_frames=False, record_obs_id=False)``
+	``CoaddMaps(map_ids=None, output_map_id='Coadd', collate=False, weighted=True, ignore_missing_weights=False, drop_input_frames=False, record_obs_id=False, keep_outputs=False)``
 
 *Constructor:*
 	*Arguments:*
@@ -1600,6 +1600,11 @@ complex pipelines.
 		    If True, include source name and observation ID info in the output coadd
 		    frame ``InputMapIds`` key, along with the map ID for each input frame.
 		    If False, only the map frame ID is included.
+		keep_outputs : bool
+		    If True, preserve the coadd frame module attributes after parsing an
+		    EndProcessing frame.  Otherwise, coadd frames are deleted to avoid
+		    memory leaks in pipelines, under the assumption that ownership of the
+		    frame(s) is transfered to downstream modules, e.g. G3Writer.
 
 
 
