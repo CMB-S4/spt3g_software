@@ -50,7 +50,7 @@ for m in maplist:
         copy_weights=True,
     )
 
-    coadder = maps.CoaddMaps()
+    coadder = maps.CoaddMaps(keep_outputs=True)
     pipe.Add(coadder)
 
     mex2 = maps.ExtractMaps(copy=True)
