@@ -610,6 +610,7 @@ class CoaddMaps(object):
         ignore_missing_weights=False,
         drop_input_frames=False,
         record_obs_id=False,
+        keep_outputs=False,
     ):
         """
         Arguments
@@ -639,6 +640,11 @@ class CoaddMaps(object):
             If True, include source name and observation ID info in the output coadd
             frame ``InputMapIds`` key, along with the map ID for each input frame.
             If False, only the map frame ID is included.
+        keep_outputs : bool
+            If True, preserve the coadd frame module attributes after parsing an
+            EndProcessing frame.  Otherwise, coadd frames are deleted to avoid
+            memory leaks in pipelines, under the assumption that ownership of the
+            frame(s) is transfered to downstream modules, e.g. G3Writer.
         """
         if isinstance(map_ids, str):
             map_ids = [map_ids]
@@ -652,6 +658,7 @@ class CoaddMaps(object):
         self.ignore_missing_weights = ignore_missing_weights
         self.drop_input_frames = drop_input_frames
         self.obs_id = None if record_obs_id else False
+        self.keep_outputs = keep_outputs
 
     @property
     def coadd_frame(self):
@@ -679,6 +686,15 @@ class CoaddMaps(object):
             self._coadd_frames = dict()
         return self._coadd_frames
 
+    def reset(self):
+        """
+        Clear internal frame cache.
+        """
+        if self.collate:
+            self.coadd_frames.clear()
+        else:
+            delattr(self, "_coadd_frame")
+
     def get_map_id(self, frame):
         """
         Return Id associated with the input frame
@@ -704,8 +720,12 @@ class CoaddMaps(object):
 
         if isinstance(frame, core.G3Frame) and frame.type == core.G3FrameType.EndProcessing:
             if self.collate:
-                return list(self.coadd_frames.values()) + [frame]
-            return [self.coadd_frame, frame]
+                out = list(self.coadd_frames.values()) + [frame]
+            else:
+                out = [self.coadd_frame, frame]
+            if not self.keep_outputs:
+                self.reset()
+            return out
 
         if self.obs_id is not False and "SourceName" in frame:
             self.obs_id = "{}/{}".format(
@@ -837,6 +857,7 @@ def coadd_map_files(
             weighted=weighted,
             drop_input_frames=True,
             record_obs_id=record_obs_id,
+            keep_outputs=True,
         )
     pipe.Add(coadder)
 
@@ -847,7 +868,7 @@ def coadd_map_files(
         pipe.Add(core.G3Writer, filename=output_file)
     pipe.Run()
 
-    if hasattr(coadder, 'coadd_frames'):
+    if collate:
         return coadder.coadd_frames
     return coadder.coadd_frame
 
