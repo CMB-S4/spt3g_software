@@ -1,7 +1,7 @@
 from . import G3Module, G3FrameObject, usefulfunc
 
 
-__all__ = ["G3ModuleDocumenter", "module_apidoc"]
+__all__ = ["G3Documenter", "module_apidoc"]
 
 
 def rst_header(title, line, overline=False):
@@ -16,7 +16,12 @@ def rst_header(title, line, overline=False):
 
 
 @usefulfunc
-class G3ModuleDocumenter:
+class G3Documenter:
+    """
+    Class for inspecting sub-modules of the SPT-3G software package and
+    generating valid RST for use with sphinx-autodoc.
+    """
+
     #: API categories for which to generate documentation, with a
     #: corresponding section title and sphinx-autodoc directive.
     categories = {
@@ -145,7 +150,7 @@ def module_apidoc(module_path):
     Arguments
     ---------
     module_path : str
-        Module path to inspect, e.g. "spt3g.core"
+        Python module path to inspect, e.g. "spt3g.core"
 
     Returns
     -------
@@ -153,4 +158,4 @@ def module_apidoc(module_path):
         String containing valid RST to append to a document
     """
 
-    return G3ModuleDocumenter(module_path).generate()
+    return G3Documenter(module_path).generate()
