@@ -103,17 +103,12 @@ void DfMuxCollator::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 		goto out;
 
 	// Init aux timestreams by enumerating all G3Doubles in first point
-	{
-		std::vector<std::string> keys = (*stash_.begin())->Keys();
-		for (auto key = keys.begin(); key != keys.end(); key++) {
-			// Make a timestream for each. Note that there are no
-			// guarantees about bit width, so don't turn on FLAC
-			// here.
-			if ((*stash_.begin())->Has<G3Double>(*key))
-				extra_data[*key] =
-				    std::make_shared<G3Timestream>(
-				    stash_.size(), NAN);
-		}
+	for (auto key: *(*stash_.begin())) {
+		// Make a timestream for each. Note that there are no guarantees
+		// about bit width, so don't turn on FLAC here.
+		if ((*stash_.begin())->Has<G3Double>(key))
+			extra_data[key] = std::make_shared<G3Timestream>(
+			    stash_.size(), NAN);
 	}
 
 	// Now collect all the data

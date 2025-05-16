@@ -12,6 +12,10 @@ public:
 	G3Module() {}
 	virtual ~G3Module() {}
 
+	// module objects are non-copyable
+	G3Module(const G3Module &) = delete;
+	G3Module& operator=(const G3Module &) = delete;
+
 	// Process the frame in 'frame' and then put some number of frames into
 	// 'out'. Cases of interest:
 	// 1. The first module in the pipe (e.g. a file reader) gets NULL for
