@@ -20,13 +20,13 @@ def addinfo(fr):
 
 pipe.Add(addinfo)
 pipe.Add(core.Dump)
-pipe.Add(core.G3Writer, filename="test.g3.xz")
+pipe.Add(core.G3Writer, filename="test.g3.xz", buffersize=1024)
 pipe.Run()
 
 # And back from disk
 print("Reading")
 pipe = core.G3Pipeline()
-pipe.Add(core.G3Reader, filename="test.g3.xz")
+pipe.Add(core.G3Reader, filename="test.g3.xz", buffersize=1024)
 pipe.Add(core.Dump)
 n = 0
 
