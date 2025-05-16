@@ -19,17 +19,19 @@ Because sky maps, like timestreams, implement the Python buffer protocol, there 
 Error Message Decryption
 ------------------------
 
-Argument Errors (prior to version 0.5)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Argument Errors
+~~~~~~~~~~~~~~~
 
 If you are adding a module to a pipeline in python, and if the module is written in C++, when you misspell a keyword argument, you may get an unhelpful message like the following:
 
 .. code-block:: none
 
-	Boost.Python.ArgumentError: Python argument types in
-		FilterEventsOnSameSquid.__init__(FilterEventsOnSameSquid) did not match C++ signature:
+	TypeError: some_complicated_function(): incompatible function arguments. The following argument types are supported:
+	    1. ...
 
-The unhelpfulness of this message arises because Python and C++ have different semantics for overloaded functions, preventing Boost from succesfully disambiguating a misspelled or otherwise wrong argument from an attempt to execute a different function entirely. If you see errors like the above, check your arguements for typos in keywords, number of positional arguments, and types.
+	Invoked with: ...
+
+This message arises because Python and C++ have different semantics for overloaded functions, preventing pybind11 from succesfully disambiguating a misspelled or otherwise wrong argument from an attempt to execute a different function entirely. If you see errors like the above, check your arguements for typos in keywords, number of positional arguments, and types.
 
 Misbehaving Compilers
 ---------------------
