@@ -1,0 +1,161 @@
+from . import G3Module, G3FrameObject, usefulfunc
+
+
+__all__ = ["G3Documenter", "module_apidoc"]
+
+
+def rst_header(title, line, overline=False):
+    """
+    Add a valid RST underline (and optional matching overline) to create a
+    section header.
+    """
+    out = title + "\n" + line * len(title) + "\n\n"
+    if overline:
+        out = line * len(title) + "\n" + out
+    return out
+
+
+@usefulfunc
+class G3Documenter:
+    """
+    Class for inspecting sub-modules of the SPT-3G software package and
+    generating valid RST for use with sphinx-autodoc.
+    """
+
+    #: API categories for which to generate documentation, with a
+    #: corresponding section title and sphinx-autodoc directive.
+    categories = {
+        "object": ("Frame Objects", "autoclass"),
+        "cmodule": ("Class-like Pipeline Modules", "autoclass"),
+        "fmodule": ("Function-like Pipeline Modules", "autofunction"),
+        "segment": ("Pipeline Segments", "autofunction"),
+        "class": ("Useful Classes", "autoclass"),
+        "function": ("Useful Functions", "autofunction"),
+    }
+
+    def __init__(self, root):
+        self.root = root
+        self.cache = {}
+
+    def find_objects(self, mod=None):
+        """
+        Recursively find all objects in the input root that fit into one of the
+        API categories listed in ``categories``.
+
+        Arguments
+        ---------
+        mod : object
+            Object to inspect
+
+        Returns
+        -------
+        cache : dict
+            Recursively populated dictionary of fully qualified names and their
+            associated API category.
+        """
+        if mod is None:
+            mod = __import__(self.root)
+            name = self.root.split(".")[-1]
+            if '.' in self.root and hasattr(mod, name):
+                mod = mod.__dict__[name]
+
+        for x, obj in mod.__dict__.items():
+            if x.startswith("_") or x.endswith("_"):
+                continue
+
+            # construct fully-qualified object name
+            if hasattr(obj, "__wrapped__"):
+                obj = obj.__wrapped__
+            try:
+                if hasattr(obj, '__module__'):
+                    itemname = '%s.%s' % (obj.__module__, obj.__name__)
+                else:
+                    itemname = obj.__name__
+            except:
+                continue
+
+            # skip objects outside of namespace
+            if not itemname.startswith(self.root):
+                continue
+            # skip already-classified objects
+            if itemname in self.cache:
+                continue
+
+            # classify
+            isclass = isinstance(obj, type)
+            ismod = isclass and issubclass(obj, G3Module)
+            isobj = isclass and issubclass(obj, G3FrameObject)
+            iscxx = 'Boost.Python' in str(type(obj))
+
+            # add to cache
+            if ismod or hasattr(obj, "__g3module__"):
+                self.cache[itemname] = "cmodule" if isclass else "fmodule"
+            elif isobj or hasattr(obj, '__g3frameobject__'):
+                self.cache[itemname] = "object"
+            elif hasattr(obj, "__pipesegment__"):
+                self.cache[itemname] = "segment"
+            elif iscxx or hasattr(obj, '__g3usefulfunc__'):
+                self.cache[itemname] = "class" if isclass else "function"
+            else:
+                self.cache[itemname] = "skip"
+                if not isclass and hasattr(obj, '__dict__'):
+                    # recurse
+                    self.find_objects(obj)
+
+        # drop all skipped objects
+        if self.root == mod.__name__:
+            for k in list(self.cache):
+                if self.cache[k] == "skip":
+                    self.cache.pop(k)
+
+        return self.cache
+
+    def generate(self):
+        """
+        Construct valid RST for each of the API types in separate sections, and
+        list all relevant objects with appropriate sphinx-autodoc directives.
+
+        Returns
+        -------
+        str :
+            String containing valid RST to append to a document
+        """
+        # find all relevant objects
+        cache = self.find_objects()
+        if not len(cache):
+            return
+
+        txt = rst_header("API Documentation", "=")
+
+        # build API sections
+        for kind, (title, directive) in self.categories.items():
+            objs = sorted([k for k, v in cache.items() if v == kind])
+            if not len(objs):
+                continue
+
+            txt += rst_header(title, "-")
+            txt += "\n\n".join([f".. {directive}:: {k}" for k in objs]) + "\n\n"
+
+        return txt
+
+
+@usefulfunc
+def module_apidoc(module_path):
+    """
+    Create API documentation for a submodule of the spt3g library.
+
+    The output separates each of the API types into separate sections, and lists
+    all relevant objects with appropriate sphinx-autodoc directives.
+
+    Arguments
+    ---------
+    module_path : str
+        Python module path to inspect, e.g. "spt3g.core"
+
+    Returns
+    -------
+    str :
+        String containing valid RST to append to a document
+    """
+
+    return G3Documenter(module_path).generate()
