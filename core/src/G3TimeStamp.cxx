@@ -261,26 +261,6 @@ g3time_repr(const py::object &obj)
 	return s.str();
 }
 
-static G3TimePtr
-g3time_from_timestamp(py::object obj)
-{
-	G3TimeStamp t;
-
-	if (py::isinstance<G3Time>(obj))
-		return G3TimePtr(new G3Time(obj.cast<G3Time>()));
-
-	// This ends up shadowing the string constructor, so add dispatch
-	if (py::isinstance<py::str>(obj))
-		return G3TimePtr(new G3Time(obj.cast<std::string>()));
-
-	if (py::isinstance<py::float_>(obj))
-		return G3TimePtr(new G3Time(obj.cast<double>()));
-
-	t = obj.cast<int64_t>();
-
-	return G3TimePtr(new G3Time(t));
-}
-
 PYBINDINGS("core", scope) {
 	register_frameobject<G3Time>(scope, "G3Time", "UTC Time", py::buffer_protocol())
 	    .def(py::init<>())
@@ -291,8 +271,10 @@ PYBINDINGS("core", scope) {
 	        "Supported formats are: YYYYMMDD_HHMMSS, YYMMDD_HHMMSS, YYMMDD HH:MM:SS, "
 	        "DD-Mon-YYYY:HH:MM:SS, YYYY-MM-DDTHH:MM:SS[+TZ] (ISO 8601). All can have a "
 	        "fraction of second field after a dot.")
-	    .def(py::init(&g3time_from_timestamp), py::arg("timestamp"),
-	        "Create a G3Time from a numeric timestamp")
+	    .def(py::init<G3TimeStamp>(), py::arg("timestamp"),
+	        "Create a G3Time from an integer timestamp")
+	    .def(py::init([](py::float_ t) { return G3TimePtr(new G3Time(t.cast<double>())); }),
+	        py::arg("timestamp"), "Create a G3Time from a floating point timestamp")
 	    .def("GetFileFormatString", &G3Time::GetFileFormatString,
 	        "Get a string corresponding to how SPTpol and GCP name files for this time")
 	    .def("isoformat", &G3Time::isoformat, "Return the ISO 8601 formatted timestamp string")
