@@ -13,6 +13,8 @@ Writing a module in Python
 
 Modules can be written in Python in any one of three styles: as python functions, as subclasses of the base class core.G3Module, or as generic Python callables.
 
+.. _function-modules:
+
 Python Modules as Functions
 ___________________________
 
@@ -116,6 +118,8 @@ The first module added to a ``G3Pipeline`` object is special: unlike all others,
 
 Unlike all other modules, the first module will be passed ``None`` instead of a frame. This module then inserts data into the processing queue by returning new frames (see `Return values from Python modules`_). Data processing will stop when it returns an empty list (``[]``).
 
+.. _class-modules:
+
 Callable Objects as Functions
 _____________________________
 
@@ -169,6 +173,8 @@ will produce the following output of ``spt3g-inspect``:
 
 All subclasses of ``core.G3Module`` (both in Python and C++) are automatically treated as though they were marked with this decorator.
 
+.. _cxx-modules:
+
 Writing a module in C++
 =======================
 
@@ -218,6 +224,8 @@ Interaction with Python occurs through the ``EXPORT_G3MODULE()`` macro. The firs
 	EXPORT_G3MODULE("exampleproject", Five, init<optional<std::string> >(args("output")), "Adds five");
 
 Here, the ``init<>`` arguments are modified to reflect that the configuration parameter is a string, that it is optional (leaving out the ``optional<>`` will make it mandatory), and that it maps to a Python keyword argument named "output". If your constructor takes multiple arguments, enclose the entire init section in parentheses to avoid preprocessor errors.
+
+.. _pipesegments:
 
 Pipeline Segments
 =================

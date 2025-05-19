@@ -25,12 +25,43 @@ class G3Documenter:
     #: API categories for which to generate documentation, with a
     #: corresponding section title and sphinx-autodoc directive.
     categories = {
-        "object": ("Frame Objects", "autoclass"),
-        "cmodule": ("Class-like Pipeline Modules", "autoclass"),
-        "fmodule": ("Function-like Pipeline Modules", "autofunction"),
-        "segment": ("Pipeline Segments", "autofunction"),
-        "class": ("Useful Classes", "autoclass"),
-        "function": ("Useful Functions", "autofunction"),
+        "object": (
+            "Frame Objects",
+            "Serializable objects that may be stored as entries in "
+            ":py:class:`~spt3g.core.G3Frame` objects.",
+            "autoclass",
+        ),
+        "cmodule": (
+            "Class-like Pipeline Modules",
+            "Classes that can be added to :py:class:`~spt3g.core.G3Pipeline` "
+            "instances, either written as callable objects in Python (see "
+            ":ref:`class-modules`) or as :py:class:`~spt3g.core.G3Module`-derived "
+            "classes in C++ (see :ref:`cxx-modules`).",
+            "autoclass",
+        ),
+        "fmodule": (
+            "Function-like Pipeline Modules",
+            "Python functions that can be added to :py:class:`~spt3g.core.G3Pipeline` "
+            "instances. See :ref:`function-modules` for more detail.",
+            "autofunction",
+        ),
+        "segment": (
+            "Pipeline Segments",
+            "Python functions that combine a sequence of pipeline modules, and can be "
+            "added to :py:class:`~spt3g.core.G3Pipeline` instances. "
+            "See :ref:`pipesegments` for more detail.",
+            "autofunction",
+        ),
+        "class": (
+            "Useful Classes",
+            "Various Python and C++ classes that are part of the public API.",
+            "autoclass",
+        ),
+        "function": (
+            "Useful Functions",
+            "Various Python and C++ functions that are part of the public API.",
+            "autofunction",
+        ),
     }
 
     def __init__(self, root):
@@ -128,12 +159,13 @@ class G3Documenter:
         txt = rst_header("API Documentation", "=")
 
         # build API sections
-        for kind, (title, directive) in self.categories.items():
+        for kind, (title, description, directive) in self.categories.items():
             objs = sorted([k for k, v in cache.items() if v == kind])
             if not len(objs):
                 continue
 
             txt += rst_header(title, "-")
+            txt += description + "\n\n"
             txt += "\n\n".join([f".. {directive}:: {k}" for k in objs]) + "\n\n"
 
         return txt
