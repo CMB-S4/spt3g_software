@@ -20,10 +20,14 @@ class G3Documenter:
     """
     Class for inspecting sub-modules of the SPT-3G software package and
     generating valid RST for use with sphinx-autodoc.
+
+    :cvar categories: Dictionary of API categories for which to generate
+        documentation, containing a section title, description, and
+        sphinx-autodoc directive as a tuple for each category.
     """
 
-    #: API categories for which to generate documentation, with a
-    #: corresponding section title and sphinx-autodoc directive.
+    # API categories for which to generate documentation, with a
+    # corresponding section title, description and sphinx-autodoc directive.
     categories = {
         "object": (
             "Frame Objects",
@@ -62,6 +66,12 @@ class G3Documenter:
             "Various Python and C++ functions that are part of the public API.",
             "autofunction",
         ),
+        "decorator": (
+            "Decorators",
+            "Decorator functions for indicating any of the above types and/or "
+            "modifying function behavior.",
+            "autodecorator",
+        )
     }
 
     def __init__(self, root):
@@ -119,7 +129,9 @@ class G3Documenter:
             iscxx = 'Boost.Python' in str(type(obj))
 
             # add to cache
-            if ismod or hasattr(obj, "__g3module__"):
+            if hasattr(obj, "__g3decorator__"):
+                self.cache[itemname] = "decorator"
+            elif ismod or hasattr(obj, "__g3module__"):
                 self.cache[itemname] = "cmodule" if isclass else "fmodule"
             elif isobj or hasattr(obj, '__g3frameobject__'):
                 self.cache[itemname] = "object"
@@ -159,14 +171,19 @@ class G3Documenter:
         txt = rst_header("API Documentation", "=")
 
         # build API sections
+        body = ""
         for kind, (title, description, directive) in self.categories.items():
             objs = sorted([k for k, v in cache.items() if v == kind])
             if not len(objs):
                 continue
 
-            txt += rst_header(title, "-")
-            txt += description + "\n\n"
-            txt += "\n\n".join([f".. {directive}:: {k}" for k in objs]) + "\n\n"
+            body += rst_header(title, "-")
+            body += description + "\n\n"
+            body += "\n\n".join([f".. {directive}:: {k}" for k in objs]) + "\n\n"
+
+        if len(body):
+            txt += ".. contents:: Contents\n   :depth: 1\n   :local:\n\n"
+            txt += body
 
         return txt
 

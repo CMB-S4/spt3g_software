@@ -9,10 +9,12 @@ Getting it documented
 
 To ensure that your functions and modules are documented properly, you need to
 tell the document generator that you want it to parse them. In Python,
-``G3Module`` objects will automatically be parsed. For functions and non-``G3Module``
-inherited classes, you'll need to decorate them with ``@core.indexmod``,
-``@core.pipesegment`` or ``@core.usefulfunc``, depending on the type of object to
-be documented.
+:py:class:`~spt3g.core.G3Module` objects will automatically be parsed. For
+functions and non-:py:class:`~spt3g.core.G3Module` inherited classes, you'll need
+to decorate them with :py:deco:`core.indexmod <spt3g.core.modconstruct.indexmod>`,
+:py:deco:`core.pipesegment <spt3g.core.modconstruct.pipesegment>` or
+:py:deco:`core.usefulfunc <spt3g.core.modconstruct.usefulfunc>`, depending on the
+type of object to be documented.
 
 In C++, functions exported with ``scope.def()`` will automatically be documented.
 Additionally, any modules exported with the ``register_g3module`` function will
