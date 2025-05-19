@@ -57,6 +57,8 @@ optarg2 = re.compile(r"\[,(\s*[\(\)\w._]+=[\w.\(\)=,\s_\'\"\-\[\]]+)\]", re.VERB
 
 typearg = re.compile(r"\(([\w.]+)\)([\w._]+)([=,\)]?)", re.VERBOSE)
 
+arg2 = re.compile(r"\(arg2:(\s*[\w.]+)\)", re.VERBOSE)
+
 
 class BoostDocsMixin:
     """
@@ -129,6 +131,9 @@ class BoostDocsMixin:
                         m.group(0), m.group(2) + ": " + m.group(1) + m.group(3)
                     )
                     m = typearg.search(line)
+                m = arg2.search(line)
+                if m:
+                    line = line.replace(m.group(0), "(arg:" + m.group(1) + ")")
                 line = line.replace("()", "(\u200b)")
                 line = re.sub('<(.*) at (.*)>', '<\\1>', str(line))
 
