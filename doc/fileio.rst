@@ -9,7 +9,7 @@ Use of these files is through four main classes: G3Reader_, G3Writer_, G3MultiFi
 G3Reader
 ========
 
-The G3Reader class reads a file from disk and inserts it into a pipeline when placed as the pipeline's first module. Once the file, or files, have been read completely, it will terminate the pipeline.
+The :py:class:`~spt3g.core.G3Reader` class reads a file from disk and inserts it into a pipeline when placed as the pipeline's first module. Once the file, or files, have been read completely, it will terminate the pipeline.
 
 .. code-block:: python
 
@@ -29,7 +29,7 @@ To read multiple files, replace the path with a python iterable of paths:
 
 All of the frames in ``file2.g3`` will appear to pipeline modules in order following all of the frames in ``file1.g3``.
 
-G3Reader also supports transparent gzip decompression. If a file path ends in ``.gz``, it will be decompressed in memory as it is read:
+G3Reader also supports transparent gzip, bzip2 or LZMA decompression. If a file path ends in ``.gz``, ``.bz2`` or ``.xz``, respectively, it will be decompressed in memory as it is read:
 
 .. code-block:: python
 
@@ -43,7 +43,7 @@ In addition to reading files, G3Reader can be used to receive streaming data ove
 G3Writer
 ========
 
-G3Writer is the output counterpart of G3Reader. All frames it receives as input get written to disk, as well as copied to the module's copied without changes. An example follows:
+:py:class:`~spt3g.core.G3Writer` is the output counterpart of G3Reader. All frames it receives as input get written to disk, as well as copied to the module's copied without changes. An example follows:
 
 .. code-block:: python
 
@@ -61,8 +61,8 @@ G3Writer can also be used outside of a pipeline as a context to write particular
 .. code-block:: python
 
 	with core.G3Writer(filename='/path/to/file.g3') as writer:
-		writer(frame1)
-		writer(frame2)
+	    writer(frame1)
+	    writer(frame2)
 
 This will open the file, write both ``frame1`` and ``frame2``, then properly close the file.
 
@@ -70,7 +70,7 @@ This will open the file, write both ``frame1`` and ``frame2``, then properly clo
 G3MultiFileWriter
 =================
 
-G3MultiFileWriter is like G3Writer but, instead of writing to only one file, it splits its output over multiple files. This is useful, for example, when doing data acquisition or TOD streams to prevent having a single TB output file. In order to make these files independently readable, the most recent instances of any metadata frames (i.e. any frame of type other than Timepoint or Scan) will be prepended to every output file in the order in which they were originally seen.
+:py:class:`~spt3g.core.G3MultiFileWriter` is like G3Writer but, instead of writing to only one file, it splits its output over multiple files. This is useful, for example, when doing data acquisition or TOD streams to prevent having a single TB output file. In order to make these files independently readable, the most recent instances of any metadata frames (i.e. any frame of type other than Timepoint or Scan) will be prepended to every output file in the order in which they were originally seen.
 
 The constructor of G3MultiFileWriter takes three arguments: a base file name, a file size limit, and, optionally, a file division algorithm. A typical invocation looks like the following and fills a directory with files of at most 1 GB:
 
@@ -78,16 +78,20 @@ The constructor of G3MultiFileWriter takes three arguments: a base file name, a 
 
 	pipe = core.G3Pipeline()
 	pipe.Add(dosomethings)
-	pipe.Add(core.G3MultiFileWriter, filename='/path/to/file-%02u.g3', size_limit = 1024**3)
+	pipe.Add(core.G3MultiFileWriter, filename='/path/to/file-%02u.g3', size_limit=1024**3)
 	pipe.Run()
 
-The base file name can be either a string or, for more complex naming schemes, a Python callable. The string uses printf-style formatting to substitute in a file sequence number. In the above case, the output files would be named file-00.g3, file-01.g3, file-02.g3, etc. It is also possible to pass a Python callable that returns a file name for more complex cases:
+The base file name can be either a string or, for more complex naming schemes, a Python callable. The string uses printf-style formatting to substitute in a file sequence number. In the above case, the output files would be named ``file-00.g3``, ``file-01.g3``, ``file-02.g3``, etc. It is also possible to pass a Python callable that returns a file name for more complex cases:
 
 .. code-block:: python
 
 	pipe = core.G3Pipeline()
 	pipe.Add(dosomethings)
-	pipe.Add(core.G3MultiFileWriter, filename=lambda frame, seq: '/path/to/file-%s-%d.g3' % (frame['SourceName'], seq), size_limit = 1024**3)
+	pipe.Add(
+	    core.G3MultiFileWriter,
+	    filename=lambda frame, seq: '/path/to/file-%s-%d.g3' % (frame['SourceName'], seq),
+	    size_limit=1024**3,
+	)
 	pipe.Run()
 
 Arbitrarily complex file division strategies can be employed using the divide_on argument. Like the base file name, this can be either static data -- an iterable of frame types -- or a Python callable. If passed an iterable of frame types, G3MultiFileWriter will always start a new file, even if the size limit is not yet reached, when it gets a frame of a type in the list. For example, to split the data into files of at most one GB, each of which includes data from at most one observation (each observation header frame will start a new file):
@@ -96,7 +100,12 @@ Arbitrarily complex file division strategies can be employed using the divide_on
 
 	pipe = core.G3Pipeline()
 	pipe.Add(dosomethings)
-	pipe.Add(core.G3MultiFileWriter, filename='/path/to/file-%02u.g3', size_limit = 1024**3, divide_on=[core.G3FrameType.Observation])
+	pipe.Add(
+	    core.G3MultiFileWriter,
+	    filename='/path/to/file-%02u.g3',
+	    size_limit=1024**3,
+	    divide_on=[core.G3FrameType.Observation],
+	)
 	pipe.Run()
 
 For more complex cases, you can also pass a callable as divide_on that takes a frame and returns ``True`` if a new file should be started without reference to the size limit and ``False`` otherwise. The following is equivalent to the above example, but uses a Python lambda function in place of the list:
@@ -105,7 +114,12 @@ For more complex cases, you can also pass a callable as divide_on that takes a f
 
 	pipe = core.G3Pipeline()
 	pipe.Add(dosomethings)
-	pipe.Add(core.G3MultiFileWriter, filename='/path/to/file-%02u.g3', size_limit = 1024**3, divide_on=lambda frame: frame.type in [core.G3FrameType.Observation])
+	pipe.Add(
+	    core.G3MultiFileWriter,
+	    filename='/path/to/file-%02u.g3',
+	    size_limit=1024**3,
+	    divide_on=lambda frame: frame.type in [core.G3FrameType.Observation],
+	)
 	pipe.Run()
 
 G3MultiFileWriter can also be used as a python context object, just like G3Writer.
@@ -113,12 +127,12 @@ G3MultiFileWriter can also be used as a python context object, just like G3Write
 G3File
 ======
 
-Unlike G3Reader and G3Writer, G3File is not a pipeline module. Instead, it is a python iterable that can be used to read frames interactively:
+Unlike G3Reader and G3Writer, :py:class:`~spt3g.core.fileio.G3File` is not a pipeline module. Instead, it is a python iterable that can be used to read frames interactively:
 
 .. code-block:: python
 
 	for frame in core.G3File('/path/to/file.g3'):
-		print(frame)
+	    print(frame)
 
 It supports the same arguments as G3Reader.
 
@@ -147,7 +161,7 @@ Frame objects are stored in the frame through the intermediate structure of a bl
 
 When a frame is read from disk, the blobs are read and stored in memory but not immediately deserialized. Instead, deserialization happens only lazily when the object is accessed. This optimizes file IO performance for data in which only a subset of keys are regularly being used and allows files to be read in which some keys are classes in unloaded libraries.
 
-When a frame object is accessed (e.g. with []), the blob is deserialized. The original blob may, however, be retained in memory as well. As frame objects are only returned via const pointers, they are immutable for the life of the frame and so the original blob can be written back to disk later without expending CPU time to reserialize the class. Blobs are not retained for very large objects (> 128 MB) to lower memory consumption.
+When a frame object is accessed (e.g. with ``[]``), the blob is deserialized. The original blob may, however, be retained in memory as well. As frame objects are only returned via const pointers, they are immutable for the life of the frame and so the original blob can be written back to disk later without expending CPU time to reserialize the class. Blobs are not retained for very large objects (> 128 MB) to lower memory consumption.
 
 Miscellany
 ~~~~~~~~~~
