@@ -400,7 +400,7 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 			buffer_ = new std::vector<double>();
 			ar & cereal::make_nvp("data", *buffer_);
 			len_ = buffer_->size();
-			data_ = &(*buffer_)[0];
+			data_ = buffer_->data();
 			break;
 		case TS_FLOAT: {
 			std::vector<float> *data = new std::vector<float>();
@@ -408,7 +408,7 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 			root_data_ref_ = std::shared_ptr<std::vector<float> >(
 			    data);
 			len_ = data->size();
-			data_ = &(*data)[0];
+			data_ = data->data();
 			break;
 			}
 		case TS_INT32: {
@@ -417,7 +417,7 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 			root_data_ref_ = std::shared_ptr<
 			    std::vector<int32_t> >(data);
 			len_ = data->size();
-			data_ = &(*data)[0];
+			data_ = data->data();
 			break;
 		}
 		case TS_INT64: {
@@ -426,7 +426,7 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 			root_data_ref_ = std::shared_ptr<
 			    std::vector<int64_t> >(data);
 			len_ = data->size();
-			data_ = &(*data)[0];
+			data_ = data->data();
 			break;
 		}
 		default:
@@ -443,12 +443,12 @@ G3Timestream::G3Timestream(const G3Timestream &r) :
 	// allocating the internal buffer.
 	if (r.buffer_) {
 		buffer_ = new std::vector<double>(*r.buffer_);
-		data_ = (&(*buffer_)[0]);
+		data_ = buffer_->data();
 	} else if (r.data_type_ == TS_DOUBLE) {
 		buffer_ = new std::vector<double>(len_);
 		for (size_t i = 0; i < len_; i++)
 			(*buffer_)[i] = r[i];
-		data_ = (&(*buffer_)[0]);
+		data_ = buffer_->data();
 	} else {
 		buffer_ = NULL;
 		size_t element = 0;
@@ -459,7 +459,7 @@ G3Timestream::G3Timestream(const G3Timestream &r) :
 			std::vector<float> *data = new std::vector<float>(len_);
 			root_data_ref_ = std::shared_ptr<std::vector<float> >(
 			    data);
-			data_ = &(*data)[0];
+			data_ = data->data();
 			element = 4;
 			break;
 			}
@@ -468,7 +468,7 @@ G3Timestream::G3Timestream(const G3Timestream &r) :
 			    new std::vector<int32_t>(len_);
 			root_data_ref_ = std::shared_ptr<
 			    std::vector<int32_t> >(data);
-			data_ = &(*data)[0];
+			data_ = data->data();
 			element = 4;
 			break;
 		}
@@ -477,7 +477,7 @@ G3Timestream::G3Timestream(const G3Timestream &r) :
 			    new std::vector<int64_t>(len_);
 			root_data_ref_ = std::shared_ptr<
 			    std::vector<int64_t> >(data);
-			data_ = &(*data)[0];
+			data_ = data->data();
 			element = 8;
 			break;
 		}
@@ -943,7 +943,7 @@ void G3TimestreamMap::Compactify()
 		std::vector<double> *data = new std::vector<double>(size() *
 		    begin()->second->size());
 		root = std::shared_ptr<std::vector<double> >(data);
-		base_ptr = &(*data)[0];
+		base_ptr = data->data();
 		row_bytes = begin()->second->size() * sizeof((*data)[0]);
 		break;
 	}
@@ -951,7 +951,7 @@ void G3TimestreamMap::Compactify()
 		std::vector<float> *data = new std::vector<float>(size() *
 		    begin()->second->size());
 		root = std::shared_ptr<std::vector<float> >(data);
-		base_ptr = &(*data)[0];
+		base_ptr = data->data();
 		row_bytes = begin()->second->size() * sizeof((*data)[0]);
 		break;
 	}
@@ -959,7 +959,7 @@ void G3TimestreamMap::Compactify()
 		std::vector<int32_t> *data = new std::vector<int32_t>(size() *
 		    begin()->second->size());
 		root = std::shared_ptr<std::vector<int32_t> >(data);
-		base_ptr = &(*data)[0];
+		base_ptr = data->data();
 		row_bytes = begin()->second->size() * sizeof((*data)[0]);
 		break;
 	}
@@ -967,7 +967,7 @@ void G3TimestreamMap::Compactify()
 		std::vector<int64_t> *data = new std::vector<int64_t>(size() *
 		    begin()->second->size());
 		root = std::shared_ptr<std::vector<int64_t> >(data);
-		base_ptr = &(*data)[0];
+		base_ptr = data->data();
 		row_bytes = begin()->second->size() * sizeof((*data)[0]);
 		break;
 	}
