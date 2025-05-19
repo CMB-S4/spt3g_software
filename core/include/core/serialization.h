@@ -56,7 +56,7 @@ class G3OutputStreamBuffer : public std::basic_streambuf<char>
 {
 public:
 	G3OutputStreamBuffer(std::vector<char> &buffer) : buffer_(buffer) {
-		setp(&buffer_[0], &buffer_[0] + buffer_.size());
+		setp(buffer_.data(), buffer_.data() + buffer_.size());
 	}
 protected:
 	std::streamsize xsputn(const char* s, std::streamsize n) {
