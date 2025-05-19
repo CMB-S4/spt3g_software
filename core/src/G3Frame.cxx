@@ -376,7 +376,12 @@ void G3Frame::blob_encode(struct blob_container &blob)
 	blob.blob = std::make_shared<std::vector<char> >();
 	G3BufferOutputStream item_os(*blob.blob);
 	cereal::PortableBinaryOutputArchive item_ar(item_os);
-	item_ar << make_nvp("val", blob.frameobject);
+	try {
+		item_ar << make_nvp("val", blob.frameobject);
+	} catch (...) {
+		blob.blob.reset();
+		throw;
+	}
 	item_os.flush();
 }
 
