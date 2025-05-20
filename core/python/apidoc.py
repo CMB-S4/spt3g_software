@@ -80,7 +80,7 @@ class G3Documenter:
                         print("Bytes written:", writer.tell())
 
             Class-like modules permit a variety of additional features beyond
-            their standard usage in pipeline.
+            their standard usage in pipelines.
             """,
             "autoclass",
         ),
