@@ -21,7 +21,7 @@ public:
 	DfMuxSample(G3TimeStamp timestamp, int nsamples) : G3FrameObject(),
 	    std::vector<int32_t>(nsamples), Timestamp(timestamp) {}
 
-	int32_t *Samples() const {return (int32_t *)&(*this)[0];}
+	int32_t *Samples() const {return (int32_t *)data();}
 	const int NSamples() const {return size();}
 
 	G3Time Timestamp;

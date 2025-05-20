@@ -268,6 +268,12 @@ FlatSkyMap::operator () (size_t x, size_t y)
 	return (*sparse_)(x, y);
 }
 
+double *
+FlatSkyMap::data()
+{
+	return dense_ == NULL ? nullptr : dense_->data();
+}
+
 double
 FlatSkyMap::at(size_t i) const
 {
@@ -900,7 +906,7 @@ FlatSkyMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 		view->buf = NULL;
 	} else {
 		sm->ConvertToDense();
-		view->buf = (void*)&(*sm)[0];
+		view->buf = (void*)sm->data();
 	}
 	view->len = sm->size() * sizeof(double);
 	view->readonly = 0;

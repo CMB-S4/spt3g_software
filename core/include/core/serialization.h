@@ -27,7 +27,7 @@ class G3InputStreamBuffer : public std::basic_streambuf<char>
 {
 public:
 	G3InputStreamBuffer(std::vector<char> &vec) : basic_streambuf() {
-		setg(&vec[0], &vec[0], &vec[0] + vec.size());
+		setg(vec.data(), vec.data(), vec.data() + vec.size());
 	}
 	G3InputStreamBuffer(char *buf, size_t len) : basic_streambuf() {
 		setg(buf, buf, buf + len);
@@ -99,7 +99,7 @@ struct g3frameobject_picklesuite : py::pickle_suite, py::def_visitor<g3frameobje
 
 		return py::make_tuple(obj.attr("__dict__"),
 		    py::object(py::handle<>(
-		    PyBytes_FromStringAndSize(&buffer[0], buffer.size()))));
+		    PyBytes_FromStringAndSize(buffer.data(), buffer.size()))));
 	}
 
 	static void setstate(py::object &obj, py::tuple state)
