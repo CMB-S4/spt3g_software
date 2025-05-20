@@ -728,7 +728,7 @@ auto vector_quat_buffer_info(T &q)
 	std::vector<size_t> shape{q.size(), 4};
 	std::vector<size_t> strides{4 * sizeof(double), sizeof(double)};
 
-	return py::buffer_info(&(q[0]), sizeof(double),
+	return py::buffer_info(q.data(), sizeof(double),
 	    py::format_descriptor<double>::format(), 2, shape, strides);
 }
 

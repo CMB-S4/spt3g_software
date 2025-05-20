@@ -50,6 +50,7 @@ public:
 	double at(size_t x, size_t y) const;
 	double operator () (size_t x, size_t y) const {	return this->at(x, y); };
 	double &operator () (size_t x, size_t y);
+	double *data();
 
 	// +
 	virtual G3SkyMap &operator+=(const G3SkyMap &rhs) override;

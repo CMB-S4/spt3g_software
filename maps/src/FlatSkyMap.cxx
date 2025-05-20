@@ -268,6 +268,12 @@ FlatSkyMap::operator () (size_t x, size_t y)
 	return (*sparse_)(x, y);
 }
 
+double *
+FlatSkyMap::data()
+{
+	return dense_ == NULL ? nullptr : dense_->data();
+}
+
 double
 FlatSkyMap::at(size_t i) const
 {
@@ -859,7 +865,7 @@ flatskymap_buffer_info(FlatSkyMap &m)
 	std::vector<size_t> shape{m.shape()[1], m.shape()[0]};
 	std::vector<size_t> strides{m.shape()[0] * sizeof(double), sizeof(double)};
 
-	return py::buffer_info(&m[0], sizeof(double), "d", 2, shape, strides);
+	return py::buffer_info(m.data(), sizeof(double), "d", 2, shape, strides);
 }
 
 static FlatSkyMapPtr

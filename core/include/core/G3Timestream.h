@@ -29,12 +29,12 @@ public:
 	G3Timestream(std::vector<double>::size_type s = 0, double val = 0) :
 	    units(None), use_flac_(0), flac_depth_(32),
 	    buffer_((s == 0) ? NULL : new std::vector<double>(s, val)),
-	    data_((s == 0) ? NULL : &(*buffer_)[0]), len_(s),
+	    data_((s == 0) ? NULL : buffer_->data()), len_(s),
 	    data_type_(TS_DOUBLE) {}
 	template <typename Iterator> G3Timestream(Iterator l, Iterator r) :
 	    units(None), use_flac_(0), flac_depth_(32),
 	    buffer_(new std::vector<double>(l, r)),
-	    data_(&(*buffer_)[0]), len_(buffer_->size()), data_type_(TS_DOUBLE) {}
+	    data_(buffer_->data()), len_(buffer_->size()), data_type_(TS_DOUBLE) {}
 	virtual ~G3Timestream() {
 		if (buffer_) delete buffer_;
 	}

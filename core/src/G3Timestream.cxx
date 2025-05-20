@@ -139,7 +139,7 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 					// Using this rather raw form for the loop can enable automatic
 					// unrolling and vectorization.
 					int32_t* in_ptr=(int32_t *)data_;
-					int32_t* out_ptr=&inbuf[0];
+					int32_t* out_ptr=inbuf.data();
 					for(int32_t* end=in_ptr+size(); in_ptr!=end; in_ptr++,out_ptr++)
 						*out_ptr = ((*in_ptr & 0x00ffffff) << 8) >> 8;
 				}
@@ -181,7 +181,7 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 		default:
 			log_fatal("Invalid FLAC bit depth %d", flac_depth_);
 		}
-		chanmap[0] = &inbuf[0];
+		chanmap[0] = inbuf.data();
 
 		ar & cereal::make_nvp("flac_depth", flac_depth_);
 		ar & cereal::make_nvp("data_type", data_type_out);
@@ -357,25 +357,25 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 			// Short-circuit for int32
 			root_data_ref_ = std::shared_ptr<std::vector<int32_t> >(
 			    callback.outbuf);
-			data_ = &(*callback.outbuf)[0];
+			data_ = callback.outbuf->data();
 			return;
 		case TS_INT64: {
 			auto data = new std::vector<int64_t>(size());
 			for (size_t i = 0; i < size(); i++)
 				(*data)[i] = (*callback.outbuf)[i];
 			root_data_ref_ = std::shared_ptr<std::vector<int64_t> >(data);
-			data_ = &(*data)[0];
+			data_ = data->data();
 			break;
 		}
 		case TS_FLOAT: {
 			auto data = unpack_flac<float>(*callback.outbuf, nanflag, nanbuf);
 			root_data_ref_ = std::shared_ptr<std::vector<float> >(data);
-			data_ = &(*data)[0];
+			data_ = data->data();
 			break;
 		}
 		case TS_DOUBLE:
 			buffer_ = unpack_flac<double>(*callback.outbuf, nanflag, nanbuf);
-			data_ = &(*buffer_)[0];
+			data_ = buffer_->data();
 			break;
 		default:
 			log_fatal("Unknown timestream datatype %d", data_type_);

@@ -334,6 +334,12 @@ HealpixSkyMap::Clone(bool copy_data) const
 		    nested(), coord_ref, units, pol_type, info_.shifted(), pol_conv);
 }
 
+double *
+HealpixSkyMap::data()
+{
+	return dense_ == NULL ? nullptr : dense_->data();
+}
+
 double
 HealpixSkyMap::at(size_t i) const
 {
@@ -1099,7 +1105,7 @@ HealpixSkyMap_buffer_info(HealpixSkyMap &m)
 {
 	m.ConvertToDense();
 
-	return py::buffer_info(&m[0], sizeof(double), "d", 1,
+	return py::buffer_info(m.data(), sizeof(double), "d", 1,
 	    {m.shape()[0]}, {sizeof(double)});
 }
 

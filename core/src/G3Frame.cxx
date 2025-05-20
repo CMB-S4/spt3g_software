@@ -240,7 +240,7 @@ void G3Frame::save(A &ar, unsigned v) const
 		crc = crc32c(crc, (const uint8_t *)i->first.c_str(),
 		    i->first.size());
 		ar << make_nvp("blob", *i->second.blob);
-		crc = crc32c(crc, (const uint8_t *)&(*i->second.blob)[0],
+		crc = crc32c(crc, (const uint8_t *)i->second.blob->data(),
 		    i->second.blob->size());
 	}
 	ar << make_nvp("crc", crc);
@@ -279,7 +279,7 @@ void G3Frame::load(A &ar, unsigned v)
 		crc = crc32c(crc, (const uint8_t *)name.c_str(), name.size());
 		blob.blob = std::make_shared<std::vector<char> >();
 		ar >> make_nvp("blob", *blob.blob);
-		crc = crc32c(crc, (const uint8_t *)&(*blob.blob)[0],
+		crc = crc32c(crc, (const uint8_t *)blob.blob->data(),
 		    blob.blob->size());
 		map_.insert(G3MapType::value_type(name, blob));
 	}

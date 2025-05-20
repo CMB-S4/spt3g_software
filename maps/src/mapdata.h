@@ -200,6 +200,8 @@ public:
 		return nz;
 	}
 
+	double *data() { return data_.data(); }
+
 	double at(size_t x, size_t y) const {
 		if (!in_bounds(x, y))
 			return 0;
