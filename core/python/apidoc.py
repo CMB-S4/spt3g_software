@@ -1,4 +1,5 @@
 from . import G3Module, G3FrameObject, usefulfunc
+import textwrap
 
 
 __all__ = ["G3Documenter", "module_apidoc"]
@@ -37,16 +38,59 @@ class G3Documenter:
         ),
         "cmodule": (
             "Class-like Pipeline Modules",
-            "Classes that can be added to :py:class:`~spt3g.core.G3Pipeline` "
-            "instances, either written as callable objects in Python (see "
-            ":ref:`class-modules`) or as :py:class:`~spt3g.core.G3Module`-derived "
-            "classes in C++ (see :ref:`cxx-modules`).",
+            """
+            Classes that can be added to :py:class:`~spt3g.core.G3Pipeline`
+            instances, either written as callable objects in Python (see
+            :ref:`class-modules`) or as :py:class:`~spt3g.core.G3Module`-derived
+            classes in C++ (see :ref:`cxx-modules`).  Aside from adding these into
+            pipelines using the standard ``Add()`` method, such objects may also be
+            instantiated outside of pipelines to make use of additional features.
+
+            One typical use case is to extract some kind of data from a series of
+            frames::
+
+                class ExtractData:
+                    def __init__(self, key="RawTimestreams"):
+                        self.key = key
+                        self.data = []
+                    def __call__(self, frame):
+                        if self.key in frame:
+                            self.data.append(frame[self.key])
+
+                # instantiate caching class
+                extractor = ExtractData()
+
+                # use instance in a pipeline
+                pipe = core.G3Pipeline()
+                pipe.Add(core.G3Reader, filename="file.g3")
+                pipe.Add(extractor)
+                pipe.Run()
+
+                # use extracted data in later processing
+                print(extractor.data)
+
+            Another use case may be to call additional methods of a class.  For
+            example, the :py:class:`~spt3g.core.G3Writer` class can be used as a
+            context manager, and also report the position of the file pointer after
+            each frame is written::
+
+                with core.G3Writer("file.g3") as writer:
+                    for frame in frames:
+                        writer(frame)
+                        print("Bytes written:", writer.tell())
+
+            Class-like modules permit a variety of additional features beyond
+            their standard usage in pipeline.
+            """,
             "autoclass",
         ),
         "fmodule": (
             "Function-like Pipeline Modules",
             "Python functions that can be added to :py:class:`~spt3g.core.G3Pipeline` "
-            "instances. See :ref:`function-modules` for more detail.",
+            "instances. Such functions may also be called directly with a "
+            ":py:class:`~spt3g.core.G3Frame` object as the first argument, and do not "
+            "necessarily need to be used in a pipeline. See :ref:`function-modules` "
+            "for more detail.",
             "autofunction",
         ),
         "segment": (
@@ -178,7 +222,7 @@ class G3Documenter:
                 continue
 
             body += rst_header(title, "-")
-            body += description + "\n\n"
+            body += textwrap.dedent(description) + "\n\n"
             body += "\n\n".join([f".. {directive}:: {k}" for k in objs]) + "\n\n"
 
         if len(body):
