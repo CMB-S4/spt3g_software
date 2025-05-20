@@ -22,7 +22,7 @@ except ImportError:
 	pass
 from .util import *
 
-from .docparser import *
+from .apidoc import *
 from .dataextensions import *
 from .frameextensions import *
 from .timestreamextensions import *

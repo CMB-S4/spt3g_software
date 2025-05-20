@@ -4,6 +4,16 @@ import re
 import textwrap
 
 
+def g3decorator(func):
+    """
+    Mark argument as a decorator that can be found by automated
+    documentation tools.
+    """
+    func.__g3decorator__ = True
+    return func
+
+
+@g3decorator
 def usefulfunc(func):
     '''
     Mark argument as a useful function that can be found by automated
@@ -59,7 +69,7 @@ class PipeSegmentDocstring(type):
     '''
 
 
-@usefulfunc
+@g3decorator
 class pipesegment(metaclass=PipeSegmentDocstring):
     def __init__(self, func):
         self.func = self.__wrapped__ = func
@@ -112,7 +122,7 @@ class pipesegment(metaclass=PipeSegmentDocstring):
         return self.func.__name__
 
 
-@usefulfunc
+@g3decorator
 def pipesegment_nodoc(func):
     """
     Use as a decorator for a pre-assembled set of pipeline modules. Makes a
@@ -146,7 +156,7 @@ def pipesegment_nodoc(func):
     return func
 
 
-@usefulfunc
+@g3decorator
 def indexmod(func):
     '''
     Mark argument as a processing module that can be found by automated

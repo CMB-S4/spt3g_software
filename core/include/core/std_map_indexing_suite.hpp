@@ -506,9 +506,9 @@ return incref(tuple.attr("__iter__")().ptr());
             cl
                 // declare constructors in descending order of arity
                 .def("__init__", init_factory<Class>::from_list, 
-                 "Initialize with keys and values from a Python dictionary: {'key':'value'}\n")
-                .def("__init__", init_factory<Class>::from_dict,
                  "Initialize with keys and values as tuples in a Python list: [('key','value')]\n")
+                .def("__init__", init_factory<Class>::from_dict,
+                 "Initialize with keys and values from a Python dictionary: {'key':'value'}\n")
                 .def(init<>()) // restore default constructor
                 
                 .def("keys", &keys, "D.keys() -> list of D's keys\n")

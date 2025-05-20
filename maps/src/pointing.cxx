@@ -367,6 +367,8 @@ PYBINDINGS("maps", scope)
 	    "x and y offsets.  Equivalent to ``t * quat(0,1,0,0) / t``, where "
 	    "``t = get_origin_rotator(x, -y)``");
 	scope.def("get_transform_quat", get_transform_quat,
+	    py::arg("as_0"), py::arg("ds_0"), py::arg("ae_0"), py::arg("de_0"),
+	    py::arg("as_1"), py::arg("ds_1"), py::arg("ae_1"), py::arg("de_1"),
 	    "Computes a rotation that will take (as_0,ds_0) to (ae_0, de_0) and "
 	    "(as_1, ds_1) to (ae_1, de_1)");
 	scope.def("get_rot_ang", get_rot_ang, py::arg("start_q"), py::arg("trans"),
@@ -377,6 +379,8 @@ PYBINDINGS("maps", scope)
 	    "Construct a transform quaternion timestream from timestreams of sky "
 	    "coordinates. Equivalent to ``R_z(alpha) * R_y(delta)``.");
 	scope.def("get_boresight_rotator_timestream", get_boresight_rotator_timestream,
+	    py::arg("az_0"), py::arg("el_0"), py::arg("ra_0"), py::arg("dec_0"),
+	    py::arg("az_1"), py::arg("el_1"), py::arg("ra_1"), py::arg("dec_1"),
 	    "Construct a transform quaternion timestream from timestreams of "
 	    "local and equatorial boresight pointing coordinates.  Computes the "
 	    "transform from local (az_0, el_0) coordinates to equatorial "

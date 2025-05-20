@@ -12,8 +12,8 @@ foreach(d ${cmake_projects})
 	endif()
 	# Copy header if exists, or create empty rst
 	if(EXISTS "${CMAKE_SOURCE_DIR}/${pname}/README.rst")
-		file(READ "${CMAKE_SOURCE_DIR}/${pname}/README.rst" MOD_HEADER)
-		file(WRITE "${CMAKE_SOURCE_DIR}/doc/moddoc_${pname}.rst" "${MOD_HEADER}\n")
+		execute_process(COMMAND ln -fsn ${CMAKE_SOURCE_DIR}/${pname}/README.rst ${CMAKE_SOURCE_DIR}/doc/intro_${pname}.rst)
+		file(WRITE "${CMAKE_SOURCE_DIR}/doc/moddoc_${pname}.rst" ".. include:: intro_${pname}.rst\n\n")
 	else()
 		# Add an RST title. Cmake doesn't have the ability to generate
 		# a string of N dashes, so generate a random string in which
