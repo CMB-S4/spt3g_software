@@ -791,7 +791,7 @@ vector_quat_from_python(py::buffer &buf)
 	    && info.strides[1] == sizeof(double)
 	    && info.itemsize == sizeof(double)) {
 		size_t nbytes = info.shape[0] * info.shape[1] * sizeof(double);
-		memcpy((void *)&(*q)[0], info.ptr, nbytes);
+		memcpy((void *)q->data(), info.ptr, nbytes);
 		return q;
 	}
 

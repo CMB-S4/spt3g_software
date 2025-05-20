@@ -887,7 +887,7 @@ HealpixSkyMap_fill(HealpixSkyMap &skymap, const py::cbuffer &v)
 		log_fatal("Got array of shape (%zu,), expected (%zu,)", npix, skymap.size());
 
 	skymap.ConvertToDense();
-	double *d = &skymap[0];
+	double *d = skymap.data();
 
 	auto format = check_buffer_format(info.format);
 

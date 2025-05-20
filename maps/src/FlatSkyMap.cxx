@@ -789,7 +789,7 @@ flatskymap_fill(FlatSkyMap &skymap, const py::cbuffer &v)
 	}
 
 	skymap.ConvertToDense();
-	double *d = &(skymap(0, 0));
+	double *d = skymap.data();
 
 	auto format = check_buffer_format(info.format);
 
