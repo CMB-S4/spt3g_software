@@ -1,223 +1,1036 @@
+
+
 <!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<html lang="en" data-content_root="./">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gcp &mdash; SPT-3G Software  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=0517cd0f" />
 
-    <title>gcp &#8212; SPT3G Software  documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="_static/nature.css?v=279e0f84" />
-    <script src="_static/documentation_options.js?v=5929fcd5"></script>
-    <script src="_static/doctools.js?v=9bcbadda"></script>
-    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+  
+    <link rel="shortcut icon" href="_static/spt_outlines_white.png"/>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="maps" href="moddoc_maps.html" />
     <link rel="prev" title="dfmux" href="moddoc_dfmux.html" /> 
-  </head><body>
-    <div class="related" role="navigation" aria-label="Related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="moddoc_maps.html" title="maps"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="moddoc_dfmux.html" title="dfmux"
-             accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">gcp</a></li> 
-      </ul>
-    </div>  
+</head>
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
-            
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            SPT-3G Software
+              <img src="_static/spt_outlines.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#how-to-install">How to Install</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#installing-dependencies-on-a-personal-system">Installing Dependencies on a Personal System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#handling-dependencies-on-the-open-science-grid">Handling Dependencies on the Open Science Grid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#handling-dependencies-on-nersc">Handling Dependencies on NERSC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#compilation">Compilation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#installation-with-pip">Installation with Pip</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#overview">Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#frames">Frames</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#id1">Modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#pipelines">Pipelines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#io">IO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#frame-objects">Frame Objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#units">Units</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#debugging-code">Debugging Code</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#writing-a-module-in-python">Writing a module in Python</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="modules.html#python-modules-as-functions">Python Modules as Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="modules.html#return-values-from-python-modules">Return values from Python modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="modules.html#im-mutability-of-frame-objects">(Im)mutability of frame objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="modules.html#the-first-module">The first module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="modules.html#callable-objects-as-functions">Callable Objects as Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="modules.html#autodocumentation-of-modules">Autodocumentation of modules</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#writing-a-module-in-c">Writing a module in C++</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#pipeline-segments">Pipeline Segments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#advanced-techniques-buffering-data">Advanced Techniques: Buffering Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#caching-previous-data">Caching Previous Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#pipelines">Pipelines</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="modules.html#pipeline-add">Pipeline.Add</a></li>
+<li class="toctree-l3"><a class="reference internal" href="modules.html#pipeline-run">Pipeline.Run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="modules.html#g3pipelineinfo">G3PipelineInfo</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="frames.html">Frames</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="frames.html#scan">Scan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="frames.html#pipelineinfo">PipelineInfo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="frames.html#timepoint">Timepoint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="frames.html#housekeeping">Housekeeping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="frames.html#map">Map</a></li>
+<li class="toctree-l2"><a class="reference internal" href="frames.html#calibration">Calibration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="frames.html#observation">Observation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="frames.html#wiring">Wiring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="frames.html#gcpslow">GcpSlow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="frames.html#endprocessing">EndProcessing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="logging.html#setting-log-levels">Setting Log Levels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="logging.html#using-logging-from-python">Using Logging from Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="logging.html#using-logging-from-c">Using Logging from C++</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="fileio.html">File IO</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="fileio.html#g3reader">G3Reader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fileio.html#g3writer">G3Writer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fileio.html#g3multifilewriter">G3MultiFileWriter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fileio.html#g3file">G3File</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fileio.html#file-format">File Format</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="fileio.html#frame-structure-on-disk">Frame Structure on Disk</a></li>
+<li class="toctree-l3"><a class="reference internal" href="fileio.html#blobs">Blobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="fileio.html#miscellany">Miscellany</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="units.html">Units</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="units.html#defining-a-quantity-with-units">Defining a quantity with units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="units.html#converting-to-different-units">Converting to different units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="units.html#available-units">Available units</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dataacquisition.html">Data Acquisition</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dataacquisition.html#dfmux">DfMux</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dataacquisition.html#bolometer-data">Bolometer Data</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="dataacquisition.html#sctp">SCTP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dataacquisition.html#udp">UDP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dataacquisition.html#legacy-boards">Legacy Boards</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dataacquisition.html#data-structures">Data Structures</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="dataacquisition.html#housekeeping-data">Housekeeping Data</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dataacquisition.html#building-timestreams">Building Timestreams</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dataacquisition.html#the-wiring-map">The Wiring Map</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dataacquisition.html#dfmuxcollator">DfMuxCollator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dataacquisition.html#collecting-data-to-a-netcdf-file">Collecting data to a NetCDF file</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dataacquisition.html#core-tools">Core Tools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dataacquisition.html#g3eventbuilder">G3EventBuilder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dataacquisition.html#g3triggeredbuilder">G3TriggeredBuilder</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dataacquisition.html#ledgerman">ledgerman</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="autodoc.html">Auto-documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="autodoc.html#getting-it-documented">Getting it documented</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autodoc.html#viewing-the-docs">Viewing the docs</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="buildsystem.html">Build System</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="buildsystem.html#cmake-overview">CMake Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="buildsystem.html#adding-a-project">Adding a Project</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="buildsystem.html#adding-python-code">Adding Python code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="buildsystem.html#adding-a-c-library">Adding a C++ library</a></li>
+<li class="toctree-l3"><a class="reference internal" href="buildsystem.html#adding-a-c-executable">Adding a C++ executable</a></li>
+<li class="toctree-l3"><a class="reference internal" href="buildsystem.html#adding-tests">Adding tests</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="buildsystem.html#python-tests">Python Tests</a></li>
+<li class="toctree-l4"><a class="reference internal" href="buildsystem.html#c-tests">C++ Tests</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="buildsystem.html#mixing-c-and-python">Mixing C++ and Python</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="styleguide.html">Style Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="styleguide.html#version-control-hygiene">Version Control Hygiene</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="styleguide.html#git">Git</a></li>
+<li class="toctree-l3"><a class="reference internal" href="styleguide.html#svn">SVN</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="styleguide.html#coding-style">Coding Style</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="styleguide.html#python-style-guide">Python Style Guide</a></li>
+<li class="toctree-l3"><a class="reference internal" href="styleguide.html#c-style-guide">C++ Style Guide</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="networkstreaming.html">Network Streaming</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="networkstreaming.html#g3networksender">G3NetworkSender</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="networkstreaming.html#connecting-to-a-remote-reader">Connecting to a Remote Reader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="networkstreaming.html#functioning-as-a-streaming-server">Functioning as a Streaming Server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="networkstreaming.html#throttling-output-data">Throttling output data</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="networkstreaming.html#using-g3reader-over-the-network">Using G3Reader Over the Network</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="commonissues.html">Common Problems</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="commonissues.html#setting-values-of-a-flatskymap">Setting Values of a FlatSkyMap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="commonissues.html#error-message-decryption">Error Message Decryption</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="commonissues.html#argument-errors">Argument Errors</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="commonissues.html#misbehaving-compilers">Misbehaving Compilers</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Module Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="moddoc_calibration.html">calibration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_calibration.html#api-documentation">API Documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_calibration.html#frame-objects">Frame Objects</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.BolometerProperties"><code class="docutils literal notranslate"><span class="pre">BolometerProperties</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.BolometerPropertiesMap"><code class="docutils literal notranslate"><span class="pre">BolometerPropertiesMap</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.PointingProperties"><code class="docutils literal notranslate"><span class="pre">PointingProperties</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.PointingPropertiesMap"><code class="docutils literal notranslate"><span class="pre">PointingPropertiesMap</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_calibration.html#class-like-pipeline-modules">Class-like Pipeline Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.bolopropertiesutils.SplitByBand"><code class="docutils literal notranslate"><span class="pre">SplitByBand</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.bolopropertiesutils.SplitByPixelType"><code class="docutils literal notranslate"><span class="pre">SplitByPixelType</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.bolopropertiesutils.SplitByProperty"><code class="docutils literal notranslate"><span class="pre">SplitByProperty</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.bolopropertiesutils.SplitByWafer"><code class="docutils literal notranslate"><span class="pre">SplitByWafer</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.bolopropertiesutils.SplitTimestreamsByBand"><code class="docutils literal notranslate"><span class="pre">SplitTimestreamsByBand</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.build_cal_frames.BuildBoloPropertiesMap"><code class="docutils literal notranslate"><span class="pre">BuildBoloPropertiesMap</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.build_cal_frames.BuildPointingProperties"><code class="docutils literal notranslate"><span class="pre">BuildPointingProperties</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.build_cal_frames.MergeCalibrationFrames"><code class="docutils literal notranslate"><span class="pre">MergeCalibrationFrames</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_calibration.html#function-like-pipeline-modules">Function-like Pipeline Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.build_cal_frames.ExplodeBolometerProperties"><code class="docutils literal notranslate"><span class="pre">ExplodeBolometerProperties()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_calibration.html#useful-functions">Useful Functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.bolopropertiesutils.band_to_string"><code class="docutils literal notranslate"><span class="pre">band_to_string()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.bolopropertiesutils.band_to_value"><code class="docutils literal notranslate"><span class="pre">band_to_value()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.bolopropertiesutils.extract_band_string"><code class="docutils literal notranslate"><span class="pre">extract_band_string()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.bolopropertiesutils.extract_band_value"><code class="docutils literal notranslate"><span class="pre">extract_band_value()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.bolopropertiesutils.get_band_units"><code class="docutils literal notranslate"><span class="pre">get_band_units()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.bolopropertiesutils.set_band_format"><code class="docutils literal notranslate"><span class="pre">set_band_format()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="moddoc_core.html">core</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_core.html#api-documentation">API Documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_core.html#frame-objects">Frame Objects</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3Bool"><code class="docutils literal notranslate"><span class="pre">G3Bool</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3Double"><code class="docutils literal notranslate"><span class="pre">G3Double</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3FrameObject"><code class="docutils literal notranslate"><span class="pre">G3FrameObject</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3Int"><code class="docutils literal notranslate"><span class="pre">G3Int</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapDouble"><code class="docutils literal notranslate"><span class="pre">G3MapDouble</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapFrameObject"><code class="docutils literal notranslate"><span class="pre">G3MapFrameObject</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapInt"><code class="docutils literal notranslate"><span class="pre">G3MapInt</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapMapDouble"><code class="docutils literal notranslate"><span class="pre">G3MapMapDouble</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapQuat"><code class="docutils literal notranslate"><span class="pre">G3MapQuat</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapString"><code class="docutils literal notranslate"><span class="pre">G3MapString</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapVectorBool"><code class="docutils literal notranslate"><span class="pre">G3MapVectorBool</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapVectorComplexDouble"><code class="docutils literal notranslate"><span class="pre">G3MapVectorComplexDouble</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapVectorDouble"><code class="docutils literal notranslate"><span class="pre">G3MapVectorDouble</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapVectorInt"><code class="docutils literal notranslate"><span class="pre">G3MapVectorInt</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapVectorQuat"><code class="docutils literal notranslate"><span class="pre">G3MapVectorQuat</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapVectorString"><code class="docutils literal notranslate"><span class="pre">G3MapVectorString</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapVectorTime"><code class="docutils literal notranslate"><span class="pre">G3MapVectorTime</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapVectorVectorString"><code class="docutils literal notranslate"><span class="pre">G3MapVectorVectorString</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3ModuleConfig"><code class="docutils literal notranslate"><span class="pre">G3ModuleConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3PipelineInfo"><code class="docutils literal notranslate"><span class="pre">G3PipelineInfo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3Quat"><code class="docutils literal notranslate"><span class="pre">G3Quat</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3String"><code class="docutils literal notranslate"><span class="pre">G3String</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3Time"><code class="docutils literal notranslate"><span class="pre">G3Time</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3TimesampleMap"><code class="docutils literal notranslate"><span class="pre">G3TimesampleMap</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3Timestream"><code class="docutils literal notranslate"><span class="pre">G3Timestream</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3TimestreamMap"><code class="docutils literal notranslate"><span class="pre">G3TimestreamMap</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3TimestreamQuat"><code class="docutils literal notranslate"><span class="pre">G3TimestreamQuat</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3VectorBool"><code class="docutils literal notranslate"><span class="pre">G3VectorBool</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3VectorComplexDouble"><code class="docutils literal notranslate"><span class="pre">G3VectorComplexDouble</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3VectorDouble"><code class="docutils literal notranslate"><span class="pre">G3VectorDouble</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3VectorFrameObject"><code class="docutils literal notranslate"><span class="pre">G3VectorFrameObject</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3VectorInt"><code class="docutils literal notranslate"><span class="pre">G3VectorInt</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3VectorQuat"><code class="docutils literal notranslate"><span class="pre">G3VectorQuat</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3VectorString"><code class="docutils literal notranslate"><span class="pre">G3VectorString</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3VectorTime"><code class="docutils literal notranslate"><span class="pre">G3VectorTime</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3VectorUnsignedChar"><code class="docutils literal notranslate"><span class="pre">G3VectorUnsignedChar</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3VectorVectorString"><code class="docutils literal notranslate"><span class="pre">G3VectorVectorString</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_core.html#class-like-pipeline-modules">Class-like Pipeline Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3EventBuilder"><code class="docutils literal notranslate"><span class="pre">G3EventBuilder</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3InfiniteSource"><code class="docutils literal notranslate"><span class="pre">G3InfiniteSource</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3Module"><code class="docutils literal notranslate"><span class="pre">G3Module</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MultiFileWriter"><code class="docutils literal notranslate"><span class="pre">G3MultiFileWriter</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3NetworkSender"><code class="docutils literal notranslate"><span class="pre">G3NetworkSender</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3Reader"><code class="docutils literal notranslate"><span class="pre">G3Reader</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3Writer"><code class="docutils literal notranslate"><span class="pre">G3Writer</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.util.AbortAfterNFrames"><code class="docutils literal notranslate"><span class="pre">AbortAfterNFrames</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.util.DeduplicateMetadata"><code class="docutils literal notranslate"><span class="pre">DeduplicateMetadata</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.util.DropOrphanMetadata"><code class="docutils literal notranslate"><span class="pre">DropOrphanMetadata</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.util.G3ThrottledNetworkSender"><code class="docutils literal notranslate"><span class="pre">G3ThrottledNetworkSender</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.util.InjectFrame"><code class="docutils literal notranslate"><span class="pre">InjectFrame</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_core.html#function-like-pipeline-modules">Function-like Pipeline Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.util.Delete"><code class="docutils literal notranslate"><span class="pre">Delete()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.util.Dump"><code class="docutils literal notranslate"><span class="pre">Dump()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.util.InjectDebug"><code class="docutils literal notranslate"><span class="pre">InjectDebug()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.util.Rename"><code class="docutils literal notranslate"><span class="pre">Rename()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_core.html#pipeline-segments">Pipeline Segments</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.util.G3NetworkReceiver"><code class="docutils literal notranslate"><span class="pre">G3NetworkReceiver()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_core.html#useful-classes">Useful Classes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.BoolVector"><code class="docutils literal notranslate"><span class="pre">BoolVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.ComplexDoubleVector"><code class="docutils literal notranslate"><span class="pre">ComplexDoubleVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.ComplexFloatVector"><code class="docutils literal notranslate"><span class="pre">ComplexFloatVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.DoubleVector"><code class="docutils literal notranslate"><span class="pre">DoubleVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.FloatVector"><code class="docutils literal notranslate"><span class="pre">FloatVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.FrameObjectVector"><code class="docutils literal notranslate"><span class="pre">FrameObjectVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.FrameTypeVector"><code class="docutils literal notranslate"><span class="pre">FrameTypeVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.FrameVector"><code class="docutils literal notranslate"><span class="pre">FrameVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3Frame"><code class="docutils literal notranslate"><span class="pre">G3Frame</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3Logger"><code class="docutils literal notranslate"><span class="pre">G3Logger</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3LoggerVector"><code class="docutils literal notranslate"><span class="pre">G3LoggerVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MultiLogger"><code class="docutils literal notranslate"><span class="pre">G3MultiLogger</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3NullLogger"><code class="docutils literal notranslate"><span class="pre">G3NullLogger</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3Pipeline"><code class="docutils literal notranslate"><span class="pre">G3Pipeline</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3PrintfLogger"><code class="docutils literal notranslate"><span class="pre">G3PrintfLogger</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3SyslogLogger"><code class="docutils literal notranslate"><span class="pre">G3SyslogLogger</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3TimeVector"><code class="docutils literal notranslate"><span class="pre">G3TimeVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3VectorStringVector"><code class="docutils literal notranslate"><span class="pre">G3VectorStringVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.Int64Vector"><code class="docutils literal notranslate"><span class="pre">Int64Vector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.IntVector"><code class="docutils literal notranslate"><span class="pre">IntVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.ModuleConfigVector"><code class="docutils literal notranslate"><span class="pre">ModuleConfigVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.Quat"><code class="docutils literal notranslate"><span class="pre">Quat</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.QuatVector"><code class="docutils literal notranslate"><span class="pre">QuatVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.StringVector"><code class="docutils literal notranslate"><span class="pre">StringVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.UInt64Vector"><code class="docutils literal notranslate"><span class="pre">UInt64Vector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.UIntVector"><code class="docutils literal notranslate"><span class="pre">UIntVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.UnsignedCharVector"><code class="docutils literal notranslate"><span class="pre">UnsignedCharVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.apidoc.G3Documenter"><code class="docutils literal notranslate"><span class="pre">G3Documenter</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.fileio.G3File"><code class="docutils literal notranslate"><span class="pre">G3File</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_core.html#useful-functions">Useful Functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.apidoc.module_apidoc"><code class="docutils literal notranslate"><span class="pre">module_apidoc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.g3logging.log_debug"><code class="docutils literal notranslate"><span class="pre">log_debug()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.g3logging.log_error"><code class="docutils literal notranslate"><span class="pre">log_error()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.g3logging.log_fatal"><code class="docutils literal notranslate"><span class="pre">log_fatal()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.g3logging.log_info"><code class="docutils literal notranslate"><span class="pre">log_info()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.g3logging.log_notice"><code class="docutils literal notranslate"><span class="pre">log_notice()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.g3logging.log_trace"><code class="docutils literal notranslate"><span class="pre">log_trace()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.g3logging.log_warn"><code class="docutils literal notranslate"><span class="pre">log_warn()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.g3logging.set_log_level"><code class="docutils literal notranslate"><span class="pre">set_log_level()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.timestreamextensions.concatenate_timestreams"><code class="docutils literal notranslate"><span class="pre">concatenate_timestreams()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_core.html#decorators">Decorators</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.g3decorators.cache_frame_data"><code class="docutils literal notranslate"><span class="pre">cache_frame_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.g3decorators.scan_func_cache_data"><code class="docutils literal notranslate"><span class="pre">scan_func_cache_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.modconstruct.indexmod"><code class="docutils literal notranslate"><span class="pre">indexmod()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.modconstruct.pipesegment"><code class="docutils literal notranslate"><span class="pre">pipesegment()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.modconstruct.pipesegment_nodoc"><code class="docutils literal notranslate"><span class="pre">pipesegment_nodoc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.modconstruct.usefulfunc"><code class="docutils literal notranslate"><span class="pre">usefulfunc()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="moddoc_dfmux.html">dfmux</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_dfmux.html#api-documentation">API Documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_dfmux.html#frame-objects">Frame Objects</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DfMuxBoardSamples"><code class="docutils literal notranslate"><span class="pre">DfMuxBoardSamples</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DfMuxChannelMapping"><code class="docutils literal notranslate"><span class="pre">DfMuxChannelMapping</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DfMuxHousekeepingMap"><code class="docutils literal notranslate"><span class="pre">DfMuxHousekeepingMap</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DfMuxMetaSample"><code class="docutils literal notranslate"><span class="pre">DfMuxMetaSample</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DfMuxSample"><code class="docutils literal notranslate"><span class="pre">DfMuxSample</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DfMuxWiringMap"><code class="docutils literal notranslate"><span class="pre">DfMuxWiringMap</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.HkBoardInfo"><code class="docutils literal notranslate"><span class="pre">HkBoardInfo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.HkChannelInfo"><code class="docutils literal notranslate"><span class="pre">HkChannelInfo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.HkMezzanineInfo"><code class="docutils literal notranslate"><span class="pre">HkMezzanineInfo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.HkModuleInfo"><code class="docutils literal notranslate"><span class="pre">HkModuleInfo</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_dfmux.html#class-like-pipeline-modules">Class-like Pipeline Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DataQualityTools.FillMissingTimepointFrames"><code class="docutils literal notranslate"><span class="pre">FillMissingTimepointFrames</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DfMuxBuilder"><code class="docutils literal notranslate"><span class="pre">DfMuxBuilder</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DfMuxCollator"><code class="docutils literal notranslate"><span class="pre">DfMuxCollator</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.HardwareMapTools.DfmlHardwareMapInjector"><code class="docutils literal notranslate"><span class="pre">DfmlHardwareMapInjector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.HardwareMapTools.GenerateFakeHardwareMap"><code class="docutils literal notranslate"><span class="pre">GenerateFakeHardwareMap</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.HardwareMapTools.PyDfMuxWiringMapInjector"><code class="docutils literal notranslate"><span class="pre">PyDfMuxWiringMapInjector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.Housekeeping.HousekeepingConsumer"><code class="docutils literal notranslate"><span class="pre">HousekeepingConsumer</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.Housekeeping.PeriodicHousekeepingCollector"><code class="docutils literal notranslate"><span class="pre">PeriodicHousekeepingCollector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.LegacyHousekeeping.LegacyHousekeepingConsumer"><code class="docutils literal notranslate"><span class="pre">LegacyHousekeepingConsumer</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.NetCDFDump"><code class="docutils literal notranslate"><span class="pre">NetCDFDump</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.ScanTools.FixedLengthScans"><code class="docutils literal notranslate"><span class="pre">FixedLengthScans</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.unittransforms.ConvertTimestreamUnits"><code class="docutils literal notranslate"><span class="pre">ConvertTimestreamUnits</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_dfmux.html#function-like-pipeline-modules">Function-like Pipeline Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.HardwareMapTools.PyDfMuxBolometerPropertiesInjector"><code class="docutils literal notranslate"><span class="pre">PyDfMuxBolometerPropertiesInjector()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_dfmux.html#useful-classes">Useful Classes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DfMuxCollector"><code class="docutils literal notranslate"><span class="pre">DfMuxCollector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.HkChannelInfoMap"><code class="docutils literal notranslate"><span class="pre">HkChannelInfoMap</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.HkMezzanineInfoMap"><code class="docutils literal notranslate"><span class="pre">HkMezzanineInfoMap</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.HkModuleInfoMap"><code class="docutils literal notranslate"><span class="pre">HkModuleInfoMap</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.LegacyDfMuxCollector"><code class="docutils literal notranslate"><span class="pre">LegacyDfMuxCollector</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_dfmux.html#useful-functions">Useful Functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.HardwareMapTools.PathStringForBolo"><code class="docutils literal notranslate"><span class="pre">PathStringForBolo()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.Housekeeping.HousekeepingForBolo"><code class="docutils literal notranslate"><span class="pre">HousekeepingForBolo()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.unittransforms.get_timestream_unit_conversion"><code class="docutils literal notranslate"><span class="pre">get_timestream_unit_conversion()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">gcp</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#api-documentation">API Documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#frame-objects">Frame Objects</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.ACUStatus"><code class="docutils literal notranslate"><span class="pre">ACUStatus</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.ACUStatusVector"><code class="docutils literal notranslate"><span class="pre">ACUStatusVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.TrackerPointing"><code class="docutils literal notranslate"><span class="pre">TrackerPointing</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.TrackerStatus"><code class="docutils literal notranslate"><span class="pre">TrackerStatus</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#class-like-pipeline-modules">Class-like Pipeline Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.ARCExtractor.CalibrateFrame"><code class="docutils literal notranslate"><span class="pre">CalibrateFrame</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.ARCFileReader"><code class="docutils literal notranslate"><span class="pre">ARCFileReader</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.ARCHKExtractor.UnpackSPTpolHKData"><code class="docutils literal notranslate"><span class="pre">UnpackSPTpolHKData</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.GCPDataTee.DAQWatchdog"><code class="docutils literal notranslate"><span class="pre">DAQWatchdog</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.GCPDataTee.GCPBoloDataTee"><code class="docutils literal notranslate"><span class="pre">GCPBoloDataTee</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.GCPDataTee.GCPHousekeepingTee"><code class="docutils literal notranslate"><span class="pre">GCPHousekeepingTee</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.GCPDataTee.GCPSignalledHousekeeping"><code class="docutils literal notranslate"><span class="pre">GCPSignalledHousekeeping</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.GCPDataTee.PagerWatchdog"><code class="docutils literal notranslate"><span class="pre">PagerWatchdog</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.GCPMuxDataDecoder"><code class="docutils literal notranslate"><span class="pre">GCPMuxDataDecoder</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#function-like-pipeline-modules">Function-like Pipeline Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.ARCExtractor.AddBenchData"><code class="docutils literal notranslate"><span class="pre">AddBenchData()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.ARCExtractor.DecryptFeatureBit"><code class="docutils literal notranslate"><span class="pre">DecryptFeatureBit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.ARCExtractor.UnpackACUData"><code class="docutils literal notranslate"><span class="pre">UnpackACUData()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.ARCExtractor.UnpackCryoData"><code class="docutils literal notranslate"><span class="pre">UnpackCryoData()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.ARCExtractor.UnpackMuxData"><code class="docutils literal notranslate"><span class="pre">UnpackMuxData()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.ARCExtractor.UnpackPTData"><code class="docutils literal notranslate"><span class="pre">UnpackPTData()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.ARCExtractor.UnpackTrackerData"><code class="docutils literal notranslate"><span class="pre">UnpackTrackerData()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.ARCExtractor.UnpackTrackerMinimal"><code class="docutils literal notranslate"><span class="pre">UnpackTrackerMinimal()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.ARCExtractor.UnpackTrackerPointingData"><code class="docutils literal notranslate"><span class="pre">UnpackTrackerPointingData()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.ARCExtractor.UnpackWeatherData"><code class="docutils literal notranslate"><span class="pre">UnpackWeatherData()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.ARCExtractor.UpdateLinearSensorDeltas"><code class="docutils literal notranslate"><span class="pre">UpdateLinearSensorDeltas()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.InfluxDB.WriteDB"><code class="docutils literal notranslate"><span class="pre">WriteDB()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pipeline-segments">Pipeline Segments</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.ARCExtractor.ARCExtract"><code class="docutils literal notranslate"><span class="pre">ARCExtract()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.ARCExtractor.ARCExtractMinimal"><code class="docutils literal notranslate"><span class="pre">ARCExtractMinimal()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.InfluxDB.UpdateDB"><code class="docutils literal notranslate"><span class="pre">UpdateDB()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#useful-classes">Useful Classes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.ARCFile.ARCFile"><code class="docutils literal notranslate"><span class="pre">ARCFile</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.CalFile.CalFileReader"><code class="docutils literal notranslate"><span class="pre">CalFileReader</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.GCPLogger"><code class="docutils literal notranslate"><span class="pre">GCPLogger</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.TrackerStateVector"><code class="docutils literal notranslate"><span class="pre">TrackerStateVector</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#useful-functions">Useful Functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.CalFile.create_g3_cal_file"><code class="docutils literal notranslate"><span class="pre">create_g3_cal_file()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="moddoc_maps.html">maps</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_maps.html#map-attributes">Map Attributes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_maps.html#file-format-conversions">File Format Conversions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_maps.html#indexing">Indexing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_maps.html#sparsity">Sparsity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_maps.html#masking">Masking</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_maps.html#mask-memory-usage">Mask Memory Usage</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_maps.html#statistics">Statistics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_maps.html#map-interpolation">Map Interpolation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_maps.html#map-weights">Map Weights</a></li>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_maps.html#map-frames-and-pipelines">Map Frames and Pipelines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_maps.html#flat-sky-map-projections">Flat Sky Map Projections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_maps.html#flat-sky-map-manipulation">Flat Sky Map Manipulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_maps.html#map-pointing">Map Pointing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_maps.html#pointing-quaternions">Pointing Quaternions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_maps.html#rotation-quaternions">Rotation Quaternions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_maps.html#detector-pointing">Detector Pointing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_maps.html#api-documentation">API Documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_maps.html#frame-objects">Frame Objects</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.FlatSkyMap"><code class="docutils literal notranslate"><span class="pre">FlatSkyMap</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.G3SkyMapMask"><code class="docutils literal notranslate"><span class="pre">G3SkyMapMask</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.G3SkyMapWeights"><code class="docutils literal notranslate"><span class="pre">G3SkyMapWeights</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.HealpixSkyMap"><code class="docutils literal notranslate"><span class="pre">HealpixSkyMap</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_maps.html#class-like-pipeline-modules">Class-like Pipeline Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.HitsBinner"><code class="docutils literal notranslate"><span class="pre">HitsBinner</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.MapBinner"><code class="docutils literal notranslate"><span class="pre">MapBinner</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.MapMockObserver"><code class="docutils literal notranslate"><span class="pre">MapMockObserver</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.MapTODMasker"><code class="docutils literal notranslate"><span class="pre">MapTODMasker</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.MapTODPointing"><code class="docutils literal notranslate"><span class="pre">MapTODPointing</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.SingleDetectorBoresightBinner"><code class="docutils literal notranslate"><span class="pre">SingleDetectorBoresightBinner</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.SingleDetectorMapBinner"><code class="docutils literal notranslate"><span class="pre">SingleDetectorMapBinner</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.map_modules.CoaddMaps"><code class="docutils literal notranslate"><span class="pre">CoaddMaps</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.map_modules.ExtractMaps"><code class="docutils literal notranslate"><span class="pre">ExtractMaps</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.map_modules.InjectMapStub"><code class="docutils literal notranslate"><span class="pre">InjectMapStub</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.map_modules.InjectMaps"><code class="docutils literal notranslate"><span class="pre">InjectMaps</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.map_modules.ReprojectMaps"><code class="docutils literal notranslate"><span class="pre">ReprojectMaps</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_maps.html#function-like-pipeline-modules">Function-like Pipeline Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.azel.EquatorialToGalacticPointing"><code class="docutils literal notranslate"><span class="pre">EquatorialToGalacticPointing()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.azel.LocalToAstronomicalPointing"><code class="docutils literal notranslate"><span class="pre">LocalToAstronomicalPointing()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.coordsysmodules.AddLocalTransRotations"><code class="docutils literal notranslate"><span class="pre">AddLocalTransRotations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.coordsysmodules.EquatorialToGalacticTransRotations"><code class="docutils literal notranslate"><span class="pre">EquatorialToGalacticTransRotations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.coordsysmodules.FillCoordTransRotations"><code class="docutils literal notranslate"><span class="pre">FillCoordTransRotations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.fitsio.SaveMapFrame"><code class="docutils literal notranslate"><span class="pre">SaveMapFrame()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.map_modules.ApplyWeights"><code class="docutils literal notranslate"><span class="pre">ApplyWeights()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.map_modules.CompactMaps"><code class="docutils literal notranslate"><span class="pre">CompactMaps()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.map_modules.FlattenPol"><code class="docutils literal notranslate"><span class="pre">FlattenPol()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.map_modules.MakeMapsPolarized"><code class="docutils literal notranslate"><span class="pre">MakeMapsPolarized()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.map_modules.MakeMapsUnpolarized"><code class="docutils literal notranslate"><span class="pre">MakeMapsUnpolarized()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.map_modules.RebinMaps"><code class="docutils literal notranslate"><span class="pre">RebinMaps()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.map_modules.RemoveWeights"><code class="docutils literal notranslate"><span class="pre">RemoveWeights()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.map_modules.ReplicateMaps"><code class="docutils literal notranslate"><span class="pre">ReplicateMaps()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.map_modules.SetPolConv"><code class="docutils literal notranslate"><span class="pre">SetPolConv()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.map_modules.ValidateMaps"><code class="docutils literal notranslate"><span class="pre">ValidateMaps()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.quathelpers.AddTimingToPointingQuats"><code class="docutils literal notranslate"><span class="pre">AddTimingToPointingQuats()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_maps.html#useful-classes">Useful Classes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.G3SkyMap"><code class="docutils literal notranslate"><span class="pre">G3SkyMap</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_maps.html#useful-functions">Useful Functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.apply_weights"><code class="docutils literal notranslate"><span class="pre">apply_weights()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.apply_weights_t"><code class="docutils literal notranslate"><span class="pre">apply_weights_t()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.azel.convert_azel_to_radec"><code class="docutils literal notranslate"><span class="pre">convert_azel_to_radec()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.azel.convert_gal_to_radec"><code class="docutils literal notranslate"><span class="pre">convert_gal_to_radec()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.azel.convert_radec_to_azel"><code class="docutils literal notranslate"><span class="pre">convert_radec_to_azel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.azel.convert_radec_to_gal"><code class="docutils literal notranslate"><span class="pre">convert_radec_to_gal()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.convolve_map"><code class="docutils literal notranslate"><span class="pre">convolve_map()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.fitsio.load_skymap_fits"><code class="docutils literal notranslate"><span class="pre">load_skymap_fits()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.fitsio.save_skymap_fits"><code class="docutils literal notranslate"><span class="pre">save_skymap_fits()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.flatten_pol"><code class="docutils literal notranslate"><span class="pre">flatten_pol()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.get_boresight_rotator_timestream"><code class="docutils literal notranslate"><span class="pre">get_boresight_rotator_timestream()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.get_fk5_j2000_to_gal_quat"><code class="docutils literal notranslate"><span class="pre">get_fk5_j2000_to_gal_quat()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.get_map_hist"><code class="docutils literal notranslate"><span class="pre">get_map_hist()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.get_map_moments"><code class="docutils literal notranslate"><span class="pre">get_map_moments()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.get_origin_rotator"><code class="docutils literal notranslate"><span class="pre">get_origin_rotator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.get_origin_rotator_timestream"><code class="docutils literal notranslate"><span class="pre">get_origin_rotator_timestream()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.get_ra_dec_map"><code class="docutils literal notranslate"><span class="pre">get_ra_dec_map()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.get_ra_dec_mask"><code class="docutils literal notranslate"><span class="pre">get_ra_dec_mask()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.get_rot_ang"><code class="docutils literal notranslate"><span class="pre">get_rot_ang()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.get_transform_quat"><code class="docutils literal notranslate"><span class="pre">get_transform_quat()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.make_point_source_mask"><code class="docutils literal notranslate"><span class="pre">make_point_source_mask()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.map_modules.coadd_map_files"><code class="docutils literal notranslate"><span class="pre">coadd_map_files()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.maputils.flatsky_to_healpix"><code class="docutils literal notranslate"><span class="pre">flatsky_to_healpix()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.maputils.healpix_to_flatsky"><code class="docutils literal notranslate"><span class="pre">healpix_to_flatsky()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.offsets_to_quat"><code class="docutils literal notranslate"><span class="pre">offsets_to_quat()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.quathelpers.ang_to_quat"><code class="docutils literal notranslate"><span class="pre">ang_to_quat()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.quathelpers.quat_to_ang"><code class="docutils literal notranslate"><span class="pre">quat_to_ang()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.remove_weights"><code class="docutils literal notranslate"><span class="pre">remove_weights()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.remove_weights_t"><code class="docutils literal notranslate"><span class="pre">remove_weights_t()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.reproj_map"><code class="docutils literal notranslate"><span class="pre">reproj_map()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="moddoc_mpi.html">mpi</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_mpi.html#frame-io-parallelization">Frame IO Parallelization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_mpi.html#frame-accumulation">Frame Accumulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_mpi.html#interface-to-toast">Interface to TOAST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_mpi.html#api-documentation">API Documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_mpi.html#class-like-pipeline-modules">Class-like Pipeline Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_mpi.html#spt3g.mpi.MPIAccumulator.MPIAccumulator"><code class="docutils literal notranslate"><span class="pre">MPIAccumulator</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_mpi.html#spt3g.mpi.MPIFileIO.MPIFileReader"><code class="docutils literal notranslate"><span class="pre">MPIFileReader</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_mpi.html#spt3g.mpi.MPIFileIO.MPIFrameParallelizer"><code class="docutils literal notranslate"><span class="pre">MPIFrameParallelizer</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_mpi.html#pipeline-segments">Pipeline Segments</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_mpi.html#spt3g.mpi.MPIFileIO.MPIIODistributor"><code class="docutils literal notranslate"><span class="pre">MPIIODistributor()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">SPT-3G Software</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">gcp</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/moddoc_gcp.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
   <section id="gcp">
-<h1>gcp<a class="headerlink" href="#gcp" title="Link to this heading">¶</a></h1>
+<h1>gcp<a class="headerlink" href="#gcp" title="Link to this heading"></a></h1>
 <p>The GCP package contains tools for interacting with the telescope control system (GCP). This includes both offline tools for processing data products from the GCP (ARCFileReader) and associated container classes (ACUStatus, TrackerStatus), as well as online tools designed for coordination of data taking with the control system (the various data tees and signalling modules).</p>
-<section id="frame-objects-in-spt3g-gcp">
-<h2>Frame Objects in spt3g.gcp<a class="headerlink" href="#frame-objects-in-spt3g-gcp" title="Link to this heading">¶</a></h2>
+<section id="api-documentation">
+<h2>API Documentation<a class="headerlink" href="#api-documentation" title="Link to this heading"></a></h2>
+<nav class="contents local" id="contents">
+<p class="topic-title">Contents</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="#spt3g-gcp-acustatus">spt3g.gcp.ACUStatus</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-acustatusvector">spt3g.gcp.ACUStatusVector</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-trackerpointing">spt3g.gcp.TrackerPointing</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-trackerstatus">spt3g.gcp.TrackerStatus</a></p></li>
+<li><p><a class="reference internal" href="#frame-objects" id="id1">Frame Objects</a></p></li>
+<li><p><a class="reference internal" href="#class-like-pipeline-modules" id="id2">Class-like Pipeline Modules</a></p></li>
+<li><p><a class="reference internal" href="#function-like-pipeline-modules" id="id3">Function-like Pipeline Modules</a></p></li>
+<li><p><a class="reference internal" href="#pipeline-segments" id="id4">Pipeline Segments</a></p></li>
+<li><p><a class="reference internal" href="#useful-classes" id="id5">Useful Classes</a></p></li>
+<li><p><a class="reference internal" href="#useful-functions" id="id6">Useful Functions</a></p></li>
 </ul>
-<section id="spt3g-gcp-acustatus">
-<span id="id1"></span><h3>spt3g.gcp.ACUStatus<a class="headerlink" href="#spt3g-gcp-acustatus" title="Link to this heading">¶</a></h3>
+</nav>
+<section id="frame-objects">
+<h3><a class="toc-backref" href="#id1" role="doc-backlink">Frame Objects</a><a class="headerlink" href="#frame-objects" title="Link to this heading"></a></h3>
+<p>Serializable objects that may be stored as entries in <a class="reference internal" href="moddoc_core.html#spt3g.core.G3Frame" title="spt3g.core.G3Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3Frame</span></code></a> objects.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="spt3g.gcp.ACUStatus">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.</span></span><span class="sig-name descname"><span class="pre">ACUStatus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.gcp.ACUStatus" title="spt3g.gcp.ACUStatus"><span class="pre">ACUStatus</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.ACUStatus" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.</span></span><span class="sig-name descname"><span class="pre">ACUStatus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Bases: <a class="reference internal" href="moddoc_core.html#spt3g.core.G3FrameObject" title="spt3g.core.G3FrameObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3FrameObject</span></code></a></p>
 <p>ACU Status information, as reported by the ACU</p>
-<dl>
-<dt><em>Constructors:</em></dt><dd><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">ACUStatus(</span> <span class="pre">(ACUStatus)arg2)</span></code> :</dt><dd><p>Copy constructor</p>
-</dd>
-</dl>
-<p><code class="docutils literal notranslate"><span class="pre">ACUStatus()</span></code></p>
-</dd>
-</dl>
-<p><em>Members:</em></p>
-<ul class="simple">
-<li><p><strong>time</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>az_pos</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>el_pos</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>az_rate</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>el_rate</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>px_checksum_error_count</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>px_resync_count</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>px_resync_timeout_count</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>px_timeout_count</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>restart_count</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>px_resyncing</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>state</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>acu_status</strong>: No Doc (Shame!)</p></li>
-</ul>
-<p><em>Methods:</em></p>
-<p id="spt3g-gcp-acustatus-summary"><strong>spt3g.gcp.ACUStatus.Summary</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">Summary(</span> <span class="pre">(ACUStatus)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Short (one-line) description of the object</p>
-</dd>
-</dl>
-<p id="spt3g-gcp-acustatus-description"><strong>spt3g.gcp.ACUStatus.Description</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">Description(</span> <span class="pre">(ACUStatus)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Long-form human-readable description of the object</p>
-</dd>
-</dl>
-</section>
-<section id="spt3g-gcp-acustatusvector">
-<span id="id2"></span><h3>spt3g.gcp.ACUStatusVector<a class="headerlink" href="#spt3g-gcp-acustatusvector" title="Link to this heading">¶</a></h3>
+<p>Signature 1: Copy constructor</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.gcp.ACUStatus.Description">
+<span class="sig-name descname"><span class="pre">Description</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#spt3g.gcp.ACUStatus.Description" title="Link to this definition"></a></dt>
+<dd><p>Long-form human-readable description of the object</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.gcp.ACUStatus.Summary">
+<span class="sig-name descname"><span class="pre">Summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#spt3g.gcp.ACUStatus.Summary" title="Link to this definition"></a></dt>
+<dd><p>Short (one-line) description of the object</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="spt3g.gcp.ACUStatusVector">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.</span></span><span class="sig-name descname"><span class="pre">ACUStatusVector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.ACUStatusVector" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="moddoc_core.html#spt3g.core.G3FrameObject" title="spt3g.core.G3FrameObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3FrameObject</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_ACUStatusBaseVector</span></code></p>
 <p>Array of ACUStatus objects, usually time-ordered</p>
-<dl class="simple">
-<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">ACUStatusVector(</span> <span class="pre">(object)arg2)</span></code></p>
-</dd>
-</dl>
-<p><em>Methods:</em></p>
-<p id="spt3g-gcp-acustatusvector-append"><strong>spt3g.gcp.ACUStatusVector.append</strong></p>
-<p><code class="docutils literal notranslate"><span class="pre">append(</span> <span class="pre">(ACUStatusVector)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
-<p id="spt3g-gcp-acustatusvector-extend"><strong>spt3g.gcp.ACUStatusVector.extend</strong></p>
-<p><code class="docutils literal notranslate"><span class="pre">extend(</span> <span class="pre">(ACUStatusVector)arg1,</span> <span class="pre">(object)arg2)</span> <span class="pre">-&gt;</span> <span class="pre">None</span></code></p>
-</section>
-<section id="spt3g-gcp-trackerpointing">
-<span id="id3"></span><h3>spt3g.gcp.TrackerPointing<a class="headerlink" href="#spt3g-gcp-trackerpointing" title="Link to this heading">¶</a></h3>
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.gcp.ACUStatusVector.append">
+<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.ACUStatusVector.append" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.gcp.ACUStatusVector.extend">
+<span class="sig-name descname"><span class="pre">extend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.ACUStatusVector.extend" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="spt3g.gcp.TrackerPointing">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.</span></span><span class="sig-name descname"><span class="pre">TrackerPointing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.gcp.TrackerPointing" title="spt3g.gcp.TrackerPointing"><span class="pre">TrackerPointing</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.TrackerPointing" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.</span></span><span class="sig-name descname"><span class="pre">TrackerPointing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Bases: <a class="reference internal" href="moddoc_core.html#spt3g.core.G3FrameObject" title="spt3g.core.G3FrameObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3FrameObject</span></code></a></p>
 <p>GCP Tracker Pointing</p>
-<dl>
-<dt><em>Constructors:</em></dt><dd><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">TrackerPointing(</span> <span class="pre">(TrackerPointing)arg2)</span></code> :</dt><dd><p>Copy constructor</p>
-</dd>
-</dl>
-<p><code class="docutils literal notranslate"><span class="pre">TrackerPointing()</span></code></p>
-</dd>
-</dl>
-<p><em>Members:</em></p>
-<ul class="simple">
-<li><p><strong>time</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>scu_temp</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>features</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>encoder_off_x</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>encoder_off_y</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>horiz_mount_x</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>horiz_mount_y</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>horiz_off_x</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>horiz_off_y</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>tilts_x</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>tilts_y</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>linsens_avg_l1</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>linsens_avg_l2</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>linsens_avg_r1</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>linsens_avg_r2</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>telescope_temp</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>telescope_pressure</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>refraction</strong>: No Doc (Shame!)</p></li>
-</ul>
-<p><em>Methods:</em></p>
-<p id="spt3g-gcp-trackerpointing-summary"><strong>spt3g.gcp.TrackerPointing.Summary</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">Summary(</span> <span class="pre">(TrackerPointing)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Short (one-line) description of the object</p>
-</dd>
-</dl>
-<p id="spt3g-gcp-trackerpointing-description"><strong>spt3g.gcp.TrackerPointing.Description</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">Description(</span> <span class="pre">(TrackerPointing)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Long-form human-readable description of the object</p>
-</dd>
-</dl>
-</section>
-<section id="spt3g-gcp-trackerstatus">
-<span id="id4"></span><h3>spt3g.gcp.TrackerStatus<a class="headerlink" href="#spt3g-gcp-trackerstatus" title="Link to this heading">¶</a></h3>
+<p>Signature 1: Copy constructor</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.gcp.TrackerPointing.Description">
+<span class="sig-name descname"><span class="pre">Description</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#spt3g.gcp.TrackerPointing.Description" title="Link to this definition"></a></dt>
+<dd><p>Long-form human-readable description of the object</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.gcp.TrackerPointing.Summary">
+<span class="sig-name descname"><span class="pre">Summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#spt3g.gcp.TrackerPointing.Summary" title="Link to this definition"></a></dt>
+<dd><p>Short (one-line) description of the object</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="spt3g.gcp.TrackerStatus">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.</span></span><span class="sig-name descname"><span class="pre">TrackerStatus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.gcp.TrackerStatus" title="spt3g.gcp.TrackerStatus"><span class="pre">TrackerStatus</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.TrackerStatus" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.</span></span><span class="sig-name descname"><span class="pre">TrackerStatus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Bases: <a class="reference internal" href="moddoc_core.html#spt3g.core.G3FrameObject" title="spt3g.core.G3FrameObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3FrameObject</span></code></a></p>
 <p>GCP Tracker Status</p>
+<p>Signature 1: Copy constructor</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.gcp.TrackerStatus.Description">
+<span class="sig-name descname"><span class="pre">Description</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#spt3g.gcp.TrackerStatus.Description" title="Link to this definition"></a></dt>
+<dd><p>Long-form human-readable description of the object</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.gcp.TrackerStatus.Summary">
+<span class="sig-name descname"><span class="pre">Summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#spt3g.gcp.TrackerStatus.Summary" title="Link to this definition"></a></dt>
+<dd><p>Short (one-line) description of the object</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="class-like-pipeline-modules">
+<h3><a class="toc-backref" href="#id2" role="doc-backlink">Class-like Pipeline Modules</a><a class="headerlink" href="#class-like-pipeline-modules" title="Link to this heading"></a></h3>
+<p>Classes that can be added to <a class="reference internal" href="moddoc_core.html#spt3g.core.G3Pipeline" title="spt3g.core.G3Pipeline"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3Pipeline</span></code></a>
+instances, either written as callable objects in Python (see
+<a class="reference internal" href="modules.html#class-modules"><span class="std std-ref">Callable Objects as Functions</span></a>) or as <a class="reference internal" href="moddoc_core.html#spt3g.core.G3Module" title="spt3g.core.G3Module"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3Module</span></code></a>-derived
+classes in C++ (see <a class="reference internal" href="modules.html#cxx-modules"><span class="std std-ref">Writing a module in C++</span></a>).  Aside from adding these into
+pipelines using the standard <code class="docutils literal notranslate"><span class="pre">Add()</span></code> method, such objects may also be
+instantiated outside of pipelines to make use of additional features.</p>
+<p>One typical use case is to extract some kind of data from a series of
+frames:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ExtractData</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;RawTimestreams&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="n">key</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="ow">in</span> <span class="n">frame</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">])</span>
+
+<span class="c1"># instantiate caching class</span>
+<span class="n">extractor</span> <span class="o">=</span> <span class="n">ExtractData</span><span class="p">()</span>
+
+<span class="c1"># use instance in a pipeline</span>
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3Pipeline</span><span class="p">()</span>
+<span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">G3Reader</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s2">&quot;file.g3&quot;</span><span class="p">)</span>
+<span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">extractor</span><span class="p">)</span>
+<span class="n">pipe</span><span class="o">.</span><span class="n">Run</span><span class="p">()</span>
+
+<span class="c1"># use extracted data in later processing</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">extractor</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Another use case may be to call additional methods of a class.  For
+example, the <a class="reference internal" href="moddoc_core.html#spt3g.core.G3Writer" title="spt3g.core.G3Writer"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3Writer</span></code></a> class can be used as a
+context manager, and also report the position of the file pointer after
+each frame is written:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">core</span><span class="o">.</span><span class="n">G3Writer</span><span class="p">(</span><span class="s2">&quot;file.g3&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">writer</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">frame</span> <span class="ow">in</span> <span class="n">frames</span><span class="p">:</span>
+        <span class="n">writer</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Bytes written:&quot;</span><span class="p">,</span> <span class="n">writer</span><span class="o">.</span><span class="n">tell</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>Class-like modules permit a variety of additional features beyond
+their standard usage in pipelines.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="spt3g.gcp.ARCExtractor.CalibrateFrame">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.ARCExtractor.</span></span><span class="sig-name descname"><span class="pre">CalibrateFrame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">calibration_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/gcp/ARCExtractor.html#CalibrateFrame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.gcp.ARCExtractor.CalibrateFrame" title="Link to this definition"></a></dt>
+<dd><p>Apply gain / offset / units from G3 cal file</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="spt3g.gcp.ARCFileReader">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.</span></span><span class="sig-name descname"><span class="pre">ARCFileReader</span></span><span class="sig-paren">(</span>
+
 <dl>
-<dt><em>Constructors:</em></dt><dd><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">TrackerStatus(</span> <span class="pre">(TrackerStatus)arg2)</span></code> :</dt><dd><p>Copy constructor</p>
+<dd><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">experiment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Experiment</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">spt3g.gcp.Experiment.SPT</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1.0</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">track_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">buffersize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1048576</span></span></em>,</dd>
+</dl>
+
+<span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.ARCFileReader" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.</span></span><span class="sig-name descname"><span class="pre">ARCFileReader</span></span><span class="sig-paren">(</span>
+
+<dl>
+<dd><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="moddoc_core.html#spt3g.core.StringVector" title="spt3g.core.StringVector"><span class="pre">StringVector</span></a></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">experiment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Experiment</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">spt3g.gcp.Experiment.SPT</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1.0</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">track_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">buffersize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1048576</span></span></em>,</dd>
+</dl>
+
+<span class="sig-paren">)</span></dt>
+<dd><p>Bases: <a class="reference internal" href="moddoc_core.html#spt3g.core.G3Module" title="spt3g.core.G3Module"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3Module</span></code></a></p>
+<p>Read GCP archive file (or files if you pass an iterable of paths). For non-SPT ARC file formats, please set Experiment to the appropriate value.  Set track_filename to True to record the filename for each frame in the ._filename attribute (fragile).</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="spt3g.gcp.ARCHKExtractor.UnpackSPTpolHKData">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.ARCHKExtractor.</span></span><span class="sig-name descname"><span class="pre">UnpackSPTpolHKData</span></span><a class="reference internal" href="_modules/spt3g/gcp/ARCHKExtractor.html#UnpackSPTpolHKData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.gcp.ARCHKExtractor.UnpackSPTpolHKData" title="Link to this definition"></a></dt>
+<dd><p>Extracts SPTpol housekeeping information from ARC files</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="spt3g.gcp.GCPDataTee.DAQWatchdog">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.GCPDataTee.</span></span><span class="sig-name descname"><span class="pre">DAQWatchdog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">calibrator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">600</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/gcp/GCPDataTee.html#DAQWatchdog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.gcp.GCPDataTee.DAQWatchdog" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#spt3g.gcp.GCPDataTee.PagerWatchdog" title="spt3g.gcp.GCPDataTee.PagerWatchdog"><code class="xref py py-class docutils literal notranslate"><span class="pre">PagerWatchdog</span></code></a></p>
+<p>Watchdog that issues a ping to the GCP pager when the DAQ is operational.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>calibrator</strong> (<em>bool</em>) – If True, ensure that the calibrator is also running successfully
+before sending a ping.</p>
 </dd>
 </dl>
-<p><code class="docutils literal notranslate"><span class="pre">TrackerStatus()</span></code></p>
-</dd>
-</dl>
-<p><em>Members:</em></p>
-<ul class="simple">
-<li><p><strong>time</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>az_pos</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>el_pos</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>az_rate</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>el_rate</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>az_command</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>el_command</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>az_rate_command</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>el_rate_command</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>state</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>acu_seq</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>in_control</strong>: No Doc (Shame!)</p></li>
-<li><p><strong>scan_flag</strong>: No Doc (Shame!)</p></li>
-</ul>
-<p><em>Methods:</em></p>
-<p id="spt3g-gcp-trackerstatus-summary"><strong>spt3g.gcp.TrackerStatus.Summary</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">Summary(</span> <span class="pre">(TrackerStatus)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Short (one-line) description of the object</p>
-</dd>
-</dl>
-<p id="spt3g-gcp-trackerstatus-description"><strong>spt3g.gcp.TrackerStatus.Description</strong></p>
-<dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">Description(</span> <span class="pre">(TrackerStatus)arg1)</span> <span class="pre">-&gt;</span> <span class="pre">str</span> <span class="pre">:</span></code></dt><dd><p>Long-form human-readable description of the object</p>
-</dd>
-</dl>
-</section>
-</section>
-<section id="modules-in-spt3g-gcp">
-<h2>Modules in spt3g.gcp<a class="headerlink" href="#modules-in-spt3g-gcp" title="Link to this heading">¶</a></h2>
-<ul class="simple">
-<li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-arcextract">spt3g.gcp.ARCExtractor.ARCExtract</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-arcextractminimal">spt3g.gcp.ARCExtractor.ARCExtractMinimal</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-addbenchdata">spt3g.gcp.ARCExtractor.AddBenchData</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-calibrateframe">spt3g.gcp.ARCExtractor.CalibrateFrame</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-decryptfeaturebit">spt3g.gcp.ARCExtractor.DecryptFeatureBit</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-unpackacudata">spt3g.gcp.ARCExtractor.UnpackACUData</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-unpackcryodata">spt3g.gcp.ARCExtractor.UnpackCryoData</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-unpackmuxdata">spt3g.gcp.ARCExtractor.UnpackMuxData</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-unpackptdata">spt3g.gcp.ARCExtractor.UnpackPTData</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-unpacktrackerdata">spt3g.gcp.ARCExtractor.UnpackTrackerData</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-unpacktrackerminimal">spt3g.gcp.ARCExtractor.UnpackTrackerMinimal</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-unpacktrackerpointingdata">spt3g.gcp.ARCExtractor.UnpackTrackerPointingData</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-unpackweatherdata">spt3g.gcp.ARCExtractor.UnpackWeatherData</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-arcextractor-updatelinearsensordeltas">spt3g.gcp.ARCExtractor.UpdateLinearSensorDeltas</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-arcfilereader">spt3g.gcp.ARCFileReader</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-archkextractor-unpacksptpolhkdata">spt3g.gcp.ARCHKExtractor.UnpackSPTpolHKData</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-gcpdatatee-daqwatchdog">spt3g.gcp.GCPDataTee.DAQWatchdog</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-gcpdatatee-gcpbolodatatee">spt3g.gcp.GCPDataTee.GCPBoloDataTee</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-gcpdatatee-gcphousekeepingtee">spt3g.gcp.GCPDataTee.GCPHousekeepingTee</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-gcpdatatee-gcpsignalledhousekeeping">spt3g.gcp.GCPDataTee.GCPSignalledHousekeeping</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-gcpdatatee-pagerwatchdog">spt3g.gcp.GCPDataTee.PagerWatchdog</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-gcpmuxdatadecoder">spt3g.gcp.GCPMuxDataDecoder</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-influxdb-updatedb">spt3g.gcp.InfluxDB.UpdateDB</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-influxdb-writedb">spt3g.gcp.InfluxDB.WriteDB</a></p></li>
-</ul>
-<p id="spt3g-gcp-arcextractor-arcextract"><strong>spt3g.gcp.ARCExtractor.ARCExtract</strong></p>
-<p>Extract GCP registers into native objects</p>
-<p><em>Equivalent to:</em></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.gcp.GCPDataTee.DAQWatchdog.data_valid">
+<span class="sig-name descname"><span class="pre">data_valid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/gcp/GCPDataTee.html#DAQWatchdog.data_valid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.gcp.GCPDataTee.DAQWatchdog.data_valid" title="Link to this definition"></a></dt>
+<dd><p>Check the incoming frame for completeness.</p>
 <blockquote>
-<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">CalibrateFrame</span><span class="p">)</span>
+<div><ul class="simple">
+<li><p>Ensure that all modules in the listed iceboards are reporting.</p></li>
+<li><p>If <cite>calibrator</cite> is True, ensure that the calibrator sync signal is in the frame.</p></li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="spt3g.gcp.GCPDataTee.GCPBoloDataTee">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.GCPDataTee.</span></span><span class="sig-name descname"><span class="pre">GCPBoloDataTee</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50020</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bolometers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/gcp/GCPDataTee.html#GCPBoloDataTee"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.gcp.GCPDataTee.GCPBoloDataTee" title="Link to this definition"></a></dt>
+<dd><p>Module that serves bolometer data to GCP when asked. Once a second,
+will serve the data from the previous second of bolometer data.</p>
+<p>If a boolean key appears in the timepoint frames named “DataOK”,
+this will be sent to GCP as a data quality indicator for paging.</p>
+<p>Send data from the given list of bolometer logical IDs to the GCP.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="spt3g.gcp.GCPDataTee.GCPHousekeepingTee">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.GCPDataTee.</span></span><span class="sig-name descname"><span class="pre">GCPHousekeepingTee</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50010</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/gcp/GCPDataTee.html#GCPHousekeepingTee"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.gcp.GCPDataTee.GCPHousekeepingTee" title="Link to this definition"></a></dt>
+<dd><p>Module that serves housekeeping information to GCP when asked. If a key
+named “DataOK” exists in the housekeeping frames, will also transmit
+that information to GCP for paging purposes.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="spt3g.gcp.GCPDataTee.GCPSignalledHousekeeping">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.GCPDataTee.</span></span><span class="sig-name descname"><span class="pre">GCPSignalledHousekeeping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50011</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collect_on_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/gcp/GCPDataTee.html#GCPSignalledHousekeeping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.gcp.GCPDataTee.GCPSignalledHousekeeping" title="Link to this definition"></a></dt>
+<dd><p>Module that collects housekeeping data when connected to. If
+collect_on_start is True (the default), injects an HK frame
+unconditionally at startup.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="spt3g.gcp.GCPDataTee.PagerWatchdog">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.GCPDataTee.</span></span><span class="sig-name descname"><span class="pre">PagerWatchdog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">600</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/gcp/GCPDataTee.html#PagerWatchdog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.gcp.GCPDataTee.PagerWatchdog" title="Link to this definition"></a></dt>
+<dd><p>Module that sends a watchdog (ping) message to the GCP pager when the parent
+process is running successfully.  Modify the <cite>data_valid</cite> method for
+particular use cases, and call the <cite>run</cite> method periodically in your
+application.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.gcp.GCPDataTee.PagerWatchdog.data_valid">
+<span class="sig-name descname"><span class="pre">data_valid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/gcp/GCPDataTee.html#PagerWatchdog.data_valid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.gcp.GCPDataTee.PagerWatchdog.data_valid" title="Link to this definition"></a></dt>
+<dd><p>Returns True if the watchdog should ping, otherwise False.  Arguments
+are passed to this method from the <cite>run</cite> method.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.gcp.GCPDataTee.PagerWatchdog.page">
+<span class="sig-name descname"><span class="pre">page</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/gcp/GCPDataTee.html#PagerWatchdog.page"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.gcp.GCPDataTee.PagerWatchdog.page" title="Link to this definition"></a></dt>
+<dd><p>Issue a page to the GCP pager process.  Called by the user for immediate
+notification of errors.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.gcp.GCPDataTee.PagerWatchdog.ping">
+<span class="sig-name descname"><span class="pre">ping</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/gcp/GCPDataTee.html#PagerWatchdog.ping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.gcp.GCPDataTee.PagerWatchdog.ping" title="Link to this definition"></a></dt>
+<dd><p>Send a watchdog ping message to the GCP pager process.  This method is
+called by the <cite>run</cite> method at regular intervals whenever the
+<cite>data_valid</cite> method returns True.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.gcp.GCPDataTee.PagerWatchdog.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/gcp/GCPDataTee.html#PagerWatchdog.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.gcp.GCPDataTee.PagerWatchdog.run" title="Link to this definition"></a></dt>
+<dd><p>When called, issues a watchdog ping message if the interval time has passed, and
+the <cite>data_valid</cite> method returns True.  All input arguments are passed to the
+<cite>data_valid</cite> method for validation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.gcp.GCPDataTee.PagerWatchdog.send">
+<span class="sig-name descname"><span class="pre">send</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmd</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/gcp/GCPDataTee.html#PagerWatchdog.send"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.gcp.GCPDataTee.PagerWatchdog.send" title="Link to this definition"></a></dt>
+<dd><p>Send a command to the GCP pager process, and return the response.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="spt3g.gcp.GCPMuxDataDecoder">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.</span></span><span class="sig-name descname"><span class="pre">GCPMuxDataDecoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.GCPMuxDataDecoder" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="moddoc_core.html#spt3g.core.G3Module" title="spt3g.core.G3Module"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3Module</span></code></a></p>
+<p>Extracts contents of receiver registers in SPTpol-style ARC files into a wiring map and timepoint frames. This is designed to convert SPTpol-style data in which GCP records bolometer data into the ARC files into a format equivalent to that for SPT-3G.</p>
+<p>For old (100d SPTpol) data not containing wiring information, insert a wiring map into the pipeline ahead of this module. The board_serial should be set to a real (positive) value for all bolometer channels and -1 for the calibrator sync readout.</p>
+</dd></dl>
+
+</section>
+<section id="function-like-pipeline-modules">
+<h3><a class="toc-backref" href="#id3" role="doc-backlink">Function-like Pipeline Modules</a><a class="headerlink" href="#function-like-pipeline-modules" title="Link to this heading"></a></h3>
+<p>Python functions that can be added to <a class="reference internal" href="moddoc_core.html#spt3g.core.G3Pipeline" title="spt3g.core.G3Pipeline"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3Pipeline</span></code></a> instances. Such functions may also be called directly with a <a class="reference internal" href="moddoc_core.html#spt3g.core.G3Frame" title="spt3g.core.G3Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3Frame</span></code></a> object as the first argument, and do not necessarily need to be used in a pipeline. See <a class="reference internal" href="modules.html#function-modules"><span class="std std-ref">Python Modules as Functions</span></a> for more detail.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="spt3g.gcp.ARCExtractor.AddBenchData">
+<span class="sig-prename descclassname"><span class="pre">spt3g.gcp.ARCExtractor.</span></span><span class="sig-name descname"><span class="pre">AddBenchData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/gcp/ARCExtractor.html#AddBenchData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.gcp.ARCExtractor.AddBenchData" title="Link to this definition"></a></dt>
+<dd><p>Add the optical bench positions to the frame.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spt3g.gcp.ARCExtractor.DecryptFeatureBit">
+<span class="sig-prename descclassname"><span class="pre">spt3g.gcp.ARCExtractor.</span></span><span class="sig-name descname"><span class="pre">DecryptFeatureBit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/gcp/ARCExtractor.html#DecryptFeatureBit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.gcp.ARCExtractor.DecryptFeatureBit" title="Link to this definition"></a></dt>
+<dd><p>Unpacks the GCP feature flags</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spt3g.gcp.ARCExtractor.UnpackACUData">
+<span class="sig-prename descclassname"><span class="pre">spt3g.gcp.ARCExtractor.</span></span><span class="sig-name descname"><span class="pre">UnpackACUData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/gcp/ARCExtractor.html#UnpackACUData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.gcp.ARCExtractor.UnpackACUData" title="Link to this definition"></a></dt>
+<dd><p>Extracts ACU status information to ACUStatus key in frame</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spt3g.gcp.ARCExtractor.UnpackCryoData">
+<span class="sig-prename descclassname"><span class="pre">spt3g.gcp.ARCExtractor.</span></span><span class="sig-name descname"><span class="pre">UnpackCryoData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/gcp/ARCExtractor.html#UnpackCryoData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.gcp.ARCExtractor.UnpackCryoData" title="Link to this definition"></a></dt>
+<dd><p>Extracts cryo information into CryoStatus key</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spt3g.gcp.ARCExtractor.UnpackMuxData">
+<span class="sig-prename descclassname"><span class="pre">spt3g.gcp.ARCExtractor.</span></span><span class="sig-name descname"><span class="pre">UnpackMuxData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/gcp/ARCExtractor.html#UnpackMuxData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.gcp.ARCExtractor.UnpackMuxData" title="Link to this definition"></a></dt>
+<dd><p>Add the DFMux data to the frame.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spt3g.gcp.ARCExtractor.UnpackPTData">
+<span class="sig-prename descclassname"><span class="pre">spt3g.gcp.ARCExtractor.</span></span><span class="sig-name descname"><span class="pre">UnpackPTData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/gcp/ARCExtractor.html#UnpackPTData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.gcp.ARCExtractor.UnpackPTData" title="Link to this definition"></a></dt>
+<dd><p>Extracts pulse tube status information to PTStatus key
+in frame</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spt3g.gcp.ARCExtractor.UnpackTrackerData">
+<span class="sig-prename descclassname"><span class="pre">spt3g.gcp.ARCExtractor.</span></span><span class="sig-name descname"><span class="pre">UnpackTrackerData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rewrite_source_from_feature_bits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/gcp/ARCExtractor.html#UnpackTrackerData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.gcp.ARCExtractor.UnpackTrackerData" title="Link to this definition"></a></dt>
+<dd><p>Extracts tracker status information to frame into the TrackerStatus key,
+along with the observation processing handled by UnpackTrackerMinimal.</p>
+<p>If rewrite_source_from_feature_bits is True (the default), will try to
+rewrite source names if DecryptFeatureBit() has been run and either
+“elnod”, “calibrator”, or “noise” is present in the feature bit list
+to that value.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spt3g.gcp.ARCExtractor.UnpackTrackerMinimal">
+<span class="sig-prename descclassname"><span class="pre">spt3g.gcp.ARCExtractor.</span></span><span class="sig-name descname"><span class="pre">UnpackTrackerMinimal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rewrite_source_from_feature_bits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/gcp/ARCExtractor.html#UnpackTrackerMinimal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.gcp.ARCExtractor.UnpackTrackerMinimal" title="Link to this definition"></a></dt>
+<dd><p>Construct SourceName and ObservationId keys from frame.</p>
+<p>If rewrite_source_from_feature_bits is True (the default), will try to
+rewrite source names if DecryptFeatureBit() has been run and either
+“elnod”, “calibrator”, or “noise” is present in the feature bit list
+to that value.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spt3g.gcp.ARCExtractor.UnpackTrackerPointingData">
+<span class="sig-prename descclassname"><span class="pre">spt3g.gcp.ARCExtractor.</span></span><span class="sig-name descname"><span class="pre">UnpackTrackerPointingData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/gcp/ARCExtractor.html#UnpackTrackerPointingData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.gcp.ARCExtractor.UnpackTrackerPointingData" title="Link to this definition"></a></dt>
+<dd><p>Extracts tracker registers relevant to online and offline pointing.
+Calibration values (offsets and multiplicative constants) are from
+gcp/control/conf/spt/cal.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spt3g.gcp.ARCExtractor.UnpackWeatherData">
+<span class="sig-prename descclassname"><span class="pre">spt3g.gcp.ARCExtractor.</span></span><span class="sig-name descname"><span class="pre">UnpackWeatherData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/gcp/ARCExtractor.html#UnpackWeatherData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.gcp.ARCExtractor.UnpackWeatherData" title="Link to this definition"></a></dt>
+<dd><p>Extracts weather status information to Weather key
+in frame</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spt3g.gcp.ARCExtractor.UpdateLinearSensorDeltas">
+<span class="sig-prename descclassname"><span class="pre">spt3g.gcp.ARCExtractor.</span></span><span class="sig-name descname"><span class="pre">UpdateLinearSensorDeltas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/gcp/ARCExtractor.html#UpdateLinearSensorDeltas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.gcp.ARCExtractor.UpdateLinearSensorDeltas" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spt3g.gcp.InfluxDB.WriteDB">
+<span class="sig-prename descclassname"><span class="pre">spt3g.gcp.InfluxDB.</span></span><span class="sig-name descname"><span class="pre">WriteDB</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/gcp/InfluxDB.html#WriteDB"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.gcp.InfluxDB.WriteDB" title="Link to this definition"></a></dt>
+<dd><p>Write points to the database for each field</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>client</strong> – InfluxDB client</p></li>
+<li><p><strong>fields</strong> – Which gcp fields to add to database. See parse_field for options. If
+None, add all.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="pipeline-segments">
+<h3><a class="toc-backref" href="#id4" role="doc-backlink">Pipeline Segments</a><a class="headerlink" href="#pipeline-segments" title="Link to this heading"></a></h3>
+<p>Python functions that combine a sequence of pipeline modules, and can be added to <a class="reference internal" href="moddoc_core.html#spt3g.core.G3Pipeline" title="spt3g.core.G3Pipeline"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3Pipeline</span></code></a> instances. See <a class="reference internal" href="modules.html#pipesegments"><span class="std std-ref">Pipeline Segments</span></a> for more detail.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="spt3g.gcp.ARCExtractor.ARCExtract">
+<span class="sig-prename descclassname"><span class="pre">spt3g.gcp.ARCExtractor.</span></span><span class="sig-name descname"><span class="pre">ARCExtract</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipe</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.ARCExtractor.ARCExtract" title="Link to this definition"></a></dt>
+<dd><p>Extract GCP registers into native objects</p>
+<p class="rubric">Equivalent to</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">CalibrateFrame</span><span class="p">)</span>
 <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UnpackACUData</span><span class="p">)</span>
 <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UnpackTrackerPointingData</span><span class="p">)</span>
 <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UpdateLinearSensorDeltas</span><span class="p">)</span>
@@ -230,228 +1043,49 @@
 <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UnpackWeatherData</span><span class="p">)</span>
 </pre></div>
 </div>
-</div></blockquote>
-<dl class="simple">
-<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">ARCExtract(pipe)</span></code></p>
-</dd>
-</dl>
-<p id="spt3g-gcp-arcextractor-arcextractminimal"><strong>spt3g.gcp.ARCExtractor.ARCExtractMinimal</strong></p>
-<p>Extract bare minimum GCP registers into native objects.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spt3g.gcp.ARCExtractor.ARCExtractMinimal">
+<span class="sig-prename descclassname"><span class="pre">spt3g.gcp.ARCExtractor.</span></span><span class="sig-name descname"><span class="pre">ARCExtractMinimal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipe</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.ARCExtractor.ARCExtractMinimal" title="Link to this definition"></a></dt>
+<dd><p>Extract bare minimum GCP registers into native objects.</p>
 <p>Includes only GCPFeatureBits, SourceName and ObservationID keys.
 Use ARCExtract to calibrate and extract the complete frame.</p>
-<p><em>Equivalent to:</em></p>
-<blockquote>
-<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">DecryptFeatureBit</span><span class="p">)</span>
+<p class="rubric">Equivalent to</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">DecryptFeatureBit</span><span class="p">)</span>
 <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">UnpackTrackerMinimal</span><span class="p">)</span>
 </pre></div>
 </div>
-</div></blockquote>
-<dl class="simple">
-<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">ARCExtractMinimal(pipe)</span></code></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spt3g.gcp.InfluxDB.UpdateDB">
+<span class="sig-prename descclassname"><span class="pre">spt3g.gcp.InfluxDB.</span></span><span class="sig-name descname"><span class="pre">UpdateDB</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.InfluxDB.UpdateDB" title="Link to this definition"></a></dt>
+<dd><p>Update InfluxDB with data in frame</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>client</strong> – InfluxDB client</p></li>
+<li><p><strong>fields</strong> – Which gcp fields to add to database. See parse_field for options. If
+None, add all.</p></li>
+</ul>
 </dd>
 </dl>
-<p id="spt3g-gcp-arcextractor-addbenchdata"><strong>spt3g.gcp.ARCExtractor.AddBenchData</strong></p>
-<p>Add the optical bench positions to the frame.</p>
-<dl class="simple">
-<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">AddBenchData(f)</span></code></p>
-</dd>
-</dl>
-<p id="spt3g-gcp-arcextractor-calibrateframe"><strong>spt3g.gcp.ARCExtractor.CalibrateFrame</strong></p>
-<p>Apply gain / offset / units from G3 cal file</p>
-<dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">CalibrateFrame(calibration_file=None)</span></code></p>
-</dd>
-</dl>
-<p id="spt3g-gcp-arcextractor-decryptfeaturebit"><strong>spt3g.gcp.ARCExtractor.DecryptFeatureBit</strong></p>
-<p>Unpacks the GCP feature flags</p>
-<dl class="simple">
-<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">DecryptFeatureBit(f)</span></code></p>
-</dd>
-</dl>
-<p id="spt3g-gcp-arcextractor-unpackacudata"><strong>spt3g.gcp.ARCExtractor.UnpackACUData</strong></p>
-<p>Extracts ACU status information to ACUStatus key in frame</p>
-<dl class="simple">
-<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">UnpackACUData(f)</span></code></p>
-</dd>
-</dl>
-<p id="spt3g-gcp-arcextractor-unpackcryodata"><strong>spt3g.gcp.ARCExtractor.UnpackCryoData</strong></p>
-<p>Extracts cryo information into CryoStatus key</p>
-<dl class="simple">
-<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">UnpackCryoData(f)</span></code></p>
-</dd>
-</dl>
-<p id="spt3g-gcp-arcextractor-unpackmuxdata"><strong>spt3g.gcp.ARCExtractor.UnpackMuxData</strong></p>
-<p>Add the DFMux data to the frame.</p>
-<dl class="simple">
-<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">UnpackMuxData(f)</span></code></p>
-</dd>
-</dl>
-<p id="spt3g-gcp-arcextractor-unpackptdata"><strong>spt3g.gcp.ARCExtractor.UnpackPTData</strong></p>
-<p>Extracts pulse tube status information to PTStatus key
-in frame</p>
-<dl class="simple">
-<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">UnpackPTData(f)</span></code></p>
-</dd>
-</dl>
-<p id="spt3g-gcp-arcextractor-unpacktrackerdata"><strong>spt3g.gcp.ARCExtractor.UnpackTrackerData</strong></p>
-<p>Extracts tracker status information to frame into the TrackerStatus key,
-along with the observation processing handled by UnpackTrackerMinimal.</p>
-<p>If rewrite_source_from_feature_bits is True (the default), will try to
-rewrite source names if DecryptFeatureBit() has been run and either
-“elnod”, “calibrator”, or “noise” is present in the feature bit list
-to that value.</p>
-<dl class="simple">
-<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">UnpackTrackerData(f,</span> <span class="pre">rewrite_source_from_feature_bits=True)</span></code></p>
-</dd>
-</dl>
-<p id="spt3g-gcp-arcextractor-unpacktrackerminimal"><strong>spt3g.gcp.ARCExtractor.UnpackTrackerMinimal</strong></p>
-<p>Construct SourceName and ObservationId keys from frame.</p>
-<p>If rewrite_source_from_feature_bits is True (the default), will try to
-rewrite source names if DecryptFeatureBit() has been run and either
-“elnod”, “calibrator”, or “noise” is present in the feature bit list
-to that value.</p>
-<dl class="simple">
-<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">UnpackTrackerMinimal(f,</span> <span class="pre">rewrite_source_from_feature_bits=True)</span></code></p>
-</dd>
-</dl>
-<p id="spt3g-gcp-arcextractor-unpacktrackerpointingdata"><strong>spt3g.gcp.ARCExtractor.UnpackTrackerPointingData</strong></p>
-<p>Extracts tracker registers relevant to online and offline pointing.
-Calibration values (offsets and multiplicative constants) are from
-gcp/control/conf/spt/cal.</p>
-<dl class="simple">
-<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">UnpackTrackerPointingData(f)</span></code></p>
-</dd>
-</dl>
-<p id="spt3g-gcp-arcextractor-unpackweatherdata"><strong>spt3g.gcp.ARCExtractor.UnpackWeatherData</strong></p>
-<p>Extracts weather status information to Weather key
-in frame</p>
-<dl class="simple">
-<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">UnpackWeatherData(f)</span></code></p>
-</dd>
-</dl>
-<p id="spt3g-gcp-arcextractor-updatelinearsensordeltas"><strong>spt3g.gcp.ARCExtractor.UpdateLinearSensorDeltas</strong></p>
-<dl class="simple">
-<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">UpdateLinearSensorDeltas(f)</span></code></p>
-</dd>
-</dl>
-<p id="spt3g-gcp-arcfilereader"><strong>spt3g.gcp.ARCFileReader</strong></p>
-<p>Read GCP archive file (or files if you pass an iterable of paths). For non-SPT ARC file formats, please set Experiment to the appropriate value.  Set track_filename to True to record the filename for each frame in the ._filename attribute (fragile).</p>
-<dl>
-<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">ARCFileReader(</span> <span class="pre">(str)filename</span> <span class="pre">[,</span> <span class="pre">(Experiment)experiment=spt3g.gcp.Experiment.SPT</span> <span class="pre">[,</span> <span class="pre">(float)timeout=-1.0</span> <span class="pre">[,</span> <span class="pre">(bool)track_filename=False</span> <span class="pre">[,</span> <span class="pre">(int)buffersize=1048576]]]])</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">ARCFileReader(</span> <span class="pre">(StringVector)filename</span> <span class="pre">[,</span> <span class="pre">(Experiment)experiment=spt3g.gcp.Experiment.SPT</span> <span class="pre">[,</span> <span class="pre">(float)timeout=-1.0</span> <span class="pre">[,</span> <span class="pre">(bool)track_filename=False</span> <span class="pre">[,</span> <span class="pre">(int)buffersize=1048576]]]])</span></code></p>
-</dd>
-</dl>
-<p id="spt3g-gcp-archkextractor-unpacksptpolhkdata"><strong>spt3g.gcp.ARCHKExtractor.UnpackSPTpolHKData</strong></p>
-<p>Extracts SPTpol housekeeping information from ARC files</p>
-<dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">UnpackSPTpolHKData(self)</span></code></p>
-</dd>
-</dl>
-<p id="spt3g-gcp-gcpdatatee-daqwatchdog"><strong>spt3g.gcp.GCPDataTee.DAQWatchdog</strong></p>
-<p>Watchdog that issues a ping to the GCP pager when the DAQ is operational.</p>
-<dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">DAQWatchdog(calibrator=False,</span> <span class="pre">interval=600,</span> <span class="pre">sim=False)</span></code></p>
-</dd>
-<dt><em>Constructor:</em></dt><dd><dl class="simple">
-<dt><em>Arguments:</em></dt><dd><dl class="simple">
-<dt>calibrator<span class="classifier">bool</span></dt><dd><p>If True, ensure that the calibrator is also running successfully
-before sending a ping.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd>
-</dl>
-<p id="spt3g-gcp-gcpdatatee-gcpbolodatatee"><strong>spt3g.gcp.GCPDataTee.GCPBoloDataTee</strong></p>
-<p>Module that serves bolometer data to GCP when asked. Once a second,
-will serve the data from the previous second of bolometer data.</p>
-<p>If a boolean key appears in the timepoint frames named “DataOK”,
-this will be sent to GCP as a data quality indicator for paging.</p>
-<dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">GCPBoloDataTee(port=50020,</span> <span class="pre">verbose=False,</span> <span class="pre">bolometers=[])</span></code></p>
-</dd>
-<dt><em>Constructor:</em></dt><dd><p>Send data from the given list of bolometer logical IDs to the GCP.</p>
-</dd>
-</dl>
-<p id="spt3g-gcp-gcpdatatee-gcphousekeepingtee"><strong>spt3g.gcp.GCPDataTee.GCPHousekeepingTee</strong></p>
-<p>Module that serves housekeeping information to GCP when asked. If a key
-named “DataOK” exists in the housekeeping frames, will also transmit
-that information to GCP for paging purposes.</p>
-<dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">GCPHousekeepingTee(port=50010,</span> <span class="pre">verbose=False)</span></code></p>
-</dd>
-</dl>
-<p id="spt3g-gcp-gcpdatatee-gcpsignalledhousekeeping"><strong>spt3g.gcp.GCPDataTee.GCPSignalledHousekeeping</strong></p>
-<p>Module that collects housekeeping data when connected to. If
-collect_on_start is True (the default), injects an HK frame
-unconditionally at startup.</p>
-<dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">GCPSignalledHousekeeping(port=50011,</span> <span class="pre">collect_on_start=True)</span></code></p>
-</dd>
-</dl>
-<p id="spt3g-gcp-gcpdatatee-pagerwatchdog"><strong>spt3g.gcp.GCPDataTee.PagerWatchdog</strong></p>
-<p>Module that sends a watchdog (ping) message to the GCP pager when the parent
-process is running successfully.  Modify the <cite>data_valid</cite> method for
-particular use cases, and call the <cite>run</cite> method periodically in your
-application.</p>
-<dl class="simple">
-<dt><em>Constructor:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">PagerWatchdog(name,</span> <span class="pre">interval=600,</span> <span class="pre">sim=False)</span></code></p>
-</dd>
-</dl>
-<p id="spt3g-gcp-gcpmuxdatadecoder"><strong>spt3g.gcp.GCPMuxDataDecoder</strong></p>
-<p>Extracts contents of receiver registers in SPTpol-style ARC files into a wiring map and timepoint frames. This is designed to convert SPTpol-style data in which GCP records bolometer data into the ARC files into a format equivalent to that for SPT-3G.</p>
-<p>For old (100d SPTpol) data not containing wiring information, insert a wiring map into the pipeline ahead of this module. The board_serial should be set to a real (positive) value for all bolometer channels and -1 for the calibrator sync readout.</p>
-<dl class="simple">
-<dt><em>Constructors:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">GCPMuxDataDecoder()</span></code></p>
-</dd>
-</dl>
-<p id="spt3g-gcp-influxdb-updatedb"><strong>spt3g.gcp.InfluxDB.UpdateDB</strong></p>
-<p>Update InfluxDB with data in frame</p>
-<dl class="simple">
-<dt><em>Arguments:</em></dt><dd><dl class="simple">
-<dt>client :</dt><dd><p>InfluxDB client</p>
-</dd>
-<dt>fields :</dt><dd><p>Which gcp fields to add to database. See parse_field for options. If
-None, add all.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p><em>Equivalent to:</em></p>
-<blockquote>
-<div><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">ARCExtract</span><span class="p">)</span>
+<p class="rubric">Equivalent to</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCExtractor</span><span class="o">.</span><span class="n">ARCExtract</span><span class="p">)</span>
 <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">InfluxDB</span><span class="o">.</span><span class="n">WriteDB</span><span class="p">,</span> <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 </pre></div>
 </div>
-</div></blockquote>
-<dl class="simple">
-<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">UpdateDB(pipe,</span> <span class="pre">client=None,</span> <span class="pre">fields=None)</span></code></p>
-</dd>
-</dl>
-<p id="spt3g-gcp-influxdb-writedb"><strong>spt3g.gcp.InfluxDB.WriteDB</strong></p>
-<p>Write points to the database for each field</p>
-<dl class="simple">
-<dt><em>Arguments:</em></dt><dd><dl class="simple">
-<dt>client :</dt><dd><p>InfluxDB client</p>
-</dd>
-<dt>fields :</dt><dd><p>Which gcp fields to add to database. See parse_field for options. If
-None, add all.</p>
-</dd>
-</dl>
-</dd>
-<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">WriteDB(fr,</span> <span class="pre">client,</span> <span class="pre">fields=None)</span></code></p>
-</dd>
-</dl>
+</dd></dl>
+
 </section>
-<section id="functions-in-spt3g-gcp">
-<h2>Functions in spt3g.gcp<a class="headerlink" href="#functions-in-spt3g-gcp" title="Link to this heading">¶</a></h2>
-<ul class="simple">
-<li><p><a class="reference internal" href="#spt3g-gcp-arcfile-arcfile">spt3g.gcp.ARCFile.ARCFile</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-calfile-calfilereader">spt3g.gcp.CalFile.CalFileReader</a></p></li>
-<li><p><a class="reference internal" href="#spt3g-gcp-calfile-create-g3-cal-file">spt3g.gcp.CalFile.create_g3_cal_file</a></p></li>
-</ul>
-<p id="spt3g-gcp-arcfile-arcfile"><strong>spt3g.gcp.ARCFile.ARCFile</strong></p>
-<p>Iterable class for ARC files, as created by GCP. Loop through frames by doing something like:</p>
+<section id="useful-classes">
+<h3><a class="toc-backref" href="#id5" role="doc-backlink">Useful Classes</a><a class="headerlink" href="#useful-classes" title="Link to this heading"></a></h3>
+<p>Various Python and C++ classes that are part of the public API.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="spt3g.gcp.ARCFile.ARCFile">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.ARCFile.</span></span><span class="sig-name descname"><span class="pre">ARCFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extract</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/gcp/ARCFile.html#ARCFile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.gcp.ARCFile.ARCFile" title="Link to this definition"></a></dt>
+<dd><p>Iterable class for ARC files, as created by GCP. Loop through frames by doing something like:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="n">gcp</span><span class="o">.</span><span class="n">ARCFile</span><span class="p">(</span><span class="s1">&#39;/path/to/arc.dat&#39;</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">frame</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span> <span class="n">frame</span> <span class="p">)</span>
@@ -461,106 +1095,108 @@ None, add all.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">f</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">gcp</span><span class="o">.</span><span class="n">ARCFile</span><span class="p">(</span><span class="s1">&#39;/path/to/arc.dat&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
-<dl class="simple">
-<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">ARCFile(path,</span> <span class="pre">extract=False)</span></code></p>
-</dd>
-</dl>
-<p id="spt3g-gcp-calfile-calfilereader"><strong>spt3g.gcp.CalFile.CalFileReader</strong></p>
-<p>For now just reads a G3 calibration file and loads the contents into
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="spt3g.gcp.CalFile.CalFileReader">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.CalFile.</span></span><span class="sig-name descname"><span class="pre">CalFileReader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">calibration_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/gcp/CalFile.html#CalFileReader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.gcp.CalFile.CalFileReader" title="Link to this definition"></a></dt>
+<dd><p>For now just reads a G3 calibration file and loads the contents into
 a dictionary</p>
-<dl class="simple">
-<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">CalFileReader(calibration_file=None)</span></code></p>
-</dd>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="spt3g.gcp.GCPLogger">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.</span></span><span class="sig-name descname"><span class="pre">GCPLogger</span></span><span class="sig-paren">(</span>
+
+<dl>
+<dd><em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50030</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">default_loglevel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">G3LogLevel</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">spt3g.core.G3LogLevel.LOG_NOTICE</span></span></em>,</dd>
 </dl>
-<p id="spt3g-gcp-calfile-create-g3-cal-file"><strong>spt3g.gcp.CalFile.create_g3_cal_file</strong></p>
-<p>Create a G3 register calibration file. Usually reads in
+
+<span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.GCPLogger" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="moddoc_core.html#spt3g.core.G3Logger" title="spt3g.core.G3Logger"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3Logger</span></code></a></p>
+<p>Logger that relays error messages to the GCP mediator over TCP</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="spt3g.gcp.GCPLogger.trim_file_names">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">trim_file_names</span></span><a class="headerlink" href="#spt3g.gcp.GCPLogger.trim_file_names" title="Link to this definition"></a></dt>
+<dd><p>Show only file leaves</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="spt3g.gcp.TrackerStateVector">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.</span></span><span class="sig-name descname"><span class="pre">TrackerStateVector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.TrackerStateVector" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="spt3g.gcp.TrackerStateVector.append">
+<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.TrackerStateVector.append" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.gcp.TrackerStateVector.extend">
+<span class="sig-name descname"><span class="pre">extend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.TrackerStateVector.extend" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="useful-functions">
+<h3><a class="toc-backref" href="#id6" role="doc-backlink">Useful Functions</a><a class="headerlink" href="#useful-functions" title="Link to this heading"></a></h3>
+<p>Various Python and C++ functions that are part of the public API.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="spt3g.gcp.CalFile.create_g3_cal_file">
+<span class="sig-prename descclassname"><span class="pre">spt3g.gcp.CalFile.</span></span><span class="sig-name descname"><span class="pre">create_g3_cal_file</span></span><span class="sig-paren">(</span>
+
+<dl>
+<dd><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">read_from_gcp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">extra_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">use_extra_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">gcp_cal_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>,</dd>
+</dl>
+
+<span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/gcp/CalFile.html#create_g3_cal_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.gcp.CalFile.create_g3_cal_file" title="Link to this definition"></a></dt>
+<dd><p>Create a G3 register calibration file. Usually reads in
 calibration and units from a GCP cal file then adds extra
 information that isn’t in the GCP one. This extra information can
 be handed to the routine as a dict (note format below); otherwise,
 the hard-coded extra info will be used. (Feel free to edit this
 hard-coded info.)</p>
-<dl class="simple">
-<dt><em>Definition:</em></dt><dd><p><code class="docutils literal notranslate"><span class="pre">create_g3_cal_file(path,</span> <span class="pre">read_from_gcp=True,</span> <span class="pre">extra_dict=None,</span> <span class="pre">use_extra_info=True,</span> <span class="pre">gcp_cal_file=None)</span></code></p>
-</dd>
-</dl>
+</dd></dl>
+
+</section>
 </section>
 </section>
 
 
-            <div class="clearer"></div>
+           </div>
           </div>
-        </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="Main">
-        <div class="sphinxsidebarwrapper">
-  <div>
-    <h3><a href="index.html">Table of Contents</a></h3>
-    <ul>
-<li><a class="reference internal" href="#">gcp</a><ul>
-<li><a class="reference internal" href="#frame-objects-in-spt3g-gcp">Frame Objects in spt3g.gcp</a><ul>
-<li><a class="reference internal" href="#spt3g-gcp-acustatus">spt3g.gcp.ACUStatus</a></li>
-<li><a class="reference internal" href="#spt3g-gcp-acustatusvector">spt3g.gcp.ACUStatusVector</a></li>
-<li><a class="reference internal" href="#spt3g-gcp-trackerpointing">spt3g.gcp.TrackerPointing</a></li>
-<li><a class="reference internal" href="#spt3g-gcp-trackerstatus">spt3g.gcp.TrackerStatus</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#modules-in-spt3g-gcp">Modules in spt3g.gcp</a></li>
-<li><a class="reference internal" href="#functions-in-spt3g-gcp">Functions in spt3g.gcp</a></li>
-</ul>
-</li>
-</ul>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="moddoc_dfmux.html" class="btn btn-neutral float-left" title="dfmux" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="moddoc_maps.html" class="btn btn-neutral float-right" title="maps" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2017-, SPT-3G Collaboration.</p>
   </div>
-  <div>
-    <h4>Previous topic</h4>
-    <p class="topless"><a href="moddoc_dfmux.html"
-                          title="previous chapter">dfmux</a></p>
-  </div>
-  <div>
-    <h4>Next topic</h4>
-    <p class="topless"><a href="moddoc_maps.html"
-                          title="next chapter">maps</a></p>
-  </div>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/moddoc_gcp.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<search id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</search>
-<script>document.getElementById('searchbox').style.display = "block"</script>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
         </div>
       </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="related" role="navigation" aria-label="Related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="moddoc_maps.html" title="maps"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="moddoc_dfmux.html" title="dfmux"
-             >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">gcp</a></li> 
-      </ul>
-    </div>
-    <div class="footer" role="contentinfo">
-    &#169; Copyright .
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
-    </div>
-  </body>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
 </html>

@@ -2,9 +2,9 @@
 Network Streaming
 -----------------
 
-The spt3g.core module provides facilities for consuming data from a network host and serving it, through the ``core.G3Reader`` and ``core.G3NetworkSender`` classes. Both exchange frames in the same wire format used by files read by ``core.G3Reader`` over TCP sockets.
+The spt3g.core module provides facilities for consuming data from a network host and serving it, through the :py:class:`~spt3g.core.G3Reader` and :py:class:`~spt3g.core.G3NetworkSender` classes. Both exchange frames in the same wire format used by files read by :py:class:`~spt3g.core.G3Reader` over TCP sockets.
 
-While communication is unidirectional from the ``core.G3NetworkSender`` (or netcat) to a ``core.G3Reader`` (or netcat), either end of the connection can be a "server" or "client" in the sense of which end of the connection is expected to be listening for the other.
+While communication is unidirectional from the :py:class:`~spt3g.core.G3NetworkSender` (or netcat) to a :py:class:`~spt3g.core.G3Reader` (or netcat), either end of the connection can be a "server" or "client" in the sense of which end of the connection is expected to be listening for the other.
 
 .. contents:: Contents
 
@@ -56,7 +56,13 @@ An additional class called G3ThrottledNetworkSender wraps G3NetworkSender_ but w
 
 .. code-block:: python
 
-    pipe.Add(core.G3ThrottledNetworkSender, hostname='*', port=4536, max_queue_size=10, frame_decimation = {G3FrameType.Timepoint: 10})
+    pipe.Add(
+        core.G3ThrottledNetworkSender,
+        hostname='*',
+        port=4536,
+        max_queue_size=10,
+        frame_decimation={G3FrameType.Timepoint: 10},
+    )
 
 Other frame types can be added by appending them to the dictionary. All instances of frame types not occurring in the dictionary will be sent.
 

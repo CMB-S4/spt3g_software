@@ -11,7 +11,9 @@ More complex manipulations are possible: the module can create new frames, throw
 Writing a module in Python
 ==========================
 
-Modules can be written in Python in any one of three styles: as python functions, as subclasses of the base class core.G3Module, or as generic Python callables.
+Modules can be written in Python in any one of three styles: as python functions, as subclasses of the base class :py:class:`core.G3Module <spt3g.core.G3Module>`, or as generic Python callables.
+
+.. _function-modules:
 
 Python Modules as Functions
 ___________________________
@@ -21,7 +23,7 @@ The simplest, and most common, case of a Python module is one that receives one 
 .. code-block:: python
 
 	def simplemod(frame):
-		print(frame)
+	    print(frame)
 	pipeline.Add(simplemod)
 
 This prints its input frame to the console, then implicitly passes it on to the next module in the chain.
@@ -31,7 +33,7 @@ As frames behave like Python dictionaries, the same approach can be used to modi
 .. code-block:: python
 
 	def five(frame):
-		frame['Five'] = 5
+	    frame['Five'] = 5
 	pipeline.Add(five)
 
 The next module in the chain will now see a key named "Five" containing the number 5.
@@ -43,14 +45,14 @@ A full example of this doing something actually useful is to implement scan-by-s
 	import scipy.signal
 
 	def poly1(frame):
-		if frame.type != core.G3FrameType.Scan:
-			return
-		outts = core.G3TimestreamMap()
-		for i in frame['CalTimestreams']:
-			outts[i.key()] = core.G3Timestream(scipy.signal.detrend(i.data(), units=i.data().units))
-		outts.start = frame['CalTimestreams'].start
-		outts.stop = frame['CalTimestreams'].stop
-		frame['Poly1FilteredTimestreams'] = outts
+	    if frame.type != core.G3FrameType.Scan:
+	        return
+	    outts = core.G3TimestreamMap()
+	    for i in frame['CalTimestreams']:
+	        outts[i.key()] = core.G3Timestream(scipy.signal.detrend(i.data(), units=i.data().units))
+	    outts.start = frame['CalTimestreams'].start
+	    outts.stop = frame['CalTimestreams'].stop
+	    frame['Poly1FilteredTimestreams'] = outts
 	pipeline.Add(poly1)
 
 This ignores non-scan frames and then creates a new timestream map containing a detrended version of the original, preserving the start and stop times and units. Right now, all the parameters of this processing step are hardcoded. It can be made configurable by the addition of keyword arguments:
@@ -60,15 +62,15 @@ This ignores non-scan frames and then creates a new timestream map containing a 
 	import scipy.signal
 
 	def poly1(frame, input='CalTimestreams', output='Poly1FilteredTimestreams'):
-		if frame.type != core.G3FrameType.Scan:
-			return
-		outts = core.G3TimestreamMap()
-		for i in frame[input]:
-			outts[i.key()] = core.G3Timestream(scipy.signal.detrend(i.data()))
-			outts[i.key()].units = i.data().units
-		outts.start = frame[input].start
-		outts.stop = frame[input].stop
-		frame[output] = outts
+	    if frame.type != core.G3FrameType.Scan:
+	        return
+	    outts = core.G3TimestreamMap()
+	    for i in frame[input]:
+	        outts[i.key()] = core.G3Timestream(scipy.signal.detrend(i.data()))
+	        outts[i.key()].units = i.data().units
+	    outts.start = frame[input].start
+	    outts.stop = frame[input].stop
+	    frame[output] = outts
 	pipeline.Add(poly1, input='SomeOtherTimeStreams', output='OtherFilteredTimeStreams')
 
 Note that the module does not modify the original timestreams in place. This is deliberate (and, in fact, modules in C++ are not even able to do this). The rationale here is that overwriting data in place:
@@ -112,9 +114,11 @@ For software connoisseurs: this is similar to, and exists for largely the same r
 The first module
 ________________
 
-The first module added to a ``G3Pipeline`` object is special: unlike all others, it does not act on input frames, since these frames cannot have come from anywhere. Instead, it is responsible for generating them. The ``G3Reader`` module is an example of this: it generates frames by reading them from disk.
+The first module added to a :py:class:`~spt3g.core.G3Pipeline` object is special: unlike all others, it does not act on input frames, since these frames cannot have come from anywhere. Instead, it is responsible for generating them. The :py:class:`~spt3g.core.G3Reader` module is an example of this: it generates frames by reading them from disk.
 
 Unlike all other modules, the first module will be passed ``None`` instead of a frame. This module then inserts data into the processing queue by returning new frames (see `Return values from Python modules`_). Data processing will stop when it returns an empty list (``[]``).
+
+.. _class-modules:
 
 Callable Objects as Functions
 _____________________________
@@ -124,32 +128,32 @@ In addition to Python functions, any Python callable (anything that implements t
 .. code-block:: python
 
 	class NumberOfCalls(object):
-		def __init__(self, Output='NCalls'):
-			self.out = Output
-			self.ncalls = 0
-		def __call__(self, frame):
-			self.ncalls = self.ncalls + 1
-			frame[self.out] = self.ncalls
+	    def __init__(self, Output='NCalls'):
+	        self.out = Output
+	        self.ncalls = 0
+	    def __call__(self, frame):
+	        self.ncalls = self.ncalls + 1
+	        frame[self.out] = self.ncalls
 	pipeline.Add(NumberOfCalls, Output='Calls')
 
-An alternative would be to subclass the ``core.G3Module`` class, which is more equivalent to the C++ mechanism but makes no practical difference at all, except that it will be automatically documented (see `Autodocumentation of modules`_). The only other difference is that the ``__call__`` method is renamed ``Process`` in this case:
+An alternative would be to subclass the :py:class:`~spt3g.core.G3Module` class, which is more equivalent to the C++ mechanism but makes no practical difference at all, except that it will be automatically documented (see `Autodocumentation of modules`_). The only other difference is that the ``__call__`` method is renamed ``Process`` in this case:
 
 .. code-block:: python
 
 	class NumberOfCalls(core.G3Module):
-		def __init__(self, Output='NCalls'):
-			super(NumberOfCalls, self).__init__()
-			self.out = Output
-			self.ncalls = 0
-		def Process(self, frame):
-			self.ncalls = self.ncalls + 1
-			frame[self.out] = self.ncalls
+	    def __init__(self, Output='NCalls'):
+	        super(NumberOfCalls, self).__init__()
+	        self.out = Output
+	        self.ncalls = 0
+	    def Process(self, frame):
+	        self.ncalls = self.ncalls + 1
+	        frame[self.out] = self.ncalls
 	pipeline.Add(NumberOfCalls, Output='Calls')
 
 Autodocumentation of modules
 ____________________________
 
-Preceding your module with the ``@core.indexmod`` decorator will allow the ``spt3g-inspect`` tool to list it. This should be used for processing steps designed for public use *only* rather than one-off functions for internal use in larger blocks of code.
+Preceding your module with the :py:deco:`core.indexmod <spt3g.core.modconstruct.indexmod>` decorator will allow the ``spt3g-inspect`` tool to list it. This should be used for processing steps designed for public use *only* rather than one-off functions for internal use in larger blocks of code.
 
 For example:
 
@@ -157,8 +161,8 @@ For example:
 
 	@core.indexmod
 	def printframe(frame):
-		'''Print frame to console'''
-		print(frame)
+	    '''Print frame to console'''
+	    print(frame)
 
 will produce the following output of ``spt3g-inspect``:
 
@@ -167,14 +171,16 @@ will produce the following output of ``spt3g-inspect``:
 	--- Processing module: spt3g.example.printframe ---
 	Print frame to console
 
-All subclasses of ``core.G3Module`` (both in Python and C++) are automatically treated as though they were marked with this decorator.
+All subclasses of :py:class:`~spt3g.core.G3Module` (both in Python and C++) are automatically treated as though they were marked with this decorator.
+
+.. _cxx-modules:
 
 Writing a module in C++
 =======================
 
 The process of writing a processing module in C++ is similar to the Python one. C++ modules use a slightly different interface than Python; in particular, they behave like the callable object interface where all methods return lists.
 
-A C++ module must inherit from the ``G3Module`` class. Data processing happens through the ``Process`` method, which takes two arguments: an input frame and an output queue. Output frames are pushed onto the queue; the semantics of this output queue are identical to those for Python processing modules returning lists.
+A C++ module must inherit from the :py:class:`~spt3g.core.G3Module` class. Data processing happens through the ``Process`` method, which takes two arguments: an input frame and an output queue. Output frames are pushed onto the queue; the semantics of this output queue are identical to those for Python processing modules returning lists.
 
 .. code-block:: c++
 
@@ -219,27 +225,29 @@ Interaction with Python occurs through the ``EXPORT_G3MODULE()`` macro. The firs
 
 Here, the ``init<>`` arguments are modified to reflect that the configuration parameter is a string, that it is optional (leaving out the ``optional<>`` will make it mandatory), and that it maps to a Python keyword argument named "output". If your constructor takes multiple arguments, enclose the entire init section in parentheses to avoid preprocessor errors.
 
+.. _pipesegments:
+
 Pipeline Segments
 =================
 
 The use of pipeline segments allows you to have a canned collection of modules that can be added to a pipeline as though it were a single module. An example would be a pipeline segment that performs standard timestream filtering, which may be made of many separate modules but where specifying them individually would be tedious and prone to error.
 
-A pipeline segment is defined by a Python function that is marked by the ``@core.pipesegment`` decorator and takes a pipeline as its first argument. For example:
+A pipeline segment is defined by a Python function that is marked by the :py:deco:`core.pipesegment <spt3g.core.modconstruct.pipesegment>` decorator and takes a pipeline as its first argument. For example:
 
 .. code-block:: python
 
 	@core.pipesegment
 	def standardfiltering(pipe, input='CalTimestreams', output='OutTimestreams'):
-		'''
-		This is the standard timestream filtering used for 2016 data
-		'''
+	    '''
+	    This is the standard timestream filtering used for 2016 data
+	    '''
 
-		pipe.Add(analysis.PolyFilter, input=input, order=1)
-		pipe.Add(analysis.MaskedHighPassFilter, ell=3000)
+	    pipe.Add(analysis.PolyFilter, input=input, order=1)
+	    pipe.Add(analysis.MaskedHighPassFilter, ell=3000)
 
 	pipe.Add(standardfiltering, output='FilteredTimestreams')
 
-By default, the ``core.pipesegment`` decorator will introspect these functions by running them against a fake pipeline object. This information about what the segment does is then automatically appended to the docstring for the segment. This makes it easy for a user to discover what your wrapper does in a way that cannot become inconsistent with documentation. If your pipeline segment has side effects (e.g. opening files) or cannot be run with its default arguments, you may wish to disable this behavior by passing the ``autodoc=False`` keyword argument to the decorator.
+By default, the :py:deco:`core.pipesegment <spt3g.core.modconstruct.pipesegment>` decorator will introspect these functions by running them against a fake pipeline object. This information about what the segment does is then automatically appended to the docstring for the segment. This makes it easy for a user to discover what your wrapper does in a way that cannot become inconsistent with documentation. If your pipeline segment has side effects (e.g. opening files) or cannot be run with its default arguments, you may wish to disable this behavior by passing the ``autodoc=False`` keyword argument to the decorator.
 
 Advanced Techniques: Buffering Data
 ===================================
@@ -248,22 +256,23 @@ Modules that need to work on granularilty coarser than a scan (e.g. notch filter
 
 .. code-block:: python
 
-	class Buffered(object):
-		def __init__(self):
-			self.buffer = []
-		def __call__(self, frame):
-			if len(self.buffer) < 5:
-				# Add to buffer and move to the next scan
-				self.buffer.append(frame)
-				return []
-
-			# Now we have 5 frames queued up
-			dostuffwithfivescans(self.buffer)
-
-			# Clear buffer and send these frames onward
-			returnval = self.buffer
-			self.buffer = []
-			return returnval
+    class Buffered(object):
+        def __init__(self):
+            self.buffer = []
+    
+        def __call__(self, frame):
+            if len(self.buffer) < 5:
+                # Add to buffer and move to the next scan
+                self.buffer.append(frame)
+                return []
+    
+            # Now we have 5 frames queued up
+            dostuffwithfivescans(self.buffer)
+    
+            # Clear buffer and send these frames onward
+            returnval = self.buffer
+            self.buffer = []
+            return returnval
 
 This implements a processing step that works on five scans at a time. From the perspective of a module either before or after this one in the chain, nothing unusual happens: frames appear in order one at a time in both cases. When ``__call__`` returns an empty list, the pipeline goes back to the first module to get a new frame instead of continuing to the next. These accumulate inside the internal queue of ``Buffered`` until there are five scans present. At that point, they are processed as a group and then moved to the output queue. When the pipeline sees five frames in the output queue, it will call the next module five times, with each frame in sequence. Once that is complete, it will then go back to the first module for new frames.
 
@@ -275,17 +284,17 @@ The previous example can be adapted to cache data from previous frames when that
 .. code-block:: python
 
         class Caching(object):
-                def __init__(self, calibrator_key='CalibratorResponse'):
-		    self.calkey = calibrator_key
-		    self.cal = None
-		def __call__(self, frame):
-		    if self.calkey in frame:
-		        self.cal = frame[self.calkey]
-			return
-		    if frame.type == core.G3FrameType.Scan:
-		        # Do something here
+            def __init__(self, calibrator_key='CalibratorResponse'):
+	        self.calkey = calibrator_key
+	        self.cal = None
+	    def __call__(self, frame):
+	        if self.calkey in frame:
+	            self.cal = frame[self.calkey]
+	        return
+	        if frame.type == core.G3FrameType.Scan:
+	            # Do something here
 
-There are two convenience methods for caching data and passing it into a module.  This is useful for writing a function that requires (for example) a ``BolometerPropertiesMap``, but otherwise does not require a class.  This is best illustrated with an example
+There are two convenience methods for caching data and passing it into a module.  This is useful for writing a function that requires (for example) a :py:class:`~spt3g.calibration.BolometerPropertiesMap`, but otherwise does not require a class.  This is best illustrated with an example
 
 .. code-block:: python
 
@@ -293,14 +302,14 @@ There are two convenience methods for caching data and passing it into a module.
     def FlagSomeStuff(frame, flag_key='Flags', bolo_props=None):
         pass
 
-The decorator ``@core.cache_frame_data`` will ensure that the bolometer properties are passed to ``FlagSomeStuff`` in the ``bolo_props`` kwarg.  The (required) ``type`` argument specifies that ``FlagSomeStuff`` only runs on frames of type ``core.G3FrameType.Scan``.  When called with an abritrary ``kwarg='FrameKey'`` pair, ``core.cache_frame_data`` caches the most recent instance of ``'FrameKey'`` in any frame, and passes it to the decorated function under the keyword argument ``kwarg``.  ``core.cache_frame_data`` can cache multiple keys from multiple frames.  For example, if one wanted to cache the calibrator singal to noise ratio (stored as ``'CalibratorResponseSN'``) as well as the bolometer properties, and pass it to a function with the keyword argument `calsn`, one would wrap that function with the decorator ``@core.cache_frame_data(type=core.G3FrameType.Scan, calsn='CalibratorResponseSN', bolo_props='BolometerProperties')``.  This would be useful if one wanted to apply different calibrator SNR thresholds to different bands, for example.
+The decorator :py:deco:`core.cache_frame_data <spt3g.core.g3decorators.cache_frame_data>` will ensure that the bolometer properties are passed to ``FlagSomeStuff`` in the ``bolo_props`` kwarg.  The (required) ``type`` argument specifies that ``FlagSomeStuff`` only runs on frames of type ``core.G3FrameType.Scan``.  When called with an abritrary ``kwarg='FrameKey'`` pair, ``core.cache_frame_data`` caches the most recent instance of ``'FrameKey'`` in any frame, and passes it to the decorated function under the keyword argument ``kwarg``.  :py:deco:`core.cache_frame_data <spt3g.core.g3decorators.cache_frame_data>` can cache multiple keys from multiple frames.  For example, if one wanted to cache the calibrator singal to noise ratio (stored as ``'CalibratorResponseSN'``) as well as the bolometer properties, and pass it to a function with the keyword argument `calsn`, one would wrap that function with the decorator ``@core.cache_frame_data(type=core.G3FrameType.Scan, calsn='CalibratorResponseSN', bolo_props='BolometerProperties')``.  This would be useful if one wanted to apply different calibrator SNR thresholds to different bands, for example.
 
-``core.scan_func_cache_data`` is a special case of ``core.cache_frame_data`` where ``type`` is set to ``core.G3FrameType.Scan``.
+:py:deco:`core.scan_func_cache_data <spt3g.core.g3decorators.scan_func_cache_data>` is a special case of :py:deco:`core.cache_frame_data <spt3g.core.g3decorators.cache_frame_data>` where ``type`` is set to ``core.G3FrameType.Scan``.
 
 Pipelines
 =========
 
-Modules are connected to one another by a pipeline object, of which there is currently one implementation: G3Pipeline. Any pipeline has two interesting methods, ``Add`` and ``Run``.
+Modules are connected to one another by a pipeline object, of which there is currently one implementation: :py:class:`~spt3g.core.G3Pipeline`. Any pipeline has two interesting methods, ``Add`` and ``Run``.
 
 Pipeline.Add
 ____________
@@ -331,7 +340,7 @@ The ``Run()`` method runs the pipeline until completion (see `The first module`_
 G3PipelineInfo
 ______________
 
-G3Pipeline will automatically insert information about its configuration into the data stream by internally emitting a PipelineInfo frame containing a timestamped G3PipelineInfo object with the following information:
+:py:class:`~spt3g.core.G3Pipeline` will automatically insert information about its configuration into the data stream by internally emitting a PipelineInfo frame containing a timestamped :py:class:`~spt3g.core.G3PipelineInfo` object with the following information:
 
 - Version control information (branch, revision number, source URL, version name if any, presence of local diffs, etc.) reflecting the software currently running.
 - The user and host running the software.
@@ -341,7 +350,7 @@ This information is added immediately following the first added module or segmen
 
 Within some limits imposed by Python (related to lambda functions, most notably), calling ``repr()`` on a G3PipelineInfo object (or a G3Pipeline object) will yield an executable Python script reflecting the exact modules and configuration used to produce the data. To within the mentioned limitations, this script can be rerun to exactly reproduce stored data; it can also be inspected to learn the configuration of the data's source pipeline[s] and thus the processing that produced it.
 
-The G3PipelineInfo ``.Run()`` method provides a convenient way of rerunning the pipeline configuration within it, and the ``.modules`` attribute is a list of G3ModuleConfig objects with dict-like access to the arguments provided to each pipeline module.
+The G3PipelineInfo ``.Run()`` method provides a convenient way of rerunning the pipeline configuration within it, and the ``.modules`` attribute is a list of :py:class:`~spt3g.core.G3ModuleConfig` objects with dict-like access to the arguments provided to each pipeline module.
 
 Limitations:
 

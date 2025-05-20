@@ -1,50 +1,645 @@
+
+
 <!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<html lang="en" data-content_root="./">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Style Guide &mdash; SPT-3G Software  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=0517cd0f" />
 
-    <title>Style Guide &#8212; SPT3G Software  documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
-    <link rel="stylesheet" type="text/css" href="_static/nature.css?v=279e0f84" />
-    <script src="_static/documentation_options.js?v=5929fcd5"></script>
-    <script src="_static/doctools.js?v=9bcbadda"></script>
-    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+  
+    <link rel="shortcut icon" href="_static/spt_outlines_white.png"/>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Network Streaming" href="networkstreaming.html" />
     <link rel="prev" title="Build System" href="buildsystem.html" /> 
-  </head><body>
-    <div class="related" role="navigation" aria-label="Related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="networkstreaming.html" title="Network Streaming"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="buildsystem.html" title="Build System"
-             accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">Style Guide</a></li> 
-      </ul>
-    </div>  
+</head>
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
-            
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            SPT-3G Software
+              <img src="_static/spt_outlines.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">General Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#how-to-install">How to Install</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#installing-dependencies-on-a-personal-system">Installing Dependencies on a Personal System</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#handling-dependencies-on-the-open-science-grid">Handling Dependencies on the Open Science Grid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#handling-dependencies-on-nersc">Handling Dependencies on NERSC</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#compilation">Compilation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#installation">Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#installation-with-pip">Installation with Pip</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#overview">Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#frames">Frames</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#id1">Modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#pipelines">Pipelines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#io">IO</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#frame-objects">Frame Objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#units">Units</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#debugging-code">Debugging Code</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#writing-a-module-in-python">Writing a module in Python</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="modules.html#python-modules-as-functions">Python Modules as Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="modules.html#return-values-from-python-modules">Return values from Python modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="modules.html#im-mutability-of-frame-objects">(Im)mutability of frame objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="modules.html#the-first-module">The first module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="modules.html#callable-objects-as-functions">Callable Objects as Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="modules.html#autodocumentation-of-modules">Autodocumentation of modules</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#writing-a-module-in-c">Writing a module in C++</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#pipeline-segments">Pipeline Segments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#advanced-techniques-buffering-data">Advanced Techniques: Buffering Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#caching-previous-data">Caching Previous Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules.html#pipelines">Pipelines</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="modules.html#pipeline-add">Pipeline.Add</a></li>
+<li class="toctree-l3"><a class="reference internal" href="modules.html#pipeline-run">Pipeline.Run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="modules.html#g3pipelineinfo">G3PipelineInfo</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="frames.html">Frames</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="frames.html#scan">Scan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="frames.html#pipelineinfo">PipelineInfo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="frames.html#timepoint">Timepoint</a></li>
+<li class="toctree-l2"><a class="reference internal" href="frames.html#housekeeping">Housekeeping</a></li>
+<li class="toctree-l2"><a class="reference internal" href="frames.html#map">Map</a></li>
+<li class="toctree-l2"><a class="reference internal" href="frames.html#calibration">Calibration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="frames.html#observation">Observation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="frames.html#wiring">Wiring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="frames.html#gcpslow">GcpSlow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="frames.html#endprocessing">EndProcessing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="logging.html#setting-log-levels">Setting Log Levels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="logging.html#using-logging-from-python">Using Logging from Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="logging.html#using-logging-from-c">Using Logging from C++</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="fileio.html">File IO</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="fileio.html#g3reader">G3Reader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fileio.html#g3writer">G3Writer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fileio.html#g3multifilewriter">G3MultiFileWriter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fileio.html#g3file">G3File</a></li>
+<li class="toctree-l2"><a class="reference internal" href="fileio.html#file-format">File Format</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="fileio.html#frame-structure-on-disk">Frame Structure on Disk</a></li>
+<li class="toctree-l3"><a class="reference internal" href="fileio.html#blobs">Blobs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="fileio.html#miscellany">Miscellany</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="units.html">Units</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="units.html#defining-a-quantity-with-units">Defining a quantity with units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="units.html#converting-to-different-units">Converting to different units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="units.html#available-units">Available units</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dataacquisition.html">Data Acquisition</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dataacquisition.html#dfmux">DfMux</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dataacquisition.html#bolometer-data">Bolometer Data</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="dataacquisition.html#sctp">SCTP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dataacquisition.html#udp">UDP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dataacquisition.html#legacy-boards">Legacy Boards</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dataacquisition.html#data-structures">Data Structures</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="dataacquisition.html#housekeeping-data">Housekeeping Data</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dataacquisition.html#building-timestreams">Building Timestreams</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dataacquisition.html#the-wiring-map">The Wiring Map</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dataacquisition.html#dfmuxcollator">DfMuxCollator</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dataacquisition.html#collecting-data-to-a-netcdf-file">Collecting data to a NetCDF file</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dataacquisition.html#core-tools">Core Tools</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dataacquisition.html#g3eventbuilder">G3EventBuilder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dataacquisition.html#g3triggeredbuilder">G3TriggeredBuilder</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dataacquisition.html#ledgerman">ledgerman</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="autodoc.html">Auto-documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="autodoc.html#getting-it-documented">Getting it documented</a></li>
+<li class="toctree-l2"><a class="reference internal" href="autodoc.html#viewing-the-docs">Viewing the docs</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="buildsystem.html">Build System</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="buildsystem.html#cmake-overview">CMake Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="buildsystem.html#adding-a-project">Adding a Project</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="buildsystem.html#adding-python-code">Adding Python code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="buildsystem.html#adding-a-c-library">Adding a C++ library</a></li>
+<li class="toctree-l3"><a class="reference internal" href="buildsystem.html#adding-a-c-executable">Adding a C++ executable</a></li>
+<li class="toctree-l3"><a class="reference internal" href="buildsystem.html#adding-tests">Adding tests</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="buildsystem.html#python-tests">Python Tests</a></li>
+<li class="toctree-l4"><a class="reference internal" href="buildsystem.html#c-tests">C++ Tests</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="buildsystem.html#mixing-c-and-python">Mixing C++ and Python</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Style Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#version-control-hygiene">Version Control Hygiene</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#git">Git</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#svn">SVN</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#coding-style">Coding Style</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#python-style-guide">Python Style Guide</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#c-style-guide">C++ Style Guide</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="networkstreaming.html">Network Streaming</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="networkstreaming.html#g3networksender">G3NetworkSender</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="networkstreaming.html#connecting-to-a-remote-reader">Connecting to a Remote Reader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="networkstreaming.html#functioning-as-a-streaming-server">Functioning as a Streaming Server</a></li>
+<li class="toctree-l3"><a class="reference internal" href="networkstreaming.html#throttling-output-data">Throttling output data</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="networkstreaming.html#using-g3reader-over-the-network">Using G3Reader Over the Network</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="commonissues.html">Common Problems</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="commonissues.html#setting-values-of-a-flatskymap">Setting Values of a FlatSkyMap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="commonissues.html#error-message-decryption">Error Message Decryption</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="commonissues.html#argument-errors">Argument Errors</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="commonissues.html#misbehaving-compilers">Misbehaving Compilers</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Module Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="moddoc_calibration.html">calibration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_calibration.html#api-documentation">API Documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_calibration.html#frame-objects">Frame Objects</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.BolometerProperties"><code class="docutils literal notranslate"><span class="pre">BolometerProperties</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.BolometerPropertiesMap"><code class="docutils literal notranslate"><span class="pre">BolometerPropertiesMap</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.PointingProperties"><code class="docutils literal notranslate"><span class="pre">PointingProperties</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.PointingPropertiesMap"><code class="docutils literal notranslate"><span class="pre">PointingPropertiesMap</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_calibration.html#class-like-pipeline-modules">Class-like Pipeline Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.bolopropertiesutils.SplitByBand"><code class="docutils literal notranslate"><span class="pre">SplitByBand</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.bolopropertiesutils.SplitByPixelType"><code class="docutils literal notranslate"><span class="pre">SplitByPixelType</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.bolopropertiesutils.SplitByProperty"><code class="docutils literal notranslate"><span class="pre">SplitByProperty</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.bolopropertiesutils.SplitByWafer"><code class="docutils literal notranslate"><span class="pre">SplitByWafer</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.bolopropertiesutils.SplitTimestreamsByBand"><code class="docutils literal notranslate"><span class="pre">SplitTimestreamsByBand</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.build_cal_frames.BuildBoloPropertiesMap"><code class="docutils literal notranslate"><span class="pre">BuildBoloPropertiesMap</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.build_cal_frames.BuildPointingProperties"><code class="docutils literal notranslate"><span class="pre">BuildPointingProperties</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.build_cal_frames.MergeCalibrationFrames"><code class="docutils literal notranslate"><span class="pre">MergeCalibrationFrames</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_calibration.html#function-like-pipeline-modules">Function-like Pipeline Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.build_cal_frames.ExplodeBolometerProperties"><code class="docutils literal notranslate"><span class="pre">ExplodeBolometerProperties()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_calibration.html#useful-functions">Useful Functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.bolopropertiesutils.band_to_string"><code class="docutils literal notranslate"><span class="pre">band_to_string()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.bolopropertiesutils.band_to_value"><code class="docutils literal notranslate"><span class="pre">band_to_value()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.bolopropertiesutils.extract_band_string"><code class="docutils literal notranslate"><span class="pre">extract_band_string()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.bolopropertiesutils.extract_band_value"><code class="docutils literal notranslate"><span class="pre">extract_band_value()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.bolopropertiesutils.get_band_units"><code class="docutils literal notranslate"><span class="pre">get_band_units()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.bolopropertiesutils.set_band_format"><code class="docutils literal notranslate"><span class="pre">set_band_format()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="moddoc_core.html">core</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_core.html#api-documentation">API Documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_core.html#frame-objects">Frame Objects</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3Bool"><code class="docutils literal notranslate"><span class="pre">G3Bool</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3Double"><code class="docutils literal notranslate"><span class="pre">G3Double</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3FrameObject"><code class="docutils literal notranslate"><span class="pre">G3FrameObject</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3Int"><code class="docutils literal notranslate"><span class="pre">G3Int</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapDouble"><code class="docutils literal notranslate"><span class="pre">G3MapDouble</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapFrameObject"><code class="docutils literal notranslate"><span class="pre">G3MapFrameObject</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapInt"><code class="docutils literal notranslate"><span class="pre">G3MapInt</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapMapDouble"><code class="docutils literal notranslate"><span class="pre">G3MapMapDouble</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapQuat"><code class="docutils literal notranslate"><span class="pre">G3MapQuat</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapString"><code class="docutils literal notranslate"><span class="pre">G3MapString</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapVectorBool"><code class="docutils literal notranslate"><span class="pre">G3MapVectorBool</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapVectorComplexDouble"><code class="docutils literal notranslate"><span class="pre">G3MapVectorComplexDouble</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapVectorDouble"><code class="docutils literal notranslate"><span class="pre">G3MapVectorDouble</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapVectorInt"><code class="docutils literal notranslate"><span class="pre">G3MapVectorInt</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapVectorQuat"><code class="docutils literal notranslate"><span class="pre">G3MapVectorQuat</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapVectorString"><code class="docutils literal notranslate"><span class="pre">G3MapVectorString</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapVectorTime"><code class="docutils literal notranslate"><span class="pre">G3MapVectorTime</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapVectorVectorString"><code class="docutils literal notranslate"><span class="pre">G3MapVectorVectorString</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3ModuleConfig"><code class="docutils literal notranslate"><span class="pre">G3ModuleConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3PipelineInfo"><code class="docutils literal notranslate"><span class="pre">G3PipelineInfo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3Quat"><code class="docutils literal notranslate"><span class="pre">G3Quat</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3String"><code class="docutils literal notranslate"><span class="pre">G3String</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3Time"><code class="docutils literal notranslate"><span class="pre">G3Time</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3TimesampleMap"><code class="docutils literal notranslate"><span class="pre">G3TimesampleMap</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3Timestream"><code class="docutils literal notranslate"><span class="pre">G3Timestream</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3TimestreamMap"><code class="docutils literal notranslate"><span class="pre">G3TimestreamMap</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3TimestreamQuat"><code class="docutils literal notranslate"><span class="pre">G3TimestreamQuat</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3VectorBool"><code class="docutils literal notranslate"><span class="pre">G3VectorBool</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3VectorComplexDouble"><code class="docutils literal notranslate"><span class="pre">G3VectorComplexDouble</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3VectorDouble"><code class="docutils literal notranslate"><span class="pre">G3VectorDouble</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3VectorFrameObject"><code class="docutils literal notranslate"><span class="pre">G3VectorFrameObject</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3VectorInt"><code class="docutils literal notranslate"><span class="pre">G3VectorInt</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3VectorQuat"><code class="docutils literal notranslate"><span class="pre">G3VectorQuat</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3VectorString"><code class="docutils literal notranslate"><span class="pre">G3VectorString</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3VectorTime"><code class="docutils literal notranslate"><span class="pre">G3VectorTime</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3VectorUnsignedChar"><code class="docutils literal notranslate"><span class="pre">G3VectorUnsignedChar</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3VectorVectorString"><code class="docutils literal notranslate"><span class="pre">G3VectorVectorString</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_core.html#class-like-pipeline-modules">Class-like Pipeline Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3EventBuilder"><code class="docutils literal notranslate"><span class="pre">G3EventBuilder</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3InfiniteSource"><code class="docutils literal notranslate"><span class="pre">G3InfiniteSource</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3Module"><code class="docutils literal notranslate"><span class="pre">G3Module</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MultiFileWriter"><code class="docutils literal notranslate"><span class="pre">G3MultiFileWriter</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3NetworkSender"><code class="docutils literal notranslate"><span class="pre">G3NetworkSender</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3Reader"><code class="docutils literal notranslate"><span class="pre">G3Reader</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3Writer"><code class="docutils literal notranslate"><span class="pre">G3Writer</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.util.AbortAfterNFrames"><code class="docutils literal notranslate"><span class="pre">AbortAfterNFrames</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.util.DeduplicateMetadata"><code class="docutils literal notranslate"><span class="pre">DeduplicateMetadata</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.util.DropOrphanMetadata"><code class="docutils literal notranslate"><span class="pre">DropOrphanMetadata</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.util.G3ThrottledNetworkSender"><code class="docutils literal notranslate"><span class="pre">G3ThrottledNetworkSender</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.util.InjectFrame"><code class="docutils literal notranslate"><span class="pre">InjectFrame</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_core.html#function-like-pipeline-modules">Function-like Pipeline Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.util.Delete"><code class="docutils literal notranslate"><span class="pre">Delete()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.util.Dump"><code class="docutils literal notranslate"><span class="pre">Dump()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.util.InjectDebug"><code class="docutils literal notranslate"><span class="pre">InjectDebug()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.util.Rename"><code class="docutils literal notranslate"><span class="pre">Rename()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_core.html#pipeline-segments">Pipeline Segments</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.util.G3NetworkReceiver"><code class="docutils literal notranslate"><span class="pre">G3NetworkReceiver()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_core.html#useful-classes">Useful Classes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.BoolVector"><code class="docutils literal notranslate"><span class="pre">BoolVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.ComplexDoubleVector"><code class="docutils literal notranslate"><span class="pre">ComplexDoubleVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.ComplexFloatVector"><code class="docutils literal notranslate"><span class="pre">ComplexFloatVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.DoubleVector"><code class="docutils literal notranslate"><span class="pre">DoubleVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.FloatVector"><code class="docutils literal notranslate"><span class="pre">FloatVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.FrameObjectVector"><code class="docutils literal notranslate"><span class="pre">FrameObjectVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.FrameTypeVector"><code class="docutils literal notranslate"><span class="pre">FrameTypeVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.FrameVector"><code class="docutils literal notranslate"><span class="pre">FrameVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3Frame"><code class="docutils literal notranslate"><span class="pre">G3Frame</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3Logger"><code class="docutils literal notranslate"><span class="pre">G3Logger</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3LoggerVector"><code class="docutils literal notranslate"><span class="pre">G3LoggerVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MultiLogger"><code class="docutils literal notranslate"><span class="pre">G3MultiLogger</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3NullLogger"><code class="docutils literal notranslate"><span class="pre">G3NullLogger</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3Pipeline"><code class="docutils literal notranslate"><span class="pre">G3Pipeline</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3PrintfLogger"><code class="docutils literal notranslate"><span class="pre">G3PrintfLogger</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3SyslogLogger"><code class="docutils literal notranslate"><span class="pre">G3SyslogLogger</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3TimeVector"><code class="docutils literal notranslate"><span class="pre">G3TimeVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3VectorStringVector"><code class="docutils literal notranslate"><span class="pre">G3VectorStringVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.Int64Vector"><code class="docutils literal notranslate"><span class="pre">Int64Vector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.IntVector"><code class="docutils literal notranslate"><span class="pre">IntVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.ModuleConfigVector"><code class="docutils literal notranslate"><span class="pre">ModuleConfigVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.Quat"><code class="docutils literal notranslate"><span class="pre">Quat</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.QuatVector"><code class="docutils literal notranslate"><span class="pre">QuatVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.StringVector"><code class="docutils literal notranslate"><span class="pre">StringVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.UInt64Vector"><code class="docutils literal notranslate"><span class="pre">UInt64Vector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.UIntVector"><code class="docutils literal notranslate"><span class="pre">UIntVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.UnsignedCharVector"><code class="docutils literal notranslate"><span class="pre">UnsignedCharVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.apidoc.G3Documenter"><code class="docutils literal notranslate"><span class="pre">G3Documenter</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.fileio.G3File"><code class="docutils literal notranslate"><span class="pre">G3File</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_core.html#useful-functions">Useful Functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.apidoc.module_apidoc"><code class="docutils literal notranslate"><span class="pre">module_apidoc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.g3logging.log_debug"><code class="docutils literal notranslate"><span class="pre">log_debug()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.g3logging.log_error"><code class="docutils literal notranslate"><span class="pre">log_error()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.g3logging.log_fatal"><code class="docutils literal notranslate"><span class="pre">log_fatal()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.g3logging.log_info"><code class="docutils literal notranslate"><span class="pre">log_info()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.g3logging.log_notice"><code class="docutils literal notranslate"><span class="pre">log_notice()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.g3logging.log_trace"><code class="docutils literal notranslate"><span class="pre">log_trace()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.g3logging.log_warn"><code class="docutils literal notranslate"><span class="pre">log_warn()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.g3logging.set_log_level"><code class="docutils literal notranslate"><span class="pre">set_log_level()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.timestreamextensions.concatenate_timestreams"><code class="docutils literal notranslate"><span class="pre">concatenate_timestreams()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_core.html#decorators">Decorators</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.g3decorators.cache_frame_data"><code class="docutils literal notranslate"><span class="pre">cache_frame_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.g3decorators.scan_func_cache_data"><code class="docutils literal notranslate"><span class="pre">scan_func_cache_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.modconstruct.indexmod"><code class="docutils literal notranslate"><span class="pre">indexmod()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.modconstruct.pipesegment"><code class="docutils literal notranslate"><span class="pre">pipesegment()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.modconstruct.pipesegment_nodoc"><code class="docutils literal notranslate"><span class="pre">pipesegment_nodoc()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.modconstruct.usefulfunc"><code class="docutils literal notranslate"><span class="pre">usefulfunc()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="moddoc_dfmux.html">dfmux</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_dfmux.html#api-documentation">API Documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_dfmux.html#frame-objects">Frame Objects</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DfMuxBoardSamples"><code class="docutils literal notranslate"><span class="pre">DfMuxBoardSamples</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DfMuxChannelMapping"><code class="docutils literal notranslate"><span class="pre">DfMuxChannelMapping</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DfMuxHousekeepingMap"><code class="docutils literal notranslate"><span class="pre">DfMuxHousekeepingMap</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DfMuxMetaSample"><code class="docutils literal notranslate"><span class="pre">DfMuxMetaSample</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DfMuxSample"><code class="docutils literal notranslate"><span class="pre">DfMuxSample</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DfMuxWiringMap"><code class="docutils literal notranslate"><span class="pre">DfMuxWiringMap</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.HkBoardInfo"><code class="docutils literal notranslate"><span class="pre">HkBoardInfo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.HkChannelInfo"><code class="docutils literal notranslate"><span class="pre">HkChannelInfo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.HkMezzanineInfo"><code class="docutils literal notranslate"><span class="pre">HkMezzanineInfo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.HkModuleInfo"><code class="docutils literal notranslate"><span class="pre">HkModuleInfo</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_dfmux.html#class-like-pipeline-modules">Class-like Pipeline Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DataQualityTools.FillMissingTimepointFrames"><code class="docutils literal notranslate"><span class="pre">FillMissingTimepointFrames</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DfMuxBuilder"><code class="docutils literal notranslate"><span class="pre">DfMuxBuilder</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DfMuxCollator"><code class="docutils literal notranslate"><span class="pre">DfMuxCollator</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.HardwareMapTools.DfmlHardwareMapInjector"><code class="docutils literal notranslate"><span class="pre">DfmlHardwareMapInjector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.HardwareMapTools.GenerateFakeHardwareMap"><code class="docutils literal notranslate"><span class="pre">GenerateFakeHardwareMap</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.HardwareMapTools.PyDfMuxWiringMapInjector"><code class="docutils literal notranslate"><span class="pre">PyDfMuxWiringMapInjector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.Housekeeping.HousekeepingConsumer"><code class="docutils literal notranslate"><span class="pre">HousekeepingConsumer</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.Housekeeping.PeriodicHousekeepingCollector"><code class="docutils literal notranslate"><span class="pre">PeriodicHousekeepingCollector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.LegacyHousekeeping.LegacyHousekeepingConsumer"><code class="docutils literal notranslate"><span class="pre">LegacyHousekeepingConsumer</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.NetCDFDump"><code class="docutils literal notranslate"><span class="pre">NetCDFDump</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.ScanTools.FixedLengthScans"><code class="docutils literal notranslate"><span class="pre">FixedLengthScans</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.unittransforms.ConvertTimestreamUnits"><code class="docutils literal notranslate"><span class="pre">ConvertTimestreamUnits</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_dfmux.html#function-like-pipeline-modules">Function-like Pipeline Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.HardwareMapTools.PyDfMuxBolometerPropertiesInjector"><code class="docutils literal notranslate"><span class="pre">PyDfMuxBolometerPropertiesInjector()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_dfmux.html#useful-classes">Useful Classes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DfMuxCollector"><code class="docutils literal notranslate"><span class="pre">DfMuxCollector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.HkChannelInfoMap"><code class="docutils literal notranslate"><span class="pre">HkChannelInfoMap</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.HkMezzanineInfoMap"><code class="docutils literal notranslate"><span class="pre">HkMezzanineInfoMap</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.HkModuleInfoMap"><code class="docutils literal notranslate"><span class="pre">HkModuleInfoMap</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.LegacyDfMuxCollector"><code class="docutils literal notranslate"><span class="pre">LegacyDfMuxCollector</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_dfmux.html#useful-functions">Useful Functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.HardwareMapTools.PathStringForBolo"><code class="docutils literal notranslate"><span class="pre">PathStringForBolo()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.Housekeeping.HousekeepingForBolo"><code class="docutils literal notranslate"><span class="pre">HousekeepingForBolo()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.unittransforms.get_timestream_unit_conversion"><code class="docutils literal notranslate"><span class="pre">get_timestream_unit_conversion()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="moddoc_gcp.html">gcp</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_gcp.html#api-documentation">API Documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_gcp.html#frame-objects">Frame Objects</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_gcp.html#spt3g.gcp.ACUStatus"><code class="docutils literal notranslate"><span class="pre">ACUStatus</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_gcp.html#spt3g.gcp.ACUStatusVector"><code class="docutils literal notranslate"><span class="pre">ACUStatusVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_gcp.html#spt3g.gcp.TrackerPointing"><code class="docutils literal notranslate"><span class="pre">TrackerPointing</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_gcp.html#spt3g.gcp.TrackerStatus"><code class="docutils literal notranslate"><span class="pre">TrackerStatus</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_gcp.html#class-like-pipeline-modules">Class-like Pipeline Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_gcp.html#spt3g.gcp.ARCExtractor.CalibrateFrame"><code class="docutils literal notranslate"><span class="pre">CalibrateFrame</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_gcp.html#spt3g.gcp.ARCFileReader"><code class="docutils literal notranslate"><span class="pre">ARCFileReader</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_gcp.html#spt3g.gcp.ARCHKExtractor.UnpackSPTpolHKData"><code class="docutils literal notranslate"><span class="pre">UnpackSPTpolHKData</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_gcp.html#spt3g.gcp.GCPDataTee.DAQWatchdog"><code class="docutils literal notranslate"><span class="pre">DAQWatchdog</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_gcp.html#spt3g.gcp.GCPDataTee.GCPBoloDataTee"><code class="docutils literal notranslate"><span class="pre">GCPBoloDataTee</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_gcp.html#spt3g.gcp.GCPDataTee.GCPHousekeepingTee"><code class="docutils literal notranslate"><span class="pre">GCPHousekeepingTee</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_gcp.html#spt3g.gcp.GCPDataTee.GCPSignalledHousekeeping"><code class="docutils literal notranslate"><span class="pre">GCPSignalledHousekeeping</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_gcp.html#spt3g.gcp.GCPDataTee.PagerWatchdog"><code class="docutils literal notranslate"><span class="pre">PagerWatchdog</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_gcp.html#spt3g.gcp.GCPMuxDataDecoder"><code class="docutils literal notranslate"><span class="pre">GCPMuxDataDecoder</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_gcp.html#function-like-pipeline-modules">Function-like Pipeline Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_gcp.html#spt3g.gcp.ARCExtractor.AddBenchData"><code class="docutils literal notranslate"><span class="pre">AddBenchData()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_gcp.html#spt3g.gcp.ARCExtractor.DecryptFeatureBit"><code class="docutils literal notranslate"><span class="pre">DecryptFeatureBit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_gcp.html#spt3g.gcp.ARCExtractor.UnpackACUData"><code class="docutils literal notranslate"><span class="pre">UnpackACUData()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_gcp.html#spt3g.gcp.ARCExtractor.UnpackCryoData"><code class="docutils literal notranslate"><span class="pre">UnpackCryoData()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_gcp.html#spt3g.gcp.ARCExtractor.UnpackMuxData"><code class="docutils literal notranslate"><span class="pre">UnpackMuxData()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_gcp.html#spt3g.gcp.ARCExtractor.UnpackPTData"><code class="docutils literal notranslate"><span class="pre">UnpackPTData()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_gcp.html#spt3g.gcp.ARCExtractor.UnpackTrackerData"><code class="docutils literal notranslate"><span class="pre">UnpackTrackerData()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_gcp.html#spt3g.gcp.ARCExtractor.UnpackTrackerMinimal"><code class="docutils literal notranslate"><span class="pre">UnpackTrackerMinimal()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_gcp.html#spt3g.gcp.ARCExtractor.UnpackTrackerPointingData"><code class="docutils literal notranslate"><span class="pre">UnpackTrackerPointingData()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_gcp.html#spt3g.gcp.ARCExtractor.UnpackWeatherData"><code class="docutils literal notranslate"><span class="pre">UnpackWeatherData()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_gcp.html#spt3g.gcp.ARCExtractor.UpdateLinearSensorDeltas"><code class="docutils literal notranslate"><span class="pre">UpdateLinearSensorDeltas()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_gcp.html#spt3g.gcp.InfluxDB.WriteDB"><code class="docutils literal notranslate"><span class="pre">WriteDB()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_gcp.html#pipeline-segments">Pipeline Segments</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_gcp.html#spt3g.gcp.ARCExtractor.ARCExtract"><code class="docutils literal notranslate"><span class="pre">ARCExtract()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_gcp.html#spt3g.gcp.ARCExtractor.ARCExtractMinimal"><code class="docutils literal notranslate"><span class="pre">ARCExtractMinimal()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_gcp.html#spt3g.gcp.InfluxDB.UpdateDB"><code class="docutils literal notranslate"><span class="pre">UpdateDB()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_gcp.html#useful-classes">Useful Classes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_gcp.html#spt3g.gcp.ARCFile.ARCFile"><code class="docutils literal notranslate"><span class="pre">ARCFile</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_gcp.html#spt3g.gcp.CalFile.CalFileReader"><code class="docutils literal notranslate"><span class="pre">CalFileReader</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_gcp.html#spt3g.gcp.GCPLogger"><code class="docutils literal notranslate"><span class="pre">GCPLogger</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_gcp.html#spt3g.gcp.TrackerStateVector"><code class="docutils literal notranslate"><span class="pre">TrackerStateVector</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_gcp.html#useful-functions">Useful Functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_gcp.html#spt3g.gcp.CalFile.create_g3_cal_file"><code class="docutils literal notranslate"><span class="pre">create_g3_cal_file()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="moddoc_maps.html">maps</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_maps.html#map-attributes">Map Attributes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_maps.html#file-format-conversions">File Format Conversions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_maps.html#indexing">Indexing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_maps.html#sparsity">Sparsity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_maps.html#masking">Masking</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_maps.html#mask-memory-usage">Mask Memory Usage</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_maps.html#statistics">Statistics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_maps.html#map-interpolation">Map Interpolation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_maps.html#map-weights">Map Weights</a></li>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_maps.html#map-frames-and-pipelines">Map Frames and Pipelines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_maps.html#flat-sky-map-projections">Flat Sky Map Projections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_maps.html#flat-sky-map-manipulation">Flat Sky Map Manipulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_maps.html#map-pointing">Map Pointing</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_maps.html#pointing-quaternions">Pointing Quaternions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_maps.html#rotation-quaternions">Rotation Quaternions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_maps.html#detector-pointing">Detector Pointing</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_maps.html#api-documentation">API Documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_maps.html#frame-objects">Frame Objects</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.FlatSkyMap"><code class="docutils literal notranslate"><span class="pre">FlatSkyMap</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.G3SkyMapMask"><code class="docutils literal notranslate"><span class="pre">G3SkyMapMask</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.G3SkyMapWeights"><code class="docutils literal notranslate"><span class="pre">G3SkyMapWeights</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.HealpixSkyMap"><code class="docutils literal notranslate"><span class="pre">HealpixSkyMap</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_maps.html#class-like-pipeline-modules">Class-like Pipeline Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.HitsBinner"><code class="docutils literal notranslate"><span class="pre">HitsBinner</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.MapBinner"><code class="docutils literal notranslate"><span class="pre">MapBinner</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.MapMockObserver"><code class="docutils literal notranslate"><span class="pre">MapMockObserver</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.MapTODMasker"><code class="docutils literal notranslate"><span class="pre">MapTODMasker</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.MapTODPointing"><code class="docutils literal notranslate"><span class="pre">MapTODPointing</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.SingleDetectorBoresightBinner"><code class="docutils literal notranslate"><span class="pre">SingleDetectorBoresightBinner</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.SingleDetectorMapBinner"><code class="docutils literal notranslate"><span class="pre">SingleDetectorMapBinner</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.map_modules.CoaddMaps"><code class="docutils literal notranslate"><span class="pre">CoaddMaps</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.map_modules.ExtractMaps"><code class="docutils literal notranslate"><span class="pre">ExtractMaps</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.map_modules.InjectMapStub"><code class="docutils literal notranslate"><span class="pre">InjectMapStub</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.map_modules.InjectMaps"><code class="docutils literal notranslate"><span class="pre">InjectMaps</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.map_modules.ReprojectMaps"><code class="docutils literal notranslate"><span class="pre">ReprojectMaps</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_maps.html#function-like-pipeline-modules">Function-like Pipeline Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.azel.EquatorialToGalacticPointing"><code class="docutils literal notranslate"><span class="pre">EquatorialToGalacticPointing()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.azel.LocalToAstronomicalPointing"><code class="docutils literal notranslate"><span class="pre">LocalToAstronomicalPointing()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.coordsysmodules.AddLocalTransRotations"><code class="docutils literal notranslate"><span class="pre">AddLocalTransRotations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.coordsysmodules.EquatorialToGalacticTransRotations"><code class="docutils literal notranslate"><span class="pre">EquatorialToGalacticTransRotations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.coordsysmodules.FillCoordTransRotations"><code class="docutils literal notranslate"><span class="pre">FillCoordTransRotations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.fitsio.SaveMapFrame"><code class="docutils literal notranslate"><span class="pre">SaveMapFrame()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.map_modules.ApplyWeights"><code class="docutils literal notranslate"><span class="pre">ApplyWeights()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.map_modules.CompactMaps"><code class="docutils literal notranslate"><span class="pre">CompactMaps()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.map_modules.FlattenPol"><code class="docutils literal notranslate"><span class="pre">FlattenPol()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.map_modules.MakeMapsPolarized"><code class="docutils literal notranslate"><span class="pre">MakeMapsPolarized()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.map_modules.MakeMapsUnpolarized"><code class="docutils literal notranslate"><span class="pre">MakeMapsUnpolarized()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.map_modules.RebinMaps"><code class="docutils literal notranslate"><span class="pre">RebinMaps()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.map_modules.RemoveWeights"><code class="docutils literal notranslate"><span class="pre">RemoveWeights()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.map_modules.ReplicateMaps"><code class="docutils literal notranslate"><span class="pre">ReplicateMaps()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.map_modules.SetPolConv"><code class="docutils literal notranslate"><span class="pre">SetPolConv()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.map_modules.ValidateMaps"><code class="docutils literal notranslate"><span class="pre">ValidateMaps()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.quathelpers.AddTimingToPointingQuats"><code class="docutils literal notranslate"><span class="pre">AddTimingToPointingQuats()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_maps.html#useful-classes">Useful Classes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.G3SkyMap"><code class="docutils literal notranslate"><span class="pre">G3SkyMap</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_maps.html#useful-functions">Useful Functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.apply_weights"><code class="docutils literal notranslate"><span class="pre">apply_weights()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.apply_weights_t"><code class="docutils literal notranslate"><span class="pre">apply_weights_t()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.azel.convert_azel_to_radec"><code class="docutils literal notranslate"><span class="pre">convert_azel_to_radec()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.azel.convert_gal_to_radec"><code class="docutils literal notranslate"><span class="pre">convert_gal_to_radec()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.azel.convert_radec_to_azel"><code class="docutils literal notranslate"><span class="pre">convert_radec_to_azel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.azel.convert_radec_to_gal"><code class="docutils literal notranslate"><span class="pre">convert_radec_to_gal()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.convolve_map"><code class="docutils literal notranslate"><span class="pre">convolve_map()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.fitsio.load_skymap_fits"><code class="docutils literal notranslate"><span class="pre">load_skymap_fits()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.fitsio.save_skymap_fits"><code class="docutils literal notranslate"><span class="pre">save_skymap_fits()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.flatten_pol"><code class="docutils literal notranslate"><span class="pre">flatten_pol()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.get_boresight_rotator_timestream"><code class="docutils literal notranslate"><span class="pre">get_boresight_rotator_timestream()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.get_fk5_j2000_to_gal_quat"><code class="docutils literal notranslate"><span class="pre">get_fk5_j2000_to_gal_quat()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.get_map_hist"><code class="docutils literal notranslate"><span class="pre">get_map_hist()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.get_map_moments"><code class="docutils literal notranslate"><span class="pre">get_map_moments()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.get_origin_rotator"><code class="docutils literal notranslate"><span class="pre">get_origin_rotator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.get_origin_rotator_timestream"><code class="docutils literal notranslate"><span class="pre">get_origin_rotator_timestream()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.get_ra_dec_map"><code class="docutils literal notranslate"><span class="pre">get_ra_dec_map()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.get_ra_dec_mask"><code class="docutils literal notranslate"><span class="pre">get_ra_dec_mask()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.get_rot_ang"><code class="docutils literal notranslate"><span class="pre">get_rot_ang()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.get_transform_quat"><code class="docutils literal notranslate"><span class="pre">get_transform_quat()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.make_point_source_mask"><code class="docutils literal notranslate"><span class="pre">make_point_source_mask()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.map_modules.coadd_map_files"><code class="docutils literal notranslate"><span class="pre">coadd_map_files()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.maputils.flatsky_to_healpix"><code class="docutils literal notranslate"><span class="pre">flatsky_to_healpix()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.maputils.healpix_to_flatsky"><code class="docutils literal notranslate"><span class="pre">healpix_to_flatsky()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.offsets_to_quat"><code class="docutils literal notranslate"><span class="pre">offsets_to_quat()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.quathelpers.ang_to_quat"><code class="docutils literal notranslate"><span class="pre">ang_to_quat()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.quathelpers.quat_to_ang"><code class="docutils literal notranslate"><span class="pre">quat_to_ang()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.remove_weights"><code class="docutils literal notranslate"><span class="pre">remove_weights()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.remove_weights_t"><code class="docutils literal notranslate"><span class="pre">remove_weights_t()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.reproj_map"><code class="docutils literal notranslate"><span class="pre">reproj_map()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="moddoc_mpi.html">mpi</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_mpi.html#frame-io-parallelization">Frame IO Parallelization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_mpi.html#frame-accumulation">Frame Accumulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_mpi.html#interface-to-toast">Interface to TOAST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="moddoc_mpi.html#api-documentation">API Documentation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_mpi.html#class-like-pipeline-modules">Class-like Pipeline Modules</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_mpi.html#spt3g.mpi.MPIAccumulator.MPIAccumulator"><code class="docutils literal notranslate"><span class="pre">MPIAccumulator</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_mpi.html#spt3g.mpi.MPIFileIO.MPIFileReader"><code class="docutils literal notranslate"><span class="pre">MPIFileReader</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_mpi.html#spt3g.mpi.MPIFileIO.MPIFrameParallelizer"><code class="docutils literal notranslate"><span class="pre">MPIFrameParallelizer</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_mpi.html#pipeline-segments">Pipeline Segments</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_mpi.html#spt3g.mpi.MPIFileIO.MPIIODistributor"><code class="docutils literal notranslate"><span class="pre">MPIIODistributor()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">SPT-3G Software</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Style Guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/styleguide.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
   <section id="style-guide">
-<h1>Style Guide<a class="headerlink" href="#style-guide" title="Link to this heading">¶</a></h1>
+<h1>Style Guide<a class="headerlink" href="#style-guide" title="Link to this heading"></a></h1>
 <section id="version-control-hygiene">
-<h2>Version Control Hygiene<a class="headerlink" href="#version-control-hygiene" title="Link to this heading">¶</a></h2>
+<h2>Version Control Hygiene<a class="headerlink" href="#version-control-hygiene" title="Link to this heading"></a></h2>
 <p>You can use two mechanisms to access the repository: git and SVN. The following is a brief overview of how to use these in a way that your collaborators will appreciate.</p>
 <section id="git">
-<h3>Git<a class="headerlink" href="#git" title="Link to this heading">¶</a></h3>
+<h3>Git<a class="headerlink" href="#git" title="Link to this heading"></a></h3>
 <p>To initially check out the repository:</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://user@github.com/CMB-S4/spt3g_software.git
 </pre></div>
@@ -61,7 +656,7 @@ git<span class="w"> </span>push
 </div>
 </section>
 <section id="svn">
-<h3>SVN<a class="headerlink" href="#svn" title="Link to this heading">¶</a></h3>
+<h3>SVN<a class="headerlink" href="#svn" title="Link to this heading"></a></h3>
 <p>To initially check out the repository:</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>svn<span class="w"> </span>co<span class="w"> </span>https://user@github.com/CMB-S4/spt3g_software/trunk<span class="w"> </span>spt3g_software
 </pre></div>
@@ -78,10 +673,10 @@ svn<span class="w"> </span>ci<span class="w"> </span>files_to_commit
 </section>
 </section>
 <section id="coding-style">
-<h2>Coding Style<a class="headerlink" href="#coding-style" title="Link to this heading">¶</a></h2>
+<h2>Coding Style<a class="headerlink" href="#coding-style" title="Link to this heading"></a></h2>
 <p>We have style guidelines for both Python and C code. These are intended to keep code readable and avoid jarring transitions before code written by different people. These are summarized below. In general, the guiding principle is to make new code look like existing code. If you run into a file that obviously violates these style guidelines, please (a) hit the author with a stick and (b) do <em>not</em> change the style yourself. When adding to files that conform to some consistent, but different, style, prefer the style of the existing code to these guidelines unless you are replacing more than 50% of the file.</p>
 <section id="python-style-guide">
-<h3>Python Style Guide<a class="headerlink" href="#python-style-guide" title="Link to this heading">¶</a></h3>
+<h3>Python Style Guide<a class="headerlink" href="#python-style-guide" title="Link to this heading"></a></h3>
 <p>For python we will be following <a class="reference external" href="https://www.python.org/dev/peps/pep-0008/">PEP8</a> (the style guide for the python standard library).
 PEP8 is a fairly significant document, so I will summarize the important points.
 Nonetheless, it is a generally good idea to read at least the section on <a class="reference external" href="https://www.python.org/dev/peps/pep-0008/#a-foolish-consistency-is-the-hobgoblin-of-little-minds">readability</a>.
@@ -160,7 +755,7 @@ Please adhere to this format for all spt3g_software code.</p>
 </div>
 </section>
 <section id="c-style-guide">
-<h3>C++ Style Guide<a class="headerlink" href="#c-style-guide" title="Link to this heading">¶</a></h3>
+<h3>C++ Style Guide<a class="headerlink" href="#c-style-guide" title="Link to this heading"></a></h3>
 <p>C and C++ code in the tree is supposed to follow the <a class="reference external" href="https://www.freebsd.org/cgi/man.cgi?query=style&amp;sektion=9">KNF</a> conventions. On Mac OS X systems, you have a local copy of this guide installed in a man page named <code class="docutils literal notranslate"><span class="pre">style</span></code>. Like PEP8, the document is long, so a brief summary follows. The general rules are similar to PEP8 in most cases.</p>
 <ul class="simple">
 <li><p>Variable and global function names should be lower case, with words separated by underscores when it improves readability.</p></li>
@@ -209,81 +804,34 @@ For reference, most terminals open at 80 characters wide. If you need to continu
 </section>
 
 
-            <div class="clearer"></div>
+           </div>
           </div>
-        </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="Main">
-        <div class="sphinxsidebarwrapper">
-  <div>
-    <h3><a href="index.html">Table of Contents</a></h3>
-    <ul>
-<li><a class="reference internal" href="#">Style Guide</a><ul>
-<li><a class="reference internal" href="#version-control-hygiene">Version Control Hygiene</a><ul>
-<li><a class="reference internal" href="#git">Git</a></li>
-<li><a class="reference internal" href="#svn">SVN</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#coding-style">Coding Style</a><ul>
-<li><a class="reference internal" href="#python-style-guide">Python Style Guide</a></li>
-<li><a class="reference internal" href="#c-style-guide">C++ Style Guide</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="buildsystem.html" class="btn btn-neutral float-left" title="Build System" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="networkstreaming.html" class="btn btn-neutral float-right" title="Network Streaming" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2017-, SPT-3G Collaboration.</p>
   </div>
-  <div>
-    <h4>Previous topic</h4>
-    <p class="topless"><a href="buildsystem.html"
-                          title="previous chapter">Build System</a></p>
-  </div>
-  <div>
-    <h4>Next topic</h4>
-    <p class="topless"><a href="networkstreaming.html"
-                          title="next chapter">Network Streaming</a></p>
-  </div>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/styleguide.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<search id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</search>
-<script>document.getElementById('searchbox').style.display = "block"</script>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
         </div>
       </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="related" role="navigation" aria-label="Related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="networkstreaming.html" title="Network Streaming"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="buildsystem.html" title="Build System"
-             >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">SPT3G Software  documentation</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">Style Guide</a></li> 
-      </ul>
-    </div>
-    <div class="footer" role="contentinfo">
-    &#169; Copyright .
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
-    </div>
-  </body>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
 </html>
