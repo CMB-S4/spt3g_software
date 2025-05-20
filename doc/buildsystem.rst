@@ -27,6 +27,8 @@ Adding a Project
 
 To add another project to the repository (corresponding to a python module, e.g. ``from spt3g import newthing``), make a new directory at the root of the repository. This directory must contain a file called CMakeLists.txt.
 
+Many of the macros used below are defined in ``cmake/Spt3gIncludes.cmake``.
+
 Adding Python code
 ~~~~~~~~~~~~~~~~~~
 
@@ -45,12 +47,16 @@ To add a C++ component to your project, add some lines like the following:
 
 .. code-block:: cmake
 
-	add_library(newthing SHARED
-		src/MyNewThing.cxx src/python.cxx
+	# shared library code
+	add_spt3g_library(newthing SHARED
+		src/MyNewThing.cxx
 	)
-	target_link_libraries(newthing core pybind11::module)
+	# link against any dependencies (typically at least the core library)
+	target_link_libraries(newthing PUBLIC core)
 
-This builds a library called ``newthing.so`` from the two given source files and links it to the spt3g core library and the Python libraries (which are mandatory). Typically C++ source files are in a directory called ``src``. Header files that you want visible from other projects must be placed in a directory called ``include/newthing``.  Python bindings are sprinkled throughout the various translation units using the PYBINDINGS macro, like so:
+	add_spt3g_module(newthing src/python.cxx)
+
+This builds a library called ``libspt3g-newthing.so`` from the given source file and links it to the spt3g core library and required Python and pybind11 headers.  It then also builds a companion Python module called (for example) ``_libnewthing.cpython-310-x86_64-linux-gnu.so``, which links against the shared library.  This separation of library and module code allows other projects to link against your library.  Typically C++ source files are in a directory called ``src``. Header files that you want visible from other projects must be placed in a directory called ``include/newthing``.  Python bindings are sprinkled throughout the various translation units using the PYBINDINGS macro, like so:
 
 .. code-block:: c++
 
@@ -90,7 +96,7 @@ You can also add C++ executables. Usually, there is not much reason to do this s
 .. code-block:: cmake
 
 	add_spt3g_executable(newthingexec MyNewThingExecutable.cxx)
-	target_link_libraries(newthingexec core newthing pybind11::embed)
+	target_link_libraries(newthingexec newthing)
 	list(APPEND SPT3G_PROGRAMS newthingexec)
 	set(SPT3G_PROGRAMS ${SPT3G_PROGRAMS} PARENT_SCOPE)
 
