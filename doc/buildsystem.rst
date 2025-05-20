@@ -91,16 +91,16 @@ This is sufficient for most uses (with "newthing" replaced by the name of the pr
 Adding a C++ executable
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-You can also add C++ executables. Usually, there is not much reason to do this since everything is designed to be interacted with by Python. A few projects contain small standalone executables nonetheless, typically as test programs.
+You can also add C++ executables. Usually, there is not much reason to do this since everything is designed to be interacted with by Python. A few projects contain small standalone executables nonetheless, typically as test programs.  Follow the pybind11 documentation_ for writing C++ programs with an embedded interpreter, and compile as follows:
 
 .. code-block:: cmake
 
 	add_spt3g_executable(newthingexec MyNewThingExecutable.cxx)
 	target_link_libraries(newthingexec newthing)
-	list(APPEND SPT3G_PROGRAMS newthingexec)
-	set(SPT3G_PROGRAMS ${SPT3G_PROGRAMS} PARENT_SCOPE)
 
-The ``target_link_libraries`` command works as in `Adding a C++ library`_ above. The first command produces an executable named ``newthingexec`` that will be placed in the ``bin`` subdirectory of the build directory. The ``list`` and ``set`` commands inform other parts of the build system that this executable will exist, so that it can be included during installation. 
+The ``target_link_libraries`` command works as in `Adding a C++ library`_ above. The first command produces an executable named ``newthingexec`` that will be placed in the ``bin`` subdirectory of the build directory.
+
+.. _documentation: https://pybind11.readthedocs.io/en/stable/advanced/embedding.html
 
 Adding tests
 ~~~~~~~~~~~~
