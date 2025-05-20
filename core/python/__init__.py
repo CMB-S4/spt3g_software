@@ -1,3 +1,11 @@
+# We need to share certain global variables (cereal and pybind11
+# type registries between shared objects, so make sure the RTLD
+# is configured to allow that to happen. This can sometimes work
+# without this on glibc due to a glibc bug, but it will fail on
+# other libc implementations
+import os, sys
+sys.setdlopenflags(sys.getdlopenflags() | os.RTLD_GLOBAL)
+
 from .._libcore import *
 
 from .modconstruct import usefulfunc, pipesegment, indexmod

@@ -375,6 +375,12 @@ HealpixSkyMap::Clone(bool copy_data) const
 		    nested(), coord_ref, units, pol_type, info_.shifted(), pol_conv);
 }
 
+double *
+HealpixSkyMap::data()
+{
+	return dense_ == NULL ? nullptr : dense_->data();
+}
+
 double
 HealpixSkyMap::at(size_t i) const
 {
@@ -1139,7 +1145,7 @@ HealpixSkyMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 	sm->ConvertToDense();
 
 	view->obj = obj;
-	view->buf = (void*)&(*sm)[0];
+	view->buf = (void*)sm->data();
 	view->len = sm->size() * sizeof(double);
 	view->readonly = 0;
 	view->itemsize = sizeof(double);

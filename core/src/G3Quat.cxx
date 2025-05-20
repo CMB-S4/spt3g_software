@@ -761,7 +761,7 @@ G3VectorQuat_getbuffer(PyObject *obj, Py_buffer *view, int flags)
 	G3VectorQuatPtr q = ext();
 
 	view->obj = obj;
-	view->buf = (void*)&(*q)[0];
+	view->buf = (void*)q->data();
 	view->len = q->size() * sizeof(double) * 4;
 	view->readonly = 0;
 	view->itemsize = sizeof(double);
@@ -905,7 +905,7 @@ quat_vec_container_from_object(py::object v)
 	    view.strides[0] == 4*sizeof(double) &&
 	    view.strides[1] == sizeof(double)) {
 		// Packed and simple, use memcpy()
-		memcpy((void *)&(*x)[0], view.buf, view.len);
+		memcpy((void *)x->data(), view.buf, view.len);
 	} else if (format == "d") {
 		QUATV(double);
 	} else if (format == "f") {
