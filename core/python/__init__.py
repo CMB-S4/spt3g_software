@@ -24,7 +24,6 @@ from .util import *
 
 from .docparser import *
 from .dataextensions import *
-from .frameextensions import *
 from .timestreamextensions import *
 from .quatextensions import *
 
