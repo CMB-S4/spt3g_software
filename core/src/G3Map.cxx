@@ -252,7 +252,6 @@ PYBINDINGS("core", scope) {
 	register_g3map<G3MapVectorTime>(scope, "G3MapVectorTime", "Mapping from "
 	    "strings to lists of G3 time objects.");
 
-	// XXX Special handling to get the object proxying right
 	register_g3map<G3MapFrameObject>(scope, "G3MapFrameObject", "Mapping "
 	    "strings to generic frame objects. Can lead to a variety of "
 	    "paradoxes; please avoid general use of this class.");
