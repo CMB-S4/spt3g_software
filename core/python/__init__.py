@@ -23,7 +23,6 @@ except ImportError:
 from .util import *
 
 from .docparser import *
-from .dataextensions import *
 from .timestreamextensions import *
 from .quatextensions import *
 
