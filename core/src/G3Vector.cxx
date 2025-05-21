@@ -125,7 +125,7 @@ struct vector_buffer<G3Time, V, C, Args...> {
 		cls.def_buffer(&time_vector_buffer_info<V>);
 		cls.def(py::init([](const py::array &v) {
 			return time_vector_from_python<V>(v);
-		}), "Copy constructor from numpy array");
+		}), "Constructor from numpy array");
 		py::implicitly_convertible<py::buffer, V>();
 	}
 };
@@ -136,7 +136,8 @@ struct vector_buffer<T, V, C, Args...> { \
 	static void impl(C &cls) { \
 		cls.def_buffer(&vector_buffer_info<V>); \
 		cls.def(py::init([](const py::array &v) { \
-			return vector_from_python<T, V>(v); })); \
+			return vector_from_python<T, V>(v); \
+		}), "Constructor from numpy array"); \
 		py::implicitly_convertible<py::buffer, V>(); \
 	} \
 }

@@ -33,10 +33,14 @@ template <typename T, typename... Args>
 auto
 register_enum(py::module_ &scope, const std::string &name, Args &&... args)
 {
+	py::options options;
+	options.disable_enum_members_docstring();
+
 	auto cls = py::enum_<T>(scope, name.c_str(), std::forward<Args>(args)...);
 
 	cls.def_property_readonly_static("names",
-	    [](py::object &obj) { return obj.attr("__members__"); });
+	    [](py::object &obj) { return obj.attr("__members__"); },
+	    "Dictionary of enum names with their associated objects");
 	cls.def_property_readonly_static("values",
 	    [](py::object &obj) {
 		py::dict out;
@@ -44,7 +48,7 @@ register_enum(py::module_ &scope, const std::string &name, Args &&... args)
 		for (auto item: mem)
 			out[item.second.attr("value")] = item.second;
 		return out;
-	    });
+	    }, "Dictionary of enum values and their associated objects");
 
 	std::string rname = scope.attr("__name__").cast<std::string>();
 

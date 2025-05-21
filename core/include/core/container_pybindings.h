@@ -218,15 +218,18 @@ register_map_iterators(py::module_ &scope, C &cls)
 
 	cls.def("keys", [](M &m) {
 		return std::unique_ptr<KeysView>(new py::detail::KeysViewImpl<M>(m));
-	}, py::keep_alive<0, 1>());
+	}, py::keep_alive<0, 1>(),
+	"Return an object providing a view on the mappings's keys.");
 
 	cls.def("values", [](M &m) {
 		return std::unique_ptr<ValuesView>(new py::detail::ValuesViewImpl<M>(m));
-	}, py::keep_alive<0, 1>());
+	}, py::keep_alive<0, 1>(),
+	"Return an object providing a view on the mappings's values.");
 
 	cls.def("items", [](M &m) {
 		return std::unique_ptr<ItemsView>(new py::detail::ItemsViewImpl<M>(m));
-	}, py::keep_alive<0, 1>());
+	}, py::keep_alive<0, 1>(),
+	"Return an object providing a view on the mappings's items.");
 }
 
 // Register python conversions to and from map types
@@ -275,14 +278,15 @@ register_map(py::module_ &scope, std::string name, Args &&...args)
 
 	cls.def("copy", [](const M &m) {
 		return std::unique_ptr<M>(new M(m)).release();
-	});
+	}, "Return a shallow copy of the mapping.");
 
 	cls.def("get", [](const M &m, const K &k, const py::object &d) {
 		auto it = m.find(k);
 		if (it == m.end())
 			return d;
 		return py::cast(it->second);
-	}, py::arg("key"), py::arg("default")=py::none());
+	}, py::arg("key"), py::arg("default")=py::none(),
+	"Return the value for key if key is in the mapping, else default.");
 
 	cls.def("__contains__", [](M &m, const K &k) -> bool {
 		auto it = m.find(k);
@@ -301,7 +305,8 @@ register_map(py::module_ &scope, std::string name, Args &&...args)
 			m.attr("__setitem__")(it.first.cast<K>(), it.second.cast<V>());
 		for (auto it: kw)
 			m.attr("__setitem__")(it.first.cast<K>(), it.second.cast<V>());
-	}, py::arg("items")=py::list());
+	}, py::arg("items")=py::list(),
+	"Update mapping from iterable/mapping.");
 
 	cls.def("__delitem__", [](M &m, const K &k) {
 		auto it = m.find(k);
@@ -317,7 +322,9 @@ register_map(py::module_ &scope, std::string name, Args &&...args)
 		auto v = it->second;
 		m.erase(it);
 		return v;
-	});
+	}, py::arg("key"),
+	"Remove specified key and return the corresponding value. "
+	"If the key is not found, raise a KeyError");
 
 	cls.def("pop", [](M &m, const K &k, const py::object &d) {
 		auto it = m.find(k);
@@ -326,9 +333,12 @@ register_map(py::module_ &scope, std::string name, Args &&...args)
 		auto v = it->second;
 		m.erase(it);
 		return py::cast(v);
-	});
+	}, py::arg("key"), py::arg("default"),
+	"Remove specified key and return the corresponding value. "
+	"If the key is not found, return the default");
 
-	cls.def("clear", [](M &m) { m.clear(); });
+	cls.def("clear", [](M &m) { m.clear(); },
+	    "Remove all items from the mapping.");
 
 	// Always use a lambda in case of `using` declaration
 	cls.def("__len__", [](const M &m) { return m.size(); });

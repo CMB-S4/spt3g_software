@@ -825,7 +825,8 @@ template <typename V, typename C, typename... Args>
 struct vector_buffer<Quat, V, C, Args...> {
 	static void impl(C &cls) {
 		cls.def_buffer(&vector_quat_buffer_info<V>);
-		cls.def(py::init(&vector_quat_from_python<V>));
+		cls.def(py::init(&vector_quat_from_python<V>),
+		    "Constructor from numpy array");
 		py::implicitly_convertible<py::buffer, V>();
 	}
 };
@@ -836,7 +837,7 @@ PYBINDINGS("core", scope)
 	register_class<Quat>(scope, "Quat", py::buffer_protocol(),
 	    "Representation of a quaternion. Data in a,b,c,d.")
 	    .def(py::init<>())
-	    .def(py::init<const Quat &>())
+	    .def(py::init<const Quat &>(), "Copy constructor")
 	    .def(py::init<double, double, double, double>(),
 	        py::arg("a"), py::arg("b"), py::arg("c"), py::arg("d"),
 	        "Create a quaternion from its four elements.")
