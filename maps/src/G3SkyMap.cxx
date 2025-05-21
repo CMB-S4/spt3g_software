@@ -1404,7 +1404,6 @@ PYBINDINGS("maps", scope) {
 	  "Base class for 1- and 2-D skymaps of various projections. Usually "
 	  "you want a subclass of this (e.g. FlatSkyMap) rather than using it "
 	  "directly.")
-	    .def_property_readonly_static("__g3frameobject__", [](py::object){ return true; })
 	    .def_readwrite("coord_ref", &G3SkyMap::coord_ref,
 	      "Coordinate system (maps.MapCoordReference) of the map (e.g. "
 	      "Galactic, Equatorial, etc.)")

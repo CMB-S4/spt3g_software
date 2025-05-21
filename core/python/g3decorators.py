@@ -1,4 +1,5 @@
-from . import G3FrameType, usefulfunc
+from . import G3FrameType
+from .modconstruct import g3decorator
 from copy import copy
 import inspect
 import textwrap
@@ -22,7 +23,7 @@ def get_function_signature(f, replacement_kwargs=None):
     return f.__name__ + re.sub('<(.*) at (.*)>', '<\\1>', str(sig))
 
 
-@usefulfunc
+@g3decorator
 class cache_frame_data(object):
     '''
     This is a decorator for use with G3Modules written as functions.  It enables
@@ -101,7 +102,7 @@ Cached Values
         return WrappedFunc
 
 
-@usefulfunc
+@g3decorator
 class scan_func_cache_data(cache_frame_data):
     '''
     This is a simple wrapper around cache_frame_data where the type argument has been set to
