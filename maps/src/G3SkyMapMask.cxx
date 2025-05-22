@@ -338,8 +338,8 @@ void G3SkyMapMask::save(A &ar, unsigned v) const
 G3_SPLIT_SERIALIZABLE_CODE(G3SkyMapMask);
 
 #define FILL_BUFFER(type) \
-	for (size_t i = 0; i < view.len / sizeof(type); i++) { \
-		double v = ((type *)view.buf)[i]; \
+	for (size_t i = 0; i < npix; i++) { \
+		double v = ((type *)info.ptr)[i]; \
 		if (v == 0) \
 			continue; \
 		if (zero_nans && std::isnan(v)) \
@@ -350,41 +350,21 @@ G3_SPLIT_SERIALIZABLE_CODE(G3SkyMapMask);
 	}
 
 static G3SkyMapMaskPtr
-skymapmask_from_numpy(const G3SkyMap &parent, py::object v,
+skymapmask_from_numpy(const G3SkyMap &parent, const py::cbuffer &v,
   bool zero_nans, bool zero_infs)
 {
-	// fall back to simple constructor
-	auto ext  = py::extract<bool>(v);
-	if (ext.check())
-		return std::make_shared<G3SkyMapMask>(parent, ext(), zero_nans, zero_infs);
-
 	G3SkyMapMaskPtr mask(new G3SkyMapMask(parent));
 
-	Py_buffer view;
+	auto info = v.request_contiguous();
 
-	if (PyObject_GetBuffer(v.ptr(), &view,
-	    PyBUF_FORMAT | PyBUF_C_CONTIGUOUS) == -1)
-		throw py::error_already_set();
+	if (info.ndim != 1)
+		throw py::value_error("Only 1-D masks supported");
 
-	if (view.ndim != 1) {
-		PyBuffer_Release(&view);
-		log_fatal("Only 1-D masks supported");
-	}
+	size_t npix = info.shape[0];
+	if (npix != mask->size())
+		log_fatal("Got array of shape (%zu,), expected (%zu,)", npix, mask->size());
 
-	size_t npix = view.shape[0];
-	if (npix != mask->size()) {
-		PyBuffer_Release(&view);
-		log_fatal("Got array of shape (%zu,), expected (%zu,)",
-		    npix, mask->size());
-	}
-
-	std::string format;
-	try {
-		format = check_buffer_format(view.format);
-	} catch (py::buffer_error &e) {
-		PyBuffer_Release(&view);
-		log_fatal("%s", e.what());
-	}
+	std::string format = check_buffer_format(info.format);
 
 	if (format == "d") {
 		FILL_BUFFER(double);
@@ -405,55 +385,42 @@ skymapmask_from_numpy(const G3SkyMap &parent, py::object v,
 	} else if (format == "?") {
 		FILL_BUFFER(bool);
 	} else {
-		PyBuffer_Release(&view);
-		log_fatal("Unknown type code %s", view.format);
+		throw py::type_error(std::string("Unknown type code ") + info.format);
 	}
-	PyBuffer_Release(&view);
 
 	return mask;
 }
 
 static G3SkyMapMaskPtr
-skymapmask_array_clone(const G3SkyMapMask &m, py::object v,
+skymapmask_array_clone(const G3SkyMapMask &m, const py::cbuffer &v,
     bool zero_nans, bool zero_infs)
 {
 	return skymapmask_from_numpy(*m.Parent(), v, zero_nans, zero_infs);
 }
 
 static int
-skymapmask_index(const G3SkyMapMask &m, const py::object &index)
+skymapmask_index(const G3SkyMapMask &m, const py::tuple &index)
 {
-	int i = 0;
-	if (py::extract<int>(index).check()) {
-		i = py::extract<int>(index)();
-	} else if (py::extract<py::tuple>(index).check()) {
-		int x, y;
+	py::tuple t = index.cast<py::tuple>();
+	FlatSkyMapConstPtr fsm = std::dynamic_pointer_cast<const FlatSkyMap>(m.Parent());
+	if (!fsm)
+		throw py::type_error("N-D pixels, but underlying map is not a flat sky map");
 
-		py::tuple t = py::extract<py::tuple>(index)();
-		FlatSkyMapConstPtr fsm = std::dynamic_pointer_cast<const FlatSkyMap>(m.Parent());
-		if (!fsm)
-			throw py::type_error("N-D pixels, but underlying map is not a flat sky map");
+	int x = unwrap_index(t[1].cast<int>(), fsm->shape()[0]);
+	int y = unwrap_index(t[0].cast<int>(), fsm->shape()[1]);
+	int i = y * fsm->shape()[0] + x;
 
-		x = unwrap_index(py::extract<int>(t[1])(), fsm->shape()[0]);
-		y = unwrap_index(py::extract<int>(t[0])(), fsm->shape()[1]);
-
-		i = y * fsm->shape()[0] + x;
-	} else {
-		throw py::type_error("Need to pass an integer pixel ID or "
-		    "(optionally) for 2D maps a tuple of coordinates");
-	}
-	
 	return unwrap_index(i, m.size());
 }
 
 static bool
-skymapmask_getitem(const G3SkyMapMask &m, py::object index)
+skymapmask_getitem(const G3SkyMapMask &m, const py::tuple &index)
 {
 	return m.at(skymapmask_index(m, index));
 }
 
 static void
-skymapmask_setitem(G3SkyMapMask &m, py::object index, bool val)
+skymapmask_setitem(G3SkyMapMask &m, const py::tuple &index, bool val)
 {
 	m[skymapmask_index(m, index)] = val;
 }
@@ -465,14 +432,6 @@ skymapmask_pyinvert(G3SkyMapMaskPtr m)
 	// so use shared pointers.
 	m->invert();
 	return m;
-}
-
-// This function handles some implicit pointer conversions that boost won't
-// do because G3SkyMap is an abstract type. Just do it by hand.
-static G3SkyMapPtr
-skymapmask_pyparent(G3SkyMapMaskPtr m)
-{
-	return std::const_pointer_cast<G3SkyMap>(m->Parent());
 }
 
 static bool
@@ -488,12 +447,18 @@ static py::dict
 G3SkyMapMask_array_interface(const G3SkyMapMask &self)
 {
 	py::dict out;
-	out["typestr"] = "f8";
-	out["data"] = py::object(self.MakeBinaryMap());
+	out["typestr"] = "b";
+
 	auto shape = self.Parent()->shape();
 	std::reverse(shape.begin(), shape.end());
 	std::vector<uint64_t> ushape(shape.begin(), shape.end());
-	out["shape"] = py::tuple(ushape);
+	out["shape"] = py::tuple(py::cast(ushape));
+
+	py::array_t<bool> data(self.size());
+	bool *d = data.mutable_data();
+	for (auto i: self)
+		d[i.first] = i.second;
+	out["data"] = data.reshape(shape);
 
 	return out;
 }
@@ -512,11 +477,11 @@ PYBINDINGS("maps", scope)
 	       py::arg("zero_nans")=false,
 	       py::arg("zero_infs")=false,
 	    "Instantiate a G3SkyMapMask from a parent G3SkyMap")
-	  .def("__init__", py::make_constructor(skymapmask_from_numpy, py::default_call_policies(),
-	       (py::arg("parent"),
+	  .def(py::init(&skymapmask_from_numpy),
+	       py::arg("parent"),
 	       py::arg("data"),
 	       py::arg("zero_nans")=false,
-	       py::arg("zero_infs")=false)),
+	       py::arg("zero_infs")=false,
 	    "Instantiate a G3SkyMapMask from a 1D numpy array")
 	  .def("clone", &G3SkyMapMask::Clone, py::arg("copy_data")=true,
 	    "Return a mask of the same type, populated with a copy of the data "
@@ -524,7 +489,7 @@ PYBINDINGS("maps", scope)
 	  .def("array_clone", &skymapmask_array_clone,
 	    py::arg("data"), py::arg("zero_nans")=false, py::arg("zero_infs")=false,
 	    "Return a mask of the same type, populated from the input numpy array")
-	  .def_property_readonly("parent", &skymapmask_pyparent, "\"Parent\" map which "
+	  .def_property_readonly("parent", &G3SkyMapMask::Parent, "\"Parent\" map which "
 	    "contains no data, but can be used to retrieve the parameters of "
 	    "the map to which this mask corresponds.")
 	  .def_property_readonly("size", &G3SkyMapMask::size, "Number of pixels in mask")
@@ -534,7 +499,11 @@ PYBINDINGS("maps", scope)
 	  .def("compatible", (bool (G3SkyMapMask::*)(const G3SkyMap &) const)
 	    &G3SkyMapMask::IsCompatible,
 	    "Returns true if this mask can be applied to the given map.")
+	  .def("__getitem__",
+	    [](const G3SkyMapMask &m, int i) { return m.at(unwrap_index(i, m.size())); })
 	  .def("__getitem__", &skymapmask_getitem)
+	  .def("__setitem__",
+	    [](G3SkyMapMask &m, int i, bool val) { m[unwrap_index(i, m.size())] = val; })
 	  .def("__setitem__", &skymapmask_setitem)
 	  .def("__bool__", &skymapmask_pybool)
 	  .def("invert", &skymapmask_pyinvert, "Invert all elements in mask")

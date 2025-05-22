@@ -13,6 +13,7 @@ public:
 	template <class A> void serialize(A &ar, unsigned v);
 	std::string Description() const;
 	bool operator ==(const G3Bool & other) const {return value == other.value;}
+	bool operator !=(const G3Bool & other) const { return value != other.value; }
 	bool operator ==(bool other) const {return value == other;}
 	bool operator !() const {return !value;}
 	operator bool() const {return value;}
@@ -28,6 +29,11 @@ public:
 	template <class A> void serialize(A &ar, unsigned v);
 	std::string Description() const;
 	bool operator==(const G3Int & other) const {return value == other.value;}
+	bool operator!=(const G3Int & other) const { return value != other.value; }
+	bool operator>=(const G3Int & other) const { return value >= other.value; }
+	bool operator>(const G3Int & other) const { return value > other.value; }
+	bool operator<=(const G3Int & other) const { return value <= other.value; }
+	bool operator<(const G3Int & other) const { return value < other.value; }
 };
 
 class G3Double : public G3FrameObject {
@@ -39,6 +45,11 @@ public:
 	template <class A> void serialize(A &ar, unsigned v);
 	std::string Description() const;
 	bool operator==(const G3Double & other) const {return value == other.value;}
+	bool operator!=(const G3Double & other) const { return value != other.value; }
+	bool operator>=(const G3Double & other) const { return value >= other.value; }
+	bool operator>(const G3Double & other) const { return value > other.value; }
+	bool operator<=(const G3Double & other) const { return value <= other.value; }
+	bool operator<(const G3Double & other) const { return value < other.value; }
 };
 
 class G3String : public G3FrameObject {
@@ -51,6 +62,11 @@ public:
 	template <class A> void serialize(A &ar, unsigned v);
 	std::string Description() const;
 	bool operator==(const G3String & other) const {return value == other.value;}
+	bool operator!=(const G3String & other) const { return value != other.value; }
+	bool operator>=(const G3String & other) const { return value >= other.value; }
+	bool operator>(const G3String & other) const { return value > other.value; }
+	bool operator<=(const G3String & other) const { return value <= other.value; }
+	bool operator<(const G3String & other) const { return value < other.value; }
 };
 
 G3_POINTERS(G3Bool);

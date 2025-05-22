@@ -149,7 +149,9 @@ PYBINDINGS("core", scope) {
 	;
 
 	register_class<G3Logger>(scope, "G3Logger", "C++ logging abstract base class")
-	    .add_static_property("global_logger", &GetRootLogger, &SetRootLogger)
+	    .def_property_static("global_logger",
+		[](const py::object &) { return GetRootLogger(); },
+		[](const py::object &, G3LoggerPtr v) { SetRootLogger(v); })
 	    .def("log", &G3Logger::Log, py::arg("level"), py::arg("unit"), py::arg("file"),
 	        py::arg("line"), py::arg("function"), py::arg("message"))
 	    .def("get_level_for_unit", &G3Logger::LogLevelForUnit, py::arg("unit"))

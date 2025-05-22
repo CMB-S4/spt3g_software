@@ -21,15 +21,11 @@ class G3Documenter:
     """
     Class for inspecting sub-modules of the SPT-3G software package and
     generating valid RST for use with sphinx-autodoc.
-
-    :cvar categories: Dictionary of API categories for which to generate
-        documentation, containing a section title, description, and
-        sphinx-autodoc directive as a tuple for each category.
     """
 
     # API categories for which to generate documentation, with a
     # corresponding section title, description and sphinx-autodoc directive.
-    categories = {
+    _categories = {
         "object": (
             "Frame Objects",
             "Serializable objects that may be stored as entries in "
@@ -122,6 +118,15 @@ class G3Documenter:
         self.root = root
         self.cache = {}
 
+    @property
+    def categories(self):
+        """
+        Dictionary of API categories for which to generate documentation,
+        containing a section title, description, and sphinx-autodoc directive as
+        a tuple for each category.
+        """
+        return self._categories
+
     def find_objects(self, mod=None):
         """
         Recursively find all objects in the input root that fit into one of the
@@ -170,7 +175,8 @@ class G3Documenter:
             isclass = isinstance(obj, type)
             ismod = isclass and issubclass(obj, G3Module)
             isobj = isclass and issubclass(obj, G3FrameObject)
-            iscxx = 'Boost.Python' in str(type(obj))
+            tstr = str(type(obj))
+            iscxx = 'builtin_function_or_method' in tstr or 'pybind11' in tstr
 
             # add to cache
             if hasattr(obj, "__g3decorator__"):

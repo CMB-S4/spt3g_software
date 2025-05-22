@@ -87,9 +87,6 @@ public:
 	bool Has(const std::string &) const;
 	template<typename T> bool Has(const std::string &name) const;
 
-	// Get list of keys. This should be an iterator eventually.
-	std::vector<std::string> Keys() const;
-
 	// Number of keys in frame
 	size_t size() const { return map_.size(); }
 
@@ -135,6 +132,40 @@ private:
 	mutable G3MapType map_;
 
 	SET_LOGGER("G3Frame");
+
+public:
+	// Iterator over keys in the frame
+	// Does not attempt to access or decode any items in the frame
+	class key_iterator {
+	public:
+		using iterator_category = std::input_iterator_tag;
+		using value_type = std::string;
+		using difference_type = std::ptrdiff_t;
+		using pointer = const value_type*;
+		using reference = const value_type&;
+
+		key_iterator(const G3MapType::const_iterator &it) : it(it) {};
+
+		bool operator ==(const key_iterator & other) const {
+			return it == other.it;
+		}
+		bool operator !=(const key_iterator & other) const {
+			return it != other.it;
+		}
+
+		key_iterator operator++() { ++it; return *this; }
+		key_iterator operator++(int) {
+			key_iterator i = *this; ++(*this); return i;
+		}
+
+		reference operator*() const { return it->first; }
+
+	private:
+		G3MapType::const_iterator it;
+	};
+
+	key_iterator begin() const { return key_iterator(map_.begin()); };
+	key_iterator end() const { return key_iterator(map_.end()); };
 };
 
 G3_POINTERS(G3Frame);

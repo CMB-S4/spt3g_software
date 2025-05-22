@@ -515,20 +515,11 @@ ConvolveMap(const FlatSkyMap &map, const FlatSkyMap &kernel)
 
 
 static FlatSkyMapPtr
-pyconvolve_map(const FlatSkyMap &map, py::object val)
+pyconvolve_map(const FlatSkyMap &map, const py::buffer &val)
 {
-
-	py::extract<const FlatSkyMap &> mext(val);
-	if (mext.check())
-		return ConvolveMap(map, mext());
-
 	// reach into python
-	auto pykernel = py::module_::import("spt3g.maps").attr("FlatSkyMap")(val, map.yres());
-	py::extract<const FlatSkyMap &> pext(pykernel);
-	if (pext.check())
-		return ConvolveMap(map, pext());
-
-	log_fatal("Invalid kernel object");
+	auto pykernel = py::type::of<FlatSkyMap>()(val, map.yres());
+	return ConvolveMap(map, pykernel.cast<const FlatSkyMap &>());
 }
 
 
@@ -620,9 +611,14 @@ PYBINDINGS("maps", scope)
 		"bin edges, optionally ignoring zero, nan and/or inf values in the map.  "
 		"If a mask is supplied, then only the non-zero pixels in the mask are included.");
 
-	scope.def("convolve_map", pyconvolve_map, py::arg("map"), py::arg("kernel"),
+	scope.def("convolve_map", ConvolveMap, py::arg("map"), py::arg("kernel"),
 		"Convolve the input flat sky map with the given map-space kernel. The "
 		"kernel must have odd dimensions and the same resolution as the map.");
+
+	scope.def("convolve_map", pyconvolve_map, py::arg("map"), py::arg("kernel"),
+		"Convolve the input flat sky map with the given 2D array kernel. The "
+		"kernel must have odd dimensions and is assumed to have the same "
+		"resolution as the map.");
 
 	scope.def("make_point_source_mask", MakePointSourceMask,
 		py::arg("map"), py::arg("ra"), py::arg("dec"), py::arg("radius"),

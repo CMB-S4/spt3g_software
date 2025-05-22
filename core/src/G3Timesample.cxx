@@ -244,13 +244,13 @@ void safe_set_times(G3TimesampleMap &self, G3VectorTime _times)
 
 PYBINDINGS("core", scope)
 {
-	register_g3map<G3TimesampleMap, true>(scope, "G3TimesampleMap",
+	auto cls = register_g3map<G3TimesampleMap>(scope, "G3TimesampleMap",
 	    "Mapping from string to vectors of data, with an associated "
 	    "vector of timestamps.  This object is for storing multiple "
 	    "co-sampled vectors with a single set of (irregular) timestamps.")
-	.def("__setitem__", &safe_set_item)
 	// Extensions for G3TimesampleMap are here:
-	.add_property("times", &G3TimesampleMap::times, &safe_set_times,
+	.def_property("times",
+	  [](G3TimesampleMap& self) -> G3VectorTime& { return self.times; }, &safe_set_times,
 	  "Times vector.  Setting this stores a copy, but getting returns a reference.")
 	.def("check", &G3TimesampleMap::Check, "Check for internal "
           "consistency.  Raises ValueError if there are problems.")
@@ -259,4 +259,8 @@ PYBINDINGS("core", scope)
 	.def("sort", &G3TimesampleMap::Sort,
           "Sort all element vectors by time, in-place.")
 	;
+
+	// override registered __setitem__ by monkeypatch
+	cls.attr("__setitem__") = py::cpp_function(&safe_set_item,
+	    py::name("__setitem__"), py::is_method(cls));
 }

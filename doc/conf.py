@@ -41,6 +41,7 @@ autodoc_typehints = "description"
 autodoc_typehints_format = "short"
 autodoc_default_options = {
     "members": True,
+    "undoc-members": True,
     "show-inheritance": True,
     "class-doc-from": "both",
     "member-order": "groupwise",
@@ -49,18 +50,11 @@ autodoc_default_options = {
 
 # custom documenters for handling C++ signatures and overloaded functions
 
-selfarg = re.compile(r"(\(\s*\([\w.]+\)arg1\s\[,\s)", re.VERBOSE)
-selfarg1 = re.compile(r"(\(\s*\([\w.]+\)arg1(?:,\s*)?)", re.VERBOSE)
-
-optarg1 = re.compile(r"\(\[([\(\)\w._]+=[\w.\(\)=,\s_\-\'\"]+)\]\)", re.VERBOSE)
-optarg2 = re.compile(r"\[,(\s*[\(\)\w._]+=[\w.\(\)=,\s_\'\"\-\[\]]+)\]", re.VERBOSE)
-
-typearg = re.compile(r"\(([\w.]+)\)([\w._]+)([=,\)]?)", re.VERBOSE)
-
-arg2 = re.compile(r"\(arg2:(\s*[\w.]+)\)", re.VERBOSE)
+selfarg = re.compile(r"(\(self\:\s*[\w.]+(?:,\s*)?)", re.VERBOSE)
+arg0 = re.compile(r"\(arg0:(\s*[\w.]+)\)", re.VERBOSE)
 
 
-class BoostDocsMixin:
+class PybindDocsMixin:
     """
     Mixin class to handle signature cleanup in C++ bindings,
     including annotations and overloaded signatures
@@ -73,11 +67,22 @@ class BoostDocsMixin:
         if not docstrings:
             return docstrings
 
-        if 'Boost.Python' not in str(type(self.object)):
-            if not (isinstance(self, PropertyDocumenter) and "->" in str(docstrings)):
-                return docstrings
+        tstr = str(type(self.object))
+        if (
+            'pybind11' not in tstr
+            and 'builtin_function_or_method' not in tstr
+            and 'instancemethod' not in tstr
+        ):
+            return docstrings
 
         for i, doclines in enumerate(docstrings):
+            overloaded = False
+            if "Overloaded function." in doclines:
+                overloaded = True
+                while doclines[0].strip() != "Overloaded function.":
+                    doclines.pop(0)
+                doclines.pop(0)
+
             # drop empty lines
             while not doclines[0].strip():
                 doclines.pop(0)
@@ -88,50 +93,23 @@ class BoostDocsMixin:
             docs1 = []
             for j, line in enumerate(doclines):
                 # CXX bindings typically have return annotations
-                if not "->" in line:
+                if (not overloaded and j > 0) or (overloaded and "->" not in line):
                     docs1.append(line)
                     continue
 
                 # remove unnecessary return annotations
-                if line.strip().endswith(":"):
-                    line = line.rstrip().rstrip(":").rstrip()
+                if overloaded and re.match(r"^[0-9]\.\s+", line):
+                    line = line.split(".", 1)[-1].lstrip()
                 if line.startswith("__init__"):
                     line = line.partition(" -> ")[0]
                 if line.endswith("-> None"):
                     line = line.replace(" -> None", "")
-                if isinstance(
-                    self, (autodoc.ClassLevelDocumenter, autodoc.ClassDocumenter)
-                ):
-                    # remove self from method argument list
-                    m = selfarg.search(line)
-                    if m:
-                        line = line.replace(m.group(0), "([")
-                    m = selfarg1.search(line)
-                    if m:
-                        line = line.replace(m.group(0), "(")
-
-                # Boost property type annotations don't work well
-                if isinstance(self, PropertyDocumenter):
-                    if line.strip().startswith("None() ->"):
-                        self._cxx_type_ann = line.replace("None() -> ", "").strip()
-                        doclines[j] = ""
-                        continue
-
-                # mangle signatures to produce python-like type annotations
-                m = optarg2.search(line)
-                while m:
-                    line = line.replace(m.group(0), "," + m.group(1))
-                    m = optarg2.search(line)
-                m = optarg1.search(line)
+                # remove self from method argument list
+                m = selfarg.search(line)
                 if m:
-                    line = line.replace(m.group(0), "(" + m.group(1) + ")")
-                m = typearg.search(line)
-                while m:
-                    line = line.replace(
-                        m.group(0), m.group(2) + ": " + m.group(1) + m.group(3)
-                    )
-                    m = typearg.search(line)
-                m = arg2.search(line)
+                    line = line.replace(m.group(0), "(")
+                # rename single arg0 to arg
+                m = arg0.search(line)
                 if m:
                     line = line.replace(m.group(0), "(arg:" + m.group(1) + ")")
                 line = line.replace("()", "(\u200b)")
@@ -167,7 +145,7 @@ class BoostDocsMixin:
 
 
 # Create mixin subclasses for all relevant documenters
-class FunctionDocumenter(BoostDocsMixin, autodoc.FunctionDocumenter):
+class FunctionDocumenter(PybindDocsMixin, autodoc.FunctionDocumenter):
     @classmethod
     def can_document_member(cls, member, membername, isattr, parent):
         # ensure that pipesegments are documented like functions
@@ -176,11 +154,32 @@ class FunctionDocumenter(BoostDocsMixin, autodoc.FunctionDocumenter):
         return super().can_document_member(member, membername, isattr, parent)
 
 
-class MethodDocumenter(BoostDocsMixin, autodoc.MethodDocumenter):
+class MethodDocumenter(PybindDocsMixin, autodoc.MethodDocumenter):
     pass
 
 
-class PropertyDocumenter(BoostDocsMixin, autodoc.PropertyDocumenter):
+class PropertyDocumenter(autodoc.PropertyDocumenter):
+    def get_doc(self):
+        if self._new_docstrings is not None:
+            return self._new_docstrings
+
+        docstrings = super().get_doc()
+        if not docstrings:
+            func = self._get_property_getter()
+            if func is not None and getattr(func, "__doc__", None) is not None:
+                docstrings.append(func.__doc__.split("\n"))
+            else:
+                return docstrings
+
+        for doclines in docstrings:
+            for j, line in enumerate(doclines):
+                if "->" in line:
+                    self._cxx_type_ann = line.partition(" -> ")[-1].strip()
+                    doclines[j] = ""
+                    return docstrings
+
+        return docstrings
+
     def add_directive_header(self, sig):
         # update property type annotation
         super().add_directive_header(sig)
@@ -189,7 +188,7 @@ class PropertyDocumenter(BoostDocsMixin, autodoc.PropertyDocumenter):
             self.add_line("   :type: " + self._cxx_type_ann, sourcename)
 
 
-class ClassDocumenter(BoostDocsMixin, autodoc.ClassDocumenter):
+class ClassDocumenter(PybindDocsMixin, autodoc.ClassDocumenter):
     def add_line(self, line, source, *lineno):
         # remove empty bases directive
         if line.strip() == "Bases:":
@@ -202,7 +201,7 @@ def handle_bases(app, name, obj, options, bases: list):
     Exclude generic base classes from inheritance lists
     """
     for b in list(bases):
-        if 'Boost.Python' in str(b):
+        if 'pybind11' in str(b):
             bases.remove(b)
     if object in bases:
         bases.remove(object)
