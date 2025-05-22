@@ -33,31 +33,38 @@ Available units
 
 We currently define units for times, angles, lengths, power, voltage, current, and temperature. Some of these have aliases with abbreviated names (e.g. both ms and millisecond). Where this occurs, all names for a unit are separated with commas. For a value ``X`` in the following lists, it is exposed to Python as ``core.G3Units.X`` and to C++ as ``G3Units::X``.
 
-Time:
+Time
+~~~~
 
-* nanosecond, ns
-* microsecond, us
-* millisecond, ms
-* second, s
-* minute, min
-* hour, h
-* day
+* nanosecond(s), ns
+* microsecond(s), us
+* millisecond(s), ms
+* second(s), sec, s
+* minute(s), min
+* hour(s), h
+* day(s)
 
-Frequency:
+Frequency
+~~~~~~~~~
 
 * Hz, hz
+* kHz
 * MHz
 * GHz
 
-Angles:
+Angles
+~~~~~~
 
-* rad
-* deg
+* radian(s), rad
+* degree(s), deg
 * arcmin
 * arcsec
 * rahour, rahr
+* raminute
+* rasecond
 
-Length:
+Length
+~~~~~~
 
 * nanometer, nm
 * micron
@@ -65,12 +72,13 @@ Length:
 * centimeter, cm
 * inch, in
 * foot, ft
-* meter, m
+* meter(s), m
 * kilometer, m
-* au
+* AU, au
 * parsec, pc
 
-Power:
+Power
+~~~~~
 
 * attowatt, aW
 * picowatt, pW
@@ -80,20 +88,43 @@ Power:
 * watt, W
 * horsepower, hp
 
-Voltage:
+Flux Density
+~~~~~~~~~~~~
+
+* jansky, Jy
+* millijansky, mJy
+* megajansky, MJy
+
+Solid Angle
+~~~~~~~~~~~
+
+* steradian(s), sr
+* squaredegree(s), sqdeg, deg2
+* squarearcmin, sqarcmin, arcmin2
+
+Voltage
+~~~~~~~
 
 * volt, V
 * millivolt, mV
 * microvolt, uV
 
-Current:
+Current
+~~~~~~~
 
 * amp, ampere, A
 * milliamp, mA
 * microamp, uA
 * nanoamp, nA
 
-Temperature:
+Resistance
+~~~~~~~~~~
+
+* ohm
+* milliohm, mohm
+
+Temperature
+~~~~~~~~~~~
 
 * picokelvin, pK
 * nanokelvin, nK
@@ -102,3 +133,41 @@ Temperature:
 * kelvin, K
 * rankine, R
 
+Pressure
+~~~~~~~~
+
+* bar, b
+* millibar, mb
+* Pa
+* kPa
+
+Data Size
+~~~~~~~~~
+
+* bit
+* byte, B
+* kilobyte, KB
+* megabyte, MB
+* gigabyte, GB
+
+Mass
+~~~~
+
+* gram, g
+* kilogram, kg
+* milligram, mg
+
+
+Common scientific constants
+===========================
+
+Some common constants are defined and made available in the ``core.G3Constants`` namespace.  These are multiplied by the appropriate combinations of the above G3Units.
+
+Available constants are:
+
+* ``c``: speed of light
+* ``h``, ``hbar``: Planck constant and reduced Planck constant
+* ``k``, ``kb``: Boltzmann constant
+* ``G``: Newtonian gravitational constant
+* ``g0``: Standard gravitational acceleration
+* ``e``: Elementary charge
