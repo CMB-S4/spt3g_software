@@ -126,7 +126,24 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Units</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#defining-a-quantity-with-units">Defining a quantity with units</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#converting-to-different-units">Converting to different units</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#available-units">Available units</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#available-units">Available units</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#time">Time</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#frequency">Frequency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#angles">Angles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#length">Length</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#power">Power</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flux-density">Flux Density</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#solid-angle">Solid Angle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#voltage">Voltage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#current">Current</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#resistance">Resistance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#temperature">Temperature</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pressure">Pressure</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#data-size">Data Size</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mass">Mass</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#common-scientific-constants">Common scientific constants</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="dataacquisition.html">Data Acquisition</a><ul>
@@ -658,31 +675,41 @@
 <section id="available-units">
 <h2>Available units<a class="headerlink" href="#available-units" title="Link to this heading"></a></h2>
 <p>We currently define units for times, angles, lengths, power, voltage, current, and temperature. Some of these have aliases with abbreviated names (e.g. both ms and millisecond). Where this occurs, all names for a unit are separated with commas. For a value <code class="docutils literal notranslate"><span class="pre">X</span></code> in the following lists, it is exposed to Python as <code class="docutils literal notranslate"><span class="pre">core.G3Units.X</span></code> and to C++ as <code class="docutils literal notranslate"><span class="pre">G3Units::X</span></code>.</p>
-<p>Time:</p>
+<section id="time">
+<h3>Time<a class="headerlink" href="#time" title="Link to this heading"></a></h3>
 <ul class="simple">
-<li><p>nanosecond, ns</p></li>
-<li><p>microsecond, us</p></li>
-<li><p>millisecond, ms</p></li>
-<li><p>second, s</p></li>
-<li><p>minute, min</p></li>
-<li><p>hour, h</p></li>
-<li><p>day</p></li>
+<li><p>nanosecond(s), ns</p></li>
+<li><p>microsecond(s), us</p></li>
+<li><p>millisecond(s), ms</p></li>
+<li><p>second(s), sec, s</p></li>
+<li><p>minute(s), min</p></li>
+<li><p>hour(s), h</p></li>
+<li><p>day(s)</p></li>
 </ul>
-<p>Frequency:</p>
+</section>
+<section id="frequency">
+<h3>Frequency<a class="headerlink" href="#frequency" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Hz, hz</p></li>
+<li><p>kHz</p></li>
 <li><p>MHz</p></li>
 <li><p>GHz</p></li>
 </ul>
-<p>Angles:</p>
+</section>
+<section id="angles">
+<h3>Angles<a class="headerlink" href="#angles" title="Link to this heading"></a></h3>
 <ul class="simple">
-<li><p>rad</p></li>
-<li><p>deg</p></li>
+<li><p>radian(s), rad</p></li>
+<li><p>degree(s), deg</p></li>
 <li><p>arcmin</p></li>
 <li><p>arcsec</p></li>
 <li><p>rahour, rahr</p></li>
+<li><p>raminute</p></li>
+<li><p>rasecond</p></li>
 </ul>
-<p>Length:</p>
+</section>
+<section id="length">
+<h3>Length<a class="headerlink" href="#length" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>nanometer, nm</p></li>
 <li><p>micron</p></li>
@@ -690,12 +717,14 @@
 <li><p>centimeter, cm</p></li>
 <li><p>inch, in</p></li>
 <li><p>foot, ft</p></li>
-<li><p>meter, m</p></li>
+<li><p>meter(s), m</p></li>
 <li><p>kilometer, m</p></li>
-<li><p>au</p></li>
+<li><p>AU, au</p></li>
 <li><p>parsec, pc</p></li>
 </ul>
-<p>Power:</p>
+</section>
+<section id="power">
+<h3>Power<a class="headerlink" href="#power" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>attowatt, aW</p></li>
 <li><p>picowatt, pW</p></li>
@@ -705,20 +734,49 @@
 <li><p>watt, W</p></li>
 <li><p>horsepower, hp</p></li>
 </ul>
-<p>Voltage:</p>
+</section>
+<section id="flux-density">
+<h3>Flux Density<a class="headerlink" href="#flux-density" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>jansky, Jy</p></li>
+<li><p>millijansky, mJy</p></li>
+<li><p>megajansky, MJy</p></li>
+</ul>
+</section>
+<section id="solid-angle">
+<h3>Solid Angle<a class="headerlink" href="#solid-angle" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>steradian(s), sr</p></li>
+<li><p>squaredegree(s), sqdeg, deg2</p></li>
+<li><p>squarearcmin, sqarcmin, arcmin2</p></li>
+</ul>
+</section>
+<section id="voltage">
+<h3>Voltage<a class="headerlink" href="#voltage" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>volt, V</p></li>
 <li><p>millivolt, mV</p></li>
 <li><p>microvolt, uV</p></li>
 </ul>
-<p>Current:</p>
+</section>
+<section id="current">
+<h3>Current<a class="headerlink" href="#current" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>amp, ampere, A</p></li>
 <li><p>milliamp, mA</p></li>
 <li><p>microamp, uA</p></li>
 <li><p>nanoamp, nA</p></li>
 </ul>
-<p>Temperature:</p>
+</section>
+<section id="resistance">
+<h3>Resistance<a class="headerlink" href="#resistance" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>ohm</p></li>
+<li><p>milliohm, mohm</p></li>
+</ul>
+</section>
+<section id="temperature">
+<h3>Temperature<a class="headerlink" href="#temperature" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>picokelvin, pK</p></li>
 <li><p>nanokelvin, nK</p></li>
@@ -726,6 +784,47 @@
 <li><p>millikelvin, mK</p></li>
 <li><p>kelvin, K</p></li>
 <li><p>rankine, R</p></li>
+</ul>
+</section>
+<section id="pressure">
+<h3>Pressure<a class="headerlink" href="#pressure" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>bar, b</p></li>
+<li><p>millibar, mb</p></li>
+<li><p>Pa</p></li>
+<li><p>kPa</p></li>
+</ul>
+</section>
+<section id="data-size">
+<h3>Data Size<a class="headerlink" href="#data-size" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>bit</p></li>
+<li><p>byte, B</p></li>
+<li><p>kilobyte, KB</p></li>
+<li><p>megabyte, MB</p></li>
+<li><p>gigabyte, GB</p></li>
+</ul>
+</section>
+<section id="mass">
+<h3>Mass<a class="headerlink" href="#mass" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>gram, g</p></li>
+<li><p>kilogram, kg</p></li>
+<li><p>milligram, mg</p></li>
+</ul>
+</section>
+</section>
+<section id="common-scientific-constants">
+<h2>Common scientific constants<a class="headerlink" href="#common-scientific-constants" title="Link to this heading"></a></h2>
+<p>Some common constants are defined and made available in the <code class="docutils literal notranslate"><span class="pre">core.G3Constants</span></code> namespace.  These are multiplied by the appropriate combinations of the above G3Units.</p>
+<p>Available constants are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">c</span></code>: speed of light</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">h</span></code>, <code class="docutils literal notranslate"><span class="pre">hbar</span></code>: Planck constant and reduced Planck constant</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">k</span></code>, <code class="docutils literal notranslate"><span class="pre">kb</span></code>: Boltzmann constant</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">G</span></code>: Newtonian gravitational constant</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">g0</span></code>: Standard gravitational acceleration</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">e</span></code>: Elementary charge</p></li>
 </ul>
 </section>
 </section>
