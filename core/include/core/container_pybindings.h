@@ -198,20 +198,23 @@ register_map_iterators(py::module_ &scope, C &cls)
 
 	// Wrap KeysView if it wasn't already wrapped
 	if (!py::detail::get_type_info(typeid(KeysView))) {
-		py::class_<KeysView> keys_view(scope, "KeysView");
+		py::class_<KeysView> keys_view(scope, "KeysView",
+		    "View of mapping keys, with length, existence and iteration operations.");
 		keys_view.def("__len__", &KeysView::len);
 		keys_view.def("__iter__", &KeysView::iter, py::keep_alive<0, 1>());
 		keys_view.def("__contains__", &KeysView::contains);
 	}
 	// Similarly for ValuesView:
 	if (!py::detail::get_type_info(typeid(ValuesView))) {
-		py::class_<ValuesView> values_view(scope, "ValuesView");
+		py::class_<ValuesView> values_view(scope, "ValuesView",
+		    "View of mapping values, with length and iteration operations.");
 		values_view.def("__len__", &ValuesView::len);
 		values_view.def("__iter__", &ValuesView::iter, py::keep_alive<0, 1>());
 	}
 	// Similarly for ItemsView:
 	if (!py::detail::get_type_info(typeid(ItemsView))) {
-		py::class_<ItemsView> items_view(scope, "ItemsView");
+		py::class_<ItemsView> items_view(scope, "ItemsView",
+		    "View of mapping items, with length and iteration operations.");
 		items_view.def("__len__", &ItemsView::len);
 		items_view.def("__iter__", &ItemsView::iter, py::keep_alive<0, 1>());
 	}
