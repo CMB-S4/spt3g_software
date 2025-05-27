@@ -56,7 +56,7 @@ selfarg = re.compile(r"(\(self\:\s*[\w.]+(?:,\s*)?)", re.VERBOSE)
 arg0 = re.compile(r"\(arg0:(\s*[\w.]+)\)", re.VERBOSE)
 
 
-class PybindDocsMixin:
+class BindingDocsMixin:
     """
     Mixin class to handle signature cleanup in C++ bindings,
     including annotations and overloaded signatures
@@ -147,7 +147,7 @@ class PybindDocsMixin:
 
 
 # Create mixin subclasses for all relevant documenters
-class FunctionDocumenter(PybindDocsMixin, autodoc.FunctionDocumenter):
+class FunctionDocumenter(BindingDocsMixin, autodoc.FunctionDocumenter):
     @classmethod
     def can_document_member(cls, member, membername, isattr, parent):
         # ensure that pipesegments are documented like functions
@@ -156,7 +156,7 @@ class FunctionDocumenter(PybindDocsMixin, autodoc.FunctionDocumenter):
         return super().can_document_member(member, membername, isattr, parent)
 
 
-class MethodDocumenter(PybindDocsMixin, autodoc.MethodDocumenter):
+class MethodDocumenter(BindingDocsMixin, autodoc.MethodDocumenter):
     pass
 
 
@@ -225,7 +225,7 @@ class AttributeDocumenter(autodoc.AttributeDocumenter):
         return [[txt, "", ".. code-block::", "", ""] + v.split("\n")]
 
 
-class ClassDocumenter(PybindDocsMixin, autodoc.ClassDocumenter):
+class ClassDocumenter(BindingDocsMixin, autodoc.ClassDocumenter):
     def add_line(self, line, source, *lineno):
         # remove empty bases directive
         if line.strip() == "Bases:":
