@@ -664,6 +664,8 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calibration_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">default_calibration_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)),</span> <span class="s1">&#39;G3RegCal.txt&#39;</span><span class="p">)</span>
 
+<div class="viewcode-block" id="CalFileReader.readCalFile">
+<a class="viewcode-back" href="../../../moddoc_gcp.html#spt3g.gcp.CalFile.CalFileReader.readCalFile">[docs]</a>
     <span class="k">def</span> <span class="nf">readCalFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calfile</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">cal_dict</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="n">calfile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -739,6 +741,7 @@
                     <span class="n">cal_dict_orig</span><span class="p">[</span><span class="n">names</span><span class="p">[</span><span class="n">j</span><span class="p">]]</span>
 
         <span class="k">return</span> <span class="n">cal_dict</span></div>
+</div>
 
 
 <div class="viewcode-block" id="create_g3_cal_file">

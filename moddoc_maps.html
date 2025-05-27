@@ -1197,6 +1197,11 @@
 <p>Polarized (Mueller matrix) or unpolarized (scalar) map pixel weights.Weights are polarized if the pol_conv attribute of the reference map is set.</p>
 <p>Signature 1: Copy constructor</p>
 <dl class="py method">
+<dt class="sig sig-object py" id="spt3g.maps.G3SkyMapWeights.Clone">
+<span class="sig-name descname"><span class="pre">Clone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">copy_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.maps.G3SkyMapWeights.Clone" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="spt3g.maps.G3SkyMapWeights.Description">
 <span class="sig-name descname"><span class="pre">Description</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#spt3g.maps.G3SkyMapWeights.Description" title="Link to this definition"></a></dt>
 <dd><p>Long-form human-readable description of the object</p>
@@ -1255,29 +1260,20 @@
 <span class="sig-name descname"><span class="pre">extract_patch</span></span><span class="sig-paren">(</span>
 
 <dl>
-<dd><em class="sig-param"><span class="n"><span class="pre">(FlatSkyMap)arg1</span></span></em>,</dd>
-<dd><em class="sig-param"><span class="n"><span class="pre">(int)x0</span></span></em>,</dd>
-<dd><em class="sig-param"><span class="n"><span class="pre">(int)y0</span></span></em>,</dd>
-<dd><em class="sig-param"><span class="n"><span class="pre">(int)width</span></span></em>,</dd>
-<dd><em class="sig-param"><span class="n"><span class="pre">(int)height</span></span></em><span class="optional">[</span>,</dd>
-<dd><em class="sig-param"><span class="n"><span class="pre">(float)fill=0</span></span></em>,<span class="optional">]</span></dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">y0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">fill</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>,</dd>
 </dl>
 
-<span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">G3SkyMap</span> <span class="pre">:</span></span></span><a class="headerlink" href="#spt3g.maps.G3SkyMapWeights.extract_patch" title="Link to this definition"></a></dt>
+<span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spt3g.maps.G3SkyMap" title="spt3g.maps.G3SkyMap"><span class="pre">G3SkyMap</span></a></span></span><a class="headerlink" href="#spt3g.maps.G3SkyMapWeights.extract_patch" title="Link to this definition"></a></dt>
 <dd><p>Returns a map of shape (width, height) containing a rectangular patch of the parent map.  Pixel (width // 2, height // 2) of the output map corresponds to pixel (x0, y0) in the parent map, and the angular location of each pixel on the sky is maintained.  Surrounding empty pixels can be optionally filled.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.maps.G3SkyMapWeights.insert_patch">
-<span class="sig-name descname"><span class="pre">insert_patch</span></span><span class="sig-paren">(</span>
-
-<dl>
-<dd><em class="sig-param"><span class="n"><span class="pre">(FlatSkyMap)arg1</span></span></em>,</dd>
-<dd><em class="sig-param"><span class="n"><span class="pre">(FlatSkyMap)patch</span></span></em><span class="optional">[</span>,</dd>
-<dd><em class="sig-param"><span class="n"><span class="pre">(bool)ignore_zeros=False</span></span></em>,<span class="optional">]</span></dd>
-</dl>
-
-<span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span> <span class="pre">:</span></span></span><a class="headerlink" href="#spt3g.maps.G3SkyMapWeights.insert_patch" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">insert_patch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">patch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.maps.FlatSkyMap" title="spt3g.maps.FlatSkyMap"><span class="pre">FlatSkyMap</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_zeros</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.maps.G3SkyMapWeights.insert_patch" title="Link to this definition"></a></dt>
 <dd><p>Inserts a patch (e.g. as extracted using extract_patch) into the parent map.  The coordinate system and angular center of the patch must match that of the parent map.  If ignore_zeros is True, zero-valued pixels in the patch are not inserted.  This is useful for preserving the sparsity of the parent map.</p>
 </dd></dl>
 
@@ -1303,16 +1299,7 @@ unique weight attributes in row major order: TT, TQ, TU, QQ, QU, UU.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.maps.G3SkyMapWeights.reshape">
-<span class="sig-name descname"><span class="pre">reshape</span></span><span class="sig-paren">(</span>
-
-<dl>
-<dd><em class="sig-param"><span class="n"><span class="pre">(FlatSkyMap)arg1</span></span></em>,</dd>
-<dd><em class="sig-param"><span class="n"><span class="pre">(int)width</span></span></em>,</dd>
-<dd><em class="sig-param"><span class="n"><span class="pre">(int)height</span></span></em><span class="optional">[</span>,</dd>
-<dd><em class="sig-param"><span class="n"><span class="pre">(float)fill=0</span></span></em>,<span class="optional">]</span></dd>
-</dl>
-
-<span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">G3SkyMap</span> <span class="pre">:</span></span></span><a class="headerlink" href="#spt3g.maps.G3SkyMapWeights.reshape" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">reshape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spt3g.maps.G3SkyMap" title="spt3g.maps.G3SkyMap"><span class="pre">G3SkyMap</span></a></span></span><a class="headerlink" href="#spt3g.maps.G3SkyMapWeights.reshape" title="Link to this definition"></a></dt>
 <dd><p>Returns a map of shape (width, height) containing the parent map centered within it.  The angular location of each pixel on the sky is maintained.  Surrounding empty pixels can be optionally filled.</p>
 </dd></dl>
 
@@ -2511,6 +2498,16 @@ one.</p>
 <dd><p>Base class for 1- and 2-D skymaps of various projections. Usually you want a subclass of this (e.g. FlatSkyMap) rather than using it directly.</p>
 <p>Raises an exception
 This class cannot be instantiated from Python</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.maps.G3SkyMap.Clone">
+<span class="sig-name descname"><span class="pre">Clone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">copy_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.maps.G3SkyMap.Clone" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.maps.G3SkyMap.IsCompatible">
+<span class="sig-name descname"><span class="pre">IsCompatible</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.maps.G3SkyMap.IsCompatible" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.maps.G3SkyMap.all">
 <span class="sig-name descname"><span class="pre">all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepdims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">where</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.maps.G3SkyMap.all" title="Link to this definition"></a></dt>

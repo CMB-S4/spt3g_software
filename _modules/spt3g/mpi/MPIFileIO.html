@@ -673,6 +673,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">files</span> <span class="o">=</span> <span class="n">files</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cur_reader</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">broadcast</span> <span class="o">=</span> <span class="kc">False</span>
+<div class="viewcode-block" id="MPIFileReader.nextreader">
+<a class="viewcode-back" href="../../../moddoc_mpi.html#spt3g.mpi.MPIFileIO.MPIFileReader.nextreader">[docs]</a>
     <span class="k">def</span> <span class="nf">nextreader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">nextfilelist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">broadcast</span> <span class="o">=</span> <span class="kc">False</span>
@@ -684,7 +686,8 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">cur_reader</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">fr</span><span class="p">:</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">toreadhere</span> <span class="o">=</span> <span class="n">nextfilelist</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">rank</span><span class="p">::</span><span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">size</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">cur_reader</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3Reader</span><span class="p">(</span><span class="n">toreadhere</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cur_reader</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3Reader</span><span class="p">(</span><span class="n">toreadhere</span><span class="p">)</span></div>
+
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="k">assert</span><span class="p">(</span><span class="n">frame</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>

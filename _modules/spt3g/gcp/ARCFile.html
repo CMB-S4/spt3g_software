@@ -672,6 +672,8 @@
     <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span>
 
+<div class="viewcode-block" id="ARCFile.next">
+<a class="viewcode-back" href="../../../moddoc_gcp.html#spt3g.gcp.ARCFile.ARCFile.next">[docs]</a>
     <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">frames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reader</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">frames</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -690,7 +692,8 @@
             <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">ARCExtract</span><span class="p">)</span>
             <span class="n">pipe</span><span class="o">.</span><span class="n">Run</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="n">frame</span>
+        <span class="k">return</span> <span class="n">frame</span></div>
+
 
     <span class="fm">__next__</span> <span class="o">=</span> <span class="nb">next</span></div>
 

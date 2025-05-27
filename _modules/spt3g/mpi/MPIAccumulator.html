@@ -731,6 +731,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">localdata</span><span class="p">[</span><span class="n">obskey</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">localdata</span><span class="p">[</span><span class="n">obskey</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">metadata</span><span class="p">,</span> <span class="n">data</span><span class="p">))</span>
 
+<div class="viewcode-block" id="MPIAccumulator.finalize">
+<a class="viewcode-back" href="../../../moddoc_mpi.html#spt3g.mpi.MPIAccumulator.MPIAccumulator.finalize">[docs]</a>
     <span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Put all observation metadata everywhere</span>
         <span class="n">fullobs</span> <span class="o">=</span> <span class="p">{}</span>
@@ -755,6 +757,7 @@
                 <span class="n">data</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sorter</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">fullobs</span> <span class="o">=</span> <span class="n">fullobs</span></div>
+</div>
 
 
 </pre></div>
