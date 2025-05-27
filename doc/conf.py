@@ -41,6 +41,7 @@ autodoc_typehints = "description"
 autodoc_typehints_format = "short"
 autodoc_default_options = {
     "members": True,
+    "undoc-members": True,
     "show-inheritance": True,
     "class-doc-from": "both",
     "member-order": "groupwise",
@@ -60,7 +61,7 @@ typearg = re.compile(r"\(([\w.]+)\)([\w._]+)([=,\)]?)", re.VERBOSE)
 arg2 = re.compile(r"\(arg2:(\s*[\w.]+)\)", re.VERBOSE)
 
 
-class BoostDocsMixin:
+class BindingDocsMixin:
     """
     Mixin class to handle signature cleanup in C++ bindings,
     including annotations and overloaded signatures
@@ -74,7 +75,7 @@ class BoostDocsMixin:
             return docstrings
 
         if 'Boost.Python' not in str(type(self.object)):
-            if not (isinstance(self, PropertyDocumenter) and "->" in str(docstrings)):
+            if "->" not in str(docstrings):
                 return docstrings
 
         for i, doclines in enumerate(docstrings):
@@ -109,13 +110,6 @@ class BoostDocsMixin:
                     m = selfarg1.search(line)
                     if m:
                         line = line.replace(m.group(0), "(")
-
-                # Boost property type annotations don't work well
-                if isinstance(self, PropertyDocumenter):
-                    if line.strip().startswith("None() ->"):
-                        self._cxx_type_ann = line.replace("None() -> ", "").strip()
-                        doclines[j] = ""
-                        continue
 
                 # mangle signatures to produce python-like type annotations
                 m = optarg2.search(line)
@@ -167,7 +161,7 @@ class BoostDocsMixin:
 
 
 # Create mixin subclasses for all relevant documenters
-class FunctionDocumenter(BoostDocsMixin, autodoc.FunctionDocumenter):
+class FunctionDocumenter(BindingDocsMixin, autodoc.FunctionDocumenter):
     @classmethod
     def can_document_member(cls, member, membername, isattr, parent):
         # ensure that pipesegments are documented like functions
@@ -176,11 +170,32 @@ class FunctionDocumenter(BoostDocsMixin, autodoc.FunctionDocumenter):
         return super().can_document_member(member, membername, isattr, parent)
 
 
-class MethodDocumenter(BoostDocsMixin, autodoc.MethodDocumenter):
+class MethodDocumenter(BindingDocsMixin, autodoc.MethodDocumenter):
     pass
 
 
-class PropertyDocumenter(BoostDocsMixin, autodoc.PropertyDocumenter):
+class PropertyDocumenter(autodoc.PropertyDocumenter):
+    def get_doc(self):
+        if self._new_docstrings is not None:
+            return self._new_docstrings
+
+        docstrings = super().get_doc()
+        if not docstrings:
+            func = self._get_property_getter()
+            if func is not None and getattr(func, "__doc__", None) is not None:
+                docstrings.append(func.__doc__.split("\n"))
+            else:
+                return docstrings
+
+        for doclines in docstrings:
+            for j, line in enumerate(doclines):
+                if "->" in line:
+                    self._cxx_type_ann = line.partition(" -> ")[-1].strip()
+                    doclines[j] = ""
+                    return docstrings
+
+        return docstrings
+
     def add_directive_header(self, sig):
         # update property type annotation
         super().add_directive_header(sig)
@@ -189,7 +204,7 @@ class PropertyDocumenter(BoostDocsMixin, autodoc.PropertyDocumenter):
             self.add_line("   :type: " + self._cxx_type_ann, sourcename)
 
 
-class ClassDocumenter(BoostDocsMixin, autodoc.ClassDocumenter):
+class ClassDocumenter(BindingDocsMixin, autodoc.ClassDocumenter):
     def add_line(self, line, source, *lineno):
         # remove empty bases directive
         if line.strip() == "Bases:":
