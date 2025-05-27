@@ -79,21 +79,41 @@ PYBINDINGS("core", scope) {
 	    .def_readwrite("value", &G3Bool::value)
 	    .def("__nonzero__", &G3Bool::truth)
 	    .def("__bool__", &G3Bool::truth)
+	    .def(py::self == py::self)
+	    .def(py::self != py::self)
 	;
 
 	register_frameobject<G3Int>(scope, "G3Int", "Serializable integer type")
 	    .def(py::init<int64_t>())
 	    .def_readwrite("value", &G3Int::value)
+	    .def(py::self == py::self)
+	    .def(py::self != py::self)
+	    .def(py::self >= py::self)
+	    .def(py::self > py::self)
+	    .def(py::self <= py::self)
+	    .def(py::self < py::self)
 	;
 
 	register_frameobject<G3Double>(scope, "G3Double", "Serializable double")
 	    .def(py::init<double>())
 	    .def_readwrite("value", &G3Double::value)
+	    .def(py::self == py::self)
+	    .def(py::self != py::self)
+	    .def(py::self >= py::self)
+	    .def(py::self > py::self)
+	    .def(py::self <= py::self)
+	    .def(py::self < py::self)
 	;
 
 	register_frameobject<G3String>(scope, "G3String", "Serializable string")
 	    .def(py::init<std::string>())
 	    .def_readwrite("value", &G3String::value)
+	    .def(py::self == py::self)
+	    .def(py::self != py::self)
+	    .def(py::self >= py::self)
+	    .def(py::self > py::self)
+	    .def(py::self <= py::self)
+	    .def(py::self < py::self)
 	;
 }
 
