@@ -1,5 +1,5 @@
 import numpy
-from . import G3Timestream, DoubleVector, G3VectorDouble, G3TimestreamMap, G3VectorTime, G3Time, IntVector, G3VectorInt, \
+from . import G3Timestream, DoubleVector, G3VectorDouble, G3TimestreamMap, G3VectorTime, G3Time, Int64Vector, G3VectorInt, \
     G3VectorComplexDouble, ComplexDoubleVector, BoolVector, G3VectorBool
 from . import G3Units, log_fatal, log_warn, usefulfunc, G3FrameObject
 
@@ -19,6 +19,9 @@ def G3Timestream_getitem(x, y):
 
 @property
 def timestream_dtype(ts):
+    """
+    Numpy data type of stored data.
+    """
     return numpy.asarray(ts).dtype
 
 G3Timestream.__getitem__ = G3Timestream_getitem
@@ -83,7 +86,7 @@ def numpybinarywrap(a, b, op):
     elif k == 'f':
         return G3VectorDouble(out) if is_g3 else DoubleVector(out)
     elif k in 'iu':
-        return G3VectorInt(out.astype(int)) if is_g3 else IntVector(out.astype(int))
+        return G3VectorInt(out.astype(int)) if is_g3 else Int64Vector(out.astype(int))
     return NotImplemented
 
 def numpyinplacebinarywrap(a, b, op):
@@ -92,7 +95,7 @@ def numpyinplacebinarywrap(a, b, op):
     op(numpy.asarray(a), numpy.asarray(b))
     return a
 
-all_cls = [G3Timestream, G3VectorDouble, DoubleVector, G3VectorInt, IntVector,
+all_cls = [G3Timestream, G3VectorDouble, DoubleVector, G3VectorInt, Int64Vector,
            G3VectorComplexDouble, ComplexDoubleVector, G3VectorBool, BoolVector]
 
 for attr in ['add', 'sub', 'mul', 'div', 'truediv', 'floordiv', 'mod', 'pow',
@@ -132,8 +135,12 @@ for x in ["sum", "mean", "any", "all", "min", "max", "argmin", "argmax", "var", 
     if x not in numpy.ndarray.__dict__:
         continue
     for cls in all_cls:
-        setattr(cls, x,
-                lambda a, *args, op=numpy.ndarray.__dict__[x], **kwargs: op(numpy.asarray(a), *args, **kwargs))
+        def ufunc_wrapper(op):
+            def ufunc(a, *args, **kwargs):
+                return numpy.ndarray.__dict__[op](numpy.asarray(a), *args, **kwargs)
+            ufunc.__doc__ = numpy.ndarray.__dict__[op].__doc__
+            return ufunc
+        setattr(cls, x, ufunc_wrapper(x))
 
 # Bind some memory-efficient methods for G3TimestreamMap
 for op in ["std", "var"]:
