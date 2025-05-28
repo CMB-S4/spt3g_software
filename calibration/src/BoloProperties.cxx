@@ -58,6 +58,17 @@ G3_SERIALIZABLE_CODE(BolometerProperties);
 G3_SERIALIZABLE_CODE(BolometerPropertiesMap);
 
 PYBINDINGS("calibration", scope) {
+	register_enum<BolometerProperties::CouplingType>(scope, "BolometerCouplingType",
+	  "Coupling type for BolometerProperties objects.")
+	    .value("Unknown", BolometerProperties::Unknown)
+	    .value("Optical", BolometerProperties::Optical)
+	    .value("DarkTermination", BolometerProperties::DarkTermination)
+	    .value("DarkCrossover", BolometerProperties::DarkCrossover)
+	    .value("Resistor", BolometerProperties::Resistor)
+	    .value("Loopback", BolometerProperties::Loopback)
+	    .value("OffResonance", BolometerProperties::OffResonance)
+	;
+
 	register_frameobject<BolometerProperties>(scope, "BolometerProperties",
             "Physical bolometer properties, such as detector angular offsets. "
 	    "Does not include tuning-dependent properties of the detectors.")
@@ -88,17 +99,6 @@ PYBINDINGS("calibration", scope) {
 	       "Name of the pixel of which this detector is a part")
 	    .def_readwrite("pixel_type", &BolometerProperties::pixel_type,
 	       "Name of the pixel type of which this detector is a part")
-	;
-
-	register_enum<BolometerProperties::CouplingType>(scope, "BolometerCouplingType",
-	  "Coupling type for BolometerProperties objects.")
-	    .value("Unknown", BolometerProperties::Unknown)
-	    .value("Optical", BolometerProperties::Optical)
-	    .value("DarkTermination", BolometerProperties::DarkTermination)
-	    .value("DarkCrossover", BolometerProperties::DarkCrossover)
-	    .value("Resistor", BolometerProperties::Resistor)
-	    .value("Loopback", BolometerProperties::Loopback)
-	    .value("OffResonance", BolometerProperties::OffResonance)
 	;
 
 	register_g3map<BolometerPropertiesMap>(scope, "BolometerPropertiesMap",
