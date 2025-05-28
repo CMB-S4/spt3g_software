@@ -673,15 +673,11 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class for inspecting sub-modules of the SPT-3G software package and</span>
 <span class="sd">    generating valid RST for use with sphinx-autodoc.</span>
-
-<span class="sd">    :cvar categories: Dictionary of API categories for which to generate</span>
-<span class="sd">        documentation, containing a section title, description, and</span>
-<span class="sd">        sphinx-autodoc directive as a tuple for each category.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># API categories for which to generate documentation, with a</span>
     <span class="c1"># corresponding section title, description and sphinx-autodoc directive.</span>
-    <span class="n">categories</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">_categories</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;object&quot;</span><span class="p">:</span> <span class="p">(</span>
             <span class="s2">&quot;Frame Objects&quot;</span><span class="p">,</span>
             <span class="s2">&quot;Serializable objects that may be stored as entries in &quot;</span>
@@ -773,6 +769,15 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">root</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cache</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">categories</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Dictionary of API categories for which to generate documentation,</span>
+<span class="sd">        containing a section title, description, and sphinx-autodoc directive as</span>
+<span class="sd">        a tuple for each category.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_categories</span>
 
 <div class="viewcode-block" id="G3Documenter.find_objects">
 <a class="viewcode-back" href="../../../moddoc_core.html#spt3g.core.apidoc.G3Documenter.find_objects">[docs]</a>
