@@ -252,6 +252,10 @@
 <li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.build_cal_frames.ExplodeBolometerProperties"><code class="docutils literal notranslate"><span class="pre">ExplodeBolometerProperties()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="moddoc_calibration.html#useful-classes">Useful Classes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.BolometerCouplingType"><code class="docutils literal notranslate"><span class="pre">BolometerCouplingType</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="moddoc_calibration.html#useful-functions">Useful Functions</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.bolopropertiesutils.band_to_string"><code class="docutils literal notranslate"><span class="pre">band_to_string()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.bolopropertiesutils.band_to_value"><code class="docutils literal notranslate"><span class="pre">band_to_value()</span></code></a></li>
@@ -343,6 +347,8 @@
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.FrameTypeVector"><code class="docutils literal notranslate"><span class="pre">FrameTypeVector</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.FrameVector"><code class="docutils literal notranslate"><span class="pre">FrameVector</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3Frame"><code class="docutils literal notranslate"><span class="pre">G3Frame</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3FrameType"><code class="docutils literal notranslate"><span class="pre">G3FrameType</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3LogLevel"><code class="docutils literal notranslate"><span class="pre">G3LogLevel</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3Logger"><code class="docutils literal notranslate"><span class="pre">G3Logger</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3LoggerVector"><code class="docutils literal notranslate"><span class="pre">G3LoggerVector</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MultiLogger"><code class="docutils literal notranslate"><span class="pre">G3MultiLogger</span></code></a></li>
@@ -351,6 +357,7 @@
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3PrintfLogger"><code class="docutils literal notranslate"><span class="pre">G3PrintfLogger</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3SyslogLogger"><code class="docutils literal notranslate"><span class="pre">G3SyslogLogger</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3TimeVector"><code class="docutils literal notranslate"><span class="pre">G3TimeVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3TimestreamUnits"><code class="docutils literal notranslate"><span class="pre">G3TimestreamUnits</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3VectorStringVector"><code class="docutils literal notranslate"><span class="pre">G3VectorStringVector</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.Int64Vector"><code class="docutils literal notranslate"><span class="pre">Int64Vector</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.IntVector"><code class="docutils literal notranslate"><span class="pre">IntVector</span></code></a></li>
@@ -486,9 +493,12 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="#useful-classes">Useful Classes</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.ACUState"><code class="docutils literal notranslate"><span class="pre">ACUState</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.ARCFile.ARCFile"><code class="docutils literal notranslate"><span class="pre">ARCFile</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.CalFile.CalFileReader"><code class="docutils literal notranslate"><span class="pre">CalFileReader</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.Experiment"><code class="docutils literal notranslate"><span class="pre">Experiment</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.GCPLogger"><code class="docutils literal notranslate"><span class="pre">GCPLogger</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.TrackerState"><code class="docutils literal notranslate"><span class="pre">TrackerState</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.gcp.TrackerStateVector"><code class="docutils literal notranslate"><span class="pre">TrackerStateVector</span></code></a></li>
 </ul>
 </li>
@@ -566,6 +576,10 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="moddoc_maps.html#useful-classes">Useful Classes</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.G3SkyMap"><code class="docutils literal notranslate"><span class="pre">G3SkyMap</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.MapCoordReference"><code class="docutils literal notranslate"><span class="pre">MapCoordReference</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.MapPolConv"><code class="docutils literal notranslate"><span class="pre">MapPolConv</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.MapPolType"><code class="docutils literal notranslate"><span class="pre">MapPolType</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.MapProjection"><code class="docutils literal notranslate"><span class="pre">MapProjection</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="moddoc_maps.html#useful-functions">Useful Functions</a><ul>
@@ -1028,7 +1042,7 @@ their standard usage in pipelines.</p>
 
 <dl>
 <dd><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>,</dd>
-<dd><em class="sig-param"><span class="n"><span class="pre">experiment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Experiment</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">spt3g.gcp.Experiment.SPT</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">experiment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.gcp.Experiment" title="spt3g.gcp.Experiment"><span class="pre">Experiment</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">spt3g.gcp.Experiment.SPT</span></span></em>,</dd>
 <dd><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1.0</span></span></em>,</dd>
 <dd><em class="sig-param"><span class="n"><span class="pre">track_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>,</dd>
 <dd><em class="sig-param"><span class="n"><span class="pre">buffersize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1048576</span></span></em>,</dd>
@@ -1040,7 +1054,7 @@ their standard usage in pipelines.</p>
 
 <dl>
 <dd><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="moddoc_core.html#spt3g.core.StringVector" title="spt3g.core.StringVector"><span class="pre">StringVector</span></a></span></em>,</dd>
-<dd><em class="sig-param"><span class="n"><span class="pre">experiment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Experiment</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">spt3g.gcp.Experiment.SPT</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">experiment</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.gcp.Experiment" title="spt3g.gcp.Experiment"><span class="pre">Experiment</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">spt3g.gcp.Experiment.SPT</span></span></em>,</dd>
 <dd><em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">-1.0</span></span></em>,</dd>
 <dd><em class="sig-param"><span class="n"><span class="pre">track_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>,</dd>
 <dd><em class="sig-param"><span class="n"><span class="pre">buffersize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1048576</span></span></em>,</dd>
@@ -1345,6 +1359,55 @@ None, add all.</p></li>
 <h3><a class="toc-backref" href="#id5" role="doc-backlink">Useful Classes</a><a class="headerlink" href="#useful-classes" title="Link to this heading"></a></h3>
 <p>Various Python and C++ classes that are part of the public API.</p>
 <dl class="py class">
+<dt class="sig sig-object py" id="spt3g.gcp.ACUState">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.</span></span><span class="sig-name descname"><span class="pre">ACUState</span></span><a class="headerlink" href="#spt3g.gcp.ACUState" title="Link to this definition"></a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="spt3g.gcp.ACUState.IDLE">
+<span class="sig-name descname"><span class="pre">IDLE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">spt3g.gcp.ACUState.IDLE</span></em><a class="headerlink" href="#spt3g.gcp.ACUState.IDLE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spt3g.gcp.ACUState.RESYNC">
+<span class="sig-name descname"><span class="pre">RESYNC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">spt3g.gcp.ACUState.RESYNC</span></em><a class="headerlink" href="#spt3g.gcp.ACUState.RESYNC" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spt3g.gcp.ACUState.TRACKING">
+<span class="sig-name descname"><span class="pre">TRACKING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">spt3g.gcp.ACUState.TRACKING</span></em><a class="headerlink" href="#spt3g.gcp.ACUState.TRACKING" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spt3g.gcp.ACUState.WAIT_RESTART">
+<span class="sig-name descname"><span class="pre">WAIT_RESTART</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">spt3g.gcp.ACUState.WAIT_RESTART</span></em><a class="headerlink" href="#spt3g.gcp.ACUState.WAIT_RESTART" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spt3g.gcp.ACUState.names">
+<span class="sig-name descname"><span class="pre">names</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#spt3g.gcp.ACUState.names" title="Link to this definition"></a></dt>
+<dd><p>Mapping of enum names to objects.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;IDLE&#39;</span><span class="p">:</span> <span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ACUState</span><span class="o">.</span><span class="n">IDLE</span><span class="p">,</span>
+ <span class="s1">&#39;RESYNC&#39;</span><span class="p">:</span> <span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ACUState</span><span class="o">.</span><span class="n">RESYNC</span><span class="p">,</span>
+ <span class="s1">&#39;TRACKING&#39;</span><span class="p">:</span> <span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ACUState</span><span class="o">.</span><span class="n">TRACKING</span><span class="p">,</span>
+ <span class="s1">&#39;WAIT_RESTART&#39;</span><span class="p">:</span> <span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ACUState</span><span class="o">.</span><span class="n">WAIT_RESTART</span><span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spt3g.gcp.ACUState.values">
+<span class="sig-name descname"><span class="pre">values</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#spt3g.gcp.ACUState.values" title="Link to this definition"></a></dt>
+<dd><p>Mapping of enum values to objects.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ACUState</span><span class="o">.</span><span class="n">IDLE</span><span class="p">,</span>
+ <span class="mi">1</span><span class="p">:</span> <span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ACUState</span><span class="o">.</span><span class="n">TRACKING</span><span class="p">,</span>
+ <span class="mi">2</span><span class="p">:</span> <span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ACUState</span><span class="o">.</span><span class="n">WAIT_RESTART</span><span class="p">,</span>
+ <span class="mi">3</span><span class="p">:</span> <span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">ACUState</span><span class="o">.</span><span class="n">RESYNC</span><span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="spt3g.gcp.ARCFile.ARCFile">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.ARCFile.</span></span><span class="sig-name descname"><span class="pre">ARCFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extract</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/gcp/ARCFile.html#ARCFile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.gcp.ARCFile.ARCFile" title="Link to this definition"></a></dt>
 <dd><p>Iterable class for ARC files, as created by GCP. Loop through frames by doing something like:</p>
@@ -1377,12 +1440,55 @@ a dictionary</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="spt3g.gcp.Experiment">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.</span></span><span class="sig-name descname"><span class="pre">Experiment</span></span><a class="headerlink" href="#spt3g.gcp.Experiment" title="Link to this definition"></a></dt>
+<dd><p>Experiment identifier, to choose the correct storage schema when parsing arcfile frames</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spt3g.gcp.Experiment.BK">
+<span class="sig-name descname"><span class="pre">BK</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">spt3g.gcp.Experiment.BK</span></em><a class="headerlink" href="#spt3g.gcp.Experiment.BK" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spt3g.gcp.Experiment.PB">
+<span class="sig-name descname"><span class="pre">PB</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">spt3g.gcp.Experiment.PB</span></em><a class="headerlink" href="#spt3g.gcp.Experiment.PB" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spt3g.gcp.Experiment.SPT">
+<span class="sig-name descname"><span class="pre">SPT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">spt3g.gcp.Experiment.SPT</span></em><a class="headerlink" href="#spt3g.gcp.Experiment.SPT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spt3g.gcp.Experiment.names">
+<span class="sig-name descname"><span class="pre">names</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#spt3g.gcp.Experiment.names" title="Link to this definition"></a></dt>
+<dd><p>Mapping of enum names to objects.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;BK&#39;</span><span class="p">:</span> <span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">Experiment</span><span class="o">.</span><span class="n">BK</span><span class="p">,</span>
+ <span class="s1">&#39;PB&#39;</span><span class="p">:</span> <span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">Experiment</span><span class="o">.</span><span class="n">PB</span><span class="p">,</span>
+ <span class="s1">&#39;SPT&#39;</span><span class="p">:</span> <span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">Experiment</span><span class="o">.</span><span class="n">SPT</span><span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spt3g.gcp.Experiment.values">
+<span class="sig-name descname"><span class="pre">values</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#spt3g.gcp.Experiment.values" title="Link to this definition"></a></dt>
+<dd><p>Mapping of enum values to objects.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">Experiment</span><span class="o">.</span><span class="n">SPT</span><span class="p">,</span>
+ <span class="mi">1</span><span class="p">:</span> <span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">Experiment</span><span class="o">.</span><span class="n">PB</span><span class="p">,</span>
+ <span class="mi">2</span><span class="p">:</span> <span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">Experiment</span><span class="o">.</span><span class="n">BK</span><span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="spt3g.gcp.GCPLogger">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.</span></span><span class="sig-name descname"><span class="pre">GCPLogger</span></span><span class="sig-paren">(</span>
 
 <dl>
 <dd><em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50030</span></span></em>,</dd>
-<dd><em class="sig-param"><span class="n"><span class="pre">default_loglevel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">G3LogLevel</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">spt3g.core.G3LogLevel.LOG_NOTICE</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">default_loglevel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3LogLevel" title="spt3g.core.G3LogLevel"><span class="pre">G3LogLevel</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">spt3g.core.G3LogLevel.LOG_NOTICE</span></span></em>,</dd>
 </dl>
 
 <span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.GCPLogger" title="Link to this definition"></a></dt>
@@ -1392,6 +1498,83 @@ a dictionary</p>
 <dt class="sig sig-object py" id="spt3g.gcp.GCPLogger.trim_file_names">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">trim_file_names</span></span><a class="headerlink" href="#spt3g.gcp.GCPLogger.trim_file_names" title="Link to this definition"></a></dt>
 <dd><p>Show only file leaves</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="spt3g.gcp.TrackerState">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.</span></span><span class="sig-name descname"><span class="pre">TrackerState</span></span><a class="headerlink" href="#spt3g.gcp.TrackerState" title="Link to this definition"></a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="spt3g.gcp.TrackerState.HALTED">
+<span class="sig-name descname"><span class="pre">HALTED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">spt3g.gcp.TrackerState.HALTED</span></em><a class="headerlink" href="#spt3g.gcp.TrackerState.HALTED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spt3g.gcp.TrackerState.LACKING">
+<span class="sig-name descname"><span class="pre">LACKING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">spt3g.gcp.TrackerState.LACKING</span></em><a class="headerlink" href="#spt3g.gcp.TrackerState.LACKING" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spt3g.gcp.TrackerState.SLEWING">
+<span class="sig-name descname"><span class="pre">SLEWING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">spt3g.gcp.TrackerState.SLEWING</span></em><a class="headerlink" href="#spt3g.gcp.TrackerState.SLEWING" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spt3g.gcp.TrackerState.TIME_ERROR">
+<span class="sig-name descname"><span class="pre">TIME_ERROR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">spt3g.gcp.TrackerState.TIME_ERROR</span></em><a class="headerlink" href="#spt3g.gcp.TrackerState.TIME_ERROR" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spt3g.gcp.TrackerState.TOO_HIGH">
+<span class="sig-name descname"><span class="pre">TOO_HIGH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">spt3g.gcp.TrackerState.TOO_HIGH</span></em><a class="headerlink" href="#spt3g.gcp.TrackerState.TOO_HIGH" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spt3g.gcp.TrackerState.TOO_LOW">
+<span class="sig-name descname"><span class="pre">TOO_LOW</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">spt3g.gcp.TrackerState.TOO_LOW</span></em><a class="headerlink" href="#spt3g.gcp.TrackerState.TOO_LOW" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spt3g.gcp.TrackerState.TRACKING">
+<span class="sig-name descname"><span class="pre">TRACKING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">spt3g.gcp.TrackerState.TRACKING</span></em><a class="headerlink" href="#spt3g.gcp.TrackerState.TRACKING" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spt3g.gcp.TrackerState.UPDATING">
+<span class="sig-name descname"><span class="pre">UPDATING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">spt3g.gcp.TrackerState.UPDATING</span></em><a class="headerlink" href="#spt3g.gcp.TrackerState.UPDATING" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spt3g.gcp.TrackerState.names">
+<span class="sig-name descname"><span class="pre">names</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#spt3g.gcp.TrackerState.names" title="Link to this definition"></a></dt>
+<dd><p>Mapping of enum names to objects.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;HALTED&#39;</span><span class="p">:</span> <span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">TrackerState</span><span class="o">.</span><span class="n">HALTED</span><span class="p">,</span>
+ <span class="s1">&#39;LACKING&#39;</span><span class="p">:</span> <span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">TrackerState</span><span class="o">.</span><span class="n">LACKING</span><span class="p">,</span>
+ <span class="s1">&#39;SLEWING&#39;</span><span class="p">:</span> <span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">TrackerState</span><span class="o">.</span><span class="n">SLEWING</span><span class="p">,</span>
+ <span class="s1">&#39;TIME_ERROR&#39;</span><span class="p">:</span> <span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">TrackerState</span><span class="o">.</span><span class="n">TIME_ERROR</span><span class="p">,</span>
+ <span class="s1">&#39;TOO_HIGH&#39;</span><span class="p">:</span> <span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">TrackerState</span><span class="o">.</span><span class="n">TOO_HIGH</span><span class="p">,</span>
+ <span class="s1">&#39;TOO_LOW&#39;</span><span class="p">:</span> <span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">TrackerState</span><span class="o">.</span><span class="n">TOO_LOW</span><span class="p">,</span>
+ <span class="s1">&#39;TRACKING&#39;</span><span class="p">:</span> <span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">TrackerState</span><span class="o">.</span><span class="n">TRACKING</span><span class="p">,</span>
+ <span class="s1">&#39;UPDATING&#39;</span><span class="p">:</span> <span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">TrackerState</span><span class="o">.</span><span class="n">UPDATING</span><span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="spt3g.gcp.TrackerState.values">
+<span class="sig-name descname"><span class="pre">values</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#spt3g.gcp.TrackerState.values" title="Link to this definition"></a></dt>
+<dd><p>Mapping of enum values to objects.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">TrackerState</span><span class="o">.</span><span class="n">LACKING</span><span class="p">,</span>
+ <span class="mi">1</span><span class="p">:</span> <span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">TrackerState</span><span class="o">.</span><span class="n">TIME_ERROR</span><span class="p">,</span>
+ <span class="mi">2</span><span class="p">:</span> <span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">TrackerState</span><span class="o">.</span><span class="n">UPDATING</span><span class="p">,</span>
+ <span class="mi">3</span><span class="p">:</span> <span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">TrackerState</span><span class="o">.</span><span class="n">HALTED</span><span class="p">,</span>
+ <span class="mi">4</span><span class="p">:</span> <span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">TrackerState</span><span class="o">.</span><span class="n">SLEWING</span><span class="p">,</span>
+ <span class="mi">5</span><span class="p">:</span> <span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">TrackerState</span><span class="o">.</span><span class="n">TRACKING</span><span class="p">,</span>
+ <span class="mi">6</span><span class="p">:</span> <span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">TrackerState</span><span class="o">.</span><span class="n">TOO_LOW</span><span class="p">,</span>
+ <span class="mi">7</span><span class="p">:</span> <span class="n">spt3g</span><span class="o">.</span><span class="n">gcp</span><span class="o">.</span><span class="n">TrackerState</span><span class="o">.</span><span class="n">TOO_HIGH</span><span class="p">}</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </dd></dl>

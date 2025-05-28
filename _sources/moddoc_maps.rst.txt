@@ -138,6 +138,14 @@ Various Python and C++ classes that are part of the public API.
 
 .. autoclass:: spt3g.maps.G3SkyMap
 
+.. autoclass:: spt3g.maps.MapCoordReference
+
+.. autoclass:: spt3g.maps.MapPolConv
+
+.. autoclass:: spt3g.maps.MapPolType
+
+.. autoclass:: spt3g.maps.MapProjection
+
 Useful Functions
 ----------------
 

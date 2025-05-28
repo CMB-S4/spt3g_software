@@ -201,6 +201,10 @@ Various Python and C++ classes that are part of the public API.
 
 .. autoclass:: spt3g.core.G3Frame
 
+.. autoclass:: spt3g.core.G3FrameType
+
+.. autoclass:: spt3g.core.G3LogLevel
+
 .. autoclass:: spt3g.core.G3Logger
 
 .. autoclass:: spt3g.core.G3LoggerVector
@@ -216,6 +220,8 @@ Various Python and C++ classes that are part of the public API.
 .. autoclass:: spt3g.core.G3SyslogLogger
 
 .. autoclass:: spt3g.core.G3TimeVector
+
+.. autoclass:: spt3g.core.G3TimestreamUnits
 
 .. autoclass:: spt3g.core.G3VectorStringVector
 

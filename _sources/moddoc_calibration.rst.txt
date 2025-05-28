@@ -91,6 +91,13 @@ Python functions that can be added to :py:class:`~spt3g.core.G3Pipeline` instanc
 
 .. autofunction:: spt3g.calibration.build_cal_frames.ExplodeBolometerProperties
 
+Useful Classes
+--------------
+
+Various Python and C++ classes that are part of the public API.
+
+.. autoclass:: spt3g.calibration.BolometerCouplingType
+
 Useful Functions
 ----------------
 

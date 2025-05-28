@@ -131,11 +131,17 @@ Useful Classes
 
 Various Python and C++ classes that are part of the public API.
 
+.. autoclass:: spt3g.gcp.ACUState
+
 .. autoclass:: spt3g.gcp.ARCFile.ARCFile
 
 .. autoclass:: spt3g.gcp.CalFile.CalFileReader
 
+.. autoclass:: spt3g.gcp.Experiment
+
 .. autoclass:: spt3g.gcp.GCPLogger
+
+.. autoclass:: spt3g.gcp.TrackerState
 
 .. autoclass:: spt3g.gcp.TrackerStateVector
 
