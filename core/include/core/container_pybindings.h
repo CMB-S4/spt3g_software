@@ -61,21 +61,28 @@ struct vector_buffer {
 namespace PYBIND11_NAMESPACE {
 class cbuffer : public buffer {
 public:
-    PYBIND11_OBJECT_DEFAULT(cbuffer, buffer, PyObject_CheckBuffer)
+	PYBIND11_OBJECT_DEFAULT(cbuffer, buffer, PyObject_CheckBuffer)
 
-    buffer_info request_contiguous(bool writable = false) const {
-        int flags = PyBUF_STRIDES | PyBUF_FORMAT | PyBUF_C_CONTIGUOUS;
-        if (writable) {
-            flags |= PyBUF_WRITABLE;
-        }
-        auto *view = new Py_buffer();
-        if (PyObject_GetBuffer(m_ptr, view, flags) != 0) {
-            delete view;
-            throw error_already_set();
-        }
-        return buffer_info(view);
-    }
+	buffer_info request_contiguous(bool writable = false) const {
+		int flags = PyBUF_STRIDES | PyBUF_FORMAT | PyBUF_C_CONTIGUOUS;
+		if (writable) {
+			flags |= PyBUF_WRITABLE;
+		}
+		auto *view = new Py_buffer();
+		if (PyObject_GetBuffer(m_ptr, view, flags) != 0) {
+			delete view;
+			throw error_already_set();
+		}
+		return buffer_info(view);
+	}
 };
+
+namespace detail {
+template <>
+struct handle_type_name<cbuffer> {
+	static constexpr auto name = const_name("Buffer");
+};
+}
 }
 
 // Check buffer format for valid types
