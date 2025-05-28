@@ -1010,6 +1010,8 @@
 <dt class="sig sig-object py" id="spt3g.maps.FlatSkyMap.wcs">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">wcs</span></span><a class="headerlink" href="#spt3g.maps.FlatSkyMap.wcs" title="Link to this definition"></a></dt>
 <dd><p>astropy.wcs.WCS instance containing projection information</p>
+<p>Creates WCS (world coordinate system) information from information in the
+input FlatSkyMap object.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -2053,12 +2055,18 @@ the frame is to be dropped from the pipeline altogether.</p>
 <dd><p>Output coadd map frame, also injected into the pipeline on
 EndProcessing.  This attribute is only populated if the <code class="docutils literal notranslate"><span class="pre">collate</span></code>
 option is set to False.</p>
+<p>Output coadd map frame, also injected into the pipeline on
+EndProcessing.  This attribute is only populated if the <code class="docutils literal notranslate"><span class="pre">collate</span></code>
+option is set to False.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.maps.map_modules.CoaddMaps.coadd_frames">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">coadd_frames</span></span><a class="headerlink" href="#spt3g.maps.map_modules.CoaddMaps.coadd_frames" title="Link to this definition"></a></dt>
 <dd><p>Dictionary of output coadd map frames, keyed by input map Id.  Each
+frame is also injected into the pipeline on EndProcessing.  This
+attribute is only populated if the <code class="docutils literal notranslate"><span class="pre">collate</span></code> option is set to True.</p>
+<p>Dictionary of output coadd map frames, keyed by input map Id.  Each
 frame is also injected into the pipeline on EndProcessing.  This
 attribute is only populated if the <code class="docutils literal notranslate"><span class="pre">collate</span></code> option is set to True.</p>
 </dd></dl>
@@ -2086,6 +2094,9 @@ single bolometer map frames with common weights through a pipeline.</p></li>
 <dt class="sig sig-object py" id="spt3g.maps.map_modules.ExtractMaps.maps">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">maps</span></span><a class="headerlink" href="#spt3g.maps.map_modules.ExtractMaps.maps" title="Link to this definition"></a></dt>
 <dd><p>Dictionary of map frames, keyed by Id.  Map objects are extracted from each
+frame in the pipeline, and stored as simple dictionaries.  Multiple frames
+with the same Id will result in a list of dictionaries for that Id.</p>
+<p>Dictionary of map frames, keyed by Id.  Map objects are extracted from each
 frame in the pipeline, and stored as simple dictionaries.  Multiple frames
 with the same Id will result in a list of dictionaries for that Id.</p>
 </dd></dl>
@@ -2181,6 +2192,10 @@ output map. For numpy array, all zeros/inf/nan/hp.UNSEEN pixels are skipped.</p>
 <dt class="sig sig-object py" id="spt3g.maps.map_modules.ReprojectMaps.mask">
 <em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mask</span></span><a class="headerlink" href="#spt3g.maps.map_modules.ReprojectMaps.mask" title="Link to this definition"></a></dt>
 <dd><p>The mask to be used for partial reprojection, of the same shape as the
+output map.  Masked (1) pixels are handled by the reprojection code, and
+unmasked (0) pixels are skipped, effectively setting their value to 0 in
+the output map.</p>
+<p>The mask to be used for partial reprojection, of the same shape as the
 output map.  Masked (1) pixels are handled by the reprojection code, and
 unmasked (0) pixels are skipped, effectively setting their value to 0 in
 the output map.</p>
