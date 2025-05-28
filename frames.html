@@ -665,33 +665,29 @@
            <div itemprop="articleBody">
              
   <section id="frames">
-<h1><a class="toc-backref" href="#id1" role="doc-backlink">Frames</a><a class="headerlink" href="#frames" title="Link to this heading"></a></h1>
+<h1>Frames<a class="headerlink" href="#frames" title="Link to this heading"></a></h1>
 <p>The basic unit of data processing is the frame. Each frame is a free-form mapping from strings to data of a type derived from G3FrameObject. In general, they behave as Python dictionaries. Wrappers are provided for Python plain-old-data types (numbers, strings, etc.) so that they can be used directly.</p>
 <p>Frames have fast serialization to and from disk (see the G3Reader and G3Writer modules in <a class="reference internal" href="fileio.html"><span class="doc">File IO</span></a>) with built-in data integrity protection. This serialization is accessible programmatically in Python through the Python pickle libraries, which are overridden to use the internal serialization.</p>
 <p>Each frame has a type defined under the <a class="reference internal" href="moddoc_core.html#spt3g.core.G3FrameType" title="spt3g.core.G3FrameType"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3FrameType</span></code></a> namespace. These are meant to indicate different types of data (calibration vs. scan data, for example) and, in general, many types of frames will be interleaved in the same data stream. A good general rule for whether data should be in a different frame type is to consider the rates at which the data change: data that change at the same speed (e.g. bolometer data and pointing) should share a frame, while data that change at different speeds (e.g. calibration constants and bolometer data) should be separated.</p>
 <p>Each frame also has a <code class="docutils literal notranslate"><span class="pre">._filename</span></code> attribute, which is set when frames are read in using the <a class="reference internal" href="moddoc_core.html#spt3g.core.G3Reader" title="spt3g.core.G3Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3Reader</span></code></a> pipeline module with the <code class="docutils literal notranslate"><span class="pre">track_filename</span></code> option set to <code class="docutils literal notranslate"><span class="pre">True</span></code>. This attribute is not serialized with the frame, so will be an empty string when used with pickling or multiprocessing.  This attribute is fragile and should not be relied upon for production code.</p>
 <p>A brief description of the intention of each frame type follows along with a table containing a representative minimal set of data likely to be contained by a frame of a given type. The list is neither exhaustive nor truly minimal: other data can and will be present and some of the data listed here may have been removed or renamed. Neither is this an exhaustive list of frame types: any single character code can be [ab]used as a frame type for special purpose tools.</p>
-<nav class="contents" id="contents">
+<nav class="contents local" id="contents">
 <p class="topic-title">Contents</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="#frames" id="id1">Frames</a></p>
-<ul>
-<li><p><a class="reference internal" href="#scan" id="id2">Scan</a></p></li>
-<li><p><a class="reference internal" href="#pipelineinfo" id="id3">PipelineInfo</a></p></li>
-<li><p><a class="reference internal" href="#timepoint" id="id4">Timepoint</a></p></li>
-<li><p><a class="reference internal" href="#housekeeping" id="id5">Housekeeping</a></p></li>
-<li><p><a class="reference internal" href="#map" id="id6">Map</a></p></li>
-<li><p><a class="reference internal" href="#calibration" id="id7">Calibration</a></p></li>
-<li><p><a class="reference internal" href="#observation" id="id8">Observation</a></p></li>
-<li><p><a class="reference internal" href="#wiring" id="id9">Wiring</a></p></li>
-<li><p><a class="reference internal" href="#gcpslow" id="id10">GcpSlow</a></p></li>
-<li><p><a class="reference internal" href="#endprocessing" id="id11">EndProcessing</a></p></li>
-</ul>
-</li>
+<li><p><a class="reference internal" href="#scan" id="id1">Scan</a></p></li>
+<li><p><a class="reference internal" href="#pipelineinfo" id="id2">PipelineInfo</a></p></li>
+<li><p><a class="reference internal" href="#timepoint" id="id3">Timepoint</a></p></li>
+<li><p><a class="reference internal" href="#housekeeping" id="id4">Housekeeping</a></p></li>
+<li><p><a class="reference internal" href="#map" id="id5">Map</a></p></li>
+<li><p><a class="reference internal" href="#calibration" id="id6">Calibration</a></p></li>
+<li><p><a class="reference internal" href="#observation" id="id7">Observation</a></p></li>
+<li><p><a class="reference internal" href="#wiring" id="id8">Wiring</a></p></li>
+<li><p><a class="reference internal" href="#gcpslow" id="id9">GcpSlow</a></p></li>
+<li><p><a class="reference internal" href="#endprocessing" id="id10">EndProcessing</a></p></li>
 </ul>
 </nav>
 <section id="scan">
-<h2><a class="toc-backref" href="#id2" role="doc-backlink">Scan</a><a class="headerlink" href="#scan" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id1" role="doc-backlink">Scan</a><a class="headerlink" href="#scan" title="Link to this heading"></a></h2>
 <p>Scan frames are the most common unit of data for analysis. They contain the data from a single left-to-right (or right-to-left) scan of the telescope. Where quantities are bolometer-indexed, the names match those in the Wiring map.</p>
 <table class="docutils align-default">
 <thead>
@@ -765,7 +761,7 @@
 </table>
 </section>
 <section id="pipelineinfo">
-<h2><a class="toc-backref" href="#id3" role="doc-backlink">PipelineInfo</a><a class="headerlink" href="#pipelineinfo" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">PipelineInfo</a><a class="headerlink" href="#pipelineinfo" title="Link to this heading"></a></h2>
 <p>PipelineInfo frames contain information on the processing applied to make the remainder of the data. They typically occur at the beginning of the data stream and are automatically inserted by G3Pipeline, if not previously present. The frame will contain at least one element of type G3PipelineInfo that gives information on the version of the software that made the data and the configuration of all modules and/or segments added to the pipeline. Other data (G3PipelineInfo from previous scripts, configuration information added by other modules) may also be present.</p>
 <table class="docutils align-default">
 <thead>
@@ -783,7 +779,7 @@
 </table>
 </section>
 <section id="timepoint">
-<h2><a class="toc-backref" href="#id4" role="doc-backlink">Timepoint</a><a class="headerlink" href="#timepoint" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">Timepoint</a><a class="headerlink" href="#timepoint" title="Link to this heading"></a></h2>
 <p>Timepoint frames include sample-by-sample data from the mux system. They are emitted directly by the DfMuxBuilder as part of primary data acquisition and are generally not seen outside the South Pole or the lab. These are transformed into <a class="reference internal" href="#scan">Scan</a> frames by DfMuxCollator.</p>
 <table class="docutils align-default">
 <thead>
@@ -805,7 +801,7 @@
 </table>
 </section>
 <section id="housekeeping">
-<h2><a class="toc-backref" href="#id5" role="doc-backlink">Housekeeping</a><a class="headerlink" href="#housekeeping" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">Housekeeping</a><a class="headerlink" href="#housekeeping" title="Link to this heading"></a></h2>
 <p>Contains housekeeping data. Issued periodically when housekeeping data is taken. Like <a class="reference internal" href="#timepoint">Timepoint</a> frames, these are rolled into <a class="reference internal" href="#scan">Scan</a> frames during processing and do not appear in general in stored data.</p>
 <table class="docutils align-default">
 <thead>
@@ -823,7 +819,7 @@
 </table>
 </section>
 <section id="map">
-<h2><a class="toc-backref" href="#id6" role="doc-backlink">Map</a><a class="headerlink" href="#map" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">Map</a><a class="headerlink" href="#map" title="Link to this heading"></a></h2>
 <p>Contains either the result of the map maker or the input to simulation.</p>
 <table class="docutils align-default">
 <thead>
@@ -861,7 +857,7 @@
 </table>
 </section>
 <section id="calibration">
-<h2><a class="toc-backref" href="#id7" role="doc-backlink">Calibration</a><a class="headerlink" href="#calibration" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id6" role="doc-backlink">Calibration</a><a class="headerlink" href="#calibration" title="Link to this heading"></a></h2>
 <p>This frame contains all measured calibration information (pointing, response, etc.) that may change when remeasured. It does <em>not</em> include static information describing how the instrument is set up (see <a class="reference internal" href="#wiring">Wiring</a> below).</p>
 <table class="docutils align-default">
 <thead>
@@ -899,7 +895,7 @@
 </table>
 </section>
 <section id="observation">
-<h2><a class="toc-backref" href="#id8" role="doc-backlink">Observation</a><a class="headerlink" href="#observation" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id7" role="doc-backlink">Observation</a><a class="headerlink" href="#observation" title="Link to this heading"></a></h2>
 <p>Indicates global observation parameters. Changes at the beginning of a new observation, though, as with all metadata, repeat observation frames may appear during processing.</p>
 <table class="docutils align-default">
 <thead>
@@ -921,7 +917,7 @@
 </table>
 </section>
 <section id="wiring">
-<h2><a class="toc-backref" href="#id9" role="doc-backlink">Wiring</a><a class="headerlink" href="#wiring" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id8" role="doc-backlink">Wiring</a><a class="headerlink" href="#wiring" title="Link to this heading"></a></h2>
 <p>Gives the description of how the system is wired: notably, the connection between board serial number, module, channel and a bolometer ID.</p>
 <table class="docutils align-default">
 <thead>
@@ -943,7 +939,7 @@
 </table>
 </section>
 <section id="gcpslow">
-<h2><a class="toc-backref" href="#id10" role="doc-backlink">GcpSlow</a><a class="headerlink" href="#gcpslow" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id9" role="doc-backlink">GcpSlow</a><a class="headerlink" href="#gcpslow" title="Link to this heading"></a></h2>
 <p>Holds all the GCP data sampled once per second. Like <a class="reference internal" href="#timepoint">Timepoint</a> and <a class="reference internal" href="#housekeeping">Housekeeping</a> frames, these data are consolidated in the Scan frames and do not appear in final data products. The data stored here begins as a strict copy of the GCP register map (see the GCP documentation for details, a few notable entries are summarized below). A few other keys are added transiently in the course of generating <a class="reference internal" href="#scan">Scan</a> frames.</p>
 <table class="docutils align-default">
 <thead>
@@ -965,7 +961,7 @@
 </table>
 </section>
 <section id="endprocessing">
-<h2><a class="toc-backref" href="#id11" role="doc-backlink">EndProcessing</a><a class="headerlink" href="#endprocessing" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id10" role="doc-backlink">EndProcessing</a><a class="headerlink" href="#endprocessing" title="Link to this heading"></a></h2>
 <p>EndProcessing is a special-purpose frame emitted implicitly by G3Pipeline at the end of processing. No further frames will occur after this and reception of an EndProcessing frame is intended as a signal to modules that they should clear any internally buffered data and clean up.</p>
 <p>EndProcessing frames should, in general, contain no data.</p>
 </section>

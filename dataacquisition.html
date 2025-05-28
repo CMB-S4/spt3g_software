@@ -665,48 +665,44 @@
            <div itemprop="articleBody">
              
   <section id="data-acquisition">
-<h1><a class="toc-backref" href="#id1" role="doc-backlink">Data Acquisition</a><a class="headerlink" href="#data-acquisition" title="Link to this heading"></a></h1>
+<h1>Data Acquisition<a class="headerlink" href="#data-acquisition" title="Link to this heading"></a></h1>
 <p>This software provides, in addition to data processing, facilities for data acquisition. The goal is to have a unified framework for simulations, data acquisition, and analysis.</p>
-<nav class="contents" id="contents">
+<nav class="contents local" id="contents">
 <p class="topic-title">Contents</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="#data-acquisition" id="id1">Data Acquisition</a></p>
+<li><p><a class="reference internal" href="#dfmux" id="id1">DfMux</a></p>
 <ul>
-<li><p><a class="reference internal" href="#dfmux" id="id2">DfMux</a></p>
+<li><p><a class="reference internal" href="#bolometer-data" id="id2">Bolometer Data</a></p>
 <ul>
-<li><p><a class="reference internal" href="#bolometer-data" id="id3">Bolometer Data</a></p>
-<ul>
-<li><p><a class="reference internal" href="#sctp" id="id4">SCTP</a></p></li>
-<li><p><a class="reference internal" href="#udp" id="id5">UDP</a></p></li>
-<li><p><a class="reference internal" href="#legacy-boards" id="id6">Legacy Boards</a></p></li>
-<li><p><a class="reference internal" href="#data-structures" id="id7">Data Structures</a></p></li>
+<li><p><a class="reference internal" href="#sctp" id="id3">SCTP</a></p></li>
+<li><p><a class="reference internal" href="#udp" id="id4">UDP</a></p></li>
+<li><p><a class="reference internal" href="#legacy-boards" id="id5">Legacy Boards</a></p></li>
+<li><p><a class="reference internal" href="#data-structures" id="id6">Data Structures</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#housekeeping-data" id="id8">Housekeeping Data</a></p></li>
+<li><p><a class="reference internal" href="#housekeeping-data" id="id7">Housekeeping Data</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#building-timestreams" id="id9">Building Timestreams</a></p>
+<li><p><a class="reference internal" href="#building-timestreams" id="id8">Building Timestreams</a></p>
 <ul>
-<li><p><a class="reference internal" href="#the-wiring-map" id="id10">The Wiring Map</a></p></li>
-<li><p><a class="reference internal" href="#dfmuxcollator" id="id11">DfMuxCollator</a></p></li>
-<li><p><a class="reference internal" href="#collecting-data-to-a-netcdf-file" id="id12">Collecting data to a NetCDF file</a></p></li>
+<li><p><a class="reference internal" href="#the-wiring-map" id="id9">The Wiring Map</a></p></li>
+<li><p><a class="reference internal" href="#dfmuxcollator" id="id10">DfMuxCollator</a></p></li>
+<li><p><a class="reference internal" href="#collecting-data-to-a-netcdf-file" id="id11">Collecting data to a NetCDF file</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#core-tools" id="id13">Core Tools</a></p>
+<li><p><a class="reference internal" href="#core-tools" id="id12">Core Tools</a></p>
 <ul>
-<li><p><a class="reference internal" href="#g3eventbuilder" id="id14">G3EventBuilder</a></p></li>
-<li><p><a class="reference internal" href="#g3triggeredbuilder" id="id15">G3TriggeredBuilder</a></p></li>
+<li><p><a class="reference internal" href="#g3eventbuilder" id="id13">G3EventBuilder</a></p></li>
+<li><p><a class="reference internal" href="#g3triggeredbuilder" id="id14">G3TriggeredBuilder</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#ledgerman" id="id16">ledgerman</a></p></li>
-</ul>
-</li>
+<li><p><a class="reference internal" href="#ledgerman" id="id15">ledgerman</a></p></li>
 </ul>
 </nav>
 <section id="dfmux">
-<h2><a class="toc-backref" href="#id2" role="doc-backlink">DfMux</a><a class="headerlink" href="#dfmux" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id1" role="doc-backlink">DfMux</a><a class="headerlink" href="#dfmux" title="Link to this heading"></a></h2>
 <section id="bolometer-data">
-<h3><a class="toc-backref" href="#id3" role="doc-backlink">Bolometer Data</a><a class="headerlink" href="#bolometer-data" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id2" role="doc-backlink">Bolometer Data</a><a class="headerlink" href="#bolometer-data" title="Link to this heading"></a></h3>
 <p>The <a class="reference internal" href="moddoc_dfmux.html"><span class="doc">dfmux</span></a> project provides two classes that can be used for event-driven acquisition of bolometer timestreams from IceBoards. The core class, <a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DfMuxCollector" title="spt3g.dfmux.DfMuxCollector"><code class="xref py py-class docutils literal notranslate"><span class="pre">DfMuxCollector</span></code></a>, listens for data from one or more IceBoards, passing the resulting data to a <a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DfMuxBuilder" title="spt3g.dfmux.DfMuxBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">DfMuxBuilder</span></code></a> object to which the collected data is reported. The <a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DfMuxBuilder" title="spt3g.dfmux.DfMuxBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">DfMuxBuilder</span></code></a> is a subclass of <a class="reference internal" href="moddoc_core.html#spt3g.core.G3EventBuilder" title="spt3g.core.G3EventBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3EventBuilder</span></code></a> (see <a class="reference internal" href="#g3eventbuilder">G3EventBuilder</a> below) that assembles mux packets from one or more <a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DfMuxCollector" title="spt3g.dfmux.DfMuxCollector"><code class="xref py py-class docutils literal notranslate"><span class="pre">DfMuxCollector</span></code></a> objects into frames, with one sample from each readout channel per frame. To do this, it is passed either the number of boards to expect for a complete sample or a list of the serial numbers of boards to use.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3Pipeline</span><span class="p">()</span>
 <span class="n">builder</span> <span class="o">=</span> <span class="n">dfmux</span><span class="o">.</span><span class="n">DfMuxBuilder</span><span class="p">([</span><span class="mi">136</span><span class="p">])</span>
@@ -721,7 +717,7 @@
 </div>
 <p>This library supports data acquisition using either of two data transport mechanisms: SCTP (newer firmware than 11.3 only) and multicast UDP.</p>
 <section id="sctp">
-<h4><a class="toc-backref" href="#id4" role="doc-backlink">SCTP</a><a class="headerlink" href="#sctp" title="Link to this heading"></a></h4>
+<h4><a class="toc-backref" href="#id3" role="doc-backlink">SCTP</a><a class="headerlink" href="#sctp" title="Link to this heading"></a></h4>
 <p>Extremely new (as-yet unreleased) IceBoard firmwares support using SCTP as a data transport. In this mode, a <a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DfMuxCollector" title="spt3g.dfmux.DfMuxCollector"><code class="xref py py-class docutils literal notranslate"><span class="pre">DfMuxCollector</span></code></a> object connects to the IceBoard, opening a data connection over which streaming samples are transported to the DAQ computer. This connection is error-tolerant and point-to-point, so the collector must be passed a list of boards to listen to. SCTP is used when the collector is created with a list of board hostnames and the builder argument <em>first</em>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">collector</span> <span class="o">=</span> <span class="n">dfmux</span><span class="o">.</span><span class="n">DfMuxCollector</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;iceboard0136.local&quot;</span><span class="p">])</span>
 </pre></div>
@@ -729,7 +725,7 @@
 <p>Note that, when using SCTP for data transport on Linux, you may need to load the sctp kernel module by running <code class="docutils literal notranslate"><span class="pre">modprobe</span> <span class="pre">sctp</span></code>. On versions of the Linux kernel earlier than 4.16, you may also need to instantiate one DfMuxCollector per board. (This is the default behavior of <code class="docutils literal notranslate"><span class="pre">record_bolodata.py</span></code>).</p>
 </section>
 <section id="udp">
-<h4><a class="toc-backref" href="#id5" role="doc-backlink">UDP</a><a class="headerlink" href="#udp" title="Link to this heading"></a></h4>
+<h4><a class="toc-backref" href="#id4" role="doc-backlink">UDP</a><a class="headerlink" href="#udp" title="Link to this heading"></a></h4>
 <p>The default mode of data acquisition is multicast UDP, which makes the data acquisition system passive. When using multicast UDP (mandatory on firmwares 11.3 and earlier, otherwise optional), the <a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DfMuxCollector" title="spt3g.dfmux.DfMuxCollector"><code class="xref py py-class docutils literal notranslate"><span class="pre">DfMuxCollector</span></code></a> must be passed the IP address of an interface <em>on the DAQ computer</em> on which to listen for detector data and, optionally, a list of board serial numbers. (The list of board serial numbers is optional when using only one Ethernet interface, but <em>must</em> be passed if using Linux on a system with multiple Ethernet interfaces as a result of a Linux kernel multicast socket routing bug.) UDP mode is activated when passing a single listening IP address and the builder object <em>second</em>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">collector</span> <span class="o">=</span> <span class="n">dfmux</span><span class="o">.</span><span class="n">DfMuxCollector</span><span class="p">(</span><span class="s2">&quot;192.168.1.4&quot;</span><span class="p">,</span> <span class="n">builder</span><span class="p">,</span> <span class="p">[</span><span class="mi">136</span><span class="p">])</span>
 </pre></div>
@@ -739,11 +735,11 @@
 <p>Lower data-loss rates with UDP can also often be achieved by setting the Qualityof-Service rules (“QoS”) on your ethernet switch to respect DSCP indications (just look for the acronym).</p>
 </section>
 <section id="legacy-boards">
-<h4><a class="toc-backref" href="#id6" role="doc-backlink">Legacy Boards</a><a class="headerlink" href="#legacy-boards" title="Link to this heading"></a></h4>
+<h4><a class="toc-backref" href="#id5" role="doc-backlink">Legacy Boards</a><a class="headerlink" href="#legacy-boards" title="Link to this heading"></a></h4>
 <p>This code can also be used to collect data from legacy boards with DAN firmware if you are so inclined by using the <a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.LegacyDfMuxCollector" title="spt3g.dfmux.LegacyDfMuxCollector"><code class="xref py py-class docutils literal notranslate"><span class="pre">LegacyDfMuxCollector</span></code></a> class in place of <a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DfMuxCollector" title="spt3g.dfmux.DfMuxCollector"><code class="xref py py-class docutils literal notranslate"><span class="pre">DfMuxCollector</span></code></a>.</p>
 </section>
 <section id="data-structures">
-<h4><a class="toc-backref" href="#id7" role="doc-backlink">Data Structures</a><a class="headerlink" href="#data-structures" title="Link to this heading"></a></h4>
+<h4><a class="toc-backref" href="#id6" role="doc-backlink">Data Structures</a><a class="headerlink" href="#data-structures" title="Link to this heading"></a></h4>
 <p>Frames generated by DfMuxBuilder contain two keys: “EventHeader” and “DfMux”.</p>
 <p>“EventHeader” is a <a class="reference internal" href="moddoc_core.html#spt3g.core.G3Time" title="spt3g.core.G3Time"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3Time</span></code></a> object containing the IRIG time of the first sample in the frame. If all the boards are synchronized correctly, this will also be the timestamp attached to all DfMux board samples.</p>
 <p>“DfMux” is an object of type <a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DfMuxMetaSample" title="spt3g.dfmux.DfMuxMetaSample"><code class="xref py py-class docutils literal notranslate"><span class="pre">DfMuxMetaSample</span></code></a>. This is a dictionary that maps board serial number to a <a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DfMuxBoardSamples" title="spt3g.dfmux.DfMuxBoardSamples"><code class="xref py py-class docutils literal notranslate"><span class="pre">DfMuxBoardSamples</span></code></a> object. This in turn is a dictionary that maps readout module number (0-7) to a <a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DfMuxSample" title="spt3g.dfmux.DfMuxSample"><code class="xref py py-class docutils literal notranslate"><span class="pre">DfMuxSample</span></code></a> object. This contains the IRIG timestamp for the data in its <code class="docutils literal notranslate"><span class="pre">Timestamp</span></code> member as well as a 128-element array of all the bolometer data in <code class="docutils literal notranslate"><span class="pre">Samples</span></code>, stored with I and Q interleaved (so element 0 is channel 1/I, 1 is channel 1/Q, 2 is channel 2/I, etc.).</p>
@@ -755,7 +751,7 @@
 </section>
 </section>
 <section id="housekeeping-data">
-<h3><a class="toc-backref" href="#id8" role="doc-backlink">Housekeeping Data</a><a class="headerlink" href="#housekeeping-data" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id7" role="doc-backlink">Housekeeping Data</a><a class="headerlink" href="#housekeeping-data" title="Link to this heading"></a></h3>
 <p>DfMux board housekeeping is collected by the <a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.Housekeeping.HousekeepingConsumer" title="spt3g.dfmux.Housekeeping.HousekeepingConsumer"><code class="xref py py-class docutils literal notranslate"><span class="pre">HousekeepingConsumer</span></code></a> class. It will query all of the boards in the most recent wiring map (see <cite>The Wiring Map</cite>) when a Housekeeping frame appears in the datastream, placing the results in the key <code class="docutils literal notranslate"><span class="pre">DfMuxHousekeeping</span></code>.</p>
 <p>Housekeeping frames at fixed intervals can be generated using <a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.Housekeeping.PeriodicHousekeepingCollector" title="spt3g.dfmux.Housekeeping.PeriodicHousekeepingCollector"><code class="xref py py-class docutils literal notranslate"><span class="pre">PeriodicHousekeepingCollector</span></code></a>. Note that collecting housekeeping information generates noise in detector timestreams and should be done only at times that you do not care about the data.</p>
 <div class="admonition note">
@@ -771,17 +767,17 @@
 </section>
 </section>
 <section id="building-timestreams">
-<h2><a class="toc-backref" href="#id9" role="doc-backlink">Building Timestreams</a><a class="headerlink" href="#building-timestreams" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id8" role="doc-backlink">Building Timestreams</a><a class="headerlink" href="#building-timestreams" title="Link to this heading"></a></h2>
 <p>All analysis tools use data in the form of G3Timestreams, indexed by bolometer ID. Timestreams are typically stored in a Scan (see <a class="reference internal" href="frames.html"><span class="doc">Frames</span></a>) frame, which is constructed from a wiring map and Timepoint frames using <a class="reference internal" href="#dfmuxcollator">DfMuxCollator</a>.</p>
 <section id="the-wiring-map">
-<h3><a class="toc-backref" href="#id10" role="doc-backlink">The Wiring Map</a><a class="headerlink" href="#the-wiring-map" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id9" role="doc-backlink">The Wiring Map</a><a class="headerlink" href="#the-wiring-map" title="Link to this heading"></a></h3>
 <p>The wiring map, stored in a Wiring frame at the beginning of data taking, stores the mapping between bolometer ID and (Board Slot/Address, SQUID, Readout channel) tuples – the information required to connect a <a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DfMuxMetaSample" title="spt3g.dfmux.DfMuxMetaSample"><code class="xref py py-class docutils literal notranslate"><span class="pre">DfMuxMetaSample</span></code></a> object to bolometer samples. The wiring map is stored as the key <code class="docutils literal notranslate"><span class="pre">WiringMap</span></code> in an object of type <a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DfMuxWiringMap" title="spt3g.dfmux.DfMuxWiringMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">DfMuxWiringMap</span></code></a> in a Wiring frame. In almost all cases, this is inserted into the data stream by the <a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.HardwareMapTools.PyDfMuxWiringMapInjector" title="spt3g.dfmux.HardwareMapTools.PyDfMuxWiringMapInjector"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyDfMuxWiringMapInjector</span></code></a> module. This module is typically inserted as the first module following the <a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DfMuxBuilder" title="spt3g.dfmux.DfMuxBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">DfMuxBuilder</span></code></a> and takes a pydfmux hardware map as input (note: <em>not</em> a pydfmux session):</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">dfmux</span><span class="o">.</span><span class="n">PyDfMuxWiringMapInjector</span><span class="p">,</span> <span class="n">pydfmux_hwm</span><span class="o">=</span><span class="n">hwm</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
 <section id="dfmuxcollator">
-<h3><a class="toc-backref" href="#id11" role="doc-backlink">DfMuxCollator</a><a class="headerlink" href="#dfmuxcollator" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id10" role="doc-backlink">DfMuxCollator</a><a class="headerlink" href="#dfmuxcollator" title="Link to this heading"></a></h3>
 <p>The <a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DfMuxCollator" title="spt3g.dfmux.DfMuxCollator"><code class="xref py py-class docutils literal notranslate"><span class="pre">DfMuxCollator</span></code></a> class builds Scan frames (and timestreams) from Timepoint frames using the wiring map. Scan boundaries are signalled by the insertion of empty Scan frames into the data stream. When the <a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.DfMuxCollator" title="spt3g.dfmux.DfMuxCollator"><code class="xref py py-class docutils literal notranslate"><span class="pre">DfMuxCollator</span></code></a> object encounters a Scan frame, it will do the following:</p>
 <blockquote>
 <div><ol class="arabic simple">
@@ -798,7 +794,7 @@
 </div>
 </section>
 <section id="collecting-data-to-a-netcdf-file">
-<h3><a class="toc-backref" href="#id12" role="doc-backlink">Collecting data to a NetCDF file</a><a class="headerlink" href="#collecting-data-to-a-netcdf-file" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id11" role="doc-backlink">Collecting data to a NetCDF file</a><a class="headerlink" href="#collecting-data-to-a-netcdf-file" title="Link to this heading"></a></h3>
 <p>The <a class="reference internal" href="moddoc_dfmux.html#spt3g.dfmux.NetCDFDump" title="spt3g.dfmux.NetCDFDump"><code class="xref py py-class docutils literal notranslate"><span class="pre">NetCDFDump</span></code></a> module takes timepoint frames and writes them to a NetCDF 3 file that can be opened using a variety of software packages, most notably KST, which will also monitor the file for updates. All sample points present in the wiring map are written to the output file with both I and Q demodulations, denoted by an <code class="docutils literal notranslate"><span class="pre">_I</span></code> or <code class="docutils literal notranslate"><span class="pre">_Q</span></code> suffix appended to the bolometer ID in the wiring map. In addition, a field called <code class="docutils literal notranslate"><span class="pre">Time</span></code> will be added containing the time of the sample (from the <code class="docutils literal notranslate"><span class="pre">EventHeader</span></code> key) in seconds since the UNIX epoch (Jan. 1, 1970). This time can be decoded using the python <code class="docutils literal notranslate"><span class="pre">time</span></code> module.</p>
 <p>An example follows, including the addition of the wiring map from pydfmux and construction of the event builder:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3Pipeline</span><span class="p">()</span>
@@ -818,18 +814,18 @@
 </section>
 </section>
 <section id="core-tools">
-<h2><a class="toc-backref" href="#id13" role="doc-backlink">Core Tools</a><a class="headerlink" href="#core-tools" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id12" role="doc-backlink">Core Tools</a><a class="headerlink" href="#core-tools" title="Link to this heading"></a></h2>
 <section id="g3eventbuilder">
-<h3><a class="toc-backref" href="#id14" role="doc-backlink">G3EventBuilder</a><a class="headerlink" href="#g3eventbuilder" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id13" role="doc-backlink">G3EventBuilder</a><a class="headerlink" href="#g3eventbuilder" title="Link to this heading"></a></h3>
 <p>The <a class="reference internal" href="moddoc_core.html#spt3g.core.G3EventBuilder" title="spt3g.core.G3EventBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3EventBuilder</span></code></a> class implements an asynchronous frame builder based on frame objects delivered to its non-blocking <code class="docutils literal notranslate"><span class="pre">AsyncDatum()</span></code> call. When these arrive, the object calls the pure virtual method <code class="docutils literal notranslate"><span class="pre">ProcessNewData()</span></code> from a main thread. This method is responsible for assembling the data and eventually passing a complete frame to <code class="docutils literal notranslate"><span class="pre">FrameOut()</span></code>, which will begin processing it in the pipeline. This is a C++-only abstract base class and is useful only when building a new data acquisition system.</p>
 </section>
 <section id="g3triggeredbuilder">
-<h3><a class="toc-backref" href="#id15" role="doc-backlink">G3TriggeredBuilder</a><a class="headerlink" href="#g3triggeredbuilder" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id14" role="doc-backlink">G3TriggeredBuilder</a><a class="headerlink" href="#g3triggeredbuilder" title="Link to this heading"></a></h3>
 <p>This C++-only class is the analog of G3EventBuilder for non-self-triggering systems (i.e. systems that poll for new data rather than streaming it). This can be used for once-every-N DAQ tasks like collecting housekeeping data.</p>
 </section>
 </section>
 <section id="ledgerman">
-<h2><a class="toc-backref" href="#id16" role="doc-backlink">ledgerman</a><a class="headerlink" href="#ledgerman" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id15" role="doc-backlink">ledgerman</a><a class="headerlink" href="#ledgerman" title="Link to this heading"></a></h2>
 <p>An example tool called <code class="docutils literal notranslate"><span class="pre">ledgerman</span></code> is included that collects data from the mux boards and writes it to a NetCDF file that can be read with kst. It is installed under <code class="docutils literal notranslate"><span class="pre">bin</span></code> in your build directory and will be available in your PATH if you have run <code class="docutils literal notranslate"><span class="pre">env-shell.sh</span></code>.</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>ledgerman<span class="w"> </span>/path/to/a/pydfmux/hardware/map.yaml<span class="w"> </span>output.nc
 </pre></div>

@@ -665,31 +665,27 @@
            <div itemprop="articleBody">
              
   <section id="network-streaming">
-<h1><a class="toc-backref" href="#id1" role="doc-backlink">Network Streaming</a><a class="headerlink" href="#network-streaming" title="Link to this heading"></a></h1>
+<h1>Network Streaming<a class="headerlink" href="#network-streaming" title="Link to this heading"></a></h1>
 <p>The spt3g.core module provides facilities for consuming data from a network host and serving it, through the <a class="reference internal" href="moddoc_core.html#spt3g.core.G3Reader" title="spt3g.core.G3Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3Reader</span></code></a> and <a class="reference internal" href="moddoc_core.html#spt3g.core.G3NetworkSender" title="spt3g.core.G3NetworkSender"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3NetworkSender</span></code></a> classes. Both exchange frames in the same wire format used by files read by <a class="reference internal" href="moddoc_core.html#spt3g.core.G3Reader" title="spt3g.core.G3Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3Reader</span></code></a> over TCP sockets.</p>
 <p>While communication is unidirectional from the <a class="reference internal" href="moddoc_core.html#spt3g.core.G3NetworkSender" title="spt3g.core.G3NetworkSender"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3NetworkSender</span></code></a> (or netcat) to a <a class="reference internal" href="moddoc_core.html#spt3g.core.G3Reader" title="spt3g.core.G3Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3Reader</span></code></a> (or netcat), either end of the connection can be a “server” or “client” in the sense of which end of the connection is expected to be listening for the other.</p>
-<nav class="contents" id="contents">
+<nav class="contents local" id="contents">
 <p class="topic-title">Contents</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="#network-streaming" id="id1">Network Streaming</a></p>
+<li><p><a class="reference internal" href="#g3networksender" id="id1">G3NetworkSender</a></p>
 <ul>
-<li><p><a class="reference internal" href="#g3networksender" id="id2">G3NetworkSender</a></p>
-<ul>
-<li><p><a class="reference internal" href="#connecting-to-a-remote-reader" id="id3">Connecting to a Remote Reader</a></p></li>
-<li><p><a class="reference internal" href="#functioning-as-a-streaming-server" id="id4">Functioning as a Streaming Server</a></p></li>
-<li><p><a class="reference internal" href="#throttling-output-data" id="id5">Throttling output data</a></p></li>
+<li><p><a class="reference internal" href="#connecting-to-a-remote-reader" id="id2">Connecting to a Remote Reader</a></p></li>
+<li><p><a class="reference internal" href="#functioning-as-a-streaming-server" id="id3">Functioning as a Streaming Server</a></p></li>
+<li><p><a class="reference internal" href="#throttling-output-data" id="id4">Throttling output data</a></p></li>
 </ul>
 </li>
-<li><p><a class="reference internal" href="#using-g3reader-over-the-network" id="id6">Using G3Reader Over the Network</a></p></li>
-</ul>
-</li>
+<li><p><a class="reference internal" href="#using-g3reader-over-the-network" id="id5">Using G3Reader Over the Network</a></p></li>
 </ul>
 </nav>
 <section id="g3networksender">
-<h2><a class="toc-backref" href="#id2" role="doc-backlink">G3NetworkSender</a><a class="headerlink" href="#g3networksender" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id1" role="doc-backlink">G3NetworkSender</a><a class="headerlink" href="#g3networksender" title="Link to this heading"></a></h2>
 <p><a class="reference internal" href="#g3networksender">G3NetworkSender</a> can operate in two modes: as a reliable transfer mechanism that connects to a remote G3Reader or as a streaming data source to which remote clients can connect to get the data currently passing through the pipeline.</p>
 <section id="connecting-to-a-remote-reader">
-<h3><a class="toc-backref" href="#id3" role="doc-backlink">Connecting to a Remote Reader</a><a class="headerlink" href="#connecting-to-a-remote-reader" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id2" role="doc-backlink">Connecting to a Remote Reader</a><a class="headerlink" href="#connecting-to-a-remote-reader" title="Link to this heading"></a></h3>
 <p>In the simplest mode, a remote G3Reader (see below) is set up to listen for an incoming connection and <a class="reference internal" href="#g3networksender">G3NetworkSender</a> is pointed at it as follows:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">G3NetworkSender</span><span class="p">,</span> <span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;name.of.remote.host&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">4536</span><span class="p">)</span>
 </pre></div>
@@ -697,7 +693,7 @@
 <p>This will send every frame passing through the pipeline to the remote host. Note that the output frames are transferred from a second thread, which builds its own unbounded buffer. In the event that file IO is much faster than network IO, this may have the effect of transiently reading the entire input into memory. (This can and should be fixed in a future version of the software)</p>
 </section>
 <section id="functioning-as-a-streaming-server">
-<h3><a class="toc-backref" href="#id4" role="doc-backlink">Functioning as a Streaming Server</a><a class="headerlink" href="#functioning-as-a-streaming-server" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id3" role="doc-backlink">Functioning as a Streaming Server</a><a class="headerlink" href="#functioning-as-a-streaming-server" title="Link to this heading"></a></h3>
 <p>This is the standard operational mode of <a class="reference internal" href="#g3networksender">G3NetworkSender</a>. When operating as a streaming server, remote clients connect to it and receive the most recent of any metadata frames (Calibration, Wiring, etc. – anything that is not a Timepoint or Scan frame), followed by all passing data beginning at the time of connection. This is designed for use, for example, in monitoring data acquisition.</p>
 <p>Streaming server mode is established by using the special hostname <code class="docutils literal notranslate"><span class="pre">*</span></code>. To create a streaming server:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">G3NetworkSender</span><span class="p">,</span> <span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">4536</span><span class="p">)</span>
@@ -714,7 +710,7 @@
 </div>
 </section>
 <section id="throttling-output-data">
-<h3><a class="toc-backref" href="#id5" role="doc-backlink">Throttling output data</a><a class="headerlink" href="#throttling-output-data" title="Link to this heading"></a></h3>
+<h3><a class="toc-backref" href="#id4" role="doc-backlink">Throttling output data</a><a class="headerlink" href="#throttling-output-data" title="Link to this heading"></a></h3>
 <p>An additional class called G3ThrottledNetworkSender wraps <a class="reference internal" href="#g3networksender">G3NetworkSender</a> but with a data reduction step that sends only every Nth of some list of frame types. For example, the following sends all non-Timepoint frames and every 10th Timepoint frame with a configuration otherwise identical to the example in the previous section:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span>
     <span class="n">core</span><span class="o">.</span><span class="n">G3ThrottledNetworkSender</span><span class="p">,</span>
@@ -729,7 +725,7 @@
 </section>
 </section>
 <section id="using-g3reader-over-the-network">
-<h2><a class="toc-backref" href="#id6" role="doc-backlink">Using G3Reader Over the Network</a><a class="headerlink" href="#using-g3reader-over-the-network" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">Using G3Reader Over the Network</a><a class="headerlink" href="#using-g3reader-over-the-network" title="Link to this heading"></a></h2>
 <p>G3Reader, in addition to opening files, can read from network sockets by passing it a URL of the form <code class="docutils literal notranslate"><span class="pre">tcp://host:port</span></code> instead of a file path.</p>
 <p>To connect to the streaming server examples above, for example, you can add a G3Reader with the following configuration:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">G3Reader</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s1">&#39;tcp://name.of.streamer.host:4536&#39;</span><span class="p">)</span>
