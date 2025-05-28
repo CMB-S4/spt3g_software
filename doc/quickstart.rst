@@ -5,6 +5,7 @@ Quick Start
 **Don't Panic**
 
 .. contents:: Contents
+   :local:
 
 How to Install
 --------------

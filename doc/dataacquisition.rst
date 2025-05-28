@@ -5,6 +5,7 @@ Data Acquisition
 This software provides, in addition to data processing, facilities for data acquisition. The goal is to have a unified framework for simulations, data acquisition, and analysis.
 
 .. contents:: Contents
+   :local:
 
 DfMux
 =====

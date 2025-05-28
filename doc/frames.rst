@@ -13,6 +13,7 @@ Each frame also has a ``._filename`` attribute, which is set when frames are rea
 A brief description of the intention of each frame type follows along with a table containing a representative minimal set of data likely to be contained by a frame of a given type. The list is neither exhaustive nor truly minimal: other data can and will be present and some of the data listed here may have been removed or renamed. Neither is this an exhaustive list of frame types: any single character code can be [ab]used as a frame type for special purpose tools.
 
 .. contents:: Contents
+   :local:
 
 Scan
 ====
