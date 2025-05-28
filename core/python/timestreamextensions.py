@@ -1,6 +1,6 @@
 import numpy
 from . import G3Timestream, DoubleVector, G3VectorDouble, G3TimestreamMap, G3VectorTime, G3Time, Int64Vector, G3VectorInt, \
-    G3VectorComplexDouble, ComplexDoubleVector, BoolVector, G3VectorBool
+    G3VectorComplexDouble, ComplexDoubleVector, BoolVector, G3VectorBool, IntVector, FloatVector, ComplexFloatVector
 from . import G3Units, log_fatal, log_warn, usefulfunc, G3FrameObject
 
 __all__ = ['concatenate_timestreams']
@@ -59,8 +59,8 @@ def numpybinarywrap(a, b, op):
     is_g3 = isinstance(a, G3FrameObject) or isinstance(b, G3FrameObject)
     is_tsa = isinstance(a, G3Timestream)
     is_tsb = isinstance(b, G3Timestream)
-    is_cxa = isinstance(a, (G3VectorComplexDouble, ComplexDoubleVector))
-    is_cxb = isinstance(b, (G3VectorComplexDouble, ComplexDoubleVector))
+    is_cxa = isinstance(a, (G3VectorComplexDouble, ComplexDoubleVector, ComplexFloatVector))
+    is_cxb = isinstance(b, (G3VectorComplexDouble, ComplexDoubleVector, ComplexFloatVector))
     cls = a.__class__
     if is_tsa:
         if is_tsb:
@@ -73,8 +73,11 @@ def numpybinarywrap(a, b, op):
         return NotImplemented
     out = op(numpy.asarray(a), numpy.asarray(b))
     k = out.dtype.kind
+    s = out.dtype.itemsize
     if k == 'c':
-        return G3VectorComplexDouble(out) if is_g3 else ComplexDoubleVector(out)
+        if is_g3:
+            return G3VectorComplexDouble(out)
+        return ComplexDoubleVector(out) if s == 16 else ComplexFloatVector(out)
     elif k == 'b':
         return G3VectorBool(out) if is_g3 else BoolVector(G3VectorBool(out))
     elif is_tsa:
@@ -84,9 +87,14 @@ def numpybinarywrap(a, b, op):
         out.stop = a.stop
         return out
     elif k == 'f':
-        return G3VectorDouble(out) if is_g3 else DoubleVector(out)
+        if is_g3:
+            return G3VectorDouble(out)
+        return DoubleVector(out) if s == 8 else FloatVector(out)
     elif k in 'iu':
-        return G3VectorInt(out.astype(int)) if is_g3 else Int64Vector(out.astype(int))
+        out = out.astype(int)
+        if is_g3:
+            return G3VectorInt(out)
+        return Int64Vector(out) if s == 8 else IntVector(out)
     return NotImplemented
 
 def numpyinplacebinarywrap(a, b, op):
@@ -96,7 +104,8 @@ def numpyinplacebinarywrap(a, b, op):
     return a
 
 all_cls = [G3Timestream, G3VectorDouble, DoubleVector, G3VectorInt, Int64Vector,
-           G3VectorComplexDouble, ComplexDoubleVector, G3VectorBool, BoolVector]
+           G3VectorComplexDouble, ComplexDoubleVector, G3VectorBool, BoolVector,
+           FloatVector, IntVector, ComplexFloatVector]
 
 for attr in ['add', 'sub', 'mul', 'div', 'truediv', 'floordiv', 'mod', 'pow',
              'and', 'or', 'xor', 'lshift', 'rshift']:
