@@ -1,5 +1,7 @@
 from sphinx.ext import autodoc
+import pprint
 import re
+import textwrap
 import spt3g
 
 # sphinx configuration options
@@ -204,6 +206,41 @@ class PropertyDocumenter(autodoc.PropertyDocumenter):
             self.add_line("   :type: " + self._cxx_type_ann, sourcename)
 
 
+# better formatting for enum name/value dicts
+class AttributeDocumenter(autodoc.AttributeDocumenter):
+    def import_object(self, raiseerror=False):
+        self._is_enum_dict = False
+        ret = super().import_object(raiseerror)
+        if isinstance(self.object, dict):
+            if self.objpath[-1] in ["names", "values"]:
+                self._is_enum_dict = True
+        return ret
+
+    def should_suppress_value_header(self):
+        if self._is_enum_dict:
+            return True
+        return super().should_suppress_value_header()
+
+    def add_directive_header(self, sig):
+        super().add_directive_header(sig)
+        if self._is_enum_dict:
+            sourcename = self.get_sourcename()
+            self.add_line("   :type: dict", sourcename)
+
+    def get_doc(self):
+        if not self._is_enum_dict:
+            return super().get_doc()
+
+        if self.objpath[-1] == "names":
+            txt = "Mapping of enum names to objects."
+        else:
+            txt = "Mapping of enum values to objects."
+
+        v = pprint.pformat(self.object)
+        v = textwrap.indent(v, "    ")
+        return [[txt, "", ".. code-block::", "", ""] + v.split("\n")]
+
+
 class ClassDocumenter(BindingDocsMixin, autodoc.ClassDocumenter):
     def add_line(self, line, source, *lineno):
         # remove empty bases directive
@@ -228,4 +265,5 @@ def setup(app):
     app.add_autodocumenter(FunctionDocumenter, override=True)
     app.add_autodocumenter(MethodDocumenter, override=True)
     app.add_autodocumenter(PropertyDocumenter, override=True)
+    app.add_autodocumenter(AttributeDocumenter, override=True)
     app.add_autodocumenter(ClassDocumenter, override=True)
