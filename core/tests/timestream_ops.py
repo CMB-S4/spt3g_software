@@ -4,10 +4,13 @@ from spt3g.core import (
     G3TimestreamMap,
     G3VectorDouble,
     DoubleVector,
+    FloatVector,
     G3VectorInt,
+    Int64Vector,
     IntVector,
     G3VectorComplexDouble,
     ComplexDoubleVector,
+    ComplexFloatVector,
     G3VectorBool,
     BoolVector,
 )
@@ -42,21 +45,24 @@ all_arr = [
     G3Timestream(vi),
     G3VectorDouble(v),
     DoubleVector(v),
+    FloatVector(v),
     G3VectorInt(vi),
+    Int64Vector(vi),
     IntVector(vi),
     G3VectorComplexDouble(vc),
     ComplexDoubleVector(vc),
+    ComplexFloatVector(vc),
     G3VectorBool(vb),
     BoolVector(G3VectorBool(vb)),
 ]
 
-def check(a1, a2, cls=None, flt=False):
+def check(a1, a2, cls=None, flt=False, short=False):
     if flt:
         np.testing.assert_allclose(
             np.asarray(a1),
             np.asarray(a2),
-            atol=1e-14,
-            rtol=1e-14,
+            atol=1e-4 if short else 1e-14,
+            rtol=1e-4 if short else 1e-14,
             verbose=True,
         )
     else:
@@ -82,17 +88,20 @@ for a in all_arr:
         k1 = np.asarray(a).dtype.kind
         k2 = np.asarray(b).dtype.kind
         flt = k1 in 'fc' or k2 in 'fc'
+        c1 = np.asarray(a).dtype.char
+        c2 = np.asarray(b).dtype.char
+        short = c1 in 'fF' or c2 in 'fF'
 
         # binary operators
         if not (k1 == 'b' and k2 == 'b'):
-            check(a + b, v1 + v2, flt=flt)
-            check(a - b, v1 - v2, flt=flt)
-            check(a * b, v1 * v2, flt=flt)
-            check(a / b, v1 / v2, flt=flt)
+            check(a + b, v1 + v2, flt=flt, short=short)
+            check(a - b, v1 - v2, flt=flt, short=short)
+            check(a * b, v1 * v2, flt=flt, short=short)
+            check(a / b, v1 / v2, flt=flt, short=short)
             if k1 != 'c' and k2 != 'c':
                 check(a // b, v1 // v2)
-                check(a % b, v1 % v2, flt=flt)
-            check(a ** b, v1 ** v2, flt=flt)
+                check(a % b, v1 % v2, flt=flt, short=short)
+            check(a ** b, v1 ** v2, flt=flt, short=short)
 
         if k1 in 'iub' and k2 in 'iub':
             check(a | b, v1 | v2)
@@ -119,15 +128,15 @@ for a in all_arr:
         # in-place binary operators
         c = copy(a)
         c += b
-        check(c, a + b, a.__class__, flt=flt)
+        check(c, a + b, a.__class__, flt=flt, short=short)
 
         c = copy(a)
         c -= b
-        check(c, a - b, a.__class__, flt=flt)
+        check(c, a - b, a.__class__, flt=flt, short=short)
 
         c = copy(a)
         c *= b
-        check(c, a * b, a.__class__, flt=flt)
+        check(c, a * b, a.__class__, flt=flt, short=short)
 
         if k1 in 'iub':
             c = copy(a)
@@ -146,7 +155,7 @@ for a in all_arr:
 
         c = copy(a)
         c /= b
-        check(c, a / b, a.__class__, flt=flt)
+        check(c, a / b, a.__class__, flt=flt, short=short)
 
     if np.isscalar(a) or isinstance(a, np.ndarray):
         continue
