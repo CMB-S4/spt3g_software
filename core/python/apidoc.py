@@ -21,15 +21,11 @@ class G3Documenter:
     """
     Class for inspecting sub-modules of the SPT-3G software package and
     generating valid RST for use with sphinx-autodoc.
-
-    :cvar categories: Dictionary of API categories for which to generate
-        documentation, containing a section title, description, and
-        sphinx-autodoc directive as a tuple for each category.
     """
 
     # API categories for which to generate documentation, with a
     # corresponding section title, description and sphinx-autodoc directive.
-    categories = {
+    _categories = {
         "object": (
             "Frame Objects",
             "Serializable objects that may be stored as entries in "
@@ -121,6 +117,15 @@ class G3Documenter:
     def __init__(self, root):
         self.root = root
         self.cache = {}
+
+    @property
+    def categories(self):
+        """
+        Dictionary of API categories for which to generate documentation,
+        containing a section title, description, and sphinx-autodoc directive as
+        a tuple for each category.
+        """
+        return self._categories
 
     def find_objects(self, mod=None):
         """
