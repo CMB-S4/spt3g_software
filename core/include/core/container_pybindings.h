@@ -28,9 +28,7 @@ std::string vec_repr(py::object self)
 {
 	std::stringstream s;
 
-	s << py::extract<std::string>(self.attr("__class__").attr("__module__"))()
-	    << "." << py::extract<std::string>(self.attr("__class__").attr("__name__"))()
-	    << "([";
+	s << py_fullname(self) << "([";
 
 	py::extract <std::vector<T> &> extself(self);
 	if (extself.check()) {

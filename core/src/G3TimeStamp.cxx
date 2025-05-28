@@ -255,8 +255,7 @@ static std::string
 g3time_repr(const py::object &obj)
 {
 	std::stringstream s;
-	s << py::extract<std::string>(obj.attr("__class__").attr("__module__"))() << "."
-	  << py::extract<std::string>(obj.attr("__class__").attr("__name__"))()
+	s << py_fullname(obj)
 	  << "(" << py::extract<G3TimeStamp>(obj.attr("time"))() << ")";
 	return s.str();
 }

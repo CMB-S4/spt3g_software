@@ -232,9 +232,7 @@ static std::string
 G3PipelineInfo_repr(const py::object &pi)
 {
 	std::ostringstream rv;
-	rv << "pipe = ";
-	rv << py::extract<std::string>(pi.attr("__class__").attr("__module__"))();
-	rv << ".G3Pipeline()";
+	rv << "pipe = " << py_modname(pi) << ".G3Pipeline()";
 
 	for (auto i : py::extract<const G3PipelineInfo &>(pi)().modules)
 		rv << "\n" << G3ModuleConfig_repr(i);

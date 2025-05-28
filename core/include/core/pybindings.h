@@ -10,6 +10,11 @@
 
 namespace py = boost::python;
 
+// Extract object names
+std::string py_modname(const py::object &obj);
+std::string py_objname(const py::object &obj);
+std::string py_fullname(const py::object &obj);
+
 // Tool for exporting enum elements called 'None', reserved in Python
 // Invoke by doing enum_none_converter::from_python<T>()
 struct enum_none_converter {

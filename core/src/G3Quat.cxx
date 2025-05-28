@@ -803,9 +803,7 @@ static std::string
 quat_repr(const py::object &q)
 {
 	std::ostringstream oss;
-	oss << py::extract<std::string>(q.attr("__class__").attr("__module__"))() << ".";
-	oss << py::extract<std::string>(q.attr("__class__").attr("__name__"))();
-	oss << py::extract<const Quat &>(q)();
+	oss << py_fullname(q) << py::extract<const Quat &>(q)();
 	return oss.str();
 }
 }

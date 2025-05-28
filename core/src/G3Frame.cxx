@@ -115,13 +115,7 @@ static std::string FrameObjectClassName(G3FrameObjectConstPtr obj)
 		try {
 			py::object pyobj(
 			    std::const_pointer_cast<G3FrameObject>(obj));
-
-			return
-			    py::extract<std::string>(
-			     pyobj.attr("__class__").attr("__module__"))() +
-			     "." +
-			     py::extract<std::string>(
-			      pyobj.attr("__class__").attr("__name__"))();
+			return py_fullname(pyobj);
 		} catch (const py::error_already_set& e) {
 			PyErr_Clear();
 		} catch (...) {
