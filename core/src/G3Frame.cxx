@@ -103,11 +103,7 @@ static std::string FrameObjectClassName(G3FrameObjectConstPtr obj)
 		py::gil_scoped_acquire gil;
 
 		try {
-			auto pyobj = py::cast(obj);
-			auto cls = pyobj.attr("__class__");
-
-			return cls.attr("__module__").cast<std::string>() +
-			    "." + cls.attr("__name__").cast<std::string>();
+			return py_fullname(py::cast(obj));
 		} catch (...) {
 			// Fall through to C++ name
 		}

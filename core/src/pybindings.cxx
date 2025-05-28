@@ -6,6 +6,22 @@
 #include <sys/endian.h>
 #endif
 
+// Extract object names
+std::string py_modname(const py::object &obj)
+{
+	return obj.attr("__class__").attr("__module__").cast<std::string>();
+}
+
+std::string py_objname(const py::object &obj)
+{
+	return obj.attr("__class__").attr("__name__").cast<std::string>();
+}
+
+std::string py_fullname(const py::object &obj)
+{
+	return py_modname(obj) + "." + py_objname(obj);
+}
+
 std::string check_buffer_format(std::string fmt) {
 	// Consume endian definition
 	const char *format = &fmt[0];

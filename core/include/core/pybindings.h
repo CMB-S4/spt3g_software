@@ -28,6 +28,11 @@ namespace py = pybind11;
  * duck-typing in Python.
  */
 
+// Extract object names
+std::string py_modname(const py::object &obj);
+std::string py_objname(const py::object &obj);
+std::string py_fullname(const py::object &obj);
+
 // Register an enum.  Add enum values using the .value() method of this object.
 template <typename T, typename... Args>
 auto

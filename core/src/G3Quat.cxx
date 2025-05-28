@@ -710,9 +710,7 @@ static std::string
 quat_repr(const py::object &q)
 {
 	std::ostringstream oss;
-	oss << q.attr("__class__").attr("__module__").cast<std::string>() << ".";
-	oss << q.attr("__class__").attr("__name__").cast<std::string>();
-	oss << q.cast<const Quat &>();
+	oss << py_fullname(q) << q.cast<const Quat &>();
 	return oss.str();
 }
 

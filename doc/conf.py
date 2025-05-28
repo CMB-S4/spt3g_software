@@ -166,12 +166,14 @@ class PropertyDocumenter(autodoc.PropertyDocumenter):
             return self._new_docstrings
 
         docstrings = super().get_doc()
-        if not docstrings:
+        if not docstrings or "->" not in str(docstrings):
             func = self._get_property_getter()
-            if func is not None and getattr(func, "__doc__", None) is not None:
-                docstrings.append(func.__doc__.split("\n"))
-            else:
+            if func is None or getattr(func, "__doc__", None) is None:
                 return docstrings
+            gdoc = func.__doc__
+            if any([gdoc.strip() in "\n".join(d).strip() for d in docstrings]):
+                return docstrings
+            docstrings.append(gdoc.split("\n"))
 
         for doclines in docstrings:
             for j, line in enumerate(doclines):
