@@ -7,6 +7,7 @@ A module is a processing step for data. Modules operate on frames, and pass fram
 More complex manipulations are possible: the module can create new frames, throw frames away, operate on more than one frame at a time, or some combination of all three. Examples of how to do these things, as well as rationales, appear below.
 
 .. contents:: Contents
+   :local:
 
 Writing a module in Python
 ==========================

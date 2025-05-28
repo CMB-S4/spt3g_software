@@ -7,6 +7,7 @@ The spt3g.core module provides facilities for consuming data from a network host
 While communication is unidirectional from the :py:class:`~spt3g.core.G3NetworkSender` (or netcat) to a :py:class:`~spt3g.core.G3Reader` (or netcat), either end of the connection can be a "server" or "client" in the sense of which end of the connection is expected to be listening for the other.
 
 .. contents:: Contents
+   :local:
 
 G3NetworkSender
 _______________

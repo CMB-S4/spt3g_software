@@ -1,6 +1,9 @@
 Build System
 ------------
 
+.. contents:: Contents
+   :local:
+
 CMake Overview
 ==============
 
