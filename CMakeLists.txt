@@ -46,17 +46,22 @@ endif()
 
 # Find pybind11
 set(PYBIND11_FINDPYTHON ON)
-if (NOT pybind11_DIR)
-	# download if necessary
-	include(FetchContent)
-	FetchContent_Declare(
-		pybind11
-		GIT_REPOSITORY https://github.com/pybind/pybind11.git
-		GIT_TAG v2.13.6
-	)
-	FetchContent_MakeAvailable(pybind11)
+find_package(pybind11 2.13 QUIET)
+if (pybind11_FOUND)
+	message(STATUS "Found pybind11: ${pybind11_INCLUDE_DIR} (found version \"${pybind11_VERSION}\")")
 else()
-	find_package(pybind11 CONFIG REQUIRED)
+	if (NOT pybind11_DIR)
+		# download if necessary
+		include(FetchContent)
+		FetchContent_Declare(
+			pybind11
+			GIT_REPOSITORY https://github.com/pybind/pybind11.git
+			GIT_TAG v2.13.6
+		)
+		FetchContent_MakeAvailable(pybind11)
+	else()
+		find_package(pybind11 2.13 CONFIG REQUIRED)
+	endif()
 endif()
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
 	add_compile_definitions(PYBIND11_DETAILED_ERROR_MESSAGES)
