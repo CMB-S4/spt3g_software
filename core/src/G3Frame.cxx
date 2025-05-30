@@ -547,7 +547,7 @@ PYBINDINGS("core", scope) {
 	      "Return the serialized representation of the object")
 	;
 
-	auto ecls = register_enum<G3Frame::FrameType, G3Frame::None>(scope, "G3FrameType",
+	register_enum<G3Frame::FrameType, G3Frame::None>(scope, "G3FrameType",
 	    "Enumerated frame type for identifying G3Frame objects")
 	    .value("Timepoint",       G3Frame::Timepoint)
 	    .value("Housekeeping",    G3Frame::Housekeeping)
@@ -564,29 +564,11 @@ PYBINDINGS("core", scope) {
 	    .value("LightCurve",      G3Frame::LightCurve)
 	    .value("Statistics",      G3Frame::Statistics)
 	    .value("none",            G3Frame::None)
-	;
-	register_vector_of<G3Frame::FrameType>(scope, "FrameType");
-
-	ecls
 	    .def_property_readonly("key",
 	        [](G3Frame::FrameType &v) { return static_cast<char>(v); },
 	        "C++ enum character key")
-	    .def_static("from_string",
-	        [](const std::string &types) {
-			std::vector<G3Frame::FrameType> v;
-			auto obj = py::type::of<G3Frame::FrameType>();
-			pybind11::dict vals = obj.attr("values");
-			for (auto c: types) {
-				int ic = static_cast<int>(c);
-				if (!vals.contains(ic))
-					log_fatal("Invalid frame type %c", c);
-				v.push_back(G3Frame::FrameType(ic));
-			}
-			return v;
-	        }, py::arg("types"),
-	        "Convert a string of characters representing frame types "
-		"to a list of the corresponding G3FrameType instances.")
 	;
+	register_vector_of<G3Frame::FrameType>(scope, "FrameType");
 
 	auto cls = register_class<G3Frame>(scope, "G3Frame",
 	  "Frames are the core datatype of the analysis software. They behave "
