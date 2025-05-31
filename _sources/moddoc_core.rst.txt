@@ -229,6 +229,10 @@ Various Python and C++ classes that are part of the public API.
 
 .. autoclass:: spt3g.core.IntVector
 
+.. autoclass:: spt3g.core.ItemsView
+
+.. autoclass:: spt3g.core.KeysView
+
 .. autoclass:: spt3g.core.ModuleConfigVector
 
 .. autoclass:: spt3g.core.Quat
@@ -242,6 +246,8 @@ Various Python and C++ classes that are part of the public API.
 .. autoclass:: spt3g.core.UIntVector
 
 .. autoclass:: spt3g.core.UnsignedCharVector
+
+.. autoclass:: spt3g.core.ValuesView
 
 .. autoclass:: spt3g.core.apidoc.G3Documenter
 

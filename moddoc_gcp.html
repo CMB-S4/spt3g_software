@@ -361,6 +361,8 @@
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3VectorStringVector"><code class="docutils literal notranslate"><span class="pre">G3VectorStringVector</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.Int64Vector"><code class="docutils literal notranslate"><span class="pre">Int64Vector</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.IntVector"><code class="docutils literal notranslate"><span class="pre">IntVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.ItemsView"><code class="docutils literal notranslate"><span class="pre">ItemsView</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.KeysView"><code class="docutils literal notranslate"><span class="pre">KeysView</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.ModuleConfigVector"><code class="docutils literal notranslate"><span class="pre">ModuleConfigVector</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.Quat"><code class="docutils literal notranslate"><span class="pre">Quat</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.QuatVector"><code class="docutils literal notranslate"><span class="pre">QuatVector</span></code></a></li>
@@ -368,6 +370,7 @@
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.UInt64Vector"><code class="docutils literal notranslate"><span class="pre">UInt64Vector</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.UIntVector"><code class="docutils literal notranslate"><span class="pre">UIntVector</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.UnsignedCharVector"><code class="docutils literal notranslate"><span class="pre">UnsignedCharVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.ValuesView"><code class="docutils literal notranslate"><span class="pre">ValuesView</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.apidoc.G3Documenter"><code class="docutils literal notranslate"><span class="pre">G3Documenter</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.fileio.G3File"><code class="docutils literal notranslate"><span class="pre">G3File</span></code></a></li>
 </ul>
@@ -690,7 +693,8 @@
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.</span></span><span class="sig-name descname"><span class="pre">ACUStatus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Bases: <a class="reference internal" href="moddoc_core.html#spt3g.core.G3FrameObject" title="spt3g.core.G3FrameObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3FrameObject</span></code></a></p>
 <p>ACU Status information, as reported by the ACU</p>
-<p>Signature 1: Copy constructor</p>
+<p>Signature 1:
+Copy constructor</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.gcp.ACUStatus.Description">
 <span class="sig-name descname"><span class="pre">Description</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#spt3g.gcp.ACUStatus.Description" title="Link to this definition"></a></dt>
@@ -705,85 +709,133 @@
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.ACUStatus.acu_status">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">acu_status</span></span><a class="headerlink" href="#spt3g.gcp.ACUStatus.acu_status" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">acu_status</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#spt3g.gcp.ACUStatus.acu_status" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.ACUStatus.az_pos">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">az_pos</span></span><a class="headerlink" href="#spt3g.gcp.ACUStatus.az_pos" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">az_pos</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#spt3g.gcp.ACUStatus.az_pos" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.ACUStatus.az_rate">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">az_rate</span></span><a class="headerlink" href="#spt3g.gcp.ACUStatus.az_rate" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">az_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#spt3g.gcp.ACUStatus.az_rate" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.ACUStatus.el_pos">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">el_pos</span></span><a class="headerlink" href="#spt3g.gcp.ACUStatus.el_pos" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">el_pos</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#spt3g.gcp.ACUStatus.el_pos" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.ACUStatus.el_rate">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">el_rate</span></span><a class="headerlink" href="#spt3g.gcp.ACUStatus.el_rate" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">el_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#spt3g.gcp.ACUStatus.el_rate" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.ACUStatus.px_checksum_error_count">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">px_checksum_error_count</span></span><a class="headerlink" href="#spt3g.gcp.ACUStatus.px_checksum_error_count" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">px_checksum_error_count</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#spt3g.gcp.ACUStatus.px_checksum_error_count" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.ACUStatus.px_resync_count">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">px_resync_count</span></span><a class="headerlink" href="#spt3g.gcp.ACUStatus.px_resync_count" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">px_resync_count</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#spt3g.gcp.ACUStatus.px_resync_count" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.ACUStatus.px_resync_timeout_count">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">px_resync_timeout_count</span></span><a class="headerlink" href="#spt3g.gcp.ACUStatus.px_resync_timeout_count" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">px_resync_timeout_count</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#spt3g.gcp.ACUStatus.px_resync_timeout_count" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.ACUStatus.px_resyncing">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">px_resyncing</span></span><a class="headerlink" href="#spt3g.gcp.ACUStatus.px_resyncing" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">px_resyncing</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#spt3g.gcp.ACUStatus.px_resyncing" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.ACUStatus.px_timeout_count">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">px_timeout_count</span></span><a class="headerlink" href="#spt3g.gcp.ACUStatus.px_timeout_count" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">px_timeout_count</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#spt3g.gcp.ACUStatus.px_timeout_count" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.ACUStatus.restart_count">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">restart_count</span></span><a class="headerlink" href="#spt3g.gcp.ACUStatus.restart_count" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">restart_count</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#spt3g.gcp.ACUStatus.restart_count" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.ACUStatus.state">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">state</span></span><a class="headerlink" href="#spt3g.gcp.ACUStatus.state" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">state</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#spt3g.gcp.ACUState" title="spt3g.gcp.ACUState"><span class="pre">ACUState</span></a></em><a class="headerlink" href="#spt3g.gcp.ACUStatus.state" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.ACUStatus.time">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time</span></span><a class="headerlink" href="#spt3g.gcp.ACUStatus.time" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="moddoc_core.html#spt3g.core.G3Time" title="spt3g.core.G3Time"><span class="pre">G3Time</span></a></em><a class="headerlink" href="#spt3g.gcp.ACUStatus.time" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="spt3g.gcp.ACUStatusVector">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.</span></span><span class="sig-name descname"><span class="pre">ACUStatusVector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.ACUStatusVector" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="moddoc_core.html#spt3g.core.G3FrameObject" title="spt3g.core.G3FrameObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3FrameObject</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_ACUStatusBaseVector</span></code></p>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.</span></span><span class="sig-name descname"><span class="pre">ACUStatusVector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.ACUStatusVector" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.</span></span><span class="sig-name descname"><span class="pre">ACUStatusVector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.gcp.ACUStatusVector" title="spt3g.gcp.ACUStatusVector"><span class="pre">ACUStatusVector</span></a></span></em><span class="sig-paren">)</span></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.</span></span><span class="sig-name descname"><span class="pre">ACUStatusVector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_ACUStatusBaseVector</span></code>, <a class="reference internal" href="moddoc_core.html#spt3g.core.G3FrameObject" title="spt3g.core.G3FrameObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3FrameObject</span></code></a></p>
 <p>Array of ACUStatus objects, usually time-ordered</p>
+<p>Signature 2:
+Copy constructor</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.gcp.ACUStatusVector.append">
-<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.ACUStatusVector.append" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.gcp.ACUStatus" title="spt3g.gcp.ACUStatus"><span class="pre">ACUStatus</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.ACUStatusVector.append" title="Link to this definition"></a></dt>
+<dd><p>Add an item to the end of the list</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.gcp.ACUStatusVector.clear">
+<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.ACUStatusVector.clear" title="Link to this definition"></a></dt>
+<dd><p>Clear the contents</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.gcp.ACUStatusVector.count">
+<span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.gcp.ACUStatus" title="spt3g.gcp.ACUStatus"><span class="pre">ACUStatus</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#spt3g.gcp.ACUStatusVector.count" title="Link to this definition"></a></dt>
+<dd><p>Return the number of times <code class="docutils literal notranslate"><span class="pre">x</span></code> appears in the list</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.gcp.ACUStatusVector.extend">
-<span class="sig-name descname"><span class="pre">extend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.ACUStatusVector.extend" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">extend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">L</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.gcp.ACUStatusVector" title="spt3g.gcp.ACUStatusVector"><span class="pre">ACUStatusVector</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.ACUStatusVector.extend" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">extend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">L</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3TimestreamUnits.None" title="spt3g.core.G3TimestreamUnits.None"><span class="pre">None</span></a></span></span></dt>
+<dd><p>Signature 1:
+Extend the list by appending all the items in the given list</p>
+<p>Signature 2:
+Extend the list by appending all the items in the given list</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.gcp.ACUStatusVector.insert">
+<span class="sig-name descname"><span class="pre">insert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.gcp.ACUStatus" title="spt3g.gcp.ACUStatus"><span class="pre">ACUStatus</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.ACUStatusVector.insert" title="Link to this definition"></a></dt>
+<dd><p>Insert an item at a given position.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.gcp.ACUStatusVector.pop">
+<span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spt3g.gcp.ACUStatus" title="spt3g.gcp.ACUStatus"><span class="pre">ACUStatus</span></a></span></span><a class="headerlink" href="#spt3g.gcp.ACUStatusVector.pop" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spt3g.gcp.ACUStatus" title="spt3g.gcp.ACUStatus"><span class="pre">ACUStatus</span></a></span></span></dt>
+<dd><p>Signature 1:
+Remove and return the last item</p>
+<p>Signature 2:
+Remove and return the item at index <code class="docutils literal notranslate"><span class="pre">i</span></code></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.gcp.ACUStatusVector.remove">
+<span class="sig-name descname"><span class="pre">remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.gcp.ACUStatus" title="spt3g.gcp.ACUStatus"><span class="pre">ACUStatus</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.ACUStatusVector.remove" title="Link to this definition"></a></dt>
+<dd><p>Remove the first item from the list whose value is x. It is an error if there is no such item.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -794,7 +846,8 @@
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.</span></span><span class="sig-name descname"><span class="pre">TrackerPointing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Bases: <a class="reference internal" href="moddoc_core.html#spt3g.core.G3FrameObject" title="spt3g.core.G3FrameObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3FrameObject</span></code></a></p>
 <p>GCP Tracker Pointing</p>
-<p>Signature 1: Copy constructor</p>
+<p>Signature 1:
+Copy constructor</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerPointing.Description">
 <span class="sig-name descname"><span class="pre">Description</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#spt3g.gcp.TrackerPointing.Description" title="Link to this definition"></a></dt>
@@ -809,92 +862,92 @@
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerPointing.encoder_off_x">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">encoder_off_x</span></span><a class="headerlink" href="#spt3g.gcp.TrackerPointing.encoder_off_x" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">encoder_off_x</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="moddoc_core.html#spt3g.core.DoubleVector" title="spt3g.core.DoubleVector"><span class="pre">DoubleVector</span></a></em><a class="headerlink" href="#spt3g.gcp.TrackerPointing.encoder_off_x" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerPointing.encoder_off_y">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">encoder_off_y</span></span><a class="headerlink" href="#spt3g.gcp.TrackerPointing.encoder_off_y" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">encoder_off_y</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="moddoc_core.html#spt3g.core.DoubleVector" title="spt3g.core.DoubleVector"><span class="pre">DoubleVector</span></a></em><a class="headerlink" href="#spt3g.gcp.TrackerPointing.encoder_off_y" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerPointing.features">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">features</span></span><a class="headerlink" href="#spt3g.gcp.TrackerPointing.features" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">features</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="moddoc_core.html#spt3g.core.IntVector" title="spt3g.core.IntVector"><span class="pre">IntVector</span></a></em><a class="headerlink" href="#spt3g.gcp.TrackerPointing.features" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerPointing.horiz_mount_x">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">horiz_mount_x</span></span><a class="headerlink" href="#spt3g.gcp.TrackerPointing.horiz_mount_x" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">horiz_mount_x</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="moddoc_core.html#spt3g.core.DoubleVector" title="spt3g.core.DoubleVector"><span class="pre">DoubleVector</span></a></em><a class="headerlink" href="#spt3g.gcp.TrackerPointing.horiz_mount_x" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerPointing.horiz_mount_y">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">horiz_mount_y</span></span><a class="headerlink" href="#spt3g.gcp.TrackerPointing.horiz_mount_y" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">horiz_mount_y</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="moddoc_core.html#spt3g.core.DoubleVector" title="spt3g.core.DoubleVector"><span class="pre">DoubleVector</span></a></em><a class="headerlink" href="#spt3g.gcp.TrackerPointing.horiz_mount_y" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerPointing.horiz_off_x">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">horiz_off_x</span></span><a class="headerlink" href="#spt3g.gcp.TrackerPointing.horiz_off_x" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">horiz_off_x</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="moddoc_core.html#spt3g.core.DoubleVector" title="spt3g.core.DoubleVector"><span class="pre">DoubleVector</span></a></em><a class="headerlink" href="#spt3g.gcp.TrackerPointing.horiz_off_x" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerPointing.horiz_off_y">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">horiz_off_y</span></span><a class="headerlink" href="#spt3g.gcp.TrackerPointing.horiz_off_y" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">horiz_off_y</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="moddoc_core.html#spt3g.core.DoubleVector" title="spt3g.core.DoubleVector"><span class="pre">DoubleVector</span></a></em><a class="headerlink" href="#spt3g.gcp.TrackerPointing.horiz_off_y" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerPointing.linsens_avg_l1">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">linsens_avg_l1</span></span><a class="headerlink" href="#spt3g.gcp.TrackerPointing.linsens_avg_l1" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">linsens_avg_l1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="moddoc_core.html#spt3g.core.DoubleVector" title="spt3g.core.DoubleVector"><span class="pre">DoubleVector</span></a></em><a class="headerlink" href="#spt3g.gcp.TrackerPointing.linsens_avg_l1" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerPointing.linsens_avg_l2">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">linsens_avg_l2</span></span><a class="headerlink" href="#spt3g.gcp.TrackerPointing.linsens_avg_l2" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">linsens_avg_l2</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="moddoc_core.html#spt3g.core.DoubleVector" title="spt3g.core.DoubleVector"><span class="pre">DoubleVector</span></a></em><a class="headerlink" href="#spt3g.gcp.TrackerPointing.linsens_avg_l2" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerPointing.linsens_avg_r1">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">linsens_avg_r1</span></span><a class="headerlink" href="#spt3g.gcp.TrackerPointing.linsens_avg_r1" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">linsens_avg_r1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="moddoc_core.html#spt3g.core.DoubleVector" title="spt3g.core.DoubleVector"><span class="pre">DoubleVector</span></a></em><a class="headerlink" href="#spt3g.gcp.TrackerPointing.linsens_avg_r1" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerPointing.linsens_avg_r2">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">linsens_avg_r2</span></span><a class="headerlink" href="#spt3g.gcp.TrackerPointing.linsens_avg_r2" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">linsens_avg_r2</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="moddoc_core.html#spt3g.core.DoubleVector" title="spt3g.core.DoubleVector"><span class="pre">DoubleVector</span></a></em><a class="headerlink" href="#spt3g.gcp.TrackerPointing.linsens_avg_r2" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerPointing.refraction">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">refraction</span></span><a class="headerlink" href="#spt3g.gcp.TrackerPointing.refraction" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">refraction</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="moddoc_core.html#spt3g.core.DoubleVector" title="spt3g.core.DoubleVector"><span class="pre">DoubleVector</span></a></em><a class="headerlink" href="#spt3g.gcp.TrackerPointing.refraction" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerPointing.scu_temp">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">scu_temp</span></span><a class="headerlink" href="#spt3g.gcp.TrackerPointing.scu_temp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">scu_temp</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="moddoc_core.html#spt3g.core.DoubleVector" title="spt3g.core.DoubleVector"><span class="pre">DoubleVector</span></a></em><a class="headerlink" href="#spt3g.gcp.TrackerPointing.scu_temp" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerPointing.telescope_pressure">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">telescope_pressure</span></span><a class="headerlink" href="#spt3g.gcp.TrackerPointing.telescope_pressure" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">telescope_pressure</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="moddoc_core.html#spt3g.core.DoubleVector" title="spt3g.core.DoubleVector"><span class="pre">DoubleVector</span></a></em><a class="headerlink" href="#spt3g.gcp.TrackerPointing.telescope_pressure" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerPointing.telescope_temp">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">telescope_temp</span></span><a class="headerlink" href="#spt3g.gcp.TrackerPointing.telescope_temp" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">telescope_temp</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="moddoc_core.html#spt3g.core.DoubleVector" title="spt3g.core.DoubleVector"><span class="pre">DoubleVector</span></a></em><a class="headerlink" href="#spt3g.gcp.TrackerPointing.telescope_temp" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerPointing.tilts_x">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tilts_x</span></span><a class="headerlink" href="#spt3g.gcp.TrackerPointing.tilts_x" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tilts_x</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="moddoc_core.html#spt3g.core.DoubleVector" title="spt3g.core.DoubleVector"><span class="pre">DoubleVector</span></a></em><a class="headerlink" href="#spt3g.gcp.TrackerPointing.tilts_x" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerPointing.tilts_y">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tilts_y</span></span><a class="headerlink" href="#spt3g.gcp.TrackerPointing.tilts_y" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tilts_y</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="moddoc_core.html#spt3g.core.DoubleVector" title="spt3g.core.DoubleVector"><span class="pre">DoubleVector</span></a></em><a class="headerlink" href="#spt3g.gcp.TrackerPointing.tilts_y" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerPointing.time">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time</span></span><a class="headerlink" href="#spt3g.gcp.TrackerPointing.time" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="moddoc_core.html#spt3g.core.G3TimeVector" title="spt3g.core.G3TimeVector"><span class="pre">G3TimeVector</span></a></em><a class="headerlink" href="#spt3g.gcp.TrackerPointing.time" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -906,7 +959,8 @@
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.</span></span><span class="sig-name descname"><span class="pre">TrackerStatus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Bases: <a class="reference internal" href="moddoc_core.html#spt3g.core.G3FrameObject" title="spt3g.core.G3FrameObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3FrameObject</span></code></a></p>
 <p>GCP Tracker Status</p>
-<p>Signature 1: Copy constructor</p>
+<p>Signature 1:
+Copy constructor</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerStatus.Description">
 <span class="sig-name descname"><span class="pre">Description</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#spt3g.gcp.TrackerStatus.Description" title="Link to this definition"></a></dt>
@@ -921,67 +975,67 @@
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerStatus.acu_seq">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">acu_seq</span></span><a class="headerlink" href="#spt3g.gcp.TrackerStatus.acu_seq" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">acu_seq</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="moddoc_core.html#spt3g.core.IntVector" title="spt3g.core.IntVector"><span class="pre">IntVector</span></a></em><a class="headerlink" href="#spt3g.gcp.TrackerStatus.acu_seq" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerStatus.az_command">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">az_command</span></span><a class="headerlink" href="#spt3g.gcp.TrackerStatus.az_command" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">az_command</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="moddoc_core.html#spt3g.core.DoubleVector" title="spt3g.core.DoubleVector"><span class="pre">DoubleVector</span></a></em><a class="headerlink" href="#spt3g.gcp.TrackerStatus.az_command" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerStatus.az_pos">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">az_pos</span></span><a class="headerlink" href="#spt3g.gcp.TrackerStatus.az_pos" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">az_pos</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="moddoc_core.html#spt3g.core.DoubleVector" title="spt3g.core.DoubleVector"><span class="pre">DoubleVector</span></a></em><a class="headerlink" href="#spt3g.gcp.TrackerStatus.az_pos" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerStatus.az_rate">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">az_rate</span></span><a class="headerlink" href="#spt3g.gcp.TrackerStatus.az_rate" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">az_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="moddoc_core.html#spt3g.core.DoubleVector" title="spt3g.core.DoubleVector"><span class="pre">DoubleVector</span></a></em><a class="headerlink" href="#spt3g.gcp.TrackerStatus.az_rate" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerStatus.az_rate_command">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">az_rate_command</span></span><a class="headerlink" href="#spt3g.gcp.TrackerStatus.az_rate_command" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">az_rate_command</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="moddoc_core.html#spt3g.core.DoubleVector" title="spt3g.core.DoubleVector"><span class="pre">DoubleVector</span></a></em><a class="headerlink" href="#spt3g.gcp.TrackerStatus.az_rate_command" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerStatus.el_command">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">el_command</span></span><a class="headerlink" href="#spt3g.gcp.TrackerStatus.el_command" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">el_command</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="moddoc_core.html#spt3g.core.DoubleVector" title="spt3g.core.DoubleVector"><span class="pre">DoubleVector</span></a></em><a class="headerlink" href="#spt3g.gcp.TrackerStatus.el_command" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerStatus.el_pos">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">el_pos</span></span><a class="headerlink" href="#spt3g.gcp.TrackerStatus.el_pos" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">el_pos</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="moddoc_core.html#spt3g.core.DoubleVector" title="spt3g.core.DoubleVector"><span class="pre">DoubleVector</span></a></em><a class="headerlink" href="#spt3g.gcp.TrackerStatus.el_pos" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerStatus.el_rate">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">el_rate</span></span><a class="headerlink" href="#spt3g.gcp.TrackerStatus.el_rate" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">el_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="moddoc_core.html#spt3g.core.DoubleVector" title="spt3g.core.DoubleVector"><span class="pre">DoubleVector</span></a></em><a class="headerlink" href="#spt3g.gcp.TrackerStatus.el_rate" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerStatus.el_rate_command">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">el_rate_command</span></span><a class="headerlink" href="#spt3g.gcp.TrackerStatus.el_rate_command" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">el_rate_command</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="moddoc_core.html#spt3g.core.DoubleVector" title="spt3g.core.DoubleVector"><span class="pre">DoubleVector</span></a></em><a class="headerlink" href="#spt3g.gcp.TrackerStatus.el_rate_command" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerStatus.in_control">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">in_control</span></span><a class="headerlink" href="#spt3g.gcp.TrackerStatus.in_control" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">in_control</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="moddoc_core.html#spt3g.core.BoolVector" title="spt3g.core.BoolVector"><span class="pre">BoolVector</span></a></em><a class="headerlink" href="#spt3g.gcp.TrackerStatus.in_control" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerStatus.scan_flag">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">scan_flag</span></span><a class="headerlink" href="#spt3g.gcp.TrackerStatus.scan_flag" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">scan_flag</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="moddoc_core.html#spt3g.core.BoolVector" title="spt3g.core.BoolVector"><span class="pre">BoolVector</span></a></em><a class="headerlink" href="#spt3g.gcp.TrackerStatus.scan_flag" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerStatus.state">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">state</span></span><a class="headerlink" href="#spt3g.gcp.TrackerStatus.state" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">state</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#spt3g.gcp.TrackerStateVector" title="spt3g.gcp.TrackerStateVector"><span class="pre">TrackerStateVector</span></a></em><a class="headerlink" href="#spt3g.gcp.TrackerStatus.state" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerStatus.time">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time</span></span><a class="headerlink" href="#spt3g.gcp.TrackerStatus.time" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="moddoc_core.html#spt3g.core.G3TimeVector" title="spt3g.core.G3TimeVector"><span class="pre">G3TimeVector</span></a></em><a class="headerlink" href="#spt3g.gcp.TrackerStatus.time" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1360,7 +1414,7 @@ None, add all.</p></li>
 <p>Various Python and C++ classes that are part of the public API.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="spt3g.gcp.ACUState">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.</span></span><span class="sig-name descname"><span class="pre">ACUState</span></span><a class="headerlink" href="#spt3g.gcp.ACUState" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.</span></span><span class="sig-name descname"><span class="pre">ACUState</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.ACUState" title="Link to this definition"></a></dt>
 <dd><dl class="py attribute">
 <dt class="sig sig-object py" id="spt3g.gcp.ACUState.IDLE">
 <span class="sig-name descname"><span class="pre">IDLE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">spt3g.gcp.ACUState.IDLE</span></em><a class="headerlink" href="#spt3g.gcp.ACUState.IDLE" title="Link to this definition"></a></dt>
@@ -1381,6 +1435,11 @@ None, add all.</p></li>
 <span class="sig-name descname"><span class="pre">WAIT_RESTART</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">spt3g.gcp.ACUState.WAIT_RESTART</span></em><a class="headerlink" href="#spt3g.gcp.ACUState.WAIT_RESTART" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="spt3g.gcp.ACUState.name">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#spt3g.gcp.ACUState.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="spt3g.gcp.ACUState.names">
 <span class="sig-name descname"><span class="pre">names</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#spt3g.gcp.ACUState.names" title="Link to this definition"></a></dt>
@@ -1392,6 +1451,11 @@ None, add all.</p></li>
 </pre></div>
 </div>
 </dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="spt3g.gcp.ACUState.value">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#spt3g.gcp.ACUState.value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="spt3g.gcp.ACUState.values">
@@ -1441,7 +1505,7 @@ a dictionary</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="spt3g.gcp.Experiment">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.</span></span><span class="sig-name descname"><span class="pre">Experiment</span></span><a class="headerlink" href="#spt3g.gcp.Experiment" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.</span></span><span class="sig-name descname"><span class="pre">Experiment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.Experiment" title="Link to this definition"></a></dt>
 <dd><p>Experiment identifier, to choose the correct storage schema when parsing arcfile frames</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="spt3g.gcp.Experiment.BK">
@@ -1458,6 +1522,11 @@ a dictionary</p>
 <span class="sig-name descname"><span class="pre">SPT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">spt3g.gcp.Experiment.SPT</span></em><a class="headerlink" href="#spt3g.gcp.Experiment.SPT" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="spt3g.gcp.Experiment.name">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#spt3g.gcp.Experiment.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="spt3g.gcp.Experiment.names">
 <span class="sig-name descname"><span class="pre">names</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#spt3g.gcp.Experiment.names" title="Link to this definition"></a></dt>
@@ -1468,6 +1537,11 @@ a dictionary</p>
 </pre></div>
 </div>
 </dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="spt3g.gcp.Experiment.value">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#spt3g.gcp.Experiment.value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="spt3g.gcp.Experiment.values">
@@ -1496,7 +1570,7 @@ a dictionary</p>
 <p>Logger that relays error messages to the GCP mediator over TCP</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.gcp.GCPLogger.trim_file_names">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">trim_file_names</span></span><a class="headerlink" href="#spt3g.gcp.GCPLogger.trim_file_names" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">trim_file_names</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#spt3g.gcp.GCPLogger.trim_file_names" title="Link to this definition"></a></dt>
 <dd><p>Show only file leaves</p>
 </dd></dl>
 
@@ -1504,7 +1578,7 @@ a dictionary</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerState">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.</span></span><span class="sig-name descname"><span class="pre">TrackerState</span></span><a class="headerlink" href="#spt3g.gcp.TrackerState" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.</span></span><span class="sig-name descname"><span class="pre">TrackerState</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.TrackerState" title="Link to this definition"></a></dt>
 <dd><dl class="py attribute">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerState.HALTED">
 <span class="sig-name descname"><span class="pre">HALTED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">spt3g.gcp.TrackerState.HALTED</span></em><a class="headerlink" href="#spt3g.gcp.TrackerState.HALTED" title="Link to this definition"></a></dt>
@@ -1545,6 +1619,11 @@ a dictionary</p>
 <span class="sig-name descname"><span class="pre">UPDATING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">spt3g.gcp.TrackerState.UPDATING</span></em><a class="headerlink" href="#spt3g.gcp.TrackerState.UPDATING" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="spt3g.gcp.TrackerState.name">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#spt3g.gcp.TrackerState.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerState.names">
 <span class="sig-name descname"><span class="pre">names</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#spt3g.gcp.TrackerState.names" title="Link to this definition"></a></dt>
@@ -1560,6 +1639,11 @@ a dictionary</p>
 </pre></div>
 </div>
 </dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="spt3g.gcp.TrackerState.value">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#spt3g.gcp.TrackerState.value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerState.values">
@@ -1581,16 +1665,64 @@ a dictionary</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerStateVector">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.</span></span><span class="sig-name descname"><span class="pre">TrackerStateVector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.TrackerStateVector" title="Link to this definition"></a></dt>
-<dd><dl class="py method">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.</span></span><span class="sig-name descname"><span class="pre">TrackerStateVector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.TrackerStateVector" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.</span></span><span class="sig-name descname"><span class="pre">TrackerStateVector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.gcp.TrackerStateVector" title="spt3g.gcp.TrackerStateVector"><span class="pre">TrackerStateVector</span></a></span></em><span class="sig-paren">)</span></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.gcp.</span></span><span class="sig-name descname"><span class="pre">TrackerStateVector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Signature 2:
+Copy constructor</p>
+<dl class="py method">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerStateVector.append">
-<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.TrackerStateVector.append" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.gcp.TrackerState" title="spt3g.gcp.TrackerState"><span class="pre">TrackerState</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.TrackerStateVector.append" title="Link to this definition"></a></dt>
+<dd><p>Add an item to the end of the list</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.gcp.TrackerStateVector.clear">
+<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.TrackerStateVector.clear" title="Link to this definition"></a></dt>
+<dd><p>Clear the contents</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.gcp.TrackerStateVector.count">
+<span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.gcp.TrackerState" title="spt3g.gcp.TrackerState"><span class="pre">TrackerState</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#spt3g.gcp.TrackerStateVector.count" title="Link to this definition"></a></dt>
+<dd><p>Return the number of times <code class="docutils literal notranslate"><span class="pre">x</span></code> appears in the list</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.gcp.TrackerStateVector.extend">
-<span class="sig-name descname"><span class="pre">extend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.TrackerStateVector.extend" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">extend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">L</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.gcp.TrackerStateVector" title="spt3g.gcp.TrackerStateVector"><span class="pre">TrackerStateVector</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.TrackerStateVector.extend" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">extend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">L</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3TimestreamUnits.None" title="spt3g.core.G3TimestreamUnits.None"><span class="pre">None</span></a></span></span></dt>
+<dd><p>Signature 1:
+Extend the list by appending all the items in the given list</p>
+<p>Signature 2:
+Extend the list by appending all the items in the given list</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.gcp.TrackerStateVector.insert">
+<span class="sig-name descname"><span class="pre">insert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.gcp.TrackerState" title="spt3g.gcp.TrackerState"><span class="pre">TrackerState</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.TrackerStateVector.insert" title="Link to this definition"></a></dt>
+<dd><p>Insert an item at a given position.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.gcp.TrackerStateVector.pop">
+<span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spt3g.gcp.TrackerState" title="spt3g.gcp.TrackerState"><span class="pre">TrackerState</span></a></span></span><a class="headerlink" href="#spt3g.gcp.TrackerStateVector.pop" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spt3g.gcp.TrackerState" title="spt3g.gcp.TrackerState"><span class="pre">TrackerState</span></a></span></span></dt>
+<dd><p>Signature 1:
+Remove and return the last item</p>
+<p>Signature 2:
+Remove and return the item at index <code class="docutils literal notranslate"><span class="pre">i</span></code></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.gcp.TrackerStateVector.remove">
+<span class="sig-name descname"><span class="pre">remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.gcp.TrackerState" title="spt3g.gcp.TrackerState"><span class="pre">TrackerState</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.gcp.TrackerStateVector.remove" title="Link to this definition"></a></dt>
+<dd><p>Remove the first item from the list whose value is x. It is an error if there is no such item.</p>
+</dd></dl>
 
 </dd></dl>
 

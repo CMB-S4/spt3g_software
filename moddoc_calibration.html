@@ -361,6 +361,8 @@
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3VectorStringVector"><code class="docutils literal notranslate"><span class="pre">G3VectorStringVector</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.Int64Vector"><code class="docutils literal notranslate"><span class="pre">Int64Vector</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.IntVector"><code class="docutils literal notranslate"><span class="pre">IntVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.ItemsView"><code class="docutils literal notranslate"><span class="pre">ItemsView</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.KeysView"><code class="docutils literal notranslate"><span class="pre">KeysView</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.ModuleConfigVector"><code class="docutils literal notranslate"><span class="pre">ModuleConfigVector</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.Quat"><code class="docutils literal notranslate"><span class="pre">Quat</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.QuatVector"><code class="docutils literal notranslate"><span class="pre">QuatVector</span></code></a></li>
@@ -368,6 +370,7 @@
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.UInt64Vector"><code class="docutils literal notranslate"><span class="pre">UInt64Vector</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.UIntVector"><code class="docutils literal notranslate"><span class="pre">UIntVector</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.UnsignedCharVector"><code class="docutils literal notranslate"><span class="pre">UnsignedCharVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.ValuesView"><code class="docutils literal notranslate"><span class="pre">ValuesView</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.apidoc.G3Documenter"><code class="docutils literal notranslate"><span class="pre">G3Documenter</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.fileio.G3File"><code class="docutils literal notranslate"><span class="pre">G3File</span></code></a></li>
 </ul>
@@ -695,7 +698,8 @@
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.calibration.</span></span><span class="sig-name descname"><span class="pre">BolometerProperties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Bases: <a class="reference internal" href="moddoc_core.html#spt3g.core.G3FrameObject" title="spt3g.core.G3FrameObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3FrameObject</span></code></a></p>
 <p>Physical bolometer properties, such as detector angular offsets. Does not include tuning-dependent properties of the detectors.</p>
-<p>Signature 1: Copy constructor</p>
+<p>Signature 1:
+Copy constructor</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.calibration.BolometerProperties.Description">
 <span class="sig-name descname"><span class="pre">Description</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#spt3g.calibration.BolometerProperties.Description" title="Link to this definition"></a></dt>
@@ -710,7 +714,7 @@
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.calibration.BolometerProperties.band">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">band</span></span><a class="headerlink" href="#spt3g.calibration.BolometerProperties.band" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">band</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#spt3g.calibration.BolometerProperties.band" title="Link to this definition"></a></dt>
 <dd><p>Nominal center of detector observing band in frequency units</p>
 </dd></dl>
 
@@ -728,67 +732,67 @@
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.calibration.BolometerProperties.bandwidth">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bandwidth</span></span><a class="headerlink" href="#spt3g.calibration.BolometerProperties.bandwidth" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bandwidth</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#spt3g.calibration.BolometerProperties.bandwidth" title="Link to this definition"></a></dt>
 <dd><p>Measured bandwidth of detector observing band in frequency units</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.calibration.BolometerProperties.center_frequency">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">center_frequency</span></span><a class="headerlink" href="#spt3g.calibration.BolometerProperties.center_frequency" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">center_frequency</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#spt3g.calibration.BolometerProperties.center_frequency" title="Link to this definition"></a></dt>
 <dd><p>Measured center of detector observing band in frequency units</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.calibration.BolometerProperties.coupling">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">coupling</span></span><a class="headerlink" href="#spt3g.calibration.BolometerProperties.coupling" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">coupling</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#spt3g.calibration.BolometerCouplingType" title="spt3g.calibration.BolometerCouplingType"><span class="pre">BolometerCouplingType</span></a></em><a class="headerlink" href="#spt3g.calibration.BolometerProperties.coupling" title="Link to this definition"></a></dt>
 <dd><p>Optical coupling type</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.calibration.BolometerProperties.physical_name">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">physical_name</span></span><a class="headerlink" href="#spt3g.calibration.BolometerProperties.physical_name" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">physical_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#spt3g.calibration.BolometerProperties.physical_name" title="Link to this definition"></a></dt>
 <dd><p>Physical name of the detector (e.g. some polarization at some particular pixel on the wafer)</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.calibration.BolometerProperties.pixel_id">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pixel_id</span></span><a class="headerlink" href="#spt3g.calibration.BolometerProperties.pixel_id" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pixel_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#spt3g.calibration.BolometerProperties.pixel_id" title="Link to this definition"></a></dt>
 <dd><p>Name of the pixel of which this detector is a part</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.calibration.BolometerProperties.pixel_type">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pixel_type</span></span><a class="headerlink" href="#spt3g.calibration.BolometerProperties.pixel_type" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pixel_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#spt3g.calibration.BolometerProperties.pixel_type" title="Link to this definition"></a></dt>
 <dd><p>Name of the pixel type of which this detector is a part</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.calibration.BolometerProperties.pol_angle">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pol_angle</span></span><a class="headerlink" href="#spt3g.calibration.BolometerProperties.pol_angle" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pol_angle</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#spt3g.calibration.BolometerProperties.pol_angle" title="Link to this definition"></a></dt>
 <dd><p>Polarization angle in angular units</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.calibration.BolometerProperties.pol_efficiency">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pol_efficiency</span></span><a class="headerlink" href="#spt3g.calibration.BolometerProperties.pol_efficiency" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pol_efficiency</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#spt3g.calibration.BolometerProperties.pol_efficiency" title="Link to this definition"></a></dt>
 <dd><p>Polarization efficiency (0-1)</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.calibration.BolometerProperties.wafer_id">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">wafer_id</span></span><a class="headerlink" href="#spt3g.calibration.BolometerProperties.wafer_id" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">wafer_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#spt3g.calibration.BolometerProperties.wafer_id" title="Link to this definition"></a></dt>
 <dd><p>Name of the wafer this detector is on</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.calibration.BolometerProperties.x_offset">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x_offset</span></span><a class="headerlink" href="#spt3g.calibration.BolometerProperties.x_offset" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x_offset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#spt3g.calibration.BolometerProperties.x_offset" title="Link to this definition"></a></dt>
 <dd><p>Horizontal pointing offset relative to boresight in angular units.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.calibration.BolometerProperties.y_offset">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y_offset</span></span><a class="headerlink" href="#spt3g.calibration.BolometerProperties.y_offset" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y_offset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#spt3g.calibration.BolometerProperties.y_offset" title="Link to this definition"></a></dt>
 <dd><p>Vertical pointing offset relative to boresight in angular units.</p>
 </dd></dl>
 
@@ -796,103 +800,68 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="spt3g.calibration.BolometerPropertiesMap">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.calibration.</span></span><span class="sig-name descname"><span class="pre">BolometerPropertiesMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.calibration.BolometerPropertiesMap" title="spt3g.calibration.BolometerPropertiesMap"><span class="pre">BolometerPropertiesMap</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.calibration.BolometerPropertiesMap" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.calibration.</span></span><span class="sig-name descname"><span class="pre">BolometerPropertiesMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.calibration.BolometerPropertiesMap" title="Link to this definition"></a></dt>
 <dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.calibration.</span></span><span class="sig-name descname"><span class="pre">BolometerPropertiesMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.calibration.</span></span><span class="sig-name descname"><span class="pre">BolometerPropertiesMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.calibration.BolometerPropertiesMap" title="spt3g.calibration.BolometerPropertiesMap"><span class="pre">BolometerPropertiesMap</span></a></span></em><span class="sig-paren">)</span></dt>
 <dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.calibration.</span></span><span class="sig-name descname"><span class="pre">BolometerPropertiesMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span></dt>
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.calibration.</span></span><span class="sig-name descname"><span class="pre">BolometerPropertiesMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span></dt>
-<dd><p>Bases: <a class="reference internal" href="moddoc_core.html#spt3g.core.G3FrameObject" title="spt3g.core.G3FrameObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3FrameObject</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_BolometerPropertiesMapBaseMap</span></code></p>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.calibration.</span></span><span class="sig-name descname"><span class="pre">BolometerPropertiesMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_BolometerPropertiesMapBaseMap</span></code>, <a class="reference internal" href="moddoc_core.html#spt3g.core.G3FrameObject" title="spt3g.core.G3FrameObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3FrameObject</span></code></a></p>
 <p>Container for bolometer properties for focal plane, mapping logical bolometer IDs to their physical properties.</p>
-<p>Signature 2: Initialize with keys and values as tuples in a Python list: [(‘key’,’value’)]</p>
-<p>Signature 3: Initialize with keys and values from a Python dictionary: {‘key’:’value’}</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="spt3g.calibration.BolometerPropertiesMap.fromkeys">
-<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromkeys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">object</span></span></span><a class="headerlink" href="#spt3g.calibration.BolometerPropertiesMap.fromkeys" title="Link to this definition"></a></dt>
-<dd><p>BolometerPropertiesMap.fromkeys(S,v) -&gt; New BolometerPropertiesMap with keys from S and values equal to v.</p>
-</dd></dl>
-
+<p>Signature 2:
+Copy constructor</p>
+<p>Signature 3:
+Iterable constructor</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.calibration.BolometerPropertiesMap.clear">
 <span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.calibration.BolometerPropertiesMap.clear" title="Link to this definition"></a></dt>
-<dd><p>D.clear(​) -&gt; None.  Remove all items from D.</p>
+<dd><p>Remove all items from the mapping.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.calibration.BolometerPropertiesMap.copy">
 <span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spt3g.calibration.BolometerPropertiesMap" title="spt3g.calibration.BolometerPropertiesMap"><span class="pre">BolometerPropertiesMap</span></a></span></span><a class="headerlink" href="#spt3g.calibration.BolometerPropertiesMap.copy" title="Link to this definition"></a></dt>
-<dd><p>D.copy(​) -&gt; a shallow copy of D</p>
+<dd><p>Return a shallow copy of the mapping.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.calibration.BolometerPropertiesMap.get">
-<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg2:</span> <span class="pre">str</span></span></em><span class="optional">[</span>, <em class="sig-param"><span class="n"><span class="pre">default_val:</span> <span class="pre">object</span></span></em><span class="optional">]</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">object</span></span></span><a class="headerlink" href="#spt3g.calibration.BolometerPropertiesMap.get" title="Link to this definition"></a></dt>
-<dd><p>D.get(k[,d]) -&gt; D[k] if k in D, else d.  d defaults to None.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="spt3g.calibration.BolometerPropertiesMap.has_key">
-<span class="sig-name descname"><span class="pre">has_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#spt3g.calibration.BolometerPropertiesMap.has_key" title="Link to this definition"></a></dt>
-<dd><p>D.has_key(k) -&gt; True if D has a key k, else False</p>
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">object</span></span></span><a class="headerlink" href="#spt3g.calibration.BolometerPropertiesMap.get" title="Link to this definition"></a></dt>
+<dd><p>Return the value for key if key is in the mapping, else default.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.calibration.BolometerPropertiesMap.items">
-<span class="sig-name descname"><span class="pre">items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#spt3g.calibration.BolometerPropertiesMap.items" title="Link to this definition"></a></dt>
-<dd><p>D.items(​) -&gt; list of D’s (key, value) pairs, as 2-tuples</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="spt3g.calibration.BolometerPropertiesMap.iteritems">
-<span class="sig-name descname"><span class="pre">iteritems</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">object</span></span></span><a class="headerlink" href="#spt3g.calibration.BolometerPropertiesMap.iteritems" title="Link to this definition"></a></dt>
-<dd><p>D.iteritems(​) -&gt; an iterator over the (key, value) items of D</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="spt3g.calibration.BolometerPropertiesMap.iterkeys">
-<span class="sig-name descname"><span class="pre">iterkeys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">object</span></span></span><a class="headerlink" href="#spt3g.calibration.BolometerPropertiesMap.iterkeys" title="Link to this definition"></a></dt>
-<dd><p>D.iterkeys(​) -&gt; an iterator over the keys of D</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="spt3g.calibration.BolometerPropertiesMap.itervalues">
-<span class="sig-name descname"><span class="pre">itervalues</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">object</span></span></span><a class="headerlink" href="#spt3g.calibration.BolometerPropertiesMap.itervalues" title="Link to this definition"></a></dt>
-<dd><p>D.itervalues(​) -&gt; an iterator over the values of D</p>
+<span class="sig-name descname"><span class="pre">items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="moddoc_core.html#spt3g.core.ItemsView" title="spt3g.core.ItemsView"><span class="pre">ItemsView</span></a></span></span><a class="headerlink" href="#spt3g.calibration.BolometerPropertiesMap.items" title="Link to this definition"></a></dt>
+<dd><p>Return an object providing a view on the mappings’s items.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.calibration.BolometerPropertiesMap.keys">
-<span class="sig-name descname"><span class="pre">keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#spt3g.calibration.BolometerPropertiesMap.keys" title="Link to this definition"></a></dt>
-<dd><p>D.keys(​) -&gt; list of D’s keys</p>
+<span class="sig-name descname"><span class="pre">keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="moddoc_core.html#spt3g.core.KeysView" title="spt3g.core.KeysView"><span class="pre">KeysView</span></a></span></span><a class="headerlink" href="#spt3g.calibration.BolometerPropertiesMap.keys" title="Link to this definition"></a></dt>
+<dd><p>Return an object providing a view on the mappings’s keys.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.calibration.BolometerPropertiesMap.pop">
-<span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">object</span></span></span><a class="headerlink" href="#spt3g.calibration.BolometerPropertiesMap.pop" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spt3g.calibration.BolometerProperties" title="spt3g.calibration.BolometerProperties"><span class="pre">BolometerProperties</span></a></span></span><a class="headerlink" href="#spt3g.calibration.BolometerPropertiesMap.pop" title="Link to this definition"></a></dt>
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg3</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">object</span></span></span></dt>
-<dd><p>D.pop(k[,d]) -&gt; v, remove specified key and return the corresponding value
-If key is not found, d is returned if given, otherwise KeyError is raised</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="spt3g.calibration.BolometerPropertiesMap.popitem">
-<span class="sig-name descname"><span class="pre">popitem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">object</span></span></span><a class="headerlink" href="#spt3g.calibration.BolometerPropertiesMap.popitem" title="Link to this definition"></a></dt>
-<dd><p>D.popitem(​) -&gt; (k, v), remove and return some (key, value) pair as a
-2-tuple; but raise KeyError if D is empty</p>
+<span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">object</span></span></span></dt>
+<dd><p>Signature 1:
+Remove specified key and return the corresponding value. If the key is not found, raise a KeyError</p>
+<p>Signature 2:
+Remove specified key and return the corresponding value. If the key is not found, return the default</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.calibration.BolometerPropertiesMap.update">
-<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.calibration.BolometerPropertiesMap.update" title="Link to this definition"></a></dt>
-<dd><p>D.update(E) -&gt; None.  Update D from E: for k in E: D[k] = E[k]</p>
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.calibration.BolometerPropertiesMap.update" title="Link to this definition"></a></dt>
+<dd><p>Update mapping from iterable/mapping.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.calibration.BolometerPropertiesMap.values">
-<span class="sig-name descname"><span class="pre">values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#spt3g.calibration.BolometerPropertiesMap.values" title="Link to this definition"></a></dt>
-<dd><p>D.values(​) -&gt; list of D’s values</p>
+<span class="sig-name descname"><span class="pre">values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="moddoc_core.html#spt3g.core.ValuesView" title="spt3g.core.ValuesView"><span class="pre">ValuesView</span></a></span></span><a class="headerlink" href="#spt3g.calibration.BolometerPropertiesMap.values" title="Link to this definition"></a></dt>
+<dd><p>Return an object providing a view on the mappings’s values.</p>
 </dd></dl>
 
 </dd></dl>
@@ -904,7 +873,8 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.calibration.</span></span><span class="sig-name descname"><span class="pre">PointingProperties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span></dt>
 <dd><p>Bases: <a class="reference internal" href="moddoc_core.html#spt3g.core.G3FrameObject" title="spt3g.core.G3FrameObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3FrameObject</span></code></a></p>
 <p>Pointing model parameters to be used for offline pointing corrections.</p>
-<p>Signature 1: Copy constructor</p>
+<p>Signature 1:
+Copy constructor</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.calibration.PointingProperties.Description">
 <span class="sig-name descname"><span class="pre">Description</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#spt3g.calibration.PointingProperties.Description" title="Link to this definition"></a></dt>
@@ -919,25 +889,25 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.calibration.PointingProperties.tiltAngle">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tiltAngle</span></span><a class="headerlink" href="#spt3g.calibration.PointingProperties.tiltAngle" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tiltAngle</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#spt3g.calibration.PointingProperties.tiltAngle" title="Link to this definition"></a></dt>
 <dd><p>Orientation of azimuth tilt.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.calibration.PointingProperties.tiltHA">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tiltHA</span></span><a class="headerlink" href="#spt3g.calibration.PointingProperties.tiltHA" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tiltHA</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#spt3g.calibration.PointingProperties.tiltHA" title="Link to this definition"></a></dt>
 <dd><p>Azimuth hour angle tilt parameter.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.calibration.PointingProperties.tiltLat">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tiltLat</span></span><a class="headerlink" href="#spt3g.calibration.PointingProperties.tiltLat" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tiltLat</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#spt3g.calibration.PointingProperties.tiltLat" title="Link to this definition"></a></dt>
 <dd><p>Azimuth lateral tilt parameter.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="spt3g.calibration.PointingProperties.tiltMag">
-<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tiltMag</span></span><a class="headerlink" href="#spt3g.calibration.PointingProperties.tiltMag" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">tiltMag</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#spt3g.calibration.PointingProperties.tiltMag" title="Link to this definition"></a></dt>
 <dd><p>Magnitude of azimuth tilt.</p>
 </dd></dl>
 
@@ -945,103 +915,68 @@ If key is not found, d is returned if given, otherwise KeyError is raised</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="spt3g.calibration.PointingPropertiesMap">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.calibration.</span></span><span class="sig-name descname"><span class="pre">PointingPropertiesMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.calibration.PointingPropertiesMap" title="spt3g.calibration.PointingPropertiesMap"><span class="pre">PointingPropertiesMap</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.calibration.PointingPropertiesMap" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.calibration.</span></span><span class="sig-name descname"><span class="pre">PointingPropertiesMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.calibration.PointingPropertiesMap" title="Link to this definition"></a></dt>
 <dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.calibration.</span></span><span class="sig-name descname"><span class="pre">PointingPropertiesMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.calibration.</span></span><span class="sig-name descname"><span class="pre">PointingPropertiesMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.calibration.PointingPropertiesMap" title="spt3g.calibration.PointingPropertiesMap"><span class="pre">PointingPropertiesMap</span></a></span></em><span class="sig-paren">)</span></dt>
 <dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.calibration.</span></span><span class="sig-name descname"><span class="pre">PointingPropertiesMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span></dt>
-<dt class="sig sig-object py">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.calibration.</span></span><span class="sig-name descname"><span class="pre">PointingPropertiesMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span></dt>
-<dd><p>Bases: <a class="reference internal" href="moddoc_core.html#spt3g.core.G3FrameObject" title="spt3g.core.G3FrameObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3FrameObject</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_PointingPropertiesMapBaseMap</span></code></p>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.calibration.</span></span><span class="sig-name descname"><span class="pre">PointingPropertiesMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_PointingPropertiesMapBaseMap</span></code>, <a class="reference internal" href="moddoc_core.html#spt3g.core.G3FrameObject" title="spt3g.core.G3FrameObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3FrameObject</span></code></a></p>
 <p>Container for pointing model parameters for offline pointing.</p>
-<p>Signature 2: Initialize with keys and values as tuples in a Python list: [(‘key’,’value’)]</p>
-<p>Signature 3: Initialize with keys and values from a Python dictionary: {‘key’:’value’}</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="spt3g.calibration.PointingPropertiesMap.fromkeys">
-<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fromkeys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">object</span></span></span><a class="headerlink" href="#spt3g.calibration.PointingPropertiesMap.fromkeys" title="Link to this definition"></a></dt>
-<dd><p>PointingPropertiesMap.fromkeys(S,v) -&gt; New PointingPropertiesMap with keys from S and values equal to v.</p>
-</dd></dl>
-
+<p>Signature 2:
+Copy constructor</p>
+<p>Signature 3:
+Iterable constructor</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.calibration.PointingPropertiesMap.clear">
 <span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.calibration.PointingPropertiesMap.clear" title="Link to this definition"></a></dt>
-<dd><p>D.clear(​) -&gt; None.  Remove all items from D.</p>
+<dd><p>Remove all items from the mapping.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.calibration.PointingPropertiesMap.copy">
 <span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spt3g.calibration.PointingPropertiesMap" title="spt3g.calibration.PointingPropertiesMap"><span class="pre">PointingPropertiesMap</span></a></span></span><a class="headerlink" href="#spt3g.calibration.PointingPropertiesMap.copy" title="Link to this definition"></a></dt>
-<dd><p>D.copy(​) -&gt; a shallow copy of D</p>
+<dd><p>Return a shallow copy of the mapping.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.calibration.PointingPropertiesMap.get">
-<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg2:</span> <span class="pre">str</span></span></em><span class="optional">[</span>, <em class="sig-param"><span class="n"><span class="pre">default_val:</span> <span class="pre">object</span></span></em><span class="optional">]</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">object</span></span></span><a class="headerlink" href="#spt3g.calibration.PointingPropertiesMap.get" title="Link to this definition"></a></dt>
-<dd><p>D.get(k[,d]) -&gt; D[k] if k in D, else d.  d defaults to None.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="spt3g.calibration.PointingPropertiesMap.has_key">
-<span class="sig-name descname"><span class="pre">has_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#spt3g.calibration.PointingPropertiesMap.has_key" title="Link to this definition"></a></dt>
-<dd><p>D.has_key(k) -&gt; True if D has a key k, else False</p>
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">object</span></span></span><a class="headerlink" href="#spt3g.calibration.PointingPropertiesMap.get" title="Link to this definition"></a></dt>
+<dd><p>Return the value for key if key is in the mapping, else default.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.calibration.PointingPropertiesMap.items">
-<span class="sig-name descname"><span class="pre">items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#spt3g.calibration.PointingPropertiesMap.items" title="Link to this definition"></a></dt>
-<dd><p>D.items(​) -&gt; list of D’s (key, value) pairs, as 2-tuples</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="spt3g.calibration.PointingPropertiesMap.iteritems">
-<span class="sig-name descname"><span class="pre">iteritems</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">object</span></span></span><a class="headerlink" href="#spt3g.calibration.PointingPropertiesMap.iteritems" title="Link to this definition"></a></dt>
-<dd><p>D.iteritems(​) -&gt; an iterator over the (key, value) items of D</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="spt3g.calibration.PointingPropertiesMap.iterkeys">
-<span class="sig-name descname"><span class="pre">iterkeys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">object</span></span></span><a class="headerlink" href="#spt3g.calibration.PointingPropertiesMap.iterkeys" title="Link to this definition"></a></dt>
-<dd><p>D.iterkeys(​) -&gt; an iterator over the keys of D</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="spt3g.calibration.PointingPropertiesMap.itervalues">
-<span class="sig-name descname"><span class="pre">itervalues</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">object</span></span></span><a class="headerlink" href="#spt3g.calibration.PointingPropertiesMap.itervalues" title="Link to this definition"></a></dt>
-<dd><p>D.itervalues(​) -&gt; an iterator over the values of D</p>
+<span class="sig-name descname"><span class="pre">items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="moddoc_core.html#spt3g.core.ItemsView" title="spt3g.core.ItemsView"><span class="pre">ItemsView</span></a></span></span><a class="headerlink" href="#spt3g.calibration.PointingPropertiesMap.items" title="Link to this definition"></a></dt>
+<dd><p>Return an object providing a view on the mappings’s items.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.calibration.PointingPropertiesMap.keys">
-<span class="sig-name descname"><span class="pre">keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#spt3g.calibration.PointingPropertiesMap.keys" title="Link to this definition"></a></dt>
-<dd><p>D.keys(​) -&gt; list of D’s keys</p>
+<span class="sig-name descname"><span class="pre">keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="moddoc_core.html#spt3g.core.KeysView" title="spt3g.core.KeysView"><span class="pre">KeysView</span></a></span></span><a class="headerlink" href="#spt3g.calibration.PointingPropertiesMap.keys" title="Link to this definition"></a></dt>
+<dd><p>Return an object providing a view on the mappings’s keys.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.calibration.PointingPropertiesMap.pop">
-<span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">object</span></span></span><a class="headerlink" href="#spt3g.calibration.PointingPropertiesMap.pop" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spt3g.calibration.PointingProperties" title="spt3g.calibration.PointingProperties"><span class="pre">PointingProperties</span></a></span></span><a class="headerlink" href="#spt3g.calibration.PointingPropertiesMap.pop" title="Link to this definition"></a></dt>
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg3</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">object</span></span></span></dt>
-<dd><p>D.pop(k[,d]) -&gt; v, remove specified key and return the corresponding value
-If key is not found, d is returned if given, otherwise KeyError is raised</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="spt3g.calibration.PointingPropertiesMap.popitem">
-<span class="sig-name descname"><span class="pre">popitem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">object</span></span></span><a class="headerlink" href="#spt3g.calibration.PointingPropertiesMap.popitem" title="Link to this definition"></a></dt>
-<dd><p>D.popitem(​) -&gt; (k, v), remove and return some (key, value) pair as a
-2-tuple; but raise KeyError if D is empty</p>
+<span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">object</span></span></span></dt>
+<dd><p>Signature 1:
+Remove specified key and return the corresponding value. If the key is not found, raise a KeyError</p>
+<p>Signature 2:
+Remove specified key and return the corresponding value. If the key is not found, return the default</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.calibration.PointingPropertiesMap.update">
-<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.calibration.PointingPropertiesMap.update" title="Link to this definition"></a></dt>
-<dd><p>D.update(E) -&gt; None.  Update D from E: for k in E: D[k] = E[k]</p>
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.calibration.PointingPropertiesMap.update" title="Link to this definition"></a></dt>
+<dd><p>Update mapping from iterable/mapping.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.calibration.PointingPropertiesMap.values">
-<span class="sig-name descname"><span class="pre">values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#spt3g.calibration.PointingPropertiesMap.values" title="Link to this definition"></a></dt>
-<dd><p>D.values(​) -&gt; list of D’s values</p>
+<span class="sig-name descname"><span class="pre">values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="moddoc_core.html#spt3g.core.ValuesView" title="spt3g.core.ValuesView"><span class="pre">ValuesView</span></a></span></span><a class="headerlink" href="#spt3g.calibration.PointingPropertiesMap.values" title="Link to this definition"></a></dt>
+<dd><p>Return an object providing a view on the mappings’s values.</p>
 </dd></dl>
 
 </dd></dl>
@@ -1359,7 +1294,7 @@ hardware map information with real calibration.</p>
 <p>Various Python and C++ classes that are part of the public API.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="spt3g.calibration.BolometerCouplingType">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.calibration.</span></span><span class="sig-name descname"><span class="pre">BolometerCouplingType</span></span><a class="headerlink" href="#spt3g.calibration.BolometerCouplingType" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.calibration.</span></span><span class="sig-name descname"><span class="pre">BolometerCouplingType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.calibration.BolometerCouplingType" title="Link to this definition"></a></dt>
 <dd><p>Coupling type for BolometerProperties objects.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="spt3g.calibration.BolometerCouplingType.DarkCrossover">
@@ -1396,6 +1331,11 @@ hardware map information with real calibration.</p>
 <span class="sig-name descname"><span class="pre">Unknown</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">spt3g.calibration.BolometerCouplingType.Unknown</span></em><a class="headerlink" href="#spt3g.calibration.BolometerCouplingType.Unknown" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="spt3g.calibration.BolometerCouplingType.name">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#spt3g.calibration.BolometerCouplingType.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="spt3g.calibration.BolometerCouplingType.names">
 <span class="sig-name descname"><span class="pre">names</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><a class="headerlink" href="#spt3g.calibration.BolometerCouplingType.names" title="Link to this definition"></a></dt>
@@ -1410,6 +1350,11 @@ hardware map information with real calibration.</p>
 </pre></div>
 </div>
 </dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="spt3g.calibration.BolometerCouplingType.value">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#spt3g.calibration.BolometerCouplingType.value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="spt3g.calibration.BolometerCouplingType.values">

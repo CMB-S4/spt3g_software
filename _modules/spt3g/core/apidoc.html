@@ -358,6 +358,8 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_core.html#spt3g.core.G3VectorStringVector"><code class="docutils literal notranslate"><span class="pre">G3VectorStringVector</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_core.html#spt3g.core.Int64Vector"><code class="docutils literal notranslate"><span class="pre">Int64Vector</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_core.html#spt3g.core.IntVector"><code class="docutils literal notranslate"><span class="pre">IntVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../moddoc_core.html#spt3g.core.ItemsView"><code class="docutils literal notranslate"><span class="pre">ItemsView</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../moddoc_core.html#spt3g.core.KeysView"><code class="docutils literal notranslate"><span class="pre">KeysView</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_core.html#spt3g.core.ModuleConfigVector"><code class="docutils literal notranslate"><span class="pre">ModuleConfigVector</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_core.html#spt3g.core.Quat"><code class="docutils literal notranslate"><span class="pre">Quat</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_core.html#spt3g.core.QuatVector"><code class="docutils literal notranslate"><span class="pre">QuatVector</span></code></a></li>
@@ -365,6 +367,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_core.html#spt3g.core.UInt64Vector"><code class="docutils literal notranslate"><span class="pre">UInt64Vector</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_core.html#spt3g.core.UIntVector"><code class="docutils literal notranslate"><span class="pre">UIntVector</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_core.html#spt3g.core.UnsignedCharVector"><code class="docutils literal notranslate"><span class="pre">UnsignedCharVector</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../moddoc_core.html#spt3g.core.ValuesView"><code class="docutils literal notranslate"><span class="pre">ValuesView</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_core.html#spt3g.core.apidoc.G3Documenter"><code class="docutils literal notranslate"><span class="pre">G3Documenter</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_core.html#spt3g.core.fileio.G3File"><code class="docutils literal notranslate"><span class="pre">G3File</span></code></a></li>
 </ul>
@@ -843,12 +846,8 @@
             <span class="n">isclass</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span>
             <span class="n">ismod</span> <span class="o">=</span> <span class="n">isclass</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">G3Module</span><span class="p">)</span>
             <span class="n">isobj</span> <span class="o">=</span> <span class="n">isclass</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">G3FrameObject</span><span class="p">)</span>
-            <span class="n">iscxx</span> <span class="o">=</span> <span class="s1">&#39;Boost.Python&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">iscxx</span><span class="p">:</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">iscxx</span> <span class="o">=</span> <span class="s1">&#39;Boost.Python&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">mro</span><span class="p">())</span>
-                <span class="k">except</span><span class="p">:</span>
-                    <span class="k">pass</span>
+            <span class="n">tstr</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+            <span class="n">iscxx</span> <span class="o">=</span> <span class="s1">&#39;builtin_function_or_method&#39;</span> <span class="ow">in</span> <span class="n">tstr</span> <span class="ow">or</span> <span class="s1">&#39;pybind11&#39;</span> <span class="ow">in</span> <span class="n">tstr</span>
 
             <span class="c1"># add to cache</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;__g3decorator__&quot;</span><span class="p">):</span>
