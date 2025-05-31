@@ -1,8 +1,4 @@
 cmake_minimum_required(VERSION 3.12)
-# Don't warn about removal of FindBoost in cmake 3.30+
-if(POLICY CMP0167)
-	cmake_policy(SET CMP0167 NEW)
-endif()
 
 project(spt3g)
 enable_testing()
@@ -37,7 +33,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-# Find all the Boost and Python libraries
+# Find all the Python libraries
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
@@ -48,11 +44,28 @@ else()
 	find_package(Python COMPONENTS Interpreter Development REQUIRED)
 endif()
 
-set(Boost_USE_STATIC_LIBS OFF)
-set(Boost_USE_MULTITHREADED ON)
-set(Boost_USE_STATIC_RUNTIME OFF)
-set(Boost_PYTHON_VERSION ${Python_VERSION})
-find_package(Boost COMPONENTS python REQUIRED)
+# Find pybind11
+set(PYBIND11_FINDPYTHON ON)
+find_package(pybind11 2.13 QUIET)
+if (pybind11_FOUND)
+	message(STATUS "Found pybind11: ${pybind11_INCLUDE_DIR} (found version \"${pybind11_VERSION}\")")
+else()
+	if (NOT pybind11_DIR)
+		# download if necessary
+		include(FetchContent)
+		FetchContent_Declare(
+			pybind11
+			GIT_REPOSITORY https://github.com/pybind/pybind11.git
+			GIT_TAG v2.13.6
+		)
+		FetchContent_MakeAvailable(pybind11)
+	else()
+		find_package(pybind11 2.13 CONFIG REQUIRED)
+	endif()
+endif()
+if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug" OR "${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
+	add_compile_definitions(PYBIND11_DETAILED_ERROR_MESSAGES)
+endif()
 
 # Interface library for flags and library dependencies
 add_library(spt3g INTERFACE)
@@ -65,27 +78,11 @@ if (SPT3G_VERSION)
 endif()
 
 target_compile_features(spt3g INTERFACE cxx_std_17)
-target_include_directories(spt3g INTERFACE ${Boost_INCLUDE_DIR})
-target_link_libraries(spt3g INTERFACE Threads::Threads Boost::python)
+target_link_libraries(spt3g INTERFACE Threads::Threads)
 target_include_directories(spt3g INTERFACE $<INSTALL_INTERFACE:${SPT3G_INCLUDE_INSTALL_DIR}>)
 
 # Python bindings
-if(TARGET Python::Module)
-	target_link_libraries(spt3g INTERFACE Python::Module)
-else()
-	target_include_directories(spt3g INTERFACE ${Python_INCLUDE_DIRS})
-	if(APPLE)
-		target_link_options(spt3g INTERFACE "LINKER:-undefined,dynamic_lookup")
-	endif()
-endif()
-
-# Work around yet more bugs in GCC 4.4, this time with C++ 11 support
-# Also increase maximum number of arguments in python bindings
-target_compile_definitions(spt3g INTERFACE -DBOOST_PYTHON_MAX_ARITY=20
-	-DBOOST_ALLOW_DEPRECATED_HEADERS)
-if(Boost_VERSION VERSION_LESS 1.77)
-	target_compile_definitions(spt3g INTERFACE -DBOOST_BIND_GLOBAL_PLACEHOLDERS)
-endif()
+target_link_libraries(spt3g INTERFACE pybind11::module)
 
 # Shell script to set environment variables
 configure_file(${CMAKE_SOURCE_DIR}/cmake/env-shell.sh.in ${CMAKE_BINARY_DIR}/env-shell.sh @ONLY)

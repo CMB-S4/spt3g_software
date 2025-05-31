@@ -22,6 +22,8 @@ enum MapCoordReference {
  * interface for the map maker.
  */
 
+#define NOT_IMPLEMENTED { log_fatal("Not implemented"); }
+
 class G3SkyMap {
 public:
 	// Following numerical values are important
@@ -57,7 +59,7 @@ public:
 	virtual ~G3SkyMap() {};
 
 	// Reimplement the following in subclasses
-	virtual std::shared_ptr<G3SkyMap> Clone(bool copy_data = true) const = 0;
+	virtual std::shared_ptr<G3SkyMap> Clone(bool copy_data = true) const NOT_IMPLEMENTED;
 
 	MapCoordReference coord_ref;
 	G3Timestream::TimestreamUnits units;
@@ -74,14 +76,14 @@ public:
 	}
 
 	// Return a (modifiable) pixel value
-	virtual double &operator [] (size_t i) = 0;
+	virtual double &operator [] (size_t i) NOT_IMPLEMENTED;
 	double operator [] (size_t i) const { return this->at(i); };
-	virtual double at(size_t i) const = 0;
+	virtual double at(size_t i) const NOT_IMPLEMENTED;
 
 	virtual size_t size(void) const;  // total number of pixels
-	virtual size_t NpixAllocated(void) const = 0;  // stored in RAM
-	virtual size_t NpixNonZero(void) const = 0;  // nonzero
-	virtual std::vector<size_t> shape(void) const = 0;  // map shape
+	virtual size_t NpixAllocated(void) const NOT_IMPLEMENTED;  // stored in RAM
+	virtual size_t NpixNonZero(void) const NOT_IMPLEMENTED;  // nonzero
+	virtual std::vector<size_t> shape(void) const NOT_IMPLEMENTED;  // map shape
 
 	bool IsPolarized() const { return pol_conv != ConvNone; }
 
@@ -171,17 +173,17 @@ public:
 
 	virtual std::vector<double> PixelToAngle(size_t pixel) const;
 	virtual size_t AngleToPixel(double alpha, double delta) const;
-	virtual Quat PixelToQuat(size_t pixel) const = 0;
-	virtual size_t QuatToPixel(const Quat &q) const = 0;
+	virtual Quat PixelToQuat(size_t pixel) const NOT_IMPLEMENTED;
+	virtual size_t QuatToPixel(const Quat &q) const NOT_IMPLEMENTED;
 
 	// Rebinning and interpolation
 	virtual void GetRebinAngles(size_t pixel, size_t scale,
 	    std::vector<double> & alphas, std::vector<double> & deltas) const;
-	virtual G3VectorQuat GetRebinQuats(size_t pixel, size_t scale) const = 0;
+	virtual G3VectorQuat GetRebinQuats(size_t pixel, size_t scale) const NOT_IMPLEMENTED;
 	virtual void GetInterpPixelsWeights(double alpha, double delta,
 	    std::vector<uint64_t> & pixels, std::vector<double> & weights) const;
 	virtual void GetInterpPixelsWeights(const Quat &q, std::vector<uint64_t> & pixels,
-	    std::vector<double> & weights) const = 0;
+	    std::vector<double> & weights) const NOT_IMPLEMENTED;
 	double GetInterpPrecalc(const std::vector<uint64_t> &pixels,
 	    const std::vector<double> &weights) const;
 	double GetInterpValue(double alpha, double delta) const;
@@ -190,11 +192,11 @@ public:
 	    const std::vector<double> &deltas) const;
 	std::vector<double> GetInterpValues(const G3VectorQuat & quats) const;
 
-	virtual std::shared_ptr<G3SkyMap> Rebin(size_t scale, bool norm = true) const = 0;
+	virtual std::shared_ptr<G3SkyMap> Rebin(size_t scale, bool norm = true) const NOT_IMPLEMENTED;
 
 	/* Analogue to healpy.query_disc, returns list of pixels within a disc */
 	std::vector<uint64_t> QueryDisc(double alpha, double delta, double radius) const;
-	virtual std::vector<uint64_t> QueryDisc(const Quat &q, double radius) const = 0;
+	virtual std::vector<uint64_t> QueryDisc(const Quat &q, double radius) const NOT_IMPLEMENTED;
 	std::vector<uint64_t> QueryAlphaEllipse(double alpha, double delta, double a, double b) const;
 	std::vector<uint64_t> QueryAlphaEllipse(const Quat &q, double a, double b) const;
 
@@ -224,6 +226,8 @@ private:
 
 	SET_LOGGER("G3SkyMap");
 };
+
+#undef NOT_IMPLEMENTED
 
 G3_POINTERS(G3SkyMap);
 

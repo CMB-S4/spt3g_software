@@ -30,6 +30,8 @@ Adding a Project
 
 To add another project to the repository (corresponding to a python module, e.g. ``from spt3g import newthing``), make a new directory at the root of the repository. This directory must contain a file called CMakeLists.txt.
 
+Many of the macros used below are defined in ``cmake/Spt3gIncludes.cmake``.
+
 Adding Python code
 ~~~~~~~~~~~~~~~~~~
 
@@ -48,12 +50,31 @@ To add a C++ component to your project, add some lines like the following:
 
 .. code-block:: cmake
 
-	add_library(newthing SHARED
-		src/MyNewThing.cxx src/python.cxx
+	# shared library code
+	add_spt3g_library(newthing SHARED
+		src/MyNewThing.cxx
 	)
-	target_link_libraries(newthing core ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
+	# link against any dependencies (typically at least the core library)
+	target_link_libraries(newthing PUBLIC core)
 
-This builds a library called ``newthing.so`` from the two given source files and links it to the spt3g core library and the Boost and Python libraries (which are mandatory). Typically C++ source files are in a directory called ``src``. Header files that you want visible from other projects must be placed in a directory called ``include/newthing``.
+	add_spt3g_module(newthing src/python.cxx)
+
+This builds a library called ``libspt3g-newthing.so`` from the given source file and links it to the spt3g core library and required Python and pybind11 headers.  It then also builds a companion Python module called (for example) ``_libnewthing.cpython-310-x86_64-linux-gnu.so``, which links against the shared library.  This separation of library and module code allows other projects to link against your library.  Typically C++ source files are in a directory called ``src``. Header files that you want visible from other projects must be placed in a directory called ``include/newthing``.  Python bindings are sprinkled throughout the various translation units using the PYBINDINGS macro, like so:
+
+.. code-block:: c++
+
+	PYBINDINGS("newthing", scope) {
+
+		scope.def("myfunction", &myfunction, "This function does stuff");
+
+		// add more things to the scope
+	}
+
+Add one such block per source file / translation unit.  This registers the block of code
+as a function to be run when the module is declared.  Bindings are generated in the
+order in which they are compiled into the library, so be careful about dependencies --
+base classes need to be registered before derived ones, etc.  There are many convenience
+functions for creating bindings, documented in the core library header files.
 
 Every C++ library must contain a file declaring the library to Python. This file is usually named ``python.cxx`` and has contents like the following:
 
@@ -61,9 +82,11 @@ Every C++ library must contain a file declaring the library to Python. This file
 
 	#include <pybindings.h>
 
-	SPT3G_PYTHON_MODULE(newthing)
+	SPT3G_PYTHON_MODULE(newthing, scope)
 	{
-		py::import("spt3g.core"); // Import core python bindings
+		py::module_::import("spt3g.core"); // Import core python bindings
+
+		// perhaps register extra bindings or modify attributes of scope
 	}
 
 This is sufficient for most uses (with "newthing" replaced by the name of the project).
@@ -71,16 +94,16 @@ This is sufficient for most uses (with "newthing" replaced by the name of the pr
 Adding a C++ executable
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-You can also add C++ executables. Usually, there is not much reason to do this since everything is designed to be interacted with by Python. A few projects contain small standalone executables nonetheless, typically as test programs.
+You can also add C++ executables. Usually, there is not much reason to do this since everything is designed to be interacted with by Python. A few projects contain small standalone executables nonetheless, typically as test programs.  Follow the pybind11 documentation_ for writing C++ programs with an embedded interpreter, and compile as follows:
 
 .. code-block:: cmake
 
 	add_spt3g_executable(newthingexec MyNewThingExecutable.cxx)
-	target_link_libraries(newthingexec core newthing)
-	list(APPEND SPT3G_PROGRAMS newthingexec)
-	set(SPT3G_PROGRAMS ${SPT3G_PROGRAMS} PARENT_SCOPE)
+	target_link_libraries(newthingexec newthing)
 
-The ``target_link_libraries`` command works as in `Adding a C++ library`_ above. The first command produces an executable named ``newthingexec`` that will be placed in the ``bin`` subdirectory of the build directory. The ``list`` and ``set`` commands inform other parts of the build system that this executable will exist, so that it can be included during installation. 
+The ``target_link_libraries`` command works as in `Adding a C++ library`_ above. The first command produces an executable named ``newthingexec`` that will be placed in the ``bin`` subdirectory of the build directory.
+
+.. _documentation: https://pybind11.readthedocs.io/en/stable/advanced/embedding.html
 
 Adding tests
 ~~~~~~~~~~~~

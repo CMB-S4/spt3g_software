@@ -12,7 +12,7 @@
 #include <maps/pointing.h>
 #include <calibration/BoloProperties.h>
 
-class HitsBinner : public G3Module {
+class __attribute__((visibility("hidden"))) HitsBinner : public G3Module {
 public:
 	HitsBinner(std::string output_map_id, const G3SkyMap &stub_map,
 	    std::string pointing, std::string timestreams,
@@ -124,11 +124,12 @@ HitsBinner::HitsBinner(std::string output_map_id, const G3SkyMap &stub_map,
 	H_->units = G3Timestream::None;
 	H_->weighted = false;
 
-	if (PyCallable_Check(map_per_scan.ptr())) {
+	if (py::isinstance<py::function>(map_per_scan)) {
 		map_per_scan_callback_ = map_per_scan;
 		map_per_scan_ = -1;
 	} else {
-		map_per_scan_ = py::extract<bool>(map_per_scan)();
+		map_per_scan_ = map_per_scan.cast<bool>();
+		map_per_scan_callback_ = py::none();
 	}
 }
 
@@ -147,7 +148,7 @@ HitsBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 			if (map_per_scan_ >= 0)
 				emit_map_now = map_per_scan_;
 			else
-				emit_map_now = map_per_scan_callback_(frame);
+				emit_map_now = map_per_scan_callback_(frame).cast<bool>();
 		}
 	}
 	

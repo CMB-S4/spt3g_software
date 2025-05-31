@@ -23,7 +23,6 @@ except ImportError:
 from .util import *
 
 from .apidoc import *
-from .frameextensions import *
 from .timestreamextensions import *
 from .quatextensions import *
 

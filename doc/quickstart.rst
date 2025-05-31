@@ -10,14 +10,14 @@ Quick Start
 How to Install
 --------------
 
-spt3g_software depends on Boost and cmake, as well as the usual Python packages. Some additional packages (FFTW, GSL, and NetCDF, in particular) will activate optional components of the code if installed. You also need a C++11 compiler. This software is designed to run and work on a variety of operating systems (all Linuxes, Mac OS X, and FreeBSD) and architectures (at least 64-bit x86 and POWER).
+spt3g_software depends on pybind11 and cmake, as well as the usual Python packages. Some additional packages (FFTW, GSL, and NetCDF, in particular) will activate optional components of the code if installed. You also need a C++11 compiler. This software is designed to run and work on a variety of operating systems (all Linuxes, Mac OS X, and FreeBSD) and architectures (at least 64-bit x86 and POWER).
 
 Minimum versions:
 
-- GCC >= 4.7 or clang >= 3.3
-- Boost >= 1.48
+- GCC >= 5.0 or clang >= 3.4
+- pybind11 >= 2.13
 - cmake >= 3.12
-- Python >= 2.7
+- Python >= 3.7
 
 
 Installing Dependencies on a Personal System
@@ -27,13 +27,13 @@ On Ubuntu/Debian, you can install the non-Python dependencies, including the opt
 
 .. code-block:: sh
 
-	apt-get install cmake libboost-all-dev libflac-dev libnetcdf-dev libfftw3-dev libgsl0-dev
+	apt-get install cmake libz-dev libbz2-dev liblzma-dev libflac-dev libnetcdf-dev
 
 On RHEL-type systems (SL, CentOS, etc.), do this:
 
 .. code-block:: sh
 
-	yum install cmake netcdf-devel boost-devel flac-devel fftw-devel gsl-devel 
+	yum install cmake netcdf-devel zlib-devel bz2-devel xz-devel flac-devel
 
 Note that on RHEL/SL versions before 7, you will need a newer compiler than ships with the OS. Please see the clustertools repository for a script in this case.
 
@@ -56,7 +56,7 @@ On NERSC, all dependencies can be installed by ensuring the following `modules <
 
 .. code-block:: sh
 
-    PrgEnv-gnu/6.0.5 python/3.7-anaconda-2019.07 gcc/8.2.0 boost/1.72.0 fftw/3.3.8 gsl/2.5
+    PrgEnv-gnu/6.0.5 python/3.7-anaconda-2019.07 gcc/8.2.0 fftw/3.3.8 gsl/2.5
 
 Python dependencies like Numpy or others can be installed with pip or conda (the ``python/3.7-anaconda-2019.07`` module above will give you a ``pip`` or ``conda`` command you can use). 
 
@@ -82,7 +82,7 @@ Having installed the appropriate dependencies, return to your checkout and run t
 
 Passing ``-jN`` to ``make``, where N is the number of cores you wish to use during building, will speed up the process.
 
-By default, this will use the system's standard Python installation (whatever you get if you just run ``python``). If you want a different python, you can specify that python through passing the argument ``-DPython_EXECUTABLE=`` to cmake. For example, to use Python 3 if Python 3 is not the default, replace the cmake command above with ``cmake -DPython_EXECUTABLE=`which python3```. Note that, if you do this, make *sure* that a Boost library built for the version of Python you are using exists -- generally, installing everything from the system package manager will ensure this.
+By default, this will use the system's standard Python installation (whatever you get if you just run ``python``). If you want a different python, you can specify that python through passing the argument ``-DPython_EXECUTABLE=`` to cmake. For example, to use Python 3 if Python 3 is not the default, replace the cmake command above with ``cmake -DPython_EXECUTABLE=`which python3```.
 
 Once that is complete, you can either use the ``env-shell.sh`` script in the build directory to set up the appropriate environment variables (PYTHONPATH, etc.):
 
@@ -118,7 +118,7 @@ For pre-built wheels hosted on `PyPI <https://pypi.org/p/spt3g>`_, available for
 
 	pip install spt3g
 
-The hosted wheels will include the necessary libraries (Boost, etc) bundled with the package.  Otherwise, ensure that the dependency libraries are installed as explained above, and processed to one of the following steps.
+The hosted wheels will include the necessary libraries (flac, etc) bundled with the package.  Otherwise, ensure that the dependency libraries are installed as explained above, and processed to one of the following steps.
 
 To install the package from the github repo, run ``pip`` as usual (this may take a while, so consider setting the ``CMAKE_BUILD_PARALLEL_LEVEL`` environment variable):
 

@@ -175,12 +175,8 @@ class G3Documenter:
             isclass = isinstance(obj, type)
             ismod = isclass and issubclass(obj, G3Module)
             isobj = isclass and issubclass(obj, G3FrameObject)
-            iscxx = 'Boost.Python' in str(type(obj))
-            if not iscxx:
-                try:
-                    iscxx = 'Boost.Python' in str(obj.mro())
-                except:
-                    pass
+            tstr = str(type(obj))
+            iscxx = 'builtin_function_or_method' in tstr or 'pybind11' in tstr
 
             # add to cache
             if hasattr(obj, "__g3decorator__"):
