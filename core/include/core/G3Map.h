@@ -52,9 +52,6 @@ public:
 	}
 };
 
-// Work around a bug in Boost related to serialization of multiple types
-// through the same base pointer in the same archive by providing a separate
-// class
 class G3MapFrameObject : public G3FrameObject, public std::map<std::string, G3FrameObjectPtr> {
 public:
 	template <class A> void save(A &ar, const unsigned v) const;
