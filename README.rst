@@ -173,10 +173,7 @@ Use the ``git archive`` command or the Python ``build`` package to export the so
 Version Control Hygiene
 -----------------------
 
-You can use two mechanisms to access the repository: git and SVN. The following is a brief overview of how to use these in a way that your collaborators will appreciate.
-
-Git
-===
+The following is a brief overview of how to use git in a way that your collaborators will appreciate.
 
 To initially check out the repository:
 
@@ -197,27 +194,4 @@ To send your changes back:
 	git diff files_to_commit <- Examine this
 	git commit files_to_commit
 	git push
-
-
-SVN
-===
-
-To initially check out the repository:
-
-.. code-block:: shell
-
-	svn co https://user@github.com/CMB-S4/spt3g_software/trunk spt3g_software
-
-To update your checkout:
-
-.. code-block:: shell
-
-	svn up
-
-To send your changes back:
-
-.. code-block:: shell
-
-	svn diff files_to_commit <- Examine this
-	svn ci files_to_commit
 
