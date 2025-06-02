@@ -71,6 +71,13 @@ for dim in [300, 301]:
         assert(np.allclose(fm1.wcs.wcs.cdelt, fm2.wcs.wcs.cdelt))
         assert(np.allclose(fm1.wcs.wcs.pc, fm2.wcs.wcs.pc))
 
+        fmask1 = maps.G3SkyMapMask(fm1, use_data=True)
+        maps.fitsio.save_skymapmask_fits("test_mask.fits", fmask1, overwrite=True)
+        fmask2 = maps.fitsio.load_skymapmask_fits("test_mask.fits")
+
+        assert(fmask1.compatible(fmask2))
+        assert((fmask1 == fmask2).all())
+
         w = fm2.wcs
         hdr = maps.fitsio.create_wcs_header(fm2)
         if verbose:
@@ -129,6 +136,7 @@ for dim in [300, 301]:
 
 if error:
     os.remove('test_map.fits')
+    os.remove('test_mask.fits')
     raise RuntimeError('Projection errors:{}'.format(error))
 
 try:
@@ -151,11 +159,20 @@ try:
 
     print('Checking healpy.write_map')
     os.remove('test_map.fits')
-    hp.write_map('test_map.fits', np.asarray(hm3), dtype=float)
+    hp.write_map('test_map.fits', np.asarray(hm3), dtype=float, coord="C")
     hm4 = maps.fitsio.load_skymap_fits('test_map.fits')['T']
     assert(hm1.compatible(hm4))
     assert(np.allclose(hm1, hm4))
 
+    hmask1 = maps.G3SkyMapMask(hm1, use_data=True)
+    maps.fitsio.save_skymapmask_fits("test_mask.fits", hmask1, overwrite=True)
+    hmask2 = maps.fitsio.load_skymapmask_fits("test_mask.fits")
+
+    assert(hmask1.compatible(hmask2))
+    assert((hmask1 == hmask2).all())
+
 finally:
     if os.path.exists('test_map.fits'):
         os.remove('test_map.fits')
+    if os.path.exists('test_mask.fits'):
+        os.remove('test_mask.fits')

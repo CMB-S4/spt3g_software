@@ -1,5 +1,5 @@
 from .. import core
-from . import HealpixSkyMap, FlatSkyMap, G3SkyMapWeights
+from . import HealpixSkyMap, FlatSkyMap, G3SkyMapWeights, G3SkyMapMask
 from . import MapPolType, MapPolConv, MapCoordReference, MapProjection
 
 import numpy as np
@@ -9,6 +9,8 @@ import warnings
 __all__ = [
     'load_skymap_fits',
     'save_skymap_fits',
+    'load_skymapmask_fits',
+    'save_skymapmask_fits',
     'SaveMapFrame',
 ]
 
@@ -52,12 +54,7 @@ def load_skymap_fits(filename, hdu=None, keys=None, memmap=False, apply_units=Fa
     pol_conv = None
     units = 'Tcmb'
     coord_ref = 'Equatorial'
-    proj = 'ProjZEA'
     weighted = False
-    alpha_center = None
-    delta_center = None
-    res = None
-    xres = None
 
     unit_dict = {
         'k_cmb': ('Tcmb', core.G3Units.K),
@@ -273,6 +270,90 @@ def load_skymap_fits(filename, hdu=None, keys=None, memmap=False, apply_units=Fa
         m.weighted = 'W' in output
 
     return output
+
+
+@core.usefulfunc
+def load_skymapmask_fits(filename, hdu=None, memmap=False):
+    """
+    Load a fits file containing a binary sky map mask.  Floating pointing or integer
+    data are converted to booleans.  Assumes the fits file contains a single mask,
+    with flat sky data stored in a single ``ImageHDU``, and healpix masks stored in a
+    single ``BinTableHDU`` in full-sky format with implicit indexing over all pixels.
+
+    Arguments
+    ---------
+    filename : str
+        Path to fits file
+    hdu : int, optional
+        If supplied, the data are extract from the given HDU index.
+    memmap : bool, optional
+        Argument passed to astropy.io.fits.open. If True, the map is not read into
+        memory, but only the required pixels are read when needed. Default: False.
+
+    Returns
+    -------
+    G3SkyMapMask :
+        The binary mask.
+    """
+    import astropy.io.fits
+
+    map_type = None
+    coord_ref = "Equatorial"
+    map_opts = {}
+
+    with astropy.io.fits.open(filename, memmap=memmap) as hdulist:
+        for hidx, H in enumerate(hdulist):
+
+            hdr = H.header
+            mtype = hdr.get('MAPTYPE', None)
+
+            if mtype == 'FLAT' or 'PROJ' in hdr or 'WCSAXES' in hdr or 'CTYPE1' in hdr:
+                map_type = 'flat'
+            elif mtype == 'HEALPIX' or hdr.get('PIXTYPE', None) == 'HEALPIX' or 'NSIDE' in hdr:
+                map_type = 'healpix'
+
+            if 'COORDSYS' in hdr:
+                cdict = {'C': 'Equatorial', 'G': 'Galactic', 'L': 'Local'}
+                coord_ref = cdict.get(hdr['COORDSYS'], coord_ref)
+            else:
+                coord_ref = hdr.get('COORDREF', coord_ref)
+            map_opts.update(coord_ref=getattr(MapCoordReference, coord_ref))
+
+            if map_type == 'flat':
+                map_opts.update(parse_wcs_header(hdr))
+            elif map_type == 'healpix':
+                nside = hdr['NSIDE']
+                nested = hdr['ORDERING'].strip().lower() in ['nest', 'nested']
+                map_opts.update(nested=nested)
+
+            # primary HDU
+            if H.data is None:
+                continue
+
+            # extracting a particular HDU
+            if map_type is not None and hdu is not None and hidx != hdu:
+                continue
+
+            # map type must be known if the HDU contains map data
+            if map_type not in ['flat', 'healpix']:
+                raise ValueError("Unknown map type in HDU {}".format(hidx))
+
+            data = np.array(H.data, dtype=bool)
+
+            if map_type == 'flat':
+                # flat map data
+                if map_opts.pop('transpose', False):
+                    data = np.array(data.T)
+                parent = FlatSkyMap(*data.shape, **map_opts)
+
+            elif map_type == 'healpix':
+                # healpix map data
+                parent = HealpixSkyMap(nside, **map_opts)
+
+            mask = G3SkyMapMask(parent, data.ravel())
+
+            del H.data, data
+            return mask
 
 
 def load_proj_dict(inverse=False):
@@ -721,6 +802,97 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
         for hdu in hdulist:
             del hdu.data
         del hdulist
+
+
+@core.usefulfunc
+def save_skymapmask_fits(filename, mask, overwrite=False, compress=False, hdr=None):
+    """
+    Save G3 mask objects to a fits file.
+
+    Masks with ``FlatSkyMap`` parents are stored in a (optionally compressed)
+    ``ImageHDU`` entry, which contains the projection information in its header in
+    standard WCS format, along with the image data for a single mask.
+
+    Masks with ``HealpixSkyMap`` parents are stored in a ``BinTableHDU`` extension,
+    which contains the necessary header information for compatiblity with healpix map
+    readers (e.g. `healpix.read_map`), and a single table with one column for the
+    mask.  Masks are stored densely with implicit indexing over all pixels.
+
+    Arguments
+    ---------
+    filename : str
+        Path to output file.  Must not exist, unless overwrite is True.
+    mask : G3SkyMapMask
+        Mask to save
+    overwrite : bool
+        If True, any existing file with the same name will be ovewritten.
+    compress : str or bool
+        If defined, and if input mask has a ``FlatSkyMap`` parent, store this in a
+        compressed image HDU.  Otherwise, store input mask in a standard ImageHDU,
+        which is readable with older FITS readers (e.g. idlastro). If defined, the
+        compression algorithm to be used by the Astropy class
+        astropy.io.fits.CompImageHDU.  Can be: 'RICE_1', 'RICE_ONE', 'PLIO_1',
+        'GZIP_1', 'GZIP_2' or 'HCOMPRESS_1'. Only GZIP_1 and GZIP_2 are lossless,
+        although only for integer data.
+    hdr  : dict
+       If defined, extra keywords to be appened to the FITS header. The dict
+       can contain entries such as ``hdr['NEWKEY'] = 'New value'`` or
+       ``hdr['NEWKEY'] = ('New value', "Comment for New value")``.
+    """
+    import astropy.io.fits
+
+    flat = isinstance(mask.parent, FlatSkyMap)
+
+    if flat:
+        header = create_wcs_header(mask.parent)
+        header["BITPIX"] = 8
+        header['NAXIS'] = 2
+
+    else:
+        header = astropy.io.fits.Header()
+
+        header['PIXTYPE'] = 'HEALPIX'
+        header['ORDERING'] = 'NEST' if mask.parent.nested else 'RING'
+        header['NSIDE'] = mask.parent.nside
+        header['INDXSCHM'] = 'IMPLICIT'
+        header['OBJECT'] = 'FULLSKY'
+        cdict = {'Equatorial': 'C', 'Galactic': 'G', 'Local': 'L'}
+        header['COORDSYS'] = cdict[str(mask.parent.coord_ref)]
+        if header['COORDSYS'] == 'C':
+            header['RADESYS'] = 'FK5'
+            header['EQUINOX'] = 2000.0
+
+    header['MAPTYPE'] = 'FLAT' if flat else 'HEALPIX'
+    header['COORDREF'] = str(mask.parent.coord_ref)
+
+    # Append extra metadata in hdr if defined
+    if hdr:
+        for keyword in hdr.keys():
+            header[keyword] = hdr[keyword]
+
+    hdulist = astropy.io.fits.HDUList()
+    data = np.asarray(mask)
+
+    if flat:
+        if compress:
+            ctype = None
+            if compress is True:
+                ctype = 'GZIP_2'
+            elif isinstance(compress, str):
+                ctype = compress
+            hdu = astropy.io.fits.CompImageHDU(
+                data, header=header, compression_type=ctype,
+            )
+        else:
+            hdu = astropy.io.fits.ImageHDU(data, header=header)
+    else:
+        cols = astropy.io.fits.ColDefs([])
+        col = astropy.io.fits.Column(name="MASK", format="B", array=data)
+        cols.add_col(col)
+        hdu = astropy.io.fits.BinTableHDU.from_columns(cols, header=header)
+
+    hdulist.append(hdu)
+    hdulist.writeto(filename, overwrite=overwrite)
 
 
 @core.indexmod
