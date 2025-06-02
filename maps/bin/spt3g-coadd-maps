@@ -31,6 +31,11 @@ P.add_argument(
     action="store_false",
     help="Do not check that weights are applied before coadding.",
 )
+P.add_argument(
+    "--record-obs-id",
+    action="store_true"
+    help="Include source name and observation ID info in the output coadd frame",
+)
 
 args = P.parse_args()
 
