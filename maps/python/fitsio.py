@@ -245,18 +245,18 @@ def load_skymap_fits(filename, hdu=None, keys=None, memmap=False, apply_units=Fa
                         col in ['TT', 'TQ', 'TU', 'QQ', 'QU', 'UU'],
                     )
                     pol_type = getattr(MapPolType, col, None)
-                    mdata = (pix, data, nside) if pix is not None else data
+                    mdata = (pix, data, nside) if pix is not None else (data,)
 
                     if weighted:
                         assert('T' in output)
                         if 'W' not in output:
                             output['W'] = G3SkyMapWeights()
                         weight_map = output['W']
-                        hm = HealpixSkyMap(mdata, pol_type=pol_type, **map_opts)
+                        hm = HealpixSkyMap(*mdata, pol_type=pol_type, **map_opts)
                         hm.overflow = overflow
                         setattr(weight_map, col, hm)
                     else:
-                        hm = HealpixSkyMap(mdata, pol_type=pol_type, **map_opts)
+                        hm = HealpixSkyMap(*mdata, pol_type=pol_type, **map_opts)
                         output[col] = hm
 
                     del mdata, data
