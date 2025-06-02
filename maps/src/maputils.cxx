@@ -205,6 +205,37 @@ G3SkyMapMaskPtr GetRaDecMask(const G3SkyMap &m, double ra_left, double ra_right,
 }
 
 
+G3SkyMapMaskPtr GetGalacticPlaneMask(const G3SkyMap &m, double lat)
+{
+	G3SkyMapMaskPtr mask(new G3SkyMapMask(m));
+
+	double slat = sin(lat / G3Units::rad);
+
+	if (m.coord_ref == MapCoordReference::Equatorial) {
+		auto q_rot = get_fk5_j2000_to_gal_quat();
+
+		for (size_t i = 0; i < m.size(); i++) {
+			// compute just latitude part of each coordinate
+			auto q = q_rot * m.PixelToQuat(i);
+			auto v = -q.a() * q_rot.d() - q.b() * q_rot.c() +
+			    q.c() * q_rot.b() + q.d() * q_rot.a();
+			if (fabs(v) <= slat)
+				(*mask)[i] = true;
+		}
+	} else if (m.coord_ref == MapCoordReference::Galactic) {
+		for (size_t i = 0; i < m.size(); i++) {
+			auto q = m.PixelToQuat(i);
+			if (fabs(q.d()) <= slat)
+				(*mask)[i] = true;
+		}
+	} else {
+		log_fatal("Unknown conversion to Galactic coordinates");
+	}
+
+	return mask;
+}
+
+
 void FlattenPol(FlatSkyMap &Q, FlatSkyMap &U, G3SkyMapWeightsPtr W, double h, bool invert)
 {
 	if (!(U.IsPolarized()))
@@ -568,6 +599,11 @@ PYBINDINGS("maps", scope)
 		py::arg("map_in"), py::arg("ra_left"), py::arg("ra_right"),
 		py::arg("dec_bottom"), py::arg("dec_top"),
 		"Returns a mask that is nonzero for any pixels within the given ra and dec ranges");
+
+	scope.def("get_galactic_plane_mask", GetGalacticPlaneMask,
+		py::arg("map_in"), py::arg("glat"),
+		"Returns a mask that is nonzero for any pixels within +/- the given latitude "
+		"about the Galactic plane.");
 
 	scope.def("flatten_pol", FlattenPol,
 		py::arg("Q"), py::arg("U"), py::arg("W")=G3SkyMapWeightsPtr(),
