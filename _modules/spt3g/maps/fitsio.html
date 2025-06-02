@@ -591,7 +591,9 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_maps.html#spt3g.maps.azel.convert_radec_to_gal"><code class="docutils literal notranslate"><span class="pre">convert_radec_to_gal()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_maps.html#spt3g.maps.convolve_map"><code class="docutils literal notranslate"><span class="pre">convolve_map()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_maps.html#spt3g.maps.fitsio.load_skymap_fits"><code class="docutils literal notranslate"><span class="pre">load_skymap_fits()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../moddoc_maps.html#spt3g.maps.fitsio.load_skymapmask_fits"><code class="docutils literal notranslate"><span class="pre">load_skymapmask_fits()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_maps.html#spt3g.maps.fitsio.save_skymap_fits"><code class="docutils literal notranslate"><span class="pre">save_skymap_fits()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../moddoc_maps.html#spt3g.maps.fitsio.save_skymapmask_fits"><code class="docutils literal notranslate"><span class="pre">save_skymapmask_fits()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_maps.html#spt3g.maps.flatten_pol"><code class="docutils literal notranslate"><span class="pre">flatten_pol()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_maps.html#spt3g.maps.get_boresight_rotator_timestream"><code class="docutils literal notranslate"><span class="pre">get_boresight_rotator_timestream()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_maps.html#spt3g.maps.get_fk5_j2000_to_gal_quat"><code class="docutils literal notranslate"><span class="pre">get_fk5_j2000_to_gal_quat()</span></code></a></li>
@@ -667,7 +669,7 @@
              
   <h1>Source code for spt3g.maps.fitsio</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">core</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">HealpixSkyMap</span><span class="p">,</span> <span class="n">FlatSkyMap</span><span class="p">,</span> <span class="n">G3SkyMapWeights</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">HealpixSkyMap</span><span class="p">,</span> <span class="n">FlatSkyMap</span><span class="p">,</span> <span class="n">G3SkyMapWeights</span><span class="p">,</span> <span class="n">G3SkyMapMask</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">MapPolType</span><span class="p">,</span> <span class="n">MapPolConv</span><span class="p">,</span> <span class="n">MapCoordReference</span><span class="p">,</span> <span class="n">MapProjection</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -677,6 +679,8 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">&#39;load_skymap_fits&#39;</span><span class="p">,</span>
     <span class="s1">&#39;save_skymap_fits&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;load_skymapmask_fits&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;save_skymapmask_fits&#39;</span><span class="p">,</span>
     <span class="s1">&#39;SaveMapFrame&#39;</span><span class="p">,</span>
 <span class="p">]</span>
 
@@ -722,12 +726,7 @@
     <span class="n">pol_conv</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;Tcmb&#39;</span>
     <span class="n">coord_ref</span> <span class="o">=</span> <span class="s1">&#39;Equatorial&#39;</span>
-    <span class="n">proj</span> <span class="o">=</span> <span class="s1">&#39;ProjZEA&#39;</span>
     <span class="n">weighted</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="n">alpha_center</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">delta_center</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">res</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">xres</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="n">unit_dict</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;k_cmb&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;Tcmb&#39;</span><span class="p">,</span> <span class="n">core</span><span class="o">.</span><span class="n">G3Units</span><span class="o">.</span><span class="n">K</span><span class="p">),</span>
@@ -943,6 +942,93 @@
         <span class="n">m</span><span class="o">.</span><span class="n">weighted</span> <span class="o">=</span> <span class="s1">&#39;W&#39;</span> <span class="ow">in</span> <span class="n">output</span>
 
     <span class="k">return</span> <span class="n">output</span></div>
+
+
+
+<div class="viewcode-block" id="load_skymapmask_fits">
+<a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.fitsio.load_skymapmask_fits">[docs]</a>
+<span class="nd">@core</span><span class="o">.</span><span class="n">usefulfunc</span>
+<span class="k">def</span> <span class="nf">load_skymapmask_fits</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">hdu</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">memmap</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load a fits file containing a binary sky map mask.  Floating pointing or integer</span>
+<span class="sd">    data are converted to booleans.  Assumes the fits file contains a single mask,</span>
+<span class="sd">    with flat sky data stored in a single ``ImageHDU``, and healpix masks stored in a</span>
+<span class="sd">    single ``BinTableHDU`` in full-sky format with implicit indexing over all pixels.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">    filename : str</span>
+<span class="sd">        Path to fits file</span>
+<span class="sd">    hdu : int, optional</span>
+<span class="sd">        If supplied, the data are extract from the given HDU index.</span>
+<span class="sd">    memmap : bool, optional</span>
+<span class="sd">        Argument passed to astropy.io.fits.open. If True, the map is not read into</span>
+<span class="sd">        memory, but only the required pixels are read when needed. Default: False.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    G3SkyMapMask :</span>
+<span class="sd">        The binary mask.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">astropy.io.fits</span>
+
+    <span class="n">map_type</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">coord_ref</span> <span class="o">=</span> <span class="s2">&quot;Equatorial&quot;</span>
+    <span class="n">map_opts</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">with</span> <span class="n">astropy</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">fits</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">memmap</span><span class="o">=</span><span class="n">memmap</span><span class="p">)</span> <span class="k">as</span> <span class="n">hdulist</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">hidx</span><span class="p">,</span> <span class="n">H</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">hdulist</span><span class="p">):</span>
+
+            <span class="n">hdr</span> <span class="o">=</span> <span class="n">H</span><span class="o">.</span><span class="n">header</span>
+            <span class="n">mtype</span> <span class="o">=</span> <span class="n">hdr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;MAPTYPE&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">mtype</span> <span class="o">==</span> <span class="s1">&#39;FLAT&#39;</span> <span class="ow">or</span> <span class="s1">&#39;PROJ&#39;</span> <span class="ow">in</span> <span class="n">hdr</span> <span class="ow">or</span> <span class="s1">&#39;WCSAXES&#39;</span> <span class="ow">in</span> <span class="n">hdr</span> <span class="ow">or</span> <span class="s1">&#39;CTYPE1&#39;</span> <span class="ow">in</span> <span class="n">hdr</span><span class="p">:</span>
+                <span class="n">map_type</span> <span class="o">=</span> <span class="s1">&#39;flat&#39;</span>
+            <span class="k">elif</span> <span class="n">mtype</span> <span class="o">==</span> <span class="s1">&#39;HEALPIX&#39;</span> <span class="ow">or</span> <span class="n">hdr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;PIXTYPE&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;HEALPIX&#39;</span> <span class="ow">or</span> <span class="s1">&#39;NSIDE&#39;</span> <span class="ow">in</span> <span class="n">hdr</span><span class="p">:</span>
+                <span class="n">map_type</span> <span class="o">=</span> <span class="s1">&#39;healpix&#39;</span>
+
+            <span class="k">if</span> <span class="s1">&#39;COORDSYS&#39;</span> <span class="ow">in</span> <span class="n">hdr</span><span class="p">:</span>
+                <span class="n">cdict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="s1">&#39;Equatorial&#39;</span><span class="p">,</span> <span class="s1">&#39;G&#39;</span><span class="p">:</span> <span class="s1">&#39;Galactic&#39;</span><span class="p">,</span> <span class="s1">&#39;L&#39;</span><span class="p">:</span> <span class="s1">&#39;Local&#39;</span><span class="p">}</span>
+                <span class="n">coord_ref</span> <span class="o">=</span> <span class="n">cdict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">hdr</span><span class="p">[</span><span class="s1">&#39;COORDSYS&#39;</span><span class="p">],</span> <span class="n">coord_ref</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">coord_ref</span> <span class="o">=</span> <span class="n">hdr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;COORDREF&#39;</span><span class="p">,</span> <span class="n">coord_ref</span><span class="p">)</span>
+            <span class="n">map_opts</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">coord_ref</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="n">MapCoordReference</span><span class="p">,</span> <span class="n">coord_ref</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="n">map_type</span> <span class="o">==</span> <span class="s1">&#39;flat&#39;</span><span class="p">:</span>
+                <span class="n">map_opts</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">parse_wcs_header</span><span class="p">(</span><span class="n">hdr</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">map_type</span> <span class="o">==</span> <span class="s1">&#39;healpix&#39;</span><span class="p">:</span>
+                <span class="n">nside</span> <span class="o">=</span> <span class="n">hdr</span><span class="p">[</span><span class="s1">&#39;NSIDE&#39;</span><span class="p">]</span>
+                <span class="n">nested</span> <span class="o">=</span> <span class="n">hdr</span><span class="p">[</span><span class="s1">&#39;ORDERING&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;nest&#39;</span><span class="p">,</span> <span class="s1">&#39;nested&#39;</span><span class="p">]</span>
+                <span class="n">map_opts</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">nested</span><span class="o">=</span><span class="n">nested</span><span class="p">)</span>
+
+            <span class="c1"># primary HDU</span>
+            <span class="k">if</span> <span class="n">H</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># extracting a particular HDU</span>
+            <span class="k">if</span> <span class="n">map_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">hdu</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">hidx</span> <span class="o">!=</span> <span class="n">hdu</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># map type must be known if the HDU contains map data</span>
+            <span class="k">if</span> <span class="n">map_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;flat&#39;</span><span class="p">,</span> <span class="s1">&#39;healpix&#39;</span><span class="p">]:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown map type in HDU </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">hidx</span><span class="p">))</span>
+
+            <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">H</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">map_type</span> <span class="o">==</span> <span class="s1">&#39;flat&#39;</span><span class="p">:</span>
+                <span class="c1"># flat map data</span>
+                <span class="k">if</span> <span class="n">map_opts</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;transpose&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+                <span class="n">parent</span> <span class="o">=</span> <span class="n">FlatSkyMap</span><span class="p">(</span><span class="o">*</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="o">**</span><span class="n">map_opts</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">map_type</span> <span class="o">==</span> <span class="s1">&#39;healpix&#39;</span><span class="p">:</span>
+                <span class="c1"># healpix map data</span>
+                <span class="n">parent</span> <span class="o">=</span> <span class="n">HealpixSkyMap</span><span class="p">(</span><span class="n">nside</span><span class="p">,</span> <span class="o">**</span><span class="n">map_opts</span><span class="p">)</span>
+
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">G3SkyMapMask</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span>
+
+            <span class="k">del</span> <span class="n">H</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">data</span>
+            <span class="k">return</span> <span class="n">mask</span></div>
 
 
 
@@ -1394,6 +1480,100 @@
         <span class="k">for</span> <span class="n">hdu</span> <span class="ow">in</span> <span class="n">hdulist</span><span class="p">:</span>
             <span class="k">del</span> <span class="n">hdu</span><span class="o">.</span><span class="n">data</span>
         <span class="k">del</span> <span class="n">hdulist</span></div>
+
+
+
+<div class="viewcode-block" id="save_skymapmask_fits">
+<a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.fitsio.save_skymapmask_fits">[docs]</a>
+<span class="nd">@core</span><span class="o">.</span><span class="n">usefulfunc</span>
+<span class="k">def</span> <span class="nf">save_skymapmask_fits</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">hdr</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Save G3 mask objects to a fits file.</span>
+
+<span class="sd">    Masks with ``FlatSkyMap`` parents are stored in a (optionally compressed)</span>
+<span class="sd">    ``ImageHDU`` entry, which contains the projection information in its header in</span>
+<span class="sd">    standard WCS format, along with the image data for a single mask.</span>
+
+<span class="sd">    Masks with ``HealpixSkyMap`` parents are stored in a ``BinTableHDU`` extension,</span>
+<span class="sd">    which contains the necessary header information for compatiblity with healpix map</span>
+<span class="sd">    readers (e.g. `healpix.read_map`), and a single table with one column for the</span>
+<span class="sd">    mask.  Masks are stored densely with implicit indexing over all pixels.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">    filename : str</span>
+<span class="sd">        Path to output file.  Must not exist, unless overwrite is True.</span>
+<span class="sd">    mask : G3SkyMapMask</span>
+<span class="sd">        Mask to save</span>
+<span class="sd">    overwrite : bool</span>
+<span class="sd">        If True, any existing file with the same name will be ovewritten.</span>
+<span class="sd">    compress : str or bool</span>
+<span class="sd">        If defined, and if input mask has a ``FlatSkyMap`` parent, store this in a</span>
+<span class="sd">        compressed image HDU.  Otherwise, store input mask in a standard ImageHDU,</span>
+<span class="sd">        which is readable with older FITS readers (e.g. idlastro). If defined, the</span>
+<span class="sd">        compression algorithm to be used by the Astropy class</span>
+<span class="sd">        astropy.io.fits.CompImageHDU.  Can be: &#39;RICE_1&#39;, &#39;RICE_ONE&#39;, &#39;PLIO_1&#39;,</span>
+<span class="sd">        &#39;GZIP_1&#39;, &#39;GZIP_2&#39; or &#39;HCOMPRESS_1&#39;. Only GZIP_1 and GZIP_2 are lossless,</span>
+<span class="sd">        although only for integer data.</span>
+<span class="sd">    hdr  : dict</span>
+<span class="sd">       If defined, extra keywords to be appened to the FITS header. The dict</span>
+<span class="sd">       can contain entries such as ``hdr[&#39;NEWKEY&#39;] = &#39;New value&#39;`` or</span>
+<span class="sd">       ``hdr[&#39;NEWKEY&#39;] = (&#39;New value&#39;, &quot;Comment for New value&quot;)``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">astropy.io.fits</span>
+
+    <span class="n">flat</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">FlatSkyMap</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">flat</span><span class="p">:</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">create_wcs_header</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+        <span class="n">header</span><span class="p">[</span><span class="s2">&quot;BITPIX&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">8</span>
+        <span class="n">header</span><span class="p">[</span><span class="s1">&#39;NAXIS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">astropy</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">fits</span><span class="o">.</span><span class="n">Header</span><span class="p">()</span>
+
+        <span class="n">header</span><span class="p">[</span><span class="s1">&#39;PIXTYPE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;HEALPIX&#39;</span>
+        <span class="n">header</span><span class="p">[</span><span class="s1">&#39;ORDERING&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;NEST&#39;</span> <span class="k">if</span> <span class="n">mask</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">nested</span> <span class="k">else</span> <span class="s1">&#39;RING&#39;</span>
+        <span class="n">header</span><span class="p">[</span><span class="s1">&#39;NSIDE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">nside</span>
+        <span class="n">header</span><span class="p">[</span><span class="s1">&#39;INDXSCHM&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;IMPLICIT&#39;</span>
+        <span class="n">header</span><span class="p">[</span><span class="s1">&#39;OBJECT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;FULLSKY&#39;</span>
+        <span class="n">cdict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Equatorial&#39;</span><span class="p">:</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;Galactic&#39;</span><span class="p">:</span> <span class="s1">&#39;G&#39;</span><span class="p">,</span> <span class="s1">&#39;Local&#39;</span><span class="p">:</span> <span class="s1">&#39;L&#39;</span><span class="p">}</span>
+        <span class="n">header</span><span class="p">[</span><span class="s1">&#39;COORDSYS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cdict</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">coord_ref</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="n">header</span><span class="p">[</span><span class="s1">&#39;COORDSYS&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span>
+            <span class="n">header</span><span class="p">[</span><span class="s1">&#39;RADESYS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;FK5&#39;</span>
+            <span class="n">header</span><span class="p">[</span><span class="s1">&#39;EQUINOX&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2000.0</span>
+
+    <span class="n">header</span><span class="p">[</span><span class="s1">&#39;MAPTYPE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;FLAT&#39;</span> <span class="k">if</span> <span class="n">flat</span> <span class="k">else</span> <span class="s1">&#39;HEALPIX&#39;</span>
+    <span class="n">header</span><span class="p">[</span><span class="s1">&#39;COORDREF&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">coord_ref</span><span class="p">)</span>
+
+    <span class="c1"># Append extra metadata in hdr if defined</span>
+    <span class="k">if</span> <span class="n">hdr</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">keyword</span> <span class="ow">in</span> <span class="n">hdr</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">header</span><span class="p">[</span><span class="n">keyword</span><span class="p">]</span> <span class="o">=</span> <span class="n">hdr</span><span class="p">[</span><span class="n">keyword</span><span class="p">]</span>
+
+    <span class="n">hdulist</span> <span class="o">=</span> <span class="n">astropy</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">fits</span><span class="o">.</span><span class="n">HDUList</span><span class="p">()</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">flat</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">compress</span><span class="p">:</span>
+            <span class="n">ctype</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">compress</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">ctype</span> <span class="o">=</span> <span class="s1">&#39;GZIP_2&#39;</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">compress</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">ctype</span> <span class="o">=</span> <span class="n">compress</span>
+            <span class="n">hdu</span> <span class="o">=</span> <span class="n">astropy</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">fits</span><span class="o">.</span><span class="n">CompImageHDU</span><span class="p">(</span>
+                <span class="n">data</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="n">header</span><span class="p">,</span> <span class="n">compression_type</span><span class="o">=</span><span class="n">ctype</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">hdu</span> <span class="o">=</span> <span class="n">astropy</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">fits</span><span class="o">.</span><span class="n">ImageHDU</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="n">header</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="n">astropy</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">fits</span><span class="o">.</span><span class="n">ColDefs</span><span class="p">([])</span>
+        <span class="n">col</span> <span class="o">=</span> <span class="n">astropy</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">fits</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;MASK&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="n">array</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">cols</span><span class="o">.</span><span class="n">add_col</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+        <span class="n">hdu</span> <span class="o">=</span> <span class="n">astropy</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">fits</span><span class="o">.</span><span class="n">BinTableHDU</span><span class="o">.</span><span class="n">from_columns</span><span class="p">(</span><span class="n">cols</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="n">header</span><span class="p">)</span>
+
+    <span class="n">hdulist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hdu</span><span class="p">)</span>
+    <span class="n">hdulist</span><span class="o">.</span><span class="n">writeto</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">)</span></div>
 
 
 

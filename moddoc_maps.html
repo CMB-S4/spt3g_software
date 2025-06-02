@@ -594,7 +594,9 @@
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.azel.convert_radec_to_gal"><code class="docutils literal notranslate"><span class="pre">convert_radec_to_gal()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.convolve_map"><code class="docutils literal notranslate"><span class="pre">convolve_map()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.fitsio.load_skymap_fits"><code class="docutils literal notranslate"><span class="pre">load_skymap_fits()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.fitsio.load_skymapmask_fits"><code class="docutils literal notranslate"><span class="pre">load_skymapmask_fits()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.fitsio.save_skymap_fits"><code class="docutils literal notranslate"><span class="pre">save_skymap_fits()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.fitsio.save_skymapmask_fits"><code class="docutils literal notranslate"><span class="pre">save_skymapmask_fits()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.flatten_pol"><code class="docutils literal notranslate"><span class="pre">flatten_pol()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.get_boresight_rotator_timestream"><code class="docutils literal notranslate"><span class="pre">get_boresight_rotator_timestream()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.get_fk5_j2000_to_gal_quat"><code class="docutils literal notranslate"><span class="pre">get_fk5_j2000_to_gal_quat()</span></code></a></li>
@@ -3718,6 +3720,31 @@ conversion factor to return maps in G3Units.</p></li>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="spt3g.maps.fitsio.load_skymapmask_fits">
+<span class="sig-prename descclassname"><span class="pre">spt3g.maps.fitsio.</span></span><span class="sig-name descname"><span class="pre">load_skymapmask_fits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hdu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/maps/fitsio.html#load_skymapmask_fits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.maps.fitsio.load_skymapmask_fits" title="Link to this definition"></a></dt>
+<dd><p>Load a fits file containing a binary sky map mask.  Floating pointing or integer
+data are converted to booleans.  Assumes the fits file contains a single mask,
+with flat sky data stored in a single <code class="docutils literal notranslate"><span class="pre">ImageHDU</span></code>, and healpix masks stored in a
+single <code class="docutils literal notranslate"><span class="pre">BinTableHDU</span></code> in full-sky format with implicit indexing over all pixels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – Path to fits file</p></li>
+<li><p><strong>hdu</strong> (<em>int</em><em>, </em><em>optional</em>) – If supplied, the data are extract from the given HDU index.</p></li>
+<li><p><strong>memmap</strong> (<em>bool</em><em>, </em><em>optional</em>) – Argument passed to astropy.io.fits.open. If True, the map is not read into
+memory, but only the required pixels are read when needed. Default: False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The binary mask.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#spt3g.maps.G3SkyMapMask" title="spt3g.maps.G3SkyMapMask"><em>G3SkyMapMask</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="spt3g.maps.fitsio.save_skymap_fits">
 <span class="sig-prename descclassname"><span class="pre">spt3g.maps.fitsio.</span></span><span class="sig-name descname"><span class="pre">save_skymap_fits</span></span><span class="sig-paren">(</span>
 
@@ -3767,6 +3794,38 @@ for integer data.</p></li>
 in more accurate floating point representation, but worse compression
 ratio.  See the astropy FITS image documention for details:
 <a class="reference external" href="https://docs.astropy.org/en/stable/io/fits/api/images.html">https://docs.astropy.org/en/stable/io/fits/api/images.html</a></p></li>
+<li><p><strong>hdr</strong> (<em>dict</em>) – If defined, extra keywords to be appened to the FITS header. The dict
+can contain entries such as <code class="docutils literal notranslate"><span class="pre">hdr['NEWKEY']</span> <span class="pre">=</span> <span class="pre">'New</span> <span class="pre">value'</span></code> or
+<code class="docutils literal notranslate"><span class="pre">hdr['NEWKEY']</span> <span class="pre">=</span> <span class="pre">('New</span> <span class="pre">value',</span> <span class="pre">&quot;Comment</span> <span class="pre">for</span> <span class="pre">New</span> <span class="pre">value&quot;)</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spt3g.maps.fitsio.save_skymapmask_fits">
+<span class="sig-prename descclassname"><span class="pre">spt3g.maps.fitsio.</span></span><span class="sig-name descname"><span class="pre">save_skymapmask_fits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hdr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/maps/fitsio.html#save_skymapmask_fits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.maps.fitsio.save_skymapmask_fits" title="Link to this definition"></a></dt>
+<dd><p>Save G3 mask objects to a fits file.</p>
+<p>Masks with <code class="docutils literal notranslate"><span class="pre">FlatSkyMap</span></code> parents are stored in a (optionally compressed)
+<code class="docutils literal notranslate"><span class="pre">ImageHDU</span></code> entry, which contains the projection information in its header in
+standard WCS format, along with the image data for a single mask.</p>
+<p>Masks with <code class="docutils literal notranslate"><span class="pre">HealpixSkyMap</span></code> parents are stored in a <code class="docutils literal notranslate"><span class="pre">BinTableHDU</span></code> extension,
+which contains the necessary header information for compatiblity with healpix map
+readers (e.g. <cite>healpix.read_map</cite>), and a single table with one column for the
+mask.  Masks are stored densely with implicit indexing over all pixels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – Path to output file.  Must not exist, unless overwrite is True.</p></li>
+<li><p><strong>mask</strong> (<a class="reference internal" href="#spt3g.maps.G3SkyMapMask" title="spt3g.maps.G3SkyMapMask"><em>G3SkyMapMask</em></a>) – Mask to save</p></li>
+<li><p><strong>overwrite</strong> (<em>bool</em>) – If True, any existing file with the same name will be ovewritten.</p></li>
+<li><p><strong>compress</strong> (<em>str</em><em> or </em><em>bool</em>) – If defined, and if input mask has a <code class="docutils literal notranslate"><span class="pre">FlatSkyMap</span></code> parent, store this in a
+compressed image HDU.  Otherwise, store input mask in a standard ImageHDU,
+which is readable with older FITS readers (e.g. idlastro). If defined, the
+compression algorithm to be used by the Astropy class
+astropy.io.fits.CompImageHDU.  Can be: ‘RICE_1’, ‘RICE_ONE’, ‘PLIO_1’,
+‘GZIP_1’, ‘GZIP_2’ or ‘HCOMPRESS_1’. Only GZIP_1 and GZIP_2 are lossless,
+although only for integer data.</p></li>
 <li><p><strong>hdr</strong> (<em>dict</em>) – If defined, extra keywords to be appened to the FITS header. The dict
 can contain entries such as <code class="docutils literal notranslate"><span class="pre">hdr['NEWKEY']</span> <span class="pre">=</span> <span class="pre">'New</span> <span class="pre">value'</span></code> or
 <code class="docutils literal notranslate"><span class="pre">hdr['NEWKEY']</span> <span class="pre">=</span> <span class="pre">('New</span> <span class="pre">value',</span> <span class="pre">&quot;Comment</span> <span class="pre">for</span> <span class="pre">New</span> <span class="pre">value&quot;)</span></code>.</p></li>
