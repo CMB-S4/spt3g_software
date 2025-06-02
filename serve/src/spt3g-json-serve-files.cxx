@@ -23,6 +23,8 @@
 #include <core/G3Reader.h>
 #include <core/G3Pipeline.h>
 
+#include <pybind11/embed.h>
+
 #include "httplib/httplib.h"
 #include "serve/favicon.h"
 namespace fs = std::filesystem;
