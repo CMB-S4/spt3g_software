@@ -175,6 +175,8 @@ Various Python and C++ functions that are part of the public API.
 
 .. autofunction:: spt3g.maps.get_fk5_j2000_to_gal_quat
 
+.. autofunction:: spt3g.maps.get_galactic_plane_mask
+
 .. autofunction:: spt3g.maps.get_map_hist
 
 .. autofunction:: spt3g.maps.get_map_moments

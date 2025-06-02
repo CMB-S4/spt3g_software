@@ -598,6 +598,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.flatten_pol"><code class="docutils literal notranslate"><span class="pre">flatten_pol()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.get_boresight_rotator_timestream"><code class="docutils literal notranslate"><span class="pre">get_boresight_rotator_timestream()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.get_fk5_j2000_to_gal_quat"><code class="docutils literal notranslate"><span class="pre">get_fk5_j2000_to_gal_quat()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.get_galactic_plane_mask"><code class="docutils literal notranslate"><span class="pre">get_galactic_plane_mask()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.get_map_hist"><code class="docutils literal notranslate"><span class="pre">get_map_hist()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.get_map_moments"><code class="docutils literal notranslate"><span class="pre">get_map_moments()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.get_origin_rotator"><code class="docutils literal notranslate"><span class="pre">get_origin_rotator()</span></code></a></li>
@@ -3815,6 +3816,19 @@ can contain entries such as <code class="docutils literal notranslate"><span cla
 <dt class="sig sig-object py" id="spt3g.maps.get_fk5_j2000_to_gal_quat">
 <span class="sig-prename descclassname"><span class="pre">spt3g.maps.</span></span><span class="sig-name descname"><span class="pre">get_fk5_j2000_to_gal_quat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="moddoc_core.html#spt3g.core.Quat" title="spt3g.core.Quat"><span class="pre">Quat</span></a></span></span><a class="headerlink" href="#spt3g.maps.get_fk5_j2000_to_gal_quat" title="Link to this definition"></a></dt>
 <dd><p>Return the rotation quaternion to rotate from equatorial to galactic coordinates.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spt3g.maps.get_galactic_plane_mask">
+<span class="sig-prename descclassname"><span class="pre">spt3g.maps.</span></span><span class="sig-name descname"><span class="pre">get_galactic_plane_mask</span></span><span class="sig-paren">(</span>
+
+<dl>
+<dd><em class="sig-param"><span class="n"><span class="pre">map_in</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.maps.G3SkyMap" title="spt3g.maps.G3SkyMap"><span class="pre">G3SkyMap</span></a></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">glat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>,</dd>
+</dl>
+
+<span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spt3g.maps.G3SkyMapMask" title="spt3g.maps.G3SkyMapMask"><span class="pre">G3SkyMapMask</span></a></span></span><a class="headerlink" href="#spt3g.maps.get_galactic_plane_mask" title="Link to this definition"></a></dt>
+<dd><p>Returns a mask that is nonzero for any pixels within +/- the given latitude about the Galactic plane.</p>
 </dd></dl>
 
 <dl class="py function">
