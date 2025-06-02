@@ -2,6 +2,7 @@
 #include <serialization.h>
 #include <container_pybindings.h>
 #include <G3PipelineInfo.h>
+#include <pybind11/eval.h>
 
 template <class A> void G3ModuleArg::serialize(A &ar, unsigned v)
 {
@@ -26,10 +27,7 @@ G3ModuleArg::Description() const {
 
 static std::string inline object_repr(py::object obj)
 {
-	PyObject *repr = PyObject_Repr(obj.ptr());
-	py::handle<> reprhand(repr);
-	py::object reprobj(reprhand);
-	return py::extract<std::string>(reprobj);
+	return py::repr(obj).cast<std::string>();
 }
 
 static std::string
@@ -38,7 +36,7 @@ G3ModuleArg_repr(const G3ModuleArg &arg)
 	// Some frame objects (e.g. G3Vectors) have repr only
 	// defined properly via the python interface.
 	if (!arg.repr.size() && !!arg.object)
-		return object_repr(py::object(arg.object));
+		return object_repr(py::cast(arg.object));
 	return arg.repr;
 }
 
@@ -123,21 +121,20 @@ G3ModuleConfig_get(const G3ModuleConfig &mc, std::string key)
 {
 	auto item = mc.config.find(key);
 	if (item == mc.config.end())
-		throw py::key_error(key);
+		throw py::key_error(key.c_str());
 
 	auto arg = item->second;
 	if (!!arg.object)
-		return py::object(arg.object);
+		return py::cast(arg.object);
 
 	py::object main = py::module_::import("__main__");
 	py::dict global = py::dict(main.attr("__dict__"));
 	global["__main__"] = main;
 
 	try {
-		return py::eval(py::str(arg.repr), global, global);
-	} catch (const py::error_already_set& e) {
-		PyErr_Clear();
-		return py::object(arg.repr);
+		return py::eval(py::str(arg.repr), global);
+	} catch (...) {
+		return py::str(arg.repr);
 	}
 }
 
@@ -145,14 +142,14 @@ static void
 G3ModuleConfig_set(G3ModuleConfig &mc, std::string key, py::object obj)
 {
 	std::string repr = object_repr(obj);
+	mc.config[key] = G3ModuleArg(repr);
+}
 
-	py::extract<G3FrameObjectPtr> extobj(obj);
-	if (!extobj.check()) {
-		mc.config[key] = G3ModuleArg(repr);
-		return;
-	}
-
-	mc.config[key] = G3ModuleArg(repr, extobj());
+static void
+G3ModuleConfig_set_frameobject(G3ModuleConfig &mc, std::string key, G3FrameObjectPtr obj)
+{
+	std::string repr = object_repr(py::cast(obj));
+	mc.config[key] = G3ModuleArg(repr, obj);
 }
 
 static py::list
@@ -229,18 +226,18 @@ G3PipelineInfo::Description() const
 }
 
 static std::string
-G3PipelineInfo_repr(const G3PipelineInfo &pi)
+G3PipelineInfo_repr(const py::object &pi)
 {
-	std::string rv;
-	rv = "pipe = spt3g.core.G3Pipeline()";
+	std::ostringstream rv;
+	rv << "pipe = " << py_modname(pi) << ".G3Pipeline()";
 
-	for (auto i : pi.modules)
-		rv += "\n" + G3ModuleConfig_repr(i);
-	return rv;
+	for (auto i : pi.cast<const G3PipelineInfo &>().modules)
+		rv << "\n" << G3ModuleConfig_repr(i);
+	return rv.str();
 }
 
 static void
-G3PipelineInfo_run(const G3PipelineInfo &pi)
+G3PipelineInfo_run(const py::object &pi)
 {
 	py::object main = py::module_::import("__main__");
 	py::dict global = py::dict(main.attr("__dict__"));
@@ -249,7 +246,7 @@ G3PipelineInfo_run(const G3PipelineInfo &pi)
 	std::string pipe = G3PipelineInfo_repr(pi);
 	pipe += "\npipe.Run()";
 
-	py::exec(py::str(pipe), global, global);
+	py::exec(py::str(pipe), global);
 }
 
 G3_SERIALIZABLE_CODE(G3ModuleArg);
@@ -264,6 +261,7 @@ PYBINDINGS("core", scope) {
 	    .def_readwrite("instancename", &G3ModuleConfig::instancename)
 	    .def("__repr__", &G3ModuleConfig_repr)
 	    .def("__getitem__", &G3ModuleConfig_get)
+	    .def("__setitem__", &G3ModuleConfig_set_frameobject)
 	    .def("__setitem__", &G3ModuleConfig_set)
 	    .def("keys", &G3ModuleConfig_keys)
 	    .def("values", &G3ModuleConfig_values)

@@ -1,5 +1,6 @@
 from .. import core
 
+@core.indexmod
 class MPIAccumulator(object):
     '''
     Accumulate data from many frames in memory, sharing metadata for all the
@@ -10,6 +11,7 @@ class MPIAccumulator(object):
     pipeline termination. 'fullobs' is a dictionary containing entries
     for each data group (see the extractfunc parameter), which in turn
     are lists of 3-element tuples with the following content:
+
     - First element is the metadata for the frame (see extractfunc)
     - Second element is the node on which the full data exist
     - Third element is the data from the frame (see extractfunc)
@@ -20,9 +22,10 @@ class MPIAccumulator(object):
         Data will be shared between nodes participating in the communicator
         mpicomm. The data stored are based on frames of the types in the
         dataframes argument and are organized based on the results of
-        extractfunc and sorter.
+        ``extractfunc`` and ``sorter``.
 
-        extractfunc is expected to return a three-element tuple:
+        ``extractfunc`` is expected to return a three-element tuple:
+
         - First element is a group ID for the data (for example, an observation
           ID). This is used only for organization and can be anything that
           Python can compare. By default, this is SourceName-ObservationID.
@@ -36,15 +39,16 @@ class MPIAccumulator(object):
           a copy of the frame (the default) or just the information (in any
           format understandable to Python) from the frame you expect to use
           later.
-        Note that extractfunc is called on all frame types (including
+
+        Note that ``extractfunc`` is called on all frame types (including
         calibration data) but *only the results if it returns non-None values*
-        are stored. Thus, it is the responsibility of extractfunc to either
+        are stored. Thus, it is the responsibility of ``extractfunc`` to either
         cache any applicable calibration, etc. information and store it in the
         return value for data frames if needed or explicitly return a value
-        for calibration data, if needed. The default extractfunc saves only
+        for calibration data, if needed. The default ``extractfunc`` saves only
         the frames in the "dataframes" argument.
 
-        sorter is used, if defined, to sort the list of frame data in each
+        ``sorter`` is used, if defined, to sort the list of frame data in each
         group. This is passed to the Python sorted() function as a 'key'
         argument and receives the three-element tuple stored for each set of
         frame data (metadata, node, data). By default, does no sorting

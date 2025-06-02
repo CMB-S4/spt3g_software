@@ -20,7 +20,7 @@ p.Run()
 assert(len(list(core.G3File('testpi.g3'))) == 11)
 for i in core.G3File('testpi.g3'):
 	if i.type == core.G3FrameType.PipelineInfo:
-		pi = i.values()[0]
+		pi = list(i.values())[0]
 		break
 
 os.remove('testpi.g3')

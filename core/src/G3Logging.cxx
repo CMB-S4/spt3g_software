@@ -137,7 +137,8 @@ g3_clogger(G3LogLevel level, const char *unit, const char *file, int line,
 }
 
 PYBINDINGS("core", scope) {
-	register_enum<G3LogLevel>(scope, "G3LogLevel")
+	register_enum<G3LogLevel>(scope, "G3LogLevel",
+	    "Logging level identifier for G3Logger objects")
 	    .value("LOG_TRACE",  G3LOG_TRACE)
 	    .value("LOG_DEBUG",  G3LOG_DEBUG)
 	    .value("LOG_INFO",   G3LOG_INFO)
@@ -148,11 +149,15 @@ PYBINDINGS("core", scope) {
 	;
 
 	register_class<G3Logger>(scope, "G3Logger", "C++ logging abstract base class")
-	    .add_static_property("global_logger", &GetRootLogger, &SetRootLogger)
-	    .def("log", &G3Logger::Log)
-	    .def("get_level_for_unit", &G3Logger::LogLevelForUnit)
-	    .def("set_level_for_unit", &G3Logger::SetLogLevelForUnit)
-	    .def("set_level", &G3Logger::SetLogLevel)
+	    .def_property_static("global_logger",
+		[](const py::object &) { return GetRootLogger(); },
+		[](const py::object &, G3LoggerPtr v) { SetRootLogger(v); })
+	    .def("log", &G3Logger::Log, py::arg("level"), py::arg("unit"), py::arg("file"),
+	        py::arg("line"), py::arg("function"), py::arg("message"))
+	    .def("get_level_for_unit", &G3Logger::LogLevelForUnit, py::arg("unit"))
+	    .def("set_level_for_unit", &G3Logger::SetLogLevelForUnit,
+	        py::arg("unit"), py::arg("level"))
+	    .def("set_level", &G3Logger::SetLogLevel, py::arg("level"))
         ;
 	register_vector_of<G3LoggerPtr>(scope, "G3Logger");
 

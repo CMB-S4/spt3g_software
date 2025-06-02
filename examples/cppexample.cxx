@@ -4,6 +4,8 @@
 #include <core/G3Reader.h>
 #include <core/G3Writer.h>
 
+#include <pybind11/embed.h>
+
 /*
  * Example of a small C++ program that is the equivalent of the
  * spt3g-dump command.

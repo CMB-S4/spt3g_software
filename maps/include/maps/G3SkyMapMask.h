@@ -19,6 +19,7 @@
  */
 
 class G3SkyMap;
+class G3Pickler;
 
 class G3SkyMapMask : public G3FrameObject {
 public:
@@ -108,6 +109,7 @@ private:
 	template <class A> void load(A &ar, const unsigned v);
 	template <class A> void save(A &ar, const unsigned v) const;
 	friend class cereal::access;
+	friend class G3Pickler;
 
 	std::vector<bool> data_;
 	std::shared_ptr<const G3SkyMap> parent_;

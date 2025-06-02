@@ -1,4 +1,5 @@
 from . import G3FrameType
+from .modconstruct import g3decorator
 from copy import copy
 import inspect
 import textwrap
@@ -22,6 +23,7 @@ def get_function_signature(f, replacement_kwargs=None):
     return f.__name__ + re.sub('<(.*) at (.*)>', '<\\1>', str(sig))
 
 
+@g3decorator
 class cache_frame_data(object):
     '''
     This is a decorator for use with G3Modules written as functions.  It enables
@@ -59,7 +61,7 @@ class cache_frame_data(object):
         self_outer.type = type
     def __call__(self_outer, f):
         func_sig = get_function_signature(f, replacement_kwargs = self_outer.keyargs)
-        doc_prepend = '\nFunction Signature:  %s\n\n' % func_sig
+        doc_prepend = '%s\n\n' % func_sig
         func_doc = textwrap.dedent(str(f.__doc__ or ''))
         doc_append = '''\n\n
 This function automatic caches values from frames that contain the keys to be
@@ -100,6 +102,7 @@ Cached Values
         return WrappedFunc
 
 
+@g3decorator
 class scan_func_cache_data(cache_frame_data):
     '''
     This is a simple wrapper around cache_frame_data where the type argument has been set to

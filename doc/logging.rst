@@ -3,19 +3,19 @@ Logging
 
 This software includes a logging framework similar to the standard python logging that can be used from both Python and C++. There are seven log **levels** (below) that can be set for each logging **unit**. The default log level is ``log_notice``.
 
- log_trace
+ ``log_trace``
    Messages of the type "At line 75" that no one really ever wants to see except in the deepest throes of debugging. In C++ code, these messages are compiled out unless ``CMAKE_BUILD_TYPE`` is set to Debug.
- log_debug
+ ``log_debug``
    Messages of the type "Configuration parameters: Foo Bar" that almost no one really ever wants to see except while debugging. In C++ code, these messages are compiled out unless ``CMAKE_BUILD_TYPE`` is set to Debug.
- log_info
+ ``log_info``
    Messages slightly more interesting than ``log_debug`` (for example: "Opening file X.h5"). Always available, but not shown by default.
- log_notice
+ ``log_notice``
    Messages that do not indicate a potential problem but that it is good for humans to see. For example, "Starting new output file X". Shown by default, so please limit the use of messages this level and above.
- log_warn
+ ``log_warn``
    Messages that indicate a potential problem such as "No data from boards in 30 seconds".
- log_error
+ ``log_error``
    Serious recoverable data problem. For example, "Scan does not have input key". Printed in bold red so you know it is serious.
- log_fatal
+ ``log_fatal``
    An unrecoverable problem such as a bad configuration. Throws an exception (RuntimeError) and stop all data processing.
 
 Setting Log Levels
@@ -31,7 +31,7 @@ The log level for an individual section of the code can be set as well, which is
 
 .. code-block:: python
 
-	core.set_log_level_for_unit(core.G3LogLevel.LOG_WARN, 'NoisyThing')
+	core.set_log_level(core.G3LogLevel.LOG_WARN, 'NoisyThing')
 
 Using Logging from Python
 =========================
@@ -42,11 +42,11 @@ From Python, you can emit log messages using the ``core.log_*`` family of functi
 
 	core.log_error('Everything is on fire')
 
-By default, all log messages from Python are assigned to the log unit "Python". If you pass a second argument, you can set the log unit to something else:
+By default, all log messages from Python are assigned to the log unit "Python". If you pass a ``unit`` keyword argument, you can set the log unit to something else:
 
 .. code-block:: python
 
-	core.log_error('Everything is on fire', 'FireWarden')
+	core.log_error('Everything is on fire', unit='FireWarden')
 
 Then you could selectively disable "FireWarden" if you don't want to see such messages by setting FireWarden's log level to log_fatal (see `Setting Log Levels`_).
 

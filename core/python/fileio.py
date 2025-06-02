@@ -2,15 +2,15 @@ from .. import core
 
 __all__ = ["G3File"]
 
-
+@core.usefulfunc
 class G3File(object):
-    """Iterable class for G3 files, as created by G3Writer. Loop through frames by doing something like:
+    """Iterable class for G3 files, as created by G3Writer. Loop through frames by doing something like::
 
         with core.G3File("/path/to/file.g3") as f:
             for frame in f:
                 print(frame)
 
-    An entire file can also be read into an indexable list by doing:
+    An entire file can also be read into an indexable list by doing::
 
         f = list(core.G3File("/path/to/file.g3"))
     """
@@ -22,6 +22,9 @@ class G3File(object):
         return self
 
     def next(self):
+        """
+        Return the next frame from the file.
+        """
         if self.reader is None:
             raise StopIteration("Reader closed")
         frames = self.reader.Process(None)

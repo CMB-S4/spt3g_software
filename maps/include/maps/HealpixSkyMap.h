@@ -25,11 +25,6 @@ public:
 	    bool shift_ra = false,
 	    G3SkyMap::MapPolConv pol_conv = G3SkyMap::ConvNone);
 
-	HealpixSkyMap(const std::vector<uint64_t> &index,
-	    const std::vector<double> &data, size_t nside, bool weighted, bool nested,
-	    MapCoordReference coord_ref, G3Timestream::TimestreamUnits u,
-	    G3SkyMap::MapPolType pol_type, G3SkyMap::MapPolConv pol_conv);
-
 	HealpixSkyMap(const HealpixSkyMapInfo &info,
 	    bool weighted = true,
 	    MapCoordReference coord_ref = MapCoordReference::Equatorial,
@@ -44,6 +39,7 @@ public:
 
 	double at(size_t i) const override;
 	double &operator [] (size_t i) override;
+	double *data();
 
 	// +
 	virtual G3SkyMap &operator+=(const G3SkyMap &rhs) override;

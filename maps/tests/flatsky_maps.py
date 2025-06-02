@@ -43,6 +43,16 @@ v = numpy.zeros((50, 50), dtype=float)
 v.ravel()[:1500] = a
 x = FlatSkyMap(v, core.G3Units.arcmin, proj=MapProjection.ProjZEA)
 
+try:
+    v2 = numpy.asarray(x)[10:20, 10:20] # non-contiguous array
+    x2 = FlatSkyMap(v2, core.G3Units.arcmin)
+    numpy.testing.assert_array_equal(x2, v2)
+except Exception as e:
+    print(str(e))
+    pass
+else:
+    raise RuntimeError("Expected error!")
+
 assert(not x.sparse)
 assert(x.npix_allocated == x.size)
 assert(x[1499] == 1499)

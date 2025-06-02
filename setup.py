@@ -37,6 +37,10 @@ class CMakeBuildExt(build_ext):
             cmake_args += [f"-DPython_ROOT_DIR={pyroot}"]
         if not any(["Python_EXECUTABLE" in a for a in cmake_args]):
             cmake_args += [f"-DPython_EXECUTABLE={sys.executable}"]
+        if not any(["pybind11_DIR" in a for a in cmake_args]):
+            import pybind11
+            pbroot = pybind11.get_cmake_dir()
+            cmake_args += [f"-Dpybind11_DIR={pbroot}"]
 
         # install libraries and headers into virtual environment too
         if "VIRTUAL_ENV" in os.environ:

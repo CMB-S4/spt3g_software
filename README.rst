@@ -24,32 +24,31 @@ The main documentation for the software is in the docs folder. After building th
 Dependencies
 ------------
 
-This depends on Boost and cmake, as well as the usual Python packages. Some additional packages (NetCDF, in particular) will activate optional components of the code if installed. You also need a C++11 compiler. This software is designed to run and work on a variety of operating systems (all Linuxes, Mac OS X, and FreeBSD) and architectures (at least 64-bit x86 and POWER).
+This depends on pybind11 and cmake, as well as the usual Python packages. Some additional packages (NetCDF, in particular) will activate optional components of the code if installed. You also need a C++11 compiler. This software is designed to run and work on a variety of operating systems (all Linuxes, Mac OS X, and FreeBSD) and architectures (at least 64-bit x86 and POWER).
 
 Minimum versions:
 
 - GCC >= 5.0 or clang >= 3.4
-- Boost >= 1.63
+- pybind11 >= 2.13
 - cmake >= 3.12
-- Python >= 2.7 (although pre-Python-3 support is best-effort)
+- Python >= 3.7 (although pre-Python-3.8 support is best-effort)
 
 On Ubuntu/Debian, you can install the non-Python dependencies, including the optional ones, by doing:
 
 .. code-block:: shell
 
-	apt-get install cmake libboost-python-dev libflac-dev libnetcdf-dev
+	apt-get install cmake libz-dev libbz2-dev liblzma-dev libflac-dev libnetcdf-dev
 
 On RHEL-type systems (SL, CentOS, etc.), do this:
 
 .. code-block:: shell
 
-	yum install cmake netcdf-devel boost-devel flac-devel
+	yum install cmake netcdf-devel zlib-devel bz2-devel xz-devel flac-devel
 	
 If your system defaults to Python 2, but you wish to use Python 3, please do the following:
 
 1. Install Python 3 *from the system package manager*
-2. Make sure the python-3 version of the Boost library is installed (on Ubuntu, this is part of the standard boost-python package referenced above)
-3. When you run cmake below, pass ``-DPython_EXECUTABLE=`which python3```
+2. When you run cmake below, pass ``-DPython_EXECUTABLE=`which python3```
 
 On any system, this software requires numpy and scipy (hard requirements), plus astropy and healpy (optional).
 
@@ -124,7 +123,7 @@ For pre-built wheels hosted on `PyPI`_, available for most Linux x86_64, macOS x
 
 	pip install spt3g
 
-The hosted wheels will include the necessary libraries (Boost, etc) bundled with the package.  Otherwise, ensure that the dependency libraries are installed as explained above, and processed to one of the following steps.
+The hosted wheels will include the necessary libraries (flac, etc) bundled with the package.  Otherwise, ensure that the dependency libraries are installed as explained above, and processed to one of the following steps.
 
 To install the package from the github repo, run ``pip`` as usual (this may take a while, so consider setting the ``CMAKE_BUILD_PARALLEL_LEVEL`` environment variable):
 
@@ -174,10 +173,7 @@ Use the ``git archive`` command or the Python ``build`` package to export the so
 Version Control Hygiene
 -----------------------
 
-You can use two mechanisms to access the repository: git and SVN. The following is a brief overview of how to use these in a way that your collaborators will appreciate.
-
-Git
-===
+The following is a brief overview of how to use git in a way that your collaborators will appreciate.
 
 To initially check out the repository:
 
@@ -198,27 +194,4 @@ To send your changes back:
 	git diff files_to_commit <- Examine this
 	git commit files_to_commit
 	git push
-
-
-SVN
-===
-
-To initially check out the repository:
-
-.. code-block:: shell
-
-	svn co https://user@github.com/CMB-S4/spt3g_software/trunk spt3g_software
-
-To update your checkout:
-
-.. code-block:: shell
-
-	svn up
-
-To send your changes back:
-
-.. code-block:: shell
-
-	svn diff files_to_commit <- Examine this
-	svn ci files_to_commit
 

@@ -715,7 +715,8 @@ G3_SPLIT_SERIALIZABLE_CODE(FlatSkyProjection);
 
 PYBINDINGS("maps", scope)
 {
-	auto cls = register_enum<MapProjection, ProjNone>(scope, "MapProjection")
+	auto cls = register_enum<MapProjection, ProjNone>(scope, "MapProjection",
+	    "Flat sky map projection")
 	    .value("Proj8", Proj8)
 	    .value("ProjSFL", ProjSFL)
 	    .value("ProjCAR", ProjCAR)
@@ -740,7 +741,7 @@ PYBINDINGS("maps", scope)
 	cls.attr("Proj4") = cls.attr("ProjSTG");
 	cls.attr("ProjStereographic") = cls.attr("ProjSTG");
 	cls.attr("Proj5") = cls.attr("ProjZEA");
-	cls.attr("ProjLambertZenithalEqualArea") = cls.attr("ProjZEA");
+	cls.attr("ProjLambertAzimuthalEqualArea") = cls.attr("ProjZEA");
 	cls.attr("Proj6") = cls.attr("ProjTAN");
 	cls.attr("ProjGnomonic") = cls.attr("ProjTAN");
 	cls.attr("Proj7") = cls.attr("ProjCEA");

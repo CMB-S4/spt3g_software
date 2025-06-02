@@ -205,6 +205,37 @@ G3SkyMapMaskPtr GetRaDecMask(const G3SkyMap &m, double ra_left, double ra_right,
 }
 
 
+G3SkyMapMaskPtr GetGalacticPlaneMask(const G3SkyMap &m, double lat)
+{
+	G3SkyMapMaskPtr mask(new G3SkyMapMask(m));
+
+	double slat = sin(lat / G3Units::rad);
+
+	if (m.coord_ref == MapCoordReference::Equatorial) {
+		auto q_rot = get_fk5_j2000_to_gal_quat();
+
+		for (size_t i = 0; i < m.size(); i++) {
+			// compute just latitude part of each coordinate
+			auto q = q_rot * m.PixelToQuat(i);
+			auto v = -q.a() * q_rot.d() - q.b() * q_rot.c() +
+			    q.c() * q_rot.b() + q.d() * q_rot.a();
+			if (fabs(v) <= slat)
+				(*mask)[i] = true;
+		}
+	} else if (m.coord_ref == MapCoordReference::Galactic) {
+		for (size_t i = 0; i < m.size(); i++) {
+			auto q = m.PixelToQuat(i);
+			if (fabs(q.d()) <= slat)
+				(*mask)[i] = true;
+		}
+	} else {
+		log_fatal("Unknown conversion to Galactic coordinates");
+	}
+
+	return mask;
+}
+
+
 void FlattenPol(FlatSkyMap &Q, FlatSkyMap &U, G3SkyMapWeightsPtr W, double h, bool invert)
 {
 	if (!(U.IsPolarized()))
@@ -515,20 +546,11 @@ ConvolveMap(const FlatSkyMap &map, const FlatSkyMap &kernel)
 
 
 static FlatSkyMapPtr
-pyconvolve_map(const FlatSkyMap &map, py::object val)
+pyconvolve_map(const FlatSkyMap &map, const py::buffer &val)
 {
-
-	py::extract<const FlatSkyMap &> mext(val);
-	if (mext.check())
-		return ConvolveMap(map, mext());
-
 	// reach into python
-	py::object pykernel = py::module_::import("spt3g.maps.FlatSkyMap")(val, map.yres());
-	py::extract<const FlatSkyMap &> pext(pykernel);
-	if (pext.check())
-		return ConvolveMap(map, pext());
-
-	log_fatal("Invalid kernel object");
+	auto pykernel = py::type::of<FlatSkyMap>()(val, map.yres());
+	return ConvolveMap(map, pykernel.cast<const FlatSkyMap &>());
 }
 
 
@@ -578,6 +600,11 @@ PYBINDINGS("maps", scope)
 		py::arg("dec_bottom"), py::arg("dec_top"),
 		"Returns a mask that is nonzero for any pixels within the given ra and dec ranges");
 
+	scope.def("get_galactic_plane_mask", GetGalacticPlaneMask,
+		py::arg("map_in"), py::arg("glat"),
+		"Returns a mask that is nonzero for any pixels within +/- the given latitude "
+		"about the Galactic plane.");
+
 	scope.def("flatten_pol", FlattenPol,
 		py::arg("Q"), py::arg("U"), py::arg("W")=G3SkyMapWeightsPtr(),
 		py::arg("h")=0.001, py::arg("invert")=false,
@@ -620,9 +647,14 @@ PYBINDINGS("maps", scope)
 		"bin edges, optionally ignoring zero, nan and/or inf values in the map.  "
 		"If a mask is supplied, then only the non-zero pixels in the mask are included.");
 
-	scope.def("convolve_map", pyconvolve_map, py::arg("map"), py::arg("kernel"),
+	scope.def("convolve_map", ConvolveMap, py::arg("map"), py::arg("kernel"),
 		"Convolve the input flat sky map with the given map-space kernel. The "
 		"kernel must have odd dimensions and the same resolution as the map.");
+
+	scope.def("convolve_map", pyconvolve_map, py::arg("map"), py::arg("kernel"),
+		"Convolve the input flat sky map with the given 2D array kernel. The "
+		"kernel must have odd dimensions and is assumed to have the same "
+		"resolution as the map.");
 
 	scope.def("make_point_source_mask", MakePointSourceMask,
 		py::arg("map"), py::arg("ra"), py::arg("dec"), py::arg("radius"),

@@ -400,39 +400,29 @@ make_dfmux_collector_v2_from_dict(const char *listenaddr,
 {
 	std::map<in_addr_t, int32_t> serial_map;
 	
-	py::list items = board_serial_map.items();
-	for (ssize_t i = 0; i < py::len(items); i++) {
-		int32_t serial = py::extract<int>(items[i][1])();
+	for (auto item: board_serial_map) {
+		int32_t serial = item.second.cast<int>();
 		in_addr_t ip;
-		bool found = false;
 
-		auto int_item = py::extract<int>(items[i][0]);
-		if (int_item.check()) {
-			ip = int_item();
-			found = true;
+		if (py::isinstance<py::int_>(item.first)) {
+			ip = item.first.cast<int>();
+		} else if (py::isinstance<py::str>(item.first)) {
+			std::string host = item.first.cast<std::string>();
+			struct addrinfo hints, *info;
+			int err;
+
+			bzero(&hints, sizeof(hints));
+			hints.ai_family = PF_INET;
+
+			err = getaddrinfo(host.c_str(), NULL, &hints, &info);
+			if (err != 0)
+				log_fatal("Could not find host %s (%s)",
+				    host.c_str(), gai_strerror(err));
+
+			g3_assert(info->ai_family == PF_INET);
+			ip = ((struct sockaddr_in *)(info->ai_addr))->
+			    sin_addr.s_addr;
 		} else {
-			auto str_item = py::extract<std::string>(items[i][0]);
-			if (str_item.check()) {
-				std::string host = str_item();
-				struct addrinfo hints, *info;
-				int err;
-
-				bzero(&hints, sizeof(hints));
-				hints.ai_family = PF_INET;
-
-				err = getaddrinfo(host.c_str(), NULL, &hints, &info);
-				if (err != 0)
-					log_fatal("Could not find host %s (%s)",
-					    host.c_str(), gai_strerror(err));
-
-				g3_assert(info->ai_family == PF_INET);
-				ip = ((struct sockaddr_in *)(info->ai_addr))->
-				    sin_addr.s_addr;
-
-				found = true;
-			}
-		}
-		if (!found) {
 			log_fatal("Map keys must be integer or string "
 			    "representations of the IP address or hostname");
 		}
@@ -464,9 +454,8 @@ PYBINDINGS("dfmux", scope)
 	        "UDP packets and forwards it to DfMuxBuilder \"builder\". Filters to "
 	        "only the boards specified in \"boardlist\" (by default empty, "
 	        "implying all boards).")
-	    .def("__init__", py::make_constructor(make_dfmux_collector_v2_from_dict,
-	        py::default_call_policies(),
-	        (py::arg("interface"), py::arg("builder"), py::arg("board_serial_map"))),
+	    .def(py::init(&make_dfmux_collector_v2_from_dict),
+	        py::arg("interface"), py::arg("builder"), py::arg("board_serial_map"),
 	        "Crate a DfMuxCollector that can parse V2 (64x) data. Pass a mapping "
 	        "from board IP address (strings or integers) to serial numbers as "
 	        "the last argument")

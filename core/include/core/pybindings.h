@@ -6,44 +6,66 @@
 #include <G3Module.h>
 #include <G3Logging.h>
 
-#include <pybind11_compat.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/operators.h>
+#include <pybind11/cast.h>
 
-namespace py = boost::python;
+namespace py = pybind11;
 
-// Tool for exporting enum elements called 'None', reserved in Python
-// Invoke by doing enum_none_converter::from_python<T>()
-struct enum_none_converter {
-	template <typename Enum, Enum NoneValue = Enum::None>
-	static void from_python()
-	{
-		py::converter::registry::push_back(
-		    &enum_none_converter::convertible,
-		    &enum_none_converter::construct<Enum, NoneValue>,
-		    py::type_id<Enum>());
-	}
+/**
+ * pybind11 registration infrastructure
+ *
+ * Each translation unit that contains structures to expose to python includes a
+ * binding function created with the PYBINDINGS macro.
+ *
+ * Modules are created using SPT3G_PYTHON_MODULE, once in the python module
+ * translation unit. In the simplest case, the body of this function calls all of
+ * the registered functions created with PYBINDINGS in the various translation
+ * units in the linked library.
+ *
+ * All objects are created with std::shared_ptr holders to allow shared memory
+ * access with persistent scope, and the dynamic_attr() option to enable
+ * duck-typing in Python.
+ */
 
-	static void* convertible(PyObject* object)
-	{
-		return (object == Py_None) ? object : NULL;
-	}
-
-	template <typename Enum, Enum NoneValue = Enum::None>
-	static void construct(
-	    PyObject* object,
-	    py::converter::rvalue_from_python_stage1_data* data)
-	{
-		data->convertible = new Enum(NoneValue);
-	}
-};
+// Extract object names
+std::string py_modname(const py::object &obj);
+std::string py_objname(const py::object &obj);
+std::string py_fullname(const py::object &obj);
 
 // Register an enum.  Add enum values using the .value() method of this object.
 template <typename T, typename... Args>
 auto
 register_enum(py::module_ &scope, const std::string &name, Args &&... args)
 {
-	(void) scope;
+	py::options options;
+	options.disable_enum_members_docstring();
 
-	auto cls = py::enum_<T>(name.c_str(), std::forward<Args>(args)...);
+	auto cls = py::enum_<T>(scope, name.c_str(), std::forward<Args>(args)...);
+
+	cls.def_property_readonly_static("names",
+	    [](py::object &obj) { return obj.attr("__members__"); },
+	    "Dictionary of enum names with their associated objects");
+	cls.def_property_readonly_static("values",
+	    [](py::object &obj) {
+		py::dict out;
+		py::dict mem = obj.attr("__members__");
+		for (auto item: mem)
+			out[item.second.attr("value")] = item.second;
+		return out;
+	    }, "Dictionary of enum values and their associated objects");
+
+	std::string rname = scope.attr("__name__").cast<std::string>();
+
+	cls.attr("__str__") = py::cpp_function([](py::object &self) {
+		return self.attr("name");
+	}, py::name("__str__"), py::is_method(cls));
+
+	cls.attr("__repr__") = py::cpp_function(
+	    [rname](py::object &self) {
+		return py::str("{}.{}.{}").format(rname,
+		    self.attr("__class__").attr("__name__"), self.attr("name"));
+	    }, py::name("__repr__"), py::is_method(cls));
 
 	return cls;
 }
@@ -60,7 +82,8 @@ register_enum(py::module_ &scope, const std::string &name, Args &&... args)
 	auto cls = register_enum<T>(scope, name, std::forward<Args>(args)...);
 
 	// Convert python None to a specific value
-	enum_none_converter::from_python<T, NoneValue>();
+	cls.def(py::init([](const py::none &) { return NoneValue; }));
+	py::implicitly_convertible<py::none, T>();
 
 	return cls;
 }
@@ -69,32 +92,10 @@ register_enum(py::module_ &scope, const std::string &name, Args &&... args)
 // Ensure that base classes are registered first to inherit their bound methods.
 template <typename T, typename... Bases, typename... Args>
 auto
-register_class_copyable(py::module_ &scope, const std::string &name, Args&&...args)
-{
-	(void) scope;
-
-	auto reg = py::converter::registry::query(py::type_id<T>());
-	if (!!reg && !!reg->m_to_python)
-		throw std::runtime_error(name + " already registered");
-
-	return py::compat_class_<T, py::bases<Bases...>, std::shared_ptr<T> >(name.c_str(),
-	    std::forward<Args>(args)...);
-}
-
-// Register a class, with optional base classes.
-// Ensure that base classes are registered first to inherit their bound methods.
-template <typename T, typename... Bases, typename... Args>
-auto
 register_class(py::module_ &scope, const std::string &name, Args&&...args)
 {
-	(void) scope;
-
-	auto reg = py::converter::registry::query(py::type_id<T>());
-	if (!!reg && !!reg->m_to_python)
-		throw std::runtime_error(name + " already registered");
-
-	return py::compat_class_<T, py::bases<Bases...>, std::shared_ptr<T>,
-	    boost::noncopyable>(name.c_str(), std::forward<Args>(args)...);
+	return py::class_<T, Bases..., std::shared_ptr<T> >(scope, name.c_str(),
+	    py::dynamic_attr(), std::forward<Args>(args)...);
 }
 
 // Register a G3Module derived class, for inclusion in a G3Pipeline.
@@ -104,15 +105,6 @@ register_g3module(py::module_ &scope, const std::string &name, Args&&...args)
 {
 	auto cls = register_class<T, Bases..., G3Module>(scope, name.c_str(),
 	    std::forward<Args>(args)...);
-
-	// mark as a module
-	try {
-		cls.def_readonly("__g3module__", true);
-	} catch (py::error_already_set &e) {
-		PyErr_Clear();
-	}
-
-	py::implicitly_convertible<std::shared_ptr<T>, G3ModulePtr>();
 
 	return cls;
 }
@@ -125,7 +117,7 @@ register_g3module(py::module_ &scope, const std::string &name, Args&&...args)
 // Registration functions take a single scope object as an input argument.
 typedef void (*module_reg_func_t)(py::module_ &);
 
-class G3ModuleRegistrator {
+class PYBIND11_EXPORT G3ModuleRegistrator {
 public:
 	G3ModuleRegistrator(const char *mod, module_reg_func_t def);
 	static void CallRegistrarsFor(const char *mod, py::module_ &scope);
@@ -148,10 +140,8 @@ public:
 //     SPT3G_PYTHON_SUBMODULE(foo, "pkg", scope)
 // for a package whose fully qualified name will be pkg.foo
 #define SPT3G_PYTHON_SUBMODULE(name, pkg, scope) \
-BOOST_PYTHON_MODULE(_lib ## name) { \
-	auto scope = py::module_(); \
+PYBIND11_MODULE(_lib ## name, scope) { \
 	scope.attr("__name__") = std::string(pkg) + "." + #name; \
-	py::docstring_options docopts(true, true, false); \
 	void (spt3g_init_module_ ## name)(py::module_ &); \
 	(spt3g_init_module_ ## name)(scope); \
 	G3ModuleRegistrator::CallRegistrarsFor(#name, scope); \

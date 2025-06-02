@@ -1,55 +1,96 @@
-from . import G3Module, G3Pipeline, G3PipelineInfo, G3Frame, G3FrameType, G3Time, G3ModuleConfig, log_fatal
+from . import G3Module, G3Pipeline, G3PipelineInfo, G3Frame, G3FrameType, G3Time, G3ModuleConfig
 import types
 import re
+import textwrap
 
 
-class pipesegment:
+def g3decorator(func):
+    """
+    Mark argument as a decorator that can be found by automated
+    documentation tools.
+    """
+    func.__g3decorator__ = True
+    return func
+
+
+@g3decorator
+def usefulfunc(func):
     '''
+    Mark argument as a useful function that can be found by automated
+    documentation tools.
+
+    Example
+    -------
+    ::
+
+        @core.usefulfunc
+        def do_some_science(data):
+            science(data)
+    '''
+
+    func.__g3usefulfunc__ = True
+
+    return func
+
+# document thyself
+usefulfunc.__g3usefulfunc__ = True
+
+
+class PipeSegmentDocstring(type):
+    @property
+    def __doc__(cls):
+        return '''
     Use as a decorator for a pre-assembled set of pipeline modules. Makes a
-    pseudo-module consisting of several inputs. If autodoc is True (the
-    default), will attempt to introspect the segment to find out what it
-    does. Set this to False if your module does anything complicated.
+    pseudo-module consisting of several inputs. Use this to introspect the
+    segment to find out what it does, or use :func:`pipesegment_nodoc` if your
+    module does anything complicated.
 
-    For example:
+    Example
+    -------
+    ::
 
-    @core.pipesegment
-    def standardfiltering(pipe, PolyOrder=4, MaskedHighPassEll=6000, Input='CalTimestreams', Output='FilteredTimestreams'):
-        pipe.Add(analysis.PolyFilter, PolyOrder=PolyOrder, Input=Input,
-            Output='__Temp' + Output)
-        pipe.Add(analysis.MaskedHighPass, MaskedHighPassEll=MaskedHighPassEll, Input='__Temp' + Output, Output=Output)
-        def cleanup(frame):
-            del frame['__Temp' + Output]
-        pipe.Add(cleanup)
+        @core.pipesegment
+        def standardfiltering(
+            pipe,
+            PolyOrder=4,
+            MaskedHighPassEll=6000,
+            Input='CalTimestreams',
+            Output='FilteredTimestreams',
+        ):
+            pipe.Add(analysis.PolyFilter, PolyOrder=PolyOrder, Input=Input,
+                Output='__Temp' + Output)
+            pipe.Add(analysis.MaskedHighPass, MaskedHighPassEll=MaskedHighPassEll,
+                Input='__Temp' + Output, Output=Output)
+            def cleanup(frame):
+                del frame['__Temp' + Output]
+            pipe.Add(cleanup)
 
-    pipe.Add(standardfiltering, PolyOrder=3)
+        pipe.Add(standardfiltering, PolyOrder=3)
     '''
-    def __init__(self, func, autodoc=True):
+
+
+@g3decorator
+class pipesegment(metaclass=PipeSegmentDocstring):
+    def __init__(self, func):
         self.func = self.__wrapped__ = func
-        self._do_autodoc = autodoc
-        self.__pipesegment__ = True
+        self.__pipesegment__ = func.__pipesegment__ = True
 
     def __call__(self, pipe, *args, **kwargs):
         return self.func(pipe, *args, **kwargs)
 
-    def autodoc(self):
+    @property
+    def __doc__(self):
         """
         Create a dummy pipeline for introspection.  Generates a docstring when
         the __doc__ attribute is accessed.
         """
-        if not self._do_autodoc:
-            self._autodoc = getattr(self.func, "__doc__", None)
-            self._rstdoc = None
-            return self._autodoc
         if hasattr(self, "_autodoc"):
             return self._autodoc
 
-        introdoc = getattr(self.func, "__doc__", None) or ""
+        introdoc = textwrap.dedent(getattr(self.func, "__doc__", "")) or ""
         if introdoc:
             introdoc += "\n\n"
-        from .docparser import format_doc
-        rstintrodoc = format_doc(introdoc)
-        introdoc += 'Equivalent to:\n'
-        rstintrodoc += '\n*Equivalent to:*\n\n'
+        introdoc += '\nEquivalent to\n-------------\n\n::\n\n'
         doclines = []
         class PotemkinPipe(object):
             def Add(self, thing, *args, **kwargs):
@@ -71,23 +112,9 @@ class pipesegment:
             self.func(fake)
         except Exception as e:
             doclines.append('Exception evaluating equivalence (%s)' % (str(e), ))
-        introdoc += '\n'.join(doclines)
-        rstintrodoc += '.. code-block:: python\n\n    '
-        rstintrodoc += '\n    '.join(doclines)
-        rstintrodoc += '\n'
+        introdoc += '    ' + '\n    '.join(doclines) + '\n'
 
         self._autodoc = introdoc
-        self._rstdoc = rstintrodoc
-        return self._autodoc
-
-    @property
-    def __rstdoc__(self):
-        self.autodoc()
-        return self._rstdoc
-
-    @property
-    def __doc__(self):
-        self.autodoc()
         return self._autodoc
 
     @property
@@ -95,16 +122,53 @@ class pipesegment:
         return self.func.__name__
 
 
+@g3decorator
 def pipesegment_nodoc(func):
-    return pipesegment(func, autodoc = False)
+    """
+    Use as a decorator for a pre-assembled set of pipeline modules. Makes a
+    pseudo-module consisting of several inputs.  Use this variant instead of
+    :class:`pipesegment` to avoid introspection if your pipeline does anything
+    complicated.
 
+    Example
+    -------
+    ::
+
+        @core.pipesegment_nodoc
+        def standardfiltering(
+            pipe,
+            PolyOrder=4,
+            MaskedHighPassEll=6000,
+            Input='CalTimestreams',
+            Output='FilteredTimestreams',
+        ):
+            pipe.Add(analysis.PolyFilter, PolyOrder=PolyOrder, Input=Input,
+                Output='__Temp' + Output)
+            pipe.Add(analysis.MaskedHighPass, MaskedHighPassEll=MaskedHighPassEll,
+                Input='__Temp' + Output, Output=Output)
+            def cleanup(frame):
+                del frame['__Temp' + Output]
+            pipe.Add(cleanup)
+
+        pipe.Add(standardfiltering, PolyOrder=3)
+    """
+    func.__pipesegment__ = True
+    return func
+
+
+@g3decorator
 def indexmod(func):
     '''
-    Mark argument as a processing module that can be found by automated documentation tools. For example:
+    Mark argument as a processing module that can be found by automated
+    documentation tools.
 
-    @core.indexmod
-    def dostuff(frame):
-        dosomestuff()
+    Example
+    -------
+    ::
+
+        @core.indexmod
+        def dostuff(frame):
+            dosomestuff()
     '''
 
     func.__g3module__ = True
@@ -113,6 +177,7 @@ def indexmod(func):
 
 def build_pymodule(pycallable, *args, **kwargs):
     '''Convert a python callable and arguments into a core.G3Module by hook or by crook'''
+    from .g3logging import log_fatal
 
     if isinstance(pycallable, G3Module):
         return pycallable
@@ -278,5 +343,5 @@ def PipelineAddCallable(self, callable, name=None, subprocess=False, **kwargs):
 
 # Add this as G3Pipeline's Add method so it takes any Python callable
 G3Pipeline.Add = PipelineAddCallable
-G3Pipeline.__repr__ = lambda self: repr(self._pipelineinfo.pipelineinfo) if hasattr(self, '_pipelineinfo') else 'pipe = spt3g.core.G3Pipeline()'
+G3Pipeline.__repr__ = lambda self: repr(self._pipelineinfo.pipelineinfo) if hasattr(self, '_pipelineinfo') else 'pipe = {}.G3Pipeline()'.format(G3Pipeline.__module__)
 

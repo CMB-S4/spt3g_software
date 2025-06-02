@@ -3,7 +3,6 @@ import copy
 from .. import core
 from . import ACUStatus, ACUState, TrackerStatus, TrackerState, TrackerPointing, CalFile
 
-@core.usefulfunc
 def UnitValue(caldict_entry):
     '''Turn unit name into floating point unit value'''
 
@@ -36,7 +35,6 @@ def UnitValue(caldict_entry):
     return uvalue
 
 
-@core.usefulfunc
 def CalibrateValue(data, caldict_entry):
     '''Apply gain / offset units from G3 cal file to register'''
 
@@ -86,7 +84,7 @@ class CalibrateFrame:
         if frame.type != core.G3FrameType.GcpSlow or 'Calibrated' in frame:
             return
 
-        for board in frame.keys():
+        for board in list(frame.keys()):
             cboard = frame.pop(board)
             if board not in self.cal:
                 continue

@@ -1,6 +1,6 @@
 import numpy
-from . import G3Timestream, DoubleVector, G3VectorDouble, G3TimestreamMap, G3VectorTime, G3Time, IntVector, G3VectorInt, \
-    G3VectorComplexDouble, ComplexDoubleVector, BoolVector, G3VectorBool
+from . import G3Timestream, DoubleVector, G3VectorDouble, G3TimestreamMap, G3VectorTime, G3Time, Int64Vector, G3VectorInt, \
+    G3VectorComplexDouble, ComplexDoubleVector, BoolVector, G3VectorBool, IntVector, FloatVector, ComplexFloatVector
 from . import G3Units, log_fatal, log_warn, usefulfunc, G3FrameObject
 
 __all__ = ['concatenate_timestreams']
@@ -19,6 +19,9 @@ def G3Timestream_getitem(x, y):
 
 @property
 def timestream_dtype(ts):
+    """
+    Numpy data type of stored data.
+    """
     return numpy.asarray(ts).dtype
 
 G3Timestream.__getitem__ = G3Timestream_getitem
@@ -56,8 +59,8 @@ def numpybinarywrap(a, b, op):
     is_g3 = isinstance(a, G3FrameObject) or isinstance(b, G3FrameObject)
     is_tsa = isinstance(a, G3Timestream)
     is_tsb = isinstance(b, G3Timestream)
-    is_cxa = isinstance(a, (G3VectorComplexDouble, ComplexDoubleVector))
-    is_cxb = isinstance(b, (G3VectorComplexDouble, ComplexDoubleVector))
+    is_cxa = isinstance(a, (G3VectorComplexDouble, ComplexDoubleVector, ComplexFloatVector))
+    is_cxb = isinstance(b, (G3VectorComplexDouble, ComplexDoubleVector, ComplexFloatVector))
     cls = a.__class__
     if is_tsa:
         if is_tsb:
@@ -70,8 +73,11 @@ def numpybinarywrap(a, b, op):
         return NotImplemented
     out = op(numpy.asarray(a), numpy.asarray(b))
     k = out.dtype.kind
+    s = out.dtype.itemsize
     if k == 'c':
-        return G3VectorComplexDouble(out) if is_g3 else ComplexDoubleVector(out)
+        if is_g3:
+            return G3VectorComplexDouble(out)
+        return ComplexDoubleVector(out) if s == 16 else ComplexFloatVector(out)
     elif k == 'b':
         return G3VectorBool(out) if is_g3 else BoolVector(G3VectorBool(out))
     elif is_tsa:
@@ -81,9 +87,14 @@ def numpybinarywrap(a, b, op):
         out.stop = a.stop
         return out
     elif k == 'f':
-        return G3VectorDouble(out) if is_g3 else DoubleVector(out)
+        if is_g3:
+            return G3VectorDouble(out)
+        return DoubleVector(out) if s == 8 else FloatVector(out)
     elif k in 'iu':
-        return G3VectorInt(out.astype(int)) if is_g3 else IntVector(out.astype(int))
+        out = out.astype(int)
+        if is_g3:
+            return G3VectorInt(out)
+        return Int64Vector(out) if s == 8 else IntVector(out)
     return NotImplemented
 
 def numpyinplacebinarywrap(a, b, op):
@@ -92,8 +103,9 @@ def numpyinplacebinarywrap(a, b, op):
     op(numpy.asarray(a), numpy.asarray(b))
     return a
 
-all_cls = [G3Timestream, G3VectorDouble, DoubleVector, G3VectorInt, IntVector,
-           G3VectorComplexDouble, ComplexDoubleVector, G3VectorBool, BoolVector]
+all_cls = [G3Timestream, G3VectorDouble, DoubleVector, G3VectorInt, Int64Vector,
+           G3VectorComplexDouble, ComplexDoubleVector, G3VectorBool, BoolVector,
+           FloatVector, IntVector, ComplexFloatVector]
 
 for attr in ['add', 'sub', 'mul', 'div', 'truediv', 'floordiv', 'mod', 'pow',
              'and', 'or', 'xor', 'lshift', 'rshift']:
@@ -132,8 +144,35 @@ for x in ["sum", "mean", "any", "all", "min", "max", "argmin", "argmax", "var", 
     if x not in numpy.ndarray.__dict__:
         continue
     for cls in all_cls:
-        setattr(cls, x,
-                lambda a, *args, op=numpy.ndarray.__dict__[x], **kwargs: op(numpy.asarray(a), *args, **kwargs))
+        def ufunc_wrapper(op):
+            def ufunc(a, *args, **kwargs):
+                return numpy.ndarray.__dict__[op](numpy.asarray(a), *args, **kwargs)
+            ufunc.__doc__ = numpy.ndarray.__dict__[op].__doc__
+            return ufunc
+        setattr(cls, x, ufunc_wrapper(x))
+
+# Bind some memory-efficient methods for G3TimestreamMap
+for op in ["std", "var"]:
+    def ufunc_wrapper(op):
+        def ufunc(a, axis=None, dtype=None, out=None, **kwargs):
+            bound_args = {}
+            if op in ["std", "var"]:
+                bound_args["ddof"] = kwargs.pop("ddof", 0)
+            if not len(kwargs) and (axis == -1 or axis == 1):
+                ret = numpy.asarray(getattr(a, "_c" + op)(**bound_args))
+                if out is not None:
+                    out[:] = ret
+                    return out
+                if dtype is not None:
+                    return ret.astype(dtype)
+                return ret
+            kwargs.update(**bound_args)
+            return numpy.ndarray.__dict__[op](numpy.asarray(a), axis, dtype, out, **kwargs)
+        ufunc.__doc__ = numpy.ndarray.__dict__[op].__doc__
+        return ufunc
+
+    setattr(G3TimestreamMap, op, ufunc_wrapper(op))
+
 
 #add concatenation routines to g3timestream objects
 def _concatenate_timestreams(cls, ts_lst, ts_rounding_error=0.6, ts_interp_threshold=0):

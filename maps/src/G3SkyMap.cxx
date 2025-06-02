@@ -455,30 +455,6 @@ G3SkyMap::QueryAlphaEllipse(const Quat &q, double a, double b) const
 	return pixels;
 }
 
-static double
-skymap_getitem(const G3SkyMap &skymap, ssize_t i)
-{
-
-	if (i < 0)
-		i = skymap.size() + i;
-	if (size_t(i) >= skymap.size())
-		throw py::index_error("Index out of range");
-
-	return skymap.at(i);
-}
-
-static void
-skymap_setitem(G3SkyMap &skymap, ssize_t i, double val)
-{
-
-	if (i < 0)
-		i = skymap.size() + i;
-	if (size_t(i) >= skymap.size())
-		throw py::index_error("Index out of range");
-
-	skymap[i] = val;
-}
-
 static py::tuple
 skymap_shape(const G3SkyMap &skymap)
 {
@@ -488,7 +464,7 @@ skymap_shape(const G3SkyMap &skymap)
 	for (ssize_t i = shape.size() - 1; i >= 0; i--)
 		pyshape.push_back(shape[i]);
 	
-	return py::tuple(pyshape);
+	return py::tuple(py::cast(pyshape));
 }
 
 static py::tuple
@@ -1389,13 +1365,15 @@ void G3SkyMapWeights::Compact(bool zero_nans)
 }
 
 PYBINDINGS("maps", scope) {
-	register_enum<MapCoordReference>(scope, "MapCoordReference")
+	register_enum<MapCoordReference>(scope, "MapCoordReference",
+	    "Coordinate system of the sky map")
 	    .value("Local", Local)
 	    .value("Equatorial", Equatorial)
 	    .value("Galactic", Galactic)
 	;
 
-	register_enum<G3SkyMap::MapPolType, G3SkyMap::None>(scope, "MapPolType")
+	register_enum<G3SkyMap::MapPolType, G3SkyMap::None>(scope, "MapPolType",
+	    "Polarization identifier for sky maps and and weights")
 	    .value("T", G3SkyMap::T)
 	    .value("Q", G3SkyMap::Q)
 	    .value("U", G3SkyMap::U)
@@ -1415,7 +1393,8 @@ PYBINDINGS("maps", scope) {
 	    .value("BB", G3SkyMap::BB)
 	;
 
-	register_enum<G3SkyMap::MapPolConv, G3SkyMap::ConvNone>(scope, "MapPolConv")
+	register_enum<G3SkyMap::MapPolConv, G3SkyMap::ConvNone>(scope, "MapPolConv",
+	    "Polarization coordinate convention for Stokes Q/U alignment")
 	    .value("IAU", G3SkyMap::IAU)
 	    .value("COSMO", G3SkyMap::COSMO)
 	    .value("none", G3SkyMap::ConvNone) // "None" is reserved in python
@@ -1425,7 +1404,6 @@ PYBINDINGS("maps", scope) {
 	  "Base class for 1- and 2-D skymaps of various projections. Usually "
 	  "you want a subclass of this (e.g. FlatSkyMap) rather than using it "
 	  "directly.")
-	    .def_readonly("__g3frameobject__", true)
 	    .def_readwrite("coord_ref", &G3SkyMap::coord_ref,
 	      "Coordinate system (maps.MapCoordReference) of the map (e.g. "
 	      "Galactic, Equatorial, etc.)")
@@ -1453,8 +1431,6 @@ PYBINDINGS("maps", scope) {
 	    .def_readwrite("overflow", &G3SkyMap::overflow,
 	      "Combined value of data processed by "
 	      "the map maker but outside of the map area")
-	    .def("__getitem__", &skymap_getitem)
-	    .def("__setitem__", &skymap_setitem)
 	    .def("__copy__", &skymap_copy)
 	    .def("copy", &skymap_copy, "Return a copy of the map object")
 	    .def("clone", &G3SkyMap::Clone, py::arg("copy_data")=true,
@@ -1581,28 +1557,28 @@ PYBINDINGS("maps", scope) {
 	    .def(py::self -= double())
 	    .def(py::self /= double())
 
-	    .def("__add__", &pyskymap_add)
-	    .def("__add__", &pyskymap_addd)
-	    .def("__radd__", &pyskymap_addd)
-	    .def("__sub__", &pyskymap_sub)
-	    .def("__sub__", &pyskymap_subd)
-	    .def("__rsub__", &pyskymap_rsubd)
-	    .def("__imul__", &pyskymap_imultm)
-	    .def("__mul__", &pyskymap_mult)
-	    .def("__mul__", &pyskymap_multm)
-	    .def("__mul__", &pyskymap_multd)
-	    .def("__rmul__", &pyskymap_multm)
-	    .def("__rmul__", &pyskymap_multd)
-	    .def("__div__", &pyskymap_div)
-	    .def("__div__", &pyskymap_divd)
-	    .def("__rdiv__", &pyskymap_rdivd)
-	    .def("__truediv__", &pyskymap_div)
-	    .def("__truediv__", &pyskymap_divd)
-	    .def("__rtruediv__", &pyskymap_rdivd)
-	    .def("__neg__", &pyskymap_neg)
-	    .def("__pos__", &skymap_copy)
-	    .def("__pow__", &pyskymap_pow)
-	    .def("__pow__", &pyskymap_powd)
+	    .def("__add__", &pyskymap_add, py::is_operator())
+	    .def("__add__", &pyskymap_addd, py::is_operator())
+	    .def("__radd__", &pyskymap_addd, py::is_operator())
+	    .def("__sub__", &pyskymap_sub, py::is_operator())
+	    .def("__sub__", &pyskymap_subd, py::is_operator())
+	    .def("__rsub__", &pyskymap_rsubd, py::is_operator())
+	    .def("__imul__", &pyskymap_imultm, py::is_operator())
+	    .def("__mul__", &pyskymap_mult, py::is_operator())
+	    .def("__mul__", &pyskymap_multm, py::is_operator())
+	    .def("__mul__", &pyskymap_multd, py::is_operator())
+	    .def("__rmul__", &pyskymap_multm, py::is_operator())
+	    .def("__rmul__", &pyskymap_multd, py::is_operator())
+	    .def("__div__", &pyskymap_div, py::is_operator())
+	    .def("__div__", &pyskymap_divd, py::is_operator())
+	    .def("__rdiv__", &pyskymap_rdivd, py::is_operator())
+	    .def("__truediv__", &pyskymap_div, py::is_operator())
+	    .def("__truediv__", &pyskymap_divd, py::is_operator())
+	    .def("__rtruediv__", &pyskymap_rdivd, py::is_operator())
+	    .def("__neg__", &pyskymap_neg, py::is_operator())
+	    .def("__pos__", &skymap_copy, py::is_operator())
+	    .def("__pow__", &pyskymap_pow, py::is_operator())
+	    .def("__pow__", &pyskymap_powd, py::is_operator())
 
 	    .def(py::self < py::self)
 	    .def(py::self <= py::self)
@@ -1648,7 +1624,6 @@ PYBINDINGS("maps", scope) {
 	    .def("isnan", &G3SkyMap::isnan, py::arg("where")=G3SkyMapMaskConstPtr())
 	    .def("isfinite", &G3SkyMap::isfinite, py::arg("where")=G3SkyMapMaskConstPtr())
 	;
-	py::implicitly_convertible<G3SkyMapPtr, G3SkyMapConstPtr>();
 
 	register_frameobject<G3SkyMapWeights>(scope, "G3SkyMapWeights",
 	    "Polarized (Mueller matrix) or unpolarized (scalar) map pixel weights."
@@ -1704,17 +1679,17 @@ PYBINDINGS("maps", scope) {
 	    .def(py::self *= double())
 	    .def(py::self /= double())
 
-	    .def("__add__", &pyskymapweights_add)
-	    .def("__sub__", &pyskymapweights_sub)
-	    .def("__imul__", &pyskymapweights_imultma)
-	    .def("__mul__", &pyskymapweights_multm)
-	    .def("__mul__", &pyskymapweights_multma)
-	    .def("__mul__", &pyskymapweights_multd)
-	    .def("__rmul__", &pyskymapweights_multm)
-	    .def("__rmul__", &pyskymapweights_multma)
-	    .def("__rmul__", &pyskymapweights_multd)
-	    .def("__div__", &pyskymapweights_divd)
-	    .def("__truediv__", &pyskymapweights_divd)
+	    .def("__add__", &pyskymapweights_add, py::is_operator())
+	    .def("__sub__", &pyskymapweights_sub, py::is_operator())
+	    .def("__imul__", &pyskymapweights_imultma, py::is_operator())
+	    .def("__mul__", &pyskymapweights_multm, py::is_operator())
+	    .def("__mul__", &pyskymapweights_multma, py::is_operator())
+	    .def("__mul__", &pyskymapweights_multd, py::is_operator())
+	    .def("__rmul__", &pyskymapweights_multm, py::is_operator())
+	    .def("__rmul__", &pyskymapweights_multma, py::is_operator())
+	    .def("__rmul__", &pyskymapweights_multd, py::is_operator())
+	    .def("__div__", &pyskymapweights_divd, py::is_operator())
+	    .def("__truediv__", &pyskymapweights_divd, py::is_operator())
 	;
 
 }

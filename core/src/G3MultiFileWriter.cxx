@@ -4,11 +4,11 @@
 
 #include <dataio.h>
 
-class G3MultiFileWriter : public G3Module {
+class __attribute__((visibility("hidden"))) G3MultiFileWriter : public G3Module {
 public:
 	G3MultiFileWriter(py::object filename,
 	    size_t size_limit,
-	    py::object divide_on = py::object(),
+	    py::object divide_on = py::none(),
 	    size_t buffersize=1024*1024);
 
 	void Process(G3FramePtr frame, std::deque<G3FramePtr> &out);
@@ -32,19 +32,18 @@ private:
 	SET_LOGGER("G3MultiFileWriter");
 };
 
-G3MultiFileWriter::G3MultiFileWriter(py::object filename,
-    size_t size_limit, py::object divide_on, size_t buffersize)
-    : size_limit_(size_limit), buffersize_(buffersize), stream_(nullptr), seqno(0)
+G3MultiFileWriter::G3MultiFileWriter(py::object filename, size_t size_limit,
+    py::object divide_on, size_t buffersize) :
+    filename_callback_(py::none()), size_limit_(size_limit), buffersize_(buffersize),
+    newfile_callback_(py::none()), stream_(nullptr), seqno(0)
 {
-	py::extract<std::string> fstr(filename);
-
-	if (fstr.check()) {
-		filename_ = fstr();
+	if (py::isinstance<py::str>(filename)) {
+		filename_ = filename.cast<std::string>();
 
 		if (snprintf(NULL, 0, filename_.c_str(), 0) < 0)
 			log_fatal("Cannot format filename. Should be "
 			    "outfile-%%03u.g3");
-	} else if (PyCallable_Check(filename.ptr())) {
+	} else if (py::isinstance<py::function>(filename)) {
 		filename_ = "";
 		filename_callback_ = filename;
 	} else {
@@ -56,21 +55,17 @@ G3MultiFileWriter::G3MultiFileWriter(py::object filename,
 	if (size_limit_ == 0)
 		log_fatal("File size limit must be greater than zero");
 
-	if (divide_on.ptr() != Py_None) {
-		py::extract<std::vector<G3Frame::FrameType> >
-		    type_list_ext(divide_on);
-
-		if (type_list_ext.check())
-			always_break_on_ = type_list_ext();
-		else if (PyCallable_Check(divide_on.ptr()))
-			newfile_callback_ = divide_on;
-		else
-			log_fatal("divide_on must be either an iterable of "
-			    "frame types on which to start a new file "
-			    "(e.g. [core.G3FrameType.Observation]) or "
-			    "a callable that inspects a frame and returns "
-			    "True if a new file should be started and False "
-			    "otherwise.");
+	if (py::isinstance<py::function>(divide_on)) {
+		newfile_callback_ = divide_on;
+	} else if (py::isinstance<py::iterable>(divide_on)) {
+		always_break_on_ = divide_on.cast<std::vector<G3Frame::FrameType> >();
+	} else if (!divide_on.is_none()) {
+		log_fatal("divide_on must be either an iterable of "
+		    "frame types on which to start a new file "
+		    "(e.g. [core.G3FrameType.Observation]) or "
+		    "a callable that inspects a frame and returns "
+		    "True if a new file should be started and False "
+		    "otherwise.");
 	}
 }
 
@@ -85,8 +80,8 @@ G3MultiFileWriter::CheckNewFile(G3FramePtr frame)
 		if ((size_t)stream_.tellp() > size_limit_)
 			start_new_ = true;
 
-		if (newfile_callback_.ptr() != Py_None &&
-		    py::extract<bool>(newfile_callback_(frame))())
+		if (!newfile_callback_.is_none() &&
+		    newfile_callback_(frame).cast<bool>())
 			start_new_ = true;
 
 		if (std::find(always_break_on_.begin(), always_break_on_.end(),
@@ -111,8 +106,7 @@ G3MultiFileWriter::CheckNewFile(G3FramePtr frame)
 		delete [] msg;
 		seqno++;
 	} else {
-		filename = py::extract<std::string>(
-		    filename_callback_(frame, seqno++))();
+		filename = filename_callback_(frame, seqno++).cast<std::string>();
 	}
 
 	current_filename_ = filename;
@@ -184,7 +178,8 @@ PYBINDINGS("core", scope) {
 	    "frame in turn. If it returns True (or something with positive "
             "truth-value), a new file will be started at that frame.")
 	    .def(py::init<py::object, size_t, py::object, size_t>(), py::arg("filename"),
-	        py::arg("size_limit"), py::arg("divide_on")=py::object(),
+	        py::arg("size_limit"), py::arg("divide_on")=py::none(),
 	        py::arg("buffersize")=1024*1024)
-	    .def_property_readonly("current_file", &G3MultiFileWriter::CurrentFile);
+	    .def_property_readonly("current_file", &G3MultiFileWriter::CurrentFile,
+		"Path to the output file to which the next input frame will be written");
 }

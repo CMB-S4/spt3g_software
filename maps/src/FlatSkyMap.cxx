@@ -268,6 +268,12 @@ FlatSkyMap::operator () (size_t x, size_t y)
 	return (*sparse_)(x, y);
 }
 
+double *
+FlatSkyMap::data()
+{
+	return dense_ == NULL ? nullptr : dense_->data();
+}
+
 double
 FlatSkyMap::at(size_t i) const
 {
@@ -712,12 +718,12 @@ G3SkyMapPtr FlatSkyMap::Rebin(size_t scale, bool norm) const
 	return out;
 }
 
-G3SkyMapPtr FlatSkyMap::ExtractPatch(size_t x0, size_t y0, size_t width, size_t height,
+FlatSkyMapPtr FlatSkyMap::ExtractPatch(size_t x0, size_t y0, size_t width, size_t height,
     double fill) const
 {
 	// short circuit copy
 	if (x0 == width / 2 && y0 == height / 2 && width == xpix_ && height == ypix_)
-		return Clone(true);
+		return std::dynamic_pointer_cast<FlatSkyMap>(Clone(true));
 
 	FlatSkyProjection p(proj_info.OverlayPatch(x0, y0, width, height));
 	FlatSkyMapPtr out(new FlatSkyMap(p, coord_ref, weighted, units, pol_type,
@@ -762,70 +768,55 @@ void FlatSkyMap::InsertPatch(const FlatSkyMap &patch, bool ignore_zeros)
 	}
 }
 
-G3SkyMapPtr FlatSkyMap::Reshape(size_t width, size_t height, double fill) const
+FlatSkyMapPtr FlatSkyMap::Reshape(size_t width, size_t height, double fill) const
 {
 	return ExtractPatch(xpix_ / 2, ypix_ / 2, width, height, fill);
 }
 
 static void
-flatskymap_fill(FlatSkyMap &skymap, py::object v)
+flatskymap_fill(FlatSkyMap &skymap, const py::cbuffer &v)
 {
-	Py_buffer view;
+	auto info = v.request_contiguous();
 
-	if (PyObject_GetBuffer(v.ptr(), &view,
-	    PyBUF_FORMAT | PyBUF_C_CONTIGUOUS) == -1)
-		throw py::error_already_set();
+	if (info.ndim != 2)
+		throw py::value_error("Only 2-D maps supported");
 
-	if (view.ndim != 2) {
-		PyBuffer_Release(&view);
-		log_fatal("Only 2-D maps supported");
-	}
-
-	size_t ypix = view.shape[0];
-	size_t xpix = view.shape[1];
+	size_t ypix = info.shape[0];
+	size_t xpix = info.shape[1];
 	if (xpix != skymap.shape()[0] || ypix != skymap.shape()[1]) {
-		PyBuffer_Release(&view);
 		log_fatal("Got array of shape (%zu, %zu), expected (%zu, %zu)",
 		    ypix, xpix, (size_t) skymap.shape()[1], (size_t) skymap.shape()[0]);
 	}
 
 	skymap.ConvertToDense();
-	double *d = &(skymap(0, 0));
+	double *d = skymap.data();
 
-	std::string format;
-	try {
-		format = check_buffer_format(view.format);
-	} catch (py::buffer_error &e) {
-		PyBuffer_Release(&view);
-		log_fatal("%s", e.what());
-	}
+	auto format = check_buffer_format(info.format);
 
 	if (format == "d") {
-		memcpy(d, view.buf, view.len);
+		memcpy(d, info.ptr, skymap.size() * info.itemsize);
 	} else if (format == "f") {
-		for (size_t i = 0; i < view.len/sizeof(float); i++)
-			d[i] = ((float *)view.buf)[i];
+		for (size_t i = 0; i < skymap.size(); i++)
+			d[i] = ((float *)info.ptr)[i];
 	} else if (format == "i") {
-		for (size_t i = 0; i < view.len/sizeof(int); i++)
-			d[i] = ((int *)view.buf)[i];
+		for (size_t i = 0; i < skymap.size(); i++)
+			d[i] = ((int *)info.ptr)[i];
 	} else if (format == "I") {
-		for (size_t i = 0; i < view.len/sizeof(int); i++)
-			d[i] = ((unsigned int *)view.buf)[i];
+		for (size_t i = 0; i < skymap.size(); i++)
+			d[i] = ((unsigned int *)info.ptr)[i];
 	} else if (format == "l") {
-		for (size_t i = 0; i < view.len/sizeof(long); i++)
-			d[i] = ((long *)view.buf)[i];
+		for (size_t i = 0; i < skymap.size(); i++)
+			d[i] = ((long *)info.ptr)[i];
 	} else if (format == "L") {
-		for (size_t i = 0; i < view.len/sizeof(long); i++)
-			d[i] = ((unsigned long *)view.buf)[i];
+		for (size_t i = 0; i < skymap.size(); i++)
+			d[i] = ((unsigned long *)info.ptr)[i];
 	} else {
-		PyBuffer_Release(&view);
-		log_fatal("Unknown type code %s", view.format);
+		throw py::type_error(std::string("Unknown type code ") + info.format);
 	}
-	PyBuffer_Release(&view);
 }
 
 static FlatSkyMapPtr
-flatskymap_from_numpy(py::object v, double res,
+flatskymap_from_numpy(const py::array &v, double res,
     bool weighted, MapProjection proj,
     double alpha_center, double delta_center,
     MapCoordReference coord_ref, G3Timestream::TimestreamUnits u,
@@ -833,20 +824,11 @@ flatskymap_from_numpy(py::object v, double res,
     double x_center, double y_center,
     bool flat_pol, G3SkyMap::MapPolConv pol_conv)
 {
-	Py_buffer view;
+	if (v.ndim() != 2)
+		throw py::value_error("Only 2-D maps supported");
 
-	if (PyObject_GetBuffer(v.ptr(), &view,
-	    PyBUF_FORMAT | PyBUF_C_CONTIGUOUS) == -1)
-		throw py::error_already_set();
-
-	if (view.ndim != 2) {
-		PyBuffer_Release(&view);
-		log_fatal("Only 2-D maps supported");
-	}
-
-	size_t ypix = view.shape[0];
-	size_t xpix = view.shape[1];
-	PyBuffer_Release(&view);
+	size_t ypix = v.shape(0);
+	size_t xpix = v.shape(1);
 
 	FlatSkyProjection proj_info(xpix, ypix, res, alpha_center,
 	    delta_center, x_res, proj, x_center, y_center);
@@ -860,7 +842,7 @@ flatskymap_from_numpy(py::object v, double res,
 }
 
 static FlatSkyMapPtr
-flatskymap_array_clone(const FlatSkyMap &m, py::object v)
+flatskymap_array_clone(const FlatSkyMap &m, const py::array &v)
 {
 	auto skymap = std::dynamic_pointer_cast<FlatSkyMap>(m.Clone(false));
 	flatskymap_fill(*skymap, v);
@@ -875,87 +857,31 @@ flatskymap_pixel_to_angle(const G3SkyMap & skymap, size_t pixel)
 	return py::make_tuple(alphadelta[0], alphadelta[1]);
 }
 
-static int
-FlatSkyMap_getbuffer(PyObject *obj, Py_buffer *view, int flags)
+static auto
+flatskymap_buffer_info(FlatSkyMap &m)
 {
-	if (view == NULL) {
-		PyErr_SetString(PyExc_ValueError, "NULL view");
-		return -1;
-	}
+	m.ConvertToDense();
 
-	view->shape = NULL;
+	std::vector<size_t> shape{m.shape()[1], m.shape()[0]};
+	std::vector<size_t> strides{m.shape()[0] * sizeof(double), sizeof(double)};
 
-	py::handle<> self(py::borrowed(obj));
-	py::object selfobj(self);
-	py::extract<FlatSkyMapPtr> ext(selfobj);
-	if (!ext.check()) {
-		PyErr_SetString(PyExc_ValueError, "Invalid flat sky map");
-		view->obj = NULL;
-		return -1;
-	}
-	FlatSkyMapPtr sm = ext();
-
-	view->obj = obj;
-	if (sm->shape()[0] == 0 && sm->shape()[1] == 0) {
-		view->buf = NULL;
-	} else {
-		sm->ConvertToDense();
-		view->buf = (void*)&(*sm)[0];
-	}
-	view->len = sm->size() * sizeof(double);
-	view->readonly = 0;
-	view->itemsize = sizeof(double);
-	if (flags & PyBUF_FORMAT)
-		view->format = (char *)"d";
-	else
-		view->format = NULL;
-
-	// XXX: following leaks small amounts of memory!
-	view->shape = new Py_ssize_t[2];
-	view->strides = new Py_ssize_t[2];
-
-	view->ndim = 2;
-	view->shape[0] = sm->shape()[1]; // Numpy has swapped indexing
-	view->shape[1] = sm->shape()[0];
-	view->strides[0] = sm->shape()[0]*view->itemsize;
-	view->strides[1] = view->itemsize;
-
-	view->suboffsets = NULL;
-
-	Py_INCREF(obj);
-
-	return 0;
+	return py::buffer_info(m.data(), sizeof(double), "d", 2, shape, strides);
 }
 
-static PyBufferProcs flatskymap_bufferprocs;
-
-static G3SkyMapPtr
-flatskymap_getslice_2d(const FlatSkyMap &skymap, py::slice yslice, py::slice xslice)
+static FlatSkyMapPtr
+flatskymap_getslice_2d(const FlatSkyMap &skymap, const py::slice &yslice, const py::slice &xslice)
 {
-	int ystart(0), ystop(skymap.shape()[1]);
-	int xstart(0), xstop(skymap.shape()[0]);
+	size_t ystart(0), ystop(skymap.shape()[1]), ystep(1), ylen(0);
+	size_t xstart(0), xstop(skymap.shape()[0]), xstep(1), xlen(0);
 
-	// Normalize and check slice boundaries
-	if (yslice.start().ptr() != Py_None)
-		ystart = py::extract<int>(yslice.start())();
-	if (ystart < 0)
-		ystart += skymap.shape()[1];
-	if (yslice.stop().ptr() != Py_None)
-		ystop = py::extract<int>(yslice.stop())();
-	if (ystop < 0)
-		ystop += skymap.shape()[1];
-	if (yslice.step().ptr() != Py_None)
-		log_fatal("Slicing with non-unity steps unsupported");
-	if (xslice.start().ptr() != Py_None)
-		xstart = py::extract<int>(xslice.start())();
-	if (xstart < 0)
-		xstart += skymap.shape()[0];
-	if (xslice.stop().ptr() != Py_None)
-		xstop = py::extract<int>(xslice.stop())();
-	if (xstop < 0)
-		xstop += skymap.shape()[0];
-	if (xslice.step().ptr() != Py_None)
-		log_fatal("Slicing with non-unity steps unsupported");
+	if (!yslice.compute(ystop, &ystart, &ystop, &ystep, &ylen))
+		throw py::error_already_set();
+	if (ystep != 1)
+		throw py::index_error("Slicing with non-unity steps unsupported");
+	if (!xslice.compute(xstop, &xstart, &xstop, &xstep, &xlen))
+		throw py::error_already_set();
+	if (xstep != 1)
+		throw py::index_error("Slicing with non-unity steps unsupported");
 
 	return skymap.ExtractPatch(
 	    (xstop + xstart)/2, (ystop + ystart)/2,
@@ -964,61 +890,51 @@ flatskymap_getslice_2d(const FlatSkyMap &skymap, py::slice yslice, py::slice xsl
 }
 
 static py::object
-flatskymap_getitem_2d(const FlatSkyMap &skymap, py::tuple coords)
+flatskymap_getitem_2d(const FlatSkyMap &skymap, const py::tuple &coords)
 {
 
-	if (py::extract<py::slice>(coords[0]).check()) {
+	if (py::isinstance<py::slice>(coords[0])) {
 		// Slicing time!
-		py::slice yslice = py::extract<py::slice>(coords[0]);
-		py::slice xslice = py::extract<py::slice>(coords[1]);
-		return py::object(flatskymap_getslice_2d(skymap, yslice, xslice));
+		py::slice yslice = coords[0].cast<py::slice>();
+		py::slice xslice = coords[1].cast<py::slice>();
+		return py::cast(flatskymap_getslice_2d(skymap, yslice, xslice));
 	}
 
-	ssize_t y = py::extract<ssize_t>(coords[0]); // Swapped to match numpy
-	ssize_t x = py::extract<ssize_t>(coords[1]);
-	if (x < 0)
-		x = skymap.shape()[0] + x;
-	if (y < 0)
-		y = skymap.shape()[1] + y;
-	if (size_t(x) >= skymap.shape()[0])
-		throw py::index_error("X index out of range");
-	if (size_t(y) >= skymap.shape()[1])
-		throw py::index_error("Y index out of range");
+	// Swapped to match numpy
+	ssize_t y = unwrap_index(coords[0].cast<ssize_t>(), skymap.shape()[1]);
+	ssize_t x = unwrap_index(coords[1].cast<ssize_t>(), skymap.shape()[0]);
 
-	return py::object(skymap.at(x, y));
+	return py::cast(skymap.at(x, y));
 }
 
 static void
-flatskymap_setslice_1d(FlatSkyMap &skymap, py::slice coords,
-    py::object val)
+flatskymap_setslice_1d(FlatSkyMap &skymap, const py::slice &coords,
+    const py::buffer &val)
 {
-	if (coords.start().ptr() != Py_None || coords.stop().ptr() != Py_None)
-		log_fatal("1D slicing not supported");
+	size_t start(0), stop(0), step(0), len(0);
+	if (!coords.compute(skymap.size(), &start, &stop, &step, &len))
+		throw py::error_already_set();
+	if (start != 0 || stop != skymap.size())
+		throw py::index_error("1D slicing not supported");
 
 	flatskymap_fill(skymap, val);
 }
 
 static void
-flatskymap_setitem_2d(FlatSkyMap &skymap, py::tuple coords,
-    py::object val)
+flatskymap_setitem_2d(FlatSkyMap &skymap, const py::tuple &coords, const py::float_ &val)
 {
-	if (py::extract<ssize_t>(coords[0]).check()) {
-		ssize_t y = py::extract<ssize_t>(coords[0]); // Swapped to match numpy
-		ssize_t x = py::extract<ssize_t>(coords[1]);
-		if (x < 0)
-			x = skymap.shape()[0] + x;
-		if (y < 0)
-			y = skymap.shape()[1] + y;
-		if (size_t(x) >= skymap.shape()[0])
-			throw py::index_error("X index out of range");
-		if (size_t(y) >= skymap.shape()[1])
-			throw py::index_error("Y index out of range");
+	// Swapped to match numpy
+	ssize_t y = unwrap_index(coords[0].cast<ssize_t>(), skymap.shape()[1]);
+	ssize_t x = unwrap_index(coords[1].cast<ssize_t>(), skymap.shape()[0]);
 
-		double dval = py::extract<double>(val);
-		skymap(x, y) = dval;
-		return;
-	}
+	double dval = val.cast<double>();
+	skymap(x, y) = dval;
+}
 
+static void
+flatskymap_setitem_2d_patch(FlatSkyMap &skymap, const py::tuple &coords,
+    const py::buffer &val)
+{
 	// This one is kind of weird in that there is precisely one set of
 	// valid coords. Check that they work in a sneaky way: extract
 	// the given part of a null-data copy of the big map, then check with
@@ -1026,17 +942,15 @@ flatskymap_setitem_2d(FlatSkyMap &skymap, py::tuple coords,
 	// This has the nice side-effect that all the irritating parsing of
 	// slice dimensions is done only once, in getitem().
 
-	py::slice yslice = py::extract<py::slice>(coords[0]);
-	py::slice xslice = py::extract<py::slice>(coords[1]);
+	py::slice yslice = coords[0].cast<py::slice>();
+	py::slice xslice = coords[1].cast<py::slice>();
 	FlatSkyMapPtr shallowclone =
 	    std::dynamic_pointer_cast<FlatSkyMap>(skymap.Clone(false));
 	FlatSkyMapPtr dummy_subpatch =
-	    std::dynamic_pointer_cast<FlatSkyMap>(
-	        flatskymap_getslice_2d(*shallowclone, yslice, xslice));
+	    flatskymap_getslice_2d(*shallowclone, yslice, xslice);
 
-	py::extract<const FlatSkyMap &> mapext(val);
-	if (mapext.check()) {
-		const FlatSkyMap &patch = mapext();
+	if (py::isinstance<FlatSkyMap>(val)) {
+		const FlatSkyMap &patch = val.cast<const FlatSkyMap &>();
 		if (!dummy_subpatch->IsCompatible(patch)) {
 			throw py::value_error("Provided patch to insert is "
 			    "not compatible with the given subregion of the map into "
@@ -1054,25 +968,13 @@ flatskymap_setitem_2d(FlatSkyMap &skymap, py::tuple coords,
 static double
 flatskymap_getitem_1d(const G3SkyMap &skymap, size_t i)
 {
-
-	if (i < 0)
-		i = skymap.size() + i;
-	if (size_t(i) >= skymap.size())
-		throw py::index_error("Index out of range");
-
-	return skymap.at(i);
+	return skymap.at(unwrap_index(i, skymap.size()));
 }
 
 static void
 flatskymap_setitem_1d(G3SkyMap &skymap, size_t i, double val)
 {
-
-	if (i < 0)
-		i = skymap.size() + i;
-	if (size_t(i) >= skymap.size())
-		throw py::index_error("Index out of range");
-
-	skymap[i] = val;
+	skymap[unwrap_index(i, skymap.size())] = val;
 }
 
 static std::vector<double>
@@ -1140,7 +1042,7 @@ flatskymap_nonzeropixels(const FlatSkyMap &m)
 
 	m.NonZeroPixels(i, d);
 
-	return py::make_tuple(i, d);
+	return py::make_tuple(std::move(i), std::move(d));
 }
 
 static py::tuple
@@ -1233,9 +1135,7 @@ G3_SPLIT_SERIALIZABLE_CODE(FlatSkyMap);
 
 PYBINDINGS("maps", scope)
 {
-	// Can't use the normal FRAMEOBJECT code since this inherits
-	// from an intermediate class. Expanded by hand here.
-	auto fsm = register_frameobject<FlatSkyMap, G3SkyMap>(scope, "FlatSkyMap",
+	register_frameobject<FlatSkyMap, G3SkyMap>(scope, "FlatSkyMap", py::buffer_protocol(),
 	  "FlatSkyMap is a G3SkyMap with the extra meta information about the "
 	  "particular flat sky projection included.  In practice it behaves "
 	  "(mostly) like a 2d numpy array.  The pixels are normally indexed with "
@@ -1263,9 +1163,8 @@ PYBINDINGS("maps", scope)
 		  py::arg("flat_pol") = false,
 		  py::arg("pol_conv") = G3SkyMap::ConvNone,
 		"Instantiate an empty flat sky map object")
-	    .def("__init__", py::make_constructor(flatskymap_from_numpy,
-		  py::default_call_policies(),
-		  (py::arg("obj"), py::arg("res"),
+	    .def(py::init(&flatskymap_from_numpy),
+		  py::arg("obj"), py::arg("res"),
 		  py::arg("weighted") = true,
 		  py::arg("proj") = MapProjection::ProjNone,
 		  py::arg("alpha_center") = 0, py::arg("delta_center") = 0,
@@ -1275,9 +1174,10 @@ PYBINDINGS("maps", scope)
 		  py::arg("x_res") = 0.0 / 0.0,
 		  py::arg("x_center") = 0.0 / 0.0, py::arg("y_center") = 0.0 / 0.0,
 		  py::arg("flat_pol") = false,
-		  py::arg("pol_conv") = G3SkyMap::ConvNone)),
+		  py::arg("pol_conv") = G3SkyMap::ConvNone,
 		"Instantiate a flat sky map object from a numpy array")
 
+	    .def_buffer(&flatskymap_buffer_info)
 	    .def("array_clone", &flatskymap_array_clone, py::arg("array"),
 	       "Return a map of the same type, populated with a copy of the input "
 	       "numpy array")
@@ -1373,21 +1273,11 @@ PYBINDINGS("maps", scope)
 	    .def("__setitem__", flatskymap_setitem_1d)
 	    .def("__getitem__", flatskymap_getitem_2d)
 	    .def("__setitem__", flatskymap_setitem_2d)
+	    .def("__setitem__", flatskymap_setitem_2d_patch)
 	    .def("__setitem__", flatskymap_setslice_1d)
 	    .def("__getitem__", flatskymap_getitem_masked)
 	    .def("__setitem__", flatskymap_setitem_masked)
 	    .def("__setitem__", flatskymap_setitem_masked_scalar)
 	;
-
-	// Add buffer protocol interface
-	PyTypeObject *fsmclass = (PyTypeObject *)fsm.ptr();
-	flatskymap_bufferprocs.bf_getbuffer = FlatSkyMap_getbuffer;
-	fsmclass->tp_as_buffer = &flatskymap_bufferprocs;
-#if PY_MAJOR_VERSION < 3
-	fsmclass->tp_flags |= Py_TPFLAGS_HAVE_NEWBUFFER;
-#endif
-
-	py::implicitly_convertible<FlatSkyMapPtr, G3SkyMapPtr>();
-	py::implicitly_convertible<FlatSkyMapPtr, G3SkyMapConstPtr>();
 }
 

@@ -41,8 +41,6 @@ private:
 
 PYBINDINGS("maps", scope) {
 register_g3module<MapMockObserver>(scope, "MapMockObserver",
-"MapMockObserver(pointing, timestreams, band, T, Q=None, U=None, bolo_properties_name=\"BolometerProperties\", interp=False)\n"
-"\n"
 "Creates a new set of timestreams by sampling from an input map.\n\n"
 "Parameters\n"
 "----------\n"

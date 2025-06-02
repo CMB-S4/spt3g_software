@@ -184,15 +184,21 @@ protected:
 		if (gptr() < egptr())
 			return traits_type::to_int_type(*gptr());
 
-		stream_.avail_in = file_.read(&inbuf_[0], bsize_).gcount();
-		if (stream_.avail_in <= 0)
-			return traits_type::eof();
-		stream_.next_in = reinterpret_cast<C*>(&inbuf_[0]);
+		if (stream_.avail_in == 0) {
+			if (file_.eof())
+				return traits_type::eof();
+			stream_.avail_in = file_.read(&inbuf_[0], bsize_).gcount();
+			if (stream_.avail_in <= 0)
+				return traits_type::eof();
+			stream_.next_in = reinterpret_cast<C*>(&inbuf_[0]);
+		}
 
 		stream_.avail_out = bsize_;
 		stream_.next_out = reinterpret_cast<C*>(&outbuf_[0]);
 
 		if (decode())
+			return traits_type::eof();
+		if (stream_.avail_out == bsize_)
 			return traits_type::eof();
 
 		setg(&outbuf_[0], &outbuf_[0],

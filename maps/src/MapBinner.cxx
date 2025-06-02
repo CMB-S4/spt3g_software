@@ -13,7 +13,7 @@
 #include <maps/pointing.h>
 #include <calibration/BoloProperties.h>
 
-class MapBinner : public G3Module {
+class __attribute__((visibility("hidden"))) MapBinner : public G3Module {
 public:
 	MapBinner(std::string output_map_id, const G3SkyMap &stub_map,
 	    std::string pointing, std::string timestreams,
@@ -49,8 +49,6 @@ private:
 
 PYBINDINGS("maps", scope) {
 register_g3module<MapBinner>(scope, "MapBinner",
-"MapBinner(map_id, stub_map, pointing, timestreams, detector_weights, bolo_properties_name=\"BolometerProperties\", store_weight_map=True, map_per_scan=False)\n"
-"\n"
 "Bins up timestreams into a map with properties (projection, etc.) specified\n"
 "by the stub_map argument. \n\n"
 "Parameters\n"
@@ -100,25 +98,29 @@ register_g3module<MapBinner>(scope, "MapBinner",
 "\n"
 "Emits\n"
 "-----\n"
-"Emits a frame of type Map at the end of processing containing the output \n"
-"map:\n\n"
-"Frame (Map) [\n"
-"\"Id\" (spt3g.core.G3String) => \"ra0hdec-57.5-150GHz\"\n"
-"\"T\" (spt3g.maps.FlatSkyMap) => 2700 x 1500 (45 x 25 deg) ZEA centered at (1350, 749.5) = (0, -57.5 deg) in equatorial coordinates  (Tcmb)\n"
-"\"Q\" (spt3g.maps.FlatSkyMap) => 2700 x 1500 (45 x 25 deg) ZEA centered at (1350, 749.5) = (0, -57.5 deg) in equatorial coordinates  (Tcmb)\n"
-"\"U\" (spt3g.maps.FlatSkyMap) => 2700 x 1500 (45 x 25 deg) ZEA centered at (1350, 749.5) = (0, -57.5 deg) in equatorial coordinates  (Tcmb)\n"
-"\"Wpol\" (spt3g.maps.G3SkyMapWeights) => G3SkyMapWeights\n"
-"]\n"
+"frame: G3Frame\n"
+"    A frame of type Map at the end of processing containing the output map:\n\n"
+"    .. code-block::\n\n"
+"        Frame (Map) [\n"
+"            \"Id\" (spt3g.core.G3String) => \"ra0hdec-57.5-150GHz\"\n"
+"            \"T\" (spt3g.maps.FlatSkyMap) => 2700 x 1500 (45 x 25 deg) ZEA centered \n"
+"        at (1350, 749.5) = (0, -57.5 deg) in equatorial coordinates  (Tcmb)\n"
+"            \"Q\" (spt3g.maps.FlatSkyMap) => 2700 x 1500 (45 x 25 deg) ZEA centered \n"
+"        at (1350, 749.5) = (0, -57.5 deg) in equatorial coordinates  (Tcmb)\n"
+"            \"U\" (spt3g.maps.FlatSkyMap) => 2700 x 1500 (45 x 25 deg) ZEA centered \n"
+"        at (1350, 749.5) = (0, -57.5 deg) in equatorial coordinates  (Tcmb)\n"
+"            \"Wpol\" (spt3g.maps.G3SkyMapWeights) => G3SkyMapWeights\n"
+"        ]\n"
 "\n"
-"For unpolarized maps, the \"Q\" and \"U\" outputs will be absent and the \n"
-"\"Wpol\" frame object will be named \"Wunpol\".\n"
+"    For unpolarized maps, the \"Q\" and \"U\" outputs will be absent and the \n"
+"    \"Wpol\" frame object will be named \"Wunpol\".\n"
 "\n"
 "See Also\n"
 "--------\n"
 "SingleDetectorMapBinner, SingleDetectorBoresightBinner :\n"
 "    Alternative map binners for making single-detector maps.\n"
 "MapMockObserver :\n"
-"    The inverse of this module. Produces timestreams from aninput map.\n"
+"    The inverse of this module. Produces timestreams from an input map.\n"
 "FlatSkyMap, HealpixSkyMap :\n"
 "    Possible output types.\n"
 "\n"
@@ -164,11 +166,12 @@ MapBinner::MapBinner(std::string output_map_id, const G3SkyMap &stub_map,
 		U_->pol_type = G3SkyMap::U;
 	}
 
-	if (PyCallable_Check(map_per_scan.ptr())) {
+	if (py::isinstance<py::function>(map_per_scan)) {
 		map_per_scan_callback_ = map_per_scan;
 		map_per_scan_ = -1;
 	} else {
-		map_per_scan_ = py::extract<bool>(map_per_scan)();
+		map_per_scan_ = map_per_scan.cast<bool>();
+		map_per_scan_callback_ = py::none();
 	}
 }
 
@@ -187,7 +190,7 @@ MapBinner::Process(G3FramePtr frame, std::deque<G3FramePtr> &out)
 			if (map_per_scan_ >= 0)
 				emit_map_now = map_per_scan_;
 			else
-				emit_map_now = map_per_scan_callback_(frame);
+				emit_map_now = map_per_scan_callback_(frame).cast<bool>();
 		}
 	}
 	

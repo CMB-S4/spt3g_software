@@ -268,7 +268,7 @@ def ExplodeBolometerProperties(frame, bpmname='NominalBolometerProperties'):
     yoff = core.G3MapDouble()
     coupling = core.G3MapInt()
 
-    for bolo, p in bpm.iteritems():
+    for bolo, p in bpm.items():
         polangle[bolo] = p.pol_angle
         poleff[bolo] = p.pol_efficiency
         bands[bolo] = p.band

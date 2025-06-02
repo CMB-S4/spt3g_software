@@ -9,8 +9,6 @@ install_manifest.txt
 *.pyc
 __pycache__
 build
-doc/module-autodocs.rst
-doc/moddoc_*
 *.g3
 .DS_Store
 .idea/

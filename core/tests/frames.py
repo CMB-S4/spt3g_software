@@ -6,7 +6,7 @@ import unittest
 class TestFrames(unittest.TestCase):
     def test_put_get_delete(self):
         frame = G3Frame()
-        self.assertEqual(frame.keys(), [])
+        self.assertEqual(list(frame.keys()), [])
         frame["key1"] = "val1"
         self.assertEqual(frame["key1"], "val1")
         del frame["key1"]
@@ -15,7 +15,7 @@ class TestFrames(unittest.TestCase):
 
     def test_iter(self):
         frame = G3Frame()
-        self.assertEqual(frame.keys(), [])
+        self.assertEqual(list(frame.keys()), [])
         frame["key1"] = "val1"
         frame["key2"] = "val2"
 
@@ -26,15 +26,15 @@ class TestFrames(unittest.TestCase):
         self.assertTrue("key1" in keys)
         self.assertTrue("key2" in keys)
 
-    def test_iteritems(self):
+    def test_items(self):
         frame = G3Frame()
-        self.assertEqual(frame.keys(), [])
+        self.assertEqual(list(frame.keys()), [])
         frame["key1"] = "val1"
         frame["key2"] = "val2"
 
         keys = []
         vals = []
-        for k, v in frame.iteritems():
+        for k, v in frame.items():
             keys.append(k)
             vals.append(v)
         self.assertEqual(len(keys), 2)
@@ -46,7 +46,7 @@ class TestFrames(unittest.TestCase):
 
     def test_values(self):
         frame = G3Frame()
-        self.assertEqual(frame.keys(), [])
+        self.assertEqual(list(frame.keys()), [])
         frame["key1"] = "val1"
         frame["key2"] = "val2"
         keys = []

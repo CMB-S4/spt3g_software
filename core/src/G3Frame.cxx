@@ -89,16 +89,6 @@ bool G3Frame::Has(const std::string &name) const
 	return map_.find(name) != map_.end();
 }
 
-std::vector<std::string> G3Frame::Keys() const
-{
-	std::vector<std::string> keys;
-
-	for (auto i = map_.begin(); i != map_.end(); i++)
-		keys.push_back(i->first);
-
-	return keys;
-}
-
 G3Frame &G3Frame::operator = (const G3Frame &copy)
 {
 	map_ = copy.map_;
@@ -113,17 +103,7 @@ static std::string FrameObjectClassName(G3FrameObjectConstPtr obj)
 		py::gil_scoped_acquire gil;
 
 		try {
-			py::object pyobj(
-			    std::const_pointer_cast<G3FrameObject>(obj));
-
-			return
-			    py::extract<std::string>(
-			     pyobj.attr("__class__").attr("__module__"))() +
-			     "." +
-			     py::extract<std::string>(
-			      pyobj.attr("__class__").attr("__name__"))();
-		} catch (const py::error_already_set& e) {
-			PyErr_Clear();
+			return py_fullname(py::cast(obj));
 		} catch (...) {
 			// Fall through to C++ name
 		}
@@ -256,7 +236,7 @@ void G3Frame::save(A &ar, unsigned v) const
 		crc = crc32c(crc, (const uint8_t *)i->first.c_str(),
 		    i->first.size());
 		ar << make_nvp("blob", *i->second.blob);
-		crc = crc32c(crc, (const uint8_t *)&(*i->second.blob)[0],
+		crc = crc32c(crc, (const uint8_t *)i->second.blob->data(),
 		    i->second.blob->size());
 	}
 	ar << make_nvp("crc", crc);
@@ -350,7 +330,7 @@ void G3Frame::load(A &ar, unsigned v)
 		crc = crc32c(crc, (const uint8_t *)name.c_str(), name.size());
 		blob.blob = std::make_shared<std::vector<char> >();
 		ar >> make_nvp("blob", *blob.blob);
-		crc = crc32c(crc, (const uint8_t *)&(*blob.blob)[0],
+		crc = crc32c(crc, (const uint8_t *)blob.blob->data(),
 		    blob.blob->size());
 		map_.insert(G3MapType::value_type(name, blob));
 	}
@@ -431,7 +411,12 @@ void G3Frame::blob_encode(struct blob_container &blob)
 	blob.blob = std::make_shared<std::vector<char> >();
 	G3BufferOutputStream item_os(*blob.blob);
 	cereal::PortableBinaryOutputArchive item_ar(item_os);
-	item_ar << make_nvp("val", blob.frameobject);
+	try {
+		item_ar << make_nvp("val", blob.frameobject);
+	} catch (...) {
+		blob.blob.reset();
+		throw;
+	}
 	item_os.flush();
 }
 
@@ -463,58 +448,24 @@ g3frame_char_constructor(std::string max_4_chars)
 	return G3FramePtr(new G3Frame(G3Frame::FrameType(code)));
 }
 
-static py::list g3frame_keys(const G3Frame &map)
+static void g3frame_python_put(G3Frame &f, const std::string &name, const py::object &obj)
 {
-	py::list keys;
-	std::vector<std::string> keyvec = map.Keys();
-
-        for (auto i = keyvec.begin(); i != keyvec.end(); i++)
-                keys.append(*i);
-
-        return keys;
-}
-
-static void g3frame_python_put(G3Frame &f, std::string name, py::object obj)
-{
-	py::extract<G3FrameObjectPtr> extframe(obj);
-	if (extframe.check()) {
-		f.Put(name, extframe());
-		return;
-	}
-
-	py::extract<bool> extbool(obj);
-	if (PyBool_Check(obj.ptr()) && extbool.check()) {
-		f.Put(name, std::make_shared<G3Bool>(extbool()));
-		return;
-	}
-
-	py::extract<int64_t> extint(obj);
-	if (extint.check()) {
-		f.Put(name, std::make_shared<G3Int>(extint()));
-		return;
-	}
-
-	py::extract<double> extdouble(obj);
-	if (extdouble.check()) {
-		f.Put(name, std::make_shared<G3Double>(extdouble()));
-		return;
-	}
-
-	py::extract<Quat> extquat(obj);
-	if (extquat.check()) {
-		f.Put(name, std::make_shared<G3Quat>(extquat()));
-		return;
-	}
-
-	py::extract<std::string> extstr(obj);
-	if (extstr.check())
-		f.Put(name, std::make_shared<G3String>(extstr()));
+	if (py::isinstance<py::bool_>(obj))
+		f.Put(name, std::make_shared<G3Bool>(obj.cast<bool>()));
+	else if (py::isinstance<py::int_>(obj))
+		f.Put(name, std::make_shared<G3Int>(obj.cast<int64_t>()));
+	else if (py::isinstance<py::float_>(obj))
+		f.Put(name, std::make_shared<G3Double>(obj.cast<double>()));
+	else if (py::isinstance<Quat>(obj))
+		f.Put(name, std::make_shared<G3Quat>(obj.cast<Quat>()));
+	else if (py::isinstance<py::str>(obj))
+		f.Put(name, std::make_shared<G3String>(obj.cast<std::string>()));
 	else
 		throw py::type_error(
 		    "Object is not a G3FrameObject derivative or a plain-old-data type");
 }
 
-static py::object g3frame_python_get(G3Frame &f, std::string name)
+static py::object g3frame_python_get(const G3Frame &f, const std::string &name)
 {
 	// Python doesn't have a concept of const. Add subterfuge.
 	G3FrameObjectConstPtr element = f[name];
@@ -522,17 +473,43 @@ static py::object g3frame_python_get(G3Frame &f, std::string name)
 		throw py::key_error(name);
 
 	if (!!std::dynamic_pointer_cast<const G3Int>(element))
-		return py::object(std::dynamic_pointer_cast<const G3Int>(element)->value);
+		return py::int_(std::dynamic_pointer_cast<const G3Int>(element)->value);
 	else if (!!std::dynamic_pointer_cast<const G3Double>(element))
-		return py::object(std::dynamic_pointer_cast<const G3Double>(element)->value);
+		return py::float_(std::dynamic_pointer_cast<const G3Double>(element)->value);
 	else if (!!std::dynamic_pointer_cast<const G3String>(element))
-		return py::object(std::dynamic_pointer_cast<const G3String>(element)->value);
+		return py::str(std::dynamic_pointer_cast<const G3String>(element)->value);
 	else if (!!std::dynamic_pointer_cast<const G3Bool>(element))
-		return py::object(std::dynamic_pointer_cast<const G3Bool>(element)->value);
+		return py::bool_(std::dynamic_pointer_cast<const G3Bool>(element)->value);
 	else if (!!std::dynamic_pointer_cast<const G3Quat>(element))
-		return py::object(std::dynamic_pointer_cast<const G3Quat>(element)->value);
+		return py::cast(std::dynamic_pointer_cast<const G3Quat>(element)->value);
 	else
-		return py::object(std::const_pointer_cast<G3FrameObject>(element));
+		return py::cast(element);
+}
+
+static py::object
+g3frame_python_get_default(const G3Frame &f, const std::string &name, const py::object &d)
+{
+	try {
+		return g3frame_python_get(f, name);
+	} catch (py::key_error &) {
+		return d;
+	}
+}
+
+static py::object
+g3frame_python_pop(G3Frame &f, const std::string &name)
+{
+	auto v = g3frame_python_get(f, name);
+	f.Delete(name);
+	return v;
+}
+
+static py::object
+g3frame_python_pop_default(G3Frame &f, const std::string &name, const py::object &d)
+{
+	auto v = g3frame_python_get_default(f, name, d);
+	f.Delete(name);
+	return v;
 }
 
 static std::string g3frame_str(const G3Frame &f)
@@ -542,25 +519,76 @@ static std::string g3frame_str(const G3Frame &f)
 	return oss.str();
 }
 
-static py::list g3frame_python_values(G3Frame &f)
+static py::bytes g3frame_hash(const py::object &obj)
 {
-	py::list values;
-	std::vector<std::string> keyvec = f.Keys();
-
-	for (auto i = keyvec.begin(); i != keyvec.end(); i++)
-		values.append(g3frame_python_get(f, *i));
-
-	return values;
+	return obj.attr("__getstate__")().cast<py::tuple>()[1];
 }
 
-static py::object g3frame_hash(py::object obj)
-{
-	return py::extract<py::tuple>(obj.attr("__getstate__")())()[1];
-}
+
+// Iterators for keys/views/items
+class PyFrameIterator {
+public:
+	using value_type = std::pair<const std::string, py::object>;
+
+	PyFrameIterator(const G3Frame &frame, const G3Frame::key_iterator &it) :
+	    frame(frame), it(it) {}
+
+	bool operator ==(const PyFrameIterator & other) const { return it == other.it; }
+	PyFrameIterator operator++() { ++it; return *this; }
+	value_type operator*() const { return {*it, g3frame_python_get(frame, *it)}; }
+
+private:
+	const G3Frame &frame;
+	G3Frame::key_iterator it;
+};
+
+PYBIND11_NAMESPACE_BEGIN(PYBIND11_NAMESPACE)
+PYBIND11_NAMESPACE_BEGIN(detail)
+
+template <>
+struct KeysViewImpl<G3Frame> : public py::detail::keys_view {
+	explicit KeysViewImpl(G3Frame &frame) : frame(frame) {}
+	size_t len() override { return frame.size(); }
+	iterator iter() override { return make_iterator(frame.begin(), frame.end()); }
+	bool contains(const py::handle &k) override {
+		try {
+			return frame.Has(k.cast<std::string>());
+		} catch (const py::cast_error &) {
+			return false;
+		}
+	}
+	G3Frame &frame;
+};
+
+template <>
+struct ValuesViewImpl<G3Frame> : public py::detail::values_view {
+	explicit ValuesViewImpl(G3Frame &frame) : frame(frame) {}
+	size_t len() override { return frame.size(); }
+	iterator iter() override {
+		return make_value_iterator(PyFrameIterator(frame, frame.begin()),
+		    PyFrameIterator(frame, frame.end()));
+	}
+	G3Frame &frame;
+};
+
+template <>
+struct ItemsViewImpl<G3Frame> : public py::detail::items_view {
+	explicit ItemsViewImpl(G3Frame &frame) : frame(frame) {}
+	size_t len() override { return frame.size(); }
+	iterator iter() override {
+		return make_iterator(PyFrameIterator(frame, frame.begin()),
+		    PyFrameIterator(frame, frame.end()));
+	}
+	G3Frame &frame;
+};
+
+PYBIND11_NAMESPACE_END(detail)
+PYBIND11_NAMESPACE_END(PYBIND11_NAMESPACE)
+
 
 PYBINDINGS("core", scope) {
 	// Internal stuff
-	register_class_copyable<G3FrameObject>(scope, "G3FrameObject",
+	register_class<G3FrameObject>(scope, "G3FrameObject",
 	  "Base class for objects that can be added to a frame. All such "
 	  "must inherit from G3FrameObject in C++. Pickle hooks are overridden "
 	  "to use the fast internal serialization")
@@ -573,9 +601,9 @@ PYBINDINGS("core", scope) {
 	    .def_property_readonly("hash", &g3frame_hash,
 	      "Return the serialized representation of the object")
 	;
-	register_pointer_conversions<G3FrameObject>();
 
-	register_enum<G3Frame::FrameType, G3Frame::None>(scope, "G3FrameType")
+	register_enum<G3Frame::FrameType, G3Frame::None>(scope, "G3FrameType",
+	    "Enumerated frame type for identifying G3Frame objects")
 	    .value("Timepoint",       G3Frame::Timepoint)
 	    .value("Housekeeping",    G3Frame::Housekeeping)
 	    .value("Observation",     G3Frame::Observation)
@@ -591,10 +619,13 @@ PYBINDINGS("core", scope) {
 	    .value("LightCurve",      G3Frame::LightCurve)
 	    .value("Statistics",      G3Frame::Statistics)
 	    .value("none",            G3Frame::None)
+	    .def_property_readonly("key",
+	        [](G3Frame::FrameType &v) { return static_cast<char>(v); },
+	        "C++ enum character key")
 	;
 	register_vector_of<G3Frame::FrameType>(scope, "FrameType");
 
-	register_class_copyable<G3Frame>(scope, "G3Frame",
+	auto cls = register_class<G3Frame>(scope, "G3Frame",
 	  "Frames are the core datatype of the analysis software. They behave "
 	  "like Python dictionaries except that they can only store subclasses "
 	  "of core.G3FrameObject and the dictionary keys must be strings. "
@@ -608,8 +639,7 @@ PYBINDINGS("core", scope) {
 	    .def(py::init<>())
 	    .def(py::init<G3Frame::FrameType>())
 	    .def(py::init<G3Frame>())
-	    .def("__init__", py::make_constructor(g3frame_char_constructor,
-	      py::default_call_policies(), py::args("adhoctypecode")),
+	    .def(py::init(&g3frame_char_constructor), py::arg("adhoctypecode"),
 	      "Create a frame with an ad-hoc (non-standard) type code. "
 	      "Use sparingly and with care.")
 	    .def_readwrite("type", &G3Frame::type,
@@ -617,16 +647,21 @@ PYBINDINGS("core", scope) {
 	    .def_readonly("_filename", &G3Frame::_filename,
 	      "Source filename for frame, if read in using G3Reader. This attribute is "
 	      "fragile, use at your own risk.")
+	    .def("__setitem__", &G3Frame::Put)
 	    .def("__setitem__", &g3frame_python_put)
 	    .def("__getitem__", &g3frame_python_get)
-	    .def("keys", &g3frame_keys, "Returns a list of keys in the frame.")
+	    .def("get", &g3frame_python_get_default, py::arg("key"),
+	      py::arg("default")=py::none())
 	    .def("__delitem__", &G3Frame::Delete)
-	    .def("values", &g3frame_python_values, "Returns a list of the "
-	      "values of the items in the frame.")
+	    .def("pop", &g3frame_python_pop)
+	    .def("pop", &g3frame_python_pop_default)
 	    .def("__contains__", (bool (G3Frame::*)(const std::string &) const)
 	       &G3Frame::Has)
 	    .def("__str__", &g3frame_str)
 	    .def("__len__", &G3Frame::size)
+	    .def("__iter__",
+	       [](G3Frame &f) { return py::make_iterator(f.begin(), f.end()); },
+	       py::keep_alive<0, 1>())
 	    .def("drop_blobs", &G3Frame::DropBlobs, py::arg("decode_all")=false,
 	      "Drop all serialized data either for already-decoded objects (default) "
 	      "or all objects after decoding them (if decode_all is true). "
@@ -645,6 +680,7 @@ PYBINDINGS("core", scope) {
 	    .def_property_readonly("hash", &g3frame_hash,
 	      "Return the serialized representation of the frame")
 	;
+	register_map_iterators<G3Frame>(scope, cls);
 	register_vector_of<G3FramePtr>(scope, "Frame");
 	register_vector_of<G3FrameObjectPtr>(scope, "FrameObject");
 }

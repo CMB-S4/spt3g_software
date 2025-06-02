@@ -5,6 +5,17 @@
 #include <cereal/types/vector.hpp>
 #include <cereal/types/utility.hpp>
 
+template <typename T>
+T unwrap_index(T idx, size_t len)
+{
+	if (idx < 0)
+		idx += len;
+	if (idx < 0 || (size_t) idx >= len)
+		throw std::out_of_range("Index out of range");
+
+	return idx;
+}
+
 class DenseMapData;
 
 template<typename T>
@@ -188,6 +199,8 @@ public:
 				nz++;
 		return nz;
 	}
+
+	double *data() { return data_.data(); }
 
 	double at(size_t x, size_t y) const {
 		if (!in_bounds(x, y))
