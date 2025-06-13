@@ -216,6 +216,7 @@ std::string G3MapFrameObject::Description() const
 G3_SERIALIZABLE_CODE(G3MapDouble);
 G3_SERIALIZABLE_CODE(G3MapMapDouble);
 G3_SERIALIZABLE_CODE(G3MapString);
+G3_SERIALIZABLE_CODE(G3MapTime);
 G3_SERIALIZABLE_CODE(G3MapVectorBool);
 G3_SERIALIZABLE_CODE(G3MapVectorDouble);
 G3_SERIALIZABLE_CODE(G3MapVectorString);
@@ -237,6 +238,8 @@ PYBINDINGS("core", scope) {
 	register_g3map<G3MapInt>(scope, "G3MapInt", "Mapping from strings to ints.");
 	register_g3map<G3MapString>(scope, "G3MapString", "Mapping from strings to "
 	    "strings.");
+	register_g3map<G3MapTime>(scope, "G3MapTime", "Mapping from strings to "
+	    "G3Times.");
 	register_g3map<G3MapVectorBool>(scope, "G3MapVectorBool", "Mapping from "
 	    "strings to arrays of booleans.");
 	register_g3map<G3MapVectorDouble>(scope, "G3MapVectorDouble", "Mapping from "

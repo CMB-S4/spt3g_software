@@ -73,6 +73,7 @@ G3MAP_OF(std::string, std::vector<bool>, G3MapVectorBool);
 G3MAP_OF(std::string, std::vector<std::string>, G3MapVectorString);
 G3MAP_OF(std::string, G3VectorVectorString, G3MapVectorVectorString);
 G3MAP_OF(std::string, std::vector<std::complex<double> >, G3MapVectorComplexDouble);
+G3MAP_OF(std::string, G3Time, G3MapTime);
 G3MAP_OF(std::string, G3VectorTime, G3MapVectorTime);
 G3MAP_OF(std::string, std::string, G3MapString);
 
