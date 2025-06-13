@@ -336,6 +336,15 @@ get_detector_pointing(double x_offset, double y_offset,
 
 }
 
+static py::tuple
+py_get_detector_pointing(double x_offset, double y_offset,
+    const G3VectorQuat &trans_quat, MapCoordReference coord_sys)
+{
+	std::vector<double> alpha, delta;
+	get_detector_pointing(x_offset, y_offset, trans_quat, coord_sys, alpha, delta);
+	return py::make_tuple(alpha, delta);
+}
+
 std::vector<double>
 get_detector_rotation(double x_offset, double y_offset,
     const G3VectorQuat &trans_quat)
@@ -386,4 +395,14 @@ PYBINDINGS("maps", scope)
 	    "transform from local (az_0, el_0) coordinates to equatorial "
 	    "(ra_0, dec_0), accounting for rotation about the boresight by "
 	    "including the second set of points.");
+	scope.def("get_detector_pointing", py_get_detector_pointing,
+	    py::arg("x_offset"), py::arg("y_offset"), py::arg("trans"), py::arg("coord_sys"),
+	    "Construct detector pointing vectors ``(alpha, delta)`` for the "
+	    "given pointing offsets ``(x_offset, y_offset)`` and boresight "
+	    "quaternion vector ``trans``.");
+	scope.def("get_detector_pointing_quats", get_detector_pointing_quats,
+	    py::arg("x_offset"), py::arg("y_offset"), py::arg("trans"), py::arg("coord_sys"),
+	    "Construct the detector pointing quaternion vector for the "
+	    "given pointing offsets ``(x_offset, y_offset)`` and boresight "
+	    "quaternion vector ``trans``.");
 }

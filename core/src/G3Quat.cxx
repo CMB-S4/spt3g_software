@@ -292,6 +292,42 @@ vec_abs(const G3VectorQuat &a)
 	return out;
 }
 
+static G3VectorDouble
+vec_norm(const G3VectorQuat &a)
+{
+	G3VectorDouble out(a.size());
+	for (unsigned i = 0; i < a.size(); i++)
+		out[i] = a[i].norm();
+	return out;
+}
+
+static G3VectorDouble
+vec_vnorm(const G3VectorQuat &a)
+{
+	G3VectorDouble out(a.size());
+	for (unsigned i = 0; i < a.size(); i++)
+		out[i] = a[i].vnorm();
+	return out;
+}
+
+static G3VectorDouble
+vec_dot3(const G3VectorQuat &a, const Quat &q)
+{
+	G3VectorDouble out(a.size());
+	for (unsigned i = 0; i < a.size(); i++)
+		out[i] = a[i].dot3(q);
+	return out;
+}
+
+static G3VectorQuat
+vec_cross3(const G3VectorQuat &a, const Quat &q)
+{
+	G3VectorQuat out(a.size());
+	for (unsigned i = 0; i < a.size(); i++)
+		out[i] = a[i].cross3(q);
+	return out;
+}
+
 static G3VectorQuat
 vec_neg(const G3VectorQuat &a)
 {
@@ -314,6 +350,46 @@ ts_abs(const G3TimestreamQuat &a)
 	out.start = a.start; out.stop = a.stop;
 	for (unsigned i = 0; i < a.size(); i++)
 		out[i] = abs(a[i]);
+	return out;
+}
+
+static G3Timestream
+ts_norm(const G3TimestreamQuat &a)
+{
+	G3Timestream out(a.size());
+	out.start = a.start; out.stop = a.stop;
+	for (unsigned i = 0; i < a.size(); i++)
+		out[i] = a[i].norm();
+	return out;
+}
+
+static G3Timestream
+ts_vnorm(const G3TimestreamQuat &a)
+{
+	G3Timestream out(a.size());
+	out.start = a.start; out.stop = a.stop;
+	for (unsigned i = 0; i < a.size(); i++)
+		out[i] = a[i].vnorm();
+	return out;
+}
+
+static G3Timestream
+ts_dot3(const G3TimestreamQuat &a, const Quat &q)
+{
+	G3Timestream out(a.size());
+	out.start = a.start; out.stop = a.stop;
+	for (unsigned i = 0; i < a.size(); i++)
+		out[i] = a[i].dot3(q);
+	return out;
+}
+
+static G3TimestreamQuat
+ts_cross3(const G3TimestreamQuat &a, const Quat &q)
+{
+	G3TimestreamQuat out(a.size());
+	out.start = a.start; out.stop = a.stop;
+	for (unsigned i = 0; i < a.size(); i++)
+		out[i] = a[i].cross3(q);
 	return out;
 }
 
@@ -877,7 +953,7 @@ PYBINDINGS("core", scope)
 	    .def("__str__", quat_str)
 	    .def("__repr__", quat_repr)
 	    .def("norm", &Quat::norm, "Return the Cayley norm of the quaternion")
-	    .def("vnorm", &Quat::norm, "Return the Cayley norm of the "
+	    .def("vnorm", &Quat::vnorm, "Return the Cayley norm of the "
 	        "unreal (vector) part of the quaternion")
 	    .def("abs", &Quat::abs, "Return the Euclidean norm of the quaternion")
 	    .def("dot3", &Quat::dot3, "Dot product of last three entries")
@@ -917,6 +993,10 @@ PYBINDINGS("core", scope)
 	    .def("__abs__", vec_abs)
 	    .def("__neg__", vec_neg)
 	    .def("abs", vec_abs, "Return the Euclidean norm of each quaternion")
+	    .def("norm", &vec_norm, "Return the Cayley norm of each quaternion")
+	    .def("vnorm", &vec_vnorm, "Return the Cayley norm of the unreal (vector) part of each quaternion")
+	    .def("dot3", &vec_dot3, "Dot product of last three entries of each quaternion with the input")
+	    .def("cross3", &vec_cross3, "Cross product of last three entries of each quaternion with the input")
 	    .def_property_readonly("real", vec_real,
 	        "Return the real (scalar) part of each quaternion")
 	;
@@ -946,6 +1026,10 @@ PYBINDINGS("core", scope)
 	    .def("__abs__", ts_abs)
 	    .def("__neg__", ts_neg)
 	    .def("abs", ts_abs, "Return the Euclidean norm of each quaternion")
+	    .def("norm", &ts_norm, "Return the Cayley norm of each quaternion")
+	    .def("vnorm", &ts_vnorm, "Return the Cayley norm of the unreal (vector) part of each quaternion")
+	    .def("dot3", &ts_dot3, "Dot product of last three entries of each quaternion with the input")
+	    .def("cross3", &ts_cross3, "Cross product of last three entries of each quaternion with the input")
 	    .def_property_readonly("real", ts_real,
 	        "Return the real (scalar) part of each quaternion")
 	    .def_readwrite("start", &G3TimestreamQuat::start,
