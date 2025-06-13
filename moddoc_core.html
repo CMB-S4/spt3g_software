@@ -282,6 +282,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.core.G3MapMapDouble"><code class="docutils literal notranslate"><span class="pre">G3MapMapDouble</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.core.G3MapQuat"><code class="docutils literal notranslate"><span class="pre">G3MapQuat</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.core.G3MapString"><code class="docutils literal notranslate"><span class="pre">G3MapString</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.core.G3MapTime"><code class="docutils literal notranslate"><span class="pre">G3MapTime</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.core.G3MapVectorBool"><code class="docutils literal notranslate"><span class="pre">G3MapVectorBool</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.core.G3MapVectorComplexDouble"><code class="docutils literal notranslate"><span class="pre">G3MapVectorComplexDouble</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.core.G3MapVectorDouble"><code class="docutils literal notranslate"><span class="pre">G3MapVectorDouble</span></code></a></li>
@@ -599,6 +600,8 @@
 <li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.fitsio.save_skymapmask_fits"><code class="docutils literal notranslate"><span class="pre">save_skymapmask_fits()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.flatten_pol"><code class="docutils literal notranslate"><span class="pre">flatten_pol()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.get_boresight_rotator_timestream"><code class="docutils literal notranslate"><span class="pre">get_boresight_rotator_timestream()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.get_detector_pointing"><code class="docutils literal notranslate"><span class="pre">get_detector_pointing()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.get_detector_pointing_quats"><code class="docutils literal notranslate"><span class="pre">get_detector_pointing_quats()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.get_fk5_j2000_to_gal_quat"><code class="docutils literal notranslate"><span class="pre">get_fk5_j2000_to_gal_quat()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.get_galactic_plane_mask"><code class="docutils literal notranslate"><span class="pre">get_galactic_plane_mask()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.get_map_hist"><code class="docutils literal notranslate"><span class="pre">get_map_hist()</span></code></a></li>
@@ -1201,6 +1204,74 @@ Remove specified key and return the corresponding value. If the key is not found
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.core.G3MapString.values">
 <span class="sig-name descname"><span class="pre">values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spt3g.core.ValuesView" title="spt3g.core.ValuesView"><span class="pre">ValuesView</span></a></span></span><a class="headerlink" href="#spt3g.core.G3MapString.values" title="Link to this definition"></a></dt>
+<dd><p>Return an object providing a view on the mappings’s values.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="spt3g.core.G3MapTime">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.core.</span></span><span class="sig-name descname"><span class="pre">G3MapTime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.core.G3MapTime" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.core.</span></span><span class="sig-name descname"><span class="pre">G3MapTime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.core.G3MapTime" title="spt3g.core.G3MapTime"><span class="pre">G3MapTime</span></a></span></em><span class="sig-paren">)</span></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.core.</span></span><span class="sig-name descname"><span class="pre">G3MapTime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_G3MapTimeBaseMap</span></code>, <a class="reference internal" href="#spt3g.core.G3FrameObject" title="spt3g.core.G3FrameObject"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3FrameObject</span></code></a></p>
+<p>Mapping from strings to G3Times.</p>
+<p>Signature 2:
+Copy constructor</p>
+<p>Signature 3:
+Iterable constructor</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.core.G3MapTime.clear">
+<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.core.G3MapTime.clear" title="Link to this definition"></a></dt>
+<dd><p>Remove all items from the mapping.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.core.G3MapTime.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spt3g.core.G3MapTime" title="spt3g.core.G3MapTime"><span class="pre">G3MapTime</span></a></span></span><a class="headerlink" href="#spt3g.core.G3MapTime.copy" title="Link to this definition"></a></dt>
+<dd><p>Return a shallow copy of the mapping.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.core.G3MapTime.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">object</span></span></span><a class="headerlink" href="#spt3g.core.G3MapTime.get" title="Link to this definition"></a></dt>
+<dd><p>Return the value for key if key is in the mapping, else default.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.core.G3MapTime.items">
+<span class="sig-name descname"><span class="pre">items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spt3g.core.ItemsView" title="spt3g.core.ItemsView"><span class="pre">ItemsView</span></a></span></span><a class="headerlink" href="#spt3g.core.G3MapTime.items" title="Link to this definition"></a></dt>
+<dd><p>Return an object providing a view on the mappings’s items.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.core.G3MapTime.keys">
+<span class="sig-name descname"><span class="pre">keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spt3g.core.KeysView" title="spt3g.core.KeysView"><span class="pre">KeysView</span></a></span></span><a class="headerlink" href="#spt3g.core.G3MapTime.keys" title="Link to this definition"></a></dt>
+<dd><p>Return an object providing a view on the mappings’s keys.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.core.G3MapTime.pop">
+<span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spt3g.core.G3Time" title="spt3g.core.G3Time"><span class="pre">G3Time</span></a></span></span><a class="headerlink" href="#spt3g.core.G3MapTime.pop" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">object</span></span></span></dt>
+<dd><p>Signature 1:
+Remove specified key and return the corresponding value. If the key is not found, raise a KeyError</p>
+<p>Signature 2:
+Remove specified key and return the corresponding value. If the key is not found, return the default</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.core.G3MapTime.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.core.G3MapTime.update" title="Link to this definition"></a></dt>
+<dd><p>Update mapping from iterable/mapping.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.core.G3MapTime.values">
+<span class="sig-name descname"><span class="pre">values</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spt3g.core.ValuesView" title="spt3g.core.ValuesView"><span class="pre">ValuesView</span></a></span></span><a class="headerlink" href="#spt3g.core.G3MapTime.values" title="Link to this definition"></a></dt>
 <dd><p>Return an object providing a view on the mappings’s values.</p>
 </dd></dl>
 
@@ -2748,6 +2819,18 @@ Copy constructor</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="spt3g.core.G3TimestreamQuat.cross3">
+<span class="sig-name descname"><span class="pre">cross3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.core.Quat" title="spt3g.core.Quat"><span class="pre">Quat</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spt3g.core.G3TimestreamQuat" title="spt3g.core.G3TimestreamQuat"><span class="pre">G3TimestreamQuat</span></a></span></span><a class="headerlink" href="#spt3g.core.G3TimestreamQuat.cross3" title="Link to this definition"></a></dt>
+<dd><p>Cross product of last three entries of each quaternion with the input</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.core.G3TimestreamQuat.dot3">
+<span class="sig-name descname"><span class="pre">dot3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.core.Quat" title="spt3g.core.Quat"><span class="pre">Quat</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spt3g.core.G3Timestream" title="spt3g.core.G3Timestream"><span class="pre">G3Timestream</span></a></span></span><a class="headerlink" href="#spt3g.core.G3TimestreamQuat.dot3" title="Link to this definition"></a></dt>
+<dd><p>Dot product of last three entries of each quaternion with the input</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="spt3g.core.G3TimestreamQuat.extend">
 <span class="sig-name descname"><span class="pre">extend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">L</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.core.G3TimestreamQuat" title="spt3g.core.G3TimestreamQuat"><span class="pre">G3TimestreamQuat</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.core.G3TimestreamQuat.extend" title="Link to this definition"></a></dt>
 <dt class="sig sig-object py">
@@ -2765,6 +2848,12 @@ Extend the list by appending all the items in the given list</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="spt3g.core.G3TimestreamQuat.norm">
+<span class="sig-name descname"><span class="pre">norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spt3g.core.G3Timestream" title="spt3g.core.G3Timestream"><span class="pre">G3Timestream</span></a></span></span><a class="headerlink" href="#spt3g.core.G3TimestreamQuat.norm" title="Link to this definition"></a></dt>
+<dd><p>Return the Cayley norm of each quaternion</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="spt3g.core.G3TimestreamQuat.pop">
 <span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spt3g.core.Quat" title="spt3g.core.Quat"><span class="pre">Quat</span></a></span></span><a class="headerlink" href="#spt3g.core.G3TimestreamQuat.pop" title="Link to this definition"></a></dt>
 <dt class="sig sig-object py">
@@ -2779,6 +2868,12 @@ Remove and return the item at index <code class="docutils literal notranslate"><
 <dt class="sig sig-object py" id="spt3g.core.G3TimestreamQuat.remove">
 <span class="sig-name descname"><span class="pre">remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.core.Quat" title="spt3g.core.Quat"><span class="pre">Quat</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.core.G3TimestreamQuat.remove" title="Link to this definition"></a></dt>
 <dd><p>Remove the first item from the list whose value is x. It is an error if there is no such item.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.core.G3TimestreamQuat.vnorm">
+<span class="sig-name descname"><span class="pre">vnorm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spt3g.core.G3Timestream" title="spt3g.core.G3Timestream"><span class="pre">G3Timestream</span></a></span></span><a class="headerlink" href="#spt3g.core.G3TimestreamQuat.vnorm" title="Link to this definition"></a></dt>
+<dd><p>Return the Cayley norm of the unreal (vector) part of each quaternion</p>
 </dd></dl>
 
 <dl class="py property">
@@ -3941,6 +4036,18 @@ Copy constructor</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="spt3g.core.G3VectorQuat.cross3">
+<span class="sig-name descname"><span class="pre">cross3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.core.Quat" title="spt3g.core.Quat"><span class="pre">Quat</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spt3g.core.G3VectorQuat" title="spt3g.core.G3VectorQuat"><span class="pre">G3VectorQuat</span></a></span></span><a class="headerlink" href="#spt3g.core.G3VectorQuat.cross3" title="Link to this definition"></a></dt>
+<dd><p>Cross product of last three entries of each quaternion with the input</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.core.G3VectorQuat.dot3">
+<span class="sig-name descname"><span class="pre">dot3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.core.Quat" title="spt3g.core.Quat"><span class="pre">Quat</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spt3g.core.G3VectorDouble" title="spt3g.core.G3VectorDouble"><span class="pre">G3VectorDouble</span></a></span></span><a class="headerlink" href="#spt3g.core.G3VectorQuat.dot3" title="Link to this definition"></a></dt>
+<dd><p>Dot product of last three entries of each quaternion with the input</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="spt3g.core.G3VectorQuat.extend">
 <span class="sig-name descname"><span class="pre">extend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">L</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.core.G3VectorQuat" title="spt3g.core.G3VectorQuat"><span class="pre">G3VectorQuat</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.core.G3VectorQuat.extend" title="Link to this definition"></a></dt>
 <dt class="sig sig-object py">
@@ -3958,6 +4065,12 @@ Extend the list by appending all the items in the given list</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="spt3g.core.G3VectorQuat.norm">
+<span class="sig-name descname"><span class="pre">norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spt3g.core.G3VectorDouble" title="spt3g.core.G3VectorDouble"><span class="pre">G3VectorDouble</span></a></span></span><a class="headerlink" href="#spt3g.core.G3VectorQuat.norm" title="Link to this definition"></a></dt>
+<dd><p>Return the Cayley norm of each quaternion</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="spt3g.core.G3VectorQuat.pop">
 <span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spt3g.core.Quat" title="spt3g.core.Quat"><span class="pre">Quat</span></a></span></span><a class="headerlink" href="#spt3g.core.G3VectorQuat.pop" title="Link to this definition"></a></dt>
 <dt class="sig sig-object py">
@@ -3972,6 +4085,12 @@ Remove and return the item at index <code class="docutils literal notranslate"><
 <dt class="sig sig-object py" id="spt3g.core.G3VectorQuat.remove">
 <span class="sig-name descname"><span class="pre">remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.core.Quat" title="spt3g.core.Quat"><span class="pre">Quat</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.core.G3VectorQuat.remove" title="Link to this definition"></a></dt>
 <dd><p>Remove the first item from the list whose value is x. It is an error if there is no such item.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.core.G3VectorQuat.vnorm">
+<span class="sig-name descname"><span class="pre">vnorm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">​</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spt3g.core.G3VectorDouble" title="spt3g.core.G3VectorDouble"><span class="pre">G3VectorDouble</span></a></span></span><a class="headerlink" href="#spt3g.core.G3VectorQuat.vnorm" title="Link to this definition"></a></dt>
+<dd><p>Return the Cayley norm of the unreal (vector) part of each quaternion</p>
 </dd></dl>
 
 <dl class="py property">

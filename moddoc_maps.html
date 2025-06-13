@@ -282,6 +282,7 @@
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapMapDouble"><code class="docutils literal notranslate"><span class="pre">G3MapMapDouble</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapQuat"><code class="docutils literal notranslate"><span class="pre">G3MapQuat</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapString"><code class="docutils literal notranslate"><span class="pre">G3MapString</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapTime"><code class="docutils literal notranslate"><span class="pre">G3MapTime</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapVectorBool"><code class="docutils literal notranslate"><span class="pre">G3MapVectorBool</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapVectorComplexDouble"><code class="docutils literal notranslate"><span class="pre">G3MapVectorComplexDouble</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapVectorDouble"><code class="docutils literal notranslate"><span class="pre">G3MapVectorDouble</span></code></a></li>
@@ -599,6 +600,8 @@
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.fitsio.save_skymapmask_fits"><code class="docutils literal notranslate"><span class="pre">save_skymapmask_fits()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.flatten_pol"><code class="docutils literal notranslate"><span class="pre">flatten_pol()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.get_boresight_rotator_timestream"><code class="docutils literal notranslate"><span class="pre">get_boresight_rotator_timestream()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.get_detector_pointing"><code class="docutils literal notranslate"><span class="pre">get_detector_pointing()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.get_detector_pointing_quats"><code class="docutils literal notranslate"><span class="pre">get_detector_pointing_quats()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.get_fk5_j2000_to_gal_quat"><code class="docutils literal notranslate"><span class="pre">get_fk5_j2000_to_gal_quat()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.get_galactic_plane_mask"><code class="docutils literal notranslate"><span class="pre">get_galactic_plane_mask()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.get_map_hist"><code class="docutils literal notranslate"><span class="pre">get_map_hist()</span></code></a></li>
@@ -3869,6 +3872,36 @@ can contain entries such as <code class="docutils literal notranslate"><span cla
 
 <span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3TimestreamQuat" title="spt3g.core.G3TimestreamQuat"><span class="pre">G3TimestreamQuat</span></a></span></span><a class="headerlink" href="#spt3g.maps.get_boresight_rotator_timestream" title="Link to this definition"></a></dt>
 <dd><p>Construct a transform quaternion timestream from timestreams of local and equatorial boresight pointing coordinates.  Computes the transform from local (az_0, el_0) coordinates to equatorial (ra_0, dec_0), accounting for rotation about the boresight by including the second set of points.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spt3g.maps.get_detector_pointing">
+<span class="sig-prename descclassname"><span class="pre">spt3g.maps.</span></span><span class="sig-name descname"><span class="pre">get_detector_pointing</span></span><span class="sig-paren">(</span>
+
+<dl>
+<dd><em class="sig-param"><span class="n"><span class="pre">x_offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">y_offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">trans</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3VectorQuat" title="spt3g.core.G3VectorQuat"><span class="pre">G3VectorQuat</span></a></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">coord_sys</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.maps.MapCoordReference" title="spt3g.maps.MapCoordReference"><span class="pre">MapCoordReference</span></a></span></em>,</dd>
+</dl>
+
+<span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#spt3g.maps.get_detector_pointing" title="Link to this definition"></a></dt>
+<dd><p>Construct detector pointing vectors <code class="docutils literal notranslate"><span class="pre">(alpha,</span> <span class="pre">delta)</span></code> for the given pointing offsets <code class="docutils literal notranslate"><span class="pre">(x_offset,</span> <span class="pre">y_offset)</span></code> and boresight quaternion vector <code class="docutils literal notranslate"><span class="pre">trans</span></code>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spt3g.maps.get_detector_pointing_quats">
+<span class="sig-prename descclassname"><span class="pre">spt3g.maps.</span></span><span class="sig-name descname"><span class="pre">get_detector_pointing_quats</span></span><span class="sig-paren">(</span>
+
+<dl>
+<dd><em class="sig-param"><span class="n"><span class="pre">x_offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">y_offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">trans</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3VectorQuat" title="spt3g.core.G3VectorQuat"><span class="pre">G3VectorQuat</span></a></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">coord_sys</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.maps.MapCoordReference" title="spt3g.maps.MapCoordReference"><span class="pre">MapCoordReference</span></a></span></em>,</dd>
+</dl>
+
+<span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3VectorQuat" title="spt3g.core.G3VectorQuat"><span class="pre">G3VectorQuat</span></a></span></span><a class="headerlink" href="#spt3g.maps.get_detector_pointing_quats" title="Link to this definition"></a></dt>
+<dd><p>Construct the detector pointing quaternion vector for the given pointing offsets <code class="docutils literal notranslate"><span class="pre">(x_offset,</span> <span class="pre">y_offset)</span></code> and boresight quaternion vector <code class="docutils literal notranslate"><span class="pre">trans</span></code>.</p>
 </dd></dl>
 
 <dl class="py function">

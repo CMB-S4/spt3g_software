@@ -279,6 +279,7 @@
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapMapDouble"><code class="docutils literal notranslate"><span class="pre">G3MapMapDouble</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapQuat"><code class="docutils literal notranslate"><span class="pre">G3MapQuat</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapString"><code class="docutils literal notranslate"><span class="pre">G3MapString</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapTime"><code class="docutils literal notranslate"><span class="pre">G3MapTime</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapVectorBool"><code class="docutils literal notranslate"><span class="pre">G3MapVectorBool</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapVectorComplexDouble"><code class="docutils literal notranslate"><span class="pre">G3MapVectorComplexDouble</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_core.html#spt3g.core.G3MapVectorDouble"><code class="docutils literal notranslate"><span class="pre">G3MapVectorDouble</span></code></a></li>
@@ -596,6 +597,8 @@
 <li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.fitsio.save_skymapmask_fits"><code class="docutils literal notranslate"><span class="pre">save_skymapmask_fits()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.flatten_pol"><code class="docutils literal notranslate"><span class="pre">flatten_pol()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.get_boresight_rotator_timestream"><code class="docutils literal notranslate"><span class="pre">get_boresight_rotator_timestream()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.get_detector_pointing"><code class="docutils literal notranslate"><span class="pre">get_detector_pointing()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.get_detector_pointing_quats"><code class="docutils literal notranslate"><span class="pre">get_detector_pointing_quats()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.get_fk5_j2000_to_gal_quat"><code class="docutils literal notranslate"><span class="pre">get_fk5_j2000_to_gal_quat()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.get_galactic_plane_mask"><code class="docutils literal notranslate"><span class="pre">get_galactic_plane_mask()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="moddoc_maps.html#spt3g.maps.get_map_hist"><code class="docutils literal notranslate"><span class="pre">get_map_hist()</span></code></a></li>
@@ -1106,6 +1109,8 @@
 </li>
         <li><a href="moddoc_core.html#spt3g.core.G3MapString.clear">(spt3g.core.G3MapString method)</a>
 </li>
+        <li><a href="moddoc_core.html#spt3g.core.G3MapTime.clear">(spt3g.core.G3MapTime method)</a>
+</li>
         <li><a href="moddoc_core.html#spt3g.core.G3MapVectorBool.clear">(spt3g.core.G3MapVectorBool method)</a>
 </li>
         <li><a href="moddoc_core.html#spt3g.core.G3MapVectorComplexDouble.clear">(spt3g.core.G3MapVectorComplexDouble method)</a>
@@ -1298,6 +1303,8 @@
 </li>
         <li><a href="moddoc_core.html#spt3g.core.G3MapString.copy">(spt3g.core.G3MapString method)</a>
 </li>
+        <li><a href="moddoc_core.html#spt3g.core.G3MapTime.copy">(spt3g.core.G3MapTime method)</a>
+</li>
         <li><a href="moddoc_core.html#spt3g.core.G3MapVectorBool.copy">(spt3g.core.G3MapVectorBool method)</a>
 </li>
         <li><a href="moddoc_core.html#spt3g.core.G3MapVectorComplexDouble.copy">(spt3g.core.G3MapVectorComplexDouble method)</a>
@@ -1413,8 +1420,14 @@
 </li>
       <li><a href="moddoc_gcp.html#spt3g.gcp.CalFile.create_g3_cal_file">create_g3_cal_file() (in module spt3g.gcp.CalFile)</a>
 </li>
-      <li><a href="moddoc_core.html#spt3g.core.Quat.cross3">cross3() (spt3g.core.Quat method)</a>
+      <li><a href="moddoc_core.html#spt3g.core.G3TimestreamQuat.cross3">cross3() (spt3g.core.G3TimestreamQuat method)</a>
+
+      <ul>
+        <li><a href="moddoc_core.html#spt3g.core.G3VectorQuat.cross3">(spt3g.core.G3VectorQuat method)</a>
 </li>
+        <li><a href="moddoc_core.html#spt3g.core.Quat.cross3">(spt3g.core.Quat method)</a>
+</li>
+      </ul></li>
       <li><a href="moddoc_core.html#spt3g.core.G3TimestreamUnits.Current">Current (spt3g.core.G3TimestreamUnits attribute)</a>
 </li>
       <li><a href="moddoc_core.html#spt3g.core.G3MultiFileWriter.current_file">current_file (spt3g.core.G3MultiFileWriter property)</a>
@@ -1553,8 +1566,14 @@
 </li>
       <li><a href="moddoc_core.html#spt3g.core.G3TimestreamUnits.Distance">Distance (spt3g.core.G3TimestreamUnits attribute)</a>
 </li>
-      <li><a href="moddoc_core.html#spt3g.core.Quat.dot3">dot3() (spt3g.core.Quat method)</a>
+      <li><a href="moddoc_core.html#spt3g.core.G3TimestreamQuat.dot3">dot3() (spt3g.core.G3TimestreamQuat method)</a>
+
+      <ul>
+        <li><a href="moddoc_core.html#spt3g.core.G3VectorQuat.dot3">(spt3g.core.G3VectorQuat method)</a>
 </li>
+        <li><a href="moddoc_core.html#spt3g.core.Quat.dot3">(spt3g.core.Quat method)</a>
+</li>
+      </ul></li>
       <li><a href="moddoc_core.html#spt3g.core.DoubleVector">DoubleVector (class in spt3g.core)</a>
 </li>
       <li><a href="moddoc_core.html#spt3g.core.G3Frame.drop_blobs">drop_blobs() (spt3g.core.G3Frame method)</a>
@@ -1799,6 +1818,8 @@
 </li>
       <li><a href="moddoc_core.html#spt3g.core.G3MapString">G3MapString (class in spt3g.core)</a>
 </li>
+      <li><a href="moddoc_core.html#spt3g.core.G3MapTime">G3MapTime (class in spt3g.core)</a>
+</li>
       <li><a href="moddoc_core.html#spt3g.core.G3MapVectorBool">G3MapVectorBool (class in spt3g.core)</a>
 </li>
       <li><a href="moddoc_core.html#spt3g.core.G3MapVectorComplexDouble">G3MapVectorComplexDouble (class in spt3g.core)</a>
@@ -1879,10 +1900,10 @@
 </li>
       <li><a href="moddoc_core.html#spt3g.core.G3VectorString">G3VectorString (class in spt3g.core)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="moddoc_core.html#spt3g.core.G3VectorStringVector">G3VectorStringVector (class in spt3g.core)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="moddoc_core.html#spt3g.core.G3VectorTime">G3VectorTime (class in spt3g.core)</a>
 </li>
       <li><a href="moddoc_core.html#spt3g.core.G3VectorUnsignedChar">G3VectorUnsignedChar (class in spt3g.core)</a>
@@ -1930,6 +1951,8 @@
 </li>
         <li><a href="moddoc_core.html#spt3g.core.G3MapString.get">(spt3g.core.G3MapString method)</a>
 </li>
+        <li><a href="moddoc_core.html#spt3g.core.G3MapTime.get">(spt3g.core.G3MapTime method)</a>
+</li>
         <li><a href="moddoc_core.html#spt3g.core.G3MapVectorBool.get">(spt3g.core.G3MapVectorBool method)</a>
 </li>
         <li><a href="moddoc_core.html#spt3g.core.G3MapVectorComplexDouble.get">(spt3g.core.G3MapVectorComplexDouble method)</a>
@@ -1968,6 +1991,10 @@
       <li><a href="moddoc_calibration.html#spt3g.calibration.bolopropertiesutils.get_band_units">get_band_units() (in module spt3g.calibration.bolopropertiesutils)</a>
 </li>
       <li><a href="moddoc_maps.html#spt3g.maps.get_boresight_rotator_timestream">get_boresight_rotator_timestream() (in module spt3g.maps)</a>
+</li>
+      <li><a href="moddoc_maps.html#spt3g.maps.get_detector_pointing">get_detector_pointing() (in module spt3g.maps)</a>
+</li>
+      <li><a href="moddoc_maps.html#spt3g.maps.get_detector_pointing_quats">get_detector_pointing_quats() (in module spt3g.maps)</a>
 </li>
       <li><a href="moddoc_maps.html#spt3g.maps.get_fk5_j2000_to_gal_quat">get_fk5_j2000_to_gal_quat() (in module spt3g.maps)</a>
 </li>
@@ -2216,6 +2243,8 @@
 </li>
         <li><a href="moddoc_core.html#spt3g.core.G3MapString.items">(spt3g.core.G3MapString method)</a>
 </li>
+        <li><a href="moddoc_core.html#spt3g.core.G3MapTime.items">(spt3g.core.G3MapTime method)</a>
+</li>
         <li><a href="moddoc_core.html#spt3g.core.G3MapVectorBool.items">(spt3g.core.G3MapVectorBool method)</a>
 </li>
         <li><a href="moddoc_core.html#spt3g.core.G3MapVectorComplexDouble.items">(spt3g.core.G3MapVectorComplexDouble method)</a>
@@ -2279,6 +2308,8 @@
         <li><a href="moddoc_core.html#spt3g.core.G3MapQuat.keys">(spt3g.core.G3MapQuat method)</a>
 </li>
         <li><a href="moddoc_core.html#spt3g.core.G3MapString.keys">(spt3g.core.G3MapString method)</a>
+</li>
+        <li><a href="moddoc_core.html#spt3g.core.G3MapTime.keys">(spt3g.core.G3MapTime method)</a>
 </li>
         <li><a href="moddoc_core.html#spt3g.core.G3MapVectorBool.keys">(spt3g.core.G3MapVectorBool method)</a>
 </li>
@@ -2619,10 +2650,10 @@
 </li>
       <li><a href="moddoc_maps.html#spt3g.maps.G3SkyMap.nanmedian">nanmedian() (spt3g.maps.G3SkyMap method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="moddoc_maps.html#spt3g.maps.G3SkyMap.nanmin">nanmin() (spt3g.maps.G3SkyMap method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="moddoc_maps.html#spt3g.maps.G3SkyMap.nanstd">nanstd() (spt3g.maps.G3SkyMap method)</a>
 </li>
       <li><a href="moddoc_maps.html#spt3g.maps.G3SkyMap.nansum">nansum() (spt3g.maps.G3SkyMap method)</a>
@@ -2673,8 +2704,14 @@
         <li><a href="moddoc_maps.html#spt3g.maps.HealpixSkyMap.nonzero_pixels">(spt3g.maps.HealpixSkyMap method)</a>
 </li>
       </ul></li>
-      <li><a href="moddoc_core.html#spt3g.core.Quat.norm">norm() (spt3g.core.Quat method)</a>
+      <li><a href="moddoc_core.html#spt3g.core.G3TimestreamQuat.norm">norm() (spt3g.core.G3TimestreamQuat method)</a>
+
+      <ul>
+        <li><a href="moddoc_core.html#spt3g.core.G3VectorQuat.norm">(spt3g.core.G3VectorQuat method)</a>
 </li>
+        <li><a href="moddoc_core.html#spt3g.core.Quat.norm">(spt3g.core.Quat method)</a>
+</li>
+      </ul></li>
       <li><a href="moddoc_core.html#spt3g.core.G3Time.Now">Now() (spt3g.core.G3Time static method)</a>
 </li>
       <li><a href="moddoc_maps.html#spt3g.maps.G3SkyMap.npix_allocated">npix_allocated (spt3g.maps.G3SkyMap property)</a>
@@ -2815,6 +2852,8 @@
         <li><a href="moddoc_core.html#spt3g.core.G3MapQuat.pop">(spt3g.core.G3MapQuat method)</a>
 </li>
         <li><a href="moddoc_core.html#spt3g.core.G3MapString.pop">(spt3g.core.G3MapString method)</a>
+</li>
+        <li><a href="moddoc_core.html#spt3g.core.G3MapTime.pop">(spt3g.core.G3MapTime method)</a>
 </li>
         <li><a href="moddoc_core.html#spt3g.core.G3MapVectorBool.pop">(spt3g.core.G3MapVectorBool method)</a>
 </li>
@@ -3634,6 +3673,8 @@
 </li>
         <li><a href="moddoc_core.html#spt3g.core.G3MapString.update">(spt3g.core.G3MapString method)</a>
 </li>
+        <li><a href="moddoc_core.html#spt3g.core.G3MapTime.update">(spt3g.core.G3MapTime method)</a>
+</li>
         <li><a href="moddoc_core.html#spt3g.core.G3MapVectorBool.update">(spt3g.core.G3MapVectorBool method)</a>
 </li>
         <li><a href="moddoc_core.html#spt3g.core.G3MapVectorComplexDouble.update">(spt3g.core.G3MapVectorComplexDouble method)</a>
@@ -3772,6 +3813,8 @@
 </li>
         <li><a href="moddoc_core.html#spt3g.core.G3MapString.values">(spt3g.core.G3MapString method)</a>
 </li>
+        <li><a href="moddoc_core.html#spt3g.core.G3MapTime.values">(spt3g.core.G3MapTime method)</a>
+</li>
         <li><a href="moddoc_core.html#spt3g.core.G3MapVectorBool.values">(spt3g.core.G3MapVectorBool method)</a>
 </li>
         <li><a href="moddoc_core.html#spt3g.core.G3MapVectorComplexDouble.values">(spt3g.core.G3MapVectorComplexDouble method)</a>
@@ -3857,8 +3900,14 @@
 </li>
       <li><a href="moddoc_core.html#spt3g.core.G3PipelineInfo.vcs_versionname">vcs_versionname (spt3g.core.G3PipelineInfo property)</a>
 </li>
-      <li><a href="moddoc_core.html#spt3g.core.Quat.vnorm">vnorm() (spt3g.core.Quat method)</a>
+      <li><a href="moddoc_core.html#spt3g.core.G3TimestreamQuat.vnorm">vnorm() (spt3g.core.G3TimestreamQuat method)</a>
+
+      <ul>
+        <li><a href="moddoc_core.html#spt3g.core.G3VectorQuat.vnorm">(spt3g.core.G3VectorQuat method)</a>
 </li>
+        <li><a href="moddoc_core.html#spt3g.core.Quat.vnorm">(spt3g.core.Quat method)</a>
+</li>
+      </ul></li>
       <li><a href="moddoc_core.html#spt3g.core.G3TimestreamUnits.Voltage">Voltage (spt3g.core.G3TimestreamUnits attribute)</a>
 </li>
       <li><a href="moddoc_dfmux.html#spt3g.dfmux.HkBoardInfo.voltages">voltages (spt3g.dfmux.HkBoardInfo property)</a>

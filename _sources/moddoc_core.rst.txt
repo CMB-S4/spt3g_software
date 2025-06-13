@@ -32,6 +32,8 @@ Serializable objects that may be stored as entries in :py:class:`~spt3g.core.G3F
 
 .. autoclass:: spt3g.core.G3MapString
 
+.. autoclass:: spt3g.core.G3MapTime
+
 .. autoclass:: spt3g.core.G3MapVectorBool
 
 .. autoclass:: spt3g.core.G3MapVectorComplexDouble
