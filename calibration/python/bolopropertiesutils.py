@@ -94,7 +94,7 @@ class BandFormat:
     def extract_string(self, string, include_units=True):
         """Return the band substring from the input string, or None if not
         found."""
-        m = self._regex.match(string)
+        m = self._regex.search(string)
         if not m:
             return None
         if not include_units:
@@ -104,10 +104,10 @@ class BandFormat:
     def extract_value(self, value):
         """Return the band in G3Units extracted from the input string, or None
         if not found."""
-        s = extract_string(value, include_units=False)
+        s = self.extract_string(value, include_units=False)
         if not s:
             return None
-        return float(v) * self._uvalue
+        return float(s) * self._uvalue
 
 
 # global instance used by functions below
