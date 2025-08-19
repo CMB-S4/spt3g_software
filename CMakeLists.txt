@@ -163,6 +163,7 @@ endif()
 add_custom_target(tarball
 	COMMAND rm -rf ${CMAKE_BINARY_DIR}/tarball ${CMAKE_BINARY_DIR}/spt3g.tgz
 	COMMAND mkdir ${CMAKE_BINARY_DIR}/tarball
+	COMMAND ${CMAKE_MAKE_PROGRAM} -C ${CMAKE_BINARY_DIR}
 	COMMAND ${CMAKE_SOURCE_DIR}/cmake/copy_build_dir.sh ${CMAKE_BINARY_DIR}
 	COMMAND ${Python_EXECUTABLE} -m compileall -fq ${CMAKE_BINARY_DIR}/tarball
 	COMMAND tar -C ${CMAKE_BINARY_DIR}/tarball/ -czf ${CMAKE_BINARY_DIR}/spt3g.tgz .
