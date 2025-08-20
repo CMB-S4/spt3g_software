@@ -87,7 +87,7 @@ class pipesegment(metaclass=PipeSegmentDocstring):
         if hasattr(self, "_autodoc"):
             return self._autodoc
 
-        introdoc = textwrap.dedent(getattr(self.func, "__doc__", "")) or ""
+        introdoc = textwrap.dedent(getattr(self.func, "__doc__", None) or "") or ""
         if introdoc:
             introdoc += "\n\n"
         introdoc += '\nEquivalent to\n-------------\n\n::\n\n'
