@@ -11,60 +11,25 @@ concurrency:
 
 jobs:
   build_wheels:
-    name: Build wheels for ${{ matrix.build }}
+    name: Build wheels for ${{ matrix.pyver }}-${{ matrix.build }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        pyver: [cp39, cp310, cp311, cp312, cp313]
+        os: [macos-13, macos-14, ubuntu-24.04, ubuntu-24.04-arm]
         include:
           # macos-13 is an intel runner, macos-14 is apple silicon
           - os: macos-13
-            build: cp38-macosx_x86_64
+            build: macosx_x86_64
             target: 13.0
-          - os: macos-13
-            build: cp39-macosx_x86_64
-            target: 13.0
-          - os: macos-13
-            build: cp310-macosx_x86_64
-            target: 13.0
-          - os: macos-13
-            build: cp311-macosx_x86_64
-            target: 13.0
-          - os: macos-13
-            build: cp312-macosx_x86_64
-            target: 13.0
-          - os: macos-13
-            build: cp313-macosx_x86_64
-            target: 13.0
-
           - os: macos-14
-            build: cp39-macosx_arm64
+            build: macosx_arm64
             target: 14.0
-          - os: macos-14
-            build: cp310-macosx_arm64
-            target: 14.0
-          - os: macos-14
-            build: cp311-macosx_arm64
-            target: 14.0
-          - os: macos-14
-            build: cp312-macosx_arm64
-            target: 14.0
-          - os: macos-14
-            build: cp313-macosx_arm64
-            target: 14.0
-
-          - os: ubuntu-latest
-            build: cp38-manylinux_x86_64
-          - os: ubuntu-latest
-            build: cp39-manylinux_x86_64
-          - os: ubuntu-latest
-            build: cp310-manylinux_x86_64
-          - os: ubuntu-latest
-            build: cp311-manylinux_x86_64
-          - os: ubuntu-latest
-            build: cp312-manylinux_x86_64
-          - os: ubuntu-latest
-            build: cp313-manylinux_x86_64
+          - os: ubuntu-24.04
+            build: manylinux_x86_64
+          - os: ubuntu-24.04-arm
+            build: manylinux_aarch64
 
     steps:
       - name: Set macOS deployment target
@@ -77,7 +42,7 @@ jobs:
         run: brew install automake libtool
 
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
           fetch-tags: true
@@ -85,9 +50,9 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.1.3
         env:
-          CIBW_BUILD: ${{ matrix.build }}
-          CIBW_BEFORE_ALL_LINUX: yum install -y zlib-devel bzip2-devel xz-devel netcdf-devel
-          CIBW_BEFORE_ALL_MACOS: brew install netcdf
+          CIBW_BUILD: ${{ matrix.pyver }}-${{ matrix.build }}
+          CIBW_BEFORE_ALL_LINUX: yum install -y zlib-devel bzip2-devel xz-devel netcdf-devel cfitsio-devel
+          CIBW_BEFORE_ALL_MACOS: brew install netcdf cfitsio
           CIBW_BEFORE_BUILD_MACOS: >
             ln -s $(dirname $(readlink -f $(which python3)))/python3-config $(dirname $(which python3))/python3-config &&
             pip install cmake && ./deps/install_flac.sh
@@ -115,14 +80,14 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: cibw-wheel-${{ matrix.build }}
+          name: cibw-wheel-${{ matrix.pyver }}-${{ matrix.build }}
           path: ./wheelhouse/spt3g*.whl
 
   build_sdist:
     name: Build source distribution
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
           fetch-tags: true
@@ -144,7 +109,7 @@ jobs:
     if: github.event_name == 'release' && github.event.action == 'published'
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           # unpacks all CIBW artifacts into dist/
           pattern: cibw-*
