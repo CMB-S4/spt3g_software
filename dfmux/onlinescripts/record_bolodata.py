@@ -67,7 +67,7 @@ if not len(args.boards):
                     unit='Data Acquisition')
     import pydfmux
     hwm = pydfmux.load_session(open(args.hardware_map, 'r'))['hardware_map']
-    boards = hwm.query(pydfmux.Dfmux)
+    boards = hwm.query(pydfmux.Dfmux).get_online()
     boards.resolve()
     boards = boards.serial
 
