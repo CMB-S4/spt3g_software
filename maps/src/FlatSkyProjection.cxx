@@ -208,6 +208,7 @@ void FlatSkyProjection::SetDeltaCenter(double delta)
 
 void FlatSkyProjection::SetAngleCenter(double alpha, double delta)
 {
+	delta0_ = 0;
 	SetAlphaCenter(alpha);
 	SetDeltaCenter(delta);
 }
