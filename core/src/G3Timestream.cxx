@@ -203,13 +203,13 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 				}
 			}
 		}
-		nanflag = SomeNan;
+		nanflag = FLACNaNFlag::SomeNan;
 		if (nans == 0)
-			nanflag = NoNan;
+			nanflag = FLACNaNFlag::NoNan;
 		else if (nans == size())
-			nanflag = AllNan;
+			nanflag = FLACNaNFlag::AllNan;
 		ar & cereal::make_nvp("nanflag", nanflag);
-		if (nanflag == SomeNan)
+		if (nanflag == FLACNaNFlag::SomeNan)
 			ar & cereal::make_nvp("nanmask", nanbuf);
 
 		// Now do FLAC encoding
@@ -278,10 +278,10 @@ unpack_flac(const std::vector<int32_t> &buf, uint8_t nanflag, const std::vector<
 		(*data)[i] = buf[i];
 
 	// Apply NaN mask
-	if (nanflag == AllNan) {
+	if (nanflag == FLACNaNFlag::AllNan) {
 		for (size_t i = 0; i < buf.size(); i++)
 			(*data)[i] = NAN;
-	} else if (nanflag == SomeNan) {
+	} else if (nanflag == FLACNaNFlag::SomeNan) {
 		for (size_t i = 0; i < buf.size(); i++)
 			if (nanbuf[i])
 				(*data)[i] = NAN;
@@ -332,7 +332,7 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 		}
 
 		ar & cereal::make_nvp("nanflag", nanflag);
-		if (nanflag == SomeNan)
+		if (nanflag == FLACNaNFlag::SomeNan)
 			ar & cereal::make_nvp("nanmask", nanbuf);
 
 		ar & cereal::make_size_tag(callback.nbytes);
