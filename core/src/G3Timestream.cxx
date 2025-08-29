@@ -265,6 +265,7 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 #endif
 }
 
+#ifdef G3_HAS_FLAC
 template <typename T>
 std::vector<T> *
 unpack_flac(const std::vector<int32_t> &buf, uint8_t nanflag, const std::vector<bool> &nanbuf)
@@ -289,6 +290,7 @@ unpack_flac(const std::vector<int32_t> &buf, uint8_t nanflag, const std::vector<
 
 	return data;
 }
+#endif
 
 template <class A> void G3Timestream::load(A &ar, unsigned v)
 {
