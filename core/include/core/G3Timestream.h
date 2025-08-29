@@ -271,8 +271,8 @@ public:
 			ts->start = start;
 			ts->stop = stop;
 			ts->units = units;
-			ts->use_flac_ = compression_level;
-			ts->flac_depth_ = bit_depth;
+			ts->SetFLACCompression(compression_level);
+			ts->SetFLACBitDepth(bit_depth);
 			ts->root_data_ref_ = data;
 			ts->data_ = data.get() + offset;
 			ts->data_type_ = data_type;

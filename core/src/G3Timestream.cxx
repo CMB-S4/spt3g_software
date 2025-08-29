@@ -107,8 +107,8 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 	ar & cereal::make_nvp("stop", stop);
 	ar & cereal::make_nvp("flac", use_flac_);
 
-#ifdef G3_HAS_FLAC
 	if (use_flac_) {
+#ifdef G3_HAS_FLAC
 		std::vector<int32_t> inbuf;
 		std::vector<uint8_t> outbuf;
 		const int32_t *chanmap[1];
@@ -225,8 +225,10 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 		FLAC__stream_encoder_delete(encoder);
 
 		ar & cereal::make_nvp("data", outbuf);
-	} else {
+#else
+		log_fatal("Trying to write FLAC-compressed timestreams but built without FLAC support");
 #endif
+	} else {
 		ar & cereal::make_nvp("data_type", data_type_);
 		if (buffer_) {
 			ar & cereal::make_nvp("data", *buffer_);
@@ -260,9 +262,7 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 				log_fatal("Unknown timestream datatype %d", data_type_);
 			}
 		}
-#ifdef G3_HAS_FLAC
 	}
-#endif
 }
 
 #ifdef G3_HAS_FLAC
