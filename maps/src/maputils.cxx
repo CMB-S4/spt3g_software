@@ -564,6 +564,9 @@ MakePointSourceMask(const G3SkyMap &map, const std::vector<double> & ra,
 
 	for (size_t i = 0; i < ra.size(); i++) {
 		auto pixels = map.QueryDisc(ra[i], dec[i], radius[i]);
+		uint64_t _ipix = map.AngleToPixel(ra[i], dec[i]);
+		if (_ipix < (size_t)-1)
+			pixels.emplace_back(_ipix);
 		for (auto p: pixels)
 			(*mask)[p] = true;
 	}
