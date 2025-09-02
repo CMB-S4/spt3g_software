@@ -90,7 +90,7 @@ jobs:
       working-directory: ${{runner.workspace}}
       shell: bash
       run: |
-        sudo pip install -r doc/requirements.txt --break-system-packages
+        sudo pip install -r ${{runner.workspace}}/doc/requirements.txt --break-system-packages
 
     - name: Docs
       if: github.ref_name == 'master' && matrix.docs
