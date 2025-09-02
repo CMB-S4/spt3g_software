@@ -87,10 +87,9 @@ jobs:
 
     - name: Docs Requirements
       if: runner.environment == 'github-hosted' && github.ref_name == 'master' && matrix.docs
-      working-directory: ${{runner.workspace}}
       shell: bash
       run: |
-        sudo pip install -r ${{runner.workspace}}/doc/requirements.txt --break-system-packages
+        python3 -m pip install -r $GITHUB_WORKSPACE/doc/requirements.txt
 
     - name: Docs
       if: github.ref_name == 'master' && matrix.docs
@@ -98,7 +97,7 @@ jobs:
       shell: bash
       # Build docs
       run: |
-        rm -f ${{runner.workspace}}/doc/moddoc_*.rst
+        rm -f $GITHUB_WORKSPACE/doc/moddoc_*.rst
         rm -rf docs/
         cmake --build . --config $BUILD_TYPE --target docs
 
