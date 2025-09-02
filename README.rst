@@ -93,6 +93,16 @@ Alternatively, for users that only use a single build environment, set the follo
 	export LD_LIBRARY_PATH=$SPT3G_SOFTWARE_BUILD_PATH/lib:$LD_LIBRARY_PATH
 	export PATH=$SPT3G_SOFTWARE_BUILD_PATH/bin:$PATH
 
+Building the Documentation
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You may find that you are missing some of the required packages for building the documentation.  To fix this, run the following commands:
+
+.. code-block:: shell
+
+	cd spt3g_software
+	pip install -r doc/requirements.txt
+
 To build the documentation in the build directory type:
 
 .. code-block:: shell
