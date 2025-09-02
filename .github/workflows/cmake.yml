@@ -25,7 +25,7 @@ jobs:
     runs-on: ${{matrix.os}}
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Install Linux Dependencies
       if: runner.environment == 'github-hosted' && runner.os == 'Linux'
@@ -97,7 +97,7 @@ jobs:
 
     - name: Checkout gh_pages
       if: github.ref_name == 'master' && matrix.docs
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         ref: gh-pages
         path: gh-pages
