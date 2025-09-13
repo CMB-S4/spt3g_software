@@ -57,6 +57,8 @@ def get_test_block(length, keys=['a', 'b', 'c', 'd'],
         constructor, cast_func = type_cycle[i % len(type_cycle)]
         vect = constructor(list(map(cast_func, y)))
         m[k] = vect
+        if not isinstance(m[k], constructor):
+            raise TypeError
     return m
 
 
