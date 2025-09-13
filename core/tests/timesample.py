@@ -57,8 +57,6 @@ def get_test_block(length, keys=['a', 'b', 'c', 'd'],
         constructor, cast_func = type_cycle[i % len(type_cycle)]
         vect = constructor(list(map(cast_func, y)))
         m[k] = vect
-        if not isinstance(m[k], constructor):
-            raise TypeError
     return m
 
 
@@ -67,6 +65,10 @@ class TestTimesampleMap(unittest.TestCase):
         # Valid block.
         m = get_test_block(100)
         m.check()
+        self.assertIsInstance(m["a"], core.G3VectorDouble)
+        self.assertIsInstance(m["b"], core.G3VectorInt)
+        self.assertIsInstance(m["c"], core.G3VectorString)
+        self.assertIsInstance(m["d"], core.G3VectorBool)
 
     def test_10_safety(self):
         m0 = get_test_block(100)
