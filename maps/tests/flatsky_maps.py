@@ -122,8 +122,8 @@ for alpha1 in numpy.linspace(0, 360, 13) * core.G3Units.deg:
             numpy.asarray(alpha) / core.G3Units.deg * u.degree,
             numpy.asarray(delta) / core.G3Units.deg * u.degree,
         ).ravel()
-        for a in numpy.linspace(numpy.min(alpha), numpy.max(alpha), 20):
-            for d in numpy.linspace(numpy.min(delta), numpy.max(delta), 20):
+        for a in numpy.linspace(numpy.min(alpha), numpy.max(alpha), 5):
+            for d in numpy.linspace(numpy.min(delta), numpy.max(delta), 5):
                 avec.append(a)
                 dvec.append(d)
                 rvec.append(radius)
