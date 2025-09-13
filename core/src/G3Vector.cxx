@@ -189,10 +189,6 @@ PYBINDINGS("core", scope) {
 	register_g3vector<G3VectorVectorString>(scope, "G3VectorVectorString",
 	    "List of lists of strings.");
 
-	register_g3vector<G3VectorFrameObject>(scope, "G3VectorFrameObject",
-	    "List of generic frame objects. Can lead to paradoxes; avoid use of "
-	    "this class unless you are sure you need it.");
-
 	register_vector_of<unsigned char>(scope, "UnsignedChar");
 	register_g3vector<G3VectorUnsignedChar>(scope, "G3VectorUnsignedChar",
 	    "List of 8-bit integers");
@@ -200,5 +196,57 @@ PYBINDINGS("core", scope) {
 	register_vector_of<G3Time>(scope, "G3Time", py::buffer_protocol());
 	register_g3vector<G3VectorTime>(scope, "G3VectorTime", py::buffer_protocol(),
 	    "List of times.");
+
+	auto cls = register_g3vector<G3VectorFrameObject>(scope, "G3VectorFrameObject",
+	    "List of generic frame objects. Can lead to paradoxes; avoid use of "
+	    "this class unless you are sure you need it.");
+
+	// overrides to avoid type conversion
+	cls.attr("__init__") = py::cpp_function(
+	    [](py::detail::value_and_holder &v_h) {
+		v_h.value_ptr() = new G3VectorFrameObject();
+	    }, py::name("__init__"), py::is_method(cls),
+	    py::detail::is_new_style_constructor());
+	cls.def(py::init<const G3VectorFrameObject&>(), "Copy constructor");
+	cls.def(py::init([](const py::iterable &d) {
+		auto v = py::cast(G3VectorFrameObjectPtr(new G3VectorFrameObject()));
+		for (auto item: d)
+			v.attr("append")(item);
+		return py::cast<G3VectorFrameObject>(v);
+	    }), "Iterable constructor");
+
+	cls.def("__setitem__",
+	    [](G3VectorFrameObject &v, ssize_t i, G3FrameObjectPtr x) {
+		if (i < 0)
+			i += v.size();
+		if (i < 0 || (size_t) i >= v.size())
+			throw py::index_error();
+		v[(size_t)i] = x;
+	    }, py::arg("i"), py::arg("x").noconvert(), py::prepend());
+
+	cls.attr("insert") = py::cpp_function(
+	    [](G3VectorFrameObject &v, ssize_t i, G3FrameObjectPtr x) {
+		if (i < 0)
+			i += v.size();
+		if (i < 0 || (size_t) i > v.size())
+			throw py::index_error();
+		v.insert(v.begin() + i, x);
+	    }, py::name("insert"), py::is_method(cls),
+	    py::arg("i"), py::arg("x").noconvert(),
+	    "Insert an item at a given position.");
+
+	cls.attr("append") = py::cpp_function(
+	    [](G3VectorFrameObject &v, G3FrameObjectPtr x) {
+		v.push_back(x);
+	    }, py::name("append"), py::is_method(cls),
+	    py::arg("x").noconvert(),
+	    "Add an item to the end of the list");
+
+	cls.attr("extend") = py::cpp_function(
+	    [](G3VectorFrameObject &v, const G3VectorFrameObject &src) {
+		v.insert(v.end(), src.begin(), src.end());
+	    }, py::name("extend"), py::is_method(cls),
+	    py::arg("L").noconvert(),
+	    "Extend the list by appending all the items in the given list");
 }
 
