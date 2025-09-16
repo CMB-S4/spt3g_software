@@ -261,7 +261,8 @@ PYBINDINGS("core", scope) {
 	    .def_readwrite("instancename", &G3ModuleConfig::instancename)
 	    .def("__repr__", &G3ModuleConfig_repr)
 	    .def("__getitem__", &G3ModuleConfig_get)
-	    .def("__setitem__", &G3ModuleConfig_set_frameobject)
+	    .def("__setitem__", &G3ModuleConfig_set_frameobject,
+	        py::arg("key"), py::arg("value").noconvert())
 	    .def("__setitem__", &G3ModuleConfig_set)
 	    .def("keys", &G3ModuleConfig_keys)
 	    .def("values", &G3ModuleConfig_values)

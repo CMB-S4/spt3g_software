@@ -4,7 +4,7 @@ import spt3g, os
 from spt3g import core
 
 args = {"n": 10, "type": core.G3FrameType.Timepoint}
-arg = core.G3VectorDouble([1, 2, 3])
+arg = core.G3VectorInt([1, 2, 3])
 
 p = core.G3Pipeline()
 p.Add(core.G3InfiniteSource, **args)
