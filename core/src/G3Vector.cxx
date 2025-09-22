@@ -80,6 +80,9 @@ auto vector_from_python(const py::array_t<T> &buf) {
 	if (buf.ndim() != 1)
 		throw py::type_error("Only valid 1D buffers can be copied to a vector");
 
+	if (buf.strides(0) == sizeof(T))
+		return std::make_shared<V>(buf.data(), buf.data() + buf.size());
+
 	auto rbuf = buf.template unchecked<1>();
 	auto vec = std::make_shared<V>(rbuf.shape(0));
 
