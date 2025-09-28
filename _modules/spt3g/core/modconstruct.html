@@ -973,21 +973,33 @@
 
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;nameprefix&#39;</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nameprefix</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="nb">callable</span><span class="p">,</span> <span class="s1">&#39;__name__&#39;</span><span class="p">)):</span>
+    <span class="n">orig_callable</span> <span class="o">=</span> <span class="nb">callable</span>
+    <span class="c1"># unwrap</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="nb">callable</span><span class="p">,</span> <span class="s1">&#39;__wrapped__&#39;</span><span class="p">):</span>
+        <span class="nb">callable</span> <span class="o">=</span> <span class="nb">callable</span><span class="o">.</span><span class="n">__wrapped__</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="nb">callable</span><span class="p">,</span> <span class="s1">&#39;__name__&#39;</span><span class="p">):</span>
         <span class="n">callable_name</span> <span class="o">=</span> <span class="nb">callable</span><span class="o">.</span><span class="vm">__name__</span>
-    <span class="k">elif</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="nb">callable</span><span class="p">,</span> <span class="s1">&#39;__class__&#39;</span><span class="p">)):</span>
+    <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="nb">callable</span><span class="p">,</span> <span class="s1">&#39;__class__&#39;</span><span class="p">):</span>
         <span class="n">callable_name</span> <span class="o">=</span> <span class="nb">callable</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Cannot establish name of pipeline module&quot;</span><span class="p">)</span>
+    <span class="c1"># callable may be a class method</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="nb">callable</span><span class="p">,</span> <span class="s1">&#39;__self__&#39;</span><span class="p">):</span>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="nb">callable</span><span class="o">.</span><span class="vm">__self__</span><span class="o">.</span><span class="vm">__class__</span>
+        <span class="n">callable_mod</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__module__</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">callable_mod</span> <span class="o">=</span> <span class="nb">callable</span><span class="o">.</span><span class="vm">__module__</span>
+    <span class="c1"># make sure wrapped callable is called</span>
+    <span class="nb">callable</span> <span class="o">=</span> <span class="n">orig_callable</span>
     <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">callable</span><span class="o">.</span><span class="vm">__module__</span><span class="p">,</span> <span class="n">callable_name</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">callable_mod</span><span class="p">,</span> <span class="n">callable_name</span><span class="p">)</span>
     <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nameprefix</span> <span class="o">+</span> <span class="n">name</span>
 
     <span class="c1"># Record module configuration for root objects</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nameprefix</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span> 
         <span class="n">modconfig</span> <span class="o">=</span> <span class="n">G3ModuleConfig</span><span class="p">()</span>
         <span class="n">modconfig</span><span class="o">.</span><span class="n">instancename</span> <span class="o">=</span> <span class="n">name</span>
-        <span class="n">modconfig</span><span class="o">.</span><span class="n">modname</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">callable</span><span class="o">.</span><span class="vm">__module__</span><span class="p">,</span> <span class="n">callable_name</span><span class="p">)</span>
+        <span class="n">modconfig</span><span class="o">.</span><span class="n">modname</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">callable_mod</span><span class="p">,</span> <span class="n">callable_name</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">tostore</span> <span class="o">=</span> <span class="n">v</span>
             <span class="k">try</span><span class="p">:</span>
