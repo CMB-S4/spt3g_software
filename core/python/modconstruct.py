@@ -94,19 +94,40 @@ class pipesegment(metaclass=PipeSegmentDocstring):
         doclines = []
         class PotemkinPipe(object):
             def Add(self, thing, *args, **kwargs):
-                if hasattr(thing, '__wrapped__'):
-                    modname = thing.__wrapped__.__module__
+                if hasattr(thing, "__wrapped__"):
+                    thing = thing.__wrapped__
+                if hasattr(thing, "__self__"):
+                    cls = thing.__self__.__class__
+                    modname = "%s.%s" % (cls.__module__, cls.__name__)
                 else:
                     modname = thing.__module__
-                doc = 'pipe.Add(%s.%s' % (modname, thing.__name__)
+                if hasattr(thing, "__name__"):
+                    callname = thing.__name__
+                elif hasattr(thing, "__class__"):
+                    callname = thing.__class__.__name__
+                else:
+                    raise RuntimeError("Cannot establish name of pipeline module")
+                docargs = ['%s.%s' % (modname, callname)]
                 for arg in args:
-                    doc += ', %s' % repr(arg)
+                    docargs.append(repr(arg))
                 for arg in kwargs:
                     # remove object hashes
                     s = re.sub('<(.*) at (.*)>', '<\\1>', repr(kwargs[arg]))
-                    doc += ', %s=%s' % (arg, s)
-                doc += ')'
-                doclines.append(doc)
+                    docargs.append('%s=%s' % (arg, s))
+                docstart = "pipe.Add("
+                docend = ")"
+                docargstr = ", ".join(docargs)
+                # simple line wrapping
+                doc = "%s%s%s" % (docstart, docargstr, docend)
+                if len(doc) <= 88:
+                    doclines.append(doc)
+                    return
+                doclines.append(docstart)
+                if len(docargstr) <= 84:
+                    doclines.append("    " + docargstr)
+                else:
+                    doclines.extend(["    %s," % a for a in docargs])
+                doclines.append(docend)
         fake = PotemkinPipe()
         try:
             self.func(fake)
