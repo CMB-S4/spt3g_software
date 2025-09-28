@@ -288,21 +288,33 @@ def PipelineAddCallable(self, callable, name=None, subprocess=False, **kwargs):
 
     if not hasattr(self, 'nameprefix'):
         self.nameprefix = ''
-    if (hasattr(callable, '__name__')):
+    orig_callable = callable
+    # unwrap
+    if hasattr(callable, '__wrapped__'):
+        callable = callable.__wrapped__
+    if hasattr(callable, '__name__'):
         callable_name = callable.__name__
-    elif (hasattr(callable, '__class__')):
+    elif hasattr(callable, '__class__'):
         callable_name = callable.__class__.__name__
     else:
         raise RuntimeError("Cannot establish name of pipeline module")
+    # callable may be a class method
+    if hasattr(callable, '__self__'):
+        cls = callable.__self__.__class__
+        callable_mod = '%s.%s' % (cls.__module__, cls.__name__)
+    else:
+        callable_mod = callable.__module__
+    # make sure wrapped callable is called
+    callable = orig_callable
     if name is None:
-        name = '%s.%s' % (callable.__module__, callable_name)
+        name = '%s.%s' % (callable_mod, callable_name)
     name = self.nameprefix + name
 
     # Record module configuration for root objects
     if self.nameprefix == '': 
         modconfig = G3ModuleConfig()
         modconfig.instancename = name
-        modconfig.modname = '%s.%s' % (callable.__module__, callable_name)
+        modconfig.modname = '%s.%s' % (callable_mod, callable_name)
         for k,v in kwargs.items():
             tostore = v
             try:
