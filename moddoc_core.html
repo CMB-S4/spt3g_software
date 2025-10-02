@@ -331,6 +331,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.core.util.Delete"><code class="docutils literal notranslate"><span class="pre">Delete()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.core.util.Dump"><code class="docutils literal notranslate"><span class="pre">Dump()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.core.util.InjectDebug"><code class="docutils literal notranslate"><span class="pre">InjectDebug()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.core.util.Keep"><code class="docutils literal notranslate"><span class="pre">Keep()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.core.util.Rename"><code class="docutils literal notranslate"><span class="pre">Rename()</span></code></a></li>
 </ul>
 </li>
@@ -4967,6 +4968,12 @@ at their full rate.</p>
 <p>The frame data is stored in the variable named “frame”.</p>
 <p>If <code class="docutils literal notranslate"><span class="pre">debug_start_func</span></code> is not None, only starts a debug session when
 <code class="docutils literal notranslate"><span class="pre">debug_start_func(frame)</span> <span class="pre">==</span> <span class="pre">True</span></code>.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spt3g.core.util.Keep">
+<span class="sig-prename descclassname"><span class="pre">spt3g.core.util.</span></span><span class="sig-name descname"><span class="pre">Keep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/core/util.html#Keep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.core.util.Keep" title="Link to this definition"></a></dt>
+<dd><p>Deletes all but specified keys from frame.  If optional type specified, only acts on frames of the given type.</p>
 </dd></dl>
 
 <dl class="py function">

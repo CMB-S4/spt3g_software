@@ -171,6 +171,8 @@ Python functions that can be added to :py:class:`~spt3g.core.G3Pipeline` instanc
 
 .. autofunction:: spt3g.core.util.InjectDebug
 
+.. autofunction:: spt3g.core.util.Keep
+
 .. autofunction:: spt3g.core.util.Rename
 
 Pipeline Segments
