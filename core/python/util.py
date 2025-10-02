@@ -13,6 +13,18 @@ def Delete(frame, keys=[], type=None):
             del frame[key]
 
 @indexmod
+def Keep(frame, keys=[], type=None):
+    '''
+    Deletes all but specified keys from frame.  If optional type specified, only acts on frames of the given type.
+    '''
+    if type is not None and frame.type != type:
+        return
+
+    for key in list(frame.keys()):
+        if key not in keys:
+            del frame[key]
+
+@indexmod
 def Rename(frame, keys={}, type=None):
     '''
     Renames specified keys in frame. If optional type specified, only acts on frames of the given type. Argument is a dictionary mapping old names to new ones.
