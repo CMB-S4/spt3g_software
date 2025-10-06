@@ -17,12 +17,8 @@ jobs:
       fail-fast: false
       matrix:
         pyver: [cp39, cp310, cp311, cp312, cp313]
-        os: [macos-13, macos-14, ubuntu-24.04, ubuntu-24.04-arm]
+        os: [macos-14, ubuntu-24.04, ubuntu-24.04-arm]
         include:
-          # macos-13 is an intel runner, macos-14 is apple silicon
-          - os: macos-13
-            build: macosx_x86_64
-            target: 13.0
           - os: macos-14
             build: macosx_arm64
             target: 14.0
