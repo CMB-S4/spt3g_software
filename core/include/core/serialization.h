@@ -90,16 +90,21 @@ class G3Pickler
 {
 public:
 	template <class T> static
-	auto getstate(const py::object &self) {
+	auto dumpstate(const T &obj) {
 		std::vector<char> buffer;
 		G3BufferOutputStream os(buffer);
 		{
 			cereal::PortableBinaryOutputArchive ar(os);
-			ar << self.cast<const T &>();
+			ar << obj;
 		}
 		os.flush();
 
-		py::bytes data(buffer.data(), buffer.size());
+		return py::bytes(buffer.data(), buffer.size());
+	}
+
+	template <class T> static
+	auto getstate(const py::object &self) {
+		py::bytes data = dumpstate<T>(self.cast<const T &>());
 
 		py::dict py_state;
 		if (py::hasattr(self, "__dict__"))
@@ -109,15 +114,20 @@ public:
 	}
 
 	template <class T> static
-	auto setstate(const py::tuple &state) {
-		auto py_state = state[0].cast<py::dict>();
-
-		auto buffer = state[1].cast<std::string_view>();
+	auto loadstate(T &obj, const std::string_view &buffer) {
 		G3BufferInputStream fis((char *)&buffer[0], buffer.size());
 		cereal::PortableBinaryInputArchive ar(fis);
 
-		T obj;
 		ar >> obj;
+	}
+
+	template <class T> static
+	auto setstate(const py::tuple &state) {
+		auto py_state = state[0].cast<py::dict>();
+		auto buffer = state[1].cast<std::string_view>();
+
+		T obj;
+		loadstate<T>(obj, buffer);
 
 		return std::make_pair(std::move(obj), py_state);
 	}
@@ -125,10 +135,18 @@ public:
 
 // Call this function in a class .def method to enable pickling
 template <class T>
-auto
-g3frameobject_picklesuite()
+struct g3frameobject_picklesuite
 {
-	return py::pickle(&G3Pickler::getstate<T>, &G3Pickler::setstate<T>);
+	static constexpr bool op_enable_if_hook = true;
+
+	template <typename Class>
+	void execute(Class &cl) const {
+		cl.def(py::pickle(&G3Pickler::getstate<T>, &G3Pickler::setstate<T>));
+		cl.def("_cereal_loads", &G3Pickler::loadstate<T>,
+		    "Populate this instance from a serialized data buffer");
+		cl.def("_cereal_dumps", &G3Pickler::dumpstate<T>,
+		    "Save the state of this instance to a serialized data buffer");
+	}
 };
 
 // Register a G3FrameObject-derived class.  Includes a copy constructor,
