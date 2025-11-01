@@ -44,7 +44,7 @@ jobs:
           fetch-tags: true
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v3.2.0
+        uses: pypa/cibuildwheel@v3.2.1
         env:
           CIBW_BUILD: ${{ matrix.pyver }}-${{ matrix.build }}
           CIBW_BEFORE_ALL_LINUX: yum install -y zlib-devel bzip2-devel xz-devel netcdf-devel cfitsio-devel
