@@ -44,7 +44,7 @@ jobs:
           fetch-tags: true
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v3.2.0
+        uses: pypa/cibuildwheel@v3.2.1
         env:
           CIBW_BUILD: ${{ matrix.pyver }}-${{ matrix.build }}
           CIBW_BEFORE_ALL_LINUX: yum install -y zlib-devel bzip2-devel xz-devel netcdf-devel cfitsio-devel
@@ -74,7 +74,7 @@ jobs:
           CIBW_TEST_COMMAND: ctest --test-dir {package}/build --output-on-failure
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: cibw-wheel-${{ matrix.pyver }}-${{ matrix.build }}
           path: ./wheelhouse/spt3g*.whl
@@ -91,7 +91,7 @@ jobs:
       - name: Build sdist
         run: pipx run build --sdist
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: cibw-sdist
           path: dist/*.tar.gz
@@ -105,7 +105,7 @@ jobs:
     if: github.event_name == 'release' && github.event.action == 'published'
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           # unpacks all CIBW artifacts into dist/
           pattern: cibw-*
