@@ -243,12 +243,16 @@ class StokesVector {
 public:
 	StokesVector(double &t_, double &q_, double &u_) :
 	    t(t_), q(q_), u(u_) {}
-	StokesVector(double &t_) : t(t_), q(backing[1]), u(backing[2]) {}
+	StokesVector(double &t_) : t(t_), q(backing[1]), u(backing[2]) {
+		q = 0; u = 0;
+	}
 	StokesVector(const StokesVector &r) : t(r.t), q(r.q), u(r.u) {}
 
 	// Note: the default constructor uses an internal buffer. This lets
 	// you initialize one of these statically and then use it in arithmetic.
-	StokesVector() : t(backing[0]), q(backing[1]), u(backing[2]) {}
+	StokesVector() : t(backing[0]), q(backing[1]), u(backing[2]) {
+		t = 0; q = 0; u = 0;
+	}
 
 	// Constructor for polarization coupling
 	StokesVector(double pol_ang, double pol_eff);
@@ -297,14 +301,18 @@ public:
 	    double &qu_, double &uu_) : tt(tt_), tq(tq_), tu(tu_), qq(qq_),
 	    qu(qu_), uu(uu_) {}
 	MuellerMatrix(double &tt_) : tt(tt_), tq(backing[1]), tu(backing[2]),
-	    qq(backing[3]), qu(backing[4]), uu(backing[5]) {}
+	    qq(backing[3]), qu(backing[4]), uu(backing[5]) {
+		tq = 0; tu = 0; qq = 0; qu = 0; uu = 0;
+	}
 	MuellerMatrix(const MuellerMatrix &r) : tt(r.tt), tq(r.tq), tu(r.tu),
 	    qq(r.qq), qu(r.qu), uu(r.uu) {}
 
 	// Note: the default constructor uses an internal buffer. This lets
 	// you initialize one of these statically and then use it in arithmetic.
 	MuellerMatrix() : tt(backing[0]), tq(backing[1]),
-	    tu(backing[2]), qq(backing[3]), qu(backing[4]), uu(backing[5]) {}
+	    tu(backing[2]), qq(backing[3]), qu(backing[4]), uu(backing[5]) {
+		tt = 0; tq = 0; tu = 0; qq = 0; qu = 0; uu = 0;
+	}
 
 	// Constructor from Stokes vector
 	MuellerMatrix(const StokesVector &r) : tt(backing[0]), tq(backing[1]),

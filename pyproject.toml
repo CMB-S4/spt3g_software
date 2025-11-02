@@ -1,7 +1,7 @@
 [build-system]
 requires = [
     "cmake>=3.12",
-    "setuptools>=61",
+    "setuptools>=77",
     "setuptools_scm[toml]>=6.3",
     "pybind11>=2.13",
     "wheel",
@@ -13,7 +13,7 @@ name = "spt3g"
 readme = "README.rst"
 description = "Public Subset of Analysis Software Developed by the SPT-3G Collaboration"
 urls = {source = "https://github.com/CMB-S4/spt3g_software"}
-license = {file = "LICENSE"}
+license = "BSD-2-Clause"
 requires-python = ">=3.7"
 dependencies = ["numpy", "scipy", "astropy"]
 dynamic=["version"]

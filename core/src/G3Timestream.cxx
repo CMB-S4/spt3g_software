@@ -107,8 +107,8 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 	ar & cereal::make_nvp("stop", stop);
 	ar & cereal::make_nvp("flac", use_flac_);
 
-#ifdef G3_HAS_FLAC
 	if (use_flac_) {
+#ifdef G3_HAS_FLAC
 		std::vector<int32_t> inbuf;
 		std::vector<uint8_t> outbuf;
 		const int32_t *chanmap[1];
@@ -203,13 +203,13 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 				}
 			}
 		}
-		nanflag = SomeNan;
+		nanflag = FLACNaNFlag::SomeNan;
 		if (nans == 0)
-			nanflag = NoNan;
+			nanflag = FLACNaNFlag::NoNan;
 		else if (nans == size())
-			nanflag = AllNan;
+			nanflag = FLACNaNFlag::AllNan;
 		ar & cereal::make_nvp("nanflag", nanflag);
-		if (nanflag == SomeNan)
+		if (nanflag == FLACNaNFlag::SomeNan)
 			ar & cereal::make_nvp("nanmask", nanbuf);
 
 		// Now do FLAC encoding
@@ -225,8 +225,10 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 		FLAC__stream_encoder_delete(encoder);
 
 		ar & cereal::make_nvp("data", outbuf);
-	} else {
+#else
+		log_fatal("Trying to write FLAC-compressed timestreams but built without FLAC support");
 #endif
+	} else {
 		ar & cereal::make_nvp("data_type", data_type_);
 		if (buffer_) {
 			ar & cereal::make_nvp("data", *buffer_);
@@ -260,11 +262,10 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 				log_fatal("Unknown timestream datatype %d", data_type_);
 			}
 		}
-#ifdef G3_HAS_FLAC
 	}
-#endif
 }
 
+#ifdef G3_HAS_FLAC
 template <typename T>
 std::vector<T> *
 unpack_flac(const std::vector<int32_t> &buf, uint8_t nanflag, const std::vector<bool> &nanbuf)
@@ -278,10 +279,10 @@ unpack_flac(const std::vector<int32_t> &buf, uint8_t nanflag, const std::vector<
 		(*data)[i] = buf[i];
 
 	// Apply NaN mask
-	if (nanflag == AllNan) {
+	if (nanflag == FLACNaNFlag::AllNan) {
 		for (size_t i = 0; i < buf.size(); i++)
 			(*data)[i] = NAN;
-	} else if (nanflag == SomeNan) {
+	} else if (nanflag == FLACNaNFlag::SomeNan) {
 		for (size_t i = 0; i < buf.size(); i++)
 			if (nanbuf[i])
 				(*data)[i] = NAN;
@@ -289,6 +290,7 @@ unpack_flac(const std::vector<int32_t> &buf, uint8_t nanflag, const std::vector<
 
 	return data;
 }
+#endif
 
 template <class A> void G3Timestream::load(A &ar, unsigned v)
 {
@@ -332,7 +334,7 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 		}
 
 		ar & cereal::make_nvp("nanflag", nanflag);
-		if (nanflag == SomeNan)
+		if (nanflag == FLACNaNFlag::SomeNan)
 			ar & cereal::make_nvp("nanmask", nanbuf);
 
 		ar & cereal::make_size_tag(callback.nbytes);

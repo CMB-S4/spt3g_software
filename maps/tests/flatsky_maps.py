@@ -109,27 +109,35 @@ angles = SkyCoord(
 ).ravel()
 radius = 5 * x.res
 
-avec = []
-dvec = []
-rvec = []
-masked = set()
+for alpha1 in numpy.linspace(0, 360, 13) * core.G3Units.deg:
+    for delta1 in numpy.linspace(-90, 90, 5) * core.G3Units.deg:
+        avec = []
+        dvec = []
+        rvec = []
+        masked = set()
 
-for a in numpy.linspace(numpy.min(alpha), numpy.max(alpha), 20):
-    for d in numpy.linspace(numpy.min(delta), numpy.max(delta), 20):
-        avec.append(a)
-        dvec.append(d)
-        rvec.append(radius)
-        pix1 = x.query_disc(a, d, radius)
-        pix2 = numpy.where(
-            angles.separation(
-                SkyCoord(
-                    a / core.G3Units.deg * u.degree,
-                    d / core.G3Units.deg * u.degree,
-                )
-            ).deg * core.G3Units.deg < radius
-        )[0]
-        masked |= set(pix2)
-        assert not (set(pix1) ^ set(pix2))
+        x = FlatSkyMap(50, 50, core.G3Units.arcmin, proj=MapProjection.ProjZEA, alpha_center=alpha1, delta_center=delta1)
+        alpha, delta = maps.get_ra_dec_map(x)
+        angles = SkyCoord(
+            numpy.asarray(alpha) / core.G3Units.deg * u.degree,
+            numpy.asarray(delta) / core.G3Units.deg * u.degree,
+        ).ravel()
+        for a in numpy.linspace(numpy.min(alpha), numpy.max(alpha), 5):
+            for d in numpy.linspace(numpy.min(delta), numpy.max(delta), 5):
+                avec.append(a)
+                dvec.append(d)
+                rvec.append(radius)
+                pix1 = x.query_disc(a, d, radius)
+                pix2 = numpy.where(
+                    angles.separation(
+                        SkyCoord(
+                            a / core.G3Units.deg * u.degree,
+                            d / core.G3Units.deg * u.degree,
+                        )
+                    ).deg * core.G3Units.deg < radius
+                )[0]
+                masked |= set(pix2)
+                assert not (set(pix1) ^ set(pix2))
 
-mask = maps.make_point_source_mask(x, numpy.asarray(avec), numpy.asarray(dvec), numpy.asarray(rvec))
-assert not (set(mask.nonzero()) ^ masked)
+        mask = maps.make_point_source_mask(x, numpy.asarray(avec), numpy.asarray(dvec), numpy.asarray(rvec))
+        assert not (set(mask.nonzero()) ^ masked)

@@ -208,6 +208,7 @@ void FlatSkyProjection::SetDeltaCenter(double delta)
 
 void FlatSkyProjection::SetAngleCenter(double alpha, double delta)
 {
+	delta0_ = 0;
 	SetAlphaCenter(alpha);
 	SetDeltaCenter(delta);
 }
@@ -602,8 +603,9 @@ FlatSkyProjection::QueryDisc(const Quat &q, double radius) const
 {
 	static const size_t npts = 72;
 	double dd = -2.0 * radius / sqrt(2.0);
-	auto qd = get_origin_rotator(0, dd);
-	auto p = qd * q * ~qd;
+	double alpha, delta;
+	quat_to_ang(q, alpha, delta);
+	auto p = ang_to_quat(alpha, delta + (((90*deg - delta) < -dd) ? dd : -dd));
 	double pva = q.b();
 	double pvb = q.c();
 	double pvc = q.d();

@@ -65,6 +65,10 @@ class TestTimesampleMap(unittest.TestCase):
         # Valid block.
         m = get_test_block(100)
         m.check()
+        self.assertIsInstance(m["a"], core.G3VectorDouble)
+        self.assertIsInstance(m["b"], core.G3VectorInt)
+        self.assertIsInstance(m["c"], core.G3VectorString)
+        self.assertIsInstance(m["d"], core.G3VectorBool)
 
     def test_10_safety(self):
         m0 = get_test_block(100)

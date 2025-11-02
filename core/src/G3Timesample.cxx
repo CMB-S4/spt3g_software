@@ -262,5 +262,30 @@ PYBINDINGS("core", scope)
 
 	// override registered __setitem__ by monkeypatch
 	cls.attr("__setitem__") = py::cpp_function(&safe_set_item,
-	    py::name("__setitem__"), py::is_method(cls));
+	    py::name("__setitem__"), py::is_method(cls),
+	    py::arg("key"), py::arg("value").noconvert());
+
+	// overrides to avoid type conversion
+	cls.attr("__init__") = py::cpp_function(
+	    [](py::detail::value_and_holder &v_h) {
+		v_h.value_ptr() = new G3TimesampleMap();
+	    }, py::name("__init__"), py::is_method(cls),
+	    py::detail::is_new_style_constructor());
+	cls.def(py::init<const G3TimesampleMap&>(), "Copy constructor");
+	cls.def(py::init([](const py::iterable &d) {
+		auto v = py::cast(G3TimesampleMapPtr(new G3TimesampleMap()));
+		for (auto item: py::dict(d))
+			v.attr("__setitem__")(item.first, item.second);
+		return py::cast<G3TimesampleMap>(v);
+	    }), "Iterable constructor");
+
+	cls.attr("update") = py::cpp_function(
+	    [](py::object &m, const py::iterable &v, py::kwargs kw) {
+		for (auto it: py::dict(v))
+			m.attr("__setitem__")(it.first, it.second);
+		for (auto it: kw)
+			m.attr("__setitem__")(it.first, it.second);
+	    }, py::name("update"), py::is_method(cls),
+	    py::arg("items")=py::list(),
+	    "Update mapping from iterable/mapping.");
 }

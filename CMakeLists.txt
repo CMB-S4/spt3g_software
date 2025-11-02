@@ -32,6 +32,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
 
 # Find all the Python libraries
 set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -163,6 +164,7 @@ endif()
 add_custom_target(tarball
 	COMMAND rm -rf ${CMAKE_BINARY_DIR}/tarball ${CMAKE_BINARY_DIR}/spt3g.tgz
 	COMMAND mkdir ${CMAKE_BINARY_DIR}/tarball
+	COMMAND ${CMAKE_MAKE_PROGRAM} -C ${CMAKE_BINARY_DIR}
 	COMMAND ${CMAKE_SOURCE_DIR}/cmake/copy_build_dir.sh ${CMAKE_BINARY_DIR}
 	COMMAND ${Python_EXECUTABLE} -m compileall -fq ${CMAKE_BINARY_DIR}/tarball
 	COMMAND tar -C ${CMAKE_BINARY_DIR}/tarball/ -czf ${CMAKE_BINARY_DIR}/spt3g.tgz .

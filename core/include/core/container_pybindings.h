@@ -163,6 +163,11 @@ register_g3vector(py::module_ &scope, std::string name, Args &&...args)
 
 	cls.def(g3frameobject_picklesuite<V>());
 
+	cls.def("__str__", &V::Summary)
+	    .def("Summary", &V::Summary, "Short (one-line) description of the object")
+	    .def("Description", &V::Description,
+	        "Long-form human-readable description of the object");
+
 	return cls;
 }
 
@@ -389,6 +394,11 @@ register_g3map(py::module_ &scope, std::string name, Args &&...args)
 	    std::forward<Args>(args)...);
 
 	cls.def(g3frameobject_picklesuite<M>());
+
+	cls.def("__str__", &M::Summary)
+	    .def("Summary", &M::Summary, "Short (one-line) description of the object")
+	    .def("Description", &M::Description,
+	        "Long-form human-readable description of the object");
 
 	return cls;
 }

@@ -216,6 +216,7 @@ std::string G3MapFrameObject::Description() const
 G3_SERIALIZABLE_CODE(G3MapDouble);
 G3_SERIALIZABLE_CODE(G3MapMapDouble);
 G3_SERIALIZABLE_CODE(G3MapString);
+G3_SERIALIZABLE_CODE(G3MapTime);
 G3_SERIALIZABLE_CODE(G3MapVectorBool);
 G3_SERIALIZABLE_CODE(G3MapVectorDouble);
 G3_SERIALIZABLE_CODE(G3MapVectorString);
@@ -237,6 +238,8 @@ PYBINDINGS("core", scope) {
 	register_g3map<G3MapInt>(scope, "G3MapInt", "Mapping from strings to ints.");
 	register_g3map<G3MapString>(scope, "G3MapString", "Mapping from strings to "
 	    "strings.");
+	register_g3map<G3MapTime>(scope, "G3MapTime", "Mapping from strings to "
+	    "G3Times.");
 	register_g3map<G3MapVectorBool>(scope, "G3MapVectorBool", "Mapping from "
 	    "strings to arrays of booleans.");
 	register_g3map<G3MapVectorDouble>(scope, "G3MapVectorDouble", "Mapping from "
@@ -252,8 +255,39 @@ PYBINDINGS("core", scope) {
 	register_g3map<G3MapVectorTime>(scope, "G3MapVectorTime", "Mapping from "
 	    "strings to lists of G3 time objects.");
 
-	register_g3map<G3MapFrameObject>(scope, "G3MapFrameObject", "Mapping "
-	    "strings to generic frame objects. Can lead to a variety of "
+	auto cls = register_g3map<G3MapFrameObject>(scope, "G3MapFrameObject",
+	    "Mapping strings to generic frame objects. Can lead to a variety of "
 	    "paradoxes; please avoid general use of this class.");
+
+	// overrides to avoid type conversion
+	cls.attr("__init__") = py::cpp_function(
+	    [](py::detail::value_and_holder &v_h) {
+		v_h.value_ptr() = new G3MapFrameObject();
+	    }, py::name("__init__"), py::is_method(cls),
+	    py::detail::is_new_style_constructor());
+	cls.def(py::init<const G3MapFrameObject&>(), "Copy constructor");
+	cls.def(py::init([](const py::iterable &d) {
+		auto v = py::cast(G3MapFrameObjectPtr(new G3MapFrameObject()));
+		for (auto item: py::dict(d))
+			v.attr("__setitem__")(item.first, item.second);
+		return py::cast<G3MapFrameObject>(v);
+	    }), "Iterable constructor");
+
+	cls.attr("__setitem__") = py::cpp_function(
+	    [](G3MapFrameObject &m, const std::string &k, G3FrameObjectPtr v) {
+		m[k] = v;
+	    }, py::name("__setitem__"), py::is_method(cls),
+	    py::arg("key"), py::arg("item").noconvert());
+
+	cls.attr("update") = py::cpp_function(
+	    [](py::object &m, const py::iterable &v, py::kwargs kw) {
+		for (auto it: py::dict(v))
+			m.attr("__setitem__")(it.first, it.second);
+		for (auto it: kw)
+			m.attr("__setitem__")(it.first, it.second);
+	    }, py::name("update"), py::is_method(cls),
+	    py::arg("items")=py::list(),
+	    "Update mapping from iterable/mapping.");
+
 }
 

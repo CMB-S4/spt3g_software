@@ -47,10 +47,8 @@ class PyDfMuxWiringMapInjector(object):
             chan_map_query = pydfmux_hwm.query(pydfmux.ChannelMapping)
 
         if len(state) > 0:
-            for bolo in pydfmux_hwm.query(pydfmux.Bolometer):
-                if bolo.readout_channel:
-                    bolo.state = bolo.retrieve_bolo_state().state
-            pydfmux_hwm.commit()
+            bolos = pydfmux_hwm.query(pydfmux.Bolometer)
+            bolos.load_bolo_states(commit=True)
             chan_map_query = chan_map_query.join(pydfmux.ChannelMapping, pydfmux.Bolometer).filter(pydfmux.Bolometer.state._in(state))
 
         for bolo in chan_map_query:

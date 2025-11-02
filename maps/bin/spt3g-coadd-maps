@@ -24,7 +24,7 @@ P.add_argument(
     help="Coadd each input map Id into a separate output map frame.  In this case, the "
     "output map Id is treated as a prefix, with the input map Id appended to the string.",
 )
-P.add_argument("-i", "--output-map-id", help="Id for output coadd map frame")
+P.add_argument("-i", "--output-map-id", default="Coadd", help="Id for output coadd map frame")
 P.add_argument(
     "--no-check-weighted",
     dest="weighted",
@@ -40,6 +40,6 @@ P.add_argument(
 args = P.parse_args()
 
 args.input_files = sum([glob.glob(x) for x in args.input_files], [])
-args.input_files = [x for x in args.input_files if os.path.splitext(x)[-1].startswith(".g3")]
+args.input_files = [x for x in args.input_files if "g3" in x.split(".")[-2:]]
 
 maps.coadd_map_files(**vars(args))

@@ -436,9 +436,10 @@ G3SkyMap::QueryAlphaEllipse(const Quat &q, double a, double b) const
 	double da = ACOS(COS(rmaj) / COS(rmin)) / cd;
 
 	// focus locations
-	auto qda = get_origin_rotator(da, 0);
-	auto ql = qda * q * ~qda;
-	auto qr = ~qda * q * qda;
+	double alpha, delta;
+	quat_to_ang(q, alpha, delta);
+	auto ql = ang_to_quat(alpha - da, delta);
+	auto qr = ang_to_quat(alpha + da, delta);
 
 	// narrow search to pixels within the major disc
 	auto disc = QueryDisc(q, rmaj);

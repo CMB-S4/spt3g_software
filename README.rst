@@ -52,14 +52,16 @@ If your system defaults to Python 2, but you wish to use Python 3, please do the
 
 On any system, this software requires numpy and scipy (hard requirements), plus astropy and healpy (optional).
 
-Setup on RHEL6
---------------
+Setup on RHEL Systems with OASIS
+--------------------------------
 
-Note that on any RHEL6 system, you will need a newer compiler than ships with the OS. Please follow whatever directions apply at your site to achieve this. Alternately, if you have OASIS set up on your local system, run this before anything else (also works on several other operating systems, including RHEL7):
+If using RHEL8 or RHEL9 and you have OASIS set up on your local system, run this before anything else:
 
 .. code-block:: shell
 
-	eval `/cvmfs/spt.opensciencegrid.org/py3-v4/setup.sh`
+	eval `/cvmfs/spt.opensciencegrid.org/py3-v5/setup.sh`
+
+This will add a relatively new compiler and all necessary development packages (FLAC, GSL, etc) for compiling this software.
 
 
 How to Build
@@ -90,6 +92,16 @@ Alternatively, for users that only use a single build environment, set the follo
 	export PYTHONPATH=$SPT3G_SOFTWARE_BUILD_PATH:$PYTHONPATH
 	export LD_LIBRARY_PATH=$SPT3G_SOFTWARE_BUILD_PATH/lib:$LD_LIBRARY_PATH
 	export PATH=$SPT3G_SOFTWARE_BUILD_PATH/bin:$PATH
+
+Building the Documentation
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You may find that you are missing some of the required packages for building the documentation.  To fix this, run the following commands:
+
+.. code-block:: shell
+
+	cd spt3g_software
+	pip install -r doc/requirements.txt
 
 To build the documentation in the build directory type:
 

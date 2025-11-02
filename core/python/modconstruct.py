@@ -87,26 +87,47 @@ class pipesegment(metaclass=PipeSegmentDocstring):
         if hasattr(self, "_autodoc"):
             return self._autodoc
 
-        introdoc = textwrap.dedent(getattr(self.func, "__doc__", "")) or ""
+        introdoc = textwrap.dedent(getattr(self.func, "__doc__", None) or "") or ""
         if introdoc:
             introdoc += "\n\n"
         introdoc += '\nEquivalent to\n-------------\n\n::\n\n'
         doclines = []
         class PotemkinPipe(object):
             def Add(self, thing, *args, **kwargs):
-                if hasattr(thing, '__wrapped__'):
-                    modname = thing.__wrapped__.__module__
+                if hasattr(thing, "__wrapped__"):
+                    thing = thing.__wrapped__
+                if hasattr(thing, "__self__"):
+                    cls = thing.__self__.__class__
+                    modname = "%s.%s" % (cls.__module__, cls.__name__)
                 else:
                     modname = thing.__module__
-                doc = 'pipe.Add(%s.%s' % (modname, thing.__name__)
+                if hasattr(thing, "__name__"):
+                    callname = thing.__name__
+                elif hasattr(thing, "__class__"):
+                    callname = thing.__class__.__name__
+                else:
+                    raise RuntimeError("Cannot establish name of pipeline module")
+                docargs = ['%s.%s' % (modname, callname)]
                 for arg in args:
-                    doc += ', %s' % repr(arg)
+                    docargs.append(repr(arg))
                 for arg in kwargs:
                     # remove object hashes
                     s = re.sub('<(.*) at (.*)>', '<\\1>', repr(kwargs[arg]))
-                    doc += ', %s=%s' % (arg, s)
-                doc += ')'
-                doclines.append(doc)
+                    docargs.append('%s=%s' % (arg, s))
+                docstart = "pipe.Add("
+                docend = ")"
+                docargstr = ", ".join(docargs)
+                # simple line wrapping
+                doc = "%s%s%s" % (docstart, docargstr, docend)
+                if len(doc) <= 88:
+                    doclines.append(doc)
+                    return
+                doclines.append(docstart)
+                if len(docargstr) <= 84:
+                    doclines.append("    " + docargstr)
+                else:
+                    doclines.extend(["    %s," % a for a in docargs])
+                doclines.append(docend)
         fake = PotemkinPipe()
         try:
             self.func(fake)
@@ -288,21 +309,33 @@ def PipelineAddCallable(self, callable, name=None, subprocess=False, **kwargs):
 
     if not hasattr(self, 'nameprefix'):
         self.nameprefix = ''
-    if (hasattr(callable, '__name__')):
+    orig_callable = callable
+    # unwrap
+    if hasattr(callable, '__wrapped__'):
+        callable = callable.__wrapped__
+    if hasattr(callable, '__name__'):
         callable_name = callable.__name__
-    elif (hasattr(callable, '__class__')):
+    elif hasattr(callable, '__class__'):
         callable_name = callable.__class__.__name__
     else:
         raise RuntimeError("Cannot establish name of pipeline module")
+    # callable may be a class method
+    if hasattr(callable, '__self__'):
+        cls = callable.__self__.__class__
+        callable_mod = '%s.%s' % (cls.__module__, cls.__name__)
+    else:
+        callable_mod = callable.__module__
+    # make sure wrapped callable is called
+    callable = orig_callable
     if name is None:
-        name = '%s.%s' % (callable.__module__, callable_name)
+        name = '%s.%s' % (callable_mod, callable_name)
     name = self.nameprefix + name
 
     # Record module configuration for root objects
     if self.nameprefix == '': 
         modconfig = G3ModuleConfig()
         modconfig.instancename = name
-        modconfig.modname = '%s.%s' % (callable.__module__, callable_name)
+        modconfig.modname = '%s.%s' % (callable_mod, callable_name)
         for k,v in kwargs.items():
             tostore = v
             try:
