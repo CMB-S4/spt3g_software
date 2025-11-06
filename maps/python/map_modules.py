@@ -15,6 +15,7 @@ __all__ = [
     "InjectMaps",
     "ReplicateMaps",
     "InvertMaps",
+    "InvertAlternatingMaps",
     "RescaleMaps",
     "CoaddMaps",
     "RebinMaps",
@@ -240,6 +241,10 @@ def MakeMapsPolarized(frame, pol_conv=maps.MapPolConv.IAU):
 def MakeMapsUnpolarized(frame):
     """
     Converts individual polarized maps to temperature-only versions of the same map.
+
+    This is done by simply dropping the Q and U Stokes terms from the input frame.
+    To ensure that the resulting T component is free of polarization, use the
+    ``RemoveWeights`` pipeline module before this module.
     """
     if "Wpol" not in frame:
         return
@@ -584,33 +589,37 @@ def ReplicateMaps(frame, input_map_id, output_map_ids, copy_weights=False):
 
 
 @core.indexmod
-class InvertMaps:
+def InvertMaps(frame):
     """
-    Invert T, Q, U maps in input map frames.
+    Invert T, Q, U maps in the input map frame.
+    """
+    if frame.type != core.G3FrameType.Map:
+        return
 
-    Arguments
-    ---------
-    alternate: bool
-        If True, invert every other map in the pipeline.  Otherwise, invert
-        every input map.
+    for k in "TQU":
+        if k in frame:
+            m = frame.pop(k)
+            m *= -1.0
+            frame[k] = m
+
+    return frame
+
+
+@core.indexmod
+class InvertAlternatingMaps:
     """
-    def __init__(self, alternate=False):
-        self.alternate = alternate
-        self.flip = False if alternate else True
+    Invert T, Q, U maps in every other input map frame.
+    """
+    def __init__(self):
+        self.flip = False
 
     def __call__(self, frame):
         if frame.type != core.G3FrameType.Map:
             return
 
         if self.flip:
-            for k in "TQU":
-                if k in frame:
-                    m = frame.pop(k)
-                    m *= -1.0
-                    frame[k] = m
-
-        if self.alternate:
-            self.flip = not self.flip
+            InvertMaps(frame)
+        self.flip = not self.flip
 
         return frame
 
@@ -658,6 +667,9 @@ def RescaleMaps(frame, t_scale=None, q_scale=None, u_scale=None):
         "UU": u_scale * u_scale,
     }
 
+    wkey = "Wpol" if "Wpol" in frame else "Wunpol" if "Wunpol" in frame else None
+    weights = frame.pop(wkey) if wkey else None
+
     for k, scale in scales.items():
         if scale == 1.0:
             continue
@@ -665,6 +677,11 @@ def RescaleMaps(frame, t_scale=None, q_scale=None, u_scale=None):
             m = frame.pop(k)
             m /= scale
             frame[k] = m
+        elif weights is not None and k in weights.keys():
+            weights[k] /= scale
+
+    if wkey is not None:
+        frame[wkey] = weights
 
     return frame
 
