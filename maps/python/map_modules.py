@@ -625,7 +625,7 @@ class InvertAlternatingMaps:
 
 
 @core.indexmod
-def RescaleMaps(frame, t_scale=None, q_scale=None, u_scale=None):
+def RescaleMaps(frame, t_scale=None, q_scale=None, u_scale=None, scale_weights=True):
     """
     Rescale input map frame using the supplied calibration factors for each
     Stokes component.  If the maps are weighted, the T, Q, and U components are
@@ -643,6 +643,9 @@ def RescaleMaps(frame, t_scale=None, q_scale=None, u_scale=None):
     u_scale : float
         Scale factor to apply to each Stokes component in the maps and weights.
         If not supplied, assumed to be unity.
+    scale_weights : bool
+        If True, apply the appropriate scale factor to the weights as well.
+        Otherwise the scale factors are only applied to the T/Q/U maps.
     """
     if frame.type != core.G3FrameType.Map:
         return
@@ -659,16 +662,7 @@ def RescaleMaps(frame, t_scale=None, q_scale=None, u_scale=None):
         "T": t_scale if weighted else 1. / t_scale,
         "Q": q_scale if weighted else 1. / q_scale,
         "U": u_scale if weighted else 1. / u_scale,
-        "TT": t_scale * t_scale,
-        "TQ": t_scale * q_scale,
-        "TU": t_scale * u_scale,
-        "QQ": q_scale * q_scale,
-        "QU": q_scale * u_scale,
-        "UU": u_scale * u_scale,
     }
-
-    wkey = "Wpol" if "Wpol" in frame else "Wunpol" if "Wunpol" in frame else None
-    weights = frame.pop(wkey) if wkey else None
 
     for k, scale in scales.items():
         if scale == 1.0:
@@ -677,11 +671,26 @@ def RescaleMaps(frame, t_scale=None, q_scale=None, u_scale=None):
             m = frame.pop(k)
             m /= scale
             frame[k] = m
-        elif weights is not None and k in weights.keys():
-            weights[k] /= scale
 
-    if wkey is not None:
-        frame[wkey] = weights
+    if scale_weights:
+        wscales = {
+            "TT": t_scale * t_scale,
+            "TQ": t_scale * q_scale,
+            "TU": t_scale * u_scale,
+            "QQ": q_scale * q_scale,
+            "QU": q_scale * u_scale,
+            "UU": u_scale * u_scale,
+        }
+
+        wkey = "Wpol" if "Wpol" in frame else "Wunpol" if "Wunpol" in frame else None
+        if wkey is not None:
+            weights = frame.pop(wkey)
+            for k, scale in wscales.items():
+                if scale == 1.0:
+                    continue
+                if k in weights.keys():
+                    weights[k] /= scale
+            frame[wkey] = weights
 
     return frame
 
