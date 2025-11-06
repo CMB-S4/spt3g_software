@@ -556,6 +556,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.map_modules.ExtractMaps"><code class="docutils literal notranslate"><span class="pre">ExtractMaps</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.map_modules.InjectMapStub"><code class="docutils literal notranslate"><span class="pre">InjectMapStub</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.map_modules.InjectMaps"><code class="docutils literal notranslate"><span class="pre">InjectMaps</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.map_modules.InvertMaps"><code class="docutils literal notranslate"><span class="pre">InvertMaps</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.map_modules.ReprojectMaps"><code class="docutils literal notranslate"><span class="pre">ReprojectMaps</span></code></a></li>
 </ul>
 </li>
@@ -2224,6 +2225,18 @@ pol_type and weights.  If a dict, contains Stokes and weights maps keyed
 by the standard map frame names.</p></li>
 <li><p><strong>ignore_missing_weights</strong> (<em>bool</em>) – Skip warning about missing weights.  Useful for masks.</p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="spt3g.maps.map_modules.InvertMaps">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.maps.map_modules.</span></span><span class="sig-name descname"><span class="pre">InvertMaps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alternate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/maps/map_modules.html#InvertMaps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.maps.map_modules.InvertMaps" title="Link to this definition"></a></dt>
+<dd><p>Invert T, Q, U maps in input map frames.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>alternate</strong> (<em>bool</em>) – If True, invert every other map in the pipeline.  Otherwise, invert
+every input map.</p>
 </dd>
 </dl>
 </dd></dl>

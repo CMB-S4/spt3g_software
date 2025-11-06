@@ -90,6 +90,8 @@ their standard usage in pipelines.
 
 .. autoclass:: spt3g.maps.map_modules.InjectMaps
 
+.. autoclass:: spt3g.maps.map_modules.InvertMaps
+
 .. autoclass:: spt3g.maps.map_modules.ReprojectMaps
 
 Function-like Pipeline Modules
