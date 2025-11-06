@@ -2597,7 +2597,7 @@ replication.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="spt3g.maps.map_modules.RescaleMaps">
-<span class="sig-prename descclassname"><span class="pre">spt3g.maps.map_modules.</span></span><span class="sig-name descname"><span class="pre">RescaleMaps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/maps/map_modules.html#RescaleMaps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.maps.map_modules.RescaleMaps" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">spt3g.maps.map_modules.</span></span><span class="sig-name descname"><span class="pre">RescaleMaps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/maps/map_modules.html#RescaleMaps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.maps.map_modules.RescaleMaps" title="Link to this definition"></a></dt>
 <dd><p>Rescale input map frame using the supplied calibration factors for each
 Stokes component.  If the maps are weighted, the T, Q, and U components are
 divide the appropriate scale factor.  If the maps are unweighted, the Stokes
@@ -2613,6 +2613,8 @@ an unweighted map that has been multiplied by the input scale factors.</p>
 <li><p><strong>q_scale</strong> (<em>float</em>)</p></li>
 <li><p><strong>u_scale</strong> (<em>float</em>) – Scale factor to apply to each Stokes component in the maps and weights.
 If not supplied, assumed to be unity.</p></li>
+<li><p><strong>scale_weights</strong> (<em>bool</em>) – If True, apply the appropriate scale factor to the weights as well.
+Otherwise the scale factors are only applied to the T/Q/U maps.</p></li>
 </ul>
 </dd>
 </dl>
