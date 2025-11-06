@@ -14,6 +14,7 @@ __all__ = [
     "InjectMapStub",
     "InjectMaps",
     "ReplicateMaps",
+    "InvertMaps",
     "CoaddMaps",
     "RebinMaps",
     "ReprojectMaps",
@@ -579,6 +580,38 @@ def ReplicateMaps(frame, input_map_id, output_map_ids, copy_weights=False):
         frames.append(fr)
 
     return frames
+
+
+@core.indexmod
+class InvertMaps:
+    """
+    Invert T, Q, U maps in input map frames.
+
+    Arguments
+    ---------
+    alternate: bool
+        If True, invert every other map in the pipeline.  Otherwise, invert
+        every input map.
+    """
+    def __init__(self, alternate=False):
+        self.alternate = alternate
+        self.flip = False if alternate else True
+
+    def __call__(self, frame):
+        if frame.type != core.G3FrameType.Map:
+            return
+
+        if self.flip:
+            for k in "TQU":
+                if k in frame:
+                    m = frame.pop(k)
+                    m *= -1.0
+                    frame[k] = m
+
+        if self.alternate:
+            self.flip = not self.flip
+
+        return frame
 
 
 @core.indexmod
