@@ -556,7 +556,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.map_modules.ExtractMaps"><code class="docutils literal notranslate"><span class="pre">ExtractMaps</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.map_modules.InjectMapStub"><code class="docutils literal notranslate"><span class="pre">InjectMapStub</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.map_modules.InjectMaps"><code class="docutils literal notranslate"><span class="pre">InjectMaps</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.map_modules.InvertMaps"><code class="docutils literal notranslate"><span class="pre">InvertMaps</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.map_modules.InvertAlternatingMaps"><code class="docutils literal notranslate"><span class="pre">InvertAlternatingMaps</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.map_modules.ReprojectMaps"><code class="docutils literal notranslate"><span class="pre">ReprojectMaps</span></code></a></li>
 </ul>
 </li>
@@ -570,6 +570,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.map_modules.ApplyWeights"><code class="docutils literal notranslate"><span class="pre">ApplyWeights()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.map_modules.CompactMaps"><code class="docutils literal notranslate"><span class="pre">CompactMaps()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.map_modules.FlattenPol"><code class="docutils literal notranslate"><span class="pre">FlattenPol()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.map_modules.InvertMaps"><code class="docutils literal notranslate"><span class="pre">InvertMaps()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.map_modules.MakeMapsPolarized"><code class="docutils literal notranslate"><span class="pre">MakeMapsPolarized()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.map_modules.MakeMapsUnpolarized"><code class="docutils literal notranslate"><span class="pre">MakeMapsUnpolarized()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.map_modules.RebinMaps"><code class="docutils literal notranslate"><span class="pre">RebinMaps()</span></code></a></li>
@@ -2231,15 +2232,9 @@ by the standard map frame names.</p></li>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="spt3g.maps.map_modules.InvertMaps">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.maps.map_modules.</span></span><span class="sig-name descname"><span class="pre">InvertMaps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alternate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/maps/map_modules.html#InvertMaps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.maps.map_modules.InvertMaps" title="Link to this definition"></a></dt>
-<dd><p>Invert T, Q, U maps in input map frames.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>alternate</strong> (<em>bool</em>) – If True, invert every other map in the pipeline.  Otherwise, invert
-every input map.</p>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="spt3g.maps.map_modules.InvertAlternatingMaps">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">spt3g.maps.map_modules.</span></span><span class="sig-name descname"><span class="pre">InvertAlternatingMaps</span></span><a class="reference internal" href="_modules/spt3g/maps/map_modules.html#InvertAlternatingMaps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.maps.map_modules.InvertAlternatingMaps" title="Link to this definition"></a></dt>
+<dd><p>Invert T, Q, U maps in every other input map frame.</p>
 </dd></dl>
 
 <dl class="py class">
@@ -2530,6 +2525,12 @@ argument to True.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="spt3g.maps.map_modules.InvertMaps">
+<span class="sig-prename descclassname"><span class="pre">spt3g.maps.map_modules.</span></span><span class="sig-name descname"><span class="pre">InvertMaps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/maps/map_modules.html#InvertMaps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.maps.map_modules.InvertMaps" title="Link to this definition"></a></dt>
+<dd><p>Invert T, Q, U maps in the input map frame.</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="spt3g.maps.map_modules.MakeMapsPolarized">
 <span class="sig-prename descclassname"><span class="pre">spt3g.maps.map_modules.</span></span><span class="sig-name descname"><span class="pre">MakeMapsPolarized</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pol_conv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">spt3g.maps.MapPolConv.IAU</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/maps/map_modules.html#MakeMapsPolarized"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.maps.map_modules.MakeMapsPolarized" title="Link to this definition"></a></dt>
 <dd><p>Converts individual unpolarized maps to polarized versions of the same map,
@@ -2542,6 +2543,9 @@ a properly invertible Wpol array from the TT Wunpol weights.</p>
 <dt class="sig sig-object py" id="spt3g.maps.map_modules.MakeMapsUnpolarized">
 <span class="sig-prename descclassname"><span class="pre">spt3g.maps.map_modules.</span></span><span class="sig-name descname"><span class="pre">MakeMapsUnpolarized</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/maps/map_modules.html#MakeMapsUnpolarized"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.maps.map_modules.MakeMapsUnpolarized" title="Link to this definition"></a></dt>
 <dd><p>Converts individual polarized maps to temperature-only versions of the same map.</p>
+<p>This is done by simply dropping the Q and U Stokes terms from the input frame.
+To ensure that the resulting T component is free of polarization, use the
+<code class="docutils literal notranslate"><span class="pre">RemoveWeights</span></code> pipeline module before this module.</p>
 </dd></dl>
 
 <dl class="py function">

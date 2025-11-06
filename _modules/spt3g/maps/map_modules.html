@@ -553,7 +553,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_maps.html#spt3g.maps.map_modules.ExtractMaps"><code class="docutils literal notranslate"><span class="pre">ExtractMaps</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_maps.html#spt3g.maps.map_modules.InjectMapStub"><code class="docutils literal notranslate"><span class="pre">InjectMapStub</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_maps.html#spt3g.maps.map_modules.InjectMaps"><code class="docutils literal notranslate"><span class="pre">InjectMaps</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../moddoc_maps.html#spt3g.maps.map_modules.InvertMaps"><code class="docutils literal notranslate"><span class="pre">InvertMaps</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../moddoc_maps.html#spt3g.maps.map_modules.InvertAlternatingMaps"><code class="docutils literal notranslate"><span class="pre">InvertAlternatingMaps</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_maps.html#spt3g.maps.map_modules.ReprojectMaps"><code class="docutils literal notranslate"><span class="pre">ReprojectMaps</span></code></a></li>
 </ul>
 </li>
@@ -567,6 +567,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_maps.html#spt3g.maps.map_modules.ApplyWeights"><code class="docutils literal notranslate"><span class="pre">ApplyWeights()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_maps.html#spt3g.maps.map_modules.CompactMaps"><code class="docutils literal notranslate"><span class="pre">CompactMaps()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_maps.html#spt3g.maps.map_modules.FlattenPol"><code class="docutils literal notranslate"><span class="pre">FlattenPol()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../moddoc_maps.html#spt3g.maps.map_modules.InvertMaps"><code class="docutils literal notranslate"><span class="pre">InvertMaps()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_maps.html#spt3g.maps.map_modules.MakeMapsPolarized"><code class="docutils literal notranslate"><span class="pre">MakeMapsPolarized()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_maps.html#spt3g.maps.map_modules.MakeMapsUnpolarized"><code class="docutils literal notranslate"><span class="pre">MakeMapsUnpolarized()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_maps.html#spt3g.maps.map_modules.RebinMaps"><code class="docutils literal notranslate"><span class="pre">RebinMaps()</span></code></a></li>
@@ -691,6 +692,7 @@
     <span class="s2">&quot;InjectMaps&quot;</span><span class="p">,</span>
     <span class="s2">&quot;ReplicateMaps&quot;</span><span class="p">,</span>
     <span class="s2">&quot;InvertMaps&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;InvertAlternatingMaps&quot;</span><span class="p">,</span>
     <span class="s2">&quot;RescaleMaps&quot;</span><span class="p">,</span>
     <span class="s2">&quot;CoaddMaps&quot;</span><span class="p">,</span>
     <span class="s2">&quot;RebinMaps&quot;</span><span class="p">,</span>
@@ -936,6 +938,10 @@
 <span class="k">def</span> <span class="nf">MakeMapsUnpolarized</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts individual polarized maps to temperature-only versions of the same map.</span>
+
+<span class="sd">    This is done by simply dropping the Q and U Stokes terms from the input frame.</span>
+<span class="sd">    To ensure that the resulting T component is free of polarization, use the</span>
+<span class="sd">    ``RemoveWeights`` pipeline module before this module.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="s2">&quot;Wpol&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">frame</span><span class="p">:</span>
         <span class="k">return</span>
@@ -1298,33 +1304,40 @@
 <div class="viewcode-block" id="InvertMaps">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.map_modules.InvertMaps">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">class</span> <span class="nc">InvertMaps</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">InvertMaps</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Invert T, Q, U maps in input map frames.</span>
-
-<span class="sd">    Arguments</span>
-<span class="sd">    ---------</span>
-<span class="sd">    alternate: bool</span>
-<span class="sd">        If True, invert every other map in the pipeline.  Otherwise, invert</span>
-<span class="sd">        every input map.</span>
+<span class="sd">    Invert T, Q, U maps in the input map frame.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alternate</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">alternate</span> <span class="o">=</span> <span class="n">alternate</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">flip</span> <span class="o">=</span> <span class="kc">False</span> <span class="k">if</span> <span class="n">alternate</span> <span class="k">else</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">frame</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Map</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="s2">&quot;TQU&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">frame</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+            <span class="n">m</span> <span class="o">*=</span> <span class="o">-</span><span class="mf">1.0</span>
+            <span class="n">frame</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">m</span>
+
+    <span class="k">return</span> <span class="n">frame</span></div>
+
+
+
+<div class="viewcode-block" id="InvertAlternatingMaps">
+<a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.map_modules.InvertAlternatingMaps">[docs]</a>
+<span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
+<span class="k">class</span> <span class="nc">InvertAlternatingMaps</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Invert T, Q, U maps in every other input map frame.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flip</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">frame</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Map</span><span class="p">:</span>
             <span class="k">return</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">flip</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="s2">&quot;TQU&quot;</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">frame</span><span class="p">:</span>
-                    <span class="n">m</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
-                    <span class="n">m</span> <span class="o">*=</span> <span class="o">-</span><span class="mf">1.0</span>
-                    <span class="n">frame</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">m</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">alternate</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">flip</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">flip</span>
+            <span class="n">InvertMaps</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flip</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">flip</span>
 
         <span class="k">return</span> <span class="n">frame</span></div>
 
@@ -1375,6 +1388,9 @@
         <span class="s2">&quot;UU&quot;</span><span class="p">:</span> <span class="n">u_scale</span> <span class="o">*</span> <span class="n">u_scale</span><span class="p">,</span>
     <span class="p">}</span>
 
+    <span class="n">wkey</span> <span class="o">=</span> <span class="s2">&quot;Wpol&quot;</span> <span class="k">if</span> <span class="s2">&quot;Wpol&quot;</span> <span class="ow">in</span> <span class="n">frame</span> <span class="k">else</span> <span class="s2">&quot;Wunpol&quot;</span> <span class="k">if</span> <span class="s2">&quot;Wunpol&quot;</span> <span class="ow">in</span> <span class="n">frame</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">weights</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">wkey</span><span class="p">)</span> <span class="k">if</span> <span class="n">wkey</span> <span class="k">else</span> <span class="kc">None</span>
+
     <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">scale</span> <span class="ow">in</span> <span class="n">scales</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">scale</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">:</span>
             <span class="k">continue</span>
@@ -1382,6 +1398,11 @@
             <span class="n">m</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
             <span class="n">m</span> <span class="o">/=</span> <span class="n">scale</span>
             <span class="n">frame</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">m</span>
+        <span class="k">elif</span> <span class="n">weights</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">weights</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">weights</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">/=</span> <span class="n">scale</span>
+
+    <span class="k">if</span> <span class="n">wkey</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">frame</span><span class="p">[</span><span class="n">wkey</span><span class="p">]</span> <span class="o">=</span> <span class="n">weights</span>
 
     <span class="k">return</span> <span class="n">frame</span></div>
 

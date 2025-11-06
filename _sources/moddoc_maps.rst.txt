@@ -90,7 +90,7 @@ their standard usage in pipelines.
 
 .. autoclass:: spt3g.maps.map_modules.InjectMaps
 
-.. autoclass:: spt3g.maps.map_modules.InvertMaps
+.. autoclass:: spt3g.maps.map_modules.InvertAlternatingMaps
 
 .. autoclass:: spt3g.maps.map_modules.ReprojectMaps
 
@@ -116,6 +116,8 @@ Python functions that can be added to :py:class:`~spt3g.core.G3Pipeline` instanc
 .. autofunction:: spt3g.maps.map_modules.CompactMaps
 
 .. autofunction:: spt3g.maps.map_modules.FlattenPol
+
+.. autofunction:: spt3g.maps.map_modules.InvertMaps
 
 .. autofunction:: spt3g.maps.map_modules.MakeMapsPolarized
 
