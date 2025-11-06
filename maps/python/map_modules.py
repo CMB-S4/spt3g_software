@@ -593,7 +593,7 @@ def InvertMaps(frame):
     """
     Invert T, Q, U maps in the input map frame.
     """
-    if frame.type != core.G3FrameType.Map:
+    if isinstance(frame, core.G3Frame) and frame.type != core.G3FrameType.Map:
         return
 
     for k in "TQU":
@@ -647,7 +647,7 @@ def RescaleMaps(frame, t_scale=None, q_scale=None, u_scale=None, scale_weights=T
         If True, apply the appropriate scale factor to the weights as well.
         Otherwise the scale factors are only applied to the T/Q/U maps.
     """
-    if frame.type != core.G3FrameType.Map:
+    if isinstance(frame, core.G3Frame) and frame.type != core.G3FrameType.Map:
         return
 
     ValidateMaps(frame)
