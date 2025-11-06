@@ -15,6 +15,7 @@ __all__ = [
     "InjectMaps",
     "ReplicateMaps",
     "InvertMaps",
+    "RescaleMaps",
     "CoaddMaps",
     "RebinMaps",
     "ReprojectMaps",
@@ -612,6 +613,60 @@ class InvertMaps:
             self.flip = not self.flip
 
         return frame
+
+
+@core.indexmod
+def RescaleMaps(frame, t_scale=None, q_scale=None, u_scale=None):
+    """
+    Rescale input map frame using the supplied calibration factors for each
+    Stokes component.  If the maps are weighted, the T, Q, and U components are
+    divide the appropriate scale factor.  If the maps are unweighted, the Stokes
+    components are multiplied by the appropriate scale factor.  If weight maps
+    are present in the frame, each weight component is divided by the product of
+    the scale factors that make up each weight component.  In this way, calling
+    ``RemoveWeights`` on the map frame resulting from this module should produce
+    an unweighted map that has been multiplied by the input scale factors.
+
+    Arguments
+    ---------
+    t_scale : float
+    q_scale : float
+    u_scale : float
+        Scale factor to apply to each Stokes component in the maps and weights.
+        If not supplied, assumed to be unity.
+    """
+    if frame.type != core.G3FrameType.Map:
+        return
+
+    ValidateMaps(frame)
+
+    t_scale = t_scale if t_scale is not None else 1.0
+    q_scale = q_scale if q_scale is not None else 1.0
+    u_scale = u_scale it u_scale is not None else 1.0
+
+    weighted = frame["T"].weighted
+
+    scales = {
+        "T": t_scale if weighted else 1. / t_scale,
+        "Q": q_scale if weighted else 1. / q_scale,
+        "U": u_scale if weighted else 1. / u_scale,
+        "TT": t_scale * t_scale,
+        "TQ": t_scale * q_scale,
+        "TU": t_scale * u_scale,
+        "QQ": q_scale * q_scale,
+        "QU": q_scale * u_scale,
+        "UU": u_scale * u_scale,
+    }
+
+    for k, scale in scales.items():
+        if scale == 1.0:
+            continue
+        if k in frame:
+            m = frame.pop(k)
+            m /= scale
+            frame[k] = m
+
+    return frame
 
 
 @core.indexmod
