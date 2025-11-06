@@ -642,7 +642,7 @@ def RescaleMaps(frame, t_scale=None, q_scale=None, u_scale=None):
 
     t_scale = t_scale if t_scale is not None else 1.0
     q_scale = q_scale if q_scale is not None else 1.0
-    u_scale = u_scale it u_scale is not None else 1.0
+    u_scale = u_scale if u_scale is not None else 1.0
 
     weighted = frame["T"].weighted
 
