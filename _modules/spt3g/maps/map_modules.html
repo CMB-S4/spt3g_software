@@ -572,6 +572,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_maps.html#spt3g.maps.map_modules.RebinMaps"><code class="docutils literal notranslate"><span class="pre">RebinMaps()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_maps.html#spt3g.maps.map_modules.RemoveWeights"><code class="docutils literal notranslate"><span class="pre">RemoveWeights()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_maps.html#spt3g.maps.map_modules.ReplicateMaps"><code class="docutils literal notranslate"><span class="pre">ReplicateMaps()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../moddoc_maps.html#spt3g.maps.map_modules.RescaleMaps"><code class="docutils literal notranslate"><span class="pre">RescaleMaps()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_maps.html#spt3g.maps.map_modules.SetPolConv"><code class="docutils literal notranslate"><span class="pre">SetPolConv()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_maps.html#spt3g.maps.map_modules.ValidateMaps"><code class="docutils literal notranslate"><span class="pre">ValidateMaps()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../moddoc_maps.html#spt3g.maps.quathelpers.AddTimingToPointingQuats"><code class="docutils literal notranslate"><span class="pre">AddTimingToPointingQuats()</span></code></a></li>
@@ -690,6 +691,7 @@
     <span class="s2">&quot;InjectMaps&quot;</span><span class="p">,</span>
     <span class="s2">&quot;ReplicateMaps&quot;</span><span class="p">,</span>
     <span class="s2">&quot;InvertMaps&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;RescaleMaps&quot;</span><span class="p">,</span>
     <span class="s2">&quot;CoaddMaps&quot;</span><span class="p">,</span>
     <span class="s2">&quot;RebinMaps&quot;</span><span class="p">,</span>
     <span class="s2">&quot;ReprojectMaps&quot;</span><span class="p">,</span>
@@ -1325,6 +1327,63 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">flip</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">flip</span>
 
         <span class="k">return</span> <span class="n">frame</span></div>
+
+
+
+<div class="viewcode-block" id="RescaleMaps">
+<a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.map_modules.RescaleMaps">[docs]</a>
+<span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
+<span class="k">def</span> <span class="nf">RescaleMaps</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">t_scale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">q_scale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">u_scale</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Rescale input map frame using the supplied calibration factors for each</span>
+<span class="sd">    Stokes component.  If the maps are weighted, the T, Q, and U components are</span>
+<span class="sd">    divide the appropriate scale factor.  If the maps are unweighted, the Stokes</span>
+<span class="sd">    components are multiplied by the appropriate scale factor.  If weight maps</span>
+<span class="sd">    are present in the frame, each weight component is divided by the product of</span>
+<span class="sd">    the scale factors that make up each weight component.  In this way, calling</span>
+<span class="sd">    ``RemoveWeights`` on the map frame resulting from this module should produce</span>
+<span class="sd">    an unweighted map that has been multiplied by the input scale factors.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">    t_scale : float</span>
+<span class="sd">    q_scale : float</span>
+<span class="sd">    u_scale : float</span>
+<span class="sd">        Scale factor to apply to each Stokes component in the maps and weights.</span>
+<span class="sd">        If not supplied, assumed to be unity.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">frame</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Map</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="n">ValidateMaps</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+
+    <span class="n">t_scale</span> <span class="o">=</span> <span class="n">t_scale</span> <span class="k">if</span> <span class="n">t_scale</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mf">1.0</span>
+    <span class="n">q_scale</span> <span class="o">=</span> <span class="n">q_scale</span> <span class="k">if</span> <span class="n">q_scale</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mf">1.0</span>
+    <span class="n">u_scale</span> <span class="o">=</span> <span class="n">u_scale</span> <span class="k">if</span> <span class="n">u_scale</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mf">1.0</span>
+
+    <span class="n">weighted</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="s2">&quot;T&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">weighted</span>
+
+    <span class="n">scales</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;T&quot;</span><span class="p">:</span> <span class="n">t_scale</span> <span class="k">if</span> <span class="n">weighted</span> <span class="k">else</span> <span class="mf">1.</span> <span class="o">/</span> <span class="n">t_scale</span><span class="p">,</span>
+        <span class="s2">&quot;Q&quot;</span><span class="p">:</span> <span class="n">q_scale</span> <span class="k">if</span> <span class="n">weighted</span> <span class="k">else</span> <span class="mf">1.</span> <span class="o">/</span> <span class="n">q_scale</span><span class="p">,</span>
+        <span class="s2">&quot;U&quot;</span><span class="p">:</span> <span class="n">u_scale</span> <span class="k">if</span> <span class="n">weighted</span> <span class="k">else</span> <span class="mf">1.</span> <span class="o">/</span> <span class="n">u_scale</span><span class="p">,</span>
+        <span class="s2">&quot;TT&quot;</span><span class="p">:</span> <span class="n">t_scale</span> <span class="o">*</span> <span class="n">t_scale</span><span class="p">,</span>
+        <span class="s2">&quot;TQ&quot;</span><span class="p">:</span> <span class="n">t_scale</span> <span class="o">*</span> <span class="n">q_scale</span><span class="p">,</span>
+        <span class="s2">&quot;TU&quot;</span><span class="p">:</span> <span class="n">t_scale</span> <span class="o">*</span> <span class="n">u_scale</span><span class="p">,</span>
+        <span class="s2">&quot;QQ&quot;</span><span class="p">:</span> <span class="n">q_scale</span> <span class="o">*</span> <span class="n">q_scale</span><span class="p">,</span>
+        <span class="s2">&quot;QU&quot;</span><span class="p">:</span> <span class="n">q_scale</span> <span class="o">*</span> <span class="n">u_scale</span><span class="p">,</span>
+        <span class="s2">&quot;UU&quot;</span><span class="p">:</span> <span class="n">u_scale</span> <span class="o">*</span> <span class="n">u_scale</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">scale</span> <span class="ow">in</span> <span class="n">scales</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">scale</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">frame</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+            <span class="n">m</span> <span class="o">/=</span> <span class="n">scale</span>
+            <span class="n">frame</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">m</span>
+
+    <span class="k">return</span> <span class="n">frame</span></div>
 
 
 

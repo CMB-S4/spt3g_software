@@ -575,6 +575,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.map_modules.RebinMaps"><code class="docutils literal notranslate"><span class="pre">RebinMaps()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.map_modules.RemoveWeights"><code class="docutils literal notranslate"><span class="pre">RemoveWeights()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.map_modules.ReplicateMaps"><code class="docutils literal notranslate"><span class="pre">ReplicateMaps()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.map_modules.RescaleMaps"><code class="docutils literal notranslate"><span class="pre">RescaleMaps()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.map_modules.SetPolConv"><code class="docutils literal notranslate"><span class="pre">SetPolConv()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.map_modules.ValidateMaps"><code class="docutils literal notranslate"><span class="pre">ValidateMaps()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.quathelpers.AddTimingToPointingQuats"><code class="docutils literal notranslate"><span class="pre">AddTimingToPointingQuats()</span></code></a></li>
@@ -2585,6 +2586,29 @@ replication.</p></li>
 <li><p><strong>output_map_ids</strong> (<em>list</em><em> of </em><em>strings</em>) – List of IDs to assign to replicated map frames.</p></li>
 <li><p><strong>copy_weights</strong> (<em>bool</em>) – If False, only the first output frame in the list includes a weights key
 (Wpol or Wunpol).  If True, all output frames include a weights key.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spt3g.maps.map_modules.RescaleMaps">
+<span class="sig-prename descclassname"><span class="pre">spt3g.maps.map_modules.</span></span><span class="sig-name descname"><span class="pre">RescaleMaps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/maps/map_modules.html#RescaleMaps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.maps.map_modules.RescaleMaps" title="Link to this definition"></a></dt>
+<dd><p>Rescale input map frame using the supplied calibration factors for each
+Stokes component.  If the maps are weighted, the T, Q, and U components are
+divide the appropriate scale factor.  If the maps are unweighted, the Stokes
+components are multiplied by the appropriate scale factor.  If weight maps
+are present in the frame, each weight component is divided by the product of
+the scale factors that make up each weight component.  In this way, calling
+<code class="docutils literal notranslate"><span class="pre">RemoveWeights</span></code> on the map frame resulting from this module should produce
+an unweighted map that has been multiplied by the input scale factors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t_scale</strong> (<em>float</em>)</p></li>
+<li><p><strong>q_scale</strong> (<em>float</em>)</p></li>
+<li><p><strong>u_scale</strong> (<em>float</em>) – Scale factor to apply to each Stokes component in the maps and weights.
+If not supplied, assumed to be unity.</p></li>
 </ul>
 </dd>
 </dl>

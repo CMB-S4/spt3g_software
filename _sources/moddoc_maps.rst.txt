@@ -127,6 +127,8 @@ Python functions that can be added to :py:class:`~spt3g.core.G3Pipeline` instanc
 
 .. autofunction:: spt3g.maps.map_modules.ReplicateMaps
 
+.. autofunction:: spt3g.maps.map_modules.RescaleMaps
+
 .. autofunction:: spt3g.maps.map_modules.SetPolConv
 
 .. autofunction:: spt3g.maps.map_modules.ValidateMaps
