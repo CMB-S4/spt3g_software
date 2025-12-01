@@ -14,6 +14,9 @@ __all__ = [
     "InjectMapStub",
     "InjectMaps",
     "ReplicateMaps",
+    "InvertMaps",
+    "InvertAlternatingMaps",
+    "RescaleMaps",
     "CoaddMaps",
     "RebinMaps",
     "ReprojectMaps",
@@ -238,6 +241,10 @@ def MakeMapsPolarized(frame, pol_conv=maps.MapPolConv.IAU):
 def MakeMapsUnpolarized(frame):
     """
     Converts individual polarized maps to temperature-only versions of the same map.
+
+    This is done by simply dropping the Q and U Stokes terms from the input frame.
+    To ensure that the resulting T component is free of polarization, use the
+    ``RemoveWeights`` pipeline module before this module.
     """
     if "Wpol" not in frame:
         return
@@ -579,6 +586,113 @@ def ReplicateMaps(frame, input_map_id, output_map_ids, copy_weights=False):
         frames.append(fr)
 
     return frames
+
+
+@core.indexmod
+def InvertMaps(frame):
+    """
+    Invert T, Q, U maps in the input map frame.
+    """
+    if isinstance(frame, core.G3Frame) and frame.type != core.G3FrameType.Map:
+        return
+
+    for k in "TQU":
+        if k in frame:
+            m = frame.pop(k)
+            m *= -1.0
+            frame[k] = m
+
+    return frame
+
+
+@core.indexmod
+class InvertAlternatingMaps:
+    """
+    Invert T, Q, U maps in every other input map frame.
+    """
+    def __init__(self):
+        self.flip = False
+
+    def __call__(self, frame):
+        if frame.type != core.G3FrameType.Map:
+            return
+
+        if self.flip:
+            InvertMaps(frame)
+        self.flip = not self.flip
+
+        return frame
+
+
+@core.indexmod
+def RescaleMaps(frame, t_scale=None, q_scale=None, u_scale=None, scale_weights=True):
+    """
+    Rescale input map frame using the supplied calibration factors for each
+    Stokes component.  If the maps are weighted, the T, Q, and U components are
+    divide the appropriate scale factor.  If the maps are unweighted, the Stokes
+    components are multiplied by the appropriate scale factor.  If weight maps
+    are present in the frame, each weight component is divided by the product of
+    the scale factors that make up each weight component.  In this way, calling
+    ``RemoveWeights`` on the map frame resulting from this module should produce
+    an unweighted map that has been multiplied by the input scale factors.
+
+    Arguments
+    ---------
+    t_scale : float
+    q_scale : float
+    u_scale : float
+        Scale factor to apply to each Stokes component in the maps and weights.
+        If not supplied, assumed to be unity.
+    scale_weights : bool
+        If True, apply the appropriate scale factor to the weights as well.
+        Otherwise the scale factors are only applied to the T/Q/U maps.
+    """
+    if isinstance(frame, core.G3Frame) and frame.type != core.G3FrameType.Map:
+        return
+
+    ValidateMaps(frame)
+
+    t_scale = t_scale if t_scale is not None else 1.0
+    q_scale = q_scale if q_scale is not None else 1.0
+    u_scale = u_scale if u_scale is not None else 1.0
+
+    weighted = frame["T"].weighted
+
+    scales = {
+        "T": t_scale if weighted else 1. / t_scale,
+        "Q": q_scale if weighted else 1. / q_scale,
+        "U": u_scale if weighted else 1. / u_scale,
+    }
+
+    for k, scale in scales.items():
+        if scale == 1.0:
+            continue
+        if k in frame:
+            m = frame.pop(k)
+            m /= scale
+            frame[k] = m
+
+    if scale_weights:
+        wscales = {
+            "TT": t_scale * t_scale,
+            "TQ": t_scale * q_scale,
+            "TU": t_scale * u_scale,
+            "QQ": q_scale * q_scale,
+            "QU": q_scale * u_scale,
+            "UU": u_scale * u_scale,
+        }
+
+        wkey = "Wpol" if "Wpol" in frame else "Wunpol" if "Wunpol" in frame else None
+        if wkey is not None:
+            weights = frame.pop(wkey)
+            for k, scale in wscales.items():
+                if scale == 1.0:
+                    continue
+                if k in weights.keys():
+                    weights[k] /= scale
+            frame[wkey] = weights
+
+    return frame
 
 
 @core.indexmod
