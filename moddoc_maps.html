@@ -1145,7 +1145,7 @@ Instantiate a G3SkyMapMask from a 1D numpy array</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.maps.G3SkyMapMask.all">
-<span class="sig-name descname"><span class="pre">all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepdims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">where</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.maps.G3SkyMapMask.all" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepdims=&lt;no</span> <span class="pre">value&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">where=&lt;no</span> <span class="pre">value&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.maps.G3SkyMapMask.all" title="Link to this definition"></a></dt>
 <dd><p>Returns True if all elements evaluate to True.</p>
 <p>Refer to <cite>numpy.all</cite> for full documentation.</p>
 <div class="admonition seealso">
@@ -1159,7 +1159,7 @@ Instantiate a G3SkyMapMask from a 1D numpy array</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.maps.G3SkyMapMask.any">
-<span class="sig-name descname"><span class="pre">any</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepdims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">where</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.maps.G3SkyMapMask.any" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">any</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepdims=&lt;no</span> <span class="pre">value&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">where=&lt;no</span> <span class="pre">value&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.maps.G3SkyMapMask.any" title="Link to this definition"></a></dt>
 <dd><p>Returns True if any of the elements of <cite>a</cite> evaluate to True.</p>
 <p>Refer to <cite>numpy.any</cite> for full documentation.</p>
 <div class="admonition seealso">
@@ -1225,12 +1225,13 @@ Returns true if this mask can be applied to the given map.</p>
 <span class="sig-name descname"><span class="pre">sum</span></span><span class="sig-paren">(</span>
 
 <dl>
-<dd><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>,</dd>
-<dd><em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>,</dd>
-<dd><em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>,</dd>
-<dd><em class="sig-param"><span class="n"><span class="pre">keepdims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>,</dd>
-<dd><em class="sig-param"><span class="n"><span class="pre">initial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>,</dd>
-<dd><em class="sig-param"><span class="n"><span class="pre">where</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">axis=None</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">dtype=None</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">out=None</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">keepdims=&lt;no</span> <span class="pre">value&gt;</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">initial=&lt;no</span> <span class="pre">value&gt;</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">where=&lt;no</span> <span class="pre">value&gt;</span></span></em>,</dd>
 </dl>
 
 <span class="sig-paren">)</span><a class="headerlink" href="#spt3g.maps.G3SkyMapMask.sum" title="Link to this definition"></a></dt>
@@ -2671,7 +2672,7 @@ one.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.maps.G3SkyMap.all">
-<span class="sig-name descname"><span class="pre">all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepdims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">where</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.maps.G3SkyMap.all" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepdims=&lt;no</span> <span class="pre">value&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">where=&lt;no</span> <span class="pre">value&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.maps.G3SkyMap.all" title="Link to this definition"></a></dt>
 <dd><p>Returns True if all elements evaluate to True.</p>
 <p>Refer to <cite>numpy.all</cite> for full documentation.</p>
 <div class="admonition seealso">
@@ -2716,7 +2717,7 @@ Compute the 1D pixel location of the given sky position.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.maps.G3SkyMap.any">
-<span class="sig-name descname"><span class="pre">any</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepdims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">where</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.maps.G3SkyMap.any" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">any</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepdims=&lt;no</span> <span class="pre">value&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">where=&lt;no</span> <span class="pre">value&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.maps.G3SkyMap.any" title="Link to this definition"></a></dt>
 <dd><p>Returns True if any of the elements of <cite>a</cite> evaluate to True.</p>
 <p>Refer to <cite>numpy.any</cite> for full documentation.</p>
 <div class="admonition seealso">
@@ -2821,7 +2822,18 @@ Return the values at each of the input coordinate locations. Computes each value
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.maps.G3SkyMap.max">
-<span class="sig-name descname"><span class="pre">max</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepdims=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial=&lt;no</span> <span class="pre">value&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">where=True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.maps.G3SkyMap.max" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">max</span></span><span class="sig-paren">(</span>
+
+<dl>
+<dd><em class="sig-param"><span class="n"><span class="pre">axis=None</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">out=None</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">keepdims=&lt;no</span> <span class="pre">value&gt;</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">initial=&lt;no</span> <span class="pre">value&gt;</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">where=&lt;no</span> <span class="pre">value&gt;</span></span></em>,</dd>
+</dl>
+
+<span class="sig-paren">)</span><a class="headerlink" href="#spt3g.maps.G3SkyMap.max" title="Link to this definition"></a></dt>
 <dd><p>Return the maximum along a given axis.</p>
 <p>Refer to <cite>numpy.amax</cite> for full documentation.</p>
 <div class="admonition seealso">
@@ -2835,7 +2847,18 @@ Return the values at each of the input coordinate locations. Computes each value
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.maps.G3SkyMap.mean">
-<span class="sig-name descname"><span class="pre">mean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepdims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">where</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.maps.G3SkyMap.mean" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">mean</span></span><span class="sig-paren">(</span>
+
+<dl>
+<dd><em class="sig-param"><span class="n"><span class="pre">axis=None</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">dtype=None</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">out=None</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">keepdims=&lt;no</span> <span class="pre">value&gt;</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">where=&lt;no</span> <span class="pre">value&gt;</span></span></em>,</dd>
+</dl>
+
+<span class="sig-paren">)</span><a class="headerlink" href="#spt3g.maps.G3SkyMap.mean" title="Link to this definition"></a></dt>
 <dd><p>Returns the average of the array elements along given axis.</p>
 <p>Refer to <cite>numpy.mean</cite> for full documentation.</p>
 <div class="admonition seealso">
@@ -2854,7 +2877,18 @@ Return the values at each of the input coordinate locations. Computes each value
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.maps.G3SkyMap.min">
-<span class="sig-name descname"><span class="pre">min</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepdims=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial=&lt;no</span> <span class="pre">value&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">where=True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.maps.G3SkyMap.min" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">min</span></span><span class="sig-paren">(</span>
+
+<dl>
+<dd><em class="sig-param"><span class="n"><span class="pre">axis=None</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">out=None</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">keepdims=&lt;no</span> <span class="pre">value&gt;</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">initial=&lt;no</span> <span class="pre">value&gt;</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">where=&lt;no</span> <span class="pre">value&gt;</span></span></em>,</dd>
+</dl>
+
+<span class="sig-paren">)</span><a class="headerlink" href="#spt3g.maps.G3SkyMap.min" title="Link to this definition"></a></dt>
 <dd><p>Return the minimum along a given axis.</p>
 <p>Refer to <cite>numpy.amin</cite> for full documentation.</p>
 <div class="admonition seealso">
@@ -3023,7 +3057,20 @@ Return a list of pixel indices whose centers are located within a disc of the gi
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.maps.G3SkyMap.std">
-<span class="sig-name descname"><span class="pre">std</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ddof</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepdims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">where</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.maps.G3SkyMap.std" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">std</span></span><span class="sig-paren">(</span>
+
+<dl>
+<dd><em class="sig-param"><span class="n"><span class="pre">axis=None</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">dtype=None</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">out=None</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">ddof=0</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">keepdims=&lt;no</span> <span class="pre">value&gt;</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">where=&lt;no</span> <span class="pre">value&gt;</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">mean=&lt;no</span> <span class="pre">value&gt;</span></span></em>,</dd>
+</dl>
+
+<span class="sig-paren">)</span><a class="headerlink" href="#spt3g.maps.G3SkyMap.std" title="Link to this definition"></a></dt>
 <dd><p>Returns the standard deviation of the array elements along given axis.</p>
 <p>Refer to <cite>numpy.std</cite> for full documentation.</p>
 <div class="admonition seealso">
@@ -3037,7 +3084,19 @@ Return a list of pixel indices whose centers are located within a disc of the gi
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.maps.G3SkyMap.sum">
-<span class="sig-name descname"><span class="pre">sum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepdims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">where</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.maps.G3SkyMap.sum" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">sum</span></span><span class="sig-paren">(</span>
+
+<dl>
+<dd><em class="sig-param"><span class="n"><span class="pre">axis=None</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">dtype=None</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">out=None</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">keepdims=&lt;no</span> <span class="pre">value&gt;</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">initial=&lt;no</span> <span class="pre">value&gt;</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">where=&lt;no</span> <span class="pre">value&gt;</span></span></em>,</dd>
+</dl>
+
+<span class="sig-paren">)</span><a class="headerlink" href="#spt3g.maps.G3SkyMap.sum" title="Link to this definition"></a></dt>
 <dd><p>Return the sum of the array elements over the given axis.</p>
 <p>Refer to <cite>numpy.sum</cite> for full documentation.</p>
 <div class="admonition seealso">
@@ -3064,7 +3123,20 @@ Return a list of pixel indices whose centers are located within a disc of the gi
 
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.maps.G3SkyMap.var">
-<span class="sig-name descname"><span class="pre">var</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ddof</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepdims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">where</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#spt3g.maps.G3SkyMap.var" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">var</span></span><span class="sig-paren">(</span>
+
+<dl>
+<dd><em class="sig-param"><span class="n"><span class="pre">axis=None</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">dtype=None</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">out=None</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">ddof=0</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">keepdims=&lt;no</span> <span class="pre">value&gt;</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">where=&lt;no</span> <span class="pre">value&gt;</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">mean=&lt;no</span> <span class="pre">value&gt;</span></span></em>,</dd>
+</dl>
+
+<span class="sig-paren">)</span><a class="headerlink" href="#spt3g.maps.G3SkyMap.var" title="Link to this definition"></a></dt>
 <dd><p>Returns the variance of the array elements, along given axis.</p>
 <p>Refer to <cite>numpy.var</cite> for full documentation.</p>
 <div class="admonition seealso">
