@@ -43,6 +43,15 @@ public:
 	std::vector<bool> in_control;
 	std::vector<bool> scan_flag;
 
+	std::vector<int> in_control_int;
+	std::vector<double> lst;
+
+	std::vector<double> source_acquired;
+	std::vector<double> source_acquired_threshold;
+
+	std::vector<int> tracker_mode, tracker_lacking, time_status;
+	std::vector<std::string> schedule_name;
+
 	// XXX identify which other parameters are meaningful and should be
 	// in this container (e.g. tiltmeter status should be elsewhere)
 
@@ -50,7 +59,7 @@ public:
 };
 
 G3_POINTERS(TrackerStatus);
-G3_SERIALIZABLE(TrackerStatus, 1);
+G3_SERIALIZABLE(TrackerStatus, 2);
 
 #endif
 

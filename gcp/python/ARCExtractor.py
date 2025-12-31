@@ -241,14 +241,14 @@ def UnpackTrackerData(f, rewrite_source_from_feature_bits=True):
     t.lst = np.asarray(board['lst'][0], dtype=float)
 
     t.source_acquired = np.asarray(board['off_source'][0])
-    t.source_acquired_threshold = np.asarray(board['source_acquired_threshold'])
+    t.source_acquired_threshold = np.asarray([board['source_acquired_threshold'].value])
     t.tracker_mode = np.asarray(board['mode'][0])
     t.tracker_lacking = np.asarray(board['lacking'][0])
     t.time_status = np.asarray(board['time_status'][0])
     try:
-        t.schedule_name = np.asarray(board['schedule_name'].value)
+        t.schedule_name = np.asarray([board['schedule_name'].value])
     except AttributeError:
-        t.schedule_name = np.asarray(''.join([chr(x) for x in board['schedule_name']]))
+        t.schedule_name = np.asarray([''.join([chr(x) for x in board['schedule_name']])])
 
     f['TrackerStatus'] = t
 

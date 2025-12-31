@@ -30,7 +30,11 @@ template <class A> void ACUStatus::serialize(A &ar, unsigned v)
 	ar & make_nvp("restart_count", restart_count);
 	ar & make_nvp("px_resyncing", px_resyncing);
 	ar & make_nvp("state", state);
-	ar & make_nvp("acu_status", acu_status);
+	ar & make_nvp("status", status);
+
+	if (v > 2) {
+		ar & make_nvp("error", error);
+	}
 }
 
 std::string ACUStatus::Description() const
@@ -91,7 +95,8 @@ PYBINDINGS("gcp", scope) {
 	    .def_readwrite("restart_count", &ACUStatus::restart_count)
 	    .def_readwrite("px_resyncing", &ACUStatus::px_resyncing)
 	    .def_readwrite("state", &ACUStatus::state)
-	    .def_readwrite("acu_status", &ACUStatus::acu_status)
+	    .def_readwrite("status", &ACUStatus::status)
+	    .def_readwrite("error", &ACUStatus::error)
 	;
 
 	register_vector_of<ACUStatus>(scope, "_ACUStatusBase");

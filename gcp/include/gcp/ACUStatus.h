@@ -39,13 +39,14 @@ public:
 	};
 
 	enum ACUState state;
-	int acu_status; // XXX Add bitmask definitions
+	int status; // XXX Add bitmask definitions
+	int error;
 
 	template <class A> void serialize(A &ar, unsigned v);
 };
 
 G3_POINTERS(ACUStatus);
-G3_SERIALIZABLE(ACUStatus, 2);
+G3_SERIALIZABLE(ACUStatus, 3);
 
 G3VECTOR_OF(ACUStatus, ACUStatusVector);
 
