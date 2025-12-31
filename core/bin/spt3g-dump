@@ -15,7 +15,7 @@ P.add_argument(
 )
 args = P.parse_args()
 
-for lib in args.packages:
+for lib in args.modules:
     __import__(lib)
 
 for f in core.G3File(args.filename):
