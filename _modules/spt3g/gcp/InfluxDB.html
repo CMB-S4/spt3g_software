@@ -1038,6 +1038,10 @@
                     <span class="n">dat</span> <span class="o">=</span> <span class="n">fr</span><span class="p">[</span><span class="n">stat</span><span class="p">][</span><span class="n">attr</span><span class="p">]</span>
                 <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span> <span class="c1"># Field only exists in live data stream</span>
                     <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">stat</span> <span class="o">==</span> <span class="s1">&#39;TrackerStatus&#39;</span> <span class="ow">and</span> <span class="n">attr</span> <span class="o">==</span> <span class="s1">&#39;state&#39;</span><span class="p">:</span>
+                <span class="n">dat</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dat</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">stat</span> <span class="o">==</span> <span class="s1">&#39;ACUStatus&#39;</span> <span class="ow">and</span> <span class="n">attr</span> <span class="o">==</span> <span class="s1">&#39;state&#39;</span><span class="p">:</span>
+                <span class="n">dat</span> <span class="o">=</span> <span class="n">dat</span><span class="o">.</span><span class="n">value</span>
             <span class="k">if</span> <span class="s1">&#39;Bench&#39;</span> <span class="ow">in</span> <span class="n">stat</span><span class="p">:</span> <span class="c1"># funny time field for bench positions</span>
                 <span class="n">time</span> <span class="o">=</span> <span class="n">fr</span><span class="p">[</span><span class="s1">&#39;BenchSampleTime&#39;</span><span class="p">]</span>
             <span class="k">elif</span> <span class="s1">&#39;Mux&#39;</span> <span class="ow">in</span> <span class="n">stat</span><span class="p">:</span>

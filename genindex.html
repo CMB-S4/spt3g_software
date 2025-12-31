@@ -720,8 +720,6 @@
       </ul></li>
       <li><a href="moddoc_gcp.html#spt3g.gcp.TrackerStatus.acu_seq">acu_seq (spt3g.gcp.TrackerStatus property)</a>
 </li>
-      <li><a href="moddoc_gcp.html#spt3g.gcp.ACUStatus.acu_status">acu_status (spt3g.gcp.ACUStatus property)</a>
-</li>
       <li><a href="moddoc_gcp.html#spt3g.gcp.ACUState">ACUState (class in spt3g.gcp)</a>
 </li>
       <li><a href="moddoc_gcp.html#spt3g.gcp.ACUStatus">ACUStatus (class in spt3g.gcp)</a>
@@ -1704,11 +1702,25 @@
 </li>
       <li><a href="moddoc_core.html#spt3g.core.G3FrameType.Ephemeris">Ephemeris (spt3g.core.G3FrameType attribute)</a>
 </li>
+      <li><a href="moddoc_gcp.html#spt3g.gcp.TrackerPointing.equat_geoc_dec">equat_geoc_dec (spt3g.gcp.TrackerPointing property)</a>
+</li>
+      <li><a href="moddoc_gcp.html#spt3g.gcp.TrackerPointing.equat_geoc_ra">equat_geoc_ra (spt3g.gcp.TrackerPointing property)</a>
+</li>
+      <li><a href="moddoc_gcp.html#spt3g.gcp.TrackerPointing.equat_off_x">equat_off_x (spt3g.gcp.TrackerPointing property)</a>
+</li>
+      <li><a href="moddoc_gcp.html#spt3g.gcp.TrackerPointing.equat_off_y">equat_off_y (spt3g.gcp.TrackerPointing property)</a>
+</li>
       <li><a href="moddoc_maps.html#spt3g.maps.MapCoordReference.Equatorial">Equatorial (spt3g.maps.MapCoordReference attribute)</a>
 </li>
       <li><a href="moddoc_maps.html#spt3g.maps.azel.EquatorialToGalacticPointing">EquatorialToGalacticPointing() (in module spt3g.maps.azel)</a>
 </li>
       <li><a href="moddoc_maps.html#spt3g.maps.coordsysmodules.EquatorialToGalacticTransRotations">EquatorialToGalacticTransRotations() (in module spt3g.maps.coordsysmodules)</a>
+</li>
+      <li><a href="moddoc_gcp.html#spt3g.gcp.ACUStatus.error">error (spt3g.gcp.ACUStatus property)</a>
+</li>
+      <li><a href="moddoc_gcp.html#spt3g.gcp.TrackerPointing.error_az">error_az (spt3g.gcp.TrackerPointing property)</a>
+</li>
+      <li><a href="moddoc_gcp.html#spt3g.gcp.TrackerPointing.error_el">error_el (spt3g.gcp.TrackerPointing property)</a>
 </li>
       <li><a href="moddoc_gcp.html#spt3g.gcp.Experiment">Experiment (class in spt3g.gcp)</a>
 </li>
@@ -2122,6 +2134,10 @@
 </li>
       <li><a href="moddoc_maps.html#spt3g.maps.HealpixSkyMap">HealpixSkyMap (class in spt3g.maps)</a>
 </li>
+      <li><a href="moddoc_gcp.html#spt3g.gcp.TrackerPointing.high_limit_az">high_limit_az (spt3g.gcp.TrackerPointing property)</a>
+</li>
+      <li><a href="moddoc_gcp.html#spt3g.gcp.TrackerPointing.high_limit_el">high_limit_el (spt3g.gcp.TrackerPointing property)</a>
+</li>
       <li><a href="moddoc_maps.html#spt3g.maps.HitsBinner">HitsBinner (class in spt3g.maps)</a>
 </li>
       <li><a href="moddoc_dfmux.html#spt3g.dfmux.HkBoardInfo">HkBoardInfo (class in spt3g.dfmux)</a>
@@ -2147,6 +2163,10 @@
       <li><a href="moddoc_gcp.html#spt3g.gcp.TrackerPointing.horiz_off_x">horiz_off_x (spt3g.gcp.TrackerPointing property)</a>
 </li>
       <li><a href="moddoc_gcp.html#spt3g.gcp.TrackerPointing.horiz_off_y">horiz_off_y (spt3g.gcp.TrackerPointing property)</a>
+</li>
+      <li><a href="moddoc_gcp.html#spt3g.gcp.TrackerPointing.horiz_topo_az">horiz_topo_az (spt3g.gcp.TrackerPointing property)</a>
+</li>
+      <li><a href="moddoc_gcp.html#spt3g.gcp.TrackerPointing.horiz_topo_el">horiz_topo_el (spt3g.gcp.TrackerPointing property)</a>
 </li>
       <li><a href="moddoc_gcp.html#spt3g.gcp.GCPDataTee.PagerWatchdog.host">host (spt3g.gcp.GCPDataTee.PagerWatchdog attribute)</a>
 </li>
@@ -2183,6 +2203,8 @@
       <li><a href="moddoc_gcp.html#spt3g.gcp.ACUState.IDLE">IDLE (spt3g.gcp.ACUState attribute)</a>
 </li>
       <li><a href="moddoc_gcp.html#spt3g.gcp.TrackerStatus.in_control">in_control (spt3g.gcp.TrackerStatus property)</a>
+</li>
+      <li><a href="moddoc_gcp.html#spt3g.gcp.TrackerStatus.in_control_int">in_control_int (spt3g.gcp.TrackerStatus property)</a>
 </li>
       <li><a href="moddoc_maps.html#spt3g.maps.HealpixSkyMap.indexedsparse">indexedsparse (spt3g.maps.HealpixSkyMap property)</a>
 </li>
@@ -2468,10 +2490,10 @@
 </li>
       <li><a href="moddoc_core.html#spt3g.core.G3LogLevel.LOG_DEBUG">LOG_DEBUG (spt3g.core.G3LogLevel attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="moddoc_core.html#spt3g.core.g3logging.log_debug">log_debug() (in module spt3g.core.g3logging)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="moddoc_core.html#spt3g.core.G3LogLevel.LOG_ERROR">LOG_ERROR (spt3g.core.G3LogLevel attribute)</a>
 </li>
       <li><a href="moddoc_core.html#spt3g.core.g3logging.log_error">log_error() (in module spt3g.core.g3logging)</a>
@@ -2499,6 +2521,12 @@
       <li><a href="moddoc_calibration.html#spt3g.calibration.BolometerCouplingType.Loopback">Loopback (spt3g.calibration.BolometerCouplingType attribute)</a>
 </li>
       <li><a href="moddoc_dfmux.html#spt3g.dfmux.HkChannelInfo.loopgain">loopgain (spt3g.dfmux.HkChannelInfo property)</a>
+</li>
+      <li><a href="moddoc_gcp.html#spt3g.gcp.TrackerPointing.low_limit_az">low_limit_az (spt3g.gcp.TrackerPointing property)</a>
+</li>
+      <li><a href="moddoc_gcp.html#spt3g.gcp.TrackerPointing.low_limit_el">low_limit_el (spt3g.gcp.TrackerPointing property)</a>
+</li>
+      <li><a href="moddoc_gcp.html#spt3g.gcp.TrackerStatus.lst">lst (spt3g.gcp.TrackerStatus property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -3320,6 +3348,12 @@
 </li>
       <li><a href="moddoc_core.html#spt3g.core.g3decorators.scan_func_cache_data">scan_func_cache_data() (in module spt3g.core.g3decorators)</a>
 </li>
+      <li><a href="moddoc_gcp.html#spt3g.gcp.TrackerPointing.scan_off_x">scan_off_x (spt3g.gcp.TrackerPointing property)</a>
+</li>
+      <li><a href="moddoc_gcp.html#spt3g.gcp.TrackerPointing.scan_off_y">scan_off_y (spt3g.gcp.TrackerPointing property)</a>
+</li>
+      <li><a href="moddoc_gcp.html#spt3g.gcp.TrackerStatus.schedule_name">schedule_name (spt3g.gcp.TrackerStatus property)</a>
+</li>
       <li><a href="moddoc_gcp.html#spt3g.gcp.TrackerPointing.scu_temp">scu_temp (spt3g.gcp.TrackerPointing property)</a>
 </li>
       <li><a href="moddoc_core.html#spt3g.core.G3Reader.seek">seek() (spt3g.core.G3Reader method)</a>
@@ -3376,9 +3410,17 @@
         <li><a href="moddoc_maps.html#spt3g.maps.G3SkyMapWeights.size">(spt3g.maps.G3SkyMapWeights property)</a>
 </li>
       </ul></li>
+      <li><a href="moddoc_gcp.html#spt3g.gcp.TrackerPointing.sky_off_x">sky_off_x (spt3g.gcp.TrackerPointing property)</a>
+</li>
+      <li><a href="moddoc_gcp.html#spt3g.gcp.TrackerPointing.sky_off_y">sky_off_y (spt3g.gcp.TrackerPointing property)</a>
+</li>
       <li><a href="moddoc_gcp.html#spt3g.gcp.TrackerState.SLEWING">SLEWING (spt3g.gcp.TrackerState attribute)</a>
 </li>
       <li><a href="moddoc_core.html#spt3g.core.G3TimesampleMap.sort">sort() (spt3g.core.G3TimesampleMap method)</a>
+</li>
+      <li><a href="moddoc_gcp.html#spt3g.gcp.TrackerStatus.source_acquired">source_acquired (spt3g.gcp.TrackerStatus property)</a>
+</li>
+      <li><a href="moddoc_gcp.html#spt3g.gcp.TrackerStatus.source_acquired_threshold">source_acquired_threshold (spt3g.gcp.TrackerStatus property)</a>
 </li>
       <li><a href="moddoc_maps.html#spt3g.maps.FlatSkyMap.sparse">sparse (spt3g.maps.FlatSkyMap property)</a>
 </li>
@@ -3438,6 +3480,8 @@
       </ul></li>
       <li><a href="moddoc_core.html#spt3g.core.G3FrameType.Statistics">Statistics (spt3g.core.G3FrameType attribute)</a>
 </li>
+      <li><a href="moddoc_gcp.html#spt3g.gcp.ACUStatus.status">status (spt3g.gcp.ACUStatus property)</a>
+</li>
       <li><a href="moddoc_core.html#spt3g.core.BoolVector.std">std() (spt3g.core.BoolVector method)</a>
 
       <ul>
@@ -3468,6 +3512,8 @@
         <li><a href="moddoc_maps.html#spt3g.maps.G3SkyMap.std">(spt3g.maps.G3SkyMap method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="moddoc_core.html#spt3g.core.G3Timestream.stop">stop (spt3g.core.G3Timestream property)</a>
 
       <ul>
@@ -3476,8 +3522,6 @@
         <li><a href="moddoc_core.html#spt3g.core.G3TimestreamQuat.stop">(spt3g.core.G3TimestreamQuat property)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="moddoc_dfmux.html#spt3g.dfmux.DfMuxCollector.Stop">Stop() (spt3g.dfmux.DfMuxCollector method)</a>
 
       <ul>
@@ -3688,6 +3732,8 @@
       </ul></li>
       <li><a href="moddoc_gcp.html#spt3g.gcp.TrackerState.TIME_ERROR">TIME_ERROR (spt3g.gcp.TrackerState attribute)</a>
 </li>
+      <li><a href="moddoc_gcp.html#spt3g.gcp.TrackerStatus.time_status">time_status (spt3g.gcp.TrackerStatus property)</a>
+</li>
       <li><a href="moddoc_gcp.html#spt3g.gcp.GCPDataTee.PagerWatchdog.timeout">timeout (spt3g.gcp.GCPDataTee.PagerWatchdog attribute)</a>
 </li>
       <li><a href="moddoc_core.html#spt3g.core.G3FrameType.Timepoint">Timepoint (spt3g.core.G3FrameType attribute)</a>
@@ -3724,6 +3770,10 @@
         <li><a href="moddoc_maps.html#spt3g.maps.MapPolType.TQ">(spt3g.maps.MapPolType attribute)</a>
 </li>
       </ul></li>
+      <li><a href="moddoc_gcp.html#spt3g.gcp.TrackerStatus.tracker_lacking">tracker_lacking (spt3g.gcp.TrackerStatus property)</a>
+</li>
+      <li><a href="moddoc_gcp.html#spt3g.gcp.TrackerStatus.tracker_mode">tracker_mode (spt3g.gcp.TrackerStatus property)</a>
+</li>
       <li><a href="moddoc_gcp.html#spt3g.gcp.TrackerPointing">TrackerPointing (class in spt3g.gcp)</a>
 </li>
       <li><a href="moddoc_gcp.html#spt3g.gcp.TrackerState">TrackerState (class in spt3g.gcp)</a>
