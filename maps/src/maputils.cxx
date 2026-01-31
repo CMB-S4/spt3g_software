@@ -5,6 +5,9 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 #include <G3Logging.h>
 #include <G3Units.h>
 
@@ -37,11 +40,17 @@ void RemoveWeights(G3SkyMap &T, G3SkyMap &Q, G3SkyMap &U, const G3SkyMapWeights 
 		T.ConvertToDense();
 		Q.ConvertToDense();
 		U.ConvertToDense();
+		#ifdef _OPENMP
+        #pragma omp parallel for schedule(static)
+        #endif
 		for (size_t pix = 0; pix < T.size(); pix++) {
 			StokesVector v(T[pix], Q[pix], U[pix]);
 			v /= W.at(pix);
 		}
 	} else {
+	    #ifdef _OPENMP
+        #pragma omp parallel for schedule(static)
+        #endif
 		for (size_t pix = 0; pix < W.size(); pix++) {
 			double t = T.at(pix);
 			MuellerMatrix m = W.at(pix);
