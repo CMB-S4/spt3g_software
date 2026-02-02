@@ -130,6 +130,9 @@ void ApplyWeights(G3SkyMap &T, G3SkyMap &Q, G3SkyMap &U, const G3SkyMapWeights &
 	g3_assert(!Q.weighted);
 	g3_assert(!U.weighted);
 
+    #ifdef _OPENMP
+    #pragma omp parallel for schedule(static)
+    #endif
 	for (size_t pix = 0; pix < T.size(); pix++) {
 		if (T.at(pix) == 0 && Q.at(pix) == 0 && U.at(pix) == 0)
 			continue;
