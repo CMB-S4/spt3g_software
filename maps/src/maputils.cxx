@@ -94,6 +94,9 @@ void RemoveWeightsT(G3SkyMap &T, const G3SkyMapWeights &W, bool zero_nans)
 		T.ConvertToDense();
 		T /= *(W.TT);
 	} else {
+	    #ifdef _OPENMP
+        #pragma omp parallel for schedule(static)
+        #endif
 		for (size_t pix = 0; pix < W.size(); pix++) {
 			double t = T.at(pix);
 			MuellerMatrix m = W.at(pix);
