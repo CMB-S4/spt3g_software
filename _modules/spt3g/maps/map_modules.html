@@ -1654,6 +1654,7 @@
     <span class="n">collate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">weighted</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">record_obs_id</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">return_outputs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Coadd map files, optionally collating map Id&#39;s into separate frames.</span>
@@ -1684,12 +1685,17 @@
 <span class="sd">        If True, include source name and observation ID info in the output coadd</span>
 <span class="sd">        frame ``InputMapIds`` key, along with the map ID for each input frame.</span>
 <span class="sd">        If False, only the map frame ID is included.</span>
+<span class="sd">    return_outputs : bool</span>
+<span class="sd">        If True, return output coadds from this function.  Assumed ``True`` if</span>
+<span class="sd">        ``output_file`` is not set.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    maps : G3Frame or dict of G3Frames</span>
 <span class="sd">        If ``collate`` is True, returns a dictionary of map frames</span>
-<span class="sd">        keyed by Id.  Otherwise, returns a single map frame.</span>
+<span class="sd">        keyed by Id.  Otherwise, returns a single map frame.  Only</span>
+<span class="sd">        returned if ``return_outputs`` is True or if ``output_file``</span>
+<span class="sd">        is not set.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">pipe</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3Pipeline</span><span class="p">()</span>
@@ -1704,7 +1710,7 @@
             <span class="n">weighted</span><span class="o">=</span><span class="n">weighted</span><span class="p">,</span>
             <span class="n">drop_input_frames</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">record_obs_id</span><span class="o">=</span><span class="n">record_obs_id</span><span class="p">,</span>
-            <span class="n">keep_outputs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">keep_outputs</span><span class="o">=</span><span class="n">return_outputs</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">output_file</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">coadder</span><span class="p">)</span>
 
@@ -1715,9 +1721,10 @@
         <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">G3Writer</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">output_file</span><span class="p">)</span>
     <span class="n">pipe</span><span class="o">.</span><span class="n">Run</span><span class="p">()</span>
 
-    <span class="k">if</span> <span class="n">collate</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">coadder</span><span class="o">.</span><span class="n">coadd_frames</span>
-    <span class="k">return</span> <span class="n">coadder</span><span class="o">.</span><span class="n">coadd_frame</span></div>
+    <span class="k">if</span> <span class="n">return_outputs</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">output_file</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">collate</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">coadder</span><span class="o">.</span><span class="n">coadd_frames</span>
+        <span class="k">return</span> <span class="n">coadder</span><span class="o">.</span><span class="n">coadd_frame</span></div>
 
 
 

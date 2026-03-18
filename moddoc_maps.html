@@ -4198,6 +4198,7 @@ can contain entries such as <code class="docutils literal notranslate"><span cla
 <dd><em class="sig-param"><span class="n"><span class="pre">collate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>,</dd>
 <dd><em class="sig-param"><span class="n"><span class="pre">weighted</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>,</dd>
 <dd><em class="sig-param"><span class="n"><span class="pre">record_obs_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">return_outputs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>,</dd>
 </dl>
 
 <span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/maps/map_modules.html#coadd_map_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.maps.map_modules.coadd_map_files" title="Link to this definition"></a></dt>
@@ -4221,11 +4222,15 @@ Otherwise, the input maps are coadded as they are.</p></li>
 <li><p><strong>record_obs_id</strong> (<em>bool</em>) – If True, include source name and observation ID info in the output coadd
 frame <code class="docutils literal notranslate"><span class="pre">InputMapIds</span></code> key, along with the map ID for each input frame.
 If False, only the map frame ID is included.</p></li>
+<li><p><strong>return_outputs</strong> (<em>bool</em>) – If True, return output coadds from this function.  Assumed <code class="docutils literal notranslate"><span class="pre">True</span></code> if
+<code class="docutils literal notranslate"><span class="pre">output_file</span></code> is not set.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>maps</strong> – If <code class="docutils literal notranslate"><span class="pre">collate</span></code> is True, returns a dictionary of map frames
-keyed by Id.  Otherwise, returns a single map frame.</p>
+keyed by Id.  Otherwise, returns a single map frame.  Only
+returned if <code class="docutils literal notranslate"><span class="pre">return_outputs</span></code> is True or if <code class="docutils literal notranslate"><span class="pre">output_file</span></code>
+is not set.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="moddoc_core.html#spt3g.core.G3Frame" title="spt3g.core.G3Frame"><em>G3Frame</em></a> or <em>dict</em> of G3Frames</p>
