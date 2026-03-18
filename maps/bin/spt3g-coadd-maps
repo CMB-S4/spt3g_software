@@ -33,7 +33,7 @@ P.add_argument(
 )
 P.add_argument(
     "--record-obs-id",
-    action="store_true"
+    action="store_true",
     help="Include source name and observation ID info in the output coadd frame",
 )
 
