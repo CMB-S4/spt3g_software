@@ -921,6 +921,7 @@ def coadd_map_files(
     collate=False,
     weighted=True,
     record_obs_id=False,
+    return_outputs=False,
 ):
     """
     Coadd map files, optionally collating map Id's into separate frames.
@@ -951,12 +952,17 @@ def coadd_map_files(
         If True, include source name and observation ID info in the output coadd
         frame ``InputMapIds`` key, along with the map ID for each input frame.
         If False, only the map frame ID is included.
+    return_outputs : bool
+        If True, return output coadds from this function.  Assumed ``True`` if
+        ``output_file`` is not set.
 
     Returns
     -------
     maps : G3Frame or dict of G3Frames
         If ``collate`` is True, returns a dictionary of map frames
-        keyed by Id.  Otherwise, returns a single map frame.
+        keyed by Id.  Otherwise, returns a single map frame.  Only
+        returned if ``return_outputs`` is True or if ``output_file``
+        is not set.
     """
 
     pipe = core.G3Pipeline()
@@ -971,7 +977,7 @@ def coadd_map_files(
             weighted=weighted,
             drop_input_frames=True,
             record_obs_id=record_obs_id,
-            keep_outputs=True,
+            keep_outputs=return_outputs or not output_file,
         )
     pipe.Add(coadder)
 
@@ -982,9 +988,10 @@ def coadd_map_files(
         pipe.Add(core.G3Writer, filename=output_file)
     pipe.Run()
 
-    if collate:
-        return coadder.coadd_frames
-    return coadder.coadd_frame
+    if return_outputs or not output_file:
+        if collate:
+            return coadder.coadd_frames
+        return coadder.coadd_frame
 
 
 @core.indexmod
