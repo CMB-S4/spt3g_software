@@ -1,4 +1,7 @@
 #include "mapdata.h"
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 template <typename T>
 typename SparseMapData<T>::const_iterator
@@ -46,6 +49,9 @@ DenseMapData *
 SparseMapData<T>::to_dense() const
 {
 	DenseMapData *rv = new DenseMapData(xlen_, ylen_);
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
 	for (size_t ix = 0; ix < data_.size(); ix++) {
 		size_t x = offset_ + ix;
 		const data_element &column = data_[ix];
@@ -190,6 +196,9 @@ SparseMapData<double>::operator*=(const SparseMapData<double> &r)
 	assert(xlen_ == r.xlen_);
 	assert(ylen_ == r.ylen_);
 
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
 	for (size_t ix = 0; ix < data_.size(); ix++) {
 		size_t x = offset_ + ix;
 		data_element &column = data_[ix];
@@ -209,6 +218,9 @@ SparseMapData<double>::operator*=(const DenseMapData &r)
 	assert(xlen_ == r.xdim());
 	assert(ylen_ == r.ydim());
 
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
 	for (size_t ix = 0; ix < data_.size(); ix++) {
 		size_t x = offset_ + ix;
 		data_element &column = data_[ix];
@@ -225,6 +237,9 @@ template <>
 SparseMapData<double> &
 SparseMapData<double>::operator*=(double r)
 {
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
 	for (size_t ix = 0; ix < data_.size(); ix++) {
 		data_element &column = data_[ix];
 		for (size_t iy = 0; iy < column.second.size(); iy++) {
@@ -283,6 +298,9 @@ SparseMapData<double>::operator/=(double r)
 {
 	assert(r != 0);
 
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
 	for (size_t ix = 0; ix < data_.size(); ix++) {
 		data_element &column = data_[ix];
 		for (size_t iy = 0; iy < column.second.size(); iy++) {
@@ -299,6 +317,9 @@ DenseMapData::operator+=(const DenseMapData &r)
 	assert(xlen_ == r.xlen_);
 	assert(ylen_ == r.ylen_);
 
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {
 			(*this)(x, y) += r.at(x, y);
@@ -314,6 +335,9 @@ DenseMapData::operator+=(const SparseMapData<double> &r)
 	assert(xlen_ == r.xdim());
 	assert(ylen_ == r.ydim());
 
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {
 			(*this)(x, y) += r.at(x, y);
@@ -329,6 +353,9 @@ DenseMapData::operator+=(double r)
 	if (r == 0)
 		return *this;
 
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {
 			(*this)(x, y) += r;
@@ -344,6 +371,9 @@ DenseMapData::operator-=(const DenseMapData &r)
 	assert(xlen_ == r.xlen_);
 	assert(ylen_ == r.ylen_);
 
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {
 			(*this)(x, y) -= r.at(x, y);
@@ -359,6 +389,9 @@ DenseMapData::operator-=(const SparseMapData<double> &r)
 	assert(xlen_ == r.xdim());
 	assert(ylen_ == r.ydim());
 
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {
 			(*this)(x, y) -= r.at(x, y);
@@ -374,6 +407,9 @@ DenseMapData::operator-=(double r)
 	if (r == 0)
 		return *this;
 
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {
 			(*this)(x, y) -= r;
@@ -389,6 +425,9 @@ DenseMapData::operator*=(const DenseMapData &r)
 	assert(xlen_ == r.xlen_);
 	assert(ylen_ == r.ylen_);
 
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {
 			(*this)(x, y) *= r.at(x, y);
@@ -404,6 +443,9 @@ DenseMapData::operator*=(const SparseMapData<double> &r)
 	assert(xlen_ == r.xdim());
 	assert(ylen_ == r.ydim());
 
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {
 			(*this)(x, y) *= r.at(x, y);
@@ -416,6 +458,9 @@ DenseMapData::operator*=(const SparseMapData<double> &r)
 DenseMapData &
 DenseMapData::operator*=(double r)
 {
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {
 			(*this)(x, y) *= r;
@@ -431,6 +476,9 @@ DenseMapData::operator/=(const DenseMapData &r)
 	assert(xlen_ == r.xlen_);
 	assert(ylen_ == r.ylen_);
 
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {
 			(*this)(x, y) /= r.at(x, y);
@@ -446,6 +494,9 @@ DenseMapData::operator/=(const SparseMapData<double> &r)
 	assert(xlen_ == r.xdim());
 	assert(ylen_ == r.ydim());
 
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {
 			(*this)(x, y) /= r.at(x, y);
@@ -458,6 +509,9 @@ DenseMapData::operator/=(const SparseMapData<double> &r)
 DenseMapData &
 DenseMapData::operator/=(double r)
 {
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
 	for (size_t x = 0; x < xlen_; x++) {
 		for (size_t y = 0; y < ylen_; y++) {
 			(*this)(x, y) /= r;
