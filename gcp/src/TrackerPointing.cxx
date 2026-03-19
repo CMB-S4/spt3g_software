@@ -47,6 +47,25 @@ template <class A> void TrackerPointing::serialize(A &ar, unsigned v)
 	//Record telescope temperature and pressure for refraction
 	ar & make_nvp("telescope_temp", telescope_temp);
 	ar & make_nvp("telescope_pressure", telescope_pressure);
+
+	if (v > 2) {
+		ar & make_nvp("low_limit_az", low_limit_az);
+		ar & make_nvp("high_limit_az", high_limit_az);
+		ar & make_nvp("low_limit_el", low_limit_el);
+		ar & make_nvp("high_limit_el", high_limit_el);
+		ar & make_nvp("scan_off_x", scan_off_x);
+		ar & make_nvp("scan_off_y", scan_off_y);
+		ar & make_nvp("sky_off_x", sky_off_x);
+		ar & make_nvp("sky_off_y", sky_off_y);
+		ar & make_nvp("equat_off_x", equat_off_x);
+		ar & make_nvp("equat_off_y", equat_off_y);
+		ar & make_nvp("equat_geoc_ra", equat_geoc_ra);
+		ar & make_nvp("equat_geoc_dec", equat_geoc_dec);
+		ar & make_nvp("horiz_topo_az", horiz_topo_az);
+		ar & make_nvp("horiz_topo_el", horiz_topo_el);
+		ar & make_nvp("error_az", error_az);
+		ar & make_nvp("error_el", error_el);
+	}
 }
 
 TrackerPointing TrackerPointing::operator +(const TrackerPointing &a) const
@@ -79,6 +98,23 @@ TrackerPointing &TrackerPointing::operator +=(const TrackerPointing &a)
 	tracker_appendarr(telescope_temp);
 	tracker_appendarr(telescope_pressure);
 	tracker_appendarr(refraction);
+
+	tracker_appendarr(low_limit_az);
+	tracker_appendarr(high_limit_az);
+	tracker_appendarr(low_limit_el);
+	tracker_appendarr(high_limit_el);
+	tracker_appendarr(scan_off_x);
+	tracker_appendarr(scan_off_y);
+	tracker_appendarr(sky_off_x);
+	tracker_appendarr(sky_off_y);
+	tracker_appendarr(equat_off_x);
+	tracker_appendarr(equat_off_y);
+	tracker_appendarr(equat_geoc_ra);
+	tracker_appendarr(equat_geoc_dec);
+	tracker_appendarr(horiz_topo_az);
+	tracker_appendarr(horiz_topo_el);
+	tracker_appendarr(error_az);
+	tracker_appendarr(error_el);
 
 	#undef tracker_appendarr
 
@@ -120,6 +156,22 @@ PYBINDINGS("gcp", scope) {
 	    .def_readwrite("telescope_temp", &TrackerPointing::telescope_temp)
 	    .def_readwrite("telescope_pressure", &TrackerPointing::telescope_pressure)
 	    .def_readwrite("refraction", &TrackerPointing::refraction)
+	    .def_readwrite("low_limit_az", &TrackerPointing::low_limit_az)
+	    .def_readwrite("high_limit_az", &TrackerPointing::high_limit_az)
+	    .def_readwrite("low_limit_el", &TrackerPointing::low_limit_el)
+	    .def_readwrite("high_limit_el", &TrackerPointing::high_limit_el)
+	    .def_readwrite("scan_off_x", &TrackerPointing::scan_off_x)
+	    .def_readwrite("scan_off_y", &TrackerPointing::scan_off_y)
+	    .def_readwrite("sky_off_x", &TrackerPointing::sky_off_x)
+	    .def_readwrite("sky_off_y", &TrackerPointing::sky_off_y)
+	    .def_readwrite("equat_off_x", &TrackerPointing::equat_off_x)
+	    .def_readwrite("equat_off_y", &TrackerPointing::equat_off_y)
+	    .def_readwrite("equat_geoc_ra", &TrackerPointing::equat_geoc_ra)
+	    .def_readwrite("equat_geoc_dec", &TrackerPointing::equat_geoc_dec)
+	    .def_readwrite("horiz_topo_az", &TrackerPointing::horiz_topo_az)
+	    .def_readwrite("horiz_topo_el", &TrackerPointing::horiz_topo_el)
+	    .def_readwrite("error_az", &TrackerPointing::error_az)
+	    .def_readwrite("error_el", &TrackerPointing::error_el)
 	    .def(py::self + py::self)
 	    .def(py::self += py::self)
 	;

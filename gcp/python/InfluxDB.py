@@ -359,6 +359,10 @@ def WriteDB(fr, client, fields=None):
                     dat = fr[stat][attr]
                 except KeyError: # Field only exists in live data stream
                     continue
+            if stat == 'TrackerStatus' and attr == 'state':
+                dat = [d.value for d in dat]
+            if stat == 'ACUStatus' and attr == 'state':
+                dat = dat.value
             if 'Bench' in stat: # funny time field for bench positions
                 time = fr['BenchSampleTime']
             elif 'Mux' in stat:

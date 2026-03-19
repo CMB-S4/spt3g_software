@@ -241,9 +241,9 @@ PYBINDINGS("dfmux", scope)
 	  "DfMuxBuilder will filter for only boards with serial numbers "
 	  "in the list.")
 	    .def(py::init<int, int64_t>(), py::arg("boards"),
-	        py::arg("collation_tolerance")=int(10*G3Units::ms))
+	        py::arg("collation_tolerance")=int(10*G3Units::us))
 	    .def(py::init<std::vector<int>, int64_t>(), py::arg("boards"),
-	        py::arg("collation_tolerance")=int(10*G3Units::ms))
+	        py::arg("collation_tolerance")=int(10*G3Units::us))
 	;
 }
 

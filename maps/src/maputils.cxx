@@ -5,6 +5,9 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 #include <G3Logging.h>
 #include <G3Units.h>
 
@@ -37,6 +40,10 @@ void RemoveWeights(G3SkyMap &T, G3SkyMap &Q, G3SkyMap &U, const G3SkyMapWeights 
 		T.ConvertToDense();
 		Q.ConvertToDense();
 		U.ConvertToDense();
+
+		#ifdef _OPENMP
+		#pragma omp parallel for
+		#endif
 		for (size_t pix = 0; pix < T.size(); pix++) {
 			StokesVector v(T[pix], Q[pix], U[pix]);
 			v /= W.at(pix);
@@ -121,6 +128,9 @@ void ApplyWeights(G3SkyMap &T, G3SkyMap &Q, G3SkyMap &U, const G3SkyMapWeights &
 	g3_assert(!Q.weighted);
 	g3_assert(!U.weighted);
 
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
 	for (size_t pix = 0; pix < T.size(); pix++) {
 		if (T.at(pix) == 0 && Q.at(pix) == 0 && U.at(pix) == 0)
 			continue;
@@ -154,6 +164,9 @@ py::tuple GetRaDecMap(const G3SkyMap &m)
 	ra->ConvertToDense();
 	dec->ConvertToDense();
 
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
 	for (size_t i = 0; i < m.size(); i++) {
 		std::vector<double> radec = m.PixelToAngle(i);
 		(*ra)[i] = radec[0];
@@ -188,6 +201,9 @@ G3SkyMapMaskPtr GetRaDecMask(const G3SkyMap &m, double ra_left, double ra_right,
 	ra_left = wrap_ra(ra_left);
 	ra_right = wrap_ra(ra_right);
 
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
 	for (size_t i = 0; i < m.size(); i++) {
 		std::vector<double> radec = m.PixelToAngle(i);
 		double ra = wrap_ra(radec[0]);
@@ -214,6 +230,9 @@ G3SkyMapMaskPtr GetGalacticPlaneMask(const G3SkyMap &m, double lat)
 	if (m.coord_ref == MapCoordReference::Equatorial) {
 		auto q_rot = get_fk5_j2000_to_gal_quat();
 
+		#ifdef _OPENMP
+		#pragma omp parallel for
+		#endif
 		for (size_t i = 0; i < m.size(); i++) {
 			// compute just latitude part of each coordinate
 			auto q = q_rot * m.PixelToQuat(i);
@@ -223,6 +242,9 @@ G3SkyMapMaskPtr GetGalacticPlaneMask(const G3SkyMap &m, double lat)
 				(*mask)[i] = true;
 		}
 	} else if (m.coord_ref == MapCoordReference::Galactic) {
+		#ifdef _OPENMP
+		#pragma omp parallel for
+		#endif
 		for (size_t i = 0; i < m.size(); i++) {
 			auto q = m.PixelToQuat(i);
 			if (fabs(q.d()) <= slat)
@@ -352,10 +374,8 @@ void ReprojMap(const G3SkyMap &in_map, G3SkyMap &out_map, int rebin, bool interp
 	size_t stop = out_map.size();
 	if (rebin > 1) {
 		for (size_t i = 0; i < stop; i++) {
-			if (!!out_map_mask && !out_map_mask->at(i)) {
-				out_map[i] = 0;
+			if (!!out_map_mask && !out_map_mask->at(i))
 				continue;
-			}
 			double val = 0;
 			auto quats = out_map.GetRebinQuats(i, rebin);
 			if (rotate)
@@ -373,10 +393,8 @@ void ReprojMap(const G3SkyMap &in_map, G3SkyMap &out_map, int rebin, bool interp
 		}
 	} else {
 		for (size_t i = 0; i < stop; i++) {
-			if (!!out_map_mask && !out_map_mask->at(i)) {
-				out_map[i] = 0;
+			if (!!out_map_mask && !out_map_mask->at(i))
 				continue;
-			}
 			double val = 0;
 			auto q = out_map.PixelToQuat(i);
 			if (rotate)

@@ -37,11 +37,22 @@ public:
 	//Define stored refraction corrections
 	std::vector<double> refraction;
 
+	std::vector<double> low_limit_az, high_limit_az;
+	std::vector<double> low_limit_el, high_limit_el;
+
+	std::vector<double> scan_off_x, scan_off_y;
+	std::vector<double> sky_off_x, sky_off_y;
+	std::vector<double> equat_off_x, equat_off_y;
+
+	std::vector<double> equat_geoc_ra, equat_geoc_dec;
+	std::vector<double> horiz_topo_az, horiz_topo_el;
+	std::vector<double> error_az, error_el;
+
 	template <class A> void serialize(A &ar, unsigned v);
 };
 
 G3_POINTERS(TrackerPointing);
-G3_SERIALIZABLE(TrackerPointing, 2);
+G3_SERIALIZABLE(TrackerPointing, 3);
 
 #endif
 
