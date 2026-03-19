@@ -374,10 +374,8 @@ void ReprojMap(const G3SkyMap &in_map, G3SkyMap &out_map, int rebin, bool interp
 	size_t stop = out_map.size();
 	if (rebin > 1) {
 		for (size_t i = 0; i < stop; i++) {
-			if (!!out_map_mask && !out_map_mask->at(i)) {
-				out_map[i] = 0;
+			if (!!out_map_mask && !out_map_mask->at(i))
 				continue;
-			}
 			double val = 0;
 			auto quats = out_map.GetRebinQuats(i, rebin);
 			if (rotate)
@@ -395,10 +393,8 @@ void ReprojMap(const G3SkyMap &in_map, G3SkyMap &out_map, int rebin, bool interp
 		}
 	} else {
 		for (size_t i = 0; i < stop; i++) {
-			if (!!out_map_mask && !out_map_mask->at(i)) {
-				out_map[i] = 0;
+			if (!!out_map_mask && !out_map_mask->at(i))
 				continue;
-			}
 			double val = 0;
 			auto q = out_map.PixelToQuat(i);
 			if (rotate)
