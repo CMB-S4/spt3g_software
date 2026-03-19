@@ -169,6 +169,9 @@ py::tuple GetRaDecMap(const G3SkyMap &m)
 	ra->ConvertToDense();
 	dec->ConvertToDense();
 
+    #ifdef _OPENMP
+    #pragma omp parallel for schedule(static)
+    #endif
 	for (size_t i = 0; i < m.size(); i++) {
 		std::vector<double> radec = m.PixelToAngle(i);
 		(*ra)[i] = radec[0];
@@ -203,6 +206,9 @@ G3SkyMapMaskPtr GetRaDecMask(const G3SkyMap &m, double ra_left, double ra_right,
 	ra_left = wrap_ra(ra_left);
 	ra_right = wrap_ra(ra_right);
 
+    #ifdef _OPENMP
+    #pragma omp parallel for schedule(static)
+    #endif
 	for (size_t i = 0; i < m.size(); i++) {
 		std::vector<double> radec = m.PixelToAngle(i);
 		double ra = wrap_ra(radec[0]);
@@ -228,7 +234,9 @@ G3SkyMapMaskPtr GetGalacticPlaneMask(const G3SkyMap &m, double lat)
 
 	if (m.coord_ref == MapCoordReference::Equatorial) {
 		auto q_rot = get_fk5_j2000_to_gal_quat();
-
+        #ifdef _OPENMP
+        #pragma omp parallel for schedule(static)
+        #endif
 		for (size_t i = 0; i < m.size(); i++) {
 			// compute just latitude part of each coordinate
 			auto q = q_rot * m.PixelToQuat(i);
@@ -238,6 +246,9 @@ G3SkyMapMaskPtr GetGalacticPlaneMask(const G3SkyMap &m, double lat)
 				(*mask)[i] = true;
 		}
 	} else if (m.coord_ref == MapCoordReference::Galactic) {
+		#ifdef _OPENMP
+        #pragma omp parallel for schedule(static)
+        #endif
 		for (size_t i = 0; i < m.size(); i++) {
 			auto q = m.PixelToQuat(i);
 			if (fabs(q.d()) <= slat)
