@@ -1,7 +1,9 @@
 #include "streams.h"
+#include <limits.h>
 
 #ifdef ZLIB_FOUND
-GZipDecoder::GZipDecoder(const std::string& path, size_t size) : Decoder(path, size)
+GZipDecoder::GZipDecoder(const std::string& path, size_t size) :
+  Decoder(path, size > UINT_MAX ? UINT_MAX : size)
 {
 	stream_.zalloc = Z_NULL;
 	stream_.zfree = Z_NULL;
@@ -27,7 +29,8 @@ int GZipDecoder::decode()
 	return 0;
 }
 
-GZipEncoder::GZipEncoder(const std::string& path, size_t size) : Encoder(path, size)
+GZipEncoder::GZipEncoder(const std::string& path, size_t size) :
+  Encoder(path, size > UINT_MAX ? UINT_MAX : size)
 {
 	stream_.zalloc = Z_NULL;
 	stream_.zfree = Z_NULL;
@@ -55,7 +58,8 @@ int GZipEncoder::encode(bool flush)
 #endif
 
 #ifdef BZIP2_FOUND
-BZip2Decoder::BZip2Decoder(const std::string& path, size_t size) : Decoder(path, size)
+BZip2Decoder::BZip2Decoder(const std::string& path, size_t size) :
+  Decoder(path, size > UINT_MAX ? UINT_MAX : size)
 {
 	stream_.bzalloc = nullptr;
 	stream_.bzfree = nullptr;
@@ -81,7 +85,8 @@ int BZip2Decoder::decode()
 	return 0;
 }
 
-BZip2Encoder::BZip2Encoder(const std::string& path, size_t size) : Encoder(path, size)
+BZip2Encoder::BZip2Encoder(const std::string& path, size_t size) :
+  Encoder(path, size > UINT_MAX ? UINT_MAX : size)
 {
 	stream_.bzalloc = nullptr;
 	stream_.bzfree = nullptr;
