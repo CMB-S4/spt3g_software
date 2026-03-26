@@ -16,6 +16,8 @@
 #include <unistd.h>
 #include <fstream>
 #include <streambuf>
+#include <utility>
+#include <limits>
 
 class RemoteInputStreamBuffer : public std::streambuf {
 public:
@@ -172,7 +174,8 @@ template<typename T, typename C>
 class Decoder : public std::streambuf {
 public:
 	Decoder(const std::string& path, size_t size)
-	  : inbuf_(new char[size]), outbuf_(new char[size]), bsize_(size) {
+	  : bsize_(size > bmax_ ? bmax_ : size), inbuf_(new char[bsize_]),
+	    outbuf_(new char[bsize_]) {
 		file_.open(path, std::ios::binary);
 		if (!file_.is_open())
 			log_fatal("Could not open file %s", path.c_str());
@@ -237,9 +240,11 @@ protected:
 	virtual int decode() = 0;
 
 	std::ifstream file_;
+	const size_t bmax_ = std::min((size_t) std::numeric_limits<std::streamsize>::max(),
+	    (size_t) std::numeric_limits<decltype(std::declval<T>().avail_in)>::max());
+	size_t bsize_;
 	std::unique_ptr<char []> inbuf_;
 	std::unique_ptr<char []> outbuf_;
-	size_t bsize_;
 	T stream_;
 };
 
@@ -247,7 +252,8 @@ template <typename T, typename C>
 class Encoder : public std::streambuf {
 public:
 	Encoder(const std::string& path, size_t size)
-	  : inbuf_(new char[size]), outbuf_(new char[size]), bsize_(size), bytes_(0) {
+	  : bsize_(size > bmax_ ? bmax_ : size), inbuf_(new char[bsize_]),
+	    outbuf_(new char[bsize_]), bytes_(0) {
 		file_.open(path, std::ios::binary);
 		if (!file_.is_open())
 			log_fatal("Could not open file %s", path.c_str());
@@ -274,7 +280,7 @@ protected:
 	std::streamsize xsputn(const char* s, std::streamsize n) {
 		std::streamsize n_written = 0;
 		while (n_written < n) {
-			std::streamsize to_write = std::min(n - n_written, (std::streamsize) bsize_);
+			std::streamsize to_write = std::min(n - n_written, (std::streamsize) bmax_);
 			stream_.avail_in = to_write;
 			stream_.next_in = reinterpret_cast<C*>(const_cast<char*>(s + n_written));
 			if (encode_all())
@@ -319,9 +325,11 @@ protected:
 	}
 
 	std::ofstream file_;
+	const size_t bmax_ = std::min((size_t) std::numeric_limits<std::streamsize>::max(),
+	    (size_t) std::numeric_limits<decltype(std::declval<T>().avail_in)>::max());
+	size_t bsize_;
 	std::unique_ptr<char []> inbuf_;
 	std::unique_ptr<char []> outbuf_;
-	size_t bsize_;
 	size_t bytes_;
 	T stream_;
 };
