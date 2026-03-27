@@ -253,7 +253,7 @@ class Encoder : public std::streambuf {
 public:
 	Encoder(const std::string& path, size_t size)
 	  : bsize_(size > bmax_ ? bmax_ : size), inbuf_(new char[bsize_]),
-	    outbuf_(new char[bsize_]), bytes_(0) {
+	    outbuf_(new char[bsize_]), bytes_(0), flushed_(false) {
 		file_.open(path, std::ios::binary);
 		if (!file_.is_open())
 			log_fatal("Could not open file %s", path.c_str());
@@ -297,6 +297,9 @@ protected:
 	}
 
 	int encode_all(bool flush=false) {
+		if (flush && flushed_)
+			return 0;
+		flushed_ = flush;
 		do {
 			stream_.avail_out = bsize_;
 			stream_.next_out = reinterpret_cast<C*>(&outbuf_[0]);
@@ -332,6 +335,7 @@ protected:
 	std::unique_ptr<char []> outbuf_;
 	size_t bytes_;
 	T stream_;
+	bool flushed_;
 };
 
 #define CODEC(name, stype, ctype) \
