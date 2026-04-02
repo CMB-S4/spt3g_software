@@ -199,6 +199,15 @@ map_repr(C &cls, std::string const &name)
 	}, "Return the canonical string representation of this map.");
 }
 
+template <typename K>
+std::string
+key_repr(const K &k)
+{
+	std::ostringstream oss;
+	oss << k;
+	return oss.str();
+}
+
 // Map key/value/item iterator views for the given class
 template <typename M, typename C>
 void
@@ -287,7 +296,7 @@ register_map(py::module_ &scope, std::string name, Args &&...args)
 	cls.def("__getitem__", [](M &m, const K &k) -> V & {
 		auto it = m.find(k);
 		if (it == m.end())
-			throw py::key_error();
+			throw py::key_error(key_repr(k));
 		return it->second;
 	}, py::return_value_policy::reference_internal);
 
@@ -326,14 +335,14 @@ register_map(py::module_ &scope, std::string name, Args &&...args)
 	cls.def("__delitem__", [](M &m, const K &k) {
 		auto it = m.find(k);
 		if (it == m.end())
-			throw py::key_error();
+			throw py::key_error(key_repr(k));
 		m.erase(it);
 	});
 
 	cls.def("pop", [](M &m, const K &k) {
 		auto it = m.find(k);
 		if (it == m.end())
-			throw py::key_error();
+			throw py::key_error(key_repr(k));
 		auto v = it->second;
 		m.erase(it);
 		return v;

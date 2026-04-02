@@ -24,6 +24,9 @@ namespace G3Constants {
 
 	/* Elementary charge */
 	const double e = 1.602176634e-19 * G3Units::A * G3Units::s;
+
+	/* CMB blackbody temperature */
+	const double Tcmb = 2.7255 * G3Units::K;
 }
 
 #endif
