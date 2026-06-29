@@ -242,6 +242,61 @@ void G3Frame::save(A &ar, unsigned v) const
 	ar << make_nvp("crc", crc);
 }
 
+#ifdef SPT3G_ENABLE_JSON_OUTPUT
+template<>
+void G3Frame::save(cereal::JSONOutputArchive &ar, unsigned v) const
+{
+	using cereal::make_nvp;
+	uint32_t size(map_.size());
+
+	ar << make_nvp("size", size);
+	std::string typestr(1,(char) type);
+	ar << make_nvp("type", typestr);
+	for (auto i = map_.begin(); i != map_.end(); i++) {
+		//make sure it's deserialized so we don't just write a blob
+		blob_decode(i->second);
+		ar << make_nvp("name", i->first);
+		ar << make_nvp("val", i->second.frameobject);
+	}
+}
+
+template<>
+void G3Frame::load(cereal::JSONInputArchive &ar, unsigned v)
+{
+	using cereal::make_nvp;
+	G3_CHECK_VERSION(v);
+
+	int size;
+	std::string typestr;
+
+	ar >> make_nvp("size", size);
+	ar >> make_nvp("type", typestr);
+	type = FrameType((uint32_t)typestr[0]);
+
+	map_.clear();
+	for (int i = 0; i < size; i++) {
+		std::string name;
+		struct blob_container blob;
+		ar >> make_nvp("name", name);
+		ar >> make_nvp("val", blob.frameobject);
+		map_.insert(G3MapType::value_type(name, blob));
+	}
+}
+#endif
+
+std::string
+G3Frame::asJSON() const
+{
+	std::stringstream str;
+#ifdef SPT3G_ENABLE_JSON_OUTPUT
+	cereal::JSONOutputArchive ar(str);
+	ar << cereal::make_nvp("frame", *this);
+#else
+	str << "{error: \"spt3g_software compiled without JSON support\"}" << std::endl;
+#endif
+	return str.str();
+}
+
 template <typename T>
 void G3Frame::loads(T &is)
 {
@@ -373,7 +428,7 @@ template void G3Frame::saves(G3BufferOutputStream &) const;
 template void G3Frame::saves(std::ostream &) const;
 template void G3Frame::saves(std::ostringstream &) const;
 
-G3_SPLIT_SERIALIZABLE_CODE(G3Frame);
+G3_SPLIT_SERIALIZABLE_CODE_BINARY(G3Frame);
 
 G3FramePtr
 g3frame_char_constructor(std::string max_4_chars)
@@ -620,6 +675,7 @@ PYBINDINGS("core", scope) {
 	      "where those serialized copies already exist. Saves memory for "
 	      "frames about to be written at the expense of CPU time to "
 	      "re-decode them if they are accessed again later.")
+	    .def("as_json", &G3Frame::asJSON, "JSON representation of frame")
 	    .def(g3frameobject_picklesuite<G3Frame>())
 	    .def_property_readonly("hash", &g3frame_hash,
 	      "Return the serialized representation of the frame")
