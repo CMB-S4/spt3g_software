@@ -19,7 +19,7 @@ jobs:
           - os: ubuntu-24.04
             toolset: build
             docs: true
-          - os: macos-14
+          - os: macos-15-arm64
             toolset: build
             docs: false
     runs-on: ${{matrix.os}}
@@ -33,10 +33,8 @@ jobs:
         sudo apt-get --allow-releaseinfo-change update -y
         sudo add-apt-repository universe
         sudo apt update
-        sudo apt install gcc-14 g++-14 -y
-        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 14 --slave /usr/bin/g++ g++ /usr/bin/g++-14
-        sudo apt-get install libz-dev libbz2-dev liblzma-dev libflac-dev libnetcdf-dev libpython3-dev
-        sudo pip install numpy scipy matplotlib astropy healpy --break-system-packages
+        sudo apt-get install libz-dev libbz2-dev liblzma-dev libflac-dev libnetcdf-dev libpython3-dev -y
+        sudo pip install numpy scipy matplotlib astropy healpy --break-system-packages --ignore-installed
 
     - name: Setup python on macOS
       if: runner.environment == 'github-hosted' && runner.os == 'macOS'
