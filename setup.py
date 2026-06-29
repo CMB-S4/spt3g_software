@@ -154,7 +154,6 @@ for d in sorted(Path("./").glob("*/CMakeLists.txt")):
     lib = d.parent.name
     if (d.parent / "src").exists():
         clibs.append(f"spt3g._lib{lib}")
-        continue
     if (d.parent / "python").exists():
         pdirs[f"spt3g.{lib}"] = libdir = d.parent / "python"
     elif (d.parent / "__init__.py").exists():
