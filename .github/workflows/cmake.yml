@@ -16,10 +16,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-24.04
+          - os: ubuntu-latest
             toolset: build
             docs: true
-          - os: macos-15-arm64
+          - os: macos-latest
             toolset: build
             docs: false
     runs-on: ${{matrix.os}}
