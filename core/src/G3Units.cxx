@@ -92,6 +92,8 @@ PYBINDINGS("core", scope) {
 	/* Flux density */
 	G3_UNITS_DEF(jansky);
 	G3_UNITS_DEF(Jy);
+	G3_UNITS_DEF(microjansky);
+	G3_UNITS_DEF(uJy);
 	G3_UNITS_DEF(millijansky);
 	G3_UNITS_DEF(mJy);
 	G3_UNITS_DEF(megajansky);

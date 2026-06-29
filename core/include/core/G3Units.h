@@ -91,6 +91,8 @@ namespace G3Units {
 	/* Flux density: base unit is W / m^2 / Hz */
 	const double jansky = 1e-26 * W / m / m / Hz;
 	const double Jy = jansky;
+	const double microjansky = 1e-6 * jansky;
+	const double uJy = microjansky;
 	const double millijansky = 1e-3 * jansky;
 	const double mJy = millijansky;
 	const double megajansky = 1e6 * jansky;
