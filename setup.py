@@ -6,7 +6,7 @@ import sys
 import sysconfig
 from pathlib import Path
 
-from setuptools import Extension, setup
+from setuptools import Extension, setup, find_namespace_packages
 from setuptools.command.build_ext import build_ext
 from setuptools.command.install import install
 from setuptools.command.install_scripts import install_scripts
@@ -154,10 +154,16 @@ for d in sorted(Path("./").glob("*/CMakeLists.txt")):
     lib = d.parent.name
     if (d.parent / "src").exists():
         clibs.append(f"spt3g._lib{lib}")
+        continue
     if (d.parent / "python").exists():
-        pdirs[f"spt3g.{lib}"] = d.parent / "python"
+        pdirs[f"spt3g.{lib}"] = libdir = d.parent / "python"
     elif (d.parent / "__init__.py").exists():
-        pdirs[f"spt3g.{lib}"] = d.parent
+        pdirs[f"spt3g.{lib}"] = libdir = d.parent
+    else:
+        continue
+
+    for ns in find_namespace_packages(where=libdir):
+        pdirs[f"spt3g.{lib}.{ns}"] = libdir / ns.replace(".", "/")
 
 setup(
     ext_modules=[CMakeExtension(lib) for lib in clibs],
