@@ -588,25 +588,27 @@ FlatSkyMap::BoundingBox(ssize_t x_pad, ssize_t y_pad) const
 	};
 }
 
-FlatSkyMapPtr
-FlatSkyMap::Crop(double pad) const
+std::pair<FlatSkyMapPtr, std::vector<ssize_t>>
+FlatSkyMap::Crop(double pad, std::vector<ssize_t> bounds) const
 {
-	ssize_t x_pad = (ssize_t)round(pad / xres());
-	ssize_t y_pad = (ssize_t)round(pad / yres());
+	if (bounds.empty()) {
+		ssize_t x_pad = (ssize_t)round(pad / xres());
+		ssize_t y_pad = (ssize_t)round(pad / yres());
+		bounds = BoundingBox(x_pad, y_pad);
+	}
 
-	auto bbox = BoundingBox(x_pad, y_pad);
-	if (bbox.empty())
-		return std::dynamic_pointer_cast<FlatSkyMap>(Clone(false));
+	if (bounds.empty())
+		return {std::dynamic_pointer_cast<FlatSkyMap>(Clone(false)), {}};
 
-	ssize_t ymin = bbox[0], ymax = bbox[1];
-	ssize_t xmin = bbox[2], xmax = bbox[3];
+	ssize_t ymin = bounds[0], ymax = bounds[1];
+	ssize_t xmin = bounds[2], xmax = bounds[3];
 
 	size_t width  = xmax - xmin + 1;
 	size_t height = ymax - ymin + 1;
 	size_t x0 = xmin + width / 2;
 	size_t y0 = ymin + height / 2;
 
-	return ExtractPatch(x0, y0, width, height);
+	return {ExtractPatch(x0, y0, width, height), bounds};
 }
 
 void
@@ -1300,10 +1302,12 @@ PYBINDINGS("maps", scope)
 		"an empty list if the map has no nonzero pixels.")
 
 	    .def("crop", &FlatSkyMap::Crop,
-		py::arg("pad") = 0,
-		"Returns a new map cropped to the bounding box of the nonzero pixels. "
-		"Optional pad is a uniform padding in angular units (G3 units) added "
-		"around the bounding box, clamped to the map edges.")
+		py::arg("pad") = 0, py::arg("bounds") = std::vector<ssize_t>(),
+		"Returns (cropped_map, bounds) where bounds is [ymin, ymax, xmin, xmax]. "
+		"If bounds is not supplied, the bounding box is computed from the nonzero "
+		"pixels with pad (in G3 angular units) added around it. If bounds is "
+		"supplied, pad is ignored and that bounding box is used directly. "
+		"Returns an empty map and empty bounds if the map has no nonzero pixels.")
 
 	    .def("extract_patch", &FlatSkyMap::ExtractPatch,
 		py::arg("x0"), py::arg("y0"), py::arg("width"), py::arg("height"),
