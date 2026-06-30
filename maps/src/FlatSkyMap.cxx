@@ -581,10 +581,10 @@ FlatSkyMap::BoundingBox(ssize_t x_pad, ssize_t y_pad) const
 		return {};
 
 	return {
-		std::max(y_min - y_pad, (ssize_t)0),
-		std::min(y_max + y_pad, (ssize_t)ypix_ - 1),
-		std::max(x_min - x_pad, (ssize_t)0),
-		std::min(x_max + x_pad, (ssize_t)xpix_ - 1)
+		(ssize_t)std::max(y_min - y_pad, 0),
+		(ssize_t)std::min(y_max + y_pad, ypix_ - 1),
+		(ssize_t)std::max(x_min - x_pad, 0),
+		(ssize_t)std::min(x_max + x_pad, xpix_ - 1)
 	};
 }
 
