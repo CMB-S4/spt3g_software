@@ -949,7 +949,7 @@ def CropMaps(frame, pad=0):
 
     # Compute bounds once from reference map, then reuse for all others
     _, bounds = ref.crop(pad)
-    if not bounds:
+    if len(bounds) == 0:
         return frame
 
     for k in ["T", "Q", "U", "H"]:
