@@ -588,6 +588,27 @@ FlatSkyMap::BoundingBox(ssize_t x_pad, ssize_t y_pad) const
 	};
 }
 
+FlatSkyMapPtr
+FlatSkyMap::Crop(double pad) const
+{
+	ssize_t x_pad = (ssize_t)round(pad / xres());
+	ssize_t y_pad = (ssize_t)round(pad / yres());
+
+	auto bbox = BoundingBox(x_pad, y_pad);
+	if (bbox.empty())
+		return std::dynamic_pointer_cast<FlatSkyMap>(Clone(false));
+
+	ssize_t ymin = bbox[0], ymax = bbox[1];
+	ssize_t xmin = bbox[2], xmax = bbox[3];
+
+	size_t width  = xmax - xmin + 1;
+	size_t height = ymax - ymin + 1;
+	size_t x0 = xmin + width / 2;
+	size_t y0 = ymin + height / 2;
+
+	return ExtractPatch(x0, y0, width, height);
+}
+
 void
 FlatSkyMap::ApplyMask(const G3SkyMapMask &mask, bool inverse)
 {
@@ -1277,6 +1298,12 @@ PYBINDINGS("maps", scope)
 		"map[ymin:ymax+1, xmin:xmax+1]. Optional x_pad and y_pad add that many "
 		"pixels of padding in each dimension, clamped to the map edges. Returns "
 		"an empty list if the map has no nonzero pixels.")
+
+	    .def("crop", &FlatSkyMap::Crop,
+		py::arg("pad") = 0,
+		"Returns a new map cropped to the bounding box of the nonzero pixels. "
+		"Optional pad is a uniform padding in angular units (G3 units) added "
+		"around the bounding box, clamped to the map edges.")
 
 	    .def("extract_patch", &FlatSkyMap::ExtractPatch,
 		py::arg("x0"), py::arg("y0"), py::arg("width"), py::arg("height"),
