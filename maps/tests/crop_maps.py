@@ -28,24 +28,24 @@ def make_map():
 m = make_map()
 
 # No pad: should recover exactly the region we painted
-bbox = m.bounding_box()
+bbox = list(m.bounding_box())
 assert bbox == [Y1, Y2, X1, X2], \
     f"bounding_box() returned {bbox}, expected [{Y1}, {Y2}, {X1}, {X2}]"
 
 # Pad of 3 pixels in both dimensions
 PAD_PIX = 3
-bbox_pad = m.bounding_box(x_pad=PAD_PIX, y_pad=PAD_PIX)
+bbox_pad = list(m.bounding_box(x_pad=PAD_PIX, y_pad=PAD_PIX))
 assert bbox_pad == [Y1 - PAD_PIX, Y2 + PAD_PIX, X1 - PAD_PIX, X2 + PAD_PIX], \
     f"bounding_box(pad=3) returned {bbox_pad}"
 
 # Pad that would exceed the map edges should clamp to 0 / NX-1 / NY-1
-bbox_clamp = m.bounding_box(x_pad=NX, y_pad=NY)
+bbox_clamp = list(m.bounding_box(x_pad=NX, y_pad=NY))
 assert bbox_clamp == [0, NY - 1, 0, NX - 1], \
     f"bounding_box with large pad should clamp to map edges, got {bbox_clamp}"
 
 # Empty map should return empty bounds
 empty = FlatSkyMap(NX, NY, RES, proj=MapProjection.ProjZEA)
-assert empty.bounding_box() == [], "empty map should return empty bounding box"
+assert list(empty.bounding_box()) == [], "empty map should return empty bounding box"
 
 print("bounding_box tests passed")
 
@@ -58,6 +58,7 @@ m = make_map()
 
 # No pad: cropped map should be exactly (Y2-Y1+1) x (X2-X1+1)
 cropped, bounds = m.crop()
+bounds = list(bounds)
 assert bounds == [Y1, Y2, X1, X2], \
     f"crop() bounds {bounds} != [{Y1}, {Y2}, {X1}, {X2}]"
 
@@ -74,6 +75,7 @@ assert np.all(arr == 1.0), "all cropped pixels should be 1"
 PAD_PIX = 3
 PAD_ANG = PAD_PIX * RES
 cropped_pad, bounds_pad = m.crop(pad=PAD_ANG)
+bounds_pad = list(bounds_pad)
 assert bounds_pad == [Y1 - PAD_PIX, Y2 + PAD_PIX, X1 - PAD_PIX, X2 + PAD_PIX], \
     f"crop(pad) bounds {bounds_pad}"
 
@@ -84,13 +86,13 @@ assert cropped_pad.shape == (padded_height, padded_width), \
 
 # Crop with pre-supplied bounds should give same result as crop without
 cropped_b, bounds_b = m.crop(bounds=bounds)
-assert bounds_b == bounds, "supplied bounds should be returned unchanged"
+assert list(bounds_b) == bounds, "supplied bounds should be returned unchanged"
 assert np.array_equal(np.asarray(cropped_b), np.asarray(cropped)), \
     "crop(bounds=...) should match crop()"
 
 # Empty map crop should return empty bounds
 _, empty_bounds = empty.crop()
-assert empty_bounds == [], "crop of empty map should return empty bounds"
+assert list(empty_bounds) == [], "crop of empty map should return empty bounds"
 
 print("crop tests passed")
 
