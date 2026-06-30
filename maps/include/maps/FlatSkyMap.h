@@ -80,6 +80,7 @@ public:
 	bool IsCompatible(const G3SkyMap & other) const override;
 	void NonZeroPixels(std::vector<uint64_t> &indices,
 	    std::vector<double> &data) const;
+	std::vector<int> BoundingBox(double pad=0) const;
 	void ApplyMask(const G3SkyMapMask &mask, bool inverse=false) override;
 
 	void SetProj(MapProjection proj);

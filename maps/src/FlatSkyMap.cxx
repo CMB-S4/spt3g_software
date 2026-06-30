@@ -561,6 +561,36 @@ FlatSkyMap::NonZeroPixels(std::vector<uint64_t> &indices,
 	}
 }
 
+std::vector<int>
+FlatSkyMap::BoundingBox(double pad) const
+{
+	int x_min = xpix_, x_max = -1, y_min = ypix_, y_max = -1;
+
+	for (auto i : *this) {
+		if (i.second == 0)
+			continue;
+		int x = i.first % xpix_;
+		int y = i.first / xpix_;
+		if (x < x_min) x_min = x;
+		if (x > x_max) x_max = x;
+		if (y < y_min) y_min = y;
+		if (y > y_max) y_max = y;
+	}
+
+	if (x_max < 0)
+		return {};
+
+	int x_pad = (int)round(pad / xres());
+	int y_pad = (int)round(pad / yres());
+
+	return {
+		std::max(y_min - y_pad, 0),
+		std::min(y_max + y_pad, (int)ypix_ - 1),
+		std::max(x_min - x_pad, 0),
+		std::min(x_max + x_pad, (int)xpix_ - 1)
+	};
+}
+
 void
 FlatSkyMap::ApplyMask(const G3SkyMapMask &mask, bool inverse)
 {
@@ -1242,6 +1272,14 @@ PYBINDINGS("maps", scope)
 	    .def("nonzero_pixels", &flatskymap_nonzeropixels,
 		"Returns a list of the indices of the non-zero pixels in the "
 		"map and a list of the values of those non-zero pixels.")
+
+	    .def("bounding_box", &FlatSkyMap::BoundingBox,
+		py::arg("pad") = 0,
+		"Returns [ymin, ymax, xmin, xmax] pixel coordinates of the bounding box "
+		"of the nonzero pixels, in the order needed for map slicing: "
+		"map[ymin:ymax+1, xmin:xmax+1]. Optional pad adds that many angular units "
+		"(in G3 units) of padding, clamped to the map edges. Returns an empty list "
+		"if the map has no nonzero pixels.")
 
 	    .def("extract_patch", &FlatSkyMap::ExtractPatch,
 		py::arg("x0"), py::arg("y0"), py::arg("width"), py::arg("height"),
