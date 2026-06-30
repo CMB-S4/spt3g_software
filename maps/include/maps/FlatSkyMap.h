@@ -80,7 +80,7 @@ public:
 	bool IsCompatible(const G3SkyMap & other) const override;
 	void NonZeroPixels(std::vector<uint64_t> &indices,
 	    std::vector<double> &data) const;
-	std::vector<size_t> BoundingBox(ssize_t x_pad=0, ssize_t y_pad=0) const;
+	std::vector<ssize_t> BoundingBox(ssize_t x_pad=0, ssize_t y_pad=0) const;
 	std::pair<std::shared_ptr<FlatSkyMap>, std::vector<ssize_t>>
 	    Crop(double pad=0, std::vector<ssize_t> bounds={}) const;
 	void ApplyMask(const G3SkyMapMask &mask, bool inverse=false) override;
