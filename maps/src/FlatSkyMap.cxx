@@ -561,8 +561,8 @@ FlatSkyMap::NonZeroPixels(std::vector<uint64_t> &indices,
 	}
 }
 
-std::vector<ssize_t>
-FlatSkyMap::BoundingBox(ssize_t x_pad, ssize_t y_pad) const
+std::vector<size_t>
+FlatSkyMap::BoundingBox(size_t x_pad, size_t y_pad) const
 {
 	ssize_t x_min = xpix_, x_max = -1, y_min = ypix_, y_max = -1;
 
