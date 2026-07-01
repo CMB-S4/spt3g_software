@@ -912,65 +912,6 @@ class CoaddMaps(object):
             return False
 
 
-@core.indexmod
-def CropMaps(frame, pad=0):
-    """
-    Crop all maps in a frame to the bounding box of the observed region,
-    with optional padding.  Only operates on FlatSkyMap frames.
-
-    The bounding box is determined from the hit map (H) if present, otherwise
-    from the TT weight map, otherwise from the T map.  All other maps are
-    cropped to the same bounds so they remain mutually compatible.
-
-    Arguments
-    ---------
-    pad : float
-        Padding in G3 angular units to add around the observed bounding box.
-        Clamped to the map edges.
-    """
-    if isinstance(frame, core.G3Frame) and frame.type != core.G3FrameType.Map:
-        return
-
-    if "T" not in frame and "H" not in frame:
-        return
-
-    # Pick the reference map that most reliably reflects the observed footprint
-    if "H" in frame:
-        ref = frame["H"]
-    elif "Wunpol" in frame:
-        ref = frame["Wunpol"].TT
-    elif "Wpol" in frame:
-        ref = frame["Wpol"].TT
-    else:
-        ref = frame["T"]
-
-    if not isinstance(ref, maps.FlatSkyMap):
-        return
-
-    # Compute bounds once from reference map, then reuse for all others
-    _, bounds = ref.crop(pad)
-    if len(bounds) == 0:
-        return frame
-
-    for k in ["T", "Q", "U", "H"]:
-        if k not in frame:
-            continue
-        m = frame.pop(k)
-        frame[k], _ = m.crop(bounds=bounds)
-
-    for wkey in ["Wpol", "Wunpol"]:
-        if wkey not in frame:
-            continue
-        wmap = frame.pop(wkey)
-        wnew = maps.G3SkyMapWeights()
-        for k in wmap.keys():
-            cropped, _ = wmap[k].crop(bounds=bounds)
-            setattr(wnew, k, cropped)
-        frame[wkey] = wnew
-
-    return frame
-
-
 @core.usefulfunc
 def coadd_map_files(
     input_files,
@@ -1246,3 +1187,61 @@ class ReprojectMaps(object):
 
             if not self._mask.compatible(self.stub):
                 raise ValueError("Mask is not compatible with output map")
+
+
+@core.indexmod
+def CropMaps(frame, pad=0):
+    """
+    Crop all maps in a frame to the bounding box of the observed region,
+    with optional padding.  Only operates on FlatSkyMap frames.
+
+    The bounding box is determined from the hit map (H) if present, otherwise
+    from the TT weight map, otherwise from the T map.  All other maps are
+    cropped to the same bounds so they remain mutually compatible.
+
+    Arguments
+    ---------
+    pad : float
+        Padding in G3 angular units to add around the observed bounding box.
+        Clamped to the map edges.
+    """
+    if isinstance(frame, core.G3Frame) and frame.type != core.G3FrameType.Map:
+        return
+
+    if "T" not in frame and "H" not in frame:
+        return
+
+    # Pick the reference map that most reliably reflects the observed footprint
+    if "H" in frame:
+        ref = frame["H"]
+    elif "Wunpol" in frame:
+        ref = frame["Wunpol"].TT
+    elif "Wpol" in frame:
+        ref = frame["Wpol"].TT
+    else:
+        ref = frame["T"]
+
+    if not isinstance(ref, maps.FlatSkyMap):
+        return
+
+    # Compute bounds once from reference map, then reuse for all others
+    patch = ref.crop(pad, False)
+    if patch is None:
+        return
+
+    for k in ["T", "Q", "U", "H"]:
+        if k not in frame:
+            continue
+        m = frame.pop(k)
+        frame[k] = m.crop_to(patch)
+
+    for wkey in ["Wpol", "Wunpol"]:
+        if wkey not in frame:
+            continue
+        wmap = frame.pop(wkey)
+        wnew = maps.G3SkyMapWeights()
+        for k in wmap.keys():
+            setattr(wnew, k, wmap[k].crop_to(patch))
+        frame[wkey] = wnew
+
+    return frame
