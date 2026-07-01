@@ -80,6 +80,9 @@ public:
 	bool IsCompatible(const G3SkyMap & other) const override;
 	void NonZeroPixels(std::vector<uint64_t> &indices,
 	    std::vector<double> &data) const;
+	std::vector<size_t> BoundingBox(size_t x_pad=0, size_t y_pad=0) const;
+	std::shared_ptr<FlatSkyMap> Crop(double pad=0, bool copy_data=true) const;
+	std::shared_ptr<FlatSkyMap> CropTo(const FlatSkyMap &map) const;
 	void ApplyMask(const G3SkyMapMask &mask, bool inverse=false) override;
 
 	void SetProj(MapProjection proj);
