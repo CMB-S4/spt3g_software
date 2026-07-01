@@ -16,12 +16,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pyver: [cp39, cp310, cp311, cp312, cp313]
-        os: [macos-14, ubuntu-24.04, ubuntu-24.04-arm]
+        pyver: [cp39, cp310, cp311, cp312, cp313, cp314]
+        os: [macos-15, ubuntu-24.04, ubuntu-24.04-arm]
         include:
-          - os: macos-14
+          - os: macos-15
             build: macosx_arm64
-            target: 14.0
+            target: 15.0
           - os: ubuntu-24.04
             build: manylinux_x86_64
           - os: ubuntu-24.04-arm
