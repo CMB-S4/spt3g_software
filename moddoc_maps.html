@@ -569,6 +569,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.fitsio.SaveMapFrame"><code class="docutils literal notranslate"><span class="pre">SaveMapFrame()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.map_modules.ApplyWeights"><code class="docutils literal notranslate"><span class="pre">ApplyWeights()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.map_modules.CompactMaps"><code class="docutils literal notranslate"><span class="pre">CompactMaps()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.map_modules.CropMaps"><code class="docutils literal notranslate"><span class="pre">CropMaps()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.map_modules.FlattenPol"><code class="docutils literal notranslate"><span class="pre">FlattenPol()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.map_modules.InvertMaps"><code class="docutils literal notranslate"><span class="pre">InvertMaps()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.map_modules.MakeMapsPolarized"><code class="docutils literal notranslate"><span class="pre">MakeMapsPolarized()</span></code></a></li>
@@ -871,6 +872,47 @@
 
 <span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spt3g.maps.FlatSkyMap" title="spt3g.maps.FlatSkyMap"><span class="pre">FlatSkyMap</span></a></span></span><a class="headerlink" href="#spt3g.maps.FlatSkyMap.array_clone" title="Link to this definition"></a></dt>
 <dd><p>Return a map of the same type, populated with a copy of the input numpy array</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.maps.FlatSkyMap.bounding_box">
+<span class="sig-name descname"><span class="pre">bounding_box</span></span><span class="sig-paren">(</span>
+
+<dl>
+<dd><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.maps.FlatSkyMap" title="spt3g.maps.FlatSkyMap"><span class="pre">FlatSkyMap</span></a></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">y_pad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">x_pad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>,</dd>
+</dl>
+
+<span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#spt3g.maps.FlatSkyMap.bounding_box" title="Link to this definition"></a></dt>
+<dd><p>Returns [ymin, ymax, xmin, xmax] pixel coordinates of the bounding box of the nonzero pixels, in the order needed for map slicing: map[ymin:ymax+1, xmin:xmax+1]. Optional y_pad and x_pad add that many pixels of padding in each dimension, clamped to the map edges. Returns an empty list if the map has no nonzero pixels.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.maps.FlatSkyMap.crop">
+<span class="sig-name descname"><span class="pre">crop</span></span><span class="sig-paren">(</span>
+
+<dl>
+<dd><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.maps.FlatSkyMap" title="spt3g.maps.FlatSkyMap"><span class="pre">FlatSkyMap</span></a></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">pad</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">copy_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>,</dd>
+</dl>
+
+<span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spt3g.maps.FlatSkyMap" title="spt3g.maps.FlatSkyMap"><span class="pre">FlatSkyMap</span></a></span></span><a class="headerlink" href="#spt3g.maps.FlatSkyMap.crop" title="Link to this definition"></a></dt>
+<dd><p>Returns the map cropped to its bounding box with optional padding. The bounding box is computed from the nonzero pixels with pad (in G3Units of angle) added around it. Returns None if the map has no nonzero pixels.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.maps.FlatSkyMap.crop_to">
+<span class="sig-name descname"><span class="pre">crop_to</span></span><span class="sig-paren">(</span>
+
+<dl>
+<dd><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.maps.FlatSkyMap" title="spt3g.maps.FlatSkyMap"><span class="pre">FlatSkyMap</span></a></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">map</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.maps.FlatSkyMap" title="spt3g.maps.FlatSkyMap"><span class="pre">FlatSkyMap</span></a></span></em>,</dd>
+</dl>
+
+<span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spt3g.maps.FlatSkyMap" title="spt3g.maps.FlatSkyMap"><span class="pre">FlatSkyMap</span></a></span></span><a class="headerlink" href="#spt3g.maps.FlatSkyMap.crop_to" title="Link to this definition"></a></dt>
+<dd><p>Returns the map cropped to the dimensions of the input map object.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -2499,6 +2541,22 @@ Optionally remove NaN values as well.  Removing NaN values will reduce
 memory use, but will remove the distinction in unweighted (or
 weight-removed) maps between unobserved regions and regions with zero
 temperature.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spt3g.maps.map_modules.CropMaps">
+<span class="sig-prename descclassname"><span class="pre">spt3g.maps.map_modules.</span></span><span class="sig-name descname"><span class="pre">CropMaps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/maps/map_modules.html#CropMaps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.maps.map_modules.CropMaps" title="Link to this definition"></a></dt>
+<dd><p>Crop all maps in a frame to the bounding box of the observed region,
+with optional padding.  Only operates on FlatSkyMap frames.</p>
+<p>The bounding box is determined from the hit map (H) if present, otherwise
+from the TT weight map, otherwise from the T map.  All other maps are
+cropped to the same bounds so they remain mutually compatible.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pad</strong> (<em>float</em>) – Padding in G3 angular units to add around the observed bounding box.
+Clamped to the map edges.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
