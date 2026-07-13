@@ -561,6 +561,70 @@ FlatSkyMap::NonZeroPixels(std::vector<uint64_t> &indices,
 	}
 }
 
+std::vector<size_t>
+FlatSkyMap::BoundingBox(size_t x_pad, size_t y_pad) const
+{
+	ssize_t x_min = xpix_, x_max = -1, y_min = ypix_, y_max = -1;
+
+	for (auto i : *this) {
+		if (i.second == 0)
+			continue;
+		ssize_t x = i.first % xpix_;
+		ssize_t y = i.first / xpix_;
+		if (x < x_min) x_min = x;
+		if (x > x_max) x_max = x;
+		if (y < y_min) y_min = y;
+		if (y > y_max) y_max = y;
+	}
+
+	if (x_max < 0)
+		return {};
+
+	return {
+		(size_t) std::max(x_min - (ssize_t) x_pad, (ssize_t) 0),
+		(size_t) std::min(x_max + (ssize_t) x_pad, (ssize_t) (xpix_ - 1)),
+		(size_t) std::max(y_min - (ssize_t) y_pad, (ssize_t) 0),
+		(size_t) std::min(y_max + (ssize_t) y_pad, (ssize_t) (ypix_ - 1)),
+	};
+}
+
+FlatSkyMapPtr
+FlatSkyMap::Crop(double pad, bool copy_data) const
+{
+	size_t x_pad = (size_t)round(pad / xres());
+	size_t y_pad = (size_t)round(pad / yres());
+	auto bounds = BoundingBox(x_pad, y_pad);
+
+	if (bounds.empty())
+		return FlatSkyMapPtr();
+
+	size_t xmin = bounds[0], xmax = bounds[1];
+	size_t ymin = bounds[2], ymax = bounds[3];
+
+	if (xmin == 0 && xmax == xpix_ - 1 && ymin == 0 && ymax == ypix_ - 1)
+		return std::dynamic_pointer_cast<FlatSkyMap>(Clone(copy_data));
+
+	size_t width  = xmax - xmin + 1;
+	size_t height = ymax - ymin + 1;
+	size_t x0 = xmin + width / 2;
+	size_t y0 = ymin + height / 2;
+
+	if (!copy_data) {
+		auto clone = std::dynamic_pointer_cast<FlatSkyMap>(Clone(false));
+		return clone->ExtractPatch(x0, y0, width, height);
+	}
+
+	return ExtractPatch(x0, y0, width, height);
+}
+
+FlatSkyMapPtr
+FlatSkyMap::CropTo(const FlatSkyMap &map) const
+{
+	auto patch = std::dynamic_pointer_cast<FlatSkyMap>(map.Clone(false));
+	patch->InsertPatch(*this, true);
+	return patch;
+}
+
 void
 FlatSkyMap::ApplyMask(const G3SkyMapMask &mask, bool inverse)
 {
@@ -1058,6 +1122,20 @@ flatskymap_nonzeropixels(const FlatSkyMap &m)
 }
 
 static py::tuple
+flatskymap_bounds(const FlatSkyMap &m, size_t y_pad, size_t x_pad)
+{
+	auto bounds = m.BoundingBox(x_pad, y_pad);
+	std::vector<uint64_t> pybounds;
+	if (!bounds.empty()) {
+		pybounds.push_back(bounds[2]);
+		pybounds.push_back(bounds[3]);
+		pybounds.push_back(bounds[0]);
+		pybounds.push_back(bounds[1]);
+	}
+	return py::tuple(py::cast(pybounds));
+}
+
+static py::tuple
 flatskymap_angles_to_xy(const FlatSkyMap & skymap, const std::vector<double> &alpha,
     const std::vector<double> &delta)
 {
@@ -1254,6 +1332,22 @@ PYBINDINGS("maps", scope)
 	    .def("nonzero_pixels", &flatskymap_nonzeropixels,
 		"Returns a list of the indices of the non-zero pixels in the "
 		"map and a list of the values of those non-zero pixels.")
+
+	    .def("bounding_box", &flatskymap_bounds,
+		py::arg("y_pad") = 0, py::arg("x_pad") = 0,
+		"Returns [ymin, ymax, xmin, xmax] pixel coordinates of the bounding box "
+		"of the nonzero pixels, in the order needed for map slicing: "
+		"map[ymin:ymax+1, xmin:xmax+1]. Optional y_pad and x_pad add that many "
+		"pixels of padding in each dimension, clamped to the map edges. Returns "
+		"an empty list if the map has no nonzero pixels.")
+
+	    .def("crop", &FlatSkyMap::Crop, py::arg("pad") = 0, py::arg("copy_data") = true,
+		"Returns the map cropped to its bounding box with optional padding. "
+		"The bounding box is computed from the nonzero pixels with pad (in G3Units "
+		"of angle) added around it. Returns None if the map has no nonzero pixels.")
+
+	    .def("crop_to", &FlatSkyMap::CropTo, py::arg("map"),
+		"Returns the map cropped to the dimensions of the input map object.")
 
 	    .def("extract_patch", &FlatSkyMap::ExtractPatch,
 		py::arg("x0"), py::arg("y0"), py::arg("width"), py::arg("height"),
