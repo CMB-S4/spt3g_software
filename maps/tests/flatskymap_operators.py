@@ -187,30 +187,35 @@ for shape in [(20, 500), (21, 501)]:
         assert(np.allclose(np.asarray(m)[sy, sx], np.asarray(m2)[sy, sx]))
 
     # Slice operators: make sure they work like numpy slicing
-    assert((np.asarray(m[10:17,320:482]) == np.asarray(m.copy())[10:17,320:482]).all())
-    # But give the right type...
-    assert(m[10:17,320:482].__class__ == m.__class__)
+    for y, x, yshift in [
+        (slice(10, 17, 1), slice(320, 482, 1), slice(11, 18, 1)),
+        (10, slice(320, 482, 1), 11),
+        (slice(10, 17, 1), 320, slice(11, 18, 1)),
+    ]:
+        assert((np.asarray(m[y,x]).ravel() == np.asarray(m.copy())[y,x].ravel()).all())
+        # But give the right type...
+        assert(m[y,x].__class__ == m.__class__)
 
-    # Try setting things
-    old_chunk = m[10:17,320:482]
-    m[10:17,320:482] = old_chunk*2
-    assert((np.asarray(m.copy())[10:17,320:482] == np.asarray(old_chunk)*2).all())
-    m[10:17,320:482] = np.asarray(old_chunk*3)
-    assert((np.asarray(m.copy())[10:17,320:482] == np.asarray(old_chunk)*3).all())
-    m[10:17,320:482] = old_chunk
-    mcopy = m.copy()
-    m[:] = np.asarray(m * 2)
-    assert((np.asarray(m) == np.asarray(mcopy * 2)).all())
-    m[:] = np.asarray(mcopy)
+        # Try setting things
+        old_chunk = m[y,x]
+        m[y,x] = old_chunk*2
+        assert((np.asarray(m.copy())[y,x].ravel() == np.asarray(old_chunk).ravel()*2).all())
+        m[y,x] = np.asarray(old_chunk*3)
+        assert((np.asarray(m.copy())[y,x].ravel() == np.asarray(old_chunk).ravel()*3).all())
+        m[y,x] = old_chunk
+        mcopy = m.copy()
+        m[:] = np.asarray(m * 2)
+        assert((np.asarray(m) == np.asarray(mcopy * 2)).all())
+        m[:] = np.asarray(mcopy)
 
-    # Make sure inserting it in the wrong place (where coordinates don't make sense, but numpy
-    # would allow it) fails
-    failed = False
-    try:
-        m[11:18,320:482] = old_chunk
-    except ValueError:
-        failed = True
-    assert(failed)
+        # Make sure inserting it in the wrong place (where coordinates don't make sense, but numpy
+        # would allow it) fails
+        failed = False
+        try:
+            m[yshift,x] = old_chunk
+        except ValueError:
+            failed = True
+        assert(failed)
 
     # negative slice indices
     assert((np.asarray(m.copy())[-10:-3, -180:-18] == np.asarray(m.copy())[-10:-3, -180:-18]).all())

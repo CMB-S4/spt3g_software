@@ -957,10 +957,21 @@ static py::object
 flatskymap_getitem_2d(const FlatSkyMap &skymap, const py::tuple &coords)
 {
 
-	if (py::isinstance<py::slice>(coords[0])) {
+	if (py::isinstance<py::slice>(coords[0]) || py::isinstance<py::slice>(coords[1])) {
 		// Slicing time!
-		py::slice yslice = coords[0].cast<py::slice>();
-		py::slice xslice = coords[1].cast<py::slice>();
+		py::slice yslice, xslice;
+		if (py::isinstance<py::slice>(coords[0]))
+			yslice = coords[0].cast<py::slice>();
+		else {
+			ssize_t y0 = coords[0].cast<ssize_t>();
+			yslice = py::slice(y0, y0 + 1, 1);
+		}
+		if (py::isinstance<py::slice>(coords[1]))
+			xslice = coords[1].cast<py::slice>();
+		else {
+			ssize_t x0 = coords[1].cast<ssize_t>();
+			xslice = py::slice(x0, x0 + 1, 1);
+		}
 		return py::cast(flatskymap_getslice_2d(skymap, yslice, xslice));
 	}
 
@@ -1006,12 +1017,13 @@ flatskymap_setitem_2d_patch(FlatSkyMap &skymap, const py::tuple &coords,
 	// This has the nice side-effect that all the irritating parsing of
 	// slice dimensions is done only once, in getitem().
 
-	py::slice yslice = coords[0].cast<py::slice>();
-	py::slice xslice = coords[1].cast<py::slice>();
+	if (!(py::isinstance<py::slice>(coords[0]) || py::isinstance<py::slice>(coords[1])))
+		throw py::value_error("At least one coordinate must be a slice into the map object");
+
 	FlatSkyMapPtr shallowclone =
 	    std::dynamic_pointer_cast<FlatSkyMap>(skymap.Clone(false));
-	FlatSkyMapPtr dummy_subpatch =
-	    flatskymap_getslice_2d(*shallowclone, yslice, xslice);
+	py::object dummy_object = flatskymap_getitem_2d(*shallowclone, coords);
+	FlatSkyMapPtr dummy_subpatch = dummy_object.cast<FlatSkyMapPtr>();
 
 	if (py::isinstance<FlatSkyMap>(val)) {
 		const FlatSkyMap &patch = val.cast<const FlatSkyMap &>();
