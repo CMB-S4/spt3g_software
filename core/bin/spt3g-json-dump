@@ -1,0 +1,22 @@
+#!/usr/bin/env python3
+
+import argparse as ap
+from spt3g import core
+import textwrap
+
+parser = ap.ArgumentParser(description="Dumps the given G3 file to standard output as JSON")
+parser.add_argument("filename", help="G3 filename")
+args = parser.parse_args()
+
+print("{")
+print(f'    "filename": "{args.filename}"')
+print('    "frames": [')
+
+first = True
+for frame in core.G3File(args.filename):
+    if not first:
+        print(",")
+    print(textwrap.indent(frame.as_json(), " " * 8), end="")
+    first = False
+
+print("\n    ]\n}")
