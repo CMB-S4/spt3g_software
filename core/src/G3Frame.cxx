@@ -289,8 +289,10 @@ G3Frame::asJSON() const
 {
 	std::stringstream str;
 #ifdef SPT3G_ENABLE_JSON_OUTPUT
-	cereal::JSONOutputArchive ar(str);
-	ar << cereal::make_nvp("frame", *this);
+	{
+		cereal::JSONOutputArchive ar(str);
+		ar << cereal::make_nvp("frame", *this);
+	}
 #else
 	str << "{error: \"spt3g_software compiled without JSON support\"}" << std::endl;
 #endif
