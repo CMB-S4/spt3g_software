@@ -9,7 +9,7 @@ parser.add_argument("filename", help="G3 filename")
 args = parser.parse_args()
 
 print("{")
-print(f'    "filename": "{args.filename}"')
+print(f'    "filename": "{args.filename}",')
 print('    "frames": [')
 
 first = True
