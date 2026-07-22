@@ -285,7 +285,7 @@ void G3Frame::load(cereal::JSONInputArchive &ar, unsigned v)
 #endif
 
 std::string
-G3Frame::asJSON() const
+G3Frame::ToJSON() const
 {
 	std::stringstream str;
 #ifdef SPT3G_ENABLE_JSON_OUTPUT
@@ -677,7 +677,7 @@ PYBINDINGS("core", scope) {
 	      "where those serialized copies already exist. Saves memory for "
 	      "frames about to be written at the expense of CPU time to "
 	      "re-decode them if they are accessed again later.")
-	    .def("as_json", &G3Frame::asJSON, "JSON representation of frame")
+	    .def("to_json", &G3Frame::ToJSON, "JSON string representation of frame")
 	    .def(g3frameobject_picklesuite<G3Frame>())
 	    .def_property_readonly("hash", &g3frame_hash,
 	      "Return the serialized representation of the frame")

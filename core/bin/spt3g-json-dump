@@ -16,7 +16,7 @@ first = True
 for frame in core.G3File(args.filename):
     if not first:
         print(",")
-    print(textwrap.indent(frame.as_json(), " " * 8), end="")
+    print(textwrap.indent(frame.to_json(), " " * 8), end="")
     first = False
 
 print("\n    ]\n}")
