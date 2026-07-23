@@ -437,7 +437,7 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 	}
 }
 
-#ifdef SPT3G_ENABLE_JSON_OUTPUT
+#ifdef G3_WITH_JSON
 template <> void G3Timestream::save(cereal::JSONOutputArchive &ar, unsigned v) const
 {
 	ar & cereal::make_nvp("G3FrameObject",

@@ -26,12 +26,12 @@ add_spt3g_library(core SHARED
 )
 
 
-# json output option (adds to compile time and binary size)
-if(NOT DEFINED ENABLE_JSON_OUTPUT)
-	set(ENABLE_JSON_OUTPUT FALSE CACHE BOOL "Enable JSON output of frames")
+# json serialization option (adds to compile time and binary size)
+if(NOT DEFINED WITH_JSON)
+	set(WITH_JSON FALSE CACHE BOOL "Enable JSON serialization of frames")
 endif()
-if (ENABLE_JSON_OUTPUT)
-	target_compile_definitions(core PUBLIC -DSPT3G_ENABLE_JSON_OUTPUT)
+if (WITH_JSON)
+	target_compile_definitions(core PUBLIC -DG3_WITH_JSON)
 endif()
 
 
@@ -102,7 +102,7 @@ endif()
 link_python_dir()
 
 add_spt3g_program(bin/spt3g-dump)
-if (ENABLE_JSON_OUTPUT)
+if (WITH_JSON)
 	add_spt3g_program(bin/spt3g-json-dump)
 endif()
 add_spt3g_program(bin/spt3g-verify)
@@ -159,7 +159,7 @@ add_spt3g_test(cached_frame)
 add_spt3g_test(pipelineinfo)
 add_spt3g_test(quaternions)
 add_spt3g_test(timesample)
-if (ENABLE_JSON_OUTPUT)
+if (WITH_JSON)
 	add_spt3g_test(jsonio)
 endif()
 

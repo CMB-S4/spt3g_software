@@ -242,7 +242,7 @@ void G3Frame::save(A &ar, unsigned v) const
 	ar << make_nvp("crc", crc);
 }
 
-#ifdef SPT3G_ENABLE_JSON_OUTPUT
+#ifdef G3_WITH_JSON
 template<>
 void G3Frame::save(cereal::JSONOutputArchive &ar, unsigned v) const
 {
@@ -288,7 +288,7 @@ std::string
 G3Frame::ToJSON() const
 {
 	std::stringstream str;
-#ifdef SPT3G_ENABLE_JSON_OUTPUT
+#ifdef G3_WITH_JSON
 	{
 		cereal::JSONOutputArchive ar(str);
 		ar << cereal::make_nvp("frame", *this);
@@ -302,7 +302,7 @@ G3Frame::ToJSON() const
 G3FramePtr
 G3Frame::FromJSON(const std::string &str)
 {
-#ifdef SPT3G_ENABLE_JSON_OUTPUT
+#ifdef G3_WITH_JSON
 	G3Frame fr;
 
 	{

@@ -4,7 +4,7 @@
 #include <sstream>
 
 #include <cereal/archives/portable_binary.hpp>
-#ifdef SPT3G_ENABLE_JSON_OUTPUT
+#ifdef G3_WITH_JSON
 #include <cereal/archives/json.hpp>
 #endif
 
@@ -25,7 +25,7 @@ template void x::serialize(cereal::PortableBinaryInputArchive &, unsigned); \
 template void x::save(cereal::PortableBinaryOutputArchive &, unsigned) const; \
 template void x::load(cereal::PortableBinaryInputArchive &, unsigned); \
 
-#ifdef SPT3G_ENABLE_JSON_OUTPUT
+#ifdef G3_WITH_JSON
 
 #define G3_SERIALIZABLE_CODE_JSON(x) \
 template void x::serialize(cereal::JSONOutputArchive &, unsigned); \
