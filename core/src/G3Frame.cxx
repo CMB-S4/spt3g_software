@@ -299,6 +299,22 @@ G3Frame::ToJSON() const
 	return str.str();
 }
 
+G3FramePtr
+G3Frame::FromJSON(const std::string &str)
+{
+#ifdef SPT3G_ENABLE_JSON_OUTPUT
+	{
+		std::stringstream is(str);
+		cereal::JSONInputArchive ar(is);
+		ar >> cereal::make_nvp("frame", *this);
+	}
+
+	return std::make_shared<G3Frame>(*this);
+#else
+	throw std::runtime_error("spt3g_software compiled without JSON support");
+#endif
+}
+
 template <typename T>
 void G3Frame::loads(T &is)
 {
@@ -678,6 +694,8 @@ PYBINDINGS("core", scope) {
 	      "frames about to be written at the expense of CPU time to "
 	      "re-decode them if they are accessed again later.")
 	    .def("to_json", &G3Frame::ToJSON, "JSON string representation of frame")
+	    .def("from_json", &G3Frame::FromJSON, py::arg("json"),
+	      "Populate frame from JSON string representation")
 	    .def(g3frameobject_picklesuite<G3Frame>())
 	    .def_property_readonly("hash", &g3frame_hash,
 	      "Return the serialized representation of the frame")

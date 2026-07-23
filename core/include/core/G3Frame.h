@@ -103,6 +103,7 @@ public:
 	// JSON string representation of a frame (if JSON output is enabled,
 	// otherwise a valid JSON string saying that JSON output isn't enabled)
 	std::string ToJSON() const;
+	std::shared_ptr<G3Frame> FromJSON(const std::string &str);
 
 	// Routines for handling the stored serialized copies of data.
 	// These are all const because they only manipulate caches and

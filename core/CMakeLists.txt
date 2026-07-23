@@ -159,6 +159,9 @@ add_spt3g_test(cached_frame)
 add_spt3g_test(pipelineinfo)
 add_spt3g_test(quaternions)
 add_spt3g_test(timesample)
+if (ENABLE_JSON_OUTPUT)
+	add_spt3g_test(jsonio)
+endif()
 
 add_spt3g_test_program(test
                        SOURCE_FILES
