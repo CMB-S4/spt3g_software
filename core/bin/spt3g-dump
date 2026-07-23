@@ -13,10 +13,28 @@ P.add_argument(
     help="Python modules(s) to load, e.g. 'spt3g.calibration'. Include the "
     "appropriate spt3g sub-modules(s) to parse objects of 'unknown polymorphic type'."
 )
+P.add_argument("--json", action="store_true", help="Output frame contents as JSON")
 args = P.parse_args()
 
 for lib in args.modules:
     __import__(lib)
 
-for f in core.G3File(args.filename):
-    print(f)
+if args.json:
+    import textwrap
+
+    print("{")
+    print(f'    "filename": "{args.filename}",')
+    print('    "frames": [')
+
+    first = True
+    for frame in core.G3File(args.filename):
+        if not first:
+            print(",")
+        print(textwrap.indent(frame.to_json(), " " * 8), end="")
+        first = False
+
+    print("\n    ]\n}")
+
+else:
+    for f in core.G3File(args.filename):
+        print(f)
