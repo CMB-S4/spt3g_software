@@ -25,16 +25,6 @@ add_spt3g_library(core SHARED
 	src/G3Units.cxx ${CORE_EXTRA_SRCS} src/pybindings.cxx
 )
 
-
-# json serialization option (adds to compile time and binary size)
-if(NOT DEFINED WITH_JSON)
-	set(WITH_JSON FALSE CACHE BOOL "Enable JSON serialization of frames")
-endif()
-if (WITH_JSON)
-	target_compile_definitions(core PUBLIC -DG3_WITH_JSON)
-endif()
-
-
 # Link dependencies
 target_link_libraries(core PUBLIC spt3g)
 
@@ -156,9 +146,7 @@ add_spt3g_test(cached_frame)
 add_spt3g_test(pipelineinfo)
 add_spt3g_test(quaternions)
 add_spt3g_test(timesample)
-if (WITH_JSON)
-	add_spt3g_test(jsonio)
-endif()
+add_spt3g_test(jsonio)
 
 add_spt3g_test_program(test
                        SOURCE_FILES

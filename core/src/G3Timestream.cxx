@@ -437,7 +437,6 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 	}
 }
 
-#ifdef G3_WITH_JSON
 template <> void G3Timestream::save(cereal::JSONOutputArchive &ar, unsigned v) const
 {
 	ar & cereal::make_nvp("G3FrameObject",
@@ -540,7 +539,6 @@ template <> void G3Timestream::load(cereal::JSONInputArchive &ar, unsigned v)
 		log_fatal("Unknown timestream datatype %d", data_type_);
 	}
 }
-#endif
 
 G3Timestream::G3Timestream(const G3Timestream &r) :
     units(r.units), start(r.start), stop(r.stop), use_flac_(r.use_flac_),

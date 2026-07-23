@@ -242,7 +242,6 @@ void G3Frame::save(A &ar, unsigned v) const
 	ar << make_nvp("crc", crc);
 }
 
-#ifdef G3_WITH_JSON
 template<>
 void G3Frame::save(cereal::JSONOutputArchive &ar, unsigned v) const
 {
@@ -282,27 +281,21 @@ void G3Frame::load(cereal::JSONInputArchive &ar, unsigned v)
 		map_.insert(G3MapType::value_type(name, blob));
 	}
 }
-#endif
 
 std::string
 G3Frame::ToJSON() const
 {
 	std::stringstream str;
-#ifdef G3_WITH_JSON
 	{
 		cereal::JSONOutputArchive ar(str);
 		ar << cereal::make_nvp("frame", *this);
 	}
-#else
-	str << "{error: \"spt3g_software compiled without JSON support\"}" << std::endl;
-#endif
 	return str.str();
 }
 
 G3FramePtr
 G3Frame::FromJSON(const std::string &str)
 {
-#ifdef G3_WITH_JSON
 	G3Frame fr;
 
 	{
@@ -312,9 +305,6 @@ G3Frame::FromJSON(const std::string &str)
 	}
 
 	return std::make_shared<G3Frame>(fr);
-#else
-	log_fatal("spt3g_software compiled without JSON support");
-#endif
 }
 
 template <typename T>

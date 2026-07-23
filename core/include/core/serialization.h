@@ -4,9 +4,7 @@
 #include <sstream>
 
 #include <cereal/archives/portable_binary.hpp>
-#ifdef G3_WITH_JSON
 #include <cereal/archives/json.hpp>
-#endif
 
 #include <cereal/types/polymorphic.hpp>
 #include <cereal/types/string.hpp>
@@ -25,8 +23,6 @@ template void x::serialize(cereal::PortableBinaryInputArchive &, unsigned); \
 template void x::save(cereal::PortableBinaryOutputArchive &, unsigned) const; \
 template void x::load(cereal::PortableBinaryInputArchive &, unsigned); \
 
-#ifdef G3_WITH_JSON
-
 #define G3_SERIALIZABLE_CODE_JSON(x) \
 template void x::serialize(cereal::JSONOutputArchive &, unsigned); \
 template void x::serialize(cereal::JSONInputArchive &, unsigned); \
@@ -42,13 +38,6 @@ G3_SERIALIZABLE_CODE_JSON(x) \
 #define G3_SPLIT_SERIALIZABLE_CODE(x) \
 G3_SPLIT_SERIALIZABLE_CODE_BINARY(x) \
 G3_SPLIT_SERIALIZABLE_CODE_JSON(x) \
-
-#else
-
-#define G3_SERIALIZABLE_CODE(x) G3_SERIALIZABLE_CODE_BINARY(x)
-#define G3_SPLIT_SERIALIZABLE_CODE(x) G3_SPLIT_SERIALIZABLE_CODE_BINARY(x)
-
-#endif
 
 // Work around crummy slow implementation of xsgetn() in libc++
 class G3InputStreamBuffer : public std::basic_streambuf<char>
