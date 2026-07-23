@@ -7,6 +7,7 @@
 #ifdef G3_HAS_FLAC
 #include <FLAC/stream_encoder.h>
 #include <cmath>
+#include <type_traits>
 
 template<typename A>
 struct FlacDecoderCallbackArgs {
@@ -105,9 +106,18 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 	ar & cereal::make_nvp("units", units);
 	ar & cereal::make_nvp("start", start);
 	ar & cereal::make_nvp("stop", stop);
-	ar & cereal::make_nvp("flac", use_flac_);
 
-	if (use_flac_) {
+	uint8_t use_flac = use_flac_;
+	if constexpr (std::is_same_v<A, cereal::JSONOutputArchive>) {
+		if (use_flac_) {
+			log_warn("FLAC encoding not supported for JSON serialization");
+			use_flac = 0;
+		}
+	}
+
+	ar & cereal::make_nvp("flac", use_flac);
+
+	if (use_flac) {
 #ifdef G3_HAS_FLAC
 		std::vector<int32_t> inbuf;
 		std::vector<uint8_t> outbuf;
@@ -305,7 +315,10 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 	}
 	ar & cereal::make_nvp("flac", use_flac_);
 
-	if (use_flac_) {
+	if constexpr (std::is_same_v<A, cereal::JSONInputArchive>) {
+		if (use_flac_)
+			log_fatal("FLAC encoding not supported for JSON serialization");
+	} else if (use_flac_) {
 #ifdef G3_HAS_FLAC
 		FlacDecoderCallbackArgs<A> callback;
 		uint8_t nanflag;
@@ -387,7 +400,9 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 #else
 		log_fatal("Trying to read FLAC-compressed timestreams but built without FLAC support");
 #endif
-	} else {
+	}
+
+	if (!use_flac_) {
 		if (buffer_)
 			delete buffer_;
 		buffer_ = NULL;
@@ -434,109 +449,6 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 		default:
 			log_fatal("Unknown timestream datatype %d", data_type_);
 		}
-	}
-}
-
-template <> void G3Timestream::save(cereal::JSONOutputArchive &ar, unsigned v) const
-{
-	ar & cereal::make_nvp("G3FrameObject",
-	    cereal::base_class<G3FrameObject>(this));
-	ar & cereal::make_nvp("units", units);
-	ar & cereal::make_nvp("start", start);
-	ar & cereal::make_nvp("stop", stop);
-
-	ar & cereal::make_nvp("data_type", data_type_);
-	if (buffer_) {
-		ar & cereal::make_nvp("data", *buffer_);
-	} else {
-		switch (data_type_) {
-		case TS_DOUBLE: {
-			std::vector<double> data((double *)data_,
-			    (double *)data_ + len_);
-			ar & cereal::make_nvp("data", data);
-			break;
-		}
-		case TS_FLOAT: {
-			std::vector<float> data((float *)data_,
-			    (float *)data_ + len_);
-			ar & cereal::make_nvp("data", data);
-			break;
-		}
-		case TS_INT32: {
-			std::vector<int32_t> data((int32_t *)data_,
-			    (int32_t *)data_ + len_);
-			ar & cereal::make_nvp("data", data);
-			break;
-		}
-		case TS_INT64: {
-			std::vector<int64_t> data((int64_t *)data_,
-			    (int64_t *)data_ + len_);
-			ar & cereal::make_nvp("data", data);
-			break;
-		}
-		default:
-			log_fatal("Unknown timestream datatype %d", data_type_);
-		}
-	}
-}
-
-template <> void G3Timestream::load(cereal::JSONInputArchive &ar, unsigned v)
-{
-	G3_CHECK_VERSION(v);
-
-	ar & cereal::make_nvp("G3FrameObject",
-	    cereal::base_class<G3FrameObject>(this));
-	ar & cereal::make_nvp("units", units);
-	if (v >= 2) {
-		ar & cereal::make_nvp("start", start);
-		ar & cereal::make_nvp("stop", stop);
-	}
-
-	if (buffer_)
-		delete buffer_;
-	buffer_ = NULL;
-	root_data_ref_.reset();
-
-	if (v >= 3)
-		ar & cereal::make_nvp("data_type", data_type_);
-	else
-		data_type_ = TS_DOUBLE;
-	switch (data_type_) {
-	case TS_DOUBLE:
-		buffer_ = new std::vector<double>();
-		ar & cereal::make_nvp("data", *buffer_);
-		len_ = buffer_->size();
-		data_ = &(*buffer_)[0];
-		break;
-	case TS_FLOAT: {
-		std::vector<float> *data = new std::vector<float>();
-		ar & cereal::make_nvp("data", *data);
-		root_data_ref_ = std::shared_ptr<std::vector<float> >(
-		    data);
-		len_ = data->size();
-		data_ = &(*data)[0];
-		break;
-		}
-	case TS_INT32: {
-		std::vector<int32_t> *data = new std::vector<int32_t>();
-		ar & cereal::make_nvp("data", *data);
-		root_data_ref_ = std::shared_ptr<
-		    std::vector<int32_t> >(data);
-		len_ = data->size();
-		data_ = &(*data)[0];
-		break;
-	}
-	case TS_INT64: {
-		std::vector<int64_t> *data = new std::vector<int64_t>();
-		ar & cereal::make_nvp("data", *data);
-		root_data_ref_ = std::shared_ptr<
-		    std::vector<int64_t> >(data);
-		len_ = data->size();
-		data_ = &(*data)[0];
-		break;
-	}
-	default:
-		log_fatal("Unknown timestream datatype %d", data_type_);
 	}
 }
 
@@ -1093,7 +1005,7 @@ void G3TimestreamMap::Compactify()
 	}
 }
 
-G3_SPLIT_SERIALIZABLE_CODE_BINARY(G3Timestream);
+G3_SPLIT_SERIALIZABLE_CODE(G3Timestream);
 G3_SERIALIZABLE_CODE(G3TimestreamMap);
 
 static void
