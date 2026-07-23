@@ -300,7 +300,7 @@ void G3Frame::load(cereal::JSONInputArchive &ar, unsigned v)
 
 	ar >> make_nvp("size", size);
 	ar >> make_nvp("type", typestr);
-	type = FrameType(frametype_from_string(typestr));
+	type = frametype_from_string(typestr);
 
 	map_.clear();
 	for (int i = 0; i < size; i++) {
