@@ -313,7 +313,7 @@ G3Frame::FromJSON(const std::string &str)
 
 	return std::make_shared<G3Frame>(fr);
 #else
-	throw std::runtime_error("spt3g_software compiled without JSON support");
+	log_fatal("spt3g_software compiled without JSON support");
 #endif
 }
 

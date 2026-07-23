@@ -54,6 +54,33 @@ G3SkyMap::serialize(A &ar, unsigned v)
 
 }
 
+#ifdef G3_WITH_JSON
+#define SERIALIZE_JSON \
+	ar & cereal::make_nvp("coord_ref", coord_ref); \
+	ar & cereal::make_nvp("units", units); \
+	ar & cereal::make_nvp("overflow", overflow); \
+	ar & cereal::make_nvp("pol_type", pol_type); \
+	ar & cereal::make_nvp("weighted", weighted); \
+	ar & cereal::make_nvp("pol_conv", pol_conv)
+
+template <> void G3SkyMap::serialize(cereal::JSONInputArchive &ar, unsigned v)
+{
+	G3_CHECK_VERSION(v);
+
+	if (v < 3)
+		log_fatal("Trying to read older class version (%d) than supported", v);
+
+	SERIALIZE_JSON;
+};
+
+template <> void G3SkyMap::serialize(cereal::JSONOutputArchive &ar, unsigned v)
+{
+	SERIALIZE_JSON;
+};
+
+#undef SERIALIZE_JSON
+#endif
+
 template <class A> void
 G3SkyMapWeights::serialize(A &ar, unsigned v)
 {
@@ -86,7 +113,7 @@ G3SkyMapWeights::serialize(A &ar, unsigned v)
 	}
 }
 
-G3_SERIALIZABLE_CODE(G3SkyMap);
+G3_SERIALIZABLE_CODE_BINARY(G3SkyMap);
 G3_SERIALIZABLE_CODE(G3SkyMapWeights);
 
 

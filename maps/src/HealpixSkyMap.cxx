@@ -137,6 +137,54 @@ HealpixSkyMap::load(A &ar, unsigned v)
 		info_.initialize(nside, nested, shifted);
 }
 
+#ifdef G3_WITH_JSON
+template <> void
+HealpixSkyMap::load(cereal::JSONInputArchive &ar, unsigned v)
+{
+	using namespace cereal;
+	int store;
+
+	G3_CHECK_VERSION(v);
+
+	if (v < 3)
+		log_fatal("Trying to read older class version (%d) than supported", v);
+
+	ar & make_nvp("G3FrameObject", base_class<G3FrameObject>(this));
+	ar & make_nvp("G3SkyMap", base_class<G3SkyMap>(this));
+	ar & make_nvp("info", info_);
+
+	if (dense_) {
+		delete dense_;
+		dense_ = NULL;
+	}
+	if (ring_sparse_) {
+		delete ring_sparse_;
+		ring_sparse_ = NULL;
+	}
+	if (indexed_sparse_) {
+		delete indexed_sparse_;
+		indexed_sparse_ = NULL;
+	}
+
+	ar & make_nvp("store", store);
+	switch (store) {
+	case 3:
+		dense_ = new std::vector<double>();
+		ar & make_nvp("data", *dense_);
+		break;
+	case 2:
+		ring_sparse_ = new SparseMapData<double>(1,1);
+		ar & make_nvp("data", *ring_sparse_);
+		break;
+	case 1:
+		indexed_sparse_ = new std::unordered_map<uint64_t, double>;
+		ar & make_nvp("data", *indexed_sparse_);
+		break;
+	}
+}
+template void HealpixSkyMap::save(cereal::JSONOutputArchive &ar, unsigned v) const;
+#endif
+
 HealpixSkyMap::const_iterator::const_iterator(const HealpixSkyMap &map, bool begin) :
     map_(map)
 {
@@ -1122,7 +1170,7 @@ HealpixSkyMap_setslice_1d(HealpixSkyMap &skymap, const py::slice &coords, const 
 }
 
 
-G3_SPLIT_SERIALIZABLE_CODE(HealpixSkyMap);
+G3_SPLIT_SERIALIZABLE_CODE_BINARY(HealpixSkyMap);
 
 PYBINDINGS("maps", scope)
 {
