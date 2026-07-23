@@ -244,8 +244,12 @@ frametype_to_string(G3Frame::FrameType type)
 	std::ostringstream os;
 
 	uint32_t code = (uint32_t) type;
-	for (int j = 0; j < 32; j += 8)
-		os << (char) (code >> j);
+	for (int j = 0; j < 32; j += 8) {
+		uint8_t c = code >> j;
+		if (!c)
+			break;
+		os << (char) c;
+	}
 
 	return os.str();
 }
