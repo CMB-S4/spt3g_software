@@ -220,6 +220,36 @@ void G3Frame::saves(T &os) const
 	ar << make_nvp("frame", *this);
 }
 
+static G3Frame::FrameType
+frametype_from_string(const std::string &max_4_chars)
+{
+	if (max_4_chars.size() > 4) {
+		log_fatal("Ad-hoc frame type must be 4 "
+		    "or fewer characters.");
+	}
+
+	// Right-justify the character string in the constant in native
+	// endianness, such that code = max_4_chars[0] for a 1-character
+	// code.
+	uint32_t code = 0;
+	for (int i = max_4_chars.size()-1, j = 0; i >= 0; i--, j += 8)
+		code |= (uint32_t(max_4_chars[i]) << j);
+
+	return G3Frame::FrameType(code);
+}
+
+static std::string
+frametype_to_string(G3Frame::FrameType type)
+{
+	std::ostringstream os;
+
+	uint32_t code = (uint32_t) type;
+	for (int j = 0; j < 32; j += 8)
+		os << (char) (code >> j);
+
+	return os.str();
+}
+
 template <class A>
 void G3Frame::save(A &ar, unsigned v) const
 {
@@ -249,7 +279,7 @@ void G3Frame::save(cereal::JSONOutputArchive &ar, unsigned v) const
 	uint32_t size(map_.size());
 
 	ar << make_nvp("size", size);
-	std::string typestr(1,(char) type);
+	std::string typestr = frametype_to_string(type);
 	ar << make_nvp("type", typestr);
 	for (auto i = map_.begin(); i != map_.end(); i++) {
 		//make sure it's deserialized so we don't just write a blob
@@ -270,7 +300,7 @@ void G3Frame::load(cereal::JSONInputArchive &ar, unsigned v)
 
 	ar >> make_nvp("size", size);
 	ar >> make_nvp("type", typestr);
-	type = FrameType((uint32_t)typestr[0]);
+	type = FrameType(frametype_from_string(typestr));
 
 	map_.clear();
 	for (int i = 0; i < size; i++) {
@@ -443,19 +473,8 @@ G3_SPLIT_SERIALIZABLE_CODE_BINARY(G3Frame);
 G3FramePtr
 g3frame_char_constructor(std::string max_4_chars)
 {
-	if (max_4_chars.size() > 4) {
-		throw py::value_error("Ad-hoc frame type must be 4 "
-		    "or fewer characters.");
-	}
 
-	// Right-justify the character string in the constant in native
-	// endianness, such that code = max_4_chars[0] for a 1-character
-	// code.
-	uint32_t code = 0;
-	for (int i = max_4_chars.size()-1, j = 0; i >= 0; i--, j += 8)
-		code |= (uint32_t(max_4_chars[i]) << j);
-
-	return G3FramePtr(new G3Frame(G3Frame::FrameType(code)));
+	return G3FramePtr(new G3Frame(frametype_from_string(max_4_chars)));
 }
 
 static void g3frame_python_put(G3Frame &f, const std::string &name, const py::object &obj)
