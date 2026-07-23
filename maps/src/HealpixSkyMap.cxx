@@ -97,6 +97,8 @@ HealpixSkyMap::load(A &ar, unsigned v)
 		ar & make_nvp("nested", nested);
 	} else {
 		ar & make_nvp("info", info_);
+		nside = info_.nside();
+		nested = info_.nested();
 	}
 
 	if (dense_) {
@@ -126,12 +128,18 @@ HealpixSkyMap::load(A &ar, unsigned v)
 		indexed_sparse_ = new std::unordered_map<uint64_t, double>;
 		ar & make_nvp("data", *indexed_sparse_);
 		break;
+	case 0:
+		break;
+	default:
+		log_fatal("Unknown storage type (%d)", store);
 	}
 
 	if (v == 2)
 		ar & make_nvp("shift_ra", shifted);
 	else if (v == 1)
 		shifted = false;
+	else
+		shifted = info_.shifted();
 
 	if (v < 3)
 		info_.initialize(nside, nested, shifted);

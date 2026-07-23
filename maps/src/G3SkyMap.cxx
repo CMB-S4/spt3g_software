@@ -25,7 +25,7 @@ G3SkyMap::serialize(A &ar, unsigned v)
 		std::vector<double> dat;
 		ar & cereal::make_nvp("data", dat);
 		
-		uint32_t xpix, ypix;
+		uint32_t xpix = 0, ypix = 0;
 		ar & cereal::make_nvp("xpix", xpix);
 		ar & cereal::make_nvp("ypix", ypix);
 		std::vector<size_t> dims;
