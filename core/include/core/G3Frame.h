@@ -100,8 +100,7 @@ public:
 	template <class A> void save(A &ar, unsigned) const;
 	template <class A> void load(A &ar, unsigned);
 
-	// JSON string representation of a frame (if JSON output is enabled,
-	// otherwise a valid JSON string saying that JSON output isn't enabled)
+	// Serialize (or deserialize) from a JSON string representation
 	std::string ToJSON() const;
 	static std::shared_ptr<G3Frame> FromJSON(const std::string &str);
 
