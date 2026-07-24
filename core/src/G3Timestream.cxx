@@ -113,10 +113,7 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 
 	uint8_t use_flac = use_flac_;
 	if constexpr (std::is_same_v<A, cereal::JSONOutputArchive>) {
-		if (use_flac) {
-			log_warn("FLAC encoding not supported for JSON serialization; disabling.");
-			use_flac = 0;
-		}
+		use_flac = 0;
 	} else if (use_flac) {
 #ifdef G3_HAS_FLAC
 		std::vector<int32_t> inbuf;
