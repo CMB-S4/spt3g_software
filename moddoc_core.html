@@ -2710,7 +2710,7 @@ interpolated to be made continuous</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="spt3g.core.G3Timestream.SetFLACCompression">
 <span class="sig-name descname"><span class="pre">SetFLACCompression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.core.G3Timestream" title="spt3g.core.G3Timestream"><span class="pre">G3Timestream</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spt3g.core.G3TimestreamUnits.None" title="spt3g.core.G3TimestreamUnits.None"><span class="pre">None</span></a></span></span><a class="headerlink" href="#spt3g.core.G3Timestream.SetFLACCompression" title="Link to this definition"></a></dt>
-<dd><p>Pass True to turn on FLAC compression when serialized. FLAC compression only works if the timestream is in units of counts.</p>
+<dd><p>Pass True to turn on FLAC compression when serialized. FLAC compression only works if the timestream is in units of counts. FLAC compression is ignored when outputing to JSON.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -7464,6 +7464,12 @@ G3Reader at a TCP URL.</p>
 </ol>
 <p>Create a frame with an ad-hoc (non-standard) type code. Use sparingly and with care.</p>
 <dl class="py method">
+<dt class="sig sig-object py" id="spt3g.core.G3Frame.from_json">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spt3g.core.G3Frame" title="spt3g.core.G3Frame"><span class="pre">G3Frame</span></a></span></span><a class="headerlink" href="#spt3g.core.G3Frame.from_json" title="Link to this definition"></a></dt>
+<dd><p>Create frame from JSON string representation</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="spt3g.core.G3Frame.drop_blobs">
 <span class="sig-name descname"><span class="pre">drop_blobs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.core.G3Frame" title="spt3g.core.G3Frame"><span class="pre">G3Frame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">decode_all</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#spt3g.core.G3TimestreamUnits.None" title="spt3g.core.G3TimestreamUnits.None"><span class="pre">None</span></a></span></span><a class="headerlink" href="#spt3g.core.G3Frame.drop_blobs" title="Link to this definition"></a></dt>
 <dd><p>Drop all serialized data either for already-decoded objects (default) or all objects after decoding them (if decode_all is true). Saves memory at the expense of CPU time if reserialized.</p>
@@ -7506,6 +7512,12 @@ G3Reader at a TCP URL.</p>
 <li><p>pop(self: spt3g.core.G3Frame, arg0: str) -&gt; object</p></li>
 <li><p>pop(self: spt3g.core.G3Frame, arg0: str, arg1: object) -&gt; object</p></li>
 </ol>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="spt3g.core.G3Frame.to_json">
+<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#spt3g.core.G3Frame" title="spt3g.core.G3Frame"><span class="pre">G3Frame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#spt3g.core.G3Frame.to_json" title="Link to this definition"></a></dt>
+<dd><p>JSON string representation of frame</p>
 </dd></dl>
 
 <dl class="py method">
