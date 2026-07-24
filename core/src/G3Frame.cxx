@@ -708,7 +708,7 @@ PYBINDINGS("core", scope) {
 	      "re-decode them if they are accessed again later.")
 	    .def("to_json", &G3Frame::ToJSON, "JSON string representation of frame")
 	    .def_static("from_json", &G3Frame::FromJSON, py::arg("json"),
-	      "Populate frame from JSON string representation")
+	      "Create frame from JSON string representation")
 	    .def(g3frameobject_picklesuite<G3Frame>())
 	    .def_property_readonly("hash", &g3frame_hash,
 	      "Return the serialized representation of the frame")
