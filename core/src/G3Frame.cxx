@@ -254,8 +254,8 @@ frametype_to_string(G3Frame::FrameType type)
 	return os.str();
 }
 
-template <class A>
-void G3Frame::save(A &ar, unsigned v) const
+template <>
+void G3Frame::save(cereal::PortableBinaryOutputArchive &ar, unsigned v) const
 {
 	using cereal::make_nvp;
 	uint32_t crc(0), size(map_.size());
@@ -291,6 +291,50 @@ void G3Frame::save(cereal::JSONOutputArchive &ar, unsigned v) const
 		ar << make_nvp("name", i->first);
 		ar << make_nvp("val", i->second.frameobject);
 	}
+}
+
+template <typename T>
+void G3Frame::loads(T &is)
+{
+	using cereal::make_nvp;
+
+	cereal::PortableBinaryInputArchive ar(is);
+	ar >> make_nvp("frame", *this);
+}
+
+template <>
+void G3Frame::load(cereal::PortableBinaryInputArchive &ar, unsigned v)
+{
+	using cereal::make_nvp;
+	G3_CHECK_VERSION(v);
+
+	int size;
+	uint32_t xtype, testcrc;
+	uint32_t crc(0);
+
+	ar >> make_nvp("size", size);
+	ar >> make_nvp("type", xtype);
+	type = FrameType(xtype);
+
+	map_.clear();
+	for (int i = 0; i < size; i++) {
+		struct blob_container blob;
+		std::string name;
+		G3FrameObjectPtr ptr;
+
+		ar >> make_nvp("name", name);
+		crc = crc32c(crc, (const uint8_t *)name.c_str(), name.size());
+		blob.blob = std::make_shared<std::vector<char> >();
+		ar >> make_nvp("blob", *blob.blob);
+		crc = crc32c(crc, (const uint8_t *)blob.blob->data(),
+		    blob.blob->size());
+		map_.insert(G3MapType::value_type(name, blob));
+	}
+	ar >> make_nvp("crc", testcrc);
+
+	if (testcrc != crc)
+		log_fatal("Recorded CRC (%#x) does not match calculated (%#x)",
+		    testcrc, crc);
 }
 
 template<>
@@ -339,50 +383,6 @@ G3Frame::FromJSON(const std::string &str)
 	}
 
 	return std::make_shared<G3Frame>(fr);
-}
-
-template <typename T>
-void G3Frame::loads(T &is)
-{
-	using cereal::make_nvp;
-
-	cereal::PortableBinaryInputArchive ar(is);
-	ar >> make_nvp("frame", *this);
-}
-
-template <class A>
-void G3Frame::load(A &ar, unsigned v)
-{
-	using cereal::make_nvp;
-	G3_CHECK_VERSION(v);
-
-	int size;
-	uint32_t xtype, testcrc;
-	uint32_t crc(0);
-
-	ar >> make_nvp("size", size);
-	ar >> make_nvp("type", xtype);
-	type = FrameType(xtype);
-
-	map_.clear();
-	for (int i = 0; i < size; i++) {
-		struct blob_container blob;
-		std::string name;
-		G3FrameObjectPtr ptr;
-
-		ar >> make_nvp("name", name);
-		crc = crc32c(crc, (const uint8_t *)name.c_str(), name.size());
-		blob.blob = std::make_shared<std::vector<char> >();
-		ar >> make_nvp("blob", *blob.blob);
-		crc = crc32c(crc, (const uint8_t *)blob.blob->data(),
-		    blob.blob->size());
-		map_.insert(G3MapType::value_type(name, blob));
-	}
-	ar >> make_nvp("crc", testcrc);
-
-	if (testcrc != crc)
-		log_fatal("Recorded CRC (%#x) does not match calculated (%#x)",
-		    testcrc, crc);
 }
 
 void G3Frame::DropBlobs(bool decode_all) const
@@ -471,8 +471,6 @@ template void G3Frame::loads(std::istringstream &);
 template void G3Frame::saves(G3BufferOutputStream &) const;
 template void G3Frame::saves(std::ostream &) const;
 template void G3Frame::saves(std::ostringstream &) const;
-
-G3_SPLIT_SERIALIZABLE_CODE_BINARY(G3Frame);
 
 G3FramePtr
 g3frame_char_constructor(std::string max_4_chars)

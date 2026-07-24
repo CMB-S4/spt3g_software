@@ -15,29 +15,17 @@
 #include <pybindings.h>
 #include <G3Logging.h>
 
-#define G3_SERIALIZABLE_CODE_BINARY(x) \
+#define G3_SERIALIZABLE_CODE(x) \
 template void x::serialize(cereal::PortableBinaryOutputArchive &, unsigned); \
 template void x::serialize(cereal::PortableBinaryInputArchive &, unsigned); \
-
-#define G3_SPLIT_SERIALIZABLE_CODE_BINARY(x) \
-template void x::save(cereal::PortableBinaryOutputArchive &, unsigned) const; \
-template void x::load(cereal::PortableBinaryInputArchive &, unsigned); \
-
-#define G3_SERIALIZABLE_CODE_JSON(x) \
 template void x::serialize(cereal::JSONOutputArchive &, unsigned); \
 template void x::serialize(cereal::JSONInputArchive &, unsigned); \
 
-#define G3_SPLIT_SERIALIZABLE_CODE_JSON(x) \
+#define G3_SPLIT_SERIALIZABLE_CODE(x) \
+template void x::save(cereal::PortableBinaryOutputArchive &, unsigned) const; \
+template void x::load(cereal::PortableBinaryInputArchive &, unsigned); \
 template void x::save(cereal::JSONOutputArchive &, unsigned) const; \
 template void x::load(cereal::JSONInputArchive &, unsigned); \
-
-#define G3_SERIALIZABLE_CODE(x) \
-G3_SERIALIZABLE_CODE_BINARY(x) \
-G3_SERIALIZABLE_CODE_JSON(x) \
-
-#define G3_SPLIT_SERIALIZABLE_CODE(x) \
-G3_SPLIT_SERIALIZABLE_CODE_BINARY(x) \
-G3_SPLIT_SERIALIZABLE_CODE_JSON(x) \
 
 // Work around crummy slow implementation of xsgetn() in libc++
 class G3InputStreamBuffer : public std::basic_streambuf<char>
