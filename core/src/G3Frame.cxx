@@ -293,6 +293,17 @@ void G3Frame::save(cereal::JSONOutputArchive &ar, unsigned v) const
 	}
 }
 
+std::string
+G3Frame::ToJSON() const
+{
+	std::stringstream str;
+	{
+		cereal::JSONOutputArchive ar(str);
+		ar << cereal::make_nvp("frame", *this);
+	}
+	return str.str();
+}
+
 template <typename T>
 void G3Frame::loads(T &is)
 {
@@ -358,17 +369,6 @@ void G3Frame::load(cereal::JSONInputArchive &ar, unsigned v)
 		ar >> make_nvp("val", blob.frameobject);
 		map_.insert(G3MapType::value_type(name, blob));
 	}
-}
-
-std::string
-G3Frame::ToJSON() const
-{
-	std::stringstream str;
-	{
-		cereal::JSONOutputArchive ar(str);
-		ar << cereal::make_nvp("frame", *this);
-	}
-	return str.str();
 }
 
 G3FramePtr
