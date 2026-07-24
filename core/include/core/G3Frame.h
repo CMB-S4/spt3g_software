@@ -100,6 +100,10 @@ public:
 	template <class A> void save(A &ar, unsigned) const;
 	template <class A> void load(A &ar, unsigned);
 
+	// Serialize (or deserialize) from a JSON string representation
+	std::string ToJSON() const;
+	static std::shared_ptr<G3Frame> FromJSON(const std::string &str);
+
 	// Routines for handling the stored serialized copies of data.
 	// These are all const because they only manipulate caches and
 	// so change only performance rather than data contents of the frame.

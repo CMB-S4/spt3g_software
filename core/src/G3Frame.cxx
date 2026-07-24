@@ -220,8 +220,42 @@ void G3Frame::saves(T &os) const
 	ar << make_nvp("frame", *this);
 }
 
-template <class A>
-void G3Frame::save(A &ar, unsigned v) const
+static G3Frame::FrameType
+frametype_from_string(const std::string &max_4_chars)
+{
+	if (max_4_chars.size() > 4) {
+		log_fatal("Ad-hoc frame type must be 4 "
+		    "or fewer characters.");
+	}
+
+	// Right-justify the character string in the constant in native
+	// endianness, such that code = max_4_chars[0] for a 1-character
+	// code.
+	uint32_t code = 0;
+	for (int i = max_4_chars.size()-1, j = 0; i >= 0; i--, j += 8)
+		code |= (uint32_t(max_4_chars[i]) << j);
+
+	return G3Frame::FrameType(code);
+}
+
+static std::string
+frametype_to_string(G3Frame::FrameType type)
+{
+	std::ostringstream os;
+
+	uint32_t code = (uint32_t) type;
+	for (int j = 0; j < 32; j += 8) {
+		uint8_t c = code >> j;
+		if (!c)
+			break;
+		os << (char) c;
+	}
+
+	return os.str();
+}
+
+template <>
+void G3Frame::save(cereal::PortableBinaryOutputArchive &ar, unsigned v) const
 {
 	using cereal::make_nvp;
 	uint32_t crc(0), size(map_.size());
@@ -242,6 +276,34 @@ void G3Frame::save(A &ar, unsigned v) const
 	ar << make_nvp("crc", crc);
 }
 
+template<>
+void G3Frame::save(cereal::JSONOutputArchive &ar, unsigned v) const
+{
+	using cereal::make_nvp;
+	uint32_t size(map_.size());
+
+	ar << make_nvp("size", size);
+	std::string typestr = frametype_to_string(type);
+	ar << make_nvp("type", typestr);
+	for (auto i = map_.begin(); i != map_.end(); i++) {
+		//make sure it's deserialized so we don't just write a blob
+		blob_decode(i->second);
+		ar << make_nvp("name", i->first);
+		ar << make_nvp("val", i->second.frameobject);
+	}
+}
+
+std::string
+G3Frame::ToJSON() const
+{
+	std::stringstream str;
+	{
+		cereal::JSONOutputArchive ar(str);
+		ar << cereal::make_nvp("frame", *this);
+	}
+	return str.str();
+}
+
 template <typename T>
 void G3Frame::loads(T &is)
 {
@@ -251,8 +313,8 @@ void G3Frame::loads(T &is)
 	ar >> make_nvp("frame", *this);
 }
 
-template <class A>
-void G3Frame::load(A &ar, unsigned v)
+template <>
+void G3Frame::load(cereal::PortableBinaryInputArchive &ar, unsigned v)
 {
 	using cereal::make_nvp;
 	G3_CHECK_VERSION(v);
@@ -284,6 +346,43 @@ void G3Frame::load(A &ar, unsigned v)
 	if (testcrc != crc)
 		log_fatal("Recorded CRC (%#x) does not match calculated (%#x)",
 		    testcrc, crc);
+}
+
+template<>
+void G3Frame::load(cereal::JSONInputArchive &ar, unsigned v)
+{
+	using cereal::make_nvp;
+	G3_CHECK_VERSION(v);
+
+	int size;
+	std::string typestr;
+
+	ar >> make_nvp("size", size);
+	ar >> make_nvp("type", typestr);
+	type = frametype_from_string(typestr);
+
+	map_.clear();
+	for (int i = 0; i < size; i++) {
+		std::string name;
+		struct blob_container blob;
+		ar >> make_nvp("name", name);
+		ar >> make_nvp("val", blob.frameobject);
+		map_.insert(G3MapType::value_type(name, blob));
+	}
+}
+
+G3FramePtr
+G3Frame::FromJSON(const std::string &str)
+{
+	G3Frame fr;
+
+	{
+		std::stringstream is(str);
+		cereal::JSONInputArchive ar(is);
+		ar >> cereal::make_nvp("frame", fr);
+	}
+
+	return std::make_shared<G3Frame>(fr);
 }
 
 void G3Frame::DropBlobs(bool decode_all) const
@@ -373,24 +472,11 @@ template void G3Frame::saves(G3BufferOutputStream &) const;
 template void G3Frame::saves(std::ostream &) const;
 template void G3Frame::saves(std::ostringstream &) const;
 
-G3_SPLIT_SERIALIZABLE_CODE(G3Frame);
-
 G3FramePtr
 g3frame_char_constructor(std::string max_4_chars)
 {
-	if (max_4_chars.size() > 4) {
-		throw py::value_error("Ad-hoc frame type must be 4 "
-		    "or fewer characters.");
-	}
 
-	// Right-justify the character string in the constant in native
-	// endianness, such that code = max_4_chars[0] for a 1-character
-	// code.
-	uint32_t code = 0;
-	for (int i = max_4_chars.size()-1, j = 0; i >= 0; i--, j += 8)
-		code |= (uint32_t(max_4_chars[i]) << j);
-
-	return G3FramePtr(new G3Frame(G3Frame::FrameType(code)));
+	return G3FramePtr(new G3Frame(frametype_from_string(max_4_chars)));
 }
 
 static void g3frame_python_put(G3Frame &f, const std::string &name, const py::object &obj)
@@ -620,6 +706,9 @@ PYBINDINGS("core", scope) {
 	      "where those serialized copies already exist. Saves memory for "
 	      "frames about to be written at the expense of CPU time to "
 	      "re-decode them if they are accessed again later.")
+	    .def("to_json", &G3Frame::ToJSON, "JSON string representation of frame")
+	    .def_static("from_json", &G3Frame::FromJSON, py::arg("json"),
+	      "Create frame from JSON string representation")
 	    .def(g3frameobject_picklesuite<G3Frame>())
 	    .def_property_readonly("hash", &g3frame_hash,
 	      "Return the serialized representation of the frame")

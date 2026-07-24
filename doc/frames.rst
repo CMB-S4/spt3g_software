@@ -10,6 +10,8 @@ Each frame has a type defined under the :py:class:`~spt3g.core.G3FrameType` name
 
 Each frame also has a ``._filename`` attribute, which is set when frames are read in using the :py:class:`~spt3g.core.G3Reader` pipeline module with the ``track_filename`` option set to ``True``. This attribute is not serialized with the frame, so will be an empty string when used with pickling or multiprocessing.  This attribute is fragile and should not be relied upon for production code.
 
+In addition to the standard binary serialization format, frames and frame objects can also be serialized to and from JSON strings.  Each frame has a ``.to_json()`` method that returns a valid JSON string representation of the frame data.  The ``.from_json()`` class method in turn returns a new frame populated from a JSON string.  FLAC compression is disabled for JSON serialization of :py:class:`~spt3g.core.G3Timestream` objects.
+
 A brief description of the intention of each frame type follows along with a table containing a representative minimal set of data likely to be contained by a frame of a given type. The list is neither exhaustive nor truly minimal: other data can and will be present and some of the data listed here may have been removed or renamed. Neither is this an exhaustive list of frame types: any single character code can be [ab]used as a frame type for special purpose tools.
 
 .. contents:: Contents

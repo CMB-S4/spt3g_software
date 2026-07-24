@@ -7,6 +7,7 @@
 #ifdef G3_HAS_FLAC
 #include <FLAC/stream_encoder.h>
 #include <cmath>
+#include <type_traits>
 
 template<typename A>
 struct FlacDecoderCallbackArgs {
@@ -105,9 +106,15 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 	ar & cereal::make_nvp("units", units);
 	ar & cereal::make_nvp("start", start);
 	ar & cereal::make_nvp("stop", stop);
-	ar & cereal::make_nvp("flac", use_flac_);
 
-	if (use_flac_) {
+	if constexpr (!std::is_same_v<A, cereal::JSONOutputArchive>) {
+		ar & cereal::make_nvp("flac", use_flac_);
+	}
+
+	uint8_t use_flac = use_flac_;
+	if constexpr (std::is_same_v<A, cereal::JSONOutputArchive>) {
+		use_flac = 0;
+	} else if (use_flac) {
 #ifdef G3_HAS_FLAC
 		std::vector<int32_t> inbuf;
 		std::vector<uint8_t> outbuf;
@@ -228,7 +235,9 @@ template <class A> void G3Timestream::save(A &ar, unsigned v) const
 #else
 		log_fatal("Trying to write FLAC-compressed timestreams but built without FLAC support");
 #endif
-	} else {
+	}
+
+	if (!use_flac) {
 		ar & cereal::make_nvp("data_type", data_type_);
 		if (buffer_) {
 			ar & cereal::make_nvp("data", *buffer_);
@@ -303,9 +312,14 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 		ar & cereal::make_nvp("start", start);
 		ar & cereal::make_nvp("stop", stop);
 	}
-	ar & cereal::make_nvp("flac", use_flac_);
 
-	if (use_flac_) {
+	if constexpr (!std::is_same_v<A, cereal::JSONInputArchive>) {
+		ar & cereal::make_nvp("flac", use_flac_);
+	}
+
+	if constexpr (std::is_same_v<A, cereal::JSONInputArchive>) {
+		use_flac_ = 0;
+	} else if (use_flac_) {
 #ifdef G3_HAS_FLAC
 		FlacDecoderCallbackArgs<A> callback;
 		uint8_t nanflag;
@@ -387,7 +401,9 @@ template <class A> void G3Timestream::load(A &ar, unsigned v)
 #else
 		log_fatal("Trying to read FLAC-compressed timestreams but built without FLAC support");
 #endif
-	} else {
+	}
+
+	if (!use_flac_) {
 		if (buffer_)
 			delete buffer_;
 		buffer_ = NULL;
@@ -1396,7 +1412,7 @@ PYBINDINGS("core", scope) {
 	    .def("SetFLACCompression", &G3Timestream::SetFLACCompression,
 	      "Pass True to turn on FLAC compression when serialized. "
 	      "FLAC compression only works if the timestream is in units of "
-	      "counts.")
+	      "counts. FLAC compression is ignored when outputing to JSON.")
 	    .def("SetFLACBitDepth", &G3Timestream::SetFLACBitDepth,
 	      "Change the bit depth for FLAC compression, may be 24 or 32 "
 	      "(default, requires version 1.4+).")

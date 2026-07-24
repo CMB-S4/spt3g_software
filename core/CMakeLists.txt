@@ -146,6 +146,7 @@ add_spt3g_test(cached_frame)
 add_spt3g_test(pipelineinfo)
 add_spt3g_test(quaternions)
 add_spt3g_test(timesample)
+add_spt3g_test(jsonio)
 
 add_spt3g_test_program(test
                        SOURCE_FILES
