@@ -703,7 +703,10 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
                     if pix is None:
                         pix = pix1
 
-                        fmt = conv.get(np.min_scalar_type(-pix.max()), 'K')
+                        dtype = np.min_scalar_type(-int(pix.max()) - 1)
+                        dtype = np.promote_types(dtype, np.int16)
+                        fmt = conv.get(dtype, "K")
+
                         col = astropy.io.fits.Column(
                             name='PIXEL', format=fmt, array=pix, unit=None
                         )
