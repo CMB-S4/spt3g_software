@@ -25,8 +25,18 @@ fi
 
 echo "No binary healpy wheel found; building from source..."
 
-${PYTHON} -m pip download --no-binary=:all: --no-deps healpy -d "${workdir}"
-tar xzf "${workdir}"/healpy-*.tar.gz -C "${workdir}"
+# Fetch the sdist directly from PyPI.  (Avoid `pip download --no-binary=:all:`,
+# which also forces healpy's build dependencies, e.g. numpy, to be compiled
+# from source just to read the package metadata.)
+sdist_url=$(${PYTHON} - <<'PY'
+import json, urllib.request
+with urllib.request.urlopen("https://pypi.org/pypi/healpy/json") as f:
+    info = json.load(f)
+print(next(u["url"] for u in info["urls"] if u["packagetype"] == "sdist"))
+PY
+)
+echo "Fetching ${sdist_url}"
+curl -sSL "${sdist_url}" | tar xz -C "${workdir}"
 srcdir=$(ls -d "${workdir}"/healpy-*/)
 
 # Build from the unpacked tree so setuptools' build/ directory (which holds
