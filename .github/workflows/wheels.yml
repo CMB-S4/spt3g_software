@@ -47,8 +47,8 @@ jobs:
         uses: pypa/cibuildwheel@v4.2.0
         env:
           CIBW_BUILD: ${{ matrix.pyver }}-${{ matrix.build }}
-          CIBW_BEFORE_ALL_LINUX: yum install -y zlib-devel bzip2-devel xz-devel netcdf-devel cfitsio-devel
-          CIBW_BEFORE_ALL_MACOS: brew install netcdf cfitsio
+          CIBW_BEFORE_ALL_LINUX: yum install -y zlib-devel bzip2-devel xz-devel netcdf-devel
+          CIBW_BEFORE_ALL_MACOS: brew install netcdf
           CIBW_BEFORE_BUILD_MACOS: >
             ln -s $(dirname $(readlink -f $(which python3)))/python3-config $(dirname $(which python3))/python3-config &&
             pip install cmake && ./deps/install_flac.sh
@@ -71,6 +71,7 @@ jobs:
             CC=clang
             CXX=clang++
             CFLAGS="-O3 -fPIC"
+	  CIBW_BEFORE_TEST: bash {project}/deps/install_healpy.sh
           CIBW_TEST_COMMAND: ctest --test-dir {package}/build --output-on-failure
 
       - name: Upload artifacts
