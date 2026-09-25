@@ -39,6 +39,11 @@ echo "Fetching ${sdist_url}"
 curl -sSL "${sdist_url}" | tar xz -C "${workdir}"
 srcdir=$(ls -d "${workdir}"/healpy-*/)
 
+# Parallel build, using existing environment configuration
+if [ -n "${CMAKE_BUILD_PARALLEL_LEVEL}" ]; then
+    export MAKEFLAGS="-j${CMAKE_BUILD_PARALLEL_LEVEL} ${MAKEFLAGS}"
+fi
+
 # Build from the unpacked tree so setuptools' build/ directory (which holds
 # the bundled shared libraries) survives until the wheel is repaired.
 ${PYTHON} -m pip wheel --no-deps -w "${workdir}/dist" "${srcdir}"
