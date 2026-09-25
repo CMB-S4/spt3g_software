@@ -71,7 +71,7 @@ jobs:
             CC=clang
             CXX=clang++
             CFLAGS="-O3 -fPIC"
-	  CIBW_BEFORE_TEST: bash {project}/deps/install_healpy.sh
+          CIBW_BEFORE_TEST: bash {project}/deps/install_healpy.sh
           CIBW_TEST_COMMAND: ctest --test-dir {package}/build --output-on-failure
 
       - name: Upload artifacts
