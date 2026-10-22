@@ -7,6 +7,31 @@ from spt3g import core, maps
 from astropy.wcs import WCS
 from astropy.io import fits
 
+
+def assert_raises(exc, func, *args, **kwargs):
+    """Check that the function call raises the given exception."""
+    try:
+        func(*args, **kwargs)
+    except exc:
+        return
+    raise AssertionError("Expected {} from {}".format(exc.__name__, func.__name__))
+
+
+def stored_units(fname):
+    """Units label of the first map stored in the file."""
+    with fits.open(fname) as hl:
+        hdr = next(h.header for h in hl if h.data is not None)
+    return hdr.get('BUNIT', hdr.get('TUNIT1'))
+
+
+def make_weights(m, scale=2):
+    """Polarized weights with each component equal to the map times the scale."""
+    w = maps.G3SkyMapWeights(m)
+    for k in maps.fitsio.weight_cols:
+        setattr(w, k, m * scale)
+    return w
+
+
 for dim in [300, 301]:
 
     arr = np.arange(dim * dim).reshape(dim, dim)
@@ -157,12 +182,155 @@ try:
     assert(hm1.compatible(hm3))
     assert(np.allclose(hm1, hm3))
 
-    print('Checking healpy.write_map')
-    os.remove('test_map.fits')
-    hp.write_map('test_map.fits', np.asarray(hm3), dtype=float, coord="C")
-    hm4 = maps.fitsio.load_skymap_fits('test_map.fits')['T']
-    assert(hm1.compatible(hm4))
-    assert(np.allclose(hm1, hm4))
+    print('Checking units of healpy files')
+    U = core.G3Units
+    TU = core.G3TimestreamUnits
+    # (units stored in the file, units argument, expected unit value or None for error)
+    for column_units, units, factor in [
+        (None, None, None),
+        (None, 'mK_CMB', U.mK),
+        (None, 'uK_CMB', U.uK),
+        ('K_CMB', None, U.K),
+        ('K_CMB', 'K_CMB', U.K),
+        ('K_CMB', 'uK_CMB', None),
+        ('Jy', 'Jy', U.Jy),
+        ('Jy', 'mJy', None),
+    ]:
+        hp.write_map('test_map.fits', np.asarray(hm3), dtype=float, coord="C",
+                     column_units=column_units, overwrite=True)
+        load = maps.fitsio.load_skymap_fits
+        if factor is None:
+            assert_raises(ValueError, load, 'test_map.fits', units=units)
+            continue
+        hm4 = load('test_map.fits', units=units)['T']
+        assert(hm1.compatible(hm4) and not hm4.weighted)
+        assert(hm4.units == maps.fitsio.parse_fits_units(units or column_units)[0])
+        assert(np.allclose(np.asarray(hm1) * factor, hm4, rtol=1e-12, atol=0))
+
+    print('Checking units parsing')
+    for ustr, utype, factor in [
+        ('K_CMB', TU.Tcmb, U.K),
+        ('KCMB', TU.Tcmb, U.K),
+        ('uK_CMB', TU.Tcmb, U.uK),
+        ('muK', TU.Tcmb, U.uK),
+        ('mK_RJ', TU.Trj, U.mK),
+        ('K_CMB^2', TU.Tcmb, U.K ** 2),
+        ('(uK_CMB)^2', TU.Tcmb, U.uK ** 2),
+        ('mJy', TU.FluxDensity, U.mJy),
+        ('MJy/sr', TU.FluxDensity, U.MJy / U.sr),
+        ('Tcmb', TU.Tcmb, 1.0),
+        ('None', getattr(TU, 'None'), 1.0),
+    ]:
+        out = maps.fitsio.parse_fits_units(ustr)
+        assert(out[0] == utype and np.isclose(out[1], factor)), (ustr, out)
+    for ustr in ['furlongs', 'K/sr', 'Jy_CMB', 'K_CMB^x']:
+        assert_raises(ValueError, maps.fitsio.parse_fits_units, ustr)
+
+    print('Checking weights and units round trip')
+    for m1 in [
+        maps.HealpixSkyMap(np.arange(12 * 16 * 16) + 1.0, pol_conv=maps.MapPolConv.IAU,
+                           weighted=False),
+        maps.FlatSkyMap(np.arange(300.).reshape(15, 20) + 1, U.arcmin,
+                        proj=maps.MapProjection.ProjZEA,
+                        pol_conv=maps.MapPolConv.IAU, weighted=False),
+    ]:
+        m1w = m1.clone()
+        m1w.weighted = True
+        w = make_weights(m1)
+
+        # maps saved without weights are stored as unweighted maps
+        for m, wt, label, weighted in [
+            (m1, None, 'mK_CMB', False),
+            (m1, w, 'mK_CMB', False),
+            (m1w, None, 'mK_CMB', False),
+            (m1w, w, 'Tcmb', True),
+        ]:
+            maps.fitsio.save_skymap_fits('test_map.fits', m, m, m, W=wt, overwrite=True)
+            assert(stored_units('test_map.fits') == label)
+            out = maps.fitsio.load_skymap_fits('test_map.fits')
+            assert(('W' in out) == (wt is not None))
+            for k in 'TQU':
+                assert(out[k].units == TU.Tcmb and out[k].weighted == weighted)
+                assert(np.allclose(out[k], m1))
+            if wt is not None:
+                assert(out['W'].polarized)
+                for k in maps.fitsio.weight_cols:
+                    assert(np.allclose(getattr(out['W'], k), getattr(w, k)))
+        # the weighted flag does not depend on whether the weights are loaded
+        out = maps.fitsio.load_skymap_fits('test_map.fits', keys=['T', 'Q', 'U'])
+        assert('W' not in out and all(out[k].weighted for k in 'TQU'))
+
+        print('Checking output units for {}'.format(type(m1).__name__))
+        m2 = m1.clone()
+        m2.units = TU.FluxDensity
+        m2 *= U.mJy
+        # (map, units argument, stored label, unit value)
+        for m, ustr, label, uval in [
+            (m2, None, 'Jy', U.Jy),
+            (m1, 'uK_CMB', 'uK_CMB', U.uK),
+            (m1w, 'uK_CMB', 'uK_CMB', U.uK),
+            (m2, 'mJy', 'mJy', U.mJy),
+        ]:
+            maps.fitsio.save_skymap_fits('test_map.fits', m, overwrite=True, units=ustr)
+            assert(stored_units('test_map.fits') == label)
+            with fits.open('test_map.fits') as hl:
+                raw = next(h.data for h in hl if h.data is not None)
+            if isinstance(m, maps.HealpixSkyMap):
+                raw = raw['TEMPERATURE']
+            assert(np.allclose(raw, np.asarray(m) / uval, rtol=1e-12, atol=0))
+            out = maps.fitsio.load_skymap_fits('test_map.fits')['T']
+            assert(out.units == m.units and not out.weighted)
+            assert(np.allclose(out, m, rtol=1e-12, atol=0))
+        for m, kwargs in [
+            (m1, dict(units='mJy')),
+            (m1, dict(units='uK_RJ')),
+            (m1w, dict(units='uK_CMB', W=w)),
+        ]:
+            assert_raises(ValueError, maps.fitsio.save_skymap_fits, 'test_map.fits',
+                          m, m, m, overwrite=True, **kwargs)
+
+    print('Checking sparse healpix maps')
+
+    def same_sparse(a, b):
+        pa, va = (np.asarray(x) for x in a.nonzero_pixels())
+        pb, vb = (np.asarray(x) for x in b.nonzero_pixels())
+        ia, ib = np.argsort(pa), np.argsort(pb)
+        return np.array_equal(pa[ia], pb[ib]) and np.allclose(va[ia], vb[ib])
+
+    rng = np.random.default_rng(42)
+    spix = rng.choice(12 * 64 * 64, 2000, replace=False)
+    extra = int(np.setdiff1d(np.arange(12 * 64 * 64), spix)[0])
+    for nested in [False, True]:
+        smaps = []
+        for scale in [1, 2, 3]:
+            sm = maps.HealpixSkyMap(64, nested=nested, pol_conv=maps.MapPolConv.IAU)
+            for p in spix:
+                sm[int(p)] = scale * (1.0 + p)
+            smaps.append(sm)
+        sT, sQ, sU = smaps
+        # store U with a different sparse layout, which lists the same pixels in a
+        # different order, to exercise the per-map reordering
+        if sU.ringsparse:
+            sU.indexedsparse = True
+        else:
+            sU.ringsparse = True
+        assert(not np.array_equal(*(np.asarray(m.nonzero_pixels()[0]) for m in (sT, sU))))
+        sw = make_weights(sT)
+
+        maps.fitsio.save_skymap_fits('test_map.fits', sT, sQ, sU, W=sw, overwrite=True)
+        filepix = fits.getdata('test_map.fits', 1)['PIXEL']
+        assert(len(filepix) == len(spix) and np.all(np.diff(filepix) > 0))
+        out = maps.fitsio.load_skymap_fits('test_map.fits')
+        for k, sm in zip('TQU', smaps):
+            assert(not out[k].dense and out[k].nested == nested)
+            assert(same_sparse(out[k], sm))
+        for k in maps.fitsio.weight_cols:
+            assert(same_sparse(getattr(out['W'], k), getattr(sw, k)))
+
+        # maps with different nonzero pixels than T
+        sQ[extra] = 1.0
+        assert_raises(ValueError, maps.fitsio.save_skymap_fits, 'test_map.fits',
+                      sT, sQ, sU, overwrite=True)
 
     hmask1 = maps.G3SkyMapMask(hm1, use_data=True)
     maps.fitsio.save_skymapmask_fits("test_mask.fits", hmask1, overwrite=True)

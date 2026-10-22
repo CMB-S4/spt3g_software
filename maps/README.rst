@@ -44,6 +44,18 @@ T, Q, U and corresponding G3SkyMapWeights objects are written to a single file a
 
 HealpixSkyMap objects are stored in a sequence of BinTableHDU objects, a format that is compatible with the ``healpy.read_map`` function.  Dense maps (see below) are stored using implicit indexing, and sparse maps are stored using explicit indexing with an additional pixel index column.
 
+FITS Units
+----------
+
+Map units are stored in the ``BUNIT`` keyword of each image HDU for flat sky maps, and in the ``TUNITn`` keyword of each table column for Healpix maps.  By default, temperature maps are stored in the native G3Units scale and labeled ``mK_CMB`` or ``mK_RJ``, flux density maps are converted to ``Jy``, and weighted maps, weights and other map types are stored in native G3Units and labeled with the name of their ``G3TimestreamUnits`` type (e.g. ``Tcmb``).  Use the ``units`` argument of ``save_skymap_fits`` (or ``SaveMapFrame``) to store unweighted maps in other physical units, e.g. ``units='uK_CMB'`` or ``units='mJy'``.  The ``UNITS`` keyword records the ``G3TimestreamUnits`` type of the T map.
+
+When loading a file, ``load_skymap_fits`` reads the units of the T, Q and U maps from these keywords, and converts the data to G3Units.  Files written by other tools often contain no units information, in which case the ``units`` argument must be set to describe the stored data (e.g. ``units='uK_CMB'``), otherwise an error is raised.  If the file and the ``units`` argument both define the units, they must agree.  Supported unit strings include temperature units (e.g. ``K_CMB``, ``uK_CMB``, ``mK_RJ``; bare kelvin units are interpreted as CMB temperature units), flux density units (e.g. ``Jy``, ``mJy``, ``MJy/sr``), integer powers of these (e.g. ``K_CMB^2``), and the names of ``G3TimestreamUnits`` types for data already stored in G3Units; see ``parse_fits_units`` for details.  Weight maps and other columns without units information are loaded unscaled.
+
+FITS Weights
+------------
+
+The ``WEIGHTED`` keyword records whether the stored Stokes maps are weighted, and ``load_skymap_fits`` sets the ``weighted`` attribute of the loaded maps accordingly, whether or not the weights are also loaded.  Files without this keyword are loaded as unweighted maps.  Maps saved without their weights are stored as unweighted maps.
+
 Indexing
 ========
 
