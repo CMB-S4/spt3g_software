@@ -3,6 +3,8 @@
 import numpy as np
 import healpy as hp
 import os
+import gzip
+import shutil
 from spt3g import core, maps
 from astropy.wcs import WCS
 from astropy.io import fits
@@ -332,6 +334,148 @@ try:
         assert_raises(ValueError, maps.fitsio.save_skymap_fits, 'test_map.fits',
                       sT, sQ, sU, overwrite=True)
 
+    # empty sparse maps
+    sm = maps.HealpixSkyMap(64, pol_conv=maps.MapPolConv.IAU)
+    maps.fitsio.save_skymap_fits('test_map.fits', sm, sm, sm, overwrite=True)
+    out = maps.fitsio.load_skymap_fits('test_map.fits')
+    assert(all(out[k].npix_nonzero == 0 and out[k].nside == 64 for k in 'TQU'))
+
+    print('Checking chunked table IO')
+    nrows = 1000
+    tcols = [
+        fits.Column(name='PIXEL', format='J', array=np.arange(nrows) * 3),
+        fits.Column(name='A', format='D', array=rng.normal(size=nrows)),
+        fits.Column(name='B', format='4E', array=rng.normal(size=(nrows, 4))),
+    ]
+    fits.HDUList([fits.PrimaryHDU(), fits.BinTableHDU.from_columns(tcols)]).writeto(
+        'test_map.fits', overwrite=True)
+    with fits.open('test_map.fits') as hl:
+        rowdtype = hl[1].columns.dtype.newbyteorder('>')
+        offset = hl.fileinfo(1)['datLoc']
+        tdata = {c.name: np.array(hl[1].data[c.name]) for c in tcols}
+    # chunks of 7 rows, so that the last chunk is partial
+    chunk = 7 * rowdtype.itemsize
+    for name, dtype in [('PIXEL', np.int64), ('A', float), ('B', float)]:
+        col = maps.fitsio.read_table_column(
+            'test_map.fits', offset, rowdtype, nrows, name, dtype, chunk=chunk
+        )
+        assert(col.dtype == dtype and np.array_equal(col, tdata[name].ravel()))
+    with open('test_map.fits', 'r+b') as f:
+        f.seek(offset)
+        f.write(bytes(nrows * rowdtype.itemsize))
+        for name in tdata:
+            maps.fitsio.write_table_column(
+                f, offset, rowdtype, name, tdata[name] * 2, ufac=2, chunk=chunk
+            )
+    with fits.open('test_map.fits') as hl:
+        assert(all(np.allclose(hl[1].data[k], v) for k, v in tdata.items()))
+
+    # compressed files are read through astropy
+    maps.fitsio.save_skymap_fits('test_map.fits', sT, sU, sU, overwrite=True)
+    with open('test_map.fits', 'rb') as fi, gzip.open('test_map.fits.gz', 'wb') as fo:
+        shutil.copyfileobj(fi, fo)
+    out = maps.fitsio.load_skymap_fits('test_map.fits.gz')
+    for k, sm in zip('TQU', (sT, sU, sU)):
+        assert(same_sparse(out[k], sm))
+
+    default_chunk = maps.fitsio.chunk_size
+    # chunks of 7 image rows, so that the last chunk is partial
+    maps.fitsio.chunk_size = 7 * 8 * 500
+    try:
+        print('Checking chunked flat map writes')
+        fmap = maps.FlatSkyMap(500, 300, U.arcmin, proj=maps.MapProjection.ProjZEA,
+                               pol_conv=maps.MapPolConv.IAU, weighted=False)
+        fmap[50:150, 100:400] = rng.normal(size=(100, 300))
+        fdense = np.asarray(fmap.clone())
+        fw = make_weights(fmap)
+        for kwargs, atol in [
+            (dict(W=fw), 1e-12),
+            (dict(units='uK_CMB'), 1e-12),
+            (dict(W=fw, compress=True), 0.1),
+        ]:
+            maps.fitsio.save_skymap_fits('test_map.fits', fmap, fmap, fmap, overwrite=True,
+                                         **kwargs)
+            # sparse input maps are not converted to dense maps
+            assert(fmap.sparse and fw.TT.sparse)
+            if kwargs.get('compress'):
+                # all maps are compressed, following an empty primary HDU
+                with fits.open('test_map.fits') as hl:
+                    assert(hl[0].data is None and len(hl) == 10)
+                    assert(all(isinstance(h, fits.CompImageHDU) for h in hl[1:]))
+            out = maps.fitsio.load_skymap_fits('test_map.fits')
+            # maps that were sparse when saved are loaded as sparse maps
+            for k in 'TQU':
+                assert(out[k].sparse)
+                assert(np.allclose(np.asarray(out[k]), fdense, rtol=0, atol=atol))
+            if 'W' in kwargs:
+                assert(out['W'].TT.sparse)
+                assert(np.allclose(np.asarray(out['W'].TT), 2 * fdense, rtol=0, atol=2 * atol))
+
+        print('Checking chunked flat map reads')
+        # irregular coverage, so that chunks have different nonzero spans
+        yy, xx = np.mgrid[:300, :500]
+        disc = (yy - 150) ** 2 + (xx - 250) ** 2 < 100 ** 2
+        fdisc = maps.FlatSkyMap(np.where(disc, rng.normal(size=(300, 500)), 0.0),
+                                U.arcmin, proj=maps.MapProjection.ProjZEA, weighted=False)
+        fdisc.compact()
+        ddisc = np.asarray(fdisc.clone())
+        nzdisc = fdisc.npix_allocated
+        for sparse in [True, False]:
+            fdisc.sparse = sparse
+            maps.fitsio.save_skymap_fits('test_map.fits', fdisc, overwrite=True)
+            with fits.open('test_map.fits') as hl:
+                # image stored with the axes swapped (DEC first), so that it is transposed
+                thdr = hl[0].header.copy()
+                thdr.update(WCS(thdr).swapaxes(0, 1).to_header())
+                for k in ['X0', 'Y0', 'ALPHA0', 'DELTA0']:
+                    thdr.remove(k, ignore_missing=True)
+                fits.PrimaryHDU(np.ascontiguousarray(hl[0].data.T), header=thdr).writeto(
+                    'test_map_t.fits', overwrite=True)
+                # scaled image, read through astropy
+                hl[0].scale('int32', bscale=1e-6, bzero=0.5)
+                hl.writeto('test_map_s.fits', overwrite=True)
+            with open('test_map.fits', 'rb') as fi, gzip.open('test_map.fits.gz', 'wb') as fo:
+                shutil.copyfileobj(fi, fo)
+            for fname, atol in [('test_map.fits', 0), ('test_map_t.fits', 0),
+                                ('test_map.fits.gz', 0), ('test_map_s.fits', 1e-6)]:
+                out = maps.fitsio.load_skymap_fits(fname)['T']
+                # maps are loaded with the storage they had when saved
+                assert(out.shape == fdisc.shape and out.sparse == sparse)
+                assert(np.allclose(np.asarray(out.clone()), ddisc, rtol=0, atol=atol))
+                if sparse and not atol:
+                    # only the nonzero pixels are stored
+                    assert(out.npix_allocated == nzdisc)
+
+        print('Checking masks')
+        # non-square flat mask, read and written in chunks of rows
+        fmask = maps.G3SkyMapMask(fdisc, use_data=True)
+        for kwargs in [dict(), dict(compress=True)]:
+            maps.fitsio.save_skymapmask_fits('test_mask.fits', fmask, overwrite=True,
+                                             **kwargs)
+            with fits.open('test_mask.fits') as hl:
+                # stored as unsigned bytes, with compressed images following an
+                # empty primary HDU
+                img = [h for h in hl if h.data is not None]
+                assert(len(img) == 1 and img[0].data.dtype == np.uint8)
+                assert(isinstance(img[0], fits.CompImageHDU) == bool(kwargs))
+            out = maps.fitsio.load_skymapmask_fits('test_mask.fits')
+            assert(out.compatible(fmask) and (out == fmask).all())
+        # masks of transposed and scaled images, and masks stored as signed bytes
+        # by earlier versions
+        fits.PrimaryHDU(np.asarray(fmask), header=maps.fitsio.create_wcs_header(fdisc)
+                        ).writeto('test_mask.fits', overwrite=True)
+        for fname in ['test_map_t.fits', 'test_map_s.fits', 'test_mask.fits']:
+            out = maps.fitsio.load_skymapmask_fits(fname)
+            assert(out.compatible(fmask) and (out == fmask).all())
+        # healpix mask, written in more than one chunk
+        hmask = maps.G3SkyMapMask(sT, use_data=True)
+        maps.fitsio.save_skymapmask_fits('test_mask.fits', hmask, overwrite=True)
+        assert(fits.getheader('test_mask.fits', 1)['NAXIS2'] > maps.fitsio.chunk_size)
+        out = maps.fitsio.load_skymapmask_fits('test_mask.fits')
+        assert(out.compatible(hmask) and (out == hmask).all())
+    finally:
+        maps.fitsio.chunk_size = default_chunk
+
     hmask1 = maps.G3SkyMapMask(hm1, use_data=True)
     maps.fitsio.save_skymapmask_fits("test_mask.fits", hmask1, overwrite=True)
     hmask2 = maps.fitsio.load_skymapmask_fits("test_mask.fits")
@@ -340,7 +484,7 @@ try:
     assert((hmask1 == hmask2).all())
 
 finally:
-    if os.path.exists('test_map.fits'):
-        os.remove('test_map.fits')
-    if os.path.exists('test_mask.fits'):
-        os.remove('test_mask.fits')
+    for f in ['test_map.fits', 'test_map_t.fits', 'test_map_s.fits', 'test_map.fits.gz',
+              'test_mask.fits']:
+        if os.path.exists(f):
+            os.remove(f)
