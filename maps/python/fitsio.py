@@ -37,6 +37,10 @@ units_types = {
     'jy': (core.G3TimestreamUnits.FluxDensity, core.G3Units.Jy),
 }
 
+# approximate size in bytes of the chunks of table rows or image rows read from or
+# written to disk at a time
+chunk_size = 1 << 22
+
 # map and weight component names
 stokes_cols = ['T', 'Q', 'U']
 weight_cols = ['TT', 'TQ', 'TU', 'QQ', 'QU', 'UU']
@@ -152,6 +156,141 @@ def get_map_units(hdr, ukeys, units=None, check=None):
     return hparsed or units
 
 
+def read_table_column(filename, offset, rowdtype, nrows, name, dtype, chunk=None):
+    """
+    Read a column of an uncompressed FITS binary table from disk, in chunks of
+    about ``chunk`` bytes (default: ``chunk_size``) of table rows, so that only
+    one chunk of the table is held in memory at a time.  ``offset`` is the
+    location of the table data in the file, and ``rowdtype`` is the (big-endian)
+    data type of a table row.  Returns the flattened column data, converted to
+    ``dtype``.
+    """
+    nel = int(np.prod(rowdtype[name].shape))
+    out = np.empty(nrows * nel, dtype=dtype)
+    step = max(1, (chunk or chunk_size) // rowdtype.itemsize)
+    with open(filename, 'rb') as f:
+        f.seek(offset)
+        for i0 in range(0, nrows, step):
+            rows = np.fromfile(f, dtype=rowdtype, count=min(step, nrows - i0))
+            out[i0 * nel:(i0 + len(rows)) * nel] = rows[name].ravel()
+    return out
+
+
+def read_image_rows(filename, hdulist, hidx, direct=True, chunk=None):
+    """
+    Iterate over the image in HDU ``hidx`` of ``hdulist`` in chunks of about
+    ``chunk`` bytes (default: ``chunk_size``) of rows, yielding the index of the
+    first row and a float array of the rows in each chunk.  Unscaled images in
+    uncompressed files (``direct``) are read from disk with plain file reads, so
+    that the image is never held in memory or memory-mapped; other images are read
+    through the HDU's ``section``.
+    """
+    import astropy.io.fits
+
+    H = hdulist[hidx]
+    nrow, ncol = H.shape
+    step = max(1, (chunk or chunk_size) // (8 * ncol))
+    dtypes = {8: 'u1', 16: '>i2', 32: '>i4', 64: '>i8', -32: '>f4', -64: '>f8'}
+    dtype = dtypes.get(H.header['BITPIX'])
+    scaled = H.header.get('BSCALE', 1) != 1 or H.header.get('BZERO', 0) != 0
+    if direct and dtype and not scaled and not isinstance(H, astropy.io.fits.CompImageHDU):
+        offset = hdulist.fileinfo(hidx)['datLoc']
+        rowsize = ncol * np.dtype(dtype).itemsize
+        with open(filename, 'rb') as f:
+            for i0 in range(0, nrow, step):
+                n = min(step, nrow - i0)
+                f.seek(offset + i0 * rowsize)
+                rows = np.fromfile(f, dtype=dtype, count=n * ncol)
+                yield i0, rows.reshape(n, ncol).astype(float)
+    else:
+        for i0 in range(0, nrow, step):
+            yield i0, np.asarray(H.section[i0:i0 + step], dtype=float)
+
+
+def write_table_column(f, offset, rowdtype, name, data, ufac=1.0, chunk=None):
+    """
+    Write a column of a FITS binary table to the open file ``f``, in chunks of
+    about ``chunk`` bytes (default: ``chunk_size``) of table rows, by reading,
+    updating and rewriting each chunk of rows, so that only one chunk of the
+    table is held in memory at a time.  ``offset`` is the location of the table
+    data in the file, and ``rowdtype`` is the (big-endian) data type of a table
+    row.  The data are divided by ``ufac`` as they are written.
+    """
+    step = max(1, (chunk or chunk_size) // rowdtype.itemsize)
+    for i0 in range(0, len(data), step):
+        n = min(step, len(data) - i0)
+        f.seek(offset + i0 * rowdtype.itemsize)
+        rows = np.fromfile(f, dtype=rowdtype, count=n)
+        rows[name] = data[i0:i0 + n] if ufac == 1 else data[i0:i0 + n] / ufac
+        f.seek(offset + i0 * rowdtype.itemsize)
+        rows.tofile(f)
+
+
+def is_uncompressed(filename):
+    """
+    Return True if the file is an uncompressed FITS file, whose data can be read
+    from disk directly.
+    """
+    try:
+        with open(filename, 'rb') as f:
+            return f.read(6) == b'SIMPLE'
+    except (TypeError, OSError):
+        return False
+
+
+def read_hdu_column(filename, hdulist, hidx, name, dtype, direct=True):
+    """
+    Read a column of the binary table in HDU ``hidx`` of ``hdulist``, as a
+    flattened array of the given ``dtype``.  Unscaled numeric columns in
+    uncompressed files (``direct``) are read from disk in chunks of rows with
+    ``read_table_column``; other columns are copied out of the table by astropy.
+    """
+    H = hdulist[hidx]
+    col = H.columns[name]
+    code = str(col.format).lstrip('0123456789')[:1]
+    if direct and code in 'BIJKED' and col.bscale in [None, 1] and col.bzero in [None, 0]:
+        rowdtype = H.columns.dtype.newbyteorder('>')
+        offset = hdulist.fileinfo(hidx)['datLoc']
+        return read_table_column(
+            filename, offset, rowdtype, H.header['NAXIS2'], name, dtype
+        )
+    return np.array(H.data[name], dtype=dtype).ravel()
+
+
+def write_table(filename, cols, header, nrows, columns):
+    """
+    Write a FITS file containing an empty primary HDU and a binary table with the
+    given column definitions, header and number of rows.  The zero-padded table
+    data are written directly to disk one column at a time with
+    ``write_table_column``.  ``columns`` is an iterable of (name, data, unit
+    value) tuples, e.g. a generator, so that the data for each column need only
+    be computed when the column is written.  A partially written file is removed
+    if writing fails.
+    """
+    import astropy.io.fits
+
+    hdu = astropy.io.fits.BinTableHDU.from_columns(cols, header=header, nrows=0)
+    hdu.header['NAXIS2'] = nrows
+    rowdtype = hdu.columns.dtype.newbyteorder('>')
+
+    try:
+        with open(filename, 'wb+') as f:
+            f.write(astropy.io.fits.PrimaryHDU().header.tostring().encode('ascii'))
+            f.write(hdu.header.tostring().encode('ascii'))
+            offset = f.tell()
+            # zero-filled table data, padded to a whole number of FITS blocks
+            size = nrows * rowdtype.itemsize
+            f.truncate(offset + size + (-size % 2880))
+            for name, data, ufac in columns:
+                write_table_column(f, offset, rowdtype, name, data, ufac)
+                del data
+    except BaseException:
+        # don't leave a partially written file behind
+        if os.path.exists(filename):
+            os.remove(filename)
+        raise
+
+
 @core.usefulfunc
 def load_skymap_fits(filename, hdu=None, keys=None, memmap=False, units=None):
     """
@@ -167,9 +306,12 @@ def load_skymap_fits(filename, hdu=None, keys=None, memmap=False, units=None):
         If supplied, return only these keys in the output dictionary.
         Options are: T, Q, U, W.
     memmap : bool, optional
-        Argument passed to astropy.io.fits.open. If True, the map is not read
-        into memory, but only the required pixels are read when needed. Default:
-        False.
+        Argument passed to astropy.io.fits.open, which applies to maps that are
+        read through astropy.  Columns of healpix tables and unscaled flat sky map
+        images in uncompressed files are read directly from disk in chunks of
+        rows, regardless of this setting, so that the table or image is never
+        held in memory; other images are read through astropy in chunks of rows.
+        Memory-mapping is not supported for scaled images.  Default: False.
     units : str, optional
         Units of the T, Q and U data stored in the file, e.g. ``'uK_CMB'`` or
         ``'K_CMB'``.  See ``parse_fits_units`` for supported options.  Required
@@ -185,7 +327,9 @@ def load_skymap_fits(filename, hdu=None, keys=None, memmap=False, units=None):
     -------
     a dictionary of maps keyed with e.g. 'T', 'Q', 'U' and 'W'.  The Stokes maps
     are marked as weighted according to the ``WEIGHTED`` header keyword written
-    by ``save_skymap_fits``, and as unweighted if the keyword is missing.
+    by ``save_skymap_fits``, and as unweighted if the keyword is missing.  Flat sky
+    maps that were sparse when saved (``SPARSE`` header keyword) are converted
+    back to sparse storage.
     """
 
     import astropy.io.fits
@@ -205,6 +349,9 @@ def load_skymap_fits(filename, hdu=None, keys=None, memmap=False, units=None):
 
     if keys is None:
         keys = ['T', 'Q', 'U', 'W']
+
+    # tables and images in uncompressed files can be read directly in chunks of rows
+    direct = is_uncompressed(filename)
 
     with astropy.io.fits.open(filename, memmap=memmap) as hdulist:
         for hidx, H in enumerate(hdulist):
@@ -271,7 +418,7 @@ def load_skymap_fits(filename, hdu=None, keys=None, memmap=False, units=None):
                 map_opts.update(nested=nested)
 
             # primary HDU
-            if H.data is None:
+            if not hdr.get('NAXIS', 0):
                 continue
 
             # extracting a particular HDU
@@ -301,15 +448,43 @@ def load_skymap_fits(filename, hdu=None, keys=None, memmap=False, units=None):
                     label = "{} map in HDU {} of {}".format(ptype, hidx, filename)
                     utype, uconv = get_map_units(hdr, ukeys, units, label)
 
-                data = np.array(H.data, dtype=float)
-                if map_opts.pop('transpose', False):
-                    data = np.array(data.T)
-                if uconv != 1:
-                    data *= uconv
-
+                # Fill the map from chunks of image rows, transposing if necessary.
+                # Maps that were sparse when saved are stored as sparse maps,
+                # with only the nonzero portion of each chunk inserted into the
+                # map; others are filled in place as dense maps.
+                transpose = map_opts.pop('transpose', False)
+                sparse = hdr.get('SPARSE', False)
+                nrow, ncol = H.shape
                 pol_type = getattr(MapPolType, ptype, None)
-                fm = FlatSkyMap(data, pol_type=pol_type, units=utype, **map_opts)
-                del data
+                fm = FlatSkyMap(
+                    nrow if transpose else ncol,
+                    ncol if transpose else nrow,
+                    pol_type=pol_type,
+                    units=utype,
+                    **map_opts,
+                )
+                if not sparse:
+                    fm.sparse = False
+                    buf = np.asarray(fm)
+                for i0, rows in read_image_rows(filename, hdulist, hidx, direct):
+                    if uconv != 1:
+                        rows = rows * uconv
+                    # first map row and column of the chunk
+                    y0, x0 = (0, i0) if transpose else (i0, 0)
+                    if transpose:
+                        rows = rows.T
+                    if not sparse:
+                        buf[y0:y0 + rows.shape[0], x0:x0 + rows.shape[1]] = rows
+                        continue
+                    yz = np.flatnonzero(rows.any(axis=1))
+                    if not len(yz):
+                        continue
+                    xz = np.flatnonzero(rows.any(axis=0))
+                    fm[y0 + yz[0]:y0 + yz[-1] + 1, x0 + xz[0]:x0 + xz[-1] + 1] = (
+                        np.ascontiguousarray(rows[yz[0]:yz[-1] + 1, xz[0]:xz[-1] + 1])
+                    )
+                if sparse:
+                    fm.compact()
 
                 if weighted:
                     assert('T' in output)
@@ -325,19 +500,19 @@ def load_skymap_fits(filename, hdu=None, keys=None, memmap=False, units=None):
 
                 partial = hdr.get('INDXSCHM') == 'EXPLICIT' or hdr.get('OBJECT') == 'PARTIAL'
 
-                for cidx, hcol in enumerate(H.data.names):
+                for cidx, hcol in enumerate(H.columns.names):
                     col = healpix_cols.get(hcol, hcol)
                     if col in stokes_cols and col not in keys:
                         continue
                     elif col in weight_cols and 'W' not in keys:
                         continue
 
-                    data = np.array(H.data[hcol], dtype=float).ravel()
-
+                    # read one column at a time
                     if col == 'PIXEL' or (partial and cidx == 0):
-                        pix = np.array(data, dtype=int).ravel()
-                        del data
+                        pix = read_hdu_column(filename, hdulist, hidx, hcol, np.int64, direct)
                         continue
+
+                    data = read_hdu_column(filename, hdulist, hidx, hcol, float, direct)
 
                     weighted = col in weight_cols
                     weighted = hdr.get('TISWGT{:d}'.format(cidx + 1), weighted)
@@ -369,10 +544,7 @@ def load_skymap_fits(filename, hdu=None, keys=None, memmap=False, units=None):
                     else:
                         output[col] = hm
 
-                del pix
                 break
-
-            del H.data
 
     for k, m in output.items():
         m.pol_conv = map_opts['pol_conv']
@@ -390,6 +562,8 @@ def load_skymapmask_fits(filename, hdu=None, memmap=False):
     data are converted to booleans.  Assumes the fits file contains a single mask,
     with flat sky data stored in a single ``ImageHDU``, and healpix masks stored in a
     single ``BinTableHDU`` in full-sky format with implicit indexing over all pixels.
+    Images and tables in uncompressed files are read directly from disk in chunks of
+    rows, so that only one boolean copy of the mask data is held in memory.
 
     Arguments
     ---------
@@ -398,8 +572,9 @@ def load_skymapmask_fits(filename, hdu=None, memmap=False):
     hdu : int, optional
         If supplied, the data are extract from the given HDU index.
     memmap : bool, optional
-        Argument passed to astropy.io.fits.open. If True, the map is not read into
-        memory, but only the required pixels are read when needed. Default: False.
+        Argument passed to astropy.io.fits.open, which applies to masks that are read
+        through astropy.  Memory-mapping is not supported for scaled images.
+        Default: False.
 
     Returns
     -------
@@ -411,6 +586,9 @@ def load_skymapmask_fits(filename, hdu=None, memmap=False):
     map_type = None
     coord_ref = "Equatorial"
     map_opts = {}
+
+    # tables and images in uncompressed files can be read directly in chunks of rows
+    direct = is_uncompressed(filename)
 
     with astropy.io.fits.open(filename, memmap=memmap) as hdulist:
         for hidx, H in enumerate(hdulist):
@@ -438,7 +616,7 @@ def load_skymapmask_fits(filename, hdu=None, memmap=False):
                 map_opts.update(nested=nested)
 
             # primary HDU
-            if H.data is None:
+            if not hdr.get('NAXIS', 0):
                 continue
 
             # extracting a particular HDU
@@ -449,22 +627,26 @@ def load_skymapmask_fits(filename, hdu=None, memmap=False):
             if map_type not in ['flat', 'healpix']:
                 raise ValueError("Unknown map type in HDU {}".format(hidx))
 
-            data = np.array(H.data, dtype=bool)
-
             if map_type == 'flat':
-                # flat map data
-                if map_opts.pop('transpose', False):
-                    data = np.array(data.T)
-                parent = FlatSkyMap(*data.shape, **map_opts)
+                # flat mask data, read in chunks of rows, transposing if necessary
+                transpose = map_opts.pop('transpose', False)
+                nrow, ncol = H.shape
+                data = np.empty((ncol, nrow) if transpose else (nrow, ncol), dtype=bool)
+                for i0, rows in read_image_rows(filename, hdulist, hidx, direct):
+                    if transpose:
+                        data[:, i0:i0 + len(rows)] = (rows != 0).T
+                    else:
+                        data[i0:i0 + len(rows)] = rows != 0
+                parent = FlatSkyMap(data.shape[1], data.shape[0], **map_opts)
 
             elif map_type == 'healpix':
-                # healpix map data
+                # healpix mask data, stored in the first table column
+                data = read_hdu_column(
+                    filename, hdulist, hidx, H.columns.names[0], bool, direct
+                )
                 parent = HealpixSkyMap(nside, **map_opts)
 
-            mask = G3SkyMapMask(parent, data.ravel())
-
-            del H.data, data
-            return mask
+            return G3SkyMapMask(parent, data.ravel())
 
 
 def load_proj_dict(inverse=False):
@@ -659,7 +841,13 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
     `FlatSkyMap` objects are stored in a series of (optionally compressed)
     `ImageHDU` entries, in which each HDU contains the projection information in
     its header in standard WCS format, along with the image data for a single
-    map (one of the Stokes maps or a weight map component).
+    map (one of the Stokes maps or a weight map component).  Uncompressed images
+    are written to disk in chunks of rows, so that sparse maps are not converted
+    to dense maps.  Compressed images are written to disk one at a time, each from
+    a dense copy of the map if it is sparse, and are all stored in image extensions
+    following an empty primary HDU.  Images are stored in dense format, and the
+    ``SPARSE`` keyword records whether each map was sparse, so that
+    ``load_skymap_fits`` can restore its storage.
 
     `HealpixSkyMap` objects are stored in a `BinTableHDU` extension, which
     contains the necessary header information for compatiblity with healpix map
@@ -759,14 +947,12 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
     if flat:
         header = create_wcs_header(T)
 
-        bitpix = {
-            np.dtype(np.int16): 16,
-            np.dtype(np.int32): 32,
-            np.dtype(np.float32): -32,
-            np.dtype(np.float64): -64,
-        }
-        header['BITPIX'] = bitpix[np.asarray(T).dtype]
+        # flat sky maps store double-precision data
+        header['BITPIX'] = -64
         header['NAXIS'] = 2
+
+        # images to write to disk: (placeholder HDU, map, unit value)
+        flat_maps = []
 
     else:
         header = astropy.io.fits.Header()
@@ -787,14 +973,26 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
             header['RADESYS'] = 'FK5'
             header['EQUINOX'] = 2000.0
 
-        conv = {
-            np.dtype(np.int16): 'I',
-            np.dtype(np.int32): 'J',
-            np.dtype(np.int64): 'K',
-            np.dtype(np.float32): 'E',
-            np.dtype(np.float64): 'D',
-        }
-        pix = None
+        # table column definitions, and the corresponding (name, map, unit value)
+        cols = []
+        columns = []
+
+        # create sorted pixel list from nonzero pixels
+        pix = order = spix = None
+        if T.dense:
+            nrows = T.size
+        else:
+            pix, tdata = T.nonzero_pixels()
+            pix = np.asarray(pix)
+            if not np.all(pix[1:] > pix[:-1]):
+                order = np.argsort(pix)
+            spix = pix if order is None else pix[order]
+            nrows = len(pix)
+
+            dtype = np.min_scalar_type(-int(spix[-1] if nrows else 0) - 1)
+            dtype = np.promote_types(dtype, np.int16)
+            fmt = {np.dtype(np.int16): 'I', np.dtype(np.int32): 'J'}.get(dtype, 'K')
+            cols.append(astropy.io.fits.Column(name='PIXEL', format=fmt))
 
     header['MAPTYPE'] = 'FLAT' if flat else 'HEALPIX'
     header['COORDREF'] = str(T.coord_ref)
@@ -830,111 +1028,139 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
         'FluxDensity': ('Jy', core.G3Units.Jy),
     }
 
-    hdulist = astropy.io.fits.HDUList()
-    cols = astropy.io.fits.ColDefs([])
-
-    try:
-        for name, m, weight in entries:
-            # weights are stored in native G3Units
-            uname, ufac = str(m.units), 1.0
-            if not weight:
-                if units is not None:
-                    if uparsed[0] != m.units:
-                        raise ValueError(
-                            "Units {!r} incompatible with {} map units {}".format(
-                                units, name, m.units
-                            )
+    for name, m, weight in entries:
+        # weights are stored in native G3Units
+        uname, ufac = str(m.units), 1.0
+        if not weight:
+            if units is not None:
+                if uparsed[0] != m.units:
+                    raise ValueError(
+                        "Units {!r} incompatible with {} map units {}".format(
+                            units, name, m.units
                         )
-                    uname, ufac = str(units).strip(), uparsed[1]
-                elif uname in fits_units and not weighted:
-                    uname, ufac = fits_units[uname]
-
-            if flat:
-                data = np.asarray(m)
-                if ufac != 1:
-                    data = data / ufac
-                if compress:
-                    hdu = astropy.io.fits.CompImageHDU(
-                        data,
-                        header=header,
-                        compression_type=ctype,
-                        quantize_level=quantize_level,
                     )
-                else:
-                    hdu = astropy.io.fits.ImageHDU(data, header=header)
-                hdu.header['ISWEIGHT'] = weight
-                hdu.header['WTYPE' if weight else 'POLTYPE'] = name
-                if not weight:
-                    hdu.header['FLATPOL'] = m.flat_pol
-                hdu.header['BUNIT'] = uname
-                hdu.header['UNITS'] = str(m.units)
-                hdulist.append(hdu)
-                del hdu, data
-            else:
-                if not T.dense:
-                    pix1, data = m.nonzero_pixels()
-                    pix1 = np.asarray(pix1)
-                    data = np.asarray(data)
-                    data = data[np.argsort(pix1)]
-                    pix1.sort()
+                uname, ufac = str(units).strip(), uparsed[1]
+            elif uname in fits_units and not weighted:
+                uname, ufac = fits_units[uname]
 
-                    if pix is None:
-                        pix = pix1
+        if flat:
+            # placeholder data, to construct the header for an image of the right
+            # shape; the map data are written to disk below
+            data = np.broadcast_to(np.zeros(()), m.shape)
+            hdu = astropy.io.fits.ImageHDU(data, header=header)
+            hdu.header['ISWEIGHT'] = weight
+            hdu.header['WTYPE' if weight else 'POLTYPE'] = name
+            if not weight:
+                hdu.header['FLATPOL'] = m.flat_pol
+            hdu.header['BUNIT'] = uname
+            hdu.header['UNITS'] = str(m.units)
+            hdu.header['SPARSE'] = m.sparse
+            flat_maps.append((hdu, m, ufac))
+            del hdu, data
+        else:
+            cols.append(astropy.io.fits.Column(name=name, format='D', unit=uname))
+            columns.append((name, m, ufac))
+            header['TISWGT{:d}'.format(len(cols))] = weight
 
-                        dtype = np.min_scalar_type(-int(pix.max()) - 1)
-                        dtype = np.promote_types(dtype, np.int16)
-                        fmt = conv.get(dtype, "K")
+    if overwrite:
+        if os.path.exists(filename):
+            os.remove(filename)
+    else:
+        assert(not os.path.exists(filename))
 
-                        col = astropy.io.fits.Column(
-                            name='PIXEL', format=fmt, array=pix, unit=None
-                        )
-                        cols.add_col(col)
-                        del col
-                    elif len(pix) != len(pix1) or not (pix == pix1).all():
-                        raise ValueError(
-                            "Map {} has different nonzero pixels than "
-                            "the T map".format(name)
-                        )
-                    del pix1
-
-                else:
-                    data = np.asarray(m)
-
+    if flat and compress:
+        # Each image is compressed and written to disk one at a time, after an
+        # empty primary HDU, so that at most one dense copy of a sparse map is held
+        # in memory.
+        try:
+            astropy.io.fits.PrimaryHDU().writeto(filename)
+            for hdu, m, ufac in flat_maps:
+                data = np.asarray(m.clone(copy_data=True) if m.sparse else m)
                 if ufac != 1:
                     data = data / ufac
-
-                fmt = conv.get(data.dtype, 'D')
-                col = astropy.io.fits.Column(
-                    name=name, format=fmt, array=data, unit=uname
+                hdu = astropy.io.fits.CompImageHDU(
+                    data,
+                    header=hdu.header,
+                    compression_type=ctype,
+                    quantize_level=quantize_level,
                 )
-                cols.add_col(col)
-                del col
-                del data
-
-                header['TISWGT{:d}'.format(len(cols))] = weight
-
-        if not flat:
-            del pix
-            hdu = astropy.io.fits.BinTableHDU.from_columns(cols, header=header)
-            hdulist.append(hdu)
-            del hdu
-
-        if overwrite:
+                with astropy.io.fits.open(filename, mode='append') as out:
+                    out.append(hdu)
+                del hdu, data
+        except BaseException:
+            # don't leave a partially written file behind
             if os.path.exists(filename):
                 os.remove(filename)
-        else:
-            assert(not os.path.exists(filename))
+            raise
+        return
 
-        hdulist.writeto(filename)
+    if flat:
+        # Each image is written directly to disk in chunks of rows, copied out of
+        # the map, so that sparse maps are not converted to dense maps.  The first
+        # image is stored in the primary HDU.
+        hdulist = astropy.io.fits.HDUList()
+        for hdu, _, _ in flat_maps:
+            hdulist.append(hdu)
+        hdulist.update_extend()
+        try:
+            for hdu, (_, m, ufac) in zip(hdulist, flat_maps):
+                stream = astropy.io.fits.StreamingHDU(filename, hdu.header)
+                step = max(1, chunk_size // (8 * m.shape[1]))
+                if m.sparse:
+                    # copying rows out of a sparse map has a fixed cost per copy,
+                    # so copy larger blocks of rows at a time
+                    step *= 4
+                for i0 in range(0, m.shape[0], step):
+                    if m.sparse:
+                        rows = np.asarray(m[i0:i0 + step, :])
+                    else:
+                        rows = np.asarray(m)[i0:i0 + step]
+                    stream.write(rows if ufac == 1 else rows / ufac)
+                stream.close()
+        except BaseException:
+            # don't leave a partially written file behind
+            if os.path.exists(filename):
+                os.remove(filename)
+            raise
+        return
 
-    finally:
-        for col in cols.names:
-            del cols[col].array
-            cols.del_col(col)
-        del cols
-        for hdu in hdulist:
-            del hdu.data
-        del hdulist
+    # The table is written directly to disk one column at a time, in chunks of
+    # rows, so that at most one temporary copy of a single map is held in memory.
+    def table_columns():
+        nonlocal tdata
+        if pix is not None:
+            yield 'PIXEL', spix, 1.0
+
+        for idx, (name, m, ufac) in enumerate(columns):
+            if pix is None:
+                data = np.asarray(m)
+            else:
+                # make sure all of the columns have the same set of nonzero pixels
+                reorder = order
+                if idx == 0:
+                    data, tdata = tdata, None
+                else:
+                    pix1, data = m.nonzero_pixels()
+                    pix1 = np.asarray(pix1)
+                    if not np.array_equal(pix1, pix):
+                        # same pixels in a different order
+                        reorder = np.argsort(pix1)
+                        if not np.array_equal(pix1[reorder], spix):
+                            raise ValueError(
+                                "Map {} has different nonzero pixels than "
+                                "the T map".format(name)
+                            )
+                    del pix1
+                data = np.asarray(data)
+                if reorder is not None:
+                    data = data[reorder]
+                del reorder
+
+            yield name, data, ufac
+            # free this map's data before computing the next column
+            del data
+
+    write_table(filename, cols, header, nrows, table_columns())
 
 
 @core.usefulfunc
@@ -944,12 +1170,16 @@ def save_skymapmask_fits(filename, mask, overwrite=False, compress=False, hdr=No
 
     Masks with ``FlatSkyMap`` parents are stored in a (optionally compressed)
     ``ImageHDU`` entry, which contains the projection information in its header in
-    standard WCS format, along with the image data for a single mask.
+    standard WCS format, along with the image data for a single mask.  Compressed
+    images follow an empty primary HDU.
 
     Masks with ``HealpixSkyMap`` parents are stored in a ``BinTableHDU`` extension,
     which contains the necessary header information for compatiblity with healpix map
     readers (e.g. `healpix.read_map`), and a single table with one column for the
-    mask.  Masks are stored densely with implicit indexing over all pixels.
+    mask.  Masks are stored densely with implicit indexing over all pixels, and the
+    table is written directly to disk in chunks of rows.
+
+    Mask values are stored as unsigned bytes (0 or 1).
 
     Arguments
     ---------
@@ -1003,8 +1233,8 @@ def save_skymapmask_fits(filename, mask, overwrite=False, compress=False, hdr=No
         for keyword in hdr.keys():
             header[keyword] = hdr[keyword]
 
-    hdulist = astropy.io.fits.HDUList()
-    data = np.asarray(mask)
+    # masks are stored as unsigned bytes
+    data = np.asarray(mask).view(np.uint8)
 
     if flat:
         if compress:
@@ -1013,19 +1243,24 @@ def save_skymapmask_fits(filename, mask, overwrite=False, compress=False, hdr=No
                 ctype = 'GZIP_2'
             elif isinstance(compress, str):
                 ctype = compress
+            # compressed images follow an empty primary HDU
             hdu = astropy.io.fits.CompImageHDU(
                 data, header=header, compression_type=ctype,
             )
+            hdulist = astropy.io.fits.HDUList([astropy.io.fits.PrimaryHDU(), hdu])
         else:
-            hdu = astropy.io.fits.ImageHDU(data, header=header)
-    else:
-        cols = astropy.io.fits.ColDefs([])
-        col = astropy.io.fits.Column(name="MASK", format="B", array=data)
-        cols.add_col(col)
-        hdu = astropy.io.fits.BinTableHDU.from_columns(cols, header=header)
+            # the image is stored in the primary HDU
+            hdulist = astropy.io.fits.HDUList()
+            hdulist.append(astropy.io.fits.ImageHDU(data, header=header))
+        hdulist.writeto(filename, overwrite=overwrite)
+        return
 
-    hdulist.append(hdu)
-    hdulist.writeto(filename, overwrite=overwrite)
+    if os.path.exists(filename):
+        if not overwrite:
+            raise OSError("File {!r} already exists".format(filename))
+        os.remove(filename)
+    col = astropy.io.fits.Column(name="MASK", format="B")
+    write_table(filename, [col], header, len(data), [("MASK", data, 1.0)])
 
 
 @core.indexmod
