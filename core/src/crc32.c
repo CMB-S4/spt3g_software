@@ -399,8 +399,8 @@ crc32c_sse42(unsigned long crc, const unsigned char FAR *buf, unsigned len)
     return crc;
 }
 
-unsigned long
-crc32c(unsigned long crc, const unsigned char FAR *buf, unsigned len)
+local int
+crc32c_i386_has_sse42(void)
 {
     static int has_sse42 = -1;
 
@@ -412,7 +412,13 @@ crc32c(unsigned long crc, const unsigned char FAR *buf, unsigned len)
         has_sse42 = ((c & 0x00100000) != 0);
     }
 
-    if (has_sse42)
+    return has_sse42;
+}
+
+unsigned long
+crc32c(unsigned long crc, const unsigned char FAR *buf, unsigned len)
+{
+    if (crc32c_i386_has_sse42())
         return crc32c_sse42(crc, buf, len);
     else
         return crc32c_tabular(crc, buf, len);
@@ -637,3 +643,26 @@ crc32c(unsigned long crc, const unsigned char FAR *buf, unsigned len)
         return crc32c_tabular(crc, buf, len);
 }
 #endif /* CRC32C_HW */
+
+/* ========================================================================= */
+/* Name of the implementation used by crc32c(), for diagnostics */
+const char *
+crc32c_impl(void)
+{
+#if defined(CRC32C_HW)
+    pthread_once(&crc32c_once, crc32c_init_hw);
+    if (!crc32c_has_hw)
+        return "tabular";
+#if defined(__x86_64__)
+    return "SSE4.2, three streams";
+#elif defined(__ARM_FEATURE_CRC32)
+    return "ARMv8 CRC32 (enabled at compile time), three streams";
+#else
+    return "ARMv8 CRC32 (detected at runtime), three streams";
+#endif
+#elif defined(__i386__)
+    return crc32c_i386_has_sse42() ? "SSE4.2, single stream" : "tabular";
+#else
+    return "tabular";
+#endif
+}

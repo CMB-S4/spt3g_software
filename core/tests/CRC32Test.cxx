@@ -1,9 +1,13 @@
 #include <G3Test.h>
 
+#include <chrono>
 #include <cstdint>
+#include <iomanip>
+#include <iostream>
 #include <vector>
 
 extern "C" unsigned long crc32c(unsigned long crc, const uint8_t *buf, unsigned int len);
+extern "C" const char *crc32c_impl(void);
 
 TEST_GROUP(CRC32C)
 
@@ -66,4 +70,42 @@ TEST(Chained){
 		ENSURE_EQUAL(crc, (unsigned long)expected,
 		    "split at " + std::to_string(split));
 	}
+}
+
+// Throughput in GiB/s of the best of several passes over a buffer
+static double crc32c_throughput(const std::vector<uint8_t> &data, int passes)
+{
+	double best = 1e30;
+	volatile unsigned long sink = 0;
+	for (int i = 0; i < passes; i++) {
+		auto start = std::chrono::steady_clock::now();
+		sink = crc32c(sink, data.data(), data.size());
+		std::chrono::duration<double> dt =
+		    std::chrono::steady_clock::now() - start;
+		if (dt.count() < best)
+			best = dt.count();
+	}
+	return data.size() / best / (1 << 30);
+}
+
+// Report which implementation is in use and how fast it is. Output is only
+// shown when running in verbose mode (core-test --verbose).
+TEST(Diagnostics){
+#if defined(__x86_64__)
+	const char *arch = "x86_64";
+#elif defined(__aarch64__)
+	const char *arch = "aarch64";
+#elif defined(__i386__)
+	const char *arch = "i386";
+#else
+	const char *arch = "other";
+#endif
+	double cached = crc32c_throughput(test_data(256 << 10), 200);
+	double large = crc32c_throughput(test_data(64 << 20), 3);
+
+	std::cout << std::fixed << std::setprecision(1) << "\n"
+	    << "  Target architecture: " << arch << "\n"
+	    << "  CRC32C implementation: " << crc32c_impl() << "\n"
+	    << "  Throughput, 256 KiB buffer (in cache): " << cached << " GiB/s\n"
+	    << "  Throughput, 64 MiB buffer: " << large << " GiB/s\n";
 }
