@@ -1,12 +1,18 @@
 /* NOTE: THIS IS MODIFIED FROM THE ZLIB VERSION IN ORDER TO COMPUTE A CRC32-C
  * INSTEAD OF A CRC32.
  *
- * In addition, an SSE4.2 implementation has been provided to compute the CRC
- * in hardware.
+ * In addition, implementations using the SSE4.2 (x86) and ARMv8 CRC32
+ * instructions have been provided to compute the CRC in hardware.
  */
 
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
+
+/* Little-endian AArch64, see crc32c_hw() below */
+#if defined(__aarch64__) && !defined(__AARCH64EB__)
+#define CRC32C_ARM
+#endif
 
 #define DYNAMIC_CRC_TABLE
 #define STDC
@@ -253,7 +259,7 @@ const unsigned long FAR * get_crc32c_table()
 #define DO8 DO1; DO1; DO1; DO1; DO1; DO1; DO1; DO1
 
 /* ========================================================================= */
-#if defined(__i386__) || defined (__x86_64__)
+#if defined(__i386__) || defined (__x86_64__) || defined(CRC32C_ARM)
 local unsigned long
 crc32c_tabular(unsigned long crc, const unsigned char FAR *buf, uInt len)
 #else
@@ -423,3 +429,88 @@ crc32c(unsigned long crc, const unsigned char FAR *buf, unsigned len)
 }
 #endif
 
+#ifdef CRC32C_ARM
+/* ========================================================================= */
+/* Hardware CRC32C using the ARMv8 CRC extension.  Like the SSE4.2 version
+ * above, no pre- or post-inversion is applied, so results match the tabular
+ * implementation.
+ *
+ * The extension is optional in ARMv8.0, so unless the compiler is already
+ * targeting a CPU that has it (e.g. on Apple silicon), support is detected at
+ * runtime on Linux, falling back to the tabular implementation.
+ */
+
+#if !defined(__ARM_FEATURE_CRC32) && defined(__linux__)
+#include <sys/auxv.h>
+#ifndef HWCAP_CRC32
+#define HWCAP_CRC32 (1 << 7)
+#endif
+#endif
+
+/* Use inline assembly rather than ACLE intrinsics, so that the build does not
+ * need to target a CPU with the CRC extension. */
+static inline uint32_t
+crc32c_hw_u8(uint32_t crc, uint8_t v)
+{
+    __asm__(".arch_extension crc\n\tcrc32cb %w0, %w0, %w1"
+        : "+r"(crc) : "r"((uint32_t)v));
+    return crc;
+}
+
+static inline uint32_t
+crc32c_hw_u64(uint32_t crc, uint64_t v)
+{
+    __asm__(".arch_extension crc\n\tcrc32cx %w0, %w0, %x1"
+        : "+r"(crc) : "r"(v));
+    return crc;
+}
+
+static inline uint64_t
+load64(const unsigned char *p)
+{
+    uint64_t v;
+    memcpy(&v, p, sizeof(v));
+    return v;
+}
+
+local uint32_t
+crc32c_hw(uint32_t crc, const unsigned char *buf, size_t len)
+{
+    /* Align to eight bytes */
+    while (len && ((uintptr_t)buf & 7)) {
+        crc = crc32c_hw_u8(crc, *buf++);
+        len--;
+    }
+
+    while (len >= 8) {
+        crc = crc32c_hw_u64(crc, load64(buf));
+        buf += 8;
+        len -= 8;
+    }
+    while (len--)
+        crc = crc32c_hw_u8(crc, *buf++);
+
+    return crc;
+}
+
+unsigned long
+crc32c(unsigned long crc, const unsigned char FAR *buf, unsigned len)
+{
+    static int has_hw = -1;
+
+    if (has_hw == -1) {
+#if defined(__ARM_FEATURE_CRC32)
+        has_hw = 1;
+#elif defined(__linux__)
+        has_hw = ((getauxval(AT_HWCAP) & HWCAP_CRC32) != 0);
+#else
+        has_hw = 0;
+#endif
+    }
+
+    if (has_hw)
+        return crc32c_hw((uint32_t)crc, buf, len);
+    else
+        return crc32c_tabular(crc, buf, len);
+}
+#endif /* CRC32C_ARM */
