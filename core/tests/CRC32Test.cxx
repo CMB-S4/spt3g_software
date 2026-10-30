@@ -37,7 +37,8 @@ TEST(KnownValue){
 }
 
 TEST(LengthsAndAlignments){
-	// A range of lengths, including partial words, at every alignment
+	// Lengths around the boundaries of the parallel-stream blocks used by
+	// the hardware implementation (3 x 256 and 3 x 8192 bytes)
 	const size_t lengths[] = {1, 7, 8, 9, 63, 767, 768, 769, 1000,
 	    24575, 24576, 24577, 3 * 24576 + 3 * 256 + 13, 100003};
 	std::vector<uint8_t> data = test_data(100003 + 8);
