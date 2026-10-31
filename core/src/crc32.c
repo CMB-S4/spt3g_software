@@ -10,7 +10,8 @@
 #include <string.h>
 
 /* Architectures with CRC32C instructions, see crc32c_hw() below */
-#if defined(__x86_64__) || (defined(__aarch64__) && !defined(__AARCH64EB__))
+#if defined(__i386__) || defined(__x86_64__) || \
+    (defined(__aarch64__) && !defined(__AARCH64EB__))
 #define CRC32C_HW
 #endif
 
@@ -259,7 +260,7 @@ const unsigned long FAR * get_crc32c_table()
 #define DO8 DO1; DO1; DO1; DO1; DO1; DO1; DO1; DO1
 
 /* ========================================================================= */
-#if defined(__i386__) || defined(CRC32C_HW)
+#ifdef CRC32C_HW
 local unsigned long
 crc32c_tabular(unsigned long crc, const unsigned char FAR *buf, uInt len)
 #else
@@ -374,63 +375,13 @@ crc32_big(unsigned long crc, const unsigned char FAR *buf, unsigned len)
 
 #endif /* BYFOUR */
 
-#if defined(__i386__)
-local unsigned long
-crc32c_sse42(unsigned long crc, const unsigned char FAR *buf, unsigned len)
-{
-    /* From: http://byteworm.com/2010/10/13/crc32 */
-    uint32_t q = len/sizeof(long);
-    uint32_t r = len % sizeof(long);
-    long *p = (long *)buf;
-
-    while (q--) {
-        __asm__ __volatile__(".byte 0xf2, 0xf, 0x38, 0xf1, 0xf1;" : "=S"(crc)
-            : "0"(crc), "c"(*p));
-        p++;
-    }
-
-    buf = (unsigned char *)p;
-    while (r--) {
-        __asm__ __volatile__(".byte 0xf2, 0xf, 0x38, 0xf0, 0xf1;" : "=S"(crc)
-            : "0"(crc), "c"(*buf));
-        buf++;
-    }
-
-    return crc;
-}
-
-static int
-crc32c_i386_has_sse42(void)
-{
-    static int has_sse42 = -1;
-
-    if (has_sse42 == -1) {
-	unsigned int a,b,c,d;
-	/* Workaround use of EBX as the PIC base register */
-        __asm__ __volatile__("xchgl %%ebx, %1; cpuid; xchgl %%ebx, %1" :
-	    "=a"(a), "=r"(b), "=c"(c), "=d"(d) : "0"(1));
-        has_sse42 = ((c & 0x00100000) != 0);
-    }
-
-    return has_sse42;
-}
-
-unsigned long
-crc32c(unsigned long crc, const unsigned char FAR *buf, unsigned len)
-{
-    if (crc32c_i386_has_sse42())
-        return crc32c_sse42(crc, buf, len);
-    else
-        return crc32c_tabular(crc, buf, len);
-}
-#endif /* __i386__ */
-
 #ifdef CRC32C_HW
 /* ========================================================================= */
-/* Hardware CRC32C for x86-64 (SSE4.2) and little-endian AArch64 (ARMv8 CRC
+/* Hardware CRC32C for x86 (SSE4.2) and little-endian AArch64 (ARMv8 CRC
  * extension).  Both provide instructions that update a CRC32C register with
- * 1 or 8 bytes of data.  As in the tabular implementation above, no pre- or
- * post-inversion is applied.
+ * a byte or a machine word of data (4 bytes on 32-bit x86, 8 otherwise).
+ * As in the tabular implementation above, no pre- or post-inversion is
+ * applied.
  *
  * These instructions can start once per cycle, but each result is only
  * available after several cycles: three on Intel (since Nehalem) and AMD
@@ -456,7 +407,13 @@ crc32c(unsigned long crc, const unsigned char FAR *buf, unsigned len)
 #endif
 #endif
 
-#if defined(__x86_64__)
+#if defined(__i386__)
+typedef uint32_t crc32c_word;
+#else
+typedef uint64_t crc32c_word;
+#endif
+
+#if defined(__i386__) || defined(__x86_64__)
 static inline uint32_t
 crc32c_hw_u8(uint32_t crc, uint8_t v)
 {
@@ -465,11 +422,16 @@ crc32c_hw_u8(uint32_t crc, uint8_t v)
 }
 
 static inline uint32_t
-crc32c_hw_u64(uint32_t crc, uint64_t v)
+crc32c_hw_word(uint32_t crc, crc32c_word v)
 {
+#if defined(__x86_64__)
     uint64_t c = crc;
     __asm__("crc32q %1, %0" : "+r"(c) : "rm"(v));
     return (uint32_t)c;
+#else
+    __asm__("crc32l %1, %0" : "+r"(crc) : "rm"(v));
+    return crc;
+#endif
 }
 #else
 /* Use inline assembly rather than ACLE intrinsics, so that the build does not
@@ -483,7 +445,7 @@ crc32c_hw_u8(uint32_t crc, uint8_t v)
 }
 
 static inline uint32_t
-crc32c_hw_u64(uint32_t crc, uint64_t v)
+crc32c_hw_word(uint32_t crc, crc32c_word v)
 {
     __asm__(".arch_extension crc\n\tcrc32cx %w0, %w0, %x1"
         : "+r"(crc) : "r"(v));
@@ -491,10 +453,10 @@ crc32c_hw_u64(uint32_t crc, uint64_t v)
 }
 #endif
 
-static inline uint64_t
-load64(const unsigned char *p)
+static inline crc32c_word
+load_word(const unsigned char *p)
 {
-    uint64_t v;
+    crc32c_word v;
     memcpy(&v, p, sizeof(v));
     return v;
 }
@@ -588,11 +550,17 @@ crc32c_has_hw(void)
 
     if (hw == -1) {
         hw = 0;
-#if defined(__x86_64__)
+#if defined(__i386__) || defined(__x86_64__)
         unsigned int a, b, c, d;
 
+#if defined(__i386__)
+        /* Workaround use of EBX as the PIC base register */
+        __asm__ __volatile__("xchgl %%ebx, %1; cpuid; xchgl %%ebx, %1" :
+            "=a"(a), "=r"(b), "=c"(c), "=d"(d) : "0"(1));
+#else
         __asm__ __volatile__("cpuid" : "=a"(a), "=b"(b), "=c"(c), "=d"(d) :
             "0"(1), "2"(0));
+#endif
         hw = ((c & 0x00100000) != 0);
 #elif defined(__ARM_FEATURE_CRC32)
         hw = 1;
@@ -617,10 +585,10 @@ crc32c_has_hw(void)
         uint32_t crc1 = 0, crc2 = 0; \
         const unsigned char *end = buf + (block); \
         do { \
-            crc0 = crc32c_hw_u64(crc0, load64(buf)); \
-            crc1 = crc32c_hw_u64(crc1, load64(buf + (block))); \
-            crc2 = crc32c_hw_u64(crc2, load64(buf + 2 * (block))); \
-            buf += 8; \
+            crc0 = crc32c_hw_word(crc0, load_word(buf)); \
+            crc1 = crc32c_hw_word(crc1, load_word(buf + (block))); \
+            crc2 = crc32c_hw_word(crc2, load_word(buf + 2 * (block))); \
+            buf += sizeof(crc32c_word); \
         } while (buf < end); \
         crc0 = crc32c_shift(zeros, crc0) ^ crc1; \
         crc0 = crc32c_shift(zeros, crc0) ^ crc2; \
@@ -631,8 +599,8 @@ crc32c_has_hw(void)
 static uint32_t
 crc32c_hw(uint32_t crc0, const unsigned char *buf, size_t len)
 {
-    /* Align to eight bytes */
-    while (len && ((uintptr_t)buf & 7)) {
+    /* Align to a word */
+    while (len && ((uintptr_t)buf & (sizeof(crc32c_word) - 1))) {
         crc0 = crc32c_hw_u8(crc0, *buf++);
         len--;
     }
@@ -640,11 +608,11 @@ crc32c_hw(uint32_t crc0, const unsigned char *buf, size_t len)
     CRC32C_STREAMS(CRC32C_LONG, crc32c_long);
     CRC32C_STREAMS(CRC32C_SHORT, crc32c_short);
 
-    /* Remaining data, eight bytes at a time and then byte by byte */
-    while (len >= 8) {
-        crc0 = crc32c_hw_u64(crc0, load64(buf));
-        buf += 8;
-        len -= 8;
+    /* Remaining data, a word at a time and then byte by byte */
+    while (len >= sizeof(crc32c_word)) {
+        crc0 = crc32c_hw_word(crc0, load_word(buf));
+        buf += sizeof(crc32c_word);
+        len -= sizeof(crc32c_word);
     }
     while (len--)
         crc0 = crc32c_hw_u8(crc0, *buf++);
@@ -670,15 +638,13 @@ crc32c_impl(void)
 #if defined(CRC32C_HW)
     if (!crc32c_has_hw())
         return "tabular";
-#if defined(__x86_64__)
+#if defined(__i386__) || defined(__x86_64__)
     return "SSE4.2, three streams";
 #elif defined(__ARM_FEATURE_CRC32)
     return "ARMv8 CRC32 (enabled at compile time), three streams";
 #else
     return "ARMv8 CRC32 (detected at runtime), three streams";
 #endif
-#elif defined(__i386__)
-    return crc32c_i386_has_sse42() ? "SSE4.2, single stream" : "tabular";
 #else
     return "tabular";
 #endif
