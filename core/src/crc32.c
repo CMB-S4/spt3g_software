@@ -399,7 +399,7 @@ crc32c_sse42(unsigned long crc, const unsigned char FAR *buf, unsigned len)
     return crc;
 }
 
-local int
+static int
 crc32c_i386_has_sse42(void)
 {
     static int has_sse42 = -1;
@@ -432,18 +432,22 @@ crc32c(unsigned long crc, const unsigned char FAR *buf, unsigned len)
  * 1 or 8 bytes of data.  As in the tabular implementation above, no pre- or
  * post-inversion is applied.
  *
- * These instructions can typically start every cycle, but take about three
- * cycles to produce a result, so a single dependent chain runs at a third of
- * the available throughput.  Large buffers are therefore split into three
- * adjacent blocks whose CRCs are computed in parallel, and then combined by
- * shifting each partial CRC past the length of the blocks that follow it
- * (i.e. appending that many zero bytes) using precomputed tables.  This is
- * the method used in Mark Adler's crc32c.c.
+ * These instructions can start once per cycle, but each result is only
+ * available after several cycles: three on Intel (since Nehalem) and AMD
+ * processors, and two to three on common ARM cores.  A single dependent
+ * chain therefore leaves the unit idle much of the time.  Large buffers are
+ * split into three adjacent blocks whose CRCs are computed in parallel, which
+ * is enough to keep the unit busy on all of these.  The partial CRCs are then
+ * combined by shifting each one past the length of the blocks that follow it
+ * (i.e. appending that many zero bytes) using precomputed tables.
+ *
+ * The method is described in V. Gopal et al., "Fast CRC Computation for
+ * iSCSI Polynomial Using CRC32 Instruction", Intel white paper (2011).  This
+ * implementation follows Mark Adler's crc32c.c (zlib license), posted at
+ * https://stackoverflow.com/questions/17645167/implementing-sse-4-2s-crc32c-in-software
  *
  * Support is detected at runtime, falling back to the tabular implementation.
  */
-
-#include <pthread.h>
 
 #if defined(__aarch64__) && !defined(__ARM_FEATURE_CRC32) && defined(__linux__)
 #include <sys/auxv.h>
@@ -500,14 +504,16 @@ load64(const unsigned char *p)
 #define CRC32C_SHORT 256
 
 /* Tables to shift a CRC past CRC32C_LONG or CRC32C_SHORT zero bytes */
-local uint32_t crc32c_long[4][256];
-local uint32_t crc32c_short[4][256];
+static uint32_t crc32c_long[4][256];
+static uint32_t crc32c_short[4][256];
 
-local int crc32c_has_hw = 0;
-local pthread_once_t crc32c_once = PTHREAD_ONCE_INIT;
+/* The CRC is linear over GF(2), so the effect of appending zero bits to the
+ * data is a linear map on the 32-bit CRC register, i.e. a 32x32 bit matrix.
+ * Matrices are stored as 32 columns, where column n is the image of bit n.
+ * These helpers are from zlib's crc32_combine(). */
 
 /* Multiply a 32x32 matrix by a vector over GF(2) */
-local uint32_t
+static uint32_t
 gf2_matrix_times(const uint32_t *mat, uint32_t vec)
 {
     uint32_t sum = 0;
@@ -522,7 +528,7 @@ gf2_matrix_times(const uint32_t *mat, uint32_t vec)
 }
 
 /* Square a 32x32 matrix over GF(2) */
-local void
+static void
 gf2_matrix_square(uint32_t *square, const uint32_t *mat)
 {
     int n;
@@ -533,14 +539,15 @@ gf2_matrix_square(uint32_t *square, const uint32_t *mat)
 
 /* Build lookup tables that shift a CRC past len zero bytes, a byte of the
  * CRC at a time.  len must be a power of two. */
-local void
+static void
 crc32c_zeros(uint32_t zeros[][256], size_t len)
 {
     uint32_t op[32], tmp[32];
     uint32_t row = 1;
     uint32_t n;
 
-    /* Operator for one zero bit */
+    /* Operator for one zero bit: the register shifts right by one, and the
+     * polynomial is added if the bit shifted out was set */
     op[0] = 0x82f63b78UL;
     for (n = 1; n < 32; n++) {
         op[n] = row;
@@ -569,25 +576,38 @@ crc32c_shift(uint32_t zeros[][256], uint32_t crc)
         zeros[2][(crc >> 16) & 0xff] ^ zeros[3][crc >> 24];
 }
 
-local void
-crc32c_init_hw(void)
+/* Detect hardware support, and build the shift tables if it is present.
+ * Threads racing through the first call all compute and store the same
+ * values.  The release store and acquire load ensure that a thread seeing
+ * has_hw set also sees the finished tables. */
+static int
+crc32c_has_hw(void)
 {
-#if defined(__x86_64__)
-    unsigned int a, b, c, d;
+    static int has_hw = -1;
+    int hw = __atomic_load_n(&has_hw, __ATOMIC_ACQUIRE);
 
-    __asm__ __volatile__("cpuid" : "=a"(a), "=b"(b), "=c"(c), "=d"(d) :
-        "0"(1), "2"(0));
-    crc32c_has_hw = ((c & 0x00100000) != 0);
+    if (hw == -1) {
+        hw = 0;
+#if defined(__x86_64__)
+        unsigned int a, b, c, d;
+
+        __asm__ __volatile__("cpuid" : "=a"(a), "=b"(b), "=c"(c), "=d"(d) :
+            "0"(1), "2"(0));
+        hw = ((c & 0x00100000) != 0);
 #elif defined(__ARM_FEATURE_CRC32)
-    crc32c_has_hw = 1;
+        hw = 1;
 #elif defined(__linux__)
-    crc32c_has_hw = ((getauxval(AT_HWCAP) & HWCAP_CRC32) != 0);
+        hw = ((getauxval(AT_HWCAP) & HWCAP_CRC32) != 0);
 #endif
 
-    if (crc32c_has_hw) {
-        crc32c_zeros(crc32c_long, CRC32C_LONG);
-        crc32c_zeros(crc32c_short, CRC32C_SHORT);
+        if (hw) {
+            crc32c_zeros(crc32c_long, CRC32C_LONG);
+            crc32c_zeros(crc32c_short, CRC32C_SHORT);
+        }
+        __atomic_store_n(&has_hw, hw, __ATOMIC_RELEASE);
     }
+
+    return hw;
 }
 
 /* Compute the CRC of len bytes of buf in three parallel streams of
@@ -608,7 +628,7 @@ crc32c_init_hw(void)
         len -= 3 * (block); \
     }
 
-local uint32_t
+static uint32_t
 crc32c_hw(uint32_t crc0, const unsigned char *buf, size_t len)
 {
     /* Align to eight bytes */
@@ -635,9 +655,7 @@ crc32c_hw(uint32_t crc0, const unsigned char *buf, size_t len)
 unsigned long
 crc32c(unsigned long crc, const unsigned char FAR *buf, unsigned len)
 {
-    pthread_once(&crc32c_once, crc32c_init_hw);
-
-    if (crc32c_has_hw)
+    if (crc32c_has_hw())
         return crc32c_hw((uint32_t)crc, buf, len);
     else
         return crc32c_tabular(crc, buf, len);
@@ -650,8 +668,7 @@ const char *
 crc32c_impl(void)
 {
 #if defined(CRC32C_HW)
-    pthread_once(&crc32c_once, crc32c_init_hw);
-    if (!crc32c_has_hw)
+    if (!crc32c_has_hw())
         return "tabular";
 #if defined(__x86_64__)
     return "SSE4.2, three streams";
