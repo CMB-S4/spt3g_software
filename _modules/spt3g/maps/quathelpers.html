@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>spt3g.maps.quathelpers &mdash; SPT-3G Software  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=0517cd0f" />
 
@@ -676,14 +676,14 @@
            <div itemprop="articleBody">
              
   <h1>Source code for spt3g.maps.quathelpers</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">..core</span> <span class="kn">import</span> <span class="n">G3Units</span><span class="p">,</span> <span class="n">Quat</span><span class="p">,</span> <span class="n">G3VectorQuat</span><span class="p">,</span> <span class="n">G3TimestreamQuat</span><span class="p">,</span> <span class="n">usefulfunc</span><span class="p">,</span> <span class="n">indexmod</span>
-<span class="kn">import</span> <span class="nn">numpy</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">..core</span><span class="w"> </span><span class="kn">import</span> <span class="n">G3Units</span><span class="p">,</span> <span class="n">Quat</span><span class="p">,</span> <span class="n">G3VectorQuat</span><span class="p">,</span> <span class="n">G3TimestreamQuat</span><span class="p">,</span> <span class="n">usefulfunc</span><span class="p">,</span> <span class="n">indexmod</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
 
 
 <div class="viewcode-block" id="quat_to_ang">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.quathelpers.quat_to_ang">[docs]</a>
 <span class="nd">@usefulfunc</span>
-<span class="k">def</span> <span class="nf">quat_to_ang</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">quat_to_ang</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert a pointing quaternion (or vector of them) to a set of angles (or</span>
 <span class="sd">    vector of them) specified as a (longitude, latitude) pair.</span>
@@ -715,7 +715,7 @@
 <div class="viewcode-block" id="ang_to_quat">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.quathelpers.ang_to_quat">[docs]</a>
 <span class="nd">@usefulfunc</span>
-<span class="k">def</span> <span class="nf">ang_to_quat</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">delta</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ang_to_quat</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">delta</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert a set of angles (or vector of them) specified as a (longitude,</span>
 <span class="sd">    latitude) pair to a pointing quaternion (or vector of them). If start</span>
@@ -751,7 +751,7 @@
 <div class="viewcode-block" id="AddTimingToPointingQuats">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.quathelpers.AddTimingToPointingQuats">[docs]</a>
 <span class="nd">@indexmod</span>
-<span class="k">def</span> <span class="nf">AddTimingToPointingQuats</span><span class="p">(</span><span class="n">fr</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">timing_ref</span><span class="o">=</span><span class="s1">&#39;RawBoresightAz&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">AddTimingToPointingQuats</span><span class="p">(</span><span class="n">fr</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">timing_ref</span><span class="o">=</span><span class="s1">&#39;RawBoresightAz&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transforms a quaternion pointing timestream &lt;key&gt; from a G3VectorQuat</span>
 <span class="sd">    to a G3TimestreamQuat by adding timing information extracted from some</span>

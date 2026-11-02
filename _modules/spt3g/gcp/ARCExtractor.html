@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>spt3g.gcp.ARCExtractor &mdash; SPT-3G Software  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=0517cd0f" />
 
@@ -676,12 +676,12 @@
            <div itemprop="articleBody">
              
   <h1>Source code for spt3g.gcp.ARCExtractor</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">core</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">ACUStatus</span><span class="p">,</span> <span class="n">ACUState</span><span class="p">,</span> <span class="n">TrackerStatus</span><span class="p">,</span> <span class="n">TrackerState</span><span class="p">,</span> <span class="n">TrackerPointing</span><span class="p">,</span> <span class="n">CalFile</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">core</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">ACUStatus</span><span class="p">,</span> <span class="n">ACUState</span><span class="p">,</span> <span class="n">TrackerStatus</span><span class="p">,</span> <span class="n">TrackerState</span><span class="p">,</span> <span class="n">TrackerPointing</span><span class="p">,</span> <span class="n">CalFile</span>
 
-<span class="k">def</span> <span class="nf">UnitValue</span><span class="p">(</span><span class="n">caldict_entry</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">UnitValue</span><span class="p">(</span><span class="n">caldict_entry</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;Turn unit name into floating point unit value&#39;&#39;&#39;</span>
 
     <span class="k">if</span> <span class="s1">&#39;UnitValue&#39;</span> <span class="ow">in</span> <span class="n">caldict_entry</span><span class="p">:</span>
@@ -713,7 +713,7 @@
     <span class="k">return</span> <span class="n">uvalue</span>
 
 
-<span class="k">def</span> <span class="nf">CalibrateValue</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">caldict_entry</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">CalibrateValue</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">caldict_entry</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;Apply gain / offset units from G3 cal file to register&#39;&#39;&#39;</span>
 
     <span class="n">uvalue</span> <span class="o">=</span> <span class="n">UnitValue</span><span class="p">(</span><span class="n">caldict_entry</span><span class="p">)</span>
@@ -752,14 +752,14 @@
 <div class="viewcode-block" id="CalibrateFrame">
 <a class="viewcode-back" href="../../../moddoc_gcp.html#spt3g.gcp.ARCExtractor.CalibrateFrame">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">class</span> <span class="nc">CalibrateFrame</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CalibrateFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;Apply gain / offset / units from G3 cal file&#39;&#39;&#39;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calibration_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calibration_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">cf</span> <span class="o">=</span> <span class="n">CalFile</span><span class="o">.</span><span class="n">CalFileReader</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cal</span> <span class="o">=</span> <span class="n">cf</span><span class="o">.</span><span class="n">readCalFile</span><span class="p">(</span><span class="n">calibration_file</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="n">frame</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">GcpSlow</span> <span class="ow">or</span> <span class="s1">&#39;Calibrated&#39;</span> <span class="ow">in</span> <span class="n">frame</span><span class="p">:</span>
             <span class="k">return</span>
@@ -801,7 +801,7 @@
 <div class="viewcode-block" id="UnpackACUData">
 <a class="viewcode-back" href="../../../moddoc_gcp.html#spt3g.gcp.ARCExtractor.UnpackACUData">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">UnpackACUData</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">UnpackACUData</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;Extracts ACU status information to ACUStatus key in frame&#39;&#39;&#39;</span>
 
     <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">GcpSlow</span><span class="p">:</span>
@@ -841,7 +841,7 @@
 <div class="viewcode-block" id="UnpackTrackerMinimal">
 <a class="viewcode-back" href="../../../moddoc_gcp.html#spt3g.gcp.ARCExtractor.UnpackTrackerMinimal">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">UnpackTrackerMinimal</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">rewrite_source_from_feature_bits</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">UnpackTrackerMinimal</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">rewrite_source_from_feature_bits</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Construct SourceName and ObservationId keys from frame.</span>
 
@@ -879,7 +879,7 @@
 <div class="viewcode-block" id="UnpackTrackerData">
 <a class="viewcode-back" href="../../../moddoc_gcp.html#spt3g.gcp.ARCExtractor.UnpackTrackerData">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">UnpackTrackerData</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">rewrite_source_from_feature_bits</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">UnpackTrackerData</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">rewrite_source_from_feature_bits</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Extracts tracker status information to frame into the TrackerStatus key,</span>
 <span class="sd">    along with the observation processing handled by UnpackTrackerMinimal.</span>
@@ -946,7 +946,7 @@
 <div class="viewcode-block" id="UnpackTrackerPointingData">
 <a class="viewcode-back" href="../../../moddoc_gcp.html#spt3g.gcp.ARCExtractor.UnpackTrackerPointingData">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">UnpackTrackerPointingData</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">UnpackTrackerPointingData</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Extracts tracker registers relevant to online and offline pointing.</span>
 <span class="sd">    Calibration values (offsets and multiplicative constants) are from</span>
@@ -1035,7 +1035,7 @@
 <div class="viewcode-block" id="UpdateLinearSensorDeltas">
 <a class="viewcode-back" href="../../../moddoc_gcp.html#spt3g.gcp.ARCExtractor.UpdateLinearSensorDeltas">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">UpdateLinearSensorDeltas</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">UpdateLinearSensorDeltas</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
 
     <span class="k">if</span> <span class="s1">&#39;TrackerPointing&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
         <span class="k">return</span>
@@ -1067,7 +1067,7 @@
 <div class="viewcode-block" id="DecryptFeatureBit">
 <a class="viewcode-back" href="../../../moddoc_gcp.html#spt3g.gcp.ARCExtractor.DecryptFeatureBit">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">DecryptFeatureBit</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">DecryptFeatureBit</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Unpacks the GCP feature flags</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -1097,7 +1097,7 @@
 <div class="viewcode-block" id="AddBenchData">
 <a class="viewcode-back" href="../../../moddoc_gcp.html#spt3g.gcp.ARCExtractor.AddBenchData">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">AddBenchData</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">AddBenchData</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Add the optical bench positions to the frame.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -1162,7 +1162,7 @@
 <div class="viewcode-block" id="UnpackCryoData">
 <a class="viewcode-back" href="../../../moddoc_gcp.html#spt3g.gcp.ARCExtractor.UnpackCryoData">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">UnpackCryoData</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">UnpackCryoData</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Extracts cryo information into CryoStatus key</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -1249,7 +1249,7 @@
 <div class="viewcode-block" id="UnpackPTData">
 <a class="viewcode-back" href="../../../moddoc_gcp.html#spt3g.gcp.ARCExtractor.UnpackPTData">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">UnpackPTData</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">UnpackPTData</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;Extracts pulse tube status information to PTStatus key </span>
 <span class="sd">    in frame&#39;&#39;&#39;</span>
 
@@ -1294,7 +1294,7 @@
 <div class="viewcode-block" id="UnpackMuxData">
 <a class="viewcode-back" href="../../../moddoc_gcp.html#spt3g.gcp.ARCExtractor.UnpackMuxData">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">UnpackMuxData</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">UnpackMuxData</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Add the DFMux data to the frame.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -1324,7 +1324,7 @@
 <div class="viewcode-block" id="UnpackWeatherData">
 <a class="viewcode-back" href="../../../moddoc_gcp.html#spt3g.gcp.ARCExtractor.UnpackWeatherData">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">UnpackWeatherData</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">UnpackWeatherData</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;Extracts weather status information to Weather key </span>
 <span class="sd">    in frame&#39;&#39;&#39;</span>
 
@@ -1355,7 +1355,7 @@
 
 
 <span class="nd">@core</span><span class="o">.</span><span class="n">pipesegment</span>
-<span class="k">def</span> <span class="nf">ARCExtract</span><span class="p">(</span><span class="n">pipe</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ARCExtract</span><span class="p">(</span><span class="n">pipe</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;Extract GCP registers into native objects&#39;&#39;&#39;</span>
     <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">CalibrateFrame</span><span class="p">)</span>
     <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">UnpackACUData</span><span class="p">)</span>
@@ -1371,7 +1371,7 @@
 
 
 <span class="nd">@core</span><span class="o">.</span><span class="n">pipesegment</span>
-<span class="k">def</span> <span class="nf">ARCExtractMinimal</span><span class="p">(</span><span class="n">pipe</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ARCExtractMinimal</span><span class="p">(</span><span class="n">pipe</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Extract bare minimum GCP registers into native objects.</span>
 

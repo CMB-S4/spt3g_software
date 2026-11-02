@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>spt3g.core.fileio &mdash; SPT-3G Software  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=0517cd0f" />
 
@@ -676,14 +676,14 @@
            <div itemprop="articleBody">
              
   <h1>Source code for spt3g.core.fileio</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">core</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">core</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;G3File&quot;</span><span class="p">]</span>
 
 <div class="viewcode-block" id="G3File">
 <a class="viewcode-back" href="../../../moddoc_core.html#spt3g.core.fileio.G3File">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">usefulfunc</span>
-<span class="k">class</span> <span class="nc">G3File</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">G3File</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Iterable class for G3 files, as created by G3Writer. Loop through frames by doing something like::</span>
 
 <span class="sd">        with core.G3File(&quot;/path/to/file.g3&quot;) as f:</span>
@@ -695,15 +695,15 @@
 <span class="sd">        f = list(core.G3File(&quot;/path/to/file.g3&quot;))</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reader</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3Reader</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span>
 
 <div class="viewcode-block" id="G3File.next">
 <a class="viewcode-back" href="../../../moddoc_core.html#spt3g.core.fileio.G3File.next">[docs]</a>
-    <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the next frame from the file.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -719,10 +719,10 @@
 
     <span class="fm">__next__</span> <span class="o">=</span> <span class="nb">next</span>
 
-    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span>
 
-    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">reader</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">reader</span> <span class="o">=</span> <span class="kc">None</span></div>
 
@@ -731,11 +731,11 @@
 <span class="c1"># writer context methods</span>
 
 
-<span class="k">def</span> <span class="nf">writer_enter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">writer_enter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">self</span>
 
 
-<span class="k">def</span> <span class="nf">writer_exit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">writer_exit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="n">fr</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3Frame</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">EndProcessing</span><span class="p">)</span>
     <span class="bp">self</span><span class="p">(</span><span class="n">fr</span><span class="p">)</span>
 

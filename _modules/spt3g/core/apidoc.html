@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>spt3g.core.apidoc &mdash; SPT-3G Software  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=0517cd0f" />
 
@@ -676,14 +676,14 @@
            <div itemprop="articleBody">
              
   <h1>Source code for spt3g.core.apidoc</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">G3Module</span><span class="p">,</span> <span class="n">G3FrameObject</span><span class="p">,</span> <span class="n">usefulfunc</span>
-<span class="kn">import</span> <span class="nn">textwrap</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">G3Module</span><span class="p">,</span> <span class="n">G3FrameObject</span><span class="p">,</span> <span class="n">usefulfunc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">textwrap</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;G3Documenter&quot;</span><span class="p">,</span> <span class="s2">&quot;module_apidoc&quot;</span><span class="p">]</span>
 
 
-<span class="k">def</span> <span class="nf">rst_header</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">overline</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">rst_header</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">overline</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Add a valid RST underline (and optional matching overline) to create a</span>
 <span class="sd">    section header.</span>
@@ -697,7 +697,7 @@
 <div class="viewcode-block" id="G3Documenter">
 <a class="viewcode-back" href="../../../moddoc_core.html#spt3g.core.apidoc.G3Documenter">[docs]</a>
 <span class="nd">@usefulfunc</span>
-<span class="k">class</span> <span class="nc">G3Documenter</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">G3Documenter</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class for inspecting sub-modules of the SPT-3G software package and</span>
 <span class="sd">    generating valid RST for use with sphinx-autodoc.</span>
@@ -794,12 +794,12 @@
         <span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">root</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cache</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">categories</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">categories</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Dictionary of API categories for which to generate documentation,</span>
 <span class="sd">        containing a section title, description, and sphinx-autodoc directive as</span>
@@ -809,7 +809,7 @@
 
 <div class="viewcode-block" id="G3Documenter.find_objects">
 <a class="viewcode-back" href="../../../moddoc_core.html#spt3g.core.apidoc.G3Documenter.find_objects">[docs]</a>
-    <span class="k">def</span> <span class="nf">find_objects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mod</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">find_objects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mod</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Recursively find all objects in the input root that fit into one of the</span>
 <span class="sd">        API categories listed in ``categories``.</span>
@@ -888,7 +888,7 @@
 
 <div class="viewcode-block" id="G3Documenter.generate">
 <a class="viewcode-back" href="../../../moddoc_core.html#spt3g.core.apidoc.G3Documenter.generate">[docs]</a>
-    <span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Construct valid RST for each of the API types in separate sections, and</span>
 <span class="sd">        list all relevant objects with appropriate sphinx-autodoc directives.</span>
@@ -928,7 +928,7 @@
 <div class="viewcode-block" id="module_apidoc">
 <a class="viewcode-back" href="../../../moddoc_core.html#spt3g.core.apidoc.module_apidoc">[docs]</a>
 <span class="nd">@usefulfunc</span>
-<span class="k">def</span> <span class="nf">module_apidoc</span><span class="p">(</span><span class="n">module_path</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">module_apidoc</span><span class="p">(</span><span class="n">module_path</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create API documentation for a submodule of the spt3g library.</span>
 

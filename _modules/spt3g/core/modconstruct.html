@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>spt3g.core.modconstruct &mdash; SPT-3G Software  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=0517cd0f" />
 
@@ -676,13 +676,13 @@
            <div itemprop="articleBody">
              
   <h1>Source code for spt3g.core.modconstruct</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">G3Module</span><span class="p">,</span> <span class="n">G3Pipeline</span><span class="p">,</span> <span class="n">G3PipelineInfo</span><span class="p">,</span> <span class="n">G3Frame</span><span class="p">,</span> <span class="n">G3FrameType</span><span class="p">,</span> <span class="n">G3Time</span><span class="p">,</span> <span class="n">G3ModuleConfig</span>
-<span class="kn">import</span> <span class="nn">types</span>
-<span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">import</span> <span class="nn">textwrap</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">G3Module</span><span class="p">,</span> <span class="n">G3Pipeline</span><span class="p">,</span> <span class="n">G3PipelineInfo</span><span class="p">,</span> <span class="n">G3Frame</span><span class="p">,</span> <span class="n">G3FrameType</span><span class="p">,</span> <span class="n">G3Time</span><span class="p">,</span> <span class="n">G3ModuleConfig</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">types</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">textwrap</span>
 
 
-<span class="k">def</span> <span class="nf">g3decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">g3decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Mark argument as a decorator that can be found by automated</span>
 <span class="sd">    documentation tools.</span>
@@ -694,7 +694,7 @@
 <div class="viewcode-block" id="usefulfunc">
 <a class="viewcode-back" href="../../../moddoc_core.html#spt3g.core.util.usefulfunc">[docs]</a>
 <span class="nd">@g3decorator</span>
-<span class="k">def</span> <span class="nf">usefulfunc</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">usefulfunc</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Mark argument as a useful function that can be found by automated</span>
 <span class="sd">    documentation tools.</span>
@@ -717,9 +717,9 @@
 <span class="n">usefulfunc</span><span class="o">.</span><span class="n">__g3usefulfunc__</span> <span class="o">=</span> <span class="kc">True</span>
 
 
-<span class="k">class</span> <span class="nc">PipeSegmentDocstring</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PipeSegmentDocstring</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">__doc__</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__doc__</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
         <span class="k">return</span> <span class="s1">&#39;&#39;&#39;</span>
 <span class="s1">    Use as a decorator for a pre-assembled set of pipeline modules. Makes a</span>
 <span class="s1">    pseudo-module consisting of several inputs. Use this to introspect the</span>
@@ -753,16 +753,16 @@
 <div class="viewcode-block" id="pipesegment">
 <a class="viewcode-back" href="../../../moddoc_core.html#spt3g.core.util.pipesegment">[docs]</a>
 <span class="nd">@g3decorator</span>
-<span class="k">class</span> <span class="nc">pipesegment</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">PipeSegmentDocstring</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">pipesegment</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">PipeSegmentDocstring</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__wrapped__</span> <span class="o">=</span> <span class="n">func</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__pipesegment__</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">__pipesegment__</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pipe</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pipe</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="n">pipe</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">__doc__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__doc__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a dummy pipeline for introspection.  Generates a docstring when</span>
 <span class="sd">        the __doc__ attribute is accessed.</span>
@@ -775,8 +775,8 @@
             <span class="n">introdoc</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span>
         <span class="n">introdoc</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Equivalent to</span><span class="se">\n</span><span class="s1">-------------</span><span class="se">\n\n</span><span class="s1">::</span><span class="se">\n\n</span><span class="s1">&#39;</span>
         <span class="n">doclines</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">class</span> <span class="nc">PotemkinPipe</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-            <span class="k">def</span> <span class="nf">Add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thing</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">class</span><span class="w"> </span><span class="nc">PotemkinPipe</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">Add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">thing</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
                 <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">thing</span><span class="p">,</span> <span class="s2">&quot;__wrapped__&quot;</span><span class="p">):</span>
                     <span class="n">thing</span> <span class="o">=</span> <span class="n">thing</span><span class="o">.</span><span class="n">__wrapped__</span>
                 <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">thing</span><span class="p">,</span> <span class="s2">&quot;__self__&quot;</span><span class="p">):</span>
@@ -822,7 +822,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_autodoc</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">__name__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__name__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span></div>
 
 
@@ -830,7 +830,7 @@
 <div class="viewcode-block" id="pipesegment_nodoc">
 <a class="viewcode-back" href="../../../moddoc_core.html#spt3g.core.util.pipesegment_nodoc">[docs]</a>
 <span class="nd">@g3decorator</span>
-<span class="k">def</span> <span class="nf">pipesegment_nodoc</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">pipesegment_nodoc</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Use as a decorator for a pre-assembled set of pipeline modules. Makes a</span>
 <span class="sd">    pseudo-module consisting of several inputs.  Use this variant instead of</span>
@@ -867,7 +867,7 @@
 <div class="viewcode-block" id="indexmod">
 <a class="viewcode-back" href="../../../moddoc_core.html#spt3g.core.util.indexmod">[docs]</a>
 <span class="nd">@g3decorator</span>
-<span class="k">def</span> <span class="nf">indexmod</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">indexmod</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Mark argument as a processing module that can be found by automated</span>
 <span class="sd">    documentation tools.</span>
@@ -886,9 +886,9 @@
     <span class="k">return</span> <span class="n">func</span></div>
 
 
-<span class="k">def</span> <span class="nf">build_pymodule</span><span class="p">(</span><span class="n">pycallable</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_pymodule</span><span class="p">(</span><span class="n">pycallable</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;Convert a python callable and arguments into a core.G3Module by hook or by crook&#39;&#39;&#39;</span>
-    <span class="kn">from</span> <span class="nn">.g3logging</span> <span class="kn">import</span> <span class="n">log_fatal</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.g3logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">log_fatal</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pycallable</span><span class="p">,</span> <span class="n">G3Module</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">pycallable</span>
@@ -897,8 +897,8 @@
         <span class="n">log_fatal</span><span class="p">(</span><span class="s1">&#39;Argument not a python callable&#39;</span><span class="p">,</span> <span class="n">unit</span> <span class="o">=</span> <span class="s1">&#39;G3Pipeline&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">pycallable</span><span class="p">)</span> <span class="o">==</span> <span class="n">types</span><span class="o">.</span><span class="n">FunctionType</span><span class="p">:</span>
-        <span class="k">class</span> <span class="nc">PyFuncModule</span><span class="p">(</span><span class="n">G3Module</span><span class="p">):</span>
-            <span class="k">def</span> <span class="nf">Process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fr</span><span class="p">):</span>
+        <span class="k">class</span><span class="w"> </span><span class="nc">PyFuncModule</span><span class="p">(</span><span class="n">G3Module</span><span class="p">):</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">Process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fr</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">pycallable</span><span class="p">(</span><span class="n">fr</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">PyFuncModule</span><span class="p">()</span>
 
@@ -925,16 +925,16 @@
         <span class="k">return</span> <span class="n">pycallable</span>
 
     <span class="c1"># This is a python callable that is not a module, so wrap it</span>
-    <span class="k">class</span> <span class="nc">PyCallObjModule</span><span class="p">(</span><span class="n">G3Module</span><span class="p">):</span>
-        <span class="k">def</span> <span class="nf">Process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fr</span><span class="p">):</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">PyCallObjModule</span><span class="p">(</span><span class="n">G3Module</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">Process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fr</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">pycallable</span><span class="p">(</span><span class="n">fr</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">PyCallObjModule</span><span class="p">()</span>
 
-<span class="k">class</span> <span class="nc">_add_pipeline_info</span><span class="p">(</span><span class="n">G3Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">version</span>
-        <span class="kn">import</span> <span class="nn">socket</span><span class="o">,</span> <span class="nn">getpass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_add_pipeline_info</span><span class="p">(</span><span class="n">G3Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">version</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">socket</span><span class="o">,</span><span class="w"> </span><span class="nn">getpass</span>
 
         <span class="n">G3Module</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">infoemitted</span> <span class="o">=</span> <span class="kc">False</span>
@@ -951,7 +951,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">pipelineinfo</span><span class="o">.</span><span class="n">hostname</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">gethostname</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pipelineinfo</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="n">getpass</span><span class="o">.</span><span class="n">getuser</span><span class="p">()</span>
-    <span class="k">def</span> <span class="nf">Process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fr</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">Process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fr</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">infoemitted</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">fr</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">G3FrameType</span><span class="o">.</span><span class="n">PipelineInfo</span> <span class="ow">and</span> \
               <span class="bp">self</span><span class="o">.</span><span class="n">originalpi</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> \
@@ -982,7 +982,7 @@
         <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span>
         <span class="k">return</span> <span class="n">rv</span>
 
-<span class="k">def</span> <span class="nf">PipelineAddCallable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">callable</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">subprocess</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">PipelineAddCallable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">callable</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">subprocess</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Add a processing module to the pipeline. It can be any subclass of</span>
 <span class="sd">    spt3g.core.G3Module or any Python callable, either an instance or</span>
@@ -1054,7 +1054,7 @@
         <span class="c1"># Otherwise it&#39;s a module</span>
         <span class="n">pymod</span> <span class="o">=</span> <span class="n">build_pymodule</span><span class="p">(</span><span class="nb">callable</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">subprocess</span><span class="p">:</span>
-            <span class="kn">from</span> <span class="nn">.multiprocess</span> <span class="kn">import</span> <span class="n">Subproc</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">.multiprocess</span><span class="w"> </span><span class="kn">import</span> <span class="n">Subproc</span>
             <span class="n">pymod</span> <span class="o">=</span> <span class="n">build_pymodule</span><span class="p">(</span><span class="n">Subproc</span><span class="p">(</span><span class="n">pymod</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">))</span>
 
         <span class="n">rv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Add_</span><span class="p">(</span><span class="n">pymod</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>

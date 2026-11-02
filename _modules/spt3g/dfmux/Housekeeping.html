@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>spt3g.dfmux.Housekeeping &mdash; SPT-3G Software  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=0517cd0f" />
 
@@ -676,17 +676,17 @@
            <div itemprop="articleBody">
              
   <h1>Source code for spt3g.dfmux.Housekeeping</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">core</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">DfMuxHousekeepingMap</span><span class="p">,</span> <span class="n">HkBoardInfo</span><span class="p">,</span> <span class="n">HkMezzanineInfo</span><span class="p">,</span> <span class="n">HkModuleInfo</span><span class="p">,</span> <span class="n">HkChannelInfo</span><span class="p">,</span> <span class="n">DfMuxWiringMap</span><span class="p">,</span> <span class="n">DfMuxChannelMapping</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">core</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">DfMuxHousekeepingMap</span><span class="p">,</span> <span class="n">HkBoardInfo</span><span class="p">,</span> <span class="n">HkMezzanineInfo</span><span class="p">,</span> <span class="n">HkModuleInfo</span><span class="p">,</span> <span class="n">HkChannelInfo</span><span class="p">,</span> <span class="n">DfMuxWiringMap</span><span class="p">,</span> <span class="n">DfMuxChannelMapping</span>
 
-<span class="kn">from</span> <span class="nn">.TuberClient</span> <span class="kn">import</span> <span class="n">TuberClient</span>
-<span class="kn">import</span> <span class="nn">socket</span><span class="o">,</span> <span class="nn">struct</span><span class="o">,</span> <span class="nn">time</span>
-<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.TuberClient</span><span class="w"> </span><span class="kn">import</span> <span class="n">TuberClient</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">socket</span><span class="o">,</span><span class="w"> </span><span class="nn">struct</span><span class="o">,</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
 
 <div class="viewcode-block" id="HousekeepingConsumer">
 <a class="viewcode-back" href="../../../moddoc_dfmux.html#spt3g.dfmux.Housekeeping.HousekeepingConsumer">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">class</span> <span class="nc">HousekeepingConsumer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">HousekeepingConsumer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Collect housekeeping data from the mux boards defined in the wiring map.</span>
 <span class="sd">    Will add a key called &#39;DfMuxHousekeeping&#39; to any housekeeping frame that</span>
@@ -702,7 +702,7 @@
 <span class="sd">    If collecting real-time data, you may want to set subprocess=True when</span>
 <span class="sd">    adding this module.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ignore_wiring</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ignore_wiring</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tuber</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">board_map</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">board_serials</span> <span class="o">=</span> <span class="p">[]</span>
@@ -712,7 +712,7 @@
 
 <div class="viewcode-block" id="HousekeepingConsumer.map_boards">
 <a class="viewcode-back" href="../../../moddoc_dfmux.html#spt3g.dfmux.Housekeeping.HousekeepingConsumer.map_boards">[docs]</a>
-    <span class="k">def</span> <span class="nf">map_boards</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">map_boards</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Cache IP address, crate serial and slot number and</span>
 <span class="sd">        create a TuberClient for each IceBoard.</span>
@@ -760,7 +760,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">board_map</span><span class="p">[</span><span class="n">board</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">ips</span><span class="p">[</span><span class="n">board</span><span class="p">],</span> <span class="n">crates</span><span class="p">[</span><span class="n">board</span><span class="p">],</span> <span class="n">slots</span><span class="p">[</span><span class="n">board</span><span class="p">])</span></div>
 
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
 
         <span class="c1"># If boards have been mapped already, then process every frame</span>
         <span class="c1"># as received.</span>
@@ -784,7 +784,7 @@
 
 <div class="viewcode-block" id="HousekeepingConsumer.ProcessBuffered">
 <a class="viewcode-back" href="../../../moddoc_dfmux.html#spt3g.dfmux.Housekeeping.HousekeepingConsumer.ProcessBuffered">[docs]</a>
-    <span class="k">def</span> <span class="nf">ProcessBuffered</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ProcessBuffered</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Process frames in the buffered order.  Returned value should</span>
 <span class="sd">        always be a list of frames, possibly empty.</span>
@@ -895,7 +895,7 @@
 <div class="viewcode-block" id="HousekeepingConsumer.HousekeepingFromJSON">
 <a class="viewcode-back" href="../../../moddoc_dfmux.html#spt3g.dfmux.Housekeeping.HousekeepingConsumer.HousekeepingFromJSON">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">HousekeepingFromJSON</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">dat</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">HousekeepingFromJSON</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">dat</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Build HKBoardInfo object from a JSON blob returned by the</span>
 <span class="sd">        _dump_housekeeping call</span>
@@ -1041,7 +1041,7 @@
 <div class="viewcode-block" id="HousekeepingConsumer.WiringFromJSON">
 <a class="viewcode-back" href="../../../moddoc_dfmux.html#spt3g.dfmux.Housekeeping.HousekeepingConsumer.WiringFromJSON">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">WiringFromJSON</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">dat</span><span class="p">,</span> <span class="n">ip</span><span class="p">,</span> <span class="n">crate</span><span class="p">,</span> <span class="n">slot</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">WiringFromJSON</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">dat</span><span class="p">,</span> <span class="n">ip</span><span class="p">,</span> <span class="n">crate</span><span class="p">,</span> <span class="n">slot</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Build WiringMap object from a JSON blob returned by the</span>
 <span class="sd">        _dump_housekeeping call</span>
@@ -1081,7 +1081,7 @@
 <div class="viewcode-block" id="HousekeepingConsumer.HousekeepingForBoard">
 <a class="viewcode-back" href="../../../moddoc_dfmux.html#spt3g.dfmux.Housekeeping.HousekeepingConsumer.HousekeepingForBoard">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">HousekeepingForBoard</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">hostname</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">HousekeepingForBoard</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">hostname</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Return HkBoardInfo object from a board. Useful for debugging.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
@@ -1094,12 +1094,12 @@
 <div class="viewcode-block" id="PeriodicHousekeepingCollector">
 <a class="viewcode-back" href="../../../moddoc_dfmux.html#spt3g.dfmux.Housekeeping.PeriodicHousekeepingCollector">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">class</span> <span class="nc">PeriodicHousekeepingCollector</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PeriodicHousekeepingCollector</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;Inserts housekeeping frames every N timepoints.&#39;&#39;&#39;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">15200</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">15200</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">N</span> <span class="o">=</span> <span class="n">N</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">frame</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Timepoint</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">N</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -1112,7 +1112,7 @@
 <div class="viewcode-block" id="HousekeepingForBolo">
 <a class="viewcode-back" href="../../../moddoc_dfmux.html#spt3g.dfmux.Housekeeping.HousekeepingForBolo">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">usefulfunc</span>
-<span class="k">def</span> <span class="nf">HousekeepingForBolo</span><span class="p">(</span><span class="n">hkmap</span><span class="p">,</span> <span class="n">wiringmap</span><span class="p">,</span> <span class="n">bolo</span><span class="p">,</span> <span class="n">all_hk</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">HousekeepingForBolo</span><span class="p">(</span><span class="n">hkmap</span><span class="p">,</span> <span class="n">wiringmap</span><span class="p">,</span> <span class="n">bolo</span><span class="p">,</span> <span class="n">all_hk</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Obtain the channel housekeeping information for a bolometer named &quot;bolo&quot;</span>
 <span class="sd">    using the passed housekeeping and wiring maps.</span>

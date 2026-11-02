@@ -7,7 +7,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>core &mdash; SPT-3G Software  documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css?v=0517cd0f" />
 
@@ -5401,11 +5401,11 @@ pipelines using the standard <code class="docutils literal notranslate"><span cl
 instantiated outside of pipelines to make use of additional features.</p>
 <p>One typical use case is to extract some kind of data from a series of
 frames:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">ExtractData</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;RawTimestreams&quot;</span><span class="p">):</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ExtractData</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s2">&quot;RawTimestreams&quot;</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="n">key</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="ow">in</span> <span class="n">frame</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">])</span>
 
@@ -9637,7 +9637,7 @@ we want to have a module that works on Scan frames, but have access to the
 BolometerProperties.  This decorator allows you to specify the information
 to cache.  This case looks like:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@core</span><span class="o">.</span><span class="n">cache_frame_data</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Scan</span><span class="p">,</span> <span class="n">bolo_props</span><span class="o">=</span><span class="s1">&#39;BolometerProperties&#39;</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">FlagSomeStuff</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">flag_key</span><span class="o">=</span><span class="s1">&#39;Flags&#39;</span><span class="p">,</span> <span class="n">bolo_props</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">FlagSomeStuff</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">flag_key</span><span class="o">=</span><span class="s1">&#39;Flags&#39;</span><span class="p">,</span> <span class="n">bolo_props</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="k">pass</span>
 </pre></div>
 </div>
@@ -9668,7 +9668,7 @@ core.G3FrameType.Scan.</p>
 documentation tools.</p>
 <p class="rubric">Example</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">dostuff</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dostuff</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
     <span class="n">dosomestuff</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -9683,7 +9683,7 @@ segment to find out what it does, or use <a class="reference internal" href="#sp
 module does anything complicated.</p>
 <p class="rubric">Example</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@core</span><span class="o">.</span><span class="n">pipesegment</span>
-<span class="k">def</span> <span class="nf">standardfiltering</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">standardfiltering</span><span class="p">(</span>
     <span class="n">pipe</span><span class="p">,</span>
     <span class="n">PolyOrder</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
     <span class="n">MaskedHighPassEll</span><span class="o">=</span><span class="mi">6000</span><span class="p">,</span>
@@ -9694,7 +9694,7 @@ module does anything complicated.</p>
         <span class="n">Output</span><span class="o">=</span><span class="s1">&#39;__Temp&#39;</span> <span class="o">+</span> <span class="n">Output</span><span class="p">)</span>
     <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">analysis</span><span class="o">.</span><span class="n">MaskedHighPass</span><span class="p">,</span> <span class="n">MaskedHighPassEll</span><span class="o">=</span><span class="n">MaskedHighPassEll</span><span class="p">,</span>
         <span class="n">Input</span><span class="o">=</span><span class="s1">&#39;__Temp&#39;</span> <span class="o">+</span> <span class="n">Output</span><span class="p">,</span> <span class="n">Output</span><span class="o">=</span><span class="n">Output</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cleanup</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
         <span class="k">del</span> <span class="n">frame</span><span class="p">[</span><span class="s1">&#39;__Temp&#39;</span> <span class="o">+</span> <span class="n">Output</span><span class="p">]</span>
     <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">cleanup</span><span class="p">)</span>
 
@@ -9712,7 +9712,7 @@ pseudo-module consisting of several inputs.  Use this variant instead of
 complicated.</p>
 <p class="rubric">Example</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@core</span><span class="o">.</span><span class="n">pipesegment_nodoc</span>
-<span class="k">def</span> <span class="nf">standardfiltering</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">standardfiltering</span><span class="p">(</span>
     <span class="n">pipe</span><span class="p">,</span>
     <span class="n">PolyOrder</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
     <span class="n">MaskedHighPassEll</span><span class="o">=</span><span class="mi">6000</span><span class="p">,</span>
@@ -9723,7 +9723,7 @@ complicated.</p>
         <span class="n">Output</span><span class="o">=</span><span class="s1">&#39;__Temp&#39;</span> <span class="o">+</span> <span class="n">Output</span><span class="p">)</span>
     <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">analysis</span><span class="o">.</span><span class="n">MaskedHighPass</span><span class="p">,</span> <span class="n">MaskedHighPassEll</span><span class="o">=</span><span class="n">MaskedHighPassEll</span><span class="p">,</span>
         <span class="n">Input</span><span class="o">=</span><span class="s1">&#39;__Temp&#39;</span> <span class="o">+</span> <span class="n">Output</span><span class="p">,</span> <span class="n">Output</span><span class="o">=</span><span class="n">Output</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cleanup</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
         <span class="k">del</span> <span class="n">frame</span><span class="p">[</span><span class="s1">&#39;__Temp&#39;</span> <span class="o">+</span> <span class="n">Output</span><span class="p">]</span>
     <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">cleanup</span><span class="p">)</span>
 
@@ -9739,7 +9739,7 @@ complicated.</p>
 documentation tools.</p>
 <p class="rubric">Example</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@core</span><span class="o">.</span><span class="n">usefulfunc</span>
-<span class="k">def</span> <span class="nf">do_some_science</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">do_some_science</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
     <span class="n">science</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 </pre></div>
 </div>

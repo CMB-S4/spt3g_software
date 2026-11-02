@@ -7,7 +7,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Units &mdash; SPT-3G Software  documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css?v=0517cd0f" />
 
@@ -693,7 +693,7 @@
 <h2>Converting to different units<a class="headerlink" href="#converting-to-different-units" title="Link to this heading"></a></h2>
 <p>If you want a numeric quantity in specific units, you divide by the unit you want (think of doing unit analysis in freshman physics courses).</p>
 <p>For example, to take a passed angle and return its sin, irrespective of the user’s preferred units:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">sinofstuff</span><span class="p">(</span><span class="n">angle</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">sinofstuff</span><span class="p">(</span><span class="n">angle</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="o">/</span><span class="n">core</span><span class="o">.</span><span class="n">G3Units</span><span class="o">.</span><span class="n">rad</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;sin(5 degrees): </span><span class="si">%f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sinoffstuff</span><span class="p">(</span><span class="mi">5</span><span class="o">*</span><span class="n">core</span><span class="o">.</span><span class="n">G3Units</span><span class="o">.</span><span class="n">deg</span><span class="p">))</span>

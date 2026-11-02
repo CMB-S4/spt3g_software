@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>spt3g.gcp.GCPDataTee &mdash; SPT-3G Software  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=0517cd0f" />
 
@@ -676,14 +676,14 @@
            <div itemprop="articleBody">
              
   <h1>Source code for spt3g.gcp.GCPDataTee</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">struct</span><span class="o">,</span> <span class="nn">socket</span><span class="o">,</span> <span class="nn">errno</span><span class="o">,</span> <span class="nn">numpy</span><span class="o">,</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">threading</span>
-<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">core</span><span class="p">,</span> <span class="n">dfmux</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">struct</span><span class="o">,</span><span class="w"> </span><span class="nn">socket</span><span class="o">,</span><span class="w"> </span><span class="nn">errno</span><span class="o">,</span><span class="w"> </span><span class="nn">numpy</span><span class="o">,</span><span class="w"> </span><span class="nn">time</span><span class="o">,</span><span class="w"> </span><span class="nn">threading</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">core</span><span class="p">,</span> <span class="n">dfmux</span>
 
 
 <div class="viewcode-block" id="PagerWatchdog">
 <a class="viewcode-back" href="../../../moddoc_gcp.html#spt3g.gcp.GCPDataTee.PagerWatchdog">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">class</span> <span class="nc">PagerWatchdog</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PagerWatchdog</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Module that sends a watchdog (ping) message to the GCP pager when the parent</span>
 <span class="sd">    process is running successfully.  Modify the `data_valid` method for</span>
@@ -695,7 +695,7 @@
     <span class="n">port</span> <span class="o">=</span> <span class="mi">50040</span>
     <span class="n">timeout</span> <span class="o">=</span> <span class="mi">20</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span> <span class="n">sim</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span> <span class="n">sim</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">Watchdog&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">capitalize</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">interval</span> <span class="o">=</span> <span class="n">interval</span>
@@ -708,7 +708,7 @@
 
 <div class="viewcode-block" id="PagerWatchdog.send">
 <a class="viewcode-back" href="../../../moddoc_gcp.html#spt3g.gcp.GCPDataTee.PagerWatchdog.send">[docs]</a>
-    <span class="k">def</span> <span class="nf">send</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">send</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmd</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Send a command to the GCP pager process, and return the response.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -737,7 +737,7 @@
 
 <div class="viewcode-block" id="PagerWatchdog.ping">
 <a class="viewcode-back" href="../../../moddoc_gcp.html#spt3g.gcp.GCPDataTee.PagerWatchdog.ping">[docs]</a>
-    <span class="k">def</span> <span class="nf">ping</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ping</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Send a watchdog ping message to the GCP pager process.  This method is</span>
 <span class="sd">        called by the `run` method at regular intervals whenever the</span>
@@ -754,7 +754,7 @@
 
 <div class="viewcode-block" id="PagerWatchdog.page">
 <a class="viewcode-back" href="../../../moddoc_gcp.html#spt3g.gcp.GCPDataTee.PagerWatchdog.page">[docs]</a>
-    <span class="k">def</span> <span class="nf">page</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">page</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Issue a page to the GCP pager process.  Called by the user for immediate</span>
 <span class="sd">        notification of errors.</span>
@@ -767,7 +767,7 @@
 
 <div class="viewcode-block" id="PagerWatchdog.data_valid">
 <a class="viewcode-back" href="../../../moddoc_gcp.html#spt3g.gcp.GCPDataTee.PagerWatchdog.data_valid">[docs]</a>
-    <span class="k">def</span> <span class="nf">data_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns True if the watchdog should ping, otherwise False.  Arguments</span>
 <span class="sd">        are passed to this method from the `run` method.</span>
@@ -777,7 +777,7 @@
 
 <div class="viewcode-block" id="PagerWatchdog.run">
 <a class="viewcode-back" href="../../../moddoc_gcp.html#spt3g.gcp.GCPDataTee.PagerWatchdog.run">[docs]</a>
-    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        When called, issues a watchdog ping message if the interval time has passed, and</span>
 <span class="sd">        the `data_valid` method returns True.  All input arguments are passed to the</span>
@@ -811,12 +811,12 @@
 <div class="viewcode-block" id="DAQWatchdog">
 <a class="viewcode-back" href="../../../moddoc_gcp.html#spt3g.gcp.GCPDataTee.DAQWatchdog">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">class</span> <span class="nc">DAQWatchdog</span><span class="p">(</span><span class="n">PagerWatchdog</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DAQWatchdog</span><span class="p">(</span><span class="n">PagerWatchdog</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Watchdog that issues a ping to the GCP pager when the DAQ is operational.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calibrator</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span> <span class="n">sim</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calibrator</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">600</span><span class="p">,</span> <span class="n">sim</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Arguments</span>
 <span class="sd">        ---------</span>
@@ -834,7 +834,7 @@
 
 <div class="viewcode-block" id="DAQWatchdog.data_valid">
 <a class="viewcode-back" href="../../../moddoc_gcp.html#spt3g.gcp.GCPDataTee.DAQWatchdog.data_valid">[docs]</a>
-    <span class="k">def</span> <span class="nf">data_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check the incoming frame for completeness.</span>
 
@@ -899,7 +899,7 @@
         <span class="k">return</span> <span class="n">retval</span></div>
 
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span></div>
 
 
@@ -907,13 +907,13 @@
 <div class="viewcode-block" id="GCPSignalledHousekeeping">
 <a class="viewcode-back" href="../../../moddoc_gcp.html#spt3g.gcp.GCPDataTee.GCPSignalledHousekeeping">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">class</span> <span class="nc">GCPSignalledHousekeeping</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">GCPSignalledHousekeeping</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Module that collects housekeeping data when connected to. If</span>
 <span class="sd">    collect_on_start is True (the default), injects an HK frame</span>
 <span class="sd">    unconditionally at startup.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">50011</span><span class="p">,</span> <span class="n">collect_on_start</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">50011</span><span class="p">,</span> <span class="n">collect_on_start</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">socket</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">socket</span><span class="o">.</span><span class="n">setsockopt</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">SOL_SOCKET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SO_REUSEADDR</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
@@ -924,10 +924,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">collect_on_start</span> <span class="o">=</span> <span class="n">collect_on_start</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">first_frame</span> <span class="o">=</span> <span class="kc">True</span>
 
-    <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">socket</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="c1"># Only try on timepoint frames</span>
         <span class="k">if</span> <span class="n">frame</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Timepoint</span><span class="p">:</span>
             <span class="k">return</span>
@@ -953,13 +953,13 @@
 <div class="viewcode-block" id="GCPHousekeepingTee">
 <a class="viewcode-back" href="../../../moddoc_gcp.html#spt3g.gcp.GCPDataTee.GCPHousekeepingTee">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">class</span> <span class="nc">GCPHousekeepingTee</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">GCPHousekeepingTee</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Module that serves housekeeping information to GCP when asked. If a key</span>
 <span class="sd">    named &quot;DataOK&quot; exists in the housekeeping frames, will also transmit</span>
 <span class="sd">    that information to GCP for paging purposes.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">50010</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">50010</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 
         <span class="c1"># make some noise at startup</span>
         <span class="n">core</span><span class="o">.</span><span class="n">log_info</span><span class="p">(</span><span class="s2">&quot;Initialize gcp.GCPHousekeepingTee on port </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">port</span><span class="p">,</span>
@@ -975,7 +975,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>  <span class="c1"># flag for printing debugging statements</span>
 
-    <span class="k">def</span> <span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Clear any pending connections. No one is getting anything now.</span>
         <span class="c1"># This works around some misfeatures in the Linux kernel that</span>
         <span class="c1"># do not occur in other, better socket implementations.</span>
@@ -990,7 +990,7 @@
             <span class="n">s</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">socket</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">frame</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Housekeeping</span><span class="p">:</span>
             <span class="n">dataok</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">if</span> <span class="s1">&#39;DataOK&#39;</span> <span class="ow">in</span> <span class="n">frame</span><span class="p">:</span>
@@ -1024,7 +1024,7 @@
 <div class="viewcode-block" id="GCPHousekeepingTee.PackHKToGCP">
 <a class="viewcode-back" href="../../../moddoc_gcp.html#spt3g.gcp.GCPDataTee.GCPHousekeepingTee.PackHKToGCP">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">PackHKToGCP</span><span class="p">(</span><span class="n">hk</span><span class="p">,</span> <span class="n">dataok</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">PackHKToGCP</span><span class="p">(</span><span class="n">hk</span><span class="p">,</span> <span class="n">dataok</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="n">core</span><span class="o">.</span><span class="n">log_debug</span><span class="p">(</span><span class="s1">&#39;gcp.GCPHousekeepingTee.PackHKToGCP(hk)&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;GCPHousekeepingTee&#39;</span><span class="p">)</span>
         <span class="n">buf</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&lt;?I&#39;</span><span class="p">,</span> <span class="n">dataok</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">hk</span><span class="p">))</span>
@@ -1100,7 +1100,7 @@
 <div class="viewcode-block" id="GCPBoloDataTee">
 <a class="viewcode-back" href="../../../moddoc_gcp.html#spt3g.gcp.GCPDataTee.GCPBoloDataTee">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">class</span> <span class="nc">GCPBoloDataTee</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">GCPBoloDataTee</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Module that serves bolometer data to GCP when asked. Once a second,</span>
 <span class="sd">    will serve the data from the previous second of bolometer data.</span>
@@ -1108,7 +1108,7 @@
 <span class="sd">    If a boolean key appears in the timepoint frames named &quot;DataOK&quot;,</span>
 <span class="sd">    this will be sent to GCP as a data quality indicator for paging.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">50020</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bolometers</span><span class="o">=</span><span class="p">[]):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">50020</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bolometers</span><span class="o">=</span><span class="p">[]):</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Send data from the given list of bolometer logical IDs to the GCP.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
@@ -1126,7 +1126,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">socket</span><span class="o">.</span><span class="n">setblocking</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">frame</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Wiring</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">wmap</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="s1">&#39;WiringMap&#39;</span><span class="p">]</span>
 
@@ -1187,7 +1187,7 @@
 <div class="viewcode-block" id="GCPBoloDataTee.PackForGCP">
 <a class="viewcode-back" href="../../../moddoc_gcp.html#spt3g.gcp.GCPDataTee.GCPBoloDataTee.PackForGCP">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">PackForGCP</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">PackForGCP</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
         <span class="c1"># Input data: dict of bolo names to samples (can be a</span>
         <span class="c1"># G3TimestreamMap, in principle)</span>
         <span class="c1">#</span>

@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>spt3g.maps.coordsysmodules &mdash; SPT-3G Software  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=0517cd0f" />
 
@@ -676,11 +676,11 @@
            <div itemprop="articleBody">
              
   <h1>Source code for spt3g.maps.coordsysmodules</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">core</span>
-<span class="kn">from</span> <span class="nn">..core</span> <span class="kn">import</span> <span class="n">G3TimestreamQuat</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">MapCoordReference</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">get_origin_rotator_timestream</span><span class="p">,</span> <span class="n">get_boresight_rotator_timestream</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">get_fk5_j2000_to_gal_quat</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">core</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..core</span><span class="w"> </span><span class="kn">import</span> <span class="n">G3TimestreamQuat</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">MapCoordReference</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_origin_rotator_timestream</span><span class="p">,</span> <span class="n">get_boresight_rotator_timestream</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_fk5_j2000_to_gal_quat</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
@@ -693,7 +693,7 @@
 <div class="viewcode-block" id="FillCoordTransRotations">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.coordsysmodules.FillCoordTransRotations">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">FillCoordTransRotations</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">FillCoordTransRotations</span><span class="p">(</span>
     <span class="n">frame</span><span class="p">,</span>
     <span class="n">transform_store_key</span><span class="o">=</span><span class="s2">&quot;OnlineRaDecRotation&quot;</span><span class="p">,</span>
     <span class="n">end_coord_sys</span><span class="o">=</span><span class="n">MapCoordReference</span><span class="o">.</span><span class="n">Equatorial</span><span class="p">,</span>
@@ -775,7 +775,7 @@
 <div class="viewcode-block" id="EquatorialToGalacticTransRotations">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.coordsysmodules.EquatorialToGalacticTransRotations">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">EquatorialToGalacticTransRotations</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">EquatorialToGalacticTransRotations</span><span class="p">(</span>
     <span class="n">frame</span><span class="p">,</span> <span class="n">eq_trans_key</span><span class="o">=</span><span class="s2">&quot;OnlineRaDecRotation&quot;</span><span class="p">,</span> <span class="n">out_key</span><span class="o">=</span><span class="s2">&quot;OnlineGalacticRotation&quot;</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -797,7 +797,7 @@
 <div class="viewcode-block" id="AddLocalTransRotations">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.coordsysmodules.AddLocalTransRotations">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">AddLocalTransRotations</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">AddLocalTransRotations</span><span class="p">(</span>
     <span class="n">frame</span><span class="p">,</span> <span class="n">az_key</span><span class="o">=</span><span class="s2">&quot;RawBoresightAz&quot;</span><span class="p">,</span> <span class="n">el_key</span><span class="o">=</span><span class="s2">&quot;RawBoresightEl&quot;</span><span class="p">,</span> <span class="n">out_key</span><span class="o">=</span><span class="s2">&quot;RawAzElRotation&quot;</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>

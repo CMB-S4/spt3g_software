@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>spt3g.dfmux.HardwareMapTools &mdash; SPT-3G Software  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=0517cd0f" />
 
@@ -676,9 +676,9 @@
            <div itemprop="articleBody">
              
   <h1>Source code for spt3g.dfmux.HardwareMapTools</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">core</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">DfMuxWiringMap</span><span class="p">,</span> <span class="n">DfMuxChannelMapping</span>
-<span class="kn">import</span> <span class="nn">struct</span><span class="o">,</span> <span class="nn">socket</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">core</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">DfMuxWiringMap</span><span class="p">,</span> <span class="n">DfMuxChannelMapping</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">struct</span><span class="o">,</span><span class="w"> </span><span class="nn">socket</span>
 
 <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Code to generate wiring map objects (and wiring frames in general) from</span>
@@ -688,12 +688,12 @@
 <div class="viewcode-block" id="GenerateFakeHardwareMap">
 <a class="viewcode-back" href="../../../moddoc_dfmux.html#spt3g.dfmux.HardwareMapTools.GenerateFakeHardwareMap">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">class</span> <span class="nc">GenerateFakeHardwareMap</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">GenerateFakeHardwareMap</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;Inserts a fake hardware map into the data stream. Takes a wiring frame as an argument to the constructor, which it will inject before any other frames.&#39;&#39;&#39;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ran</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">insert</span> <span class="o">=</span> <span class="n">frame</span>
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ran</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">frame</span>
         <span class="k">else</span><span class="p">:</span>
@@ -708,7 +708,7 @@
 <div class="viewcode-block" id="PyDfMuxWiringMapInjector">
 <a class="viewcode-back" href="../../../moddoc_dfmux.html#spt3g.dfmux.HardwareMapTools.PyDfMuxWiringMapInjector">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">class</span> <span class="nc">PyDfMuxWiringMapInjector</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PyDfMuxWiringMapInjector</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Insert a wiring map derived from a pydfmux hardware map into the data</span>
 <span class="sd">    stream ahead of what would otherwise be the first frame.</span>
@@ -717,10 +717,10 @@
 <span class="sd">    (see pydfmux documentation for hwm.channel_maps_from_pstring()) and</span>
 <span class="sd">    detectors in one of the states identified by the state argument.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pydfmux_hwm</span><span class="p">,</span> <span class="n">pathstring</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="p">[]):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pydfmux_hwm</span><span class="p">,</span> <span class="n">pathstring</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="p">[]):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ran</span> <span class="o">=</span> <span class="kc">False</span>
 
-        <span class="kn">from</span> <span class="nn">pydfmux.core</span> <span class="kn">import</span> <span class="n">dfmux</span> <span class="k">as</span> <span class="n">pydfmux</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pydfmux.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">dfmux</span> <span class="k">as</span> <span class="n">pydfmux</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hwmf</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3Frame</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Wiring</span><span class="p">)</span>
         <span class="n">hwm</span> <span class="o">=</span> <span class="n">DfMuxWiringMap</span><span class="p">()</span>
         
@@ -749,12 +749,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">hwmf</span><span class="p">[</span><span class="s1">&#39;ReadoutSystem&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;ICE&#39;</span>
 
         <span class="k">try</span><span class="p">:</span>
-            <span class="kn">from</span> <span class="nn">pydfmux</span> <span class="kn">import</span> <span class="n">current_transferfunction</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pydfmux</span><span class="w"> </span><span class="kn">import</span> <span class="n">current_transferfunction</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">hwmf</span><span class="p">[</span><span class="s1">&#39;DfMuxTransferFunction&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_transferfunction</span>
         <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
             <span class="k">pass</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ran</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">frame</span>
 
@@ -771,7 +771,7 @@
 <div class="viewcode-block" id="PathStringForBolo">
 <a class="viewcode-back" href="../../../moddoc_dfmux.html#spt3g.dfmux.HardwareMapTools.PathStringForBolo">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">usefulfunc</span>
-<span class="k">def</span> <span class="nf">PathStringForBolo</span><span class="p">(</span><span class="n">wiringmap</span><span class="p">,</span> <span class="n">bolo</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">PathStringForBolo</span><span class="p">(</span><span class="n">wiringmap</span><span class="p">,</span> <span class="n">bolo</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Obtain the channel pathstring for a bolometer named &quot;bolo&quot;</span>
 <span class="sd">    using the passed wiring map.</span>
@@ -797,7 +797,7 @@
 <div class="viewcode-block" id="PyDfMuxBolometerPropertiesInjector">
 <a class="viewcode-back" href="../../../moddoc_dfmux.html#spt3g.dfmux.HardwareMapTools.PyDfMuxBolometerPropertiesInjector">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">PyDfMuxBolometerPropertiesInjector</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">pydfmux_hwm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">angle_per_mm</span> <span class="o">=</span> <span class="mf">4.186</span><span class="o">*</span><span class="n">core</span><span class="o">.</span><span class="n">G3Units</span><span class="o">.</span><span class="n">deg</span><span class="o">/</span><span class="mi">1000</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">PyDfMuxBolometerPropertiesInjector</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">pydfmux_hwm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">angle_per_mm</span> <span class="o">=</span> <span class="mf">4.186</span><span class="o">*</span><span class="n">core</span><span class="o">.</span><span class="n">G3Units</span><span class="o">.</span><span class="n">deg</span><span class="o">/</span><span class="mi">1000</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Insert a calibration frame following any wiring frame containing a</span>
 <span class="sd">    BolometerPropertiesMap named &quot;NominalBolometerProperties&quot; that has</span>
@@ -808,8 +808,8 @@
     <span class="k">if</span> <span class="n">frame</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Wiring</span><span class="p">:</span>
         <span class="k">return</span>
 
-    <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">calibration</span>
-    <span class="kn">from</span> <span class="nn">pydfmux.core</span> <span class="kn">import</span> <span class="n">dfmux</span> <span class="k">as</span> <span class="n">pydfmux</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">calibration</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pydfmux.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">dfmux</span> <span class="k">as</span> <span class="n">pydfmux</span>
 
     <span class="n">cal</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3Frame</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Calibration</span><span class="p">)</span>
     <span class="n">bpm</span> <span class="o">=</span> <span class="n">calibration</span><span class="o">.</span><span class="n">BolometerPropertiesMap</span><span class="p">()</span>
@@ -848,20 +848,20 @@
         <span class="n">bpm</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">bolo</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span> <span class="o">=</span> <span class="n">bp</span>
 
     <span class="n">cal</span><span class="p">[</span><span class="s1">&#39;NominalBolometerProperties&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bpm</span>
-    <span class="kn">from</span> <span class="nn">pydfmux</span> <span class="kn">import</span> <span class="n">current_transferfunction</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pydfmux</span><span class="w"> </span><span class="kn">import</span> <span class="n">current_transferfunction</span>
     <span class="n">cal</span><span class="p">[</span><span class="s1">&#39;DfMuxTransferFunction&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_transferfunction</span>
 
     <span class="k">return</span> <span class="p">[</span><span class="n">frame</span><span class="p">,</span> <span class="n">cal</span><span class="p">]</span></div>
 
 
 <span class="n">core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">class</span> <span class="nc">PyDfMuxWiringMapInjectorAllChannels</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PyDfMuxWiringMapInjectorAllChannels</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Insert a wiring map derived from a pydfmux hardware map, but</span>
 <span class="sd">    ignoring the channel mappings and adding all the channels on each defined</span>
 <span class="sd">    module from the HWM.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pydfmux_hwm</span><span class="p">,</span> <span class="n">channels</span><span class="o">=</span><span class="mi">64</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pydfmux_hwm</span><span class="p">,</span> <span class="n">channels</span><span class="o">=</span><span class="mi">64</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Use readout modules from provided pydfmux_hwm and add channels to it</span>
 <span class="sd">        up to the index specified in channels.</span>
@@ -869,11 +869,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">ran</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">hwm</span> <span class="o">=</span> <span class="n">pydfmux_hwm</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">channels</span> <span class="o">=</span> <span class="n">channels</span>
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ran</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">frame</span>
 
-        <span class="kn">from</span> <span class="nn">pydfmux.core</span> <span class="kn">import</span> <span class="n">dfmux</span> <span class="k">as</span> <span class="n">pydfmux</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pydfmux.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">dfmux</span> <span class="k">as</span> <span class="n">pydfmux</span>
         <span class="n">hwmf</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3Frame</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Wiring</span><span class="p">)</span>
         <span class="n">hwm</span> <span class="o">=</span> <span class="n">DfMuxWiringMap</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">mod</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">hwm</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">pydfmux</span><span class="o">.</span><span class="n">ReadoutModule</span><span class="p">):</span>
@@ -900,8 +900,8 @@
 <div class="viewcode-block" id="DfmlHardwareMapInjector">
 <a class="viewcode-back" href="../../../moddoc_dfmux.html#spt3g.dfmux.HardwareMapTools.DfmlHardwareMapInjector">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">class</span> <span class="nc">DfmlHardwareMapInjector</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dfml_hwm</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DfmlHardwareMapInjector</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dfml_hwm</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ran</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dfml_hwm</span> <span class="o">=</span> <span class="n">dfml_hwm</span>
 
@@ -920,7 +920,7 @@
             <span class="n">mapping</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dfml_hwm</span><span class="p">(</span><span class="n">ch</span><span class="p">,</span> <span class="s1">&#39;module&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
             <span class="n">mapping</span><span class="o">.</span><span class="n">channel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dfml_hwm</span><span class="p">(</span><span class="n">ch</span><span class="p">,</span> <span class="s1">&#39;chan_num&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">hwm</span><span class="p">[</span><span class="n">bolo_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapping</span>
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ran</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">frame</span>
         <span class="n">hwmf</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3Frame</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Wiring</span><span class="p">)</span>

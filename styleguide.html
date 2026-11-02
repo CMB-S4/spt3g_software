@@ -7,7 +7,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Style Guide &mdash; SPT-3G Software  documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css?v=0517cd0f" />
 
@@ -742,15 +742,15 @@ this rule, so we should generally</p></li>
 <p>For example:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">CONSTANT_VALUE</span> <span class="o">=</span> <span class="mi">10</span>
 
-<span class="k">def</span> <span class="nf">function_name</span><span class="p">(</span><span class="n">variable_name</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">function_name</span><span class="p">(</span><span class="n">variable_name</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
     <span class="n">do_some_things</span>
 
-<span class="k">class</span> <span class="nc">MyClass</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MyClass</span><span class="p">:</span>
     <span class="n">CONSTANCE_INSTANCE_VARIABLE</span> <span class="o">=</span> <span class="mi">100</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">,</span> <span class="n">other_input</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">,</span> <span class="n">other_input</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">instance_variable</span> <span class="o">=</span> <span class="nb">input</span> <span class="o">+</span> <span class="n">other_input</span>
 
-    <span class="k">def</span> <span class="nf">class_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">class_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span>
         <span class="n">do_things</span>
 </pre></div>
 </div>
@@ -759,7 +759,7 @@ This includes individually defining each argument and output of a function along
 Below is an example of a well written docstring using the <a class="reference external" href="https://numpydoc.readthedocs.io/en/latest/format.html">numpy</a> docstring format.
 Please adhere to this format for all spt3g_software code.</p>
 <p>Docsting example:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">get_fft_scale_fac</span><span class="p">(</span><span class="n">res</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_fft_scale_fac</span><span class="p">(</span><span class="n">res</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                       <span class="n">apod_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a scale factor to convert a 2d fft of a map into</span>

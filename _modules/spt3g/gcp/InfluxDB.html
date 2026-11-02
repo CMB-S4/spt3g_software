@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>spt3g.gcp.InfluxDB &mdash; SPT-3G Software  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=0517cd0f" />
 
@@ -676,14 +676,14 @@
            <div itemprop="articleBody">
              
   <h1>Source code for spt3g.gcp.InfluxDB</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
-<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">core</span>
-<span class="kn">from</span> <span class="nn">..core</span> <span class="kn">import</span> <span class="n">G3Units</span> <span class="k">as</span> <span class="n">U</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">ARCExtractor</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">dt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">core</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..core</span><span class="w"> </span><span class="kn">import</span> <span class="n">G3Units</span> <span class="k">as</span> <span class="n">U</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">ARCExtractor</span>
 
-<span class="k">def</span> <span class="nf">build_field_list</span><span class="p">(</span><span class="n">fr</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_field_list</span><span class="p">(</span><span class="n">fr</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    All the fields you can upload from gcp to InfluxDB</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -951,7 +951,7 @@
     <span class="k">return</span> <span class="n">r</span>
 
 
-<span class="k">def</span> <span class="nf">make_lines</span><span class="p">(</span><span class="n">measurement</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">dat</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">make_lines</span><span class="p">(</span><span class="n">measurement</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">dat</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Return list of string lines to add to database</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -972,7 +972,7 @@
 <div class="viewcode-block" id="WriteDB">
 <a class="viewcode-back" href="../../../moddoc_gcp.html#spt3g.gcp.InfluxDB.WriteDB">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">WriteDB</span><span class="p">(</span><span class="n">fr</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">WriteDB</span><span class="p">(</span><span class="n">fr</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Write points to the database for each field</span>
 
@@ -985,8 +985,8 @@
 <span class="sd">        None, add all.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">assert</span> <span class="n">client</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;InfluxDB client required&quot;</span>
-    <span class="kn">from</span> <span class="nn">influxdb.exceptions</span> <span class="kn">import</span> <span class="n">InfluxDBClientError</span>
-    <span class="kn">from</span> <span class="nn">influxdb.exceptions</span> <span class="kn">import</span> <span class="n">InfluxDBServerError</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">influxdb.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">InfluxDBClientError</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">influxdb.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">InfluxDBServerError</span>
 
     <span class="k">if</span> <span class="n">fr</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">GcpSlow</span><span class="p">:</span>
         <span class="k">return</span>
@@ -1179,7 +1179,7 @@
 
 
 <span class="nd">@core</span><span class="o">.</span><span class="n">pipesegment</span>
-<span class="k">def</span> <span class="nf">UpdateDB</span><span class="p">(</span><span class="n">pipe</span><span class="p">,</span> <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">UpdateDB</span><span class="p">(</span><span class="n">pipe</span><span class="p">,</span> <span class="n">client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Update InfluxDB with data in frame</span>
 

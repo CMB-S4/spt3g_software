@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>spt3g.core.timestreamextensions &mdash; SPT-3G Software  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=0517cd0f" />
 
@@ -676,15 +676,15 @@
            <div itemprop="articleBody">
              
   <h1>Source code for spt3g.core.timestreamextensions</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">G3Timestream</span><span class="p">,</span> <span class="n">DoubleVector</span><span class="p">,</span> <span class="n">G3VectorDouble</span><span class="p">,</span> <span class="n">G3TimestreamMap</span><span class="p">,</span> <span class="n">G3VectorTime</span><span class="p">,</span> <span class="n">G3Time</span><span class="p">,</span> <span class="n">Int64Vector</span><span class="p">,</span> <span class="n">G3VectorInt</span><span class="p">,</span> \
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">G3Timestream</span><span class="p">,</span> <span class="n">DoubleVector</span><span class="p">,</span> <span class="n">G3VectorDouble</span><span class="p">,</span> <span class="n">G3TimestreamMap</span><span class="p">,</span> <span class="n">G3VectorTime</span><span class="p">,</span> <span class="n">G3Time</span><span class="p">,</span> <span class="n">Int64Vector</span><span class="p">,</span> <span class="n">G3VectorInt</span><span class="p">,</span> \
     <span class="n">G3VectorComplexDouble</span><span class="p">,</span> <span class="n">ComplexDoubleVector</span><span class="p">,</span> <span class="n">BoolVector</span><span class="p">,</span> <span class="n">G3VectorBool</span><span class="p">,</span> <span class="n">IntVector</span><span class="p">,</span> <span class="n">FloatVector</span><span class="p">,</span> <span class="n">ComplexFloatVector</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">G3Units</span><span class="p">,</span> <span class="n">log_fatal</span><span class="p">,</span> <span class="n">log_warn</span><span class="p">,</span> <span class="n">usefulfunc</span><span class="p">,</span> <span class="n">G3FrameObject</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">G3Units</span><span class="p">,</span> <span class="n">log_fatal</span><span class="p">,</span> <span class="n">log_warn</span><span class="p">,</span> <span class="n">usefulfunc</span><span class="p">,</span> <span class="n">G3FrameObject</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;concatenate_timestreams&#39;</span><span class="p">]</span>
 
 <span class="c1"># Use numpy bindings rather than vector_indexing_suite for G3Timestream</span>
-<span class="k">def</span> <span class="nf">G3Timestream_getitem</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">G3Timestream_getitem</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="nb">slice</span><span class="p">):</span>
         <span class="c1"># If the argument is a slice, and the value would be a numpy array,</span>
         <span class="c1"># turn it into an appropriately sliced timestream, with appropriate</span>
@@ -696,7 +696,7 @@
     <span class="k">return</span> <span class="n">it</span>
 
 <span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">timestream_dtype</span><span class="p">(</span><span class="n">ts</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">timestream_dtype</span><span class="p">(</span><span class="n">ts</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Numpy data type of stored data.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -707,7 +707,7 @@
 <span class="n">G3Timestream</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">timestream_dtype</span>
 <span class="n">G3TimestreamMap</span><span class="o">.</span><span class="n">dtype</span> <span class="o">=</span> <span class="n">timestream_dtype</span>
 
-<span class="k">def</span> <span class="nf">timestreamastype</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">timestreamastype</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Convert timestream to a different data type. See numpy.array.astype()</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -720,7 +720,7 @@
     <span class="k">return</span> <span class="n">out</span>
 <span class="n">G3Timestream</span><span class="o">.</span><span class="n">astype</span> <span class="o">=</span> <span class="n">timestreamastype</span>
 
-<span class="k">def</span> <span class="nf">timestreammapastype</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">timestreammapastype</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Convert timestream map to a different data type.  See numpy.array.astype()</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -733,7 +733,7 @@
 
 <span class="c1"># Provide all the numpy binary arithmetic operators, first non-in-place, then</span>
 <span class="c1"># in-place, with slightly different semantics</span>
-<span class="k">def</span> <span class="nf">numpybinarywrap</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">op</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">numpybinarywrap</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">op</span><span class="p">):</span>
     <span class="n">is_g3</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">G3FrameObject</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">G3FrameObject</span><span class="p">)</span>
     <span class="n">is_tsa</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">G3Timestream</span><span class="p">)</span>
     <span class="n">is_tsb</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">G3Timestream</span><span class="p">)</span>
@@ -775,7 +775,7 @@
         <span class="k">return</span> <span class="n">Int64Vector</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="k">if</span> <span class="n">s</span> <span class="o">==</span> <span class="mi">8</span> <span class="k">else</span> <span class="n">IntVector</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
     <span class="k">return</span> <span class="bp">NotImplemented</span>
 
-<span class="k">def</span> <span class="nf">numpyinplacebinarywrap</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">op</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">numpyinplacebinarywrap</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">op</span><span class="p">):</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">G3Timestream</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">G3Timestream</span><span class="p">):</span>
         <span class="n">a</span><span class="o">.</span><span class="n">_assert_congruence</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
     <span class="n">op</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">b</span><span class="p">))</span>
@@ -822,8 +822,8 @@
     <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
         <span class="k">continue</span>
     <span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">all_cls</span><span class="p">:</span>
-        <span class="k">def</span> <span class="nf">ufunc_wrapper</span><span class="p">(</span><span class="n">op</span><span class="p">):</span>
-            <span class="k">def</span> <span class="nf">ufunc</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">ufunc_wrapper</span><span class="p">(</span><span class="n">op</span><span class="p">):</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">ufunc</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">op</span><span class="p">](</span><span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="n">ufunc</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">op</span><span class="p">]</span><span class="o">.</span><span class="vm">__doc__</span>
             <span class="k">return</span> <span class="n">ufunc</span>
@@ -831,8 +831,8 @@
 
 <span class="c1"># Bind some memory-efficient methods for G3TimestreamMap</span>
 <span class="k">for</span> <span class="n">op</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;std&quot;</span><span class="p">,</span> <span class="s2">&quot;var&quot;</span><span class="p">]:</span>
-    <span class="k">def</span> <span class="nf">ufunc_wrapper</span><span class="p">(</span><span class="n">op</span><span class="p">):</span>
-        <span class="k">def</span> <span class="nf">ufunc</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">ufunc_wrapper</span><span class="p">(</span><span class="n">op</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">ufunc</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
             <span class="n">bound_args</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">if</span> <span class="n">op</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;std&quot;</span><span class="p">,</span> <span class="s2">&quot;var&quot;</span><span class="p">]:</span>
                 <span class="n">bound_args</span><span class="p">[</span><span class="s2">&quot;ddof&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;ddof&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
@@ -853,7 +853,7 @@
 
 
 <span class="c1">#add concatenation routines to g3timestream objects</span>
-<span class="k">def</span> <span class="nf">_concatenate_timestreams</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">ts_lst</span><span class="p">,</span> <span class="n">ts_rounding_error</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">ts_interp_threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_concatenate_timestreams</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">ts_lst</span><span class="p">,</span> <span class="n">ts_rounding_error</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">ts_interp_threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Concatenate G3Timestream objects together.</span>
 
@@ -904,7 +904,7 @@
 <span class="n">G3Timestream</span><span class="o">.</span><span class="n">concatenate</span> <span class="o">=</span> <span class="nb">classmethod</span><span class="p">(</span><span class="n">_concatenate_timestreams</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_concatenate_timestream_maps</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">ts_map_lst</span><span class="p">,</span> <span class="n">ts_rounding_error</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">ts_interp_threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">skip_missing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_concatenate_timestream_maps</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">ts_map_lst</span><span class="p">,</span> <span class="n">ts_rounding_error</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">ts_interp_threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">skip_missing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Concatenate G3TimestreamMap objects together.</span>
 
@@ -955,7 +955,7 @@
 <div class="viewcode-block" id="concatenate_timestreams">
 <a class="viewcode-back" href="../../../moddoc_core.html#spt3g.core.concatenate_timestreams">[docs]</a>
 <span class="nd">@usefulfunc</span>
-<span class="k">def</span> <span class="nf">concatenate_timestreams</span><span class="p">(</span><span class="n">ts_lst</span><span class="p">,</span> <span class="n">ts_rounding_error</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">ts_interp_threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">concatenate_timestreams</span><span class="p">(</span><span class="n">ts_lst</span><span class="p">,</span> <span class="n">ts_rounding_error</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">ts_interp_threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Concatenate G3Timestream or G3TimestreamMap objects together.</span>
 
@@ -984,7 +984,7 @@
 
 
 <span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">tsm_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">tsm_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Get timestream map channel names.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -993,7 +993,7 @@
 <span class="n">G3TimestreamMap</span><span class="o">.</span><span class="n">names</span> <span class="o">=</span> <span class="n">tsm_names</span>
 
 <span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">tsm_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">tsm_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Return a numpy array view into the underlying 2D array of the timestream map</span>
 <span class="sd">    &#39;&#39;&#39;</span>

@@ -7,7 +7,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Modules &mdash; SPT-3G Software  documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css?v=0517cd0f" />
 
@@ -714,23 +714,23 @@
 <section id="python-modules-as-functions">
 <span id="function-modules"></span><h3><a class="toc-backref" href="#id2" role="doc-backlink">Python Modules as Functions</a><a class="headerlink" href="#python-modules-as-functions" title="Link to this heading"></a></h3>
 <p>The simplest, and most common, case of a Python module is one that receives one frame, (potentially) modifies it, then passes it to the next module. This can be easily written as a simple Python function:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">simplemod</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">simplemod</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
 <span class="n">pipeline</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">simplemod</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>This prints its input frame to the console, then implicitly passes it on to the next module in the chain.</p>
 <p>As frames behave like Python dictionaries, the same approach can be used to modify frames:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">five</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">five</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
     <span class="n">frame</span><span class="p">[</span><span class="s1">&#39;Five&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span>
 <span class="n">pipeline</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">five</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The next module in the chain will now see a key named “Five” containing the number 5.</p>
 <p>A full example of this doing something actually useful is to implement scan-by-scan poly-1 filtering of timestreams:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">scipy.signal</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">scipy.signal</span>
 
-<span class="k">def</span> <span class="nf">poly1</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">poly1</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">frame</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Scan</span><span class="p">:</span>
         <span class="k">return</span>
     <span class="n">outts</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3TimestreamMap</span><span class="p">()</span>
@@ -743,9 +743,9 @@
 </pre></div>
 </div>
 <p>This ignores non-scan frames and then creates a new timestream map containing a detrended version of the original, preserving the start and stop times and units. Right now, all the parameters of this processing step are hardcoded. It can be made configurable by the addition of keyword arguments:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">scipy.signal</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">scipy.signal</span>
 
-<span class="k">def</span> <span class="nf">poly1</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="nb">input</span><span class="o">=</span><span class="s1">&#39;CalTimestreams&#39;</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s1">&#39;Poly1FilteredTimestreams&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">poly1</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="nb">input</span><span class="o">=</span><span class="s1">&#39;CalTimestreams&#39;</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s1">&#39;Poly1FilteredTimestreams&#39;</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">frame</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Scan</span><span class="p">:</span>
         <span class="k">return</span>
     <span class="n">outts</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3TimestreamMap</span><span class="p">()</span>
@@ -805,23 +805,23 @@
 <section id="callable-objects-as-functions">
 <span id="class-modules"></span><h3><a class="toc-backref" href="#id6" role="doc-backlink">Callable Objects as Functions</a><a class="headerlink" href="#callable-objects-as-functions" title="Link to this heading"></a></h3>
 <p>In addition to Python functions, any Python callable (anything that implements the <code class="docutils literal notranslate"><span class="pre">__call__</span></code> method) can be used as a processing module. This can be useful for processing steps that need to maintain state, such as a map making module that needs to keep its in-progress map between scans. Semantics and return values are the same as for Python functions (see <a class="reference internal" href="#return-values-from-python-modules">Return values from Python modules</a>).</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">NumberOfCalls</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Output</span><span class="o">=</span><span class="s1">&#39;NCalls&#39;</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">NumberOfCalls</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Output</span><span class="o">=</span><span class="s1">&#39;NCalls&#39;</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">out</span> <span class="o">=</span> <span class="n">Output</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ncalls</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ncalls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncalls</span> <span class="o">+</span> <span class="mi">1</span>
         <span class="n">frame</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">out</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncalls</span>
 <span class="n">pipeline</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">NumberOfCalls</span><span class="p">,</span> <span class="n">Output</span><span class="o">=</span><span class="s1">&#39;Calls&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>An alternative would be to subclass the <a class="reference internal" href="moddoc_core.html#spt3g.core.G3Module" title="spt3g.core.G3Module"><code class="xref py py-class docutils literal notranslate"><span class="pre">G3Module</span></code></a> class, which is more equivalent to the C++ mechanism but makes no practical difference at all, except that it will be automatically documented (see <a class="reference internal" href="#autodocumentation-of-modules">Autodocumentation of modules</a>). The only other difference is that the <code class="docutils literal notranslate"><span class="pre">__call__</span></code> method is renamed <code class="docutils literal notranslate"><span class="pre">Process</span></code> in this case:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">NumberOfCalls</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">G3Module</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Output</span><span class="o">=</span><span class="s1">&#39;NCalls&#39;</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">NumberOfCalls</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">G3Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Output</span><span class="o">=</span><span class="s1">&#39;NCalls&#39;</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">NumberOfCalls</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">out</span> <span class="o">=</span> <span class="n">Output</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ncalls</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">def</span> <span class="nf">Process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">Process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ncalls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncalls</span> <span class="o">+</span> <span class="mi">1</span>
         <span class="n">frame</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">out</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ncalls</span>
 <span class="n">pipeline</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">NumberOfCalls</span><span class="p">,</span> <span class="n">Output</span><span class="o">=</span><span class="s1">&#39;Calls&#39;</span><span class="p">)</span>
@@ -833,7 +833,7 @@
 <p>Preceding your module with the <a class="reference internal" href="moddoc_core.html#spt3g.core.modconstruct.indexmod" title="spt3g.core.modconstruct.indexmod"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;core.indexmod</span></code></a> decorator will allow the <code class="docutils literal notranslate"><span class="pre">spt3g-inspect</span></code> tool to list it. This should be used for processing steps designed for public use <em>only</em> rather than one-off functions for internal use in larger blocks of code.</p>
 <p>For example:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">printframe</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">printframe</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;Print frame to console&#39;&#39;&#39;</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
 </pre></div>
@@ -894,7 +894,7 @@ Print frame to console</p>
 <p>The use of pipeline segments allows you to have a canned collection of modules that can be added to a pipeline as though it were a single module. An example would be a pipeline segment that performs standard timestream filtering, which may be made of many separate modules but where specifying them individually would be tedious and prone to error.</p>
 <p>A pipeline segment is defined by a Python function that is marked by the <a class="reference internal" href="moddoc_core.html#spt3g.core.modconstruct.pipesegment" title="spt3g.core.modconstruct.pipesegment"><code class="xref py py-deco docutils literal notranslate"><span class="pre">&#64;core.pipesegment</span></code></a> decorator and takes a pipeline as its first argument. For example:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@core</span><span class="o">.</span><span class="n">pipesegment</span>
-<span class="k">def</span> <span class="nf">standardfiltering</span><span class="p">(</span><span class="n">pipe</span><span class="p">,</span> <span class="nb">input</span><span class="o">=</span><span class="s1">&#39;CalTimestreams&#39;</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s1">&#39;OutTimestreams&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">standardfiltering</span><span class="p">(</span><span class="n">pipe</span><span class="p">,</span> <span class="nb">input</span><span class="o">=</span><span class="s1">&#39;CalTimestreams&#39;</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s1">&#39;OutTimestreams&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    This is the standard timestream filtering used for 2016 data</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -910,11 +910,11 @@ Print frame to console</p>
 <section id="advanced-techniques-buffering-data">
 <h2><a class="toc-backref" href="#id10" role="doc-backlink">Advanced Techniques: Buffering Data</a><a class="headerlink" href="#advanced-techniques-buffering-data" title="Link to this heading"></a></h2>
 <p>Modules that need to work on granularilty coarser than a scan (e.g. notch filtering) can <strong>buffer</strong> frames. This can be implemented using the Python callable interface. For example:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Buffered</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Buffered</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">:</span>
             <span class="c1"># Add to buffer and move to the next scan</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
@@ -934,11 +934,11 @@ Print frame to console</p>
 <section id="caching-previous-data">
 <h2><a class="toc-backref" href="#id11" role="doc-backlink">Caching Previous Data</a><a class="headerlink" href="#caching-previous-data" title="Link to this heading"></a></h2>
 <p>The previous example can be adapted to cache data from previous frames when that data is required to operate on current frames.  This is useful for caching e.g. calibration data.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Caching</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calibrator_key</span><span class="o">=</span><span class="s1">&#39;CalibratorResponse&#39;</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Caching</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calibrator_key</span><span class="o">=</span><span class="s1">&#39;CalibratorResponse&#39;</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">calkey</span> <span class="o">=</span> <span class="n">calibrator_key</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cal</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calkey</span> <span class="ow">in</span> <span class="n">frame</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cal</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">calkey</span><span class="p">]</span>
         <span class="k">return</span>
@@ -948,7 +948,7 @@ Print frame to console</p>
 </div>
 <p>There are two convenience methods for caching data and passing it into a module.  This is useful for writing a function that requires (for example) a <a class="reference internal" href="moddoc_calibration.html#spt3g.calibration.BolometerPropertiesMap" title="spt3g.calibration.BolometerPropertiesMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">BolometerPropertiesMap</span></code></a>, but otherwise does not require a class.  This is best illustrated with an example</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@core</span><span class="o">.</span><span class="n">cache_frame_data</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Scan</span><span class="p">,</span> <span class="n">bolo_props</span><span class="o">=</span><span class="s1">&#39;BolometerProperties&#39;</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">FlagSomeStuff</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">flag_key</span><span class="o">=</span><span class="s1">&#39;Flags&#39;</span><span class="p">,</span> <span class="n">bolo_props</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">FlagSomeStuff</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">flag_key</span><span class="o">=</span><span class="s1">&#39;Flags&#39;</span><span class="p">,</span> <span class="n">bolo_props</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="k">pass</span>
 </pre></div>
 </div>

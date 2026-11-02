@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>spt3g.dfmux.DataQualityTools &mdash; SPT-3G Software  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=0517cd0f" />
 
@@ -676,22 +676,22 @@
            <div itemprop="articleBody">
              
   <h1>Source code for spt3g.dfmux.DataQualityTools</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">core</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">DfMuxMetaSample</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">core</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">DfMuxMetaSample</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
-<span class="k">def</span> <span class="nf">get_empty_timepoint</span><span class="p">(</span><span class="n">sample_time</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_empty_timepoint</span><span class="p">(</span><span class="n">sample_time</span><span class="p">):</span>
     <span class="n">tp_frame</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3Frame</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Timepoint</span><span class="p">)</span>
     <span class="n">tp_frame</span><span class="p">[</span><span class="s2">&quot;EventHeader&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sample_time</span>
     <span class="n">tp_frame</span><span class="p">[</span><span class="s2">&quot;DfMux&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">DfMuxMetaSample</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">tp_frame</span>
 
-<span class="k">class</span> <span class="nc">AddMissingTimepoints</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expected_sample_rate</span> <span class="o">=</span> <span class="p">(</span><span class="mf">20e6</span> <span class="o">*</span> <span class="n">core</span><span class="o">.</span><span class="n">G3Units</span><span class="o">.</span><span class="n">Hz</span><span class="p">)</span><span class="o">/</span> <span class="mi">2</span><span class="o">**</span><span class="mi">17</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AddMissingTimepoints</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expected_sample_rate</span> <span class="o">=</span> <span class="p">(</span><span class="mf">20e6</span> <span class="o">*</span> <span class="n">core</span><span class="o">.</span><span class="n">G3Units</span><span class="o">.</span><span class="n">Hz</span><span class="p">)</span><span class="o">/</span> <span class="mi">2</span><span class="o">**</span><span class="mi">17</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">samp_spacing_</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">expected_sample_rate</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prev_sample_time_</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">frame</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Timepoint</span><span class="p">:</span>
             <span class="k">return</span>            
         <span class="k">if</span> <span class="s1">&#39;EventHeader&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">frame</span><span class="p">:</span>
@@ -710,18 +710,18 @@
 <div class="viewcode-block" id="FillMissingTimepointFrames">
 <a class="viewcode-back" href="../../../moddoc_dfmux.html#spt3g.dfmux.DataQualityTools.FillMissingTimepointFrames">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">class</span> <span class="nc">FillMissingTimepointFrames</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FillMissingTimepointFrames</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Search for Timepoint frames that come at larger-than-expected intervals.</span>
 <span class="sd">    Fill in the missin frames with garbage, and mark them as garbage for</span>
 <span class="sd">    conversion to NaNs later.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">last_frame</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fr</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fr</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">fr</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Timepoint</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -739,7 +739,7 @@
                 <span class="k">return</span> <span class="n">out</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_and_fill_frames</span><span class="p">(</span><span class="n">fr</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_find_and_fill_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fr</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_find_and_fill_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fr</span><span class="p">):</span>
         <span class="c1"># This function does most of the work:</span>
         <span class="c1"># Find frames with separation that is too large, and fill the gaps</span>
         <span class="c1"># with new frames.</span>

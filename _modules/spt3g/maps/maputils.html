@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>spt3g.maps.maputils &mdash; SPT-3G Software  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=0517cd0f" />
 
@@ -676,9 +676,9 @@
            <div itemprop="articleBody">
              
   <h1>Source code for spt3g.maps.maputils</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">core</span><span class="p">,</span> <span class="n">maps</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">core</span><span class="p">,</span> <span class="n">maps</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;flatsky_to_healpix&quot;</span><span class="p">,</span> <span class="s2">&quot;healpix_to_flatsky&quot;</span><span class="p">]</span>
 
@@ -686,7 +686,7 @@
 <div class="viewcode-block" id="healpix_to_flatsky">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.maputils.healpix_to_flatsky">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">usefulfunc</span>
-<span class="k">def</span> <span class="nf">healpix_to_flatsky</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">healpix_to_flatsky</span><span class="p">(</span>
     <span class="n">map_in</span><span class="p">,</span> <span class="n">nest</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">map_stub</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rebin</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">interp</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -774,7 +774,7 @@
 <div class="viewcode-block" id="flatsky_to_healpix">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.maputils.flatsky_to_healpix">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">usefulfunc</span>
-<span class="k">def</span> <span class="nf">flatsky_to_healpix</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">flatsky_to_healpix</span><span class="p">(</span>
     <span class="n">map_in</span><span class="p">,</span> <span class="n">map_stub</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rebin</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">interp</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fullsky</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>

@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>spt3g.calibration.build_cal_frames &mdash; SPT-3G Software  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=0517cd0f" />
 
@@ -676,10 +676,10 @@
            <div itemprop="articleBody">
              
   <h1>Source code for spt3g.calibration.build_cal_frames</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">core</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">BolometerProperties</span><span class="p">,</span> <span class="n">BolometerPropertiesMap</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">PointingProperties</span><span class="p">,</span> <span class="n">PointingPropertiesMap</span>
-<span class="kn">import</span> <span class="nn">numpy</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">re</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">core</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">BolometerProperties</span><span class="p">,</span> <span class="n">BolometerPropertiesMap</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">PointingProperties</span><span class="p">,</span> <span class="n">PointingPropertiesMap</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="o">,</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">re</span>
 
 <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Utilities for bringing together calibration data from a number of sources</span>
@@ -690,7 +690,7 @@
 <div class="viewcode-block" id="BuildBoloPropertiesMap">
 <a class="viewcode-back" href="../../../moddoc_calibration.html#spt3g.calibration.build_cal_frames.BuildBoloPropertiesMap">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">class</span> <span class="nc">BuildBoloPropertiesMap</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BuildBoloPropertiesMap</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Build bolometer properties map from raw calibration sub-frames emitted</span>
 <span class="sd">    by other processing scripts. Input data are maps of bolo ID to floats</span>
@@ -705,7 +705,7 @@
 <span class="sd">    - Physical Name Data (Key: &#39;PhysicalBoloIDs&#39;)</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">drop_original_frames</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fiducial_detectors</span><span class="o">=</span><span class="p">[],</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">drop_original_frames</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fiducial_detectors</span><span class="o">=</span><span class="p">[],</span>
                  <span class="n">bpm_name</span><span class="o">=</span><span class="s1">&#39;NominalBolometerProperties&#39;</span><span class="p">,</span> <span class="n">use_bpm_pointing</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        If drop_original_frames is True, will drop all input Calibration frames.</span>
@@ -733,13 +733,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">props</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dfmux_tf</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">frame</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">EndProcessing</span><span class="p">:</span>
             <span class="n">boloprops</span> <span class="o">=</span> <span class="n">BolometerPropertiesMap</span><span class="p">()</span>
 
             <span class="c1"># Technique to average together points while ignoring outliers</span>
-            <span class="k">def</span> <span class="nf">robust_avg</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-                <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">sigmaclip</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">robust_avg</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">sigmaclip</span>
 
                 <span class="n">gooddata</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">data</span><span class="p">)[</span><span class="n">numpy</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">data</span><span class="p">)]</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">gooddata</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -928,7 +928,7 @@
 <div class="viewcode-block" id="ExplodeBolometerProperties">
 <a class="viewcode-back" href="../../../moddoc_calibration.html#spt3g.calibration.build_cal_frames.ExplodeBolometerProperties">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">ExplodeBolometerProperties</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">bpmname</span><span class="o">=</span><span class="s1">&#39;NominalBolometerProperties&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ExplodeBolometerProperties</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">bpmname</span><span class="o">=</span><span class="s1">&#39;NominalBolometerProperties&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Take a bolometer properties map (usually the nominal one) and convert it</span>
 <span class="sd">    into its constituent keys as though they came from real calibration. This</span>
@@ -978,7 +978,7 @@
 <div class="viewcode-block" id="BuildPointingProperties">
 <a class="viewcode-back" href="../../../moddoc_calibration.html#spt3g.calibration.build_cal_frames.BuildPointingProperties">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">class</span> <span class="nc">BuildPointingProperties</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BuildPointingProperties</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Build pointing properties from raw calibration sub-frames emitted</span>
 <span class="sd">    by other processing scripts. Input data are floats, including</span>
@@ -988,7 +988,7 @@
 <span class="sd">    - Az tilt fit parameters (Keys: &#39;tiltAngle&#39;, &#39;tiltHA&#39;, &#39;tiltLat&#39;, &#39;tiltMag&#39;)</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">drop_original_frames</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">drop_original_frames</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        If drop_original_frames is True, will drop all input Calibration frames.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
@@ -997,7 +997,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">props</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">frame</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">EndProcessing</span><span class="p">:</span>
             <span class="n">pointingprops</span> <span class="o">=</span> <span class="n">PointingPropertiesMap</span><span class="p">()</span>
 
@@ -1022,7 +1022,7 @@
 <div class="viewcode-block" id="MergeCalibrationFrames">
 <a class="viewcode-back" href="../../../moddoc_calibration.html#spt3g.calibration.build_cal_frames.MergeCalibrationFrames">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">class</span> <span class="nc">MergeCalibrationFrames</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MergeCalibrationFrames</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Merge the keys from a sequence of calibration frames. Will throw an</span>
 <span class="sd">    exception if a key recurs in more than one calibration frame. The merged</span>
@@ -1030,7 +1030,7 @@
 <span class="sd">    that follows a calibration frame or at the end of processing, whichever</span>
 <span class="sd">    comes first. Other non-calibration frames will be ignored.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">KeysToIgnore</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;PointingOffsetX&#39;</span><span class="p">,</span> <span class="s1">&#39;PointingOffsetY&#39;</span><span class="p">]):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">KeysToIgnore</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;PointingOffsetX&#39;</span><span class="p">,</span> <span class="s1">&#39;PointingOffsetY&#39;</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Ignores keys in the KeysToIgnore list during merging. By default, set</span>
 <span class="sd">        to values written by the flux/pointing calibration that are stored to</span>
@@ -1038,7 +1038,7 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">outframe</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3Frame</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Calibration</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ignore_keys</span> <span class="o">=</span> <span class="n">KeysToIgnore</span>
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">frame</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Calibration</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">frame</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ignore_keys</span><span class="p">:</span>

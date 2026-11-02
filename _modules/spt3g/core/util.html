@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>spt3g.core.util &mdash; SPT-3G Software  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=0517cd0f" />
 
@@ -676,12 +676,12 @@
            <div itemprop="articleBody">
              
   <h1>Source code for spt3g.core.util</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">indexmod</span><span class="p">,</span> <span class="n">pipesegment</span><span class="p">,</span> <span class="n">G3FrameType</span><span class="p">,</span> <span class="n">log_fatal</span><span class="p">,</span> <span class="n">G3Reader</span><span class="p">,</span> <span class="n">G3NetworkSender</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">indexmod</span><span class="p">,</span> <span class="n">pipesegment</span><span class="p">,</span> <span class="n">G3FrameType</span><span class="p">,</span> <span class="n">log_fatal</span><span class="p">,</span> <span class="n">G3Reader</span><span class="p">,</span> <span class="n">G3NetworkSender</span>
 
 <div class="viewcode-block" id="Delete">
 <a class="viewcode-back" href="../../../moddoc_core.html#spt3g.core.util.Delete">[docs]</a>
 <span class="nd">@indexmod</span>
-<span class="k">def</span> <span class="nf">Delete</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">keys</span><span class="o">=</span><span class="p">[],</span> <span class="nb">type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Delete</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">keys</span><span class="o">=</span><span class="p">[],</span> <span class="nb">type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Deletes specified keys from frame. If optional type specified, only acts on frames of the given type.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -696,7 +696,7 @@
 <div class="viewcode-block" id="Keep">
 <a class="viewcode-back" href="../../../moddoc_core.html#spt3g.core.util.Keep">[docs]</a>
 <span class="nd">@indexmod</span>
-<span class="k">def</span> <span class="nf">Keep</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">keys</span><span class="o">=</span><span class="p">[],</span> <span class="nb">type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Keep</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">keys</span><span class="o">=</span><span class="p">[],</span> <span class="nb">type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Deletes all but specified keys from frame.  If optional type specified, only acts on frames of the given type.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -711,7 +711,7 @@
 <div class="viewcode-block" id="Rename">
 <a class="viewcode-back" href="../../../moddoc_core.html#spt3g.core.util.Rename">[docs]</a>
 <span class="nd">@indexmod</span>
-<span class="k">def</span> <span class="nf">Rename</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">keys</span><span class="o">=</span><span class="p">{},</span> <span class="nb">type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Rename</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">keys</span><span class="o">=</span><span class="p">{},</span> <span class="nb">type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Renames specified keys in frame. If optional type specified, only acts on frames of the given type. Argument is a dictionary mapping old names to new ones.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -727,7 +727,7 @@
 <div class="viewcode-block" id="Dump">
 <a class="viewcode-back" href="../../../moddoc_core.html#spt3g.core.util.Dump">[docs]</a>
 <span class="nd">@indexmod</span>
-<span class="k">def</span> <span class="nf">Dump</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">added_message</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Dump</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">added_message</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Prints frames to console. If optional type specified, only acts on frames of the given type.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -744,7 +744,7 @@
 <div class="viewcode-block" id="InjectFrame">
 <a class="viewcode-back" href="../../../moddoc_core.html#spt3g.core.util.InjectFrame">[docs]</a>
 <span class="nd">@indexmod</span>
-<span class="k">class</span> <span class="nc">InjectFrame</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">InjectFrame</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Inject an arbitrary frame into a pipeline.</span>
 
@@ -753,9 +753,9 @@
 <span class="sd">    frame : G3Frame</span>
 <span class="sd">        The frame to inject</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">frame</span> <span class="o">=</span> <span class="n">frame</span>
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">frame</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="n">out</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">frame</span><span class="p">,</span> <span class="n">frame</span><span class="p">]</span>
@@ -767,7 +767,7 @@
 <div class="viewcode-block" id="InjectDebug">
 <a class="viewcode-back" href="../../../moddoc_core.html#spt3g.core.util.InjectDebug">[docs]</a>
 <span class="nd">@indexmod</span>
-<span class="k">def</span> <span class="nf">InjectDebug</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug_start_func</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">InjectDebug</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug_start_func</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;Starts a pdb session when a frame of type shows up.</span>
 
 <span class="sd">    The frame data is stored in the variable named &quot;frame&quot;.</span>
@@ -777,7 +777,7 @@
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">if</span> <span class="nb">type</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">frame</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="nb">type</span><span class="p">:</span>
         <span class="k">if</span> <span class="p">((</span><span class="n">debug_start_func</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="n">debug_start_func</span><span class="p">(</span><span class="n">frame</span><span class="p">)):</span>
-            <span class="kn">import</span> <span class="nn">pdb</span><span class="o">,</span> <span class="nn">rlcompleter</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">pdb</span><span class="o">,</span><span class="w"> </span><span class="nn">rlcompleter</span>
             <span class="n">pdb</span><span class="o">.</span><span class="n">Pdb</span><span class="o">.</span><span class="n">complete</span> <span class="o">=</span> <span class="n">rlcompleter</span><span class="o">.</span><span class="n">Completer</span><span class="p">(</span><span class="nb">locals</span><span class="p">())</span><span class="o">.</span><span class="n">complete</span>
             <span class="n">pdb</span><span class="o">.</span><span class="n">set_trace</span><span class="p">()</span></div>
 
@@ -786,13 +786,13 @@
 <div class="viewcode-block" id="AbortAfterNFrames">
 <a class="viewcode-back" href="../../../moddoc_core.html#spt3g.core.util.AbortAfterNFrames">[docs]</a>
 <span class="nd">@indexmod</span>
-<span class="k">class</span> <span class="nc">AbortAfterNFrames</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">AbortAfterNFrames</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;Stops processing after n_frames frames go by&#39;&#39;&#39;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="n">n_frames</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="n">n_frames</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_desired_frames</span> <span class="o">=</span> <span class="n">n_frames</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_frames</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="nb">type</span>
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_frames</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_desired_frames</span><span class="p">:</span>
             <span class="n">log_fatal</span><span class="p">(</span><span class="s2">&quot;Manual Abort Triggered&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">frame</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">:</span>
@@ -801,7 +801,7 @@
 
 
 <span class="nd">@pipesegment</span>
-<span class="k">def</span> <span class="nf">G3NetworkReceiver</span><span class="p">(</span><span class="n">pipe</span><span class="p">,</span> <span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">5978</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">G3NetworkReceiver</span><span class="p">(</span><span class="n">pipe</span><span class="p">,</span> <span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">5978</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Emulation of old G3NetworkReceiver class. Equivalent to pointing</span>
 <span class="sd">    G3Reader at a TCP URL.</span>
@@ -812,19 +812,19 @@
 <div class="viewcode-block" id="G3ThrottledNetworkSender">
 <a class="viewcode-back" href="../../../moddoc_core.html#spt3g.core.util.G3ThrottledNetworkSender">[docs]</a>
 <span class="nd">@indexmod</span>
-<span class="k">class</span> <span class="nc">G3ThrottledNetworkSender</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">G3ThrottledNetworkSender</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Send every Nth frame of certain types using a wrapped G3NetworkSender.</span>
 <span class="sd">    All instances of frames not in the dictionary frame_decimation will be sent</span>
 <span class="sd">    at their full rate.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">5978</span><span class="p">,</span> <span class="n">frame_decimation</span> <span class="o">=</span> <span class="p">{</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Timepoint</span><span class="p">:</span> <span class="mi">10</span><span class="p">},</span> <span class="n">max_queue_size</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hostname</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">5978</span><span class="p">,</span> <span class="n">frame_decimation</span> <span class="o">=</span> <span class="p">{</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Timepoint</span><span class="p">:</span> <span class="mi">10</span><span class="p">},</span> <span class="n">max_queue_size</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sender</span> <span class="o">=</span> <span class="n">G3NetworkSender</span><span class="p">(</span><span class="n">hostname</span><span class="o">=</span><span class="n">hostname</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span> <span class="n">max_queue_size</span><span class="o">=</span><span class="n">max_queue_size</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">decimation</span> <span class="o">=</span> <span class="n">frame_decimation</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">counts</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">decimation</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">counts</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">frame</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">counts</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">decimation</span><span class="p">[</span><span class="n">frame</span><span class="o">.</span><span class="n">type</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">return</span>
@@ -838,7 +838,7 @@
 <div class="viewcode-block" id="DeduplicateMetadata">
 <a class="viewcode-back" href="../../../moddoc_core.html#spt3g.core.util.DeduplicateMetadata">[docs]</a>
 <span class="nd">@indexmod</span>
-<span class="k">class</span> <span class="nc">DeduplicateMetadata</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DeduplicateMetadata</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Drop metadata frames (e.g. Calibration, Wiring) for which the previous</span>
 <span class="sd">    metadata frame of the same type is byte-for-byte identical. This can be</span>
@@ -847,16 +847,16 @@
 <span class="sd">    all frames not in &lt;dataframetypes&gt; to be metadata (by default, everything</span>
 <span class="sd">    except Timepoint and Scan frames).</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataframetype</span><span class="o">=</span><span class="p">[</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Timepoint</span><span class="p">,</span> <span class="n">G3FrameType</span><span class="o">.</span><span class="n">Scan</span><span class="p">]):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataframetype</span><span class="o">=</span><span class="p">[</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Timepoint</span><span class="p">,</span> <span class="n">G3FrameType</span><span class="o">.</span><span class="n">Scan</span><span class="p">]):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataframes</span> <span class="o">=</span> <span class="n">dataframetype</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metacache</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataframes</span> <span class="ow">or</span> <span class="n">f</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">G3FrameType</span><span class="o">.</span><span class="n">EndProcessing</span><span class="p">:</span>
             <span class="c1"># Pass data or end processing frames through</span>
             <span class="k">return</span>
 
         <span class="c1"># Compare serialized form of frame</span>
-        <span class="kn">from</span> <span class="nn">hashlib</span> <span class="kn">import</span> <span class="n">md5</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">hashlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">md5</span>
         <span class="n">rawdata</span> <span class="o">=</span> <span class="n">md5</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">hash</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">metacache</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">metacache</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">type</span><span class="p">]</span> <span class="o">==</span> <span class="n">rawdata</span><span class="p">:</span>
             <span class="c1"># Same as the last one, so drop this frame</span>
@@ -869,7 +869,7 @@
 <div class="viewcode-block" id="DropOrphanMetadata">
 <a class="viewcode-back" href="../../../moddoc_core.html#spt3g.core.util.DropOrphanMetadata">[docs]</a>
 <span class="nd">@indexmod</span>
-<span class="k">class</span> <span class="nc">DropOrphanMetadata</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DropOrphanMetadata</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Remove metadata frames (e.g. Calibration, Wiring) without</span>
 <span class="sd">    intervening data frames (e.g. Timepoint, Scan, specified by the</span>
@@ -877,10 +877,10 @@
 <span class="sd">    do show up will be the most recent of each type and appear in their</span>
 <span class="sd">    original order.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataframetype</span><span class="o">=</span><span class="p">[</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Timepoint</span><span class="p">,</span> <span class="n">G3FrameType</span><span class="o">.</span><span class="n">Scan</span><span class="p">]):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataframetype</span><span class="o">=</span><span class="p">[</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Timepoint</span><span class="p">,</span> <span class="n">G3FrameType</span><span class="o">.</span><span class="n">Scan</span><span class="p">]):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dataframes</span> <span class="o">=</span> <span class="n">dataframetype</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metacache</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">frame</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">G3FrameType</span><span class="o">.</span><span class="n">EndProcessing</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="n">frame</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataframes</span><span class="p">:</span>

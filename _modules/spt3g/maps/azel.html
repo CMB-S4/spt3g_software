@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>spt3g.maps.azel &mdash; SPT-3G Software  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=0517cd0f" />
 
@@ -676,10 +676,10 @@
            <div itemprop="articleBody">
              
   <h1>Source code for spt3g.maps.azel</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">os</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
-<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">core</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">core</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s2">&quot;convert_azel_to_radec&quot;</span><span class="p">,</span>
@@ -691,7 +691,7 @@
 <span class="p">]</span>
 
 
-<span class="k">def</span> <span class="nf">get_location</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="s2">&quot;spt&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_location</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="s2">&quot;spt&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Return the astropy EarthLocation for the given location name.</span>
 
@@ -701,8 +701,8 @@
 <span class="sd">        If a string, must be a recognized location name.  Currently</span>
 <span class="sd">        only &quot;spt&quot; is supported.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">astropy.coordinates</span> <span class="kn">import</span> <span class="n">EarthLocation</span>
-    <span class="kn">import</span> <span class="nn">astropy.units</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">astropy.coordinates</span><span class="w"> </span><span class="kn">import</span> <span class="n">EarthLocation</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="n">EarthLocation</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">location</span>
@@ -721,7 +721,7 @@
 <span class="n">iers_checked</span> <span class="o">=</span> <span class="kc">False</span>
 
 
-<span class="k">def</span> <span class="nf">check_iers</span><span class="p">(</span><span class="n">mjd</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_iers</span><span class="p">(</span><span class="n">mjd</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check whether IERS calculations will work, and load an IERS database file</span>
 <span class="sd">    from backup if all else fails.</span>
@@ -736,8 +736,8 @@
 <span class="sd">    t : astropy.time.Time instance</span>
 <span class="sd">        Time instance for the input MJD(s).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">astropy.utils</span> <span class="kn">import</span> <span class="n">iers</span>
-    <span class="kn">import</span> <span class="nn">astropy.time</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">astropy.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">iers</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">astropy.time</span>
 
     <span class="k">global</span> <span class="n">iers_checked</span>
     <span class="k">if</span> <span class="n">iers_checked</span><span class="p">:</span>
@@ -784,7 +784,7 @@
     <span class="k">return</span> <span class="n">astropy</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">Time</span><span class="p">(</span><span class="n">mjd</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;mjd&quot;</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">convert_deg</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">system</span><span class="o">=</span><span class="s2">&quot;g3&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">convert_deg</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">system</span><span class="o">=</span><span class="s2">&quot;g3&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert the input array to the appropriate system of units.</span>
 
@@ -796,7 +796,7 @@
 <span class="sd">        System to convert to, either &quot;g3&quot; or &quot;astropy&quot;.  Assumes conversion from</span>
 <span class="sd">        the other system.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">import</span> <span class="nn">astropy.units</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">astropy.units</span>
 
     <span class="n">system</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">system</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">system</span> <span class="o">==</span> <span class="s2">&quot;astropy&quot;</span><span class="p">:</span>
@@ -809,7 +809,7 @@
 <div class="viewcode-block" id="convert_azel_to_radec">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.azel.convert_azel_to_radec">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">usefulfunc</span>
-<span class="k">def</span> <span class="nf">convert_azel_to_radec</span><span class="p">(</span><span class="n">az</span><span class="p">,</span> <span class="n">el</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="s2">&quot;spt&quot;</span><span class="p">,</span> <span class="n">mjd</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">convert_azel_to_radec</span><span class="p">(</span><span class="n">az</span><span class="p">,</span> <span class="n">el</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="s2">&quot;spt&quot;</span><span class="p">,</span> <span class="n">mjd</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert timestreams of local azimuth and elevation to right ascension and</span>
 <span class="sd">    declination.</span>
@@ -829,7 +829,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    ra, dec : np.ndarray or G3Timestream</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">import</span> <span class="nn">astropy.coordinates</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">astropy.coordinates</span>
 
     <span class="n">singleton</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">az</span><span class="p">,</span> <span class="n">core</span><span class="o">.</span><span class="n">G3Timestream</span><span class="p">):</span>
@@ -885,7 +885,7 @@
 <div class="viewcode-block" id="convert_radec_to_azel">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.azel.convert_radec_to_azel">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">usefulfunc</span>
-<span class="k">def</span> <span class="nf">convert_radec_to_azel</span><span class="p">(</span><span class="n">ra</span><span class="p">,</span> <span class="n">dec</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="s2">&quot;spt&quot;</span><span class="p">,</span> <span class="n">mjd</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">convert_radec_to_azel</span><span class="p">(</span><span class="n">ra</span><span class="p">,</span> <span class="n">dec</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="s2">&quot;spt&quot;</span><span class="p">,</span> <span class="n">mjd</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert timestreams of right ascension and declination to local</span>
 <span class="sd">    azimuth and elevation.</span>
@@ -905,7 +905,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    az, el : np.ndarray or G3Timestream</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">import</span> <span class="nn">astropy.coordinates</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">astropy.coordinates</span>
 
     <span class="n">singleton</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ra</span><span class="p">,</span> <span class="n">core</span><span class="o">.</span><span class="n">G3Timestream</span><span class="p">):</span>
@@ -956,7 +956,7 @@
 <div class="viewcode-block" id="convert_radec_to_gal">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.azel.convert_radec_to_gal">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">usefulfunc</span>
-<span class="k">def</span> <span class="nf">convert_radec_to_gal</span><span class="p">(</span><span class="n">ra</span><span class="p">,</span> <span class="n">dec</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">convert_radec_to_gal</span><span class="p">(</span><span class="n">ra</span><span class="p">,</span> <span class="n">dec</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert timestreams of right ascension and declination to Galactic</span>
 <span class="sd">    longitude and latitude.</span>
@@ -971,7 +971,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    glon, glat : np.ndarray or G3Timestream</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">import</span> <span class="nn">astropy.coordinates</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">astropy.coordinates</span>
 
     <span class="n">singleton</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ra</span><span class="p">,</span> <span class="n">core</span><span class="o">.</span><span class="n">G3Timestream</span><span class="p">):</span>
@@ -1012,7 +1012,7 @@
 <div class="viewcode-block" id="convert_gal_to_radec">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.azel.convert_gal_to_radec">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">usefulfunc</span>
-<span class="k">def</span> <span class="nf">convert_gal_to_radec</span><span class="p">(</span><span class="n">glon</span><span class="p">,</span> <span class="n">glat</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">convert_gal_to_radec</span><span class="p">(</span><span class="n">glon</span><span class="p">,</span> <span class="n">glat</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert timestreams of Galactic longitude and latitude to right ascension</span>
 <span class="sd">    and declination.</span>
@@ -1027,7 +1027,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    ra, dec : np.ndarray or G3Timestream</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">import</span> <span class="nn">astropy.coordinates</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">astropy.coordinates</span>
 
     <span class="n">singleton</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">glon</span><span class="p">,</span> <span class="n">core</span><span class="o">.</span><span class="n">G3Timestream</span><span class="p">):</span>
@@ -1068,7 +1068,7 @@
 <div class="viewcode-block" id="LocalToAstronomicalPointing">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.azel.LocalToAstronomicalPointing">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">LocalToAstronomicalPointing</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">LocalToAstronomicalPointing</span><span class="p">(</span>
     <span class="n">frame</span><span class="p">,</span>
     <span class="n">az_timestream</span><span class="o">=</span><span class="s2">&quot;BoresightAz&quot;</span><span class="p">,</span>
     <span class="n">el_timestream</span><span class="o">=</span><span class="s2">&quot;BoresightEl&quot;</span><span class="p">,</span>
@@ -1097,7 +1097,7 @@
 <div class="viewcode-block" id="EquatorialToGalacticPointing">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.azel.EquatorialToGalacticPointing">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">EquatorialToGalacticPointing</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">EquatorialToGalacticPointing</span><span class="p">(</span>
     <span class="n">frame</span><span class="p">,</span>
     <span class="n">ra_timestream</span><span class="o">=</span><span class="s2">&quot;BoresightRa&quot;</span><span class="p">,</span>
     <span class="n">dec_timestream</span><span class="o">=</span><span class="s2">&quot;BoresightDec&quot;</span><span class="p">,</span>

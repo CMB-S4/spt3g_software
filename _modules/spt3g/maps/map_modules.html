@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>spt3g.maps.map_modules &mdash; SPT-3G Software  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=0517cd0f" />
 
@@ -676,8 +676,8 @@
            <div itemprop="articleBody">
              
   <h1>Source code for spt3g.maps.map_modules</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">core</span><span class="p">,</span> <span class="n">maps</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">core</span><span class="p">,</span> <span class="n">maps</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s2">&quot;CompactMaps&quot;</span><span class="p">,</span>
@@ -706,7 +706,7 @@
 <div class="viewcode-block" id="CompactMaps">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.map_modules.CompactMaps">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">CompactMaps</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">zero_nans</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">CompactMaps</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">zero_nans</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compact all maps in a frame to their default sparse representation.</span>
 <span class="sd">    Optionally remove NaN values as well.  Removing NaN values will reduce</span>
@@ -726,7 +726,7 @@
 <div class="viewcode-block" id="RemoveWeights">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.map_modules.RemoveWeights">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">RemoveWeights</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">zero_nans</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">RemoveWeights</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">zero_nans</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Remove weights from input maps.  If zero_nans is `True`, empty pixels are</span>
 <span class="sd">    skipped and pixels with zero weight are set to 0 instead of NaN.  Operation</span>
@@ -762,7 +762,7 @@
 <div class="viewcode-block" id="ApplyWeights">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.map_modules.ApplyWeights">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">ApplyWeights</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ApplyWeights</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply weights to the input maps.  The operation is performed in place to</span>
 <span class="sd">    minimize memory use.</span>
@@ -797,7 +797,7 @@
 <div class="viewcode-block" id="SetPolConv">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.map_modules.SetPolConv">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">SetPolConv</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">pol_conv</span><span class="o">=</span><span class="n">maps</span><span class="o">.</span><span class="n">MapPolConv</span><span class="o">.</span><span class="n">IAU</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">SetPolConv</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">pol_conv</span><span class="o">=</span><span class="n">maps</span><span class="o">.</span><span class="n">MapPolConv</span><span class="o">.</span><span class="n">IAU</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set or change the polarization convention of the input polarized map frame.</span>
 <span class="sd">    If switching between IAU and COSMO conventions, flip the sign of the U map</span>
@@ -847,7 +847,7 @@
 <div class="viewcode-block" id="FlattenPol">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.map_modules.FlattenPol">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">FlattenPol</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">FlattenPol</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">invert</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    For maps defined on the sphere the direction of the polarization angle is</span>
 <span class="sd">    is defined relative to the direction of North.  When making maps we follow</span>
@@ -892,7 +892,7 @@
 <div class="viewcode-block" id="MakeMapsPolarized">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.map_modules.MakeMapsPolarized">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">MakeMapsPolarized</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">pol_conv</span><span class="o">=</span><span class="n">maps</span><span class="o">.</span><span class="n">MapPolConv</span><span class="o">.</span><span class="n">IAU</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">MakeMapsPolarized</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">pol_conv</span><span class="o">=</span><span class="n">maps</span><span class="o">.</span><span class="n">MapPolConv</span><span class="o">.</span><span class="n">IAU</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts individual unpolarized maps to polarized versions of the same map,</span>
 <span class="sd">    with the given polarization convention</span>
@@ -937,7 +937,7 @@
 <div class="viewcode-block" id="MakeMapsUnpolarized">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.map_modules.MakeMapsUnpolarized">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">MakeMapsUnpolarized</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">MakeMapsUnpolarized</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Converts individual polarized maps to temperature-only versions of the same map.</span>
 
@@ -968,7 +968,7 @@
 <div class="viewcode-block" id="ValidateMaps">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.map_modules.ValidateMaps">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">ValidateMaps</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">ignore_missing_weights</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ValidateMaps</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">ignore_missing_weights</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Validate that the input map frame has all the necessary keys.</span>
 
@@ -1085,7 +1085,7 @@
 <div class="viewcode-block" id="ExtractMaps">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.map_modules.ExtractMaps">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">class</span> <span class="nc">ExtractMaps</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExtractMaps</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Cache maps that come through the pipeline. Initialize an instance of this</span>
 <span class="sd">    module before adding to a pipeline.  Any map frames that pass through the pipe</span>
@@ -1103,13 +1103,13 @@
 <span class="sd">        single bolometer map frames with common weights through a pipeline.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">map_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ignore_missing_weights</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">map_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ignore_missing_weights</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">map_id</span> <span class="o">=</span> <span class="n">map_id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">copy_</span> <span class="o">=</span> <span class="n">copy</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ignore_missing_weights</span> <span class="o">=</span> <span class="n">ignore_missing_weights</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">maps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">maps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Dictionary of map frames, keyed by Id.  Map objects are extracted from each</span>
 <span class="sd">        frame in the pipeline, and stored as simple dictionaries.  Multiple frames</span>
@@ -1119,7 +1119,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_maps</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_maps</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">frame</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Map</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_id</span> <span class="ow">and</span> <span class="n">frame</span><span class="p">[</span><span class="s2">&quot;Id&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_id</span><span class="p">:</span>
@@ -1149,7 +1149,7 @@
 <div class="viewcode-block" id="InjectMapStub">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.map_modules.InjectMapStub">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">class</span> <span class="nc">InjectMapStub</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">InjectMapStub</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Inject a new map frame from a map stub.</span>
 
@@ -1164,7 +1164,7 @@
 <span class="sd">        output frame will include Q and U maps (and polarized weights).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">map_id</span><span class="p">,</span> <span class="n">map_stub</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">map_id</span><span class="p">,</span> <span class="n">map_stub</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">map_frame</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3Frame</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Map</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">map_frame</span><span class="p">[</span><span class="s2">&quot;Id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">map_id</span>
 
@@ -1186,7 +1186,7 @@
             <span class="n">W</span> <span class="o">=</span> <span class="n">maps</span><span class="o">.</span><span class="n">G3SkyMapWeights</span><span class="p">(</span><span class="n">map_stub</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">map_frame</span><span class="p">[</span><span class="s2">&quot;Wpol&quot;</span> <span class="k">if</span> <span class="n">polarized</span> <span class="k">else</span> <span class="s2">&quot;Wunpol&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">W</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_frame</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span>
 
@@ -1199,7 +1199,7 @@
 <div class="viewcode-block" id="InjectMaps">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.map_modules.InjectMaps">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">class</span> <span class="nc">InjectMaps</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">InjectMaps</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Inject a set of maps into a new map frame.</span>
 
@@ -1215,7 +1215,7 @@
 <span class="sd">        Skip warning about missing weights.  Useful for masks.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">map_id</span><span class="p">,</span> <span class="n">maps_in</span><span class="p">,</span> <span class="n">ignore_missing_weights</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">map_id</span><span class="p">,</span> <span class="n">maps_in</span><span class="p">,</span> <span class="n">ignore_missing_weights</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">map_frame</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3Frame</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Map</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">map_frame</span><span class="p">[</span><span class="s2">&quot;Id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">map_id</span>
 
@@ -1242,7 +1242,7 @@
 
         <span class="n">ValidateMaps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">map_frame</span><span class="p">,</span> <span class="n">ignore_missing_weights</span><span class="o">=</span><span class="n">ignore_missing_weights</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">map_frame</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span>
 
@@ -1255,7 +1255,7 @@
 <div class="viewcode-block" id="ReplicateMaps">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.map_modules.ReplicateMaps">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">ReplicateMaps</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">input_map_id</span><span class="p">,</span> <span class="n">output_map_ids</span><span class="p">,</span> <span class="n">copy_weights</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ReplicateMaps</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">input_map_id</span><span class="p">,</span> <span class="n">output_map_ids</span><span class="p">,</span> <span class="n">copy_weights</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Clone the input map frame with Id input_map_id into new stub frames, one for</span>
 <span class="sd">    each Id listed in output_map_ids.</span>
@@ -1306,7 +1306,7 @@
 <div class="viewcode-block" id="InvertMaps">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.map_modules.InvertMaps">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">InvertMaps</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">InvertMaps</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Invert T, Q, U maps in the input map frame.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1326,14 +1326,14 @@
 <div class="viewcode-block" id="InvertAlternatingMaps">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.map_modules.InvertAlternatingMaps">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">class</span> <span class="nc">InvertAlternatingMaps</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">InvertAlternatingMaps</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Invert T, Q, U maps in every other input map frame.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">flip</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">frame</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Map</span><span class="p">:</span>
             <span class="k">return</span>
 
@@ -1348,7 +1348,7 @@
 <div class="viewcode-block" id="RescaleMaps">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.map_modules.RescaleMaps">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">RescaleMaps</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">t_scale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">q_scale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">u_scale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scale_weights</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">RescaleMaps</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">t_scale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">q_scale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">u_scale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scale_weights</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Rescale input map frame using the supplied calibration factors for each</span>
 <span class="sd">    Stokes component.  If the maps are weighted, the T, Q, and U components are</span>
@@ -1422,7 +1422,7 @@
 <div class="viewcode-block" id="CoaddMaps">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.map_modules.CoaddMaps">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">class</span> <span class="nc">CoaddMaps</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CoaddMaps</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Coadd maps and weights, optionally collating by map Id.  This class can be</span>
 <span class="sd">    used as an argument to ``pipe.Add()`` as a standard pipeline module, or</span>
@@ -1441,7 +1441,7 @@
 <span class="sd">    complex pipelines.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">map_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">output_map_id</span><span class="o">=</span><span class="s2">&quot;Coadd&quot;</span><span class="p">,</span>
@@ -1501,7 +1501,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">keep_outputs</span> <span class="o">=</span> <span class="n">keep_outputs</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">coadd_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">coadd_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Output coadd map frame, also injected into the pipeline on</span>
 <span class="sd">        EndProcessing.  This attribute is only populated if the ``collate``</span>
@@ -1514,7 +1514,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coadd_frame</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">coadd_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">coadd_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Dictionary of output coadd map frames, keyed by input map Id.  Each</span>
 <span class="sd">        frame is also injected into the pipeline on EndProcessing.  This</span>
@@ -1528,7 +1528,7 @@
 
 <div class="viewcode-block" id="CoaddMaps.reset">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.map_modules.CoaddMaps.reset">[docs]</a>
-    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Clear internal frame cache.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1540,7 +1540,7 @@
 
 <div class="viewcode-block" id="CoaddMaps.get_map_id">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.map_modules.CoaddMaps.get_map_id">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_map_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_map_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return Id associated with the input frame</span>
 
@@ -1562,7 +1562,7 @@
         <span class="k">return</span> <span class="n">frame</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Id&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">core</span><span class="o">.</span><span class="n">G3Frame</span><span class="p">)</span> <span class="ow">and</span> <span class="n">frame</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">EndProcessing</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">collate</span><span class="p">:</span>
@@ -1647,7 +1647,7 @@
 <div class="viewcode-block" id="coadd_map_files">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.map_modules.coadd_map_files">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">usefulfunc</span>
-<span class="k">def</span> <span class="nf">coadd_map_files</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">coadd_map_files</span><span class="p">(</span>
     <span class="n">input_files</span><span class="p">,</span>
     <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">coadder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1733,7 +1733,7 @@
 <div class="viewcode-block" id="RebinMaps">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.map_modules.RebinMaps">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">RebinMaps</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">weighted</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">RebinMaps</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">weighted</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">norm</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Rebin any maps in the input frame into larger pixels by summing scale-x-scale</span>
 <span class="sd">    blocks of pixels together.  Map dimensions must be a multiple of the rebinning</span>
@@ -1779,7 +1779,7 @@
 <div class="viewcode-block" id="ReprojectMaps">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.map_modules.ReprojectMaps">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">class</span> <span class="nc">ReprojectMaps</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ReprojectMaps</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Reproject a map frame into a different projection.  Original data are</span>
 <span class="sd">    dropped and replaced by reprojected maps in the input frames.  Maps can be</span>
@@ -1823,7 +1823,7 @@
 <span class="sd">        output map. For numpy array, all zeros/inf/nan/hp.UNSEEN pixels are skipped.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">map_stub</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">rebin</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
@@ -1842,7 +1842,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">partial</span> <span class="o">=</span> <span class="n">partial</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">core</span><span class="o">.</span><span class="n">G3Frame</span><span class="p">)</span> <span class="ow">and</span> <span class="n">frame</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Map</span><span class="p">:</span>
             <span class="k">return</span>
 
@@ -1886,7 +1886,7 @@
         <span class="k">return</span> <span class="n">frame</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The mask to be used for partial reprojection, of the same shape as the</span>
 <span class="sd">        output map.  Masked (1) pixels are handled by the reprojection code, and</span>
@@ -1896,7 +1896,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span>
 
     <span class="nd">@mask</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">partial</span><span class="p">:</span>
@@ -1907,7 +1907,7 @@
                     <span class="n">mask</span><span class="p">,</span> <span class="n">use_data</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">zero_nans</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">zero_infs</span><span class="o">=</span><span class="kc">True</span>
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-                <span class="kn">import</span> <span class="nn">healpy</span> <span class="k">as</span> <span class="nn">hp</span>
+                <span class="kn">import</span><span class="w"> </span><span class="nn">healpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">hp</span>
 
                 <span class="n">tmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stub</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
                 <span class="n">mask_copy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
@@ -1933,7 +1933,7 @@
 <div class="viewcode-block" id="CropMaps">
 <a class="viewcode-back" href="../../../moddoc_maps.html#spt3g.maps.map_modules.CropMaps">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">def</span> <span class="nf">CropMaps</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">CropMaps</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Crop all maps in a frame to the bounding box of the observed region,</span>
 <span class="sd">    with optional padding.  Only operates on FlatSkyMap frames.</span>

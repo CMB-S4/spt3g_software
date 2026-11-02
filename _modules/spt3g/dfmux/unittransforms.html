@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>spt3g.dfmux.unittransforms &mdash; SPT-3G Software  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=0517cd0f" />
 
@@ -676,15 +676,15 @@
            <div itemprop="articleBody">
              
   <h1>Source code for spt3g.dfmux.unittransforms</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span>
-<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">core</span>
-<span class="kn">from</span> <span class="nn">.Housekeeping</span> <span class="kn">import</span> <span class="n">HousekeepingForBolo</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">core</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.Housekeeping</span><span class="w"> </span><span class="kn">import</span> <span class="n">HousekeepingForBolo</span>
 
 <span class="c1"># Transfer functions for 3G and SPTpol boards</span>
-<span class="kn">from</span> <span class="nn">.IceboardConversions</span> <span class="kn">import</span> <span class="n">convert_TF</span><span class="p">,</span> <span class="n">convert_adc_samples</span>
-<span class="kn">from</span> <span class="nn">.wtl_ConvertUtils</span> <span class="kn">import</span> <span class="n">convert_squid</span><span class="p">,</span> <span class="n">convert_demod</span><span class="p">,</span> <span class="n">convert_mb</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.IceboardConversions</span><span class="w"> </span><span class="kn">import</span> <span class="n">convert_TF</span><span class="p">,</span> <span class="n">convert_adc_samples</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.wtl_ConvertUtils</span><span class="w"> </span><span class="kn">import</span> <span class="n">convert_squid</span><span class="p">,</span> <span class="n">convert_demod</span><span class="p">,</span> <span class="n">convert_mb</span>
 
-<span class="k">def</span> <span class="nf">counts_to_rms_amps</span><span class="p">(</span><span class="n">wiringmap</span><span class="p">,</span> <span class="n">hkmap</span><span class="p">,</span> <span class="n">bolo</span><span class="p">,</span> <span class="n">system</span><span class="p">,</span> <span class="n">tf</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">counts_to_rms_amps</span><span class="p">(</span><span class="n">wiringmap</span><span class="p">,</span> <span class="n">hkmap</span><span class="p">,</span> <span class="n">bolo</span><span class="p">,</span> <span class="n">system</span><span class="p">,</span> <span class="n">tf</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">boardhk</span><span class="p">,</span> <span class="n">mezzhk</span><span class="p">,</span> <span class="n">modhk</span><span class="p">,</span> <span class="n">chanhk</span> <span class="o">=</span> <span class="n">HousekeepingForBolo</span><span class="p">(</span><span class="n">hkmap</span><span class="p">,</span> <span class="n">wiringmap</span><span class="p">,</span> <span class="n">bolo</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">system</span> <span class="o">==</span> <span class="s1">&#39;ICE&#39;</span><span class="p">:</span>
@@ -715,7 +715,7 @@
 
     <span class="k">return</span> <span class="n">tf_I</span> <span class="o">*</span> <span class="n">core</span><span class="o">.</span><span class="n">G3Units</span><span class="o">.</span><span class="n">amp</span>
 
-<span class="k">def</span> <span class="nf">bolo_bias_voltage_rms</span><span class="p">(</span><span class="n">wiringmap</span><span class="p">,</span> <span class="n">hkmap</span><span class="p">,</span> <span class="n">bolo</span><span class="p">,</span> <span class="n">system</span><span class="p">,</span> <span class="n">tf</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">bolo_bias_voltage_rms</span><span class="p">(</span><span class="n">wiringmap</span><span class="p">,</span> <span class="n">hkmap</span><span class="p">,</span> <span class="n">bolo</span><span class="p">,</span> <span class="n">system</span><span class="p">,</span> <span class="n">tf</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">boardhk</span><span class="p">,</span> <span class="n">mezzhk</span><span class="p">,</span> <span class="n">modhk</span><span class="p">,</span> <span class="n">chanhk</span> <span class="o">=</span> <span class="n">HousekeepingForBolo</span><span class="p">(</span><span class="n">hkmap</span><span class="p">,</span> <span class="n">wiringmap</span><span class="p">,</span> <span class="n">bolo</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">system</span> <span class="o">==</span> <span class="s1">&#39;ICE&#39;</span><span class="p">:</span>
@@ -734,7 +734,7 @@
 <div class="viewcode-block" id="get_timestream_unit_conversion">
 <a class="viewcode-back" href="../../../moddoc_dfmux.html#spt3g.dfmux.unittransforms.get_timestream_unit_conversion">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">usefulfunc</span>
-<span class="k">def</span> <span class="nf">get_timestream_unit_conversion</span><span class="p">(</span><span class="n">from_units</span><span class="p">,</span> <span class="n">to_units</span><span class="p">,</span> <span class="n">bolo</span><span class="p">,</span> <span class="n">wiringmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hkmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">system</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tf</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_timestream_unit_conversion</span><span class="p">(</span><span class="n">from_units</span><span class="p">,</span> <span class="n">to_units</span><span class="p">,</span> <span class="n">bolo</span><span class="p">,</span> <span class="n">wiringmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hkmap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">system</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tf</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Return the scalar conversion factor to move timestream data from a</span>
 <span class="sd">    given system of units (Power, Resistance, Current, Counts) to another one.</span>
@@ -808,7 +808,7 @@
 <div class="viewcode-block" id="ConvertTimestreamUnits">
 <a class="viewcode-back" href="../../../moddoc_dfmux.html#spt3g.dfmux.unittransforms.ConvertTimestreamUnits">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">class</span> <span class="nc">ConvertTimestreamUnits</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ConvertTimestreamUnits</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Changes timestream units from one set of units (e.g. ADC counts) to</span>
 <span class="sd">    another (e.g. Power). Currents and power are time averaged quantities</span>
@@ -817,7 +817,7 @@
 <span class="sd">    Note that this does not handle conversions to on-sky quantities (e.g. K_cmb)</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Input</span><span class="o">=</span><span class="s1">&#39;RawTimestreams&#39;</span><span class="p">,</span> <span class="n">Output</span><span class="o">=</span><span class="s1">&#39;CalTimestreams&#39;</span><span class="p">,</span> <span class="n">Units</span><span class="o">=</span><span class="n">core</span><span class="o">.</span><span class="n">G3TimestreamUnits</span><span class="o">.</span><span class="n">Power</span><span class="p">,</span> <span class="n">SkipUncalibratable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">KeepConversionsForObservation</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Input</span><span class="o">=</span><span class="s1">&#39;RawTimestreams&#39;</span><span class="p">,</span> <span class="n">Output</span><span class="o">=</span><span class="s1">&#39;CalTimestreams&#39;</span><span class="p">,</span> <span class="n">Units</span><span class="o">=</span><span class="n">core</span><span class="o">.</span><span class="n">G3TimestreamUnits</span><span class="o">.</span><span class="n">Power</span><span class="p">,</span> <span class="n">SkipUncalibratable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">KeepConversionsForObservation</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Copy data in the timestream map Input to the timestream map Output,</span>
 <span class="sd">        converting the units from whatever they were to those specified by</span>
@@ -845,7 +845,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">skiperrors</span> <span class="o">=</span> <span class="n">SkipUncalibratable</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">keepconversions</span> <span class="o">=</span> <span class="n">KeepConversionsForObservation</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="k">if</span> <span class="s1">&#39;DfMuxTransferFunction&#39;</span> <span class="ow">in</span> <span class="n">frame</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">default_tf</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="s1">&#39;DfMuxTransferFunction&#39;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">frame</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Wiring</span><span class="p">:</span>

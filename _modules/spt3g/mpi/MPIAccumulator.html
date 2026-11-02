@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>spt3g.mpi.MPIAccumulator &mdash; SPT-3G Software  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=0517cd0f" />
 
@@ -676,12 +676,12 @@
            <div itemprop="articleBody">
              
   <h1>Source code for spt3g.mpi.MPIAccumulator</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">core</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">core</span>
 
 <div class="viewcode-block" id="MPIAccumulator">
 <a class="viewcode-back" href="../../../moddoc_mpi.html#spt3g.mpi.MPIAccumulator.MPIAccumulator">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">indexmod</span>
-<span class="k">class</span> <span class="nc">MPIAccumulator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MPIAccumulator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Accumulate data from many frames in memory, sharing metadata for all the</span>
 <span class="sd">    frames between nodes in an MPI communicator, potentially organized into</span>
@@ -697,7 +697,7 @@
 <span class="sd">    - Third element is the data from the frame (see extractfunc)</span>
 <span class="sd">      or None if the data are on a remote process.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mpicomm</span><span class="p">,</span> <span class="n">extractfunc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sorter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dataframes</span><span class="o">=</span><span class="p">[</span><span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Scan</span><span class="p">,</span> <span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Timepoint</span><span class="p">]):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mpicomm</span><span class="p">,</span> <span class="n">extractfunc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sorter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dataframes</span><span class="o">=</span><span class="p">[</span><span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Scan</span><span class="p">,</span> <span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">Timepoint</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Data will be shared between nodes participating in the communicator</span>
 <span class="sd">        mpicomm. The data stored are based on frames of the types in the</span>
@@ -737,7 +737,7 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mpicomm</span> <span class="o">=</span> <span class="n">mpicomm</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">extractfunc</span> <span class="o">=</span> <span class="n">extractfunc</span>
-        <span class="k">def</span> <span class="nf">defaultextract</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">defaultextract</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataframes</span><span class="p">:</span>
                 <span class="k">return</span>
             <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">-</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;SourceName&#39;</span><span class="p">],</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;ObservationID&#39;</span><span class="p">]),</span> <span class="kc">None</span><span class="p">,</span> <span class="n">core</span><span class="o">.</span><span class="n">G3Frame</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
@@ -745,7 +745,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">extractfunc</span> <span class="o">=</span> <span class="n">defaultextract</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sorter</span> <span class="o">=</span> <span class="n">sorter</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">localdata</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">frame</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">core</span><span class="o">.</span><span class="n">G3FrameType</span><span class="o">.</span><span class="n">EndProcessing</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
             <span class="k">return</span>
@@ -761,7 +761,7 @@
 
 <div class="viewcode-block" id="MPIAccumulator.finalize">
 <a class="viewcode-back" href="../../../moddoc_mpi.html#spt3g.mpi.MPIAccumulator.MPIAccumulator.finalize">[docs]</a>
-    <span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Put all observation metadata everywhere</span>
         <span class="n">fullobs</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">localchunk</span> <span class="o">=</span> <span class="p">{}</span>

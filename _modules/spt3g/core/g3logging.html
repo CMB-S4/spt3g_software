@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>spt3g.core.g3logging &mdash; SPT-3G Software  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=0517cd0f" />
 
@@ -676,9 +676,9 @@
            <div itemprop="articleBody">
              
   <h1>Source code for spt3g.core.g3logging</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">G3Logger</span><span class="p">,</span> <span class="n">G3LogLevel</span><span class="p">,</span> <span class="n">usefulfunc</span>
-<span class="kn">import</span> <span class="nn">traceback</span>
-<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">reduce</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">G3Logger</span><span class="p">,</span> <span class="n">G3LogLevel</span><span class="p">,</span> <span class="n">usefulfunc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">traceback</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">reduce</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s2">&quot;log_trace&quot;</span><span class="p">,</span>
@@ -692,7 +692,7 @@
 <span class="p">]</span>
 
 
-<span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="n">log_level</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">log</span><span class="p">(</span><span class="n">log_level</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
     <span class="n">message</span> <span class="o">=</span> <span class="n">reduce</span><span class="p">(</span><span class="k">lambda</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">:</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span> <span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">b</span><span class="p">)),</span> <span class="n">args</span><span class="p">)</span>
     <span class="n">tb</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">extract_stack</span><span class="p">(</span><span class="n">limit</span><span class="o">=</span><span class="mi">3</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">G3Logger</span><span class="o">.</span><span class="n">global_logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">log_level</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">tb</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tb</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">tb</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">message</span><span class="p">)</span>
@@ -703,7 +703,7 @@
 <div class="viewcode-block" id="log_trace">
 <a class="viewcode-back" href="../../../moddoc_core.html#spt3g.core.g3logging.log_trace">[docs]</a>
 <span class="nd">@usefulfunc</span>
-<span class="k">def</span> <span class="nf">log_trace</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;Python&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">log_trace</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;Python&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Log a message for the given unit at level LOG_TRACE.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -713,7 +713,7 @@
 <div class="viewcode-block" id="log_debug">
 <a class="viewcode-back" href="../../../moddoc_core.html#spt3g.core.g3logging.log_debug">[docs]</a>
 <span class="nd">@usefulfunc</span>
-<span class="k">def</span> <span class="nf">log_debug</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;Python&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">log_debug</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;Python&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Log a message for the given unit at level LOG_DEBUG.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -723,7 +723,7 @@
 <div class="viewcode-block" id="log_info">
 <a class="viewcode-back" href="../../../moddoc_core.html#spt3g.core.g3logging.log_info">[docs]</a>
 <span class="nd">@usefulfunc</span>
-<span class="k">def</span> <span class="nf">log_info</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;Python&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">log_info</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;Python&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Log a message for the given unit at level LOG_INFO.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -733,7 +733,7 @@
 <div class="viewcode-block" id="log_notice">
 <a class="viewcode-back" href="../../../moddoc_core.html#spt3g.core.g3logging.log_notice">[docs]</a>
 <span class="nd">@usefulfunc</span>
-<span class="k">def</span> <span class="nf">log_notice</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;Python&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">log_notice</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;Python&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Log a message for the given unit at level LOG_NOTICE.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -743,7 +743,7 @@
 <div class="viewcode-block" id="log_warn">
 <a class="viewcode-back" href="../../../moddoc_core.html#spt3g.core.g3logging.log_warn">[docs]</a>
 <span class="nd">@usefulfunc</span>
-<span class="k">def</span> <span class="nf">log_warn</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;Python&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">log_warn</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;Python&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Log a message for the given unit at level LOG_WARN.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -753,7 +753,7 @@
 <div class="viewcode-block" id="log_error">
 <a class="viewcode-back" href="../../../moddoc_core.html#spt3g.core.g3logging.log_error">[docs]</a>
 <span class="nd">@usefulfunc</span>
-<span class="k">def</span> <span class="nf">log_error</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;Python&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">log_error</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;Python&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Log a message for the given unit at level LOG_ERROR.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -763,7 +763,7 @@
 <div class="viewcode-block" id="log_fatal">
 <a class="viewcode-back" href="../../../moddoc_core.html#spt3g.core.g3logging.log_fatal">[docs]</a>
 <span class="nd">@usefulfunc</span>
-<span class="k">def</span> <span class="nf">log_fatal</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;Python&quot;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">log_fatal</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;Python&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Log a message for the given unit at level LOG_FATAL,</span>
 <span class="sd">    and raise a RuntimeError.</span>
@@ -774,7 +774,7 @@
 <div class="viewcode-block" id="set_log_level">
 <a class="viewcode-back" href="../../../moddoc_core.html#spt3g.core.g3logging.set_log_level">[docs]</a>
 <span class="nd">@usefulfunc</span>
-<span class="k">def</span> <span class="nf">set_log_level</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">set_log_level</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Set log level to the requested level. If unit is not None, set the</span>
 <span class="sd">    log level for the given logging unit only.</span>
@@ -793,8 +793,8 @@
 
 
 
-<span class="kn">import</span> <span class="nn">atexit</span>
-<span class="k">def</span> <span class="nf">fix_logging_crash</span><span class="p">():</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">atexit</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">fix_logging_crash</span><span class="p">():</span>
     <span class="c1"># Unload any python loggers at exit to prevent Py_DECREF() after</span>
     <span class="c1"># interpreter destruction</span>
     <span class="n">G3Logger</span><span class="o">.</span><span class="n">global_logger</span> <span class="o">=</span> <span class="kc">None</span>

@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>spt3g.gcp.CalFile &mdash; SPT-3G Software  documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=0517cd0f" />
 
@@ -676,25 +676,25 @@
            <div itemprop="articleBody">
              
   <h1>Source code for spt3g.gcp.CalFile</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">core</span>
-<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">time</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">core</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
 <div class="viewcode-block" id="CalFileReader">
 <a class="viewcode-back" href="../../../moddoc_gcp.html#spt3g.gcp.CalFile.CalFileReader">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">usefulfunc</span>
-<span class="k">class</span> <span class="nc">CalFileReader</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CalFileReader</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    For now just reads a G3 calibration file and loads the contents into </span>
 <span class="sd">    a dictionary</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calibration_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calibration_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">default_calibration_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)),</span> <span class="s1">&#39;G3RegCal.txt&#39;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="CalFileReader.readCalFile">
 <a class="viewcode-back" href="../../../moddoc_gcp.html#spt3g.gcp.CalFile.CalFileReader.readCalFile">[docs]</a>
-    <span class="k">def</span> <span class="nf">readCalFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calfile</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">readCalFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">calfile</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">cal_dict</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="n">calfile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">calibration_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_calibration_file</span>
@@ -775,7 +775,7 @@
 <div class="viewcode-block" id="create_g3_cal_file">
 <a class="viewcode-back" href="../../../moddoc_gcp.html#spt3g.gcp.CalFile.create_g3_cal_file">[docs]</a>
 <span class="nd">@core</span><span class="o">.</span><span class="n">usefulfunc</span>
-<span class="k">def</span> <span class="nf">create_g3_cal_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">read_from_gcp</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extra_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_g3_cal_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">read_from_gcp</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extra_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                        <span class="n">use_extra_info</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">gcp_cal_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Create a G3 register calibration file. Usually reads in</span>

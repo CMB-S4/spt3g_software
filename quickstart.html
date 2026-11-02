@@ -7,7 +7,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Quick Start &mdash; SPT-3G Software  documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/custom.css?v=0517cd0f" />
 
@@ -833,17 +833,17 @@ Frame (Scan) [
 <section id="id1">
 <h3><a class="toc-backref" href="#id11" role="doc-backlink">Modules</a><a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
 <p>A module is a python callable that does data processing. Modules are passed a frame and can inspect and modify it at will before the frame is passed along to the next module. An example of a module is doing poly filtering on a timestream. As an example of a very simple module:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">simplemod</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">simplemod</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>This prints the contents of the frame and does not modify it. As a more complex example, this would print the time at which a DfMux sample was recorded:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">printmuxtime</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">printmuxtime</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="s1">&#39;EventHeader&#39;</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>Modifying the frame also works like a dictionary. The following adds the number 5 to every frame:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">five</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">five</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
     <span class="n">frame</span><span class="p">[</span><span class="s1">&#39;Five&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span>
 </pre></div>
 </div>
@@ -921,7 +921,7 @@ Frame (Scan) [
 <p>To break into a debugger session at a certain point in the pipeline, you can use the <a class="reference internal" href="moddoc_core.html#spt3g.core.util.InjectDebug" title="spt3g.core.util.InjectDebug"><code class="xref py py-func docutils literal notranslate"><span class="pre">InjectDebug()</span></code></a> module.</p>
 <p>Another common idiom is to insert a pipeline module that grabs data as it goes by for later examination, which lets you debug as though there were not callbacks. For example,</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">stuff</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="k">def</span> <span class="nf">grabstuff</span><span class="p">(</span><span class="n">fr</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">grabstuff</span><span class="p">(</span><span class="n">fr</span><span class="p">):</span>
     <span class="k">if</span> <span class="s1">&#39;MyData&#39;</span> <span class="ow">in</span> <span class="n">fr</span><span class="p">:</span>
         <span class="n">stuff</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fr</span><span class="p">[</span><span class="s1">&#39;MyData&#39;</span><span class="p">])</span>
 <span class="n">pipe</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">grabstuff</span><span class="p">)</span>
