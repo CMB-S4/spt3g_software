@@ -12,6 +12,26 @@ if(NOT WITHOUT_SUPERTIMESTREAM)
 	set(CORE_EXTRA_SRCS ${CORE_EXTRA_SRCS} src/G3SuperTimestream.cxx)
 endif()
 
+# Hardware CRC32C, compiled with the instruction set extensions it needs.
+# crc32.c only calls it if the CPU supports them.
+include(CheckCCompilerFlag)
+check_c_compiler_flag(-mpclmul HAVE_CRC32C_SSE)
+check_c_compiler_flag(-march=armv8-a+crc+crypto HAVE_CRC32C_NEON)
+if(HAVE_CRC32C_SSE)
+	set(CRC32C_HW_SRC src/crc32c_sse.c)
+	set_source_files_properties(${CRC32C_HW_SRC} PROPERTIES
+	    COMPILE_OPTIONS "-msse4.2;-mpclmul")
+elseif(HAVE_CRC32C_NEON)
+	set(CRC32C_HW_SRC src/crc32c_neon.c)
+	set_source_files_properties(${CRC32C_HW_SRC} PROPERTIES
+	    COMPILE_OPTIONS "-march=armv8-a+crc+crypto")
+endif()
+if(CRC32C_HW_SRC)
+	set(CORE_EXTRA_SRCS ${CORE_EXTRA_SRCS} ${CRC32C_HW_SRC})
+	set_source_files_properties(src/crc32.c PROPERTIES
+	    COMPILE_DEFINITIONS CRC32C_HW_SRC)
+endif()
+
 add_spt3g_library(core SHARED
 	src/G3Logging.cxx src/G3PrintfLogger.cxx src/G3SyslogLogger.cxx
 	src/crc32.c src/G3Frame.cxx src/G3Data.cxx src/G3TimeStamp.cxx

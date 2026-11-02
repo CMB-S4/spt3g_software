@@ -41,14 +41,15 @@ TEST(KnownValue){
 }
 
 TEST(LengthsAndAlignments){
-	// Lengths around the boundaries of the parallel-stream blocks used by
-	// the hardware implementation (3 x 256 and 3 x 8192 bytes)
-	const size_t lengths[] = {1, 7, 8, 9, 63, 767, 768, 769, 1000,
-	    24575, 24576, 24577, 3 * 24576 + 3 * 256 + 13, 100003};
-	std::vector<uint8_t> data = test_data(100003 + 8);
+	// Lengths around the thresholds at which the hardware implementations
+	// switch strategy (32 and 112 bytes on AArch64, 208 on x86-64), and
+	// alignments around the 16-byte alignment that both establish first
+	const size_t lengths[] = {1, 7, 8, 9, 31, 32, 33, 63, 111, 112, 113,
+	    207, 208, 209, 408, 1000, 24577, 100003};
+	std::vector<uint8_t> data = test_data(100003 + 16);
 
 	for (size_t len : lengths) {
-		for (size_t offset = 0; offset < 8; offset++) {
+		for (size_t offset = 0; offset < 16; offset++) {
 			const uint8_t *buf = data.data() + offset;
 			ENSURE_EQUAL(crc32c(0, buf, len),
 			    (unsigned long)crc32c_ref(0, buf, len),
