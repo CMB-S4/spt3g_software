@@ -89,8 +89,15 @@ jobs:
     - name: CRC32C Diagnostics
       working-directory: ${{runner.workspace}}/${{matrix.toolset}}
       shell: bash
-      # Report which CRC32C implementation is in use and its throughput
-      run: ./bin/core-test --verbose --run-tests CRC32C
+      # Report the CPU model, which CRC32C implementation is in use and its
+      # throughput
+      run: |
+        if [ "$RUNNER_OS" == "macOS" ]; then
+          echo "CPU: $(sysctl -n machdep.cpu.brand_string)"
+        else
+          lscpu | grep 'Model name'
+        fi
+        ./bin/core-test --verbose --run-tests CRC32C
 
     - name: Docs Requirements
       if: runner.environment == 'github-hosted' && github.ref_name == 'master' && matrix.docs

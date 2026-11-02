@@ -457,7 +457,7 @@ crc32c_impl(void)
     if (!crc32c_has_hw())
         return "tabular";
 #if defined(__x86_64__)
-    return "SSE4.2 and PCLMULQDQ (fast-crc32 sse v8s3x3)";
+    return "SSE4.2 and PCLMULQDQ (fast-crc32 sse v4s3x3)";
 #else
     return "ARMv8 CRC32 and PMULL (fast-crc32 neon v4s3x2e_s3)";
 #endif
