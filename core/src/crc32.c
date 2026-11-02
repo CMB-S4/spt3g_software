@@ -8,13 +8,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-/* Hardware implementations, see crc32c_hw below.  CRC32C_HW_SRC is defined
- * by the build when it compiles crc32c_sse.c or crc32c_neon.c. */
-#if defined(CRC32C_HW_SRC) && (defined(__x86_64__) || \
-    (defined(__aarch64__) && !defined(__AARCH64EB__)))
-#define CRC32C_HW
-#endif
-
 #define DYNAMIC_CRC_TABLE
 #define STDC
 #define FAR
@@ -260,13 +253,8 @@ const unsigned long FAR * get_crc32c_table()
 #define DO8 DO1; DO1; DO1; DO1; DO1; DO1; DO1; DO1
 
 /* ========================================================================= */
-#ifdef CRC32C_HW
 local unsigned long
 crc32c_tabular(unsigned long crc, const unsigned char FAR *buf, uInt len)
-#else
-unsigned long
-crc32c(unsigned long crc, const unsigned char FAR *buf, uInt len)
-#endif
 {
     if (buf == Z_NULL) return 0UL;
 
@@ -375,7 +363,6 @@ crc32_big(unsigned long crc, const unsigned char FAR *buf, unsigned len)
 
 #endif /* BYFOUR */
 
-#ifdef CRC32C_HW
 /* ========================================================================= */
 /* Hardware CRC32C for x86-64 and little-endian AArch64, in crc32c_sse.c and
  * crc32c_neon.c.  These use the scalar CRC32C instructions (SSE4.2 on x86-64,
@@ -384,15 +371,16 @@ crc32_big(unsigned long crc, const unsigned char FAR *buf, unsigned len)
  * several parts of the buffer at once.  See
  * https://github.com/corsix/fast-crc32/ for the method and benchmarks.
  *
+ * CRC32C_HW_SRC is defined by the build when it compiles one of these files.
  * Support is detected at runtime, falling back to the tabular implementation.
  */
 
-#if defined(__x86_64__)
+#if defined(CRC32C_HW_SRC) && defined(__x86_64__)
+#define CRC32C_HW
 uint32_t crc32c_sse(uint32_t crc, const char *buf, size_t len);
-#define crc32c_hw crc32c_sse
-#else
+#elif defined(CRC32C_HW_SRC) && defined(__aarch64__) && !defined(__AARCH64EB__)
+#define CRC32C_HW
 uint32_t crc32c_neon(uint32_t crc, const char *buf, size_t len);
-#define crc32c_hw crc32c_neon
 #if (defined(__ARM_FEATURE_CRC32) && \
     (defined(__ARM_FEATURE_AES) || defined(__ARM_FEATURE_CRYPTO))) || \
     defined(__APPLE__)
@@ -409,13 +397,17 @@ uint32_t crc32c_neon(uint32_t crc, const char *buf, size_t len);
 #endif
 #endif
 
-/* Threads racing through the first call all compute and store the same
- * value. */
-static int
-crc32c_has_hw(void)
-{
-    static int has_hw = -1;
+#ifdef CRC32C_HW
+/* Set by the first call to crc32c().  Threads racing through it all compute
+ * and store the same value. */
+static int has_hw = -1;
+#endif
 
+/* ========================================================================= */
+unsigned long
+crc32c(unsigned long crc, const unsigned char FAR *buf, unsigned len)
+{
+#ifdef CRC32C_HW
     if (has_hw == -1) {
 #if defined(__x86_64__)
         unsigned int a, b, c, d;
@@ -434,34 +426,34 @@ crc32c_has_hw(void)
 #endif
     }
 
-    return has_hw;
-}
-
-unsigned long
-crc32c(unsigned long crc, const unsigned char FAR *buf, unsigned len)
-{
     /* The hardware implementations invert the CRC before and after */
-    if (crc32c_has_hw())
-        return ~crc32c_hw(~(uint32_t)crc, (const char *)buf, len);
-    else
-        return crc32c_tabular(crc, buf, len);
+    if (has_hw) {
+#if defined(__x86_64__)
+        return ~crc32c_sse(~(uint32_t)crc, (const char *)buf, len);
+#else
+        return ~crc32c_neon(~(uint32_t)crc, (const char *)buf, len);
+#endif
+    }
+#endif
+    return crc32c_tabular(crc, buf, len);
 }
-#endif /* CRC32C_HW */
 
 /* ========================================================================= */
 /* Name of the implementation used by crc32c(), for diagnostics */
 const char *
 crc32c_impl(void)
 {
-#if defined(CRC32C_HW)
-    if (!crc32c_has_hw())
-        return "tabular";
+#ifdef CRC32C_HW
+    /* Make sure crc32c() has checked for hardware support */
+    crc32c(0, (const unsigned char *)"", 0);
+
+    if (has_hw) {
 #if defined(__x86_64__)
-    return "SSE4.2 and PCLMULQDQ (fast-crc32 sse v4s3x3)";
+        return "SSE4.2 and PCLMULQDQ (fast-crc32 sse v4s3x3)";
 #else
-    return "ARMv8 CRC32 and PMULL (fast-crc32 neon v4s3x2e_s3)";
+        return "ARMv8 CRC32 and PMULL (fast-crc32 neon v4s3x2e_s3)";
 #endif
-#else
+    }
+#endif
     return "tabular";
-#endif
 }
