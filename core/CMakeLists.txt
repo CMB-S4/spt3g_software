@@ -12,35 +12,44 @@ if(NOT WITHOUT_SUPERTIMESTREAM)
 	set(CORE_EXTRA_SRCS ${CORE_EXTRA_SRCS} src/G3SuperTimestream.cxx)
 endif()
 
-# Hardware CRC32C, compiled with the instruction set extensions it needs.  The
-# library then requires a CPU with those extensions.  Disable it to build for
-# CPUs without them, e.g. older x86-64 or ARM without PMULL (Raspberry Pi 4).
+# CRC32C implementation: crc32.c (portable), or crc32c_sse.c (x86-64) or
+# crc32c_neon.c (AArch64) compiled with the instruction set extensions they
+# need.  A hardware one requires a CPU with those extensions, so disable
+# WITH_HW_CRC to build for CPUs without them, e.g. older x86-64 or ARM without
+# PMULL (Raspberry Pi 4).
 if(NOT DEFINED WITH_HW_CRC)
 	set(WITH_HW_CRC TRUE CACHE BOOL "Use hardware CRC32C instructions")
 endif()
+set(CRC32C_SRC src/crc32.c)
 if(WITH_HW_CRC)
-	include(CheckCCompilerFlag)
-	check_c_compiler_flag(-mpclmul HAVE_CRC32C_SSE)
-	check_c_compiler_flag(-march=armv8-a+crc+crypto HAVE_CRC32C_NEON)
-	if(HAVE_CRC32C_SSE)
-		set(CRC32C_HW_SRC src/crc32c_sse.c)
-		set_source_files_properties(${CRC32C_HW_SRC} PROPERTIES
+	include(CheckCSourceCompiles)
+	set(CMAKE_REQUIRED_FLAGS "-msse4.2 -mpclmul")
+	check_c_source_compiles([[
+		#if !defined(__x86_64__)
+		#error
+		#endif
+		int main(void) { return 0; }]] HAVE_HW_CRC_SSE)
+	set(CMAKE_REQUIRED_FLAGS "-march=armv8-a+crc+crypto")
+	check_c_source_compiles([[
+		#if !defined(__aarch64__) || defined(__AARCH64EB__)
+		#error
+		#endif
+		int main(void) { return 0; }]] HAVE_HW_CRC_NEON)
+	unset(CMAKE_REQUIRED_FLAGS)
+	if(HAVE_HW_CRC_SSE)
+		set(CRC32C_SRC src/crc32c_sse.c)
+		set_source_files_properties(${CRC32C_SRC} PROPERTIES
 		    COMPILE_OPTIONS "-msse4.2;-mpclmul")
-	elseif(HAVE_CRC32C_NEON)
-		set(CRC32C_HW_SRC src/crc32c_neon.c)
-		set_source_files_properties(${CRC32C_HW_SRC} PROPERTIES
+	elseif(HAVE_HW_CRC_NEON)
+		set(CRC32C_SRC src/crc32c_neon.c)
+		set_source_files_properties(${CRC32C_SRC} PROPERTIES
 		    COMPILE_OPTIONS "-march=armv8-a+crc+crypto")
 	endif()
-endif()
-if(CRC32C_HW_SRC)
-	set(CORE_EXTRA_SRCS ${CORE_EXTRA_SRCS} ${CRC32C_HW_SRC})
-	set_source_files_properties(src/crc32.c PROPERTIES
-	    COMPILE_DEFINITIONS CRC32C_HW_SRC)
 endif()
 
 add_spt3g_library(core SHARED
 	src/G3Logging.cxx src/G3PrintfLogger.cxx src/G3SyslogLogger.cxx
-	src/crc32.c src/G3Frame.cxx src/G3Data.cxx src/G3TimeStamp.cxx
+	${CRC32C_SRC} src/G3Frame.cxx src/G3Data.cxx src/G3TimeStamp.cxx
 	src/G3Pipeline.cxx src/G3PipelineInfo.cxx
 	src/int_storage.cxx src/G3Vector.cxx src/G3Map.cxx
 	src/dataio.cxx src/compression.cxx

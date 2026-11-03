@@ -6,8 +6,7 @@
 #include <iostream>
 #include <vector>
 
-extern "C" unsigned long crc32c(unsigned long crc, const uint8_t *buf, unsigned int len);
-extern "C" const char *crc32c_impl(void);
+#include "../src/crc32c.h"
 
 TEST_GROUP(CRC32C)
 

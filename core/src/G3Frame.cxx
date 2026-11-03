@@ -9,7 +9,7 @@
 #include <cxxabi.h>
 #include <algorithm>
 
-extern "C" unsigned long crc32c(unsigned long crc, const uint8_t *buf, unsigned int len);
+#include "crc32c.h"
 
 template <typename T>
 static std::string cxx_demangle(const T& v)
