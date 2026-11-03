@@ -34,6 +34,13 @@ uint32_t crc32c_neon(uint32_t crc, const char *buf, size_t len);
 #define CRC32C_IMPL "tabular"
 #endif
 
+/* Name of the implementation used by crc32c(), for diagnostics */
+const char *
+crc32c_impl(void)
+{
+    return CRC32C_IMPL;
+}
+
 #ifdef CRC32C_HW
 unsigned long
 crc32c(unsigned long crc, const unsigned char *buf, unsigned len)
@@ -399,11 +406,3 @@ crc32_big(unsigned long crc, const unsigned char FAR *buf, unsigned len)
 #endif /* BYFOUR */
 
 #endif /* CRC32C_HW */
-
-/* ========================================================================= */
-/* Name of the implementation used by crc32c(), for diagnostics */
-const char *
-crc32c_impl(void)
-{
-    return CRC32C_IMPL;
-}
