@@ -1,12 +1,47 @@
 /* NOTE: THIS IS MODIFIED FROM THE ZLIB VERSION IN ORDER TO COMPUTE A CRC32-C
  * INSTEAD OF A CRC32.
  *
- * In addition, crc32c() uses the hardware implementations in crc32c_sse.c
- * (x86-64) and crc32c_neon.c (AArch64) when the CPU supports them.
+ * In addition, crc32c() uses the hardware implementation in crc32c_sse.c
+ * (x86-64) or crc32c_neon.c (AArch64) instead when the build includes it.
  */
 
 #include <stddef.h>
 #include <stdint.h>
+
+/* ========================================================================= */
+/* Hardware CRC32C for x86-64 and little-endian AArch64, in crc32c_sse.c and
+ * crc32c_neon.c.  These use the scalar CRC32C instructions (SSE4.2 on x86-64,
+ * the ARMv8 CRC extension on AArch64) together with carryless multiplication
+ * (PCLMULQDQ or PMULL), which runs on separate execution units, to process
+ * several parts of the buffer at once.  See
+ * https://github.com/corsix/fast-crc32/ for the method and benchmarks.
+ *
+ * CRC32C_HW_SRC is defined by the build when it compiles one of these files,
+ * unless WITH_HW_CRC is disabled.  The CPU must then support the
+ * extensions they use.  Otherwise, crc32c() is the tabular implementation
+ * below.
+ */
+
+#if defined(CRC32C_HW_SRC) && defined(__x86_64__)
+uint32_t crc32c_sse(uint32_t crc, const char *buf, size_t len);
+#define CRC32C_HW crc32c_sse
+#define CRC32C_IMPL "SSE4.2 and PCLMULQDQ (fast-crc32 sse v4s3x3)"
+#elif defined(CRC32C_HW_SRC) && defined(__aarch64__) && !defined(__AARCH64EB__)
+uint32_t crc32c_neon(uint32_t crc, const char *buf, size_t len);
+#define CRC32C_HW crc32c_neon
+#define CRC32C_IMPL "ARMv8 CRC32 and PMULL (fast-crc32 neon v4s3x2e_s3)"
+#else
+#define CRC32C_IMPL "tabular"
+#endif
+
+#ifdef CRC32C_HW
+unsigned long
+crc32c(unsigned long crc, const unsigned char *buf, unsigned len)
+{
+    /* The hardware implementations invert the CRC before and after */
+    return ~CRC32C_HW(~(uint32_t)crc, (const char *)buf, len);
+}
+#else
 
 #define DYNAMIC_CRC_TABLE
 #define STDC
@@ -253,8 +288,8 @@ const unsigned long FAR * get_crc32c_table()
 #define DO8 DO1; DO1; DO1; DO1; DO1; DO1; DO1; DO1
 
 /* ========================================================================= */
-local unsigned long
-crc32c_tabular(unsigned long crc, const unsigned char FAR *buf, uInt len)
+unsigned long
+crc32c(unsigned long crc, const unsigned char FAR *buf, uInt len)
 {
     if (buf == Z_NULL) return 0UL;
 
@@ -363,97 +398,12 @@ crc32_big(unsigned long crc, const unsigned char FAR *buf, unsigned len)
 
 #endif /* BYFOUR */
 
-/* ========================================================================= */
-/* Hardware CRC32C for x86-64 and little-endian AArch64, in crc32c_sse.c and
- * crc32c_neon.c.  These use the scalar CRC32C instructions (SSE4.2 on x86-64,
- * the ARMv8 CRC extension on AArch64) together with carryless multiplication
- * (PCLMULQDQ or PMULL), which runs on separate execution units, to process
- * several parts of the buffer at once.  See
- * https://github.com/corsix/fast-crc32/ for the method and benchmarks.
- *
- * CRC32C_HW_SRC is defined by the build when it compiles one of these files.
- * Support is detected at runtime, falling back to the tabular implementation.
- */
-
-#if defined(CRC32C_HW_SRC) && defined(__x86_64__)
-#define CRC32C_HW
-uint32_t crc32c_sse(uint32_t crc, const char *buf, size_t len);
-#elif defined(CRC32C_HW_SRC) && defined(__aarch64__) && !defined(__AARCH64EB__)
-#define CRC32C_HW
-uint32_t crc32c_neon(uint32_t crc, const char *buf, size_t len);
-#if (defined(__ARM_FEATURE_CRC32) && \
-    (defined(__ARM_FEATURE_AES) || defined(__ARM_FEATURE_CRYPTO))) || \
-    defined(__APPLE__)
-/* Both extensions are part of the target, or present on every Apple CPU */
-#define CRC32C_HW_TARGET
-#elif defined(__linux__)
-#include <sys/auxv.h>
-#ifndef HWCAP_PMULL
-#define HWCAP_PMULL (1 << 4)
-#endif
-#ifndef HWCAP_CRC32
-#define HWCAP_CRC32 (1 << 7)
-#endif
-#endif
-#endif
-
-#ifdef CRC32C_HW
-/* Set by the first call to crc32c().  Threads racing through it all compute
- * and store the same value. */
-static int has_hw = -1;
-#endif
-
-/* ========================================================================= */
-unsigned long
-crc32c(unsigned long crc, const unsigned char FAR *buf, unsigned len)
-{
-#ifdef CRC32C_HW
-    if (has_hw == -1) {
-#if defined(__x86_64__)
-        unsigned int a, b, c, d;
-
-        __asm__ __volatile__("cpuid" : "=a"(a), "=b"(b), "=c"(c), "=d"(d) :
-            "0"(1), "2"(0));
-        /* SSE4.2 and PCLMULQDQ */
-        has_hw = ((c & 0x00100002) == 0x00100002);
-#elif defined(CRC32C_HW_TARGET)
-        has_hw = 1;
-#elif defined(__linux__)
-        unsigned long hwcap = getauxval(AT_HWCAP);
-        has_hw = ((hwcap & HWCAP_CRC32) && (hwcap & HWCAP_PMULL));
-#else
-        has_hw = 0;
-#endif
-    }
-
-    /* The hardware implementations invert the CRC before and after */
-    if (has_hw) {
-#if defined(__x86_64__)
-        return ~crc32c_sse(~(uint32_t)crc, (const char *)buf, len);
-#else
-        return ~crc32c_neon(~(uint32_t)crc, (const char *)buf, len);
-#endif
-    }
-#endif
-    return crc32c_tabular(crc, buf, len);
-}
+#endif /* CRC32C_HW */
 
 /* ========================================================================= */
 /* Name of the implementation used by crc32c(), for diagnostics */
 const char *
 crc32c_impl(void)
 {
-#ifdef CRC32C_HW
-    /* Make sure crc32c() has checked for hardware support */
-    crc32c(0, (const unsigned char *)"", 0);
-
-    if (has_hw) {
-#if defined(__x86_64__)
-        return "SSE4.2 and PCLMULQDQ (fast-crc32 sse v4s3x3)";
-#else
-        return "ARMv8 CRC32 and PMULL (fast-crc32 neon v4s3x2e_s3)";
-#endif
-    }
-#endif
-    return "tabular";
+    return CRC32C_IMPL;
 }

@@ -12,19 +12,25 @@ if(NOT WITHOUT_SUPERTIMESTREAM)
 	set(CORE_EXTRA_SRCS ${CORE_EXTRA_SRCS} src/G3SuperTimestream.cxx)
 endif()
 
-# Hardware CRC32C, compiled with the instruction set extensions it needs.
-# crc32.c only calls it if the CPU supports them.
-include(CheckCCompilerFlag)
-check_c_compiler_flag(-mpclmul HAVE_CRC32C_SSE)
-check_c_compiler_flag(-march=armv8-a+crc+crypto HAVE_CRC32C_NEON)
-if(HAVE_CRC32C_SSE)
-	set(CRC32C_HW_SRC src/crc32c_sse.c)
-	set_source_files_properties(${CRC32C_HW_SRC} PROPERTIES
-	    COMPILE_OPTIONS "-msse4.2;-mpclmul")
-elseif(HAVE_CRC32C_NEON)
-	set(CRC32C_HW_SRC src/crc32c_neon.c)
-	set_source_files_properties(${CRC32C_HW_SRC} PROPERTIES
-	    COMPILE_OPTIONS "-march=armv8-a+crc+crypto")
+# Hardware CRC32C, compiled with the instruction set extensions it needs.  The
+# library then requires a CPU with those extensions.  Disable it to build for
+# CPUs without them, e.g. older x86-64 or ARM without PMULL (Raspberry Pi 4).
+if(NOT DEFINED WITH_HW_CRC)
+	set(WITH_HW_CRC TRUE CACHE BOOL "Use hardware CRC32C instructions")
+endif()
+if(WITH_HW_CRC)
+	include(CheckCCompilerFlag)
+	check_c_compiler_flag(-mpclmul HAVE_CRC32C_SSE)
+	check_c_compiler_flag(-march=armv8-a+crc+crypto HAVE_CRC32C_NEON)
+	if(HAVE_CRC32C_SSE)
+		set(CRC32C_HW_SRC src/crc32c_sse.c)
+		set_source_files_properties(${CRC32C_HW_SRC} PROPERTIES
+		    COMPILE_OPTIONS "-msse4.2;-mpclmul")
+	elseif(HAVE_CRC32C_NEON)
+		set(CRC32C_HW_SRC src/crc32c_neon.c)
+		set_source_files_properties(${CRC32C_HW_SRC} PROPERTIES
+		    COMPILE_OPTIONS "-march=armv8-a+crc+crypto")
+	endif()
 endif()
 if(CRC32C_HW_SRC)
 	set(CORE_EXTRA_SRCS ${CORE_EXTRA_SRCS} ${CRC32C_HW_SRC})
