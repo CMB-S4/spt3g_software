@@ -15,8 +15,8 @@ endif()
 # CRC32C implementation: crc32.c (portable), or crc32c_sse.c (x86-64) or
 # crc32c_neon.c (AArch64) compiled with the instruction set extensions they
 # need.  A hardware one requires a CPU with those extensions, so disable
-# WITH_HW_CRC to build for CPUs without them, e.g. older x86-64 or ARM without
-# PMULL (Raspberry Pi 4).
+# WITH_HW_CRC to build for CPUs without them, e.g. older (pre-2008) x86-64
+# or ARM (e.g. Raspberry Pi 4) that don't support CRC instructions.
 if(NOT DEFINED WITH_HW_CRC)
 	set(WITH_HW_CRC TRUE CACHE BOOL "Use hardware CRC32C instructions")
 endif()
