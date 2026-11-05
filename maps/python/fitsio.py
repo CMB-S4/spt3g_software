@@ -77,13 +77,14 @@ def parse_fits_units(units):
 
     Arguments
     ---------
-    units : str
+    units : str or False
         Unit string.  Supported options are temperature units (e.g. ``'K_CMB'``,
         ``'uK_CMB'``, ``'mK_RJ'``, ``'uK'``; bare kelvin units are interpreted as CMB
         temperature units), flux density units (e.g. ``'Jy'``, ``'mJy'``,
         ``'MJy/sr'``), any of these raised to an integer power (e.g.  ``'K_CMB^2'``),
         or the name of a ``core.G3TimestreamUnits`` type (e.g.  ``'Tcmb'`` or
-        ``'None'``), which denotes data already stored in native G3Units.
+        ``'None'``), which denotes data already stored in native G3Units.  False
+        denotes unitless data, and is equivalent to ``'None'``.
 
     Returns
     -------
@@ -98,6 +99,8 @@ def parse_fits_units(units):
     ValueError :
         If the unit string is not recognized.
     """
+    if units is False:
+        units = 'None'
     ustr = str(units).replace(' ', '').replace('_', '')
 
     # check if an existing timestream units type
@@ -314,16 +317,17 @@ def load_skymap_fits(filename, hdu=None, keys=None, memmap=False, units=None):
         rows, regardless of this setting, so that the table or image is never
         held in memory; other images are read through astropy in chunks of rows.
         Memory-mapping is not supported for scaled images.  Default: False.
-    units : str, optional
+    units : str or False, optional
         Units of the T, Q and U data stored in the file, e.g. ``'uK_CMB'`` or
-        ``'K_CMB'``.  See ``parse_fits_units`` for supported options.  Required
-        if the file does not contain units information for these maps (via the
-        ``BUNIT`` keyword for flat sky maps, the ``TUNITn`` keywords for healpix
-        maps, or the ``UNITS`` keyword written by ``save_skymap_fits``).  If the
-        file contains units information that is inconsistent with this argument,
-        a ValueError is raised.  Maps are converted from these units to G3Units.
-        Weight maps and any other columns without units information are loaded
-        unscaled.
+        ``'K_CMB'``, or False for unitless data, which are loaded unscaled with
+        units type ``None``.  See ``parse_fits_units`` for supported options.
+        Required if the file does not contain units information for these maps
+        (via the ``BUNIT`` keyword for flat sky maps, the ``TUNITn`` keywords for
+        healpix maps, or the ``UNITS`` keyword written by ``save_skymap_fits``).
+        If the file contains units information that is inconsistent with this
+        argument, a ValueError is raised.  Maps are converted from these units to
+        G3Units.  Weight maps and any other columns without units information are
+        loaded unscaled.
 
     Returns
     -------
@@ -899,12 +903,13 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
        If defined, extra keywords to be appened to the FITS header. The dict
        can contain entries such as ``hdr['NEWKEY'] = 'New value'`` or
        ``hdr['NEWKEY'] = ('New value', "Comment for New value")``.
-    units : str, optional
+    units : str or False, optional
         If defined, store the T, Q and U maps in these physical units (e.g.
         ``'uK_CMB'`` or ``'mJy'``) instead of the defaults described above.  See
         ``parse_fits_units`` for supported options.  The unit type must match
         that of the input maps, and the maps must be unweighted if weights are
-        also supplied.
+        also supplied.  If False, the maps must be unitless (units type
+        ``None``), and are stored unscaled, with or without weights.
     """
 
     import astropy.io.fits
@@ -941,7 +946,7 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
     weighted = W is not None and any(m.weighted for m in maps)
     if units is not None:
         uparsed = parse_fits_units(units)
-        if weighted:
+        if weighted and uparsed[0] != getattr(core.G3TimestreamUnits, 'None'):
             raise ValueError(
                 "Cannot store weighted maps in physical units, remove weights first"
             )
@@ -1041,7 +1046,8 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
                             units, name, m.units
                         )
                     )
-                uname, ufac = str(units).strip(), uparsed[1]
+                uname = str(m.units) if units is False else str(units).strip()
+                ufac = uparsed[1]
             elif uname in fits_units and not weighted:
                 uname, ufac = fits_units[uname]
 
@@ -1307,10 +1313,10 @@ def SaveMapFrame(
         https://docs.astropy.org/en/stable/io/fits/api/images.html
     overwrite : bool
         If True, any existing file with the same name will be ovewritten.
-    units : str, optional
+    units : str or False, optional
         If defined, store the T, Q and U maps in these physical units (e.g.
         ``'uK_CMB'`` or ``'mJy'``).  The maps must be unweighted if the frame
-        also contains weights.
+        also contains weights.  If False, the maps must be unitless.
     """
 
     if frame.type != core.G3FrameType.Map:

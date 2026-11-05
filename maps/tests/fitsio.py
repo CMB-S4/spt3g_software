@@ -197,6 +197,8 @@ try:
         ('K_CMB', 'uK_CMB', None),
         ('Jy', 'Jy', U.Jy),
         ('Jy', 'mJy', None),
+        (None, False, 1.0),
+        ('K_CMB', False, None),
     ]:
         hp.write_map('test_map.fits', np.asarray(hm3), dtype=float, coord="C",
                      column_units=column_units, overwrite=True)
@@ -206,7 +208,8 @@ try:
             continue
         hm4 = load('test_map.fits', units=units)['T']
         assert(hm1.compatible(hm4) and not hm4.weighted)
-        assert(hm4.units == maps.fitsio.parse_fits_units(units or column_units)[0])
+        utype = maps.fitsio.parse_fits_units(column_units if units is None else units)[0]
+        assert(hm4.units == utype)
         assert(np.allclose(np.asarray(hm1) * factor, hm4, rtol=1e-12, atol=0))
 
     print('Checking units parsing')
@@ -222,6 +225,7 @@ try:
         ('MJy/sr', TU.FluxDensity, U.MJy / U.sr),
         ('Tcmb', TU.Tcmb, 1.0),
         ('None', getattr(TU, 'None'), 1.0),
+        (False, getattr(TU, 'None'), 1.0),
     ]:
         out = maps.fitsio.parse_fits_units(ustr)
         assert(out[0] == utype and np.isclose(out[1], factor)), (ustr, out)
@@ -266,12 +270,15 @@ try:
         m2 = m1.clone()
         m2.units = TU.FluxDensity
         m2 *= U.mJy
+        m3 = m1.clone()
+        m3.units = getattr(TU, 'None')
         # (map, units argument, stored label, unit value)
         for m, ustr, label, uval in [
             (m2, None, 'Jy', U.Jy),
             (m1, 'uK_CMB', 'uK_CMB', U.uK),
             (m1w, 'uK_CMB', 'uK_CMB', U.uK),
             (m2, 'mJy', 'mJy', U.mJy),
+            (m3, False, 'None', 1.0),
         ]:
             maps.fitsio.save_skymap_fits('test_map.fits', m, overwrite=True, units=ustr)
             assert(stored_units('test_map.fits') == label)
@@ -283,9 +290,20 @@ try:
             out = maps.fitsio.load_skymap_fits('test_map.fits')['T']
             assert(out.units == m.units and not out.weighted)
             assert(np.allclose(out, m, rtol=1e-12, atol=0))
+        # unitless maps can be stored with weights
+        m3w = m3.clone()
+        m3w.weighted = True
+        maps.fitsio.save_skymap_fits('test_map.fits', m3w, m3w, m3w, W=make_weights(m3),
+                                     overwrite=True, units=False)
+        assert(stored_units('test_map.fits') == 'None')
+        out = maps.fitsio.load_skymap_fits('test_map.fits', units=False)
+        for k in 'TQU':
+            assert(out[k].units == m3.units and out[k].weighted)
+            assert(np.allclose(out[k], m3, rtol=1e-12, atol=0))
         for m, kwargs in [
             (m1, dict(units='mJy')),
             (m1, dict(units='uK_RJ')),
+            (m1, dict(units=False)),
             (m1w, dict(units='uK_CMB', W=w)),
         ]:
             assert_raises(ValueError, maps.fitsio.save_skymap_fits, 'test_map.fits',
