@@ -1,12 +1,25 @@
 /* NOTE: THIS IS MODIFIED FROM THE ZLIB VERSION IN ORDER TO COMPUTE A CRC32-C
  * INSTEAD OF A CRC32.
  *
- * In addition, an SSE4.2 implementation has been provided to compute the CRC
- * in hardware.
+ * This is the portable implementation of crc32c() and crc32c_impl().
+ * crc32c_sse.c (x86-64) and crc32c_neon.c (AArch64) define the same
+ * functions using hardware CRC32C instructions together with carryless
+ * multiplication, which runs on separate execution units, to process several
+ * parts of the buffer at once.  See https://github.com/corsix/fast-crc32/ for
+ * the method and benchmarks.  The build compiles exactly one of the three
+ * files, using a hardware one unless WITH_HW_CRC is disabled.
  */
 
 #include <stddef.h>
 #include <stdint.h>
+
+#include "crc32c.h"
+
+const char *
+crc32c_impl(void)
+{
+    return "tabular";
+}
 
 #define DYNAMIC_CRC_TABLE
 #define STDC
@@ -253,13 +266,8 @@ const unsigned long FAR * get_crc32c_table()
 #define DO8 DO1; DO1; DO1; DO1; DO1; DO1; DO1; DO1
 
 /* ========================================================================= */
-#if defined(__i386__) || defined (__x86_64__)
-local unsigned long
-crc32c_tabular(unsigned long crc, const unsigned char FAR *buf, uInt len)
-#else
 unsigned long
 crc32c(unsigned long crc, const unsigned char FAR *buf, uInt len)
-#endif
 {
     if (buf == Z_NULL) return 0UL;
 
@@ -367,59 +375,3 @@ crc32_big(unsigned long crc, const unsigned char FAR *buf, unsigned len)
 }
 
 #endif /* BYFOUR */
-
-#if defined(__i386__) || defined (__x86_64__)
-local unsigned long
-crc32c_sse42(unsigned long crc, const unsigned char FAR *buf, unsigned len)
-{
-    /* From: http://byteworm.com/2010/10/13/crc32 */
-    uint32_t q = len/sizeof(long);
-    uint32_t r = len % sizeof(long);
-    long *p = (long *)buf;
-
-    while (q--) {
-#ifdef __x86_64__
-        __asm__ __volatile__(".byte 0xf2,0x48,0xf,0x38,0xf1,0xf1;" : "=S"(crc)
-            : "0"(crc), "c"(*p));
-#else
-        __asm__ __volatile__(".byte 0xf2, 0xf, 0x38, 0xf1, 0xf1;" : "=S"(crc)
-            : "0"(crc), "c"(*p));
-#endif
-        p++;
-    }
-
-    buf = (unsigned char *)p;
-    while (r--) {
-        __asm__ __volatile__(".byte 0xf2, 0xf, 0x38, 0xf0, 0xf1;" : "=S"(crc)
-            : "0"(crc), "c"(*buf));
-        buf++;
-    }
-
-    return crc;
-}
-
-unsigned long
-crc32c(unsigned long crc, const unsigned char FAR *buf, unsigned len)
-{
-    static int has_sse42 = -1;
-
-    if (has_sse42 == -1) {
-	unsigned int a,b,c,d;
-#ifdef __i386__
-	/* Workaround use of EBX as the PIC base register */
-        __asm__ __volatile__("xchgl %%ebx, %1; cpuid; xchgl %%ebx, %1" :
-	    "=a"(a), "=r"(b), "=c"(c), "=d"(d) : "0"(1));
-#else
-        __asm__ __volatile__("cpuid" : "=a"(a), "=b"(b), "=c"(c), "=d"(d) :
-            "0"(1));
-#endif
-        has_sse42 = ((c & 0x00100000) != 0);
-    }
-
-    if (has_sse42)
-        return crc32c_sse42(crc, buf, len);
-    else
-        return crc32c_tabular(crc, buf, len);
-}
-#endif
-
