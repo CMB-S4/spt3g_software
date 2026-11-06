@@ -30,11 +30,15 @@ unit_prefixes = {
 
 # lowercase unit suffixes, in order of matching precedence
 units_types = {
-    'kcmb': (core.G3TimestreamUnits.Tcmb, core.G3Units.K),
-    'krj': (core.G3TimestreamUnits.Trj, core.G3Units.K),
-    'k': (core.G3TimestreamUnits.Tcmb, core.G3Units.K),
-    'jy/sr': (core.G3TimestreamUnits.FluxDensity, core.G3Units.Jy / core.G3Units.sr),
-    'jy': (core.G3TimestreamUnits.FluxDensity, core.G3Units.Jy),
+    'kcmb': (core.G3TimestreamUnits.Tcmb, core.G3Units.K, "CMB Temperature"),
+    'krj': (core.G3TimestreamUnits.Trj, core.G3Units.K, "RJ Temperature"),
+    'k': (core.G3TimestreamUnits.Tcmb, core.G3Units.K, "Temperature"),
+    'jy/sr': (
+        core.G3TimestreamUnits.FluxDensity,
+        core.G3Units.Jy / core.G3Units.sr,
+        "Brightness",
+    ),
+    'jy': (core.G3TimestreamUnits.FluxDensity, core.G3Units.Jy, "Flux Density"),
 }
 
 # approximate size in bytes of the chunks of table rows or image rows read from or
@@ -93,6 +97,8 @@ def parse_fits_units(units):
     unit_value : float
         Value of the unit in G3Units, i.e. the factor by which the input data
         should be multiplied to convert to G3Units.
+    unit_label : str
+        Long-form label to include in the fits header
 
     Raises
     ------
@@ -106,7 +112,7 @@ def parse_fits_units(units):
     # check if an existing timestream units type
     for uname, uval in core.G3TimestreamUnits.names.items():
         if ustr.lower() == uname.lower():
-            return uval, 1.0
+            return uval, 1.0, None
 
     # split off integer power, e.g. K_CMB^2
     base, _, power = ustr.replace('**', '^').partition('^')
@@ -116,11 +122,11 @@ def parse_fits_units(units):
     except ValueError:
         raise ValueError(f"Unrecognized units {units!r}") from None
 
-    for suffix, (utype, uconv) in units_types.items():
+    for suffix, (utype, uconv, ulabel) in units_types.items():
         if base.lower().endswith(suffix):
             prefix = base[:-len(suffix)]
             if prefix in unit_prefixes:
-                return utype, (unit_prefixes[prefix] * uconv) ** power
+                return utype, (unit_prefixes[prefix] * uconv) ** power, ulabel
 
     raise ValueError(f"Unrecognized units {units!r}")
 
@@ -156,7 +162,7 @@ def get_map_units(hdr, ukeys, units=None, check=None):
             raise ValueError(
                 f"Units {hunits!r} for {check} are inconsistent with the units argument"
             )
-    return hparsed or units
+    return (hparsed or units)[:2]
 
 
 def read_table_column(filename, offset, rowdtype, nrows, name, dtype, chunk=None):
@@ -870,6 +876,8 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
     maps, weights and other map types are stored in native G3Units and labeled
     with the name of their ``G3TimestreamUnits`` type (e.g. ``'Tcmb'``).  Use the
     ``units`` argument to store unweighted Stokes maps in other physical units.
+    Flat sky maps stored in physical units are also labeled with the type of
+    quantity in the ``BTYPE`` keyword (e.g. ``'CMB Temperature'``).
     The ``UNITS`` keyword stores the ``G3TimestreamUnits`` type of the T map, and
     the ``WEIGHTED`` keyword records whether the Stokes maps are weighted.  Maps
     stored without weights are treated as unweighted.
@@ -1061,6 +1069,10 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
             if not weight:
                 hdu.header['FLATPOL'] = m.flat_pol
             hdu.header['BUNIT'] = uname
+            # long-form label for physical units, e.g. 'CMB Temperature'
+            ulabel = parse_fits_units(uname)[2]
+            if ulabel:
+                hdu.header['BTYPE'] = ulabel
             hdu.header['UNITS'] = str(m.units)
             hdu.header['SPARSE'] = m.sparse
             flat_maps.append((hdu, m, ufac))

@@ -26,6 +26,13 @@ def stored_units(fname):
     return hdr.get('BUNIT', hdr.get('TUNIT1'))
 
 
+def stored_btype(fname):
+    """Quantity label of the first map stored in the file."""
+    with fits.open(fname) as hl:
+        hdr = next(h.header for h in hl if h.data is not None)
+    return hdr.get('BTYPE')
+
+
 def make_weights(m, scale=2):
     """Polarized weights with each component equal to the map times the scale."""
     w = maps.G3SkyMapWeights(m)
@@ -244,15 +251,19 @@ try:
         m1w.weighted = True
         w = make_weights(m1)
 
+        flat = isinstance(m1, maps.FlatSkyMap)
+
         # maps saved without weights are stored as unweighted maps
-        for m, wt, label, weighted in [
-            (m1, None, 'mK_CMB', False),
-            (m1, w, 'mK_CMB', False),
-            (m1w, None, 'mK_CMB', False),
-            (m1w, w, 'Tcmb', True),
+        for m, wt, label, btype, weighted in [
+            (m1, None, 'mK_CMB', 'CMB Temperature', False),
+            (m1, w, 'mK_CMB', 'CMB Temperature', False),
+            (m1w, None, 'mK_CMB', 'CMB Temperature', False),
+            (m1w, w, 'Tcmb', None, True),
         ]:
             maps.fitsio.save_skymap_fits('test_map.fits', m, m, m, W=wt, overwrite=True)
             assert(stored_units('test_map.fits') == label)
+            # quantity labels are only stored for flat sky maps
+            assert(stored_btype('test_map.fits') == (btype if flat else None))
             out = maps.fitsio.load_skymap_fits('test_map.fits')
             assert(('W' in out) == (wt is not None))
             for k in 'TQU':
@@ -272,16 +283,17 @@ try:
         m2 *= U.mJy
         m3 = m1.clone()
         m3.units = getattr(TU, 'None')
-        # (map, units argument, stored label, unit value)
-        for m, ustr, label, uval in [
-            (m2, None, 'Jy', U.Jy),
-            (m1, 'uK_CMB', 'uK_CMB', U.uK),
-            (m1w, 'uK_CMB', 'uK_CMB', U.uK),
-            (m2, 'mJy', 'mJy', U.mJy),
-            (m3, False, 'None', 1.0),
+        # (map, units argument, stored label, quantity label, unit value)
+        for m, ustr, label, btype, uval in [
+            (m2, None, 'Jy', 'Flux Density', U.Jy),
+            (m1, 'uK_CMB', 'uK_CMB', 'CMB Temperature', U.uK),
+            (m1w, 'uK_CMB', 'uK_CMB', 'CMB Temperature', U.uK),
+            (m2, 'mJy', 'mJy', 'Flux Density', U.mJy),
+            (m3, False, 'None', None, 1.0),
         ]:
             maps.fitsio.save_skymap_fits('test_map.fits', m, overwrite=True, units=ustr)
             assert(stored_units('test_map.fits') == label)
+            assert(stored_btype('test_map.fits') == (btype if flat else None))
             with fits.open('test_map.fits') as hl:
                 raw = next(h.data for h in hl if h.data is not None)
             if isinstance(m, maps.HealpixSkyMap):
