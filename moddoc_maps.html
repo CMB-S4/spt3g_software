@@ -517,7 +517,11 @@
 </li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">maps</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#map-attributes">Map Attributes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#file-format-conversions">File Format Conversions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#file-format-conversions">File Format Conversions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#fits-units">FITS Units</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fits-weights">FITS Weights</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#indexing">Indexing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#sparsity">Sparsity</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#masking">Masking</a><ul>
@@ -601,6 +605,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.convolve_map"><code class="docutils literal notranslate"><span class="pre">convolve_map()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.fitsio.load_skymap_fits"><code class="docutils literal notranslate"><span class="pre">load_skymap_fits()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.fitsio.load_skymapmask_fits"><code class="docutils literal notranslate"><span class="pre">load_skymapmask_fits()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.fitsio.parse_fits_units"><code class="docutils literal notranslate"><span class="pre">parse_fits_units()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.fitsio.save_skymap_fits"><code class="docutils literal notranslate"><span class="pre">save_skymap_fits()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.fitsio.save_skymapmask_fits"><code class="docutils literal notranslate"><span class="pre">save_skymapmask_fits()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#spt3g.maps.flatten_pol"><code class="docutils literal notranslate"><span class="pre">flatten_pol()</span></code></a></li>
@@ -708,8 +713,17 @@
 <section id="file-format-conversions">
 <h2>File Format Conversions<a class="headerlink" href="#file-format-conversions" title="Link to this heading"></a></h2>
 <p>We support writing maps into FITS files that can be read with other tools (such as DS9), using the <code class="docutils literal notranslate"><span class="pre">fitsio.save_skymap_fits</span></code> function.  FITS files with compatible headers can be read in using the <code class="docutils literal notranslate"><span class="pre">fitsio.load_skymap_fits</span></code> function.</p>
-<p>T, Q, U and corresponding G3SkyMapWeights objects are written to a single file as a sequence of HDUs.  FlatSkyMap objects are stored in dense format (see below) to CompImageHDU objects if compression is enabled, and otherwise stored in dense format to standard ImageHDU objects.  The latter can be loaded using “old style” fits readers, such as the <code class="docutils literal notranslate"><span class="pre">idlastro</span></code> fits utilities.</p>
-<p>HealpixSkyMap objects are stored in a sequence of BinTableHDU objects, a format that is compatible with the <code class="docutils literal notranslate"><span class="pre">healpy.read_map</span></code> function.  Dense maps (see below) are stored using implicit indexing, and sparse maps are stored using explicit indexing with an additional pixel index column.</p>
+<p>T, Q, U and corresponding G3SkyMapWeights objects are written to a single file as a sequence of HDUs.  FlatSkyMap objects are stored in dense format (see below) to CompImageHDU objects if compression is enabled, and otherwise stored in dense format to standard ImageHDU objects.  The latter can be loaded using “old style” fits readers, such as the <code class="docutils literal notranslate"><span class="pre">idlastro</span></code> fits utilities.  Uncompressed images are written to disk in chunks of rows, so that sparse maps are not converted to dense maps in memory when saving.  Compressed images are written one at a time, each from a dense copy of the map if it is sparse, and all of the maps (including T) are stored in compressed image extensions following an empty primary HDU.  The <code class="docutils literal notranslate"><span class="pre">SPARSE</span></code> keyword records whether each flat sky map was sparse when saved, and such maps are loaded back into sparse storage.  Flat sky map images are loaded in chunks of rows, with only the nonzero portion of each chunk inserted into sparse maps, so that the full dense image is never held in memory.</p>
+<p>HealpixSkyMap objects are stored in a sequence of BinTableHDU objects, a format that is compatible with the <code class="docutils literal notranslate"><span class="pre">healpy.read_map</span></code> function.  Dense maps (see below) are stored using implicit indexing, and sparse maps are stored using explicit indexing with an additional pixel index column.  To limit memory use for large maps, these tables are written and read (for uncompressed files) directly on disk one column at a time, in chunks of table rows, so that the full table is never held in memory.  Compressed files (e.g. gzipped) are read using <code class="docutils literal notranslate"><span class="pre">astropy.io.fits</span></code>.</p>
+<section id="fits-units">
+<h3>FITS Units<a class="headerlink" href="#fits-units" title="Link to this heading"></a></h3>
+<p>Map units are stored in the <code class="docutils literal notranslate"><span class="pre">BUNIT</span></code> keyword of each image HDU for flat sky maps, and in the <code class="docutils literal notranslate"><span class="pre">TUNITn</span></code> keyword of each table column for Healpix maps.  By default, temperature maps are stored in the native G3Units scale and labeled <code class="docutils literal notranslate"><span class="pre">mK_CMB</span></code> or <code class="docutils literal notranslate"><span class="pre">mK_RJ</span></code>, flux density maps are converted to <code class="docutils literal notranslate"><span class="pre">mJy</span></code>, whether or not they are weighted.  Weights and unitless maps are stored in native G3Units and labeled with the name of their <code class="docutils literal notranslate"><span class="pre">G3TimestreamUnits</span></code> type (e.g. <code class="docutils literal notranslate"><span class="pre">Tcmb</span></code> or <code class="docutils literal notranslate"><span class="pre">None</span></code>), so that removing the weights from the stored Stokes maps with other tools gives maps in their stored physical units.  Maps with any other unit type (e.g. <code class="docutils literal notranslate"><span class="pre">Power</span></code>) cannot be stored, since the purpose of this format is to provide maps in physical units.  Flat sky maps stored in physical units are also labeled with the type of quantity in the <code class="docutils literal notranslate"><span class="pre">BTYPE</span></code> keyword (e.g. <code class="docutils literal notranslate"><span class="pre">CMB</span> <span class="pre">Temperature</span></code> or <code class="docutils literal notranslate"><span class="pre">Flux</span> <span class="pre">Density</span></code>).  Use the <code class="docutils literal notranslate"><span class="pre">units</span></code> argument of <code class="docutils literal notranslate"><span class="pre">save_skymap_fits</span></code> (or <code class="docutils literal notranslate"><span class="pre">SaveMapFrame</span></code>) to store Stokes maps in other physical units, e.g. <code class="docutils literal notranslate"><span class="pre">units='uK_CMB'</span></code> or <code class="docutils literal notranslate"><span class="pre">units='Jy'</span></code>, or <code class="docutils literal notranslate"><span class="pre">units=False</span></code> to require that the maps be unitless (units type <code class="docutils literal notranslate"><span class="pre">None</span></code>, e.g. for floating point masks).  The <code class="docutils literal notranslate"><span class="pre">UNITS</span></code> keyword records the <code class="docutils literal notranslate"><span class="pre">G3TimestreamUnits</span></code> type of the T map.</p>
+<p>When loading a file, <code class="docutils literal notranslate"><span class="pre">load_skymap_fits</span></code> reads the units of the T, Q and U maps from these keywords, and converts the data to G3Units.  Files written by other tools often contain no units information, in which case the <code class="docutils literal notranslate"><span class="pre">units</span></code> argument must be set to describe the stored data (e.g. <code class="docutils literal notranslate"><span class="pre">units='uK_CMB'</span></code>, or <code class="docutils literal notranslate"><span class="pre">units=False</span></code> for unitless data), otherwise an error is raised.  If the file and the <code class="docutils literal notranslate"><span class="pre">units</span></code> argument both define the units, they must agree.  Supported unit strings include temperature units (e.g. <code class="docutils literal notranslate"><span class="pre">K_CMB</span></code>, <code class="docutils literal notranslate"><span class="pre">uK_CMB</span></code>, <code class="docutils literal notranslate"><span class="pre">mK_RJ</span></code>; bare kelvin units are interpreted as CMB temperature units), flux density units (e.g. <code class="docutils literal notranslate"><span class="pre">Jy</span></code>, <code class="docutils literal notranslate"><span class="pre">mJy</span></code>, <code class="docutils literal notranslate"><span class="pre">MJy/sr</span></code>), integer powers of these (e.g. <code class="docutils literal notranslate"><span class="pre">K_CMB^2</span></code>), and the names of <code class="docutils literal notranslate"><span class="pre">G3TimestreamUnits</span></code> types for data already stored in G3Units; see <code class="docutils literal notranslate"><span class="pre">parse_fits_units</span></code> for details.  Weight maps and other columns without units information are loaded unscaled.</p>
+</section>
+<section id="fits-weights">
+<h3>FITS Weights<a class="headerlink" href="#fits-weights" title="Link to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">WEIGHTED</span></code> keyword records whether the stored Stokes maps are weighted, and <code class="docutils literal notranslate"><span class="pre">load_skymap_fits</span></code> sets the <code class="docutils literal notranslate"><span class="pre">weighted</span></code> attribute of the loaded maps accordingly, whether or not the weights are also loaded.  Files without this keyword are loaded as unweighted maps.  Maps saved without their weights are stored as unweighted maps.</p>
+</section>
 </section>
 <section id="indexing">
 <h2>Indexing<a class="headerlink" href="#indexing" title="Link to this heading"></a></h2>
@@ -2493,12 +2507,14 @@ transformation.</p></li>
 <dd><em class="sig-param"><span class="n"><span class="pre">compress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>,</dd>
 <dd><em class="sig-param"><span class="n"><span class="pre">quantize_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16.0</span></span></em>,</dd>
 <dd><em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>,</dd>
 </dl>
 
 <span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/maps/fitsio.html#SaveMapFrame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.maps.fitsio.SaveMapFrame" title="Link to this definition"></a></dt>
 <dd><p>Save a map frame to a FITS file.  See <code class="docutils literal notranslate"><span class="pre">save_skymap_fits</span></code> for details.  The
 map frame should contain T maps and (optionally) unpolarized weights, or T/Q/U
-maps and (optionally) polarized weights to store in the output file.</p>
+maps and (optionally) polarized weights to store in the output file.  Maps
+stored without weights are treated as unweighted.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -2521,6 +2537,9 @@ in more accurate floating point representation, but worse compression
 ratio.  See the astropy FITS image documention for details:
 <a class="reference external" href="https://docs.astropy.org/en/stable/io/fits/api/images.html">https://docs.astropy.org/en/stable/io/fits/api/images.html</a></p></li>
 <li><p><strong>overwrite</strong> (<em>bool</em>) – If True, any existing file with the same name will be ovewritten.</p></li>
+<li><p><strong>units</strong> (<em>str</em><em> or </em><em>False</em><em>, </em><em>optional</em>) – If defined, store the T, Q and U maps in these physical units (e.g.
+<code class="docutils literal notranslate"><span class="pre">'uK_CMB'</span></code> or <code class="docutils literal notranslate"><span class="pre">'Jy'</span></code>).  Weights are stored in native G3Units.  If
+False, the maps must be unitless.</p></li>
 </ul>
 </dd>
 </dl>
@@ -3904,7 +3923,7 @@ objects, G3Timestreams are also returned.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="spt3g.maps.fitsio.load_skymap_fits">
-<span class="sig-prename descclassname"><span class="pre">spt3g.maps.fitsio.</span></span><span class="sig-name descname"><span class="pre">load_skymap_fits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hdu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">apply_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/maps/fitsio.html#load_skymap_fits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.maps.fitsio.load_skymap_fits" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">spt3g.maps.fitsio.</span></span><span class="sig-name descname"><span class="pre">load_skymap_fits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hdu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/maps/fitsio.html#load_skymap_fits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.maps.fitsio.load_skymap_fits" title="Link to this definition"></a></dt>
 <dd><p>Load a fits file containing a sky map.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -3913,15 +3932,33 @@ objects, G3Timestreams are also returned.</p></li>
 <li><p><strong>hdu</strong> (<em>int</em><em>, </em><em>optional</em>) – If supplied, the data are extract from the given HDU index.</p></li>
 <li><p><strong>keys</strong> (<em>list</em><em> of </em><em>strings</em><em>, </em><em>optional</em>) – If supplied, return only these keys in the output dictionary.
 Options are: T, Q, U, W.</p></li>
-<li><p><strong>memmap</strong> (<em>bool</em><em>, </em><em>optional</em>) – Argument passed to astropy.io.fits.open. If True, the map is not read
-into memory, but only the required pixels are read when needed. Default:
-False.</p></li>
-<li><p><strong>apply_units</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, and input maps have known units, multiply by the appropriate
-conversion factor to return maps in G3Units.</p></li>
+<li><p><strong>memmap</strong> (<em>bool</em><em>, </em><em>optional</em>) – Argument passed to astropy.io.fits.open, which applies to maps that are
+read through astropy.  Columns of healpix tables and unscaled flat sky map
+images in uncompressed files are read directly from disk in chunks of
+rows, regardless of this setting, so that the table or image is never
+held in memory; other images are read through astropy in chunks of rows.
+Memory-mapping is not supported for scaled images.  Default: False.</p></li>
+<li><p><strong>units</strong> (<em>str</em><em> or </em><em>False</em><em>, </em><em>optional</em>) – Units of the T, Q and U data stored in the file, e.g. <code class="docutils literal notranslate"><span class="pre">'uK_CMB'</span></code> or
+<code class="docutils literal notranslate"><span class="pre">'K_CMB'</span></code>, or False for unitless data, which are loaded unscaled with
+units type <code class="docutils literal notranslate"><span class="pre">None</span></code>.  See <code class="docutils literal notranslate"><span class="pre">parse_fits_units</span></code> for supported options.
+Required if the file does not contain units information for these maps
+(via the <code class="docutils literal notranslate"><span class="pre">BUNIT</span></code> keyword for flat sky maps, the <code class="docutils literal notranslate"><span class="pre">TUNITn</span></code> keywords for
+healpix maps, or the <code class="docutils literal notranslate"><span class="pre">UNITS</span></code> keyword written by <code class="docutils literal notranslate"><span class="pre">save_skymap_fits</span></code>).
+If the file contains units information that is inconsistent with this
+argument, a ValueError is raised.  Maps are converted from these units to
+G3Units.  Weight maps and any other columns without units information are
+loaded unscaled.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>a dictionary of maps keyed with e.g. ‘T’, ’Q’, ‘U’ and ‘W’.</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>a dictionary of maps keyed with e.g. ‘T’, ‘Q’, ‘U’ and ‘W’.  The Stokes maps</em></p></li>
+<li><p>are marked as weighted according to the <code class="docutils literal notranslate"><span class="pre">WEIGHTED</span></code> header keyword written</p></li>
+<li><p>by <code class="docutils literal notranslate"><span class="pre">save_skymap_fits</span></code>, and as unweighted if the keyword is missing.  Flat sky</p></li>
+<li><p>maps that were sparse when saved (<code class="docutils literal notranslate"><span class="pre">SPARSE</span></code> header keyword) are converted</p></li>
+<li><p><em>back to sparse storage.</em></p></li>
+</ul>
+</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3929,17 +3966,21 @@ conversion factor to return maps in G3Units.</p></li>
 <dl class="py function">
 <dt class="sig sig-object py" id="spt3g.maps.fitsio.load_skymapmask_fits">
 <span class="sig-prename descclassname"><span class="pre">spt3g.maps.fitsio.</span></span><span class="sig-name descname"><span class="pre">load_skymapmask_fits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hdu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/maps/fitsio.html#load_skymapmask_fits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.maps.fitsio.load_skymapmask_fits" title="Link to this definition"></a></dt>
-<dd><p>Load a fits file containing a binary sky map mask.  Floating pointing or integer
-data are converted to booleans.  Assumes the fits file contains a single mask,
-with flat sky data stored in a single <code class="docutils literal notranslate"><span class="pre">ImageHDU</span></code>, and healpix masks stored in a
-single <code class="docutils literal notranslate"><span class="pre">BinTableHDU</span></code> in full-sky format with implicit indexing over all pixels.</p>
+<dd><p>Load a fits file containing a binary sky map mask into a G3SkyMapMask object.
+Floating pointing or integer data are converted to booleans.  Assumes the fits
+file contains a single mask, with flat sky data stored in a single <code class="docutils literal notranslate"><span class="pre">ImageHDU</span></code>,
+and healpix masks stored in a single <code class="docutils literal notranslate"><span class="pre">BinTableHDU</span></code> in full-sky format with
+implicit indexing over all pixels.  Images and tables in uncompressed files are
+read directly from disk in chunks of rows, so that only one boolean copy of the
+mask data is held in memory.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filename</strong> (<em>str</em>) – Path to fits file</p></li>
 <li><p><strong>hdu</strong> (<em>int</em><em>, </em><em>optional</em>) – If supplied, the data are extract from the given HDU index.</p></li>
-<li><p><strong>memmap</strong> (<em>bool</em><em>, </em><em>optional</em>) – Argument passed to astropy.io.fits.open. If True, the map is not read into
-memory, but only the required pixels are read when needed. Default: False.</p></li>
+<li><p><strong>memmap</strong> (<em>bool</em><em>, </em><em>optional</em>) – Argument passed to astropy.io.fits.open, which applies to masks that are read
+through astropy.  Memory-mapping is not supported for scaled images.
+Default: False.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -3947,6 +3988,36 @@ memory, but only the required pixels are read when needed. Default: False.</p></
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#spt3g.maps.G3SkyMapMask" title="spt3g.maps.G3SkyMapMask"><em>G3SkyMapMask</em></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="spt3g.maps.fitsio.parse_fits_units">
+<span class="sig-prename descclassname"><span class="pre">spt3g.maps.fitsio.</span></span><span class="sig-name descname"><span class="pre">parse_fits_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">units</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/maps/fitsio.html#parse_fits_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.maps.fitsio.parse_fits_units" title="Link to this definition"></a></dt>
+<dd><p>Parse a FITS unit string into a unit type and conversion factor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>units</strong> (<em>str</em><em> or </em><em>False</em>) – Unit string.  Supported options are temperature units (e.g. <code class="docutils literal notranslate"><span class="pre">'K_CMB'</span></code>,
+<code class="docutils literal notranslate"><span class="pre">'uK_CMB'</span></code>, <code class="docutils literal notranslate"><span class="pre">'mK_RJ'</span></code>, <code class="docutils literal notranslate"><span class="pre">'uK'</span></code>; bare kelvin units are interpreted as CMB
+temperature units), flux density units (e.g. <code class="docutils literal notranslate"><span class="pre">'Jy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'mJy'</span></code>,
+<code class="docutils literal notranslate"><span class="pre">'MJy/sr'</span></code>), any of these raised to an integer power (e.g.  <code class="docutils literal notranslate"><span class="pre">'K_CMB^2'</span></code>),
+or the name of a <code class="docutils literal notranslate"><span class="pre">core.G3TimestreamUnits</span></code> type (e.g.  <code class="docutils literal notranslate"><span class="pre">'Tcmb'</span></code> or
+<code class="docutils literal notranslate"><span class="pre">'None'</span></code>), which denotes data already stored in native G3Units.  False
+denotes unitless data (e.g. floating point masks), and is equivalent to
+<code class="docutils literal notranslate"><span class="pre">'None'</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>unit_type</strong> (<em>core.G3TimestreamUnits</em>) – Unit type</p></li>
+<li><p><strong>unit_value</strong> (<em>float</em>) – Value of the unit in G3Units, i.e. the factor by which the input data
+should be multiplied to convert to G3Units.</p></li>
+<li><p><strong>unit_label</strong> (<em>str</em>) – Long-form label to include in the fits header</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError :</strong> – If the unit string is not recognized.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3965,6 +4036,7 @@ memory, but only the required pixels are read when needed. Default: False.</p></
 <dd><em class="sig-param"><span class="n"><span class="pre">compress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>,</dd>
 <dd><em class="sig-param"><span class="n"><span class="pre">quantize_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16.0</span></span></em>,</dd>
 <dd><em class="sig-param"><span class="n"><span class="pre">hdr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>,</dd>
+<dd><em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>,</dd>
 </dl>
 
 <span class="sig-paren">)</span><a class="reference internal" href="_modules/spt3g/maps/fitsio.html#save_skymap_fits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spt3g.maps.fitsio.save_skymap_fits" title="Link to this definition"></a></dt>
@@ -3972,7 +4044,13 @@ memory, but only the required pixels are read when needed. Default: False.</p></
 <p><cite>FlatSkyMap</cite> objects are stored in a series of (optionally compressed)
 <cite>ImageHDU</cite> entries, in which each HDU contains the projection information in
 its header in standard WCS format, along with the image data for a single
-map (one of the Stokes maps or a weight map component).</p>
+map (one of the Stokes maps or a weight map component).  Uncompressed images
+are written to disk in chunks of rows, so that sparse maps are not converted
+to dense maps.  Compressed images are written to disk one at a time, each from
+a dense copy of the map if it is sparse, and are all stored in image extensions
+following an empty primary HDU.  Images are stored in dense format, and the
+<code class="docutils literal notranslate"><span class="pre">SPARSE</span></code> keyword records whether each map was sparse, so that
+<code class="docutils literal notranslate"><span class="pre">load_skymap_fits</span></code> can restore its storage.</p>
 <p><cite>HealpixSkyMap</cite> objects are stored in a <cite>BinTableHDU</cite> extension, which
 contains the necessary header information for compatiblity with healpix map
 readers (e.g. <cite>healpix.read_map</cite>), and a single table with one column per
@@ -3980,6 +4058,22 @@ Stokes map or weight map component.  Sparse maps are stored as cut-sky
 pixel-indexed tables, while dense maps are stored with implicit indexing
 over all pixels.  The former produces output that is equivalent to using
 <cite>healpy.write_map</cite> with the <cite>partial=True</cite> option.</p>
+<p>Units information is stored in the <code class="docutils literal notranslate"><span class="pre">BUNIT</span></code> keyword of each image HDU for
+flat sky maps, or in the <code class="docutils literal notranslate"><span class="pre">TUNITn</span></code> keyword of each table column for healpix
+maps.  Temperature maps are labeled <code class="docutils literal notranslate"><span class="pre">'mK_CMB'</span></code> or <code class="docutils literal notranslate"><span class="pre">'mK_RJ'</span></code> (the native
+G3Units scale) and flux density maps are converted to <code class="docutils literal notranslate"><span class="pre">'mJy'</span></code>, whether or not
+they are weighted.  Weights and unitless maps are stored in native G3Units and
+labeled with the name of their <code class="docutils literal notranslate"><span class="pre">G3TimestreamUnits</span></code> type (e.g. <code class="docutils literal notranslate"><span class="pre">'Tcmb'</span></code> or
+<code class="docutils literal notranslate"><span class="pre">'None'</span></code>), so that removing the weights from the stored Stokes maps gives
+maps in their stored physical units.  Maps with any other unit type (e.g.
+<code class="docutils literal notranslate"><span class="pre">Power</span></code>) cannot be stored, since they have no physical units in this
+format.  Use the <code class="docutils literal notranslate"><span class="pre">units</span></code> argument to store Stokes maps in other physical
+units.
+Flat sky maps stored in physical units are also labeled with the type of
+quantity in the <code class="docutils literal notranslate"><span class="pre">BTYPE</span></code> keyword (e.g. <code class="docutils literal notranslate"><span class="pre">'CMB</span> <span class="pre">Temperature'</span></code>).
+The <code class="docutils literal notranslate"><span class="pre">UNITS</span></code> keyword stores the <code class="docutils literal notranslate"><span class="pre">G3TimestreamUnits</span></code> type of the T map, and
+the <code class="docutils literal notranslate"><span class="pre">WEIGHTED</span></code> keyword records whether the Stokes maps are weighted.  Maps
+stored without weights are treated as unweighted.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -3987,7 +4081,8 @@ over all pixels.  The former produces output that is equivalent to using
 <li><p><strong>T</strong> (<a class="reference internal" href="#spt3g.maps.FlatSkyMap" title="spt3g.maps.FlatSkyMap"><em>FlatSkyMap</em></a><em> or </em><a class="reference internal" href="#spt3g.maps.HealpixSkyMap" title="spt3g.maps.HealpixSkyMap"><em>HealpixSkyMap</em></a>) – Maps to save</p></li>
 <li><p><strong>Q</strong> (<a class="reference internal" href="#spt3g.maps.FlatSkyMap" title="spt3g.maps.FlatSkyMap"><em>FlatSkyMap</em></a><em> or </em><a class="reference internal" href="#spt3g.maps.HealpixSkyMap" title="spt3g.maps.HealpixSkyMap"><em>HealpixSkyMap</em></a>) – Maps to save</p></li>
 <li><p><strong>U</strong> (<a class="reference internal" href="#spt3g.maps.FlatSkyMap" title="spt3g.maps.FlatSkyMap"><em>FlatSkyMap</em></a><em> or </em><a class="reference internal" href="#spt3g.maps.HealpixSkyMap" title="spt3g.maps.HealpixSkyMap"><em>HealpixSkyMap</em></a>) – Maps to save</p></li>
-<li><p><strong>W</strong> (<a class="reference internal" href="#spt3g.maps.G3SkyMapWeights" title="spt3g.maps.G3SkyMapWeights"><em>G3SkyMapWeights</em></a>) – Weights to save with the maps</p></li>
+<li><p><strong>W</strong> (<a class="reference internal" href="#spt3g.maps.G3SkyMapWeights" title="spt3g.maps.G3SkyMapWeights"><em>G3SkyMapWeights</em></a>) – Weights to save with the maps.  If not supplied, the input maps are
+stored as unweighted maps.</p></li>
 <li><p><strong>overwrite</strong> (<em>bool</em>) – If True, any existing file with the same name will be ovewritten.</p></li>
 <li><p><strong>compress</strong> (<em>str</em><em> or </em><em>bool</em>) – If defined, and if input maps are FlatSkyMap objects, store these in a
 series of compressed image HDUs, one per map.  Otherwise, store input
@@ -4004,6 +4099,13 @@ ratio.  See the astropy FITS image documention for details:
 <li><p><strong>hdr</strong> (<em>dict</em>) – If defined, extra keywords to be appened to the FITS header. The dict
 can contain entries such as <code class="docutils literal notranslate"><span class="pre">hdr['NEWKEY']</span> <span class="pre">=</span> <span class="pre">'New</span> <span class="pre">value'</span></code> or
 <code class="docutils literal notranslate"><span class="pre">hdr['NEWKEY']</span> <span class="pre">=</span> <span class="pre">('New</span> <span class="pre">value',</span> <span class="pre">&quot;Comment</span> <span class="pre">for</span> <span class="pre">New</span> <span class="pre">value&quot;)</span></code>.</p></li>
+<li><p><strong>units</strong> (<em>str</em><em> or </em><em>False</em><em>, </em><em>optional</em>) – If defined, store the T, Q and U maps in these physical units (e.g.
+<code class="docutils literal notranslate"><span class="pre">'uK_CMB'</span></code> or <code class="docutils literal notranslate"><span class="pre">'Jy'</span></code>) instead of the defaults described above.  See
+<code class="docutils literal notranslate"><span class="pre">parse_fits_units</span></code> for supported options, except for the names of
+<code class="docutils literal notranslate"><span class="pre">G3TimestreamUnits</span></code> types other than <code class="docutils literal notranslate"><span class="pre">'None'</span></code>.  The unit type must
+match that of the input maps.  Weights are stored in native G3Units in
+either case.  If False, the maps must be unitless (units type <code class="docutils literal notranslate"><span class="pre">None</span></code>),
+and are stored unscaled.</p></li>
 </ul>
 </dd>
 </dl>
@@ -4015,11 +4117,14 @@ can contain entries such as <code class="docutils literal notranslate"><span cla
 <dd><p>Save G3 mask objects to a fits file.</p>
 <p>Masks with <code class="docutils literal notranslate"><span class="pre">FlatSkyMap</span></code> parents are stored in a (optionally compressed)
 <code class="docutils literal notranslate"><span class="pre">ImageHDU</span></code> entry, which contains the projection information in its header in
-standard WCS format, along with the image data for a single mask.</p>
+standard WCS format, along with the image data for a single mask.  Compressed
+images follow an empty primary HDU.</p>
 <p>Masks with <code class="docutils literal notranslate"><span class="pre">HealpixSkyMap</span></code> parents are stored in a <code class="docutils literal notranslate"><span class="pre">BinTableHDU</span></code> extension,
 which contains the necessary header information for compatiblity with healpix map
 readers (e.g. <cite>healpix.read_map</cite>), and a single table with one column for the
-mask.  Masks are stored densely with implicit indexing over all pixels.</p>
+mask.  Masks are stored densely with implicit indexing over all pixels, and the
+table is written directly to disk in chunks of rows.</p>
+<p>Mask values are stored as unsigned bytes (0 or 1).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">

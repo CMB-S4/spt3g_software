@@ -177,6 +177,8 @@ Various Python and C++ functions that are part of the public API.
 
 .. autofunction:: spt3g.maps.fitsio.load_skymapmask_fits
 
+.. autofunction:: spt3g.maps.fitsio.parse_fits_units
+
 .. autofunction:: spt3g.maps.fitsio.save_skymap_fits
 
 .. autofunction:: spt3g.maps.fitsio.save_skymapmask_fits
