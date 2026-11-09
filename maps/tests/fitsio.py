@@ -258,7 +258,7 @@ try:
             (m1, None, 'mK_CMB', 'CMB Temperature', False),
             (m1, w, 'mK_CMB', 'CMB Temperature', False),
             (m1w, None, 'mK_CMB', 'CMB Temperature', False),
-            (m1w, w, 'Tcmb', None, True),
+            (m1w, w, 'mK_CMB', 'CMB Temperature', True),
         ]:
             maps.fitsio.save_skymap_fits('test_map.fits', m, m, m, W=wt, overwrite=True)
             assert(stored_units('test_map.fits') == label)
@@ -312,11 +312,52 @@ try:
         for k in 'TQU':
             assert(out[k].units == m3.units and out[k].weighted)
             assert(np.allclose(out[k], m3, rtol=1e-12, atol=0))
+        # weighted maps are stored in physical units, and weights in G3Units, so that
+        # removing the weights from the stored maps gives maps in physical units
+        for m, ustr, label, uval in [
+            (m1, 'uK_CMB', 'uK_CMB', U.uK),
+            (m2, None, 'Jy', U.Jy),
+        ]:
+            # diagonal weights of 2 in G3Units, applied to the map
+            wd = make_weights(m * 0 + 1)
+            for k in ['TQ', 'TU', 'QU']:
+                setattr(wd, k, m * 0)
+            mw = m * 2
+            mw.weighted = True
+            maps.fitsio.save_skymap_fits('test_map.fits', mw, mw, mw, W=wd,
+                                         overwrite=True, units=ustr)
+            assert(stored_units('test_map.fits') == label)
+            with fits.open('test_map.fits') as hl:
+                hdus = [h for h in hl if h.data is not None]
+                if flat:
+                    raw = {h.header.get('POLTYPE', h.header.get('WTYPE')): h.data
+                           for h in hdus}
+                else:
+                    raw = {maps.fitsio.healpix_cols.get(k, k): hdus[0].data[k]
+                           for k in hdus[0].columns.names}
+            # weights are stored in G3Units, and removing them from the stored
+            # weighted map gives the map in physical units
+            assert(np.allclose(raw['TT'], 2))
+            unweighted = np.ravel(raw['T'] / raw['TT'])
+            assert(np.allclose(unweighted, np.ravel(np.asarray(m)) / uval,
+                               rtol=1e-12, atol=0))
+            out = maps.fitsio.load_skymap_fits('test_map.fits')
+            for k in 'TQU':
+                assert(out[k].units == m.units and out[k].weighted)
+                assert(np.allclose(out[k], mw, rtol=1e-12, atol=0))
+            for k in maps.fitsio.weight_cols:
+                assert(np.allclose(getattr(out['W'], k), getattr(wd, k), rtol=1e-12, atol=0))
+
+        # maps of other unit types have no physical units for the file
+        m4 = m1.clone()
+        m4.units = TU.Power
         for m, kwargs in [
             (m1, dict(units='mJy')),
             (m1, dict(units='uK_RJ')),
             (m1, dict(units=False)),
-            (m1w, dict(units='uK_CMB', W=w)),
+            (m1, dict(units='Tcmb')),
+            (m4, dict()),
+            (m4, dict(units='Power')),
         ]:
             assert_raises(ValueError, maps.fitsio.save_skymap_fits, 'test_map.fits',
                           m, m, m, overwrite=True, **kwargs)
