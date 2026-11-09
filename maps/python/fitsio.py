@@ -874,7 +874,7 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
     Units information is stored in the ``BUNIT`` keyword of each image HDU for
     flat sky maps, or in the ``TUNITn`` keyword of each table column for healpix
     maps.  Temperature maps are labeled ``'mK_CMB'`` or ``'mK_RJ'`` (the native
-    G3Units scale) and flux density maps are converted to ``'Jy'``, whether or not
+    G3Units scale) and flux density maps are converted to ``'mJy'``, whether or not
     they are weighted.  Weights and unitless maps are stored in native G3Units and
     labeled with the name of their ``G3TimestreamUnits`` type (e.g. ``'Tcmb'`` or
     ``'None'``), so that removing the weights from the stored Stokes maps gives
@@ -919,7 +919,7 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
        ``hdr['NEWKEY'] = ('New value', "Comment for New value")``.
     units : str or False, optional
         If defined, store the T, Q and U maps in these physical units (e.g.
-        ``'uK_CMB'`` or ``'mJy'``) instead of the defaults described above.  See
+        ``'uK_CMB'`` or ``'Jy'``) instead of the defaults described above.  See
         ``parse_fits_units`` for supported options, except for the names of
         ``G3TimestreamUnits`` types other than ``'None'``.  The unit type must
         match that of the input maps.  Weights are stored in native G3Units in
@@ -961,7 +961,7 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
     fits_units = {
         'Tcmb': ('mK_CMB', core.G3Units.mK),
         'Trj': ('mK_RJ', core.G3Units.mK),
-        'FluxDensity': ('Jy', core.G3Units.Jy),
+        'FluxDensity': ('mJy', core.G3Units.mJy),
     }
     unitless = getattr(core.G3TimestreamUnits, 'None')
 
@@ -1345,7 +1345,7 @@ def SaveMapFrame(
         If True, any existing file with the same name will be ovewritten.
     units : str or False, optional
         If defined, store the T, Q and U maps in these physical units (e.g.
-        ``'uK_CMB'`` or ``'mJy'``).  Weights are stored in native G3Units.  If
+        ``'uK_CMB'`` or ``'Jy'``).  Weights are stored in native G3Units.  If
         False, the maps must be unitless.
     """
 

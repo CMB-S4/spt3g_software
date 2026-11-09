@@ -285,10 +285,10 @@ try:
         m3.units = getattr(TU, 'None')
         # (map, units argument, stored label, quantity label, unit value)
         for m, ustr, label, btype, uval in [
-            (m2, None, 'Jy', 'Flux Density', U.Jy),
+            (m2, None, 'mJy', 'Flux Density', U.mJy),
             (m1, 'uK_CMB', 'uK_CMB', 'CMB Temperature', U.uK),
             (m1w, 'uK_CMB', 'uK_CMB', 'CMB Temperature', U.uK),
-            (m2, 'mJy', 'mJy', 'Flux Density', U.mJy),
+            (m2, 'Jy', 'Jy', 'Flux Density', U.Jy),
             (m3, False, 'None', None, 1.0),
         ]:
             maps.fitsio.save_skymap_fits('test_map.fits', m, overwrite=True, units=ustr)
@@ -316,7 +316,7 @@ try:
         # removing the weights from the stored maps gives maps in physical units
         for m, ustr, label, uval in [
             (m1, 'uK_CMB', 'uK_CMB', U.uK),
-            (m2, None, 'Jy', U.Jy),
+            (m2, None, 'mJy', U.mJy),
         ]:
             # diagonal weights of 2 in G3Units, applied to the map
             wd = make_weights(m * 0 + 1)
