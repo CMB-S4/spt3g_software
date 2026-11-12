@@ -43,7 +43,8 @@ protected:
 		if (to_read > n)
 			to_read = n;
 		memcpy(buf, gptr(), to_read);
-		gbump(to_read);
+		// gbump() takes an int, which is too small for large reads
+		setg(eback(), gptr() + to_read, egptr());
 		return to_read;
 	}
 };
