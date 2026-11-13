@@ -1320,8 +1320,10 @@ tsmap_from_python(py::iterable keys, py::cbuffer data, G3Time start, G3Time stop
 {
 	G3TimestreamMapPtr x(new G3TimestreamMap);
 
-	// may need to keep this
-	auto info = std::make_shared<py::buffer_info>(data.request_contiguous());
+	// May need to keep this.  Timestreams that share the data can be
+	// written to, so it must be writable.
+	auto info = std::make_shared<py::buffer_info>(
+	    data.request_contiguous(!copy_data));
 
 	if (py::len(keys) != (size_t)info->shape[0]) {
 		throw py::index_error("Number of keys does not match "

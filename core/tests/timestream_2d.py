@@ -62,6 +62,19 @@ tsm2 = core.G3TimestreamMap(tsm.keys(), buffer1d, copy_data = False)
 buffer1d[2,6] = 16.0
 assert(numpy.asarray(tsm2)[2,6] == 16.0)
 
+# A read-only array can be copied, but not shared, since the timestreams
+# could then write to it
+readonly = buffer1d.copy()
+readonly.flags.writeable = False
+tsm2 = core.G3TimestreamMap(tsm.keys(), readonly)
+assert(numpy.asarray(tsm2)[2,6] == 16.0)
+try:
+	core.G3TimestreamMap(tsm.keys(), readonly, copy_data = False)
+except ValueError:
+	pass
+else:
+	raise AssertionError("Shared a read-only array")
+
 # Test setting secondary properties at the time of direct construction
 tsm2 = core.G3TimestreamMap(tsm.keys(), buffer1d, start=start, stop=stop,
                             units=core.G3TimestreamUnits.Counts,
