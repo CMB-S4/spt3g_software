@@ -4077,7 +4077,10 @@ stored without weights are treated as unweighted.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>filename</strong> (<em>str</em>) – Path to output file.  Must not exist, unless overwrite is True.</p></li>
+<li><p><strong>filename</strong> (<em>str</em>) – Path to output file.  Must not exist, unless overwrite is True.  Files
+with a <code class="docutils literal notranslate"><span class="pre">.gz</span></code>, <code class="docutils literal notranslate"><span class="pre">.bz2</span></code> or <code class="docutils literal notranslate"><span class="pre">.xz</span></code> extension are compressed accordingly.
+These are first written to a temporary uncompressed file in the same
+directory, which is then compressed into the output file in chunks.</p></li>
 <li><p><strong>T</strong> (<a class="reference internal" href="#spt3g.maps.FlatSkyMap" title="spt3g.maps.FlatSkyMap"><em>FlatSkyMap</em></a><em> or </em><a class="reference internal" href="#spt3g.maps.HealpixSkyMap" title="spt3g.maps.HealpixSkyMap"><em>HealpixSkyMap</em></a>) – Maps to save</p></li>
 <li><p><strong>Q</strong> (<a class="reference internal" href="#spt3g.maps.FlatSkyMap" title="spt3g.maps.FlatSkyMap"><em>FlatSkyMap</em></a><em> or </em><a class="reference internal" href="#spt3g.maps.HealpixSkyMap" title="spt3g.maps.HealpixSkyMap"><em>HealpixSkyMap</em></a>) – Maps to save</p></li>
 <li><p><strong>U</strong> (<a class="reference internal" href="#spt3g.maps.FlatSkyMap" title="spt3g.maps.FlatSkyMap"><em>FlatSkyMap</em></a><em> or </em><a class="reference internal" href="#spt3g.maps.HealpixSkyMap" title="spt3g.maps.HealpixSkyMap"><em>HealpixSkyMap</em></a>) – Maps to save</p></li>
