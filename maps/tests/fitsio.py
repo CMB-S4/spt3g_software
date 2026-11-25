@@ -449,6 +449,19 @@ try:
     for k, sm in zip('TQU', (sT, sU, sU)):
         assert(same_sparse(out[k], sm))
 
+    # maps saved to compressed file names are compressed on disk, without leaving
+    # the temporary uncompressed file behind
+    files = set(os.listdir('.'))
+    for ext, magic in [('.gz', b'\x1f\x8b'), ('.bz2', b'BZh')]:
+        fname = 'test_map.fits' + ext
+        maps.fitsio.save_skymap_fits(fname, sT, sU, sU, overwrite=True)
+        with open(fname, 'rb') as f:
+            assert(f.read(len(magic)) == magic)
+        out = maps.fitsio.load_skymap_fits(fname)
+        for k, sm in zip('TQU', (sT, sU, sU)):
+            assert(same_sparse(out[k], sm))
+    assert(set(os.listdir('.')) - files <= {'test_map.fits.bz2'})
+
     default_chunk = maps.fitsio.chunk_size
     # chunks of 7 image rows, so that the last chunk is partial
     maps.fitsio.chunk_size = 7 * 8 * 500
@@ -481,6 +494,15 @@ try:
             if 'W' in kwargs:
                 assert(out['W'].TT.sparse)
                 assert(np.allclose(np.asarray(out['W'].TT), 2 * fdense, rtol=0, atol=2 * atol))
+
+        # flat maps saved to a compressed file name, including compressed images
+        for kwargs, atol in [(dict(), 0), (dict(compress=True), 0.1)]:
+            maps.fitsio.save_skymap_fits('test_map.fits.gz', fmap, overwrite=True,
+                                         **kwargs)
+            with open('test_map.fits.gz', 'rb') as f:
+                assert(f.read(2) == b'\x1f\x8b')
+            out = maps.fitsio.load_skymap_fits('test_map.fits.gz')['T']
+            assert(np.allclose(np.asarray(out), fdense, rtol=0, atol=atol))
 
         print('Checking chunked flat map reads')
         # irregular coverage, so that chunks have different nonzero spans
@@ -556,6 +578,6 @@ try:
 
 finally:
     for f in ['test_map.fits', 'test_map_t.fits', 'test_map_s.fits', 'test_map.fits.gz',
-              'test_mask.fits']:
+              'test_map.fits.bz2', 'test_mask.fits']:
         if os.path.exists(f):
             os.remove(f)

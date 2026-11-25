@@ -238,6 +238,25 @@ def write_table_column(f, offset, rowdtype, name, data, ufac=1.0, chunk=None):
         rows.tofile(f)
 
 
+def compressed_file_opener(filename):
+    """
+    Return the function for opening a compressed file for writing, based on the
+    file name extension, or None if the file name does not have one of the
+    compressed file extensions that astropy writes (``.gz``, ``.bz2`` or ``.xz``).
+    """
+    ext = os.path.splitext(filename)[1]
+    if ext == '.gz':
+        import gzip
+        return gzip.open
+    if ext == '.bz2':
+        import bz2
+        return bz2.open
+    if ext == '.xz':
+        import lzma
+        return lzma.open
+    return None
+
+
 def is_uncompressed(filename):
     """
     Return True if the file is an uncompressed FITS file, whose data can be read
@@ -891,7 +910,10 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
     Arguments
     ---------
     filename : str
-        Path to output file.  Must not exist, unless overwrite is True.
+        Path to output file.  Must not exist, unless overwrite is True.  Files
+        with a ``.gz``, ``.bz2`` or ``.xz`` extension are compressed accordingly.
+        These are first written to a temporary uncompressed file in the same
+        directory, which is then compressed into the output file in chunks.
     T, Q, U : FlatSkyMap or HealpixSkyMap
         Maps to save
     W : G3SkyMapWeights
@@ -926,6 +948,40 @@ def save_skymap_fits(filename, T, Q=None, U=None, W=None, overwrite=False,
         either case.  If False, the maps must be unitless (units type ``None``),
         and are stored unscaled.
     """
+
+    opener = compressed_file_opener(filename)
+    if opener is not None:
+        # The map data are written to disk in chunks below, which requires an
+        # uncompressed file, so write one next to the output file and then
+        # compress it into the output file in chunks.
+        import shutil
+        import tempfile
+
+        if overwrite:
+            if os.path.exists(filename):
+                os.remove(filename)
+        else:
+            assert(not os.path.exists(filename))
+
+        fd, tmpfile = tempfile.mkstemp(
+            suffix='.fits', dir=os.path.dirname(os.path.abspath(filename))
+        )
+        os.close(fd)
+        try:
+            save_skymap_fits(
+                tmpfile, T, Q=Q, U=U, W=W, overwrite=True, compress=compress,
+                quantize_level=quantize_level, hdr=hdr, units=units,
+            )
+            with open(tmpfile, 'rb') as fin, opener(filename, 'wb') as fout:
+                shutil.copyfileobj(fin, fout, chunk_size)
+        except BaseException:
+            # don't leave a partially written file behind
+            if os.path.exists(filename):
+                os.remove(filename)
+            raise
+        finally:
+            os.remove(tmpfile)
+        return
 
     import astropy.io.fits
 
